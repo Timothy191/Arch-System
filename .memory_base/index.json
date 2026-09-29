@@ -1,5 +1,36 @@
 {
-  "lastUpdated": "2026-09-28T05:36:04.862Z",
-  "totalRetrospectives": 0,
-  "entries": []
+  "lastUpdated": "2026-09-28T15:34:41.854Z",
+  "totalRetrospectives": 5,
+  "entries": [
+    {
+      "id": "err-20260925-vercel-headless-deploy",
+      "category": "DEPLOYMENT",
+      "errorSignature": "Vercel headless deployment fails after login",
+      "preventionRule": "Always ensure the Vercel project is interactively linked before delegating deployment to headless CI/CD or autonomous swarm agents."
+    },
+    {
+      "id": "err-20260925-wayland-playwright-crash",
+      "category": "E2E_TESTING",
+      "errorSignature": "Playwright/Chromium crash with eglCreateImage errors",
+      "preventionRule": "Always inject Ozone platform flags into Playwright configs when running in a Wayland environment."
+    },
+    {
+      "id": "err-20260928-hardcoded-credentials",
+      "category": "SECURITY",
+      "errorSignature": "Hardcoded Supabase URL and keys in createBearerSupabaseClient",
+      "preventionRule": "Never commit live credentials, API keys, or JWTs. Always use environment variables and ensure client factories validate their existence."
+    },
+    {
+      "id": "err-20260928-kysely-connection-leak",
+      "category": "DATABASE",
+      "errorSignature": "Kysely Pool exhaustion due to per-request instantiation",
+      "preventionRule": "Always enforce singleton patterns for database connection pools in serverless/server action environments to prevent connection exhaustion."
+    },
+    {
+      "id": "err-20260928-unreachable-validation",
+      "category": "UI_UX",
+      "errorSignature": "Unreachable email validation in LoginForm.tsx blur handler",
+      "preventionRule": "When handling onChange or onBlur for HTML5 specific inputs (like type=\"email\"), utilize the Constraint Validation API (e.target.validity) instead of parsing e.target.value directly."
+    }
+  ]
 }

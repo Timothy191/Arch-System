@@ -1,18 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "taskTag",
+    "category",
+    "errorSignature",
+    "affectedFiles",
+    "rootCause",
+    "resolution",
+    "preventionRule"
+  ],
   "properties": {
-    "version": { "type": "string" },
-    "entities": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "type": { "type": "string" },
-          "description": { "type": "string" }
-        }
-      }
-    }
+    "id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "taskTag": { "type": "string" },
+    "category": { "type": "string" },
+    "errorSignature": { "type": "string" },
+    "affectedFiles": { "type": "array", "items": { "type": "string" } },
+    "rootCause": { "type": "string" },
+    "resolution": { "type": "string" },
+    "preventionRule": { "type": "string" }
   }
 }

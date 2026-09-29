@@ -1,0 +1,11 @@
+{
+  "id": "err-20260925-vercel-headless-deploy",
+  "timestamp": "2026-09-25T12:05:00Z",
+  "taskTag": "--task-deployment",
+  "category": "DEPLOYMENT",
+  "errorSignature": "Vercel headless deployment fails after login",
+  "affectedFiles": ["session-2026-09-25.md"],
+  "rootCause": "Vercel CLI headless deploys ('vercel --prod --yes') fail if the project isn't previously linked via a local '.vercel/' directory.",
+  "resolution": "Require the user to link the project interactively once before autonomous swarm takeover.",
+  "preventionRule": "Always ensure the Vercel project is interactively linked before delegating deployment to headless CI/CD or autonomous swarm agents."
+}

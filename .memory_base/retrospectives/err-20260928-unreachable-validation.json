@@ -1,0 +1,11 @@
+{
+  "id": "err-20260928-unreachable-validation",
+  "timestamp": "2026-09-28T17:05:00Z",
+  "taskTag": "--task-ui-bug",
+  "category": "UI_UX",
+  "errorSignature": "Unreachable email validation in LoginForm.tsx blur handler",
+  "affectedFiles": ["libs/features/auth/ui/src/LoginForm.tsx"],
+  "rootCause": "HTML5 type=\"email\" inputs evaluate e.target.value as an empty string if the content is an invalid email, causing string prototype checks like .includes('@') to silently skip.",
+  "resolution": "Updated the onBlur handler to check e.target.validity.typeMismatch instead of purely relying on e.target.value string methods.",
+  "preventionRule": "When handling onChange or onBlur for HTML5 specific inputs (like type=\"email\"), utilize the Constraint Validation API (e.target.validity) instead of parsing e.target.value directly."
+}

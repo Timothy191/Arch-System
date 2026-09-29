@@ -1,0 +1,11 @@
+{
+  "id": "err-20260928-kysely-connection-leak",
+  "timestamp": "2026-09-28T17:15:00Z",
+  "taskTag": "--task-connection-stability",
+  "category": "DATABASE",
+  "errorSignature": "Kysely Pool exhaustion due to per-request instantiation",
+  "affectedFiles": ["packages/supabase/src/kysely.ts"],
+  "rootCause": "The createKyselyClient() factory instantiated a new pg.Pool with max=10 connections on every invocation, causing connection leaks during 24/7 continuous operations.",
+  "resolution": "Refactored the factory to memoize the Kysely instance in a global variable (singleton pattern) and configured idleTimeoutMillis and connectionTimeoutMillis on the pool.",
+  "preventionRule": "Always enforce singleton patterns for database connection pools in serverless/server action environments to prevent connection exhaustion."
+}

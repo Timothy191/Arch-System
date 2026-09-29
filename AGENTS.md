@@ -411,30 +411,31 @@ Runtime clients are decoupled behind factory helpers to prevent environment leak
 
 ## Important Files
 
-| Category                 | File Path                                               | Description                                                                      |
-| :----------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------- |
-| **Edge Interceptor**     | `apps/portal/proxy.ts`                                  | Next.js 16 Edge proxy validating sessions, employee roles, and security headers. |
-| **App Layout**           | `apps/portal/app/layout.tsx`                            | Root portal layout mounting themes, providers, and global UI layers.             |
-| **App Next Config**      | `apps/portal/next.config.mjs`                           | Standalone output, Turbopack root, transpilePackages, and CSS inlining.          |
-| **Contract SSoT**        | `packages/contract/src/index.ts`                        | Central export of all Zod validation schemas and contract types.                 |
-| **Database Migrations**  | `packages/database/migrations/`                         | 164+ sequential PostgreSQL migrations defining schemas and RLS policies.         |
-| **Database Safety Test** | `packages/database/tests/migration-rollback-safety.mjs` | Static analysis verifying non-destructive SQL and rollback semantics.            |
-| **Error Hierarchy**      | `packages/errors/src/index.ts`                          | Canonical `AppError` classes, status codes, and type guards.                     |
-| **Supabase Server**      | `packages/supabase/src/server.ts`                       | Server-side cookie-based Supabase client with query timing instrumentation.      |
-| **Supabase Kysely**      | `packages/supabase/src/kysely.ts`                       | Type-safe Kysely database client for complex SQL aggregations.                   |
-| **Supabase Browser**     | `packages/supabase/src/client.ts`                       | Browser Supabase client configured for on-prem LAN rewrite.                      |
-| **Redis Cache**          | `packages/redis/src/cache.ts`                           | Two-tier L1 memory / L2 Redis cache manager with XFetch and tag invalidation.    |
-| **Rate Limiter**         | `packages/rate-limiter/src/index.ts`                    | DI rate limiting engine with modular stores and strategies.                      |
-| **Design Tokens**        | `packages/theme/src/tokens/index.ts`                    | Single source of truth for OKLCH tokens, glass refraction math, and radii.       |
-| **Glass Component**      | `packages/ui/src/components/GlassCard.tsx`              | Primary card component adhering to strict light-mode glass refraction.           |
-| **Offline Queue**        | `apps/portal/hooks/useOfflineQueue.ts`                  | Zustand persistent store queueing mutations during field connectivity drops.     |
-| **Pit Connectivity**     | `libs/shared/hooks/src/usePitConnectivity.ts`           | Jittered heartbeat detector for mining pit network degradation and lie-fi.       |
-| **Policy Compiler**      | `tools/repo/policy-compiler.cjs`                        | Monorepo boundary compiler generating ESLint boundaries and policy JSONs.        |
-| **Compound Bash Guard**  | `tools/scripts/check-compound-bash.cjs`                 | AST parser blocking dangerous shell commands before execution.                   |
-| **Quality Gates**        | `tools/scripts/enforce-quality-gates.sh`                | 4-gate verification script (ARWR, tests, modernization, strict TS).              |
-| **Monorepo Topology**    | `pnpm-workspace.yaml`                                   | Defines workspace layout and centralized pnpm catalogs (`catalogs.react19`).     |
-| **Task Pipeline**        | `turbo.json`                                            | Turborepo configuration for caching builds, tests, lints, and asset syncs.       |
-| **Biome Config**         | `biome.json`                                            | Repository-wide formatting rules and linting presets.                            |
+| Category                   | File Path                                                 | Description                                                                       |
+| :------------------------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Edge Interceptor**       | `apps/portal/proxy.ts`                                    | Next.js 16 Edge proxy validating sessions, employee roles, and security headers.  |
+| **App Layout**             | `apps/portal/app/layout.tsx`                              | Root portal layout mounting themes, providers, and global UI layers.              |
+| **App Next Config**        | `apps/portal/next.config.mjs`                             | Standalone output, Turbopack root, transpilePackages, and CSS inlining.           |
+| **Contract SSoT**          | `packages/contract/src/index.ts`                          | Central export of all Zod validation schemas and contract types.                  |
+| **Database Migrations**    | `packages/database/migrations/`                           | 164+ sequential PostgreSQL migrations defining schemas and RLS policies.          |
+| **Database Safety Test**   | `packages/database/tests/migration-rollback-safety.mjs`   | Static analysis verifying non-destructive SQL and rollback semantics.             |
+| **Error Hierarchy**        | `packages/errors/src/index.ts`                            | Canonical `AppError` classes, status codes, and type guards.                      |
+| **Supabase Server**        | `packages/supabase/src/server.ts`                         | Server-side cookie-based Supabase client with query timing instrumentation.       |
+| **Supabase Kysely**        | `packages/supabase/src/kysely.ts`                         | Type-safe Kysely database client for complex SQL aggregations.                    |
+| **Supabase Browser**       | `packages/supabase/src/client.ts`                         | Browser Supabase client configured for on-prem LAN rewrite.                       |
+| **Redis Cache**            | `packages/redis/src/cache.ts`                             | Two-tier L1 memory / L2 Redis cache manager with XFetch and tag invalidation.     |
+| **Rate Limiter**           | `packages/rate-limiter/src/index.ts`                      | DI rate limiting engine with modular stores and strategies.                       |
+| **Design Tokens**          | `packages/theme/src/tokens/index.ts`                      | Single source of truth for OKLCH tokens, glass refraction math, and radii.        |
+| **Glass Component**        | `packages/ui/src/components/GlassCard.tsx`                | Primary card component adhering to strict light-mode glass refraction.            |
+| **Offline Queue**          | `apps/portal/hooks/useOfflineQueue.ts`                    | Zustand persistent store queueing mutations during field connectivity drops.      |
+| **Pit Connectivity**       | `libs/shared/hooks/src/usePitConnectivity.ts`             | Jittered heartbeat detector for mining pit network degradation and lie-fi.        |
+| **Policy Compiler**        | `tools/repo/policy-compiler.cjs`                          | Monorepo boundary compiler generating ESLint boundaries and policy JSONs.         |
+| **Compound Bash Guard**    | `tools/scripts/check-compound-bash.cjs`                   | AST parser blocking dangerous shell commands before execution.                    |
+| **Quality Gates**          | `tools/scripts/enforce-quality-gates.sh`                  | 4-gate verification script (ARWR, tests, modernization, strict TS).               |
+| **TODO & Report Protocol** | `.agents/rules/todo-completion-and-detailed-reporting.md` | Mandatory 100% TODO execution and detailed post-investigation reporting protocol. |
+| **Monorepo Topology**      | `pnpm-workspace.yaml`                                     | Defines workspace layout and centralized pnpm catalogs (`catalogs.react19`).      |
+| **Task Pipeline**          | `turbo.json`                                              | Turborepo configuration for caching builds, tests, lints, and asset syncs.        |
+| **Biome Config**           | `biome.json`                                              | Repository-wide formatting rules and linting presets.                             |
 
 ---
 
@@ -573,3 +574,42 @@ Configured in `apps/portal/jest.config.cjs`:
 - **Lines**: 40%
 - **Strategic Target**: Long-term strategy mandates critical mutations (Server Actions, RLS helper policies, Auth, AI provider failovers) reach 90%+ unit coverage.
 - **Output Directory**: `apps/portal/coverage/` (HTML, LCOV, text summary).
+
+## Agent Personas & Operational Souls (Real-World Grounding)
+
+To maximize real-world execution fidelity, all subagents operating in this monorepo MUST adopt their designated **Persona (Real world Job Role)** and operational **Soul**. This guarantees code is written with production-grade pragmatism, hardware constraints, and industrial safety in mind.
+
+### 1. `database-architect`
+
+- **Persona:** Principal PostgreSQL DBA & Data Engineer
+- **Soul:** "Data is the lifeblood of the operation. I prevent data loss, ensure atomic transactional safety, strictly optimize InitPlan RLS policies, and treat every schema mutation as if it is running on a live 24/7 production system."
+
+### 2. `ui-engineer`
+
+- **Persona:** Senior React/Next.js Frontend Architect
+- **Soul:** "User interfaces must be flawless, accessible, and instantaneous. I strictly enforce the light-mode OKLCH invariant, guarantee zero React hydration errors, and design for hostile field environments with extreme glare and dust."
+
+### 3. `realtime-telemetry-engineer`
+
+- **Persona:** Industrial IoT & SCADA Systems Engineer
+- **Soul:** "I bridge the physical and digital. I ensure 100% telemetry uptime, gracefully handle 'lie-fi' satellite latency, prevent WebSocket socket leaks, and drop zero payloads from heavy machinery."
+
+### 4. `autonomous-orchestrator` / `core-coordinator`
+
+- **Persona:** Staff Systems Architect & Engineering Manager
+- **Soul:** "Complexity is a liability. I maintain absolute architectural boundary integrity, meticulously plan tasks before execution, delegate efficiently, and prevent agentic drift."
+
+### 5. `security-quality-gatekeeper`
+
+- **Persona:** Application Security & Quality Assurance Lead
+- **Soul:** "Trust nothing. Verify everything. I blindly enforce TypeScript strictness, validate boundary invariants, prevent SQL injections, and block all regressions before they infect the main branch."
+
+### 6. `system-simplifier`
+
+- **Persona:** Staff Refactoring Engineer
+- **Soul:** "Code is a liability; less is more. I ruthlessly eliminate dead code, prune orphaned dependencies, aggressively manage bundle sizes, and simplify complex logic without altering behavior."
+
+### 7. `critique-council-reviewer`
+
+- **Persona:** Lead Site Reliability Engineer (SRE)
+- **Soul:** "I am the last line of defense. I adversarial-test every assumption, verify hardware interlocks, demand empirical proof (via k6/playwright), and reject any PR that cannot survive a real-world outage."

@@ -1,0 +1,11 @@
+{
+  "id": "err-20260925-wayland-playwright-crash",
+  "timestamp": "2026-09-25T12:00:00Z",
+  "taskTag": "--task-testing",
+  "category": "E2E_TESTING",
+  "errorSignature": "Playwright/Chromium crash with eglCreateImage errors",
+  "affectedFiles": ["session-2026-09-25.md"],
+  "rootCause": "Arch Linux Wayland/Hyprland environment requires explicit Ozone flags for Chromium to render headless or headful without EGL crashes.",
+  "resolution": "Injected '--ozone-platform=wayland' and '--disable-gpu' into Playwright launch configurations.",
+  "preventionRule": "Always inject Ozone platform flags into Playwright configs when running in a Wayland environment."
+}
