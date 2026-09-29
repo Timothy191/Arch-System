@@ -22,9 +22,24 @@
     "vitepress",
     "swagger-jsdoc",
     "vite-tsconfig-paths",
-    "@repo/shared/hooks"
+    "^@repo/.*"
   ],
-  "ignoreBinaries": ["python3", "psql", "wait-on", "serve", "poetry", "uv"],
+  "ignoreBinaries": [
+    "python3",
+    "psql",
+    "wait-on",
+    "serve",
+    "poetry",
+    "uv",
+    "lighthouse",
+    "repowise",
+    "repomix",
+    "xdg-open",
+    "open",
+    "redis-cli",
+    "tsx",
+    "chokidar"
+  ],
   "ignore": [
     "**/jest.config.*",
     "**/postcss.config.*",
@@ -78,7 +93,19 @@
         "@opentelemetry/sdk-node",
         "@opentelemetry/semantic-conventions",
         "@opentelemetry/sdk-trace-node",
-        "@repo/shared/hooks"
+        "@repo/shared/hooks",
+        "@repo/agents",
+        "@repo/auth/data-access",
+        "@repo/auth/ui",
+        "@repo/auth/utils",
+        "@repo/departments/data-access",
+        "@repo/departments/ui",
+        "@repo/hub/ui",
+        "@repo/shared/data-access",
+        "@repo/shared/utils",
+        "@repo/typescript-config",
+        "@tailwindcss/typography",
+        "tailwindcss-animate"
       ],
       "ignore": [
         "lib/observability/metrics.ts",
@@ -117,12 +144,14 @@
     "packages/theme": {
       "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.{ts,tsx,css}"],
-      "ignore": ["src/tokens/colors.ts", "src/tokens/motion.ts"]
+      "ignore": ["src/tokens/colors.ts", "src/tokens/motion.ts"],
+      "ignoreDependencies": ["@types/react-dom"]
     },
     "packages/database": {
       "entry": [".eslintrc.{js,cjs}"],
       "project": ["migrations/**/*.sql"],
-      "ignore": ["supabase/migrations/**"]
+      "ignore": ["supabase/migrations/**"],
+      "ignoreDependencies": ["supabase"]
     },
     "packages/eslint-config": {
       "entry": ["*.js"],
@@ -176,6 +205,16 @@
     "packages/eval": {
       "entry": ["tests/**/*.py"],
       "project": ["**/*.{py,toml}"]
+    },
+    "packages/contract": {
+      "entry": ["src/index.ts", "scripts/**/*.ts"],
+      "project": ["src/**/*.ts", "scripts/**/*.ts"],
+      "ignoreDependencies": ["pg"]
+    },
+    "packages/agents": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"],
+      "ignoreDependencies": ["@babel/preset-typescript"]
     }
   },
   "rules": {

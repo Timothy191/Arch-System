@@ -8,6 +8,10 @@ export default {
     'apps/portal/public/css/fuxa-light-theme.css',
   ],
   rules: {
+    'max-nesting-depth': 3,
+    'selector-max-specificity': '0,4,0',
+    'selector-max-compound-selectors': 4,
+    'selector-max-id': 0,
     // Tailwind's @apply preludes (e.g. `@apply border-border`) are not valid
     // CSS grammar — stylelint cannot validate them. Disable the prelude check.
     'at-rule-prelude-no-invalid': null,

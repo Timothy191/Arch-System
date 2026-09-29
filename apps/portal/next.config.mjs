@@ -33,6 +33,8 @@ if (
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // AGENT-TRACE: Next.js 16 Cache Components enabled for 'use cache' directives and granular component prerendering
+  cacheComponents: true,
   // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds
   // (`next build`). Webpack (`next build --webpack`) produces better chunk deduplication (0 vs
   // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
@@ -100,6 +102,9 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
@@ -145,7 +150,15 @@ const nextConfig = {
       expire: 1800,
     },
   },
+  logging: {
+    fetches: {
+      fullUrl: !isProduction,
+    },
+    browserToTerminal: 'warn',
+  },
   experimental: {
+    // AGENT-TRACE: React 19 Taint APIs enabled to prevent sensitive database objects/tokens crossing RSC boundary
+    taint: true,
     // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
     optimizePackageImports: [
       'lucide-react',

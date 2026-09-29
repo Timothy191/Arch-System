@@ -33,7 +33,10 @@ You are operating within the Arch-System enterprise monorepo.
 To ensure high-performance execution and real-world quality, ALWAYS execute tasks using the optimized Agent Toolchain over legacy bash commands:
 
 - **Code Search & Refactoring**: Use `ast-grep` (`sg`) instead of standard `grep` for accurate, AST-aware structural search (`sg --pattern 'export async function $FUNC($$$ARGS) { $$$BODY }'`).
-- **Context Bundling**: Use `repomix` to bundle target modules into token-optimized context before feeding large blocks into deliberation subagents.
+- **Context Bundling**: Use `repomix` (`pnpm context:pack`) to bundle target modules into token-optimized context before feeding large blocks into deliberation subagents.
+- **Codebase Intelligence & Architecture**: Use `repowise` (`pnpm code:health`, `pnpm code:risk`, `pnpm code:dead`) or the `repowise` MCP server to compute change blast radius, detect dead code, and verify architecture decisions without recurring token burn.
+- **Performance & Web Auditing**: Use `lighthouse` (`pnpm audit:perf`) to benchmark page performance, accessibility, and Core Web Vitals under headless Chrome/Chromium.
+- **Offline Field Utilities**: Use Docker companion stacks (`it-tools` on `:8088`, `omni-tools` on `:8089` in `compose.tools.yml`) for isolated client-side document/data conversions without internet dependency.
 - **Diffing**: Use `difftastic` (`difft`) instead of `git diff` for structural syntax-aware code comparisons to prevent token drift.
 - **Configuration & Workflows**: Use `yq` and `jq` for querying and safely mutating `pnpm-workspace.yaml`, Docker Compose, and CI configs.
 - **Benchmarking & Validation**: Use `k6` to stress-test route handlers and real-time telemetry endpoints, enforcing the "Real-World Checker" grounding.
@@ -46,8 +49,18 @@ To guarantee that generated code works flawlessly in production, agents must adh
 
 1. **The "Compile Before Speak" Rule**: You must run `pnpm type-check` and `pnpm lint` on any modified package before returning a solution. Never deliver uncompiled or pseudo-code to the user.
 2. **Visual & UI Verification**: For any Next.js UI task, use the **Puppeteer MCP Server** (`@modelcontextprotocol/server-puppeteer`) to load the local dev server (`http://localhost:3000`), inspect the DOM for React hydration errors, and verify the OKLCH theme renders without crashes.
-3. **Dead Code Prevention**: After significant refactors, run `pnpm knip` to identify and remove dangling exports and orphaned dependencies.
+3. **Dead Code & Risk Verification**: After significant refactors, run `pnpm knip` and `pnpm code:risk` / `pnpm code:dead` to ensure zero orphaned exports or risk regressions.
 4. **Contract/Database Parity**: If modifying Supabase schemas or Zod validation logic in `@repo/contract`, you must execute `pnpm audit:drift` and `pnpm --filter @repo/database test` to ensure production rollout safety.
+5. **Image Optimization & Zero-CLS**: For any UI task introducing or modifying images in `apps/portal`, you must use `<Image />` from `next/image` with explicit dimensions/fill, alt text, and run `pnpm audit:images` to guarantee zero Cumulative Layout Shift (CLS).
+6. **Server-First Data Fetching & Zero-Waterfall**: Primary data queries must run in Server Components or Server Actions via `@repo/supabase`. Independent queries must use `Promise.allSettled()`, per-request shared lookups must use `React.cache()`, and `pnpm audit:data-fetching` must pass.
+7. **Cache Components & Boundary Isolation**: Next.js 16 Cache Components (`cacheComponents: true`) must pair `'use cache'` with explicit `cacheLife()` profiles. Dynamic APIs (`cookies()`, `headers()`) must be isolated behind `<Suspense>` to preserve static shell prerendering, and `pnpm audit:caching` must pass.
+8. **Turbopack & Lazy Loading**: Monorepo compilation must anchor `turbopack.root: workspaceRoot`. Dynamic imports using `{ ssr: false }` are restricted strictly to Client Components (`'use client'`), heavy external libraries must be dynamically imported on demand, and `pnpm audit:turbopack` must pass.
+9. **App Router & Server Actions Boundary**: Layouts and pages must default to Server Components. Interactivity must be isolated in leaf Client Components (`'use client'`). Server Actions (`'use server'`) must enforce caller authorization and invalidate cache before calling `redirect()`. `pnpm audit:routing` must pass.
+10. **Server Components, Boundary & Taint**: UI components default to RSC (no directive). Interactive state must use `'use client'` with serializable boundary props. Sensitive records and tokens must be guarded with React 19 Taint APIs (`taint: true`), and `pnpm audit:rsc` must pass.
+11. **Single-Source Client Query & State Invariant (Anti-SWR)**: Client data fetching is standardized on `@tanstack/react-query` alongside Server Components and Supabase Realtime CDC. Dual client caching libraries (`swr`) are strictly prohibited, and `pnpm audit:hooks` must pass.
+12. **Industrial Field Hooks & SSR Hydration Safety**: Custom hooks in `libs/shared/hooks` must be engineered for harsh mining conditions (lie-fi connectivity, sensor bounce) and guard browser globals during SSR (`typeof window === 'undefined'`), and `pnpm audit:hooks` must pass.
+13. **Vercel CLI & Deployment Preflight**: Monorepo builds and preview/prod deployments via Vercel CLI (`vercel`) must strictly satisfy `tools/scripts/vercel-preflight.cjs`, and `pnpm audit:vercel` must pass.
+14. **Single-Source Unit Test Runner Invariant (Anti-Runner Fragmentation)**: All unit and integration tests across TypeScript packages are strictly standardized on Jest 30 with `@swc/jest`. Fragmented test runners (`ava`, `mocha`, `tape`) are prohibited to maintain a single test harness across Turborepo, and `pnpm audit:hooks` must pass.
 
 ## 19. Autonomous Self-Healing Loop (Zero-Interruption Policy)
 

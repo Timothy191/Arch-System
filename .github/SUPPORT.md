@@ -1,1 +1,1 @@
-docs/SUPPORT.md
+../docs/SUPPORT.md

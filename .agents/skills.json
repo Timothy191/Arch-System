@@ -15,7 +15,14 @@
         "universal-agentic-execution",
         "self-reflection-loop",
         "dag-orchestrator",
-        "eval-loop"
+        "eval-loop",
+        "next-image-optimization",
+        "next-data-fetching",
+        "next-caching",
+        "next-turbopack",
+        "next-routing-and-actions",
+        "next-server-components",
+        "react-industrial-hooks"
       ]
     }
   ]

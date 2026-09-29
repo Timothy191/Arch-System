@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
+import Image from 'next/image';
 import { type JSX, useEffect, useRef, useState } from 'react';
 import { AriaAvatar, type AriaState } from '@/components/ai/AriaAvatar';
 
@@ -86,9 +87,11 @@ export function AriaLauncher(): JSX.Element {
                 <span className="text-[10px] text-white/50 uppercase tracking-wider font-mono">
                   Powered by
                 </span>
-                <img
+                <Image
                   src="/images/ai-sdk/ai-sdk-logotype-light.svg"
                   alt="Vercel AI SDK text logo"
+                  width={48}
+                  height={14}
                   className="h-3.5 w-auto object-contain block"
                 />
               </div>

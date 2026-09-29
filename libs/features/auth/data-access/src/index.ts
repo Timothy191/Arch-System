@@ -1,1 +1,1 @@
-export { useLogin } from './use-login';
+export { type LoginResult, useLogin } from './use-login';

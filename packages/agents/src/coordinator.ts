@@ -17,7 +17,7 @@ export interface Subtask {
 export interface CoordinatorConfig {
   openaiApiKey?: string;
   baseURL?: string;
-  provider?: 'openai' | 'gemini' | 'aion' | 'cohere' | 'ollama';
+  provider?: 'openai' | 'gemini' | 'aion' | 'cohere' | 'ollama' | 'vercel-ai-gateway';
   defaultModel?: string;
   synthesisModel?: string;
   concurrencyLimit?: number;
@@ -75,9 +75,15 @@ export class SubagentCoordinator {
       baseURL = baseURL || process.env.OPENAI_BASE_URL || 'http://127.0.0.1:11434/v1';
       defaultModel = defaultModel || 'qwen2.5:3b';
       synthesisModel = synthesisModel || 'qwen2.5:3b';
+    } else if (config.provider === 'vercel-ai-gateway') {
+      apiKey = apiKey || process.env.AI_GATEWAY_API_KEY;
+      baseURL = baseURL || process.env.AI_GATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1';
+      defaultModel = defaultModel || process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
+      synthesisModel = synthesisModel || process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
     } else {
       apiKey =
         apiKey ||
+        process.env.AI_GATEWAY_API_KEY ||
         process.env.OPENAI_API_KEY ||
         process.env.GEMINI_API_KEY ||
         process.env.AION_API_KEY ||
@@ -85,29 +91,37 @@ export class SubagentCoordinator {
 
       baseURL =
         baseURL ||
-        process.env.OPENAI_BASE_URL ||
-        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'https://generativelanguage.googleapis.com/v1beta/openai/'
-          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-            ? 'https://api.aionlabs.ai/v1'
-            : undefined);
+        process.env.AI_GATEWAY_BASE_URL ||
+        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
+          ? 'https://ai-gateway.vercel.sh/v1'
+          : process.env.OPENAI_BASE_URL ||
+            (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+              ? 'https://generativelanguage.googleapis.com/v1beta/openai/'
+              : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+                ? 'https://api.aionlabs.ai/v1'
+                : undefined));
 
       defaultModel =
         defaultModel ||
+        process.env.AI_GATEWAY_MODEL ||
         process.env.OPENAI_MODEL ||
-        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'gemini-3.6-flash'
-          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-            ? 'aion-labs/aion-3.0-mini'
-            : 'gpt-4o-mini');
+        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
+          ? 'openai/gpt-4o-mini'
+          : process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+            ? 'gemini-3.6-flash'
+            : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+              ? 'aion-labs/aion-3.0-mini'
+              : 'gpt-4o-mini');
 
       synthesisModel =
         synthesisModel ||
-        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'gemini-3.6-flash'
-          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-            ? 'aion-labs/aion-3.0'
-            : 'gpt-4o');
+        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
+          ? 'openai/gpt-4o-mini'
+          : process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+            ? 'gemini-3.6-flash'
+            : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+              ? 'aion-labs/aion-3.0'
+              : 'gpt-4o');
     }
 
     this.openai = new OpenAI({

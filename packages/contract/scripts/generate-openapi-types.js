@@ -62,7 +62,9 @@ async function generateTypes(spec) {
   try {
     console.log('Generating TypeScript types from OpenAPI spec...');
     // Use openapi-typescript CLI
-    execSync(`npx openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`, { stdio: 'inherit' });
+    execSync(`npx --yes openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`, {
+      stdio: 'inherit',
+    });
     console.log(`✓ Generated types saved to ${OUTPUT_FILE}`);
   } finally {
     // Clean up temp file

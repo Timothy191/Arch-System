@@ -61,6 +61,7 @@ venv/
 skills-lock.json
 MCP/
 .playwright-mcp/
+.repowise/
 
 # Debug
 npm-debug.log*
@@ -159,6 +160,8 @@ fallow_output.txt
 
 # Agent / IDE runtime artifacts
 .codebuddy/
+.deepeval/
+.gpt-researcher/
 .poolside/
 .project/
 .memory/
