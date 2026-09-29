@@ -41,10 +41,17 @@ _HAS_REAL_OPENAI_KEY = (
     and len(os.environ.get("OPENAI_API_KEY", "")) > 20
 )
 
-requires_openai = pytest.mark.skipif(
-    not _HAS_REAL_OPENAI_KEY,
-    reason="OPENAI_API_KEY not set — skipping LLM-judge AI service tests",
-)
+if (os.environ.get("CI") or os.environ.get("AGENT_EVAL_GATE") == "required") and not _HAS_REAL_OPENAI_KEY:
+    # Fail closed in CI when evaluation keys are required
+    requires_openai = pytest.mark.skipif(
+        False,
+        reason="CI / AGENT_EVAL_GATE requires LLM evaluation keys — fail-closed",
+    )
+else:
+    requires_openai = pytest.mark.skipif(
+        not _HAS_REAL_OPENAI_KEY,
+        reason="OPENAI_API_KEY not set — skipping LLM-judge AI service tests",
+    )
 
 
 def pytest_configure(config):

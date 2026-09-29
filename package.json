@@ -45,7 +45,7 @@
     "web-vitals": "^6.2.1"
   },
   "engines": {
-    "node": ">=24.x",
+    "node": "24.x",
     "pnpm": ">=9.0.0"
   },
   "license": "MIT",
@@ -166,7 +166,7 @@
     "test:a11y": "pnpm --filter @repo/ui test-storybook:a11y",
     "test:e2e": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --no-deprecation\" playwright test --config=e2e/playwright.config.ts",
     "test:e2e:visual": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --no-deprecation\" playwright test --config=e2e/playwright.config.ts --grep 'theme.smoke'",
-    "type-check": "turbo run type-check",
+    "type-check": "turbo run type-check --concurrency=2",
     "ui": "pnpm --filter @repo/ui ui",
     "release": "changeset publish",
     "version-packages": "changeset version",
@@ -178,7 +178,7 @@
   },
   "type": "module",
   "volta": {
-    "node": "24.15.0",
+    "node": "24.x",
     "pnpm": "9.15.9"
   },
   "pnpm": {

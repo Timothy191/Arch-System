@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-09-29T07:13:26.756Z",
-  "databaseTablesCount": 88,
-  "contractSchemasCount": 161,
-  "synchronizedTablesCount": 88,
+  "timestamp": "2026-09-29T07:47:08.299Z",
+  "databaseTablesCount": 90,
+  "contractSchemasCount": 163,
+  "synchronizedTablesCount": 90,
   "unmappedTablesCount": 0,
   "driftHealthIndex": 100,
   "status": "HEALTHY",
@@ -636,6 +636,20 @@
         "controlRoomOutboxSchema"
       ],
       "migration": "162_idempotency_and_outbox.sql"
+    },
+    {
+      "table": "mutation_log",
+      "schemas": [
+        "mutationLogSchema"
+      ],
+      "migration": "165_offline_crdt_mutation_log_and_smr.sql"
+    },
+    {
+      "table": "smr_readings",
+      "schemas": [
+        "smrReadingsSchema"
+      ],
+      "migration": "165_offline_crdt_mutation_log_and_smr.sql"
     }
   ]
 }

@@ -792,7 +792,38 @@ export const webhookEndpointsSchema = z
   })
   .passthrough();
 
+export const mutationLogSchema = z
+  .object({
+    tenant_id: z.string().uuid().optional(),
+    mutation_id: z.string().uuid().optional(),
+    hlc_wall: z.number().optional(),
+    hlc_counter: z.number().optional(),
+    node_id: z.string().optional(),
+    entity: z.string().optional(),
+    entity_id: z.string().optional(),
+    op: z.string().optional(),
+    payload: z.any().optional(),
+    created_at: z.string().optional(),
+  })
+  .passthrough();
+
+export const smrReadingsSchema = z
+  .object({
+    tenant_id: z.string().uuid().optional(),
+    meter_id: z.string().optional(),
+    reading: z.number().optional(),
+    reading_at: z.string().optional(),
+    device_id: z.string().optional(),
+    hlc_wall: z.number().optional(),
+    hlc_counter: z.number().optional(),
+    node_id: z.string().optional(),
+    mutation_id: z.string().uuid().optional(),
+  })
+  .passthrough();
+
 export const tableSchemas = {
+  mutation_log: mutationLogSchema,
+  smr_readings: smrReadingsSchema,
   ab_test_results: abTestResultsSchema,
   access_logs: accessLogsSchema,
   access_logs_archive: accessLogsArchiveSchema,
@@ -882,7 +913,3 @@ export const tableSchemas = {
   webhook_delivery_logs: webhookDeliveryLogsSchema,
   webhook_endpoints: webhookEndpointsSchema,
 } as const;
-
-export function validateMutation<T>(schema: z.ZodType<T>, payload: unknown): T {
-  return schema.parse(payload);
-}

@@ -115,5 +115,6 @@ export function getOperationalToday(timeZone: string = 'Africa/Johannesburg'): s
 }
 
 export * from './fetch-client';
+export * from './hlc';
 export * from './n8n';
 export * from './offline-storage';

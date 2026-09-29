@@ -96,6 +96,9 @@ export const useOfflineQueue = create<OfflineQueueState>()(
         if (successCount > 0) {
           toast.success(`Synced ${successCount} offline items to the server.`);
         }
+        if (failCount > 0) {
+          toast.error(`Failed to sync ${failCount} items. Will retry later.`);
+        }
       },
     }),
     {

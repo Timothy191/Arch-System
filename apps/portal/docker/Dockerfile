@@ -3,7 +3,7 @@
 
 # ── Stage 1: pruner ──────────────────────────────────────
 # Generates a filtered workspace with only the packages portal depends on
-FROM node:22-alpine AS pruner
+FROM node:24-alpine AS pruner
 RUN apk add --no-cache libc6-compat && \
     npm install -g turbo
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN cp -r scripts out/json/ && cp -r scripts out/full/
 
 # ── Stage 2: deps ──────────────────────────────────────
 # Installs dependencies from the pruned lockfile with pnpm store cache mount
-FROM node:22-alpine AS deps
+FROM node:24-alpine AS deps
 RUN apk add --no-cache libc6-compat python3 make g++ && \
     npm install -g pnpm@9.15.9
 WORKDIR /app

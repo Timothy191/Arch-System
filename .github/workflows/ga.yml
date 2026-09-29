@@ -1,0 +1,86 @@
+name: GA Production Verification Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ga-hardening:
+    name: GA Hardening Quality Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enforce Node 24 runtime alignment
+        run: node -v | grep '^v24\.' || (echo "Node 24 required"; exit 1)
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.15.9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify RLS Coverage Matrix (90/90 tables)
+        run: node tools/audits/audit-rls-matrix.cjs
+
+      - name: Contract drift audit (88/88 Zod parity)
+        run: pnpm audit:contract
+
+      - name: Full monorepo Turbo build and quality gates
+        run: pnpm turbo run lint type-check test build
+
+  eval-gates:
+    name: Autonomous Agent Quality Gate (DeepEval)
+    runs-on: ubuntu-latest
+    needs: [ga-hardening]
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEEPEVAL_API_KEY: ${{ secrets.DEEPEVAL_API_KEY }}
+      AGENT_EVAL_GATE: required
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.15.9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run DeepEval evaluation gate
+        run: pnpm --filter @repo/eval test:eval -- --ci --runInBand

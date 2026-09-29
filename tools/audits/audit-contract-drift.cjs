@@ -154,18 +154,21 @@ const reportMd = `# Schema & Contract Drift Audit Report
 Generated on ${new Date().toISOString()}
 
 ## Fitness Function Telemetry
+
 - **Database Tables Scanned**: ${dbTables.size}
 - **Zod Contract Schemas**: ${contractSchemas.size}
 - **Drift Health Index (DHI)**: ${driftHealthIndex}%
 - **Contract Coverage Rating**: ${driftHealthIndex >= 90 ? '🟢 Tier-1 Synchronized' : '🟡 Needs Review'}
 
 ## Synchronized Domain Contracts (${coveredTables.length} Tables)
+
 | Database Table | Migration Source | Contract Schema |
 | :--- | :--- | :--- |
 ${coveredTables.map((c) => `| \`${c.table}\` | \`${c.info.file}\` | \`${c.schemas.join(', ')}\` |`).join('\n')}
 
 ## System & Infrastructure Tables (${unmappedTables.length} Tables)
-${unmappedTables.map((u) => `- \`${u.table}\` (${u.info.file})`).join('\n')}
+
+${unmappedTables.length > 0 ? unmappedTables.map((u) => `- \`${u.table}\` (${u.info.file})`).join('\n') : '_None_'}
 `;
 
 fs.writeFileSync(path.join(REPORT_DIR, 'contract-drift-report.md'), reportMd, 'utf8');

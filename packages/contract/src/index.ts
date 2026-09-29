@@ -112,6 +112,7 @@ export * from './agent-governance';
 export * from './codemod';
 export * from './control-room';
 export * from './schemas/_registry';
+export * from './schemas/_registry';
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,
@@ -190,3 +191,4 @@ export type {
 } from './types/tire-management.types';
 export type { CreateWebhookInput, UpdateWebhookInput } from './types/webhook.types';
 export * from './ultragoal';
+export * from './validate-mutation';

@@ -1,11 +1,11 @@
 # 4-Operation Row-Level Security (RLS) Coverage Matrix Report
 
-Generated on 2026-09-29T07:10:37.830Z
+Generated on 2026-09-29T07:36:22.950Z
 
 ## Summary Metrics
 
-- **Total Tables**: 88
-- **RLS Enabled**: 88/88 (100.0%)
+- **Total Tables**: 90
+- **RLS Enabled**: 90/90 (100.0%)
 - **Critical Security Violations**: 0
 
 ## 4-Operation Policy Coverage Matrix
@@ -100,5 +100,7 @@ Generated on 2026-09-29T07:10:37.830Z
 | `compliance_audit_runs`                | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `153_operational_compliance_checks.sql`          |
 | `idempotency_keys`                     | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `162_idempotency_and_outbox.sql`                 |
 | `control_room_outbox`                  | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `162_idempotency_and_outbox.sql`                 |
+| `mutation_log`                         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `165_offline_crdt_mutation_log_and_smr.sql`      |
+| `smr_readings`                         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `165_offline_crdt_mutation_log_and_smr.sql`      |
 
 _Legend: 🟢 = Explicit Policy Defined | ⚪ (Deny) = Default Secure Tenant Isolation (Implicit Deny)_
