@@ -163,7 +163,8 @@
     "type-check": "turbo run type-check",
     "ui": "pnpm --filter @repo/ui ui",
     "release": "changeset publish",
-    "version-packages": "changeset version"
+    "version-packages": "changeset version",
+    "agent:verify": "bash tools/scripts/agent-verify.sh"
   },
   "syncpack": {
     "config": "config/tools/.syncpackrc.js"
