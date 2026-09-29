@@ -32,27 +32,35 @@ export interface ContextSnapshotEntry {
   metadata?: Record<string, unknown>;
 }
 
+export interface SearchMemoryOptions {
+  queryEmbedding: number[];
+  matchThreshold?: number;
+  matchCount?: number;
+  agentId?: string;
+  memoryType?: AgentMemoryEntry['memoryType'];
+}
+
 /**
- * Client for storing agent memories, token metrics, and context state
- * in the dedicated Supabase storage instance.
+ * Client for storing and retrieving agent memories, token metrics, and context state.
  */
 export class AgentMemoryStore {
   private supabase;
 
   constructor(options?: { supabaseUrl?: string; supabaseKey?: string }) {
-    const url =
-      options?.supabaseUrl ||
-      process.env.AGY_SUPABASE_URL ||
-      process.env.SUPABASE_URL ||
-      'https://fjcfkrbbfzizrxclgkhq.supabase.co';
+    const url = options?.supabaseUrl || process.env.AGY_SUPABASE_URL || process.env.SUPABASE_URL;
 
     const key =
       options?.supabaseKey ||
       process.env.AGY_SUPABASE_SECRET_KEY ||
       process.env.AGY_SUPABASE_PUBLISHABLE_KEY ||
       process.env.SUPABASE_SECRET_KEY ||
-      process.env.SUPABASE_PUBLISHABLE_KEY ||
-      'sb_publishable_8Mz3qACjG0uNKFmm3FyRJQ_fEz6SDZE';
+      process.env.SUPABASE_PUBLISHABLE_KEY;
+
+    if (!url || !key) {
+      throw new Error(
+        'AgentMemoryStore requires Supabase URL and Key. Hardcoded fallback credentials have been purged for security.'
+      );
+    }
 
     this.supabase = createClient(url, key);
   }
@@ -76,6 +84,26 @@ export class AgentMemoryStore {
     if (error) {
       console.warn('Failed to persist agent memory:', error.message);
       return null;
+    }
+    return data;
+  }
+
+  /**
+   * Retrieves semantically relevant memories using pgvector cosine distance.
+   * Requires `match_memories` RPC function deployed in Supabase.
+   */
+  public async searchRelevantMemories(opts: SearchMemoryOptions) {
+    const { data, error } = await this.supabase.rpc('match_memories', {
+      query_embedding: opts.queryEmbedding,
+      match_threshold: opts.matchThreshold ?? 0.75,
+      match_count: opts.matchCount ?? 5,
+      p_agent_id: opts.agentId || null,
+      p_memory_type: opts.memoryType || null,
+    });
+
+    if (error) {
+      console.warn('Failed to retrieve semantic memories:', error.message);
+      return [];
     }
     return data;
   }
