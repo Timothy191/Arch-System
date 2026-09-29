@@ -14,7 +14,14 @@
  *   5. Root agent directives (AGENTS.md, GEMINI.md, CLAUDE.md)
  *
  * Run: node tools/audits/audit-agentic-content.cjs
+ *      node tools/audits/audit-agentic-content.cjs --check   (verify only; never writes)
  * Exit code: 0 (pass) or 1 (fail)
+ *
+ * Idempotency contract: the emitted report is a pure function of the audited
+ * inputs. It carries no wall-clock timestamp, and its markdown matches the
+ * repository's prettier/markdownlint canonical layout — so re-running this
+ * auditor on an unchanged tree rewrites nothing and leaves `git status` clean.
+ * Generation provenance lives in `git log -1 -- documentation/03-audit-reports/`.
  */
 
 const fs = require('node:fs');
@@ -24,6 +31,10 @@ const glob = require('glob');
 const ROOT = path.resolve(__dirname, '..', '..');
 const AGENTS_DIR = path.join(ROOT, '.agents');
 const REPORT_DIR = path.join(ROOT, 'documentation', '03-audit-reports');
+const REPORT_PATH = path.join(REPORT_DIR, 'agentic-audit-report.md');
+
+/** When set, the auditor validates the on-disk report instead of rewriting it. */
+const CHECK_ONLY = process.argv.includes('--check');
 
 console.log('\n🤖 Initiating AI & Agentic Content Audit...\n');
 
@@ -199,26 +210,49 @@ if (warnings.length > 0) {
   });
 }
 
-if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
+/**
+ * Deterministic report body. Deliberately carries no wall-clock field: the
+ * report must be a pure function of the audited inputs, or every invocation
+ * rewrites it and the working tree can never be clean. Blank lines around
+ * headings keep this byte-identical to the markdownlint/prettier canonical form.
+ */
 const reportMd = `# AI & Agentic Content Audit Report
 
-Generated on ${new Date().toISOString()}
-
 ## Summary Metrics
+
 - **Agent Rules**: ${rulesCount} verified in \`.agents/rules/\`
 - **Agent Skills**: ${skillsCount} verified in \`.agents/skills/\`
 - **Workspace Tracers**: ${tracerCount} \`AGENT_TRACER.md\` files active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
 
 ## Critical Findings
+
 ${violations.length === 0 ? '✅ None' : violations.map((v) => `- **[${v.type}]** \`${v.file}\`: ${v.description}`).join('\n')}
 
 ## Advisories & Warnings
+
 ${warnings.length === 0 ? '✅ None' : warnings.map((w) => `- **[${w.type}]** \`${w.file}\`: ${w.description}`).join('\n')}
 `;
 
-fs.writeFileSync(path.join(REPORT_DIR, 'agentic-audit-report.md'), reportMd, 'utf8');
-console.log(`\n📄 Report written to: documentation/03-audit-reports/agentic-audit-report.md`);
+const REPORT_REL = 'documentation/03-audit-reports/agentic-audit-report.md';
+const previousMd = fs.existsSync(REPORT_PATH) ? fs.readFileSync(REPORT_PATH, 'utf8') : null;
+const drifted = previousMd !== reportMd;
+
+if (CHECK_ONLY) {
+  if (drifted) {
+    console.error(`\n❌ Report is stale: ${REPORT_REL}`);
+    console.error('   Regenerate with: node tools/audits/audit-agentic-content.cjs');
+    process.exit(1);
+  }
+  console.log(`\n📄 Report is up to date: ${REPORT_REL}`);
+} else if (drifted) {
+  if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
+  fs.writeFileSync(REPORT_PATH, reportMd, 'utf8');
+  console.log(`\n📄 Report written to: ${REPORT_REL}`);
+} else {
+  // Byte-identical: skip the write so mtime and `git status` stay untouched.
+  console.log(`\n📄 Report unchanged: ${REPORT_REL}`);
+}
 
 const score = violations.length === 0 ? 100.0 : Math.max(0, 100.0 - violations.length * 15);
 console.log(`🎯 Agentic Compliance Score: ${score.toFixed(1)}%`);

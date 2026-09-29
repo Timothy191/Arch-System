@@ -1,7 +1,5 @@
 # AI & Agentic Content Audit Report
 
-Generated on 2026-09-29T04:45:40.385Z
-
 ## Summary Metrics
 
 - **Agent Rules**: 16 verified in `.agents/rules/`
