@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "node scripts/sync-assets-smart.cjs && pnpm turbo run build --filter=portal",
+  "buildCommand": "pnpm build:vercel",
   "outputDirectory": "apps/portal/.next"
 }
