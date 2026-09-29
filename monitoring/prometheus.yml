@@ -11,6 +11,10 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
+  - job_name: 'otel-collector' # Scrapes OTLP metrics exported by the OpenTelemetry Collector
+    static_configs:
+      - targets: ['otel-collector:8889']
+
   # - job_name: "plantcor-portal"
   #   metrics_path: "/api/metrics"
   #   static_configs:

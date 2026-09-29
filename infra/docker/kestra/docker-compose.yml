@@ -1,0 +1,35 @@
+version: '3'
+services:
+  kestra:
+    image: kestra/kestra:latest
+    network_mode: 'host'
+    restart: unless-stopped
+    volumes:
+      - /home/tim/kestra/flows:/kestra/flows
+      - /home/tim/.local/bin:/home/tim/.local/bin
+    environment:
+      JAVA_OPTS: '-Xmx2048m'
+      KESTRA_TRACER_EXPORTER: 'otlp'
+      KESTRA_TRACER_OTLP_ENDPOINT: 'http://127.0.0.1:4317'
+      KESTRA_CONFIGURATION: |
+        kestra:
+          repository:
+            type: postgres
+          queue:
+            type: postgres
+          jdbc:
+            postgres:
+              url: jdbc:postgresql://127.0.0.1:54322/kestra
+              username: ${KESTRA_DB_USERNAME:-supabase_admin}
+              password: ${KESTRA_DB_PASSWORD:-postgres}
+          webserver:
+            basic-auth:
+              enabled: false
+    command: server local
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    network_mode: 'host'
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true

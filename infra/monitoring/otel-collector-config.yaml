@@ -1,0 +1,29 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  # Pull-based exporter: exposes collected metrics at /metrics on :8889 for Prometheus to scrape.
+  prometheus:
+    endpoint: '0.0.0.0:8889'
+  # Local dev sink for traces; swap for otlp/jaeger or Tempo when a trace backend is provisioned.
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
