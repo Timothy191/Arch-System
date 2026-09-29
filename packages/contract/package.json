@@ -41,7 +41,8 @@
     "openapi:generate": "SPEC_FILE=./openapi.generated.json node scripts/generate-openapi-types.js",
     "openapi:validate": "node scripts/validate-contract.js",
     "generate-zod": "openapi-zod-client openapi.generated.json -o src/generated/schemas.ts",
-    "test:contract:health": "node scripts/test-contract-health.js"
+    "test:contract:health": "node scripts/test-contract-health.js",
+    "audit:contract": "tsx scripts/audit-contract-drift.ts --fail-on-drift"
   },
   "types": "./dist/index.d.ts"
 }

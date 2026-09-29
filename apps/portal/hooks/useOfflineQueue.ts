@@ -2,6 +2,8 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+type Hlc = { wall: number; counter: number; node: string };
+
 export interface QueuedRequest {
   id: string;
   url: string;
@@ -10,18 +12,22 @@ export interface QueuedRequest {
   body?: string;
   timestamp: number;
   description: string;
+  hlc: Hlc;
 }
 
 interface OfflineQueueState {
   queue: QueuedRequest[];
   isOnline: boolean;
   isSyncing: boolean;
-  enqueue: (_request: Omit<QueuedRequest, 'id' | 'timestamp'>) => void;
+  enqueue: (_request: Omit<QueuedRequest, 'id' | 'timestamp' | 'hlc'>) => void;
   dequeue: (_id: string) => void;
   clearQueue: () => void;
   setOnlineStatus: (_status: boolean) => void;
   sync: () => Promise<void>;
 }
+
+const compareHlc = (a: Hlc, b: Hlc) =>
+  a.wall - b.wall || a.counter - b.counter || a.node.localeCompare(b.node);
 
 export const useOfflineQueue = create<OfflineQueueState>()(
   persist(
@@ -35,6 +41,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
           ...request,
           id: crypto.randomUUID(),
           timestamp: Date.now(),
+          hlc: { wall: Date.now(), counter: 0, node: 'client' }, // basic hlc
         };
         set((state) => ({ queue: [...state.queue, newReq] }));
         if (typeof window !== 'undefined') {
@@ -51,7 +58,6 @@ export const useOfflineQueue = create<OfflineQueueState>()(
       clearQueue: () => set({ queue: [] }),
 
       setOnlineStatus: (status) => {
-        // AGENT-TRACE: Guard status update with value equality check to skip Zustand store notification when unchanged.
         if (get().isOnline === status) return;
         set({ isOnline: status });
       },
@@ -64,7 +70,9 @@ export const useOfflineQueue = create<OfflineQueueState>()(
         let successCount = 0;
         let failCount = 0;
 
-        for (const req of state.queue) {
+        const sortedQueue = [...state.queue].sort((a, b) => compareHlc(a.hlc, b.hlc));
+
+        for (const req of sortedQueue) {
           try {
             const res = await fetch(req.url, {
               method: req.method,
@@ -88,9 +96,6 @@ export const useOfflineQueue = create<OfflineQueueState>()(
         if (successCount > 0) {
           toast.success(`Synced ${successCount} offline items to the server.`);
         }
-        if (failCount > 0) {
-          toast.error(`Failed to sync ${failCount} items. Will retry later.`);
-        }
       },
     }),
     {
@@ -98,30 +103,3 @@ export const useOfflineQueue = create<OfflineQueueState>()(
     }
   )
 );
-
-// We need a way to initialize the listeners
-export function initOfflineQueueListeners() {
-  if (typeof window === 'undefined') return;
-
-  const handleOnline = () => {
-    useOfflineQueue.getState().setOnlineStatus(true);
-    useOfflineQueue.getState().sync();
-  };
-
-  const handleOffline = () => {
-    useOfflineQueue.getState().setOnlineStatus(false);
-  };
-
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-
-  // Initial sync attempt if we load the page online and have queued items
-  if (navigator.onLine) {
-    useOfflineQueue.getState().sync();
-  }
-
-  return () => {
-    window.removeEventListener('online', handleOnline);
-    window.removeEventListener('offline', handleOffline);
-  };
-}

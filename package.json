@@ -45,7 +45,8 @@
     "web-vitals": "^6.2.1"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=24.x",
+    "pnpm": ">=9.0.0"
   },
   "license": "MIT",
   "markdownlint": {
@@ -169,7 +170,8 @@
     "ui": "pnpm --filter @repo/ui ui",
     "release": "changeset publish",
     "version-packages": "changeset version",
-    "agent:verify": "bash tools/scripts/agent-verify.sh"
+    "agent:verify": "bash tools/scripts/agent-verify.sh",
+    "audit:contract": "pnpm --filter @repo/contract audit:contract"
   },
   "syncpack": {
     "config": "config/tools/.syncpackrc.js"
