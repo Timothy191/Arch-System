@@ -42,14 +42,14 @@ export function RouteBackground() {
   return (
     <>
       {/* ── LCP background: preloaded compressed WebP poster ── */}
-      {/* AGENT-TRACE: 86 KB WebP poster is the critical LCP asset. Heavier video is lazy/deferred. */}
+      {/* AGENT-TRACE: 94 KB WebP poster is the critical LCP asset. Heavier video is lazy/deferred. */}
       <div
         className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
         <img
           id="route-bg-light-image"
-          src="/background/earth-orbit-poster.webp"
+          src="/background/global-background-poster.webp"
           alt=""
           className="route-bg-image object-cover object-center w-full h-full filter brightness-105"
         />
@@ -62,6 +62,7 @@ export function RouteBackground() {
           aria-hidden="true"
         >
           <video
+            id="route-bg-light-video"
             ref={videoRef}
             src="/background/global-background.mp4"
             className="route-bg-video filter brightness-105 object-cover object-center w-full h-full"

@@ -46,6 +46,7 @@ const MacMenuBar = dynamic(
   }
 );
 
+import { RouteBackground } from '@/components/RouteBackground';
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 import { ViewportBoundaries } from '@/components/system/ViewportBoundaries';
 
@@ -105,10 +106,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} bg-[#f3f4f6]`}
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
+        {/* Preload primary LCP background asset off critical path */}
+        <link
+          rel="preload"
+          href="/background/global-background-poster.webp"
+          as="image"
+          type="image/webp"
+          fetchPriority="high"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -122,7 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-[#f3f4f6]"
+        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent"
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />
@@ -132,6 +141,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
         <ArchThemeProvider>
           <ClientProviders>
+            {/* Global ambient background wallpaper */}
+            <RouteBackground />
+
             {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
             <WebVitalsReporter />
             <OfflineBanner />

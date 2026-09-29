@@ -322,7 +322,7 @@ Overlays and HUD elements overlay layout pages without completely blocking backg
 
 The sign-in interface is a key entry point that demonstrates the peak of the system's "Liquid Glass" visual design language and macOS Sonoma aesthetics.
 
-- **Background Video**: Fixed high-resolution 4K H.264 loop representing active operations (`/background/edge-of-the-event-horizon.3840x2160.mp4` at ~28MB). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/edge-of-the-event-horizon-poster.webp`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
+- **Background Video**: Fixed high-resolution H.264 loop representing active operations (`/background/global-background.mp4`). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/global-background-poster.webp`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
 - **Ambient Film Grain & Glass Filters**: A persistent noise/grain layer overlay (`.route-bg-grain`) is rendered on top of the layout to eliminate color banding in gradients and videos. The background video uses standard Sonoma filters (`brightness-95 saturate-110`) for optimal glass legibility.
 - **Window Geometry (macOS Sign-In Card)**:
   - **Container**: A `w-[380px]` frosty glassmorphic panel (`.liquid-glass-light` class) with a 1px white border (`border-white/40`), custom shadow (`shadow-window`), and rounded corners (`rounded-2xl`).
@@ -510,43 +510,43 @@ _Note:_ Keep existing variables (like `--color-bg-base`) untouched. Only **add**
 
 ```ts
 // packages/theme/src/preset.ts
-import { Config } from "tailwindcss";
+import { Config } from 'tailwindcss';
 
 export const preset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
         hud: {
-          DEFAULT: "var(--color-bg-hud)",
-          border: "var(--color-border-hud)",
-          "text-primary": "var(--color-text-hud-primary)",
-          "text-secondary": "var(--color-text-hud-secondary)",
-          "text-tertiary": "var(--color-text-hud-tertiary)",
+          DEFAULT: 'var(--color-bg-hud)',
+          border: 'var(--color-border-hud)',
+          'text-primary': 'var(--color-text-hud-primary)',
+          'text-secondary': 'var(--color-text-hud-secondary)',
+          'text-tertiary': 'var(--color-text-hud-tertiary)',
         },
         // ... existing color extensions remain
       },
       opacity: {
-        "focus-dim": "var(--opacity-focus-dim)",
-        disabled: "var(--opacity-disabled)",
-        hover: "var(--opacity-hover)",
+        'focus-dim': 'var(--opacity-focus-dim)',
+        disabled: 'var(--opacity-disabled)',
+        hover: 'var(--opacity-hover)',
       },
       blur: {
-        "focus-dim": "var(--blur-focus-dim)",
+        'focus-dim': 'var(--blur-focus-dim)',
       },
       boxShadow: {
-        sm: "var(--shadow-sm)",
-        md: "var(--shadow-md)",
-        lg: "var(--shadow-lg)",
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
       },
       borderRadius: {
-        sm: "var(--radius-sm)",
-        md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
-        xl: "var(--radius-xl)",
-        full: "var(--radius-full)",
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        full: 'var(--radius-full)',
       },
       backdropBlur: {
-        xl: "var(--blur-focus-dim)", // align HUD blur if needed
+        xl: 'var(--blur-focus-dim)', // align HUD blur if needed
       },
     },
   },
@@ -600,7 +600,7 @@ Ensure styles resolve correctly at compile time.
 // packages/ui/src/components/GlassCard/GlassCard.tsx
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "spotlight" | "glowborder";
+  variant?: 'default' | 'spotlight' | 'glowborder';
   children: React.ReactNode;
   className?: string;
   // ... other shared props
@@ -622,7 +622,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 ```tsx
 const defaultClasses =
-  "rounded-lg border border-subtle bg-elevated p-4 transition-colors duration-150";
+  'rounded-lg border border-subtle bg-elevated p-4 transition-colors duration-150';
 ```
 
 **Spotlight variant:**
@@ -642,23 +642,23 @@ const defaultClasses =
 #### 3.2.3 Implementation Code Skeleton
 
 ```tsx
-import { useRef, useState, useCallback } from "react";
-import { useReducedMotion } from "framer-motion"; // or custom hook
-import clsx from "clsx";
+import { useRef, useState, useCallback } from 'react';
+import { useReducedMotion } from 'framer-motion'; // or custom hook
+import clsx from 'clsx';
 
-export function GlassCard({ variant = "default", children, className, ...props }: GlassCardProps) {
+export function GlassCard({ variant = 'default', children, className, ...props }: GlassCardProps) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (prefersReduced || variant !== "spotlight") return;
+      if (prefersReduced || variant !== 'spotlight') return;
       const rect = cardRef.current?.getBoundingClientRect();
       if (!rect) return;
       setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     },
-    [prefersReduced, variant],
+    [prefersReduced, variant]
   );
 
   const handleMouseLeave = useCallback(() => setMousePos(null), []);
@@ -673,21 +673,21 @@ export function GlassCard({ variant = "default", children, className, ...props }
     <div
       ref={cardRef}
       className={clsx(
-        "rounded-lg border border-subtle bg-elevated p-4 transition-colors duration-150",
-        variant === "glowborder" && "relative glow-border",
-        className,
+        'rounded-lg border border-subtle bg-elevated p-4 transition-colors duration-150',
+        variant === 'glowborder' && 'relative glow-border',
+        className
       )}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       {...props}
     >
-      {variant === "spotlight" && !prefersReduced && (
+      {variant === 'spotlight' && !prefersReduced && (
         <div
           className="absolute inset-0 pointer-events-none rounded-[inherit]"
           style={spotlightStyle}
         />
       )}
-      {variant === "glowborder" && <div className="glow-border-overlay" aria-hidden="true" />}
+      {variant === 'glowborder' && <div className="glow-border-overlay" aria-hidden="true" />}
       {children}
     </div>
   );
@@ -770,14 +770,14 @@ Update barrel exports (`index.ts`) to remove old components.
 ### 4.4 E2E Test Automation (Playwright/Cypress)
 
 ```ts
-test("weather popover accessible", async ({ page }) => {
-  await page.goto("/");
-  const trigger = page.getByLabel("Weather details");
+test('weather popover accessible', async ({ page }) => {
+  await page.goto('/');
+  const trigger = page.getByLabel('Weather details');
   await expect(trigger).toBeVisible();
   await trigger.click();
-  const popover = page.getByRole("dialog", { name: "Weather details" }); // if role added
+  const popover = page.getByRole('dialog', { name: 'Weather details' }); // if role added
   await expect(popover).toBeVisible();
-  await page.keyboard.press("Escape");
+  await page.keyboard.press('Escape');
   await expect(popover).not.toBeVisible();
 });
 ```
