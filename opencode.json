@@ -4,7 +4,7 @@
   "mcp": {
     "codebase-memory": {
       "type": "local",
-      "command": ["npx", "-y", "codebase-memory-mcp"],
+      "command": ["npx", "-y", "codebase-memory-mcp@0.11.0"],
       "enabled": true
     },
     "context7": {
@@ -14,32 +14,32 @@
     },
     "github": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github@2025.4.8"],
       "enabled": true
     },
     "knowledge-rail": {
       "type": "local",
-      "command": ["npx", "-y", "knowledge-rail"],
+      "command": ["npx", "-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
       "enabled": true
     },
     "memory": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory@2026.8.31"],
       "enabled": true
     },
     "next-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "next-devtools-mcp@0.3.10"],
+      "command": ["npx", "-y", "next-devtools-mcp@0.4.0"],
       "enabled": true
     },
     "npm-mcp": {
       "type": "local",
-      "command": ["npx", "-y", "@mikusnuz/npm-mcp"],
+      "command": ["npx", "-y", "@mikusnuz/npm-mcp@1.2.1"],
       "enabled": true
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp@0.0.76", "--headless"],
+      "command": ["npx", "-y", "@playwright/mcp@0.0.82", "--headless"],
       "enabled": true
     },
     "postgres": {
@@ -47,8 +47,8 @@
       "command": [
         "npx",
         "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
       ],
       "enabled": true
     },
@@ -57,10 +57,10 @@
       "command": [
         "uvx",
         "--from",
-        "redis-mcp-server@latest",
+        "redis-mcp-server",
         "redis-mcp-server",
         "--url",
-        "redis://localhost:6379/0"
+        "redis://127.0.0.1:6379/0"
       ],
       "enabled": true
     }

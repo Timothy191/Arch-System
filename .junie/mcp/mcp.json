@@ -1,10 +1,8 @@
 {
-  "tools": {
-    "sandbox": "docker",
-    "enableHooks": true,
-    "enableMessageBusIntegration": true
-  },
   "mcpServers": {
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    },
     "codebase-memory": {
       "command": "npx",
       "args": ["-y", "codebase-memory-mcp@0.11.0"]
@@ -29,12 +27,5 @@
         "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
       ]
     }
-  },
-  "experimental": {
-    "enableAgents": true
-  },
-  "hooksConfig": {
-    "enabled": true,
-    "notifications": true
   }
 }
