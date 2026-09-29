@@ -10,6 +10,7 @@
  * Turbo task: "codegen" → runs before build
  */
 
+import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -180,4 +181,21 @@ export type RadiusTokens = typeof tokens.radius;
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, output, 'utf8');
+
+// AGENT-TRACE: `renderObject` emits values via JSON.stringify, so the raw output uses
+// double quotes while the repository canonicalises on single quotes. Biome owns that
+// layout decision, so hand the file to it rather than hand-rolling a quote serialiser
+// (which would have to re-implement escaping and line-width rules).
+// This script is the LAST writer in the `codegen` chain (sd.config.mjs && this), so the
+// format step must live here — adding OUT to sd.config.mjs's generatedFiles list would be
+// immediately undone. Skipped on Vercel for the same reason as sd.config.mjs: npx biome
+// resolution crashes there.
+if (!process.env.VERCEL) {
+  try {
+    execSync(`npx biome format --write ${OUT}`, { stdio: 'ignore' });
+  } catch (err) {
+    console.warn(`⚠️ Warning: Could not format ${OUT} with Biome.`);
+  }
+}
+
 console.log(`✅  Token map generated → ${OUT.replace(process.cwd(), '.')}`);
