@@ -103,3 +103,28 @@ export const useOfflineQueue = create<OfflineQueueState>()(
     }
   )
 );
+
+export function initOfflineQueueListeners() {
+  if (typeof window === 'undefined') return;
+
+  const handleOnline = () => {
+    useOfflineQueue.getState().setOnlineStatus(true);
+    useOfflineQueue.getState().sync();
+  };
+
+  const handleOffline = () => {
+    useOfflineQueue.getState().setOnlineStatus(false);
+  };
+
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+
+  if (navigator.onLine) {
+    useOfflineQueue.getState().sync();
+  }
+
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+}

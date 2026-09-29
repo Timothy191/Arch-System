@@ -16,8 +16,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Vercel
+# Vercel & AI Tooling Checkpoints
 .vercel
+.palabre/
 
 # Build Outputs
 .next/

@@ -15,7 +15,6 @@
     "@repo/auth/ui": "workspace:*",
     "@repo/auth/utils": "workspace:*",
     "@repo/contract": "1.0.0",
-    "@repo/database": "workspace:^",
     "@repo/departments/data-access": "workspace:*",
     "@repo/departments/ui": "workspace:*",
     "@repo/errors": "1.0.0",
@@ -53,7 +52,6 @@
     "recharts": "catalog:",
     "sonner": "catalog:",
     "swagger-ui-react": "^5.18.2",
-    "xlsx": "^0.18.5",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"

@@ -111,6 +111,7 @@ export { createWebhookSchema, updateWebhookSchema } from './schemas/webhook.sche
 export * from './agent-governance';
 export * from './codemod';
 export * from './control-room';
+export * from './schemas/_registry';
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,
