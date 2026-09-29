@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION get_monolithized_department_dashboard_payload(dept_id
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   result JSONB;
 BEGIN

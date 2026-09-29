@@ -45,7 +45,7 @@ RETURNS TABLE (
   utilization_pct   NUMERIC
 )
 LANGUAGE sql STABLE
-AS $$
+SET search_path = '' AS $$
   WITH rigs_in_scope AS (
     SELECT DISTINCT m.id, m.name
     FROM machines m

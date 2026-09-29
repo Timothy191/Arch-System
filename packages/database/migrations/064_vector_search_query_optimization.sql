@@ -62,7 +62,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   lambda FLOAT := 0.05;
   adaptive_ef_search INT;
@@ -142,7 +142,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   adaptive_ef_search INT;
 BEGIN
@@ -234,7 +234,7 @@ CREATE OR REPLACE FUNCTION public.generate_vector_search_cache_key(
 RETURNS VARCHAR(64)
 LANGUAGE sql
 STABLE
-AS $$
+SET search_path = '' AS $$
   SELECT encode(digest(
     p_user_id::TEXT || 
     COALESCE(p_memory_type, '') || 
@@ -252,7 +252,7 @@ RETURNS JSONB
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT result_data
   FROM vector_search_cache
   WHERE cache_key = p_cache_key
@@ -273,7 +273,7 @@ CREATE OR REPLACE FUNCTION public.cache_vector_search_results(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   -- Update access count and timestamp if cache entry exists
   UPDATE vector_search_cache
@@ -302,7 +302,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_vector_search_cache()
 RETURNS int
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   deleted_count INT;
 BEGIN
@@ -381,7 +381,7 @@ CREATE OR REPLACE FUNCTION public.record_vector_search_performance(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   INSERT INTO vector_search_performance (
     user_id, search_type, match_count, ef_search, result_count, execution_time_ms, cache_hit

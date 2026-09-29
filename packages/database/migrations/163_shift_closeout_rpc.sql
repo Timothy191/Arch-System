@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION public.atomic_shift_closeout(
 ) RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_existing_hash text;
   v_response jsonb;

@@ -36,7 +36,7 @@ CREATE OR REPLACE FUNCTION get_unified_shift_compilation(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
     v_result JSONB;
     v_shift_status JSONB;

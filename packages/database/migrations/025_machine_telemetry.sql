@@ -157,7 +157,7 @@ CREATE OR REPLACE FUNCTION archive_telemetry_month(
 ) RETURNS TABLE (
   archived_count INTEGER,
   machines_archived INTEGER
-) AS $$
+) SET search_path = '' AS $$
 DECLARE
   v_target_month TEXT;
 BEGIN
@@ -243,7 +243,7 @@ CREATE OR REPLACE FUNCTION get_telemetry_summary(
   avg_penetration_rate NUMERIC,
   total_alerts INTEGER,
   record_count BIGINT
-) AS $$
+) SET search_path = '' AS $$
 BEGIN
   IF p_granularity = 'hour' THEN
     RETURN QUERY
@@ -296,7 +296,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================
 
 CREATE OR REPLACE FUNCTION check_and_archive_telemetry()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   -- Archive previous month data when new month starts
   IF (SELECT MAX(year_month) FROM machine_telemetry) < TO_CHAR(NOW(), 'YYYY-MM') THEN

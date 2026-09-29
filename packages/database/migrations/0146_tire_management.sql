@@ -109,7 +109,7 @@ RETURNS TABLE (
   avg_lifespan_hours NUMERIC,
   avg_lifespan_days NUMERIC,
   scrapped_count BIGINT
-) AS $$
+) SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT

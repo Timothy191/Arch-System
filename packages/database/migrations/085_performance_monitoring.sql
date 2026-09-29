@@ -35,7 +35,7 @@ RETURNS TABLE (
   mean_exec_time FLOAT,
   max_exec_time FLOAT
 ) SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT 

@@ -118,7 +118,7 @@ RETURNS SETOF dept_production_summary
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT s.*
   FROM dept_production_summary s
   WHERE public.has_department_access(s.department_id)
@@ -134,7 +134,7 @@ RETURNS SETOF machine_utilization_weekly
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT m.*
   FROM machine_utilization_weekly m
   WHERE public.has_department_access(m.department_id)
@@ -150,7 +150,7 @@ RETURNS SETOF safety_incident_monthly
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT s.*
   FROM safety_incident_monthly s
   WHERE public.has_department_access(s.department_id)

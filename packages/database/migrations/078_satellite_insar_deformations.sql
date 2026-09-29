@@ -26,7 +26,7 @@ CREATE INDEX IF NOT EXISTS idx_satellite_deformations_location_risk ON satellite
 
 -- Automatic updated_at trigger
 CREATE OR REPLACE FUNCTION update_satellite_deformations_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;

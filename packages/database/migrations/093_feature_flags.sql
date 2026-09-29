@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION evaluate_feature_flag(
   p_session_id TEXT DEFAULT NULL
 ) RETURNS JSONB
 LANGUAGE plpgsql
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_flag RECORD;
   v_result JSONB;

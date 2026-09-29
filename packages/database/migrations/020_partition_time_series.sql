@@ -123,7 +123,7 @@ FROM hourly_loads_legacy;
 DROP TRIGGER IF EXISTS update_hourly_loads_updated_at ON hourly_loads_legacy;
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
@@ -245,7 +245,7 @@ CREATE OR REPLACE FUNCTION public.create_next_month_partitions()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   next_month_start DATE := date_trunc('month', NOW() + INTERVAL '1 month')::DATE;
   next_month_end   DATE := (next_month_start + INTERVAL '1 month')::DATE;

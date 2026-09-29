@@ -97,7 +97,7 @@ CREATE INDEX IF NOT EXISTS idx_delay_entries_deleted_at ON delay_entries(deleted
 -- This is implemented as a trigger function since CHECK constraints
 -- cannot reference aggregated data from other rows
 CREATE OR REPLACE FUNCTION check_delay_hours_max_12_hours()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   total_hours NUMERIC;
 BEGIN
@@ -326,7 +326,7 @@ CREATE POLICY "delay_entries_archive_select"
 -- 6. Update updated_at trigger
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
@@ -345,7 +345,7 @@ CREATE TRIGGER trigger_update_delay_categories_updated_at
 -- 6.5. Validate delay entry times
 -- ============================================
 CREATE OR REPLACE FUNCTION validate_delay_entry_time()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   mo_start TIMESTAMPTZ;
   mo_end TIMESTAMPTZ;

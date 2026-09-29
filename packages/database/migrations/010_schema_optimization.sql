@@ -66,6 +66,6 @@ ALTER TABLE daily_logs ADD CONSTRAINT daily_logs_shift_check CHECK (shift IN ('d
 
 -- 4. Utility Functions for Soft Deletes
 -- CREATE OR REPLACE FUNCTION public.is_not_deleted()
--- RETURNS BOOLEAN AS $$
+-- RETURNS BOOLEAN SET search_path = '' AS $$
 --   SELECT deleted_at IS NULL;
 -- $$ LANGUAGE sql STABLE;

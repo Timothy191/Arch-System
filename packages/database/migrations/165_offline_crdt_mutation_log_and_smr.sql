@@ -67,7 +67,7 @@ END $$;
 CREATE OR REPLACE FUNCTION apply_offline_mutations(
   p_tenant uuid,
   p_mutations jsonb
-) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
   m jsonb;
   v_mutation_id uuid;

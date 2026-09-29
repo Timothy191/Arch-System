@@ -4,7 +4,7 @@
 
 -- 1. Create a generic audit trigger function
 CREATE OR REPLACE FUNCTION public.process_audit_log()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   v_old_data JSONB := NULL;
   v_new_data JSONB := NULL;

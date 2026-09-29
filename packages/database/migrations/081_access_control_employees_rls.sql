@@ -6,7 +6,7 @@ RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
 STABLE
-AS $$
+SET search_path = '' AS $$
   SELECT EXISTS (
     SELECT 1 FROM employees WHERE auth_id = auth.uid() AND role = 'access_control'
   );

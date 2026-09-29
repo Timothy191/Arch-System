@@ -5,7 +5,7 @@
 -- ==========================================================
 
 CREATE OR REPLACE FUNCTION validate_dozer_roll_date()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   v_server_date DATE;
 BEGIN

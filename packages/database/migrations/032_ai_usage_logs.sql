@@ -73,7 +73,7 @@ RETURNS NUMERIC(12,6)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT COALESCE(SUM(estimated_cost_usd), 0)
   FROM ai_usage_logs
   WHERE user_id = p_user_id

@@ -25,7 +25,7 @@ ALTER TABLE access_logs_archive
 -- Moves logs from previous ISO weeks into the archive
 -- ============================================
 CREATE OR REPLACE FUNCTION archive_weekly_access_logs()
-RETURNS void AS $$
+RETURNS void SET search_path = '' AS $$
 DECLARE
   week_boundary timestamptz;
   week_start date;

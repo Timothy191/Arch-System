@@ -540,7 +540,7 @@ ON CONFLICT DO NOTHING;
 -- Update Triggers
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;

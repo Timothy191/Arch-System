@@ -3,7 +3,7 @@
 
 -- Function to queue webhook delivery
 CREATE OR REPLACE FUNCTION queue_webhook_delivery()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   event_type TEXT;
   payload JSONB;

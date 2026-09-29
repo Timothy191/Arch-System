@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION record_slo_measurement(
   p_metadata JSONB DEFAULT '{}'
 ) RETURNS UUID
 LANGUAGE plpgsql
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_status TEXT;
   v_id UUID;

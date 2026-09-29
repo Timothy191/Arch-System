@@ -140,7 +140,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   lambda FLOAT := 0.05; -- temporal decay constant (half-life ~13.9 hours)
 BEGIN
@@ -205,7 +205,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT
@@ -240,7 +240,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT

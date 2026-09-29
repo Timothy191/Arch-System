@@ -21,7 +21,7 @@ ON breakdowns USING GIN (shared_with_departments);
 
 -- Function to automatically share active Engineering breakdowns with Control Room
 CREATE OR REPLACE FUNCTION auto_share_breakdown_with_control_room()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   engineering_dept_id UUID;
   control_room_id UUID;

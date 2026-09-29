@@ -234,7 +234,7 @@ DROP TABLE IF EXISTS shift_notes;
 -- 6. Update triggers for new tables
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;

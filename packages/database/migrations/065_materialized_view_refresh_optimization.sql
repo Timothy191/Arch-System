@@ -69,7 +69,7 @@ CREATE OR REPLACE FUNCTION public.log_mv_refresh_start(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   log_id UUID;
 BEGIN
@@ -93,7 +93,7 @@ CREATE OR REPLACE FUNCTION public.log_mv_refresh_end(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   duration_ms INT;
 BEGIN
@@ -113,7 +113,7 @@ CREATE OR REPLACE FUNCTION public.refresh_dept_production_summary_smart()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   log_id UUID;
   refresh_status TEXT := 'completed';
@@ -176,7 +176,7 @@ CREATE OR REPLACE FUNCTION public.refresh_machine_utilization_weekly_smart()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   log_id UUID;
   refresh_status TEXT := 'completed';
@@ -230,7 +230,7 @@ CREATE OR REPLACE FUNCTION public.refresh_safety_incident_monthly_smart()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   log_id UUID;
   refresh_status TEXT := 'completed';
@@ -333,7 +333,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   last_refresh TIMESTAMPTZ;
   age_mins INT;
@@ -385,7 +385,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT 

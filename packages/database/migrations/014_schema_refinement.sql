@@ -105,7 +105,7 @@ ALTER TABLE generated_reports ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 ALTER TABLE memory_embeddings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 
 -- Add triggers for updated_at on tables that have the column but no trigger
-CREATE OR REPLACE FUNCTION ensure_updated_at_trigger(p_table_name TEXT) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION ensure_updated_at_trigger(p_table_name TEXT) RETURNS void SET search_path = '' AS $$
 BEGIN
   EXECUTE format(
     'DROP TRIGGER IF EXISTS %I ON %I; CREATE TRIGGER %I BEFORE UPDATE ON %I FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();',

@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS pg_net;
 
 -- Create the trigger function
 CREATE OR REPLACE FUNCTION notify_telemetry_webhook()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   v_url TEXT;
   v_payload JSONB;

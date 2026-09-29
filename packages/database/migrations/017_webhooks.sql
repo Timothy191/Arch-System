@@ -141,7 +141,7 @@ CREATE POLICY "system_insert_delivery_logs"
 
 -- Function to trigger webhook delivery
 CREATE OR REPLACE FUNCTION trigger_webhook_delivery()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   -- This function will be called by triggers on key tables
   -- It will queue webhook deliveries to Svix

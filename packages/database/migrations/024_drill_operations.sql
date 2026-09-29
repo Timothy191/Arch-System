@@ -63,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_drill_operations_shift ON drill_operations(shift_
 
 -- Update trigger
 CREATE OR REPLACE FUNCTION update_drill_operations_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;

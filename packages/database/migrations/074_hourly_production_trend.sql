@@ -61,7 +61,7 @@ CREATE INDEX idx_hourly_production_timestamp ON view_hourly_production(hour_time
 
 -- 3. Refresh Function
 CREATE OR REPLACE FUNCTION refresh_hourly_production()
-RETURNS void AS $$
+RETURNS void SET search_path = '' AS $$
 BEGIN
   REFRESH MATERIALIZED VIEW CONCURRENTLY view_hourly_production;
 END;
@@ -78,7 +78,7 @@ RETURNS TABLE (
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT 
     to_char(hour_timestamp, 'HH24:00') as hour_label,
     department_name,

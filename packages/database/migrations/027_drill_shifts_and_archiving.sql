@@ -30,7 +30,7 @@ ALTER TABLE drill_operations_archive
 -- Safely moves operations older than 30 days to the archive
 -- ============================================
 CREATE OR REPLACE FUNCTION archive_monthly_drill_operations()
-RETURNS void AS $$
+RETURNS void SET search_path = '' AS $$
 BEGIN
   -- Move records older than the beginning of the previous month
   WITH moved_rows AS (

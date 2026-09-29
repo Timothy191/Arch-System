@@ -104,7 +104,7 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET hnsw.ef_search = 200  -- dynamic ef_search for better recall on this query
-AS $$
+SET search_path = '' AS $$
 DECLARE
   lambda FLOAT := 0.05;
 BEGIN
@@ -165,7 +165,7 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET hnsw.ef_search = 200
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT

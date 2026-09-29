@@ -103,7 +103,7 @@ CREATE POLICY "breakdowns_delete_admin"
 CREATE OR REPLACE FUNCTION update_breakdowns_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-AS $$
+SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;

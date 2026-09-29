@@ -99,7 +99,7 @@ ALTER TABLE machine_operations ADD CONSTRAINT fk_machine_ops_daily_log FOREIGN K
 -- ============================================
 
 CREATE OR REPLACE FUNCTION check_shift_immutable()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
     v_status TEXT;
     v_approved_by UUID;

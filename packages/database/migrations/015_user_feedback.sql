@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION submit_user_feedback(
   p_user_id UUID DEFAULT NULL
 ) RETURNS UUID
 LANGUAGE plpgsql
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_id UUID;
 BEGIN
@@ -78,7 +78,7 @@ CREATE OR REPLACE FUNCTION submit_quick_feedback(
   p_session_id TEXT DEFAULT NULL
 ) RETURNS UUID
 LANGUAGE plpgsql
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_id UUID;
 BEGIN

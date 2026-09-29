@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION public.add_partition_check_constraints()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   partition_record RECORD;
   partition_name TEXT;
@@ -130,7 +130,7 @@ CREATE OR REPLACE FUNCTION public.create_next_month_partitions()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   next_month_start DATE := date_trunc('month', NOW() + INTERVAL '1 month')::DATE;
   next_month_end   DATE := (next_month_start + INTERVAL '1 month')::DATE;
@@ -204,7 +204,7 @@ CREATE OR REPLACE FUNCTION public.archive_old_partitions(months_to_keep INT DEFA
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   cutoff_date DATE := date_trunc('month', NOW() - INTERVAL '1 month' * months_to_keep)::DATE;
   partition_record RECORD;

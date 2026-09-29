@@ -18,7 +18,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   v_last_refresh TIMESTAMPTZ;
   v_age_mins INT;
@@ -70,7 +70,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 BEGIN
   RETURN QUERY
   SELECT 

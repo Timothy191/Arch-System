@@ -4,7 +4,7 @@
 
 -- 1. Helper Function for Soft Delete filtering in policies
 CREATE OR REPLACE FUNCTION public.is_active(record_deleted_at TIMESTAMPTZ)
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN SET search_path = '' AS $$
   SELECT record_deleted_at IS NULL;
 $$ LANGUAGE sql STABLE;
 

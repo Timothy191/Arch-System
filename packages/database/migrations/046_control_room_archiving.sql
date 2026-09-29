@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION archive_monthly_control_room_shifts()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
 DECLARE
   cutoff DATE := date_trunc('month', CURRENT_DATE)::DATE;
 BEGIN

@@ -148,7 +148,7 @@ CREATE INDEX idx_production_summary_dept ON view_production_summary(department_i
 
 -- 4. Refresh Function
 CREATE OR REPLACE FUNCTION refresh_production_summary()
-RETURNS void AS $$
+RETURNS void SET search_path = '' AS $$
 BEGIN
   REFRESH MATERIALIZED VIEW CONCURRENTLY view_production_summary;
 END;
@@ -160,7 +160,7 @@ RETURNS SETOF view_production_summary
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-AS $$
+SET search_path = '' AS $$
   SELECT s.*
   FROM view_production_summary s
   WHERE (public.has_department_access(s.department_id) OR public.is_admin())

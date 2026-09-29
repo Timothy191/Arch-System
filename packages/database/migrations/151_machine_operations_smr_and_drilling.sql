@@ -37,7 +37,7 @@ COMMENT ON COLUMN machine_operations.meters_drilled IS 'Meters drilled (if Drill
 
 -- Preserve delay-window validation while legacy operation times remain available.
 CREATE OR REPLACE FUNCTION validate_delay_entry_time()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   mo_start TIMESTAMPTZ;
   mo_end TIMESTAMPTZ;
@@ -102,7 +102,7 @@ COMMENT ON VIEW machine_operations_with_delays IS 'Machine operations with delay
 
 -- 6. Create function to sync to drill_operations
 CREATE OR REPLACE FUNCTION sync_to_drill_operations()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   v_machine_type TEXT;
   v_drilling_dept_id UUID;
@@ -214,7 +214,7 @@ CREATE TRIGGER trigger_sync_to_drill_operations
 
 -- 7. Create function to trigger sync when delay_entries change
 CREATE OR REPLACE FUNCTION sync_delays_to_drill_operations()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER SET search_path = '' AS $$
 DECLARE
   v_mo_id UUID;
 BEGIN

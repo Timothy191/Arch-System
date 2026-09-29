@@ -10,7 +10,7 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_extension WHERE extname = 'pg_graphql'
   ) THEN
-    CREATE EXTENSION IF NOT EXISTS pg_graphql SCHEMA graphql;
+    CREATE EXTENSION IF NOT EXISTS pg_graphql SCHEMA extensions;
   END IF;
 END $$;
 
