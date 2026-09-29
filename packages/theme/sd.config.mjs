@@ -50,19 +50,20 @@ const sd = new StyleDictionary({
 
 await sd.buildAllPlatforms();
 
-// AGENT-TRACE: Format generated outputs with Prettier to guarantee 0-drift and canonical repo formatting.
+// AGENT-TRACE: Skip formatting generated outputs in Vercel to avoid npx biome resolution crashes.
 const generatedFiles = [
   resolve(__dirname, 'src/css/variables-generated.css'),
   resolve(__dirname, 'src/tokens/generated-sd.ts'),
   resolve(__dirname, 'src/tokens/tokens-hsl.json'),
 ];
 
-for (const filePath of generatedFiles) {
-  try {
-    const raw = readFileSync(filePath, 'utf8');
-    execSync(`pnpm biome format --write ${filePath}`);
-  } catch (err) {
-    console.warn(`⚠️ Warning: Could not format ${filePath} with Prettier:`, err);
+if (!process.env.VERCEL) {
+  for (const filePath of generatedFiles) {
+    try {
+      execSync(`npx biome format --write ${filePath}`, { stdio: 'ignore' });
+    } catch (err) {
+      console.warn(`⚠️ Warning: Could not format ${filePath} with Biome.`);
+    }
   }
 }
 
