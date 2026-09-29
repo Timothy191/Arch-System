@@ -16,7 +16,7 @@ export interface GlassCardProps extends HTMLMotionProps<'div'> {
   className?: string;
   hover?: boolean;
   onClick?: () => void;
-  accent?: 'green' | 'blue' | 'red' | 'cyan' | 'indigo' | 'violet' | 'alert' | 'none';
+  accent?: 'green' | 'blue' | 'red' | 'cyan' | 'indigo' | 'violet' | 'alert' | 'charcoal' | 'none';
   variant?: 'default' | 'window' | 'spotlight' | 'glowborder' | 'liquid';
   glassIntensity?: GlassVariant;
   title?: string;
@@ -158,6 +158,7 @@ const ACCENT_COLORS = {
   indigo: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
   violet: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
   alert: 'hover:border-[var(--accent-red)]/40 hover:shadow-card-hover',
+  charcoal: 'hover:border-accent-charcoal/40 hover:shadow-card-hover',
   none: 'hover:border-black/[0.12] hover:shadow-card-hover',
 };
 

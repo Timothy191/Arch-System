@@ -8,29 +8,29 @@ import { Suspense } from 'react';
 const ShiftCoverageSectionClient = dynamic(
   () => import('./ShiftCoverageSectionClient').then((m) => m.ShiftCoverageSectionClient),
   {
-    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+    loading: () => <div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />,
   }
 );
 
 const ControlRoomChecklistWidget = dynamic(
   () => import('@/features/departments').then((m) => m.ControlRoomChecklistWidget),
   {
-    loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+    loading: () => <div className="h-96 animate-pulse bg-bg-tertiary rounded-card" />,
   }
 );
 
 const ScadaPanel = dynamic(() => import('@/features/departments').then((m) => m.ScadaPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+  loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
 });
 
 const AlertPanel = dynamic(() => import('@/features/departments').then((m) => m.AlertPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+  loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
 });
 
 const ControlRoomActivityFeed = dynamic(
   () => import('@/features/departments').then((m) => m.ControlRoomActivityFeed),
   {
-    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+    loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
   }
 );
 
@@ -44,16 +44,12 @@ export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidge
   return (
     <div className="space-y-6">
       {/* Shift Coverage - Client-side with React Query */}
-      <Suspense
-        fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-      >
+      <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
         <ShiftCoverageSectionClient deptId={deptId} deptSlug={deptSlug} today={today} />
       </Suspense>
 
       {/* Control Room Shift Checklist & Operational KPIs */}
-      <Suspense
-        fallback={<div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-      >
+      <Suspense fallback={<div className="h-96 animate-pulse bg-bg-tertiary rounded-card" />}>
         <ControlRoomChecklistWidget
           departmentId={deptId}
           departmentSlug={deptSlug}
@@ -65,21 +61,19 @@ export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidge
       {/* SCADA and Alert Telemetry Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
         >
           <ScadaPanel departmentId={deptId} />
         </Suspense>
         <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
         >
           <AlertPanel departmentId={deptId} />
         </Suspense>
       </div>
 
       {/* Activity Feed */}
-      <Suspense
-        fallback={<div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-      >
+      <Suspense fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}>
         <ControlRoomActivityFeed departmentId={deptId} />
       </Suspense>
     </div>
