@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-09-29T07:44:45.420Z",
-  "totalRetrospectives": 5,
+  "lastUpdated": "2026-09-29T14:05:00.000Z",
+  "totalRetrospectives": 9,
   "entries": [
     {
       "id": "err-20260925-vercel-headless-deploy",
@@ -31,6 +31,29 @@
       "category": "UI_UX",
       "errorSignature": "Unreachable email validation in LoginForm.tsx blur handler",
       "preventionRule": "When handling onChange or onBlur for HTML5 specific inputs (like type=\"email\"), utilize the Constraint Validation API (e.target.validity) instead of parsing e.target.value directly."
+    },
+    {
+      "id": "err-20260929-stale-branch-key-lurkers",
+      "category": "SECURITY",
+      "errorSignature": "Deleted main-tip secrets reappear as live files on stale public bot branches (bolt/*, vercel/*, jules/*)",
+      "preventionRule": "After leaking or scrubbing any secret, enumerate git ls-remote --heads and grep EVERY published branch for the secret fingerprint, not just main; delete stale bot branches immediately after their work lands."
+    },
+    {
+      "id": "recovery-20260929-remaining-branch-deletion",
+      "category": "SECURITY",
+      "preventionRule": "Treat 'remaining heads are clean' as an unverified claim until every published branch is fingerprint-scanned; bundle tips (with chmod 600) BEFORE any push --delete of diverged branches."
+    },
+    {
+      "id": "err-20260929-unreachable-object-exposure",
+      "category": "SECURITY",
+      "errorSignature": "On a public repo, rewriting refs/heads/* does NOT remove leaked secrets: refs/pull/<N>/head pins pre-rewrite commits forever, so GitHub never GCs them (71/138 PR heads still serve live Supabase JWTs)",
+      "preventionRule": "Deleting a branch or rewriting refs/heads/* does NOT remove a secret from a public repo: refs/pull/<N>/head pins the pre-rewrite commit forever. Treat any leaked secret as live until the key is rotated AND unreachable objects are purged server-side. Never treat push --delete, a history rewrite, or a 'heads are clean' scan as remediation."
+    },
+    {
+      "id": "err-20260929-placeholder-secret-false-positive",
+      "category": "SECURITY",
+      "errorSignature": "Regex secret fingerprinting false-positives on placeholder values; base64 token counts read as 0 unless the API's newline wrapping is stripped first",
+      "preventionRule": "Always tr -d '\\n' before base64 -d when reading files via the GitHub contents API, and disambiguate placeholders from real secrets by comparing blob ids across commits (git rev-parse <sha>:<path>) or by spotting filler like 00000000/XXXX rather than trusting a regex match alone."
     }
   ]
 }

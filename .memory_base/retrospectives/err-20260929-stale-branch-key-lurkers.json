@@ -1,0 +1,15 @@
+{
+  "id": "err-20260929-stale-branch-key-lurkers",
+  "timestamp": "2026-09-29T09:50:00Z",
+  "taskTag": "--task-privacy-audit",
+  "category": "SECURITY",
+  "errorSignature": "Deleted main-tip secrets reappear as live files on stale public bot branches (bolt/*, vercel/*, jules/*)",
+  "affectedFiles": [
+    "apps/portal/env/.env.example",
+    "packages/supabase/src/seed.ts",
+    "temp/phase7-testing-qa.md"
+  ],
+  "rootCause": "Key scrubbing was applied to main tip only; 12 orphaned agent-generated remote branches still carried complete 208-219 char Supabase anon+service_role JWTs bound to real project ref mrwhtxbhrzyttlsyuofc.",
+  "resolution": "Snapshot branch tips to session files for recovery, issued a single atomic git push origin --delete of 12 stale refs (11 bot + 1 jules), pruned local tracking refs, and verified remaining heads contain no live-branch JWTs.",
+  "preventionRule": "After leaking or scrubbing any secret, enumerate git ls-remote --heads and grep EVERY published branch for the secret fingerprint, not just main; delete stale bot branches immediately after their work lands."
+}

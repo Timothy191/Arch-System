@@ -1,0 +1,52 @@
+{
+  "id": "err-20260929-unreachable-object-exposure",
+  "timestamp": "2026-09-29T14:05:00Z",
+  "taskTag": "--task-branch-review",
+  "category": "SECURITY",
+  "relatedTo": [
+    "err-20260929-stale-branch-key-lurkers",
+    "recovery-20260929-remaining-branch-deletion",
+    "err-20260929-placeholder-secret-false-positive"
+  ],
+  "errorSignature": "On a public repo, history-rewriting refs/heads/* does NOT remove leaked secrets: refs/pull/<N>/head keeps pre-rewrite commits reachable forever, so GitHub never garbage-collects them",
+  "finding": "Repo Timothy191/Arch-System is PUBLIC (gh api reports fork=false, private=false), so every reachable object is world-readable. 71 of 138 PR head commits still serve live Supabase JWTs for project mrwhtxbhrzyttlsyuofc. PRs #63-#71 leak 1 JWT each (apps/portal/env/.env.example); PRs #72-#134 leak 4 JWTs each across apps/portal/env/.env.example (3), apps/portal/.env.example (3) and packages/supabase/src/seed.ts (1) - and seed.ts carries a service_role token that bypasses RLS. Current refs/heads/main is clean (0 JWT matches in all three paths).",
+  "rootCause": "refs/pull/<N>/head is retained by GitHub for every pull request regardless of state (closed or merged). A ref pointing at an object makes it reachable, so it is exempt from gc --prune. Proof: the perf/optimize-machine-operations-list-* tip 3c3f1502 (branch deleted, NO associated PR ref) was reclaimed and now returns 422 No commit found, while 2020fd3bfb377f1a5356f9da0427e5ecb34bc3c2 (PR #121 head, head.sha == merge_commit_sha) remains fully retrievable and still serves 7 JWTs.",
+  "evidence": {
+    "pinnedCommitServingSecrets": "2020fd3bfb377f1a5356f9da0427e5ecb34bc3c2",
+    "pinnedCommitPinningRef": "refs/pull/121/head",
+    "leakingPrHeadCount": 71,
+    "totalPrHeadCount": 138,
+    "cleanPrHeadCount": 67,
+    "leakingPrRange": "63-134 (74 absent)",
+    "leakedPaths": [
+      "apps/portal/env/.env.example",
+      "apps/portal/.env.example",
+      "packages/supabase/src/seed.ts"
+    ],
+    "secretScanningAlertOpen": "#2 Supabase Secret Key @ apps/portal/env/.env.example first seen at ac6277f8",
+    "secretScanningAlertFalsePositive": "#1 Slack Incoming Webhook URL @ infra/observability/alertmanager.yml - placeholder T00000000/B00000000/XXXX..., blob 5cd59e72 identical in initial commit d22deb0 and current main; resolved as false_positive"
+  },
+  "verificationMethod": "gh api repos/Timothy191/Arch-System/commits/<sha> and contents/<path>?ref=<sha> --jq .content | tr -d '\\n' | base64 -d | grep -coE 'eyJ[A-Za-z0-9_.-]{120,}'; git merge-base --is-ancestor; git rev-parse <sha>:<path> blob comparison. Token presence measured by count and length only - no secret values were emitted.",
+  "additionalExposure": {
+    "staleLocalClone": "/home/tim/Projects/Arch-System_reference (483 MB) was an ancestor-of-main clone embedding the live tokens across 11 commits - DELETED 2026-09-29",
+    "localBundles": "/home/tim/backups/arch-system-branch-bundles-20260929/*.bundle (chmod 600, sha256 verified, local btrfs, not synced) embed the same live tokens; deliberately retained while rotation is deferred"
+  },
+  "remediationCompleted": [
+    "Deleted the 483 MB stale clone that embedded the secrets in its main history",
+    "Pruned 17 dead remote-tracking refs + expired reflogs + gc --prune=now in that clone before deletion",
+    "Deleted 6 token-free orphan refs/copilot/checkpoints/* refs",
+    "Unset the inert merge.ours.driver config foot-gun",
+    "Enabled branch protection on main (blocks force-push + deletion, keeps direct pushes)",
+    "Enabled secret scanning and secret scanning push protection (both were disabled)",
+    "Resolved secret-scanning alert #1 as false positive",
+    "Drafted the GitHub Support purge request covering all 71 leaking PR heads"
+  ],
+  "residualRisk": "ACTIVE exposure. Live Supabase anon + service_role JWTs for project mrwhtxbhrzyttlsyuofc remain fetchable by anyone on the public internet via 71 PR-head commits. Key rotation was deliberately excluded by the owner, and GitHub will not purge PR-pinned refs on request alone - so the exposure persists. Rotation is the only effective mitigation; the Support purge is best-effort.",
+  "unresolvedActions": [
+    "Rotate Supabase anon + service_role keys for project mrwhtxbhrzyttlsyuofc (owner decision pending) - the only true remediation",
+    "File the GitHub Support purge request (session artifact github-support-purge-request.md) to remove the 71 pinning refs and force server-side GC",
+    "Keep secret-scanning alert #2 open until the key is actually rotated, then resolve it with resolution=revoked",
+    "Keep the recovery-bundle directory off any synced/backed-up location until rotation"
+  ],
+  "preventionRule": "Deleting a branch or rewriting refs/heads/* does NOT remove a secret from a public repo: refs/pull/<N>/head pins the pre-rewrite commit forever. Treat any leaked secret as live until the key is rotated AND unreachable objects are purged server-side. Never treat push --delete, a history rewrite, or a 'heads are clean' scan as remediation."
+}
