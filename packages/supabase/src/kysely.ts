@@ -79,7 +79,11 @@ export interface KyselyDatabase {
  *   .execute();
  * ```
  */
+let globalKyselyInstance: Kysely<KyselyDatabase> | null = null;
+
 export function createKyselyClient() {
+  if (globalKyselyInstance) return globalKyselyInstance;
+
   const url = process.env.DATABASE_URL ?? process.env.SUPABASE_DATABASE_URL;
 
   if (!url) {
@@ -89,8 +93,14 @@ export function createKyselyClient() {
   }
 
   const dialect = new PostgresDialect({
-    pool: new Pool({ connectionString: url, max: 10 }),
+    pool: new Pool({
+      connectionString: url,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    }),
   });
 
-  return new Kysely<KyselyDatabase>({ dialect });
+  globalKyselyInstance = new Kysely<KyselyDatabase>({ dialect });
+  return globalKyselyInstance;
 }
