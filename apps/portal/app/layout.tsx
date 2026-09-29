@@ -3,6 +3,7 @@ import '@/styles/print-report.css';
 import { ArchThemeProvider } from '@repo/theme/react';
 import { EveLogo } from '@repo/ui/EveLogo';
 import { Toaster } from '@repo/ui/Toaster';
+import { Analytics } from '@vercel/analytics/react';
 import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Inter, JetBrains_Mono, Outfit } from 'next/font/google';
@@ -199,6 +200,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             <CommandBar />
             <ViewportBoundaries />
             <ClientOverlays />
+            <Analytics />
             <Toaster />
           </ClientProviders>
         </ArchThemeProvider>
