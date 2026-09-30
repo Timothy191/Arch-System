@@ -71,10 +71,7 @@ describe('ExcavatorActivityList', () => {
 
   it('renders site heading and aggregates total site BCM and loads', () => {
     render(
-      <ExcavatorActivityList
-        todayActivity={mockActivities}
-        todayAssignments={mockAssignments}
-      />
+      <ExcavatorActivityList todayActivity={mockActivities} todayAssignments={mockAssignments} />
     );
 
     expect(screen.getByText("Today's Activity")).toBeInTheDocument();
@@ -85,10 +82,7 @@ describe('ExcavatorActivityList', () => {
 
   it('renders Day Shift and Night Shift sections with corresponding machines and assignments', () => {
     render(
-      <ExcavatorActivityList
-        todayActivity={mockActivities}
-        todayAssignments={mockAssignments}
-      />
+      <ExcavatorActivityList todayActivity={mockActivities} todayAssignments={mockAssignments} />
     );
 
     expect(screen.getByRole('heading', { name: /Day Shift/i })).toBeInTheDocument();
@@ -104,10 +98,7 @@ describe('ExcavatorActivityList', () => {
 
   it('correctly maps dumper assignments using the indexed lookup Map', () => {
     render(
-      <ExcavatorActivityList
-        todayActivity={mockActivities}
-        todayAssignments={mockAssignments}
-      />
+      <ExcavatorActivityList todayActivity={mockActivities} todayAssignments={mockAssignments} />
     );
 
     expect(screen.getByText('DT-01')).toBeInTheDocument();

@@ -85,9 +85,7 @@ export function ExcavatorActivityList({
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap(
-          (a) => assignmentsByActivityId.get(a.id) || []
-        );
+        const siteAssignments = activities.flatMap((a) => assignmentsByActivityId.get(a.id) || []);
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
 
