@@ -40,9 +40,19 @@ interface ControlRoomWidgetsProps {
   today: string;
 }
 
+const EquipmentDashboard = dynamic(
+  () => import('@/features/departments').then((m) => m.EquipmentDashboard),
+  { loading: () => <div className="h-64 animate-pulse bg-bg-tertiary rounded-card" /> }
+);
+
 export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidgetsProps) {
   return (
     <div className="space-y-6">
+      {/* Equipment Dashboard with Breakdown Workflow Triggers */}
+      <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
+        <EquipmentDashboard departmentId={deptId} />
+      </Suspense>
+
       {/* Shift Coverage - Client-side with React Query */}
       <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
         <ShiftCoverageSectionClient deptId={deptId} deptSlug={deptSlug} today={today} />

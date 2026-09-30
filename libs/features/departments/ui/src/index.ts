@@ -4,6 +4,10 @@ export * from './control-room/CloseShiftModal';
 export * from './control-room/ControlRoomActivityFeed';
 export * from './control-room/ControlRoomChecklistWidget';
 export * from './control-room/DozerRollForm';
+// AGENT-TRACE: UniverSheet removed from barrel to preserve next/dynamic code-splitting.
+// Import directly: import UniverSheet from "./tools/UniverSheet"
+// The barrel export was pulling @univerjs (~7 MB OT engine) into every page using @repo/departments/ui
+export { EquipmentDashboard } from './control-room/EquipmentDashboard';
 export * from './control-room/ExportPdfButton';
 export * from './control-room/FleetKpiTable';
 export * from './control-room/MachineControl';
@@ -23,6 +27,3 @@ export * from './engineering/breakdowns/types';
 export * from './engineering/tires';
 export * from './tools/ToolCard';
 export * from './tools/ToolsPageClient';
-// AGENT-TRACE: UniverSheet removed from barrel to preserve next/dynamic code-splitting.
-// Import directly: import UniverSheet from "./tools/UniverSheet"
-// The barrel export was pulling @univerjs (~7 MB OT engine) into every page using @repo/departments/ui
