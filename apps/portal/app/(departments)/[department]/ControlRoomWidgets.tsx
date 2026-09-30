@@ -41,7 +41,7 @@ interface ControlRoomWidgetsProps {
 }
 
 const EquipmentDashboard = dynamic(
-  () => import('@/features/departments').then((m) => m.EquipmentDashboard),
+  () => import('@repo/departments/ui').then((m) => m.EquipmentDashboard),
   { loading: () => <div className="h-64 animate-pulse bg-bg-tertiary rounded-card" /> }
 );
 
