@@ -1,3 +1,8 @@
+jest.mock('next/server', () => ({
+  ...jest.requireActual('next/server'),
+  connection: jest.fn().mockResolvedValue(undefined),
+}));
+
 /**
  * @jest-environment node
  */
