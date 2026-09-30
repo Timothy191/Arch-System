@@ -1,11 +1,20 @@
-jest.mock('next/server', () => ({
-  ...jest.requireActual('next/server'),
-  connection: jest.fn().mockResolvedValue(undefined),
-}));
-
 /**
  * @jest-environment node
  */
+
+jest.mock('next/server', () => {
+  return {
+    NextRequest: Request,
+    NextResponse: {
+      json: (body: any, init?: any) => ({
+        status: init?.status || 200,
+        json: async () => body,
+      }),
+    },
+    connection: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 import { GET } from './route';
 
 jest.mock('@repo/supabase/server', () => ({
@@ -67,7 +76,7 @@ describe('GET /api/printers/scan', () => {
       auth: {
         getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
       },
-      from: jest.fn((table) => {
+      from: jest.fn((table: string) => {
         if (table === 'employees') {
           return {
             select: jest.fn(() => ({
@@ -107,7 +116,7 @@ describe('GET /api/printers/scan', () => {
       auth: {
         getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
       },
-      from: jest.fn((table) => {
+      from: jest.fn((table: string) => {
         if (table === 'employees') {
           return {
             select: jest.fn(() => ({

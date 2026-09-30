@@ -4,7 +4,6 @@ import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-produ
 import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
 import {
   BreakdownsShiftWidget,
-  ExportPdfButton,
   FleetKpiTable,
   MultiSiteShiftReportClient,
   ProductionSummaryCard,
@@ -54,30 +53,18 @@ export function ShiftCompilationClient({
         ).toFixed(1)
       : '100.0';
 
-  const isClosed = report.shift_status.status === 'closed';
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <ShiftCompilationHeader
-          departmentSlug={departmentSlug}
-          shiftDate={shiftDate}
-          shiftType={shiftType}
-          status={report.shift_status.status}
-          closedAt={report.shift_status.closed_at}
-          onOpenCloseoutModal={() => setModalOpen(true)}
-        />
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          {/* Export PDF Button with cryptographic seal */}
-          <ExportPdfButton
-            departmentId={departmentId}
-            shiftDate={shiftDate}
-            shiftType={shiftType}
-            isShiftClosed={isClosed}
-            onExport={exportSignedShiftReportPdf}
-          />
-        </div>
-      </div>
+      <ShiftCompilationHeader
+        departmentId={departmentId}
+        departmentSlug={departmentSlug}
+        shiftDate={shiftDate}
+        shiftType={shiftType}
+        status={report.shift_status.status}
+        closedAt={report.shift_status.closed_at}
+        onOpenCloseoutModal={() => setModalOpen(true)}
+        onExportPdf={exportSignedShiftReportPdf}
+      />
 
       {/* View Switcher: Department Shift vs Multi-Site Operations */}
       <div className="flex items-center justify-between border-b border-arch-border-subtle pb-2">
