@@ -1,45 +1,28 @@
-#!/usr/bin/env bash
-# ==============================================================================
-# Arch-Systems — Automated One-Click Setup & Server Orchestration
-# ==============================================================================
-# Usage:
-#   ./setup.sh              # Standard setup (install dependencies, configure, build tokens)
-#   ./setup.sh --dev        # Setup and immediately launch dev server on 0.0.0.0
-#   ./setup.sh --start      # Setup and launch production server on 0.0.0.0
-#   ./setup.sh --clean      # Full clean wipe of node_modules/caches and fresh reinstall
-#   ./setup.sh --reinstall  # Alias for --clean
-# ==============================================================================
+#!/bin/bash
 
-set -euo pipefail
+# Ensure script exits on error
+set -e
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$REPO_ROOT"
+# Terminal Colors
+CLR_RESET='\033[0m'
+CLR_RED='\033[0;31m'
+CLR_GREEN='\033[0;32m'
+CLR_YELLOW='\033[0;33m'
+CLR_CYAN='\033[0;36m'
+CLR_DIM='\033[2m'
+CLR_BOLD='\033[1m'
 
-# Formatting colors
-CLR_RESET="\033[0m"
-CLR_BOLD="\033[1m"
-CLR_DIM="\033[2m"
-CLR_GREEN="\033[0;32m"
-CLR_CYAN="\033[0;36m"
-CLR_YELLOW="\033[0;33m"
-CLR_RED="\033[0;31m"
-CLR_WHITE="\033[0;37m"
+# Helpers
+function info() { echo -e "${CLR_CYAN}ℹ ${1}${CLR_RESET}"; }
+function success() { echo -e "${CLR_GREEN}✔ ${1}${CLR_RESET}"; }
+function warn() { echo -e "${CLR_YELLOW}⚠ ${1}${CLR_RESET}"; }
+function error() { echo -e "${CLR_RED}✖ ${1}${CLR_RESET}"; }
 
-info()    { echo -e "  ${CLR_CYAN}ℹ${CLR_RESET} ${CLR_WHITE}$*${CLR_RESET}"; }
-success() { echo -e "  ${CLR_GREEN}✓${CLR_RESET} ${CLR_WHITE}$*${CLR_RESET}"; }
-warn()    { echo -e "  ${CLR_YELLOW}⚠${CLR_RESET} ${CLR_YELLOW}$*${CLR_RESET}"; }
-error()   { echo -e "  ${CLR_RED}✖${CLR_RESET} ${CLR_RED}$*${CLR_RESET}"; }
-
-# Detect LAN IP
-get_lan_ip() {
+function get_lan_ip() {
   local ip=""
-  if command -v hostname >/dev/null 2>&1; then
-    ip=$(hostname -I 2>/dev/null | awk '{print $1}')
-  fi
-  if [ -z "$ip" ] && command -v ip >/dev/null 2>&1; then
-    ip=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}')
-  fi
-  if [ -z "$ip" ] && command -v ifconfig >/dev/null 2>&1; then
+  if command -v ip >/dev/null 2>&1; then
+    ip=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+  elif command -v ifconfig >/dev/null 2>&1; then
     ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n1)
   fi
   echo "${ip:-127.0.0.1}"
@@ -52,24 +35,30 @@ PORT="${PORT:-3000}"
 CLEAN_MODE=false
 START_DEV=false
 START_PROD=false
+START_INFRA=false
+BUILD_PROJECT=false
 
 for arg in "$@"; do
   case "$arg" in
-    --clean|--reinstall|--fresh)
+    --clean|--reinstall|--fresh) CLEAN_MODE=true ;;
+    --dev) START_DEV=true ;;
+    --start|--prod|--production) START_PROD=true; BUILD_PROJECT=true ;;
+    --infra|--tools) START_INFRA=true ;;
+    --build) BUILD_PROJECT=true ;;
+    --full)
       CLEAN_MODE=true
-      ;;
-    --dev)
-      START_DEV=true
-      ;;
-    --start|--prod|--production)
-      START_PROD=true
+      START_INFRA=true
+      BUILD_PROJECT=true
       ;;
     --help|-h)
       echo "Arch-Systems One-Click Setup"
       echo "Usage: ./setup.sh [OPTIONS]"
       echo ""
       echo "Options:"
+      echo "  --full                 Complete end-to-end setup (Clean, Install, Docker Infra, Build)"
       echo "  --clean, --reinstall   Wipe node_modules, cache, and perform clean reinstall"
+      echo "  --infra, --tools       Download and start required Docker infrastructure (Redis, Postgres, etc.)"
+      echo "  --build                Build the project"
       echo "  --dev                  Complete setup and launch development server"
       echo "  --start, --prod        Complete setup, run production build, and start server"
       echo "  --help, -h             Show this help message"
@@ -147,7 +136,7 @@ if [ ! -f "$PORTAL_ENV" ]; then
     cp "apps/portal/.env.example" "$PORTAL_ENV"
     success "Created apps/portal/.env from .env.example"
   else
-    cat << 'EOF' > "$PORTAL_ENV"
+    cat << 'INNER_EOF' > "$PORTAL_ENV"
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 PORT=3000
 HOST=0.0.0.0
@@ -156,7 +145,7 @@ NODE_ENV=development
 NEXT_PUBLIC_SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
 REDIS_URL=redis://localhost:6379
-EOF
+INNER_EOF
     success "Created apps/portal/.env with default configuration"
   fi
 else
@@ -169,7 +158,8 @@ if [ ! -f "$TOOLS_ENV" ]; then
     cp ".env.tools.example" "$TOOLS_ENV"
     warn ".env.tools created from .env.tools.example — replace placeholder values before starting Docker tools"
   else
-    warn ".env.tools is missing — create it before starting the Docker tools stack"
+    touch "$TOOLS_ENV"
+    warn ".env.tools created — ensure variables are set if required by docker tools"
   fi
 else
   success ".env.tools already configured"
@@ -190,7 +180,41 @@ pnpm --filter @repo/theme codegen
 pnpm policy:gen
 success "Design tokens and workspace policies verified"
 
-# ── 7. Summary & Reachability ─────────────────────────────────────────────────
+# ── 7. Docker Infrastructure Setup ────────────────────────────────────────────
+DOCKER_AVAILABLE=false
+if command -v docker >/dev/null 2>&1; then
+  if docker info >/dev/null 2>&1; then
+    DOCKER_AVAILABLE=true
+  fi
+fi
+
+if [ "$DOCKER_AVAILABLE" = true ]; then
+  if [ "$START_INFRA" = true ] || [ "$START_DEV" = true ] || [ "$START_PROD" = true ]; then
+    info "Docker is available. Setting up infrastructure containers (Redis, DB, etc.)..."
+    if [ -f "infra/docker/compose.redis.yml" ]; then
+      docker compose -f infra/docker/compose.redis.yml pull || true
+      docker compose -f infra/docker/compose.redis.yml up -d
+    fi
+    if [ -f "infra/docker/compose.tools.yml" ]; then
+      docker compose --env-file "$TOOLS_ENV" -f infra/docker/compose.tools.yml pull || true
+      docker compose --env-file "$TOOLS_ENV" -f infra/docker/compose.tools.yml up -d
+    fi
+    success "Docker infrastructure is up and running"
+  fi
+else
+  if [ "$START_INFRA" = true ]; then
+    warn "Docker is not running or not installed. Skipping infrastructure setup."
+  fi
+fi
+
+# ── 8. Build Project ──────────────────────────────────────────────────────────
+if [ "$BUILD_PROJECT" = true ]; then
+  info "Building the project..."
+  pnpm build
+  success "Project built successfully"
+fi
+
+# ── 9. Summary & Reachability ─────────────────────────────────────────────────
 echo
 echo -e "${CLR_GREEN}${CLR_BOLD}══════════════════════════════════════════════════════════════${CLR_RESET}"
 echo -e "${CLR_GREEN}${CLR_BOLD}  ARCH-SYSTEMS MONOREPO IS FULLY CONFIGURED & READY!          ${CLR_RESET}"
@@ -202,13 +226,11 @@ if [ -n "$LAN_IP" ] && [ "$LAN_IP" != "127.0.0.1" ]; then
 fi
 echo
 
-# ── 8. Start Server (if requested) ────────────────────────────────────────────
+# ── 10. Start Server (if requested) ───────────────────────────────────────────
 if [ "$START_DEV" = true ]; then
   info "Starting development server on 0.0.0.0:${PORT}..."
   exec pnpm dev
 elif [ "$START_PROD" = true ]; then
-  info "Building for production..."
-  pnpm build
   info "Starting production server on 0.0.0.0:${PORT}..."
   exec pnpm start
 else
@@ -218,4 +240,3 @@ else
   echo -e "    ${CLR_CYAN}./setup.sh --dev${CLR_RESET}  ${CLR_DIM}# Auto re-run & start dev server${CLR_RESET}"
   echo
 fi
-
