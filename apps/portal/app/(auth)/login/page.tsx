@@ -1,8 +1,9 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { Logo } from '@repo/ui/Logo';
-import { AlertTriangle, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.4.1';
@@ -71,7 +72,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         className="pointer-events-none absolute w-[600px] h-[600px] rounded-full blur-[50px] -bottom-48 -right-48 -z-10 bg-[radial-gradient(circle,rgba(217,119,6,0.07)_0%,rgba(243,244,246,0)_70%)]"
       />
 
-      <div className="w-full max-w-md z-10">
+      <div className="relative w-full max-w-md z-10">
         {systemUnavailable ? (
           <div
             data-testid="login-card"
@@ -127,7 +128,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             </div>
 
             {/* Form */}
-            <LoginForm />
+            <Suspense
+              fallback={
+                <div className="h-48 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-amber-600" />
+                </div>
+              }
+            >
+              <LoginForm />
+            </Suspense>
           </div>
         )}
 
