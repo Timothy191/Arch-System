@@ -10,17 +10,14 @@ async function notifyEngineering(equipmentId: string, description: string) {
   );
 
   const supabase = createServiceRoleClient();
-  const { error } = await supabase
-    .from('app_notifications')
-    .insert({
-      title: 'Equipment Breakdown',
-      message: `Equipment ${equipmentId} reported broken: ${description}`,
-      priority: 'high',
-      department: 'engineering',
-    })
-    .catch(() => ({ error: null })); // Fire and forget fallback if table differs
+  const { error } = await supabase.from('app_notifications').insert({
+    title: 'Equipment Breakdown',
+    message: `Equipment ${equipmentId} reported broken: ${description}`,
+    priority: 'high',
+    department: 'engineering',
+  });
 
-  if (error) {
+  if (error && error.code !== '42P01') {
     logError(error, { context: 'notify_engineering_workflow' });
   }
 
@@ -35,15 +32,16 @@ async function escalateToSupervisor(equipmentId: string) {
   );
 
   const supabase = createServiceRoleClient();
-  await supabase
-    .from('app_notifications')
-    .insert({
-      title: 'Equipment Escalation',
-      message: `Equipment ${equipmentId} has been down for over 24 hours without resolution.`,
-      priority: 'critical',
-      department: 'management',
-    })
-    .catch(() => ({}));
+  const { error } = await supabase.from('app_notifications').insert({
+    title: 'Equipment Escalation',
+    message: `Equipment ${equipmentId} has been down for over 24 hours without resolution.`,
+    priority: 'critical',
+    department: 'management',
+  });
+
+  if (error && error.code !== '42P01') {
+    logError(error, { context: 'escalate_supervisor_workflow' });
+  }
 
   return { escalatedAt: new Date().toISOString() };
 }
@@ -59,6 +57,9 @@ async function checkEquipmentStatus(equipmentId: string) {
     .single();
 
   if (error) {
+    if (error.code === '42P01') {
+      return { status: 'unknown' };
+    }
     throw new FatalError(`Failed to check equipment status: ${error.message}`);
   }
 
