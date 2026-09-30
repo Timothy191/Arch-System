@@ -1017,6 +1017,91 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/ui-branding:
+    dependencies:
+      '@repo/theme':
+        specifier: 1.0.0
+        version: link:../theme
+      '@repo/ui-primitives':
+        specifier: 1.0.0
+        version: link:../ui-primitives
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
+      react:
+        specifier: ^19
+        version: 19.3.0
+      react-dom:
+        specifier: ^19
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: 1.0.0
+        version: link:../typescript-config
+
+  packages/ui-composites:
+    dependencies:
+      '@repo/theme':
+        specifier: 1.0.0
+        version: link:../theme
+      '@repo/ui-primitives':
+        specifier: 1.0.0
+        version: link:../ui-primitives
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
+      react:
+        specifier: ^19
+        version: 19.3.0
+      react-dom:
+        specifier: ^19
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: 1.0.0
+        version: link:../typescript-config
+
+  packages/ui-motion:
+    dependencies:
+      '@repo/theme':
+        specifier: 1.0.0
+        version: link:../theme
+      '@repo/ui-primitives':
+        specifier: 1.0.0
+        version: link:../ui-primitives
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
+      react:
+        specifier: ^19
+        version: 19.3.0
+      react-dom:
+        specifier: ^19
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: 1.0.0
+        version: link:../typescript-config
+
+  packages/ui-primitives:
+    dependencies:
+      '@repo/theme':
+        specifier: 1.0.0
+        version: link:../theme
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
+      react:
+        specifier: ^19
+        version: 19.3.0
+      react-dom:
+        specifier: ^19
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: 1.0.0
+        version: link:../typescript-config
+
   packages/utils:
     dependencies:
       '@novu/node':
