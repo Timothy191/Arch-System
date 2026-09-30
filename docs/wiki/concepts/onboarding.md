@@ -195,6 +195,33 @@ Practice database operations:
 
 ---
 
+## Recommended Onboarding Checklist
+
+Use this checklist to make the first week consistent and measurable:
+
+- [ ] Confirm local setup and required environment access with a team lead
+- [ ] Run portal type-checking and start the development environment
+- [ ] Read the architecture, design-system, authentication, and database guides
+- [ ] Review the repository dependency boundaries before changing packages
+- [ ] Trace one user flow from the portal route through its service and data layer
+- [ ] Make a small change in a feature branch and add or update a focused test
+- [ ] Review offline resilience, RLS, validation, and audit-log expectations
+- [ ] Pair with an experienced contributor on the first pull request
+- [ ] Record any setup gaps or unclear documentation for the next onboarding cycle
+
+### Recommended First Contributions
+
+Start with a low-risk task that exercises the project's conventions:
+
+1. Improve an existing UI component or KPI variant
+2. Add a focused test around an existing service or route
+3. Improve a wiki page or troubleshooting guide
+4. Fix a small accessibility, validation, or error-state issue
+
+Avoid starting with database migrations, authentication changes, or cross-package refactors until you have completed a reviewed contribution.
+
+---
+
 ## Key Resources
 
 ### Essential Wiki Pages
