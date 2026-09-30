@@ -13,7 +13,7 @@ import { addEvent, withAsyncSpan } from '@/lib/observability/tracing';
 
 export const maxDuration = 60;
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   return withAsyncSpan('cron_outbox_drain', {}, async () => {
     try {
       // Security: Validate cron secret
