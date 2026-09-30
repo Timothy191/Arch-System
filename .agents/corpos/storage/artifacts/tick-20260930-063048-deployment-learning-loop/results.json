@@ -1,0 +1,15 @@
+{
+  "allPass": false,
+  "results": [
+    {
+      "command": "sidekick status",
+      "status": "FAIL",
+      "log": "/home/tim/Fork/Arch-System/.agents/corpos/storage/artifacts/tick-20260930-063048-deployment-learning-loop/cmd_1790742648240_0.log"
+    },
+    {
+      "command": "sidekick health",
+      "status": "FAIL",
+      "log": "/home/tim/Fork/Arch-System/.agents/corpos/storage/artifacts/tick-20260930-063048-deployment-learning-loop/cmd_1790742648259_1.log"
+    }
+  ]
+}
