@@ -17,7 +17,7 @@
 
 import { createRedisSubscriber } from '@repo/redis';
 import { logError } from '@/lib/errors/error-logger';
-export const dynamic = 'force-dynamic';
+
 export const maxDuration = 60;
 
 // AGENT-TRACE: Server-Sent Events (SSE) stream for real-time drill rig telemetry

@@ -54,8 +54,6 @@ import { EXTERNAL_TOOLS } from '~/lib/tools';
  *                   type: string
  */
 
-export const dynamic = 'force-dynamic';
-
 interface ToolStatus {
   name: string;
   displayName: string;

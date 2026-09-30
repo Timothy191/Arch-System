@@ -28,8 +28,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { RealtimeDrillTelemetryStream } from './RealtimeDrillTelemetryStream';
 
-export const dynamic = 'force-dynamic';
-
 interface TelemetryRecord {
   period: string;
   machine_id: string;

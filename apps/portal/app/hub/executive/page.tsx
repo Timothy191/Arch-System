@@ -22,8 +22,6 @@ import { withCache } from '@/lib/cache-utils';
 import { classifyReconciliationDrift, RECONCILIATION_UI } from '@/lib/production-reconciliation';
 import { cachedRSC } from '@/lib/server-cache';
 
-export const dynamic = 'force-dynamic';
-
 // AGENT-TRACE: Typed interface for the get_production_summary RPC response.
 // Replaces the previous `any` annotations throughout this page.
 interface ProductionSummaryRow {

@@ -4,8 +4,6 @@ import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import { AlertTriangle, ClipboardList, Clock, Drill } from 'lucide-react';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = 'force-dynamic';
-
 interface DrillingReportsPageProps {
   params: Promise<{ department: string }>;
   searchParams: Promise<{ from?: string; to?: string }>;

@@ -136,8 +136,6 @@ interface _WebhookEndpoint {
   updated_at: string | null;
 }
 
-export const dynamic = 'force-dynamic';
-
 async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
   const {

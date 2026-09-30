@@ -4,8 +4,6 @@ import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityList } from './ExcavatorActivityList';
 
-export const revalidate = 0;
-
 export default async function ExcavatorActivityPage({
   params,
 }: {

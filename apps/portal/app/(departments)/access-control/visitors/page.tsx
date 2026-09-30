@@ -15,8 +15,6 @@ import { getDepartmentContext } from '~/lib/dept-context';
 import { getVisitorsForDepartment } from '../actions';
 import { VisitorForm } from './visitor-form';
 
-export const dynamic = 'force-dynamic';
-
 export default async function VisitorsPage({
   searchParams,
 }: {

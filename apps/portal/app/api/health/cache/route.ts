@@ -34,8 +34,6 @@
 import { getCacheStats, getRedisClient } from '@repo/redis';
 import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   const stats = await getCacheStats();
   let redisConnected = false;

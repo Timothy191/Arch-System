@@ -28,8 +28,6 @@ import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departm
 import { cachedRSC } from '@/lib/server-cache';
 import { getTools } from '@/lib/tools';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
   description:

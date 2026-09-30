@@ -7,8 +7,6 @@ import { LoginForm } from '@/features/auth/components/LoginForm';
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.4.1';
 
-export const dynamic = 'force-dynamic';
-
 interface LoginPageProps {
   searchParams?: Promise<{ redirect?: string }>;
 }

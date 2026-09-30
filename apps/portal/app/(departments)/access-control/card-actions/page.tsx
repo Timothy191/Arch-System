@@ -1,8 +1,6 @@
 import { PageHeader } from '@repo/ui/PageHeader';
 import { CardActionsView } from './card-actions-view';
 
-export const dynamic = 'force-dynamic';
-
 export default async function CardActionsPage(props: {
   searchParams: Promise<{ q?: string; selected?: string }>;
 }) {

@@ -13,8 +13,6 @@ import {
 import Link from 'next/link';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = 'force-dynamic';
-
 interface BreakdownSummary {
   id: string;
   machine_name: string;

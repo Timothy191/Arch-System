@@ -12,8 +12,6 @@ import {
   getRecentAccessActivity,
 } from './actions';
 
-export const dynamic = 'force-dynamic';
-
 const DashboardKPIGrid = nextDynamic(() => import('./components/DashboardKPIGrid'), {
   loading: () => <Skeleton className="h-[140px] w-full" />,
 });

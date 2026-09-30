@@ -18,13 +18,7 @@ export default function PrivacyPage(): React.JSX.Element {
       </div>
 
       <div className="prose prose-neutral max-w-none text-[var(--text-muted)] space-y-6">
-        <p className="text-lg">
-          Last updated:{' '}
-          {new Date().toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric',
-          })}
-        </p>
+        <p className="text-lg">Last updated: September 2026</p>
 
         <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
           <h2 className="text-xl font-medium text-[var(--text-heading)] mb-4">

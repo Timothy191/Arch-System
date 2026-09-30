@@ -15,19 +15,20 @@ interface SystemMetrics {
   online: boolean;
 }
 
-/**
- * useSystemMetrics
- *
- * Custom hook to monitor system runtime metrics:
- * - Websocket latency (with realistic jitter and spikes)
- * - Server time tracked in South African Standard Time (SAST)
- * - Current operational shift calculated using getThreeShift
- * - Online connection status tracked via browser network events
- */
+const INITIAL_FALLBACK: SystemMetrics = {
+  websocketLatency: 15,
+  serverTimeSAST: '00:00:00',
+  currentShift: { shift: 'A', label: 'Morning Shift', start: '06:00', end: '14:00' },
+  online: true,
+};
+
 export function useSystemMetrics(): SystemMetrics {
-  const [metrics, setMetrics] = useState<SystemMetrics>(() => {
+  const [metrics, setMetrics] = useState<SystemMetrics>(INITIAL_FALLBACK);
+
+  useEffect(() => {
+    // Set initial real time right after mount
     const now = new Date();
-    return {
+    setMetrics({
       websocketLatency: 15,
       serverTimeSAST: now.toLocaleTimeString('en-US', {
         timeZone: 'Africa/Johannesburg',
@@ -38,10 +39,8 @@ export function useSystemMetrics(): SystemMetrics {
       }),
       currentShift: getThreeShift(now),
       online: typeof window !== 'undefined' ? window.navigator.onLine : true,
-    };
-  });
+    });
 
-  useEffect(() => {
     // Network status change listeners
     const handleOnline = () =>
       setMetrics((prev) => (prev.online ? prev : { ...prev, online: true }));

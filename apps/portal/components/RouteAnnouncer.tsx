@@ -1,16 +1,9 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 
-/**
- * Announces page title changes to screen readers after SPA route transitions.
- *
- * WCAG 4.1.3 (Status Messages): When the route changes client-side, the
- * document title is pushed into an `aria-live` region so assistive tech
- * announces it without requiring a full page reload.
- */
-export function RouteAnnouncer() {
+function RouteAnnouncerInner() {
   const pathname = usePathname();
   const pathRef = useRef(pathname);
   const announcerRef = useRef<HTMLDivElement>(null);
@@ -30,4 +23,12 @@ export function RouteAnnouncer() {
   }, [pathname]);
 
   return <div ref={announcerRef} aria-live="polite" aria-atomic="true" className="sr-only" />;
+}
+
+export function RouteAnnouncer() {
+  return (
+    <Suspense fallback={null}>
+      <RouteAnnouncerInner />
+    </Suspense>
+  );
 }

@@ -4,8 +4,6 @@ import { getDepartmentContext } from '~/lib/dept-context';
 import { getMultiSiteShiftReport, getUnifiedShiftReport } from './actions';
 import { ShiftCompilationClient } from './ShiftCompilationClient';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ShiftCompilationPage({
   params,
   searchParams,

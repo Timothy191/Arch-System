@@ -3,8 +3,6 @@ import type { TireWithInspections } from '@/features/departments';
 import { TireManagementDashboard } from '@/features/departments';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = 'force-dynamic';
-
 export default async function TireManagementPage() {
   await getDepartmentContext({
     department: 'engineering',

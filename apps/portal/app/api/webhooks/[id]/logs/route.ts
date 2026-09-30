@@ -62,8 +62,6 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
-export const dynamic = 'force-dynamic';
-
 async function handleGetLogs(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

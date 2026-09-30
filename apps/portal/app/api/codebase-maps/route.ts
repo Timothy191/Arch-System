@@ -9,8 +9,6 @@ import { NextResponse } from 'next/server';
 // the Next.js Node File Trace (NFT) static analyzer.
 const DEFAULT_MAPS_ROOT = path.normalize(`${process.cwd()}/../../codebase-maps`);
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request, options?: { mapsRoot?: string }) {
   const mapsRoot = options?.mapsRoot ?? DEFAULT_MAPS_ROOT;
   const { searchParams } = new URL(request.url);

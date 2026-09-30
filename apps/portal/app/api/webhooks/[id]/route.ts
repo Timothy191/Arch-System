@@ -105,8 +105,6 @@ import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { validateBody } from '@/lib/api/response';
 
-export const dynamic = 'force-dynamic';
-
 async function handlePutWebhook(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

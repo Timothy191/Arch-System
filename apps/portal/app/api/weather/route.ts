@@ -55,8 +55,6 @@ const getCachedWeather = cache(async () => {
   return weather;
 });
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   return withAsyncSpan('weather_api_route', { context: 'weather' }, async () => {
     const startTime = Date.now();

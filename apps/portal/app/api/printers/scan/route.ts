@@ -1,8 +1,9 @@
 import { createServerSupabaseClient } from '@repo/supabase/server';
-import { NextResponse } from 'next/server';
+import { connection, NextResponse } from 'next/server';
 import { detectAllPrinters } from '@/app/(departments)/access-control/lib/printer-detection';
 
 export async function GET() {
+  await connection();
   try {
     const supabase = await createServerSupabaseClient();
     const {

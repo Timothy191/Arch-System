@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useFetchOfflineQueue } from '@/hooks/useFetchOfflineQueue';
 
 /* ------------------------------------------------------------------ */
@@ -674,7 +674,7 @@ function OfflineQueueRow() {
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
-export const SystemTrayPill = React.memo(function SystemTrayPill() {
+const SystemTrayPillInner = React.memo(function SystemTrayPillInner() {
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
   const volume = useAppVolume();
@@ -841,3 +841,11 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
     </div>
   );
 });
+
+export function SystemTrayPill() {
+  return (
+    <Suspense fallback={null}>
+      <SystemTrayPillInner />
+    </Suspense>
+  );
+}

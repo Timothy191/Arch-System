@@ -17,7 +17,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useDockPreferences } from '@/hooks/useDockPreferences';
 import { useSplitWindow } from '@/hooks/useSplitWindow';
 import { useSystemMetrics } from '@/hooks/useSystemMetrics';
@@ -42,7 +42,7 @@ const DOCK_APPS = [
  * Automatically shifts bottom right widgets to avoid overlapping persistent split-pane windows.
  * Features an auto-hide dock with hover sensor, focus preservation, and pin/unpin controls.
  */
-export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
+function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
   const { websocketLatency, serverTimeSAST, currentShift, online } = useSystemMetrics();
   const splitWindowOpen = useSplitWindow((s) => s.isOpen);
   const { autoHide, toggleAutoHide } = useDockPreferences();
@@ -305,5 +305,13 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function ViewportBoundaries(props: ViewportBoundariesProps) {
+  return (
+    <Suspense fallback={null}>
+      <ViewportBoundariesInner {...props} />
+    </Suspense>
   );
 }

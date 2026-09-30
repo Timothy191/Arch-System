@@ -5,8 +5,6 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertTriangle, Clock, Drill } from 'lucide-react';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = 'force-dynamic';
-
 async function getDrillingDashboardData(deptId: string, today: string) {
   const db = await createReadReplicaClient();
 
