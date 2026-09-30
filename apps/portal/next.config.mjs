@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs';
+import { withWorkflow } from 'workflow/next';
 
 const require = createRequire(import.meta.url);
 const { version: PORTAL_VERSION } = require('./package.json');
@@ -350,9 +351,11 @@ const analyzedConfig = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })(pwaConfig);
 
+const workflowConfig = withWorkflow(analyzedConfig);
+
 // Skip Sentry source-map upload in local builds — saves ~10-15s per clean build
 export default enableHeavyPlugins
-  ? withSentryConfig(analyzedConfig, {
+  ? withSentryConfig(workflowConfig, {
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       silent: !isCI,
@@ -361,4 +364,4 @@ export default enableHeavyPlugins
       tunnelRoute: '/api/sentry-proxy',
       hideSourceMaps: true,
     })
-  : analyzedConfig;
+  : workflowConfig;

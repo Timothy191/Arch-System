@@ -38,6 +38,6 @@ export default proxy;
 export const config = {
   // Exclude static assets, API routes, SEO files, and the Aria assistant overlay from proxy.
   matcher: [
-    '/((?!_next/static|_next/image|api/|assistant(?:/|$)|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
+    '/((?!_next/static|_next/image|api/|assistant(?:/|$)|.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
   ],
 };
