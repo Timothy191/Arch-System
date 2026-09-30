@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     // Start the durable workflow asynchronously to bypass 10s serverless timeout constraints
-    const { id: runId } = await start(handleShiftReport, [shiftId]);
+    const { runId } = await start(handleShiftReport, [shiftId]);
 
     return NextResponse.json({
       message: 'Shift report compilation workflow started',

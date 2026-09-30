@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     // Start the durable workflow asynchronously
-    const { id: runId } = await start(handleEquipmentBreakdown, [equipmentId, description]);
+    const { runId } = await start(handleEquipmentBreakdown, [equipmentId, description]);
 
     return NextResponse.json({
       message: 'Breakdown alert workflow started',
