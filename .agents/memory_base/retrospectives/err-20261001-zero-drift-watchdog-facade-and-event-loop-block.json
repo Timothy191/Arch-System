@@ -1,0 +1,14 @@
+{
+  "id": "err-20261001-zero-drift-watchdog-facade-and-event-loop-block",
+  "timestamp": "2026-10-01T10:10:00Z",
+  "taskTag": "ZERO_DRIFT_WATCHDOG_TRI_ENV",
+  "category": "WATCHDOG_TEST_AUTOMATION",
+  "errorSignature": "spawnSync child process deadlock on mock HTTP server & detached HEAD facade shortcut",
+  "affectedFiles": [
+    "tools/zero-drift-watchdog/src/cli.mjs",
+    "tools/zero-drift-watchdog/test/e2e/tier2_boundary.test.mjs"
+  ],
+  "rootCause": "1. In-process test scripts running an HTTP server on the main Node.js event loop deadlocked when spawning CLI processes synchronously with spawnSync, because spawnSync blocked the event loop from handling incoming HTTP requests. 2. A detached HEAD check in the watchdog CLI returned hardcoded fake status strings ('identical') and mock deployment IDs ('dpl_mock') instead of querying genuine remote API endpoints.",
+  "resolution": "1. Spawned CLI child processes asynchronously using child_process.spawn inside test harnesses so the event loop remained unblocked. 2. Fully removed mock shortcuts and detached HEAD facades from cli.mjs, routing all checks through authentic Git and Vercel inspectors.",
+  "preventionRule": "Never use synchronous spawnSync when the child process needs to communicate with mock HTTP servers hosted in the parent Node.js event loop. In production CLI tools and watchdogs, never introduce mock return shortcuts to bypass unusual Git states (e.g. detached HEAD); always execute authentic remote queries with proper error handling."
+}

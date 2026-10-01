@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-10-01T06:00:33.721Z",
-  "totalRetrospectives": 12,
+  "lastUpdated": "2026-10-01T10:09:42.044Z",
+  "totalRetrospectives": 13,
   "entries": [
     {
       "id": "err-20260925-vercel-headless-deploy",
@@ -61,6 +61,12 @@
       "category": "TOOLING_DRIFT",
       "errorSignature": "Drift detected: /home/tim/Fork/Arch-System/tools/repo/policy/eslint-boundaries.generated.cjs",
       "preventionRule": "If `pnpm agent:verify` or `pnpm policy:check` fails due to drift on generated `.cjs` files, always run `pnpm policy:gen` to regenerate them and realign the pipeline."
+    },
+    {
+      "id": "err-20261001-zero-drift-watchdog-facade-and-event-loop-block",
+      "category": "WATCHDOG_TEST_AUTOMATION",
+      "errorSignature": "spawnSync child process deadlock on mock HTTP server & detached HEAD facade shortcut",
+      "preventionRule": "Never use synchronous spawnSync when the child process needs to communicate with mock HTTP servers hosted in the parent Node.js event loop. In production CLI tools and watchdogs, never introduce mock return shortcuts to bypass unusual Git states (e.g. detached HEAD); always execute authentic remote queries with proper error handling."
     },
     {
       "id": "recovery-20260929-remaining-branch-deletion",
