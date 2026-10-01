@@ -91,6 +91,42 @@
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       },
       "type": "stdio"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "type": "stdio"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "description": "Safe local filesystem operations and directory tree inspection",
+      "type": "stdio"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "type": "stdio"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Web Content Fetcher (Zero-Auth)",
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
+      "type": "stdio"
     }
   }
 }

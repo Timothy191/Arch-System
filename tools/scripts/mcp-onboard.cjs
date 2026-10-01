@@ -130,8 +130,11 @@ for (const client of clientConfigs) {
   const containerKey = client.type === 'opencode' ? 'mcp' : 'mcpServers';
   config[containerKey] = config[containerKey] || {};
 
+  const missingServers = [];
+
   // Verify and register Firecrawl
   if (!config[containerKey].firecrawl) {
+    missingServers.push('firecrawl');
     if (isCheckOnly) {
       totalIssues++;
     } else {
@@ -172,6 +175,7 @@ for (const client of clientConfigs) {
 
   // Verify and register Upstash
   if (!config[containerKey].upstash) {
+    missingServers.push('upstash');
     if (isCheckOnly) {
       totalIssues++;
     } else {
@@ -216,6 +220,7 @@ for (const client of clientConfigs) {
   ];
   for (const toolName of coreStdio) {
     if (!config[containerKey][toolName] && servers[toolName]) {
+      missingServers.push(toolName);
       if (isCheckOnly) {
         totalIssues++;
       } else {
@@ -243,9 +248,15 @@ for (const client of clientConfigs) {
     }
   }
 
-  if (modified && !isCheckOnly) {
+  if (isCheckOnly) {
+    if (missingServers.length > 0) {
+      console.log(`❌ MISSING (${missingServers.join(', ')})`);
+    } else {
+      console.log('✅ PASS (Fully Registered)');
+    }
+  } else if (modified) {
     fs.writeFileSync(client.path, JSON.stringify(config, null, 2));
-    console.log('✅ SYNCHRONIZED');
+    console.log(`✅ SYNCHRONIZED (Added: ${missingServers.join(', ')})`);
   } else {
     console.log('✅ PASS (Fully Registered)');
   }
