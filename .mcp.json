@@ -44,6 +44,53 @@
       "headers": {
         "Authorization": "Bearer ${WINDSOR_API_KEY}"
       }
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"]
+    },
+    "asana": {
+      "type": "http",
+      "url": "https://mcp.asana.com/v2/mcp"
+    },
+    "appsai": {
+      "command": "npx",
+      "args": ["-y", "@appsai/mcp-server"]
+    },
+    "airtable": {
+      "type": "http",
+      "url": "https://mcp.airtable.com/mcp"
+    },
+    "ai-memory": {
+      "command": "npx",
+      "args": ["-y", "@alphaonedev/ai-memory-mcp"]
+    },
+    "agenty": {
+      "type": "http",
+      "url": "https://cloud.agenty.com/api",
+      "headers": {
+        "Authorization": "Bearer ${AGENTY_API_KEY}"
+      }
+    },
+    "agentql": {
+      "command": "npx",
+      "args": ["-y", "agentql-mcp"]
+    },
+    "agenttrafficlab": {
+      "type": "http",
+      "url": "https://mcp.agenttrafficlab.com/mcp"
+    },
+    "web-hygiene": {
+      "type": "http",
+      "url": "https://bruco3--web-hygiene-mcp.apify.actor/mcp"
+    },
+    "firecrawl": {
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "args": [],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "type": "stdio"
     }
   }
 }

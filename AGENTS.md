@@ -249,6 +249,10 @@ pnpm audit:rls-matrix
 
 # Audit design token compliance (detects raw colors and forbidden dark: classes)
 pnpm audit:tokens
+
+# Audit & synchronize MCP server registrations across all 7 agent runtimes
+pnpm mcp:verify
+pnpm mcp:onboard
 ```
 
 ### Database & Migrations
@@ -741,15 +745,15 @@ All agent behavioral rules, operational guides, subagent definitions, protocol s
 
 ### The 7 Mining Operational Departments
 
-| Department ID | Department Name | Lead Role | Authority | Focus Areas |
-|:---|:---|:---|:---|:---|
-| `executive` | Executive Strategy | Chief Operating Executive | L3 | Multi-site production summaries, cross-department arbitration |
-| `finance` | Financial Intelligence | Mining Financial Intelligence Director | L3 | Equipment OPEX/CAPEX, shift profitability, Dexter cost model |
-| `engineering` | Software Engineering | Principal Systems Engineer | L2 | Codebase health, deployment learning, maintenance work orders |
-| `control-room` | Plant Operations & SCADA | Operations Shift Lead | L2 | Real-time telemetry, loader cycle times, atomic shift closeouts |
-| `compliance-safety` | Governance & Security | Chief Security & Safety Auditor | L3 | Environmental compliance, statutory safety, RLS policy audit |
-| `access-control` | Access & Badging | Head of Access Control | L2 | Contractor inductions, RFID truck tracking, CR80 badge printing |
-| `drilling` | Drilling Telemetry | Chief Drilling Telemetry Engineer | L2 | Penetration rates (ROP), bit depth SSE stream, void detection |
+| Department ID       | Department Name          | Lead Role                              | Authority | Focus Areas                                                     |
+| :------------------ | :----------------------- | :------------------------------------- | :-------- | :-------------------------------------------------------------- |
+| `executive`         | Executive Strategy       | Chief Operating Executive              | L3        | Multi-site production summaries, cross-department arbitration   |
+| `finance`           | Financial Intelligence   | Mining Financial Intelligence Director | L3        | Equipment OPEX/CAPEX, shift profitability, Dexter cost model    |
+| `engineering`       | Software Engineering     | Principal Systems Engineer             | L2        | Codebase health, deployment learning, maintenance work orders   |
+| `control-room`      | Plant Operations & SCADA | Operations Shift Lead                  | L2        | Real-time telemetry, loader cycle times, atomic shift closeouts |
+| `compliance-safety` | Governance & Security    | Chief Security & Safety Auditor        | L3        | Environmental compliance, statutory safety, RLS policy audit    |
+| `access-control`    | Access & Badging         | Head of Access Control                 | L2        | Contractor inductions, RFID truck tracking, CR80 badge printing |
+| `drilling`          | Drilling Telemetry       | Chief Drilling Telemetry Engineer      | L2        | Penetration rates (ROP), bit depth SSE stream, void detection   |
 
 ### Mandatory Root Entry Points
 
@@ -757,4 +761,3 @@ All agent behavioral rules, operational guides, subagent definitions, protocol s
 - **`CLAUDE.md`** (Root): Thin redirect pointing Claude Code agents to `.agents/GUIDE.md` and `.agents/rules/`.
 - **`GEMINI.md`** (Root): Gemini/Antigravity guide with explicit directives pointing to `.agents/GUIDE.md`.
 - **`.cursorrules`** (Root): Thin redirect pointing Cursor IDE agents to `.agents/GUIDE.md` and `.agents/rules/`.
-

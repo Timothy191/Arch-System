@@ -188,6 +188,8 @@
     "release": "changeset publish",
     "version-packages": "changeset version",
     "agent:verify": "bash tools/scripts/agent-verify.sh",
+    "mcp:onboard": "node tools/scripts/mcp-onboard.cjs",
+    "mcp:verify": "node tools/scripts/mcp-onboard.cjs --check",
     "audit:contract": "pnpm --filter @repo/contract audit:contract"
   },
   "syncpack": {

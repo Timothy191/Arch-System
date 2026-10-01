@@ -58,6 +58,93 @@
       "headers": {
         "Authorization": "Bearer ${WINDSOR_API_KEY}"
       }
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"]
+    },
+    "asana": {
+      "type": "http",
+      "url": "https://mcp.asana.com/v2/mcp"
+    },
+    "appsai": {
+      "command": "npx",
+      "args": ["-y", "@appsai/mcp-server"]
+    },
+    "airtable": {
+      "type": "http",
+      "url": "https://mcp.airtable.com/mcp"
+    },
+    "ai-memory": {
+      "command": "npx",
+      "args": ["-y", "@alphaonedev/ai-memory-mcp"]
+    },
+    "agenty": {
+      "type": "http",
+      "url": "https://cloud.agenty.com/api",
+      "headers": {
+        "Authorization": "Bearer ${AGENTY_API_KEY}"
+      }
+    },
+    "agentql": {
+      "command": "npx",
+      "args": ["-y", "agentql-mcp"]
+    },
+    "agenttrafficlab": {
+      "type": "http",
+      "url": "https://mcp.agenttrafficlab.com/mcp"
+    },
+    "web-hygiene": {
+      "type": "http",
+      "url": "https://bruco3--web-hygiene-mcp.apify.actor/mcp"
+    },
+    "firecrawl": {
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "args": [],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "type": "stdio"
+    },
+    "upstash": {
+      "type": "http",
+      "url": "https://mcp.upstash.com/mcp"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "type": "stdio"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "description": "Safe local filesystem operations and directory tree inspection",
+      "type": "stdio"
+    },
+    "ripgrep": {
+      "command": "npx",
+      "args": ["-y", "mcp-ripgrep"],
+      "description": "Blazing fast AST and regex code search across local projects",
+      "type": "stdio"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "type": "stdio"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Web Content Fetcher (Zero-Auth)",
+      "type": "stdio"
     }
   }
 }

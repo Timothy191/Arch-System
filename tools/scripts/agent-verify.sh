@@ -22,6 +22,9 @@ if pnpm audit:drift > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"
 echo -n "🛡️  5. Agent Skill Security (SkillSpector)... "
 if bash tools/audits/skill-spector.sh > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Security vulnerability in .agents/skills."; exit 1; fi
 
+echo -n "🤖 6. MCP Server Registration & Toolchain... "
+if pnpm mcp:verify > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm mcp:onboard' to register required MCP servers."; exit 1; fi
+
 echo "========================================================"
 echo "✅ [AGENT VERIFICATION] 100% PASS. Code is real-world ready."
 echo "========================================================"

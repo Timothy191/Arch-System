@@ -1,6 +1,6 @@
 ---
-description: "Permanent agent registration, 9-pillar setup, and auto-deployment policy"
-paths: [".agents/agents/**/*", ".agents/a2a/registry/**/*", "packages/agents/**/*"]
+description: 'Permanent agent registration, 9-pillar setup, and auto-deployment policy'
+paths: ['.agents/agents/**/*', '.agents/a2a/registry/**/*', 'packages/agents/**/*']
 ---
 
 # Permanent Agent Registry & Auto-Deployment Policy
@@ -34,3 +34,24 @@ Agents are pre-populated with:
 ## 4. Auto-Deployment Protocol
 
 When an orchestrator or coordinator encounters a task requiring a missing capability, it MUST automatically provision and register the new specialist adhering to the 9-pillar schema before executing the task.
+
+## 5. MCP Server Registration & Onboarding Mandate
+
+Upon onboarding into the workspace or starting an operational session, every agent MUST execute or verify:
+
+```bash
+pnpm mcp:verify   # Audits that all 7 agent runtimes have required MCP servers registered
+pnpm mcp:onboard  # Automatically provisions and synchronizes missing MCP server configurations
+```
+
+Mandatory MCP servers defined in `tools/mcp/mcp-registry.json` include:
+
+- **`firecrawl`**: Web scraping, crawling, paper research, and Alexandria contracts (`FIRECRAWL_API_KEY`).
+- **`upstash`**: Serverless Redis, QStash, Vector, Search, Box, and Blob (`UPSTASH_*` credentials).
+- **`filesystem`**: Safe workspace file operations.
+- **`memory`**: Cross-session knowledge graph memory.
+- **`sequential-thinking`**: Structured dynamic problem decomposition.
+- **`ripgrep`**: Fast AST and regex code search.
+- **`git`**: Monorepo VCS operations.
+- **`fetch`**: Zero-auth web content retrieval.
+- **`context7`**: Real-time framework and library documentation.

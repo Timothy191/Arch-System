@@ -180,6 +180,11 @@ pnpm --filter @repo/theme codegen
 pnpm policy:gen
 success "Design tokens and workspace policies verified"
 
+# ── 6b. Agent MCP Server Onboarding & Synchronization ────────────────────────
+info "Registering and synchronizing Agent MCP servers (Firecrawl, Upstash, Core MCPs)..."
+node tools/scripts/mcp-onboard.cjs || true
+success "Agent MCP server registry synchronized"
+
 # ── 7. Docker Infrastructure Setup ────────────────────────────────────────────
 DOCKER_AVAILABLE=false
 if command -v docker >/dev/null 2>&1; then

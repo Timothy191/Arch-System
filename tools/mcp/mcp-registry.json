@@ -1,0 +1,144 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/mcp.json",
+  "version": "1.0.0",
+  "title": "Arch-System Master MCP Server Registry",
+  "description": "Canonical Single Source of Truth for MCP server registration, tool discovery, and agent onboarding across all multi-agent runtimes (Antigravity CLI, Claude Code, OpenCode, Cursor, VS Code, and Hermes).",
+  "requiredServers": [
+    "firecrawl",
+    "upstash",
+    "filesystem",
+    "memory",
+    "sequential-thinking",
+    "ripgrep",
+    "git",
+    "fetch",
+    "context7"
+  ],
+  "servers": {
+    "firecrawl": {
+      "name": "firecrawl",
+      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
+      "required": true,
+      "category": "research_and_web",
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "fallbackCommand": "npx",
+      "fallbackArgs": ["-y", "firecrawl-mcp"],
+      "remoteUrl": "https://mcp.firecrawl.dev/v2/mcp",
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "autoApprove": [
+        "firecrawl_search",
+        "firecrawl_scrape",
+        "firecrawl_map",
+        "firecrawl_find_tools",
+        "firecrawl_developer_search",
+        "firecrawl_research_search_papers"
+      ],
+      "toolsCount": 27,
+      "schemaDir": "/home/tim/.gemini/antigravity-cli/mcp/firecrawl"
+    },
+    "upstash": {
+      "name": "upstash",
+      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
+      "required": true,
+      "category": "cloud_infrastructure",
+      "type": "remote",
+      "url": "https://mcp.upstash.com/mcp",
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+        "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
+        "UPSTASH_BOX_API_KEY": "${UPSTASH_BOX_API_KEY}"
+      },
+      "toolsCount": 55
+    },
+    "filesystem": {
+      "name": "filesystem",
+      "description": "Safe local filesystem operations and directory tree inspection",
+      "required": true,
+      "category": "core_local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "type": "stdio"
+    },
+    "memory": {
+      "name": "memory",
+      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+      "required": true,
+      "category": "core_local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "name": "sequential-thinking",
+      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "required": true,
+      "category": "core_local",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "type": "stdio"
+    },
+    "ripgrep": {
+      "name": "ripgrep",
+      "description": "Blazing fast AST and regex code search across local projects",
+      "required": true,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "mcp-ripgrep"],
+      "type": "stdio"
+    },
+    "git": {
+      "name": "git",
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "required": true,
+      "category": "developer_tools",
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "type": "stdio"
+    },
+    "fetch": {
+      "name": "fetch",
+      "description": "Web Content Fetcher (Zero-Auth)",
+      "required": true,
+      "category": "research_and_web",
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "type": "stdio"
+    },
+    "context7": {
+      "name": "context7",
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
+      "required": true,
+      "category": "research_and_web",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "type": "stdio"
+    },
+    "repowise": {
+      "name": "repowise",
+      "description": "Codebase intelligence: code health scores, git analytics, dead code detection, risk evaluation",
+      "required": false,
+      "category": "developer_tools",
+      "command": "/home/tim/.local/bin/repowise",
+      "args": ["mcp", "/home/tim/Fork/Arch-System"],
+      "type": "stdio"
+    },
+    "deepwiki": {
+      "name": "deepwiki",
+      "description": "Public GitHub repository documentation and Ask Devin search",
+      "required": false,
+      "category": "research_and_web",
+      "type": "remote",
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "agenttrafficlab": {
+      "name": "agenttrafficlab",
+      "description": "AgentTrafficLab: Zero-auth multi-agent search, extract, summarize, translate, and classify router",
+      "required": false,
+      "category": "research_and_web",
+      "type": "remote",
+      "url": "https://mcp.agenttrafficlab.com/mcp"
+    }
+  }
+}

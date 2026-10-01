@@ -99,10 +99,12 @@ pnpm audit:drift                              # Database↔contract parity check
 pnpm audit:rls                                # RLS coverage audit
 ```
 
-### Agent Verification
+### Agent Verification & Toolchain Onboarding
 
 ```bash
 pnpm agent:verify     # Unified verification — must exit 0 before completing any task
+pnpm mcp:verify       # Verify all 7 agent runtimes have required MCP servers registered
+pnpm mcp:onboard      # Provision and synchronize missing MCP server configurations
 pnpm verify:gates     # 4-gate reality enforcement (ARWR, tests, modernization, strict TS)
 pnpm audit:compliance # Full compliance audit suite
 ```
@@ -262,15 +264,15 @@ These hard stops are **always in force**, with no approval path:
 
 ## 10. Cross-References
 
-| Resource | Location | Purpose |
-|:---|:---|:---|
-| **Architecture & Domain SSoT** | `AGENTS.md` (root) | Full architecture, data flow, personas, invariants, SSoT table |
-| **Engineering Rules** | `.agents/rules/` | 17 permanent rule files covering security, databases, testing, thinking |
-| **Agent Skills** | `.agents/skills/` | 60+ reusable workflow skills |
-| **Agent Cards** | `.agents/agents/` | 35+ specialist agent definitions |
-| **A2A Protocol** | `.agents/a2a/SPEC.md` | Agent-to-Agent communication protocol |
-| **Memory Base** | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph |
-| **CorpOS Loops** | `.agents/corpos/` | Autonomous business loop engine |
-| **Lifecycle Hooks** | `.agents/hooks/` | Pre/post tool guards and tracing |
+| Resource                       | Location               | Purpose                                                                 |
+| :----------------------------- | :--------------------- | :---------------------------------------------------------------------- |
+| **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table          |
+| **Engineering Rules**          | `.agents/rules/`       | 17 permanent rule files covering security, databases, testing, thinking |
+| **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                            |
+| **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                        |
+| **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                   |
+| **Memory Base**                | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph                  |
+| **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                         |
+| **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                        |
 
 Last updated: 2026-09-30
