@@ -99,6 +99,22 @@ export async function getTools(
  */
 export const EXTERNAL_TOOLS: ExternalTool[] = [
   {
+    name: 'n8n',
+    displayName: 'n8n Workflows',
+    url: '/admin/workflows',
+    description: 'Visual automation pipeline and BullMQ asynchronous queue dispatcher',
+    icon: 'Network',
+    color: '#6366f1',
+  },
+  {
+    name: 'redisinsight',
+    displayName: 'RedisInsight',
+    url: '/admin/redis',
+    description: 'Real-time telemetry cache inspector & memory key browser',
+    icon: 'Database',
+    color: '#0ea5e9',
+  },
+  {
     name: 'flowise',
     displayName: 'Flowise',
     url: process.env.FLOWISE_URL ?? 'http://localhost:3001',

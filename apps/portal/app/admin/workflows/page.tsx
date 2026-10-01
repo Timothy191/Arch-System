@@ -78,7 +78,7 @@ export default function WorkflowsPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col gap-4 p-4 lg:p-8">
+    <div className="flex h-[calc(100vh-65px)] flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <PageHeader title="n8n Visual Workflow Engine" />

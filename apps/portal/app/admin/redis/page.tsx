@@ -97,7 +97,7 @@ export default function RedisManagerPage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 p-4 lg:p-8 bg-zinc-50">
+    <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 p-4 lg:p-6 bg-zinc-50">
       <div className="flex justify-between items-center">
         <PageHeader title="RedisInsight Manager" />
         <button
