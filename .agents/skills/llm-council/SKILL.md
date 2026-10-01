@@ -77,4 +77,4 @@ const { transcript, transcriptPath } = runCouncil(
 console.log(transcript.stage3_synthesis.finalVerdict);
 ```
 
-Deliberation transcripts are automatically archived in `.a2a/bus/council-transcripts/`.
+Deliberation transcripts are automatically archived in `.agents/a2a/bus/council-transcripts/`.

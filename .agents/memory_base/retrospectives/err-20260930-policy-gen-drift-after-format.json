@@ -1,0 +1,14 @@
+{
+  "id": "err-20260930-policy-gen-drift-after-format",
+  "timestamp": "2026-09-30T20:11:00Z",
+  "taskTag": "--task-policy-gen",
+  "category": "TOOLING_DRIFT",
+  "errorSignature": "Drift detected: /home/tim/Fork/Arch-System/tools/repo/policy/eslint-boundaries.generated.cjs",
+  "affectedFiles": [
+    "tools/repo/policy-compiler.cjs",
+    "tools/repo/policy/eslint-boundaries.generated.cjs"
+  ],
+  "rootCause": "Running `pnpm format` formats the generated policy files, breaking the strict content drift verification in `pnpm policy:check`.",
+  "resolution": "Ran `pnpm policy:gen` immediately after `pnpm format` to regenerate the files to match the expected format.",
+  "preventionRule": "If `pnpm agent:verify` or `pnpm policy:check` fails due to drift on generated `.cjs` files, always run `pnpm policy:gen` to regenerate them and realign the pipeline."
+}

@@ -1,3 +1,5 @@
+export { getAuthenticatedEmployee, EMPLOYEE_CACHE_KEY } from './auth';
+export type { AuthenticatedPrincipal, EmployeeSummary } from './auth';
 export { createBrowserSupabaseClient } from './client';
 // Database types - Database is a stub until supabase:gen can run against local DB
 export type { Database } from './database.types';

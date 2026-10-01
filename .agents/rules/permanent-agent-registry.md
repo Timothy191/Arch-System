@@ -1,13 +1,13 @@
 ---
 description: "Permanent agent registration, 9-pillar setup, and auto-deployment policy"
-paths: [".agents/agents/**/*", ".a2a/registry/**/*", "packages/agents/**/*"]
+paths: [".agents/agents/**/*", ".agents/a2a/registry/**/*", "packages/agents/**/*"]
 ---
 
 # Permanent Agent Registry & Auto-Deployment Policy
 
 ## 1. Permanent Persistence Mandate
 
-Every newly authored or synthesized agent MUST be permanently registered in `.a2a/registry/` and `.agents/agents/`. No ephemeral "one-off" agents without registration.
+Every newly authored or synthesized agent MUST be permanently registered in `.agents/a2a/registry/` and `.agents/agents/`. No ephemeral "one-off" agents without registration.
 
 ## 2. The 9-Pillar Specification Standard
 
@@ -21,13 +21,13 @@ All registered agents must strictly define the 9 Core Pillars:
 6. **Hard Negatives**: Explicitly forbidden operations and anti-patterns.
 7. **Input Contract**: Strict JSON schema defining required invocation inputs.
 8. **Output Contract**: Schema-strict JSON or Markdown structure.
-9. **Error Recovery & Memory**: Auto-fallback mechanisms, skill bindings, and `.memory_base/` error logging.
+9. **Error Recovery & Memory**: Auto-fallback mechanisms, skill bindings, and `.agents/memory_base/` error logging.
 
 ## 3. Pre-Population & Warm Redeployment
 
 Agents are pre-populated with:
 
-- Relevant domain memories and previous error retrospectives from `.memory_base/`.
+- Relevant domain memories and previous error retrospectives from `.agents/memory_base/`.
 - Required toolkits and MCP server configurations (`mcp_config.json`).
 - Reusable skills located in `.agents/skills/`.
 

@@ -95,7 +95,7 @@ You are the **Karpathy LLM Council Chairman** (Multi-Agent Deliberation & Consen
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/task-handoff.schema.json`
+Schema reference: `.agents/a2a/schemas/task-handoff.schema.json`
 
 ```json
 {

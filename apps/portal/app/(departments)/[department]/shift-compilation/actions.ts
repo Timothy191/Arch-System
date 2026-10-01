@@ -12,11 +12,13 @@ import type {
 } from '@repo/contract/types/shift-compilation.types';
 import { AuthError, ForbiddenError, ValidationError } from '@repo/errors';
 import { serverLogger } from '@repo/logger';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
+import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 
 // AGENT-TRACE: Server action fetching unified shift compilation from PostgreSQL RPC.
 export async function getUnifiedShiftReport(
@@ -25,18 +27,14 @@ export async function getUnifiedShiftReport(
   shiftType: 'day' | 'night'
 ): Promise<{ data?: UnifiedShiftReport; error?: string }> {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal) {
       throw new AuthError('Unauthorized: valid session required', {
         context: { operation: 'getUnifiedShiftReport' },
       });
     }
 
+    const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.rpc('get_unified_shift_compilation', {
       p_department_id: departmentId,
       p_shift_date: shiftDate,
@@ -76,18 +74,14 @@ export async function getMultiSiteShiftReport(
   shiftType: 'day' | 'night'
 ): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal) {
       throw new AuthError('Unauthorized: valid session required', {
         context: { operation: 'getMultiSiteShiftReport' },
       });
     }
 
+    const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.rpc('get_multi_site_shift_compilation', {
       p_department_id: departmentId,
       p_shift_date: shiftDate,
@@ -123,27 +117,24 @@ export async function getMultiSiteShiftReport(
 // AGENT-TRACE: Server action locking and signing the unified shift closeout with supervisor PIN verification.
 export async function lockAndSignUnifiedShift(
   payload: LockAndSignShiftInput & { departmentSlug?: string }
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; jobId?: string }> {
   try {
     const validated = lockAndSignShiftSchema.parse(payload);
 
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const principal = await getAuthenticatedEmployee(supabase);
+    if (!principal) {
       throw new AuthError('Unauthorized', {
         context: { operation: 'lockAndSignUnifiedShift' },
       });
     }
 
-    // 1. Fetch current user employee record
+    // 1. Fetch current user employee record (PIN + name fields beyond the
+    // helper's common shape — kept here so the auth cache stays small).
     const { data: currentEmployee } = await supabase
       .from('employees')
       .select('id, role, full_name, pin_hash')
-      .eq('auth_id', user.id)
+      .eq('auth_id', principal.user.id)
       .single();
 
     if (!currentEmployee) {
@@ -235,7 +226,16 @@ export async function lockAndSignUnifiedShift(
     revalidatePath(`/${slug}`);
     revalidatePath(`/${slug}/shift-coverage`);
 
-    return { success: true };
+    // 6. Trigger background generation of Shift PDF via n8n & Redis
+    const jobId = `shift-closeout-${updatedStatus?.id}-${Date.now()}`;
+    await triggerTrackedWorkflow(jobId, '/webhook/shift-closed', {
+      departmentId: validated.departmentId,
+      shiftDate: validated.shiftDate,
+      shiftType: validated.shiftType,
+      statusId: updatedStatus?.id,
+    });
+
+    return { success: true, jobId };
   } catch (err: unknown) {
     if (err instanceof ValidationError) {
       return { success: false, error: err.message };

@@ -11,7 +11,7 @@ permissions:
   read: "allow"
 scope:
   include:
-    - ".memory_base/**"
+    - ".agents/memory_base/**"
     - "docs/**"
     - "archive/tracers/**"
   exclude:
@@ -56,7 +56,7 @@ You are the **ai-memory-curator** (AI Memory Graph & Context Index Curator (T1))
 ### 4. PATH SCOPE & ISOLATION
 
 - **Workspace Inclusions (Domain Scope)**:
-  - `.memory_base/**`
+  - `.agents/memory_base/**`
   - `docs/**`
   - `archive/tracers/**`
 - **Strict Exclusions (Zero-Leak Boundary)**:
@@ -71,7 +71,7 @@ You are the **ai-memory-curator** (AI Memory Graph & Context Index Curator (T1))
 ### 5. OPERATIONAL RUNBOOK
 
 - **Phase 1**: Ingest session observations and distill key architectural decisions
-- **Phase 2**: Synthesize reusable memory nodes and link into .memory_base/
+- **Phase 2**: Synthesize reusable memory nodes and link into .agents/memory_base/
 - **Phase 3**: Update retrospective indexes and knowledge graphs
 - **Phase 4**: Emit memory health summary
 
@@ -92,7 +92,7 @@ You are the **ai-memory-curator** (AI Memory Graph & Context Index Curator (T1))
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {

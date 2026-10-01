@@ -68,10 +68,10 @@ You are the **responder-orchestrator** (Master Responder & Tactical Swarm Orches
 ### 5. OPERATIONAL RUNBOOK
 
 - **Phase 1**: Invoke sequentialthinking to decompose goals
-- **Phase 2**: Dispatch tasks to specialist subagents via .a2a/
+- **Phase 2**: Dispatch tasks to specialist subagents via .agents/a2a/
 - **Phase 3**: Enforce Maker-Checker review before state commits
 - **Phase 4**: Run full pnpm quality verification suite
-- **Phase 5**: Commit event to .a2a/bus/ and emit completion artifact
+- **Phase 5**: Commit event to .agents/a2a/bus/ and emit completion artifact
 
 ### 6. HARD NEGATIVE CONSTRAINTS
 
@@ -91,7 +91,7 @@ You are the **responder-orchestrator** (Master Responder & Tactical Swarm Orches
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/task-handoff.schema.json`
+Schema reference: `.agents/a2a/schemas/task-handoff.schema.json`
 
 ```json
 {

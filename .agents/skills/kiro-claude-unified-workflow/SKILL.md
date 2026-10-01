@@ -56,6 +56,6 @@ flowchart TD
 
 ### Step 5: Retrospective & Cleanup
 
-- Log any encountered errors and resolutions into `.memory_base/retrospectives/`.
+- Log any encountered errors and resolutions into `.agents/memory_base/retrospectives/`.
 - Clean up scratch scripts and temp test files.
 - Record the immutable task execution log in `archive/tracers/log/` and index in `archive/tracers/README.md`.

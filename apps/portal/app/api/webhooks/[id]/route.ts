@@ -98,6 +98,7 @@
  */
 
 import { updateWebhookSchema } from '@repo/contract/schemas/webhook.schema';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -110,29 +111,18 @@ async function handlePutWebhook(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const { id } = await params;
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal.employee) {
+    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
+  const { employee } = principal;
 
   const parsed = await validateBody(request, updateWebhookSchema);
   if (parsed instanceof NextResponse) return parsed;
   const { url, description, event_types, active } = parsed.data;
 
-  // Get user's department and role
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('department_id, role, accessible_departments')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
-  }
+  const supabase = await createServerSupabaseClient();
 
   // Get the webhook to check ownership
   const { data: existingWebhook } = await supabase
@@ -189,25 +179,14 @@ async function handleDeleteWebhook(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const { id } = await params;
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Get user's department and role
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('department_id, role, accessible_departments')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee) {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal.employee) {
     return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
+  const { employee } = principal;
+
+  const supabase = await createServerSupabaseClient();
 
   // Get the webhook to check ownership
   const { data: existingWebhook } = await supabase

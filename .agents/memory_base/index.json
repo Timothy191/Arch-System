@@ -1,0 +1,72 @@
+{
+  "lastUpdated": "2026-09-30T18:11:20.603Z",
+  "totalRetrospectives": 11,
+  "entries": [
+    {
+      "id": "err-20260925-vercel-headless-deploy",
+      "category": "DEPLOYMENT",
+      "errorSignature": "Vercel headless deployment fails after login",
+      "preventionRule": "Always ensure the Vercel project is interactively linked before delegating deployment to headless CI/CD or autonomous swarm agents."
+    },
+    {
+      "id": "err-20260925-wayland-playwright-crash",
+      "category": "E2E_TESTING",
+      "errorSignature": "Playwright/Chromium crash with eglCreateImage errors",
+      "preventionRule": "Always inject Ozone platform flags into Playwright configs when running in a Wayland environment."
+    },
+    {
+      "id": "err-20260928-hardcoded-credentials",
+      "category": "SECURITY",
+      "errorSignature": "Hardcoded Supabase URL and keys in createBearerSupabaseClient",
+      "preventionRule": "Never commit live credentials, API keys, or JWTs. Always use environment variables and ensure client factories validate their existence."
+    },
+    {
+      "id": "err-20260928-kysely-connection-leak",
+      "category": "DATABASE",
+      "errorSignature": "Kysely Pool exhaustion due to per-request instantiation",
+      "preventionRule": "Always enforce singleton patterns for database connection pools in serverless/server action environments to prevent connection exhaustion."
+    },
+    {
+      "id": "err-20260928-unreachable-validation",
+      "category": "UI_UX",
+      "errorSignature": "Unreachable email validation in LoginForm.tsx blur handler",
+      "preventionRule": "When handling onChange or onBlur for HTML5 specific inputs (like type=\"email\"), utilize the Constraint Validation API (e.target.validity) instead of parsing e.target.value directly."
+    },
+    {
+      "id": "err-20260929-placeholder-secret-false-positive",
+      "category": "SECURITY",
+      "errorSignature": "Regex secret fingerprinting produces false positives on placeholder values; a naive 'leak count' can also be zero because the base64 line-wrap was not stripped",
+      "preventionRule": "Before treating a fingerprint match as a real secret, (1) always strip the base64 newline wrapping with tr -d '\\n' before base64 -d when reading files via the GitHub contents API, and (2) disambiguate placeholders from real secrets by comparing blob ids across commits (git rev-parse <sha>:<path>) or by checking for repeated/sequential filler like 00000000/XXXX. Prefer provider-verified detection (GitHub secret scanning validity checks) over regex alone."
+    },
+    {
+      "id": "err-20260929-stale-branch-key-lurkers",
+      "category": "SECURITY",
+      "errorSignature": "Deleted main-tip secrets reappear as live files on stale public bot branches (bolt/*, vercel/*, jules/*)",
+      "preventionRule": "After leaking or scrubbing any secret, enumerate git ls-remote --heads and grep EVERY published branch for the secret fingerprint, not just main; delete stale bot branches immediately after their work lands."
+    },
+    {
+      "id": "err-20260929-unreachable-object-exposure",
+      "category": "SECURITY",
+      "errorSignature": "On a public repo, history-rewriting refs/heads/* does NOT remove leaked secrets: refs/pull/<N>/head keeps pre-rewrite commits reachable forever, so GitHub never garbage-collects them",
+      "preventionRule": "Deleting a branch or rewriting refs/heads/* does NOT remove a secret from a public repo: refs/pull/<N>/head pins the pre-rewrite commit forever. Treat any leaked secret as live until the key is rotated AND unreachable objects are purged server-side. Never treat push --delete, a history rewrite, or a 'heads are clean' scan as remediation."
+    },
+    {
+      "id": "err-20260930-daily-log-test-mock-server-action",
+      "category": "TESTING_RSC_BOUNDARY",
+      "errorSignature": "expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs')",
+      "preventionRule": "When refactoring client components to use Server Actions for mutations, always update the associated unit tests to mock and assert against the newly imported Server Action rather than direct database clients."
+    },
+    {
+      "id": "err-20260930-policy-gen-drift-after-format",
+      "category": "TOOLING_DRIFT",
+      "errorSignature": "Drift detected: /home/tim/Fork/Arch-System/tools/repo/policy/eslint-boundaries.generated.cjs",
+      "preventionRule": "If `pnpm agent:verify` or `pnpm policy:check` fails due to drift on generated `.cjs` files, always run `pnpm policy:gen` to regenerate them and realign the pipeline."
+    },
+    {
+      "id": "recovery-20260929-remaining-branch-deletion",
+      "category": "SECURITY",
+      "errorSignature": "Published remote branch tips retained live un-rotated Supabase JWTs post-cleanup",
+      "preventionRule": "Treat 'remaining heads are clean' as an unverified claim until every published branch is fingerprint-scanned; bundle tips (with chmod 600) BEFORE any push --delete of diverged branches."
+    }
+  ]
+}

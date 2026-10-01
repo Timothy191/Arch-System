@@ -48,7 +48,10 @@ const MacMenuBar = dynamic(
   }
 );
 
-import { RouteBackground } from '@/components/RouteBackground';
+const RouteBackground = dynamic(() =>
+  import('@/components/RouteBackground').then((m) => ({ default: m.RouteBackground }))
+);
+
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 import { ViewportBoundaries } from '@/components/system/ViewportBoundaries';
 

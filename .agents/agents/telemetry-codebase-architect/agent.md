@@ -97,7 +97,7 @@ You are the **telemetry-codebase-architect** (Telemetry & Codebase Maps Architec
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {

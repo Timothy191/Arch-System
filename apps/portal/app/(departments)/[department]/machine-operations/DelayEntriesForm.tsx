@@ -1,11 +1,13 @@
 'use client';
 
+import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertCircle, CheckCircle, Clock, HelpCircle, Info, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
+import { saveDelayEntriesBatch } from './actions';
 
 // AGENT-TRACE: Delay entry form with granular tracking, auto-calculation, and manual override
 // Supports draft/committed workflow with role-based access control
@@ -265,33 +267,41 @@ export function DelayEntriesForm({
         return;
       }
 
-      // Save each entry
-      for (const entry of delayEntries) {
-        const entryData = {
-          machine_operation_id: machineOperationId,
-          delay_category_id: entry.delay_category_id,
-          // AGENT-TRACE: Convert local time to UTC for database storage
-          delay_start_time: toUTC(entry.delay_start_time),
-          delay_end_time: toUTC(entry.delay_end_time),
-          is_manual_override: entry.is_manual_override,
-          manual_duration_hours: entry.manual_duration_hours,
-          description: entry.description,
-          status: 'draft' as const,
-        };
+      // Prepare batch for saving
+      const entriesToSave = delayEntries.map((entry) => ({
+        ...(entry.id ? { id: entry.id } : {}),
+        machine_operation_id: machineOperationId,
+        delay_category_id: entry.delay_category_id,
+        delay_start_time: toUTC(entry.delay_start_time),
+        delay_end_time: toUTC(entry.delay_end_time),
+        is_manual_override: entry.is_manual_override,
+        manual_duration_hours: entry.manual_duration_hours,
+        description: entry.description,
+        status: 'draft' as const,
+      }));
 
-        if (entry.id) {
-          // Update existing
-          const { error } = await supabase
-            .from('delay_entries')
-            .update(entryData)
-            .eq('id', entry.id);
-          if (error) throw error;
-        } else {
-          // Insert new
-          const { error } = await supabase.from('delay_entries').insert(entryData);
-          if (error) throw error;
-        }
+      if (!navigator.onLine) {
+        useOfflineQueue.getState().enqueue({
+          url: '/api/sync/fallback',
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'saveDelayEntriesBatch',
+            payload: {
+              machineOperationId,
+              entries: entriesToSave,
+            },
+          }),
+          description: `Saving ${entriesToSave.length} delay entries`,
+        });
+        // Mock the reload since we are offline
+        const simulatedUpdate = delayEntries.map((d) => ({ ...d, status: 'draft' as const }));
+        setDelayEntries(simulatedUpdate);
+        onDelayChange?.(simulatedUpdate);
+        setIsSubmitting(false);
+        return;
       }
+
+      await saveDelayEntriesBatch({ machineOperationId, entries: entriesToSave });
 
       // Reload delays to get IDs for new entries
       const { data } = await supabase

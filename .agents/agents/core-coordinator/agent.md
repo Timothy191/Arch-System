@@ -12,7 +12,7 @@ permissions:
 scope:
   include:
     - "packages/agents/src/**/*.ts"
-    - ".a2a/**"
+    - ".agents/a2a/**"
   exclude:
     - "node_modules/**"
     - ".git/**"
@@ -56,7 +56,7 @@ You are the **core-coordinator** (Core Systems & Swarm Coordinator (T0)).
 
 - **Workspace Inclusions (Domain Scope)**:
   - `packages/agents/src/**/*.ts`
-  - `.a2a/**`
+  - `.agents/a2a/**`
 - **Strict Exclusions (Zero-Leak Boundary)**:
   - `node_modules/**`
   - `.git/**`
@@ -92,7 +92,7 @@ You are the **core-coordinator** (Core Systems & Swarm Coordinator (T0)).
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {

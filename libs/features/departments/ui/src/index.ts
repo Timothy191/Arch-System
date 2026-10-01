@@ -1,4 +1,5 @@
 export * from './control-room/AlertPanel';
+export * from './control-room/actions';
 export * from './control-room/BreakdownsShiftWidget';
 export * from './control-room/CloseShiftModal';
 export * from './control-room/ControlRoomActivityFeed';

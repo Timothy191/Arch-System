@@ -18,6 +18,12 @@ jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
+// Mock actions
+const mockCreateDailyLog = jest.fn();
+jest.mock('./actions', () => ({
+  createDailyLog: (...args: any[]) => mockCreateDailyLog(...args),
+}));
+
 // Mock sonner
 jest.mock('sonner', () => ({
   toast: {
@@ -46,6 +52,7 @@ describe('DailyLogForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateDailyLog.mockResolvedValue({ success: true, id: 'log-1' });
     mockSingle.mockResolvedValue({ data: { id: 'log-1' }, error: null });
     mockSelect.mockReturnValue({ single: mockSingle });
     mockInsert.mockReturnValue({ select: mockSelect });
@@ -97,8 +104,7 @@ describe('DailyLogForm', () => {
 
     // Wait for success
     await waitFor(() => {
-      expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs');
-      expect(mockInsert).toHaveBeenCalled();
+      expect(mockCreateDailyLog).toHaveBeenCalled();
     });
 
     // Should show success message via toast
@@ -116,10 +122,7 @@ describe('DailyLogForm', () => {
 
   it('handles submission errors', async () => {
     // Mock an error
-    mockSingle.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Database error' },
-    });
+    mockCreateDailyLog.mockRejectedValueOnce(new Error('Database error'));
 
     render(<DailyLogForm {...props} />);
 
@@ -134,8 +137,7 @@ describe('DailyLogForm', () => {
 
     // Wait for error
     await waitFor(() => {
-      expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs');
-      expect(mockInsert).toHaveBeenCalled();
+      expect(mockCreateDailyLog).toHaveBeenCalled();
     });
 
     // Should show error message via toast

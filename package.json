@@ -100,6 +100,8 @@
     "audit:explain": "node tools/ops/explain-query-plans.cjs",
     "audit:rls": "node tools/audits/audit-rls.cjs",
     "maps:gen": "node tools/repo/generate-codebase-maps.cjs",
+    "memory:index": "node tools/scripts/smart-indexer.cjs",
+    "memory:recall": "node tools/scripts/smart-indexer.cjs --query",
     "build": "node scripts/sync-assets-smart.cjs && turbo run build",
     "build:vercel": "node scripts/sync-assets-smart.cjs && pnpm turbo run build --filter=portal",
     "commitlint": "commitlint --edit",

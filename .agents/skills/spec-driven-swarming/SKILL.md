@@ -43,7 +43,7 @@ The Auto-Dispatch Router automatically assigns one of three primary swarm topolo
 
 ### Topology C: Parallel Specialist Swarm
 
-- Concurrent execution of independent domain specialists with non-overlapping file scopes, logging state to `.a2a/bus/event-log.jsonl`.
+- Concurrent execution of independent domain specialists with non-overlapping file scopes, logging state to `.agents/a2a/bus/event-log.jsonl`.
 
 ---
 

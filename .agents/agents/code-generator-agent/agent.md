@@ -93,7 +93,7 @@ You are the **code-generator-agent** (Automated Code Generation & Scaffold Speci
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/code-generation-result.schema.json`
+Schema reference: `.agents/a2a/schemas/code-generation-result.schema.json`
 
 ```json
 {

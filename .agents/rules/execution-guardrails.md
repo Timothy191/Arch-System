@@ -52,3 +52,18 @@ Before marking any task, feature, or refactor complete, the agent **MUST autonom
 - Every modified package or application root contains an `AGENT_TRACER.md`.
 - Assistants must append an ISO 8601 timestamped entry documenting changes, reasons, and next-agent handover notes.
 - Complex logic must include inline `// AGENT-TRACE: <explanation>` breadcrumbs.
+
+---
+
+## 6. Tooling Drift Resolution
+
+- Running `pnpm format` will format auto-generated policy files and break the strict drift verification. If `pnpm policy:check` or `agent:verify` fails due to drift on generated files (e.g., `eslint-boundaries.generated.cjs`), you **MUST** autonomously run `pnpm policy:gen` to regenerate them and realign the pipeline before proceeding.
+
+## 7. Finish What You Start Invariant
+
+- **Strict Completion Enforcement**: Nothing new may be added or started until all past or outstanding actions, tasks, or other requirements are fully completed. You must always finish what you start before moving on to parallel integrations or new feature mappings.
+
+## 8. Backlog Zero Invariant
+
+- **Mandatory Backlog Check**: At the start of new sessions or when switching contexts, you must autonomously check for any backlog, unfinished tasks, or incomplete `temp/tasks.md` items.
+- **Autonomous Completion**: If an outstanding backlog is detected, you must prompt/inform the user and immediately autonomously complete the required tasks. You must maintain a "zero outstanding" state so you can assist the user with new requests without forgotten or hanging tasks.

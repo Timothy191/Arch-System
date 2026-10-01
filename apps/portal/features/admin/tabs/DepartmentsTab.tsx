@@ -1,5 +1,6 @@
 'use client';
 
+import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
@@ -9,6 +10,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Edit2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { logError } from '@/lib/errors/error-logger';
+import { createDepartment } from './actions';
 
 interface Department {
   id: string;
@@ -77,11 +79,23 @@ export function DepartmentsTab() {
           context: 'departments_tab_update',
         });
     } else {
-      const { error } = await supabase.from('departments').insert(formData);
-      if (error)
-        logError(new Error(error.message), {
-          context: 'departments_tab_create',
+      if (!navigator.onLine) {
+        useOfflineQueue.getState().enqueue({
+          url: '/api/sync/fallback',
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createDepartment',
+            payload: formData,
+          }),
+          description: `Create Department: ${formData.name}`,
         });
+      } else {
+        try {
+          await createDepartment(formData);
+        } catch (err: any) {
+          logError(err, { context: 'departments_tab_create' });
+        }
+      }
     }
     setShowEditDialog(false);
     setEditingDept(null);

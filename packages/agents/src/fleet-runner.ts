@@ -1,5 +1,5 @@
-import { QualityGate } from './quality-gate.js';
-import { SPECIALIST_PERSONAS, type SpecialistPersona } from './specialists.js';
+import { QualityGate } from './quality-gate';
+import { SPECIALIST_PERSONAS, type SpecialistPersona } from './specialists';
 
 export interface AgentSwarmReport {
   timestamp: string;

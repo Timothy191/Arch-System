@@ -98,7 +98,7 @@ You are the **Master Autonomous Swarm Orchestrator** (Autonomous Swarm Coordinat
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/task-handoff.schema.json`
+Schema reference: `.agents/a2a/schemas/task-handoff.schema.json`
 
 ```json
 {

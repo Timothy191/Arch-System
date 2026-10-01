@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 /**
@@ -47,11 +48,14 @@ export function RouteBackground() {
         className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
-        <img
+        <Image
           id="route-bg-light-image"
           src="/background/global-background-poster.webp"
           alt=""
-          className="route-bg-image object-cover object-center w-full h-full filter brightness-105"
+          fill
+          priority
+          sizes="100vw"
+          className="route-bg-image object-cover object-center filter brightness-105"
         />
       </div>
 

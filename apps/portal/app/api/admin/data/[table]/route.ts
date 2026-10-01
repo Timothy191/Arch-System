@@ -185,9 +185,10 @@
  *         description: Internal server error
  */
 
+import { serverLogger } from '@repo/logger';
 import { FixedWindowStrategy, RateLimiter, RedisStore } from '@repo/rate-limiter';
 import { getRedisClient } from '@repo/redis';
-import { createServerSupabaseClient } from '@repo/supabase/server';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { type NextRequest, NextResponse } from 'next/server';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
@@ -242,29 +243,27 @@ async function getMachineStatusRateLimiter(): Promise<RateLimiter | null> {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Redis not available for machine rate limiting:', error);
+    serverLogger.warn(
+      { error: error instanceof Error ? error.message : String(error) },
+      'Redis unavailable; machine status rate limiting disabled'
+    );
   }
   return null;
 }
 
-async function assertAdmin() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: 'Unauthorized', status: 401 } as const;
+async function assertAdmin(): Promise<
+  | { error: string; status: 401 | 403 }
+  | { employee: { id: string; role: string }; user: { id: string } }
+> {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal?.employee) return { error: 'Unauthorized', status: 401 };
+  if (principal.employee.role !== 'admin') {
+    return { error: 'Forbidden', status: 403 };
   }
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, role')
-    .eq('auth_id', user.id)
-    .single();
-  if (employee?.role !== 'admin') {
-    return { error: 'Forbidden', status: 403 } as const;
-  }
-  return { employee, user };
+  return {
+    employee: principal.employee,
+    user: principal.user,
+  };
 }
 
 async function handleGetRequest(

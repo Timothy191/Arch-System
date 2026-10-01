@@ -39,6 +39,7 @@ function resolveChain(rows: unknown[]) {
     gte: jest.fn().mockReturnThis(),
     in: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
+    single: jest.fn(() => Promise.resolve({ data: rows[0] ?? null, error: null })),
     maybeSingle: jest.fn(() => Promise.resolve({ data: rows[0] ?? null, error: null })),
   };
 

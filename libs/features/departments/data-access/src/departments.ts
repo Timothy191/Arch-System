@@ -235,6 +235,7 @@ export const DRILLING_TABS = [
  */
 export const ACCESS_CONTROL_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'muster', label: 'Muster Station', icon: 'LifeBuoy' },
   { name: 'print-cards', label: 'Print Cards', icon: 'Printer' },
   { name: 'qr-codes', label: 'QR & RFID Codes', icon: 'QrCode' },
   { name: 'access-logs', label: 'Access Logs', icon: 'ShieldCheck' },

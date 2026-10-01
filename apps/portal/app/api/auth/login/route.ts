@@ -135,7 +135,14 @@ export async function POST(request: NextRequest) {
 
       if (origin) {
         // Origin header is always protocol + host + port; compare directly
-        if (origin !== appOrigin) {
+        const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+        const hostOrigin = host
+          ? host.includes('localhost')
+            ? `http://${host}`
+            : `https://${host}`
+          : null;
+
+        if (origin !== appOrigin && origin !== hostOrigin) {
           return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
         }
       } else if (referer) {
@@ -143,7 +150,13 @@ export async function POST(request: NextRequest) {
         // prevent subdomain suffix attacks (e.g., app.example.com.evil.com)
         try {
           const refUrl = new URL(referer);
-          if (refUrl.origin !== appOrigin) {
+          const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+          const hostOrigin = host
+            ? host.includes('localhost')
+              ? `http://${host}`
+              : `https://${host}`
+            : null;
+          if (refUrl.origin !== appOrigin && refUrl.origin !== hostOrigin) {
             return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
           }
         } catch {

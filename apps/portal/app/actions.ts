@@ -2,6 +2,7 @@
 
 import { monthlyReportInputSchema } from '@repo/contract/schemas/form.schema';
 import { AuthError, ForbiddenError, isAppError, ValidationError } from '@repo/errors';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { aiGenerateEmbeddingEvent, inngest } from '@repo/utils/inngest';
 import { redirect } from 'next/navigation';
@@ -27,12 +28,8 @@ export async function speculativeEmbedShiftLog(
 ): Promise<ServerActionResponse<{ queued: boolean }>> {
   try {
     // Validate that the user is authenticated
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal) {
       throw new AuthError('Unauthorized');
     }
 
@@ -44,7 +41,7 @@ export async function speculativeEmbedShiftLog(
       name: aiGenerateEmbeddingEvent,
       data: {
         text,
-        userId: user.id,
+        userId: principal.user.id,
       },
     });
 
@@ -70,12 +67,8 @@ export async function speculativeEmbedShiftLog(
 export async function revalidateRSC(tags: string[]): Promise<ServerActionResponse> {
   try {
     // Always validate the user at the top
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal) {
       throw new AuthError('Unauthorized');
     }
 
@@ -100,30 +93,20 @@ export async function generateMonthlyReport(
   departmentId?: string
 ): Promise<ServerActionResponse<{ url: string }>> {
   try {
-    // Validate that the user is authenticated
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal?.employee) {
       throw new AuthError('Unauthorized');
     }
+    const { user, employee } = principal;
 
     // AGENT-TRACE: Enforce strict runtime schema validation via @repo/contract
     const reportData = monthlyReportInputSchema.parse(rawReportData);
 
-    // Validate user role is admin or manager
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role, department_id')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (employee?.role !== 'admin' && employee?.role !== 'manager') {
+    if (employee.role !== 'admin' && employee.role !== 'manager') {
       throw new ForbiddenError('Unauthorized: Insufficient permissions');
     }
 
+    const supabase = await createServerSupabaseClient();
     const { pdf } = await import('@react-pdf/renderer');
     const { ReportTemplate } = await import('@/features/analytics/components/ReportTemplate');
     const React = await import('react');

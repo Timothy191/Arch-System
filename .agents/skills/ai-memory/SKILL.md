@@ -17,7 +17,7 @@ description: Local-first long-term cross-session memory management, observation 
 | :------------------------ | :----------------- | :--------------------------------------------------------------------------- |
 | `/remember <observation>` | Slash Command      | Explicitly persist architectural decision or constraint into long-term store |
 | `/forget <id>`            | Slash Command      | Deprecate stale or invalidated memory entries                                |
-| `smart-indexer query`     | CLI Auto-Recall    | Search indexed retrospectives across `.memory_base/`                         |
+| `smart-indexer query`     | CLI Auto-Recall    | Search indexed retrospectives across `.agents/memory_base/`                         |
 | `MCP Memory Tools`        | MCP Tools          | Structured graph entity creation and semantic relation tracing               |
 
 ---

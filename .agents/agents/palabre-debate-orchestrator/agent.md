@@ -11,7 +11,7 @@ permissions:
   read: "allow"
 scope:
   include:
-    - ".a2a/**"
+    - ".agents/a2a/**"
     - "temp/**"
     - "archive/tracers/**"
   exclude:
@@ -56,7 +56,7 @@ You are the **palabre-debate-orchestrator** (Multi-Agent Debate & Deliberation O
 ### 4. PATH SCOPE & ISOLATION
 
 - **Workspace Inclusions (Domain Scope)**:
-  - `.a2a/**`
+  - `.agents/a2a/**`
   - `temp/**`
   - `archive/tracers/**`
 - **Strict Exclusions (Zero-Leak Boundary)**:
@@ -93,7 +93,7 @@ You are the **palabre-debate-orchestrator** (Multi-Agent Debate & Deliberation O
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/task-handoff.schema.json`
+Schema reference: `.agents/a2a/schemas/task-handoff.schema.json`
 
 ```json
 {

@@ -102,6 +102,7 @@ export * from './components/ui/table';
 export * from './components/ui/tabs';
 export * from './components/ui/telemetry-chart';
 export * from './components/WorkflowBuilder';
+export * from './components/WorkflowStatusBadge';
 export * from './hooks/useAutoSave';
 // Utilities & Hooks
 export * from './lib/utils';

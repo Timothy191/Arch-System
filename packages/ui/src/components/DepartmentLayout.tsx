@@ -18,8 +18,11 @@ import {
   GraduationCap,
   HardHat,
   Layers,
+  LifeBuoy,
   Monitor,
   Pickaxe,
+  Printer,
+  QrCode,
   Radio,
   Satellite,
   Search,
@@ -63,6 +66,9 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Monitor,
   HardHat,
   GraduationCap,
+  Printer,
+  QrCode,
+  LifeBuoy,
 };
 
 interface Tab {

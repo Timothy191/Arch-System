@@ -51,7 +51,19 @@ describe('actions', () => {
   describe('logout', () => {
     it('calls signOut and redirects to /login', async () => {
       const signOut = jest.fn().mockResolvedValue({});
-      createServerSupabaseClient.mockResolvedValue({ auth: { signOut } });
+      createServerSupabaseClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'emp-1', department_id: 'dept-1' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
+        auth: { signOut },
+      });
 
       await expect(logout()).rejects.toThrow('NEXT_REDIRECT');
       expect(signOut).toHaveBeenCalledTimes(1);
@@ -61,6 +73,16 @@ describe('actions', () => {
   describe('speculativeEmbedShiftLog', () => {
     it('returns unauthorized error result if user is not authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'emp-1', department_id: 'dept-1' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
@@ -75,6 +97,16 @@ describe('actions', () => {
 
     it('does not generate embedding if text is empty', async () => {
       createServerSupabaseClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'emp-1', department_id: 'dept-1' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
         auth: {
           getUser: jest.fn().mockResolvedValue({
             data: { user: { id: 'user-123' } },
@@ -90,6 +122,16 @@ describe('actions', () => {
 
     it('generates embedding for valid text when user is authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'emp-1', department_id: 'dept-1' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
         auth: {
           getUser: jest.fn().mockResolvedValue({
             data: { user: { id: 'user-123' } },
@@ -113,6 +155,16 @@ describe('actions', () => {
   describe('generateMonthlyReport', () => {
     it('returns unauthorized error if user is not authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { id: 'emp-1', department_id: 'dept-1' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
@@ -178,6 +230,7 @@ describe('actions', () => {
       } as any);
 
       const res = await generateMonthlyReport({ title: 'Test' }, 'dept-1');
+
       expect(res.success).toBe(true);
       expect(res.url).toBe('http://signed-url');
       expect(mockUpload).toHaveBeenCalled();

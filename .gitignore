@@ -36,22 +36,24 @@ deployment-logs/*
 .venv/
 venv/
 
-# Agent runtime / personal skills (not project source)
+# ─── Unified Agent System (.agents/ is tracked; provider-specific runtime is ignored) ───
+# Provider-specific runtime artifacts (NOT project source)
 .claude/skills/
 .claude/hooks/scripts/db/
 .claude/hooks/scripts/search/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
-# Vendored agent plugin checkouts (e.g. compound-engineering) — not project source
-.agent-plugins/
-
-# .kiro/ agent config — tracked except local overrides and runtime data
+.claude/worktrees
+.claude-flow/
+.cursor/
 .kiro/settings.local.json
 .kiro/worktrees/
 !.kiro/worktrees/.gitkeep
 .kiro/deploy/
 .kiro/guardrails/
 .kiro/skills/
+.agent-plugins/
+.agentsroom/
 
 # IDE
 .vscode/
@@ -151,8 +153,6 @@ dev_run.log
 .antigravitycli/
 populating-data/
 
-.cursor/
-knowledge.md
 
 # Fallow dead-code analyzer output
 fallow_json.txt
@@ -194,14 +194,12 @@ tools/devdocs
 **/storybook-static/
 packages/ui/storybook-static/
 **/storybook-static
-.claude/worktrees
-.claude/settings.local.json
 
 # Build artifact checksums
 .assets-checksum
 
-# External execution / AI temp files
-.claude-flow/
+# Misc generated / non-project files
+knowledge.md
 QWEN.md
 
 # Binary toolchains / standalone archives (never commit to git)
@@ -252,8 +250,6 @@ e2e/.auth/
 libs/features/*/node_modules/
 dev-report.md
 {workspaceRoot}/
-# AgentsRoom local MCP workspace and cache
-.agentsroom/
 # Autoresearch benchmark harness (runtime script, not project source)
 autoresearch.sh
 # Generated portal route map (per-route /init pass output)

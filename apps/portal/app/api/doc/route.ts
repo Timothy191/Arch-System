@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@repo/supabase/server';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { NextResponse } from 'next/server';
 import { createSwaggerSpec } from 'next-swagger-doc';
 
@@ -44,28 +44,17 @@ import { createSwaggerSpec } from 'next-swagger-doc';
 // Only accessible to authenticated users with admin or engineering roles via Supabase auth
 
 async function assertAuthorizedUser() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Unauthorized', status: 401 } as const;
-  }
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, role')
-    .eq('auth_id', user.id)
-    .single();
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return { error: 'Unauthorized', status: 401 } as const;
+  if (!principal.employee) return { error: 'Forbidden', status: 403 } as const;
 
   // Allow admin and engineering roles to access API docs
   const allowedRoles = new Set(['admin', 'engineering']);
-  if (!employee || !allowedRoles.has(employee.role)) {
+  if (!allowedRoles.has(principal.employee.role)) {
     return { error: 'Forbidden', status: 403 } as const;
   }
 
-  return { employee, user };
+  return principal;
 }
 
 export async function GET() {

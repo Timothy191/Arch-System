@@ -1,5 +1,5 @@
-import type { QueuedRequest } from './useOfflineQueue';
-import { initOfflineQueueListeners, useOfflineQueue } from './useOfflineQueue';
+import type { QueuedRequest } from '@repo/shared/hooks';
+import { initOfflineQueueListeners, useOfflineQueue } from '@repo/shared/hooks';
 
 const mockToastInfo = jest.fn();
 const mockToastSuccess = jest.fn();

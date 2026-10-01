@@ -6,6 +6,8 @@
         "supabase",
         "trailblazer",
         "ce-compound",
+        "smart-memory-indexing",
+        "ai-memory",
         "llm-council",
         "ultragoal",
         "fresh-cli",

@@ -2,9 +2,13 @@
 
 You are operating within the Arch-System enterprise monorepo.
 
+> **⚠️ Unified Agent System**: All agent behavioral rules, operational guides, skills, and governance have been consolidated into `.agents/`. Read [`.agents/GUIDE.md`](./.agents/GUIDE.md) for the full operational reference.
+
 ## Directives & Ground Rules
 
 - Refer to the canonical Agent SSoT: [AGENTS.md](./AGENTS.md).
+- Refer to the unified operational guide: [`.agents/GUIDE.md`](./.agents/GUIDE.md).
+- Refer to all permanent rules: `.agents/rules/` (17 rule files).
 - Follow Turborepo task conventions: use `pnpm` exclusively.
 - All code changes must satisfy the repo lint gates (Biome, Stylelint, cspell) and TypeScript strict checking.
 - Do not edit generated Supabase types manually; use `pnpm --filter @repo/database db:types`.
@@ -69,3 +73,19 @@ To minimize user interaction and guarantee 99% accuracy, agents MUST utilize the
 - **Rule:** If `pnpm agent:verify` exits with a non-zero status code, you are **FORBIDDEN** from stopping to ask the user for help.
 - **Action:** You must autonomously read the specific error logs, execute a self-correction using `ast-grep` or file edits, and re-run `pnpm agent:verify` until it passes.
 - **Completion:** Only when `pnpm agent:verify` outputs `100% PASS` may you summarize your completion to the user.
+
+## 20. Structured Thinking Mandate (STM-0)
+
+All AI agents — regardless of model provider, framework, or execution context — MUST engage **structured, extended thinking** before executing ANY non-trivial code mutation, architectural decision, or configuration change. Reflexive code generation without demonstrated reasoning is a quality gate violation.
+
+**The Mandatory Thinking Protocol (MTP)** requires five phases before any mutation:
+
+1. **Situational Comprehension**: Restate the task, identify affected packages and boundary layers, map to the architecture diagram.
+2. **Evidence Gathering**: Read the actual source files, trace data flows, identify existing tests and contracts. Never propose changes based on assumptions.
+3. **Solution Design**: Propose at least two candidate approaches for non-trivial changes, evaluate each against the five-pillar Real-World Quality Score (Feasibility, Maintainability, Security, Performance, Industrial Reliability).
+4. **Pre-Commit Criticism**: Play Devil's Advocate — analyze blast radius, invariant violations, edge cases, regression risk. If criticism reveals a flaw, revise before proceeding.
+5. **Execution Contract**: State the exact files to modify, the verification commands to run, and the expected outcome. Only then begin file mutations.
+
+**Thinking must be visible, structured, falsifiable, and self-critical.** Depth scales with risk: one-line rationale for typos, full 5-phase protocol for migrations and security changes.
+
+**Full specification**: [`.agents/rules/structured-thinking-mandate.md`](./.agents/rules/structured-thinking-mandate.md)

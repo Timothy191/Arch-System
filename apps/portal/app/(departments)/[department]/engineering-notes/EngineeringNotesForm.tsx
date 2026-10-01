@@ -1,5 +1,6 @@
 'use client';
 
+import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Checkbox } from '@repo/ui/Checkbox';
 import { GlassCard } from '@repo/ui/GlassCard';
@@ -11,6 +12,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { speculativeEmbedShiftLog } from '@/app/actions';
 import type { BreakdownControlRoomView } from '@/features/departments';
+import { createEngineeringNote } from './actions';
 
 interface Machine {
   id: string;
@@ -142,8 +144,7 @@ export function EngineeringNotesForm({
 
     try {
       const today = new Date().toISOString().split('T')[0];
-
-      const { error } = await supabase.from('engineering_notes').insert({
+      const payload = {
         department_id: departmentId,
         note_date: today,
         shift_type: formData.shiftType,
@@ -154,10 +155,28 @@ export function EngineeringNotesForm({
         action_taken: formData.actionTaken || null,
         requires_follow_up: formData.requiresFollowUp,
         status: 'open',
-      });
+      };
 
-      if (error) throw error;
+      if (!navigator.onLine) {
+        useOfflineQueue.getState().enqueue({
+          url: '/api/sync/fallback',
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createEngineeringNote',
+            payload,
+          }),
+          description: 'Engineering Note',
+        });
+        clearDraft();
+        toast.success('Note saved offline and will sync automatically.');
 
+        // Speculatively generate embeddings in background when online
+        setIsSubmitting(false);
+
+        return;
+      }
+
+      await createEngineeringNote(payload);
       clearDraft();
 
       // Speculatively generate embeddings in background

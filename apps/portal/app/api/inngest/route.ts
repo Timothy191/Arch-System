@@ -1,12 +1,15 @@
 import { inngest } from '@repo/utils/inngest';
 import { serve } from 'inngest/next';
+import { autonomousScadaSimulationFn } from '@/lib/jobs/autonomous-scada-simulation';
 import { dailyPdfReportGenerationFn } from '@/lib/jobs/daily-pdf-report-generation';
 import { generateEmbeddingFn } from '@/lib/jobs/embedding-generation';
 import { machineBreakdownNotificationFn } from '@/lib/jobs/machine-breakdown-notification';
 import { memoryPersistFn } from '@/lib/jobs/memory-persist';
 import { monthlyExcelReportFn } from '@/lib/jobs/monthly-excel-report';
 import { orphanedRecordDetectionFn } from '@/lib/jobs/orphaned-record-detection';
+import { outboxDrainFn } from '@/lib/jobs/outbox-drain';
 import { generateReportFn } from '@/lib/jobs/report-generation';
+import { shiftCloseoutReportFn } from '@/lib/jobs/shift-closeout-report';
 import { shiftCompletenessCheckFn } from '@/lib/jobs/shift-completeness-check';
 import { shiftRolloverNotificationFn } from '@/lib/jobs/shift-rollover-notification';
 import { syncPlaybackFn } from '@/lib/jobs/sync-playback';
@@ -18,12 +21,15 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     syncPlaybackFn,
+    outboxDrainFn,
+    autonomousScadaSimulationFn,
     generateReportFn,
     generateEmbeddingFn,
     memoryPersistFn,
     shiftCompletenessCheckFn,
     orphanedRecordDetectionFn,
     shiftIntegrityReportFn,
+    shiftCloseoutReportFn,
     shiftRolloverNotificationFn,
     dailyPdfReportGenerationFn,
     machineBreakdownNotificationFn,

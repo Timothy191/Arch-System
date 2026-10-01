@@ -19,9 +19,7 @@
       "durationSeconds": 70.571,
       "details": {
         "packagesBuilt": 12,
-        "warnings": [
-          "Some packages lack build output definitions in turbo.json (non-blocking)"
-        ]
+        "warnings": ["Some packages lack build output definitions in turbo.json (non-blocking)"]
       }
     },
     "typeCheck": {

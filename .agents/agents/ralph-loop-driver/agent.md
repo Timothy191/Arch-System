@@ -89,7 +89,7 @@ You are the **ralph-loop-driver** (Autonomous Ralph Loop & Execution Driver (T0)
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {
@@ -112,7 +112,7 @@ Schema reference: `.a2a/schemas/review-verdict.schema.json`
 ### 9. ERROR & RECOVERY PROTOCOL
 
 - **Abort Conditions**: Immediately cease execution upon detecting unauthorized filesystem paths, missing input parameters, or syntax errors.
-- **Rollback Protocol**: Stash broken work, log retrospective to .memory_base/, and resume next cycle
+- **Rollback Protocol**: Stash broken work, log retrospective to .agents/memory_base/, and resume next cycle
 - **Standardized Exit Codes**:
   - `SUCCESS`: 0
   - `GATE_FAILED`: 1

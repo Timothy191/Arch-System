@@ -42,7 +42,7 @@ export class QualityGate {
         filePath &&
         (filePath.endsWith('.ts') ||
           filePath.endsWith('.tsx') ||
-          filePath.endsWith('.js') ||
+          filePath.endsWith('') ||
           filePath.endsWith('.jsx'))
       ) {
         const ast = babel.parseSync(content, {

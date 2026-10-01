@@ -1,0 +1,37 @@
+{
+  "id": "recovery-20260929-remaining-branch-deletion",
+  "timestamp": "2026-09-29T11:12:00Z",
+  "taskTag": "--task-privacy-audit",
+  "category": "SECURITY",
+  "errorSignature": "Published remote branch tips retained live un-rotated Supabase JWTs post-cleanup",
+  "affectedFiles": ["apps/portal/env/.env.example", "packages/supabase/src/seed.ts"],
+  "rootCause": "Two diverged remote branches (control-room-hardening and perf/optimize-machine-operations-list-7451426985180956390) remained published with historical commits carrying un-rotated Supabase JWTs.",
+  "resolution": "Deleted the two remaining published refs carrying pre-scrub secrets after archiving branch tips to local encrypted/chmod 600 recovery bundles.",
+  "relatedTo": "err-20260929-stale-branch-key-lurkers",
+  "action": "Deleted the two remaining published refs that still carried live un-rotated Supabase JWTs from pre-scrub history",
+  "branchesDeleted": [
+    {
+      "name": "control-room-hardening",
+      "tipSha": "2020fd3bfb377f1a5356f9da0427e5ecb34bc3c2",
+      "commitsAheadOfOriginMain": 287,
+      "recoveryBundle": "/home/tim/backups/arch-system-branch-bundles-20260929/control-room-hardening.bundle",
+      "bundleSha256": "17e7c0c87502f4465f579514a7ea30f57497f2fc84623b2ca3d8f94bfd045815"
+    },
+    {
+      "name": "perf/optimize-machine-operations-list-7451426985180956390",
+      "tipSha": "3c3f1505935fc37536cd54dd251c62632873be26",
+      "commitsAheadOfOriginMain": 294,
+      "recoveryBundle": "/home/tim/backups/arch-system-branch-bundles-20260929/perf-machine-operations-list.bundle",
+      "bundleSha256": "e3769e2b27da2b7d1739b03429db96fd9ef7f433b95b511180f3802ada348bd9"
+    }
+  ],
+  "secretCarrierFiles": ["apps/portal/env/.env.example", "packages/supabase/src/seed.ts"],
+  "preDeletionVerification": {
+    "remoteTipsMatchedLocalTrackingRefs": true,
+    "noWorktreesOrLocalBranchesDependedOnThem": true,
+    "originMainHistoryScan": "0 live-range (>=200 char) JWT tokens across all versions of 16 env/seed/secret-named paths",
+    "bundlesVerified": "git bundle verify 'okay' for both; list-heads matched remote tips"
+  },
+  "ownerDecision": "Key rotation skipped (owner instruction, 2026-09-29). Live tokens persist ONLY inside the local recovery bundles now; GitHub-side unreachable objects of the deleted branches linger until server GC.",
+  "preventionRule": "Treat 'remaining heads are clean' as an unverified claim until every published branch is fingerprint-scanned; bundle tips (with chmod 600) BEFORE any push --delete of diverged branches."
+}

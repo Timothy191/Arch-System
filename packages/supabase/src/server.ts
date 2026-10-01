@@ -159,32 +159,23 @@ export function createBearerSupabaseClient(token: string) {
 }
 
 /**
- * Safely gets the current user from Supabase auth using getClaims().
+ * Safely gets the current user from Supabase auth.
  *
- * Per Supabase official docs (https://supabase.com/docs/guides/auth/server-side/creating-a-client):
- * - Use getClaims() to protect pages and user data (verifies JWT signature locally)
- * - getUser() makes a network call and should only be used when you need fresh user data
- * - getSession() should not be trusted for authorization decisions
+ * Calls `auth.getUser()` (which validates the JWT signature against the
+ * Supabase JWKS) and swallows any error into a `null` result, so callers
+ * can treat an unauthenticated request and a transient Supabase error
+ * the same way.
  *
- * getClaims() is preferred because it:
- * - Validates JWT signature against published public keys
- * - Works locally via WebCrypto API (faster, no network call)
- * - Returns claims from decoding the JWT, not from a user lookup
- *
- * Returns null if the user is not authenticated or if token validation fails.
+ * Returns `null` if the user is not authenticated or if the call fails.
  */
 export async function getUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
 ): Promise<User | null> {
   try {
-    // Use getUser() for identity verification (recommended by Supabase docs)
-    // This validates the JWT signature and ensures we have the latest user
     const { data, error } = await supabase.auth.getUser();
-
     if (error || !data?.user) {
       return null;
     }
-
     return data.user;
   } catch (_error) {
     return null;

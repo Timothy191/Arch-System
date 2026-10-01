@@ -492,5 +492,6 @@ They should:
 - protect production data
 - request approval for destructive actions
 - verify their own work
+- **engage structured thinking before every non-trivial mutation** (see `.agents/rules/structured-thinking-mandate.md`)
 
 The objective is a maintainable, secure, observable, resilient real-world system.

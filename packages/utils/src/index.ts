@@ -118,3 +118,4 @@ export * from './fetch-client';
 export * from './hlc';
 export * from './n8n';
 export * from './offline-storage';
+export * from './openrouter';

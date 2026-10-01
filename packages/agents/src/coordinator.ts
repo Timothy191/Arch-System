@@ -1,7 +1,7 @@
 import type { Langfuse, LangfuseTraceClient } from 'langfuse';
 import OpenAI from 'openai';
 import pLimit from 'p-limit';
-import { getLangfuseClient, type LangfuseConfig } from './langfuse.js';
+import { getLangfuseClient, type LangfuseConfig } from './langfuse';
 
 export interface Subtask {
   id: string;

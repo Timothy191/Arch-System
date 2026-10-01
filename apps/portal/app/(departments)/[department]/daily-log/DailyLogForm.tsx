@@ -12,6 +12,7 @@ import type {
   DrillingDailyLogFormValues,
   ProductionDailyLogFormValues,
 } from '@repo/contract/types/form.types';
+import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { cn } from '@repo/ui/lib/utils';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
@@ -23,6 +24,7 @@ import { toast } from 'sonner';
 import { revalidateRSC, speculativeEmbedShiftLog } from '@/app/actions';
 import { logError } from '@/lib/errors/error-logger';
 import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
+import { createDailyLog } from './actions';
 
 interface Machine {
   id: string;
@@ -168,38 +170,45 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       finalNotes = finalNotes.trim() ? `${summaryPrefix}\n\nNotes:\n${finalNotes}` : summaryPrefix;
     }
 
-    const { data: logData, error } = await supabase
-      .from('daily_logs')
-      .insert({
-        department_id: departmentId,
-        log_date: today,
-        shift: data.shift,
-        notes: finalNotes === '' ? null : finalNotes,
-      })
-      .select('id')
-      .single();
+    const payload = {
+      departmentId,
+      today,
+      shift: data.shift,
+      notes: finalNotes === '' ? null : finalNotes,
+      isProduction,
+      actualCoalTonnes: data.actualCoalTonnes,
+      actualWasteTonnes: data.actualWasteTonnes,
+    };
 
-    if (error) {
-      logError(error);
-      toast.error('Failed to save daily log', {
-        description: error.message,
+    if (!navigator.onLine) {
+      useOfflineQueue.getState().enqueue({
+        url: '/api/sync/fallback',
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'createDailyLog',
+          payload,
+        }),
+        description: 'Daily Log',
       });
-      setStatus('error');
+
+      clearDraft();
+      toast.success('Log saved offline and will sync automatically');
+      setStatus('success');
+
       return;
     }
 
-    if (isProduction && logData) {
-      const { error: prodError } = await supabase.from('production_logs').insert({
-        daily_log_id: logData.id,
-        coal_tonnes: data.actualCoalTonnes || 0,
-        waste_tonnes: data.actualWasteTonnes || 0,
+    let logData;
+    try {
+      const res = await createDailyLog(payload);
+      logData = { id: res.id };
+    } catch (err: any) {
+      logError(err);
+      toast.error('Failed to save daily log', {
+        description: err.message,
       });
-      if (prodError) {
-        logError(prodError);
-        toast.error('Saved daily log, but failed to save production metrics', {
-          description: prodError.message,
-        });
-      }
+      setStatus('error');
+      return;
     }
 
     // Offer a quick‑undo in case the user saved by mistake.

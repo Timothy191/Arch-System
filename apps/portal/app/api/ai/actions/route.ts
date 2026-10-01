@@ -3,6 +3,7 @@ import {
   createBreakdownSchema,
   directCheckoutSchema,
 } from '@repo/contract/schemas/form.schema';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 import {
@@ -47,19 +48,12 @@ export async function POST(request: Request) {
 
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+    const principal = await getAuthenticatedEmployee(supabase);
+
+    if (!principal) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('id, department_id')
-      .eq('auth_id', user.id)
-      .maybeSingle();
-    if (!employee?.department_id) {
+    if (!principal.employee?.department_id) {
       return NextResponse.json(
         { success: false, error: 'Employee record or department not found' },
         { status: 403 }
@@ -67,10 +61,10 @@ export async function POST(request: Request) {
     }
 
     if (body.kind === 'read') {
-      return handleRead(supabase, body.tool, employee.department_id);
+      return handleRead(supabase, body.tool, principal.employee.department_id);
     }
 
-    return await handleWrite(body.tool, args, employee.department_id);
+    return await handleWrite(body.tool, args, principal.employee.department_id);
   } catch (error) {
     await logError(error, { context: 'aria_actions_route' });
     if (isAppError(error)) {

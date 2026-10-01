@@ -2,9 +2,9 @@
 
 import type { Department } from '@repo/departments/data-access';
 import type { Panel } from '@repo/ui/HeroRotator';
+import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import { ThreeHeroRotatorDynamic as GenericHeroRotator } from '@repo/ui/ThreeHeroRotatorDynamic';
 import {
   ArrowUpRight,
   Layers,

@@ -26,6 +26,11 @@ jest.mock('@/lib/observability/tracing', () => ({
   addEvent: jest.fn(),
 }));
 
+jest.mock('@repo/utils/inngest', () => ({
+  inngest: { send: jest.fn() },
+  shiftCloseoutReportEvent: 'reports/shift-closeout',
+}));
+
 jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn((e) => console.log(e)),
 }));
@@ -74,6 +79,11 @@ describe('POST /api/control-room/shift-closeout', () => {
 
   it('returns 400 for invalid payload', async () => {
     mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'u1' } } });
+    mockSupabase.from.mockReturnValueOnce({
+      select: () => ({
+        eq: () => ({ single: () => Promise.resolve({ data: { id: 'e1', role: 'operator' } }) }),
+      }),
+    });
     const req = makeRequest({ ...validPayload, shift: 'invalid' });
     const res = await POST(req);
     expect(res.status).toBe(400);

@@ -525,6 +525,7 @@ Runtime clients are decoupled behind factory helpers to prevent environment leak
 | **Compound Bash Guard**    | `tools/scripts/check-compound-bash.cjs`                   | AST parser blocking dangerous shell commands before execution.                    |
 | **Quality Gates**          | `tools/scripts/enforce-quality-gates.sh`                  | 4-gate verification script (ARWR, tests, modernization, strict TS).               |
 | **TODO & Report Protocol** | `.agents/rules/todo-completion-and-detailed-reporting.md` | Mandatory 100% TODO execution and detailed post-investigation reporting protocol. |
+| **Structured Thinking**    | `.agents/rules/structured-thinking-mandate.md`            | Mandatory 5-phase thinking protocol (STM-0) for all agents before code mutations. |
 | **Monorepo Topology**      | `pnpm-workspace.yaml`                                     | Defines workspace layout and centralized pnpm catalogs (`catalogs.react19`).      |
 | **Task Pipeline**          | `turbo.json`                                              | Turborepo configuration for caching builds, tests, lints, and asset syncs.        |
 | **Biome Config**           | `biome.json`                                              | Repository-wide formatting rules and linting presets.                             |
@@ -714,3 +715,46 @@ To maximize real-world execution fidelity, all subagents operating in this monor
 
 - **Persona:** Lead Site Reliability Engineer (SRE)
 - **Soul:** "I am the last line of defense. I adversarial-test every assumption, verify hardware interlocks, demand empirical proof (via k6/playwright), and reject any PR that cannot survive a real-world outage."
+
+---
+
+## Unified Agent Governance System (`.agents/`)
+
+All agent behavioral rules, operational guides, subagent definitions, protocol specifications, memory retrospectives, and business loops are consolidated under **`.agents/`**:
+
+```
+.agents/
+├── GUIDE.md              # Unified operational guide (commands, conventions, debugging)
+├── README.md             # Governance overview & Win Loop specification
+├── a2a/                  # Agent-to-Agent protocol (SPEC, 35+ registry cards, schemas, bus)
+├── agents/               # 40+ specialist subagent persona definitions
+├── bin/                  # Central execution binaries (corpos)
+├── corpos/               # Arch-CorpOS business loop engine & 7 department blueprints
+│   └── departments/      # executive, finance, engineering, control-room, compliance-safety, access-control, drilling
+├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool guard, post-tool tracer)
+├── memory_base/          # Cross-session memory (schema, index, error retrospectives)
+├── mcp_config.json       # Fully populated MCP server configuration (10 context servers)
+├── rules/                # 17 permanent engineering rules (including STM-0 structured thinking)
+├── skills/               # 60+ reusable workflow skills
+└── run-manifests/        # Reproducibility manifests
+```
+
+### The 7 Mining Operational Departments
+
+| Department ID | Department Name | Lead Role | Authority | Focus Areas |
+|:---|:---|:---|:---|:---|
+| `executive` | Executive Strategy | Chief Operating Executive | L3 | Multi-site production summaries, cross-department arbitration |
+| `finance` | Financial Intelligence | Mining Financial Intelligence Director | L3 | Equipment OPEX/CAPEX, shift profitability, Dexter cost model |
+| `engineering` | Software Engineering | Principal Systems Engineer | L2 | Codebase health, deployment learning, maintenance work orders |
+| `control-room` | Plant Operations & SCADA | Operations Shift Lead | L2 | Real-time telemetry, loader cycle times, atomic shift closeouts |
+| `compliance-safety` | Governance & Security | Chief Security & Safety Auditor | L3 | Environmental compliance, statutory safety, RLS policy audit |
+| `access-control` | Access & Badging | Head of Access Control | L2 | Contractor inductions, RFID truck tracking, CR80 badge printing |
+| `drilling` | Drilling Telemetry | Chief Drilling Telemetry Engineer | L2 | Penetration rates (ROP), bit depth SSE stream, void detection |
+
+### Mandatory Root Entry Points
+
+- **`AGENTS.md`** (Root): Primary Single Source of Truth (SSoT) for architecture, domain, personas, and invariants.
+- **`CLAUDE.md`** (Root): Thin redirect pointing Claude Code agents to `.agents/GUIDE.md` and `.agents/rules/`.
+- **`GEMINI.md`** (Root): Gemini/Antigravity guide with explicit directives pointing to `.agents/GUIDE.md`.
+- **`.cursorrules`** (Root): Thin redirect pointing Cursor IDE agents to `.agents/GUIDE.md` and `.agents/rules/`.
+

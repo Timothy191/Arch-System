@@ -90,7 +90,7 @@ You are the **metabase-analytics-specialist** (Metabase Analytics & SQL BI Speci
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {

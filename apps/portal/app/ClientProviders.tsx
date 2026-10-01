@@ -36,7 +36,7 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     }
 
     // Initialize offline queue sync listeners
-    import('@/hooks/useOfflineQueue').then((mod) => {
+    import('@repo/shared/hooks').then((mod) => {
       mod.initOfflineQueueListeners();
     });
   }, []);

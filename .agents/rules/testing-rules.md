@@ -56,3 +56,5 @@ When investigating Jest open handles or diagnosing test lifecycle warnings:
 7. **No Arbitrary Suppression**: Do not add arbitrary Jest flags, timers, or process exits simply to suppress warnings.
 8. **Targeted Lifecycle Fixes Only**: Only change application or test infrastructure when diagnostic output identifies a genuine resource-lifecycle leak.
 9. **Verify with Standard Test Command**: Re-run the standard test command afterward and confirm expected pass counts.
+
+- **Server Actions Mocking**: When a Client Component is refactored to use Server Actions for database mutations to comply with Architectural Boundaries, you **must** update its associated unit tests to mock the Server Action file directly (e.g., `jest.mock('./actions')`) rather than mocking the Supabase client (`createBrowserSupabaseClient`). Do not assert on `mockSupabase.from()` if the component calls a Server Action.

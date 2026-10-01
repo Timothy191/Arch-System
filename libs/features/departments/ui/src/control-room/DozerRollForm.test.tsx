@@ -18,6 +18,10 @@ jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
+jest.mock('./actions', () => ({
+  createDozerRoll: jest.fn(),
+}));
+
 jest.mock('@repo/ui/GlassCard', () => ({
   GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
@@ -314,13 +318,8 @@ describe('DozerRollForm', () => {
   // ── 11. Successful submission ──────────────────────────────────────────
 
   it('successful submission resets form', async () => {
-    const mockInsert = jest.fn().mockResolvedValue({ error: null });
-
-    createBrowserSupabaseClient.mockReturnValue({
-      from: jest.fn(() => ({
-        insert: mockInsert,
-      })),
-    });
+    const { createDozerRoll } = jest.requireMock('./actions');
+    createDozerRoll.mockResolvedValue({ success: true });
 
     render(<DozerRollForm {...defaultProps} />);
 
@@ -353,22 +352,23 @@ describe('DozerRollForm', () => {
     // Submit
     fireEvent.click(screen.getByRole('button', { name: /save roll/i }));
 
-    // Wait for the insert call
+    // Wait for the action call
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalledTimes(1);
+      expect(createDozerRoll).toHaveBeenCalledTimes(1);
     });
 
-    // Verify correct data was sent to the database
-    expect(mockInsert).toHaveBeenCalledWith({
-      department_id: '550e8400-e29b-41d4-a716-446655440000',
-      machine_id: '550e8400-e29b-41d4-a716-446655440001',
-      roll_date: '2026-06-15',
-      shift_type: 'day',
-      blade_passes: 5,
-      push_count: 3,
-      hours_operated: 8.5,
-      area_covered_sqm: 150,
-      notes: 'Length: 15m, Width: 10m',
+    // Verify correct data was sent
+    expect(createDozerRoll).toHaveBeenCalledWith({
+      departmentId: '550e8400-e29b-41d4-a716-446655440000',
+      machineId: '550e8400-e29b-41d4-a716-446655440001',
+      today: '2026-06-15',
+      shiftType: 'day',
+      bladePasses: 5,
+      pushCount: 3,
+      hoursOperated: 8.5,
+      area: 150,
+      lengthM: '15',
+      widthM: '10',
     });
 
     // Verify router.refresh was called
@@ -386,13 +386,8 @@ describe('DozerRollForm', () => {
 
   it('shows submission error', async () => {
     const testError = new Error('Test submission error');
-    const mockInsert = jest.fn().mockRejectedValue(testError);
-
-    createBrowserSupabaseClient.mockReturnValue({
-      from: jest.fn(() => ({
-        insert: mockInsert,
-      })),
-    });
+    const { createDozerRoll } = jest.requireMock('./actions');
+    createDozerRoll.mockRejectedValue(testError);
 
     render(<DozerRollForm {...defaultProps} />);
 
@@ -433,17 +428,12 @@ describe('DozerRollForm', () => {
   // ── 13. "Saving..." during submission ──────────────────────────────────
 
   it("shows 'Saving...' during submission", async () => {
-    let _resolveInsert: ((_value: { error: null }) => void) | null = null;
-    const insertPromise = new Promise<{ error: null }>((resolve) => {
-      _resolveInsert = resolve;
+    let _resolveAction: ((_value: { success: boolean }) => void) | null = null;
+    const actionPromise = new Promise<{ success: boolean }>((resolve) => {
+      _resolveAction = resolve;
     });
-    const mockInsert = jest.fn().mockReturnValue(insertPromise);
-
-    createBrowserSupabaseClient.mockReturnValue({
-      from: jest.fn(() => ({
-        insert: mockInsert,
-      })),
-    });
+    const { createDozerRoll } = jest.requireMock('./actions');
+    createDozerRoll.mockReturnValue(actionPromise);
 
     render(<DozerRollForm {...defaultProps} />);
 
@@ -480,7 +470,7 @@ describe('DozerRollForm', () => {
 
     // Resolve to clean up async state
     await act(async () => {
-      _resolveInsert!({ error: null });
+      _resolveAction!({ success: true });
     });
   });
 });

@@ -104,6 +104,7 @@
  */
 
 import { createWebhookSchema } from '@repo/contract/schemas/webhook.schema';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -137,25 +138,14 @@ interface _WebhookEndpoint {
 }
 
 async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Get user's department and role
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('department_id, role, accessible_departments')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee) {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal.employee) {
     return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
+
+  const supabase = await createServerSupabaseClient();
+  const { employee } = principal;
 
   // Admins can see all webhooks, supervisors only their department's
   let query = supabase.from('webhook_endpoints').select('*').is('deleted_at', null);
@@ -182,29 +172,17 @@ export async function GET(request: NextRequest) {
 }
 
 async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal.employee) {
+    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
 
   const parsed = await validateBody(request, createWebhookSchema);
   if (parsed instanceof NextResponse) return parsed;
   const { url, description, event_types, department_id } = parsed.data;
 
-  // Get user's department and role
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('department_id, role, accessible_departments')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
-  }
+  const { employee } = principal;
 
   // Non-admins can only create webhooks for their department
   if (employee.role !== 'admin') {
@@ -217,6 +195,7 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
     }
   }
 
+  const supabase = await createServerSupabaseClient();
   const { data: webhook, error } = await supabase
     .from('webhook_endpoints')
     .insert({

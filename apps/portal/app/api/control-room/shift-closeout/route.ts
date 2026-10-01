@@ -1,5 +1,7 @@
 import { shiftCloseoutPayloadSchema } from '@repo/contract';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { inngest, shiftCloseoutReportEvent } from '@repo/utils/inngest';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { logError } from '@/lib/errors/error-logger';
@@ -16,12 +18,12 @@ export async function POST(req: NextRequest) {
       }
 
       const supabase = await createServerSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
+      const principal = await getAuthenticatedEmployee(supabase);
+      if (!principal) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      if (!principal.employee) {
+        return NextResponse.json({ error: 'Employee record not found' }, { status: 403 });
       }
 
       const rawBody = await req.text();
@@ -54,16 +56,7 @@ export async function POST(req: NextRequest) {
       });
 
       // Role check: Only operator, supervisor, admin can close shifts
-      const { data: employee } = await supabase
-        .from('employees')
-        .select('id, role')
-        .eq('auth_id', user.id)
-        .single();
-
-      if (!employee) {
-        return NextResponse.json({ error: 'Employee record not found' }, { status: 403 });
-      }
-
+      const { employee, user } = principal;
       if (['viewer'].includes(employee.role)) {
         return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
       }
@@ -104,6 +97,10 @@ export async function POST(req: NextRequest) {
       }
 
       addEvent('shift_closed', { report_id: rpcResult.id, status: rpcResult.status });
+
+      if (rpcResult.id) {
+        await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId: rpcResult.id } });
+      }
       return NextResponse.json(rpcResult, { status: 200 });
     } catch (error: any) {
       logError(error, { context: 'shift_closeout_route' });

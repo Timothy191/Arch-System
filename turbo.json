@@ -1,30 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["tsconfig.json", "pnpm-workspace.yaml", ".npmrc"],
-  "globalEnv": [
-    "NODE_ENV",
-    "VERCEL_ENV",
-    "CI",
+  "globalEnv": ["NODE_ENV", "VERCEL_ENV", "CI"],
+  "globalPassThroughEnv": [
     "OTEL_EXPORTER_OTLP_ENDPOINT",
-    "INNGEST_EVENT_KEY",
-    "NOVU_API_KEY",
     "OTEL_SERVICE_NAME",
-    "PORTAL_VERSION",
-    "RATE_LIMIT_IP_WHITELIST",
-    "ENABLE_LOAD_ADAPTIVE_TEST",
-    "DISABLE_RATE_LIMIT",
-    "ANALYZE",
-    "USERPROFILE",
-    "COHERE_API_KEY",
-    "OPENROUTER_API_KEY",
-    "SITE_URL",
-    "SITE_NAME",
-    "SKILL_VALIDATOR",
-    "NEXT_PUBLIC_FUXA_URL"
+    "INNGEST_EVENT_KEY",
+    "NOVU_API_KEY"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "^codegen", "codegen"],
+      "dependsOn": ["^build", "codegen"],
       "inputs": [
         "$TURBO_DEFAULT$",
         "!**/*.test.*",
@@ -35,19 +21,19 @@
         "!**/tsconfig.storybook.json"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "ANALYZE",
+        "PORTAL_VERSION",
+        "SITE_URL",
+        "SITE_NAME",
+        "DISABLE_RATE_LIMIT",
+        "NEXT_PUBLIC_*"
+      ],
       "cache": true
     },
     "build-storybook": {
-      "dependsOn": ["^build", "^codegen", "codegen"],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "!**/*.test.*",
-        "!**/*.spec.*",
-        "!**/__tests__/**",
-        "!**/*.stories.*",
-        "!**/.storybook/**",
-        "!**/tsconfig.storybook.json"
-      ],
+      "dependsOn": ["^build", "codegen"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.*", "!**/*.spec.*", "!**/__tests__/**"],
       "outputs": ["storybook-static/**", "dist/**"],
       "cache": true
     },
@@ -69,16 +55,18 @@
       "persistent": true
     },
     "lint": {
-      "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "!pnpm-lock.yaml"],
+      "inputs": ["$TURBO_DEFAULT$", "biome.json", ".eslintrc.*"],
       "outputs": [],
       "cache": true
     },
     "lint:css": {
-      "inputs": ["src/**/*.css", ".stylelintrc.*"],
+      "inputs": ["src/**/*.css", "**/*.css", ".stylelintrc.*", "config/tools/.stylelintignore"],
+      "outputs": [],
       "cache": true
     },
     "lint:tokens": {
       "inputs": ["src/css/variables.css", "src/tailwind/preset.ts", "scripts/validate-tokens.mjs"],
+      "outputs": [],
       "cache": true
     },
     "sync-assets": {
@@ -88,6 +76,11 @@
     },
     "test": {
       "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*", "playwright.config.*"],
+      "outputs": [],
+      "cache": true
+    },
+    "test:coverage": {
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"],
       "outputs": ["coverage/**"],
       "cache": true
     },

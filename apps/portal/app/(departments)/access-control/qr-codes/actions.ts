@@ -1,5 +1,6 @@
 'use server';
 
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
@@ -29,25 +30,17 @@ export interface EntityOption {
 
 async function assertAccessControlRole() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new AuthError('Unauthorized');
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) throw new AuthError('Unauthorized');
 
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, role, department_id')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+  if (!['admin', 'access_control'].includes(principal.employee.role)) {
     throw new ForbiddenError('Forbidden: access_control or admin role required', {
       resource: 'qr_management',
       action: 'assert_role',
     });
   }
 
-  return { supabase, user, employee };
+  return { supabase, user: principal.user, employee: principal.employee };
 }
 
 /**

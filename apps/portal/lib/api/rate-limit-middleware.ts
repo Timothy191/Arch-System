@@ -61,30 +61,13 @@ class RedisStore {
   }
 }
 
-// Token bucket strategy
-class TokenBucketStrategy {
-  async check(
-    key: string,
-    limit: number,
-    windowMs: number,
-    store: MemoryStore | RedisStore
-  ): Promise<RateLimitResult> {
-    const result = await store.increment(key, windowMs);
-    const allowed = result.count <= limit;
-    const remaining = Math.max(0, limit - result.count);
+// Shared window-based counter strategy. Both "token bucket" and
+// "sliding window" currently share the same fixed-window increment;
+// they are kept as separate named instances only so the call site can
+// describe intent (bursty vs steady traffic) without branching logic.
+class WindowStrategy {
+  constructor(readonly _kind: 'token-bucket' | 'sliding-window') {}
 
-    return {
-      allowed,
-      limit,
-      remaining,
-      resetTime: result.resetTime,
-      retryAfter: Math.max(0, Math.ceil((result.resetTime - Date.now()) / 1000)),
-    };
-  }
-}
-
-// Sliding window strategy
-class SlidingWindowStrategy {
   async check(
     key: string,
     limit: number,
@@ -146,8 +129,8 @@ function isSystemUnderHighLoad(): boolean {
 const globalMemoryStore = new MemoryStore();
 let globalRedisStore: RedisStore | null = null;
 
-const slidingWindowStrategy = new SlidingWindowStrategy();
-const tokenBucketStrategy = new TokenBucketStrategy();
+const slidingWindowStrategy = new WindowStrategy('sliding-window');
+const tokenBucketStrategy = new WindowStrategy('token-bucket');
 
 /**
  * Check rate limit for a given identifier and configuration

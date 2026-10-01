@@ -13,11 +13,17 @@ export * from './useLifecycle';
 // Storage & Persistence
 export * from './useLocalStorage';
 export * from './useMediaQuery';
+export * from './useOfflineQueue';
 // Network & Realtime
 export * from './useOnlineStatus';
 export * from './useOptimisticAction';
 export * from './usePitConnectivity';
 export * from './usePolling';
+// Redis & Automation Hooks
+export * from './useRedisCache';
 export * from './useSupabaseRealtime';
 export * from './useThrottle';
 export * from './useThrottledState';
+export * from './useWorkflowStatus';
+export * from './useWorkflowStatus';
+export * from './useWorkflowTrigger';

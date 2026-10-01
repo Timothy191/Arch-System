@@ -1,30 +1,19 @@
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal?.employee) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    // Verify user has access_control or admin role
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+    if (!['admin', 'access_control'].includes(principal.employee.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Soft delete
+    const supabase = await createServerSupabaseClient();
     const { error } = await supabase
       .from('card_printers')
       .update({ deleted_at: new Date().toISOString() })

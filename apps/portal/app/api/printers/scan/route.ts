@@ -1,3 +1,4 @@
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { connection, NextResponse } from 'next/server';
 import { detectAllPrinters } from '@/app/(departments)/access-control/lib/printer-detection';
@@ -5,25 +6,13 @@ import { detectAllPrinters } from '@/app/(departments)/access-control/lib/printe
 export async function GET() {
   await connection();
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Verify user has access_control or admin role
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('role')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal?.employee) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!['admin', 'access_control'].includes(principal.employee.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    const supabase = await createServerSupabaseClient();
 
     // 1. Detect all printers via CUPS + USB
     const detected = await detectAllPrinters();

@@ -24,6 +24,7 @@
   "dependencies": {
     "@opentelemetry/api": "catalog:",
     "@repo/logger": "1.0.0",
+    "@repo/redis": "1.0.0",
     "@supabase/ssr": "catalog:",
     "@supabase/supabase-js": "catalog:",
     "kysely": "catalog:",

@@ -1,6 +1,7 @@
 'use server';
 
 import type { BadgesRow, IssuedCardsRow, PersonnelRow } from '@repo/supabase';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
 import { submitCupsPrintJob } from '../lib/printer-detection';
@@ -33,25 +34,17 @@ export interface PersonnelDetail extends PersonnelRow {
 
 async function assertAccessCardActionsRole() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new AuthError('Unauthorized');
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal?.employee) throw new AuthError('Unauthorized');
 
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+  if (!['admin', 'access_control'].includes(principal.employee.role)) {
     throw new ForbiddenError('Forbidden: access_control or admin role required', {
       resource: 'card_actions',
       action: 'assert_role',
     });
   }
 
-  return { supabase, user, employee };
+  return { supabase, user: principal.user, employee: principal.employee };
 }
 
 /* ------------------------------------------------------------------ */
@@ -164,18 +157,12 @@ export async function getPersonnelDetail(personnelId: string): Promise<Personnel
 /* ------------------------------------------------------------------ */
 
 export async function printCardForPersonnel(personnelId: string, templateId?: string) {
-  const { supabase, user } = await assertAccessCardActionsRole();
+  const { supabase, employee } = await assertAccessCardActionsRole();
 
   const detail = await getPersonnelDetail(personnelId);
   if (!detail) {
     throw new DatabaseError('Personnel not found', { table: 'personnel' });
   }
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, department_id')
-    .eq('auth_id', user.id)
-    .single();
 
   const qrCode = detail.badge?.qr_code ?? null;
 
@@ -197,7 +184,7 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
       status: 'queued',
       printer_id: printer?.id ?? null,
       template_id: templateId ?? null,
-      created_by: employee?.id ?? null,
+      created_by: employee.id,
       expires_at: detail.induction_expiry ?? undefined,
     })
     .select()

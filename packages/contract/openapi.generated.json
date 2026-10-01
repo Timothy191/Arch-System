@@ -1724,12 +1724,6 @@
         }
       }
     },
-    "/api/cron/outbox-drain": {
-      "post": {
-        "summary": "Drain the SCADA Outbox",
-        "description": "Iterates through the control_room_outbox queue to apply degraded writes with exponential backoff and DLQ logic."
-      }
-    },
     "/api/control-room/shift-completeness": {
       "get": {
         "summary": "Get shift completeness metrics",

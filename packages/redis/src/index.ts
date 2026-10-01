@@ -13,6 +13,7 @@ export {
 } from './cache';
 export { closeRedis, createRedisSubscriber, getRedisClient } from './client';
 export { buildCacheKey, CACHE_TTL_REGISTRY, CacheCategory, type CacheTtlConfig } from './registry';
+export { ServerlessRedisClient, serverlessRedis } from './serverless-client';
 export {
   getCacheStats,
   recordCacheHit,

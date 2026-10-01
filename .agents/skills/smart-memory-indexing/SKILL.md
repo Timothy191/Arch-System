@@ -1,20 +1,20 @@
 ---
 name: smart-memory-indexing
-description: Autonomous memory indexing and auto-recall system managing .memory_base/ error retrospectives, knowledge graphs, and codebase insights.
+description: Autonomous memory indexing and auto-recall system managing .agents/memory_base/ error retrospectives, knowledge graphs, and codebase insights.
 ---
 
 # Smart Memory Indexing & Auto-Recall Skill
 
 ## Overview
 
-This skill manages the `.memory_base/` system, an immutable knowledge base storing error retrospectives, solution patterns, architectural decisions, and hardware quirks. It provides automated indexing and query capabilities to prevent repeat mistakes across autonomous agent runs.
+This skill manages the `.agents/memory_base/` system, an immutable knowledge base storing error retrospectives, solution patterns, architectural decisions, and hardware quirks. It provides automated indexing and query capabilities to prevent repeat mistakes across autonomous agent runs.
 
 ---
 
 ## 1. Directory Structure
 
 ```
-.memory_base/
+.agents/memory_base/
 ├── README.md                  # Index registry and memory summary
 ├── schema.json                # JSON schema for retrospective entries
 ├── retrospectives/            # Discrete immutable error retrospectives
@@ -31,7 +31,7 @@ This skill manages the `.memory_base/` system, an immutable knowledge base stori
 
 When an agent encounters and resolves an error (e.g. Postgres RLS violation, missing mock, type mismatch):
 
-1. Create a new entry in `.memory_base/retrospectives/err-<timestamp>-<slug>.json`.
+1. Create a new entry in `.agents/memory_base/retrospectives/err-<timestamp>-<slug>.json`.
 2. Format the payload adhering to `schema.json`:
    ```json
    {

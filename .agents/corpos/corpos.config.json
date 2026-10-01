@@ -1,18 +1,24 @@
 {
   "$schema": "./schema.json",
   "company_name": "Plantcor Mining Operations (Arch-Systems)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Autonomous Corporate Business Loop Operating System combining win.sh, CorpOS, and ai-company",
   "tiers": {
     "tier_0": {
       "name": "Executive & Strategic Brain",
-      "description": "High-level goal prioritization, cross-department arbitration, token/compute budgeting",
-      "departments": ["executive"]
+      "description": "High-level goal prioritization, cross-department arbitration, token/compute budgeting, financial intelligence",
+      "departments": ["executive", "finance"]
     },
     "tier_1": {
       "name": "Core Business Operations",
-      "description": "Domain-specific execution units responsible for system health, plant telemetry, and security",
-      "departments": ["engineering", "control-room", "compliance-safety"]
+      "description": "Domain-specific execution units responsible for system health, plant telemetry, security, badging, and drilling",
+      "departments": [
+        "engineering",
+        "control-room",
+        "compliance-safety",
+        "access-control",
+        "drilling"
+      ]
     }
   },
   "departments": {
@@ -22,6 +28,14 @@
       "lead_role": "Chief Operating Executive",
       "authority_ceiling": "L3",
       "spec_path": "departments/executive.md",
+      "assigned_loops": ["agent-tracer", "stack-monitor"]
+    },
+    "finance": {
+      "id": "finance",
+      "name": "Financial Intelligence & OPEX Optimization",
+      "lead_role": "Mining Financial Intelligence Director",
+      "authority_ceiling": "L3",
+      "spec_path": "departments/finance.md",
       "assigned_loops": []
     },
     "engineering": {
@@ -47,6 +61,22 @@
       "authority_ceiling": "L3",
       "spec_path": "departments/compliance-safety.md",
       "assigned_loops": ["security-compliance"]
+    },
+    "access-control": {
+      "id": "access-control",
+      "name": "Access Control & Personnel Badging",
+      "lead_role": "Head of Access Control & Badging Security",
+      "authority_ceiling": "L2",
+      "spec_path": "departments/access-control.md",
+      "assigned_loops": []
+    },
+    "drilling": {
+      "id": "drilling",
+      "name": "Drilling Telemetry & Blast Prep",
+      "lead_role": "Chief Drilling Telemetry Engineer",
+      "authority_ceiling": "L2",
+      "spec_path": "departments/drilling.md",
+      "assigned_loops": []
     }
   },
   "authority_matrix": {

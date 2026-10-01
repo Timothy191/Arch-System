@@ -2,6 +2,7 @@
 
 import type { DrillOperationInput } from '@repo/contract/schemas/drill.schema';
 import { drillOperationSchema } from '@repo/contract/schemas/drill.schema';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 
@@ -26,24 +27,16 @@ export async function upsertDrillOperationAction(
 
     const payload = parseResult.data;
     const supabase = await createServerSupabaseClient();
+    const principal = await getAuthenticatedEmployee(supabase);
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!principal?.employee) {
       return { success: false, error: 'Unauthorized access' };
     }
 
-    const { data: employee } = await supabase
-      .from('employees')
-      .select('department_id, role')
-      .eq('auth_id', user.id)
-      .maybeSingle();
+    const { user, employee } = principal;
 
     // Verify employee access if not global admin
-    if (employee && employee.role !== 'admin' && employee.department_id !== payload.department_id) {
+    if (employee.role !== 'admin' && employee.department_id !== payload.department_id) {
       return { success: false, error: 'Forbidden: Department access denied' };
     }
 

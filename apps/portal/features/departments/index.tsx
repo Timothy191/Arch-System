@@ -1,15 +1,8 @@
-export function ScadaPanel({ departmentId }: any) {
-  return <div>Scada Panel (Under Review)</div>;
-}
-export function AlertPanel({ departmentId }: any) {
-  return <div>Alert Panel (Under Review)</div>;
-}
-export function ControlRoomChecklistWidget(props: any) {
-  return <div>Checklist (Under Review)</div>;
-}
-export function ControlRoomActivityFeed({ departmentId }: any) {
-  return <div>Activity Feed (Under Review)</div>;
-}
+export * from './components/control-room/AlertPanel';
+export * from './components/control-room/ControlRoomActivityFeed';
+export * from './components/control-room/ControlRoomChecklistWidget';
+export * from './components/control-room/ScadaPanel';
+
 export function BreakdownsDashboard(props: any) {
   return <div>BreakdownsDashboard (Under Review)</div>;
 }
@@ -19,6 +12,7 @@ export function ShiftCoverageWidget(props: any) {
 export function TireManagementDashboard(props: any) {
   return <div>TireManagementDashboard (Under Review)</div>;
 }
+
 export type Breakdown = any;
 export type BreakdownMetrics = any;
 export type Machine = any;

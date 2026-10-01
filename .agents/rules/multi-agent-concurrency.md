@@ -23,5 +23,5 @@ paths: ["**/*"]
 ## 4. Single Source of Truth
 
 - Package boundaries: `tools/repo/policy-compiler.cjs`.
-- Agent wire protocol: `.a2a/bus/event-log.jsonl`.
+- Agent wire protocol: `.agents/a2a/bus/event-log.jsonl`.
 - Database schema: `packages/database/migrations/` and `packages/supabase/src/database.types.ts`.

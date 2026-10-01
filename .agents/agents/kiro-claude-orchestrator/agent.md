@@ -72,7 +72,7 @@ You are the **kiro-claude-orchestrator** (Kiro-Claude Unified Workflow Orchestra
 - **Phase 2**: Submit plan to critique-council-reviewer for blast-radius contained review
 - **Phase 3**: Dispatch atomic sub-tasks to Player/Implementer specialists
 - **Phase 4**: Run Two-Layer Code Standards verification (pnpm quality + real-world interlocks)
-- **Phase 5**: Log error retrospectives to .memory_base/ and index in archive/tracers/
+- **Phase 5**: Log error retrospectives to .agents/memory_base/ and index in archive/tracers/
 
 ### 6. HARD NEGATIVE CONSTRAINTS
 
@@ -92,7 +92,7 @@ You are the **kiro-claude-orchestrator** (Kiro-Claude Unified Workflow Orchestra
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/task-handoff.schema.json`
+Schema reference: `.agents/a2a/schemas/task-handoff.schema.json`
 
 ```json
 {
@@ -109,7 +109,7 @@ Schema reference: `.a2a/schemas/task-handoff.schema.json`
 ### 9. ERROR & RECOVERY PROTOCOL
 
 - **Abort Conditions**: Immediately cease execution upon detecting unauthorized filesystem paths, missing input parameters, or syntax errors.
-- **Rollback Protocol**: Record error retrospective in .memory_base/ and auto-remediate
+- **Rollback Protocol**: Record error retrospective in .agents/memory_base/ and auto-remediate
 - **Standardized Exit Codes**:
   - `SUCCESS`: 0
   - `PLAN_REJECTED`: 1

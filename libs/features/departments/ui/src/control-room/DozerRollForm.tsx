@@ -1,6 +1,7 @@
 'use client';
 
 import { dozerRollSchema } from '@repo/contract/schemas/form.schema';
+import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { ShiftToggle } from '@repo/ui/ShiftToggle';
@@ -9,6 +10,7 @@ import { Calculator, Equal, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
+import { createDozerRoll } from './actions';
 
 interface DozerWithSite {
   id: string;
@@ -198,19 +200,44 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
     }
 
     try {
-      const { error: insertError } = await supabase.from('dozer_rolls').insert({
-        department_id: departmentId,
-        machine_id: machineId,
-        roll_date: today,
-        shift_type: shiftType,
-        blade_passes: parseInt(bladePasses || '0', 10),
-        push_count: parseInt(pushCount || '0', 10),
-        hours_operated: parseFloat(hoursOperated || '0'),
-        area_covered_sqm: area,
-        notes: `Length: ${lengthM}m, Width: ${widthM}m`,
-      });
+      if (!navigator.onLine) {
+        useOfflineQueue.getState().enqueue({
+          url: '/api/sync/fallback',
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createDozerRoll',
+            payload: {
+              departmentId,
+              machineId,
+              today,
+              shiftType,
+              bladePasses: parseInt(bladePasses || '0', 10),
+              pushCount: parseInt(pushCount || '0', 10),
+              hoursOperated: parseFloat(hoursOperated || '0'),
+              area,
+              lengthM,
+              widthM,
+            },
+          }),
+          description: `Dozer Roll for ${dozers.find((d) => d.id === machineId)?.name || 'Unknown'}`,
+        });
+        reset();
+        router.refresh();
+        return;
+      }
 
-      if (insertError) throw insertError;
+      await createDozerRoll({
+        departmentId,
+        machineId,
+        today,
+        shiftType,
+        bladePasses: parseInt(bladePasses || '0', 10),
+        pushCount: parseInt(pushCount || '0', 10),
+        hoursOperated: parseFloat(hoursOperated || '0'),
+        area,
+        lengthM,
+        widthM,
+      });
 
       reset();
       router.refresh();

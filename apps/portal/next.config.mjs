@@ -157,6 +157,7 @@ const nextConfig = {
     },
     browserToTerminal: 'warn',
   },
+  serverExternalPackages: ['@babel/core', '@babel/traverse', 'p-limit'],
   experimental: {
     // AGENT-TRACE: React 19 Taint APIs enabled to prevent sensitive database objects/tokens crossing RSC boundary
     taint: true,

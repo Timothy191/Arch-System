@@ -2,26 +2,54 @@
   "mcpServers": {
     "codebase-memory": {
       "command": "npx",
-      "args": ["-y", "codebase-memory-mcp"]
+      "args": [
+        "-y",
+        "codebase-memory-mcp@0.11.0"
+      ],
+      "env": {
+        "CODEBASE_MEMORY_PERSIST": "true",
+        "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
+      }
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.1.1"
+      ]
     },
     "knowledge-rail": {
       "command": "npx",
-      "args": ["-y", "knowledge-rail"]
+      "args": [
+        "-y",
+        "knowledge-rail@2.9.1",
+        "--root",
+        "/home/tim/Fork/Arch-System"
+      ]
     },
     "next-devtools": {
       "command": "npx",
-      "args": ["-y", "next-devtools-mcp"]
+      "args": [
+        "-y",
+        "next-devtools-mcp@0.4.0"
+      ]
     },
     "postgres": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
+      ]
+    },
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "redis-mcp-server",
+        "redis-mcp-server",
+        "--url",
+        "redis://127.0.0.1:6379/0"
       ]
     }
   }

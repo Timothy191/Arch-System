@@ -85,7 +85,7 @@ You are the **compound-bash-auditor** (Compound Bash & AST Boundary Auditor (T1)
 
 ### 8. OUTPUT CONTRACT (UAP SCHEMA)
 
-Schema reference: `.a2a/schemas/review-verdict.schema.json`
+Schema reference: `.agents/a2a/schemas/review-verdict.schema.json`
 
 ```json
 {
