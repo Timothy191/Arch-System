@@ -8,7 +8,7 @@ You are operating within the Arch-System enterprise monorepo.
 
 - Refer to the canonical Agent SSoT: [AGENTS.md](./AGENTS.md).
 - Refer to the unified operational guide: [`.agents/GUIDE.md`](./.agents/GUIDE.md).
-- Refer to all permanent rules: `.agents/rules/` (17 rule files).
+- Refer to all permanent rules: `.agents/rules/` (21 rule files).
 - Follow Turborepo task conventions: use `pnpm` exclusively.
 - All code changes must satisfy the repo lint gates (Biome, Stylelint, cspell) and TypeScript strict checking.
 - Do not edit generated Supabase types manually; use `pnpm --filter @repo/database db:types`.

@@ -145,7 +145,7 @@ documentation/         # Tool-written operational center (audit suites write her
 ├── mcp_config.json       # MCP server configuration
 ├── plans/                # Active planning artifacts
 ├── reports/              # Generated audit reports
-├── rules/                # Permanent engineering rules (16 rule files)
+├── rules/                # Permanent engineering rules (21 rule files)
 ├── run-manifests/        # Reproducibility manifests
 ├── skills/               # 60+ agent skills (SKILL.md + scripts + resources)
 └── skills.json           # Skill registry
@@ -267,7 +267,7 @@ These hard stops are **always in force**, with no approval path:
 | Resource                       | Location               | Purpose                                                                 |
 | :----------------------------- | :--------------------- | :---------------------------------------------------------------------- |
 | **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table          |
-| **Engineering Rules**          | `.agents/rules/`       | 17 permanent rule files covering security, databases, testing, thinking |
+| **Engineering Rules**          | `.agents/rules/`       | 21 permanent rule files covering security, databases, testing, thinking |
 | **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                            |
 | **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                        |
 | **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                   |
