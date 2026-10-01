@@ -19,6 +19,9 @@
     "codebase-memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "upstash": {
+      "url": "https://mcp.upstash.com/mcp"
     }
   }
 }
