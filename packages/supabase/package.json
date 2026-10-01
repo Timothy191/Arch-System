@@ -17,7 +17,6 @@
     "./service-role": "./src/service-role.ts"
   },
   "scripts": {
-    "build": "tsc --noEmit",
     "supabase:gen-types": "supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc > src/database.types.ts",
     "type-check": "tsc --noEmit"
   },

@@ -11,7 +11,7 @@
     "react": "catalog:react19",
     "sonner": "^2.0.8",
     "zustand": "^5.0.15",
-    "@tanstack/react-query": "^5.62.0"
+    "@tanstack/react-query": "^5.104.0"
   },
   "peerDependencies": {
     "react": "^19"

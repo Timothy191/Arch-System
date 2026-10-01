@@ -13,6 +13,7 @@ export * from './useLifecycle';
 // Storage & Persistence
 export * from './useLocalStorage';
 export * from './useMediaQuery';
+export * from './useOfflineMuster';
 export * from './useOfflineQueue';
 // Network & Realtime
 export * from './useOnlineStatus';

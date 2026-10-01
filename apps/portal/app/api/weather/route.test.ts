@@ -1,67 +1,66 @@
 /**
  * @jest-environment node
  */
-import { GET } from './route';
+import { POST } from './route';
 
-jest.mock('@/lib/weather-api', () => ({
-  fetchWeather: jest.fn(),
+jest.mock('@/lib/jobs/workflow-runner', () => ({
+  triggerTrackedWorkflow: jest.fn().mockResolvedValue(true),
 }));
 
-jest.mock('@/lib/errors/error-logger', () => ({
-  logError: jest.fn().mockResolvedValue('error-id-123'),
-}));
-
-jest.mock('@/lib/observability/tracing', () => ({
-  withAsyncSpan: jest.fn((_name, _attrs, fn) => fn()),
-  addEvent: jest.fn(),
-  setAttributes: jest.fn(),
-}));
-
-const { fetchWeather } = jest.requireMock('@/lib/weather-api') as {
-  fetchWeather: jest.Mock;
-};
-
-describe('GET /api/weather', () => {
+describe('POST /api/weather', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns weather JSON with cache headers on success', async () => {
-    fetchWeather.mockResolvedValue({
-      temperature: 24,
-      conditions: 'Sunny',
-      humidity: 40,
-      windSpeed: 12,
-      windDirection: 'NE',
-      visibility: 10,
-      timestamp: new Date().toISOString(),
+  it('triggers a Red Code Muster for lightning within 5km', async () => {
+    const req = new Request('http://localhost/api/weather', {
+      method: 'POST',
+      body: JSON.stringify({
+        alert_type: 'lightning',
+        distance_km: 4.5,
+        severity: 'critical',
+        timestamp: new Date().toISOString(),
+      }),
     });
 
-    const res = await GET();
-    expect(res.status).toBe(200);
+    const res = await POST(req);
+    expect(res.status).toBe(202);
 
     const json = await res.json();
-    expect(json.temperature).toBe(24);
-    expect(json.conditions).toBe('Sunny');
-
-    expect(res.headers.get('cache-control')).toBe(
-      'public, s-maxage=300, stale-while-revalidate=300'
-    );
-    expect(res.headers.get('x-weather-cache')).toBe('hit');
-    expect(res.headers.get('x-response-time')).toMatch(/^\d+ms$/);
+    expect(json.success).toBe(true);
+    expect(json.message).toBe('Red Code Muster Initiated');
+    expect(json.jobId).toBeDefined();
   });
 
-  it('returns null payload with error headers when fetchWeather fails', async () => {
-    fetchWeather.mockRejectedValue(new Error('Upstream weather service unavailable'));
+  it('ignores lightning further than 5km', async () => {
+    const req = new Request('http://localhost/api/weather', {
+      method: 'POST',
+      body: JSON.stringify({
+        alert_type: 'lightning',
+        distance_km: 10,
+        severity: 'high',
+        timestamp: new Date().toISOString(),
+      }),
+    });
 
-    const res = await GET();
+    const res = await POST(req);
     expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json).toBeNull();
+    expect(json.success).toBe(true);
+    expect(json.message).toBe('Alert logged, no action required');
+  });
 
-    expect(res.headers.get('cache-control')).toBe('public, s-maxage=60');
-    expect(res.headers.get('x-weather-cache')).toBe('error');
-    expect(res.headers.get('x-error-id')).toBe('error-id-123');
+  it('returns 400 for invalid payloads', async () => {
+    const req = new Request('http://localhost/api/weather', {
+      method: 'POST',
+      body: JSON.stringify({
+        alert_type: 'tornado', // Invalid enum
+        distance_km: 5,
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(400);
   });
 });

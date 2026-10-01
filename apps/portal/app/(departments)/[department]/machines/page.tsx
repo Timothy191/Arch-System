@@ -8,7 +8,7 @@ export default async function MachinesPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  const { supabase } = await getDepartmentContext({
+  const { supabase, deptId } = await getDepartmentContext({
     department: deptSlug,
   });
 
@@ -17,6 +17,7 @@ export default async function MachinesPage({
     .select(
       'id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)'
     )
+    .eq('department_id', deptId)
     .order('name');
 
   const activeCount = machines?.filter((m) => m.active).length || 0;

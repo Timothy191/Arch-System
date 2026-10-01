@@ -105,6 +105,7 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+import { ServiceWorkerRegister } from './ServiceWorkerRegister';
 export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html
@@ -209,6 +210,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             <Toaster />
           </ClientProviders>
         </ArchThemeProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

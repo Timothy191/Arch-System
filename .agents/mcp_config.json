@@ -2,10 +2,7 @@
   "mcpServers": {
     "codebase-memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "codebase-memory-mcp@0.11.0"
-      ],
+      "args": ["-y", "codebase-memory-mcp@0.11.0"],
       "env": {
         "CODEBASE_MEMORY_PERSIST": "true",
         "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
@@ -13,26 +10,15 @@
     },
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@4.1.1"
-      ]
+      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
     },
     "knowledge-rail": {
       "command": "npx",
-      "args": [
-        "-y",
-        "knowledge-rail@2.9.1",
-        "--root",
-        "/home/tim/Fork/Arch-System"
-      ]
+      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@0.4.0"
-      ]
+      "args": ["-y", "next-devtools-mcp@0.4.0"]
     },
     "postgres": {
       "command": "npx",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertCircle,
@@ -36,6 +37,8 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const [selectedStation, setSelectedStation] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unaccounted' | 'accounted'>('all');
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const { isOnline } = usePitConnectivity();
+  const { enqueue, queue, isSyncing } = useOfflineQueue();
 
   // Compute live counts
   const totalSouls = records.length;
@@ -143,6 +146,28 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
 
   return (
     <div className="space-y-6">
+      {(!isOnline || queue.length > 0) && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-center justify-between text-amber-600">
+          <div className="flex items-center gap-2">
+            <Radio className="h-5 w-5 animate-pulse" />
+            <span className="font-semibold text-sm">
+              {!isOnline ? 'OFFLINE MODE (SAT/WIFI DOWN)' : 'SYNCING QUEUE'}
+            </span>
+            <span className="text-sm opacity-80 border-l border-amber-500/20 pl-2 ml-2">
+              {queue.length} tap(s) buffered to local storage.
+              {!isOnline
+                ? ' Do not close this tablet. Will auto-sync when network returns.'
+                : isSyncing
+                  ? ' Synchronizing to command center...'
+                  : ''}
+            </span>
+          </div>
+          {isOnline && !isSyncing && queue.length > 0 && (
+            <RefreshCw className="h-4 w-4 animate-spin opacity-50" />
+          )}
+        </div>
+      )}
+
       {/* Top Emergency Command HUD */}
       <GlassCard
         variant="window"

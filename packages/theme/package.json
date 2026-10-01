@@ -29,7 +29,6 @@
   },
   "private": true,
   "scripts": {
-    "build": "pnpm codegen",
     "clean": "rm -rf dist .turbo",
     "codegen": "node sd.config.mjs && node scripts/generate-tokens.mjs",
     "dev": "node sd.config.mjs --watch",

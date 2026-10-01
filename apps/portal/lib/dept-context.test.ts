@@ -1,4 +1,5 @@
 import { getDepartmentContext, requireDepartment } from './dept-context';
+import { clearDeptCache } from './dept-registry';
 
 jest.mock('@repo/redis/cache', () => ({
   cacheGet: jest.fn().mockResolvedValue(null),
@@ -21,6 +22,7 @@ const { notFound } = jest.requireMock('next/navigation');
 describe('getDepartmentContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearDeptCache();
   });
 
   it('returns context for a valid department', async () => {

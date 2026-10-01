@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 import { AuthError, DatabaseError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
+import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 import type { BookOutInput, CreateBreakdownInput, DirectCheckoutInput } from './types';
 
 const BookOutSchema = bookOutSchema;
@@ -54,6 +55,16 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
     tableName: 'breakdowns',
     newData: { fleet_id: input.fleet_id.toUpperCase(), reason: input.reason },
     departmentId,
+  });
+
+  const jobId = crypto.randomUUID();
+  await triggerTrackedWorkflow(jobId, '/webhook/erp-work-order', {
+    departmentId,
+    fleetId: input.fleet_id.toUpperCase(),
+    machineType: input.machine_type,
+    reason: input.reason,
+    action: 'create_work_order',
+    notifySms: true,
   });
 
   await cacheInvalidateTags(['table:breakdowns']);

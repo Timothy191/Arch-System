@@ -38,15 +38,15 @@ export default async function AdminPage({
 
   return (
     <div className="p-6 max-w-7xl mx-auto w-full">
-        <AdminTabsClient activeTab={activeTab}>
-          {activeTab === 'users' && <UsersTab />}
-          {activeTab === 'departments' && <DepartmentsTab />}
-          {activeTab === 'fleet' && <FleetTab />}
-          {activeTab === 'sites' && <SitesTab />}
-          {activeTab === 'webhooks' && <WebhooksTab />}
-          {activeTab === 'audit-logs' && <AuditLogsTab />}
-          {activeTab === 'settings' && <SettingsTab />}
-        </AdminTabsClient>
+      <AdminTabsClient activeTab={activeTab}>
+        {activeTab === 'users' && <UsersTab />}
+        {activeTab === 'departments' && <DepartmentsTab />}
+        {activeTab === 'fleet' && <FleetTab />}
+        {activeTab === 'sites' && <SitesTab />}
+        {activeTab === 'webhooks' && <WebhooksTab />}
+        {activeTab === 'audit-logs' && <AuditLogsTab />}
+        {activeTab === 'settings' && <SettingsTab />}
+      </AdminTabsClient>
     </div>
   );
 }

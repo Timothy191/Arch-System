@@ -9,6 +9,7 @@ jest.mock('next/server', () => {
       json: (body, init) => ({
         status: init?.status || 200,
         json: async () => body,
+        headers: new Headers(),
       }),
     },
   };

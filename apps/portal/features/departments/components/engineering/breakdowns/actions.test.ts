@@ -21,6 +21,14 @@ jest.mock('@/lib/audit', () => ({
   logAuditEvent: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('@/lib/jobs/workflow-runner', () => ({
+  triggerTrackedWorkflow: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock('@repo/redis', () => ({
+  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
 // ---------------------------------------------------------------------------

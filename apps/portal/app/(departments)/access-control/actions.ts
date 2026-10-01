@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { withCache } from '@/lib/cache-utils';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
+import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -1144,7 +1145,8 @@ export async function getAccessReportsData(
 
   const logs = logsRes.data ?? [];
   const totalEvents = logs.length ? logs.length * 12 : 624;
-  const deniedEvents = logs.filter((l) => !l.access_granted).length * 8 || 18;
+  const deniedEvents =
+    logs.filter((l: { access_granted: boolean }) => !l.access_granted).length * 8 || 18;
   const grantedEvents = totalEvents - deniedEvents;
   const complianceRate = Math.round((grantedEvents / totalEvents) * 100);
 
@@ -1191,15 +1193,90 @@ export async function getAccessReportsData(
         peakHour: '09:00 - 10:00',
       },
     ],
-    recentAudits: logs.slice(0, 15).map((l) => ({
-      id: l.id,
-      timestamp: new Date(l.scanned_at).toLocaleString(),
-      gate: l.gate_location,
-      entityName: 'Authorized Operator / Truck',
-      entityType: 'Personnel',
-      action: l.direction === 'IN' ? 'Entry Verification' : 'Exit Clearance',
-      granted: l.access_granted,
-      reason: l.denial_reason,
-    })),
+    recentAudits: logs
+      .slice(0, 15)
+      .map(
+        (l: {
+          id: string;
+          scanned_at: string;
+          gate_location: string;
+          direction: string;
+          access_granted: boolean;
+          denial_reason: string | null;
+        }) => ({
+          id: l.id,
+          timestamp: new Date(l.scanned_at).toLocaleString(),
+          gate: l.gate_location,
+          entityName: 'Authorized Operator / Truck',
+          entityType: 'Personnel',
+          action: l.direction === 'IN' ? 'Entry Verification' : 'Exit Clearance',
+          granted: l.access_granted,
+          reason: l.denial_reason,
+        })
+      ),
   };
+}
+
+export async function logGateDenial(
+  deptId: string,
+  gateId: string,
+  badgeId: string,
+  reason: string
+): Promise<{ success: boolean; message: string; blacklisted?: boolean }> {
+  const { supabase } = await assertAccessControlRole({ requireWrite: true });
+
+  const { data: log, error } = await supabase
+    .from('access_logs')
+    .insert({
+      gate_location: gateId,
+      access_type: 'CARD_SCAN',
+      direction: 'IN',
+      access_granted: false,
+      denial_reason: reason,
+      department_id: deptId,
+      badge_id: badgeId,
+    })
+    .select('id')
+    .single();
+
+  if (error || !log) {
+    throw new DatabaseError('Failed to record gate denial', {
+      operation: 'insert',
+      table: 'access_logs',
+      context: { error: error?.message },
+    });
+  }
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const { count: denialsCount } = await supabase
+    .from('access_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('badge_id', badgeId)
+    .eq('access_granted', false)
+    .gte('scanned_at', today.toISOString());
+
+  let blacklisted = false;
+
+  if (denialsCount && denialsCount >= 3) {
+    const jobId = `SOC-ALERT-${log.id}`;
+    await triggerTrackedWorkflow(jobId, '/webhook/soc-alert-blacklist', {
+      badgeId,
+      gateId,
+      reason: 'Repeated Denials Threshold Exceeded',
+      count: denialsCount,
+      departmentId: deptId,
+    });
+
+    await supabase
+      .from('badges')
+      .update({ is_active: false, revoked_at: new Date().toISOString() })
+      .eq('id', badgeId);
+    blacklisted = true;
+  }
+
+  await cacheInvalidateTags(['table:access_logs', 'table:badges', `dept:${deptId}`]);
+  revalidatePath('/access-control');
+
+  return { success: true, message: 'Gate denial logged.', blacklisted };
 }

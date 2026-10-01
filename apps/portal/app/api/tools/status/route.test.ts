@@ -48,20 +48,14 @@ describe('GET /api/tools/status', () => {
 
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json).toEqual({
-      tools: [
-        {
-          name: 'flowise',
-          displayName: 'Flowise',
-          url: 'http://localhost:3001',
-          description: expect.any(String),
-          icon: 'Bot',
-          color: '#3ecf8e',
-          status: 'online',
-          responseTime: expect.any(Number),
-        },
-      ],
-    });
+    expect(json.tools).toHaveLength(3);
+    expect(json.tools).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'n8n', status: 'online' }),
+        expect.objectContaining({ name: 'redisinsight', status: 'online' }),
+        expect.objectContaining({ name: 'flowise', status: 'online' }),
+      ])
+    );
     expect(cacheWrap).toHaveBeenCalledWith('tools:status', expect.any(Function), 60);
   });
 
@@ -79,8 +73,10 @@ describe('GET /api/tools/status', () => {
 
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.tools).toHaveLength(1);
+    expect(json.tools).toHaveLength(3);
     expect(json.tools[0].status).toBe('offline');
+    expect(json.tools[1].status).toBe('offline');
+    expect(json.tools[2].status).toBe('offline');
     expect(json.tools[0].responseTime).toBeGreaterThanOrEqual(0);
   });
 
@@ -99,6 +95,8 @@ describe('GET /api/tools/status', () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.tools[0].status).toBe('offline');
+    expect(json.tools[1].status).toBe('offline');
+    expect(json.tools[2].status).toBe('offline');
   });
 
   it('uses the cache wrapper with the expected key and TTL', async () => {

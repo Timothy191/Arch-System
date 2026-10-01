@@ -14,7 +14,6 @@
   },
   "private": true,
   "scripts": {
-    "build": "tsc --noEmit",
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

@@ -1,7 +1,9 @@
 'use client';
 
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode, useState } from 'react';
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { type ReactNode, useEffect, useState } from 'react';
 
 export function ReactQueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -9,12 +11,8 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // SSR friendly settings
-            // AGENT-TRACE: Increased staleTime to 5 min to reduce unnecessary refetches.
-            // Most department data changes infrequently; per-query overrides handle
-            // real-time needs (e.g., AIMetricsDashboard uses refetchInterval: 30s).
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             retry: 2,
@@ -22,6 +20,19 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
         },
       })
   );
+
+  useEffect(() => {
+    // Only run on the client, does not block SSR
+    if (typeof window !== 'undefined') {
+      const storagePersister = createSyncStoragePersister({
+        storage: window.localStorage,
+      });
+      persistQueryClient({
+        queryClient,
+        persister: storagePersister,
+      });
+    }
+  }, [queryClient]);
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

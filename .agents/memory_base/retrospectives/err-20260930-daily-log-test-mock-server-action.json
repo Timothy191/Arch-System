@@ -4,9 +4,7 @@
   "taskTag": "--task-daily-log-test",
   "category": "TESTING_RSC_BOUNDARY",
   "errorSignature": "expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs')",
-  "affectedFiles": [
-    "apps/portal/app/(departments)/[department]/daily-log/DailyLogForm.test.tsx"
-  ],
+  "affectedFiles": ["apps/portal/app/(departments)/[department]/daily-log/DailyLogForm.test.tsx"],
   "rootCause": "The component was refactored to use a Server Action (createDailyLog) to comply with architectural boundaries, but the test still expected a direct Supabase client mock call.",
   "resolution": "Updated the test suite to mock the local Server Action (`jest.mock('./actions', ...)`) and assert on the mocked action instead of the Supabase client.",
   "preventionRule": "When refactoring client components to use Server Actions for mutations, always update the associated unit tests to mock and assert against the newly imported Server Action rather than direct database clients."
