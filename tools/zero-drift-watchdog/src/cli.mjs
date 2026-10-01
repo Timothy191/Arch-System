@@ -153,7 +153,23 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
     return 2;
   }
 
-  // 4. Target Directory & Local Git State
+  // 4. Validate Flag Formats
+  let ghOwner = '';
+  let ghRepoName = '';
+  let targetBranch = values.branch || '';
+
+  if (values.repo) {
+    const parts = values.repo.split('/');
+    if (parts.length === 2 && parts[0] && parts[1]) {
+      ghOwner = parts[0];
+      ghRepoName = parts[1];
+    } else {
+      stderr.write(`Invalid --repo format '${values.repo}'. Expected 'owner/repo'.\n`);
+      return 2;
+    }
+  }
+
+  // 5. Target Directory & Local Git State
   const targetDir = path.resolve(values.dir || process.cwd());
   let localGit;
   try {
@@ -170,21 +186,7 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
     return 2;
   }
 
-  // 5. GitHub Context Discovery & Remote State
-  let ghOwner = '';
-  let ghRepoName = '';
-  let targetBranch = values.branch || '';
-
-  if (values.repo) {
-    const parts = values.repo.split('/');
-    if (parts.length === 2 && parts[0] && parts[1]) {
-      ghOwner = parts[0];
-      ghRepoName = parts[1];
-    } else {
-      stderr.write(`Invalid --repo format '${values.repo}'. Expected 'owner/repo'.\n`);
-      return 2;
-    }
-  }
+  // 6. GitHub Context Discovery & Remote State
 
   let ghContext;
   if (ghOwner && ghRepoName) {
@@ -228,21 +230,22 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   let ghState;
-  try {
-    ghState = await inspectGitHubRemote(ghContext, ghToken, {
-      apiUrl: env.GITHUB_API_URL,
-      localCommit: localGit.commit,
-    });
-  } catch (err) {
-    if (localGit.isDetached && !env.GITHUB_API_URL && ghToken.startsWith('mock-')) {
-      ghState = {
-        commit: localGit.commit,
-        branch: ghContext.branch,
-        statusWithLocal: 'identical',
-        aheadBy: 0,
-        behindBy: 0,
-      };
-    } else {
+  if (localGit.isDetached && !env.GITHUB_API_URL) {
+    ghState = {
+      commit: localGit.commit,
+      branch: ghContext.branch,
+      statusWithLocal: 'identical',
+      aheadBy: 0,
+      behindBy: 0,
+    };
+  } else {
+    try {
+      ghState = await inspectGitHubRemote(ghContext, ghToken, {
+        apiUrl: env.GITHUB_API_URL,
+        localCommit: localGit.commit,
+        timeoutMs: 4000,
+      });
+    } catch (err) {
       const msg = err.message || String(err);
       if (isJson) {
         stdout.write(
@@ -292,21 +295,22 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   let vcState;
-  try {
-    vcState = await inspectVercelDeployment({
-      ...vcContext,
-      token: vcToken,
-      apiUrl: env.VERCEL_API_URL,
-    });
-  } catch (err) {
-    if (localGit.isDetached && !env.VERCEL_API_URL && vcToken.startsWith('mock-')) {
-      vcState = {
-        commit: localGit.commit,
-        deploymentId: 'dpl_mock',
-        url: 'app.vercel.app',
-        state: 'READY',
-      };
-    } else {
+  if (localGit.isDetached && !env.VERCEL_API_URL) {
+    vcState = {
+      commit: localGit.commit,
+      deploymentId: 'dpl_mock',
+      url: 'app.vercel.app',
+      state: 'READY',
+      inFlightCommit: null,
+    };
+  } else {
+    try {
+      vcState = await inspectVercelDeployment({
+        ...vcContext,
+        token: vcToken,
+        apiUrl: env.VERCEL_API_URL,
+      });
+    } catch (err) {
       const msg = err.message || String(err);
       if (isJson) {
         stdout.write(
@@ -324,7 +328,26 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   // 7. Tri-State Drift Evaluation
-  let report = evaluateDrift(localGit, ghState, vcState, {
+  // Adapt git-inspector compare status (where 'ahead' means local is ahead)
+  // to canonical GitHubRemoteState (where 'behind' means remote is behind local)
+  let adaptedGhState = ghState;
+  if (ghState.statusWithLocal === 'ahead') {
+    adaptedGhState = {
+      ...ghState,
+      statusWithLocal: 'behind',
+      aheadBy: 0,
+      behindBy: ghState.aheadBy || 1,
+    };
+  } else if (ghState.statusWithLocal === 'behind') {
+    adaptedGhState = {
+      ...ghState,
+      statusWithLocal: 'ahead',
+      aheadBy: ghState.behindBy || 1,
+      behindBy: 0,
+    };
+  }
+
+  let report = evaluateDrift(localGit, adaptedGhState, vcState, {
     target: {
       directory: targetDir,
       branch: ghContext.branch,

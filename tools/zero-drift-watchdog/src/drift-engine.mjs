@@ -147,6 +147,10 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
   );
 
   // 3. Git tri-state relative positioning
+  // In GitHubRemoteState convention:
+  // 'behind'   = remote is behind local (local has unpushed commits -> localAhead = true)
+  // 'ahead'    = remote is ahead of local (local is behind remote -> localBehind = true)
+  // 'diverged' = remote and local have diverged (diverged = true)
   const status = safeGithub.statusWithLocal || 'identical';
   const aheadBy = Number(safeGithub.aheadBy || 0);
   const behindBy = Number(safeGithub.behindBy || 0);
@@ -160,23 +164,16 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
     isLocalAhead = false;
     isLocalBehind = false;
   } else if (!isDiverged) {
-    const isRemoteAheadCommit = Boolean(
-      safeGithub.commit &&
-        (safeGithub.commit.includes('aheadrem') || safeGithub.commit.startsWith('ahead'))
-    );
-
-    if (isRemoteAheadCommit) {
-      isLocalBehind = true;
-    } else if (status === 'behind' || (behindBy > 0 && aheadBy === 0)) {
+    if (status === 'behind' || (behindBy > 0 && aheadBy === 0)) {
       isLocalAhead = true;
     } else if (status === 'ahead' || (aheadBy > 0 && behindBy === 0)) {
-      isLocalAhead = true;
-    } else if (safeLocal.commit && safeGithub.commit && safeLocal.commit !== safeGithub.commit) {
-      isLocalAhead = true;
+      isLocalBehind = true;
     } else if (safeLocal.commit && !safeGithub.commit) {
       isLocalAhead = true;
     } else if (safeGithub.commit && !safeLocal.commit) {
       isLocalBehind = true;
+    } else if (safeLocal.commit && safeGithub.commit && safeLocal.commit !== safeGithub.commit) {
+      isLocalAhead = true;
     }
   }
 
@@ -200,15 +197,16 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
   const hasDrift = !isParity;
 
   // 6. Target Context Resolution
+  const target = targetContext?.target || targetContext || {};
   const resolvedTarget = {
-    directory: targetContext.directory || (typeof process !== 'undefined' ? process.cwd() : '.'),
-    branch: targetContext.branch || safeLocal.branch || safeGithub.branch || 'main',
+    directory: target.directory || (typeof process !== 'undefined' ? process.cwd() : '.'),
+    branch: target.branch || safeLocal.branch || safeGithub.branch || 'main',
     repository:
-      targetContext.repository ||
+      target.repository ||
       (safeGithub['owner'] && safeGithub['repo']
         ? `${safeGithub['owner']}/${safeGithub['repo']}`
         : 'plantcor/arch-system'),
-    vercelProject: targetContext.vercelProject || targetContext['project'] || 'prj_arch_system',
+    vercelProject: target.vercelProject || target['project'] || 'prj_arch_system',
   };
 
   return {
