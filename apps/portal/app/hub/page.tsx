@@ -25,6 +25,7 @@ import {
 } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
 import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departments';
+import { getPluginWidgets } from '@/lib/plugins/consumers';
 import { cachedRSC } from '@/lib/server-cache';
 import { getTools } from '@/lib/tools';
 
@@ -300,6 +301,10 @@ export default async function HubPage() {
 
   const userRole = userRoleResult.status === 'fulfilled' ? userRoleResult.value : null;
 
+  // Plugin widgets come from the failure-isolated consumers wrapper — a broken
+  // plugin orchestrator degrades to an empty grid, never a broken hub page.
+  const pluginWidgets = await getPluginWidgets();
+
   const canSeeExecutive = userRole === 'admin' || userRole === 'manager';
 
   // AGENT-TRACE: Admin/manager users see all departments. Regular users with
@@ -429,6 +434,24 @@ export default async function HubPage() {
           >
             <ToolBanner tools={tools} />
           </Suspense>
+        </section>
+      )}
+
+      {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
+      {pluginWidgets.length > 0 && (
+        <section className="space-y-4 animate-fade-up" style={{ animationDelay: '0.35s' }}>
+          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary">
+              Plugin Widgets
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {pluginWidgets.map((widget) => (
+              <div key={widget.id} className={widget.gridSpan ?? 'col-span-1'}>
+                <widget.component departmentId={accessibleDeptIds[0] ?? ''} />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 

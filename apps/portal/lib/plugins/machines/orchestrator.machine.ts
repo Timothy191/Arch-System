@@ -3,10 +3,10 @@ import { pluginMachine } from './plugin.machine';
 import type { HealthReport, OrchestratorContext, OrchestratorEvent, PluginActor } from './types';
 
 // =============================================================================
-// Default Installed Plugins (matches current orchestrator)
+// Default Installed Plugins (must match apps/portal/plugins/* directory names)
 // =============================================================================
 
-const DEFAULT_PLUGINS = ['predictive-maintenance', 'rust-telemetry-engine', 'buggy-plugin'];
+const DEFAULT_PLUGINS = ['rust-telemetry-engine'];
 
 // =============================================================================
 // Health Report Computation

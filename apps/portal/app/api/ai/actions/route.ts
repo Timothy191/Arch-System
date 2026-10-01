@@ -3,6 +3,7 @@ import {
   createBreakdownSchema,
   directCheckoutSchema,
 } from '@repo/contract/schemas/form.schema';
+import { INTEGRATION_TOOL_PREFIX } from '@repo/contract/schemas/integration.schema';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
@@ -13,6 +14,7 @@ import {
 } from '@/features/departments/components/engineering/breakdowns/actions';
 import { isAppError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
+import { invokeIntegrationTool } from '@/lib/integrations/tool-bridge';
 
 /**
  * POST /api/ai/actions
@@ -60,6 +62,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Integration tools are namespaced `integration__<slug>__<tool>` and ride the
+    // same read/write contract: `write` arrives only after Aria's confirm card.
+    if (typeof body.tool === 'string' && body.tool.startsWith(INTEGRATION_TOOL_PREFIX)) {
+      return handleIntegrationTool(body.tool, args, body.kind, principal);
+    }
+
     if (body.kind === 'read') {
       return handleRead(supabase, body.tool, principal.employee.department_id);
     }
@@ -81,6 +89,22 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+async function handleIntegrationTool(
+  tool: string,
+  args: Record<string, unknown>,
+  kind: 'read' | 'write',
+  principal: NonNullable<Awaited<ReturnType<typeof getAuthenticatedEmployee>>>
+): Promise<NextResponse> {
+  const result = await invokeIntegrationTool({
+    tool,
+    args,
+    employeeId: principal.user.id,
+    departmentId: principal.employee!.department_id!,
+    kind,
+  });
+  return NextResponse.json(result, { status: result.ok ? 200 : 400 });
 }
 
 async function handleRead(

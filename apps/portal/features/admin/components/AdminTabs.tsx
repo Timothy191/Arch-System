@@ -1,13 +1,14 @@
 'use client';
 
 import { Tabs, TabsList, TabsTrigger } from '@repo/ui/components/ui/tabs';
-import { Building2, FileText, MapPin, Settings, Truck, Users, Webhook } from 'lucide-react';
+import { Building2, FileText, MapPin, Plug, Settings, Truck, Users, Webhook } from 'lucide-react';
 
 const TABS = [
   { value: 'users', label: 'Users', icon: Users },
   { value: 'departments', label: 'Departments', icon: Building2 },
   { value: 'fleet', label: 'Fleet', icon: Truck },
   { value: 'sites', label: 'Sites', icon: MapPin },
+  { value: 'integrations', label: 'Integrations', icon: Plug },
   { value: 'webhooks', label: 'Webhooks', icon: Webhook },
   { value: 'audit-logs', label: 'Audit Logs', icon: FileText },
   { value: 'settings', label: 'Settings', icon: Settings },

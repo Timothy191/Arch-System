@@ -54,6 +54,7 @@ venv/
 .kiro/skills/
 .agent-plugins/
 .agentsroom/
+.agents/teamwork/
 
 # IDE
 .vscode/

@@ -702,6 +702,161 @@ export type Database = {
           },
         ];
       };
+      integration_audit_logs: {
+        Row: {
+          args_digest: string | null;
+          created_at: string;
+          duration_ms: number | null;
+          error_message: string | null;
+          id: string;
+          installation_id: string | null;
+          invoked_by: string | null;
+          status: string;
+          tool_name: string;
+        };
+        Insert: {
+          args_digest?: string | null;
+          created_at?: string;
+          duration_ms?: number | null;
+          error_message?: string | null;
+          id?: string;
+          installation_id?: string | null;
+          invoked_by?: string | null;
+          status: string;
+          tool_name: string;
+        };
+        Update: {
+          args_digest?: string | null;
+          created_at?: string;
+          duration_ms?: number | null;
+          error_message?: string | null;
+          id?: string;
+          installation_id?: string | null;
+          invoked_by?: string | null;
+          status?: string;
+          tool_name?: string;
+        };
+      };
+      integration_catalog: {
+        Row: {
+          author: string | null;
+          capabilities: Json;
+          created_at: string;
+          description: string | null;
+          docs_url: string | null;
+          icon_url: string | null;
+          id: string;
+          kind: string;
+          name: string;
+          server_url: string | null;
+          updated_at: string | null;
+          verified: boolean;
+        };
+        Insert: {
+          author?: string | null;
+          capabilities?: Json;
+          created_at?: string;
+          description?: string | null;
+          docs_url?: string | null;
+          icon_url?: string | null;
+          id: string;
+          kind?: string;
+          name: string;
+          server_url?: string | null;
+          updated_at?: string | null;
+          verified?: boolean;
+        };
+        Update: {
+          author?: string | null;
+          capabilities?: Json;
+          created_at?: string;
+          description?: string | null;
+          docs_url?: string | null;
+          icon_url?: string | null;
+          id?: string;
+          kind?: string;
+          name?: string;
+          server_url?: string | null;
+          updated_at?: string | null;
+          verified?: boolean;
+        };
+      };
+      integration_credentials: {
+        Row: {
+          ciphertext: string;
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          installation_id: string;
+          kind: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          ciphertext: string;
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          installation_id: string;
+          kind?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          ciphertext?: string;
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          installation_id?: string;
+          kind?: string;
+          updated_at?: string | null;
+        };
+      };
+      integration_installations: {
+        Row: {
+          catalog_id: string;
+          config: Json;
+          created_at: string;
+          department_id: string | null;
+          id: string;
+          installed_by: string | null;
+          last_error: string | null;
+          scope: string;
+          status: string;
+          tool_allowlist: Json;
+          tool_cache: Json | null;
+          tools_synced_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          catalog_id: string;
+          config?: Json;
+          created_at?: string;
+          department_id?: string | null;
+          id?: string;
+          installed_by?: string | null;
+          last_error?: string | null;
+          scope?: string;
+          status?: string;
+          tool_allowlist?: Json;
+          tool_cache?: Json | null;
+          tools_synced_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          catalog_id?: string;
+          config?: Json;
+          created_at?: string;
+          department_id?: string | null;
+          id?: string;
+          installed_by?: string | null;
+          last_error?: string | null;
+          scope?: string;
+          status?: string;
+          tool_allowlist?: Json;
+          tool_cache?: Json | null;
+          tools_synced_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
       hourly_loads: {
         Row: {
           created_at: string;

@@ -82,6 +82,8 @@
     "audit:agents": "node tools/audits/audit-agentic-content.cjs",
     "audit:agents:check": "node tools/audits/audit-agentic-content.cjs --check",
     "audit:antidrift": "node tools/audits/antidrift-test.cjs",
+    "audit:parity": "node tools/zero-drift-watchdog/bin/zero-drift-watchdog.mjs --audit-only",
+    "watchdog": "node tools/zero-drift-watchdog/bin/zero-drift-watchdog.mjs",
     "audit:data-fetching": "node tools/audits/audit-data-fetching.cjs",
     "audit:caching": "node tools/audits/audit-caching.cjs",
     "audit:turbopack": "node tools/audits/audit-turbopack.cjs",

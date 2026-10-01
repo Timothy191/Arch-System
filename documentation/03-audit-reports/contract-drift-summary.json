@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-10-01T06:09:12.032Z",
-  "databaseTablesCount": 90,
-  "contractSchemasCount": 166,
+  "timestamp": "2026-10-01T09:29:56.294Z",
+  "databaseTablesCount": 94,
+  "contractSchemasCount": 179,
   "synchronizedTablesCount": 90,
-  "unmappedTablesCount": 0,
-  "driftHealthIndex": 100,
+  "unmappedTablesCount": 4,
+  "driftHealthIndex": 95.7,
   "status": "HEALTHY",
   "tables": [
     {

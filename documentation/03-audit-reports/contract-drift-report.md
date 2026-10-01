@@ -1,12 +1,12 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-10-01T06:09:12.031Z
+Generated on 2026-10-01T09:29:56.293Z
 
 ## Fitness Function Telemetry
 
-- **Database Tables Scanned**: 90
-- **Zod Contract Schemas**: 166
-- **Drift Health Index (DHI)**: 100%
+- **Database Tables Scanned**: 94
+- **Zod Contract Schemas**: 179
+- **Drift Health Index (DHI)**: 95.7%
 - **Contract Coverage Rating**: 🟢 Tier-1 Synchronized
 
 ## Synchronized Domain Contracts (90 Tables)
@@ -104,6 +104,9 @@ Generated on 2026-10-01T06:09:12.031Z
 | `mutation_log`                         | `165_offline_crdt_mutation_log_and_smr.sql`      | `mutationLogSchema`                                        |
 | `smr_readings`                         | `165_offline_crdt_mutation_log_and_smr.sql`      | `smrReadingsSchema`                                        |
 
-## System & Infrastructure Tables (0 Tables)
+## System & Infrastructure Tables (4 Tables)
 
-_None_
+- `integration_catalog` (168_integration_platform.sql)
+- `integration_installations` (168_integration_platform.sql)
+- `integration_credentials` (168_integration_platform.sql)
+- `integration_audit_logs` (168_integration_platform.sql)

@@ -1,0 +1,48 @@
+{
+  "name": "zero-drift-watchdog",
+  "version": "1.0.0",
+  "description": "CI/CD-agnostic anti-drift synchronization watchdog reconciling local Git, GitHub, and Vercel deployment states",
+  "type": "module",
+  "main": "./src/index.mjs",
+  "bin": {
+    "zero-drift-watchdog": "./bin/zero-drift-watchdog.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./git-inspector": "./src/git-inspector.mjs",
+    "./vercel-inspector": "./src/vercel-inspector.mjs",
+    "./drift-engine": "./src/drift-engine.mjs",
+    "./errors": "./src/errors.mjs",
+    "./cli": "./src/cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.mjs",
+    "test:unit": "node --test test/unit/**/*.test.mjs",
+    "test:e2e": "node test/run-all-tests.mjs",
+    "watchdog": "node bin/zero-drift-watchdog.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "git",
+    "github",
+    "vercel",
+    "anti-drift",
+    "watchdog",
+    "ci-cd",
+    "synchronization",
+    "parity",
+    "zero-drift"
+  ],
+  "author": "Plantcor Industrial Operations <timothyoniel558@gmail.com>",
+  "license": "MIT"
+}

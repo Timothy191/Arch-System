@@ -4,6 +4,7 @@ import { AuthError, DatabaseError } from '@repo/errors';
 import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { triggerPluginHook } from '@/lib/plugins/consumers';
 
 export async function createDailyLog(payload: any) {
   const supabase = await createServerSupabaseClient();
@@ -52,6 +53,14 @@ export async function createDailyLog(payload: any) {
   }
 
   await cacheInvalidateTags(['table:daily_logs']);
+  await triggerPluginHook('onLogCreated', {
+    id: logData?.id,
+    department_id: payload.departmentId,
+    log_date: payload.today,
+    shift: payload.shift,
+    notes: payload.notes === '' ? null : payload.notes,
+    is_production: payload.isProduction ?? false,
+  });
   revalidatePath('/');
   return { success: true, id: logData?.id };
 }

@@ -12,6 +12,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { AuthError, DatabaseError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+import { triggerPluginHook } from '@/lib/plugins/consumers';
 import type { BookOutInput, CreateBreakdownInput, DirectCheckoutInput } from './types';
 
 const BookOutSchema = bookOutSchema;
@@ -68,6 +69,16 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
   });
 
   await cacheInvalidateTags(['table:breakdowns']);
+  await triggerPluginHook('onBreakdownAdded', {
+    department_id: departmentId,
+    fleet_id: input.fleet_id.toUpperCase(),
+    machine_name: input.machine_name || input.fleet_id.toUpperCase(),
+    machine_type: input.machine_type,
+    date_in: input.date_in,
+    time_in: input.time_in,
+    reason: input.reason,
+    status: 'active',
+  });
   revalidatePath('/engineering/breakdowns');
   revalidatePath('/control-room/engineering-notes');
   return { success: true };
@@ -181,6 +192,19 @@ export async function directCheckout(departmentId: string, rawInput: DirectCheck
   });
 
   await cacheInvalidateTags(['table:breakdowns']);
+  await triggerPluginHook('onBreakdownAdded', {
+    department_id: departmentId,
+    fleet_id: input.fleet_id.toUpperCase(),
+    machine_type: input.machine_type,
+    date_in: input.date_out,
+    time_in: input.time_out,
+    date_out: input.date_out,
+    time_out: input.time_out,
+    reason: input.reason,
+    repair_notes: input.repair_notes || null,
+    status: 'completed',
+    missing_book_in: true,
+  });
   revalidatePath('/engineering/breakdowns');
   revalidatePath('/control-room/engineering-notes');
   return { success: true };

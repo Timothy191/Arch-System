@@ -4,12 +4,22 @@ import { AdminTabsClient } from '~/features/admin/components/AdminTabsClient';
 import { AuditLogsTab } from '~/features/admin/tabs/AuditLogsTab';
 import { DepartmentsTab } from '~/features/admin/tabs/DepartmentsTab';
 import { FleetTab } from '~/features/admin/tabs/FleetTab';
+import { IntegrationsTab } from '~/features/admin/tabs/IntegrationsTab';
 import { SettingsTab } from '~/features/admin/tabs/SettingsTab';
 import { SitesTab } from '~/features/admin/tabs/SitesTab';
 import { UsersTab } from '~/features/admin/tabs/UsersTab';
 import { WebhooksTab } from '~/features/admin/tabs/WebhooksTab';
 
-const TABS = ['users', 'departments', 'fleet', 'sites', 'webhooks', 'audit-logs', 'settings'];
+const TABS = [
+  'users',
+  'departments',
+  'fleet',
+  'sites',
+  'integrations',
+  'webhooks',
+  'audit-logs',
+  'settings',
+];
 
 export default async function AdminPage({
   searchParams,
@@ -43,6 +53,7 @@ export default async function AdminPage({
         {activeTab === 'departments' && <DepartmentsTab />}
         {activeTab === 'fleet' && <FleetTab />}
         {activeTab === 'sites' && <SitesTab />}
+        {activeTab === 'integrations' && <IntegrationsTab />}
         {activeTab === 'webhooks' && <WebhooksTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}
         {activeTab === 'settings' && <SettingsTab />}
