@@ -101,6 +101,8 @@ export * from './components/ui/sonner';
 export * from './components/ui/table';
 export * from './components/ui/tabs';
 export * from './components/ui/telemetry-chart';
+export * from './components/N8nIcon';
+export * from './components/RedisIcon';
 export * from './components/WorkflowBuilder';
 export * from './components/WorkflowStatusBadge';
 export * from './hooks/useAutoSave';

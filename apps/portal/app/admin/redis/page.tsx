@@ -3,6 +3,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
+import { RedisIcon } from '@repo/ui/RedisIcon';
 import { Activity, Database, HardDrive, Key, Network, RefreshCw } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -98,8 +99,18 @@ export default function RedisManagerPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 p-4 lg:p-6 bg-zinc-50">
-      <div className="flex justify-between items-center">
-        <PageHeader title="RedisInsight Manager" />
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#dc382d]/10 rounded-lg border border-[#dc382d]/20 flex items-center justify-center">
+            <RedisIcon size={24} color="#dc382d" />
+          </div>
+          <div>
+            <PageHeader title="RedisInsight Manager" />
+            <p className="text-xs text-zinc-500 font-mono mt-0.5">
+              Cluster: {stats.host} • Port: {stats.port}
+            </p>
+          </div>
+        </div>
         <button
           onClick={fetchStats}
           disabled={isLoading}
@@ -147,7 +158,7 @@ export default function RedisManagerPage() {
         <div className="lg:col-span-1 flex flex-col gap-4">
           <GlassCard variant="spotlight" className="flex-1 flex flex-col p-4">
             <div className="flex items-center gap-2 mb-4">
-              <Database className="h-5 w-5 text-indigo-600" />
+              <RedisIcon size={18} color="#dc382d" />
               <h3 className="font-semibold text-zinc-800">Key Browser</h3>
             </div>
             <input

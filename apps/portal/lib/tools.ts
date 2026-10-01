@@ -104,7 +104,7 @@ export const EXTERNAL_TOOLS: ExternalTool[] = [
     url: '/admin/workflows',
     description: 'Visual automation pipeline and BullMQ asynchronous queue dispatcher',
     icon: 'Network',
-    color: '#6366f1',
+    color: '#ea4b71',
   },
   {
     name: 'redisinsight',
@@ -112,7 +112,7 @@ export const EXTERNAL_TOOLS: ExternalTool[] = [
     url: '/admin/redis',
     description: 'Real-time telemetry cache inspector & memory key browser',
     icon: 'Database',
-    color: '#0ea5e9',
+    color: '#dc382d',
   },
   {
     name: 'flowise',

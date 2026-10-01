@@ -104,7 +104,9 @@
     "./hooks/useAutoSave": "./src/hooks/useAutoSave.ts",
     "./nodes/PluginNode": "./src/components/nodes/PluginNode.tsx",
     "./nodes/TriggerNode": "./src/components/nodes/TriggerNode.tsx",
-    "./edges/FlowEdge": "./src/components/edges/FlowEdge.tsx"
+    "./edges/FlowEdge": "./src/components/edges/FlowEdge.tsx",
+    "./N8nIcon": "./src/components/N8nIcon.tsx",
+    "./RedisIcon": "./src/components/RedisIcon.tsx"
   },
   "peerDependencies": {
     "next": "^16.2.6",

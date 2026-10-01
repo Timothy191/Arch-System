@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { N8nIcon } from '@repo/ui/N8nIcon';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { WorkflowBuilder } from '@repo/ui/WorkflowBuilder';
 import { type Edge, type Node } from '@xyflow/react';
@@ -80,8 +81,13 @@ export default function WorkflowsPage() {
   return (
     <div className="flex h-[calc(100vh-65px)] flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <PageHeader title="n8n Visual Workflow Engine" />
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#ea4b71]/10 rounded-lg border border-[#ea4b71]/20 flex items-center justify-center">
+            <N8nIcon size={24} color="#ea4b71" />
+          </div>
+          <div>
+            <PageHeader title="n8n Visual Workflow Engine" />
+          </div>
           {lastJob && (
             <div className="flex items-center gap-2 mt-1 text-xs text-emerald-600 font-mono bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
               <CheckCircle2 className="h-3.5 w-3.5" />

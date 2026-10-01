@@ -1,5 +1,7 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { Activity, ArrowLeft, Cpu, Database, Network, ShieldCheck } from 'lucide-react';
+import { N8nIcon } from '@repo/ui/N8nIcon';
+import { RedisIcon } from '@repo/ui/RedisIcon';
+import { Activity, ArrowLeft, Cpu, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
@@ -60,14 +62,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               href="/admin/workflows"
               className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5"
             >
-              <Network className="h-3.5 w-3.5 text-indigo-600" />
+              <N8nIcon className="h-3.5 w-3.5" color="#ea4b71" />
               n8n Workflows
             </Link>
             <Link
               href="/admin/redis"
               className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5"
             >
-              <Database className="h-3.5 w-3.5 text-blue-600" />
+              <RedisIcon className="h-3.5 w-3.5" color="#dc382d" />
               RedisInsight
             </Link>
             <Link
