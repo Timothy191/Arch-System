@@ -1,0 +1,15 @@
+---
+description: Turborepo Monorepo Architectural Boundary Invariants
+globs: packages/**/*,libs/**/*,apps/**/*
+alwaysApply: true
+---
+
+# Monorepo Dependency & Boundary Invariants
+
+Enforced by `tools/repo/policy-compiler.cjs` and ESLint boundaries:
+
+1. **No Direct Database Access in Apps**: `apps/*` MUST NOT import `packages/database` directly — data persistence routes through `@repo/supabase` or typed services.
+2. **Pure UI Components**: `packages/ui` MUST remain strictly pure presentational — zero database, Supabase, or backend access.
+3. **Theme Isolation**: `packages/theme` MUST NOT import `packages/ui`.
+4. **No Inverse Dependencies**: `packages/*` and `tools/*` MUST NOT import `apps/*` (strict dependency inversion).
+5. **No Deep Component Imports**: Use canonical package exports (`@repo/ui/GlassCard`, NOT `@repo/ui/src/components/GlassCard`).

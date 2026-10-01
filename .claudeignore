@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build Artefacts & Compiled Caches
+.next/
+dist/
+build/
+.turbo/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# Cloud & Local Runtime Metadata
+.vercel/
+.husky/_/
+.agent-logs/
+temp/
+.temp/
+
+# Heavy Assets & Dumps
+*.sql.gz
+*.tar.gz
+*.zip
+*.mp4
+*.webm
+*.pdf
+
+# Environment Secrets
+.env.local
+.env.*.local

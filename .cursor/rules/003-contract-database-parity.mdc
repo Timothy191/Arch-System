@@ -1,0 +1,13 @@
+---
+description: PostgreSQL Database Migrations and Zod Contract Parity Invariant
+globs: packages/contract/**/*,packages/database/migrations/**/*
+alwaysApply: false
+---
+
+# Contract & Database Schema Parity
+
+### Hard Invariants:
+1. **Zero Drift**: Every database table and column must have a matching Zod schema in `@repo/contract/src/schemas/`.
+2. **Sequential Migrations**: Database changes must be sequential, zero-padded SQL files (`NNN_description.sql`) in `packages/database/migrations/`.
+3. **Rollback Safety**: Migrations must include safe rollback handling and pass `pnpm --filter @repo/database test`.
+4. **Verification**: After modifying database or contract files, always run `pnpm audit:drift` to confirm 100% Drift Health Index (DHI).

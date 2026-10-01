@@ -1,0 +1,15 @@
+---
+description: Next.js 16 App Router Server Components and Boundary Invariants
+globs: apps/portal/app/**/*.{ts,tsx},apps/portal/features/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next.js 16 App Router & RSC Boundary Invariants
+
+### Hard Invariants:
+1. **Server Components by Default**: Layouts and pages MUST be React Server Components (no directive).
+2. **Leaf Client Interactivity**: Only push `'use client'` down to the smallest interactive leaf components.
+3. **Zero Direct DB Access in Client Components**: Client components must NEVER import `@repo/supabase/server` or query the database directly. Use props, streamed promises with `use(promise)`, or typed API route handlers (`/api/...`).
+4. **Zero Waterfall**: Independent data requests in RSC must be parallelized with `Promise.allSettled()` or `Promise.all()`. Wrap per-request lookups in `React.cache()`.
+5. **Dynamic API Isolation**: Dynamic request APIs (`cookies()`, `headers()`) must be isolated behind `<Suspense>` boundaries to preserve static prerendering of the App Shell.
+6. **Images**: Always use `<Image />` from `next/image` with explicit `width`/`height` or `fill` with `sizes`. Never use raw `<img>`.

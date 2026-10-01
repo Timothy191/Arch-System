@@ -26,13 +26,25 @@
 AGENTS.md                   ← Architecture, domain, personas, data flow (root SSoT)
 GEMINI.md                   ← Gemini/Antigravity-specific directives → .agents/
 CLAUDE.md                   ← THIS FILE: Claude Code entry point → .agents/
-.cursorrules                ← Cursor IDE entry point → .agents/
-.claude/settings.json       ← Claude Code permissions (required at this path)
+.cursor/rules/*.mdc         ← Modern Cursor IDE context-aware rules
+.claude/commands/           ← Claude Code custom slash commands (/verify, /drift, /think, /deploy, /test)
+.claude/settings.json       ← Claude Code permissions & tool allowlists
+.claudeignore               ← Context isolation (blocks .next, dist, .turbo from token burn)
+.mcp.json                   ← Project Model Context Protocol servers (Postgres, Redis, Ripgrep)
 ```
 
-## Claude Code Permissions
+## Claude Code Custom Slash Commands
 
-Claude Code's tool permissions are managed in `.claude/settings.json` (required by Claude Code at this path — do not move). All behavioral rules are in `.agents/rules/`.
+The following project commands are available in Claude Code:
+- `/project:verify` — Executes `pnpm quality` (Turborepo type-check, Biome lint, Stylelint OKLCH tokens, drift audit).
+- `/project:drift` — Audits database schema vs `@repo/contract` Zod schemas (`pnpm audit:drift`).
+- `/project:think` — Enforces the 5-phase Mandatory Thinking Protocol (STM-0).
+- `/project:deploy` — Runs deployment preflight checks and audits Vercel status.
+- `/project:test` — Runs unit tests across packages (`pnpm test`).
+
+## Claude Code Permissions & MCP
+
+Tool permissions are managed in `.claude/settings.json`. Project-level MCP servers (PostgreSQL, Redis, Ripgrep, Memory) are defined in `.mcp.json`. Context indexing excludes heavy build outputs via `.claudeignore`.
 
 ## Environment Notes (This Machine)
 

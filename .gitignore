@@ -43,9 +43,9 @@ venv/
 .claude/hooks/scripts/search/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
-.claude/worktrees
 .claude-flow/
-.cursor/
+.cursor/*
+!.cursor/rules/
 .kiro/settings.local.json
 .kiro/worktrees/
 !.kiro/worktrees/.gitkeep
@@ -59,7 +59,6 @@ venv/
 .vscode/
 
 # Tooling
-.mcp.json
 skills-lock.json
 MCP/
 .playwright-mcp/

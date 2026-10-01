@@ -38,7 +38,13 @@
       "Bash(trip:*)",
       "Bash(websocat:*)",
       "Bash(fastfetch:*)",
-      "Bash(export:*)"
+      "Bash(export:*)",
+      "Bash(vercel:*)",
+      "Bash(biome:*)",
+      "Bash(stylelint:*)",
+      "Bash(sg:*)",
+      "Bash(ast-grep:*)",
+      "Bash(k6:*)"
     ]
   },
   "enabledPlugins": {

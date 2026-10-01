@@ -25,7 +25,7 @@ export interface AuthenticatedPrincipal {
 
 export const EMPLOYEE_CACHE_KEY = (userId: string): string => `arch:auth:employee:${userId}`;
 const EMPLOYEE_CACHE_TTL_SEC = 3600;
-const CACHE_TIMEOUT_MS = 150;
+const CACHE_TIMEOUT_MS = 500;
 
 /**
  * Resolve the current authenticated user together with their authoritative
@@ -58,8 +58,8 @@ export async function getAuthenticatedEmployee(
   let employee: EmployeeSummary | null = null;
   try {
     const cachePromise = cacheGet<EmployeeSummary>(EMPLOYEE_CACHE_KEY(user.id));
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error('Redis cache timeout')), CACHE_TIMEOUT_MS)
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), CACHE_TIMEOUT_MS)
     );
     employee = await Promise.race([cachePromise, timeoutPromise]);
   } catch {

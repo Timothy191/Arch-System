@@ -1,0 +1,15 @@
+---
+description: Universal Agent Single Source of Truth and Operational Governance
+globs: *
+alwaysApply: true
+---
+
+# Arch-System Agent Governance
+
+All AI coding assistants (Claude Code, Cursor, Gemini, Copilot) operating within this repository MUST follow the Single Source of Truth:
+
+1. **Architecture & Boundaries**: Read `AGENTS.md` before making architectural decisions.
+2. **Operational Guidelines**: Follow `.agents/GUIDE.md` for tool usage, testing, and conventions.
+3. **Structured Thinking Mandate (STM-0)**: Engage the 5-phase Mandatory Thinking Protocol (`.agents/rules/structured-thinking-mandate.md`) before any non-trivial mutation.
+4. **Autonomous Self-Healing Loop**: If verification fails, autonomously diagnose and self-correct using AST tools or targeted edits. Never stop to ask for help on compile/test failures.
+5. **Quality Verification**: Always ensure `pnpm type-check` and `pnpm lint` pass before completing work.

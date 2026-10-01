@@ -1,0 +1,16 @@
+---
+description: Strict Light-Mode UI and OKLCH Design Tokens Invariant
+globs: apps/portal/**/*.{ts,tsx,css},packages/ui/**/*.{ts,tsx,css},libs/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Strict Light Mode Invariant
+
+Plantcor OS / Arch-System operates in harsh industrial mining field conditions under direct sunlight.
+
+### Hard Invariants:
+1. **Always Light Mode**: Canvas background is `#f3f4f6` with luminance > 200.
+2. **Hard Negative**: NEVER write `dark:` Tailwind variant classes or dark-mode toggles under any circumstances.
+3. **Semantic Tokens**: All colors, radiuses, and glass styling must consume semantic OKLCH tokens from `@repo/theme` (`color-bg-base`, `color-bg-elevated`, `color-text-primary`, `color-action-primary`).
+4. **Frosted Glass Cards**: Use `<GlassCard variant="window" | "spotlight" | "liquid">` from `@repo/ui/GlassCard`.
+5. **Quality Gate**: Verified automatically via `pnpm audit:tokens`.
