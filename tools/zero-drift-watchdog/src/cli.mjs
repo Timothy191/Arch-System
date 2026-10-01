@@ -230,36 +230,26 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   let ghState;
-  if (localGit.isDetached && !env.GITHUB_API_URL) {
-    ghState = {
-      commit: localGit.commit,
-      branch: ghContext.branch,
-      statusWithLocal: 'identical',
-      aheadBy: 0,
-      behindBy: 0,
-    };
-  } else {
-    try {
-      ghState = await inspectGitHubRemote(ghContext, ghToken, {
-        apiUrl: env.GITHUB_API_URL,
-        localCommit: localGit.commit,
-        timeoutMs: 4000,
-      });
-    } catch (err) {
-      const msg = err.message || String(err);
-      if (isJson) {
-        stdout.write(
-          JSON.stringify({
-            error: err.name || 'GitHubApiError',
-            message: msg,
-            exitCode: err.exitCode || 2,
-          }) + '\n'
-        );
-      } else {
-        stderr.write(`GitHub Remote Error: ${msg}\n`);
-      }
-      return err.exitCode || 2;
+  try {
+    ghState = await inspectGitHubRemote(ghContext, ghToken, {
+      apiUrl: env.GITHUB_API_URL,
+      localCommit: localGit.commit,
+      timeoutMs: 4000,
+    });
+  } catch (err) {
+    const msg = err.message || String(err);
+    if (isJson) {
+      stdout.write(
+        JSON.stringify({
+          error: err.name || 'GitHubApiError',
+          message: msg,
+          exitCode: err.exitCode || 2,
+        }) + '\n'
+      );
+    } else {
+      stderr.write(`GitHub Remote Error: ${msg}\n`);
     }
+    return err.exitCode || 2;
   }
 
   // 6. Vercel Context Discovery & Remote State
@@ -295,36 +285,26 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   let vcState;
-  if (localGit.isDetached && !env.VERCEL_API_URL) {
-    vcState = {
-      commit: localGit.commit,
-      deploymentId: 'dpl_mock',
-      url: 'app.vercel.app',
-      state: 'READY',
-      inFlightCommit: null,
-    };
-  } else {
-    try {
-      vcState = await inspectVercelDeployment({
-        ...vcContext,
-        token: vcToken,
-        apiUrl: env.VERCEL_API_URL,
-      });
-    } catch (err) {
-      const msg = err.message || String(err);
-      if (isJson) {
-        stdout.write(
-          JSON.stringify({
-            error: err.name || 'VercelApiError',
-            message: msg,
-            exitCode: err.exitCode || 2,
-          }) + '\n'
-        );
-      } else {
-        stderr.write(`Vercel Deployment Error: ${msg}\n`);
-      }
-      return err.exitCode || 2;
+  try {
+    vcState = await inspectVercelDeployment({
+      ...vcContext,
+      token: vcToken,
+      apiUrl: env.VERCEL_API_URL,
+    });
+  } catch (err) {
+    const msg = err.message || String(err);
+    if (isJson) {
+      stdout.write(
+        JSON.stringify({
+          error: err.name || 'VercelApiError',
+          message: msg,
+          exitCode: err.exitCode || 2,
+        }) + '\n'
+      );
+    } else {
+      stderr.write(`Vercel Deployment Error: ${msg}\n`);
     }
+    return err.exitCode || 2;
   }
 
   // 7. Tri-State Drift Evaluation

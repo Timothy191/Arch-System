@@ -23,6 +23,27 @@
     "upstash": {
       "type": "http",
       "url": "https://mcp.upstash.com/mcp"
+    },
+    "workos": {
+      "type": "http",
+      "url": "https://mcp.workos.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${WORKOS_API_KEY}"
+      }
+    },
+    "sixtyfour-intelligence": {
+      "type": "http",
+      "url": "https://mcp.sixtyfour.ai/mcp",
+      "headers": {
+        "x-api-key": "${SIXTYFOUR_API_KEY}"
+      }
+    },
+    "windsor": {
+      "type": "http",
+      "url": "https://mcp.windsor.ai/",
+      "headers": {
+        "Authorization": "Bearer ${WINDSOR_API_KEY}"
+      }
     }
   }
 }

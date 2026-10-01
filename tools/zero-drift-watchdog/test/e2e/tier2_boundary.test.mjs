@@ -83,7 +83,12 @@ describe('Tier 2: Boundary & Corner Cases (Resilience & Error Handling)', () => 
         const res = await runWatchdog(
           ['--dir', detachedRepo.dir, '--branch', 'main', '--audit-only'],
           {
-            env: { GITHUB_TOKEN: 'mock-gh-token', VERCEL_TOKEN: 'mock-vc-token' },
+            env: {
+              GITHUB_TOKEN: 'mock-gh-token',
+              VERCEL_TOKEN: 'mock-vc-token',
+              GITHUB_API_URL: gh.url,
+              VERCEL_API_URL: vc.url,
+            },
           }
         );
         assert.ok(res.status === 0 || res.status === 1);
