@@ -2,7 +2,7 @@
   "mcpServers": {
     "redis": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6381"]
     },
     "postgres": {
       "command": "npx",
