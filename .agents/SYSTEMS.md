@@ -236,6 +236,22 @@ sequenceDiagram
 - Uses distributed claims (`claims_claim`, `claims_release`, `claims_handoff`) to guarantee that only one agent modifies a given package, route, or schema at a time.
 - Employs swarm consensus (`hive-mind_consensus`) to resolve architectural conflicts between specialist subagents.
 
+### 4.3 Canonical Workspace Agent Registry (`.agents/a2a/registry/`)
+
+The workspace registers 9 canonical agents in [.agents/a2a/registry/index.json](file:///home/tim/Fork/.agents/a2a/registry/index.json) strictly following the 9 pillars:
+
+| Agent Card                                                                                            | Role & Mode         | Authority Tier | Runtime Model      | Core Purpose                                                                                     |
+| :---------------------------------------------------------------------------------------------------- | :------------------ | :------------- | :----------------- | :----------------------------------------------------------------------------------------------- |
+| **[`core-coordinator.json`](file:///home/tim/Fork/.agents/a2a/registry/core-coordinator.json)**       | Master Coordinator  | L1 Advisor     | `gemini-2.5-pro`   | Multi-agent task decomposition, RISEN prompt construction, and context budget allocation.        |
+| **[`federation-auditor.json`](file:///home/tim/Fork/.agents/a2a/registry/federation-auditor.json)**   | Parity Auditor      | L0 Observer    | `gemini-2.5-pro`   | Inspects Git HEAD vs Vercel deployments and verifies cross-service CSP allowlists.               |
+| **[`deployment-sentinel.json`](file:///home/tim/Fork/.agents/a2a/registry/deployment-sentinel.json)** | Deployment Sentinel | L3 Executive   | `gemini-2.5-pro`   | Preflight checks, scoped Vercel dispatch, post-deploy health probes, and automated rollback.     |
+| **[`maker-checker-gate.json`](file:///home/tim/Fork/.agents/a2a/registry/maker-checker-gate.json)**   | Dual-Mind Checker   | L1 Advisor     | `gemini-2.5-pro`   | Independent AST review, anti-mock invariant verification, and static quality scoring ($\ge 90$). |
+| **[`contract-sync-agent.json`](file:///home/tim/Fork/.agents/a2a/registry/contract-sync-agent.json)** | Contract Specialist | L2 Operator    | `gemini-2.5-pro`   | Synchronizes Zod contracts and DTOs between `@repo/contract`, proxy, and redis engine.           |
+| **[`memory-curator.json`](file:///home/tim/Fork/.agents/a2a/registry/memory-curator.json)**           | Memory Curator      | L1 Advisor     | `gemini-2.5-pro`   | Retrospective indexing, Knowledge Graph sync, and local Ruflo HNSW vector curation.              |
+| **[`rag-librarian.json`](file:///home/tim/Fork/.agents/a2a/registry/rag-librarian.json)**             | RAG Librarian       | L0 Observer    | `gemini-2.5-flash` | Context7, DeepWiki, and local unauthenticated Firecrawl scraper (`192.168.0.215:3002`).          |
+| **[`hitl-bridge.json`](file:///home/tim/Fork/.agents/a2a/registry/hitl-bridge.json)**                 | HITL Sentinel       | L3 Executive   | `gemini-2.5-pro`   | Authority matrix gatekeeper, approval cards in `storage/approvals/`, and Slack review channel.   |
+| **[`swarm-consensus.json`](file:///home/tim/Fork/.agents/a2a/registry/swarm-consensus.json)**         | Swarm Coordinator   | L1 Advisor     | `gemini-2.5-pro`   | Ruflo claims lock management (`claims_claim`), file contention avoidance, and hive-mind voting.  |
+
 ---
 
 ## 5. Human-in-the-Loop (HITL) & Corporate Authority Matrix
