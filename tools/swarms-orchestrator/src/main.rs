@@ -9,10 +9,17 @@ use swarms_rs::{
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
+    let model_name = std::env::var("OLLAMA_MODEL")
+        .unwrap_or_else(|_| "deepseek-v4.1-flash:cloud".to_string());
+    let ollama_url = std::env::var("OLLAMA_BASE_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:11434/v1".to_string());
+
+    println!("Initializing Swarms Orchestrator with Ollama model: {}", model_name);
+
     let llm = OpenAI::from_url(
-        "http://127.0.0.1:11434/v1",
-        "ollama",
-    ).set_model("qwen2.5:3b");
+        ollama_url,
+        "ollama".to_string(),
+    ).set_model(&model_name);
 
     let agent1 = SwarmsAgentBuilder::new_with_model(llm.clone())
         .agent_name("Worker")

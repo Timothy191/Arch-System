@@ -55,6 +55,13 @@ try {
   console.warn('⚠️  Warning: Version sync failed:', verErr.message);
 }
 
+// The assets/ directory exists locally but is not git-tracked, so
+// GitHub-triggered Vercel builds have no assets/ at all. Skip gracefully.
+if (!existsSync(ASSETS_DIR)) {
+  console.log('✅ Assets directory not found, skipping sync.');
+  process.exit(0);
+}
+
 const currentChecksum = getAssetsChecksum(ASSETS_DIR);
 const previousChecksum = existsSync(CHECKSUM_FILE)
   ? readFileSync(CHECKSUM_FILE, 'utf8').trim()

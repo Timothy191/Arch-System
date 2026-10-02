@@ -1,24 +1,53 @@
 {
-  "$schema": "../schemas/agent-profile.schema.json",
-  "id": "autonomous-watchdog-supervisor",
-  "name": "Autonomous Watchdog & Health Supervisor",
-  "version": "1.0.0",
-  "role": "Background Health & Lifecycle Loop Supervisor (T1)",
-  "description": "Monitors codebase health, executes periodic memory indexing, audits AST command rules, verifies tracer integrity, and guards quality gates.",
-  "modelTier": "inherit",
-  "capabilities": [
-    "background_watchdog_supervision",
-    "memory_index_reconciliation",
-    "ast_command_audit",
-    "tracer_integrity_verification",
-    "corpos_loop_execution"
-  ],
-  "pathScope": {
-    "read": ["**/*"],
-    "write": [".agents/corpos/storage/**", ".agents/memory_base/**", ".agents/a2a/bus/**"]
+  "name": "autonomous-watchdog-supervisor",
+  "mode": "sentinel",
+  "description": "Background Health & Lifecycle Loop Supervisor. Continuously audits codebase health, verifies memory index parity, executes compound bash AST checks, and guards quality gates.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 20,
+    "token_budget": 24000
   },
-  "tools": ["autonomous-watchdog", "check-compound-bash", "smart-indexer", "rtk"],
-  "protocols": ["UAP/1.0", "A2A/Bus"],
-  "qualityThreshold": 95,
-  "sandboxed": false
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "run_command", "call_mcp_tool"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "restricted"
+  },
+  "scope": {
+    "include_paths": [
+      ".agents/corpos/storage/**",
+      ".agents/memory_base/**",
+      ".agents/a2a/bus/**",
+      "tools/audits/**"
+    ],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest health signals and active corpos loop ticks",
+    "Phase 2: Assert memory index consistency in .agents/memory_base/index.json",
+    "Phase 3: Execute compound bash AST security checks against all script files",
+    "Phase 4: Run antidrift and contract verification suites",
+    "Phase 5: Record watchdog heartbeat and anomalies on A2A bus"
+  ],
+  "negative_constraints": [
+    "NEVER suppress health anomalies or failing audit exit codes",
+    "NEVER execute unsafe bash patterns without AST safety validation",
+    "NEVER modify production database or deployment state directly"
+  ],
+  "input_contract": {
+    "watchdogInterval": "number",
+    "targetLoops": "array"
+  },
+  "output_contract": {
+    "schema": ".agents/a2a/schemas/status-heartbeat.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Isolate failing loop, log incident to journal.jsonl, and notify core-coordinator",
+    "exit_codes": {
+      "WATCHDOG_HEALTHY": 0,
+      "HEALTH_ANOMALY_DETECTED": 1,
+      "CRITICAL_DRIFT": 2
+    }
+  }
 }

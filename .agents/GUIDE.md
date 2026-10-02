@@ -39,7 +39,7 @@ alwaysApply: true
 - Runtime is **mise-managed** (Node 26.8.1), not Volta. The `volta` field in `package.json` is inert here.
 - **`pnpm` history note:** until 2026-09-25, `pnpm` hung in this repo (its version-switch step stalled against the `pnpm@9.15.9` pin, so `pnpm dev`/`build`/`test`/`quality` never started). Verified working again on 2026-09-28 (`pnpm -v` → `9.15.9`, instant). If a `pnpm` invocation ever produces no output within seconds, kill it rather than waiting; the `Makefile` targets or direct `node`/`turbo` invocations are the fallback.
 - `nx`, `turbo`, `knip`, `cspell`, and `syncpack` are devDependencies, not global binaries — they run through `pnpm`.
-- `poetry` is not installed, which blocks `packages/eval` (Python/DeepEval).
+- `packages/eval` is fully managed via `uv` (Python 3.12, DeepEval, pytest). Run tests via `cd packages/eval && uv run pytest`.
 
 ---
 
