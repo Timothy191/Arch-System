@@ -38,14 +38,7 @@ venv/
 
 # ─── Unified Agent System (.agents/ is tracked; provider-specific runtime is ignored) ───
 # Provider-specific runtime artifacts (NOT project source)
-.claude/skills/
-.claude/hooks/scripts/db/
-.claude/hooks/scripts/search/
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
-.claude/helpers/
-.claude/memory.db
-.claude/proven-config.json
+.claude/
 .claude-flow/
 .swarm/
 ruvector.db
