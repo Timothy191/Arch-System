@@ -64,7 +64,7 @@ export function LoginForm() {
           Email Address
         </label>
         <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
-          <Mail className="w-4 h-4 absolute left-3.5 text-neutral-400 pointer-events-none" />
+          <Mail className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="email"
             type="email"
@@ -84,7 +84,7 @@ export function LoginForm() {
               }
             }}
             placeholder="username@arch-systems.io"
-            className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+            className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-0"
             autoComplete="username"
           />
         </div>
@@ -101,13 +101,13 @@ export function LoginForm() {
           </label>
           <Link
             href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-            className="text-xs font-medium text-amber-600 hover:text-amber-700 hover:underline transition-colors select-none"
+            className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:underline transition-colors select-none py-1 inline-flex items-center min-h-[32px]"
           >
             Forgot password?
           </Link>
         </div>
         <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
-          <Lock className="w-4 h-4 absolute left-3.5 text-neutral-400 pointer-events-none" />
+          <Lock className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="password"
             type={showPassword ? 'text' : 'password'}
@@ -123,13 +123,13 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             placeholder="••••••••"
-            className="w-full pl-10 pr-11 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+            className="w-full pl-10 pr-11 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-0"
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors p-1 rounded focus:outline-none"
+            className="absolute right-1 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors p-2 rounded focus:outline-none min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

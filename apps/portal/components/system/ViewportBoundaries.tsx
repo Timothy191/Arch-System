@@ -107,6 +107,11 @@ function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
     };
   }, [clearLeaveTimer]);
 
+  // Performance & Accessibility: Bypass the OS dock entirely on authentication pages
+  if (pathname === '/login' || pathname?.startsWith('/login')) {
+    return null;
+  }
+
   const isRevealed = !autoHide || isHovered || isFocused;
 
   return (
@@ -126,7 +131,8 @@ function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
       </div>
 
       {/* Bottom boundary container - Unified OS Dock */}
-      <div
+      <nav
+        aria-label="Reveal dock"
         className="w-full flex flex-col items-center justify-end pb-2 pointer-events-none relative"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -142,14 +148,15 @@ function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
 
         {/* Peek indicator when dock is auto-hidden */}
         {autoHide && (
-          <div
+          <button
+            type="button"
             data-testid="dock-peek-indicator"
             onClick={handleMouseEnter}
             onMouseEnter={handleMouseEnter}
             aria-label="Reveal dock"
             className={cn(
               'fixed bottom-1.5 pointer-events-auto cursor-pointer transition-all duration-300 ease-glass',
-              'w-12 h-1 rounded-full bg-black/20 hover:bg-black/40 shadow-diffusion-sm border border-black/5',
+              'w-12 h-2.5 rounded-full bg-black/20 hover:bg-black/40 shadow-diffusion-sm border border-black/5 flex items-center justify-center min-h-[24px]',
               isRevealed
                 ? 'opacity-0 pointer-events-none translate-y-2'
                 : 'opacity-100 translate-y-0'
@@ -290,7 +297,7 @@ function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
               aria-label={autoHide ? 'Pin dock (disable auto-hide)' : 'Auto-hide dock'}
               aria-pressed={!autoHide}
               title={autoHide ? 'Pin Dock (Keep visible)' : 'Auto-Hide Dock'}
-              className="group relative flex items-center p-1.5 rounded-xl hover:bg-black/5 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
+              className="group relative flex items-center justify-center min-h-[32px] min-w-[32px] p-2 rounded-xl hover:bg-black/5 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
             >
               {autoHide ? (
                 <PinOff className="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-200" />
@@ -303,7 +310,7 @@ function ViewportBoundariesInner({ className }: ViewportBoundariesProps) {
             </button>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }

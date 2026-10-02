@@ -141,15 +141,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
         {/* Footer */}
         <footer className="mt-8 text-center space-y-2 select-none">
-          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-600 dark:text-neutral-400">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
-          <div className="flex justify-center gap-6 text-xs text-neutral-400">
-            <a className="hover:text-neutral-700 transition-colors" href="/docs">
+          <div className="flex justify-center gap-6 text-xs text-neutral-600 dark:text-neutral-300">
+            <a
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              href="/docs"
+            >
               Security Policy
             </a>
-            <a className="hover:text-neutral-700 transition-colors" href="/docs#support">
+            <a
+              className="hover:text-neutral-900 dark:hover:text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              href="/docs#support"
+            >
               Support
             </a>
           </div>

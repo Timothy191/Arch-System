@@ -4,8 +4,9 @@ import { useSplitWindow } from '@/hooks/useSplitWindow';
 import { useSystemMetrics } from '@/hooks/useSystemMetrics';
 import { ViewportBoundaries } from './ViewportBoundaries';
 
+let mockPathname = '/hub';
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/hub',
+  usePathname: () => mockPathname,
 }));
 
 jest.mock('@/hooks/useSystemMetrics');
@@ -44,6 +45,17 @@ describe('ViewportBoundaries component', () => {
     expect(screen.getByText('Engineering')).toBeInTheDocument();
     expect(screen.getByText('Alerts')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
+
+    // Check ARIA landmarks (WCAG 4.1.2)
+    const nav = screen.getByRole('navigation', { name: 'Reveal dock' });
+    expect(nav).toBeInTheDocument();
+  });
+
+  it('bypasses rendering on the /login route', () => {
+    mockPathname = '/login';
+    const { container } = render(<ViewportBoundaries />);
+    expect(container).toBeEmptyDOMElement();
+    mockPathname = '/hub';
   });
 
   it('should not apply shift class when split window is closed', () => {
