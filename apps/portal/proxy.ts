@@ -14,10 +14,10 @@ export async function proxy(request: NextRequest) {
 
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const cspHeader = `
-    frame-src 'self' https://scada.example.com https://arch-system-nest-proxy.vercel.app;
+    frame-src 'self' https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app;
     frame-ancestors 'none';
     script-src 'self' 'nonce-${nonce}' 'unsafe-eval';
-    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app;
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
