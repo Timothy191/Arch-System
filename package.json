@@ -1,6 +1,6 @@
 {
   "name": "arch-systems",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "commitlint": {
     "extends": [
       "./config/tools/commitlint.config.mjs"
