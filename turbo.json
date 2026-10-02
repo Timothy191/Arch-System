@@ -88,6 +88,10 @@
       "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "tsconfig.*.json"],
       "outputs": [],
       "cache": true
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "outputs": []
     }
   }
 }

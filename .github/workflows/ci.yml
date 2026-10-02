@@ -167,9 +167,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000
@@ -282,9 +282,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000
@@ -345,9 +345,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
+      SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000

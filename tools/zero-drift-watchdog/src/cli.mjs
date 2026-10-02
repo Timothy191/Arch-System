@@ -206,10 +206,13 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
       const teamCandidate = values.team || env.VERCEL_ORG_ID || env.VERCEL_TEAM_ID;
       const projCandidate = values.project || env.VERCEL_PROJECT_ID;
       if (teamCandidate || projCandidate || env.GITHUB_API_URL || localGit.isDetached) {
-        ghOwner = teamCandidate ? teamCandidate.replace(/^team_/, '') : 'plantcor';
-        ghRepoName = projCandidate
-          ? projCandidate.replace(/^prj_/, '').replace(/_/g, '-')
-          : 'arch-system';
+        if (!teamCandidate || !projCandidate) {
+          throw new Error(
+            'Unable to infer GitHub repository context. Please specify --repo or run inside a GitHub repository.'
+          );
+        }
+        ghOwner = teamCandidate.replace(/^team_/, '');
+        ghRepoName = projCandidate.replace(/^prj_/, '').replace(/_/g, '-');
         ghContext = {
           owner: ghOwner,
           repo: ghRepoName,

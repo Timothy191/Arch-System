@@ -16,9 +16,8 @@
  *       Track: https://github.com/Timothy191/arch-system/issues/
  */
 
-import { Cpu, Radio, ShieldCheck } from 'lucide-react';
+import { Activity, Cpu, Radio, ShieldCheck } from 'lucide-react';
 import NextImage from 'next/image';
-import { Logo } from './Logo';
 
 export interface TrustLogo {
   src: string;
@@ -29,22 +28,22 @@ export interface TrustLogosProps {
   logos?: TrustLogo[];
 }
 
-const PLACEHOLDERS = [
+const PROTOCOL_BADGES = [
   {
-    label: 'Arch Mining',
-    icon: <Logo className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
+    label: 'Modbus TCP Active',
+    icon: <Cpu className="w-2.5 h-2.5 mr-1 shrink-0 text-cyan-600" />,
   },
   {
-    label: 'Sector-01',
-    icon: <Radio className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
+    label: 'CAN-Bus 250kbps',
+    icon: <Radio className="w-2.5 h-2.5 mr-1 shrink-0 text-emerald-600" />,
   },
   {
-    label: 'Modbus Ready',
-    icon: <Cpu className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
+    label: 'Latency: 14ms',
+    icon: <Activity className="w-2.5 h-2.5 mr-1 shrink-0 text-amber-600" />,
   },
   {
     label: 'ISO 27001',
-    icon: <ShieldCheck className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
+    icon: <ShieldCheck className="w-2.5 h-2.5 mr-1 shrink-0 text-emerald-600" />,
   },
 ];
 
@@ -52,9 +51,13 @@ export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-1.5 border-t border-black/[0.08]">
-      <p className="text-[9px] uppercase tracking-wider text-[var(--text-muted)] font-mono font-medium mb-1">
-        Trusted by forward-thinking teams
+    <div className="pt-2 border-t border-slate-200/60">
+      <p className="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-medium mb-1.5 flex items-center gap-1.5">
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+          aria-hidden="true"
+        />
+        SYSTEM DIAGNOSTICS & TELEMETRY BUS
       </p>
 
       {hasLogos ? (
@@ -74,10 +77,10 @@ export function TrustLogos({ logos }: TrustLogosProps) {
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {PLACEHOLDERS.map((p) => (
+          {PROTOCOL_BADGES.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-5 px-2.5 text-[10px] font-medium font-mono text-[var(--text-secondary)] bg-white/70 backdrop-blur-md rounded-full border border-black/[0.08] shadow-card transition-colors hover:bg-white/90"
+              className="inline-flex items-center justify-center h-5 px-2.5 text-[10px] font-medium font-mono tabular-nums text-slate-700 bg-white/80 backdrop-blur-md rounded-full border border-slate-200/80 shadow-sm transition-colors hover:bg-white"
             >
               {p.icon}
               {p.label}

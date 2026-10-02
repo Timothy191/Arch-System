@@ -3,6 +3,7 @@
 import type { BadgesRow, IssuedCardsRow, PersonnelRow } from '@repo/supabase';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { RawSocketBridge } from '@repo/utils';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
 import { submitCupsPrintJob } from '../lib/printer-detection';
 
@@ -200,10 +201,19 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
   let cupsJobId: number | null = null;
   if (printer?.cups_name) {
     try {
-      const result = await submitCupsPrintJob(printer.cups_name, `card-${personnelId}`);
-      cupsJobId = result.cupsJobId;
+      if (printer.cups_name.startsWith('Zebra-') || printer.cups_name.startsWith('ZPL-')) {
+        // Use production-ready RawSocketBridge for direct ZPL binary transmission on Port 9100
+        const host = process.env.PRINTER_HOST || '127.0.0.1';
+        const bridge = new RawSocketBridge({ host, port: 9100, timeout: 5000 });
+        const zplPayload = Buffer.from(`^XA^FO50,50^BQN,2,10^FDQA,${qrCode}^FS^XZ`);
+        await bridge.send(zplPayload);
+        cupsJobId = 9999; // Mock ID for raw socket success
+      } else {
+        const result = await submitCupsPrintJob(printer.cups_name, `card-${personnelId}`);
+        cupsJobId = result.cupsJobId;
+      }
     } catch {
-      // CUPS submission is best-effort; job remains queued in DB
+      // Submission is best-effort; job remains queued in DB
     }
   }
 

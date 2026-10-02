@@ -7,43 +7,81 @@ import { useEffect, useRef, useState } from 'react';
  * RouteBackground
  *
  * Renders the full-screen macOS-style wallpaper background beneath all portal
- * content across all server pages. Uses the small WebP poster as the LCP asset
- * and defers the heavier video to a lazy, off-critical-path element.
+ * content across all server pages.
+ *
+ * Performance Architecture:
+ * 1. Uses the lightweight 94 KB WebP poster as the primary LCP asset.
+ * 2. Defers the heavy 11 MB MP4 video off the critical path using requestIdleCallback.
+ * 3. Bypasses video completely when:
+ *    - User prefers reduced motion (`prefers-reduced-motion: reduce`)
+ *    - User is on mobile device (viewport width < 768px)
+ *    - Network connection is constrained (Save-Data mode or 2G/3G "lie-fi" links)
+ * 4. Sets preload="none" to prevent automatic massive background data downloads.
  */
 export function RouteBackground() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
+    // 1. Accessibility: reduced motion check
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motionQuery.matches) {
+      return;
+    }
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
+    // 2. Viewport: mobile devices do not render video wallpaper to save battery/data
+    if (window.innerWidth < 768) {
+      return;
+    }
+
+    // 3. Network connection constraints (Network Information API)
+    const nav = navigator as Navigator & {
+      connection?: {
+        saveData?: boolean;
+        effectiveType?: string;
+      };
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    if (nav.connection) {
+      if (nav.connection.saveData) {
+        return;
+      }
+      if (
+        nav.connection.effectiveType === 'slow-2g' ||
+        nav.connection.effectiveType === '2g' ||
+        nav.connection.effectiveType === '3g'
+      ) {
+        return;
+      }
+    }
+
+    // 4. Defer video mounting until browser is idle after LCP
+    const loadDeferredVideo = () => {
+      setShouldLoadVideo(true);
+    };
+
+    if ('requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(loadDeferredVideo, { timeout: 3000 });
+      return () => (window as any).cancelIdleCallback(handle);
+    } else {
+      const timer = setTimeout(loadDeferredVideo, 1500);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-
   useEffect(() => {
-    if (videoRef.current && !prefersReducedMotion) {
-      // Sometimes onCanPlay doesn't fire if the video is already ready or cached,
-      // so we check readyState.
+    if (videoRef.current && shouldLoadVideo) {
       if (videoRef.current.readyState >= 3) {
         setIsVideoLoaded(true);
       }
       videoRef.current.play().catch(() => {});
     }
-  }, [prefersReducedMotion]);
+  }, [shouldLoadVideo]);
 
   return (
     <>
-      {/* ── LCP background: preloaded compressed WebP poster ── */}
-      {/* AGENT-TRACE: 94 KB WebP poster is the critical LCP asset. Heavier video is lazy/deferred. */}
+      {/* ── LCP background: preloaded compressed WebP poster (94 KB) ── */}
       <div
         className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
         aria-hidden="true"
@@ -59,8 +97,8 @@ export function RouteBackground() {
         />
       </div>
 
-      {/* ── Ambient Video Background ── */}
-      {!prefersReducedMotion && (
+      {/* ── Ambient Video Background (Deferred / Constrained-Safe) ── */}
+      {shouldLoadVideo && (
         <div
           className="route-bg-video-container fixed inset-0 -z-10 pointer-events-none"
           aria-hidden="true"
@@ -83,7 +121,7 @@ export function RouteBackground() {
             muted
             playsInline
             disablePictureInPicture
-            preload="auto"
+            preload="none"
             crossOrigin="anonymous"
           />
         </div>

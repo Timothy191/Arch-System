@@ -200,4 +200,76 @@ describe('HeroRotator', () => {
     expect(screen.queryByLabelText('Next highlight')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Previous highlight')).not.toBeInTheDocument();
   });
+
+  it('configures 3D perspective container and applies cover-flow transforms to slides', () => {
+    const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
+    const perspectiveContainer = container.querySelector('[style*="perspective"]');
+    expect(perspectiveContainer).toBeInTheDocument();
+    expect(perspectiveContainer).toHaveStyle({
+      perspective: '1400px',
+      transformStyle: 'preserve-3d',
+    });
+
+    const slides = container.querySelectorAll<HTMLElement>('[role="group"]');
+    expect(slides).toHaveLength(3);
+
+    // Active slide (index 0 - Overview): center, scale(1), full opacity, z-index 30
+    expect(slides[0]).toHaveStyle({
+      transform: 'translate3d(0%, 0, 0) rotateY(0deg) scale(1)',
+      opacity: '1',
+      zIndex: '30',
+    });
+
+    // Right slide (index 1 - Drilling): angled away right, scale(0.86), opacity 0.42, z-index 10
+    expect(slides[1]).toHaveStyle({
+      transform: 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)',
+      opacity: '0.42',
+      zIndex: '10',
+    });
+
+    // Left slide (index 2 - Production): angled away left, scale(0.86), opacity 0.42, z-index 10
+    expect(slides[2]).toHaveStyle({
+      transform: 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)',
+      opacity: '0.42',
+      zIndex: '10',
+    });
+  });
+
+  it('activates slide when clicking adjacent preview flank panels', () => {
+    const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
+    const slides = container.querySelectorAll<HTMLElement>('[role="group"]');
+
+    // Initially Overview (0) is active
+    expect(slides[0].getAttribute('aria-hidden')).toBe('false');
+
+    // Click right flank preview panel (Drilling Operations)
+    fireEvent.click(slides[1]);
+    expect(screen.getByLabelText('2 of 3: Drilling Operations')).toHaveAttribute(
+      'aria-hidden',
+      'false'
+    );
+
+    // Click left flank preview panel (Overview)
+    fireEvent.click(slides[0]);
+    expect(screen.getByLabelText('1 of 3: System Overview')).toHaveAttribute(
+      'aria-hidden',
+      'false'
+    );
+  });
+
+  it('renders authentic telemetry bus badges and live video HUD overlays', () => {
+    render(<HeroRotator {...baseProps} departments={mockDepartments} />);
+
+    // Assert live video HUD overlays on the active card
+    expect(screen.getByText('LIVE')).toBeInTheDocument();
+    expect(screen.getByText('30 FPS')).toBeInTheDocument();
+    expect(screen.getByText('1080p')).toBeInTheDocument();
+
+    // Assert telemetry bus heading and live protocol badges
+    expect(screen.getByText(/SYSTEM DIAGNOSTICS & TELEMETRY BUS/i)).toBeInTheDocument();
+    expect(screen.getByText('Modbus TCP Active')).toBeInTheDocument();
+    expect(screen.getByText('CAN-Bus 250kbps')).toBeInTheDocument();
+    expect(screen.getByText('Latency: 14ms')).toBeInTheDocument();
+    expect(screen.getByText('ISO 27001')).toBeInTheDocument();
+  });
 });

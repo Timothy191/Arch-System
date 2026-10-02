@@ -396,6 +396,7 @@ export function createMockVercelServer(options = {}) {
     async start() {
       return new Promise((resolve, reject) => {
         server = http.createServer(requestListener);
+        server.keepAliveTimeout = 1;
         server.on('connection', (socket) => {
           openSockets.add(socket);
           socket.on('close', () => openSockets.delete(socket));

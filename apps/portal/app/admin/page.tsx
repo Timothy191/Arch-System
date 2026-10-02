@@ -39,7 +39,7 @@ export default async function AdminPage({
     .eq('auth_id', user.id)
     .single();
 
-  if (employee?.role !== 'admin' && user.email?.toLowerCase() !== 'timothyoniel558@gmail.com') {
+  if (employee?.role !== 'admin') {
     redirect('/');
   }
 

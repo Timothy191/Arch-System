@@ -369,8 +369,8 @@ describe('Empirical Adversarial Stress Test Harness - Challenger M1-2', () => {
       assert.equal(remoteState.commit, initialSha, 'Remote commit should be initialSha');
       assert.equal(remoteState.branch, 'main');
       assert.equal(remoteState.statusWithLocal, 'ahead', 'statusWithLocal should be ahead');
-      assert.equal(remoteState.aheadBy, 1, 'Local should be ahead by 1 commit');
-      assert.equal(remoteState.behindBy, 0, 'Local should be behind by 0 commits');
+      assert.equal(remoteState.localAheadBy, 1, 'Local should be ahead by 1 commit');
+      assert.equal(remoteState.localBehindBy, 0, 'Local should be behind by 0 commits');
 
       mockServer.clearErrors();
     });
@@ -405,8 +405,8 @@ describe('Empirical Adversarial Stress Test Harness - Challenger M1-2', () => {
 
       assert.equal(remoteState.commit, initialSha);
       assert.equal(remoteState.statusWithLocal, 'ahead');
-      assert.equal(remoteState.aheadBy, 3, 'Local should be ahead by 3 commits');
-      assert.equal(remoteState.behindBy, 0);
+      assert.equal(remoteState.localAheadBy, 3, 'Local should be ahead by 3 commits');
+      assert.equal(remoteState.localBehindBy, 0);
 
       mockServer.clearErrors();
     });
@@ -444,8 +444,8 @@ describe('Empirical Adversarial Stress Test Harness - Challenger M1-2', () => {
 
       assert.equal(remoteState.commit, remoteSha);
       assert.equal(remoteState.statusWithLocal, 'diverged', 'statusWithLocal should be diverged');
-      assert.equal(remoteState.aheadBy, 3, 'Local ahead by 3');
-      assert.equal(remoteState.behindBy, 1, 'Local behind by 1');
+      assert.equal(remoteState.localAheadBy, 3, 'Local ahead by 3');
+      assert.equal(remoteState.localBehindBy, 1, 'Local behind by 1');
 
       mockServer.clearErrors();
     });

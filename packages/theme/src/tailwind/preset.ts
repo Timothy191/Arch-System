@@ -86,7 +86,7 @@ const archTheme: Config = {
           'Consolas',
           'monospace',
         ],
-        heading: ['Anurati', 'var(--font-sans)', 'sans-serif'],
+        heading: ['var(--font-outfit)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Arch palette — direct CSS variable references

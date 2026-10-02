@@ -31,7 +31,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates perfect tri-state parity (Zero Drift)', () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha1, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' },
         { repository: 'plantcor/arch-system', vercelProject: 'arch-system' }
       );
@@ -53,7 +59,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates local ahead (Local > GitHub == Vercel)', () => {
       const report = evaluateDrift(
         { commit: sha2, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha1, branch: 'main', statusWithLocal: 'behind', aheadBy: 0, behindBy: 1 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'ahead',
+          localAheadBy: 1,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -71,7 +83,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates vercel behind (Local == GitHub > Vercel)', () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha1, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         { commit: sha2, deploymentId: 'dpl_old', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -86,7 +104,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates multi-tier cascading drift (Local > GitHub > Vercel)', () => {
       const report = evaluateDrift(
         { commit: sha3, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'behind', aheadBy: 0, behindBy: 1 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'ahead',
+          localAheadBy: 1,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_ancient', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -98,7 +122,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates in-flight deployment active on GitHub commit', () => {
       const report = evaluateDrift(
         { commit: sha2, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         {
           commit: sha1,
           deploymentId: 'dpl_prev',
@@ -119,7 +149,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates diverged branches (ahead > 0 && behind > 0)', () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'diverged', aheadBy: 2, behindBy: 3 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'diverged',
+          localAheadBy: 2,
+          localBehindBy: 3,
+        },
         { commit: sha2, deploymentId: 'dpl_div', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -135,7 +171,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('evaluates local behind remote (Local < GitHub)', () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'ahead', aheadBy: 1, behindBy: 0 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'behind',
+          localAheadBy: 0,
+          localBehindBy: 1,
+        },
         { commit: sha2, deploymentId: 'dpl_ahead', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -155,7 +197,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
           uncommittedFiles: ['src/app.mjs'],
           isDetached: false,
         },
-        { commit: sha1, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -411,7 +459,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('returns resolved true immediately when no drift is present', async () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha1, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -429,7 +483,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
           uncommittedFiles: ['dirty.txt'],
           isDetached: false,
         },
-        { commit: sha1, branch: 'main', statusWithLocal: 'identical', aheadBy: 0, behindBy: 0 },
+        {
+          commit: sha1,
+          branch: 'main',
+          statusWithLocal: 'identical',
+          localAheadBy: 0,
+          localBehindBy: 0,
+        },
         { commit: sha1, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -442,7 +502,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('refuses to resolve and throws GitError when repositories have diverged', async () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'diverged', aheadBy: 1, behindBy: 2 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'diverged',
+          localAheadBy: 1,
+          localBehindBy: 2,
+        },
         { commit: sha2, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 
@@ -455,7 +521,13 @@ describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)',
     it('refuses to resolve and throws GitError when local is behind remote', async () => {
       const report = evaluateDrift(
         { commit: sha1, branch: 'main', isClean: true, uncommittedFiles: [], isDetached: false },
-        { commit: sha2, branch: 'main', statusWithLocal: 'ahead', aheadBy: 1, behindBy: 0 },
+        {
+          commit: sha2,
+          branch: 'main',
+          statusWithLocal: 'behind',
+          localAheadBy: 0,
+          localBehindBy: 1,
+        },
         { commit: sha2, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
       );
 

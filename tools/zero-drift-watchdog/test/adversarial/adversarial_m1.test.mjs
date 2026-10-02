@@ -587,8 +587,8 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
 
       assert.equal(remoteState.commit, sha);
       assert.equal(remoteState.statusWithLocal, 'identical');
-      assert.equal(remoteState.aheadBy, 0);
-      assert.equal(remoteState.behindBy, 0);
+      assert.equal(remoteState.localAheadBy, 0);
+      assert.equal(remoteState.localBehindBy, 0);
     });
 
     it('computes drift via local rev-list fallback when localCommit is not on remote (unpushed)', async () => {
@@ -621,8 +621,8 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
 
       assert.equal(remoteState.commit, initialSha);
       assert.equal(remoteState.statusWithLocal, 'ahead');
-      assert.equal(remoteState.aheadBy, 3);
-      assert.equal(remoteState.behindBy, 0);
+      assert.equal(remoteState.localAheadBy, 3);
+      assert.equal(remoteState.localBehindBy, 0);
     });
 
     it('discovers GitHub repository context from diverse URL formats and env variables', async () => {

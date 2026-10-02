@@ -84,6 +84,8 @@ export function HeroRotator({
       iconBgColor: 'bg-[var(--accent-blue)]/10',
       primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
       secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
+      assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
+      assetSubtitle: defaultDescription,
     };
 
     const deptPanels = departments.map((dept): Panel => {
@@ -94,11 +96,31 @@ export function HeroRotator({
       };
       const DeptIcon = style.icon;
 
+      const assetOverline =
+        dept.name === 'drilling'
+          ? 'FIELD OPERATIONS // UNIT-PV351'
+          : dept.name === 'production'
+            ? 'EXTRACTION & YIELD // PLANT-EXT01'
+            : dept.name === 'access-control'
+              ? 'SITE SECURITY // SEC-GATE01'
+              : dept.name === 'engineering'
+                ? 'PLANT MAINTENANCE // WORKSHOP-03'
+                : dept.name === 'control-room'
+                  ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
+                  : 'FIELD OPERATIONS // MINE-UNIT';
+
+      const assetSubtitle =
+        dept.name === 'drilling'
+          ? 'Epiroc Pit Viper 351 · Bit Depth Telemetry · Pattern B-14'
+          : dept.description;
+
       return {
         id: dept.name,
         name: dept.name,
         title: dept.displayName,
         description: dept.description,
+        assetOverline,
+        assetSubtitle,
         category:
           dept.type === 'control_room'
             ? 'SCADA & Telemetry'

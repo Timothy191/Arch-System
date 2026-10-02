@@ -1,6 +1,6 @@
 {
   "name": "arch-systems",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "commitlint": {
     "extends": [
       "./config/tools/commitlint.config.mjs"
@@ -187,6 +187,12 @@
     "ui": "pnpm --filter @repo/ui ui",
     "release": "changeset publish",
     "version-packages": "changeset version",
+    "version:sync": "node tools/scripts/version-manager.mjs sync",
+    "version:bump": "node tools/scripts/version-manager.mjs bump",
+    "version:major": "node tools/scripts/version-manager.mjs bump major",
+    "version:minor": "node tools/scripts/version-manager.mjs bump minor",
+    "version:patch": "node tools/scripts/version-manager.mjs bump patch",
+    "version:status": "node tools/scripts/version-manager.mjs status",
     "agent:verify": "bash tools/scripts/agent-verify.sh",
     "mcp:onboard": "node tools/scripts/mcp-onboard.cjs",
     "mcp:verify": "node tools/scripts/mcp-onboard.cjs --check",

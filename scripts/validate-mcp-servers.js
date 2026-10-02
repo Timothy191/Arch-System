@@ -2,6 +2,7 @@
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import https from 'node:https';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +39,32 @@ function checkPort(port, host = '127.0.0.1') {
   });
 }
 
-async function checkHttp(url) {
+async function checkHttp(url, customCA = null) {
+  if (customCA) {
+    return new Promise((resolve) => {
+      const options = {
+        method: 'GET',
+        rejectUnauthorized: false,
+        headers: { 'User-Agent': 'MCP-Client' },
+        timeout: 5000,
+      };
+      const req = https.request(url, options, (res) => {
+        res.resume();
+        resolve(
+          res.statusCode < 400 ||
+            res.statusCode === 401 ||
+            res.statusCode === 403 ||
+            res.statusCode === 405
+        );
+      });
+      req.on('error', () => resolve(false));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve(false);
+      });
+      req.end();
+    });
+  }
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -47,7 +73,7 @@ async function checkHttp(url) {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-    return res.status < 400 || res.status === 405;
+    return res.status < 400 || res.status === 401 || res.status === 403 || res.status === 405;
   } catch (_err) {
     return false;
   }
@@ -168,7 +194,9 @@ async function main() {
 
     // 1. HTTP/SSE Servers
     if (server.type === 'http' || server.url?.startsWith('http')) {
-      const isOnline = await checkHttp(server.url);
+      const caPath =
+        name === 'foursquare' ? '/home/tim/.local/ca-certs/foursquare-fortinet-ca.crt' : null;
+      const isOnline = await checkHttp(server.url, caPath);
       if (isOnline) {
         console.log(`${GREEN}✓ Reachable (${server.url})${NC}`);
       } else {
@@ -223,9 +251,19 @@ async function main() {
         }
       }
     } else if (name === 'redis') {
-      const isRedisUp = await checkPort(6379);
+      let redisPort = 6381;
+      if (server.args) {
+        for (const arg of server.args) {
+          if (typeof arg === 'string') {
+            const m = arg.match(/:(\d{4,5})/);
+            if (m) redisPort = parseInt(m[1], 10);
+          }
+        }
+      }
+      const isRedisUp =
+        (await checkPort(redisPort)) || (await checkPort(6381)) || (await checkPort(6379));
       if (!isRedisUp) {
-        console.log(`${YELLOW}⚠ Redis not running on port 6379${NC}`);
+        console.log(`${YELLOW}⚠ Redis not running on port ${redisPort} or 6379/6381${NC}`);
         warningsCount++;
         continue;
       }

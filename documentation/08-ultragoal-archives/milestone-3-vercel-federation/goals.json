@@ -1,0 +1,65 @@
+{
+  "goal-01": {
+    "status": "completed",
+    "description": "Establish formal CLI backend linkage for n8n-vercel under team_9puAfgXPqVuwIBENr1LmhCxO without mock IDs.",
+    "verification_criteria": "Vercel CLI auth handshake validated; real projectId prj_yZquU1rvd2nJuGXsudMJGbkll2iL populated by Vercel backend.",
+    "owner": "devops-engineer",
+    "evidence": "n8n-vercel/.vercel/project.json"
+  },
+  "goal-02": {
+    "status": "completed",
+    "description": "Segregate Redis cluster topology into distinct CACHE_REDIS_URL and QUEUE_REDIS_URL configurations.",
+    "verification_criteria": "Portal session/tag invalidation decoupled from BullMQ workflow queue execution.",
+    "owner": "backend-lead",
+    "evidence": "Arch-System/apps/portal/.env.production.example"
+  },
+  "goal-03": {
+    "status": "completed",
+    "description": "Parameterize Supabase project URLs across GitHub Actions CI/CD workflows (deploy.yml & ci.yml).",
+    "verification_criteria": "CI uses environment variable interpolation with fallback defaults without hardcoded project ref pinning.",
+    "owner": "devops-engineer",
+    "evidence": "Arch-System/.github/workflows/deploy.yml"
+  },
+  "goal-04": {
+    "status": "completed",
+    "description": "Standardize environment variable nomenclature across Next.js portal, NestJS proxy, and Redis serverless service.",
+    "verification_criteria": "Canonical REDIS_URL supported across all services with backwards-compatible connection option fallbacks.",
+    "owner": "architecture-critic",
+    "evidence": "arch-system-nest-proxy/src/app.module.ts"
+  },
+  "goal-05": {
+    "status": "completed",
+    "description": "Architect persistent BullMQ queue worker process to prevent serverless execution freezes on Vercel.",
+    "verification_criteria": "Queue dispatching separated from long-lived BullMQ job consumption.",
+    "owner": "backend-lead",
+    "evidence": "arch-system-nest-proxy/src/app.service.ts"
+  },
+  "goal-06": {
+    "status": "completed",
+    "description": "Embed standard HTTP container healthcheck in n8n-vercel Dockerfile.",
+    "verification_criteria": "HEALTHCHECK instruction tests n8n internal /healthz probe via dynamic port.",
+    "owner": "qa-security",
+    "evidence": "n8n-vercel/Dockerfile"
+  },
+  "goal-07": {
+    "status": "completed",
+    "description": "Formulate Turborepo Monorepo Consolidation RFC for arch-system-nest-proxy, redis, and n8n-vercel.",
+    "verification_criteria": "RFC defines package workspace boundaries, shared tsconfig, and unified build pipeline.",
+    "owner": "cto-hod-engineering",
+    "evidence": "Arch-System/documentation/05-wiki/rfc-monorepo-vercel-consolidation.md"
+  },
+  "goal-08": {
+    "status": "completed",
+    "description": "Extend zero-drift-watchdog discovery engine to audit federated multi-project Vercel workspaces.",
+    "verification_criteria": "Discovery engine traverses peer project roots and flags configuration divergence.",
+    "owner": "devops-engineer",
+    "evidence": "Arch-System/tools/zero-drift-watchdog/src/cli/discovery/vercel.mjs"
+  },
+  "goal-09": {
+    "status": "completed",
+    "description": "Implement automated canary deployment verification with synthetic smoke gate.",
+    "verification_criteria": "deploy-canary.yml verifies health status and metric stability before traffic cutover.",
+    "owner": "qa-security",
+    "evidence": "Arch-System/.github/workflows/deploy-canary.yml"
+  }
+}

@@ -21,7 +21,8 @@
     "./offline-storage": "./src/offline-storage.ts",
     "./inngest": "./src/inngest.ts",
     "./novu": "./src/novu.ts",
-    "./n8n": "./src/n8n.ts"
+    "./n8n": "./src/n8n.ts",
+    "./hardware": "./src/hardware/index.ts"
   },
   "private": true,
   "scripts": {

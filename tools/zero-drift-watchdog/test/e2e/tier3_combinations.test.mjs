@@ -62,8 +62,8 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
             commit: paritySha,
             branch: testBranch,
             statusWithLocal: 'identical',
-            aheadBy: 0,
-            behindBy: 0,
+            localAheadBy: 0,
+            localBehindBy: 0,
           },
           { commit: paritySha, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
         );
@@ -135,9 +135,9 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
           {
             commit: baseSha,
             branch: testBranch,
-            statusWithLocal: 'behind',
-            aheadBy: 0,
-            behindBy: 1,
+            statusWithLocal: 'ahead',
+            localAheadBy: 1,
+            localBehindBy: 0,
           },
           { commit: baseSha, deploymentId: 'dpl_1', url: 'app.vercel.app', state: 'READY' }
         );
@@ -202,8 +202,8 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
             commit: latestSha,
             branch: testBranch,
             statusWithLocal: 'identical',
-            aheadBy: 0,
-            behindBy: 0,
+            localAheadBy: 0,
+            localBehindBy: 0,
           },
           { commit: staleSha, deploymentId: 'dpl_old', url: 'app.vercel.app', state: 'READY' }
         );
@@ -268,9 +268,9 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
           {
             commit: githubSha,
             branch: testBranch,
-            statusWithLocal: 'behind',
-            aheadBy: 0,
-            behindBy: 1,
+            statusWithLocal: 'ahead',
+            localAheadBy: 1,
+            localBehindBy: 0,
           },
           { commit: vercelSha, deploymentId: 'dpl_ancient', url: 'app.vercel.app', state: 'READY' }
         );
@@ -343,8 +343,8 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
             commit: targetSha,
             branch: testBranch,
             statusWithLocal: 'identical',
-            aheadBy: 0,
-            behindBy: 0,
+            localAheadBy: 0,
+            localBehindBy: 0,
           },
           {
             commit: prevSha,
@@ -417,8 +417,8 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
             commit: remoteSha,
             branch: testBranch,
             statusWithLocal: 'diverged',
-            aheadBy: 2,
-            behindBy: 3,
+            localAheadBy: 2,
+            localBehindBy: 3,
           },
           { commit: remoteSha, deploymentId: 'dpl_div', url: 'app.vercel.app', state: 'READY' }
         );
@@ -475,9 +475,9 @@ describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
           {
             commit: aheadRemoteSha,
             branch: testBranch,
-            statusWithLocal: 'ahead',
-            aheadBy: 1,
-            behindBy: 0,
+            statusWithLocal: 'behind',
+            localAheadBy: 0,
+            localBehindBy: 1,
           },
           {
             commit: aheadRemoteSha,

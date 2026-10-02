@@ -79,7 +79,7 @@ const outfit = Outfit({
   adjustFontFallback: true,
 });
 
-const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.0.0.1';
+import { APP_VERSION } from '@/lib/version';
 
 export const metadata: Metadata = {
   title: 'Arch-Systems | Arch OS',
@@ -187,7 +187,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       Arch OS
                     </span>
                     <span className="text-[var(--text-muted)]/60">·</span>
-                    <span>v{PORTAL_VERSION}</span>
+                    <span>v{APP_VERSION}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <EveLogo className="h-3 w-auto text-[var(--text-secondary)]" />

@@ -1,0 +1,23 @@
+name: n8n Keep-Warm & Synthetic Health Monitor
+
+on:
+  schedule:
+    # Runs every 5 minutes to maintain container warmth and prevent scale-to-zero dormancy
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping n8n Health Probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Ping n8n /healthz
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://n8n-vercel-alpha.vercel.app/healthz")
+          echo "n8n /healthz responded with HTTP $STATUS"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::warning ::n8n health probe returned HTTP $STATUS"
+            exit 1
+          fi

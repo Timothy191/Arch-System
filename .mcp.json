@@ -76,10 +76,6 @@
       "command": "npx",
       "args": ["-y", "agentql-mcp"]
     },
-    "agenttrafficlab": {
-      "type": "http",
-      "url": "https://mcp.agenttrafficlab.com/mcp"
-    },
     "web-hygiene": {
       "type": "http",
       "url": "https://bruco3--web-hygiene-mcp.apify.actor/mcp"
@@ -127,6 +123,31 @@
       "args": ["-y", "@upstash/context7-mcp"],
       "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
+    },
+    "knowledge-rail": {
+      "command": "npx",
+      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
+      "description": "Deterministic semantic architecture enforcement & codebase navigation rail",
+      "type": "stdio"
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@0.4.0"],
+      "description": "Next.js DevTools AST & routing inspector",
+      "type": "stdio"
+    },
+    "composio": {
+      "url": "https://connect.composio.dev/mcp",
+      "description": "Composio For You MCP - connect apps to your agent",
+      "type": "http",
+      "headers": {
+        "x-consumer-api-key": "${COMPOSIO_CONSUMER_KEY}"
+      }
+    },
+    "foursquare": {
+      "url": "https://api.foursquare.com/v2/streaming/mcp/swarm-beta",
+      "description": "Foursquare Swarm Beta MCP - location & POI streaming",
+      "type": "http"
     }
   }
 }

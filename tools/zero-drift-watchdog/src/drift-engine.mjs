@@ -44,8 +44,8 @@ export { IN_FLIGHT_STATES, TimeoutError };
  * @property {string} commit
  * @property {string} branch
  * @property {'identical'|'ahead'|'behind'|'diverged'} [statusWithLocal]
- * @property {number} [aheadBy]
- * @property {number} [behindBy]
+ * @property {number} [localAheadBy]
+ * @property {number} [localBehindBy]
  */
 
 /**
@@ -111,8 +111,8 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
     commit: '',
     branch: safeLocal.branch || 'main',
     statusWithLocal: 'identical',
-    aheadBy: 0,
-    behindBy: 0,
+    localAheadBy: 0,
+    localBehindBy: 0,
   };
 
   const safeVercel = vercel || {
@@ -152,10 +152,10 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
   // 'ahead'    = remote is ahead of local (local is behind remote -> localBehind = true)
   // 'diverged' = remote and local have diverged (diverged = true)
   const status = safeGithub.statusWithLocal || 'identical';
-  const aheadBy = Number(safeGithub.aheadBy || 0);
-  const behindBy = Number(safeGithub.behindBy || 0);
+  const localAheadBy = Number(safeGithub.localAheadBy || 0);
+  const localBehindBy = Number(safeGithub.localBehindBy || 0);
 
-  const isDiverged = status === 'diverged' || (aheadBy > 0 && behindBy > 0);
+  const isDiverged = status === 'diverged' || (localAheadBy > 0 && localBehindBy > 0);
 
   let isLocalAhead = false;
   let isLocalBehind = false;
@@ -164,9 +164,9 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
     isLocalAhead = false;
     isLocalBehind = false;
   } else if (!isDiverged) {
-    if (status === 'behind' || (behindBy > 0 && aheadBy === 0)) {
+    if (status === 'ahead' || (localAheadBy > 0 && localBehindBy === 0)) {
       isLocalAhead = true;
-    } else if (status === 'ahead' || (aheadBy > 0 && behindBy === 0)) {
+    } else if (status === 'behind' || (localBehindBy > 0 && localAheadBy === 0)) {
       isLocalBehind = true;
     } else if (safeLocal.commit && !safeGithub.commit) {
       isLocalAhead = true;
@@ -205,8 +205,8 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
       target.repository ||
       (safeGithub['owner'] && safeGithub['repo']
         ? `${safeGithub['owner']}/${safeGithub['repo']}`
-        : 'plantcor/arch-system'),
-    vercelProject: target.vercelProject || target['project'] || 'prj_arch_system',
+        : 'unknown/unknown'),
+    vercelProject: target.vercelProject || target['project'] || 'unknown',
   };
 
   return {
@@ -225,8 +225,10 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
         commit: safeGithub.commit,
         branch: safeGithub.branch,
         statusWithLocal: safeGithub.statusWithLocal,
-        ...(safeGithub.aheadBy !== undefined ? { aheadBy: safeGithub.aheadBy } : {}),
-        ...(safeGithub.behindBy !== undefined ? { behindBy: safeGithub.behindBy } : {}),
+        ...(safeGithub.localAheadBy !== undefined ? { localAheadBy: safeGithub.localAheadBy } : {}),
+        ...(safeGithub.localBehindBy !== undefined
+          ? { localBehindBy: safeGithub.localBehindBy }
+          : {}),
       },
       vercel: {
         commit: safeVercel.commit,
@@ -795,14 +797,14 @@ export async function resolveDrift(report, options = {}) {
       commit: currentTargetSha,
       branch,
       statusWithLocal: 'identical',
-      aheadBy: 0,
-      behindBy: 0,
+      localAheadBy: 0,
+      localBehindBy: 0,
     };
   } else {
     finalGitHub = await inspectGitHubRemote(
       options.repoContext || {
-        owner: report.target.repository.split('/')[0] || 'plantcor',
-        repo: report.target.repository.split('/')[1] || 'arch-system',
+        owner: report.target.repository.split('/')[0],
+        repo: report.target.repository.split('/')[1],
         branch,
       },
       options.githubToken || process.env.GITHUB_TOKEN || '',
@@ -838,13 +840,18 @@ export async function reconcileDrift(options = {}) {
   const localGit = await inspectLocalGit(cwd, options);
 
   // 2. Discover & Inspect GitHub
-  let githubContext = await discoverGitHubContext(cwd, options).catch(() => ({
-    owner: options.team ? options.team.replace(/^team[_-]/, '') : 'plantcor',
-    repo: options.project
-      ? options.project.replace(/^prj[_-]/, '').replace(/_/g, '-')
-      : 'arch-system',
-    branch: options.branch || localGit.branch || 'main',
-  }));
+  let githubContext = await discoverGitHubContext(cwd, options).catch((err) => {
+    if (!options.team || !options.project) {
+      throw new Error(
+        'Unable to infer GitHub repository context. Please specify --repo or run inside a GitHub repository.'
+      );
+    }
+    return {
+      owner: options.team.replace(/^team[_-]/, ''),
+      repo: options.project.replace(/^prj[_-]/, '').replace(/_/g, '-'),
+      branch: options.branch || localGit.branch || 'main',
+    };
+  });
   if (options.branch) githubContext.branch = options.branch;
   if (options.repo && options.repo.includes('/')) {
     const [o, r] = options.repo.split('/');
@@ -869,8 +876,18 @@ export async function reconcileDrift(options = {}) {
     fallbackToDirName: false,
     ...options,
   }).catch(() => ({
-    projectId: options.project || options.projectId || 'prj_arch_system',
-    teamId: options.team || options.teamId || 'team_plantcor',
+    projectId:
+      options.project ||
+      options.projectId ||
+      (() => {
+        throw new Error('Missing project for Vercel infer');
+      })(),
+    teamId:
+      options.team ||
+      options.teamId ||
+      (() => {
+        throw new Error('Missing team for Vercel infer');
+      })(),
     token: options.vercelToken || options.token || resolveVercelToken(options),
     deployHookUrl: options.deployHookUrl,
   }));

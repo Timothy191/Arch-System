@@ -22,8 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('auth_id', user.id)
     .single();
 
-  const isAdmin =
-    employee?.role === 'admin' || user.email?.toLowerCase() === 'timothyoniel558@gmail.com';
+  const isAdmin = employee?.role === 'admin';
 
   if (!isAdmin) {
     redirect('/');
@@ -86,9 +85,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
               SUPER-ADMIN
             </span>
-            <span className="text-xs text-zinc-500 font-mono hidden md:inline">
-              {user.email || 'timothyoniel558@gmail.com'}
-            </span>
+            <span className="text-xs text-zinc-500 font-mono hidden md:inline">{user.email}</span>
           </div>
         </div>
       </header>

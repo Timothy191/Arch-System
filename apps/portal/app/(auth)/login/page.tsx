@@ -5,8 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
-
-const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.4.1';
+import { APP_VERSION } from '@/lib/version';
 
 interface LoginPageProps {
   searchParams?: Promise<{ redirect?: string }>;
@@ -109,7 +108,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   Arch Systems
                 </h1>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500 mt-0.5">
-                  Arch OS v{PORTAL_VERSION}
+                  Arch OS v{APP_VERSION}
                 </p>
               </div>
             </div>
@@ -144,7 +143,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         <footer className="mt-8 text-center space-y-2 select-none">
           <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Secure industrial access • Arch-Systems v{PORTAL_VERSION}</span>
+            <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
           <div className="flex justify-center gap-6 text-xs text-neutral-400">
             <a className="hover:text-neutral-700 transition-colors" href="/docs">

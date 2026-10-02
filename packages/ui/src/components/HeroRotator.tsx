@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
 import { HeroCardContent } from './HeroCardContent';
@@ -20,6 +20,8 @@ export interface Panel {
   iconBgColor: string;
   primary: { href: string; label: string; icon: React.ReactNode };
   secondary?: { href: string; label: string; icon: React.ReactNode };
+  assetOverline?: string;
+  assetSubtitle?: string;
 }
 
 export interface HeroRotatorProps {
@@ -66,42 +68,105 @@ function HeroSlide({
   if (diff > total / 2) diff -= total;
   if (diff < -total / 2) diff += total;
 
-  let slideClass = '';
-  if (isActive) {
-    slideClass = 'opacity-100 z-10 translate-x-0 scale-100';
-  } else if (diff === 1 || (diff < 0 && diff !== -1 && idx === 0 && activeIndex === total - 1)) {
-    slideClass = 'opacity-0 -z-10 translate-x-[20%] scale-95 pointer-events-none';
-  } else if (diff === -1 || (diff > 0 && diff !== 1 && idx === total - 1 && activeIndex === 0)) {
-    slideClass = 'opacity-0 -z-10 -translate-x-[20%] scale-95 pointer-events-none';
+  const isCenter = isActive || diff === 0;
+  const isLeft = diff === -1 || (diff < 0 && diff !== -1 && idx === 0 && activeIndex === total - 1);
+  const isRight = diff === 1 || (diff > 0 && diff !== 1 && idx === total - 1 && activeIndex === 0);
+
+  let transform = 'translate3d(0, 0, -250px) scale(0.7)';
+  let opacity = 0;
+  let zIndex = 0;
+  let filter = 'blur(4px)';
+  let pointerEvents: 'auto' | 'none' = 'none';
+  let maskStyle: React.CSSProperties = {};
+  let cursorClass = '';
+
+  if (isCenter) {
+    transform = 'translate3d(0%, 0, 0) rotateY(0deg) scale(1)';
+    opacity = 1;
+    zIndex = 30;
+    filter = 'blur(0px)';
+    pointerEvents = 'auto';
+  } else if (isLeft) {
+    transform = 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)';
+    opacity = 0.42;
+    zIndex = 10;
+    filter = 'blur(0px)';
+    pointerEvents = 'auto';
+    cursorClass = 'cursor-pointer hover:opacity-65';
+    maskStyle = {
+      maskImage: 'linear-gradient(to right, transparent, black 40%)',
+      WebkitMaskImage: 'linear-gradient(to right, transparent, black 40%)',
+    };
+  } else if (isRight) {
+    transform = 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)';
+    opacity = 0.42;
+    zIndex = 10;
+    filter = 'blur(0px)';
+    pointerEvents = 'auto';
+    cursorClass = 'cursor-pointer hover:opacity-65';
+    maskStyle = {
+      maskImage: 'linear-gradient(to left, transparent, black 40%)',
+      WebkitMaskImage: 'linear-gradient(to left, transparent, black 40%)',
+    };
   } else {
-    slideClass = 'opacity-0 -z-20 scale-90 pointer-events-none';
+    transform =
+      diff < 0
+        ? 'translate3d(-100%, 0, -250px) rotateY(35deg) scale(0.7)'
+        : 'translate3d(100%, 0, -250px) rotateY(-35deg) scale(0.7)';
+    opacity = 0;
+    zIndex = 0;
+    filter = 'blur(4px)';
+    pointerEvents = 'none';
   }
+
+  const handleClick = () => {
+    if (!isCenter && (isLeft || isRight)) {
+      onJumpTo(idx);
+    }
+  };
 
   return (
     <div
       role="group"
       aria-roledescription="slide"
       aria-label={`${idx + 1} of ${total}: ${panel.title}`}
-      inert={!isActive ? true : undefined}
-      aria-hidden={!isActive}
+      inert={!isCenter ? true : undefined}
+      aria-hidden={!isCenter}
+      onClick={handleClick}
       className={cn(
-        'absolute inset-0 w-full h-full will-change-transform transform-gpu',
-        'transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        slideClass
+        'absolute inset-x-0 mx-auto w-[82%] sm:w-[78%] lg:w-[72%] max-w-[760px] h-full will-change-[transform,opacity] transform-gpu',
+        cursorClass
       )}
+      style={{
+        transform,
+        opacity,
+        zIndex,
+        filter,
+        pointerEvents,
+        transformStyle: 'preserve-3d',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        transition:
+          'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
+        ...maskStyle,
+      }}
     >
       <div
         className={cn(
           'relative h-full w-full rounded-2xl overflow-hidden select-none',
-          'bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window',
-          'transition-[shadow,transform] duration-500 ease-out',
-          isActive && 'hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1'
+          'bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06]',
+          'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          isCenter && 'hover:-translate-y-1'
         )}
+        style={{
+          boxShadow:
+            'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 20px 45px -12px rgba(15, 23, 42, 0.18)',
+        }}
       >
         <HeroCardContent
           panel={panel}
           idx={idx}
-          isActive={isActive}
+          isActive={isCenter}
           failedImages={failedImages}
           onImageError={onImageError}
           incidentCount={incidentCount}
@@ -123,6 +188,7 @@ export function HeroRotator({
   const [isHovering, setIsHovering] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [failedImages, setFailedImages] = useState(new Set<string>());
+  const touchStartX = useRef<number | null>(null);
 
   const total = panels.length;
 
@@ -162,52 +228,87 @@ export function HeroRotator({
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         prevSlide();
+      } else if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        setIsManuallyPaused((p) => !p);
       }
     },
     [total, nextSlide, prevSlide]
   );
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches?.[0]) {
+      touchStartX.current = e.touches[0].clientX;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const clientX = e.changedTouches?.[0]?.clientX;
+    if (typeof clientX === 'number') {
+      const diff = clientX - touchStartX.current;
+      if (diff < -CONFIG.swipeThreshold) {
+        nextSlide();
+      } else if (diff > CONFIG.swipeThreshold) {
+        prevSlide();
+      }
+    }
+    touchStartX.current = null;
+  };
+
   return (
     <div
-      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl max-w-4xl mx-auto"
+      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl max-w-5xl mx-auto"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
+      role="region"
       aria-roledescription="carousel"
       aria-label="Department Hero Highlights"
     >
-      <motion.div
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={(e, { offset, velocity }) => {
-          const swipe = offset.x;
-          if (swipe < -CONFIG.swipeThreshold || velocity.x < -500) {
-            nextSlide();
-          } else if (swipe > CONFIG.swipeThreshold || velocity.x > 500) {
-            prevSlide();
-          }
+      <div
+        className="relative w-full overflow-visible"
+        style={{
+          perspective: '1400px',
+          WebkitPerspective: '1400px',
+          transformStyle: 'preserve-3d',
         }}
-        className="relative w-full cursor-grab active:cursor-grabbing overflow-visible"
-        style={{ height: 440, touchAction: 'pan-y' }}
       >
-        {panels.map((panel, idx) => (
-          <HeroSlide
-            key={panel.id}
-            panel={panel}
-            idx={idx}
-            activeIndex={activeIndex}
-            total={total}
-            isActive={idx === activeIndex}
-            failedImages={failedImages}
-            onImageError={handleImageError}
-            onJumpTo={jumpToSlide}
-            incidentCount={incidentCount}
-            breakdownCount={breakdownCount}
-            offlineMachineCount={offlineMachineCount}
-          />
-        ))}
-      </motion.div>
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(_e, { offset, velocity }) => {
+            const swipe = offset.x;
+            if (swipe < -CONFIG.swipeThreshold || velocity.x < -500) {
+              nextSlide();
+            } else if (swipe > CONFIG.swipeThreshold || velocity.x > 500) {
+              prevSlide();
+            }
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="relative w-full cursor-grab active:cursor-grabbing overflow-visible touch-pan-y"
+          style={{ height: 440, transformStyle: 'preserve-3d' }}
+        >
+          {panels.map((panel, idx) => (
+            <HeroSlide
+              key={panel.id}
+              panel={panel}
+              idx={idx}
+              activeIndex={activeIndex}
+              total={total}
+              isActive={idx === activeIndex}
+              failedImages={failedImages}
+              onImageError={handleImageError}
+              onJumpTo={jumpToSlide}
+              incidentCount={incidentCount}
+              breakdownCount={breakdownCount}
+              offlineMachineCount={offlineMachineCount}
+            />
+          ))}
+        </motion.div>
+      </div>
 
       {total > 1 && (
         <div className="mt-5 flex items-center justify-between px-1">

@@ -52,6 +52,7 @@
     "services/integrations/**",
     "scripts/autonomous-ui-delegator.mjs",
     "scripts/codemods/remove-dark-classes.cjs",
+    "scripts/sync-integrations-mcp.mjs",
     "scripts/sync-mcp-config.js",
     "scripts/test-langfuse-tracing.mjs",
     "scripts/validate-mcp-servers.js",

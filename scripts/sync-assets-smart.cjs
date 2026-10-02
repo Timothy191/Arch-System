@@ -45,9 +45,14 @@ function getAssetsChecksum(dir) {
   return createHash('sha256').update(combined).digest('hex');
 }
 
-if (!existsSync(ASSETS_DIR)) {
-  console.log('⚠️  No assets directory found. Skipping sync.');
-  process.exit(0);
+// Always ensure automated versioning and build metadata are synchronized
+try {
+  const versionManager = path.join(REPO_ROOT, 'tools/scripts/version-manager.mjs');
+  if (existsSync(versionManager)) {
+    execSync(`node "${versionManager}" sync`, { stdio: 'inherit' });
+  }
+} catch (verErr) {
+  console.warn('⚠️  Warning: Version sync failed:', verErr.message);
 }
 
 const currentChecksum = getAssetsChecksum(ASSETS_DIR);

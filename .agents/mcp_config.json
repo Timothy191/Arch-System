@@ -25,7 +25,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-postgres@0.6.2",
-        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
+        "${DATABASE_POOLER_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
       ]
     },
     "redis": {
@@ -35,7 +35,7 @@
         "redis-mcp-server",
         "redis-mcp-server",
         "--url",
-        "redis://127.0.0.1:6379/0"
+        "redis://127.0.0.1:6381/0"
       ]
     },
     "workos": {
@@ -90,10 +90,6 @@
       "command": "npx",
       "args": ["-y", "agentql-mcp"]
     },
-    "agenttrafficlab": {
-      "type": "http",
-      "url": "https://mcp.agenttrafficlab.com/mcp"
-    },
     "web-hygiene": {
       "type": "http",
       "url": "https://bruco3--web-hygiene-mcp.apify.actor/mcp"
@@ -145,6 +141,19 @@
       "args": ["mcp-server-fetch"],
       "description": "Web Content Fetcher (Zero-Auth)",
       "type": "stdio"
+    },
+    "composio": {
+      "url": "https://connect.composio.dev/mcp",
+      "description": "Composio For You MCP - connect apps to your agent",
+      "type": "http",
+      "headers": {
+        "x-consumer-api-key": "${COMPOSIO_CONSUMER_KEY}"
+      }
+    },
+    "foursquare": {
+      "url": "https://api.foursquare.com/v2/streaming/mcp/swarm-beta",
+      "description": "Foursquare Swarm Beta MCP - location & POI streaming",
+      "type": "http"
     }
   }
 }

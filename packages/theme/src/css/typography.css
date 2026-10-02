@@ -1,21 +1,15 @@
 /**
  * Arch System — Typography overrides
+ * Configures robust heading typography using the application's loaded font hierarchy
+ * (Outfit / Inter / system-ui fallback), eliminating missing font asset 404 network requests.
  */
 
-@font-face {
-  font-family: Anurati;
-  src: url("/fonts/Anurati-Regular.otf") format("opentype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Apply Anurati exclusively to heading elements */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: Anurati, var(--font-sans), sans-serif;
+  font-family: var(--font-outfit), var(--font-sans), system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
 }

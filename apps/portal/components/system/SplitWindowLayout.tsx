@@ -256,135 +256,143 @@ function GitHubMockView() {
   ];
 
   return (
-    <div className="p-4 space-y-4 text-[13px] overflow-y-auto flex-1">
-      {/* Branch & Status */}
-      <div className="flex items-center justify-between bg-black/[0.02] border border-black/[0.05] p-3 rounded-xl">
-        <div className="flex items-center gap-2">
-          <GitBranch className="w-4 h-4 text-[var(--text-secondary)]" />
-          <span className="font-semibold text-[var(--text-heading)]">master</span>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="bg-amber-500/10 border-b border-amber-500/20 px-3 py-1.5 text-[11px] text-amber-800 flex items-center justify-between font-medium shrink-0">
+        <span>⚠️ Developer Preview — Simulated GitHub Integration</span>
+        <span className="text-[10px] font-mono uppercase bg-amber-200/60 px-1.5 py-0.5 rounded font-bold">
+          PROTOTYPE
+        </span>
+      </div>
+      <div className="p-4 space-y-4 text-[13px] overflow-y-auto flex-1">
+        {/* Branch & Status */}
+        <div className="flex items-center justify-between bg-black/[0.02] border border-black/[0.05] p-3 rounded-xl">
+          <div className="flex items-center gap-2">
+            <GitBranch className="w-4 h-4 text-[var(--text-secondary)]" />
+            <span className="font-semibold text-[var(--text-heading)]">master</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[var(--accent-green)] font-medium">
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>CI Quality Gate Passed</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[var(--accent-green)] font-medium">
-          <svg
-            className="w-4 h-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+
+        {/* Tabs */}
+        <div className="flex border-b border-black/[0.06] text-[12px] font-semibold text-[var(--text-muted)]">
+          <button
+            type="button"
+            onClick={() => setTab('code')}
+            className={cn(
+              'pb-2 px-3 border-b-2 transition-all',
+              tab === 'code'
+                ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
+                : 'border-transparent hover:text-[var(--text-secondary)]'
+            )}
           >
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
-          </svg>
-          <span>CI Quality Gate Passed</span>
+            Commits
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('pulls')}
+            className={cn(
+              'pb-2 px-3 border-b-2 transition-all',
+              tab === 'pulls'
+                ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
+                : 'border-transparent hover:text-[var(--text-secondary)]'
+            )}
+          >
+            Pull Requests (1)
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('issues')}
+            className={cn(
+              'pb-2 px-3 border-b-2 transition-all',
+              tab === 'issues'
+                ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
+                : 'border-transparent hover:text-[var(--text-secondary)]'
+            )}
+          >
+            Issues (2)
+          </button>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-black/[0.06] text-[12px] font-semibold text-[var(--text-muted)]">
-        <button
-          type="button"
-          onClick={() => setTab('code')}
-          className={cn(
-            'pb-2 px-3 border-b-2 transition-all',
-            tab === 'code'
-              ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
-              : 'border-transparent hover:text-[var(--text-secondary)]'
-          )}
-        >
-          Commits
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('pulls')}
-          className={cn(
-            'pb-2 px-3 border-b-2 transition-all',
-            tab === 'pulls'
-              ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
-              : 'border-transparent hover:text-[var(--text-secondary)]'
-          )}
-        >
-          Pull Requests (1)
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('issues')}
-          className={cn(
-            'pb-2 px-3 border-b-2 transition-all',
-            tab === 'issues'
-              ? 'border-[var(--accent-blue)] text-[var(--accent-blue)]'
-              : 'border-transparent hover:text-[var(--text-secondary)]'
-          )}
-        >
-          Issues (2)
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      <div className="space-y-3">
-        {tab === 'code' && (
-          <div className="space-y-2.5">
-            <p className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-              Recent Commits
-            </p>
-            {commits.map((c) => (
-              <div
-                key={c.hash}
-                className="bg-black/[0.015] border border-black/[0.04] p-3 rounded-lg flex flex-col gap-1 hover:bg-black/[0.03] transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-blue-600 hover:underline cursor-pointer">
-                    {c.hash}
-                  </span>
-                  <span className="text-[11px] text-[var(--text-muted)]">{c.date}</span>
+        {/* Tab Content */}
+        <div className="space-y-3">
+          {tab === 'code' && (
+            <div className="space-y-2.5">
+              <p className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                Recent Commits
+              </p>
+              {commits.map((c) => (
+                <div
+                  key={c.hash}
+                  className="bg-black/[0.015] border border-black/[0.04] p-3 rounded-lg flex flex-col gap-1 hover:bg-black/[0.03] transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-600 hover:underline cursor-pointer">
+                      {c.hash}
+                    </span>
+                    <span className="text-[11px] text-[var(--text-muted)]">{c.date}</span>
+                  </div>
+                  <p className="text-[12px] text-[var(--text-heading)] leading-snug">{c.msg}</p>
+                  <span className="text-[10px] text-[var(--text-muted)]">By {c.author}</span>
                 </div>
-                <p className="text-[12px] text-[var(--text-heading)] leading-snug">{c.msg}</p>
-                <span className="text-[10px] text-[var(--text-muted)]">By {c.author}</span>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {tab === 'pulls' && (
-          <div className="bg-black/[0.015] border border-black/[0.04] p-4 rounded-lg space-y-2">
-            <div className="flex items-start gap-2">
-              <svg
-                className="w-4 h-4 text-[var(--accent-green)] mt-0.5 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-              <div>
-                <p className="font-bold text-[13px] text-[var(--text-heading)] leading-snug">
-                  #105 Feature: Access Control Card Printing & 5-Entity QR RFID Generator
-                </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-1">
-                  Opened by Timothy • 13 unit tests passed
-                </p>
+          {tab === 'pulls' && (
+            <div className="bg-black/[0.015] border border-black/[0.04] p-4 rounded-lg space-y-2">
+              <div className="flex items-start gap-2">
+                <svg
+                  className="w-4 h-4 text-[var(--accent-green)] mt-0.5 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <div>
+                  <p className="font-bold text-[13px] text-[var(--text-heading)] leading-snug">
+                    #105 Feature: Access Control Card Printing & 5-Entity QR RFID Generator
+                  </p>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                    Opened by Timothy • 13 unit tests passed
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {tab === 'issues' && (
-          <div className="space-y-2">
-            <div className="bg-black/[0.015] border border-black/[0.04] p-3 rounded-lg flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5" />
-              <div>
-                <p className="font-bold leading-snug text-[var(--text-heading)]">
-                  #104 Magicard Neo 300 direct spooling & CUPS verification
-                </p>
-                <p className="text-[10.5px] text-[var(--text-muted)] mt-0.5">Resolved in #105</p>
+          {tab === 'issues' && (
+            <div className="space-y-2">
+              <div className="bg-black/[0.015] border border-black/[0.04] p-3 rounded-lg flex items-start gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5" />
+                <div>
+                  <p className="font-bold leading-snug text-[var(--text-heading)]">
+                    #104 Magicard Neo 300 direct spooling & CUPS verification
+                  </p>
+                  <p className="text-[10.5px] text-[var(--text-muted)] mt-0.5">Resolved in #105</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
@@ -512,12 +520,13 @@ function WhatsAppWebView() {
               <h2 className="text-xs font-bold tracking-tight truncate leading-none">
                 WhatsApp Operations Chat
               </h2>
-              <span className="flex items-center gap-1 text-[10px] bg-emerald-700/80 px-1.5 py-0.5 rounded-full font-medium text-emerald-100">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
-                Live
+              <span className="flex items-center gap-1 text-[10px] bg-amber-600/90 px-1.5 py-0.5 rounded-full font-medium text-amber-50">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-300" />
+                Prototype Demo
               </span>
             </div>
             <p className="text-[10.5px] text-emerald-100/90 truncate mt-0.5">
+              Simulated Field Dispatch • Non-Production •{' '}
               {currentChannelObj
                 ? `${currentChannelObj.icon} ${currentChannelObj.name}`
                 : 'Online Dispatch Network'}

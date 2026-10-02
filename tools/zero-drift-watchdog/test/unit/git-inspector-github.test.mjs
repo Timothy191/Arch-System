@@ -300,8 +300,8 @@ describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
       const res = await compareCommits(testContext, shaA, shaA);
       assert.deepEqual(res, {
         status: 'identical',
-        aheadBy: 0,
-        behindBy: 0,
+        localAheadBy: 0,
+        localBehindBy: 0,
         totalCommits: 0,
       });
     });
@@ -323,8 +323,8 @@ describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
 
       const res = await compareCommits(testContext, shaA, shaB, { fetchImpl: mockFetch });
       assert.equal(res.status, 'ahead');
-      assert.equal(res.aheadBy, 3);
-      assert.equal(res.behindBy, 0);
+      assert.equal(res.localAheadBy, 3);
+      assert.equal(res.localBehindBy, 0);
       assert.equal(res.totalCommits, 3);
     });
 
@@ -368,8 +368,8 @@ describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
       assert.equal(res.commit, remoteSha);
       assert.equal(res.branch, 'main');
       assert.equal(res.statusWithLocal, 'identical');
-      assert.equal(res.aheadBy, 0);
-      assert.equal(res.behindBy, 0);
+      assert.equal(res.localAheadBy, 0);
+      assert.equal(res.localBehindBy, 0);
     });
 
     it('computes statusWithLocal using compare API when local differs', async () => {
@@ -404,8 +404,8 @@ describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
 
       assert.equal(res.commit, remoteSha);
       assert.equal(res.statusWithLocal, 'ahead');
-      assert.equal(res.aheadBy, 2);
-      assert.equal(res.behindBy, 0);
+      assert.equal(res.localAheadBy, 2);
+      assert.equal(res.localBehindBy, 0);
     });
   });
 

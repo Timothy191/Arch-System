@@ -79,10 +79,12 @@ export interface KyselyDatabase {
  *   .execute();
  * ```
  */
-let globalKyselyInstance: Kysely<KyselyDatabase> | null = null;
+const globalForKysely = globalThis as unknown as {
+  kyselyInstance: Kysely<KyselyDatabase> | undefined;
+};
 
 export function createKyselyClient() {
-  if (globalKyselyInstance) return globalKyselyInstance;
+  if (globalForKysely.kyselyInstance) return globalForKysely.kyselyInstance;
 
   const url = process.env.DATABASE_URL ?? process.env.SUPABASE_DATABASE_URL;
 
@@ -101,6 +103,8 @@ export function createKyselyClient() {
     }),
   });
 
-  globalKyselyInstance = new Kysely<KyselyDatabase>({ dialect });
-  return globalKyselyInstance;
+  const db = new Kysely<KyselyDatabase>({ dialect });
+  if (process.env.NODE_ENV !== 'production') globalForKysely.kyselyInstance = db;
+  else globalForKysely.kyselyInstance = db;
+  return db;
 }

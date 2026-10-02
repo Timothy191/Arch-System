@@ -196,6 +196,22 @@ describe('proxy', () => {
     expect(res.headers.get('location')).toContain('unauthorized_department');
   });
 
+  it('does NOT allow hardcoded email bypass to access /admin if employee role is not admin', async () => {
+    buildProxyMock({
+      user: { id: 'auth-1', email: 'timothyoniel558@gmail.com' },
+      employee: {
+        role: 'operator',
+        department_id: 'dept-1',
+        accessible_departments: [],
+      },
+    });
+    (cacheGet as jest.Mock).mockResolvedValue(null);
+    const req = makeRequest('/admin');
+    const res = await proxy(req);
+    expect(res.status).toBe(307);
+    expect(res.headers.get('location')).toContain('unauthorized_department');
+  });
+
   it('allows admin to access /admin', async () => {
     buildProxyMock({
       employee: {

@@ -1,3 +1,0 @@
-sed -i 's/cacheGet: jest.fn(async () => null),/cacheGet: jest.fn(async (key) => key.includes("arch:auth:employee") ? { id: "emp-1", role: "admin", department_id: "dept-1", accessible_departments: [] } : null),/' apps/portal/setupTests.ts
-sed -i 's/expect(res.success).toBe(false);/const res = await upsertDrillOperationAction(validPayload);\n    expect(res.success).toBe(false);/' apps/portal/app/\(departments\)/drilling/drilling-operations/actions.test.ts
-sed -i 's/expect(res.success).toBe(true);/const res = await upsertDrillOperationAction(validPayload);\n    expect(res.success).toBe(true);/' apps/portal/app/\(departments\)/drilling/drilling-operations/actions.test.ts

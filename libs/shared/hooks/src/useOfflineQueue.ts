@@ -1,6 +1,7 @@
+import { del, get, set } from 'idb-keyval';
 import { toast } from 'sonner';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
 type Hlc = { wall: number; counter: number; node: string };
 
@@ -25,6 +26,43 @@ interface OfflineQueueState {
   setOnlineStatus: (_status: boolean) => void;
   sync: () => Promise<void>;
 }
+
+const memoryFallback = new Map<string, string>();
+
+const idbStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    if (typeof indexedDB === 'undefined') {
+      return memoryFallback.get(name) || null;
+    }
+    try {
+      return (await get(name)) || null;
+    } catch {
+      return memoryFallback.get(name) || null;
+    }
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    if (typeof indexedDB === 'undefined') {
+      memoryFallback.set(name, value);
+      return;
+    }
+    try {
+      await set(name, value);
+    } catch {
+      memoryFallback.set(name, value);
+    }
+  },
+  removeItem: async (name: string): Promise<void> => {
+    if (typeof indexedDB === 'undefined') {
+      memoryFallback.delete(name);
+      return;
+    }
+    try {
+      await del(name);
+    } catch {
+      memoryFallback.delete(name);
+    }
+  },
+};
 
 const compareHlc = (a: Hlc, b: Hlc) =>
   a.wall - b.wall || a.counter - b.counter || a.node.localeCompare(b.node);
@@ -103,6 +141,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
     }),
     {
       name: 'arch-offline-queue',
+      storage: createJSONStorage(() => idbStorage),
     }
   )
 );

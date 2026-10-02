@@ -267,7 +267,7 @@ These hard stops are **always in force**, with no approval path:
 | Resource                       | Location               | Purpose                                                                 |
 | :----------------------------- | :--------------------- | :---------------------------------------------------------------------- |
 | **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table          |
-| **Engineering Rules**          | `.agents/rules/`       | 21 permanent rule files covering security, databases, testing, thinking |
+| **Engineering Rules**          | `.agents/rules/`       | 22 permanent rule files covering security, verification, testing, thinking |
 | **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                            |
 | **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                        |
 | **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                   |
@@ -275,4 +275,4 @@ These hard stops are **always in force**, with no approval path:
 | **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                         |
 | **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                        |
 
-Last updated: 2026-09-30
+Last updated: 2026-10-02
