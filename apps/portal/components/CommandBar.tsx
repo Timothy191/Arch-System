@@ -177,8 +177,13 @@ export function CommandBar() {
         setOpen(false);
       }
     };
+    const onOpenEvent = () => setOpen(true);
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('open-command-bar', onOpenEvent);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('open-command-bar', onOpenEvent);
+    };
   }, []);
 
   useEffect(() => {

@@ -13,36 +13,17 @@ import { AriaLauncher } from '@/components/ai/AriaLauncher';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
-import { SystemTrayPill } from '@/components/system/SystemTray';
 import { WebVitalsReporter } from '@/components/WebVitalsReporter';
 import ClientProviders from './ClientProviders';
-
-const HeaderWidgets = dynamic(
-  () =>
-    import('@/components/HeaderWidgets').then((m) => ({
-      default: m.HeaderWidgets,
-    })),
-  {
-    loading: () => (
-      <div className="flex items-center gap-3" aria-hidden="true">
-        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
-        <div className="w-20 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
-        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
-      </div>
-    ),
-  }
-);
 
 const CommandBar = dynamic(() =>
   import('@/components/CommandBar').then((m) => ({ default: m.CommandBar }))
 );
 
-// AGENT-TRACE: MacMenuBar deferred via next/dynamic to remove framer-motion
-// from the shared layout chunk. Without this, framer-motion lands in every
-// page's bundle (including error.tsx, global-error.tsx) because MacMenuBar
-// is synchronously imported in a Server Component layout boundary.
-const MacMenuBar = dynamic(
-  () => import('@repo/ui/MacMenuBar').then((m) => ({ default: m.MacMenuBar })),
+// AGENT-TRACE: OperationsAppBar deferred via next/dynamic to remove framer-motion
+// from the shared layout chunk.
+const OperationsAppBar = dynamic(
+  () => import('@repo/ui/OperationsAppBar').then((m) => ({ default: m.OperationsAppBar })),
   {
     ssr: true,
   }
@@ -155,23 +136,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             <OfflineBanner />
             <AriaLauncher />
 
-            {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
-            <header aria-label="Global navigation">
-              <MacMenuBar
-                rightSlot={
-                  <nav id="navigation" aria-label="Main menu">
-                    <div className="flex items-center gap-3">
-                      <SystemTrayPill />
-                      <HeaderWidgets />
-                    </div>
-                  </nav>
-                }
-              />
+            {/* Global Operations Navigation Header (WCAG 1.3.1) */}
+            <header aria-label="Operations navigation">
+              <OperationsAppBar />
             </header>
 
             {/* Content wrapper with main landmark (WCAG 1.3.1) */}
             <div className="relative z-primary-card max-w-[1920px] mx-auto shadow-window">
-              <main id="main-content" aria-label="Main content" className="relative pt-16">
+              <main id="main-content" aria-label="Main content" className="relative pt-20">
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
 

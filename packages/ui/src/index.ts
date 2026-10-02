@@ -20,6 +20,7 @@ export * from './components/KPI';
 export * from './components/Logo';
 export * from './components/MacMenuBar';
 export * from './components/MacTitleBar';
+export * from './components/header';
 // Motion Primitives
 export * from './components/motion/AnimeNumber';
 export * from './components/motion/AnimeStagger';
