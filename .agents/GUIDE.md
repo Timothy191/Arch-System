@@ -82,6 +82,8 @@ pnpm --filter portal test -- --testPathPatterns="<name>"   # Single test file
 pnpm test:e2e                 # Playwright (requires portal on :3000 + Chromium)
 pnpm test:e2e:visual          # Theme smoke snapshots only
 pnpm test:a11y                # Storybook a11y
+pnpm audit:browser            # Closed-loop browser, devtools & accessibility probe
+pnpm audit:perf               # Headless Lighthouse performance and speed index audit
 pnpm turbo run test --filter=...[HEAD~1]   # Only tests affected by last commit
 ```
 
@@ -264,15 +266,15 @@ These hard stops are **always in force**, with no approval path:
 
 ## 10. Cross-References
 
-| Resource                       | Location               | Purpose                                                                 |
-| :----------------------------- | :--------------------- | :---------------------------------------------------------------------- |
-| **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table          |
+| Resource                       | Location               | Purpose                                                                    |
+| :----------------------------- | :--------------------- | :------------------------------------------------------------------------- |
+| **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table             |
 | **Engineering Rules**          | `.agents/rules/`       | 22 permanent rule files covering security, verification, testing, thinking |
-| **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                            |
-| **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                        |
-| **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                   |
-| **Memory Base**                | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph                  |
-| **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                         |
-| **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                        |
+| **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                               |
+| **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                           |
+| **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                      |
+| **Memory Base**                | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph                     |
+| **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                            |
+| **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                           |
 
 Last updated: 2026-10-02

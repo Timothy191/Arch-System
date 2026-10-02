@@ -93,6 +93,7 @@
     "audit:hooks": "node tools/audits/audit-hooks-and-clients.cjs",
     "audit:vercel": "node tools/scripts/vercel-preflight.cjs",
     "audit:perf": "lighthouse http://localhost:3000 --chrome-flags=\"--headless\" --output json --output-path=./temp/lighthouse-report.json",
+    "audit:browser": "node tools/audits/browser-devtools-audit.cjs",
     "code:health": "repowise health",
     "code:dead": "repowise dead-code",
     "code:risk": "repowise risk",
