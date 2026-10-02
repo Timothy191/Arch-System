@@ -42,9 +42,9 @@
       "id": "engineering",
       "name": "Software Engineering & Architecture",
       "lead_role": "Principal Systems Engineer",
-      "authority_ceiling": "L2",
+      "authority_ceiling": "L3",
       "spec_path": "departments/engineering.md",
-      "assigned_loops": ["codebase-health", "deployment-learning-loop"]
+      "assigned_loops": ["codebase-health", "deployment-learning-loop", "federation-deploy"]
     },
     "control-room": {
       "id": "control-room",
