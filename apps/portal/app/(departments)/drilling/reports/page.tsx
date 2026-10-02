@@ -1,3 +1,4 @@
+import '@/styles/print-report.css';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';

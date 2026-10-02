@@ -1,6 +1,6 @@
 {
   "name": "portal",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "type": "module",
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

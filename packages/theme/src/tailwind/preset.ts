@@ -29,6 +29,11 @@ const content = [
   `!${at('libs/**/node_modules/**/*')}`,
   `!${at('libs/**/.next/**/*')}`,
   `!${at('libs/**/.turbo/**/*')}`,
+  `!${at('**/*.test.{ts,tsx}')}`,
+  `!${at('**/*.spec.{ts,tsx}')}`,
+  `!${at('**/*.stories.{ts,tsx}')}`,
+  `!${at('**/__tests__/**/*.{ts,tsx}')}`,
+  `!${at('**/__mocks__/**/*.{ts,tsx}')}`,
   at('node_modules/@tremor/**/*.{js,ts,jsx,tsx}'),
 ];
 

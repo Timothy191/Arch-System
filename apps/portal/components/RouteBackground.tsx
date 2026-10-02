@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 /**
@@ -11,19 +12,28 @@ import { useEffect, useRef, useState } from 'react';
  *
  * Performance Architecture:
  * 1. Uses the lightweight 94 KB WebP poster as the primary LCP asset.
- * 2. Defers the heavy 11 MB MP4 video off the critical path using requestIdleCallback.
+ * 2. Defers the optimized MP4/WebM video off the critical path using requestIdleCallback.
  * 3. Bypasses video completely when:
+ *    - User is on auth route (`/login`) to maximize Speed Index and zero main-thread decode work
  *    - User prefers reduced motion (`prefers-reduced-motion: reduce`)
  *    - User is on mobile device (viewport width < 768px)
  *    - Network connection is constrained (Save-Data mode or 2G/3G "lie-fi" links)
- * 4. Sets preload="none" to prevent automatic massive background data downloads.
+ * 4. Multi-format progressive enhancement: delivers WebM (VP9) with MP4 (H.264, 982 KB) fallback.
+ * 5. Sets preload="none" to prevent automatic massive background data downloads.
  */
 export function RouteBackground() {
+  const pathname = usePathname();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    // 0. Auth route bypass: login screen does not render video wallpaper
+    if (pathname === '/login' || pathname?.startsWith('/login')) {
+      setShouldLoadVideo(false);
+      return;
+    }
+
     // 1. Accessibility: reduced motion check
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (motionQuery.matches) {
@@ -62,13 +72,13 @@ export function RouteBackground() {
     };
 
     if ('requestIdleCallback' in window) {
-      const handle = (window as any).requestIdleCallback(loadDeferredVideo, { timeout: 3000 });
+      const handle = (window as any).requestIdleCallback(loadDeferredVideo, { timeout: 3500 });
       return () => (window as any).cancelIdleCallback(handle);
     } else {
-      const timer = setTimeout(loadDeferredVideo, 1500);
+      const timer = setTimeout(loadDeferredVideo, 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (videoRef.current && shouldLoadVideo) {
@@ -123,7 +133,10 @@ export function RouteBackground() {
             disablePictureInPicture
             preload="none"
             crossOrigin="anonymous"
-          />
+          >
+            <source src="/background/global-background.webm" type="video/webm" />
+            <source src="/background/global-background.mp4" type="video/mp4" />
+          </video>
         </div>
       )}
 

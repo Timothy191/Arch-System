@@ -1,5 +1,4 @@
 import '@repo/ui/globals.css';
-import '@/styles/print-report.css';
 import { ArchThemeProvider } from '@repo/theme/react';
 import { EveLogo } from '@repo/ui/EveLogo';
 import { Toaster } from '@repo/ui/Toaster';
@@ -9,12 +8,9 @@ import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { Inter, JetBrains_Mono, Outfit } from 'next/font/google';
 import { SkipLinks } from '@/components/accessibility/SkipLinks';
-import { AriaLauncher } from '@/components/ai/AriaLauncher';
 import { ClientOverlays } from '@/components/ClientOverlays';
-import { OfflineBanner } from '@/components/OfflineBanner';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
 import { SystemTrayPill } from '@/components/system/SystemTray';
-import { WebVitalsReporter } from '@/components/WebVitalsReporter';
 import ClientProviders from './ClientProviders';
 
 const HeaderWidgets = dynamic(
@@ -52,8 +48,31 @@ const RouteBackground = dynamic(() =>
   import('@/components/RouteBackground').then((m) => ({ default: m.RouteBackground }))
 );
 
+// Performance & Speed Index: Defer off-critical-path layout overlays
+const AriaLauncher = dynamic(
+  () => import('@/components/ai/AriaLauncher').then((m) => ({ default: m.AriaLauncher })),
+  { ssr: false }
+);
+
+const OfflineBanner = dynamic(
+  () => import('@/components/OfflineBanner').then((m) => ({ default: m.OfflineBanner })),
+  { ssr: false }
+);
+
+const WebVitalsReporter = dynamic(
+  () => import('@/components/WebVitalsReporter').then((m) => ({ default: m.WebVitalsReporter })),
+  { ssr: false }
+);
+
+const ViewportBoundaries = dynamic(
+  () =>
+    import('@/components/system/ViewportBoundaries').then((m) => ({
+      default: m.ViewportBoundaries,
+    })),
+  { ssr: false }
+);
+
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
-import { ViewportBoundaries } from '@/components/system/ViewportBoundaries';
 
 const inter = Inter({
   subsets: ['latin'],
