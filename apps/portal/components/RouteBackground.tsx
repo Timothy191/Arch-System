@@ -2,26 +2,39 @@
 
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 /**
- * RouteBackground
- *
- * Renders the full-screen macOS-style wallpaper background beneath all portal
- * content across all server pages.
- *
- * Performance Architecture:
- * 1. Uses the lightweight 94 KB WebP poster as the primary LCP asset.
- * 2. Defers the optimized MP4/WebM video off the critical path using requestIdleCallback.
- * 3. Bypasses video completely when:
- *    - User is on auth route (`/login`) to maximize Speed Index and zero main-thread decode work
- *    - User prefers reduced motion (`prefers-reduced-motion: reduce`)
- *    - User is on mobile device (viewport width < 768px)
- *    - Network connection is constrained (Save-Data mode or 2G/3G "lie-fi" links)
- * 4. Multi-format progressive enhancement: delivers WebM (VP9) with MP4 (H.264, 982 KB) fallback.
- * 5. Sets preload="none" to prevent automatic massive background data downloads.
+ * RouteBackgroundPoster
+ * Renders the primary LCP asset (94 KB WebP poster) and film grain overlay.
  */
-export function RouteBackground() {
+function RouteBackgroundPoster() {
+  return (
+    <>
+      <div
+        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
+        aria-hidden="true"
+      >
+        <Image
+          id="route-bg-light-image"
+          src="/background/global-background-poster.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="route-bg-image object-cover object-center filter brightness-105"
+        />
+      </div>
+      <div className="route-bg-grain" aria-hidden="true" />
+    </>
+  );
+}
+
+/**
+ * RouteBackgroundInner
+ * Handles progressive enhancement video loading based on route, device, and network constraints.
+ */
+function RouteBackgroundInner() {
   const pathname = usePathname();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -91,21 +104,7 @@ export function RouteBackground() {
 
   return (
     <>
-      {/* ── LCP background: preloaded compressed WebP poster (94 KB) ── */}
-      <div
-        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
-        aria-hidden="true"
-      >
-        <Image
-          id="route-bg-light-image"
-          src="/background/global-background-poster.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="route-bg-image object-cover object-center filter brightness-105"
-        />
-      </div>
+      <RouteBackgroundPoster />
 
       {/* ── Ambient Video Background (Deferred / Constrained-Safe) ── */}
       {shouldLoadVideo && (
@@ -116,7 +115,6 @@ export function RouteBackground() {
           <video
             id="route-bg-light-video"
             ref={videoRef}
-            src="/background/global-background.mp4"
             className="route-bg-video filter brightness-105 object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
@@ -139,9 +137,18 @@ export function RouteBackground() {
           </video>
         </div>
       )}
-
-      {/* ── Ambient Film Grain overlay ── */}
-      <div className="route-bg-grain" aria-hidden="true" />
     </>
+  );
+}
+
+/**
+ * RouteBackground
+ * Suspense-wrapped boundary to isolate dynamic usePathname from SSR prerender tree.
+ */
+export function RouteBackground() {
+  return (
+    <Suspense fallback={<RouteBackgroundPoster />}>
+      <RouteBackgroundInner />
+    </Suspense>
   );
 }

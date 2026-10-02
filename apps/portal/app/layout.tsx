@@ -48,30 +48,6 @@ const RouteBackground = dynamic(() =>
   import('@/components/RouteBackground').then((m) => ({ default: m.RouteBackground }))
 );
 
-// Performance & Speed Index: Defer off-critical-path layout overlays
-const AriaLauncher = dynamic(
-  () => import('@/components/ai/AriaLauncher').then((m) => ({ default: m.AriaLauncher })),
-  { ssr: false }
-);
-
-const OfflineBanner = dynamic(
-  () => import('@/components/OfflineBanner').then((m) => ({ default: m.OfflineBanner })),
-  { ssr: false }
-);
-
-const WebVitalsReporter = dynamic(
-  () => import('@/components/WebVitalsReporter').then((m) => ({ default: m.WebVitalsReporter })),
-  { ssr: false }
-);
-
-const ViewportBoundaries = dynamic(
-  () =>
-    import('@/components/system/ViewportBoundaries').then((m) => ({
-      default: m.ViewportBoundaries,
-    })),
-  { ssr: false }
-);
-
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 
 const inter = Inter({
@@ -169,11 +145,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             {/* Global ambient background wallpaper */}
             <RouteBackground />
 
-            {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
-            <WebVitalsReporter />
-            <OfflineBanner />
-            <AriaLauncher />
-
             {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
             <header aria-label="Global navigation">
               <MacMenuBar
@@ -222,7 +193,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             </div>
 
             <CommandBar />
-            <ViewportBoundaries />
             <ClientOverlays />
             <Analytics />
             <SpeedInsights />

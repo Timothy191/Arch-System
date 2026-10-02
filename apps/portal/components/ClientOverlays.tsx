@@ -14,11 +14,39 @@ const PWAInstallButton = dynamic(
   { ssr: false }
 );
 
+// Performance & Speed Index: Defer off-critical-path client overlays
+const AriaLauncher = dynamic(
+  () => import('@/components/ai/AriaLauncher').then((m) => ({ default: m.AriaLauncher })),
+  { ssr: false }
+);
+
+const OfflineBanner = dynamic(
+  () => import('@/components/OfflineBanner').then((m) => ({ default: m.OfflineBanner })),
+  { ssr: false }
+);
+
+const WebVitalsReporter = dynamic(
+  () => import('@/components/WebVitalsReporter').then((m) => ({ default: m.WebVitalsReporter })),
+  { ssr: false }
+);
+
+const ViewportBoundaries = dynamic(
+  () =>
+    import('@/components/system/ViewportBoundaries').then((m) => ({
+      default: m.ViewportBoundaries,
+    })),
+  { ssr: false }
+);
+
 export function ClientOverlays() {
   return (
     <>
       <PWAInstallButton />
       <CookieConsent />
+      <AriaLauncher />
+      <OfflineBanner />
+      <WebVitalsReporter />
+      <ViewportBoundaries />
     </>
   );
 }
