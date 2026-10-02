@@ -88,8 +88,6 @@
     "./AnimatedList": "./src/components/ui/animated-list.tsx",
     "./HeroVideoDialog": "./src/components/ui/hero-video-dialog.tsx",
     "./MacMenuBar": "./src/components/MacMenuBar.tsx",
-    "./OperationsAppBar": "./src/components/header/OperationsAppBar.tsx",
-    "./header/*": "./src/components/header/*.tsx",
     "./MacTitleBar": "./src/components/MacTitleBar.tsx",
     "./WorkflowBuilder": "./src/components/WorkflowBuilder.tsx",
     "./HeroRotator": "./src/components/HeroRotator.tsx",
