@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { memo, useMemo } from 'react';
 
 const SHIFT_HOURS = 12;
 
@@ -41,43 +42,93 @@ interface ExcavatorActivityListProps {
   todayAssignments: DumperAssignment[];
 }
 
-export function ExcavatorActivityList({
+// EMPTY_ASSIGNMENTS static fallback to maintain referential equality when an activity has no dumper assignments
+const EMPTY_ASSIGNMENTS: DumperAssignment[] = [];
+
+function ExcavatorActivityListComponent({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
-  // Group by site_id, then by shift
-  const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
-
-  for (const activity of todayActivity) {
-    const siteKey = activity.site_id ?? '__none__';
-    const siteName = activity.site?.name ?? 'No Site Assigned';
-    if (!siteMap.has(siteKey)) {
-      siteMap.set(siteKey, { siteName, activities: [] });
+  // AGENT-TRACE: Pre-index todayAssignments by excavator_activity_id into a Map (O(M)).
+  // Replaces nested O(N * M) .filter() array searches on every render with O(1) Map lookups.
+  const assignmentsByActivityId = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (let i = 0; i < todayAssignments.length; i++) {
+      const assignment = todayAssignments[i];
+      if (!assignment) continue;
+      const list = map.get(assignment.excavator_activity_id);
+      if (list) {
+        list.push(assignment);
+      } else {
+        map.set(assignment.excavator_activity_id, [assignment]);
+      }
     }
-    siteMap.get(siteKey)!.activities.push(activity);
-  }
+    return map;
+  }, [todayAssignments]);
 
-  // Put "No Site Assigned" last
-  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === '__none__') return 1;
-    if (b === '__none__') return -1;
-    return 0;
-  });
+  // AGENT-TRACE: Group activities by site_id and shift_type in a single pass O(N) with pre-indexed site totals.
+  // Avoids repeated .flatMap(), .filter(), and .reduce() calculations during rendering.
+  const siteEntries = useMemo(() => {
+    const siteMap = new Map<
+      string,
+      {
+        siteName: string;
+        dayOps: ExcavatorActivity[];
+        nightOps: ExcavatorActivity[];
+        siteBcm: number;
+        siteLoads: number;
+      }
+    >();
+
+    for (let i = 0; i < todayActivity.length; i++) {
+      const activity = todayActivity[i];
+      if (!activity) continue;
+
+      const siteKey = activity.site_id ?? '__none__';
+      const siteName = activity.site?.name ?? 'No Site Assigned';
+
+      let entry = siteMap.get(siteKey);
+      if (!entry) {
+        entry = {
+          siteName,
+          dayOps: [],
+          nightOps: [],
+          siteBcm: 0,
+          siteLoads: 0,
+        };
+        siteMap.set(siteKey, entry);
+      }
+
+      if (activity.shift_type === 'day') {
+        entry.dayOps.push(activity);
+      } else {
+        entry.nightOps.push(activity);
+      }
+
+      const assignments = assignmentsByActivityId.get(activity.id);
+      if (assignments) {
+        for (let j = 0; j < assignments.length; j++) {
+          const a = assignments[j];
+          if (!a) continue;
+          entry.siteBcm += a.total_bcm || 0;
+          entry.siteLoads += a.total_loads || 0;
+        }
+      }
+    }
+
+    // Put "No Site Assigned" last
+    return Array.from(siteMap.entries()).sort(([a], [b]) => {
+      if (a === '__none__') return 1;
+      if (b === '__none__') return -1;
+      return 0;
+    });
+  }, [todayActivity, assignmentsByActivityId]);
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
-      {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
-        );
-        const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
-        const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
-
-        const dayOps = activities.filter((a) => a.shift_type === 'day');
-        const nightOps = activities.filter((a) => a.shift_type === 'night');
-
+      {siteEntries.map(([siteKey, { siteName, dayOps, nightOps, siteBcm, siteLoads }]) => {
         return (
           <div key={siteKey} className="space-y-3">
             {/* Site header */}
@@ -110,9 +161,9 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={
+                        assignmentsByActivityId.get(activity.id) || EMPTY_ASSIGNMENTS
+                      }
                     />
                   ))}
                 </div>
@@ -131,9 +182,9 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={
+                        assignmentsByActivityId.get(activity.id) || EMPTY_ASSIGNMENTS
+                      }
                     />
                   ))}
                 </div>
@@ -146,15 +197,21 @@ export function ExcavatorActivityList({
   );
 }
 
-function ActivityCard({
+const ActivityCard = memo(function ActivityCard({
   activity,
   assignments,
 }: {
   activity: ExcavatorActivity;
   assignments: DumperAssignment[];
 }) {
-  const totalBcm = assignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
-  const totalLoads = assignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
+  const totalBcm = useMemo(
+    () => assignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0),
+    [assignments]
+  );
+  const totalLoads = useMemo(
+    () => assignments.reduce((sum, a) => sum + (a.total_loads || 0), 0),
+    [assignments]
+  );
   const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
   const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
   const estimatedScoopMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
@@ -297,4 +354,6 @@ function ActivityCard({
       </div>
     </GlassCard>
   );
-}
+});
+
+export const ExcavatorActivityList = memo(ExcavatorActivityListComponent);
