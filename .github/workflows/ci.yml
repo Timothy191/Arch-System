@@ -220,7 +220,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Terraform Lint (tflint)
-        uses: terraform-linters/setup-tflint@v4
+        uses: terraform-linters/setup-tflint@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tflint
