@@ -17,9 +17,10 @@ describe('useSystemMetrics hook', () => {
     expect(['A', 'B', 'C']).toContain(result.current.currentShift.shift);
   });
 
-  it('should update clock and shift on time tick', () => {
+  it('should update clock on time tick while preserving currentShift object reference', () => {
     const { result } = renderHook(() => useSystemMetrics());
     const initialTime = result.current.serverTimeSAST;
+    const initialShiftRef = result.current.currentShift;
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -27,6 +28,7 @@ describe('useSystemMetrics hook', () => {
 
     const nextTime = result.current.serverTimeSAST;
     expect(nextTime).not.toBe(initialTime);
+    expect(result.current.currentShift).toBe(initialShiftRef);
   });
 
   it('should update latency after latency interval', () => {

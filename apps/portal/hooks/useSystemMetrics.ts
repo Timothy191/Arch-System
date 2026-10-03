@@ -62,16 +62,27 @@ export function useSystemMetrics(): SystemMetrics {
         minute: '2-digit',
         second: '2-digit',
       });
-      const currentShift = getThreeShift(now);
+      const newShift = getThreeShift(now);
 
       setMetrics((prev) => {
-        if (prev.serverTimeSAST === serverTimeSAST && prev.currentShift === currentShift) {
+        // PERFORMANCE OPTIMIZATION:
+        // getThreeShift returns a new object on every call.
+        // Compare shift identifier (prev.currentShift.shift === newShift.shift) to avoid creating
+        // new object references or triggering state updates when the shift has not changed.
+        const shiftUnchanged =
+          prev.currentShift.shift === newShift.shift &&
+          prev.currentShift.label === newShift.label &&
+          prev.currentShift.start === newShift.start &&
+          prev.currentShift.end === newShift.end;
+
+        if (prev.serverTimeSAST === serverTimeSAST && shiftUnchanged) {
           return prev;
         }
+
         return {
           ...prev,
           serverTimeSAST,
-          currentShift,
+          currentShift: shiftUnchanged ? prev.currentShift : newShift,
         };
       });
     }, 1000);
