@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { GlassCard } from '@repo/ui/GlassCard';
 
 const SHIFT_HOURS = 12;
@@ -46,59 +45,35 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
-  // Pre-index dumper assignments by excavator_activity_id to turn O(N * M) repeated filters into O(1) Map lookups
-  const assignmentsByActivityMap = useMemo(() => {
-    const map = new Map<string, DumperAssignment[]>();
-    for (const assignment of todayAssignments) {
-      const list = map.get(assignment.excavator_activity_id);
-      if (list) {
-        list.push(assignment);
-      } else {
-        map.set(assignment.excavator_activity_id, [assignment]);
-      }
+  // Group by site_id, then by shift
+  const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
+
+  for (const activity of todayActivity) {
+    const siteKey = activity.site_id ?? '__none__';
+    const siteName = activity.site?.name ?? 'No Site Assigned';
+    if (!siteMap.has(siteKey)) {
+      siteMap.set(siteKey, { siteName, activities: [] });
     }
-    return map;
-  }, [todayAssignments]);
+    siteMap.get(siteKey)!.activities.push(activity);
+  }
 
-  // Group by site_id and sort entries, memoized to prevent recalculation on unrelated renders
-  const siteEntries = useMemo(() => {
-    const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
-
-    for (const activity of todayActivity) {
-      const siteKey = activity.site_id ?? '__none__';
-      const siteName = activity.site?.name ?? 'No Site Assigned';
-      if (!siteMap.has(siteKey)) {
-        siteMap.set(siteKey, { siteName, activities: [] });
-      }
-      siteMap.get(siteKey)!.activities.push(activity);
-    }
-
-    // Put "No Site Assigned" last
-    return Array.from(siteMap.entries()).sort(([a], [b]) => {
-      if (a === '__none__') return 1;
-      if (b === '__none__') return -1;
-      return 0;
-    });
-  }, [todayActivity]);
+  // Put "No Site Assigned" last
+  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
+    if (a === '__none__') return 1;
+    if (b === '__none__') return -1;
+    return 0;
+  });
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        // Fast aggregate calculation using pre-indexed Map
-        let siteBcm = 0;
-        let siteLoads = 0;
-
-        for (const activity of activities) {
-          const assignments = assignmentsByActivityMap.get(activity.id);
-          if (assignments) {
-            for (const assignment of assignments) {
-              siteBcm += assignment.total_bcm || 0;
-              siteLoads += assignment.total_loads || 0;
-            }
-          }
-        }
+        const siteAssignments = activities.flatMap((a) =>
+          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
+        );
+        const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
+        const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
 
         const dayOps = activities.filter((a) => a.shift_type === 'day');
         const nightOps = activities.filter((a) => a.shift_type === 'night');
@@ -135,7 +110,9 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={assignmentsByActivityMap.get(activity.id) || []}
+                      assignments={todayAssignments.filter(
+                        (a) => a.excavator_activity_id === activity.id
+                      )}
                     />
                   ))}
                 </div>
@@ -154,7 +131,9 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={assignmentsByActivityMap.get(activity.id) || []}
+                      assignments={todayAssignments.filter(
+                        (a) => a.excavator_activity_id === activity.id
+                      )}
                     />
                   ))}
                 </div>
