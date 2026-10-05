@@ -100,3 +100,42 @@ Before completing ANY task:
 - Read `.agents/GUIDE.md` for operational reference
 - Read `AGENTS.md` for architecture, domain, personas, data flow, and invariants
 - Provider-specific settings (e.g., `.claude/settings.json`) remain at their required locations but contain no behavioral rules
+
+## Session Learnings (Additions for Future Sessions)
+
+### Essential Skills
+
+- Always invoke relevant skills before any action - use `superpowers:using-superpowers` to check
+- For planning tasks, use `superpowers:brainstorming` first
+- Skills take precedence over default behavior when applicable
+
+### Critical Verification
+
+- Always run `pnpm agent:verify` before considering a task complete
+- For frontend work, also run `pnpm audit:browser`
+- Never skip verification gates - they enforce architectural boundaries
+
+### Code Conventions
+
+- File length strictly enforced: 400-450 lines target, 500 hard ceiling
+- Light mode only: use OKLCH tokens from `@repo/theme`, never dark mode variants
+- Server Actions must validate user on first line before any operations
+- All data fetching must be in Server Components/RSC/Route Handlers
+
+### Repository Boundaries
+
+- Never import `packages/database` directly from `apps/*` - always go through `@repo/supabase`
+- `packages/ui` must remain pure presentational (zero business logic)
+- No imports from `apps/*` into `packages/*` or `tools/*`
+
+### Git & Commits
+
+- Conventional commits enforced by commitlint/Husky
+- One commit per task; no amending or force-pushing without explicit permission
+- Commit messages must follow conventional format (feat, fix, docs, etc.)
+
+### Environment & Troubleshooting
+
+- If `pnpm` hangs with no output, kill it and use `make` targets or direct `turbo`/`node`
+- Sibling paths are hardcoded in federated audit - renaming related projects breaks verification
+- `.env` files contain secrets - never expose or commit them
