@@ -34,12 +34,14 @@ setup('authenticate', async ({ page }) => {
     await page.locator("button[type='submit']").click();
   }
 
-  // Wait for the redirect to complete
+  // Wait for the redirect to complete. Timeout raised 5s -> 15s for slow
+  // CI environments; a mismatched landing path must not hard-fail every test
+  // in global setup -- later assertions still catch a broken auth flow.
   await page
     .waitForURL(
       (url) =>
         url.pathname.includes('/hub') || url.pathname.includes('/overview') || url.pathname === '/',
-      { timeout: 5000 }
+      { timeout: 15000 }
     )
     .catch(() => {});
 
