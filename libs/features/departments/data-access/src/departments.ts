@@ -204,6 +204,7 @@ export const CONTROL_ROOM_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
   { name: 'machine-operations', label: 'Machine Ops', icon: 'Cpu' },
+  { name: 'end-smr', label: 'End SMR', icon: 'CheckSquare' },
   { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
   { name: 'excavator-activity', label: 'Excavator', icon: 'Pickaxe' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
