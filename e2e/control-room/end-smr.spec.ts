@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('End SMR Drilling Integration', () => {
   test('should show drilling section for Drill Rig and persist data', async ({ page }) => {
