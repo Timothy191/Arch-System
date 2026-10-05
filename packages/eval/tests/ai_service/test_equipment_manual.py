@@ -7,7 +7,7 @@ from deepeval.metrics import HallucinationMetric, FaithfulnessMetric
 from deepeval.test_case import LLMTestCase
 
 from datasets.golden_cases import EQUIPMENT_MANUAL_INPUTS
-from helpers import call_ai_service
+from helpers import call_ai_service, get_judge_model
 
 
 @pytest.mark.ai_service
@@ -24,8 +24,10 @@ class TestEquipmentManual:
             input=case["input"],
             actual_output=actual_output,
             context=case["context"],
+            retrieval_context=case["context"],
         )
-        hallucination = HallucinationMetric(threshold=0.7)
+        judge = get_judge_model()
+        hallucination = HallucinationMetric(threshold=0.7, model=judge)
         assert_test(test_case, [hallucination])
 
     @pytest.mark.parametrize("case", EQUIPMENT_MANUAL_INPUTS)
@@ -36,6 +38,8 @@ class TestEquipmentManual:
             input=case["input"],
             actual_output=actual_output,
             context=case["context"],
+            retrieval_context=case["context"],
         )
-        factual = FaithfulnessMetric(threshold=0.8)
+        judge = get_judge_model()
+        factual = FaithfulnessMetric(threshold=0.8, model=judge)
         assert_test(test_case, [factual])

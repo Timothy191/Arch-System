@@ -31,6 +31,12 @@
       ],
       "cache": true
     },
+    "@repo/swarms-orchestrator#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "Cargo.toml", "Cargo.lock"],
+      "outputs": ["target/release/swarms-orchestrator", "target/release/swarms-orchestrator.exe"],
+      "cache": true
+    },
     "build-storybook": {
       "dependsOn": ["^build", "codegen"],
       "inputs": ["$TURBO_DEFAULT$", "!**/*.test.*", "!**/*.spec.*", "!**/__tests__/**"],

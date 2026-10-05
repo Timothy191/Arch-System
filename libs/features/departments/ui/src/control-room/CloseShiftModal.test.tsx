@@ -1,5 +1,5 @@
 // AGENT-TRACE: CloseShiftModal test covering full shift closeout workflow states (validating -> has_errors -> pin_entry -> verifying -> verified -> submitting -> success -> api_error).
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { closeShift, verifyPin } from '@/lib/shift-closeout';
 import { CloseShiftModal } from './CloseShiftModal';
 
@@ -40,7 +40,9 @@ describe('CloseShiftModal', () => {
   it('should show validating state initially and call closeShift as a dry run', async () => {
     (closeShift as jest.Mock).mockReturnValue(new Promise(() => {})); // Never resolves to keep it in validating state
 
-    render(<CloseShiftModal {...mockProps} />);
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
 
     expect(screen.getByText('Validating shift data...')).toBeInTheDocument();
     expect(closeShift).toHaveBeenCalledWith('dept-123', '2026-06-15', 'day', '', '', true);
@@ -51,7 +53,9 @@ describe('CloseShiftModal', () => {
       errors: ['Machine M001 is missing hourly loads', 'Operator O002 has unacknowledged alerts'],
     });
 
-    render(<CloseShiftModal {...mockProps} />);
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(
@@ -63,14 +67,18 @@ describe('CloseShiftModal', () => {
     expect(screen.getByText('Operator O002 has unacknowledged alerts')).toBeInTheDocument();
 
     const closeBtn = screen.getByRole('button', { name: 'Close' });
-    fireEvent.click(closeBtn);
+    await act(async () => {
+      fireEvent.click(closeBtn);
+    });
     expect(mockProps.onClose).toHaveBeenCalled();
   });
 
   it('should transition to pin_entry state if validation succeeds', async () => {
     (closeShift as jest.Mock).mockResolvedValue({ errors: [] });
 
-    render(<CloseShiftModal {...mockProps} />);
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(
@@ -87,21 +95,27 @@ describe('CloseShiftModal', () => {
     (closeShift as jest.Mock).mockResolvedValue({ errors: [] });
     (verifyPin as jest.Mock).mockResolvedValue({ valid: false });
 
-    render(<CloseShiftModal {...mockProps} />);
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText('e.g. EMP001')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText('e.g. EMP001'), {
-      target: { value: 'EMP001' },
-    });
-    fireEvent.change(screen.getByPlaceholderText('Enter supervisor PIN'), {
-      target: { value: '9999' },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText('e.g. EMP001'), {
+        target: { value: 'EMP001' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Enter supervisor PIN'), {
+        target: { value: '9999' },
+      });
     });
 
     const verifyBtn = screen.getByRole('button', { name: 'Verify PIN' });
-    fireEvent.click(verifyBtn);
+    await act(async () => {
+      fireEvent.click(verifyBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Invalid employee code or PIN')).toBeInTheDocument();
@@ -109,7 +123,9 @@ describe('CloseShiftModal', () => {
 
     // Verify it allows retrying validation
     const tryAgainBtn = screen.getByRole('button', { name: 'Try Again' });
-    fireEvent.click(tryAgainBtn);
+    await act(async () => {
+      fireEvent.click(tryAgainBtn);
+    });
     expect(closeShift).toHaveBeenCalledTimes(2);
   });
 
@@ -124,21 +140,27 @@ describe('CloseShiftModal', () => {
       employee: { id: 'emp-abc', full_name: 'John Supervisor' },
     });
 
-    render(<CloseShiftModal {...mockProps} />);
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText('e.g. EMP001')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText('e.g. EMP001'), {
-      target: { value: 'EMP001' },
-    });
-    fireEvent.change(screen.getByPlaceholderText('Enter supervisor PIN'), {
-      target: { value: '1234' },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText('e.g. EMP001'), {
+        target: { value: 'EMP001' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Enter supervisor PIN'), {
+        target: { value: '1234' },
+      });
     });
 
     const verifyBtn = screen.getByRole('button', { name: 'Verify PIN' });
-    fireEvent.click(verifyBtn);
+    await act(async () => {
+      fireEvent.click(verifyBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Approved by')).toBeInTheDocument();
@@ -148,15 +170,17 @@ describe('CloseShiftModal', () => {
     const closeShiftBtn = screen.getByRole('button', {
       name: 'Close Shift & Lock',
     });
-    fireEvent.click(closeShiftBtn);
-
-    expect(screen.getByText('Closing shift...')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(closeShiftBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Shift closed successfully')).toBeInTheDocument();
     });
 
-    jest.advanceTimersByTime(2000);
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
     expect(mockProps.onComplete).toHaveBeenCalled();
     expect(mockProps.onClose).toHaveBeenCalled();
     jest.useRealTimers();

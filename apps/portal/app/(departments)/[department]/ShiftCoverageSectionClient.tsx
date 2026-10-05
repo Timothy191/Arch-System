@@ -1,6 +1,6 @@
 'use client';
 
-import { getCurrentShift } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
 import { ShiftCoverageWidget } from '@/features/departments';
 import { useShiftCoverage } from '@/hooks/useDashboardQueries';
 

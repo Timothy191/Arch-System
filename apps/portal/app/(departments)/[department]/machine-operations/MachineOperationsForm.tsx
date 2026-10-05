@@ -2,7 +2,7 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { getCurrentShift } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
 import { ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';

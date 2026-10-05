@@ -7,7 +7,7 @@ from deepeval.metrics import FaithfulnessMetric
 from deepeval.test_case import LLMTestCase
 
 from datasets.golden_cases import TRANSLATION_INPUTS
-from helpers import call_ai_service
+from helpers import call_ai_service, get_judge_model
 
 
 @pytest.mark.ai_service
@@ -24,7 +24,9 @@ class TestTranslation:
             input=case["input"],
             actual_output=actual_output,
             context=case["context"],
+            retrieval_context=case["context"],
         )
+        judge = get_judge_model()
         # Factual consistency checks that the meaning and terminology are preserved
-        consistency = FaithfulnessMetric(threshold=0.85)
+        consistency = FaithfulnessMetric(threshold=0.85, model=judge)
         assert_test(test_case, [consistency])

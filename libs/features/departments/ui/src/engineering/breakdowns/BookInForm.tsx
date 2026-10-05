@@ -129,20 +129,14 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         clearDraft();
 
         // Dispatch Inngest event for breakdown alert
-        import('@repo/utils/inngest').then(({ inngest, machineBreakdownEvent }) => {
-          inngest
-            .send({
-              name: machineBreakdownEvent,
-              data: {
-                department_id: departmentId,
-                fleet_id: selectedMachine.serial_number || selectedMachine.id,
-                machine_type: selectedMachine.machine_type,
-                reason,
-                status: 'active',
-              },
-            })
-            .catch(() => {});
-        });
+        fetch('/api/engineering/breakdown-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            equipmentId: selectedMachine.serial_number || selectedMachine.id,
+            description: reason,
+          }),
+        }).catch(() => {});
       } catch (_err) {
         setMessage({ type: 'error', text: 'Failed to book in machine.' });
       }

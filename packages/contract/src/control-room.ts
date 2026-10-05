@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { machineTimeAllocationSchema } from './schemas/machine-ledger.schema';
 
 export const shiftTypeSchema = z.enum(['day', 'night']);
 
@@ -35,6 +36,7 @@ export const shiftCloseoutPayloadSchema = z.object({
   checklistItems: z.array(checklistItemSchema).default([]),
   supervisorSignature: z.string().min(2, 'Supervisor signature required').optional(),
   machineIds: z.array(z.string().uuid()).optional(),
+  allocations: z.array(machineTimeAllocationSchema).default([]),
   idempotencyKey: z.string().min(10, 'Idempotency key required'),
 });
 

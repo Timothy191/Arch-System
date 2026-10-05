@@ -1,6 +1,6 @@
 'use client';
 
-import { getThreeShift } from '@repo/utils';
+import { getThreeShift } from '@repo/utils/client';
 import { useEffect, useState } from 'react';
 
 interface SystemMetrics {

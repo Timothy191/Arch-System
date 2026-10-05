@@ -1,7 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { getCurrentShift } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
 import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';

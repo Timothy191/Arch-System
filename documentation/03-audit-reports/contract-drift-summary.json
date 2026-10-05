@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-10-02T09:36:24.156Z",
+  "timestamp": "2026-10-05T10:38:23.638Z",
   "databaseTablesCount": 94,
-  "contractSchemasCount": 179,
+  "contractSchemasCount": 181,
   "synchronizedTablesCount": 90,
   "unmappedTablesCount": 4,
   "driftHealthIndex": 95.7,
@@ -9,452 +9,646 @@
   "tables": [
     {
       "table": "departments",
-      "schemas": ["departmentsSchema"],
+      "schemas": [
+        "departmentsSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "employees",
-      "schemas": ["employeesSchema"],
+      "schemas": [
+        "employeesSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "machines",
-      "schemas": ["machinesSchema"],
+      "schemas": [
+        "machinesSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "daily_logs",
-      "schemas": ["dailyLogSchema"],
+      "schemas": [
+        "dailyLogSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "machine_hours",
-      "schemas": ["machineHoursSchema"],
+      "schemas": [
+        "machineHoursSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "fuel_logs",
-      "schemas": ["fuelLogsSchema"],
+      "schemas": [
+        "fuelLogsSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "production_logs",
-      "schemas": ["productionDailyLogSchema"],
+      "schemas": [
+        "productionDailyLogSchema"
+      ],
       "migration": "001_initial.sql"
     },
     {
       "table": "operators",
-      "schemas": ["operatorsSchema"],
+      "schemas": [
+        "operatorsSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "sites",
-      "schemas": ["sitesSchema"],
+      "schemas": [
+        "sitesSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "machine_operations",
-      "schemas": ["machineOperationsSchema"],
+      "schemas": [
+        "machineOperationsSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "hourly_loads",
-      "schemas": ["hourlyLoadsSchema"],
+      "schemas": [
+        "hourlyLoadsSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "delay_categories",
-      "schemas": ["delayCategoriesSchema"],
+      "schemas": [
+        "delayCategoriesSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "shift_notes",
-      "schemas": ["controlRoomShiftReportSchema", "unifiedShiftReportSchema"],
+      "schemas": [
+        "controlRoomShiftReportSchema",
+        "unifiedShiftReportSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "excavator_activity",
-      "schemas": ["excavatorHaulSchema"],
+      "schemas": [
+        "excavatorHaulSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "dozer_rolls",
-      "schemas": ["dozerRollSchema"],
+      "schemas": [
+        "dozerRollSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "report_templates",
-      "schemas": ["reportTemplatesSchema"],
+      "schemas": [
+        "reportTemplatesSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "generated_reports",
-      "schemas": ["generatedReportsSchema"],
+      "schemas": [
+        "generatedReportsSchema"
+      ],
       "migration": "002_control_room_tables.sql"
     },
     {
       "table": "engineering_notes",
-      "schemas": ["engineeringNotesSchema"],
+      "schemas": [
+        "engineeringNotesSchema"
+      ],
       "migration": "003_control_room_revisions.sql"
     },
     {
       "table": "operational_delays",
-      "schemas": ["operationalDelaysSchema"],
+      "schemas": [
+        "operationalDelaysSchema"
+      ],
       "migration": "003_control_room_revisions.sql"
     },
     {
       "table": "breakdowns",
-      "schemas": ["createBreakdownSchema", "breakdownReportEntrySchema"],
+      "schemas": [
+        "createBreakdownSchema",
+        "breakdownReportEntrySchema"
+      ],
       "migration": "004_breakdowns.sql"
     },
     {
       "table": "safety_severities",
-      "schemas": ["safetySeveritiesSchema"],
+      "schemas": [
+        "safetySeveritiesSchema"
+      ],
       "migration": "006_safety_department.sql"
     },
     {
       "table": "safety_incident_categories",
-      "schemas": ["safetyIncidentCategoriesSchema"],
+      "schemas": [
+        "safetyIncidentCategoriesSchema"
+      ],
       "migration": "006_safety_department.sql"
     },
     {
       "table": "safety_incidents",
-      "schemas": ["safetyIncidentsSchema"],
+      "schemas": [
+        "safetyIncidentsSchema"
+      ],
       "migration": "006_safety_department.sql"
     },
     {
       "table": "audit_logs",
-      "schemas": ["auditLogsSchema"],
+      "schemas": [
+        "auditLogsSchema"
+      ],
       "migration": "007_audit_logs.sql"
     },
     {
       "table": "mine_blocks",
-      "schemas": ["mineBlocksSchema"],
+      "schemas": [
+        "mineBlocksSchema"
+      ],
       "migration": "008_excavator_activity_redesign.sql"
     },
     {
       "table": "excavator_dumper_assignments",
-      "schemas": ["excavatorDumperAssignmentsSchema"],
+      "schemas": [
+        "excavatorDumperAssignmentsSchema"
+      ],
       "migration": "008_excavator_activity_redesign.sql"
     },
     {
       "table": "memory_embeddings",
-      "schemas": ["aiHandoffSchema", "riskAssessmentSchema"],
+      "schemas": [
+        "aiHandoffSchema",
+        "riskAssessmentSchema"
+      ],
       "migration": "009_ai_memory.sql"
     },
     {
       "table": "shift_status",
-      "schemas": ["lockAndSignShiftSchema"],
+      "schemas": [
+        "lockAndSignShiftSchema"
+      ],
       "migration": "0145_shift_closeout.sql"
     },
     {
       "table": "tires",
-      "schemas": ["tireSchema", "createTireSchema", "replaceTireSchema"],
+      "schemas": [
+        "tireSchema",
+        "createTireSchema",
+        "replaceTireSchema"
+      ],
       "migration": "0146_tire_management.sql"
     },
     {
       "table": "tire_inspections",
-      "schemas": ["tireInspectionSchema", "logTireInspectionSchema"],
+      "schemas": [
+        "tireInspectionSchema",
+        "logTireInspectionSchema"
+      ],
       "migration": "0146_tire_management.sql"
     },
     {
       "table": "user_feedback",
-      "schemas": ["userFeedbackSchema"],
+      "schemas": [
+        "userFeedbackSchema"
+      ],
       "migration": "015_user_feedback.sql"
     },
     {
       "table": "quick_feedback",
-      "schemas": ["quickFeedbackSchema"],
+      "schemas": [
+        "quickFeedbackSchema"
+      ],
       "migration": "015_user_feedback.sql"
     },
     {
       "table": "webhook_endpoints",
-      "schemas": ["createWebhookSchema", "updateWebhookSchema"],
+      "schemas": [
+        "createWebhookSchema",
+        "updateWebhookSchema"
+      ],
       "migration": "017_webhooks.sql"
     },
     {
       "table": "webhook_delivery_logs",
-      "schemas": ["webhookDeliveryLogsSchema"],
+      "schemas": [
+        "webhookDeliveryLogsSchema"
+      ],
       "migration": "017_webhooks.sql"
     },
     {
       "table": "drill_operations",
-      "schemas": ["drillOperationSchema", "drillTelemetryIngestSchema"],
+      "schemas": [
+        "drillOperationSchema",
+        "drillTelemetryIngestSchema"
+      ],
       "migration": "024_drill_operations.sql"
     },
     {
       "table": "machine_telemetry",
-      "schemas": ["machineTelemetrySchema"],
+      "schemas": [
+        "machineTelemetrySchema"
+      ],
       "migration": "025_machine_telemetry.sql"
     },
     {
       "table": "machine_telemetry_archive",
-      "schemas": ["machineTelemetryArchiveSchema"],
+      "schemas": [
+        "machineTelemetryArchiveSchema"
+      ],
       "migration": "025_machine_telemetry.sql"
     },
     {
       "table": "drill_operations_archive",
-      "schemas": ["drillOperationsArchiveSchema"],
+      "schemas": [
+        "drillOperationsArchiveSchema"
+      ],
       "migration": "027_drill_shifts_and_archiving.sql"
     },
     {
       "table": "personnel",
-      "schemas": ["personnelSchema"],
+      "schemas": [
+        "personnelSchema"
+      ],
       "migration": "028_access_control_system.sql"
     },
     {
       "table": "visitors",
-      "schemas": ["visitorsSchema"],
+      "schemas": [
+        "visitorsSchema"
+      ],
       "migration": "028_access_control_system.sql"
     },
     {
       "table": "badges",
-      "schemas": ["scannerBadgeSchema"],
+      "schemas": [
+        "scannerBadgeSchema"
+      ],
       "migration": "028_access_control_system.sql"
     },
     {
       "table": "access_logs",
-      "schemas": ["accessLogsSchema"],
+      "schemas": [
+        "accessLogsSchema"
+      ],
       "migration": "028_access_control_system.sql"
     },
     {
       "table": "sync_watermarks",
-      "schemas": ["syncWatermarksSchema"],
+      "schemas": [
+        "syncWatermarksSchema"
+      ],
       "migration": "031_embedding_sync_watermarks.sql"
     },
     {
       "table": "ai_usage_logs",
-      "schemas": ["aiChatSchema", "aiSafetySchema", "aiPredictSchema"],
+      "schemas": [
+        "aiChatSchema",
+        "aiSafetySchema",
+        "aiPredictSchema"
+      ],
       "migration": "032_ai_usage_logs.sql"
     },
     {
       "table": "access_logs_archive",
-      "schemas": ["accessLogsArchiveSchema"],
+      "schemas": [
+        "accessLogsArchiveSchema"
+      ],
       "migration": "033_access_logs_weekly_archival.sql"
     },
     {
       "table": "fleet",
-      "schemas": ["fleetSchema"],
+      "schemas": [
+        "fleetSchema"
+      ],
       "migration": "035_fleet_and_equipment_tables.sql"
     },
     {
       "table": "equipment",
-      "schemas": ["equipmentSchema"],
+      "schemas": [
+        "equipmentSchema"
+      ],
       "migration": "035_fleet_and_equipment_tables.sql"
     },
     {
       "table": "documents",
-      "schemas": ["documentsSchema"],
+      "schemas": [
+        "documentsSchema"
+      ],
       "migration": "036_documents.sql"
     },
     {
       "table": "document_versions",
-      "schemas": ["documentVersionsSchema"],
+      "schemas": [
+        "documentVersionsSchema"
+      ],
       "migration": "036_documents.sql"
     },
     {
       "table": "machine_configurations",
-      "schemas": ["machineConfigurationsSchema"],
+      "schemas": [
+        "machineConfigurationsSchema"
+      ],
       "migration": "042_machine_configurations.sql"
     },
     {
       "table": "machine_operations_archive",
-      "schemas": ["machineOperationsArchiveSchema"],
+      "schemas": [
+        "machineOperationsArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "excavator_activity_archive",
-      "schemas": ["excavatorActivityArchiveSchema"],
+      "schemas": [
+        "excavatorActivityArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "excavator_dumper_assignments_archive",
-      "schemas": ["excavatorDumperAssignmentsArchiveSchema"],
+      "schemas": [
+        "excavatorDumperAssignmentsArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "operational_delays_archive",
-      "schemas": ["operationalDelaysArchiveSchema"],
+      "schemas": [
+        "operationalDelaysArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "dozer_rolls_archive",
-      "schemas": ["dozerRollsArchiveSchema"],
+      "schemas": [
+        "dozerRollsArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "engineering_notes_archive",
-      "schemas": ["engineeringNotesArchiveSchema"],
+      "schemas": [
+        "engineeringNotesArchiveSchema"
+      ],
       "migration": "046_control_room_archiving.sql"
     },
     {
       "table": "embedding_cache",
-      "schemas": ["embeddingCacheSchema"],
+      "schemas": [
+        "embeddingCacheSchema"
+      ],
       "migration": "059_embedding_cache.sql"
     },
     {
       "table": "vector_search_cache",
-      "schemas": ["vectorSearchCacheSchema"],
+      "schemas": [
+        "vectorSearchCacheSchema"
+      ],
       "migration": "064_vector_search_query_optimization.sql"
     },
     {
       "table": "vector_search_performance",
-      "schemas": ["vectorSearchPerformanceSchema"],
+      "schemas": [
+        "vectorSearchPerformanceSchema"
+      ],
       "migration": "064_vector_search_query_optimization.sql"
     },
     {
       "table": "materialized_view_refresh_log",
-      "schemas": ["materializedViewRefreshLogSchema"],
+      "schemas": [
+        "materializedViewRefreshLogSchema"
+      ],
       "migration": "065_materialized_view_refresh_optimization.sql"
     },
     {
       "table": "cache_events",
-      "schemas": ["cacheEventsSchema"],
+      "schemas": [
+        "cacheEventsSchema"
+      ],
       "migration": "067_cache_events.sql"
     },
     {
       "table": "cache_anomalies",
-      "schemas": ["cacheAnomaliesSchema"],
+      "schemas": [
+        "cacheAnomaliesSchema"
+      ],
       "migration": "067_cache_events.sql"
     },
     {
       "table": "delay_entries",
-      "schemas": ["delayEntriesSchema"],
+      "schemas": [
+        "delayEntriesSchema"
+      ],
       "migration": "068_delay_entries_table.sql"
     },
     {
       "table": "delay_entries_archive",
-      "schemas": ["delayEntriesArchiveSchema"],
+      "schemas": [
+        "delayEntriesArchiveSchema"
+      ],
       "migration": "068_delay_entries_table.sql"
     },
     {
       "table": "roles",
-      "schemas": ["rolesSchema"],
+      "schemas": [
+        "rolesSchema"
+      ],
       "migration": "070_control_room_operator_role_and_lookup.sql"
     },
     {
       "table": "material_density",
-      "schemas": ["materialDensitySchema"],
+      "schemas": [
+        "materialDensitySchema"
+      ],
       "migration": "073_production_summary_view.sql"
     },
     {
       "table": "card_printers",
-      "schemas": ["PrintRequestSchema"],
+      "schemas": [
+        "PrintRequestSchema"
+      ],
       "migration": "076_card_printing_infrastructure.sql"
     },
     {
       "table": "card_templates",
-      "schemas": ["PrintRequestSchema"],
+      "schemas": [
+        "PrintRequestSchema"
+      ],
       "migration": "076_card_printing_infrastructure.sql"
     },
     {
       "table": "print_jobs",
-      "schemas": ["PrintRequestSchema"],
+      "schemas": [
+        "PrintRequestSchema"
+      ],
       "migration": "076_card_printing_infrastructure.sql"
     },
     {
       "table": "issued_cards",
-      "schemas": ["PrintRequestSchema", "EmployeeProfileUpdateSchema"],
+      "schemas": [
+        "PrintRequestSchema",
+        "EmployeeProfileUpdateSchema"
+      ],
       "migration": "076_card_printing_infrastructure.sql"
     },
     {
       "table": "satellite_deformations",
-      "schemas": ["insarTelemetryIngestSchema", "insarGeoTIFFUploadSchema"],
+      "schemas": [
+        "insarTelemetryIngestSchema",
+        "insarGeoTIFFUploadSchema"
+      ],
       "migration": "078_satellite_insar_deformations.sql"
     },
     {
       "table": "secrets_rotation_log",
-      "schemas": ["secretsRotationLogSchema"],
+      "schemas": [
+        "secretsRotationLogSchema"
+      ],
       "migration": "086_secrets_rotation_log.sql"
     },
     {
       "table": "shift_completeness_alerts",
-      "schemas": ["shiftCompletenessAlertsSchema"],
+      "schemas": [
+        "shiftCompletenessAlertsSchema"
+      ],
       "migration": "087_shift_completeness_alerts.sql"
     },
     {
       "table": "data_integrity_issues",
-      "schemas": ["dataIntegrityIssuesSchema"],
+      "schemas": [
+        "dataIntegrityIssuesSchema"
+      ],
       "migration": "088_data_integrity_issues.sql"
     },
     {
       "table": "shift_integrity_reports",
-      "schemas": ["shiftIntegrityReportsSchema"],
+      "schemas": [
+        "shiftIntegrityReportsSchema"
+      ],
       "migration": "089_shift_integrity_reports.sql"
     },
     {
       "table": "slo_metrics",
-      "schemas": ["sloMetricsSchema"],
+      "schemas": [
+        "sloMetricsSchema"
+      ],
       "migration": "092_slo_monitoring.sql"
     },
     {
       "table": "feature_flags",
-      "schemas": ["featureFlagsSchema"],
+      "schemas": [
+        "featureFlagsSchema"
+      ],
       "migration": "093_feature_flags.sql"
     },
     {
       "table": "feature_flag_exposures",
-      "schemas": ["featureFlagExposuresSchema"],
+      "schemas": [
+        "featureFlagExposuresSchema"
+      ],
       "migration": "093_feature_flags.sql"
     },
     {
       "table": "ab_test_results",
-      "schemas": ["abTestResultsSchema"],
+      "schemas": [
+        "abTestResultsSchema"
+      ],
       "migration": "093_feature_flags.sql"
     },
     {
       "table": "control_room_shift_reports",
-      "schemas": ["controlRoomShiftReportsSchema"],
+      "schemas": [
+        "controlRoomShiftReportsSchema"
+      ],
       "migration": "097_control_room_shift_reports.sql"
     },
     {
       "table": "ai_token_usage",
-      "schemas": ["aiChatSchema", "aiPredictSchema"],
+      "schemas": [
+        "aiChatSchema",
+        "aiPredictSchema"
+      ],
       "migration": "102_ai_token_usage_tracking.sql"
     },
     {
       "table": "excavator_haul_logs",
-      "schemas": ["excavatorHaulSchema"],
+      "schemas": [
+        "excavatorHaulSchema"
+      ],
       "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "excavator_truck_tallies",
-      "schemas": ["truckTallySchema"],
+      "schemas": [
+        "truckTallySchema"
+      ],
       "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "dozer_rollover_logs",
-      "schemas": ["dozerRolloverEntrySchema"],
+      "schemas": [
+        "dozerRolloverEntrySchema"
+      ],
       "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "ancillary_shift_logs",
-      "schemas": ["ancillaryReportEntrySchema"],
+      "schemas": [
+        "ancillaryReportEntrySchema"
+      ],
       "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "compliance_audit_runs",
-      "schemas": ["complianceAuditRunSchema", "createComplianceAuditRunSchema"],
+      "schemas": [
+        "complianceAuditRunSchema",
+        "createComplianceAuditRunSchema"
+      ],
       "migration": "153_operational_compliance_checks.sql"
     },
     {
       "table": "idempotency_keys",
-      "schemas": ["idempotencyKeysSchema"],
+      "schemas": [
+        "idempotencyKeysSchema"
+      ],
       "migration": "162_idempotency_and_outbox.sql"
     },
     {
       "table": "control_room_outbox",
-      "schemas": ["controlRoomOutboxSchema"],
+      "schemas": [
+        "controlRoomOutboxSchema"
+      ],
       "migration": "162_idempotency_and_outbox.sql"
     },
     {
       "table": "mutation_log",
-      "schemas": ["mutationLogSchema"],
+      "schemas": [
+        "mutationLogSchema"
+      ],
       "migration": "165_offline_crdt_mutation_log_and_smr.sql"
     },
     {
       "table": "smr_readings",
-      "schemas": ["smrReadingsSchema"],
+      "schemas": [
+        "smrReadingsSchema"
+      ],
       "migration": "165_offline_crdt_mutation_log_and_smr.sql"
     }
   ]

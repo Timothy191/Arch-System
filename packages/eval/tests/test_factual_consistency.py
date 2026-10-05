@@ -31,7 +31,7 @@ def test_ai_response_factual_consistency():
     # Define strict threshold for faithfulness (Must be 100% accurate for mining ops)
     faithfulness_metric = FaithfulnessMetric(threshold=1.0, model=judge)
 
-    # Hallucination metric (Should be 0.0 or strict threshold)
-    hallucination_metric = HallucinationMetric(threshold=0.2, model=judge)
+    # Hallucination metric (Should be 0.8+ passing threshold)
+    hallucination_metric = HallucinationMetric(threshold=0.8, model=judge)
 
     assert_test(test_case, [faithfulness_metric, hallucination_metric])

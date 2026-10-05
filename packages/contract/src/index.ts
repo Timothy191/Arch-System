@@ -69,6 +69,8 @@ export {
   drillingDailyLogSchema,
   monthlyReportInputSchema,
   productionDailyLogSchema,
+  splitHourlyLoadSchema,
+  updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
 } from './schemas/form.schema';
 export {
@@ -161,6 +163,8 @@ export type {
   DrillingDailyLogFormValues,
   MonthlyReportInput,
   ProductionDailyLogFormValues,
+  SplitHourlyLoadInput,
+  UpdateHourlyLoadExcavatorInput,
   UpdateMachineSiteInput,
 } from './types/form.types';
 export type {

@@ -1,4 +1,10 @@
-import { buildHourlyLoadsMap, type HourlyLoad, sumHourlyTotal } from './loads-utils';
+import {
+  buildHourlyLoadsGroupedMap,
+  buildHourlyLoadsMap,
+  type HourlyLoad,
+  isHourEditable,
+  sumHourlyTotal,
+} from './loads-utils';
 
 /** Regression: day/night rows must not overwrite each other in the grid map. */
 describe('hourly loads helpers', () => {
@@ -53,7 +59,97 @@ describe('hourly loads helpers', () => {
       machine_id: 'm1',
       shift_type: 'day',
       id: 'x',
+      excavator_id: 'excavator-1',
     };
     expect(sumHourlyTotal(load)).toBe(12);
+  });
+
+  it('supports excavator_id in HourlyLoad mapping', () => {
+    const map = buildHourlyLoadsMap([
+      {
+        id: 'd1',
+        machine_id: 'm1',
+        shift_type: 'day',
+        hour_01: 1,
+        total_loads: 1,
+        excavator_id: 'excavator-101',
+      } as HourlyLoad,
+    ]);
+
+    expect(map.get('m1:day')?.excavator_id).toBe('excavator-101');
+  });
+
+  it('groups multiple split segments for the same machine and shift', () => {
+    const grouped = buildHourlyLoadsGroupedMap([
+      {
+        id: 'seg-1',
+        machine_id: 'm1',
+        shift_type: 'day',
+        start_hour: 1,
+        end_hour: 9,
+        is_locked: true,
+        excavator_id: 'ex-1',
+        material_type: 'Waste',
+        hour_01: 5,
+        total_loads: 5,
+      } as HourlyLoad,
+      {
+        id: 'seg-2',
+        machine_id: 'm1',
+        shift_type: 'day',
+        start_hour: 10,
+        end_hour: 12,
+        is_locked: false,
+        excavator_id: 'ex-2',
+        material_type: 'Coal',
+        hour_10: 8,
+        total_loads: 8,
+      } as HourlyLoad,
+    ]);
+
+    const segments = grouped.get('m1:day');
+    expect(segments).toHaveLength(2);
+    expect(segments?.[0]?.id).toBe('seg-1');
+    expect(segments?.[1]?.id).toBe('seg-2');
+  });
+
+  it('correctly validates editable hours and locks previous hours from double work', () => {
+    const lockedPreviousSegment: HourlyLoad = {
+      id: 'seg-1',
+      machine_id: 'm1',
+      shift_type: 'day',
+      start_hour: 1,
+      end_hour: 9,
+      is_locked: true,
+      hour_01: 5,
+      hour_02: 4,
+      total_loads: 9,
+    } as HourlyLoad;
+
+    // Locked segment cannot be edited on any hour
+    expect(isHourEditable(lockedPreviousSegment, 1)).toBe(false);
+    expect(isHourEditable(lockedPreviousSegment, 9)).toBe(false);
+    expect(isHourEditable(lockedPreviousSegment, 10)).toBe(false);
+
+    const activeSplitSegment: HourlyLoad = {
+      id: 'seg-2',
+      machine_id: 'm1',
+      shift_type: 'day',
+      start_hour: 10,
+      end_hour: 12,
+      is_locked: false,
+      hour_10: 0,
+      total_loads: 0,
+    } as HourlyLoad;
+
+    // Newly added split segment CANNOT fill loads for hours worked previously (hours 1..9)
+    for (let h = 1; h <= 9; h++) {
+      expect(isHourEditable(activeSplitSegment, h)).toBe(false);
+    }
+
+    // Newly added split segment CAN fill loads starting from Hour 10 onwards
+    expect(isHourEditable(activeSplitSegment, 10)).toBe(true);
+    expect(isHourEditable(activeSplitSegment, 11)).toBe(true);
+    expect(isHourEditable(activeSplitSegment, 12)).toBe(true);
   });
 });

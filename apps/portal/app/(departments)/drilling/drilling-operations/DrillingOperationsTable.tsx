@@ -10,7 +10,7 @@ import {
 } from '@repo/ui/components/ui/table';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { cn } from '@repo/ui/lib/utils';
-import { getOperationalToday } from '@repo/utils';
+import { getOperationalToday } from '@repo/utils/client';
 import { AlertCircle, Check, Loader2, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';

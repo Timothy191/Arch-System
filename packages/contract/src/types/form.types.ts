@@ -8,6 +8,8 @@ import type {
   drillingDailyLogSchema,
   monthlyReportInputSchema,
   productionDailyLogSchema,
+  splitHourlyLoadSchema,
+  updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
 } from '../schemas/form.schema.js';
 
@@ -20,3 +22,5 @@ export type BookOutInput = z.infer<typeof bookOutSchema>;
 export type DirectCheckoutInput = z.infer<typeof directCheckoutSchema>;
 export type MonthlyReportInput = z.infer<typeof monthlyReportInputSchema>;
 export type UpdateMachineSiteInput = z.infer<typeof updateMachineSiteSchema>;
+export type UpdateHourlyLoadExcavatorInput = z.infer<typeof updateHourlyLoadExcavatorSchema>;
+export type SplitHourlyLoadInput = z.infer<typeof splitHourlyLoadSchema>;

@@ -99,6 +99,32 @@ export async function POST(req: NextRequest) {
       addEvent('shift_closed', { report_id: rpcResult.id, status: rpcResult.status });
 
       if (rpcResult.id) {
+        // Save SMR allocations
+        if (payload.allocations && payload.allocations.length > 0) {
+          const mutations = payload.allocations.map((alloc) => ({
+            id: crypto.randomUUID(),
+            hlc: { wall: Date.now(), counter: 0, node: 'server' },
+            entity: 'smr',
+            entityId: alloc.machine_id,
+            op: 'smr.update',
+            payload: {
+              meterId: alloc.machine_id,
+              reading: alloc.closing_smr,
+              readingAt: new Date().toISOString(),
+              deviceId: 'shift-closeout-form',
+            },
+          }));
+
+          const { error: smrError } = await supabase.rpc('apply_offline_mutations', {
+            p_tenant: payload.deptId,
+            p_mutations: mutations,
+          });
+
+          if (smrError) {
+            logError(smrError, { context: 'shift_closeout_smr_update' });
+          }
+        }
+
         await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId: rpcResult.id } });
       }
       return NextResponse.json(rpcResult, { status: 200 });

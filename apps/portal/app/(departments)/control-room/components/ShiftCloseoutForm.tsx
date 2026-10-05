@@ -1,46 +1,26 @@
 'use client';
 
-import { MachineTimeAllocationInput, machineLedgerCloseoutSchema } from '@repo/contract';
+import { MachineTimeAllocationInput, shiftCloseoutPayloadSchema } from '@repo/contract';
 import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
 import { GlassCard } from '@repo/ui/components/GlassCard';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ZodError } from 'zod';
 
-// Mock data: In reality, this would be fetched from the DB (the closing SMRs of the previous shift)
-const MOCK_FLEET: MachineTimeAllocationInput[] = [
-  {
-    machine_id: 'd9b9365c-6e6b-4cf7-8b5d-e21b0b411d51',
-    machine_name: 'DMP-01 (Drill)',
-    opening_smr: 12450.5,
-    closing_smr: 12450.5,
-    breakdown_hours: 0,
-    delay_hours: 0,
-  },
-  {
-    machine_id: 'e1a2f1ab-1b1a-4c1c-9a1d-2b3a4b5c6d7e',
-    machine_name: 'EXC-04 (Excavator)',
-    opening_smr: 8900.0,
-    closing_smr: 8900.0,
-    breakdown_hours: 0,
-    delay_hours: 0,
-  },
-  {
-    machine_id: 'f2b3c2bc-2c2b-5d2d-0b2e-3c4b5c6d7e8f',
-    machine_name: 'TRK-12 (Dumper)',
-    opening_smr: 15600.2,
-    closing_smr: 15600.2,
-    breakdown_hours: 0,
-    delay_hours: 0,
-  },
-];
-
-export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shiftDate: string }) {
+export function ShiftCloseoutForm({
+  deptId,
+  shiftDate,
+  initialFleet,
+}: {
+  deptId: string;
+  shiftDate: string;
+  initialFleet: MachineTimeAllocationInput[];
+}) {
   const { isOnline } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
 
   const [shiftType, setShiftType] = useState<'day' | 'night'>('day');
-  const [machines, setMachines] = useState<MachineTimeAllocationInput[]>(MOCK_FLEET);
+  const [machines, setMachines] = useState<MachineTimeAllocationInput[]>(initialFleet);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,15 +40,19 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
     e.preventDefault();
     setValidationErrors({});
 
+    const idempotencyKey = crypto.randomUUID();
     const payload = {
-      shift_date: shiftDate,
-      shift_type: shiftType,
+      deptId,
+      date: shiftDate,
+      shift: shiftType,
+      operatorName: 'Control Room Operator',
+      idempotencyKey,
       allocations: machines,
     };
 
     // 1. Zod Validation (The Block)
     try {
-      machineLedgerCloseoutSchema.parse(payload);
+      shiftCloseoutPayloadSchema.parse(payload);
     } catch (err) {
       if (err instanceof ZodError) {
         const errors: Record<string, string> = {};
@@ -98,7 +82,7 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
       description: `Shift Closeout for ${shiftDate} (${shiftType})`,
       headers: {
         'Content-Type': 'application/json',
-        'X-Idempotency-Key': crypto.randomUUID(),
+        'Idempotency-Key': idempotencyKey,
       },
     });
 
@@ -111,19 +95,19 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
   };
 
   return (
-    <GlassCard variant="spotlight" className="p-6 max-w-5xl bg-[#ffffff]">
+    <GlassCard variant="spotlight" className="p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-color-text-primary">
+          <h2 className="text-xl font-semibold text-[var(--text-heading)]">
             Shift Production & SMR Ledger
           </h2>
-          <p className="text-sm text-color-text-secondary mt-1">
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             Every machine must be accounted for. Operating SMR + Breakdowns + Delays cannot exceed
             12 hours.
           </p>
         </div>
         {!isOnline && (
-          <span className="text-sm text-amber-600 animate-pulse font-medium px-3 py-1 bg-amber-50 rounded-full border border-amber-200">
+          <span className="text-sm text-amber-600 animate-pulse font-medium px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/30">
             ⚠️ Connection Degraded
           </span>
         )}
@@ -134,57 +118,62 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
           <select
             value={shiftType}
             onChange={(e) => setShiftType(e.target.value as 'day' | 'night')}
-            className="rounded border border-gray-300 p-2 text-sm bg-white"
+            className="rounded-lg border border-[var(--border-default)] px-3 py-2 min-h-[44px] text-sm bg-[var(--bg-secondary)] text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors shadow-sm"
           >
             <option value="day">Day Shift (06:00 - 18:00)</option>
             <option value="night">Night Shift (18:00 - 06:00)</option>
           </select>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/40 backdrop-blur-sm shadow-sm">
+          <table className="min-w-full divide-y divide-[var(--border-subtle)]">
+            <thead className="bg-[var(--bg-secondary)]/70">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Equipment
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Opening SMR
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Closing SMR
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Breakdown (h)
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Delays (h)
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Total Allocated
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-[var(--border-subtle)]">
               {machines.map((m) => {
                 const isError = !!validationErrors[m.machine_id];
                 const operatingHours = m.closing_smr - m.opening_smr;
                 const totalAllocated = operatingHours + m.breakdown_hours + m.delay_hours;
 
                 return (
-                  <tr key={m.machine_id} className={isError ? 'bg-red-50' : ''}>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr
+                    key={m.machine_id}
+                    className={`transition-colors ${
+                      isError ? 'bg-red-500/10' : 'hover:bg-[var(--bg-secondary)]/30'
+                    }`}
+                  >
+                    <td className="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-[var(--text-heading)]">
                       {m.machine_name}
                       {isError && (
-                        <div className="text-xs text-red-600 mt-1 max-w-xs whitespace-normal">
+                        <div className="text-xs text-red-600 font-normal mt-1 max-w-xs whitespace-normal">
                           {validationErrors[m.machine_id]}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3.5 whitespace-nowrap text-sm font-mono text-[var(--text-secondary)]">
                       {m.opening_smr.toFixed(1)}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <input
                         type="number"
                         step="0.1"
@@ -196,10 +185,14 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
                             parseFloat(e.target.value) || m.opening_smr
                           )
                         }
-                        className={`w-24 rounded border p-1 text-sm ${isError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}`}
+                        className={`w-24 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                          isError
+                            ? 'border-red-500 focus:ring-red-500'
+                            : 'border-[var(--border-default)]'
+                        }`}
                       />
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <input
                         type="number"
                         step="0.1"
@@ -212,10 +205,14 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className={`w-20 rounded border p-1 text-sm ${isError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}`}
+                        className={`w-20 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                          isError
+                            ? 'border-red-500 focus:ring-red-500'
+                            : 'border-[var(--border-default)]'
+                        }`}
                       />
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <input
                         type="number"
                         step="0.1"
@@ -228,17 +225,21 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className={`w-20 rounded border p-1 text-sm ${isError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}`}
+                        className={`w-20 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                          isError
+                            ? 'border-red-500 focus:ring-red-500'
+                            : 'border-[var(--border-default)]'
+                        }`}
                       />
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-mono font-medium">
                       <span
                         className={
                           totalAllocated > 12
                             ? 'text-red-600 font-bold'
                             : totalAllocated < 12
                               ? 'text-amber-600'
-                              : 'text-green-600'
+                              : 'text-emerald-600'
                         }
                       >
                         {totalAllocated.toFixed(1)} / 12.0 h
@@ -251,8 +252,8 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
           </table>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <p className="text-xs text-gray-500 font-medium">
+        <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
+          <p className="text-xs text-[var(--text-muted)] font-medium">
             {queue.length > 0
               ? `${queue.length} shift record(s) buffered offline.`
               : 'Real-time sync active.'}
@@ -260,7 +261,7 @@ export function ShiftCloseoutForm({ deptId, shiftDate }: { deptId: string; shift
           <button
             type="submit"
             disabled={isSubmitting || isSyncing}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm disabled:opacity-50 transition-colors"
+            className="px-6 py-2.5 min-h-[44px] bg-[var(--arch-brand-blue)] hover:bg-[var(--arch-brand-blue-hover)] text-white font-medium rounded-lg shadow-sm disabled:opacity-50 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-1"
           >
             {isOnline ? 'Lock Shift & Compile Ledger' : 'Lock Shift (Local Cache)'}
           </button>

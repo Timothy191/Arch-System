@@ -5,7 +5,7 @@ import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Checkbox } from '@repo/ui/Checkbox';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { useAutoSave } from '@repo/ui/hooks/useAutoSave';
-import { getCurrentShift } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
 import { AlertTriangle, ChevronDown, ChevronUp, Wrench } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

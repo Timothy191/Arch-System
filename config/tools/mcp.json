@@ -1,6 +1,56 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "mcpServers": {
+    "firecrawl": {
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "args": [],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
+      "type": "stdio"
+    },
+    "upstash": {
+      "type": "remote",
+      "url": "https://mcp.upstash.com/mcp",
+      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "description": "Safe local filesystem operations and directory tree inspection",
+      "type": "stdio"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "type": "stdio"
+    },
+    "ripgrep": {
+      "command": "npx",
+      "args": ["-y", "mcp-ripgrep"],
+      "description": "Blazing fast AST and regex code search across local projects",
+      "type": "stdio"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "type": "stdio"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Web Content Fetcher (Zero-Auth)",
+      "type": "stdio"
+    },
     "codebase-memory": {
       "command": "npx",
       "args": ["-y", "codebase-memory-mcp@0.11.0"],

@@ -1,3 +1,5 @@
+export const instant = false;
+
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { Logo } from '@repo/ui/Logo';
 import { AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
@@ -141,19 +143,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
         {/* Footer */}
         <footer className="mt-8 text-center space-y-2 select-none">
-          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-600 dark:text-neutral-400">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-600 ">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
-          <div className="flex justify-center gap-6 text-xs text-neutral-600 dark:text-neutral-300">
+          <div className="flex justify-center gap-6 text-xs text-neutral-600 ">
             <a
-              className="hover:text-neutral-900 dark:hover:text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              className="hover:text-neutral-900 :text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
               href="/docs"
             >
               Security Policy
             </a>
             <a
-              className="hover:text-neutral-900 dark:hover:text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              className="hover:text-neutral-900 :text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
               href="/docs#support"
             >
               Support

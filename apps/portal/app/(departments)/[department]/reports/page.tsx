@@ -45,7 +45,9 @@ export default async function ReportsPage({
         .order('shift_date', { ascending: false }),
       supabase
         .from('hourly_loads')
-        .select('load_date, shift_type, total_loads')
+        .select(
+          'load_date, shift_type, total_loads, excavator:machines!excavator_id(name, site:sites(name))'
+        )
         .eq('department_id', deptId)
         .gte('load_date', fromDateStr)
         .lte('load_date', toDateStr),
@@ -113,7 +115,14 @@ export default async function ReportsPage({
       getOrCreate('', o.shift_date, o.shift_type).hours += o.hours_worked || 0;
     });
     loads?.forEach((l) => {
-      getOrCreate('', l.load_date, l.shift_type).loads += l.total_loads || 0;
+      const rawExcavator = l.excavator as unknown as
+        | { name?: string; site?: { name: string } | { name: string }[] | null }
+        | { name?: string; site?: { name: string } | { name: string }[] | null }[]
+        | null;
+      const excavatorObj = Array.isArray(rawExcavator) ? rawExcavator[0] : rawExcavator;
+      const rawSite = excavatorObj?.site;
+      const siteName = Array.isArray(rawSite) ? (rawSite[0]?.name ?? '') : (rawSite?.name ?? '');
+      getOrCreate(siteName, l.load_date, l.shift_type).loads += l.total_loads || 0;
     });
     delays?.forEach((d) => {
       getOrCreate('', d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;

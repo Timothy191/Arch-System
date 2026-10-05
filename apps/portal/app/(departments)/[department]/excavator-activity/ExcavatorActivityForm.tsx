@@ -2,7 +2,7 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { getCurrentShift } from '@repo/utils';
+import { getCurrentShift } from '@repo/utils/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';

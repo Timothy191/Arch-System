@@ -283,9 +283,9 @@ export function IntegrationManager() {
         <AnimatePresence>
           {showForm && (
             <motion.form
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
               onSubmit={handleInstall}
               className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-2 overflow-hidden"
             >
@@ -489,9 +489,9 @@ export function IntegrationManager() {
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
                       className="overflow-hidden"
                     >
                       <div className="pt-3 mt-3 border-t border-[var(--border-default)] grid grid-cols-1 lg:grid-cols-2 gap-4">

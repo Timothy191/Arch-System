@@ -19,8 +19,16 @@ export default async function HourlyLoadsPage({
   // Fetch dump trucks with bin_factor (centralised fleet)
   const { data: machines } = await supabase
     .from('machines')
-    .select('id, name, machine_type, bin_factor, site_id, sites(name)')
+    .select('id, name, machine_type, bin_factor')
     .eq('machine_type', 'Dump Truck')
+    .eq('active', true)
+    .order('name');
+
+  // Fetch active excavators with their site associations
+  const { data: excavators } = await supabase
+    .from('machines')
+    .select('id, name, machine_type, site_id, sites(name)')
+    .eq('machine_type', 'Excavator')
     .eq('active', true)
     .order('name');
 
@@ -63,6 +71,7 @@ export default async function HourlyLoadsPage({
       <HourlyLoadsGrid
         departmentId={deptId}
         machines={machines || []}
+        excavators={excavators || []}
         hourlyLoads={hourlyLoads || []}
         sites={sites || []}
         today={today}

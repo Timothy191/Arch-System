@@ -22,15 +22,6 @@ const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === 'true';
 if (isProduction && !process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.IGNORE_ENV_VALIDATION) {
   console.warn('⚠️  WARNING: NEXT_PUBLIC_SUPABASE_URL is not set at build time.');
 }
-if (
-  isProduction &&
-  !process.env.OTEL_EXPORTER_OTLP_ENDPOINT &&
-  !process.env.IGNORE_ENV_VALIDATION
-) {
-  console.warn(
-    '⚠️  WARNING: OTEL_EXPORTER_OTLP_ENDPOINT is not set at build time. Telemetry may fail.'
-  );
-}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

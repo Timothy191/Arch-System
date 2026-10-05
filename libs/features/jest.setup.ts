@@ -5,6 +5,16 @@ global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || (TextDecoder as any);
 
 // Web API globals that Next.js server modules expect but jsdom may not define.
+if (typeof global.fetch === 'undefined') {
+  global.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(''),
+    })
+  ) as any;
+}
+
 global.Request =
   global.Request ||
   class Request {

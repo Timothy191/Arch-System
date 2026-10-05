@@ -1,5 +1,56 @@
 {
   "mcpServers": {
+    "firecrawl": {
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "args": [],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
+      "type": "stdio"
+    },
+    "upstash": {
+      "type": "remote",
+      "url": "https://mcp.upstash.com/mcp",
+      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
+      "serverUrl": "https://mcp.upstash.com/mcp"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "description": "Safe local filesystem operations and directory tree inspection",
+      "type": "stdio"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "type": "stdio"
+    },
+    "ripgrep": {
+      "command": "npx",
+      "args": ["-y", "mcp-ripgrep"],
+      "description": "Blazing fast AST and regex code search across local projects",
+      "type": "stdio"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "type": "stdio"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Web Content Fetcher (Zero-Auth)",
+      "type": "stdio"
+    },
     "codebase-memory": {
       "command": "npx",
       "args": ["-y", "codebase-memory-mcp@0.11.0"],
@@ -25,7 +76,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-postgres@0.6.2",
-        "${DATABASE_POOLER_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
+        "postgresql://postgres.<project-ref>:your_db_password@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
       ]
     },
     "redis": {
@@ -35,125 +86,8 @@
         "redis-mcp-server",
         "redis-mcp-server",
         "--url",
-        "redis://127.0.0.1:6381/0"
+        "redis://127.0.0.1:6379/0"
       ]
-    },
-    "workos": {
-      "type": "http",
-      "url": "https://mcp.workos.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${WORKOS_API_KEY}"
-      }
-    },
-    "sixtyfour-intelligence": {
-      "type": "http",
-      "url": "https://mcp.sixtyfour.ai/mcp",
-      "headers": {
-        "x-api-key": "${SIXTYFOUR_API_KEY}"
-      }
-    },
-    "windsor": {
-      "type": "http",
-      "url": "https://mcp.windsor.ai/",
-      "headers": {
-        "Authorization": "Bearer ${WINDSOR_API_KEY}"
-      }
-    },
-    "exa": {
-      "command": "npx",
-      "args": ["-y", "exa-mcp-server"]
-    },
-    "asana": {
-      "type": "http",
-      "url": "https://mcp.asana.com/v2/mcp"
-    },
-    "appsai": {
-      "command": "npx",
-      "args": ["-y", "@appsai/mcp-server"]
-    },
-    "airtable": {
-      "type": "http",
-      "url": "https://mcp.airtable.com/mcp"
-    },
-    "ai-memory": {
-      "command": "npx",
-      "args": ["-y", "@alphaonedev/ai-memory-mcp"]
-    },
-    "agenty": {
-      "type": "http",
-      "url": "https://cloud.agenty.com/api",
-      "headers": {
-        "Authorization": "Bearer ${AGENTY_API_KEY}"
-      }
-    },
-    "agentql": {
-      "command": "npx",
-      "args": ["-y", "agentql-mcp"]
-    },
-    "web-hygiene": {
-      "type": "http",
-      "url": "https://bruco3--web-hygiene-mcp.apify.actor/mcp"
-    },
-    "firecrawl": {
-      "command": "/home/tim/.local/bin/firecrawl-mcp",
-      "args": [],
-      "env": {
-        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
-      },
-      "type": "stdio"
-    },
-    "upstash": {
-      "type": "http",
-      "url": "https://mcp.upstash.com/mcp"
-    },
-    "memory": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "description": "Persistent Knowledge Graph Memory across conversations and agents",
-      "type": "stdio"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
-      "type": "stdio"
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
-      "description": "Safe local filesystem operations and directory tree inspection",
-      "type": "stdio"
-    },
-    "ripgrep": {
-      "command": "npx",
-      "args": ["-y", "mcp-ripgrep"],
-      "description": "Blazing fast AST and regex code search across local projects",
-      "type": "stdio"
-    },
-    "git": {
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "description": "Git repository operations, diffs, branches, and commit tracking",
-      "type": "stdio"
-    },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web Content Fetcher (Zero-Auth)",
-      "type": "stdio"
-    },
-    "composio": {
-      "url": "https://connect.composio.dev/mcp",
-      "description": "Composio For You MCP - connect apps to your agent",
-      "type": "http",
-      "headers": {
-        "x-consumer-api-key": "${COMPOSIO_CONSUMER_KEY}"
-      }
-    },
-    "foursquare": {
-      "url": "https://api.foursquare.com/v2/streaming/mcp/swarm-beta",
-      "description": "Foursquare Swarm Beta MCP - location & POI streaming",
-      "type": "http"
     }
   }
 }

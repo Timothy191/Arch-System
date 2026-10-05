@@ -1,8 +1,7 @@
 'use client';
 
 import { Button } from '@repo/ui/components/ui/button';
-import { analytics } from '@repo/utils';
-import { fetchClient } from '@repo/utils/client';
+import { analytics, fetchClient } from '@repo/utils/client';
 import { useState } from 'react';
 
 interface FeedbackWidgetProps {

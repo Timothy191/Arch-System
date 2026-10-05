@@ -115,6 +115,65 @@
       "args": ["-y", "@upstash/context7-mcp"],
       "type": "stdio"
     },
+    "codebase-memory": {
+      "name": "codebase-memory",
+      "description": "Persistent project codebase memory and indexing",
+      "required": false,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "codebase-memory-mcp@0.11.0"],
+      "env": {
+        "CODEBASE_MEMORY_PERSIST": "true",
+        "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
+      },
+      "type": "stdio"
+    },
+    "knowledge-rail": {
+      "name": "knowledge-rail",
+      "description": "Deterministic semantic architecture enforcement & codebase navigation rail",
+      "required": false,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
+      "type": "stdio"
+    },
+    "next-devtools": {
+      "name": "next-devtools",
+      "description": "Next.js DevTools AST & routing inspector",
+      "required": false,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@0.4.0"],
+      "type": "stdio"
+    },
+    "postgres": {
+      "name": "postgres",
+      "description": "PostgreSQL database introspection and query execution",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
+      ],
+      "type": "stdio"
+    },
+    "redis": {
+      "name": "redis",
+      "description": "Redis cache inspection and key-value operations",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "redis-mcp-server",
+        "redis-mcp-server",
+        "--url",
+        "redis://127.0.0.1:6379/0"
+      ],
+      "type": "stdio"
+    },
     "repowise": {
       "name": "repowise",
       "description": "Codebase intelligence: code health scores, git analytics, dead code detection, risk evaluation",
