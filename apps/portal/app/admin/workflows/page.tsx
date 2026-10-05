@@ -130,8 +130,8 @@ export default function WorkflowsPage() {
         <WorkflowBuilder
           initialNodes={initialNodes}
           initialEdges={initialEdges}
-          onSave={(nodes, edges) => {
-            console.log('Saved Workflow State:', { nodes, edges });
+          onSave={() => {
+            // Workflow persistence handled by WorkflowBuilder internals.
           }}
           onExecute={async (nodes, edges) => {
             await handleDispatch(nodes, edges);
