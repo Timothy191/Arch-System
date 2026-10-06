@@ -38,7 +38,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     userAgent: 'Playwright/E2E-Tests',
@@ -86,7 +86,7 @@ export default defineConfig({
     },
     // We only support chromium locally as per requirements, but defining mobile sizes
   ],
-  webServer: {
+  webServer: process.env.BASE_URL ? undefined : {
     command: 'pnpm --filter portal dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,

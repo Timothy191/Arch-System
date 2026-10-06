@@ -31,8 +31,8 @@ echo "🚀 [VERCEL DEPLOY] Target Environment: ${MODE^^}"
 echo "========================================================"
 
 # Step 1: Run preflight audit
-echo "🔍 Step 1: Running Vercel deployment preflight..."
-node tools/scripts/vercel-preflight.cjs
+echo "🔍 Step 1: Running Vercel deployment preflight (${MODE})..."
+node tools/scripts/vercel-preflight.cjs --env="${MODE}"
 
 # Step 2: Check project linkage
 if [ ! -f ".vercel/project.json" ]; then

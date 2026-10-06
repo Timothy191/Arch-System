@@ -138,6 +138,8 @@
     "deploy:rollback": "bash scripts/deploy.sh production --rollback",
     "deploy:staging": "bash scripts/deploy.sh staging",
     "deploy:vercel:preflight": "node tools/scripts/vercel-preflight.cjs",
+    "deploy:vercel:preflight:preview": "node tools/scripts/vercel-preflight.cjs --env=preview",
+    "deploy:vercel:preflight:prod": "node tools/scripts/vercel-preflight.cjs --env=production",
     "deploy:vercel:preview": "bash tools/scripts/vercel-deploy.sh --preview",
     "deploy:vercel:prod": "bash tools/scripts/vercel-deploy.sh --prod",
     "deps:check": "syncpack list-mismatches --config config/tools/.syncpackrc.js",

@@ -1,0 +1,83 @@
+name: Kilo Autonomous Code Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: false
+        type: string
+      scope:
+        description: 'Review scope (branch, uncommitted, commit)'
+        required: false
+        default: 'branch'
+        type: string
+
+concurrency:
+  group: kilo-review-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kilo-review:
+    name: Kilo Autonomous Code Review
+    # Skip bot PRs per Kilo specification to prevent automated notification loops
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false && !endsWith(github.actor, '[bot]')) ||
+      (github.event_name == 'issue_comment' && (
+        startsWith(github.event.comment.body, '/kilo') ||
+        contains(github.event.comment.body, ' /kilo') ||
+        startsWith(github.event.comment.body, '/review') ||
+        contains(github.event.comment.body, ' /review') ||
+        startsWith(github.event.comment.body, '/kc') ||
+        contains(github.event.comment.body, ' /kc')
+      )) ||
+      (github.event_name == 'pull_request_review_comment' && (
+        startsWith(github.event.comment.body, '/kilo') ||
+        contains(github.event.comment.body, ' /kilo') ||
+        startsWith(github.event.comment.body, '/review') ||
+        contains(github.event.comment.body, ' /review') ||
+        startsWith(github.event.comment.body, '/kc') ||
+        contains(github.event.comment.body, ' /kc')
+      )) ||
+      (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout Base Branch for REVIEW.md policy
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify REVIEW.md Integrity
+        run: |
+          if [ -f "REVIEW.md" ]; then
+            CHAR_COUNT=$(wc -m < REVIEW.md)
+            echo "Found REVIEW.md with $CHAR_COUNT characters."
+            if [ "$CHAR_COUNT" -gt 10000 ]; then
+              echo "::warning::REVIEW.md exceeds 10,000 characters ($CHAR_COUNT chars). Kilo will truncate it."
+            fi
+          else
+            echo "::warning::REVIEW.md not found in repository root; using fallback review guidance."
+          fi
+
+      - name: Run Kilo Code Reviewer
+        uses: Kilo-Org/kilocode/github@latest
+        env:
+          KILO_TOKEN: ${{ secrets.KILO_TOKEN || secrets.KILO_API_KEY }}
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY || secrets.KILO_TOKEN }}
+          KILO_ORG_ID: ${{ secrets.KILO_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: kilo/anthropic/claude-3-7-sonnet
