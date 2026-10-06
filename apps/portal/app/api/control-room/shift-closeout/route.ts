@@ -170,8 +170,8 @@ export async function POST(req: NextRequest) {
       }
 
       await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId } });
-      revalidateTag('control-room');
-      revalidateTag('shift-closeout');
+      revalidateTag('control-room', 'max');
+      revalidateTag('shift-closeout', 'max');
       return NextResponse.json(closeoutResult, { status: 200 });
     } catch (error: unknown) {
       logError(error, { context: 'shift_closeout_route' });

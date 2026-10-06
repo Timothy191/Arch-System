@@ -407,6 +407,6 @@ async function logAccess(
       context: 'access_log_write_failed',
     });
   } else {
-    revalidateTag('access-control');
+    revalidateTag('access-control', 'max');
   }
 }
