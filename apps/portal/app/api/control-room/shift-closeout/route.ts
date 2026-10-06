@@ -3,6 +3,7 @@ import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { inngest, shiftCloseoutReportEvent } from '@repo/utils/inngest';
 import crypto from 'crypto';
+import { revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { logError } from '@/lib/errors/error-logger';
 import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
@@ -169,6 +170,8 @@ export async function POST(req: NextRequest) {
       }
 
       await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId } });
+      revalidateTag('control-room');
+      revalidateTag('shift-closeout');
       return NextResponse.json(closeoutResult, { status: 200 });
     } catch (error: unknown) {
       logError(error, { context: 'shift_closeout_route' });

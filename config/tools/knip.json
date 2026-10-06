@@ -75,15 +75,19 @@
         "lib/ai/embeddings.ts",
         "lib/api/rate-limit-middleware.ts",
         "components/dynamic/LazyHeavyComponents.tsx",
+        "flags/index.ts",
+        "workflows/index.ts",
         ".eslintrc.{js,cjs}"
       ],
       "project": [
         "app/**/*.{ts,tsx}",
         "components/**/*.{ts,tsx}",
         "features/**/*.{ts,tsx}",
+        "flags/**/*.{ts,tsx}",
         "hooks/**/*.{ts,tsx}",
         "lib/**/*.{ts,tsx}",
-        "plugins/**/*.{ts,tsx}"
+        "plugins/**/*.{ts,tsx}",
+        "workflows/**/*.{ts,tsx}"
       ],
       "ignoreDependencies": [
         "autoprefixer",

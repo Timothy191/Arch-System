@@ -1,5 +1,6 @@
 import { scannerBadgeSchema } from '@repo/contract/schemas/scanner.schema';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
@@ -405,5 +406,7 @@ async function logAccess(
       url: '/api/c66',
       context: 'access_log_write_failed',
     });
+  } else {
+    revalidateTag('access-control');
   }
 }

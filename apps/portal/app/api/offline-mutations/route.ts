@@ -60,6 +60,7 @@
 import { offlineMutationBatchSchema } from '@repo/contract';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { logError } from '@/lib/errors/error-logger';
 
@@ -118,6 +119,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       return NextResponse.json({ error: 'Failed to persist offline mutations' }, { status: 500 });
     }
 
+    revalidateTag('offline-mutations');
     return NextResponse.json(data);
   } catch (error) {
     await logError(error, { context: 'offline_mutations_route' });
