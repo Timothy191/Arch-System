@@ -100,16 +100,24 @@ Configure these in the Vercel Dashboard under **Project Settings → Environment
 ## 4. Execution Commands & Automation Runbook
 
 ```bash
-# 1. Run automated preflight verification
-pnpm deploy:vercel:preflight
+# 1. Run automated preflight verification (Preview or Production)
+pnpm deploy:vercel:preflight:preview
+pnpm deploy:vercel:preflight:prod
 
-# 2. Deploy to Preview environment (non-interactive)
+# 2. Deploy to Preview environment (automated preflight gate + non-interactive CLI)
 pnpm deploy:vercel:preview
 
-# 3. Deploy to Production environment (non-interactive)
+# 3. Deploy to Production environment (automated preflight gate + non-interactive CLI)
 pnpm deploy:vercel:prod
 
-# 4. View live deployment logs
+# 4. Advanced Operational Tooling (Build, Cache, Comments)
+pnpm vercel:build:local            # Simulate Vercel build container locally into .vercel/output
+pnpm vercel:deploy:prebuilt        # Deploy prebuilt artifacts with zero server-side compilation
+pnpm vercel:cache:invalidate --tag telemetry  # Invalidate specific Next.js 16 cache tag on Vercel CDN
+pnpm vercel:cache:purge            # Purge entire CDN and Data cache across edge PoPs
+pnpm vercel:comments:list          # Inspect unresolved Vercel Toolbar feedback comments
+
+# 5. View live deployment logs
 npx vercel logs <deployment-url>
 ```
 
