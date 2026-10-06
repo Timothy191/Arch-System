@@ -70,10 +70,7 @@ describe('ExcavatorActivityList Component', () => {
 
   it('renders site headers, machine activities, and assignments correctly', () => {
     render(
-      <ExcavatorActivityList
-        todayActivity={mockActivity}
-        todayAssignments={mockAssignments}
-      />
+      <ExcavatorActivityList todayActivity={mockActivity} todayAssignments={mockAssignments} />
     );
 
     // Site header check
@@ -102,12 +99,7 @@ describe('ExcavatorActivityList Component', () => {
   });
 
   it('renders empty assignment message when activity has no dumper assignments', () => {
-    render(
-      <ExcavatorActivityList
-        todayActivity={[mockActivity[1]]}
-        todayAssignments={[]}
-      />
-    );
+    render(<ExcavatorActivityList todayActivity={[mockActivity[1]]} todayAssignments={[]} />);
 
     expect(screen.getByText('EX-02')).toBeInTheDocument();
     expect(screen.getByText('No dumper assignments')).toBeInTheDocument();
