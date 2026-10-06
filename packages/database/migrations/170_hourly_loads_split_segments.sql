@@ -7,22 +7,32 @@ ADD COLUMN IF NOT EXISTS start_hour INTEGER NOT NULL DEFAULT 1,
 ADD COLUMN IF NOT EXISTS end_hour INTEGER NOT NULL DEFAULT 12,
 ADD COLUMN IF NOT EXISTS is_locked BOOLEAN NOT NULL DEFAULT false;
 
--- Drop unique constraint that prevented multiple segments per machine on same shift date
-ALTER TABLE hourly_loads DROP CONSTRAINT IF EXISTS hourly_loads_machine_id_load_date_shift_type_key;
-
+-- Drop only locally-defined unique constraints. Partition constraints inherit
+-- from the parent and PostgreSQL rejects dropping them directly from a child.
 DO $$
 DECLARE
-  p RECORD;
+  v_constraint record;
 BEGIN
-  FOR p IN 
-    SELECT c.relname 
-    FROM pg_class c 
-    JOIN pg_namespace n ON n.oid = c.relnamespace 
-    WHERE c.relname LIKE 'hourly_loads_%' AND n.nspname = 'public'
+  FOR v_constraint IN
+    SELECT relation.relname AS table_name, constraint_row.conname AS constraint_name
+      FROM pg_catalog.pg_constraint AS constraint_row
+      JOIN pg_catalog.pg_class AS relation ON relation.oid = constraint_row.conrelid
+      JOIN pg_catalog.pg_namespace AS relation_schema ON relation_schema.oid = relation.relnamespace
+     WHERE relation_schema.nspname = 'public'
+       AND (relation.relname = 'hourly_loads' OR relation.relname LIKE 'hourly_loads_%')
+       AND constraint_row.contype = 'u'
+       AND constraint_row.conparentid = 0
+       AND constraint_row.conname LIKE '%machine_id_load_date_shift_type_key%'
   LOOP
-    EXECUTE format('ALTER TABLE %I DROP CONSTRAINT IF EXISTS %I', p.relname, p.relname || '_machine_id_load_date_shift_type_key');
+    EXECUTE pg_catalog.format(
+      'ALTER TABLE %I.%I DROP CONSTRAINT IF EXISTS %I',
+      'public',
+      v_constraint.table_name,
+      v_constraint.constraint_name
+    );
   END LOOP;
-END $$;
+END
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_hourly_loads_machine_shift_date ON hourly_loads(machine_id, load_date, shift_type);
 

@@ -31,7 +31,9 @@
       "get": {
         "summary": "List webhook endpoints",
         "description": "Retrieve all webhook endpoints. Admins can see all webhooks, supervisors only see webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -109,7 +111,9 @@
       "post": {
         "summary": "Create webhook endpoint",
         "description": "Create a new webhook endpoint for receiving event notifications. Non-admins can only create webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -121,7 +125,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["url", "event_types"],
+                "required": [
+                  "url",
+                  "event_types"
+                ],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -198,7 +205,9 @@
       "put": {
         "summary": "Update webhook endpoint",
         "description": "Update an existing webhook endpoint. All fields are optional - only provided fields will be updated. Non-admins can only update webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -298,7 +307,9 @@
       "delete": {
         "summary": "Delete webhook endpoint",
         "description": "Soft delete a webhook endpoint (sets deleted_at timestamp). Non-admins can only delete webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -353,7 +364,9 @@
       "get": {
         "summary": "Get webhook delivery logs",
         "description": "Retrieve delivery logs for a specific webhook endpoint. Returns the last 50 log entries in reverse chronological order. Non-admins can only view logs for webhooks in their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -394,7 +407,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["success", "failed", "retrying"]
+                            "enum": [
+                              "success",
+                              "failed",
+                              "retrying"
+                            ]
                           },
                           "response_status": {
                             "type": "number",
@@ -438,7 +455,9 @@
       "get": {
         "summary": "External tools health status",
         "description": "Returns the health status and response times of all configured external tools. Results are cached for 60 seconds. Requires authentication.",
-        "tags": ["Tools"],
+        "tags": [
+          "Tools"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -477,7 +496,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["online", "offline", "unknown"]
+                            "enum": [
+                              "online",
+                              "offline",
+                              "unknown"
+                            ]
                           },
                           "responseTime": {
                             "type": "number"
@@ -512,7 +535,9 @@
       "post": {
         "summary": "Push telemetry data to SCADA",
         "description": "Store machine telemetry in the Redis cache (system of record) for FUXA to pull via /api/scada/tags (reverse-flow ingest). Two-level dedup (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates.",
-        "tags": ["Telemetry"],
+        "tags": [
+          "Telemetry"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -522,11 +547,16 @@
                   {
                     "type": "object",
                     "description": "Supabase webhook payload (auto-detected)",
-                    "required": ["table", "record"],
+                    "required": [
+                      "table",
+                      "record"
+                    ],
                     "properties": {
                       "table": {
                         "type": "string",
-                        "enum": ["machine_telemetry"]
+                        "enum": [
+                          "machine_telemetry"
+                        ]
                       },
                       "record": {
                         "type": "object",
@@ -559,7 +589,10 @@
                   {
                     "type": "object",
                     "description": "Direct tag update",
-                    "required": ["name", "value"],
+                    "required": [
+                      "name",
+                      "value"
+                    ],
                     "properties": {
                       "name": {
                         "type": "string",
@@ -640,14 +673,18 @@
       "post": {
         "summary": "Ingest drill rig telemetry data",
         "description": "Ingests real-time IoT metrics from drill rigs (penetration rate, pull-down force, bit depth, RPM) into database and Redis, forwarding updates to SCADA FUXA.",
-        "tags": ["Telemetry"],
+        "tags": [
+          "Telemetry"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["machine_id"],
+                "required": [
+                  "machine_id"
+                ],
                 "properties": {
                   "machine_id": {
                     "type": "string",
@@ -705,7 +742,9 @@
       "get": {
         "summary": "Real-Time Drill Rig Telemetry SSE Stream",
         "description": "Server-Sent Events (SSE) endpoint subscribing to Redis pub/sub channel `drilling:telemetry:stream` to stream live rig telemetry updates.",
-        "tags": ["Telemetry"],
+        "tags": [
+          "Telemetry"
+        ],
         "responses": {
           "200": {
             "description": "SSE event stream initialized",
@@ -724,7 +763,9 @@
       "post": {
         "summary": "Queue sync playback event",
         "description": "Queue a sync playback event via Inngest for offline-first data synchronization. Uses idempotency keys to prevent duplicate processing.",
-        "tags": ["Sync"],
+        "tags": [
+          "Sync"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -736,7 +777,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["idempotencyKey", "actionType", "payload", "departmentId"],
+                "required": [
+                  "idempotencyKey",
+                  "actionType",
+                  "payload",
+                  "departmentId"
+                ],
                 "properties": {
                   "idempotencyKey": {
                     "type": "string",
@@ -797,7 +843,9 @@
       "get": {
         "summary": "FUXA WebAPI tag source (reverse-flow ingest)",
         "description": "Serves the current telemetry tag values from the Redis cache in the FUXA WebAPI device shape (`[{id,name,value,type}]`). FUXA polls this endpoint via its WebAPI device `getTags` URL — FUXA exposes no /api/tag write endpoint, so ingest is pull-based (D2-a).",
-        "tags": ["SCADA"],
+        "tags": [
+          "SCADA"
+        ],
         "responses": {
           "200": {
             "description": "FUXA WebAPI tag array",
@@ -829,7 +877,10 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": ["number", "string"]
+                        "enum": [
+                          "number",
+                          "string"
+                        ]
                       }
                     }
                   }
@@ -847,7 +898,10 @@
       "post": {
         "summary": "Rust telemetry engine for predictive maintenance",
         "description": "Calculates wear index and remaining useful life (RUL) for drilling equipment using either native Rust engine or JavaScript fallback. Requires authentication and rate limiting.",
-        "tags": ["Plugins", "Telemetry"],
+        "tags": [
+          "Plugins",
+          "Telemetry"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -900,7 +954,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["critical", "warning", "optimal"]
+                      "enum": [
+                        "critical",
+                        "warning",
+                        "optimal"
+                      ]
                     },
                     "isNative": {
                       "type": "boolean",
@@ -932,6 +990,147 @@
         }
       }
     },
+    "/api/offline-mutations": {
+      "post": {
+        "summary": "Replay an authenticated employee's offline SMR mutations",
+        "tags": [
+          "Offline Operations"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "clientHlc",
+                  "mutations"
+                ],
+                "properties": {
+                  "clientHlc": {
+                    "type": "object",
+                    "required": [
+                      "wall",
+                      "counter",
+                      "node"
+                    ],
+                    "properties": {
+                      "wall": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "counter": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2147483647
+                      },
+                      "node": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      }
+                    }
+                  },
+                  "mutations": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 500,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "hlc",
+                        "entity",
+                        "entityId",
+                        "op",
+                        "payload"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "entity": {
+                          "type": "string",
+                          "enum": [
+                            "smr"
+                          ]
+                        },
+                        "entityId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "op": {
+                          "type": "string",
+                          "enum": [
+                            "smr.update"
+                          ]
+                        },
+                        "payload": {
+                          "type": "object",
+                          "required": [
+                            "meterId",
+                            "reading",
+                            "readingAt",
+                            "deviceId"
+                          ],
+                          "properties": {
+                            "meterId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "reading": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "readingAt": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "deviceId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mutations accepted and persisted atomically"
+          },
+          "400": {
+            "description": "Malformed or invalid mutation batch"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Employee or department is not authorized"
+          },
+          "413": {
+            "description": "Request body exceeds the size limit"
+          },
+          "500": {
+            "description": "Mutation persistence failed"
+          }
+        }
+      }
+    },
     "/api/metrics": {
       "get": {
         "summary": "Prometheus Metrics",
@@ -942,7 +1141,9 @@
       "get": {
         "summary": "Prometheus metrics endpoint",
         "description": "Exposes Prometheus-compatible metrics for Control Room operations. This endpoint can be scraped by Prometheus server or Grafana for monitoring and alerting.",
-        "tags": ["Metrics"],
+        "tags": [
+          "Metrics"
+        ],
         "responses": {
           "200": {
             "description": "Prometheus metrics in text format",
@@ -982,7 +1183,9 @@
       "get": {
         "summary": "List integration catalog and installations",
         "description": "Returns the admin-curated integration catalog and the installations visible to the caller. Admins see every installation; other employees see global installations plus those scoped to their departments.\n",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1003,7 +1206,9 @@
       "post": {
         "summary": "Install an integration",
         "description": "Admin-only. Creates (or reuses) a catalog entry, stores the credential encrypted, and probes MCP servers immediately for tool discovery.\n",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1015,7 +1220,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["catalog_id"],
+                "required": [
+                  "catalog_id"
+                ],
                 "properties": {
                   "catalog_id": {
                     "type": "string",
@@ -1027,7 +1234,10 @@
                   },
                   "scope": {
                     "type": "string",
-                    "enum": ["global", "department"]
+                    "enum": [
+                      "global",
+                      "department"
+                    ]
                   },
                   "department_id": {
                     "type": "string",
@@ -1043,7 +1253,11 @@
                   },
                   "secret_kind": {
                     "type": "string",
-                    "enum": ["api_key", "bearer", "custom_header"]
+                    "enum": [
+                      "api_key",
+                      "bearer",
+                      "custom_header"
+                    ]
                   },
                   "tool_allowlist": {
                     "type": "array",
@@ -1082,7 +1296,9 @@
       "get": {
         "summary": "Dev-agent MCP manifest",
         "description": "Machine-readable manifest of active MCP integrations for coding agents (Claude, GLM, …). Consumed by scripts/sync-integrations-mcp.* to write .mcp.json-style configs. Requires an admin session OR the INTEGRATIONS_MANIFEST_TOKEN bearer token.\n",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1102,7 +1318,9 @@
       "get": {
         "summary": "Get installation detail with audit log tail",
         "description": "Admins see any installation; other employees only installations scoped to their departments (or global ones).",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1137,7 +1355,9 @@
       "patch": {
         "summary": "Update an installation",
         "description": "Admin-only. Toggle status, edit config/allowlist, rotate the secret, or point the catalog entry at a new server URL.",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1172,7 +1392,9 @@
       "delete": {
         "summary": "Uninstall an integration",
         "description": "Admin-only. Cascades credentials; keeps audit logs.",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1209,7 +1431,9 @@
       "post": {
         "summary": "Refresh MCP tool discovery",
         "description": "Admin-only. Re-runs tools/list against the connector and persists the result into the installation tool cache.",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1249,7 +1473,9 @@
       "post": {
         "summary": "Invoke one tool for admin validation",
         "description": "Admin-only test path. Calls the requested MCP tool with the supplied arguments through the same guard chain Aria uses (allowlist, risk class bypassed as confirmed, audit logging).\n",
-        "tags": ["Integrations"],
+        "tags": [
+          "Integrations"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1272,7 +1498,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["tool"],
+                "required": [
+                  "tool"
+                ],
                 "properties": {
                   "tool": {
                     "type": "string",
@@ -1306,7 +1534,9 @@
       "get": {
         "summary": "n8n Workflow Engine health check",
         "description": "Probes external n8n automation engine. n8n is an optional service; if offline or unreachable, the endpoint returns HTTP 200 with optional flag true and backend status normal so backend functions continue unaffected.",
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "responses": {
           "200": {
             "description": "n8n health status (always 200 as n8n is an optional integration)",
@@ -1317,7 +1547,11 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["healthy", "degraded", "unavailable"]
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "unavailable"
+                      ]
                     },
                     "optional": {
                       "type": "boolean"
@@ -1360,7 +1594,9 @@
       "get": {
         "summary": "FUXA SCADA health check",
         "description": "Monitors FUXA SCADA server connectivity and response latency. Critical for production monitoring of telemetry integration.",
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "responses": {
           "200": {
             "description": "FUXA health status",
@@ -1371,7 +1607,11 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["healthy", "degraded", "down"]
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "down"
+                      ]
                     },
                     "latency_ms": {
                       "type": "integer",
@@ -1412,7 +1652,9 @@
       "get": {
         "summary": "Cache health check",
         "description": "Returns cache statistics including hit rate, hits, misses, and Redis connection status. Monitors the performance of the caching layer used for department slug resolution.",
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "responses": {
           "200": {
             "description": "Cache health status",
@@ -1423,7 +1665,10 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["healthy", "degraded"]
+                      "enum": [
+                        "healthy",
+                        "degraded"
+                      ]
                     },
                     "hitRate": {
                       "type": "number",
@@ -1454,7 +1699,9 @@
       "get": {
         "summary": "Export fleet tire inspection history and scrap logs",
         "description": "Export fleet tire inspection data, wear profiles, and decommissioning/scrap logs for regulatory and maintenance audits.",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1466,7 +1713,12 @@
             "name": "type",
             "schema": {
               "type": "string",
-              "enum": ["fleet", "inspections", "scrap", "all"],
+              "enum": [
+                "fleet",
+                "inspections",
+                "scrap",
+                "all"
+              ],
               "default": "all"
             },
             "description": "Type of export dataset"
@@ -1476,7 +1728,10 @@
             "name": "format",
             "schema": {
               "type": "string",
-              "enum": ["json", "csv"],
+              "enum": [
+                "json",
+                "csv"
+              ],
               "default": "csv"
             },
             "description": "Export format"
@@ -1493,7 +1748,9 @@
       "get": {
         "summary": "Export production logs",
         "description": "Export production data (coal and waste tonnage) with date range filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1625,7 +1882,9 @@
       "get": {
         "summary": "Export machines",
         "description": "Export machine registry data with optional department filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1742,7 +2001,9 @@
       "get": {
         "summary": "Export fuel logs",
         "description": "Export fuel consumption logs with date range filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1880,7 +2141,9 @@
       "get": {
         "summary": "OpenAPI specification",
         "description": "Returns the OpenAPI 3.0 specification for all API routes. Requires authentication with admin or engineering role.",
-        "tags": ["Documentation"],
+        "tags": [
+          "Documentation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1934,7 +2197,10 @@
       "post": {
         "summary": "Content Security Policy violation reporting",
         "description": "Browsers POST CSP violations here when the policy includes a report-uri or report-to directive. Logs violations for monitoring before enforcing strict CSP. Always returns 204 No Content per CSP spec.",
-        "tags": ["Security", "CSP"],
+        "tags": [
+          "Security",
+          "CSP"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1998,7 +2264,9 @@
       "get": {
         "summary": "Get shift completeness metrics",
         "description": "Returns completeness metrics for a specific department, date, and shift. Requires authentication.",
-        "tags": ["Control Room"],
+        "tags": [
+          "Control Room"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2039,7 +2307,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "enum": ["day", "night"]
+              "enum": [
+                "day",
+                "night"
+              ]
             },
             "description": "Shift type"
           }
@@ -2092,14 +2363,18 @@
       "get": {
         "summary": "Retrieve SCADA & Redis Degraded Status",
         "description": "Returns SCADA server health with state machine, hysteresis, and outage tracking.",
-        "tags": ["Control Room"]
+        "tags": [
+          "Control Room"
+        ]
       }
     },
     "/api/c66": {
       "post": {
         "summary": "Badge scanner validation endpoint",
         "description": "Validates badge QR codes from C66 hardware scanners. Checks badge status, personnel/visitor authorization, and logs access events. Requires scanner API token authentication.",
-        "tags": ["Access Control"],
+        "tags": [
+          "Access Control"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2120,7 +2395,11 @@
             "description": "Scanner source identifier",
             "schema": {
               "type": "string",
-              "enum": ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"]
+              "enum": [
+                "C66-HARDWARE",
+                "C66-SCANNER",
+                "GATE-TERMINAL"
+              ]
             }
           }
         ],
@@ -2130,7 +2409,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["code"],
+                "required": [
+                  "code"
+                ],
                 "properties": {
                   "code": {
                     "type": "string",
@@ -2284,14 +2565,19 @@
       "post": {
         "summary": "Authenticate user with email and password",
         "description": "Authenticates a user using Supabase auth with rate limiting and CSRF protection",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -2411,7 +2697,9 @@
       "get": {
         "summary": "Query admin data tables",
         "description": "Query operational tables (machines, daily_logs, breakdowns, etc.) with pagination. Admin-only access.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2499,7 +2787,9 @@
       "post": {
         "summary": "Insert into admin data tables",
         "description": "Insert records into operational tables. Admin-only access with rate limiting for machine status updates.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2566,7 +2856,9 @@
       "put": {
         "summary": "Update admin data tables",
         "description": "Update records in operational tables. Admin-only access with rate limiting for machine status updates.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2633,7 +2925,9 @@
       "delete": {
         "summary": "Delete from admin data tables",
         "description": "Delete records from operational tables. Admin-only access.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []

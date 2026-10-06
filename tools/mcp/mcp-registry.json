@@ -115,17 +115,26 @@
       "args": ["-y", "@upstash/context7-mcp"],
       "type": "stdio"
     },
-    "codebase-memory": {
-      "name": "codebase-memory",
-      "description": "Persistent project codebase memory and indexing",
+    "docker": {
+      "name": "docker",
+      "description": "Docker container management and introspection",
       "required": false,
       "category": "developer_tools",
       "command": "npx",
-      "args": ["-y", "codebase-memory-mcp@0.11.0"],
-      "env": {
-        "CODEBASE_MEMORY_PERSIST": "true",
-        "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
-      },
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "type": "stdio"
+    },
+    "postgres-local": {
+      "name": "postgres-local",
+      "description": "PostgreSQL database introspection (Supabase backend)",
+      "required": false,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+      ],
       "type": "stdio"
     },
     "knowledge-rail": {
@@ -137,6 +146,15 @@
       "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
       "type": "stdio"
     },
+    "chrome-devtools": {
+      "name": "chrome-devtools",
+      "description": "Chrome DevTools MCP for browser inspection and automation",
+      "required": false,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
+      "type": "stdio"
+    },
     "next-devtools": {
       "name": "next-devtools",
       "description": "Next.js DevTools AST & routing inspector",
@@ -146,17 +164,22 @@
       "args": ["-y", "next-devtools-mcp@0.4.0"],
       "type": "stdio"
     },
+    "agent-mcp": {
+      "name": "agent-mcp",
+      "description": "Swarming and orchestration MCP for multi-agent delegation",
+      "required": false,
+      "category": "developer_tools",
+      "command": "node",
+      "args": ["/home/tim/Fork/agent-mcp/dist/index.js"],
+      "type": "stdio"
+    },
     "postgres": {
       "name": "postgres",
       "description": "PostgreSQL database introspection and query execution",
       "required": false,
       "category": "cloud_infrastructure",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres@0.6.2",
-        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"],
       "type": "stdio"
     },
     "redis": {
@@ -198,6 +221,239 @@
       "category": "research_and_web",
       "type": "remote",
       "url": "https://mcp.agenttrafficlab.com/mcp"
+    },
+    "codemap": {
+      "name": "codemap",
+      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
+      "required": false,
+      "category": "developer_tools",
+      "command": "/home/tim/.local/bin/codemap",
+      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "type": "stdio"
+    },
+    "code-index": {
+      "name": "code-index",
+      "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
+      "required": false,
+      "category": "developer_tools",
+      "command": "/home/tim/.local/bin/code-index",
+      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
+      "env": {
+        "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
+      },
+      "type": "stdio"
+    },
+    "github-knowledge-base-mcp": {
+      "name": "github-knowledge-base-mcp",
+      "description": "Connect to and query public GitHub repositories as knowledge bases (markdown, documentation, and notebooks)",
+      "required": false,
+      "category": "research_and_web",
+      "command": "/home/tim/Fork/github-knowledge-base-mcp/.venv/bin/python",
+      "args": ["/home/tim/Fork/github-knowledge-base-mcp/server.py"],
+      "env": {
+        "KB_GITHUB_REPO": "vercel-labs/agent-skills"
+      },
+      "type": "stdio"
+    },
+    "gluestack-mcp": {
+      "name": "gluestack-mcp",
+      "description": "Gluestack UI component generation, docs, and metadata MCP server",
+      "required": false,
+      "category": "ui_components",
+      "command": "node",
+      "args": ["/home/tim/Fork/gluestack-mcp/index.js"],
+      "type": "stdio"
+    },
+    "guidepoint-mcp": {
+      "name": "guidepoint-mcp",
+      "description": "Guidepoint Security API vulnerability intelligence & MCP server endpoint",
+      "required": false,
+      "category": "security_and_compliance",
+      "type": "remote",
+      "url": "https://clapi.guidepoint.io/mcp-server/v1/mcp"
+    },
+    "ui-ux-suite": {
+      "name": "ui-ux-suite",
+      "description": "UI/UX design audit tool: WCAG 2.2, APCA, and OKLCH color science inspection",
+      "required": false,
+      "category": "ui_components",
+      "command": "node",
+      "args": ["/home/tim/Fork/ui-ux-suite/bin/ui-ux-suite.js", "--mcp"],
+      "type": "stdio"
+    },
+    "shadcn-ui-jpisnice": {
+      "name": "shadcn-ui-jpisnice",
+      "description": "Shadcn UI v4 components, blocks, demos, and themes MCP server (Jpisnice)",
+      "required": false,
+      "category": "ui_components",
+      "command": "node",
+      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-jpisnice/build/index.js"],
+      "type": "stdio"
+    },
+    "shadcn-ui-ymadd": {
+      "name": "shadcn-ui-ymadd",
+      "description": "Shadcn UI component references and documentation MCP server (ymadd)",
+      "required": false,
+      "category": "ui_components",
+      "command": "node",
+      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-ymadd/build/index.js"],
+      "type": "stdio"
+    },
+    "shadcn-ui-heilgar": {
+      "name": "shadcn-ui-heilgar",
+      "description": "Shadcn UI component installation and blocks MCP server (heilgar)",
+      "required": false,
+      "category": "ui_components",
+      "command": "node",
+      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-heilgar/dist/index.js"],
+      "type": "stdio"
+    },
+    "search-parallel": {
+      "name": "search-parallel",
+      "description": "Parallel Search: Real-time web search and content extraction MCP server",
+      "required": false,
+      "category": "research_and_web",
+      "type": "remote",
+      "url": "https://search.parallel.ai/mcp"
+    },
+    "adaptive-recall": {
+      "name": "adaptive-recall",
+      "description": "Adaptive Recall: Multi-strategy retrieval, cognitive scoring, and knowledge graph memory MCP server",
+      "required": false,
+      "category": "cognitive_and_memory",
+      "type": "remote",
+      "url": "https://s1.adaptiverecall.com/mcp"
+    },
+    "agentsknow": {
+      "name": "agentsknow",
+      "description": "AgentsKnow: Zero-auth agent directory, capabilities, and intelligence MCP endpoint",
+      "required": false,
+      "category": "research_and_web",
+      "type": "remote",
+      "url": "https://agentsknow.app/mcp"
+    },
+    "agentic-tools": {
+      "name": "agentic-tools",
+      "description": "Agentic Tools MCP: Task management and agent memories with JSON file storage",
+      "required": false,
+      "category": "developer_tools",
+      "command": "node",
+      "args": ["/home/tim/Fork/agentic-tools-mcp/dist/index.js"],
+      "type": "stdio"
+    },
+    "better-design": {
+      "name": "better-design",
+      "description": "Better Design: UI component review, visual audit, and design intelligence MCP endpoint",
+      "required": false,
+      "category": "ui_components",
+      "type": "remote",
+      "url": "https://better-design.com/api/mcp"
+    },
+    "cie": {
+      "name": "cie",
+      "description": "CIE (Code Intelligence Engine): Datalog-powered graph database and semantic code analysis",
+      "required": false,
+      "category": "code_intelligence",
+      "command": "/home/tim/Fork/cie/bin/cie",
+      "args": ["--mcp"],
+      "type": "stdio"
+    },
+    "codesight": {
+      "name": "codesight",
+      "description": "Codesight: Universal AI context generator mapping routes, schemas, components, and dependencies",
+      "required": false,
+      "category": "code_intelligence",
+      "command": "node",
+      "args": ["/home/tim/Fork/codesight/dist/index.js", "--mcp"],
+      "type": "stdio"
+    },
+    "coding-tools-mcp": {
+      "name": "coding-tools-mcp",
+      "description": "Coding Tools MCP: Workspace-confined coding tools with line edits, patching, and execution",
+      "required": false,
+      "category": "developer_tools",
+      "command": "/home/tim/Fork/coding-tools-mcp/.venv/bin/coding-tools-mcp",
+      "args": ["--stdio"],
+      "type": "stdio"
+    },
+    "agent-lsp": {
+      "name": "agent-lsp",
+      "description": "Agent LSP: Language Server Protocol orchestrating 66 code-intelligence tools across 31 languages",
+      "required": false,
+      "category": "code_intelligence",
+      "command": "/home/tim/Fork/agent-lsp/bin/agent-lsp",
+      "type": "stdio"
+    },
+    "code-reason": {
+      "name": "code-reason",
+      "description": "Code-Reason: Program analysis primitives, call-graph traversal, data-flow reachability, and evidence chains",
+      "required": false,
+      "category": "code_intelligence",
+      "command": "/home/tim/Fork/code-reason/build/install/code-reason/bin/code-reason",
+      "args": ["--stdio"],
+      "env": {
+        "JAVA_HOME": "/home/tim/.local/share/junie/versions/3419.29/junie-app/lib/runtime"
+      },
+      "type": "stdio"
+    },
+    "layermap": {
+      "name": "layermap",
+      "description": "LayerMap: Call graph, impact analysis, declarations, callers, and callees across TS, Go, Python, and Java",
+      "required": false,
+      "category": "code_intelligence",
+      "command": "pnpm",
+      "args": ["--dir", "/home/tim/Fork/layermap", "exec", "tsx", "src/cli.ts", "mcp"],
+      "type": "stdio"
+    },
+    "appsai": {
+      "name": "appsai",
+      "description": "AppsAI: Full-stack React, AWS, MongoDB, and Next.js project integration MCP server",
+      "required": false,
+      "category": "developer_tools",
+      "command": "node",
+      "args": ["/home/tim/Fork/appsai-mcp-server/dist/index.js"],
+      "type": "stdio"
+    },
+    "hyperbrowser": {
+      "name": "hyperbrowser",
+      "description": "Hyperbrowser: Cloud browser automation, web scraping, and content extraction MCP server",
+      "required": false,
+      "category": "browser_automation",
+      "command": "node",
+      "args": ["/home/tim/Fork/hyperbrowser-mcp/dist/server.js"],
+      "type": "stdio"
+    },
+    "vercel": {
+      "name": "vercel",
+      "description": "Official Vercel MCP Server: Projects, deployments, domains, logs, and edge flags",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "type": "remote",
+      "url": "https://mcp.vercel.com"
+    },
+    "aegntic-knowledge-engine": {
+      "name": "aegntic-knowledge-engine",
+      "description": "Aegntic Knowledge Engine: Unified web crawling, RAG, memory graph, and task management MCP server",
+      "required": false,
+      "category": "cognitive_and_memory",
+      "command": "uv",
+      "args": ["run", "--project", "/home/tim/Fork/aegntic-mcp/servers/aegntic-knowledge-engine", "python", "src/crawl4ai_mcp.py"],
+      "env": {
+        "TRANSPORT": "stdio"
+      },
+      "type": "stdio"
+    },
+    "ui-skills": {
+      "name": "ui-skills",
+      "description": "UI Skills Catalog: Browse and fetch design-engineering UI skills registry (list_skills, get_skill)",
+      "required": false,
+      "category": "ui_components",
+      "type": "remote",
+      "url": "https://www.ui-skills.com/mcp",
+      "autoApprove": [
+        "list_skills",
+        "get_skill"
+      ]
     }
   }
 }

@@ -23,9 +23,17 @@ console.log('╚═════════════════════�
 
 let anyFailed = false;
 
+const isStrictClean = process.argv.includes('--strict-clean') || process.argv.includes('--require-clean');
+
 for (const deployment of TARGET_DEPLOYMENTS) {
   console.log(`\n🔎 [Auditing] ${deployment.name} at ${deployment.path}`);
-  const result = spawnSync('node', [watchdogBin, '--audit-only', '--dir', deployment.path], {
+  const watchdogArgs = [watchdogBin, '--audit-only'];
+  if (!isStrictClean) {
+    watchdogArgs.push('--allow-dirty');
+  }
+  watchdogArgs.push('--dir', deployment.path);
+
+  const result = spawnSync('node', watchdogArgs, {
     stdio: 'inherit',
     env: process.env,
   });

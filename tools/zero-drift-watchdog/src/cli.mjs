@@ -21,6 +21,8 @@ import { WatchdogError, GitError, VercelApiError, GitHubApiError } from './error
 
 export const CLI_OPTIONS = {
   'audit-only': { type: 'boolean', default: false },
+  'allow-dirty': { type: 'boolean', default: false },
+  'ignore-dirty': { type: 'boolean', default: false },
   fix: { type: 'boolean', default: false },
   dir: { type: 'string' },
   branch: { type: 'string' },
@@ -330,12 +332,15 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
     };
   }
 
+  const allowDirty = Boolean(values['allow-dirty'] || values['ignore-dirty']);
   let report = evaluateDrift(localGit, adaptedGhState, vcState, {
+    allowDirty,
     target: {
       directory: targetDir,
       branch: ghContext.branch,
       repository: `${ghContext.owner}/${ghContext.repo}`,
       vercelProject: vcContext.projectId,
+      allowDirty,
     },
   });
 

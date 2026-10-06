@@ -1,0 +1,9 @@
+{
+  "maxRetrospectives": 50,
+  "maxRetrospectiveSize": 5000,
+  "maxRulesSize": 100000,
+  "maxSkillsSize": 350000,
+  "maxSessionContext": 500000,
+  "maxRootInstructionsSize": 20000,
+  "maxDirectMcpServers": 10
+}

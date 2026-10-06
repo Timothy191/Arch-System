@@ -27,6 +27,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const glob = require('glob');
+const { getActiveSkillDirectories } = require('./active-skill-directories.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AGENTS_DIR = path.join(ROOT, '.agents');
@@ -73,36 +74,36 @@ console.log('2️⃣  Auditing .agents/skills/ packages and frontmatter schemas.
 const skillsDir = path.join(AGENTS_DIR, 'skills');
 let skillsCount = 0;
 if (fs.existsSync(skillsDir)) {
-  const skillEntries = fs.readdirSync(skillsDir, { withFileTypes: true });
+  const skillEntries = getActiveSkillDirectories(
+    fs.readdirSync(skillsDir, { withFileTypes: true })
+  );
   skillEntries.forEach((entry) => {
-    if (entry.isDirectory()) {
-      skillsCount++;
-      const skillFile = path.join(skillsDir, entry.name, 'SKILL.md');
-      if (!fs.existsSync(skillFile)) {
-        violations.push({
-          file: `.agents/skills/${entry.name}`,
-          type: 'MISSING_SKILL_MD',
-          description: `Skill folder is missing required SKILL.md.`,
+    skillsCount++;
+    const skillFile = path.join(skillsDir, entry.name, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) {
+      violations.push({
+        file: `.agents/skills/${entry.name}`,
+        type: 'MISSING_SKILL_MD',
+        description: `Skill folder is missing required SKILL.md.`,
+      });
+    } else {
+      const content = fs.readFileSync(skillFile, 'utf8');
+      // Validate YAML frontmatter
+      const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+      if (!frontmatterMatch) {
+        warnings.push({
+          file: `.agents/skills/${entry.name}/SKILL.md`,
+          type: 'MISSING_FRONTMATTER',
+          description: `SKILL.md is missing YAML frontmatter (name, description).`,
         });
       } else {
-        const content = fs.readFileSync(skillFile, 'utf8');
-        // Validate YAML frontmatter
-        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!frontmatterMatch) {
+        const fm = frontmatterMatch[1];
+        if (!fm.includes('name:') || !fm.includes('description:')) {
           warnings.push({
             file: `.agents/skills/${entry.name}/SKILL.md`,
-            type: 'MISSING_FRONTMATTER',
-            description: `SKILL.md is missing YAML frontmatter (name, description).`,
+            type: 'INCOMPLETE_FRONTMATTER',
+            description: `Frontmatter missing required 'name' or 'description' field.`,
           });
-        } else {
-          const fm = frontmatterMatch[1];
-          if (!fm.includes('name:') || !fm.includes('description:')) {
-            warnings.push({
-              file: `.agents/skills/${entry.name}/SKILL.md`,
-              type: 'INCOMPLETE_FRONTMATTER',
-              description: `Frontmatter missing required 'name' or 'description' field.`,
-            });
-          }
         }
       }
     }

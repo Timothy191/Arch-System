@@ -6,6 +6,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { renderToFile } from '@react-pdf/renderer';
 import React from 'react';
+import { assertAccessControlRole } from './actions/shared';
 import { CardDocument } from './card-actions/card-pdf';
 
 const execAsync = promisify(exec);
@@ -25,6 +26,7 @@ export interface CardPrintSpec {
  * Server action to generate a high-res card image and send it to the Magicard printer.
  */
 export async function submitPrintJob(spec: CardPrintSpec) {
+  await assertAccessControlRole({ requireWrite: true });
   try {
     // 1. Generate high-resolution card image file as PDF
     const tmpDir = os.tmpdir();

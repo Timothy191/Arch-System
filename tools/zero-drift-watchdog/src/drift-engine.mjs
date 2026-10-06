@@ -181,13 +181,19 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
   const isVercelBehind = Boolean(safeGithub.commit && safeVercel.commit !== safeGithub.commit);
 
   // 5. Parity evaluation
+  const allowDirty = Boolean(
+    targetContext?.allowDirty ||
+      targetContext?.target?.allowDirty
+  );
+  const effectiveClean = allowDirty ? true : isClean;
+
   const isParity = Boolean(
     safeLocal.commit &&
       safeGithub.commit &&
       safeVercel.commit &&
       safeLocal.commit === safeGithub.commit &&
       safeGithub.commit === safeVercel.commit &&
-      isClean &&
+      effectiveClean &&
       !isDiverged &&
       !isLocalAhead &&
       !isLocalBehind &&
@@ -275,7 +281,10 @@ export function formatDriftReport(report) {
     lines.push(`Directory:  ${target.directory}`);
     lines.push(`Timestamp:  ${timestamp}`);
     lines.push('-'.repeat(70));
-    lines.push(`• Local HEAD:    ${state.local.commit} (${state.local.branch}, clean)`);
+    const localStatus = state.local.isClean
+      ? 'clean'
+      : `dirty (${state.local.uncommittedFiles.length} files)`;
+    lines.push(`• Local HEAD:    ${state.local.commit} (${state.local.branch}, ${localStatus})`);
     lines.push(`• GitHub HEAD:   ${state.github.commit} (${state.github.branch})`);
     lines.push(
       `• Vercel Prod:   ${state.vercel.commit} (${state.vercel.url || 'production'}, READY)`

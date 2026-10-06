@@ -1,6 +1,7 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
+import { C66MachineOperatorScanner } from '@/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
 
@@ -19,8 +20,14 @@ export default async function HourlyLoadsPage({
   // Fetch dump trucks with bin_factor (centralised fleet)
   const { data: machines } = await supabase
     .from('machines')
-    .select('id, name, machine_type, bin_factor')
+    .select('id, name, machine_type, bin_factor, site_id')
     .eq('machine_type', 'Dump Truck')
+    .eq('active', true)
+    .order('name');
+
+  const { data: activeMachines } = await supabase
+    .from('machines')
+    .select('id, name, machine_type, site_id')
     .eq('active', true)
     .order('name');
 
@@ -67,6 +74,12 @@ export default async function HourlyLoadsPage({
           value={loadsByMachine.size > 0 ? Math.round(grandTotal / loadsByMachine.size) : 0}
         />
       </KPIGrid>
+
+      <C66MachineOperatorScanner
+        departmentId={deptId}
+        machines={activeMachines || []}
+        sites={sites || []}
+      />
 
       <HourlyLoadsGrid
         departmentId={deptId}

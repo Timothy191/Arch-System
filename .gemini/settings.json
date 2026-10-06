@@ -23,11 +23,7 @@
     },
     "postgres": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres@0.6.2",
-        "${DATABASE_POOLER_URL:-postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres}"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"]
     }
   },
   "experimental": {

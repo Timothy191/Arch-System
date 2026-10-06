@@ -153,7 +153,7 @@ SELECT full_name, role, department_id FROM employees WHERE auth_id = 'user-uuid'
 
 ### Symptom: "Migration differs from local" or missing tables
 
-**Cause**: `packages/database/migrations/` (source of truth) differs from `packages/supabase/supabase/migrations/` (deploy copy).
+**Cause**: `packages/database/migrations/` (source of truth) and the `packages/supabase/migrations/` symlink resolve differently, or a real directory was created over the symlink.
 
 **Solution**:
 
@@ -164,11 +164,12 @@ cd packages/database && pnpm supabase:reset
 # 2. Verify migrations exist
 ls packages/database/migrations/*.sql
 
-# 3. Deploy local (syncs and pushes)
-pnpm deploy:local
+# 3. Verify the symlinks resolve to the canonical tree
+ls -la packages/supabase/migrations packages/database/supabase/migrations
+node packages/database/tests/check-migration-drift.mjs
 ```
 
-**Prevention**: Always edit migrations in `packages/database/migrations/`, never in `packages/supabase/`.
+**Prevention**: Always edit migrations in `packages/database/migrations/`, never in `packages/supabase/`. The two deploy paths are symlinks enforced by the drift linter.
 
 ---
 

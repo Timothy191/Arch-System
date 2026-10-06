@@ -121,7 +121,7 @@ export const splitHourlyLoadSchema = z.object({
   machineId: z.string().uuid('Invalid machine ID format'),
   loadDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
   shiftType: z.enum(['day', 'night']),
-  startHour: z.number().int().min(1).max(12),
+  startHour: z.number().int().min(2).max(12),
   excavatorId: z.string().uuid('Invalid excavator ID format').nullable(),
   materialType: z.enum(['Waste', 'Coal']),
   previousLoadId: z.string().uuid('Invalid previous load ID format').optional().nullable(),

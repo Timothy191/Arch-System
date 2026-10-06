@@ -3,20 +3,36 @@
   "mode": "subagent",
   "description": "Specialist subagent responsible for verifying monorepo boundary integrity, strict TypeScript checking (zero 'any'), ESLint/Prettier compliance, SQL injection prevention, and vulnerability auditing. Do not invoke for creative styling or speculative refactoring.",
   "runtime": {
-    "model": "gemini-2.5-pro",
-    "temperature": 0.0,
+    "model": "gemini-2.5-flash",
+    "temperature": 0,
     "max_steps": 12,
-    "token_budget": 20000
+    "token_budget": 20000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "read_only",
-    "tools": ["view_file", "grep_search", "run_command"],
-    "forbidden_tools": ["git push", "rm -rf", "replace_file_content", "write_to_file"],
+    "tools": [
+      "view_file",
+      "grep_search",
+      "run_command"
+    ],
+    "forbidden_tools": [
+      "git push",
+      "rm -rf",
+      "replace_file_content",
+      "write_to_file"
+    ],
     "bash": "scoped"
   },
   "scope": {
-    "include_paths": ["**/*"],
-    "exclude_paths": ["node_modules/**", ".git/**", "dist/**"]
+    "include_paths": [
+      "**/*"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**"
+    ]
   },
   "runbook": [
     "Phase 1: Ingest modified file list from task handoff",
@@ -40,6 +56,10 @@
   },
   "recovery_protocol": {
     "on_failure": "Report CRITICAL violations immediately and trigger ReflectionEngine",
-    "exit_codes": { "SUCCESS": 0, "LINT_OR_TYPE_FAILURE": 1, "SECURITY_VIOLATION": 2 }
+    "exit_codes": {
+      "SUCCESS": 0,
+      "LINT_OR_TYPE_FAILURE": 1,
+      "SECURITY_VIOLATION": 2
+    }
   }
 }

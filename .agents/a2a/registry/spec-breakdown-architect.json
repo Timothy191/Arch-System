@@ -3,20 +3,35 @@
   "mode": "specialist",
   "description": "Specification & Real-World Quality Architect. Translates ambiguous user prompts into structured EARS specifications, designs phased task breakdowns, and computes 5-pillar Real-World Quality Scores.",
   "runtime": {
-    "model": "gemini-2.5-pro",
-    "temperature": 0.0,
+    "model": "gemini-2.5-flash",
+    "temperature": 0,
     "max_steps": 20,
-    "token_budget": 24000
+    "token_budget": 24000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": ["view_file", "replace_file_content", "write_to_file", "call_mcp_tool"],
-    "forbidden_tools": ["git push --force"],
+    "tools": [
+      "view_file",
+      "replace_file_content",
+      "write_to_file",
+      "call_mcp_tool"
+    ],
+    "forbidden_tools": [
+      "git push --force"
+    ],
     "bash": "deny"
   },
   "scope": {
-    "include_paths": [".agents/plans/**", "temp/**", "docs/**"],
-    "exclude_paths": ["node_modules/**", ".git/**"]
+    "include_paths": [
+      ".agents/plans/**",
+      "temp/**",
+      "docs/**"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**"
+    ]
   },
   "runbook": [
     "Phase 1: Ingest raw user objective and project context",

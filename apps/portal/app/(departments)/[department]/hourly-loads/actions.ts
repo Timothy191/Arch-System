@@ -6,8 +6,24 @@ import {
   updateMachineSiteSchema,
 } from '@repo/contract/schemas/form.schema';
 import type { SplitHourlyLoadInput } from '@repo/contract/types/form.types';
-import { getAuthenticatedEmployee } from '@repo/supabase';
+import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+
+function assertDepartmentAccess(
+  employee: EmployeeSummary | null | undefined,
+  departmentId: string,
+  allowedRoles: readonly string[]
+): asserts employee is EmployeeSummary {
+  if (
+    !employee ||
+    !allowedRoles.includes(employee.role) ||
+    (employee.role !== 'admin' &&
+      employee.department_id !== departmentId &&
+      !employee.accessible_departments?.includes(departmentId))
+  ) {
+    throw new Error('Not authorized for this Control Room operation');
+  }
+}
 
 export async function updateMachineSite(machineId: string, siteId: string | null) {
   // AGENT-TRACE: Validate input parameters with @repo/contract schema
@@ -19,12 +35,33 @@ export async function updateMachineSite(machineId: string, siteId: string | null
     throw new Error('Unauthorized');
   }
 
-  // Update machine's site_id using service role client to bypass admin-only update RLS
   const serviceClient = createServiceRoleClient();
+  const { data: machine, error: machineError } = await serviceClient
+    .from('machines')
+    .select('department_id')
+    .eq('id', validated.machineId)
+    .maybeSingle();
+  if (machineError) throw machineError;
+  if (!machine) throw new Error('Machine not found');
+  assertDepartmentAccess(principal.employee, machine.department_id, ['admin', 'supervisor']);
+
+  if (validated.siteId) {
+    const { data: site, error: siteError } = await serviceClient
+      .from('sites')
+      .select('id')
+      .eq('id', validated.siteId)
+      .eq('active', true)
+      .maybeSingle();
+    if (siteError) throw siteError;
+    if (!site) throw new Error('Active site not found');
+  }
+
+  // Use the service client only after checking the machine's owning department and role.
   const { error } = await serviceClient
     .from('machines')
     .update({ site_id: validated.siteId })
-    .eq('id', validated.machineId);
+    .eq('id', validated.machineId)
+    .eq('department_id', machine.department_id);
 
   if (error) {
     throw error;
@@ -57,16 +94,30 @@ export async function updateHourlyLoadExcavator(
   if (!principal?.employee) {
     throw new Error('Unauthorized');
   }
+  assertDepartmentAccess(principal.employee, validated.departmentId, [
+    'admin',
+    'operator',
+    'supervisor',
+  ]);
 
   const serviceClient = createServiceRoleClient();
   if (loadId && !loadId.startsWith('local-')) {
-    const { error } = await serviceClient
+    const { data, error } = await serviceClient
       .from('hourly_loads')
       .update({ excavator_id: validated.excavatorId })
-      .eq('id', loadId);
+      .eq('id', loadId)
+      .eq('department_id', validated.departmentId)
+      .eq('machine_id', validated.machineId)
+      .eq('load_date', validated.loadDate)
+      .eq('shift_type', validated.shiftType)
+      .select('id')
+      .maybeSingle();
 
     if (error) {
       throw error;
+    }
+    if (!data) {
+      throw new Error('Hourly load not found for the selected department, machine, date and shift');
     }
   } else {
     const { error } = await serviceClient
@@ -92,67 +143,31 @@ export async function splitMachineHourlyLoad(input: SplitHourlyLoadInput) {
   if (!principal?.employee) {
     throw new Error('Unauthorized');
   }
+  assertDepartmentAccess(principal.employee, validated.departmentId, [
+    'admin',
+    'operator',
+    'supervisor',
+  ]);
 
   const serviceClient = createServiceRoleClient();
-  const prevEndHour = Math.max(1, validated.startHour - 1);
+  const { data, error } = await serviceClient.rpc('atomic_split_hourly_load', {
+    p_department_id: validated.departmentId,
+    p_machine_id: validated.machineId,
+    p_load_date: validated.loadDate,
+    p_shift_type: validated.shiftType,
+    p_start_hour: validated.startHour,
+    p_excavator_id: validated.excavatorId,
+    p_material_type: validated.materialType,
+    p_previous_load_id:
+      validated.previousLoadId && !validated.previousLoadId.startsWith('local-')
+        ? validated.previousLoadId
+        : null,
+  });
 
-  // 1. Lock previous segment(s)
-  if (validated.previousLoadId && !validated.previousLoadId.startsWith('local-')) {
-    const { error: lockError } = await serviceClient
-      .from('hourly_loads')
-      .update({
-        is_locked: true,
-        end_hour: prevEndHour,
-      })
-      .eq('id', validated.previousLoadId);
-
-    if (lockError) throw lockError;
-  } else {
-    const { error: lockAllError } = await serviceClient
-      .from('hourly_loads')
-      .update({
-        is_locked: true,
-        end_hour: prevEndHour,
-      })
-      .eq('department_id', validated.departmentId)
-      .eq('machine_id', validated.machineId)
-      .eq('load_date', validated.loadDate)
-      .eq('shift_type', validated.shiftType);
-
-    if (lockAllError) throw lockAllError;
-  }
-
-  // 2. Insert new split segment
-  const { data: newLoad, error: insertError } = await serviceClient
-    .from('hourly_loads')
-    .insert({
-      department_id: validated.departmentId,
-      machine_id: validated.machineId,
-      load_date: validated.loadDate,
-      shift_type: validated.shiftType,
-      start_hour: validated.startHour,
-      end_hour: 12,
-      is_locked: false,
-      material_type: validated.materialType,
-      excavator_id: validated.excavatorId,
-      hour_01: 0,
-      hour_02: 0,
-      hour_03: 0,
-      hour_04: 0,
-      hour_05: 0,
-      hour_06: 0,
-      hour_07: 0,
-      hour_08: 0,
-      hour_09: 0,
-      hour_10: 0,
-      hour_11: 0,
-      hour_12: 0,
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    throw insertError;
+  if (error) throw error;
+  const newLoad = data?.[0];
+  if (!newLoad) {
+    throw new Error('Hourly-load split RPC returned no new segment');
   }
 
   return { success: true, newLoad };

@@ -82,7 +82,7 @@ Commit both source and generated files in the same atomic change.
 
 ### Database and RLS
 
-- Migration files: zero-padded `NNN_description.sql` in `packages/database/migrations/`. Never edit `packages/supabase/supabase/migrations/` (deploy-time copy; a hook blocks edits there).
+- Migration files: zero-padded `NNN_description.sql` in `packages/database/migrations/`. `packages/supabase/migrations/` and `packages/database/supabase/migrations/` are symlinks to that single tree — never replace them with real directories.
 - Workflow: add migration → apply to cloud Supabase → `pnpm --filter @repo/database db:types` → commit migration + regenerated `database.types.ts` atomically.
 - Every new table must `ENABLE ROW LEVEL SECURITY`. Policies consult `employees.role` / `employees.department_id`, not `auth.uid()` alone.
 - Pause for human review before merging any DB schema, RLS, or auth change.

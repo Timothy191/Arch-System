@@ -28,6 +28,7 @@ export async function GET(req: Request) {
       let reportedFuxaHealthy = false;
       let latencyMs = 0;
       let redisConnected = false;
+      let redisReadError = false;
       let lastGoodAt: string | null = null;
       let previousState = 'offline';
 
@@ -39,7 +40,7 @@ export async function GET(req: Request) {
         try {
           // Use SCAN (non-blocking) instead of KEYS (blocking) per Redis best practice.
           // KEYS blocks the single-threaded Redis event loop; SCAN iterates in chunks.
-          const tagKeys: string[] = [];
+          let tagCount = 0;
           let cursor = 0;
           do {
             const result = (await redis.scan(cursor, {
@@ -47,22 +48,22 @@ export async function GET(req: Request) {
               COUNT: 100,
             })) as { cursor: number; keys: string[] };
             cursor = result.cursor;
-            if (result.keys && result.keys.length > 0) {
-              tagKeys.push(...result.keys);
-            }
+            tagCount += result.keys?.length ?? 0;
           } while (cursor !== 0);
 
           const [savedStateStr] = await Promise.all([
             typeof redis.get === 'function' ? redis.get(SCADA_STATE_KEY).catch(() => null) : null,
           ]);
-          cachedTagCount = Array.isArray(tagKeys) ? tagKeys.length : 0;
+          cachedTagCount = tagCount;
           if (savedStateStr) {
             const parsed = JSON.parse(savedStateStr);
             lastGoodAt = parsed.lastGoodAt || null;
             previousState = parsed.state || 'offline';
           }
         } catch (e) {
-          // ignore cache read error
+          redisConnected = false;
+          redisReadError = true;
+          logError(e, { context: 'scada_status_cache_read' });
         }
       }
 
@@ -76,11 +77,10 @@ export async function GET(req: Request) {
       } else {
         // Probe FUXA
         const startTime = Date.now();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
         try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 3000); // 3s budget
           const res = await fetch(fuxaUrl, { method: 'HEAD', signal: controller.signal });
-          clearTimeout(timeout);
           latencyMs = Date.now() - startTime;
 
           if (res.ok) {
@@ -90,10 +90,12 @@ export async function GET(req: Request) {
             reportedFuxaHealthy = false;
             consecutiveFailures++;
           }
-        } catch (err: any) {
+        } catch {
           latencyMs = Date.now() - startTime;
           reportedFuxaHealthy = false;
           consecutiveFailures++;
+        } finally {
+          clearTimeout(timeout);
         }
 
         // Open breaker if failed 5 times in a row, for 30s
@@ -108,7 +110,10 @@ export async function GET(req: Request) {
         breaker_tripped: breakerTripped,
       });
 
-      let currentState = reportedFuxaHealthy ? 'healthy' : redisConnected ? 'degraded' : 'offline';
+      let currentState = 'offline';
+      if (reportedFuxaHealthy || redisConnected) {
+        currentState = reportedFuxaHealthy && redisConnected ? 'healthy' : 'degraded';
+      }
 
       // Hysteresis
       if (reportedFuxaHealthy && previousState !== 'healthy' && lastGoodAt) {
@@ -126,7 +131,11 @@ export async function GET(req: Request) {
       if (breakerTripped) reasons.push('Circuit breaker open due to consecutive failures');
       else if (!reportedFuxaHealthy) reasons.push('SCADA endpoint unreachable or timed out');
 
-      if (!redisConnected) reasons.push('Redis telemetry cache unavailable');
+      if (!redisConnected) {
+        reasons.push(
+          redisReadError ? 'Redis telemetry cache read failed' : 'Redis telemetry cache unavailable'
+        );
+      }
 
       const isStale = !!lastGoodAt && now - new Date(lastGoodAt).getTime() > 60000;
 

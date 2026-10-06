@@ -94,9 +94,9 @@ Jest coverage thresholds (portal, global): lines 40%, branches 30%, functions 30
 ```bash
 pnpm --filter @repo/database db:types    # Regenerate packages/supabase/src/database.types.ts
 pnpm db:seed                             # Seed cloud dev database
-pnpm --filter @repo/supabase supabase:start   # Start local Supabase
-pnpm --filter @repo/supabase supabase:reset   # Reset local database
-pnpm --filter @repo/database sync-migrations  # Sync SQL migrations
+pnpm --filter @repo/database supabase:start   # Start local Supabase (migrations from @repo/database/migrations)
+pnpm --filter @repo/database supabase:reset   # Reset local database
+pnpm --filter @repo/database check-migrations  # Lint migrations + verify tree consolidation
 pnpm audit:drift                              # Database↔contract parity check
 pnpm audit:rls                                # RLS coverage audit
 ```
@@ -178,7 +178,7 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 ### Migrations & RLS
 
-- `packages/database/migrations/NNN_description.sql` is the source of truth. **Never edit `packages/supabase/supabase/migrations/`**.
+- `packages/database/migrations/NNN_description.sql` is the **single source of truth**. `packages/supabase/migrations/` and `packages/database/supabase/migrations/` are **symlinks** to it (enforced by `pnpm check-migrations`/`sync-migrations`) — never replace them with real directories, and never edit a "copy".
 - Every new table must `ENABLE ROW LEVEL SECURITY`.
 - Pause for human review before merging any DB schema, RLS, or auth change.
 
@@ -269,12 +269,13 @@ These hard stops are **always in force**, with no approval path:
 | Resource                       | Location               | Purpose                                                                    |
 | :----------------------------- | :--------------------- | :------------------------------------------------------------------------- |
 | **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table             |
+| **skills-mcp Registry**        | `skills-mcp/`          | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)      |
 | **Engineering Rules**          | `.agents/rules/`       | 22 permanent rule files covering security, verification, testing, thinking |
-| **Agent Skills**               | `.agents/skills/`      | 60+ reusable workflow skills                                               |
-| **Agent Cards**                | `.agents/agents/`      | 35+ specialist agent definitions                                           |
+| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 60+ reusable workflow skills (dynamically leased via `acquire_skill`) |
+| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 35+ specialist agent definitions (queried via `list_available_personas`) |
 | **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                      |
 | **Memory Base**                | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph                     |
 | **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                            |
 | **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                           |
 
-Last updated: 2026-10-02
+Last updated: 2026-10-06

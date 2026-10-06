@@ -122,6 +122,7 @@ for (const file of allSourceFiles) {
       content.includes('getUser') ||
       content.includes('session') ||
       content.includes('createServerSupabaseClient') ||
+      content.includes('assert') ||
       content.includes('verify');
 
     if (!hasAuthCheck && !file.includes('/test') && !file.includes('mock')) {

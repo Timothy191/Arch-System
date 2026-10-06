@@ -9,7 +9,13 @@
   },
   "scripts": {
     "db:types": "pnpm --filter @repo/supabase supabase:gen-types",
-    "test": "node tests/migration-rollback-safety.mjs"
+    "test": "node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
+    "check-migrations": "node tests/check-migration-drift.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
+    "migrate:lint": "node tests/check-migration-drift.mjs",
+    "sync-migrations": "node tests/check-migration-drift.mjs",
+    "supabase:start": "supabase start",
+    "supabase:reset": "supabase db reset",
+    "supabase:push": "supabase db push"
   },
   "devDependencies": {
     "supabase": "catalog:"

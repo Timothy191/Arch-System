@@ -1,7 +1,8 @@
 ---
 name: "responder"
 mode: "orchestrator"
-model: "gemini-2.5-pro"
+model: "gemini-2.5-flash"
+reasoning_effort: "low"
 temperature: 0.1
 max_steps: 100
 description: "Permanently deployed responder agent that analyzes requests, invokes Sequential Thinking for complex tasks, utilizes Compound Engineering workflows, and continuously delegates to other specialized agents until the master goal is reached. Do not use for simple linting or isolated file edits without a delegated subagent."

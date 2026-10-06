@@ -1,7 +1,7 @@
 # Agent Tracers Archive Index
 
 Centralized archive of all historical and active autonomous agent tasks across the Arch-System monorepo.
-Total Archived Tasks: **263**
+Total Archived Tasks: **267**
 
 ## Archived Task Directory
 
@@ -270,3 +270,7 @@ Total Archived Tasks: **263**
 | `--task-261` | `archive/tracers`                                                 | Agent Tracer Task Log: --task-261                                                            | [`--task-261-combine-login-status-bars.md`](./log/--task-261-combine-login-status-bars.md)                                                                                                   |
 | `--task-262` | `Control Room Top-Tier Hardening`                                 | Control Room Top-Tier Hardening — Full Plan                                                  | [`--task-262-2026-09-22-control-room-ultragoal.md`](./log/--task-262-2026-09-22-control-room-ultragoal.md)                                                                                   |
 | `--task-263` | `Repository Setup Readiness Audit`                                | Repository setup prerequisites, local Supabase, Compose, and Docker build audit              | [`--task-263-2026-09-28-setup-readiness-audit-and-repair.md`](./log/--task-263-2026-09-28-setup-readiness-audit-and-repair.md)                                                               |
+| `--task-264` | `Control Room UI Workflows & Real-World Validation`                | Control Room dashboards, workflow reporting, and validation                                  | [`--task-264-2026-09-30-control-room-workflows-and-testing.md`](./log/--task-264-2026-09-30-control-room-workflows-and-testing.md)                                                           |
+| `--task-265` | `Vercel Production Readiness Audit`                                 | Spec-driven production-readiness audit, dependency remediation, and deployment blockers     | [`--task-265-2026-10-05-vercel-production-readiness-audit.md`](./log/--task-265-2026-10-05-vercel-production-readiness-audit.md)                                                            |
+| `--task-266` | `Production Dependency Gate and Migration Review`                   | Production-scoped dependency remediation and review of historical database audit notes     | [`--task-266-2026-10-05-production-dependency-gate-and-migration-review.md`](./log/--task-266-2026-10-05-production-dependency-gate-and-migration-review.md)                                  |
+| `--task-267` | `UltraGoal Priorities & Recommendations Remediation`              | Onboarding priority resolution, key fallback alignment, database bootstrap verification    | [`--task-267-2026-10-06-ultragoal-priorities-and-recommendations-remediation.md`](./log/--task-267-2026-10-06-ultragoal-priorities-and-recommendations-remediation.md)                          |

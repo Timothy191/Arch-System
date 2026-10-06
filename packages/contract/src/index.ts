@@ -78,6 +78,10 @@ export {
   machineTimeAllocationSchema,
 } from './schemas/machine-ledger.schema';
 export {
+  machineOperatorScanRequestSchema,
+  machineOperatorScanResponseSchema,
+} from './schemas/machine-operator-scan.schema';
+export {
   ancillaryReportEntrySchema,
   breakdownReportEntrySchema,
   bredellReportEntrySchema,
@@ -88,6 +92,11 @@ export {
   operationalStatusEnum,
   truckTallySchema,
 } from './schemas/multi-site-production.schema';
+export {
+  offlineMutationBatchSchema,
+  offlineMutationHlcSchema,
+  offlineSmrMutationSchema,
+} from './schemas/offline-mutations.schema';
 export { scannerBadgeSchema } from './schemas/scanner.schema';
 export {
   lockAndSignShiftSchema,
@@ -132,6 +141,15 @@ export type {
   FleetCategory,
   FleetStatus,
 } from './schemas/fleet-equipment.schema';
+export type {
+  MachineOperatorScanRequest,
+  MachineOperatorScanResponse,
+} from './schemas/machine-operator-scan.schema';
+export type {
+  OfflineMutationBatch,
+  OfflineMutationHlc,
+  OfflineSmrMutation,
+} from './schemas/offline-mutations.schema';
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from './types/access-card.types';
 export type {
   AdminDataDeleteInput,

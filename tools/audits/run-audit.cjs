@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Consolidated Audit Runner
- * Executes RLS and Design System audits, creates versioned log directories (e.g., log-1(26-08-20)/),
+ * Executes RLS, Design System, and dependency audits, creates versioned log directories (e.g., log-1(26-08-20)/),
  * and generates 4 comprehensive reports:
  *   1. design-report.md
  *   2. rls-report.md
@@ -61,6 +61,31 @@ function getNextLogNumber() {
   return maxLogNum + 1;
 }
 
+function runDependencyAudit(args) {
+  try {
+    const stdout = execSync(`pnpm audit ${args} --json`, {
+      cwd: ROOT,
+      timeout: 60_000,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    return { exitCode: 0, report: JSON.parse(stdout), error: null };
+  } catch (err) {
+    const stdout = err.stdout?.toString() || '';
+    let report = null;
+    try {
+      report = stdout.trim() ? JSON.parse(stdout) : null;
+    } catch {
+      report = null;
+    }
+    return {
+      exitCode: err.status || 1,
+      report,
+      error: err.stderr?.toString().trim() || stdout.trim() || err.message,
+    };
+  }
+}
+
 /**
  * Main orchestrator for audit execution.
  */
@@ -103,24 +128,55 @@ function main() {
     designExitCode = err.status || 1;
   }
 
-  // 3. Run Vulnerability Audit (CI Gate)
-  console.log('\n🛡️ Running Dependency Vulnerability Audit (CI Gate)...');
-  let _auditExitCode = 0;
-  try {
-    execSync('pnpm audit --audit-level=high --ignore-decls', {
-      cwd: ROOT,
-      timeout: 5000,
-      stdio: 'pipe',
-    });
-    console.log('   ✓ Dependency vulnerability check passed (0 high/critical issues).');
-  } catch (err) {
-    if (err.code === 'ETIMEDOUT') {
-      console.log('   ⚠️ Vulnerability check skipped (network registry request timed out).');
-    } else {
-      _auditExitCode = err.status || 1;
-      console.log('   ✓ Dependency vulnerability audit evaluated.');
+  // 3. Gate deployment on production dependencies; keep workspace-only findings visible.
+  console.log('\n🛡️ Running production dependency vulnerability audit (CI Gate)...');
+  const productionAudit = runDependencyAudit('--prod --audit-level=high');
+  const productionFindings = Object.entries(productionAudit.report?.advisories || {});
+  const productionBlockingAdvisories = productionFindings.filter(([, advisory]) =>
+    ['high', 'critical'].includes(String(advisory.severity).toLowerCase())
+  );
+  const productionWarningAdvisories = productionFindings.filter(([, advisory]) =>
+    ['low', 'moderate'].includes(String(advisory.severity).toLowerCase())
+  );
+  const auditExitCode = !productionAudit.report || productionBlockingAdvisories.length > 0 ? 1 : 0;
+  if (auditExitCode === 0) {
+    console.log(
+      `   ✓ Production dependency check passed (0 high/critical issues; ${productionWarningAdvisories.length} lower-severity warning(s)).`
+    );
+    for (const [, advisory] of productionWarningAdvisories) {
+      console.warn(`   - ${advisory.module_name}: ${advisory.title} (${advisory.severity})`);
     }
+  } else {
+    console.error('   ❌ Production dependency vulnerability audit failed; failing closed.');
+    for (const [, advisory] of productionBlockingAdvisories) {
+      console.error(`   - ${advisory.module_name}: ${advisory.title} (${advisory.severity})`);
+    }
+    if (!productionAudit.report && productionAudit.error) console.error(productionAudit.error);
   }
+
+  console.log('\n🔎 Checking the full workspace dependency graph for non-production findings...');
+  const workspaceAudit = runDependencyAudit('--audit-level=high');
+  const productionAdvisories = new Set(Object.keys(productionAudit.report?.advisories || {}));
+  const workspaceAdvisories = Object.entries(workspaceAudit.report?.advisories || {}).filter(
+    ([id, advisory]) =>
+      !productionAdvisories.has(id) &&
+      ['high', 'critical'].includes(String(advisory.severity).toLowerCase())
+  );
+  const workspaceAuditUnavailable = !workspaceAudit.report;
+  if (workspaceAuditUnavailable) {
+    console.error('   ❌ Full workspace dependency report unavailable.');
+    if (workspaceAudit.error) console.error(workspaceAudit.error);
+  } else if (workspaceAdvisories.length > 0) {
+    console.warn(
+      `   ⚠️ ${workspaceAdvisories.length} high/critical finding(s) are limited to non-production dependencies.`
+    );
+    for (const [, advisory] of workspaceAdvisories) {
+      console.warn(`   - ${advisory.module_name}: ${advisory.title} (${advisory.severity})`);
+    }
+  } else {
+    console.log('   ✓ No high/critical workspace-only findings.');
+  }
+  const workspaceWarningCount = workspaceAuditUnavailable ? 1 : workspaceAdvisories.length;
 
   // 4. Read generated reports
   const rlsReportPath = path.join(targetDir, 'rls-report.md');
@@ -160,8 +216,9 @@ function main() {
       : 0;
   const designWarnings = designWarningMatch ? parseInt(designWarningMatch[1], 10) : 0;
 
-  const totalCriticals = rlsCriticals + designCriticals;
-  const totalWarnings = rlsWarnings + designWarnings;
+  const totalCriticals = rlsCriticals + designCriticals + (auditExitCode === 0 ? 0 : 1);
+  const totalWarnings =
+    rlsWarnings + designWarnings + workspaceWarningCount + productionWarningAdvisories.length;
 
   // Compute audit score (100 base, -15 per critical, -2 per warning)
   let score = 100 - totalCriticals * 15 - totalWarnings * 2;
@@ -177,10 +234,14 @@ function main() {
   // 4. Generate results.md
   const resultsContent = `# 📊 System Audit Results — Log #${logNum} (${dateInfo.folderDate})
 
-**Audit Date:** ${dateInfo.displayDate}  
-**Log Folder:** \`.audit/${folderName}/\`  
-**Overall Audit Score:** **${score.toFixed(1)}%** (${overallStatus === 'PASS' ? '✅ PASS' : overallStatus === 'WARN' ? '⚠️ WARN' : '❌ FAIL'})  
-**Status Gate:** ${totalCriticals === 0 ? 'PASSED (Clean Production Gate)' : 'FAILED (Critical Violations Present)'}
+**Audit Date:** ${dateInfo.displayDate}
+
+**Log Folder:** \`.audit/${folderName}/\`
+
+**Overall Audit Score:** **${score.toFixed(1)}%** (${overallStatus === 'PASS' ? '✅ PASS' : overallStatus === 'WARN' ? '⚠️ WARN' : '❌ FAIL'})
+**Status Gate:** ${totalCriticals > 0 ? 'FAILED (Production Action Required)' : totalWarnings > 0 ? 'PASSED WITH WARNINGS (No Production Blockers)' : 'PASSED (Clean Production Gate)'}
+
+**Production Dependency Vulnerability Audit:** ${auditExitCode === 0 ? 'PASSED' : 'FAILED (high/critical vulnerabilities or audit error)'}
 
 ---
 
@@ -190,7 +251,9 @@ function main() {
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Row Level Security (RLS)** | ${rlsCriticals === 0 ? '✅ PASS' : '❌ FAIL'} | ${rlsCriticals === 0 ? '100%' : '0%'} | ${rlsCriticals} | ${rlsWarnings} | ${rlsCriticals === 0 ? 'Passed' : 'Blocking'} |
 | **Design System Compliance** | ${designCriticals === 0 ? (designWarnings === 0 ? '✅ PASS' : '⚠️ WARN') : '❌ FAIL'} | ${(100 - designCriticals * 20 - designWarnings * 2).toFixed(1)}% | ${designCriticals} | ${designWarnings} | ${designCriticals === 0 ? 'Passed' : 'Blocking'} |
-| **Consolidated Total** | **${overallStatus === 'PASS' ? '✅ PASS' : overallStatus === 'WARN' ? '⚠️ WARN' : '❌ FAIL'}** | **${score.toFixed(1)}%** | **${totalCriticals}** | **${totalWarnings}** | **${totalCriticals === 0 ? 'READY FOR DEPLOY' : 'ACTION REQUIRED'}** |
+| **Production Dependency Vulnerability Audit** | ${auditExitCode === 0 ? (productionWarningAdvisories.length === 0 ? '✅ PASS' : '⚠️ WARN') : '❌ FAIL'} | ${auditExitCode === 0 ? '100%' : '0%'} | ${auditExitCode === 0 ? 0 : 1} | ${productionWarningAdvisories.length} | ${auditExitCode === 0 ? (productionWarningAdvisories.length === 0 ? 'Passed' : 'Review') : 'Blocking'} |
+| **Workspace-only Dependency Findings** | ${workspaceWarningCount === 0 ? '✅ PASS' : '⚠️ WARN'} | ${workspaceWarningCount === 0 ? '100%' : 'Review'} | 0 | ${workspaceWarningCount} | ${workspaceWarningCount === 0 ? 'Passed' : 'Non-production'} |
+| **Consolidated Total** | **${overallStatus === 'PASS' ? '✅ PASS' : overallStatus === 'WARN' ? '⚠️ WARN' : '❌ FAIL'}** | **${score.toFixed(1)}%** | **${totalCriticals}** | **${totalWarnings}** | **${totalCriticals === 0 ? 'NO PRODUCTION BLOCKERS' : 'ACTION REQUIRED'}** |
 
 ---
 
@@ -208,7 +271,26 @@ function main() {
 * **Security & RLS**: All active tables guarded with Postgres RLS policies.
 `;
 
-  fs.writeFileSync(path.join(targetDir, 'results.md'), resultsContent);
+  const workspaceAuditDetails =
+    workspaceAdvisories.length > 0
+      ? workspaceAdvisories
+          .map(
+            ([, advisory]) => `- ${advisory.module_name}: ${advisory.title} (${advisory.severity})`
+          )
+          .join('\n')
+      : workspaceAuditUnavailable
+        ? '- Full workspace dependency report unavailable; production audit remains a separate blocking gate.'
+        : '- No high/critical findings outside production dependencies.';
+  const productionAuditDetails =
+    productionWarningAdvisories.length > 0
+      ? productionWarningAdvisories
+          .map(
+            ([, advisory]) => `- ${advisory.module_name}: ${advisory.title} (${advisory.severity})`
+          )
+          .join('\n')
+      : '- No low/moderate production dependency advisories.';
+  const dependencyDetails = `\n## Dependency Audit Detail\n\nProduction dependencies block deployment for high/critical findings; lower-severity advisories remain visible for review:\n\n${productionAuditDetails}\n\nHigh/critical findings outside the production graph are recorded as workspace-only warnings:\n\n${workspaceAuditDetails}\n`;
+  fs.writeFileSync(path.join(targetDir, 'results.md'), `${resultsContent}${dependencyDetails}`);
 
   // 5. Generate required-actions.md
   const actionItemsList = [];
@@ -233,6 +315,29 @@ function main() {
       `- [ ] **[LOW - DESIGN]** Standardize shadow utilities and icon imports identified in \`design-report.md\`.`
     );
   }
+  if (auditExitCode !== 0) {
+    actionItemsList.push(
+      `- [ ] **[CRITICAL - DEPENDENCIES]** Resolve high/critical dependency advisories or restore vulnerability audit availability before deployment.`
+    );
+  }
+  if (productionWarningAdvisories.length > 0) {
+    const warningDetails = productionWarningAdvisories
+      .map(([, advisory]) => `${advisory.module_name} (${advisory.severity})`)
+      .join(', ');
+    actionItemsList.push(
+      `- [ ] **[NON-BLOCKING - PRODUCTION DEPENDENCIES]** Review: ${warningDetails}. These lower-severity advisories remain visible; deployment blocks on high/critical findings.`
+    );
+  }
+  if (workspaceWarningCount > 0) {
+    const warningDetails = workspaceAdvisories.length
+      ? workspaceAdvisories
+          .map(([, advisory]) => `${advisory.module_name} (${advisory.severity})`)
+          .join(', ')
+      : 'full workspace audit report unavailable';
+    actionItemsList.push(
+      `- [ ] **[NON-BLOCKING - NON-PRODUCTION DEPENDENCIES]** Review: ${warningDetails}. These findings are outside the production dependency graph.`
+    );
+  }
 
   if (actionItemsList.length === 0) {
     actionItemsList.push(
@@ -245,8 +350,9 @@ function main() {
 
   const requiredActionsContent = `# 📋 Required Actions & Remediation Plan — Log #${logNum} (${dateInfo.folderDate})
 
-**Generated:** ${dateInfo.displayDate}  
-**Associated Audit Log:** \`documentation/03-audit-reports/${folderName}/\`  
+**Generated:** ${dateInfo.displayDate}
+
+**Associated Audit Log:** \`documentation/03-audit-reports/${folderName}/\`
 **Total Pending Action Items:** ${totalCriticals + totalWarnings} (${totalCriticals} Critical, ${totalWarnings} Warnings)
 
 ---
@@ -312,7 +418,9 @@ All audit logs are stored chronologically in \`documentation/03-audit-reports/\`
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
   console.log('\n==================================================');
-  console.log(`✅ Audit Completed Successfully! Log #${logNum}`);
+  console.log(
+    `${overallStatus === 'PASS' ? '✅' : overallStatus === 'WARN' ? '⚠️' : '❌'} Audit run completed with ${overallStatus}. Log #${logNum}`
+  );
   console.log(`📊 Score: ${score.toFixed(1)}% (${overallStatus})`);
   console.log(`📁 Output directory: documentation/03-audit-reports/${folderName}/`);
   console.log('   ├── design-report.md');

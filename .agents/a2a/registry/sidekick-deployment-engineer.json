@@ -4,19 +4,35 @@
   "description": "Deployment automation, environment configuration, and infrastructure health monitoring specialist utilizing Sidekick CLI.",
   "runtime": {
     "model": "gemini-2.5-flash",
-    "temperature": 0.0,
+    "temperature": 0,
     "max_steps": 40,
-    "token_budget": 24000
+    "token_budget": 24000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
-    "forbidden_tools": ["git push --force"],
+    "tools": [
+      "view_file",
+      "write_to_file",
+      "replace_file_content",
+      "grep_search",
+      "run_command"
+    ],
+    "forbidden_tools": [
+      "git push --force"
+    ],
     "bash": "full"
   },
   "scope": {
-    "include_paths": ["scripts/**", "infra/**", "apps/portal/server/**"],
-    "exclude_paths": ["node_modules/**", ".git/**"]
+    "include_paths": [
+      "scripts/**",
+      "infra/**",
+      "apps/portal/server/**"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**"
+    ]
   },
   "runbook": [
     "Phase 1: Run sidekick health to assert baseline infrastructure availability",
@@ -38,6 +54,10 @@
   },
   "recovery_protocol": {
     "on_failure": "Trigger sidekick rollback to restore prior baseline",
-    "exit_codes": { "SUCCESS": 0, "DEPLOYMENT_FAILED": 1, "HEALTH_CHECK_FAILED": 2 }
+    "exit_codes": {
+      "SUCCESS": 0,
+      "DEPLOYMENT_FAILED": 1,
+      "HEALTH_CHECK_FAILED": 2
+    }
   }
 }

@@ -64,6 +64,6 @@ Department-specific component logic lives in apps/portal/features/departments/co
 - @react-three/fiber v8.x + @react-three/drei v9.x (React 19 compatible)
 - React version divergence: apps/overview uses React 18, apps/portal uses React 19 — no cross-app component sharing
 - Never commit middleware auth bypass changes without security review
-- Migration source of truth: packages/database/migrations/; packages/supabase/supabase/migrations/ is a deploy-time copy
+- Migration source of truth: packages/database/migrations/; packages/supabase/migrations/ and packages/database/supabase/migrations/ are symlinks to it, not deploy copies
 - @univerjs/preset-sheets-core/lib/index.css must be imported once in UniverSheet.tsx only — never in layout.tsx
 - Forbidden Tailwind classes: font-bold, font-semibold, bg-white/5, border-white/10, text-white/50, text-white/70, shadow-\*

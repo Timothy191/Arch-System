@@ -107,14 +107,30 @@ CREATE INDEX IF NOT EXISTS idx_mv_refresh_log_duration ON materialized_view_refr
 -- From 072_partition_production_logs.sql
 CREATE INDEX IF NOT EXISTS idx_production_logs_daily_log ON production_logs(daily_log_id);
 
--- From 073_production_summary_view.sql
-CREATE INDEX IF NOT EXISTS uidx_production_summary_log ON production_summary (log_date, department_id);
-CREATE INDEX IF NOT EXISTS idx_production_summary_date ON production_summary(date);
-CREATE INDEX IF NOT EXISTS idx_production_summary_dept ON production_summary(department_id);
+-- From 073_production_summary_view.sql / 074_hourly_production_trend.sql
+-- The canonical 073/074 migrations create the view_production_summary and
+-- view_hourly_production MATERIALIZED VIEWs (with their own unique indexes),
+-- NOT base tables named production_summary / hourly_production. These index
+-- statements were copied from an older base-table era and target relations
+-- that no migration in the canonical tree (001..175) creates. Guard both
+-- groups so a clean bootstrap does not fail; environments that still carry
+-- the legacy base tables keep creating these indexes.
+DO $$
+BEGIN
+  IF to_regclass('public.production_summary') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS uidx_production_summary_log ON production_summary (log_date, department_id);
+    CREATE INDEX IF NOT EXISTS idx_production_summary_date ON production_summary(date);
+    CREATE INDEX IF NOT EXISTS idx_production_summary_dept ON production_summary(department_id);
+  END IF;
+END $$;
 
--- From 074_hourly_production_trend.sql
-CREATE INDEX IF NOT EXISTS uidx_hourly_production ON hourly_production (timestamp, department_id);
-CREATE INDEX IF NOT EXISTS idx_hourly_production_timestamp ON hourly_production(timestamp);
+DO $$
+BEGIN
+  IF to_regclass('public.hourly_production') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS uidx_hourly_production ON hourly_production (timestamp, department_id);
+    CREATE INDEX IF NOT EXISTS idx_hourly_production_timestamp ON hourly_production(timestamp);
+  END IF;
+END $$;
 
 -- From 076_card_printing_infrastructure.sql
 CREATE INDEX IF NOT EXISTS idx_print_jobs_status ON print_jobs(status);
@@ -137,8 +153,24 @@ CREATE INDEX IF NOT EXISTS idx_ai_token_usage_created_at ON ai_token_usage(creat
 CREATE INDEX IF NOT EXISTS idx_ai_token_usage_model_name ON ai_token_usage(model_name);
 CREATE INDEX IF NOT EXISTS idx_ai_token_usage_date_range ON ai_token_usage(date_range);
 
--- From 165_offline_crdt_mutation_log_and_smr.sql
-CREATE INDEX IF NOT EXISTS smr_latest_tenant_meter_idx ON smr_latest_tenant_meter (tenant_id, meter_type, recorded_at DESC);
+-- The smr_latest_tenant_meter relation below was part of a legacy/unblocked
+-- schema in some environments (see 171_offline_crdt_mutation_log_and_smr.sql,
+-- which creates the smr_latest matview with the canonical
+-- smr_latest_tenant_meter_idx unique index). Guard the stray index creation so
+-- a clean bootstrap (001..173) does not fail when the legacy relation is absent.
+DO $$
+BEGIN
+  IF to_regclass('public.smr_latest_tenant_meter') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_indexes
+       WHERE schemaname = 'public'
+         AND indexname = 'smr_latest_tenant_meter_idx'
+     )
+  THEN
+    CREATE INDEX smr_latest_tenant_meter_idx
+      ON smr_latest_tenant_meter (tenant_id, meter_type, recorded_at DESC);
+  END IF;
+END $$;
 
 -- ============================================
 -- Part 3: Add ALTER TABLE ADD COLUMN IF NOT EXISTS for legacy additions

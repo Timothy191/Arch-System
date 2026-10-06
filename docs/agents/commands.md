@@ -139,22 +139,19 @@ pnpm mcp:onboard
 ### Database & Migrations
 
 ```bash
-# Start local Supabase container stack (automatically synchronizes migrations first)
-pnpm --filter @repo/supabase supabase:start
+# Start local Supabase container stack (migrations live in @repo/database/migrations)
+pnpm --filter @repo/database supabase:start
 
 # Reset local database and re-apply all migrations cleanly
-pnpm --filter @repo/supabase supabase:reset
+pnpm --filter @repo/database supabase:reset
 
 # Generate TypeScript database types (src/database.types.ts)
 pnpm --filter @repo/supabase supabase:gen-types
 
-# Synchronize SQL migrations between @repo/database/migrations and Supabase
-pnpm --filter @repo/database sync-migrations
-
-# Check that migrations are strictly in sync
+# Lint migrations + verify tree consolidation (symlinks, drift, relation hygiene)
 pnpm --filter @repo/database check-migrations
 
-# Run migration rollback safety static analysis
+# Run migration rollback safety static analysis + offline mutation security checks
 pnpm --filter @repo/database test
 
 # Seed local database via tsx

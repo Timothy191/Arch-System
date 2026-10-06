@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-10-02T07:47:00.000Z",
-  "totalRetrospectives": 13,
+  "lastUpdated": "2026-10-06T11:32:10.037Z",
+  "totalRetrospectives": 14,
   "entries": [
     {
       "id": "err-20260925-vercel-headless-deploy",
@@ -69,16 +69,17 @@
       "preventionRule": "Never use synchronous spawnSync when the child process needs to communicate with mock HTTP servers hosted in the parent Node.js event loop. In production CLI tools and watchdogs, never introduce mock return shortcuts to bypass unusual Git states (e.g. detached HEAD); always execute authentic remote queries with proper error handling."
     },
     {
+      "id": "err-20261002-rbac-bypass-lingering-and-unverified-pass",
+      "category": "SECURITY_VERIFICATION",
+      "errorSignature": "Hardcoded admin bypass persisted across nested layouts and leaf routes after premature '100% Pass' claim; sed replacement without compile check introduced build break",
+      "preventionRule": "1. Never claim a security vulnerability is 'completely removed' until executing a repository-wide case-insensitive regex search across all layouts, routes, components, and mock payloads. 2. Always compile-check (pnpm type-check && pnpm build) immediately after automated or batch text replacements before reporting status. 3. Distinguish static verification (E1/E2) from runtime/browser verification (E3/E4) and never report '100% verified' in headless environments."
+    },
+    {
       "id": "recovery-20260929-remaining-branch-deletion",
       "category": "SECURITY",
       "errorSignature": "Published remote branch tips retained live un-rotated Supabase JWTs post-cleanup",
       "preventionRule": "Treat 'remaining heads are clean' as an unverified claim until every published branch is fingerprint-scanned; bundle tips (with chmod 600) BEFORE any push --delete of diverged branches."
     },
-    {
-      "id": "err-20261002-rbac-bypass-lingering-and-unverified-pass",
-      "category": "SECURITY_VERIFICATION",
-      "errorSignature": "Hardcoded admin bypass persisted across nested layouts and leaf routes after premature '100% Pass' claim; sed replacement without compile check introduced build break",
-      "preventionRule": "Never claim a security vulnerability is 'completely removed' until executing a repository-wide case-insensitive regex search across all layouts, routes, components, and mock payloads. Always compile-check (pnpm type-check && pnpm build) immediately after automated or batch text replacements before reporting status."
-    }
+    {}
   ]
 }

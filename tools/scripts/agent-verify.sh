@@ -25,6 +25,9 @@ if bash tools/audits/skill-spector.sh > /dev/null 2>&1; then echo "✅ PASS"; el
 echo -n "🤖 6. MCP Server Registration & Toolchain... "
 if pnpm mcp:verify > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm mcp:onboard' to register required MCP servers."; exit 1; fi
 
+echo -n "💰 7. Context Budget Enforcement... "
+if pnpm token:budget-check > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm context:debloat' to prune context bloat."; exit 1; fi
+
 echo "========================================================"
 echo "✅ [AGENT VERIFICATION] 100% PASS. Code is real-world ready."
 echo "========================================================"

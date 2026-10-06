@@ -87,8 +87,10 @@ loses them. Full text with rationale and examples: `docs/agents/invariants.md`.
   Never `bun`/`npm`/`yarn`. Catalogs in `pnpm-workspace.yaml` (`catalog:react19`).
 - **Node**: `>=22`, pinned `24.15.0`. **Portal**: Next.js 16 (React 19) App Router,
   standalone output, Turbopack.
-- **DB**: PostgreSQL 15+ via Supabase, RLS on every table, 164+ sequential migrations
-  (`NNN_description.sql`), atomic RPCs (e.g. `atomic_shift_closeout`).
+- **DB**: PostgreSQL 15+ via Supabase, RLS on every table, sequential migrations
+  in `packages/database/migrations/` (`NNN_description.sql`, 126 active files
+  through version 175; `packages/supabase/migrations` is a symlink),
+  atomic RPCs (e.g. `atomic_shift_closeout`).
 - **Quality**: Biome (2-space, 100 col, single quotes, semicolons, ES5 trailing commas),
   Stylelint (OKLCH), Jest 30 + `@swc/jest`, Playwright E2E, DeepEval (Python ≥3.10),
   Storybook + axe, k6, Conventional Commits via Husky/Commitlint.
@@ -119,6 +121,11 @@ Full command reference: `docs/agents/commands.md`.
 - **`CLAUDE.md`** — thin redirect → `.agents/GUIDE.md` + `.agents/rules/`.
 - **`GEMINI.md`** — Gemini/Antigravity guide → `.agents/GUIDE.md`.
 - **`.cursorrules`** — Cursor redirect → `.agents/GUIDE.md`.
+- **`skills-mcp`** — Anti-bloat registry for 60+ dynamic skills, scoped context slices, and 40+ personas.
+- **`memory-gateway-mcp`** — Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs.
+- **`slim-tooling-mcp`** — Virtual tool proxy middleman preventing tool definition bloat across MCP servers.
+- **`codemap`** — TypeScript/Rust/CSS AST structural intelligence (SQLite symbols, imports, AST call graph, token recipes).
+- **`code-index`** — Sub-millisecond Rust AST multi-language code indexer & daemon (symbol search, caller/callee graphs, FTS).
 - **`.agents/`** — 17 permanent rules (incl. STM-0 structured thinking), 40+ subagent
   personas, 60+ skills, lifecycle hooks, A2A protocol, CorpOS business loops.
 
@@ -127,3 +134,5 @@ Full command reference: `docs/agents/commands.md`.
 Before any code mutation, follow the **STM-0 5-phase structured thinking mandate**
 (`.agents/rules/structured-thinking-mandate.md`). Complete 100% of listed TODOs and
 report in detail per `.agents/rules/todo-completion-and-detailed-reporting.md`.
+Use `skills-mcp` to lease skills/context on-demand and release them immediately upon task completion to prevent token bloat. Route external MCP tools via `slim-tooling-mcp` on-demand rather than preloading full toolsets into prompt memory.
+For codebase exploration and refactoring, query `codemap` and `code-index` rather than catting large files into prompt context. Ensure `code-index` daemon and `codemap` watchers remain running in background. Autonomous tool shopping is executed via `clihub-ai` / `mise` / `cargo` / `uv`. Version control is managed with GitButler (`but`).

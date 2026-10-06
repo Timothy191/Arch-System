@@ -208,7 +208,7 @@ for (const client of clientConfigs) {
     }
   }
 
-  // Verify and register Core Tools (filesystem, memory, sequential-thinking, ripgrep, git, fetch, context7)
+  // Verify and register Core Tools
   const coreStdio = [
     'memory',
     'sequential-thinking',
@@ -217,6 +217,13 @@ for (const client of clientConfigs) {
     'git',
     'fetch',
     'context7',
+    'codemap',
+    'code-index',
+    'docker',
+    'postgres',
+    'chrome-devtools',
+    'next-devtools',
+    'agent-mcp',
   ];
   for (const toolName of coreStdio) {
     if (!config[containerKey][toolName] && servers[toolName]) {
@@ -229,11 +236,13 @@ for (const client of clientConfigs) {
           config[containerKey][toolName] = {
             type: 'local',
             command: [sDef.command, ...(sDef.args || [])],
+            ...(sDef.env ? { env: sDef.env } : {}),
           };
         } else if (client.type === 'claude') {
           config[containerKey][toolName] = {
             command: sDef.command,
             args: sDef.args || [],
+            ...(sDef.env ? { env: sDef.env } : {}),
           };
         } else {
           config[containerKey][toolName] = {
@@ -241,6 +250,7 @@ for (const client of clientConfigs) {
             args: sDef.args || [],
             description: sDef.description,
             type: sDef.type || 'stdio',
+            ...(sDef.env ? { env: sDef.env } : {}),
           };
         }
         modified = true;

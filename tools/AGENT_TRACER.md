@@ -51,3 +51,47 @@
 - Evaluated and integrated Vercel AI SDK and Streamdown for streaming LLM markdown rendering.
 
 **Next agent:** Use `make check-fast` for sub-second pre-commit formatting and lint sanity across all packages.
+
+## 2026-10-05T11:22:00Z
+
+**Purpose:** Hardened the repository audit runner during a Vercel production-readiness audit.
+
+**Changes made:**
+
+- Replaced the unsupported `pnpm audit --ignore-decls` invocation with the supported audit command.
+- Increased the audit timeout and made audit errors and high-severity dependency findings fail closed and appear in reports/actions.
+- Corrected audit completion messaging so a failing dependency gate cannot be described as successful.
+
+**Verification:** Dependency audit now reports two remaining high-severity advisories instead of silently passing. The full portal build passed.
+
+**Next agent:** Keep dependency findings deployment-blocking. Revisit the `http-cache-semantics` and `braces` advisories when upstream patched releases are available.
+
+## 2026-10-05T12:23:00Z
+
+**Purpose:** Reassessed the dependency audit and historical database warnings against current package and migration sources.
+
+**Changes made:**
+
+- Updated the dependency audit gate to block on production dependency findings while explicitly reporting high/critical workspace-only advisories as non-blocking warnings.
+- Pinned `http-cache-semantics` to the fixed 4.3.0 release and updated Sass to 1.105.1, removing the vulnerable braces chain from production/build dependencies.
+- Moved the theme's Tailwind plugins to development dependencies; the consuming portal already declares its build-time Tailwind dependencies.
+- The current full-workspace audit retains one high `braces` advisory, only through root `@changesets/cli` release tooling; no patched braces release is available in the registry.
+- Scanned 86 dollar-quoted migration function declarations; all currently declare `SET search_path`. The historical 85-warning summary is not reproduced by the current migration sources.
+
+**Verification:** `pnpm audit --prod --audit-level=high`, `pnpm quality`, `pnpm agent:verify`, portal production build, and Vercel preflight passed. Audit report `log-131(26-10-05)` records zero production dependency blockers and one non-production warning.
+
+**Database review:** After the owner confirmed the offline migration 165 had been applied and authorized renumbering, moved the duplicate `168_offline_crdt_mutation_log_and_smr.sql` to `171_offline_crdt_mutation_log_and_smr.sql`; left the deleted 165 source untouched. The migration sequence now has no duplicate numbers, and database rollback-safety/RLS checks passed.
+
+## 2026-10-06: Deployment Audit Severity and Dependency Fixes
+
+- Added root pnpm overrides for `proxy-addr@2.0.8` and `@opentelemetry/auto-instrumentations-node@0.80.0`; the first removes the critical proxy advisory, and the latter removes eight production telemetry advisories.
+- Fixed dependency gate classification in `tools/audits/run-audit.cjs`: use parsed high/critical severities as blockers, keep low/moderate production advisories and non-production high/critical findings visible as warnings, and fail closed when audit JSON is unavailable.
+- Verified `pnpm audit:suite`: exits successfully with WARN, zero high/critical production findings, one moderate production advisory (`sprintf-js`, no patched upstream release), and the pre-existing high `braces` advisory in non-production tooling.
+- `pnpm quality` initially failed because pnpm returned a nonzero JSON-audit exit for moderate advisories despite `--audit-level=high`; rerun the full suite after this correction.
+
+## 2026-10-06: Archived Skill Audit False Positive
+
+- The Agentic Content Audit counted every top-level directory in `.agents/skills` as an active skill, so the cleanup tool's `.archived` container triggered a false `MISSING_SKILL_MD` critical violation.
+- Extracted active skill directory filtering into `active-skill-directories.cjs`; dot-prefixed archive containers are excluded, while normal active directories without `SKILL.md` continue to be audited and fail.
+- Added three Node regression tests and included them in `audit:compliance`.
+- Verified: targeted audit tests pass; agentic audit checks 52 active skills with zero critical findings; `pnpm quality` exits 0 with WARN for remaining dependency advisories; `pnpm agent:verify` passes; portal production build passes after removing the route runtime option incompatible with Cache Components.

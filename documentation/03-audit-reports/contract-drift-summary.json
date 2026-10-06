@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-10-05T10:38:23.638Z",
+  "timestamp": "2026-10-06T11:32:15.812Z",
   "databaseTablesCount": 94,
-  "contractSchemasCount": 181,
+  "contractSchemasCount": 186,
   "synchronizedTablesCount": 90,
   "unmappedTablesCount": 4,
   "driftHealthIndex": 95.7,
@@ -642,14 +642,14 @@
       "schemas": [
         "mutationLogSchema"
       ],
-      "migration": "165_offline_crdt_mutation_log_and_smr.sql"
+      "migration": "171_offline_crdt_mutation_log_and_smr.sql"
     },
     {
       "table": "smr_readings",
       "schemas": [
         "smrReadingsSchema"
       ],
-      "migration": "165_offline_crdt_mutation_log_and_smr.sql"
+      "migration": "171_offline_crdt_mutation_log_and_smr.sql"
     }
   ]
 }

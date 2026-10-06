@@ -32,8 +32,6 @@
       "@repo/contract/*": ["../../packages/contract/src/*"],
       "@repo/utils": ["../../packages/utils/src/index.ts"],
       "@repo/utils/*": ["../../packages/utils/src/*"],
-      "@repo/database": ["../../packages/database/src/index.ts"],
-      "@repo/database/*": ["../../packages/database/src/*"],
       "@repo/agents": ["../../packages/agents/src/index.ts"],
       "@repo/agents/*": ["../../packages/agents/src/*"],
       "@repo/supabase": ["../../packages/supabase/src/index.ts"],

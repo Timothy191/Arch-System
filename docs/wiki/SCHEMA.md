@@ -543,9 +543,9 @@ CREATE INDEX idx_machine_ops_dept_date
 
 ## Migration Guidelines
 
-1. **Source of truth**: `packages/database/migrations/`
-2. **Deploy copy**: `packages/supabase/supabase/migrations/` (auto-synced)
-3. **Run locally**: `cd packages/database && pnpm supabase:dev`
+1. **Source of truth**: `packages/database/migrations/` (single canonical tree)
+2. **Deploy paths**: `packages/supabase/migrations/` and `packages/database/supabase/migrations/` are **symlinks** to the canonical tree — never replace them with real directories
+3. **Run locally**: `cd packages/database && pnpm supabase:start`
 4. **Reset local**: `cd packages/database && pnpm supabase:reset`
 5. **Push remote**: `cd packages/database && pnpm supabase:push`
 

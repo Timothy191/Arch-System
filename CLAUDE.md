@@ -1,141 +1,75 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in `Arch-System`.
 
 ## Essential Commands
 
-Always run these commands from the `Arch-System/` directory:
-
-### Development
+Always execute from `Arch-System/`:
 
 ```bash
+# Development
 pnpm dev              # Full dev system (binds 0.0.0.0:3000)
 pnpm dev:quick        # Headless quick boot (no Docker)
 pnpm dev:turbo        # Portal dev via Turborepo
-```
 
-### Build & Quality
-
-```bash
+# Build & Quality Gates
 pnpm build            # Full Turborepo build
-pnpm type-check       # TypeScript check across workspace
-pnpm lint             # Linting (Biome in portal)
-pnpm quality          # Full quality gate (lint, type-check, test, tokens, CSS, etc.)
-```
+pnpm type-check       # Workspace TypeScript check
+pnpm lint             # Linting (Biome)
+pnpm quality          # Full quality gate (lint, types, test, tokens, CSS)
+pnpm agent:verify     # MANDATORY verification before completing any task
+pnpm audit:browser    # Closed-loop browser, devtools & a11y probe (frontend)
 
-### Testing
-
-```bash
-pnpm test                     # All unit tests
-pnpm --filter portal test     # Portal unit tests only
-pnpm --filter portal test -- --testPathPattern="<name>"  # Single test file
-pnpm test:e2e                 # Playwright E2E (requires portal on :3000)
+# Testing
+pnpm test                     # All unit tests (Jest 30 SSoT)
+pnpm --filter portal test     # Portal unit tests
+pnpm test:e2e                 # Playwright E2E (:3000)
 pnpm test:a11y                # Storybook accessibility tests
-```
 
-### Database
-
-```bash
+# Database
 pnpm --filter @repo/database db:types    # Regenerate Supabase types
-pnpm db:seed                             # Seed cloud dev database
-pnpm --filter @repo/supabase supabase:start  # Start local Supabase
-pnpm --filter @repo/supabase supabase:reset  # Reset local database
+pnpm db:seed                             # Seed dev database
+pnpm --filter @repo/database supabase:start  # Start local Supabase
+pnpm --filter @repo/database supabase:reset  # Reset local database
 ```
 
-### Agent Verification (MANDATORY)
+## Anti-Bloat Context Management (`skills-mcp`, `slim-tooling-mcp`)
 
-```bash
-pnpm agent:verify     # Must exit 0 before completing any task
-pnpm audit:browser    # Closed-loop browser, devtools & accessibility probe (frontend tasks)
-```
+- **Never inject raw manuals or rules into prompt context.**
+- Lease skills dynamically via `skills-mcp` (`acquire_skill`) and release immediately via `return_skill(name, agentId, status)`.
+- Lease architectural slices via `acquire_context(id, agentId)` and free via `release_context`.
+- Query memory & retrospectives via `memory-gateway-mcp` (`search_unified_memory`).
+- Route external MCP tool calls virtually through `slim-tooling-mcp` (`call_upstream_tool`) instead of preloading raw schemas.
 
-## High-Level Architecture
+## High-Level Architecture & Boundaries
 
-### Monorepo Structure
+- **`apps/portal`** — Next.js 16 App Router (RSC-first).
+- **`packages/*`** — `@repo/contract` (Zod SSoT), `@repo/supabase` (data layer), `@repo/database` (migrations), `@repo/redis` (L1/L2), `@repo/theme`, `@repo/ui` (pure presentational), `@repo/utils`.
+- **`libs/features/*`** & **`libs/shared/*`** — Domain feature slices and cross-cutting hooks/utilities.
 
-- **`apps/portal`** — Next.js 16 App Router (main application)
-- **`packages/*`** — Foundational packages: `@repo/contract` (Zod SSoT), `@repo/supabase` (clients + Kysely), `@repo/database` (migrations), `@repo/redis` (L1/L2 cache), `@repo/theme`, `@repo/ui`, `@repo/utils`
-- **`libs/features/*`** — Domain feature slices (`auth`, `departments`, `hub`)
-- **`libs/shared/*`** — Cross-cutting utilities (`data-access`, `hooks`)
-- **`tools/`** — Build-time governance (policy compiler, audit suites)
+### Strict Enforced Boundaries
+- `apps/*` MUST NOT import `packages/database` directly — route via `@repo/supabase`.
+- `packages/ui` must remain pure presentational (zero business logic).
+- No imports from `apps/*` into `packages/*` or `tools/*`.
+- All primary data fetching in RSC / Server Actions / Handlers — never in `'use client'`.
+- Parallelize independent queries (`Promise.allSettled`), memoize with `React.cache()`.
 
-### Key Boundaries (ENFORCED)
+## Critical Conventions
 
-- `apps/*` must NOT import `packages/database` directly — use `@repo/supabase`
-- `packages/ui` must remain pure presentational (no logic)
-- `packages/*` and `tools/*` must NOT import `apps/*`
-- All data fetching must happen in Server Components/RSC/Route Handlers — never in `'use client'` components
+- **Package Manager**: `pnpm` exclusively (pinned v9.15.9).
+- **Light Mode Only**: Strict light mode (#f3f4f6 background); semantic OKLCH tokens from `@repo/theme`. Never `dark:` variants.
+- **File Length**: Target 400–450 lines, hard ceiling 500 lines. Decompose proactively.
+- **Server Actions**: Authenticate on first line, authorize, validate via `@repo/contract`, rate-limit, and invalidate cache before `redirect()`.
+- **Caching**: Next.js 16 cache components (`'use cache'` requires named `cacheLife()` profile). Mutations must invalidate tags.
+- **Client State**: `@tanstack/react-query` SSoT. SWR is prohibited.
+- **Commits**: Conventional commits via Husky/Commitlint. One commit per task; no force-push.
+- **Secrets**: Never print, edit, or commit `.env*` secrets.
+- **Troubleshooting**: If `pnpm` hangs with no output, kill it and use `make` targets (`make dev`, `make build`, `make test`) or direct `turbo`/`node`.
 
-### Critical Conventions
-
-- **Package Manager**: Use `pnpm` exclusively (v9.15.9 pinned)
-- **Light Mode Only**: No dark mode variants; use semantic OKLCH tokens from `@repo/theme`
-- **File Length**: Target 400-450 lines, hard ceiling 500 lines
-- **Server Actions**: Must authenticate, authorize, validate via `@repo/contract`, rate-limit, and invalidate cache before `redirect()`
-- **Caching**: Requires named `cacheLife()` profile; mutations invalidate tags
-- **React Query**: `@tanstack/react-query` only — SWR prohibited
-- **Testing**: Jest 30 SSoT — no other test runners
-
-### Critical Gotchas
-
-- Always scope commands per project (pnpm/turbo commands run from `Arch-System/`)
-- `.env` files contain secrets — never print, edit, or commit them
-- Sibling paths are hardcoded in federated audit — renaming `arch-system-nest-proxy/`, `redis/`, or `n8n-vercel/` breaks audit
-- If `pnpm` hangs with no output, kill it and use `make` targets (`make dev`, `make build`, `make test`) or invoke `turbo`/`node` directly
-
-## Verification Requirements
+## Verification Mandate
 
 Before completing ANY task:
-
-1. Run `pnpm agent:verify` — must exit 0
-2. For frontend tasks: run `pnpm audit:browser` — must exit 0
-3. Follow STM-0 5-phase structured thinking mandate (see `.agents/rules/structured-thinking-mandate.md`)
-4. No force-push, history rewrite, or branch deletion
-5. No new runtime dependencies without approval
-6. No edits to secrets, credentials, or key material
-
-## Agent Governance
-
-- All behavioral rules, operational guides, skills, and governance are consolidated in `.agents/`
-- Read `.agents/GUIDE.md` for operational reference
-- Read `AGENTS.md` for architecture, domain, personas, data flow, and invariants
-- Provider-specific settings (e.g., `.claude/settings.json`) remain at their required locations but contain no behavioral rules
-
-## Session Learnings (Additions for Future Sessions)
-
-### Essential Skills
-
-- Always invoke relevant skills before any action - use `superpowers:using-superpowers` to check
-- For planning tasks, use `superpowers:brainstorming` first
-- Skills take precedence over default behavior when applicable
-
-### Critical Verification
-
-- Always run `pnpm agent:verify` before considering a task complete
-- For frontend work, also run `pnpm audit:browser`
-- Never skip verification gates - they enforce architectural boundaries
-
-### Code Conventions
-
-- File length strictly enforced: 400-450 lines target, 500 hard ceiling
-- Light mode only: use OKLCH tokens from `@repo/theme`, never dark mode variants
-- Server Actions must validate user on first line before any operations
-- All data fetching must be in Server Components/RSC/Route Handlers
-
-### Repository Boundaries
-
-- Never import `packages/database` directly from `apps/*` - always go through `@repo/supabase`
-- `packages/ui` must remain pure presentational (zero business logic)
-- No imports from `apps/*` into `packages/*` or `tools/*`
-
-### Git & Commits
-
-- Conventional commits enforced by commitlint/Husky
-- One commit per task; no amending or force-pushing without explicit permission
-- Commit messages must follow conventional format (feat, fix, docs, etc.)
-
-### Environment & Troubleshooting
-
-- If `pnpm` hangs with no output, kill it and use `make` targets or direct `turbo`/`node`
-- Sibling paths are hardcoded in federated audit - renaming related projects breaks verification
-- `.env` files contain secrets - never expose or commit them
+1. Run `pnpm agent:verify` — must exit 0.
+2. For UI/frontend tasks: run `pnpm audit:browser` — must exit 0.
+3. Follow STM-0 5-phase structured thinking mandate (`.agents/rules/structured-thinking-mandate.md`).
+4. Operational reference lives in `.agents/GUIDE.md` and `AGENTS.md`.

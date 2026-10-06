@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./src/index.mjs",
   "bin": {
-    "zero-drift-watchdog": "./bin/zero-drift-watchdog.mjs"
+    "zero-drift-watchdog": "./bin/zero-drift-watchdog.mjs",
+    "federated-audit": "./bin/federated-audit.mjs"
   },
   "exports": {
     ".": "./src/index.mjs",
@@ -19,7 +20,8 @@
     "test": "node --test test/**/*.test.mjs",
     "test:unit": "node --test test/unit/**/*.test.mjs",
     "test:e2e": "node test/run-all-tests.mjs",
-    "watchdog": "node bin/zero-drift-watchdog.mjs"
+    "watchdog": "node bin/zero-drift-watchdog.mjs",
+    "audit:federated": "node bin/federated-audit.mjs"
   },
   "engines": {
     "node": ">=18.0.0"

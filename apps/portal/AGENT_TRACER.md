@@ -1,3 +1,34 @@
+## 2026-10-06: C66 Camera and Dropdown Machine/Operator Shift Assignment
+
+- Both Control Room Machine Operations and Hourly Loads offer active central-fleet dropdown selection, keyboard-wedge scans, and browser-camera barcode scanning when supported. Fleet assets may belong to the shared `admin` registry while the shift record belongs to `control-room`.
+- The authenticated API returns operators whose active personnel record has a matching machine-type job title and current medical/induction expiry; it repeats those checks on assignment.
+- Machine-specific licenses are not represented in the schema, so job-title matching is an eligibility filter only and is not reported as certification verification.
+- Writes remain on the caller's session-bound Supabase client and RLS. Dump trucks continue to appear in Hourly Loads from the machine registry without fabricated load counts.
+- Camera uses native `getUserMedia` and `BarcodeDetector`; unsupported browsers, camera denial, or unavailable devices retain dropdown and keyboard-scanner fallback.
+- Scanner hardware network addressing is not configured; no database migration was added.
+
+## 2026-10-06: Control Room Resilience and Authorization Audit
+
+- Hourly Loads service-role actions now verify authenticated employee role and department access before privileged writes; load-id updates include the requested department, machine, date, and shift predicates. Machine-site changes require an admin/supervisor with access to the asset's owning department and an active site.
+- Hourly-load splits use a single transaction-scoped service-role RPC with scope-key advisory locking; load-ID updates verify a matching scoped row before returning success.
+- Shift closeout now whitelists roles, validates department access, body size, and header/body idempotency-key equality before RPC invocation.
+- SCADA telemetry key scanning now counts each Redis page without accumulating the entire key list in process memory. Redis read failures are logged and surfaced as degraded health even when FUXA responds. The FUXA timeout is always cleared after a failed or successful probe.
+- Migration `173_control_room_rpc_security_and_atomic_split.sql` makes the closeout function verify the database caller's `auth.uid()`, employee identity, role and department access; function execution is restricted to authenticated callers.
+- The same migration creates a service-role-only split RPC. Its lock, prior-segment update and insert are one PostgreSQL transaction; a thrown insert error rolls the whole operation back. Direct authenticated/anonymous RPC execution is revoked.
+- Migration `169_hourly_loads_excavator_id.sql` is a prerequisite for the split RPC. Migration `170_hourly_loads_split_segments.sql` drops the locally-defined parent unique constraint rather than attempting to drop inherited partition constraints from child tables.
+- The split migration schema-qualifies `check_shift_immutable()` references while retaining an empty search path; this is required because the secure RPC invokes the existing hourly-load trigger.
+- `/api/health/supabase-realtime` now opens a bounded WebSocket probe and reports degraded for configuration/network/timeout failures; it does not claim to verify database CDC or application channel authorization.
+- Removed the route's explicit `runtime = 'nodejs'` config after Next.js 16 production build rejected route runtime settings with Cache Components enabled. The default route runtime remains Node.js; the full portal production build now passes.
+- Local migration/integration tests are run against the existing local Supabase stack only. Production grants, migration application and deployment health remain unverified and must be checked during approved rollout.
+
+## 2026-10-06: Production Rollout Gate Follow-up
+
+- **Dependency findings**: The production graph's critical `proxy-addr@2.0.7` advisory was fixed with a root pnpm override to `2.0.8`. OpenTelemetry instrumentation advisories were fixed by overriding the auto-instrumentation bundle to `0.80.0`. The production audit now reports zero high/critical findings; one moderate `sprintf-js` advisory remains, with no patched upstream release. The high `braces` advisory is confined to non-production tooling.
+- **Audit runner**: `tools/audits/run-audit.cjs` now interprets parsed advisory severities instead of treating pnpm's nonzero JSON exit for moderate findings as a blocking audit failure. It records remaining lower-severity findings as explicit warnings and fails closed when the audit report is unavailable or contains high/critical production findings.
+- **Vercel**: The local checkout is linked to the inspected `arch-system` project (project root `.`, Node 24.x); `pnpm deploy:vercel:preflight` passes with zero warnings. The Ready production deployment dated 2026-10-05 12:41 still serves the previous constant-healthy Realtime route. A live `healthy` response is not proof of service reachability until the WebSocket probe is deployed.
+- **Rollout boundary**: No Vercel deployment or hosted database mutation was performed. The migration history has conflicting reports (164 and 166), generated database types omit the new RPCs, and migration 166 contains a stale index target absent from earlier checked-in migrations. Resolve these through approved migration-history review and type generation before deployment.
+- **Recheck**: Current local `schema_migrations` ends at 164 while the closeout/split RPCs exist locally without corresponding ledger entries; this is not a clean migration replay. Supabase CLI linked history needs a missing access token/project link, the Postgres MCP target is unavailable, and production DB values pulled through Vercel are redacted in this runtime. Do not deploy until authoritative hosted history, function grants, and generated RPC types are verified.
+
 ## 2026-09-14T11:55:00Z: Service-Role Key Naming — Decision Recorded (AGENT-TRACE: run-skill-generator close-out)
 
 - **Agent**: Claude Code (Orca-supervised, run `run_2e95a05dba11`)
@@ -525,3 +556,19 @@ AIAssistant chat.
 - **Verification**:
   - `pnpm --filter portal test -- app/actions.test.ts` (7/7 passed).
   - `pnpm type-check` (21/21 packages successful across the monorepo).
+
+## 2026-10-05T17:12:00+02:00: Offline Mutation and Closeout Retry Hardening
+
+- **Purpose**: Prevent unauthorized offline SMR writes and make closeout SMR
+  persistence safe to retry after intermittent database failures.
+- **Changes**:
+  - `app/api/offline-mutations/route.ts`: authenticate the employee, reject
+    viewers/missing departments, validate bounded batches, and derive tenant
+    scope from the employee record.
+  - `app/api/control-room/shift-closeout/route.ts`: unwrap stored idempotent
+    closeout responses, derive stable UUID mutation IDs from report/allocation
+    identity, and return HTTP 503 plus `Retry-After` when SMR writes fail.
+  - Added request-path regression coverage, including retry ID stability.
+- **Verification**: Offline mutation and closeout route tests passed (11/11);
+  portal/contract type-check and production build passed; `pnpm quality`,
+  `pnpm audit:vercel` (0 warnings), and `pnpm agent:verify` (100% PASS) passed.

@@ -279,3 +279,11 @@ Arch-System-main (2).zip
 .claude-flow/data/
 .claude-flow/logs/
 .claude-flow/sessions/
+
+# Machine-generated code index & state directories
+.code-index/
+.codemap/
+.autohand/
+.ori/
+packages/redis/.code-index/
+

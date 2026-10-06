@@ -3,20 +3,36 @@
   "mode": "coordinator",
   "description": "Multi-Agent Deliberation & Consensus Chairman. Presides over the 3-stage LLM Council deliberation process, evaluates blind peer reviews, reconciles contradictory proposals, and synthesizes authoritative architectural verdicts.",
   "runtime": {
-    "model": "gemini-2.5-pro",
+    "model": "gemini-2.5-flash",
     "temperature": 0.1,
     "max_steps": 25,
-    "token_budget": 32000
+    "token_budget": 32000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": ["view_file", "replace_file_content", "write_to_file", "run_command", "call_mcp_tool"],
-    "forbidden_tools": ["git push --force"],
+    "tools": [
+      "view_file",
+      "replace_file_content",
+      "write_to_file",
+      "run_command",
+      "call_mcp_tool"
+    ],
+    "forbidden_tools": [
+      "git push --force"
+    ],
     "bash": "restricted"
   },
   "scope": {
-    "include_paths": [".agents/a2a/bus/**", "temp/**", ".agents/plans/**"],
-    "exclude_paths": ["node_modules/**", ".git/**"]
+    "include_paths": [
+      ".agents/a2a/bus/**",
+      "temp/**",
+      ".agents/plans/**"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**"
+    ]
   },
   "runbook": [
     "Phase 1: Ingest competing architectural proposals or contradictory peer critiques",

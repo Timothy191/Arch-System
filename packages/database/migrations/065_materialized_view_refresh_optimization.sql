@@ -121,7 +121,7 @@ DECLARE
   row_count INT;
 BEGIN
   -- Log refresh start
-  log_id := public.log_mv_refresh_start('dept_production_summary', TRUE, 'cron');
+  log_id := public.log_mv_refresh_start('dept_production_summary', FALSE, 'cron');
   
   BEGIN
     -- Check if a concurrent refresh is already running
@@ -140,8 +140,9 @@ BEGIN
       RETURN;
     END IF;
     
-    -- Perform concurrent refresh
-    REFRESH MATERIALIZED VIEW CONCURRENTLY dept_production_summary;
+    -- Perform refresh (plain refresh is used here: CONCURRENTLY cannot run
+    -- inside a transaction block, so it is scheduled directly via pg_cron)
+    REFRESH MATERIALIZED VIEW dept_production_summary;
     
     -- Get row count
     SELECT COUNT(*) INTO row_count FROM dept_production_summary;
@@ -183,7 +184,7 @@ DECLARE
   error_msg TEXT := NULL;
   row_count INT;
 BEGIN
-  log_id := public.log_mv_refresh_start('machine_utilization_weekly', TRUE, 'cron');
+  log_id := public.log_mv_refresh_start('machine_utilization_weekly', FALSE, 'cron');
   
   BEGIN
     IF EXISTS (
@@ -200,7 +201,7 @@ BEGIN
       RETURN;
     END IF;
     
-    REFRESH MATERIALIZED VIEW CONCURRENTLY machine_utilization_weekly;
+    REFRESH MATERIALIZED VIEW machine_utilization_weekly;
     SELECT COUNT(*) INTO row_count FROM machine_utilization_weekly;
     
   EXCEPTION WHEN OTHERS THEN
@@ -237,7 +238,7 @@ DECLARE
   error_msg TEXT := NULL;
   row_count INT;
 BEGIN
-  log_id := public.log_mv_refresh_start('safety_incident_monthly', TRUE, 'cron');
+  log_id := public.log_mv_refresh_start('safety_incident_monthly', FALSE, 'cron');
   
   BEGIN
     IF EXISTS (
@@ -254,7 +255,7 @@ BEGIN
       RETURN;
     END IF;
     
-    REFRESH MATERIALIZED VIEW CONCURRENTLY safety_incident_monthly;
+    REFRESH MATERIALIZED VIEW safety_incident_monthly;
     SELECT COUNT(*) INTO row_count FROM safety_incident_monthly;
     
   EXCEPTION WHEN OTHERS THEN

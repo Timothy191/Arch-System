@@ -1,5 +1,12 @@
 # Contract Package Agent Tracer
 
+## 2026-10-06: C66 Camera/Dropdown Machine and Operator Contract
+
+- Request schema supports machine/operator IDs from dropdowns or scanned machine/badge codes, and rejects conflicting selection methods.
+- Response schema includes eligible operators filtered by matching personnel job title and distinguishes badge-verified assignment from dropdown selection.
+- Scan identifiers reject unsupported filter syntax before reaching server-side database lookups.
+- Contract tests cover scan normalization, dropdown selection, conflicting inputs, unsupported payloads, eligible-operator responses, and assignments.
+
 ## 2026-08-27: Compliance Audit Contract Schemas & Drift Detection
 
 - **Purpose**: Add canonical Zod contracts for compliance audit runs (`complianceAuditRunSchema`, `createComplianceAuditRunSchema`) and support automated schema drift detection.
@@ -224,3 +231,18 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - **Changes**:
   - Added `shiftCloseoutSchema` and `healthCheckResponseSchema` to `src/schemas/control-room.schema.ts`.
   - Re-exported schemas and inferred types (`ShiftCloseoutInput`, `HealthCheckResponse`) from `src/index.ts`.
+
+## 2026-10-05T17:12:00+02:00: Offline Mutation Contracts
+
+- **Purpose**: Define a canonical, bounded SMR offline mutation contract shared
+  by portal request validation and database mutation handling.
+- **Changes**:
+  - Added strict HLC, SMR mutation, and batch schemas in
+    `src/schemas/offline-mutations.schema.ts`; batches allow 1–500 entries and
+    numeric readings/clock values are bounded.
+  - Re-exported runtime schemas and inferred types from `src/index.ts`.
+  - Added tests for valid payloads, unsupported operations, negative readings,
+    oversized batches, and caller-supplied tenant rejection.
+- **Verification**: Offline mutation contract tests passed (4/4); contract
+  type-check/build and `pnpm audit:drift` passed. The drift audit reported
+  90/94 fully synchronized domain tables and a 95.7% Drift Health Index.

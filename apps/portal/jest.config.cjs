@@ -32,7 +32,6 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/$1',
     '^~/(.*)$': '<rootDir>/$1',
-    '^@repo/database$': '<rootDir>/../../packages/database/src/index.ts',
     '^@repo/contract$': '<rootDir>/../../packages/contract/src/index.ts',
     '^@repo/contract/(.*)$': '<rootDir>/../../packages/contract/src/$1',
     '^@repo/supabase/(.*)$': '<rootDir>/../../packages/supabase/src/$1',

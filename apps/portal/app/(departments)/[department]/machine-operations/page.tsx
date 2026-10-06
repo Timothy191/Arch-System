@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { C66MachineOperatorScanner } from '@/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 const MachineOperationsForm = dynamic(
@@ -133,6 +134,12 @@ export default async function MachineOperationsPage({
           })}
         </p>
       </div>
+
+      <C66MachineOperatorScanner
+        departmentId={deptId}
+        machines={machines || []}
+        sites={sites || []}
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

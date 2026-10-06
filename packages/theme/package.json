@@ -3,16 +3,16 @@
   "description": "OKLCH design tokens, Style Dictionary code generation, Tailwind preset, and CSS variables as single source of truth for design system",
   "version": "1.0.0",
   "dependencies": {
-    "@tailwindcss/typography": "^0.5.16",
-    "lucide-react": "catalog:",
-    "tailwindcss": "catalog:",
-    "tailwindcss-animate": "^1.0.7"
+    "lucide-react": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@repo/typescript-config": "1.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
+    "@tailwindcss/typography": "^0.5.16",
+    "tailwindcss": "catalog:",
+    "tailwindcss-animate": "^1.0.7",
     "style-dictionary": "^5.4.1"
   },
   "exports": {

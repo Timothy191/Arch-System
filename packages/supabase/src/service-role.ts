@@ -12,12 +12,15 @@ class APIError extends Error {
 
 export function createServiceRoleClient() {
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  // AGENT-TRACE: Accept both SUPABASE_SECRET_KEY (new Supabase key format, sb_secret_...)
-  // and SUPABASE_SERVICE_KEY (legacy name) for backward compatibility
-  const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
+  // AGENT-TRACE: Accept SUPABASE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY,
+  // and SUPABASE_SERVICE_KEY for backward compatibility across all environments
+  const key =
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) {
     throw new APIError(
-      'Missing SUPABASE_URL or SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_KEY) environment variables'
+      'Missing SUPABASE_URL or SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY / SUPABASE_SERVICE_KEY) environment variables'
     );
   }
   return createClient(url, key, {

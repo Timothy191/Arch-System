@@ -9,6 +9,23 @@ import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/trac
 
 export const maxDuration = 60;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function createCloseoutMutationId(reportId: string, machineId: string, index: number): string {
+  const hash = crypto
+    .createHash('sha256')
+    .update(`shift-closeout:${reportId}:${machineId}:${index}`)
+    .digest('hex')
+    .slice(0, 32)
+    .split('');
+  hash[12] = '8';
+  hash[16] = ((Number.parseInt(hash[16] ?? '0', 16) & 0x3) | 0x8).toString(16);
+  const hex = hash.join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 export async function POST(req: NextRequest) {
   return withAsyncSpan('api_shift_closeout', {}, async () => {
     try {
@@ -27,6 +44,9 @@ export async function POST(req: NextRequest) {
       }
 
       const rawBody = await req.text();
+      if (new TextEncoder().encode(rawBody).byteLength > 1024 * 1024) {
+        return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+      }
       let body;
       try {
         body = JSON.parse(rawBody);
@@ -55,10 +75,19 @@ export async function POST(req: NextRequest) {
         idempotency_key: idempotencyKey,
       });
 
-      // Role check: Only operator, supervisor, admin can close shifts
       const { employee, user } = principal;
-      if (['viewer'].includes(employee.role)) {
+      if (!['admin', 'operator', 'supervisor'].includes(employee.role)) {
         return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+      }
+      if (
+        employee.role !== 'admin' &&
+        employee.department_id !== payload.deptId &&
+        !employee.accessible_departments?.includes(payload.deptId)
+      ) {
+        return NextResponse.json({ error: 'Department access denied' }, { status: 403 });
+      }
+      if (payload.idempotencyKey !== idempotencyKey) {
+        return NextResponse.json({ error: 'Idempotency key mismatch' }, { status: 400 });
       }
 
       // Execute atomic RPC
@@ -96,39 +125,52 @@ export async function POST(req: NextRequest) {
         throw new Error(rpcError.message);
       }
 
-      addEvent('shift_closed', { report_id: rpcResult.id, status: rpcResult.status });
-
-      if (rpcResult.id) {
-        // Save SMR allocations
-        if (payload.allocations && payload.allocations.length > 0) {
-          const mutations = payload.allocations.map((alloc) => ({
-            id: crypto.randomUUID(),
-            hlc: { wall: Date.now(), counter: 0, node: 'server' },
-            entity: 'smr',
-            entityId: alloc.machine_id,
-            op: 'smr.update',
-            payload: {
-              meterId: alloc.machine_id,
-              reading: alloc.closing_smr,
-              readingAt: new Date().toISOString(),
-              deviceId: 'shift-closeout-form',
-            },
-          }));
-
-          const { error: smrError } = await supabase.rpc('apply_offline_mutations', {
-            p_tenant: payload.deptId,
-            p_mutations: mutations,
-          });
-
-          if (smrError) {
-            logError(smrError, { context: 'shift_closeout_smr_update' });
-          }
-        }
-
-        await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId: rpcResult.id } });
+      const closeoutResult =
+        isRecord(rpcResult) && rpcResult.status === 'already_closed'
+          ? rpcResult.response
+          : rpcResult;
+      if (!isRecord(closeoutResult) || typeof closeoutResult.id !== 'string') {
+        throw new Error('Shift closeout RPC returned an invalid response');
       }
-      return NextResponse.json(rpcResult, { status: 200 });
-    } catch (error: any) {
+      const reportId = closeoutResult.id;
+
+      addEvent('shift_closed', {
+        report_id: reportId,
+        status: typeof closeoutResult.status === 'string' ? closeoutResult.status : 'closed',
+      });
+
+      if (payload.allocations.length > 0) {
+        const mutations = payload.allocations.map((alloc, index) => ({
+          id: createCloseoutMutationId(reportId, alloc.machine_id, index),
+          hlc: { wall: Date.now(), counter: 0, node: 'server' },
+          entity: 'smr',
+          entityId: alloc.machine_id,
+          op: 'smr.update',
+          payload: {
+            meterId: alloc.machine_id,
+            reading: alloc.closing_smr,
+            readingAt: new Date().toISOString(),
+            deviceId: 'shift-closeout-form',
+          },
+        }));
+
+        const { error: smrError } = await supabase.rpc('apply_offline_mutations', {
+          p_tenant: payload.deptId,
+          p_mutations: mutations,
+        });
+
+        if (smrError) {
+          logError(smrError, { context: 'shift_closeout_smr_update', report_id: reportId });
+          return NextResponse.json(
+            { error: 'Shift closed, but SMR readings were not saved. Retry this request.' },
+            { status: 503, headers: { 'Retry-After': '5' } }
+          );
+        }
+      }
+
+      await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId } });
+      return NextResponse.json(closeoutResult, { status: 200 });
+    } catch (error: unknown) {
       logError(error, { context: 'shift_closeout_route' });
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

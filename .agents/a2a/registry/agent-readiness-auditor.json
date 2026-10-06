@@ -4,19 +4,34 @@
   "description": "Agent readability, MCP manifest grading, and JSON-LD structured data verification specialist utilizing agent-ready scanner.",
   "runtime": {
     "model": "gemini-2.5-flash",
-    "temperature": 0.0,
+    "temperature": 0,
     "max_steps": 30,
-    "token_budget": 16000
+    "token_budget": 16000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
-    "forbidden_tools": ["git push --force"],
+    "tools": [
+      "view_file",
+      "write_to_file",
+      "replace_file_content",
+      "grep_search",
+      "run_command"
+    ],
+    "forbidden_tools": [
+      "git push --force"
+    ],
     "bash": "scoped"
   },
   "scope": {
-    "include_paths": ["apps/portal/**", "docs/**"],
-    "exclude_paths": ["node_modules/**", ".git/**"]
+    "include_paths": [
+      "apps/portal/**",
+      "docs/**"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**"
+    ]
   },
   "runbook": [
     "Phase 1: Run agent-ready scan against target deployment URL",
@@ -38,6 +53,10 @@
   },
   "recovery_protocol": {
     "on_failure": "Report endpoint unreachable and re-test with local proxy",
-    "exit_codes": { "SUCCESS": 0, "SCAN_FAILED": 1, "SCHEMA_INVALID": 2 }
+    "exit_codes": {
+      "SUCCESS": 0,
+      "SCAN_FAILED": 1,
+      "SCHEMA_INVALID": 2
+    }
   }
 }

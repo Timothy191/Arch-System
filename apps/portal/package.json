@@ -3,6 +3,7 @@
   "version": "1.6.2",
   "type": "module",
   "dependencies": {
+    "@flags-sdk/vercel": "^1.5.0",
     "@hookform/resolvers": "^5.2.2",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@opentelemetry/api": "^1.9.1",
@@ -43,6 +44,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "catalog:",
     "bcryptjs": "^3.0.3",
+    "flags": "^4.3.1",
     "framer-motion": "catalog:",
     "inngest": "^4.4.0",
     "lucide-react": "catalog:",

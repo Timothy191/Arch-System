@@ -27,8 +27,9 @@ export async function assertAccessControlRole(options?: { requireWrite?: boolean
     return { supabase, user: principal.user, employee: principal.employee };
   }
 
-  // Permissive read access for all authenticated staff (operator, supervisor, admin, access_control)
-  const user = principal?.user ?? null;
-  const employee = principal?.employee ?? null;
-  return { supabase, user, employee };
+  if (!principal?.employee || !principal?.user) {
+    throw new AuthError('Unauthorized: employee profile required for access control operations');
+  }
+
+  return { supabase, user: principal.user, employee: principal.employee };
 }

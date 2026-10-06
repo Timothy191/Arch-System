@@ -3,10 +3,11 @@
   "mode": "orchestrator",
   "description": "Unified orchestrator combining Kiro-CLI specialized agent topologies with Claude-Code plan-first execution, worktree isolation, and verification loops.",
   "runtime": {
-    "model": "gemini-2.5-pro",
+    "model": "gemini-2.5-flash",
     "temperature": 0.1,
     "max_steps": 100,
-    "token_budget": 64000
+    "token_budget": 64000,
+    "reasoning_effort": "low"
   },
   "permissions": {
     "filesystem": "full_write",
@@ -18,12 +19,20 @@
       "run_command",
       "call_mcp_tool"
     ],
-    "forbidden_tools": ["git push --force", "rm -rf /"],
+    "forbidden_tools": [
+      "git push --force",
+      "rm -rf /"
+    ],
     "bash": "full"
   },
   "scope": {
-    "include_paths": ["**/*"],
-    "exclude_paths": ["node_modules/**", ".git/**"]
+    "include_paths": [
+      "**/*"
+    ],
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**"
+    ]
   },
   "runbook": [
     "Phase 1: Maintain temp/ phased documentation (outline, requirements, design, tasks)",
@@ -48,6 +57,10 @@
   },
   "recovery_protocol": {
     "on_failure": "Record error retrospective in .agents/memory_base/ and auto-remediate",
-    "exit_codes": { "SUCCESS": 0, "PLAN_REJECTED": 1, "VERIFICATION_FAILED": 2 }
+    "exit_codes": {
+      "SUCCESS": 0,
+      "PLAN_REJECTED": 1,
+      "VERIFICATION_FAILED": 2
+    }
   }
 }

@@ -150,7 +150,10 @@ CREATE INDEX idx_production_summary_dept ON view_production_summary(department_i
 CREATE OR REPLACE FUNCTION refresh_production_summary()
 RETURNS void SET search_path = '' AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY view_production_summary;
+  -- Plain refresh is executed here (manual / function-driven path).
+  -- pg_cron schedules this view's CONCURRENTLY refresh directly below,
+  -- since CONCURRENTLY cannot run inside a transaction block.
+  REFRESH MATERIALIZED VIEW view_production_summary;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -174,7 +177,7 @@ GRANT EXECUTE ON FUNCTION public.get_production_summary(DATE, DATE) TO authentic
 SELECT cron.schedule(
   'refresh-view-production-summary',
   '*/15 * * * *',
-  'SELECT refresh_production_summary()'
+  'REFRESH MATERIALIZED VIEW CONCURRENTLY view_production_summary'
 );
 
 COMMIT;
