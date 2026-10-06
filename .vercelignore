@@ -28,11 +28,32 @@ packages/eval/
 .palabre/
 .gpt-researcher/
 .antigravity/
+.gemini/
 .omg/
 .cargo/
 .venv/
 .changeset/
 .codebase-memory/
+.remember/
+.swarm/
+.autohand/
+.ori/
+.kiro/
+.junie/
+.claude/
+.claude-flow/
+.vscode/
+.cursor/
+
+# Indexers and AST structural databases
+**/.code-index/
+**/.codemap/
+**/.repowise/
+*.db
+*.db-shm
+*.db-wal
+*.pkl
+*.zst
 
 # Build caches and build outputs
 .turbo/
@@ -42,6 +63,7 @@ apps/portal/.next/
 dist/
 **/dist/
 *.tsbuildinfo
+playwright-report/
 
 # Rust and binary targets
 target/
@@ -51,4 +73,5 @@ tools/swarms-orchestrator/target/
 # Local worktrees, agent caches, and analysis
 .kilo/
 analysis/
+
 
