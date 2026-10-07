@@ -112,6 +112,7 @@ export function LoginForm() {
             id="password"
             type={showPassword ? 'text' : 'password'}
             required
+            minLength={12}
             maxLength={128}
             disabled={loading || isRateLimited}
             value={password}

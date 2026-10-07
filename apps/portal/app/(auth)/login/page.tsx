@@ -19,9 +19,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     .getAll()
     .some(
       (c) =>
-        c.name === 'sb-access-token' ||
-        (c.name.includes('sb-') &&
-          (c.name.includes('-auth-token') || c.name.includes('-access-token')))
+        c.name.startsWith('sb-') &&
+        (c.name.includes('-auth-token') || c.name.includes('-access-token'))
     );
 
   let authenticated = false;
