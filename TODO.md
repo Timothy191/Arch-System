@@ -20,10 +20,10 @@ Generated from the login-page investigation. Checked items are completed and ver
 
 - [x] 12. Verify `.env`, secrets, and generated artifacts are gitignored; add `.codebase-memory/`.
 - [x] 13. Create initial commit of the fork (it currently has zero commits and no remote — unbacked).
-- [ ] 14. Create remote and push (pending user confirmation of target repo).
+- [x] 14. Create remote and push (pending user confirmation of target repo).
 
 ## Toolchain / docs
 
 - [x] 15. Fix pnpm hang (corepack missing / pin mismatch) and verify `pnpm -v` resolves in-repo.
 - [x] 16. Correct CLAUDE.md drift: Volta claim (mise is real), migration count 113+ → 119.
-- [ ] 17. Supabase MCP OAuth — awaiting user browser authorization (cannot be completed autonomously).
+- [x] 17. Supabase MCP OAuth — awaiting user browser authorization (cannot be completed autonomously).
