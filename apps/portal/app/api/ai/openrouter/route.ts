@@ -1,4 +1,5 @@
 import {
+  AgentCursorTracker,
   createChatCompletion,
   getAccountCredits,
   getAvailableModels,
@@ -48,6 +49,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // --- FULCRA LIFE CONTEXT INJECTION ---
+    const lifeContext = await AgentCursorTracker.getLifeContext();
+    const systemInstruction = {
+      role: 'system',
+      content: `[REAL-TIME CONTEXT] You are a highly personalized AI. Current user telemetry: ${JSON.stringify(lifeContext)}`,
+    };
+
+    // Prepend the system instruction to the messages array
+    body.messages = [systemInstruction, ...body.messages];
 
     const completion = await createChatCompletion(body);
 
