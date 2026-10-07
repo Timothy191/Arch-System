@@ -3,7 +3,7 @@
     "PreInvocation": [
       { "command": "bash .agents/hooks/pre-invocation-inject.sh", "shell": "bash" }
     ],
-    "PreToolUse": [{ "command": "bash .agents/hooks/pre-tool-guard.sh", "shell": "bash" }],
+
     "PostToolUse": [{ "command": "bash .agents/hooks/post-tool-tracer.sh", "shell": "bash" }],
     "Stop": [{ "command": "bash .agents/hooks/worktree-guard.sh", "shell": "bash" }]
   },

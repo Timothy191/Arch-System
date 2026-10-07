@@ -1,66 +1,112 @@
-import { MachineTimeAllocationInput } from '@repo/contract';
-import { createServerSupabaseClient } from '@repo/supabase/server';
-import { GlassCard } from '@repo/ui/components/GlassCard';
 import { Divider } from '@repo/ui/Divider';
+import { CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { Suspense } from 'react';
+import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getDepartmentContext } from '~/lib/dept-context';
-import { ShiftCloseoutForm } from './components/ShiftCloseoutForm';
 
-async function ShiftCloseoutSection() {
-  const { deptId, today } = await getDepartmentContext({ department: 'control-room' });
-  const supabase = await createServerSupabaseClient();
+import { ControlRoomSummaryGridClient } from '../[department]/ControlRoomSummaryGridClient';
 
-  const { data: machines } = await supabase.from('machines').select('id, name').eq('active', true);
-
-  const fleetData: MachineTimeAllocationInput[] =
-    machines && machines.length > 0
-      ? machines.map((m) => ({
-          machine_id: m.id,
-          machine_name: m.name,
-          opening_smr: 0,
-          closing_smr: 0,
-          breakdown_hours: 0,
-          delay_hours: 0,
-        }))
-      : [];
-
-  return <ShiftCloseoutForm deptId={deptId} shiftDate={today} initialFleet={fleetData} />;
-}
-
-function ShiftCloseoutSkeleton() {
-  return (
-    <GlassCard variant="spotlight" className="p-6 max-w-5xl animate-pulse">
-      <div className="flex items-center justify-between mb-6">
-        <div className="space-y-2">
-          <div className="h-6 w-64 bg-[var(--bg-secondary)] rounded-md" />
-          <div className="h-4 w-96 bg-[var(--bg-secondary)]/60 rounded-md" />
+// AGENT-TRACE: ControlRoomWidgets dynamic island — co-locates all control-room
+// specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage, EquipmentDashboard)
+const ControlRoomWidgets = dynamic(
+  () => import('../[department]/ControlRoomWidgets').then((m) => m.ControlRoomWidgets),
+  {
+    loading: () => (
+      <div className="space-y-6">
+        <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
         </div>
+        <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
       </div>
-      <div className="h-10 w-48 bg-[var(--bg-secondary)] rounded-lg mb-4" />
-      <div className="h-64 w-full bg-[var(--bg-secondary)]/40 rounded-xl" />
-    </GlassCard>
+    ),
+  }
+);
+
+function SummaryGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+      <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+      <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+      <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+      <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+    </div>
   );
 }
 
-export default function ControlRoomDashboardPage() {
+export default async function ControlRoomPage() {
+  const { deptId, today } = await getDepartmentContext({ department: 'control-room' });
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
-            Control Room Operations
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Live SCADA monitoring and atomic shift closeout.
+    <ErrorBoundary context="Control Room Dashboard">
+      <div className="space-y-6">
+        {/* Page Title & Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+              Control Room Dashboard
+            </h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Live SCADA monitoring, production metrics, and shift dispatch.
+            </p>
+          </div>
+          <p className="text-[var(--text-muted)] text-sm">
+            {new Date().toLocaleDateString('en-ZA', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </p>
         </div>
+
+        <Divider variant="fading" />
+
+        {/* Control Room Summary Grid - Client-side with React Query */}
+        <Suspense fallback={<SummaryGridSkeleton />}>
+          <ControlRoomSummaryGridClient deptId={deptId} today={today} />
+        </Suspense>
+
+        {/* Quick Action Navigation Buttons */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/control-room/machine-operations"
+            className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+          >
+            <Cpu className="w-4 h-4" />
+            Machine Operations
+          </Link>
+          <Link
+            href="/control-room/hourly-loads"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+          >
+            <Clock className="w-4 h-4" />
+            Update Loads
+          </Link>
+          <Link
+            href="/control-room/shift-compilation"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Shift Handover
+          </Link>
+          <Link
+            href="/control-room/shift-closeout"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+          >
+            <CheckSquare className="w-4 h-4" />
+            Shift Closeout
+          </Link>
+        </div>
+
+        {/* Consolidated Dynamic Control Room Widgets */}
+        <ControlRoomWidgets deptId={deptId} deptSlug="control-room" today={today} />
       </div>
-
-      <Divider variant="dotted" label="END OF SHIFT PROCEDURES" />
-
-      <Suspense fallback={<ShiftCloseoutSkeleton />}>
-        <ShiftCloseoutSection />
-      </Suspense>
-    </div>
+    </ErrorBoundary>
   );
 }

@@ -10,10 +10,12 @@ export const machineTimeAllocationSchema = z
     breakdown_hours: z.number().nonnegative().default(0),
     delay_hours: z.number().nonnegative().default(0),
     delay_reason: z.string().optional(),
+    overrun_reason: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    // Total shift window is exactly 12 hours
-    const SHIFT_WINDOW_HOURS = 12;
+    // Standard shift window is 12 hours, with up to 12.5h operational tolerance
+    const STANDARD_SHIFT_WINDOW_HOURS = 12.0;
+    const MAX_SHIFT_WINDOW_HOURS = 12.5;
 
     // Operating SMR = difference between closing and opening
     const operating_hours = data.closing_smr - data.opening_smr;
@@ -30,14 +32,20 @@ export const machineTimeAllocationSchema = z
     // Total allocated hours for the shift
     const total_allocated = operating_hours + data.breakdown_hours + data.delay_hours;
 
-    if (total_allocated > SHIFT_WINDOW_HOURS) {
-      // If engineering logged 6 hours breakdown, max operating SMR allowed is 6 hours (because 6 + 6 = 12)
-      // If they log 7 operating hours and 6 breakdown hours = 13 > 12 -> BLOCK.
+    if (total_allocated > MAX_SHIFT_WINDOW_HOURS) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Total allocated time (${total_allocated}h) exceeds the maximum 12-hour shift window. (Operating: ${operating_hours}h, Breakdown: ${data.breakdown_hours}h, Delays: ${data.delay_hours}h)`,
+        message: `Total allocated time (${total_allocated}h) exceeds the maximum 12.5-hour shift window with operational tolerance. (Operating: ${operating_hours}h, Breakdown: ${data.breakdown_hours}h, Delays: ${data.delay_hours}h)`,
         path: ['closing_smr'], // Highlight the SMR field red
       });
+    } else if (total_allocated > STANDARD_SHIFT_WINDOW_HOURS) {
+      if (!data.overrun_reason || data.overrun_reason.trim() === '') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Overrun reason is required when total allocated time (${total_allocated}h) exceeds the standard 12.0-hour shift window (up to 12.5h operational tolerance).`,
+          path: ['overrun_reason'],
+        });
+      }
     }
   });
 

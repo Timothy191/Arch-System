@@ -26,6 +26,8 @@ interface MachineOperation {
   start_time: string;
   end_time: string | null;
   hours_worked: number | null;
+  start_smu?: number | null;
+  end_smu?: number | null;
   machine?: { name: string; bin_factor?: number; serial_number?: string | null } | null;
   operator?: { full_name: string } | null;
   site?: { name: string } | null;
@@ -277,6 +279,11 @@ function OperationCard({
               {operation.end_time ? formatTime(operation.end_time) : 'In Progress'}
             </p>
             <div className="flex items-center gap-3 mt-0.5 justify-end">
+              {operation.start_smu != null && operation.end_smu != null && (
+                <span className="text-[var(--text-muted)] text-xs font-mono">
+                  SMU: {operation.start_smu.toFixed(1)} - {operation.end_smu.toFixed(1)}
+                </span>
+              )}
               {operation.hours_worked !== null && (
                 <span className="text-accent-green text-xs">
                   {operation.hours_worked.toFixed(2)}h

@@ -8,6 +8,7 @@ import {
   CheckSquare,
   ChevronRight,
   Circle,
+  ClipboardCheck,
   ClipboardList,
   Clock,
   Cpu,
@@ -22,6 +23,7 @@ import {
   LifeBuoy,
   Monitor,
   Pickaxe,
+  Pin,
   Printer,
   QrCode,
   Radio,
@@ -51,6 +53,7 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Database,
   FileText,
   Satellite,
+  ClipboardCheck,
   ClipboardList,
   History: Undo2,
   Radio,
@@ -94,8 +97,32 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   const pathname = usePathname();
   const basePath = `/${department.name}`;
   const [isOpen, setIsOpen] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const collapseTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('arch:sidebar:pinned');
+      if (saved === 'true') {
+        setIsPinned(true);
+        setIsOpen(true);
+      }
+    }
+  }, []);
+
+  const togglePin = useCallback(() => {
+    setIsPinned((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('arch:sidebar:pinned', String(next));
+      }
+      if (next) {
+        setIsOpen(true);
+      }
+      return next;
+    });
+  }, []);
 
   const openSidebar = useCallback(() => {
     if (collapseTimerRef.current) {
@@ -105,17 +132,21 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
     setIsOpen(true);
   }, []);
 
-  const closeSidebarWithDelay = useCallback((delayMs = 450) => {
-    if (collapseTimerRef.current) {
-      clearTimeout(collapseTimerRef.current);
-    }
-    collapseTimerRef.current = setTimeout(() => {
-      // Keep open if user currently has focus inside sidebar
-      if (!sidebarRef.current?.contains(document.activeElement)) {
-        setIsOpen(false);
+  const closeSidebarWithDelay = useCallback(
+    (delayMs = 450) => {
+      if (isPinned) return;
+      if (collapseTimerRef.current) {
+        clearTimeout(collapseTimerRef.current);
       }
-    }, delayMs);
-  }, []);
+      collapseTimerRef.current = setTimeout(() => {
+        // Keep open if user currently has focus inside sidebar
+        if (!sidebarRef.current?.contains(document.activeElement)) {
+          setIsOpen(false);
+        }
+      }, delayMs);
+    },
+    [isPinned]
+  );
 
   useEffect(() => {
     return () => {
@@ -128,30 +159,34 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   // Global mousemove proximity detection near left edge
   const handleContainerMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isPinned) return;
       // If cursor is close enough to the left edge (within 36px), auto-reveal
       if (e.clientX <= 36) {
         openSidebar();
       }
     },
-    [openSidebar]
+    [isPinned, openSidebar]
   );
 
   return (
     <div className="flex h-[calc(100vh-28px)] relative" onMouseMove={handleContainerMouseMove}>
-      {/* Invisible hover / proximity trigger zone at the far left */}
+      {/* Hover / proximity trigger zone at the far left (disabled when pinned) */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-12 z-40 cursor-pointer"
+        className={cn(
+          'absolute left-0 top-0 bottom-0 w-12 z-40',
+          isPinned ? 'pointer-events-none' : 'cursor-pointer'
+        )}
         onMouseEnter={openSidebar}
         onMouseMove={openSidebar}
         aria-hidden="true"
       />
 
-      {/* macOS Sidebar — Auto-hide/reveal style with proximity reveal and delayed auto-collapse */}
+      {/* macOS Sidebar — Auto-hide/reveal style with proximity reveal, delayed collapse, and manual pin */}
       <aside
         ref={sidebarRef}
         className={cn(
           'absolute left-0 top-0 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-2xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
-          isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
+          isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
         onMouseEnter={openSidebar}
@@ -167,7 +202,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         <div
           className={cn(
             'absolute top-1/2 right-0 -translate-y-1/2 translate-x-full w-4 h-12 flex items-center justify-center transition-opacity pointer-events-none',
-            isOpen ? 'opacity-0' : 'opacity-50'
+            isPinned || isOpen ? 'opacity-0' : 'opacity-50'
           )}
         >
           <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
@@ -176,11 +211,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* MacTitleBar with department name */}
         <MacTitleBar title={department.displayName} />
 
-        {/* Back to Hub link */}
+        {/* Back to Hub link & Pin toggle */}
         <div
           className={cn(
             'px-3 pt-3 pb-1 flex items-center justify-between transition-opacity duration-200',
-            isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            isPinned || isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           )}
         >
           <Link
@@ -190,7 +225,23 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
             <span>Back to Hub</span>
           </Link>
-          <Logo className="w-4 h-4 opacity-60 mr-2" />
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={togglePin}
+              aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+              className="p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
+              title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
+            >
+              <Pin
+                className={cn(
+                  'w-3.5 h-3.5 transition-transform',
+                  isPinned ? 'rotate-45 text-[var(--accent-blue)]' : ''
+                )}
+              />
+            </button>
+            <Logo className="w-4 h-4 opacity-60 mr-1" />
+          </div>
         </div>
 
         {/* Department icon + label */}
@@ -278,7 +329,12 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       </aside>
 
       {/* Main content area */}
-      <main className="flex-1 h-full overflow-auto p-6 pl-12 transition-all duration-300">
+      <main
+        className={cn(
+          'flex-1 h-full overflow-auto p-6 transition-all duration-300',
+          isPinned ? 'pl-64' : 'pl-12'
+        )}
+      >
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}

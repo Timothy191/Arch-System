@@ -37,6 +37,8 @@ interface MachineOperation {
   start_time: string;
   end_time: string | null;
   hours_worked: number | null;
+  start_smu?: number | null;
+  end_smu?: number | null;
 }
 
 interface MachineOperationsFormProps {
@@ -75,6 +77,8 @@ export function MachineOperationsForm({
     shiftType: getCurrentShift(),
     startTime: getDefaultStartTime(),
     endTime: '',
+    startSmu: '',
+    endSmu: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,8 +123,16 @@ export function MachineOperationsForm({
     }
   }, [todayOperations, formData.operatorId]);
 
-  // Calculate hours worked
+  // Calculate hours worked (SMU preferred when present to match Postgres computed column)
   const calculateHours = useCallback(() => {
+    if (formData.startSmu && formData.endSmu) {
+      const s = parseFloat(formData.startSmu);
+      const e = parseFloat(formData.endSmu);
+      if (!isNaN(s) && !isNaN(e) && e >= s) {
+        return e - s;
+      }
+    }
+
     if (!formData.startTime || !formData.endTime) return null;
 
     const start = new Date(`2000-01-01T${formData.startTime}`);
@@ -130,7 +142,7 @@ export function MachineOperationsForm({
 
     const diffMs = end.getTime() - start.getTime();
     return diffMs / (1000 * 60 * 60);
-  }, [formData.startTime, formData.endTime]);
+  }, [formData.startSmu, formData.endSmu, formData.startTime, formData.endTime]);
 
   const hoursWorked = calculateHours();
 
@@ -158,6 +170,22 @@ export function MachineOperationsForm({
       newErrors.endTime = 'End time must be after start time';
     }
 
+    if (formData.startSmu && isNaN(parseFloat(formData.startSmu))) {
+      newErrors.startSmu = 'Start SMU must be a valid number';
+    }
+
+    if (formData.endSmu && isNaN(parseFloat(formData.endSmu))) {
+      newErrors.endSmu = 'End SMU must be a valid number';
+    }
+
+    if (formData.startSmu && formData.endSmu) {
+      const s = parseFloat(formData.startSmu);
+      const e = parseFloat(formData.endSmu);
+      if (e < s) {
+        newErrors.endSmu = 'End SMU cannot be less than Start SMU';
+      }
+    }
+
     if (hoursWorked !== null && hoursWorked > 14) {
       newErrors.endTime = 'Hours cannot exceed 14 per shift';
     }
@@ -179,6 +207,8 @@ export function MachineOperationsForm({
 
     try {
       const today = new Date().toISOString().split('T')[0];
+      const startSmuVal = formData.startSmu ? parseFloat(formData.startSmu) : null;
+      const endSmuVal = formData.endSmu ? parseFloat(formData.endSmu) : null;
 
       const { data, error } = await supabase
         .from('machine_operations')
@@ -191,6 +221,8 @@ export function MachineOperationsForm({
           shift_type: formData.shiftType,
           start_time: formData.startTime,
           end_time: formData.endTime || null,
+          start_smu: startSmuVal,
+          end_smu: endSmuVal,
         })
         .select()
         .single();
@@ -211,6 +243,8 @@ export function MachineOperationsForm({
         shiftType: formData.shiftType,
         startTime: formData.endTime || getDefaultStartTime(), // End time becomes next start
         endTime: '',
+        startSmu: formData.endSmu || '', // End SMU carries over to next start SMU
+        endSmu: '',
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
@@ -351,6 +385,40 @@ export function MachineOperationsForm({
             />
             {errors.endTime && <p className="text-accent-red text-xs">{errors.endTime}</p>}
           </div>
+
+          {/* Start SMU */}
+          <div className="space-y-2">
+            <label className="text-[var(--text-secondary)] text-sm block">
+              Opening / Start SMU
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              placeholder="e.g. 1420.5"
+              value={formData.startSmu}
+              onChange={(e) => setFormData((prev) => ({ ...prev, startSmu: e.target.value }))}
+              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+            />
+            {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
+          </div>
+
+          {/* End SMU */}
+          <div className="space-y-2">
+            <label className="text-[var(--text-secondary)] text-sm block">
+              Closing / End SMU
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              placeholder="e.g. 1431.0"
+              value={formData.endSmu}
+              onChange={(e) => setFormData((prev) => ({ ...prev, endSmu: e.target.value }))}
+              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+            />
+            {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}
+          </div>
         </div>
 
         {/* Hours Worked Display */}
@@ -360,7 +428,11 @@ export function MachineOperationsForm({
             <span className="text-2xl font-medium text-[var(--accent-blue)]">
               {hoursWorked.toFixed(2)}h
             </span>
-            <span className="text-[var(--text-muted)] text-xs">(auto-calculated)</span>
+            <span className="text-[var(--text-muted)] text-xs">
+              {formData.startSmu && formData.endSmu
+                ? '(SMU calculated: End - Start)'
+                : '(time duration estimate)'}
+            </span>
           </div>
         )}
 

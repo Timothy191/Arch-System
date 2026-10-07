@@ -8,6 +8,7 @@ import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import { exportToExcel } from '@repo/utils/client';
 import { Download, Lock, Plus } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { DataGrid } from '@/components/dynamic/LazyHeavyComponents';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
@@ -367,7 +368,7 @@ function HourlyLoadsGrid({
           context: `hourly_loads_${operation}`,
         });
         revertField(loadId, field, newValue, previousValue);
-        alert('Failed to save. Please try again.');
+        toast.error('Failed to save. Please try again.');
       }
     },
     [applyLoadState, persistLoad, revertField, departmentId]
@@ -480,7 +481,7 @@ function HourlyLoadsGrid({
       } catch (err) {
         logError(err, { context: 'update_excavator_site' });
         setExcavatorSites((prev) => ({ ...prev, [excavatorId]: prevSiteId }));
-        alert('Failed to update excavator site.');
+        toast.error('Failed to update excavator site.');
       }
     },
     [excavatorSites]
@@ -489,11 +490,11 @@ function HourlyLoadsGrid({
   // Handle split creation
   const handleCreateSplit = async () => {
     if (!splitMachineId) {
-      alert('Please select a haul truck to split.');
+      toast.warning('Please select a haul truck to split.');
       return;
     }
     if (splitStartHour < 2 || splitStartHour > 12) {
-      alert('Split start hour must be between Hour 2 and Hour 12.');
+      toast.warning('Split start hour must be between Hour 2 and Hour 12.');
       return;
     }
 
@@ -530,7 +531,7 @@ function HourlyLoadsGrid({
       }
     } catch (err) {
       logError(err, { context: 'create_hourly_load_split' });
-      alert('Failed to add machine split. Please try again.');
+      toast.error('Failed to add machine split. Please try again.');
     } finally {
       setIsSubmittingSplit(false);
     }
@@ -579,6 +580,30 @@ function HourlyLoadsGrid({
     [handleExcavatorAssignment]
   );
 
+  // Handle keyboard arrow increment/decrement on focused cells
+  const handleGridKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'SELECT') return;
+
+      const cellOrButton = (target.closest('[data-hour]') ||
+        target.querySelector('[data-hour]')) as HTMLElement | null;
+      if (!cellOrButton) return;
+
+      const rowIndexStr = cellOrButton.dataset.row;
+      const hourProp = cellOrButton.dataset.hour;
+      if (!rowIndexStr || !hourProp) return;
+
+      const rowIndex = parseInt(rowIndexStr, 10);
+      const delta = e.key === 'ArrowUp' ? 1 : -1;
+      e.preventDefault();
+      handleCellChange(rowIndex, hourProp, delta);
+    },
+    [handleCellChange]
+  );
+
   // Build RevoGrid columns
   const columns = useMemo(() => {
     const width = containerWidth || 1150;
@@ -586,7 +611,7 @@ function HourlyLoadsGrid({
     let machineColSize = 140;
     let excavatorColSize = 140;
     let materialColSize = 100;
-    let hourColSize = 56;
+    let hourColSize = 88;
     let totalColSize = 70;
     let binFactorColSize = 80;
     let totalMaterialColSize = 100;
@@ -595,7 +620,7 @@ function HourlyLoadsGrid({
       machineColSize = Math.max(160, Math.floor(width * 0.12));
       excavatorColSize = Math.max(130, Math.floor(width * 0.1));
       materialColSize = Math.max(90, Math.floor(width * 0.08));
-      hourColSize = Math.max(76, Math.floor(width * 0.041));
+      hourColSize = Math.max(88, Math.floor(width * 0.045));
       totalColSize = Math.max(76, Math.floor(width * 0.055));
       binFactorColSize = Math.max(76, Math.floor(width * 0.055));
       totalMaterialColSize = Math.max(95, Math.floor(width * 0.075));
@@ -603,7 +628,7 @@ function HourlyLoadsGrid({
       machineColSize = Math.max(160, Math.floor(width * 0.14));
       excavatorColSize = Math.max(130, Math.floor(width * 0.12));
       materialColSize = Math.max(90, Math.floor(width * 0.08));
-      hourColSize = Math.max(76, Math.floor(width * 0.051));
+      hourColSize = Math.max(88, Math.floor(width * 0.055));
       totalColSize = Math.max(76, Math.floor(width * 0.045));
     }
 
@@ -806,69 +831,90 @@ function HourlyLoadsGrid({
 
             const isMax = value >= 100;
             const isMin = value <= 0;
-            return h('div', { class: 'flex items-center justify-between px-1 gap-1 h-full' }, [
-              h(
-                'span',
-                { class: 'text-sm font-medium font-mono tabular-nums px-1 cursor-text' },
-                value
-              ),
-              h('div', { class: 'flex flex-col' }, [
+            return h(
+              'div',
+              {
+                class:
+                  'flex items-center justify-between px-1 gap-1 h-full outline-none focus-within:ring-1 focus-within:ring-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] rounded-sm',
+                tabIndex: 0,
+                'data-row': String(rowIndex),
+                'data-hour': hourProp,
+                'data-cell-type': 'hour-load',
+                role: 'gridcell',
+                'aria-label': `${hourLabels[index]}:00 loads: ${value}. Use Arrow Up or Arrow Down to adjust`,
+              },
+              [
                 h(
-                  'button',
-                  {
-                    class:
-                      'hour-btn-up p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors',
-                    'data-row': String(rowIndex),
-                    'data-hour': hourProp,
-                    'data-action': 'up',
-                    disabled: isMax,
-                    style: isMax ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
-                  },
-                  h(
-                    'svg',
-                    {
-                      xmlns: 'http://www.w3.org/2000/svg',
-                      width: '10',
-                      height: '10',
-                      viewBox: '0 0 24 24',
-                      fill: 'none',
-                      stroke: 'currentColor',
-                      'stroke-width': '3',
-                      'stroke-linecap': 'round',
-                      'stroke-linejoin': 'round',
-                    },
-                    h('path', { d: 'm18 15-6-6-6 6' })
-                  )
+                  'span',
+                  { class: 'text-sm font-medium font-mono tabular-nums px-1 cursor-text select-none' },
+                  value
                 ),
-                h(
-                  'button',
-                  {
-                    class:
-                      'hour-btn-down p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors',
-                    'data-row': String(rowIndex),
-                    'data-hour': hourProp,
-                    'data-action': 'down',
-                    disabled: isMin,
-                    style: isMin ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
-                  },
+                h('div', { class: 'flex items-center gap-0.5' }, [
                   h(
-                    'svg',
+                    'button',
                     {
-                      xmlns: 'http://www.w3.org/2000/svg',
-                      width: '10',
-                      height: '10',
-                      viewBox: '0 0 24 24',
-                      fill: 'none',
-                      stroke: 'currentColor',
-                      'stroke-width': '3',
-                      'stroke-linecap': 'round',
-                      'stroke-linejoin': 'round',
+                      type: 'button',
+                      class:
+                        'hour-btn-up relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
+                      'data-row': String(rowIndex),
+                      'data-hour': hourProp,
+                      'data-action': 'up',
+                      'aria-label': `Increase loads for hour ${hourLabels[index]}:00 (currently ${value})`,
+                      title: `Increase loads for hour ${hourLabels[index]}:00`,
+                      disabled: isMax,
+                      style: isMax ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
                     },
-                    h('path', { d: 'm6 9 6 6 6-6' })
-                  )
-                ),
-              ]),
-            ]);
+                    h(
+                      'svg',
+                      {
+                        xmlns: 'http://www.w3.org/2000/svg',
+                        width: '14',
+                        height: '14',
+                        viewBox: '0 0 24 24',
+                        fill: 'none',
+                        stroke: 'currentColor',
+                        'stroke-width': '2.5',
+                        'stroke-linecap': 'round',
+                        'stroke-linejoin': 'round',
+                        'aria-hidden': 'true',
+                      },
+                      h('path', { d: 'm18 15-6-6-6 6' })
+                    )
+                  ),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      class:
+                        'hour-btn-down relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
+                      'data-row': String(rowIndex),
+                      'data-hour': hourProp,
+                      'data-action': 'down',
+                      'aria-label': `Decrease loads for hour ${hourLabels[index]}:00 (currently ${value})`,
+                      title: `Decrease loads for hour ${hourLabels[index]}:00`,
+                      disabled: isMin,
+                      style: isMin ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
+                    },
+                    h(
+                      'svg',
+                      {
+                        xmlns: 'http://www.w3.org/2000/svg',
+                        width: '14',
+                        height: '14',
+                        viewBox: '0 0 24 24',
+                        fill: 'none',
+                        stroke: 'currentColor',
+                        'stroke-width': '2.5',
+                        'stroke-linecap': 'round',
+                        'stroke-linejoin': 'round',
+                        'aria-hidden': 'true',
+                      },
+                      h('path', { d: 'm6 9 6 6 6-6' })
+                    )
+                  ),
+                ]),
+              ]
+            );
           },
         };
       }),
@@ -944,7 +990,7 @@ function HourlyLoadsGrid({
       const hourNum = hourIndex + 1;
 
       if (!isHourEditable(row, hourNum)) {
-        alert('This hour is locked for this machine segment.');
+        toast.warning('This hour is locked for this machine segment.');
         applyLoadState(row.loadId, row.machineId, selectedShift, {
           [prop]: row[hourPropName(hourIndex)],
         });
@@ -955,7 +1001,7 @@ function HourlyLoadsGrid({
       const value = parseInt(String(val), 10) || 0;
 
       if (value < 0 || value > 100) {
-        alert('Please enter a value between 0 and 100');
+        toast.warning('Please enter a value between 0 and 100');
         applyLoadState(row.loadId, row.machineId, selectedShift, { [prop]: currentValue });
         return;
       }
@@ -1107,6 +1153,7 @@ function HourlyLoadsGrid({
         ref={containerRef}
         onClick={handleGridClick}
         onChange={handleGridChange}
+        onKeyDown={handleGridKeyDown}
         className="revo-grid-visible"
       >
         <DataGrid

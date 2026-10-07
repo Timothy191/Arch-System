@@ -145,11 +145,13 @@ async function resolveDeptUuid(
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Exempt health, hardware API, and Prometheus metrics endpoints from authentication entirely
+  // Exempt health, hardware API, Prometheus metrics, and Vercel Speed Insights/observability endpoints from authentication entirely
   if (
     pathname.startsWith('/api/c66') ||
     pathname.startsWith('/api/health') ||
-    pathname.startsWith('/api/metrics')
+    pathname.startsWith('/api/metrics') ||
+    pathname.startsWith('/_vercel/speed-insights') ||
+    pathname.startsWith('/_vercel/insights')
   ) {
     return NextResponse.next();
   }
@@ -373,5 +375,5 @@ export const config = {
   // Exclude static assets and API routes from middleware.
   // API routes handle their own auth; running Supabase getUser() here adds
   // a redundant round-trip (and ~50 s cold-start risk) to every API call.
-  matcher: ['/((?!_next/static|_next/image|api/|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|_vercel|api/|favicon.ico).*)'],
 };

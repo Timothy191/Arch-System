@@ -33,7 +33,9 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Machine Ops/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /End SMR/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Shift Handover/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Roster & Coverage/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Shift Closeout/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
@@ -136,6 +138,34 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
       fireEvent.mouseMove(mainContainer, { clientX: 20 });
     });
 
+    expect(aside.className).toContain('translate-x-0');
+  });
+
+  it('pins sidebar permanently when clicking Pin button', () => {
+    const { container } = render(
+      <DepartmentLayout department={controlRoomDept} tabs={controlRoomTabs}>
+        <div>Main Area</div>
+      </DepartmentLayout>
+    );
+
+    const aside = container.querySelector('aside')!;
+    const pinBtn = screen.getByRole('button', { name: /Pin sidebar/i });
+
+    // Click pin button
+    act(() => {
+      fireEvent.click(pinBtn);
+    });
+
+    // Should now be open permanently
+    expect(aside.className).toContain('translate-x-0');
+
+    // Mouse leaves
+    act(() => {
+      fireEvent.mouseLeave(aside);
+      jest.advanceTimersByTime(1000);
+    });
+
+    // Stays open because it is pinned
     expect(aside.className).toContain('translate-x-0');
   });
 });

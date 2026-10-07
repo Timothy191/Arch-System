@@ -13,14 +13,14 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
   const warningCount = tireEvents.filter((t) => t.condition_status === 'warning').length;
 
   return (
-    <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
-      <div className="border-b border-black/[0.08] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50">
+    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
+      <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex items-center gap-2">
-            <Disc className="h-4 w-4 text-neutral-700" />
+          <h3 className="text-sm font-semibold text-[var(--text-heading)] tracking-tight flex items-center gap-2">
+            <Disc className="h-4 w-4 text-[var(--text-secondary)]" />
             Tire Health & Inspection Activity
           </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Pressure telemetry, tread wear logs, and tire swap events logged for this shift
           </p>
         </div>
@@ -64,20 +64,20 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
                       ? 'border-rose-200 bg-rose-50/40'
                       : isWarning
                         ? 'border-amber-200 bg-amber-50/40'
-                        : 'border-black/[0.06] bg-white/50'
+                        : 'border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <div className="font-semibold text-neutral-900 flex items-center gap-1.5">
+                      <div className="font-semibold text-[var(--text-heading)] flex items-center gap-1.5">
                         <span>{event.serial_number}</span>
                         {event.machine_name && (
-                          <span className="text-neutral-500 font-normal text-[11px]">
+                          <span className="text-[var(--text-muted)] font-normal text-[11px]">
                             ({event.machine_name})
                           </span>
                         )}
                       </div>
-                      <div className="text-neutral-500 text-[11px] mt-0.5">{event.position}</div>
+                      <div className="text-[var(--text-muted)] text-[11px] mt-0.5">{event.position}</div>
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
@@ -92,23 +92,23 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-neutral-700 pt-1 border-t border-black/[0.04]">
+                  <div className="flex items-center gap-4 text-[11px] font-mono text-[var(--text-secondary)] pt-1 border-t border-[var(--border-subtle)]">
                     {event.pressure_psi !== null && event.pressure_psi !== undefined && (
                       <span className="flex items-center gap-1">
-                        <Gauge className="h-3 w-3 text-neutral-400" />
+                        <Gauge className="h-3 w-3 text-[var(--text-muted)]" />
                         {event.pressure_psi} PSI
                       </span>
                     )}
                     {event.tread_depth_mm !== null && event.tread_depth_mm !== undefined && (
                       <span className="flex items-center gap-1">
-                        <Ruler className="h-3 w-3 text-neutral-400" />
+                        <Ruler className="h-3 w-3 text-[var(--text-muted)]" />
                         {event.tread_depth_mm} mm
                       </span>
                     )}
                   </div>
 
                   {event.notes && (
-                    <p className="mt-2 text-[11px] text-neutral-600 italic">{event.notes}</p>
+                    <p className="mt-2 text-[11px] text-[var(--text-secondary)] italic">{event.notes}</p>
                   )}
                 </div>
               );

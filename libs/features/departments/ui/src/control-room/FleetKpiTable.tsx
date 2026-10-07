@@ -41,35 +41,35 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
   const totalBreakdownHours = fleet.reduce((acc, curr) => acc + curr.breakdown_hours, 0).toFixed(1);
 
   return (
-    <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
-      <div className="border-b border-black/[0.08] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50">
+    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
+      <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex items-center gap-2">
-            <Activity className="h-4 w-4 text-neutral-700" />
+          <h3 className="text-sm font-semibold text-[var(--text-heading)] tracking-tight flex items-center gap-2">
+            <Activity className="h-4 w-4 text-[var(--text-secondary)]" />
             Fleet Availability & SMU Performance
           </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Machine operating hours, recorded operational delays, and mechanical availability
           </p>
         </div>
         <div className="flex items-center gap-4 text-xs font-medium">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200/60">
-            <Clock className="h-3.5 w-3.5 text-neutral-500" />
-            Total SMU: <strong className="font-mono">{totalSmuHours}h</strong>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+            <Clock className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+            Total SMU: <strong className="font-mono text-[var(--text-heading)]">{totalSmuHours}h</strong>
           </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200/60">
-            <Wrench className="h-3.5 w-3.5 text-neutral-500" />
-            Breakdowns: <strong className="font-mono">{totalBreakdownHours}h</strong>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+            <Wrench className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+            Breakdowns: <strong className="font-mono text-[var(--text-heading)]">{totalBreakdownHours}h</strong>
           </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-green)]/10 text-[var(--accent-green)] border border-[var(--accent-green)]/20">
+            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--accent-green)]" />
             Avg MA: <strong className="font-mono">{avgAvailability}%</strong>
           </span>
         </div>
       </div>
 
       {/* Table Header Wrapper to keep headers fixed if we scroll */}
-      <div className="w-full text-left text-xs bg-neutral-100/60 text-neutral-600 font-medium grid grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] border-b border-black/[0.08]">
+      <div className="w-full text-left text-xs bg-[var(--bg-secondary)]/80 text-[var(--text-secondary)] font-medium grid grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] border-b border-[var(--border-subtle)]">
         <div className="px-5 py-3">Machine</div>
         <div className="px-4 py-3">Type</div>
         <div className="px-4 py-3">Operating Window</div>
@@ -107,17 +107,17 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
-                <div className="px-5 font-semibold text-neutral-900 flex items-center gap-2">
+                <div className="px-5 font-semibold text-[var(--text-heading)] flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   {item.machine_name}
                 </div>
-                <div className="px-4 text-neutral-600 capitalize truncate">{item.machine_type}</div>
-                <div className="px-4 text-neutral-500 font-mono text-[11px] truncate">
+                <div className="px-4 text-[var(--text-secondary)] capitalize truncate">{item.machine_type}</div>
+                <div className="px-4 text-[var(--text-muted)] font-mono text-[11px] truncate">
                   {item.start_time
                     ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`
                     : 'Not logged'}
                 </div>
-                <div className="px-4 text-right font-mono font-medium text-neutral-800">
+                <div className="px-4 text-right font-mono font-medium text-[var(--text-heading)]">
                   {item.hours_worked.toFixed(1)}h
                 </div>
                 <div className="px-4 text-right font-mono font-medium text-amber-700">

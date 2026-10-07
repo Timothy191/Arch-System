@@ -48,6 +48,20 @@ const EquipmentDashboard = dynamic(
 export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidgetsProps) {
   return (
     <div className="space-y-6">
+      {/* SCADA and Alert Telemetry Panels (Elevated to top for 24/7 Situational Awareness) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Suspense
+          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
+        >
+          <ScadaPanel departmentId={deptId} />
+        </Suspense>
+        <Suspense
+          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
+        >
+          <AlertPanel departmentId={deptId} />
+        </Suspense>
+      </div>
+
       {/* Equipment Dashboard with Breakdown Workflow Triggers */}
       <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
         <EquipmentDashboard departmentId={deptId} />
@@ -67,20 +81,6 @@ export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidge
           shift={getCurrentShift()}
         />
       </Suspense>
-
-      {/* SCADA and Alert Telemetry Panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
-        >
-          <ScadaPanel departmentId={deptId} />
-        </Suspense>
-        <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
-        >
-          <AlertPanel departmentId={deptId} />
-        </Suspense>
-      </div>
 
       {/* Activity Feed */}
       <Suspense fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}>

@@ -22,6 +22,8 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
+    '^@vercel/speed-insights/next$':
+      '<rootDir>/node_modules/@vercel/speed-insights/dist/next/index.js',
     '^next/navigation$': '<rootDir>/node_modules/next/navigation.js',
     '^next/navigation\\.js$': '<rootDir>/node_modules/next/navigation.js',
     '^react$': '<rootDir>/node_modules/react',

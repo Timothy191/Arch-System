@@ -28,98 +28,133 @@ interface TelemetryRow {
 export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const [data, setData] = useState<TelemetryRow[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [gatewayStatus, setGatewayStatus] = useState<{
+    healthy: boolean;
+    tripped: boolean;
+    latencyMs: number;
+    tagCount: number;
+  }>({
+    healthy: true,
+    tripped: false,
+    latencyMs: 12,
+    tagCount: 8,
+  });
+
+  const checkScadaStatus = async () => {
+    try {
+      const res = await fetch('/api/control-room/scada-status');
+      if (res.ok) {
+        const json = await res.json();
+        setGatewayStatus({
+          healthy: Boolean(json.reportedFuxaHealthy),
+          tripped: Boolean(json.breakerTripped),
+          latencyMs: json.latencyMs || 0,
+          tagCount: json.cachedTagCount || 8,
+        });
+      }
+    } catch {
+      setGatewayStatus((prev) => ({ ...prev, healthy: false }));
+    }
+  };
+
+  const loadMockData = () => {
+    setData([
+      {
+        id: '1',
+        sensor: 'EX-01-ENG',
+        machine: 'Excavator 01',
+        parameter: 'Engine RPM',
+        value: 1850,
+        unit: 'rpm',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        sensor: 'EX-01-TEMP',
+        machine: 'Excavator 01',
+        parameter: 'Coolant Temp',
+        value: 92,
+        unit: '°C',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '3',
+        sensor: 'DT-14-HYD',
+        machine: 'Dump Truck 14',
+        parameter: 'Hydraulic Pressure',
+        value: 4200,
+        unit: 'kPa',
+        status: 'critical',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '4',
+        sensor: 'DT-14-PAY',
+        machine: 'Dump Truck 14',
+        parameter: 'Payload Mass',
+        value: 245,
+        unit: 't',
+        status: 'warning',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '5',
+        sensor: 'DR-02-BIT',
+        machine: 'Drill 02',
+        parameter: 'Bit Depth',
+        value: 14.2,
+        unit: 'm',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '6',
+        sensor: 'DR-02-PEN',
+        machine: 'Drill 02',
+        parameter: 'Penetration Rate',
+        value: 1.2,
+        unit: 'm/min',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '7',
+        sensor: 'DOZ-05-OIL',
+        machine: 'Dozer 05',
+        parameter: 'Oil Pressure',
+        value: 300,
+        unit: 'kPa',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: '8',
+        sensor: 'EX-03-PUMP',
+        machine: 'Excavator 03',
+        parameter: 'Main Pump Flow',
+        value: 480,
+        unit: 'L/min',
+        status: 'normal',
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await checkScadaStatus();
+    loadMockData();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   useEffect(() => {
-    // Simulated SCADA data for the Control Room dashboard
-    const loadMockData = () => {
-      setData([
-        {
-          id: '1',
-          sensor: 'EX-01-ENG',
-          machine: 'Excavator 01',
-          parameter: 'Engine RPM',
-          value: 1850,
-          unit: 'rpm',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          sensor: 'EX-01-TEMP',
-          machine: 'Excavator 01',
-          parameter: 'Coolant Temp',
-          value: 92,
-          unit: '°C',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          sensor: 'DT-14-HYD',
-          machine: 'Dump Truck 14',
-          parameter: 'Hydraulic Pressure',
-          value: 4200,
-          unit: 'kPa',
-          status: 'critical',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '4',
-          sensor: 'DT-14-PAY',
-          machine: 'Dump Truck 14',
-          parameter: 'Payload Mass',
-          value: 245,
-          unit: 't',
-          status: 'warning',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '5',
-          sensor: 'DR-02-BIT',
-          machine: 'Drill 02',
-          parameter: 'Bit Depth',
-          value: 14.2,
-          unit: 'm',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '6',
-          sensor: 'DR-02-PEN',
-          machine: 'Drill 02',
-          parameter: 'Penetration Rate',
-          value: 1.2,
-          unit: 'm/min',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '7',
-          sensor: 'DOZ-05-OIL',
-          machine: 'Dozer 05',
-          parameter: 'Oil Pressure',
-          value: 300,
-          unit: 'kPa',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: '8',
-          sensor: 'EX-03-PUMP',
-          machine: 'Excavator 03',
-          parameter: 'Main Pump Flow',
-          value: 480,
-          unit: 'L/min',
-          status: 'normal',
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    };
     loadMockData();
+    checkScadaStatus();
     const interval = setInterval(() => {
-      setIsRefreshing(true);
-      setTimeout(() => setIsRefreshing(false), 500);
-    }, 5000);
+      checkScadaStatus();
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -168,11 +203,27 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         </div>
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-xs font-medium text-arch-text-secondary">
-            <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
-            Stream Active
+            {gatewayStatus.tripped ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-accent-red animate-pulse" />
+                <span className="text-accent-red font-semibold">Breaker Tripped</span>
+              </>
+            ) : !gatewayStatus.healthy ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-accent-orange animate-pulse" />
+                <span className="text-accent-orange">Degraded ({gatewayStatus.latencyMs}ms)</span>
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                Stream Active ({gatewayStatus.tagCount} tags)
+              </>
+            )}
           </span>
           <button
             type="button"
+            onClick={handleRefresh}
+            aria-label="Refresh SCADA Telemetry"
             className={`p-1.5 rounded-md hover:bg-arch-surface-tertiary transition-colors ${
               isRefreshing ? 'animate-spin' : ''
             }`}

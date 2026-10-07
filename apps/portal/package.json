@@ -91,6 +91,7 @@
     "lint": "biome check .",
     "start": "next start -H 0.0.0.0",
     "test": "jest --passWithNoTests --runInBand",
+    "test:speed-insights": "jest --passWithNoTests --runInBand lib/observability/speed-insights.test.ts",
     "type-check": "tsc --noEmit",
     "generate-openapi-spec": "node scripts/generate-openapi-spec.js"
   }

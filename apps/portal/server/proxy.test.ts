@@ -384,4 +384,41 @@ describe('proxy', () => {
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2Fdrilling');
   });
+
+  it('exempts /_vercel/speed-insights endpoints from authentication to support reverse proxy routing', async () => {
+    buildProxyMock();
+    const req = makeRequest('/_vercel/speed-insights/vitals', false);
+    const res = await proxy(req);
+
+    // Must not be redirected to /login
+    expect(res.status).not.toBe(307);
+  });
+
+  it('exempts /_vercel/insights endpoints from authentication', async () => {
+    buildProxyMock();
+    const req = makeRequest('/_vercel/insights/script.js', false);
+    const res = await proxy(req);
+
+    // Must not be redirected to /login
+    expect(res.status).not.toBe(307);
+  });
+
+  it('does NOT exempt arbitrary non-observability /_vercel paths and redirects unauthenticated to /login', async () => {
+    buildProxyMock();
+    const req = makeRequest('/_vercel_malicious/data', false);
+    const res = await proxy(req);
+
+    // Unauthenticated non-observability route must be redirected to /login
+    expect(res.status).toBe(307);
+    expect(res.headers.get('location')).toContain('/login');
+  });
+
+  it('redirects unauthenticated requests on unknown application routes to /login', async () => {
+    buildProxyMock();
+    const req = makeRequest('/unknown-feature-path', false);
+    const res = await proxy(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get('location')).toContain('/login');
+  });
 });

@@ -207,6 +207,7 @@
     "start": "pnpm --filter portal start",
     "sync-assets": "node scripts/sync-assets-smart.cjs",
     "test": "turbo run test",
+    "test:speed-insights": "pnpm --filter portal test:speed-insights",
     "test:watch": "turbo run test -- --watch",
     "test:coverage": "turbo run test -- --coverage",
     "test:a11y": "pnpm --filter @repo/ui test-storybook:a11y",

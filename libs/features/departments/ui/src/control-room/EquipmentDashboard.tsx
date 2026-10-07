@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedDialog } from '@repo/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { BadgeAlert, CheckCircle2, Factory, Loader2, Map, ShieldAlert, Truck } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
@@ -18,6 +19,8 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
 
   const [fleet, setFleet] = useState<FleetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [breakdownTarget, setBreakdownTarget] = useState<FleetItem | null>(null);
+  const [isSubmittingBreakdown, setIsSubmittingBreakdown] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +44,7 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
   }, [departmentId]);
 
   const handleReportBreakdown = async (equipmentId: string, code: string) => {
+    setIsSubmittingBreakdown(true);
     startTransition(async () => {
       try {
         const res = await fetch('/api/engineering/breakdown-alert', {
@@ -65,6 +69,9 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
       } catch (err) {
         setActionMessage(`Error: Could not trigger workflow.`);
         setTimeout(() => setActionMessage(null), 5000);
+      } finally {
+        setIsSubmittingBreakdown(false);
+        setBreakdownTarget(null);
       }
     });
   };
@@ -160,9 +167,9 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
                     </div>
                     <button
                       type="button"
-                      disabled={isPending || item.status === 'breakdown'}
-                      onClick={() => handleReportBreakdown(item.id, item.code)}
-                      className={`text-[10px] font-semibold px-2.5 py-1.5 rounded-md transition-all ${
+                      disabled={isPending || isSubmittingBreakdown || item.status === 'breakdown'}
+                      onClick={() => setBreakdownTarget(item)}
+                      className={`min-h-[44px] h-[44px] px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center ${
                         item.status === 'breakdown'
                           ? 'bg-arch-surface-secondary text-arch-text-muted cursor-not-allowed'
                           : 'bg-accent-red/10 text-accent-red hover:bg-accent-red/20 cursor-pointer active:scale-95'
@@ -177,6 +184,64 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
           )}
         </div>
       </GlassCard>
+
+      {/* Confirmation Modal before Dispatching Breakdown Escalation */}
+      <AnimatedDialog
+        open={Boolean(breakdownTarget)}
+        onClose={() => !isSubmittingBreakdown && setBreakdownTarget(null)}
+        title="Confirm Breakdown Escalation"
+        description="Escalating an equipment breakdown notifies the engineering and dispatch teams immediately and marks this asset as down."
+        className="max-w-md"
+      >
+        <div className="space-y-4 mt-2">
+          <div className="p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-arch-text-primary">
+                Report line-down event for {breakdownTarget?.code}?
+              </p>
+              <p className="text-xs text-arch-text-secondary">
+                Asset: <span className="font-mono font-medium">{breakdownTarget?.code}</span> (
+                <span className="capitalize">{breakdownTarget?.category}</span>) &bull; SMU:{' '}
+                <span className="font-mono">{breakdownTarget?.hour_meter?.toLocaleString()}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              disabled={isSubmittingBreakdown}
+              onClick={() => setBreakdownTarget(null)}
+              className="px-4 py-2 text-xs font-medium rounded-lg border border-arch-border-subtle hover:bg-arch-surface-secondary text-arch-text-secondary transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isSubmittingBreakdown}
+              onClick={() => {
+                if (breakdownTarget) {
+                  handleReportBreakdown(breakdownTarget.id, breakdownTarget.code);
+                }
+              }}
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-accent-red text-white hover:bg-accent-red/90 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+            >
+              {isSubmittingBreakdown ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Dispatching...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Confirm Breakdown</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </AnimatedDialog>
     </div>
   );
 }

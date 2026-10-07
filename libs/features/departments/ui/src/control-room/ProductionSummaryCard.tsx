@@ -16,20 +16,20 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
       : ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
 
   return (
-    <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
-      <div className="border-b border-black/[0.08] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50">
+    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
+      <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex items-center gap-2">
-            <Truck className="h-4 w-4 text-neutral-700" />
+          <h3 className="text-sm font-semibold text-[var(--text-heading)] tracking-tight flex items-center gap-2">
+            <Truck className="h-4 w-4 text-[var(--text-secondary)]" />
             Excavator & Hauling Output
           </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Total loads hauled and hourly loader production rates
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-mono text-xs flex items-center gap-2">
-            <Layers className="h-3.5 w-3.5 text-neutral-300" />
+          <div className="px-3 py-1.5 rounded-lg bg-[var(--surface-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-mono text-xs flex items-center gap-2">
+            <Layers className="h-3.5 w-3.5 text-[var(--text-muted)]" />
             <span>Total Shift Loads:</span>
             <span className="text-sm font-bold text-emerald-400">{production.total_loads}</span>
           </div>
@@ -38,8 +38,8 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
 
       <div className="p-5">
         {production.machines.length === 0 ? (
-          <div className="py-8 text-center text-neutral-500 text-xs">
-            <BarChart2 className="h-8 w-8 mx-auto mb-2 text-neutral-300" />
+          <div className="py-8 text-center text-[var(--text-muted)] text-xs">
+            <BarChart2 className="h-8 w-8 mx-auto mb-2 text-[var(--text-muted)]" />
             No hourly load tallies recorded for this shift date.
           </div>
         ) : (
@@ -53,18 +53,18 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
               return (
                 <div
                   key={machine.machine_id}
-                  className="p-3.5 rounded-lg border border-black/[0.06] bg-white/50 space-y-2.5"
+                  className="p-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 space-y-2.5"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 font-semibold text-neutral-900">
+                    <div className="flex items-center gap-2 font-semibold text-[var(--text-heading)]">
                       <span>{machine.machine_name}</span>
-                      <span className="text-[10px] font-normal text-neutral-500 px-2 py-0.5 rounded bg-neutral-100 uppercase">
+                      <span className="text-[10px] font-normal text-[var(--text-muted)] px-2 py-0.5 rounded bg-[var(--bg-secondary)] uppercase">
                         {machine.machine_type}
                       </span>
                     </div>
-                    <div className="font-mono font-medium text-neutral-700">
+                    <div className="font-mono font-medium text-[var(--text-secondary)]">
                       Loads:{' '}
-                      <strong className="text-neutral-950 font-bold">{machine.total_loads}</strong>
+                      <strong className="text-[var(--text-heading)] font-bold">{machine.total_loads}</strong>
                     </div>
                   </div>
 

@@ -16,8 +16,8 @@ export async function proxy(request: NextRequest) {
   const cspHeader = `
     frame-src 'self' https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app;
     frame-ancestors 'none';
-    script-src 'self' 'nonce-${nonce}' 'unsafe-eval';
-    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -36,8 +36,8 @@ export const middleware = proxy;
 export default proxy;
 
 export const config = {
-  // Exclude static assets, API routes, and SEO files from proxy.
+  // Exclude static assets, API routes, Vercel telemetry, and SEO files from proxy.
   matcher: [
-    '/((?!_next/static|_next/image|api/|.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
+    '/((?!_next/static|_next/image|_vercel|api/|.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
   ],
 };
