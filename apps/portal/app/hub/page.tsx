@@ -388,15 +388,17 @@ export default async function HubPage() {
         className="space-y-4 animate-fade-up group/row"
         style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-            <span className="p-1 rounded-lg bg-accent-red/10 text-accent-red">
+        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
+            <span className="p-1 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center">
               <Shield className="w-4 h-4" />
             </span>
             Live System Urgency & Incident Controls
           </h2>
+        </header>
+        <div className="w-full flex justify-center">
+          <AlertTicker events={alertEvents} />
         </div>
-        <AlertTicker events={alertEvents} />
       </div>
 
       {/* Core Operational Modules - Interactive Filtered Grid */}
