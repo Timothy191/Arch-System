@@ -11,16 +11,8 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "replace_file_content",
-      "write_to_file",
-      "grep_search"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "scoped"
   },
   "scope": {
@@ -29,9 +21,7 @@
       "apps/portal/lib/observability/**/*.{ts,tsx}",
       "packages/supabase/src/**/*.ts"
     ],
-    "exclude_paths": [
-      "node_modules/**"
-    ]
+    "exclude_paths": ["node_modules/**"]
   },
   "runbook": [
     "Phase 1: Ingest CDC topic specs and event payload contracts",

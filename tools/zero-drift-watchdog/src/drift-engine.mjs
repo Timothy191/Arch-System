@@ -181,10 +181,7 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
   const isVercelBehind = Boolean(safeGithub.commit && safeVercel.commit !== safeGithub.commit);
 
   // 5. Parity evaluation
-  const allowDirty = Boolean(
-    targetContext?.allowDirty ||
-      targetContext?.target?.allowDirty
-  );
+  const allowDirty = Boolean(targetContext?.allowDirty || targetContext?.target?.allowDirty);
   const effectiveClean = allowDirty ? true : isClean;
 
   const isParity = Boolean(

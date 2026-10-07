@@ -1,7 +1,15 @@
-/** @jest-environment node */
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
-import { splitMachineHourlyLoad, updateHourlyLoadExcavator, updateMachineSite } from './actions';
+import {
+  saveHourlyLoad,
+  splitMachineHourlyLoad,
+  updateHourlyLoadExcavator,
+  updateMachineSite,
+} from './actions';
+
+jest.mock('@repo/redis', () => ({
+  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('@repo/supabase', () => ({
   getAuthenticatedEmployee: jest.fn(),
@@ -23,6 +31,7 @@ function makeQuery(data: unknown = null) {
     update: jest.fn(() => query),
     insert: jest.fn(() => query),
     eq: jest.fn(() => query),
+    order: jest.fn(() => query),
     maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
     single: jest.fn().mockResolvedValue({ data, error: null }),
     then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) =>
@@ -53,23 +62,27 @@ function setPrincipal({
 
 function setServiceClient({
   machineDepartmentId = departmentId,
+  dailyLogData = { id: 'daily-log-1', log_date: '2026-10-06' },
 }: {
   machineDepartmentId?: string;
+  dailyLogData?: unknown;
 } = {}) {
   const machineQuery = makeQuery({ department_id: machineDepartmentId });
   const siteQuery = makeQuery({ id: siteId });
   const mutationQuery = makeQuery();
+  const dailyLogQuery = makeQuery(dailyLogData);
   const serviceClient = {
     from: jest.fn((table: string) => {
       if (table === 'machines') return machineQuery;
       if (table === 'sites') return siteQuery;
       if (table === 'hourly_loads') return mutationQuery;
+      if (table === 'daily_logs') return dailyLogQuery;
       throw new Error(`Unexpected table: ${table}`);
     }),
     rpc: jest.fn(),
   };
   jest.mocked(createServiceRoleClient).mockReturnValue(serviceClient as never);
-  return { serviceClient, machineQuery, siteQuery, mutationQuery };
+  return { serviceClient, machineQuery, siteQuery, mutationQuery, dailyLogQuery };
 }
 
 describe('Control Room Hourly Loads actions', () => {
@@ -216,5 +229,227 @@ describe('Control Room Hourly Loads actions', () => {
       })
     ).rejects.toThrow();
     expect(createServiceRoleClient).not.toHaveBeenCalled();
+  });
+
+  it('rejects unauthenticated saveHourlyLoad attempts', async () => {
+    jest.mocked(getAuthenticatedEmployee).mockResolvedValue(null);
+
+    await expect(
+      saveHourlyLoad({
+        departmentId,
+        machineId,
+        loadDate: '2026-10-06',
+        shiftType: 'day',
+        patch: { hour_01: 5 },
+      })
+    ).rejects.toThrow('Unauthorized');
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
+  });
+
+  it('rejects saveHourlyLoad for department outside accessible scope', async () => {
+    setPrincipal({ employeeDepartmentId: otherDepartmentId });
+
+    await expect(
+      saveHourlyLoad({
+        departmentId,
+        machineId,
+        loadDate: '2026-10-06',
+        shiftType: 'day',
+        patch: { hour_01: 5 },
+      })
+    ).rejects.toThrow('Not authorized for this Control Room operation');
+  });
+
+  it('updates an existing hourly load record when a persistent loadId is provided', async () => {
+    setPrincipal();
+    const { mutationQuery } = setServiceClient();
+    const updatedRow = { id: loadId, department_id: departmentId, hour_01: 5 };
+    mutationQuery.maybeSingle.mockResolvedValue({ data: updatedRow, error: null });
+
+    const result = await saveHourlyLoad({
+      departmentId,
+      machineId,
+      loadDate: '2026-10-06',
+      shiftType: 'day',
+      loadId,
+      patch: { hour_01: 5 },
+    });
+
+    expect(result).toEqual({ success: true, load: updatedRow });
+    expect(mutationQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hour_01: 5,
+        updated_by: 'employee-1',
+      })
+    );
+    expect(mutationQuery.eq).toHaveBeenCalledWith('id', loadId);
+  });
+
+  it('updates existing DB record when local- virtual loadId is passed but row already exists in DB', async () => {
+    setPrincipal();
+    const existingRow = { id: 'existing-db-id', department_id: departmentId, hour_01: 2 };
+    const findQuery = makeQuery();
+    findQuery.order = jest.fn(() => ({
+      then: (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) =>
+        Promise.resolve({ data: [existingRow], error: null }).then(resolve, reject),
+    })) as never;
+    const updateQuery = makeQuery({ ...existingRow, hour_01: 3 });
+
+    let hourlyLoadsCount = 0;
+    const { serviceClient } = setServiceClient();
+    serviceClient.from = jest.fn((table: string) => {
+      if (table === 'hourly_loads') {
+        hourlyLoadsCount++;
+        return hourlyLoadsCount === 1 ? findQuery : updateQuery;
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const result = await saveHourlyLoad({
+      departmentId,
+      machineId,
+      loadDate: '2026-10-06',
+      shiftType: 'day',
+      loadId: `local-${machineId}-day`,
+      patch: { hour_01: 3 },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.load.id).toBe('existing-db-id');
+    expect(updateQuery.update).toHaveBeenCalledWith(expect.objectContaining({ hour_01: 3 }));
+    expect(updateQuery.eq).toHaveBeenCalledWith('id', 'existing-db-id');
+  });
+
+  it('resolves daily_logs header and inserts new hourly_loads record with all required constraints', async () => {
+    setPrincipal();
+    const dailyLogHeader = { id: 'daily-log-header-1', log_date: '2026-10-06' };
+    const dailyLogQuery = makeQuery(dailyLogHeader);
+
+    const findQuery = makeQuery();
+    findQuery.order = jest.fn(() => ({
+      then: (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) =>
+        Promise.resolve({ data: [], error: null }).then(resolve, reject),
+    })) as never;
+
+    const insertedRow = {
+      id: 'new-hourly-load-id',
+      department_id: departmentId,
+      machine_id: machineId,
+      daily_log_id: dailyLogHeader.id,
+      daily_log_date: '2026-10-06',
+      hour_01: 1,
+    };
+    const insertQuery = makeQuery(insertedRow);
+
+    let hourlyLoadsCount = 0;
+    const { serviceClient } = setServiceClient();
+    serviceClient.from = jest.fn((table: string) => {
+      if (table === 'daily_logs') return dailyLogQuery;
+      if (table === 'hourly_loads') {
+        hourlyLoadsCount++;
+        return hourlyLoadsCount === 1 ? findQuery : insertQuery;
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const result = await saveHourlyLoad({
+      departmentId,
+      machineId,
+      loadDate: '2026-10-06',
+      shiftType: 'day',
+      loadId: `local-${machineId}-day`,
+      patch: { hour_01: 1 },
+    });
+
+    expect(result).toEqual({ success: true, load: insertedRow });
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        department_id: departmentId,
+        machine_id: machineId,
+        load_date: '2026-10-06',
+        shift_type: 'day',
+        daily_log_id: 'daily-log-header-1',
+        daily_log_date: '2026-10-06',
+        hour_01: 1,
+        start_hour: 1,
+        end_hour: 12,
+        is_locked: false,
+        material_type: 'Waste',
+      })
+    );
+  });
+
+  it('auto-creates daily_logs header when missing and inserts hourly_loads', async () => {
+    setPrincipal();
+    let dailyLogCallCount = 0;
+    const findDailyLogQuery = makeQuery(null);
+    const createDailyLogQuery = makeQuery({ id: 'created-daily-log-id', log_date: '2026-10-06' });
+
+    const findQuery = makeQuery();
+    findQuery.order = jest.fn(() => ({
+      then: (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) =>
+        Promise.resolve({ data: [], error: null }).then(resolve, reject),
+    })) as never;
+
+    const insertedRow = {
+      id: 'new-row-id',
+      daily_log_id: 'created-daily-log-id',
+      hour_01: 1,
+    };
+    const insertQuery = makeQuery(insertedRow);
+
+    let hourlyLoadsCount = 0;
+    const { serviceClient } = setServiceClient();
+    serviceClient.from = jest.fn((table: string) => {
+      if (table === 'daily_logs') {
+        dailyLogCallCount++;
+        return dailyLogCallCount === 1 ? findDailyLogQuery : createDailyLogQuery;
+      }
+      if (table === 'hourly_loads') {
+        hourlyLoadsCount++;
+        return hourlyLoadsCount === 1 ? findQuery : insertQuery;
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const result = await saveHourlyLoad({
+      departmentId,
+      machineId,
+      loadDate: '2026-10-06',
+      shiftType: 'day',
+      patch: { hour_01: 1 },
+    });
+
+    expect(result.success).toBe(true);
+    expect(createDailyLogQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        department_id: departmentId,
+        log_date: '2026-10-06',
+        shift: 'day',
+      })
+    );
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        daily_log_id: 'created-daily-log-id',
+        hour_01: 1,
+      })
+    );
+  });
+
+  it('throws error when updating an existing loadId that is not found', async () => {
+    setPrincipal();
+    const { mutationQuery } = setServiceClient();
+    mutationQuery.maybeSingle.mockResolvedValue({ data: null, error: null });
+
+    await expect(
+      saveHourlyLoad({
+        departmentId,
+        machineId,
+        loadDate: '2026-10-06',
+        shiftType: 'day',
+        loadId,
+        patch: { hour_01: 5 },
+      })
+    ).rejects.toThrow('Hourly load not found for the selected department, machine, date and shift');
   });
 });

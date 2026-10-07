@@ -437,7 +437,13 @@
       "required": false,
       "category": "cognitive_and_memory",
       "command": "uv",
-      "args": ["run", "--project", "/home/tim/Fork/aegntic-mcp/servers/aegntic-knowledge-engine", "python", "src/crawl4ai_mcp.py"],
+      "args": [
+        "run",
+        "--project",
+        "/home/tim/Fork/aegntic-mcp/servers/aegntic-knowledge-engine",
+        "python",
+        "src/crawl4ai_mcp.py"
+      ],
       "env": {
         "TRANSPORT": "stdio"
       },
@@ -450,10 +456,7 @@
       "category": "ui_components",
       "type": "remote",
       "url": "https://www.ui-skills.com/mcp",
-      "autoApprove": [
-        "list_skills",
-        "get_skill"
-      ]
+      "autoApprove": ["list_skills", "get_skill"]
     }
   }
 }

@@ -11,26 +11,13 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "replace_file_content",
-      "write_to_file",
-      "grep_search"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "deny"
   },
   "scope": {
-    "include_paths": [
-      "packages/agents/src/**/*.ts",
-      ".agents/a2a/**"
-    ],
-    "exclude_paths": [
-      "node_modules/**"
-    ]
+    "include_paths": ["packages/agents/src/**/*.ts", ".agents/a2a/**"],
+    "exclude_paths": ["node_modules/**"]
   },
   "runbook": [
     "Phase 1: Ingest overarching user goal and execution constraints",

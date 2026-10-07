@@ -8,6 +8,7 @@ import type {
   drillingDailyLogSchema,
   monthlyReportInputSchema,
   productionDailyLogSchema,
+  saveHourlyLoadSchema,
   splitHourlyLoadSchema,
   updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
@@ -24,3 +25,4 @@ export type MonthlyReportInput = z.infer<typeof monthlyReportInputSchema>;
 export type UpdateMachineSiteInput = z.infer<typeof updateMachineSiteSchema>;
 export type UpdateHourlyLoadExcavatorInput = z.infer<typeof updateHourlyLoadExcavatorSchema>;
 export type SplitHourlyLoadInput = z.infer<typeof splitHourlyLoadSchema>;
+export type SaveHourlyLoadInput = z.infer<typeof saveHourlyLoadSchema>;

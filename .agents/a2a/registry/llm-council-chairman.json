@@ -11,28 +11,13 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "replace_file_content",
-      "write_to_file",
-      "run_command",
-      "call_mcp_tool"
-    ],
-    "forbidden_tools": [
-      "git push --force"
-    ],
+    "tools": ["view_file", "replace_file_content", "write_to_file", "run_command", "call_mcp_tool"],
+    "forbidden_tools": ["git push --force"],
     "bash": "restricted"
   },
   "scope": {
-    "include_paths": [
-      ".agents/a2a/bus/**",
-      "temp/**",
-      ".agents/plans/**"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "include_paths": [".agents/a2a/bus/**", "temp/**", ".agents/plans/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Ingest competing architectural proposals or contradictory peer critiques",

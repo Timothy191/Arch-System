@@ -11,27 +11,13 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "write_to_file",
-      "grep_search",
-      "call_mcp_tool"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "write_to_file", "grep_search", "call_mcp_tool"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "deny"
   },
   "scope": {
-    "include_paths": [
-      ".dir/**",
-      "documentation/**",
-      "packages/agents/docs/**"
-    ],
-    "exclude_paths": [
-      "node_modules/**"
-    ]
+    "include_paths": [".dir/**", "documentation/**", "packages/agents/docs/**"],
+    "exclude_paths": ["node_modules/**"]
   },
   "runbook": [
     "Phase 1: Ingest research target and technical problem statement",

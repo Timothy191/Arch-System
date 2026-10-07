@@ -126,3 +126,32 @@ export const splitHourlyLoadSchema = z.object({
   materialType: z.enum(['Waste', 'Coal']),
   previousLoadId: z.string().uuid('Invalid previous load ID format').optional().nullable(),
 });
+
+export const saveHourlyLoadSchema = z.object({
+  departmentId: z.string().uuid('Invalid department ID format'),
+  machineId: z.string().uuid('Invalid machine ID format'),
+  loadDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
+  shiftType: z.enum(['day', 'night']),
+  loadId: z.string().optional().nullable(),
+  patch: z.object({
+    hour_01: z.number().int().min(0).max(100).optional(),
+    hour_02: z.number().int().min(0).max(100).optional(),
+    hour_03: z.number().int().min(0).max(100).optional(),
+    hour_04: z.number().int().min(0).max(100).optional(),
+    hour_05: z.number().int().min(0).max(100).optional(),
+    hour_06: z.number().int().min(0).max(100).optional(),
+    hour_07: z.number().int().min(0).max(100).optional(),
+    hour_08: z.number().int().min(0).max(100).optional(),
+    hour_09: z.number().int().min(0).max(100).optional(),
+    hour_10: z.number().int().min(0).max(100).optional(),
+    hour_11: z.number().int().min(0).max(100).optional(),
+    hour_12: z.number().int().min(0).max(100).optional(),
+    material_type: z.enum(['Waste', 'Coal']).optional(),
+    excavator_id: z
+      .string()
+      .uuid('Invalid excavator ID format')
+      .nullable()
+      .optional()
+      .or(z.literal('')),
+  }),
+});

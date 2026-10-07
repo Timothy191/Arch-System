@@ -11,17 +11,8 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "replace_file_content",
-      "write_to_file",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "scoped"
   },
   "scope": {
@@ -30,10 +21,7 @@
       "packages/database/migrations/*vector*.sql",
       "packages/database/migrations/*embedding*.sql"
     ],
-    "exclude_paths": [
-      "packages/ui/**",
-      "node_modules/**"
-    ]
+    "exclude_paths": ["packages/ui/**", "node_modules/**"]
   },
   "runbook": [
     "Phase 1: Ingest text queries, mathematical notation, and target vector configurations",

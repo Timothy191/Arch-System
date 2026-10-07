@@ -20,22 +20,12 @@
       "send_message",
       "call_mcp_tool"
     ],
-    "forbidden_tools": [
-      "git push --force",
-      "rm -rf /"
-    ],
+    "forbidden_tools": ["git push --force", "rm -rf /"],
     "bash": "restricted"
   },
   "scope": {
-    "include_paths": [
-      "**/*"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**",
-      "**/.next/**",
-      "**/.turbo/**"
-    ]
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**", "**/.next/**", "**/.turbo/**"]
   },
   "runbook": [
     "Phase 1: Ingest user goal, constraints, and target package scope",

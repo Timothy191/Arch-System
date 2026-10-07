@@ -86,14 +86,16 @@ export default defineConfig({
     },
     // We only support chromium locally as per requirements, but defining mobile sizes
   ],
-  webServer: process.env.BASE_URL ? undefined : {
-    command: 'pnpm --filter portal dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    env: {
-      ...process.env,
-      NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --no-deprecation`.trim(),
-    },
-  },
+  webServer: process.env.BASE_URL
+    ? undefined
+    : {
+        command: 'pnpm --filter portal dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+        env: {
+          ...process.env,
+          NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --no-deprecation`.trim(),
+        },
+      },
 });

@@ -11,7 +11,13 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataGrid } from '@/components/dynamic/LazyHeavyComponents';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
-import { splitMachineHourlyLoad, updateExcavatorSite, updateHourlyLoadExcavator } from './actions';
+import {
+  saveHourlyLoad,
+  splitMachineHourlyLoad,
+  updateExcavatorSite,
+  updateHourlyLoadExcavator,
+} from './actions';
+
 import {
   buildHourlyLoadsGroupedMap,
   HOUR_PROP,
@@ -267,27 +273,46 @@ function HourlyLoadsGrid({
       shiftType: HourlyShift,
       patch: Partial<HourlyLoad>
     ) => {
-      if (!loadId.startsWith('local-')) {
-        const { error } = await supabase.from('hourly_loads').update(patch).eq('id', loadId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('hourly_loads').upsert(
-          {
-            department_id: departmentId,
-            machine_id: machineId,
-            load_date: today,
-            shift_type: shiftType,
-            start_hour: 1,
-            end_hour: 12,
-            is_locked: false,
-            ...patch,
-          },
-          { onConflict: 'machine_id,load_date,shift_type' }
-        );
-        if (error) throw error;
+      const cleanPatch: Record<string, any> = {};
+      HOURS_12.forEach((_, idx) => {
+        const prop = HOUR_PROP(idx) as keyof HourlyLoad;
+        if (patch[prop] !== undefined && typeof patch[prop] === 'number') {
+          cleanPatch[prop] = patch[prop];
+        }
+      });
+      if (patch.material_type !== undefined) {
+        cleanPatch.material_type = patch.material_type;
       }
+      if ('excavator_id' in patch) {
+        cleanPatch.excavator_id = patch.excavator_id || null;
+      }
+
+      const res = await saveHourlyLoad({
+        departmentId,
+        machineId,
+        loadDate: today,
+        shiftType,
+        loadId: loadId.startsWith('local-') ? null : loadId,
+        patch: cleanPatch,
+      });
+
+      if (!res?.success) {
+        throw new Error('Failed to save hourly load');
+      }
+
+      if (res.load?.id && loadId.startsWith('local-')) {
+        setLoadsState((prev) => {
+          const hasDbRow = prev.some((l) => l.id === res.load.id);
+          if (hasDbRow) {
+            return prev.filter((l) => l.id !== loadId);
+          }
+          return prev.map((l) => (l.id === loadId ? { ...l, ...res.load, id: res.load.id } : l));
+        });
+      }
+
+      return res.load;
     },
-    [supabase, departmentId, today]
+    [departmentId, today]
   );
 
   /**

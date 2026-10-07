@@ -11,16 +11,8 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "replace_file_content",
-      "write_to_file",
-      "run_command",
-      "call_mcp_tool"
-    ],
-    "forbidden_tools": [
-      "git push --force"
-    ],
+    "tools": ["view_file", "replace_file_content", "write_to_file", "run_command", "call_mcp_tool"],
+    "forbidden_tools": ["git push --force"],
     "bash": "restricted"
   },
   "scope": {
@@ -30,10 +22,7 @@
       ".agents/a2a/bus/**",
       "tools/audits/**"
     ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Ingest health signals and active corpos loop ticks",

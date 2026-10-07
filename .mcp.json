@@ -294,7 +294,13 @@
     },
     "aegntic-knowledge-engine": {
       "command": "uv",
-      "args": ["run", "--project", "/home/tim/Fork/aegntic-mcp/servers/aegntic-knowledge-engine", "python", "src/crawl4ai_mcp.py"],
+      "args": [
+        "run",
+        "--project",
+        "/home/tim/Fork/aegntic-mcp/servers/aegntic-knowledge-engine",
+        "python",
+        "src/crawl4ai_mcp.py"
+      ],
       "env": {
         "TRANSPORT": "stdio"
       },

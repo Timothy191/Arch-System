@@ -11,27 +11,13 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "write_to_file",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "write_to_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "allow"
   },
   "scope": {
-    "include_paths": [
-      "temp/gpt-engineer-workspace/**"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**",
-      "src/**"
-    ]
+    "include_paths": ["temp/gpt-engineer-workspace/**"],
+    "exclude_paths": ["node_modules/**", ".git/**", "src/**"]
   },
   "runbook": [
     "Phase 1: Ingest natural language prompt and technical requirements",

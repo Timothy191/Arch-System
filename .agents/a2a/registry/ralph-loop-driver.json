@@ -11,26 +11,13 @@
   },
   "permissions": {
     "filesystem": "full_write",
-    "tools": [
-      "view_file",
-      "write_to_file",
-      "replace_file_content",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push --force"
-    ],
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
     "bash": "full"
   },
   "scope": {
-    "include_paths": [
-      "**/*"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Split overarching feature goal into discrete atomic jobs",

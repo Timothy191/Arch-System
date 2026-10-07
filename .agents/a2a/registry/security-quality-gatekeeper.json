@@ -11,28 +11,13 @@
   },
   "permissions": {
     "filesystem": "read_only",
-    "tools": [
-      "view_file",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf",
-      "replace_file_content",
-      "write_to_file"
-    ],
+    "tools": ["view_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf", "replace_file_content", "write_to_file"],
     "bash": "scoped"
   },
   "scope": {
-    "include_paths": [
-      "**/*"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**",
-      "dist/**"
-    ]
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**", "dist/**"]
   },
   "runbook": [
     "Phase 1: Ingest modified file list from task handoff",

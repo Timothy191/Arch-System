@@ -19,19 +19,12 @@
       "run_command",
       "call_mcp_tool"
     ],
-    "forbidden_tools": [
-      "git push --force"
-    ],
+    "forbidden_tools": ["git push --force"],
     "bash": "full"
   },
   "scope": {
-    "include_paths": [
-      "**/*"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Strategic Deliberation — Invoke sequentialthinking to decompose goals",

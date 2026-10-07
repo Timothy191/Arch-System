@@ -70,7 +70,7 @@ function analyzeSkills() {
 
   const skills = fs
     .readdirSync(SKILLS_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
+    .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
     .map((d) => ({
       name: d.name,
       path: path.join(SKILLS_DIR, d.name),
@@ -124,8 +124,10 @@ function analyzeRules() {
 }
 
 function archiveSkill(skillName, dryRun = false) {
+  if (skillName === '.archived' || skillName.startsWith('.')) return;
   const skillPath = path.join(SKILLS_DIR, skillName);
   const archiveDir = path.join(SKILLS_DIR, '.archived');
+
 
   if (!fs.existsSync(archiveDir)) {
     if (!dryRun) {

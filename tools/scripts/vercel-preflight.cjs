@@ -41,9 +41,19 @@ const c = {
 let errors = 0;
 let warnings = 0;
 
-console.log(c.bold(c.blue('======================================================================')));
-console.log(c.bold(c.blue(`🚀 [VERCEL PREFLIGHT] Target: ${targetEnv.toUpperCase()} | Monorepo Deployment Pre-Check`)));
-console.log(c.bold(c.blue('======================================================================')));
+console.log(
+  c.bold(c.blue('======================================================================'))
+);
+console.log(
+  c.bold(
+    c.blue(
+      `🚀 [VERCEL PREFLIGHT] Target: ${targetEnv.toUpperCase()} | Monorepo Deployment Pre-Check`
+    )
+  )
+);
+console.log(
+  c.bold(c.blue('======================================================================'))
+);
 
 function recordError(msg) {
   console.log(c.red(`  ❌ [ERROR] ${msg}`));
@@ -86,7 +96,9 @@ if (!fs.existsSync(vercelJsonPath)) {
       recordWarn(`vercel.json framework is '${config.framework}', expected 'nextjs'.`);
     }
     if (config.outputDirectory !== 'apps/portal/.next') {
-      recordError(`vercel.json outputDirectory is '${config.outputDirectory}', expected 'apps/portal/.next'.`);
+      recordError(
+        `vercel.json outputDirectory is '${config.outputDirectory}', expected 'apps/portal/.next'.`
+      );
     } else {
       recordPass('vercel.json outputDirectory correctly mapped to apps/portal/.next');
     }
@@ -144,7 +156,9 @@ if (!fs.existsSync(nextConfigPath)) {
 // -----------------------------------------------------------------------------
 // TIER 2: Environment Secret & Matrix Validation
 // -----------------------------------------------------------------------------
-console.log(c.bold(c.cyan(`\n[Tier 2: Environment Secret & URL Matrix (${targetEnv.toUpperCase()})]`)));
+console.log(
+  c.bold(c.cyan(`\n[Tier 2: Environment Secret & URL Matrix (${targetEnv.toUpperCase()})]`))
+);
 
 // Load local .env files if present to populate process.env for local auditing
 const envFiles = [
@@ -163,7 +177,10 @@ for (const envFile of envFiles) {
       if (eqIdx !== -1) {
         const key = trimmed.slice(0, eqIdx).trim();
         let val = trimmed.slice(eqIdx + 1).trim();
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        if (
+          (val.startsWith('"') && val.endsWith('"')) ||
+          (val.startsWith("'") && val.endsWith("'"))
+        ) {
           val = val.slice(1, -1);
         }
         // Avoid placeholders like <project-ref> or [SENSITIVE]
@@ -178,10 +195,7 @@ for (const envFile of envFiles) {
   }
 }
 
-const requiredPublicVars = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-];
+const requiredPublicVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
 for (const v of requiredPublicVars) {
   const val = process.env[v];
@@ -200,7 +214,7 @@ if (dbUrl) {
   if (dbUrl.includes(':5432/')) {
     recordWarn(
       'DATABASE_URL connects to direct Postgres port 5432. For Vercel Serverless, ' +
-      'use Supavisor transaction pooler port 6543 to avoid connection exhaustion.'
+        'use Supavisor transaction pooler port 6543 to avoid connection exhaustion.'
     );
   } else if (dbUrl.includes(':6543/')) {
     recordPass('DATABASE_URL is correctly routed to Supavisor transaction pooler (port 6543)');
@@ -209,7 +223,9 @@ if (dbUrl) {
   }
 } else {
   if (targetEnv === 'production') {
-    recordWarn('DATABASE_URL not detected in shell (required for Kysely direct pooled queries in production).');
+    recordWarn(
+      'DATABASE_URL not detected in shell (required for Kysely direct pooled queries in production).'
+    );
   } else {
     recordPass('DATABASE_URL check skipped for preview (Supabase JS REST API used by default)');
   }
@@ -221,7 +237,9 @@ if (targetEnv === 'production') {
   for (const secret of prodSecrets) {
     const val = process.env[secret];
     if (!val) {
-      recordWarn(`Production secret ${secret} not detected in local shell (ensure set in Vercel Dashboard).`);
+      recordWarn(
+        `Production secret ${secret} not detected in local shell (ensure set in Vercel Dashboard).`
+      );
     } else if (secret === 'CRON_SECRET' && val.length < 16) {
       recordWarn('CRON_SECRET should be at least 16 characters for cryptographic safety.');
     } else if (secret === 'REDIS_URL' && val.includes('localhost')) {
@@ -252,13 +270,18 @@ if (fs.existsSync(serverProxyPath)) {
   const disallowedModules = ['node:fs', 'node:net', 'node:child_process', 'node:tls'];
   const importedDisallowed = disallowedModules.filter((m) => content.includes(m));
   if (importedDisallowed.length > 0) {
-    recordError(`server/proxy.ts imports Node native modules illegal in Edge runtime: ${importedDisallowed.join(', ')}`);
+    recordError(
+      `server/proxy.ts imports Node native modules illegal in Edge runtime: ${importedDisallowed.join(', ')}`
+    );
   } else {
     recordPass('server/proxy.ts verified free of prohibited Node native modules');
   }
 
   // Check CSP connect-src header
-  if (content.includes('connect-src') || fs.readFileSync(proxyPath, 'utf8').includes('connect-src')) {
+  if (
+    content.includes('connect-src') ||
+    fs.readFileSync(proxyPath, 'utf8').includes('connect-src')
+  ) {
     recordPass('Content-Security-Policy headers and nonces configured');
   }
 }
@@ -291,7 +314,9 @@ if (fs.existsSync(reqServerFiles)) {
 
     const maxMb = (maxChunkSize / (1024 * 1024)).toFixed(2);
     if (maxChunkSize > 1024 * 1024) {
-      recordWarn(`Largest client chunk (${maxChunkName}) is ${maxMb} MB (target budget <= 1.0 MB).`);
+      recordWarn(
+        `Largest client chunk (${maxChunkName}) is ${maxMb} MB (target budget <= 1.0 MB).`
+      );
     } else {
       recordPass(`Largest client chunk (${maxChunkName}) is ${maxMb} MB (within 1.0 MB budget)`);
     }
@@ -314,7 +339,9 @@ if (!fs.existsSync(vercelProjectJson)) {
     if (!projectData.projectId || !projectData.orgId) {
       recordError('.vercel/project.json is missing projectId or orgId.');
     } else {
-      recordPass(`Linked to Project: ${projectData.projectName || projectData.projectId} (Org: ${projectData.orgId})`);
+      recordPass(
+        `Linked to Project: ${projectData.projectName || projectData.projectId} (Org: ${projectData.orgId})`
+      );
     }
   } catch (err) {
     recordError(`.vercel/project.json is invalid JSON: ${err.message}`);
@@ -347,7 +374,9 @@ async function checkSupabaseReachability() {
         (res) => {
           // Status 200 or 401/400 (auth check response) proves reachability
           if (res.statusCode && res.statusCode < 500) {
-            recordPass(`Supabase REST endpoint reachable (${url.hostname}, HTTP ${res.statusCode})`);
+            recordPass(
+              `Supabase REST endpoint reachable (${url.hostname}, HTTP ${res.statusCode})`
+            );
           } else {
             recordWarn(`Supabase REST endpoint returned HTTP ${res.statusCode}`);
           }
@@ -376,10 +405,14 @@ async function checkSupabaseReachability() {
 async function run() {
   await checkSupabaseReachability();
 
-  console.log(c.bold(c.blue('\n======================================================================')));
+  console.log(
+    c.bold(c.blue('\n======================================================================'))
+  );
   if (errors > 0) {
     console.log(
-      c.red(c.bold(`❌ Preflight FAILED with ${errors} blocking error(s) and ${warnings} warning(s).`))
+      c.red(
+        c.bold(`❌ Preflight FAILED with ${errors} blocking error(s) and ${warnings} warning(s).`)
+      )
     );
     console.log(c.red('   Resolve all blocking errors before deploying to Vercel.'));
     process.exit(1);
@@ -388,7 +421,7 @@ async function run() {
       c.green(
         c.bold(
           `✅ Preflight 100% PASSED with ${warnings} non-blocking warning(s).\n` +
-          `   Monorepo is fully certified and guaranteed ready for Vercel ${targetEnv.toUpperCase()} deployment.`
+            `   Monorepo is fully certified and guaranteed ready for Vercel ${targetEnv.toUpperCase()} deployment.`
         )
       )
     );

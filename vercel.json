@@ -3,5 +3,15 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm build:vercel",
-  "outputDirectory": "apps/portal/.next"
+  "outputDirectory": "apps/portal/.next",
+  "functions": {
+    "app/api/queues/process-order/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "orders"
+        }
+      ]
+    }
+  }
 }

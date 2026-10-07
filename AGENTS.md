@@ -126,6 +126,11 @@ Full command reference: `docs/agents/commands.md`.
 - **`slim-tooling-mcp`** — Virtual tool proxy middleman preventing tool definition bloat across MCP servers.
 - **`codemap`** — TypeScript/Rust/CSS AST structural intelligence (SQLite symbols, imports, AST call graph, token recipes).
 - **`code-index`** — Sub-millisecond Rust AST multi-language code indexer & daemon (symbol search, caller/callee graphs, FTS).
+- **`aegntic-mcp`** — Multi-layer RAG knowledge engine with web crawling, knowledge graphs (27+ entities, 40+ relationships), and task management.
+- **`appsai-mcp-server`** — Full-stack React/Next.js project integration with AWS + MongoDB backend connectivity.
+- **`hyperbrowser-mcp`** — Cloud browser automation, web scraping, and content extraction via @hyperbrowser/sdk.
+- **`coding-tools-mcp`** — Workspace-confined coding primitives: patch application, command execution, Git operations, and workspace inspection.
+- **`agentic-tools-mcp`** — Advanced task management with unlimited hierarchy + agent memories with JSON file storage.
 - **`.agents/`** — 17 permanent rules (incl. STM-0 structured thinking), 40+ subagent
   personas, 60+ skills, lifecycle hooks, A2A protocol, CorpOS business loops.
 

@@ -11,24 +11,13 @@
   },
   "permissions": {
     "filesystem": "read_only",
-    "tools": [
-      "view_file",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push --force"
-    ],
+    "tools": ["view_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
     "bash": "scoped"
   },
   "scope": {
-    "include_paths": [
-      "tools/scripts/**"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "include_paths": ["tools/scripts/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Ingest compound shell command string",

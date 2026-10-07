@@ -23,7 +23,8 @@ console.log('╚═════════════════════�
 
 let anyFailed = false;
 
-const isStrictClean = process.argv.includes('--strict-clean') || process.argv.includes('--require-clean');
+const isStrictClean =
+  process.argv.includes('--strict-clean') || process.argv.includes('--require-clean');
 
 for (const deployment of TARGET_DEPLOYMENTS) {
   console.log(`\n🔎 [Auditing] ${deployment.name} at ${deployment.path}`);

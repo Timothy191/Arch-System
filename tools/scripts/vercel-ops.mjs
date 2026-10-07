@@ -118,6 +118,27 @@ async function main() {
       break;
     }
 
+    case 'prune': {
+      console.log(
+        chalk.bold(chalk.blue('🧹 [PRUNE] Executing safe Vercel deployment storage pruner...'))
+      );
+      const isDryRun = extraArgs.includes('--dry-run');
+      const prunerPath = path.resolve(ROOT_DIR, '../tools/scripts/prune-vercel-deployments.mjs');
+      const prunerArgs = [prunerPath];
+      if (isDryRun) prunerArgs.push('--dry-run');
+      else prunerArgs.push('--execute');
+
+      const pruner = spawn('node', prunerArgs, { stdio: 'inherit' });
+      await new Promise((resolve, reject) => {
+        pruner.on('close', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`Pruner exited with code ${code}`));
+        });
+        pruner.on('error', reject);
+      });
+      break;
+    }
+
     default:
       console.log(
         chalk.bold(
@@ -130,6 +151,7 @@ Commands:
   invalidate --tag <tag>     Invalidate specific Next.js 16 cache tag on Vercel CDN
   purge                      Purge full CDN and Data cache
   comments [--json]          List and review Vercel Toolbar comments
+  prune [--dry-run]          Prune obsolete deployments and reclaim Vercel storage
 `)
         )
       );

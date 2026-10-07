@@ -11,17 +11,8 @@
   },
   "permissions": {
     "filesystem": "scoped_write",
-    "tools": [
-      "view_file",
-      "write_to_file",
-      "replace_file_content",
-      "grep_search",
-      "run_command"
-    ],
-    "forbidden_tools": [
-      "git push",
-      "rm -rf"
-    ],
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
     "bash": "scoped"
   },
   "scope": {
@@ -31,9 +22,7 @@
       "packages/contract/src/**/*.ts",
       "apps/portal/app/api/**/*.ts"
     ],
-    "exclude_paths": [
-      "node_modules/**"
-    ]
+    "exclude_paths": ["node_modules/**"]
   },
   "runbook": [
     "Phase 1: Ingest active routes, database tables, and shared schemas",

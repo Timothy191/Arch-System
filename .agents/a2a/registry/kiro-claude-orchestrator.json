@@ -19,20 +19,12 @@
       "run_command",
       "call_mcp_tool"
     ],
-    "forbidden_tools": [
-      "git push --force",
-      "rm -rf /"
-    ],
+    "forbidden_tools": ["git push --force", "rm -rf /"],
     "bash": "full"
   },
   "scope": {
-    "include_paths": [
-      "**/*"
-    ],
-    "exclude_paths": [
-      "node_modules/**",
-      ".git/**"
-    ]
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
     "Phase 1: Maintain temp/ phased documentation (outline, requirements, design, tasks)",
