@@ -167,7 +167,6 @@ const nextConfig = {
       'date-fns',
       'recharts',
       'sonner',
-      '@ai-sdk/react',
       '@radix-ui/react-tabs',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',

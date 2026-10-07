@@ -5,7 +5,16 @@ import { notFound } from 'next/navigation';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
 import { prewarmDepartmentCache } from '@/lib/prewarm-cache';
 
-export async function generateMetadata({ params }: { params: Promise<any> }): Promise<Metadata> {
+interface DepartmentLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ department: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ department: string }>;
+}): Promise<Metadata> {
   const { department } = await params;
   const dept = DEPARTMENTS.find((d) => d.name === department);
   return {
@@ -13,13 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<any> }): Pr
   };
 }
 
-export default async function DepartmentRootLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<any>;
-}) {
+export default async function DepartmentRootLayout({ children, params }: DepartmentLayoutProps) {
   const { department } = await params;
   const dept = DEPARTMENTS.find((d) => d.name === department);
   if (!dept) notFound();

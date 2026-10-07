@@ -3,7 +3,6 @@
   "version": "1.6.2",
   "type": "module",
   "dependencies": {
-    "@ai-sdk/gateway": "^4.0.104",
     "@flags-sdk/vercel": "^1.5.0",
     "@hookform/resolvers": "^5.2.2",
     "@modelcontextprotocol/sdk": "^1.31.0",
@@ -34,8 +33,6 @@
     "@repo/ui": "1.0.0",
     "@repo/utils": "1.0.0",
     "@sentry/nextjs": "catalog:",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.117.2",
     "@tanstack/query-sync-storage-persister": "^5.104.0",
     "@tanstack/react-query": "^5.104.0",
     "@tanstack/react-query-persist-client": "^5.104.0",
@@ -47,7 +44,6 @@
     "@vercel/queue": "^0.8.0",
     "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "catalog:",
-    "ai": "^7.0.128",
     "bcryptjs": "^3.0.3",
     "flags": "^4.3.1",
     "framer-motion": "catalog:",
@@ -64,7 +60,6 @@
     "sonner": "catalog:",
     "swagger-ui-react": "^5.18.2",
     "workflow": "^4.8.9",
-    "ws": "^8.22.0",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
