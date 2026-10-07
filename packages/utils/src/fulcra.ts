@@ -1,7 +1,10 @@
-import { exec } from 'child_process';
 import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+const execAsync = async (cmd: string) => {
+  if (typeof window !== 'undefined') throw new Error('Cannot run exec on client');
+  const { exec } = eval('require')('child_process');
+  return promisify(exec)(cmd);
+};
 
 /**
  * AgentCursorTracker
