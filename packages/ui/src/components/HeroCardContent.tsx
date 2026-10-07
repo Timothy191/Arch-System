@@ -163,7 +163,7 @@ export function HeroCardContent({
       <div className="absolute top-0 right-0 w-[55%] h-full group/img overflow-hidden rounded-r-2xl z-10">
         <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
         <img
-          src={failedImages.has(panel.image) ? '/images/departments/overview.jpg' : panel.image}
+          src={failedImages.has(panel.image) ? 'https://res.cloudinary.com/zwevvryv/image/upload/images/departments/overview.jpg' : panel.image}
           alt={`${panel.title} visual`}
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
           loading={isActive ? 'eager' : 'lazy'}
