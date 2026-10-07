@@ -2,7 +2,6 @@ import { DEPARTMENTS, getDepartmentTabs } from '@repo/departments/data-access';
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { AriaLauncher } from '@/components/ai/AriaLauncher';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +22,6 @@ export default async function ControlRoomLayout({ children }: { children: React.
       <ActiveDepartmentSetter department="control-room" />
       <DepartmentLayout department={dept} tabs={tabs}>
         {children}
-        <AriaLauncher />
       </DepartmentLayout>
     </>
   );

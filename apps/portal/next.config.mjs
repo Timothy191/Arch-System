@@ -66,18 +66,6 @@ const nextConfig = {
       },
     ];
   },
-  // AGENT-TRACE: Aria assistant is served by a standalone sidecar (aria-overlay,
-  // basePath `/assistant`). The portal proxies it server-side so the iframe stays
-  // same-origin and Supabase cookies flow; AI_ASSISTANT_URL points at the sidecar.
-  async rewrites() {
-    const assistantUrl = process.env.AI_ASSISTANT_URL ?? 'http://127.0.0.1:3100';
-    return [
-      {
-        source: '/assistant/:path*',
-        destination: `${assistantUrl}/assistant/:path*`,
-      },
-    ];
-  },
   typescript: {
     // !! DANGER !!
     // Only allow skipping type checks in local development!
@@ -193,52 +181,8 @@ const nextConfig = {
   },
   async headers() {
     return [
-      // AGENT-TRACE: Aria's proxied document is embedded in a same-origin iframe,
-      // so its header rule must allow framing (SAMEORIGIN + frame-ancestors 'self')
-      // and must NOT be overridden by the DENY/'none' generic rule below. The
-      // generic rule therefore excludes the /assistant prefix.
       {
-        source: '/assistant/:path*',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          ...(isProduction
-            ? [
-                {
-                  key: 'Content-Security-Policy',
-                  value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'self';",
-                },
-              ]
-            : [
-                {
-                  key: 'Content-Security-Policy-Report-Only',
-                  value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*; object-src 'none'; frame-ancestors 'self'; report-uri /api/csp-violations;",
-                },
-              ]),
-        ],
-      },
-      {
-        source: '/((?!assistant(?:/|$)).*)',
+        source: '/:path*',
         headers: [
           {
             key: 'X-Content-Type-Options',

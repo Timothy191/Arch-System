@@ -369,7 +369,7 @@ export function IntegrationManager() {
                 value={form.risk_class}
                 onChange={(e) => setForm({ ...form, risk_class: e.target.value as RiskClass })}
               >
-                <option value="read">Tools are read-class (Aria executes directly)</option>
+                <option value="read">Tools are read-class (Agents execute directly)</option>
                 <option value="write">Tools are write-class (confirmation required)</option>
               </select>
 
@@ -401,8 +401,8 @@ export function IntegrationManager() {
         <GlassCard className="p-6 text-sm text-[var(--text-muted)]">Loading…</GlassCard>
       ) : installations.length === 0 ? (
         <GlassCard className="p-6 text-sm text-[var(--text-muted)]">
-          No integrations installed yet. Install an MCP connector to expose its tools to the Aria
-          assistant and dev coding agents.
+          No integrations installed yet. Install an MCP connector to expose its tools to AI and dev
+          coding agents.
         </GlassCard>
       ) : (
         <div className="space-y-3">

@@ -2,7 +2,6 @@ import { DEPARTMENTS, getDepartmentTabs } from '@repo/departments/data-access';
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { AriaLauncher } from '@/components/ai/AriaLauncher';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
 import { prewarmDepartmentCache } from '@/lib/prewarm-cache';
 
@@ -38,7 +37,6 @@ export default async function DepartmentRootLayout({
       <ActiveDepartmentSetter department={department} />
       <DepartmentLayout department={dept} tabs={tabs}>
         {children}
-        <AriaLauncher />
       </DepartmentLayout>
     </>
   );

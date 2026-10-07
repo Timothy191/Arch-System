@@ -15,11 +15,6 @@ const PWAInstallButton = dynamic(
 );
 
 // Performance & Speed Index: Defer off-critical-path client overlays
-const AriaLauncher = dynamic(
-  () => import('@/components/ai/AriaLauncher').then((m) => ({ default: m.AriaLauncher })),
-  { ssr: false }
-);
-
 const OfflineBanner = dynamic(
   () => import('@/components/OfflineBanner').then((m) => ({ default: m.OfflineBanner })),
   { ssr: false }
@@ -43,7 +38,6 @@ export function ClientOverlays() {
     <>
       <PWAInstallButton />
       <CookieConsent />
-      <AriaLauncher />
       <OfflineBanner />
       <WebVitalsReporter />
       <ViewportBoundaries />
