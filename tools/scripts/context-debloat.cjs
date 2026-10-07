@@ -128,7 +128,6 @@ function archiveSkill(skillName, dryRun = false) {
   const skillPath = path.join(SKILLS_DIR, skillName);
   const archiveDir = path.join(SKILLS_DIR, '.archived');
 
-
   if (!fs.existsSync(archiveDir)) {
     if (!dryRun) {
       fs.mkdirSync(archiveDir, { recursive: true });
@@ -327,13 +326,21 @@ function main() {
   console.log('\n🧹 Removing stale session logs...\n');
   removeStaleSessionLogs(dryRun);
 
-  // Re-index memory base
+  // Re-index memory base & vector memory
   if (!dryRun) {
     console.log('\n🧹 Re-indexing memory base...\n');
     try {
       require('./smart-indexer.cjs');
     } catch (e) {
       console.warn('⚠️ Failed to re-index memory base:', e.message);
+    }
+
+    console.log('\n⚡ Synchronizing RuFlo Swarm SQLite vector database...\n');
+    try {
+      const { spawnSync } = require('node:child_process');
+      spawnSync('node', [path.join(__dirname, 'sync-vector-memory.mjs')], { stdio: 'inherit' });
+    } catch (e) {
+      console.warn('⚠️ Failed to synchronize vector memory:', e.message);
     }
   }
 

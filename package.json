@@ -98,6 +98,8 @@
     "code:dead": "repowise dead-code",
     "code:risk": "repowise risk",
     "context:pack": "repomix",
+    "context:debloat": "node tools/scripts/context-debloat.cjs",
+    "memory:sync": "node tools/scripts/sync-vector-memory.mjs",
     "verify:n8n": "bash scripts/verify-n8n-stack.sh",
     "audit:compliance": "pnpm audit:agents:test && pnpm audit:suite && node tools/audits/audit-design-tokens.cjs && node tools/audits/audit-image-optimization.cjs && node tools/audits/audit-data-fetching.cjs && node tools/audits/audit-caching.cjs && node tools/audits/audit-turbopack.cjs && node tools/audits/audit-routing-and-actions.cjs && node tools/audits/audit-server-components.cjs && node tools/audits/audit-hooks-and-clients.cjs && node tools/scripts/vercel-preflight.cjs && node tools/audits/audit-contract-drift.cjs && node tools/audits/audit-rls-matrix.cjs && node tools/audits/audit-agentic-content.cjs && pnpm --filter @repo/database test",
     "audit:explain": "node tools/ops/explain-query-plans.cjs",
