@@ -1,6 +1,7 @@
 {
   "name": "arch-systems",
   "version": "1.6.2",
+  "packageManager": "pnpm@9.15.9",
   "commitlint": {
     "extends": [
       "./config/tools/commitlint.config.mjs"

@@ -8,7 +8,7 @@ Welcome to the Arch-Systems (Plantcor) project! This guide will help you set up,
 
 Ensure your local machine satisfies the monorepo engine requirements:
 
-- **Node.js**: `>=22` (Pinned via Volta to `24.15.0`)
+- **Node.js**: `>=22` (Pinned via mise to `24.15.0`)
 - **pnpm**: `9.15.9` (Enforced via `packageManager` field)
 - **Docker & Docker Compose**: Required for local Supabase database and E2E visual suites.
 - **Git & SSH**: Configured with proper commit signing and repository access.
