@@ -164,7 +164,8 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
           <div className="absolute inset-0 z-0">
             {!imageError && (
               <Image
-                src={`/images/departments/${department.name}.jpg`}
+                // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
+                src={`https://res.cloudinary.com/zwevvryv/image/upload/images/departments/${department.name}.jpg`}
                 alt=""
                 aria-hidden="true"
                 fill
