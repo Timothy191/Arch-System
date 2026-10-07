@@ -32,6 +32,22 @@ const nextConfig = {
   // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
   // can't handle. Until Turbopack improves deduplication or inngest is excluded from the client
   outputFileTracingRoot: workspaceRoot,
+  outputFileTracingExcludes: {
+    '*': [
+      '**/.agents/**',
+      '**/.gemini/**',
+      '**/.palabre/**',
+      '**/.swarm/**',
+      '**/.remember/**',
+      '**/docs/**',
+      '**/documentation/**',
+      '**/tests/**',
+      '**/e2e/**',
+      '**/k6/**',
+      '**/playwright-report/**',
+      '**/coverage/**',
+    ],
+  },
   turbopack: {
     root: workspaceRoot,
   },
