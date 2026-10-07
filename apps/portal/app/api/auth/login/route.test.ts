@@ -70,7 +70,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcor.os',
-      password: 'Yugioh@123#',
+      password: 'Yugioh@1234#',
     });
 
     const res = await POST(req);
@@ -111,7 +111,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcor.os',
-      password: 'Yugioh@123#',
+      password: 'Yugioh@1234#',
     });
 
     const res = await POST(req);
@@ -131,7 +131,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcor.os',
-      password: 'Yugioh@123#',
+      password: 'Yugioh@1234#',
     });
 
     const res = await POST(req);
@@ -147,7 +147,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcor.os',
-      password: 'Yugioh@123#',
+      password: 'Yugioh@1234#',
     });
 
     const res = await POST(req);

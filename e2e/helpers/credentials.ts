@@ -6,4 +6,4 @@
  * import from here so CI can override per-environment (S4: secrets hygiene).
  */
 export const TEST_EMAIL = process.env.TEST_EMAIL || 'admin@plantcor.os';
-export const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@123#';
+export const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@1234#';

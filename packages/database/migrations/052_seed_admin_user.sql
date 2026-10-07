@@ -35,7 +35,7 @@ BEGIN
       admin_uid,
       '00000000-0000-0000-0000-000000000000',
       'admin@plantcor.os',
-      crypt('Yugioh@123#', gen_salt('bf')),
+      crypt('Yugioh@1234#', gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}',
       '{}',
@@ -52,7 +52,7 @@ BEGIN
     -- If exists, update password and ensure email capitalization is Admin@plantcor.os
     UPDATE auth.users
     SET 
-      encrypted_password = crypt('Yugioh@123#', gen_salt('bf')),
+      encrypted_password = crypt('Yugioh@1234#', gen_salt('bf')),
       email = 'admin@plantcor.os'
     WHERE id = admin_uid;
   END IF;

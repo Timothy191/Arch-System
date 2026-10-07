@@ -4,7 +4,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 const AUTH_FILE = path.resolve(process.cwd(), 'e2e/.auth/user.json');
 const TEST_EMAIL = process.env.TEST_EMAIL || 'admin@plantcor.os';
-const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@123#';
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@1234#';
 
 /**
  * Attempt to authenticate via form-based login.

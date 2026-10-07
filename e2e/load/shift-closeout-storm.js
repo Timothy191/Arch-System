@@ -45,7 +45,7 @@ export function setup() {
     `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
     JSON.stringify({
       email: 'admin@plantcor.os',
-      password: 'Yugioh@123#',
+      password: 'Yugioh@1234#',
     }),
     {
       headers: {
