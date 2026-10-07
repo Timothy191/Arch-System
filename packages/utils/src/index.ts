@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './fetch-client';
+export * from './fulcra';
 export * from './hardware/raw-socket';
 export * from './hlc';
 export * from './n8n';
