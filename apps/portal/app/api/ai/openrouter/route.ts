@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // --- FULCRA LIFE CONTEXT INJECTION ---
     const lifeContext = await AgentCursorTracker.getLifeContext();
     const systemInstruction = {
-      role: 'system',
+      role: 'system' as const,
       content: `[REAL-TIME CONTEXT] You are a highly personalized AI. Current user telemetry: ${JSON.stringify(lifeContext)}`,
     };
 

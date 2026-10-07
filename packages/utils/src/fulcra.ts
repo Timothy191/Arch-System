@@ -38,7 +38,7 @@ export class AgentCursorTracker {
       const records = stdout
         .trim()
         .split('\n')
-        .map((r) => JSON.parse(r));
+        .map((r: any) => JSON.parse(r));
       return records.length > 0 ? records[0] : null;
     } catch (err) {
       console.error(`[AgentCursor] Failed to get latest record:`, err);
@@ -60,7 +60,7 @@ export class AgentCursorTracker {
         context.sleep = sleepOut
           .trim()
           .split('\n')
-          .map((r) => JSON.parse(r));
+          .map((r: any) => JSON.parse(r));
       }
 
       // 2. Fetch recent location
