@@ -40,11 +40,30 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const { isOnline } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
 
-  // Compute live counts
+  // Compute live counts in a single pass memoized loop (prevents 3 separate O(N) array scans per render)
   const totalSouls = records.length;
-  const accounted = records.filter((r) => r.status === 'accounted').length;
-  const unaccounted = records.filter((r) => r.status === 'unaccounted').length;
-  const evacuated = records.filter((r) => r.status === 'evacuated').length;
+  const { accounted, unaccounted, evacuated } = useMemo(() => {
+    let acc = 0;
+    let unacc = 0;
+    let evac = 0;
+    for (const r of records) {
+      if (r.status === 'accounted') acc++;
+      else if (r.status === 'unaccounted') unacc++;
+      else if (r.status === 'evacuated') evac++;
+    }
+    return { accounted: acc, unaccounted: unacc, evacuated: evac };
+  }, [records]);
+
+  // Pre-index station counts to replace O(S * N) nested array filtering during JSX station mapping
+  const stationCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of records) {
+      if (r.status === 'accounted' && r.station) {
+        map.set(r.station, (map.get(r.station) || 0) + 1);
+      }
+    }
+    return map;
+  }, [records]);
 
   const handleToggleStatus = async (record: MusterPersonnelRecord) => {
     const nextStatus: MusterPersonnelRecord['status'] =
@@ -129,17 +148,25 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
     toast.success('Emergency roll call exported for safety marshals.');
   };
 
+  // Hoist lowercased search and station query strings outside filter callback to eliminate O(N) string transformations
   const filteredRecords = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const targetStationLower = selectedStation.toLowerCase();
+
     return records.filter((r) => {
       const matchesSearch =
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.assignedZone.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        r.company.toLowerCase().includes(q) ||
+        r.assignedZone.toLowerCase().includes(q);
+
       const matchesStation =
         selectedStation === 'all' ||
         (selectedStation === 'unassigned' && !r.station) ||
-        r.station?.toLowerCase().includes(selectedStation.toLowerCase());
+        (r.station ? r.station.toLowerCase().includes(targetStationLower) : false);
+
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+
       return matchesSearch && matchesStation && matchesStatus;
     });
   }, [records, searchQuery, selectedStation, statusFilter]);
@@ -276,9 +303,8 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       {/* Muster Point Stations Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {summary.musterStations.map((station) => {
-          const stationCount = records.filter(
-            (r) => r.status === 'accounted' && r.station === station.name
-          ).length;
+          // O(1) Map lookup replacing previous O(N) array filtering per station
+          const stationCount = stationCountMap.get(station.name) || 0;
           return (
             <div
               key={station.id}
