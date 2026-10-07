@@ -109,7 +109,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         <div className="flex items-center gap-2 flex-wrap">
           {/* Quick Search Input */}
           <div className="relative flex-1 sm:w-52 min-w-[160px]">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none" />
             <input
               id="hub-module-search"
               type="text"
@@ -118,7 +118,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               placeholder="Search modules... (/)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8 pr-7 text-xs rounded-button bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
+              className="w-full h-8 pl-8.5 pr-8 text-xs rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search
@@ -133,7 +133,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 ✕
               </button>
             ) : (
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-arch-text-tertiary font-mono bg-arch-surface-tertiary px-1 rounded-md border border-arch-border-subtle pointer-events-none">
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-arch-text-tertiary font-mono bg-arch-surface-tertiary px-1.5 py-0.5 rounded-full border border-arch-border-subtle pointer-events-none">
                 /
               </kbd>
             )}
@@ -141,7 +141,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-1 bg-arch-surface-secondary/80 p-1 rounded-button border border-arch-border-subtle text-xs font-medium"
+            className="flex items-center gap-1 bg-arch-surface-secondary/80 p-1 rounded-full border border-arch-border-subtle text-xs font-medium"
             role="group"
             aria-label="Filter modules by category"
           >
@@ -150,7 +150,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === 'all'}
               onClick={() => setActiveFilter('all')}
               className={cn(
-                'px-2.5 py-1 rounded-button transition-all text-xs',
+                'px-2.5 py-1 rounded-full transition-all text-xs',
                 activeFilter === 'all'
                   ? 'bg-white text-arch-text-primary shadow-card font-semibold'
                   : 'text-arch-text-tertiary hover:text-arch-text-secondary'
@@ -164,7 +164,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 aria-pressed={activeFilter === 'pinned'}
                 onClick={() => setActiveFilter('pinned')}
                 className={cn(
-                  'px-2.5 py-1 rounded-button transition-all text-xs flex items-center gap-1',
+                  'px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1',
                   activeFilter === 'pinned'
                     ? 'bg-white text-arch-accent-blue shadow-card font-semibold'
                     : 'text-arch-text-tertiary hover:text-arch-text-secondary'
@@ -179,7 +179,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === 'active'}
               onClick={() => setActiveFilter('active')}
               className={cn(
-                'px-2.5 py-1 rounded-button transition-all text-xs',
+                'px-2.5 py-1 rounded-full transition-all text-xs',
                 activeFilter === 'active'
                   ? 'bg-white text-accent-green shadow-card font-semibold'
                   : 'text-arch-text-tertiary hover:text-arch-text-secondary'
@@ -192,7 +192,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === 'critical'}
               onClick={() => setActiveFilter('critical')}
               className={cn(
-                'px-2.5 py-1 rounded-button transition-all text-xs',
+                'px-2.5 py-1 rounded-full transition-all text-xs',
                 activeFilter === 'critical'
                   ? 'bg-white text-accent-amber shadow-card font-semibold'
                   : 'text-arch-text-tertiary hover:text-arch-text-secondary'
