@@ -16,6 +16,8 @@ services:
       retries: 5
     networks:
       - plantcor-tools
+    mem_limit: 256m
+    cpus: 0.5
 
   langfuse:
     image: langfuse/langfuse:3
@@ -68,6 +70,8 @@ services:
         condition: service_healthy
     networks:
       - plantcor-tools
+    mem_limit: 1024m
+    cpus: 1.5
 
   langfuse-db:
     image: postgres:16-alpine
@@ -80,6 +84,7 @@ services:
       - POSTGRES_DB=${LANGFUSE_DB_NAME}
     volumes:
       - langfuse_db_data:/var/lib/postgresql/data
+    command: postgres -c max_connections=150 -c shared_buffers=128MB -c work_mem=8MB
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${LANGFUSE_DB_USER} -d ${LANGFUSE_DB_NAME}']
       interval: 5s
@@ -87,6 +92,8 @@ services:
       retries: 10
     networks:
       - plantcor-tools
+    mem_limit: 512m
+    cpus: 1.0
 
   langfuse-redis:
     image: redis:7
@@ -101,6 +108,8 @@ services:
       retries: 5
     networks:
       - plantcor-tools
+    mem_limit: 256m
+    cpus: 0.5
 
   it-tools:
     image: corentinth/it-tools:latest
@@ -110,6 +119,8 @@ services:
       - '127.0.0.1:8088:80'
     networks:
       - plantcor-tools
+    mem_limit: 128m
+    cpus: 0.5
 
   omni-tools:
     image: iib0011/omni-tools:latest
@@ -119,6 +130,8 @@ services:
       - '127.0.0.1:8089:80'
     networks:
       - plantcor-tools
+    mem_limit: 256m
+    cpus: 0.5
 
 volumes:
   redis_data:

@@ -26,6 +26,8 @@ services:
             basic-auth:
               enabled: false
     command: server local
+    mem_limit: 2048m
+    cpus: 2.0
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -33,3 +35,5 @@ services:
     restart: unless-stopped
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+    mem_limit: 512m
+    cpus: 1.0
