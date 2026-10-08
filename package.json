@@ -92,6 +92,7 @@
     "audit:rsc": "node tools/audits/audit-server-components.cjs",
     "audit:images": "node tools/audits/audit-image-optimization.cjs",
     "audit:hooks": "node tools/audits/audit-hooks-and-clients.cjs",
+    "audit:rule-drift": "node tools/audits/audit-agent-rules-drift.cjs",
     "audit:vercel": "node tools/scripts/vercel-preflight.cjs",
     "audit:perf": "lighthouse http://localhost:3000 --chrome-flags=\"--headless\" --output json --output-path=./temp/lighthouse-report.json",
     "audit:browser": "node tools/audits/browser-devtools-audit.cjs",
