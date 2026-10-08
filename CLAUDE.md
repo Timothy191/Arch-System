@@ -66,11 +66,13 @@ pnpm --filter @repo/database supabase:reset  # Reset local database
 - **Secrets**: Never print, edit, or commit `.env*` secrets.
 - **Troubleshooting**: If `pnpm` hangs with no output, kill it and use `make` targets (`make dev`, `make build`, `make test`) or direct `turbo`/`node`.
 
-## Verification Mandate
+## Verification Mandate (6-Pillar Protocol)
 
-Before completing ANY task:
+Before completing ANY task, execute and satisfy the 6-pillar protocol ([`.agents/rules/agent-accuracy-enforcement.md`](file:///home/tim/Fork/Arch-System/.agents/rules/agent-accuracy-enforcement.md)):
 
-1. Run `pnpm agent:verify` — must exit 0.
-2. For UI/frontend tasks: run `pnpm audit:browser` — must exit 0.
-3. Follow STM-0 5-phase structured thinking mandate (`.agents/rules/structured-thinking-mandate.md`).
-4. Operational reference lives in `.agents/GUIDE.md` and `AGENTS.md`.
+1. **Zero-Exception Verification**: Run `pnpm agent:verify` — must achieve 100% PASS (0 exit code). Autonomously self-heal any failures.
+2. **Dynamic Context Leasing**: Pull skills dynamically via `skills-mcp` (`acquire_skill`) and free immediately via `return_skill()`. Route external tools via `slim-tooling-mcp`.
+3. **Structured Thinking (STM-0)**: Follow the 5 phases (Comprehension → Evidence → Solution → Criticism → Execution) defined in [`.agents/rules/structured-thinking-mandate.md`](file:///home/tim/Fork/Arch-System/.agents/rules/structured-thinking-mandate.md). Complete 100% of TODOs.
+4. **Scoped Progression**: Decompose large objectives into smaller atomic tasks to understand conventions before mutating code.
+5. **AST Exploration**: Explore code via `codemap`, `code-index`, or `ast-grep` rather than dumping files into context.
+6. **Continuous Invariant Auditing**: Continuously run the corresponding domain audit (`pnpm policy:check`, `pnpm audit:tokens`, `pnpm audit:routing`, `pnpm audit:caching`, `pnpm audit:vercel`, etc.). For UI changes, execute `pnpm audit:browser`. Operational reference lives in [`.agents/GUIDE.md`](file:///home/tim/Fork/Arch-System/.agents/GUIDE.md) and [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md).

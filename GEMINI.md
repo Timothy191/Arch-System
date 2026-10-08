@@ -15,21 +15,15 @@ Guidance for Gemini and Antigravity agents operating within the Arch-System ente
    - `packages/*` and `tools/*` must NOT import `apps/*`.
    - All primary data fetching in RSC / Server Actions / Route Handlers — never in `'use client'`.
 4. **Type Safety**: Strict TypeScript throughout. Never use `any` or `@ts-ignore`.
-5. **Anti-Bloat Context Management**:
-   - Never inject raw manuals or full rule catalogs into prompt memory.
-   - Pull skills on-demand via `skills-mcp` (`acquire_skill`) and release with `return_skill()`.
-   - Route external MCP tools virtually via `slim-tooling-mcp` (`call_upstream_tool`).
-   - Query unified memory & retrospectives via `memory-gateway-mcp`.
-6. **Toolchain Mandate**:
-   - Code Search: Use `code-index`, `codemap`, or `ast-grep` (`sg`) instead of raw file dumps.
-   - Context Bundling: Use `repomix` (`pnpm context:pack`) for targeted module packaging.
-   - Verification: Use `difftastic` (`difft`) for structural syntax diffs.
+5. **Toolchain Mandate**: Use `code-index`, `codemap`, or `ast-grep` (`sg`) for search, `repomix` (`pnpm context:pack`) for bundling, and `difftastic` (`difft`) for diffs.
 
-## Mandatory Verification Protocol
+## Mandatory Verification Protocol (6-Pillar Protocol)
 
-Before declaring ANY task complete, execute and satisfy:
+Before declaring ANY task complete, execute and satisfy the 6-pillar protocol ([`.agents/rules/agent-accuracy-enforcement.md`](file:///home/tim/Fork/Arch-System/.agents/rules/agent-accuracy-enforcement.md)):
 
-1. **Structured Thinking Mandate (STM-0)**: Follow the 5-phase protocol (Comprehension → Evidence → Solution → Criticism → Execution) defined in [`.agents/rules/structured-thinking-mandate.md`](file:///home/tim/Fork/Arch-System/.agents/rules/structured-thinking-mandate.md).
-2. **Zero-Interruption Self-Healing**: Run `pnpm agent:verify`. If any gate fails, autonomously diagnose and self-heal until `100% PASS` is achieved.
-3. **Frontend Verification**: For UI modifications, execute `pnpm audit:browser` to verify DOM hydration, zero-CLS, and OKLCH color rendering.
-4. **Detailed Reporting Standard**: Provide comprehensive, evidence-backed reports per [`.agents/rules/todo-completion-and-detailed-reporting.md`](file:///home/tim/Fork/Arch-System/.agents/rules/todo-completion-and-detailed-reporting.md).
+1. **Zero-Exception Verification Gate**: Run `pnpm agent:verify`. If any gate fails, autonomously diagnose and self-heal until `100% PASS` is achieved.
+2. **Dynamic Context Leasing**: Pull skills dynamically via `skills-mcp` (`acquire_skill`) and release with `return_skill()`. Route external tools through `slim-tooling-mcp`.
+3. **Structured Thinking Mandate (STM-0)**: Follow the 5-phase protocol (Comprehension → Evidence → Solution → Criticism → Execution) defined in [`.agents/rules/structured-thinking-mandate.md`](file:///home/tim/Fork/Arch-System/.agents/rules/structured-thinking-mandate.md). Complete 100% of TODOs.
+4. **Scoped Task Progression**: Decompose large objectives into smaller, atomic tasks to build codebase pattern familiarity before broad mutations.
+5. **AST Exploration**: Use `codemap`, `code-index`, or `ast-grep` (`sg`) rather than dumping large files into prompt context.
+6. **Continuous Invariant Auditing**: Continuously run the corresponding domain audit (`pnpm policy:check`, `pnpm audit:tokens`, `pnpm audit:routing`, `pnpm audit:vercel`, etc.). For UI changes, execute `pnpm audit:browser`. Provide comprehensive evidence-backed reports per [`.agents/rules/todo-completion-and-detailed-reporting.md`](file:///home/tim/Fork/Arch-System/.agents/rules/todo-completion-and-detailed-reporting.md).

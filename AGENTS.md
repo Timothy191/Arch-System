@@ -133,12 +133,15 @@ Full command reference: `docs/agents/commands.md`.
 - **`.agents/`** — 17 permanent rules (incl. STM-0 structured thinking), 40+ subagent
   personas, 60+ skills, lifecycle hooks, A2A protocol, CorpOS business loops.
 
-## Mandatory Protocol
+## Mandatory Protocol (6-Pillar Execution Standard)
 
-Before any code mutation, follow the **STM-0 5-phase structured thinking mandate**
-(`.agents/rules/structured-thinking-mandate.md`). Complete 100% of listed TODOs and
-report in detail per `.agents/rules/todo-completion-and-detailed-reporting.md`.
-Use `skills-mcp` to lease skills/context on-demand and release them immediately upon task completion to prevent token bloat. Route external MCP tools via `slim-tooling-mcp` on-demand rather than preloading full toolsets into prompt memory.
-For codebase exploration and refactoring, query `codemap` and `code-index` rather than catting large files into prompt context. Ensure `code-index` daemon and `codemap` watchers remain running in background. Autonomous tool shopping is executed via `clihub-ai` / `mise` / `cargo` / `uv`.
+Every task must strictly adhere to the 6-pillar accuracy protocol (`.agents/rules/agent-accuracy-enforcement.md`):
+
+1. **Zero-Exception Verification**: Run `pnpm agent:verify` before declaring ANY task complete. Autonomously self-heal all gate failures.
+2. **Dynamic Context Leasing**: Lease skills via `skills-mcp` (`acquire_skill`) and free via `return_skill()`. Route external MCP tools via `slim-tooling-mcp`.
+3. **Structured Thinking (STM-0)**: Follow the 5 phases (Comprehension → Evidence → Solution → Criticism → Execution) for non-trivial changes. Complete 100% of TODOs per `.agents/rules/todo-completion-and-detailed-reporting.md`.
+4. **Scoped Progression**: Decompose large objectives into smaller, atomic tasks to build familiarity with patterns before mutating multi-package code.
+5. **AST Exploration**: Query `codemap` and `code-index` rather than catting large files into prompt context.
+6. **Continuous Invariant Auditing**: Continuously run the corresponding domain audit (`policy:check`, `audit:tokens`, `audit:routing`, `audit:caching`, `audit:vercel`, etc.).
 
 **Version control**: use plain `git` by default. GitButler (`but`) is the intended workflow, but it is **not initialized in this repo** — `but` fails with _"No GitButler project found"_, and no `.gitbutler/` config exists. Initializing it (`but setup`) mutates the global GitButler registry and adds a `gb-local` remote, so it is a human decision, not an autonomous one. Until someone runs `but setup`, plain `git` is the only working path. The current branch is `gitbutler/workspace` despite this.
