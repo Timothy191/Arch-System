@@ -1,6 +1,8 @@
 'use client';
 
 import { Button } from '@repo/ui/components/ui/button';
+import { Select, SelectItem } from '@repo/ui/components/ui/select';
+import { Textarea } from '@repo/ui/components/ui/textarea';
 import { analytics, fetchClient } from '@repo/utils/client';
 import { useState } from 'react';
 
@@ -16,16 +18,16 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Escape') {
       setIsOpen(false);
     } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && message.trim()) {
       e.preventDefault();
-      handleSubmit(e as unknown as React.FormEvent);
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
     setSubmitting(true);
@@ -74,17 +76,17 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
               </Button>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <select
+              <Select
                 value={type}
-                onChange={(e) => setType(e.target.value)}
+                onValueChange={(value) => setType(value)}
                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="bug">Report a Bug</option>
-                <option value="feature">Suggest a Feature</option>
-                <option value="general">General Feedback</option>
-                <option value="support">Need Operational Support</option>
-              </select>
-              <textarea
+                <SelectItem value="bug">Report a Bug</SelectItem>
+                <SelectItem value="feature">Suggest a Feature</SelectItem>
+                <SelectItem value="general">General Feedback</SelectItem>
+                <SelectItem value="support">Need Operational Support</SelectItem>
+              </Select>
+              <Textarea
                 placeholder="Describe your issue or feedback... (Press Cmd+Enter to send)"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -170,17 +172,17 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
         </Button>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <select
+        <Select
           value={type}
-          onChange={(e) => setType(e.target.value)}
+          onValueChange={(value) => setType(value)}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value="bug">Report a Bug</option>
-          <option value="feature">Suggest a Feature</option>
-          <option value="general">General Feedback</option>
-          <option value="support">Need Support</option>
-        </select>
-        <textarea
+          <SelectItem value="bug">Report a Bug</SelectItem>
+          <SelectItem value="feature">Suggest a Feature</SelectItem>
+          <SelectItem value="general">General Feedback</SelectItem>
+          <SelectItem value="support">Need Support</SelectItem>
+        </Select>
+        <Textarea
           placeholder="Please describe your issue or suggestion... (Press Cmd+Enter to send)"
           value={message}
           onChange={(e) => setMessage(e.target.value)}

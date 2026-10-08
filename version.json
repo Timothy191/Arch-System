@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "6217194",
-  "gitCommitFull": "6217194c5d749a3f304187818ed1530a32fed08f",
-  "gitBranch": "gitbutler/workspace",
-  "buildTimestamp": "2026-10-08T06:08:11.817Z",
+  "gitCommit": "d4a0512",
+  "gitCommitFull": "d4a05128c5a4d545fc7fff150e23700b43ef9b35",
+  "gitBranch": "main",
+  "buildTimestamp": "2026-10-08T12:55:05.171Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

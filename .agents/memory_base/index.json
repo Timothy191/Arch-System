@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-10-07T07:14:03.903Z",
-  "totalRetrospectives": 14,
+  "lastUpdated": "2026-10-08T15:45:56.707Z",
+  "totalRetrospectives": 13,
   "entries": [
     {
       "id": "err-20260925-vercel-headless-deploy",
@@ -79,7 +79,6 @@
       "category": "SECURITY",
       "errorSignature": "Published remote branch tips retained live un-rotated Supabase JWTs post-cleanup",
       "preventionRule": "Treat 'remaining heads are clean' as an unverified claim until every published branch is fingerprint-scanned; bundle tips (with chmod 600) BEFORE any push --delete of diverged branches."
-    },
-    {}
+    }
   ]
 }
