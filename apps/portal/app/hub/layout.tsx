@@ -20,7 +20,7 @@ export default async function HubLayout({ children }: { children: React.ReactNod
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">
       <div className="relative z-10">
         {/* Full-width responsive Hub Content Container */}
-        <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 pt-2 pb-20 md:pb-12">
+        <main className="w-full px-md sm:px-lg lg:px-xl xl:px-3xl 2xl:px-4xl pt-sm pb-20 md:pb-3xl">
           {children}
         </main>
 

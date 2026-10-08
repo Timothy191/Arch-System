@@ -141,7 +141,7 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(aside.className).toContain('translate-x-0');
   });
 
-  it('pins sidebar permanently when clicking Pin button', () => {
+  it('pins sidebar permanently when clicking Pin button and toggles main content padding offset', () => {
     const { container } = render(
       <DepartmentLayout department={controlRoomDept} tabs={controlRoomTabs}>
         <div>Main Area</div>
@@ -149,15 +149,24 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     );
 
     const aside = container.querySelector('aside')!;
+    const main = container.querySelector('main')!;
     const pinBtn = screen.getByRole('button', { name: /Pin sidebar/i });
+
+    // Initial unpinned state: base padding p-lg with pl-12 rail clearance
+    expect(main.className).toContain('p-lg');
+    expect(main.className).toContain('pl-12');
+    expect(main.className).not.toContain('pl-64');
 
     // Click pin button
     act(() => {
       fireEvent.click(pinBtn);
     });
 
-    // Should now be open permanently
+    // Pinned state: base padding p-lg with pl-64 expanded sidebar clearance
     expect(aside.className).toContain('translate-x-0');
+    expect(main.className).toContain('p-lg');
+    expect(main.className).toContain('pl-64');
+    expect(main.className).not.toContain('pl-12');
 
     // Mouse leaves
     act(() => {
@@ -165,7 +174,8 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
       jest.advanceTimersByTime(1000);
     });
 
-    // Stays open because it is pinned
+    // Stays open and pinned
     expect(aside.className).toContain('translate-x-0');
+    expect(main.className).toContain('pl-64');
   });
 });

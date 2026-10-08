@@ -47,7 +47,7 @@ export default async function AdminPage({
   const activeTab = typeof rawTab === 'string' && TABS.includes(rawTab) ? rawTab : 'users';
 
   return (
-    <div className="p-6 max-w-7xl mx-auto w-full">
+    <div className="p-lg max-w-7xl mx-auto w-full">
       <AdminTabsClient activeTab={activeTab}>
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'departments' && <DepartmentsTab />}

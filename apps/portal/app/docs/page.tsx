@@ -110,7 +110,7 @@ await client.recordMetric({
 
 export default function DocsLandingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl py-10 space-y-12">
       {/* Navigation Breadcrumbs (Geist Menu Type) */}
       <Breadcrumb type="menu">
         <BreadcrumbItem href="/">Home</BreadcrumbItem>

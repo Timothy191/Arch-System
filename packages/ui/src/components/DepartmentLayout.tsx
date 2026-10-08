@@ -331,7 +331,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       {/* Main content area */}
       <main
         className={cn(
-          'flex-1 h-full overflow-auto p-6 transition-all duration-300',
+          'flex-1 h-full overflow-auto p-lg transition-all duration-300',
           isPinned ? 'pl-64' : 'pl-12'
         )}
       >
