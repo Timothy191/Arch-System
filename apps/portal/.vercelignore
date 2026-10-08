@@ -1,0 +1,12 @@
+# Apps/Portal Vercel Ignore - Defense in Depth
+.turbo/
+.next/
+*.tsbuildinfo
+*.log
+
+# Agent files & tracings
+AGENTS.md
+AGENT_TRACER.md
+.claude/
+.cursor/
+.agents/

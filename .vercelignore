@@ -45,6 +45,23 @@ packages/eval/
 .vscode/
 .cursor/
 
+# Coding agent instructions, specifications, and tracings
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude.local.md
+.cursorrules
+REVIEW.md
+.mcp.json
+.mcp.json.*
+**/*AGENT_TRACER.md
+**/AGENTS.md
+
+# Non-production tooling and scripts
+tools/
+scripts/
+.github/
+
 # Indexers and AST structural databases
 **/.code-index/
 **/.codemap/
