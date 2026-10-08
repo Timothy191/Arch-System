@@ -120,13 +120,32 @@ if (!fs.existsSync(vercelIgnorePath)) {
   recordError('Missing .vercelignore file in repository root.');
 } else {
   const ignoreContent = fs.readFileSync(vercelIgnorePath, 'utf8');
-  const criticalExclusions = ['packages/eval/', 'e2e/', '.agents/', 'target/', '.turbo/', '*.db'];
+  const criticalExclusions = [
+    'packages/eval/',
+    'e2e/',
+    '.agents/',
+    'target/',
+    '.turbo/',
+    '*.db',
+    'AGENTS.md',
+    'CLAUDE.md',
+    'GEMINI.md',
+    '.cursorrules',
+    'REVIEW.md',
+    '.mcp.json',
+    'tools/',
+    'scripts/',
+  ];
   const missingExclusions = criticalExclusions.filter((p) => !ignoreContent.includes(p));
 
   if (missingExclusions.length > 0) {
-    recordWarn(`.vercelignore is missing critical heavy patterns: ${missingExclusions.join(', ')}`);
+    recordWarn(
+      `.vercelignore is missing critical heavy / agent patterns: ${missingExclusions.join(', ')}`
+    );
   } else {
-    recordPass('.vercelignore verified with heavy artifact exclusions (target/, .agents/, tests)');
+    recordPass(
+      '.vercelignore verified with heavy artifact & coding agent exclusions (target/, .agents/, AGENTS.md, tools/)'
+    );
   }
 }
 
@@ -140,6 +159,21 @@ if (!fs.existsSync(nextConfigPath)) {
     recordError('next.config.mjs missing outputFileTracingRoot (breaks monorepo NFT).');
   } else {
     recordPass('next.config.mjs declares outputFileTracingRoot for monorepo tracing');
+  }
+  if (!nextConfigContent.includes('outputFileTracingExcludes')) {
+    recordWarn('next.config.mjs should configure outputFileTracingExcludes for agent isolation.');
+  } else {
+    const requiredTracingExcludes = ['AGENTS.md', 'CLAUDE.md', '.cursorrules', 'tools/'];
+    const missingTracingExcludes = requiredTracingExcludes.filter(
+      (p) => !nextConfigContent.includes(p)
+    );
+    if (missingTracingExcludes.length > 0) {
+      recordWarn(
+        `outputFileTracingExcludes missing agent patterns: ${missingTracingExcludes.join(', ')}`
+      );
+    } else {
+      recordPass('next.config.mjs outputFileTracingExcludes isolates all coding agent assets');
+    }
   }
   if (!nextConfigContent.includes('process.env.VERCEL')) {
     recordWarn('next.config.mjs should omit standalone output when process.env.VERCEL is defined.');

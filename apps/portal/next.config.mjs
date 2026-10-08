@@ -50,6 +50,7 @@ const nextConfig = {
       '**/GEMINI.md',
       '**/.claude.local.md',
       '**/.cursorrules',
+      '**/REVIEW.md',
       '**/*AGENT_TRACER.md',
       '**/docs/**',
       '**/documentation/**',
