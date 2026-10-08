@@ -289,3 +289,7 @@ Arch-System-main (2).zip
 .ori/
 packages/redis/.code-index/
 secrets/
+
+# Lighthouse output from `pnpm audit:perf` (temp/ also holds tracked planning docs)
+temp/lh-*.json
+temp/lighthouse-report.json
