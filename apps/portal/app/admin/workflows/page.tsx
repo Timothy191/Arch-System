@@ -54,7 +54,7 @@ export default function WorkflowsPage() {
           name: 'Plantcor Autonomous Shift Pipeline',
           nodes,
           edges,
-          triggeredBy: 'admin@plantcor.os',
+          triggeredBy: 'admin@plantcormining.os',
         }),
       });
 

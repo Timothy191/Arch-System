@@ -55,7 +55,7 @@ describe('POST /api/auth/login', () => {
   });
 
   it('returns 400 when email or password is missing', async () => {
-    const req = createRequest({ email: 'admin@plantcor.os' });
+    const req = createRequest({ email: 'admin@plantcormining.os' });
     const res = await POST(req);
     expect(res.status).toBe(400);
     const json = await res.json();
@@ -64,12 +64,12 @@ describe('POST /api/auth/login', () => {
 
   it('returns 200 on successful credentials', async () => {
     mockSignInWithPassword.mockResolvedValueOnce({
-      data: { user: { id: 'user-123', email: 'admin@plantcor.os' } },
+      data: { user: { id: 'user-123', email: 'admin@plantcormining.os' } },
       error: null,
     });
 
     const req = createRequest({
-      email: 'Admin@plantcormining.os',
+      email: 'admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -90,7 +90,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'admin@plantcor.os',
+      email: 'admin@plantcormining.os',
       password: 'WrongPassword',
     });
 
@@ -110,7 +110,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'Admin@plantcormining.os',
+      email: 'admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -130,7 +130,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'Admin@plantcormining.os',
+      email: 'admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -146,7 +146,7 @@ describe('POST /api/auth/login', () => {
     );
 
     const req = createRequest({
-      email: 'Admin@plantcormining.os',
+      email: 'admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 

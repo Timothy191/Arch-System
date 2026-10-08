@@ -37,7 +37,7 @@ const keySampleData: Record<string, any> = {
   shift_001_cache: {
     shiftId: 'shift_001',
     foreman: 'Timothy Oniel',
-    email: 'admin@plantcor.os',
+    email: 'admin@plantcormining.os',
     role: 'admin',
     activeMachines: 14,
     totalTonsMoved: 15400,
@@ -45,7 +45,7 @@ const keySampleData: Record<string, any> = {
   },
   user_session_abc123: {
     userId: 'usr_timothy_admin',
-    email: 'admin@plantcor.os',
+    email: 'admin@plantcormining.os',
     role: 'admin',
     lastActive: new Date().toISOString(),
     ip: '10.0.0.4',

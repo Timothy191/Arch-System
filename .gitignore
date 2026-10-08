@@ -293,3 +293,6 @@ secrets/
 # Lighthouse output from `pnpm audit:perf` (temp/ also holds tracked planning docs)
 temp/lh-*.json
 temp/lighthouse-report.json
+
+# Local auth helper with hardcoded dev credentials — never commit
+get-token.js
