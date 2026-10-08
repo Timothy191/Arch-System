@@ -134,7 +134,7 @@ function HeroSlide({
       aria-hidden={!isCenter}
       onClick={handleClick}
       className={cn(
-        'absolute inset-x-0 mx-auto w-[82%] sm:w-[78%] lg:w-[72%] max-w-[760px] h-full will-change-[transform,opacity] transform-gpu',
+        'absolute inset-x-0 mx-auto w-[86%] sm:w-[82%] lg:w-[76%] max-w-[840px] h-full will-change-[transform,opacity] transform-gpu',
         cursorClass
       )}
       style={{
@@ -258,7 +258,7 @@ export function HeroRotator({
 
   return (
     <div
-      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl max-w-5xl mx-auto"
+      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl max-w-6xl mx-auto"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
@@ -289,7 +289,7 @@ export function HeroRotator({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className="relative w-full cursor-grab active:cursor-grabbing overflow-visible touch-pan-y"
-          style={{ height: 440, transformStyle: 'preserve-3d' }}
+          style={{ height: 460, transformStyle: 'preserve-3d' }}
         >
           {panels.map((panel, idx) => (
             <HeroSlide

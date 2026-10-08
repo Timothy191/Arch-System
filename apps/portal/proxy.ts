@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
     frame-src 'self' https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app;
     frame-ancestors 'none';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
-    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com;
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

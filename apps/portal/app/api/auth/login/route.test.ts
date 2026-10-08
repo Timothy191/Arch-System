@@ -69,7 +69,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'admin@plantcor.os',
+      email: 'Admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -110,7 +110,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'admin@plantcor.os',
+      email: 'Admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -130,7 +130,7 @@ describe('POST /api/auth/login', () => {
     });
 
     const req = createRequest({
-      email: 'admin@plantcor.os',
+      email: 'Admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 
@@ -146,7 +146,7 @@ describe('POST /api/auth/login', () => {
     );
 
     const req = createRequest({
-      email: 'admin@plantcor.os',
+      email: 'Admin@plantcormining.os',
       password: 'Yugioh@1234#',
     });
 

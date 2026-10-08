@@ -64,7 +64,9 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
                     </div>
                     <div className="font-mono font-medium text-[var(--text-secondary)]">
                       Loads:{' '}
-                      <strong className="text-[var(--text-heading)] font-bold">{machine.total_loads}</strong>
+                      <strong className="text-[var(--text-heading)] font-bold">
+                        {machine.total_loads}
+                      </strong>
                     </div>
                   </div>
 

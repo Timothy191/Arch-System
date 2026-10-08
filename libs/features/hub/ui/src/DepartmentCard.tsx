@@ -162,18 +162,24 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
           <div className="absolute inset-0 z-0">
-            {!imageError && (
-              <Image
-                // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
-                src={`https://res.cloudinary.com/zwevvryv/image/upload/images/departments/${department.name}.jpg`}
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
-                onError={() => setImageError(true)}
-              />
-            )}
+            <Image
+              // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
+              src={
+                imageError
+                  ? `/images/departments/${department.name}.jpg`
+                  : `https://res.cloudinary.com/zwevvryv/image/upload/images/departments/${department.name}.jpg`
+              }
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
+              onError={() => {
+                if (!imageError) {
+                  setImageError(true);
+                }
+              }}
+            />
             {/* Glass gradient overlay to ensure icon bubble contrast */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 z-10" />
           </div>

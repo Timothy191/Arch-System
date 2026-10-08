@@ -128,7 +128,7 @@ export function MachineOperationsForm({
     if (formData.startSmu && formData.endSmu) {
       const s = parseFloat(formData.startSmu);
       const e = parseFloat(formData.endSmu);
-      if (!isNaN(s) && !isNaN(e) && e >= s) {
+      if (!Number.isNaN(s) && !Number.isNaN(e) && e >= s) {
         return e - s;
       }
     }
@@ -170,11 +170,11 @@ export function MachineOperationsForm({
       newErrors.endTime = 'End time must be after start time';
     }
 
-    if (formData.startSmu && isNaN(parseFloat(formData.startSmu))) {
+    if (formData.startSmu && Number.isNaN(parseFloat(formData.startSmu))) {
       newErrors.startSmu = 'Start SMU must be a valid number';
     }
 
-    if (formData.endSmu && isNaN(parseFloat(formData.endSmu))) {
+    if (formData.endSmu && Number.isNaN(parseFloat(formData.endSmu))) {
       newErrors.endSmu = 'End SMU must be a valid number';
     }
 
@@ -405,9 +405,7 @@ export function MachineOperationsForm({
 
           {/* End SMU */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
-              Closing / End SMU
-            </label>
+            <label className="text-[var(--text-secondary)] text-sm block">Closing / End SMU</label>
             <input
               type="number"
               step="0.1"

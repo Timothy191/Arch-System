@@ -77,7 +77,9 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
                           </span>
                         )}
                       </div>
-                      <div className="text-[var(--text-muted)] text-[11px] mt-0.5">{event.position}</div>
+                      <div className="text-[var(--text-muted)] text-[11px] mt-0.5">
+                        {event.position}
+                      </div>
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
@@ -108,7 +110,9 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
                   </div>
 
                   {event.notes && (
-                    <p className="mt-2 text-[11px] text-[var(--text-secondary)] italic">{event.notes}</p>
+                    <p className="mt-2 text-[11px] text-[var(--text-secondary)] italic">
+                      {event.notes}
+                    </p>
                   )}
                 </div>
               );

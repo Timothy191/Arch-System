@@ -419,15 +419,15 @@ export default async function HubPage() {
       {/* Productivity & Workflow Tools - Marquee Banner */}
       {tools.length > 0 && (
         <section
-          className="space-y-4 animate-fade-up group/row"
+          className="space-y-4 animate-fade-up group/row relative rounded-card liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
           style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
         >
-          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+          <div className="flex items-center justify-between pb-4 border-b border-arch-border-subtle">
             <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
               <span className="p-1 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue">
                 <WrenchIcon className="w-4 h-4" />
               </span>
-              Daily Workflow & Efficiency Tools
+              Daily Workflow &amp; Efficiency Tools
             </h2>
           </div>
 
@@ -462,14 +462,14 @@ export default async function HubPage() {
         className="space-y-4 animate-fade-up group/row"
         style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-            <span className="p-1 rounded-lg bg-accent-green/10 text-accent-green">
+        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
+            <span className="p-1 rounded-full bg-accent-green/10 text-accent-green flex items-center justify-center">
               <Activity className="w-4 h-4" />
             </span>
             Operational Ingestion Telemetry
           </h2>
-        </div>
+        </header>
         <GlassCard
           variant="default"
           padding

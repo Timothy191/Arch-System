@@ -106,9 +106,9 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         </div>
 
         {/* Search & Category Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Quick Search Input */}
-          <div className="relative flex-1 sm:w-52 min-w-[160px]">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Quick Search Input - Extended to the left */}
+          <div className="relative flex-1 sm:w-72 sm:min-w-[260px] min-w-[200px]">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none" />
             <input
               id="hub-module-search"
@@ -118,7 +118,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               placeholder="Search modules... (/)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8.5 pr-8 text-xs rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
+              className="w-full h-8 pl-9 pr-9 text-xs rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search

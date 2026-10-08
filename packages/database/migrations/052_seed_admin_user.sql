@@ -11,7 +11,7 @@ BEGIN
   CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
   -- 1. Create or update the user in auth.users
-  SELECT id INTO admin_uid FROM auth.users WHERE email ILIKE 'admin@plantcor.os';
+  SELECT id INTO admin_uid FROM auth.users WHERE email ILIKE 'Admin@plantcormining.os';
 
   IF admin_uid IS NULL THEN
     admin_uid := gen_random_uuid();
@@ -34,7 +34,7 @@ BEGIN
     ) VALUES (
       admin_uid,
       '00000000-0000-0000-0000-000000000000',
-      'admin@plantcor.os',
+      'Admin@plantcormining.os',
       crypt('Yugioh@1234#', gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}',
@@ -53,7 +53,7 @@ BEGIN
     UPDATE auth.users
     SET 
       encrypted_password = crypt('Yugioh@1234#', gen_salt('bf')),
-      email = 'admin@plantcor.os'
+      email = 'Admin@plantcormining.os'
     WHERE id = admin_uid;
   END IF;
 

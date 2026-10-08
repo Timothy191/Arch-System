@@ -138,8 +138,30 @@ function HourlyLoadsGrid({
   // Check if any machine in this department has a bin_factor set
   const hasBinFactors = machines.some((m) => m.bin_factor != null && m.bin_factor > 0);
 
+  const [asyncSource, setAsyncSource] = useState<Record<string, any>[]>([]);
+  const workerRef = useRef<Worker | null>(null);
+  const workerVersionRef = useRef<number>(0);
+  const latestReceivedVersionRef = useRef<number>(0);
+
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('./aggregation.worker.ts', import.meta.url));
+    workerRef.current.onmessage = (e) => {
+      const { rows, version } = e.data;
+      if (version >= latestReceivedVersionRef.current) {
+        latestReceivedVersionRef.current = version;
+        setAsyncSource(rows);
+      }
+    };
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  const isLargeDataset = machines.length > 50 || loadsState.length > 100;
+
   // Build RevoGrid source rows (including mid-shift splits)
-  const source = useMemo(() => {
+  const syncSource = useMemo(() => {
+    if (isLargeDataset) return [];
     const rows: Record<string, any>[] = [];
 
     machines.forEach((machine) => {
@@ -216,7 +238,23 @@ function HourlyLoadsGrid({
     });
 
     return rows;
-  }, [machines, groupedLoadsByMachine, selectedShift, hourLabels, hasBinFactors]);
+  }, [isLargeDataset, machines, groupedLoadsByMachine, selectedShift, hourLabels, hasBinFactors]);
+
+  useEffect(() => {
+    if (isLargeDataset && workerRef.current) {
+      const version = ++workerVersionRef.current;
+      workerRef.current.postMessage({
+        machines,
+        loadsState,
+        selectedShift,
+        hourLabels,
+        hasBinFactors,
+        version,
+      });
+    }
+  }, [isLargeDataset, machines, loadsState, selectedShift, hourLabels, hasBinFactors]);
+
+  const source = isLargeDataset ? asyncSource : syncSource;
 
   /**
    * Applies a patch to a specific load record in local state.
@@ -259,6 +297,36 @@ function HourlyLoadsGrid({
           ...patch,
         };
         return [...prev, { ...row, total_loads: sumHourlyTotal(row) }];
+      });
+
+      // Optimistically update asyncSource so the UI doesn't stutter before worker responds
+      setAsyncSource((prev) => {
+        if (!prev || prev.length === 0) return prev;
+        let changed = false;
+        const next = prev.map((row) => {
+          if (row.loadId === loadId) {
+            changed = true;
+            const updatedRow: Record<string, any> = { ...row, ...patch };
+            let newTotal = 0;
+            HOURS_12.forEach((_, idx) => {
+              const val = updatedRow[HOUR_PROP(idx)];
+              newTotal += typeof val === 'number' ? val : 0;
+            });
+            updatedRow.total = newTotal;
+            if (updatedRow.binFactor && updatedRow.binFactor !== '-') {
+              updatedRow.totalMaterial = Math.round(newTotal * updatedRow.binFactor * 10) / 10;
+            }
+            if (patch.excavator_id !== undefined) {
+              updatedRow.excavatorId = patch.excavator_id || '';
+            }
+            if (patch.material_type !== undefined) {
+              updatedRow.materialType = patch.material_type;
+            }
+            return updatedRow;
+          }
+          return row;
+        });
+        return changed ? next : prev;
       });
     },
     []
@@ -846,7 +914,10 @@ function HourlyLoadsGrid({
               [
                 h(
                   'span',
-                  { class: 'text-sm font-medium font-mono tabular-nums px-1 cursor-text select-none' },
+                  {
+                    class:
+                      'text-sm font-medium font-mono tabular-nums px-1 cursor-text select-none',
+                  },
                   value
                 ),
                 h('div', { class: 'flex items-center gap-0.5' }, [

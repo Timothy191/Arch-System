@@ -1,7 +1,7 @@
 'use client';
 
 import { Html } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -129,9 +129,26 @@ function CarouselCylinder({
   const total = panels.length;
   const angleStep = (2 * Math.PI) / total;
 
+  const { invalidate } = useThree();
+
+  useEffect(() => {
+    invalidate();
+  }, [targetIndex, invalidate]);
+
   useFrame(() => {
     if (!groupRef.current) return;
     const targetAngle = -targetIndex * angleStep;
+    const diff = Math.abs(currentAngleRef.current - targetAngle);
+
+    if (diff < 0.001) {
+      if (groupRef.current.rotation.y !== targetAngle) {
+        currentAngleRef.current = targetAngle;
+        groupRef.current.rotation.y = targetAngle;
+        invalidate();
+      }
+      return;
+    }
+
     // Smooth lerp towards target angle
     currentAngleRef.current = THREE.MathUtils.lerp(
       currentAngleRef.current,
@@ -139,6 +156,7 @@ function CarouselCylinder({
       R3F_CONFIG.rotDamping
     );
     groupRef.current.rotation.y = currentAngleRef.current;
+    invalidate();
   });
 
   return (
@@ -162,6 +180,18 @@ function CarouselCylinder({
   );
 }
 
+function CanvasCleanup() {
+  const { gl } = useThree();
+  useEffect(() => {
+    return () => {
+      // Explicitly dispose WebGL contexts to fix memory leak on unmount
+      gl.dispose();
+      gl.forceContextLoss();
+    };
+  }, [gl]);
+  return null;
+}
+
 export function ThreeHeroRotator({
   panels,
   incidentCount = 0,
@@ -173,6 +203,7 @@ export function ThreeHeroRotator({
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
 
   // Pointer event gesture tracking
   const pointerStartX = useRef<number | null>(null);
@@ -180,6 +211,11 @@ export function ThreeHeroRotator({
 
   useEffect(() => {
     setMounted(true);
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isLowPower = (navigator.hardwareConcurrency || 4) <= 4;
+    if (prefersReduced || isLowPower) {
+      setUseFallback(true);
+    }
   }, []);
 
   const total = panels.length;
@@ -362,26 +398,48 @@ export function ThreeHeroRotator({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <Canvas
-          camera={{ position: [0, 0, R3F_CONFIG.cameraZ], fov: R3F_CONFIG.fov }}
-          style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
-          gl={{ antialias: true, alpha: true }}
-        >
-          <ambientLight intensity={0.9} />
-          <directionalLight position={[5, 10, 5]} intensity={1.2} />
-          <Suspense fallback={null}>
-            <CarouselCylinder
-              panels={panels}
-              targetIndex={targetIndex}
-              failedImages={failedImages}
-              onImageError={handleImageError}
-              onSelect={jumpToSlide}
-              incidentCount={incidentCount}
-              breakdownCount={breakdownCount}
-              offlineMachineCount={offlineMachineCount}
-            />
-          </Suspense>
-        </Canvas>
+        {useFallback ? (
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="w-full max-w-[720px] h-full max-h-[420px] relative rounded-2xl overflow-hidden bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
+              {panels[activeIndex] && (
+                <HeroCardContent
+                  panel={panels[activeIndex]}
+                  idx={activeIndex}
+                  isActive={true}
+                  failedImages={failedImages}
+                  onImageError={handleImageError}
+                  incidentCount={incidentCount}
+                  breakdownCount={breakdownCount}
+                  offlineMachineCount={offlineMachineCount}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <Canvas
+            frameloop="demand"
+            camera={{ position: [0, 0, R3F_CONFIG.cameraZ], fov: R3F_CONFIG.fov }}
+            style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
+            gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+          >
+            <CanvasCleanup />
+            <ambientLight intensity={0.9} />
+            <directionalLight position={[5, 10, 5]} intensity={1.2} />
+            <Suspense fallback={null}>
+              <CarouselCylinder
+                panels={panels}
+                targetIndex={targetIndex}
+                failedImages={failedImages}
+                onImageError={handleImageError}
+                onSelect={jumpToSlide}
+                incidentCount={incidentCount}
+                breakdownCount={breakdownCount}
+                offlineMachineCount={offlineMachineCount}
+              />
+            </Suspense>
+          </Canvas>
+        )}
       </div>
 
       {total > 1 && (

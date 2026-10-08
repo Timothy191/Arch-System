@@ -1,13 +1,7 @@
 'use client';
 
 import { type GlassVariant, glassVariants } from '@repo/theme';
-import {
-  type HTMLMotionProps,
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  useReducedMotion,
-} from 'framer-motion';
+import { type HTMLMotionProps, motion, useReducedMotion } from 'framer-motion';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/utils';
 
@@ -285,21 +279,18 @@ export function GlassCard({
     );
   }, []);
 
-  // Spotlight mouse tracking
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const spotlightBg = useMotionTemplate`
-    radial-gradient(
-      400px circle at ${mouseX}px ${mouseY}px,
-      ${spotlightColor},
-      transparent 80%
-    )
-  `;
-
-  const handleMouseMove = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {
-    // Disabled mouse effects
-  }, []);
+  // Spotlight mouse tracking using native CSS vars to avoid heavy react/framer updates
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isSpotlight || prefersReduced || isTouch) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+      e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+    },
+    [isSpotlight, prefersReduced, isTouch]
+  );
 
   // GlowBorder colors setup
   const glowColors =
@@ -451,9 +442,6 @@ export function GlassCard({
           (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }}
-      whileHover={hover && !prefersReduced && !isLiquid ? { scale: 1.01 } : undefined}
-      whileTap={hover && !prefersReduced && !isLiquid ? { scale: 0.995 } : undefined}
-      transition={prefersReduced ? { duration: 0 } : { duration: 0.3, ease: [0.2, 0, 0, 1] }}
       tabIndex={tabIndexProp ?? (hover && onClick ? 0 : undefined)}
       role={roleProp ?? (onClick ? 'button' : undefined)}
       onClick={onClick}
@@ -479,6 +467,12 @@ export function GlassCard({
         'liquid-glass-light border border-white/20 shadow-window',
         'group rounded-card animate-window-open',
         hover && 'liquid-glass-interactive',
+
+        // CSS based animations to unblock main thread
+        hover &&
+          !prefersReduced &&
+          !isLiquid &&
+          'transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:scale-[1.01] active:scale-[0.995]',
 
         // Accent colors for hover
         hover && ACCENT_COLORS[accent],
@@ -543,9 +537,11 @@ export function GlassCard({
 
       {/* Spotlight dynamic mouse overlay */}
       {isSpotlight && !prefersReduced && !isTouch && (
-        <motion.div
+        <div
           className="pointer-events-none absolute -inset-px rounded-[inherit] opacity-0 transition duration-300 group-hover:opacity-100"
-          style={{ background: spotlightBg }}
+          style={{
+            background: `radial-gradient(400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${spotlightColor}, transparent 80%)`,
+          }}
         />
       )}
 

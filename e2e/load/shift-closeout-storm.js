@@ -44,7 +44,7 @@ export function setup() {
   const res = http.post(
     `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
     JSON.stringify({
-      email: 'admin@plantcor.os',
+      email: 'Admin@plantcormining.os',
       password: 'Yugioh@1234#',
     }),
     {

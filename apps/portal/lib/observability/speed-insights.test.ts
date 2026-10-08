@@ -1,19 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import {
-  SPEED_INSIGHTS_THRESHOLDS,
-  RES_METRIC_WEIGHTS,
-  rateMetric,
   calculateMetricScore,
   calculateRES,
-  resolveSpeedInsightsConfig,
-  processSpeedInsightsEvent,
-  validateCspForSpeedInsights,
   isReverseProxyPathExempt,
-  SpeedInsightsEvent,
+  processSpeedInsightsEvent,
+  RES_METRIC_WEIGHTS,
+  rateMetric,
+  resolveSpeedInsightsConfig,
+  SPEED_INSIGHTS_THRESHOLDS,
   SpeedInsightsConfig,
+  SpeedInsightsEvent,
+  validateCspForSpeedInsights,
 } from './speed-insights';
 
 describe('Speed Insights Metrics & RES Test Suite', () => {
@@ -33,7 +33,7 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
     test('verifies LCP thresholds: Good <= 2.5s (2500ms), Needs Improvement <= 4.0s, Poor > 4.0s', () => {
       expect(SPEED_INSIGHTS_THRESHOLDS.LCP.good).toBe(2500);
       expect(SPEED_INSIGHTS_THRESHOLDS.LCP.needsImprovement).toBe(4000);
-      expect(SPEED_INSIGHTS_THRESHOLDS.LCP.weight).toBe(0.30);
+      expect(SPEED_INSIGHTS_THRESHOLDS.LCP.weight).toBe(0.3);
 
       expect(rateMetric('LCP', 1500)).toBe('good');
       expect(rateMetric('LCP', 2500)).toBe('good');
@@ -45,7 +45,7 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
     test('verifies INP thresholds: Good <= 200ms, Needs Improvement <= 500ms, Poor > 500ms', () => {
       expect(SPEED_INSIGHTS_THRESHOLDS.INP.good).toBe(200);
       expect(SPEED_INSIGHTS_THRESHOLDS.INP.needsImprovement).toBe(500);
-      expect(SPEED_INSIGHTS_THRESHOLDS.INP.weight).toBe(0.30);
+      expect(SPEED_INSIGHTS_THRESHOLDS.INP.weight).toBe(0.3);
 
       expect(rateMetric('INP', 50)).toBe('good');
       expect(rateMetric('INP', 200)).toBe('good');
@@ -101,7 +101,7 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
       const result = calculateRES({
         FCP: 1200, // <= 1800ms
         LCP: 1800, // <= 2500ms
-        INP: 80,   // <= 200ms
+        INP: 80, // <= 200ms
         CLS: 0.02, // <= 0.1
       });
 
@@ -119,7 +119,7 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
       const result = calculateRES({
         FCP: 2400, // > 1800ms, <= 3000ms
         LCP: 3200, // > 2500ms, <= 4000ms
-        INP: 350,  // > 200ms, <= 500ms
+        INP: 350, // > 200ms, <= 500ms
         CLS: 0.18, // > 0.1, <= 0.25
       });
 
@@ -136,7 +136,7 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
       const result = calculateRES({
         FCP: 4500, // > 3000ms
         LCP: 6000, // > 4000ms
-        INP: 800,  // > 500ms
+        INP: 800, // > 500ms
         CLS: 0.45, // > 0.25
       });
 
@@ -343,7 +343,9 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
       expect(typeof (window as any).si).toBe('function');
 
       // Verify that the real SDK appended a script tag to document.head
-      const scriptTag = document.head.querySelector('script[src*="speed-insights"]') as HTMLScriptElement;
+      const scriptTag = document.head.querySelector(
+        'script[src*="speed-insights"]'
+      ) as HTMLScriptElement;
       expect(scriptTag).not.toBeNull();
       // In test/dev environment, SDK points to debug script or resilient intake
       expect(scriptTag.src).toMatch(/speed-insights/);
@@ -367,7 +369,8 @@ describe('Speed Insights Metrics & RES Test Suite', () => {
       expect(validResult.issues).toHaveLength(0);
 
       // Restrictive CSP missing both 'self' and vercel scripts
-      const restrictiveCsp = "script-src https://scada.internal; connect-src https://scada.internal;";
+      const restrictiveCsp =
+        'script-src https://scada.internal; connect-src https://scada.internal;';
       const restrictedResult = validateCspForSpeedInsights(restrictiveCsp);
       expect(restrictedResult.valid).toBe(false);
       expect(restrictedResult.scriptAllowed).toBe(false);

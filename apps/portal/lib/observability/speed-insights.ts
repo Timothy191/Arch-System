@@ -19,8 +19,8 @@ export interface MetricThreshold {
 
 export const SPEED_INSIGHTS_THRESHOLDS: Record<SpeedInsightsMetric, MetricThreshold> = {
   FCP: { good: 1800, needsImprovement: 3000, unit: 'ms', weight: 0.15 },
-  LCP: { good: 2500, needsImprovement: 4000, unit: 'ms', weight: 0.30 },
-  INP: { good: 200, needsImprovement: 500, unit: 'ms', weight: 0.30 },
+  LCP: { good: 2500, needsImprovement: 4000, unit: 'ms', weight: 0.3 },
+  INP: { good: 200, needsImprovement: 500, unit: 'ms', weight: 0.3 },
   CLS: { good: 0.1, needsImprovement: 0.25, unit: 'score', weight: 0.25 },
   FID: { good: 100, needsImprovement: 300, unit: 'ms' },
   TBT: { good: 800, needsImprovement: 800, unit: 'ms' }, // Good < 800ms
@@ -29,8 +29,8 @@ export const SPEED_INSIGHTS_THRESHOLDS: Record<SpeedInsightsMetric, MetricThresh
 
 export const RES_METRIC_WEIGHTS: Record<'FCP' | 'LCP' | 'INP' | 'CLS', number> = {
   FCP: 0.15,
-  LCP: 0.30,
-  INP: 0.30,
+  LCP: 0.3,
+  INP: 0.3,
   CLS: 0.25,
 };
 
@@ -149,17 +149,15 @@ export function calculateMetricScore(metric: SpeedInsightsMetric, value: number)
  * 50 - 89: Needs Improvement
  * 0 - 49: Poor
  */
-export function calculateRES(
-  input: {
-    FCP?: number;
-    LCP?: number;
-    INP?: number;
-    CLS?: number;
-    FID?: number; // Optional fallback if INP is absent
-    TBT?: number;
-    TTFB?: number;
-  }
-): RESResult {
+export function calculateRES(input: {
+  FCP?: number;
+  LCP?: number;
+  INP?: number;
+  CLS?: number;
+  FID?: number; // Optional fallback if INP is absent
+  TBT?: number;
+  TTFB?: number;
+}): RESResult {
   const evaluatedMetrics: Partial<Record<SpeedInsightsMetric, MetricEvaluation>> = {};
 
   // Track Core Web Vitals weights
@@ -372,9 +370,5 @@ export function validateCspForSpeedInsights(cspHeader: string): CspCheckResult {
  * Vercel requires forwarding of `/_vercel/speed-insights/*` and custom script endpoints.
  */
 export function isReverseProxyPathExempt(pathname: string): boolean {
-  return (
-    pathname.startsWith('/_vercel/speed-insights') ||
-    pathname.startsWith('/_vercel/insights')
-  );
+  return pathname.startsWith('/_vercel/speed-insights') || pathname.startsWith('/_vercel/insights');
 }
-

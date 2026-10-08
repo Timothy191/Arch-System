@@ -6,8 +6,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'admin@plantcor.os',
-  password: 'Yugioh@123#',
+  email: 'Admin@plantcormining.os',
+  password: 'Yugioh@1234#',
 });
 if (error) {
   console.error(error);

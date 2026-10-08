@@ -9,6 +9,10 @@ jest.mock('@react-three/fiber', () => {
     Canvas: ({ children }: { children: React.ReactNode }) =>
       React.createElement('div', { 'data-testid': 'r3f-canvas' }, children),
     useFrame: jest.fn(),
+    useThree: jest.fn(() => ({
+      invalidate: jest.fn(),
+      gl: { dispose: jest.fn(), forceContextLoss: jest.fn() },
+    })),
   };
 });
 

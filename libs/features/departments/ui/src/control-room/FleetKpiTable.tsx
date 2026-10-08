@@ -55,11 +55,13 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
         <div className="flex items-center gap-4 text-xs font-medium">
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
             <Clock className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            Total SMU: <strong className="font-mono text-[var(--text-heading)]">{totalSmuHours}h</strong>
+            Total SMU:{' '}
+            <strong className="font-mono text-[var(--text-heading)]">{totalSmuHours}h</strong>
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
             <Wrench className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            Breakdowns: <strong className="font-mono text-[var(--text-heading)]">{totalBreakdownHours}h</strong>
+            Breakdowns:{' '}
+            <strong className="font-mono text-[var(--text-heading)]">{totalBreakdownHours}h</strong>
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-green)]/10 text-[var(--accent-green)] border border-[var(--accent-green)]/20">
             <CheckCircle2 className="h-3.5 w-3.5 text-[var(--accent-green)]" />
@@ -111,7 +113,9 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   {item.machine_name}
                 </div>
-                <div className="px-4 text-[var(--text-secondary)] capitalize truncate">{item.machine_type}</div>
+                <div className="px-4 text-[var(--text-secondary)] capitalize truncate">
+                  {item.machine_type}
+                </div>
                 <div className="px-4 text-[var(--text-muted)] font-mono text-[11px] truncate">
                   {item.start_time
                     ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`

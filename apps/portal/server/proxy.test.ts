@@ -3,6 +3,7 @@
  */
 
 import { NextRequest } from 'next/server';
+import { proxy as edgeProxy } from '../proxy';
 import { isTokenExpiredError, normalizeRole, proxy } from './proxy';
 
 jest.mock('@repo/supabase/middleware', () => ({
@@ -420,5 +421,17 @@ describe('proxy', () => {
 
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toContain('/login');
+  });
+
+  it('emits CSP header containing https://api.open-meteo.com in connect-src without wildcards', async () => {
+    buildProxyMock();
+    const req = makeRequest('/hub', false);
+    const res = await edgeProxy(req);
+
+    const csp = res.headers.get('Content-Security-Policy');
+    expect(csp).toBeDefined();
+    expect(csp).toContain('https://api.open-meteo.com');
+    expect(csp).toContain("connect-src 'self'");
+    expect(csp).not.toContain('connect-src *');
   });
 });

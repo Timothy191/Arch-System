@@ -105,6 +105,9 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
       { protocol: 'https', hostname: 'avatar.vercel.sh' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: '*.whatsapp.net' },
+      { protocol: 'https', hostname: '*.whatsapp.com' },
     ],
   },
   compiler: {
@@ -209,14 +212,14 @@ const nextConfig = {
                 {
                   key: 'Content-Security-Policy',
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://avatar.vercel.sh https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app; frame-ancestors 'none';",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://avatar.vercel.sh https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; media-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app; frame-ancestors 'none';",
                 },
               ]
             : [
                 {
                   key: 'Content-Security-Policy-Report-Only',
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://avatar.vercel.sh https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app; frame-ancestors 'none'; report-uri /api/csp-violations;",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://avatar.vercel.sh https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; media-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app; frame-ancestors 'none'; report-uri /api/csp-violations;",
                 },
               ]),
         ],

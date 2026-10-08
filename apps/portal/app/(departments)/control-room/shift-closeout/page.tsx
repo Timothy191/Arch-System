@@ -19,10 +19,7 @@ async function ShiftCloseoutSection() {
   const { deptId, today } = await getDepartmentContext({ department: 'control-room' });
   const supabase = await createServerSupabaseClient();
 
-  const { data: machines } = await supabase
-    .from('machines')
-    .select('id, name')
-    .eq('active', true);
+  const { data: machines } = await supabase.from('machines').select('id, name').eq('active', true);
 
   // AGENT-TRACE: Dynamic Opening SMR Resolution
   // Queries latest closing SMR per machine from machine_operations.end_smu instead of defaulting to 0.

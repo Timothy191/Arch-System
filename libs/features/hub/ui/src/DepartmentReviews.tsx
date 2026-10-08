@@ -129,14 +129,14 @@ export function DepartmentReviews() {
       className="space-y-4 animate-fade-up group/row"
       style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
-        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-          <span className="p-1 rounded-md bg-arch-surface-secondary text-arch-accent-blue">
+      <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
+          <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
             <MessageSquareQuote className="w-4 h-4" />
           </span>
-          Operational Feedback & Department Logs
+          Operational Feedback &amp; Department Logs
         </h2>
-      </div>
+      </header>
 
       <div
         className="relative flex w-full flex-col items-center justify-center overflow-hidden"
