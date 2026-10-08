@@ -5,10 +5,13 @@ import { loginWithTestUser } from '../helpers/auth';
  * Production Asset Resolution & CSP Regression Test Suite
  *
  * Prevents regressions across:
- * 1. Cloudinary / local fallback image rendering on Hero carousel and Department cards.
- * 2. CSP connect-src allowlisting of https://api.open-meteo.com.
- * 3. CSP media-src allowlisting of https://res.cloudinary.com.
- * 4. Zero CSP console violations in browser runtime.
+ * 1. Hub mount and shell initialization.
+ * 2. Cloudinary / local fallback image rendering on Hero carousel.
+ * 3. Department cards visual banner rendering.
+ * 4. Zero failed image requests (HTTP >= 400).
+ * 5. Zero CSP console violations in browser runtime.
+ * 6. Open-Meteo weather API connectivity (HTTP 200).
+ * 7. Cloudinary video background element and sources on desktop viewports.
  */
 test.describe('Asset Integrity & CSP Gating', () => {
   test('Hub loads with all visual assets rendered and zero CSP violations', async ({
@@ -17,6 +20,8 @@ test.describe('Asset Integrity & CSP Gating', () => {
   }) => {
     const cspViolations: string[] = [];
     const failedImageUrls: string[] = [];
+    let openMeteoStatusCode: number | null = null;
+    let mediaRequestBlocked = false;
 
     // Monitor browser console for CSP violations
     page.on('console', (msg) => {
@@ -27,14 +32,23 @@ test.describe('Asset Integrity & CSP Gating', () => {
         text.includes('Refused to load')
       ) {
         cspViolations.push(text);
+        if (text.includes('media-src') || text.includes('res.cloudinary.com/video')) {
+          mediaRequestBlocked = true;
+        }
       }
     });
 
-    // Monitor network traffic for failed department images
+    // Monitor network traffic for failed assets and weather API
     page.on('response', (res) => {
       const url = res.url();
       const status = res.status();
 
+      // Check Open-Meteo API response
+      if (url.includes('api.open-meteo.com')) {
+        openMeteoStatusCode = status;
+      }
+
+      // Track failed department images
       if (
         (url.includes('/images/departments/') ||
           url.includes('res.cloudinary.com/zwevvryv/image/')) &&
@@ -48,12 +62,12 @@ test.describe('Asset Integrity & CSP Gating', () => {
     await loginWithTestUser(context, page);
     await page.goto('/hub', { waitUntil: 'domcontentloaded' });
 
-    // Wait for the main shell and cards to mount
+    // 1. Assertion: /hub successfully mounts main shell
     const heroCarousel = page.locator('[role="region"][aria-label="Department Hero Highlights"]');
     await heroCarousel.waitFor({ state: 'visible', timeout: 15000 });
     await heroCarousel.scrollIntoViewIfNeeded();
 
-    // 2. Verify Hero carousel image rendered with natural dimensions
+    // 2. Assertion: Hero image exists, complete === true, naturalWidth > 0
     const heroImg = heroCarousel.locator('img').first();
     await heroImg.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForFunction(
@@ -71,12 +85,12 @@ test.describe('Asset Integrity & CSP Gating', () => {
     expect(heroImageStats.complete).toBe(true);
     expect(heroImageStats.naturalWidth).toBeGreaterThan(0);
 
-    // 3. Scroll to Department Modules to trigger lazy-loaded card banners
+    // 3. Assertion: Department cards every .uiverse-card-banner image is loaded with naturalWidth > 0
     const firstDeptCard = page.locator('.uiverse-card-banner').first();
     await firstDeptCard.waitFor({ state: 'visible', timeout: 10000 });
     await firstDeptCard.scrollIntoViewIfNeeded();
 
-    // Wait for department card images to finish loading across viewports
+    // Await lazy-loaded card images across viewports
     await page.evaluate(async () => {
       const images = Array.from(
         document.querySelectorAll('.uiverse-card-banner img')
@@ -114,10 +128,32 @@ test.describe('Asset Integrity & CSP Gating', () => {
       expect(card.naturalWidth).toBeGreaterThan(0);
     }
 
-    // 4. Verify no department image requests failed with HTTP errors
+    // 4. Assertion: Asset network health (zero failed image requests)
     expect(failedImageUrls).toEqual([]);
 
-    // 5. Verify zero CSP console violations occurred
+    // 5. Assertion: CSP (zero CSP violations during test lifecycle)
     expect(cspViolations).toEqual([]);
+
+    // 6. Assertion: Weather API (confirm HTTP 200 when initialized)
+    if (openMeteoStatusCode !== null) {
+      expect(openMeteoStatusCode).toBe(200);
+    }
+
+    // 7. Assertion: Video background element and sources on desktop viewports
+    const isDesktop = (page.viewportSize()?.width ?? 1280) >= 768;
+    if (isDesktop) {
+      // Await deferred background video container if rendered
+      await page.waitForSelector('#route-bg-light-video', { timeout: 8000 }).catch(() => {});
+      const videoExists = await page.locator('#route-bg-light-video').count();
+      if (videoExists > 0) {
+        const sourceUrls = await page.evaluate(() => {
+          const video = document.getElementById('route-bg-light-video') as HTMLVideoElement | null;
+          if (!video) return [];
+          return Array.from(video.querySelectorAll('source')).map((s) => s.src);
+        });
+        expect(sourceUrls.some((u) => u.includes('res.cloudinary.com'))).toBe(true);
+      }
+      expect(mediaRequestBlocked).toBe(false);
+    }
   });
 });
