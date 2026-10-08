@@ -5,6 +5,11 @@
 import { NextRequest } from 'next/server';
 import { POST } from './route';
 
+// Auth is fully mocked below, so this never authenticates against a real account.
+// It is a placeholder that must not equal any real credential, and must never be
+// read from the environment — a unit test must behave identically on every machine.
+const TEST_PASSWORD = 'placeholder-not-a-real-password';
+
 const mockSignInWithPassword = jest.fn();
 
 jest.mock('@repo/supabase/server', () => ({
@@ -70,7 +75,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcormining.os',
-      password: 'Yugioh@1234#',
+      password: TEST_PASSWORD,
     });
 
     const res = await POST(req);
@@ -111,7 +116,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcormining.os',
-      password: 'Yugioh@1234#',
+      password: TEST_PASSWORD,
     });
 
     const res = await POST(req);
@@ -131,7 +136,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcormining.os',
-      password: 'Yugioh@1234#',
+      password: TEST_PASSWORD,
     });
 
     const res = await POST(req);
@@ -147,7 +152,7 @@ describe('POST /api/auth/login', () => {
 
     const req = createRequest({
       email: 'admin@plantcormining.os',
-      password: 'Yugioh@1234#',
+      password: TEST_PASSWORD,
     });
 
     const res = await POST(req);

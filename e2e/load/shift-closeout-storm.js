@@ -26,6 +26,12 @@ const SUPABASE_URL = __ENV.SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabas
 const SUPABASE_ANON_KEY =
   __ENV.SUPABASE_ANON_KEY || 'sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5';
 
+// Credentials come from the environment only — never a committed literal.
+// NOTE: this is a k6 script, so it must use __ENV, not process.env.
+// Supply with: k6 run -e TEST_PASSWORD=... e2e/load/shift-closeout-storm.js
+const TEST_EMAIL = __ENV.TEST_EMAIL || 'admin@plantcormining.os';
+const TEST_PASSWORD = __ENV.TEST_PASSWORD;
+
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     let r = (Math.random() * 16) | 0,
@@ -40,12 +46,17 @@ function base64urlEncode(str) {
 }
 
 export function setup() {
+  if (!TEST_PASSWORD) {
+    throw new Error(
+      'TEST_PASSWORD is not set. Run with: k6 run -e TEST_PASSWORD=... e2e/load/shift-closeout-storm.js'
+    );
+  }
   // Login to get a valid session
   const res = http.post(
     `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
     JSON.stringify({
-      email: 'Admin@plantcormining.os',
-      password: 'Yugioh@1234#',
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
     }),
     {
       headers: {

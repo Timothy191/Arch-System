@@ -173,6 +173,7 @@ fallow_output.txt
 
 # Generated OpenAPI types from contract validation
 packages/contract/src/generated/
+packages/contract/openapi.generated.json
 
 # One-off generated reports / backups
 audit_report.md
@@ -222,6 +223,7 @@ e2e/.auth/
 /storybook/
 /supabase
 **/.archived/
+docs/archive/
 vibe-audit.html
 
 # Compound Engineering local scratch space
