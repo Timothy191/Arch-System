@@ -75,8 +75,7 @@ loses them. Full text with rationale and examples: `docs/agents/invariants.md`.
    Gate: `pnpm audit:hooks`.
 10. **Jest 30 SSoT** — one unit-test runner. Never introduce `ava`/`mocha`/`tape`.
     Never weaken or delete assertions to silence a warning. Gate: `pnpm audit:hooks`.
-11. **File length** — target 400–450 lines, hard ceiling 500. Decompose proactively.
-12. **Shell safety** — never destructive bash (`rm -rf /`, `dd`, `chmod 777`, raw block
+11. **Shell safety** — never destructive bash (`rm -rf /`, `dd`, `chmod 777`, raw block
     device writes, pipe-to-shell). Audited by `tools/scripts/check-compound-bash.cjs`.
 
 ---

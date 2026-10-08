@@ -48,6 +48,7 @@ pnpm --filter @repo/database supabase:reset  # Reset local database
 - **`libs/features/*`** & **`libs/shared/*`** — Domain feature slices and cross-cutting hooks/utilities.
 
 ### Strict Enforced Boundaries
+
 - `apps/*` MUST NOT import `packages/database` directly — route via `@repo/supabase`.
 - `packages/ui` must remain pure presentational (zero business logic).
 - No imports from `apps/*` into `packages/*` or `tools/*`.
@@ -58,7 +59,6 @@ pnpm --filter @repo/database supabase:reset  # Reset local database
 
 - **Package Manager**: `pnpm` exclusively (pinned v9.15.9).
 - **Light Mode Only**: Strict light mode (#f3f4f6 background); semantic OKLCH tokens from `@repo/theme`. Never `dark:` variants.
-- **File Length**: Target 400–450 lines, hard ceiling 500 lines. Decompose proactively.
 - **Server Actions**: Authenticate on first line, authorize, validate via `@repo/contract`, rate-limit, and invalidate cache before `redirect()`.
 - **Caching**: Next.js 16 cache components (`'use cache'` requires named `cacheLife()` profile). Mutations must invalidate tags.
 - **Client State**: `@tanstack/react-query` SSoT. SWR is prohibited.
@@ -69,6 +69,7 @@ pnpm --filter @repo/database supabase:reset  # Reset local database
 ## Verification Mandate
 
 Before completing ANY task:
+
 1. Run `pnpm agent:verify` — must exit 0.
 2. For UI/frontend tasks: run `pnpm audit:browser` — must exit 0.
 3. Follow STM-0 5-phase structured thinking mandate (`.agents/rules/structured-thinking-mandate.md`).

@@ -212,11 +212,6 @@ Runtime clients are decoupled behind factory helpers to prevent environment leak
 3. **Form State**: React Hook Form with Zod resolvers (`@hookform/resolvers/zod`) paired with local storage draft persistence (`arch_*_draft_*`).
 4. **Complex State Machines**: XState 5 actors (`orchestrator.machine.ts`) for multi-step hardware and shift closeout lifecycles.
 
-### File Length Limits & Modularity
-
-- Target: 400–450 lines per file.
-- Hard ceiling: 500 lines. Proactively decompose bloated files into subcomponents, domain hooks, or utility files.
-
 ---
 
 ## Important Files

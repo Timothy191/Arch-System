@@ -67,3 +67,12 @@ Before marking any task, feature, or refactor complete, the agent **MUST autonom
 
 - **Mandatory Backlog Check**: At the start of new sessions or when switching contexts, you must autonomously check for any backlog, unfinished tasks, or incomplete `temp/tasks.md` items.
 - **Autonomous Completion**: If an outstanding backlog is detected, you must prompt/inform the user and immediately autonomously complete the required tasks. You must maintain a "zero outstanding" state so you can assist the user with new requests without forgotten or hanging tasks.
+
+## 9. Anti-Bloat Dynamic Leases via `skills-mcp`
+
+- **No Static Context Flooding**: Agents MUST NOT inject entire markdown skill manuals, architectural guides, or schemas into prompts or persistent system rules.
+- **Lease-and-Return Lifecycle**:
+  1. Inspect metadata via `list_available_skills` or `list_available_context`.
+  2. Lease the active instructions via `acquire_skill(skillName, agentId)` or `acquire_context(contextId, agentId)`.
+  3. Execute the scoped subtask.
+  4. Promptly invoke `return_skill` / `release_context` upon completion to release tokens and unbloat the agent context window.
