@@ -17,6 +17,13 @@ jest.mock('@repo/utils/inngest', () => ({
   aiGenerateEmbeddingEvent: 'ai/generate-embedding',
 }));
 
+const mockIndexBreakdownVector = jest.fn().mockResolvedValue({ success: true });
+const mockIndexShiftNoteVector = jest.fn().mockResolvedValue({ success: true });
+jest.mock('@/lib/ai/mining-rag', () => ({
+  indexBreakdownVector: (...args: unknown[]) => mockIndexBreakdownVector(...args),
+  indexShiftNoteVector: (...args: unknown[]) => mockIndexShiftNoteVector(...args),
+}));
+
 import { generateEmbeddingFn } from './embedding-generation';
 
 const handler = (generateEmbeddingFn as any).handler;
@@ -26,6 +33,38 @@ describe('generateEmbeddingFn', () => {
     mockLogError.mockClear();
     mockGenerateEmbedding.mockClear();
     mockBatchGenerateEmbeddings.mockClear();
+    mockIndexBreakdownVector.mockClear();
+    mockIndexShiftNoteVector.mockClear();
+  });
+
+  it('indexes breakdown when breakdown payload is provided', async () => {
+    const breakdown = {
+      id: 'bd-1',
+      fleet_id: 'EX01',
+      machine_type: 'Excavator',
+      reason: 'Boom oil leak',
+    };
+    const result = await handler({
+      event: { data: { breakdown, userId: 'u1' } },
+    });
+    expect(result).toEqual({ success: true });
+    expect(mockIndexBreakdownVector).toHaveBeenCalledWith(breakdown, 'u1');
+    expect(mockGenerateEmbedding).not.toHaveBeenCalled();
+  });
+
+  it('indexes shift note when shiftNote payload is provided', async () => {
+    const shiftNote = {
+      id: 'sn-1',
+      shift_type: 'day',
+      note_date: '2026-10-08',
+      note_text: 'Blasting done',
+    };
+    const result = await handler({
+      event: { data: { shiftNote, userId: 'u1' } },
+    });
+    expect(result).toEqual({ success: true });
+    expect(mockIndexShiftNoteVector).toHaveBeenCalledWith(shiftNote, 'u1');
+    expect(mockGenerateEmbedding).not.toHaveBeenCalled();
   });
 
   it('uses the batch path when texts is an array', async () => {

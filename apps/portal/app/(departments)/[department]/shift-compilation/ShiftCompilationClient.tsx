@@ -8,6 +8,7 @@ import {
   MultiSiteShiftReportClient,
   ProductionSummaryCard,
   ShiftCompilationHeader,
+  ShiftIntelligenceWidget,
   TireAlertsBanner,
   UnifiedShiftCloseoutModal,
 } from '@repo/departments/ui';
@@ -15,6 +16,7 @@ import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { cn } from '@repo/ui/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { searchShiftIntelligenceAction } from '@/app/actions/vector-search';
 import { lockAndSignUnifiedShift } from './actions';
 import { exportSignedShiftReportPdf } from './pdf-actions';
 
@@ -131,6 +133,9 @@ export function ShiftCompilationClient({
             <BreakdownsShiftWidget breakdowns={report.breakdowns} />
             <TireAlertsBanner tireEvents={report.tire_management} />
           </div>
+
+          {/* Cross-Shift Operational Intelligence */}
+          <ShiftIntelligenceWidget onSearchIntelligence={searchShiftIntelligenceAction} />
         </>
       )}
 

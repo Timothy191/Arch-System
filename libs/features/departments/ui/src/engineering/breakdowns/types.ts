@@ -102,3 +102,14 @@ export interface MTBFDataPoint {
   mtbfHours: number;
   failureCount: number;
 }
+
+export interface BreakdownDiagnosticResult {
+  id: string;
+  breakdownId?: string;
+  fleetId: string;
+  machineType: string;
+  reason: string;
+  repairNotes?: string;
+  score: number;
+  createdAt: string;
+}

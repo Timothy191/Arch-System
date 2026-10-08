@@ -6,22 +6,33 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import { BookInForm } from './BookInForm';
 import { BookOutForm } from './BookOutForm';
+import { BreakdownDiagnosticAssistant } from './BreakdownDiagnosticAssistant';
 import { BreakdownStats } from './BreakdownStats';
 import { BreakdownsTable } from './BreakdownsTable';
-import type { Breakdown, BreakdownMetrics, Machine, MTBFDataPoint, ServiceTrigger } from './types';
+import type {
+  Breakdown,
+  BreakdownDiagnosticResult,
+  BreakdownMetrics,
+  Machine,
+  MTBFDataPoint,
+  ServiceTrigger,
+} from './types';
 
 const BreakdownCharts = dynamic(() => import('./BreakdownCharts').then((m) => m.BreakdownCharts), {
   ssr: false,
   loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
 });
 
-type Tab = 'overview' | 'bookin' | 'bookout' | 'query';
+type Tab = 'overview' | 'diagnostics' | 'bookin' | 'bookout' | 'query';
 
 interface BreakdownsDashboardProps {
   departmentId: string;
   breakdowns: Breakdown[];
   metrics: BreakdownMetrics;
   machines: Machine[];
+  onSearchDiagnostics?: (
+    query: string
+  ) => Promise<{ success: boolean; data?: BreakdownDiagnosticResult[]; error?: string }>;
 }
 
 export function BreakdownsDashboard({
@@ -29,11 +40,13 @@ export function BreakdownsDashboard({
   breakdowns,
   metrics,
   machines,
+  onSearchDiagnostics,
 }: BreakdownsDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
+    { id: 'diagnostics' as const, label: 'AI Diagnostics', icon: Zap },
     { id: 'bookin' as const, label: 'Book In', icon: LogIn },
     { id: 'bookout' as const, label: 'Book Out', icon: LogOut },
     { id: 'query' as const, label: 'Query Data', icon: Search },
@@ -211,6 +224,10 @@ export function BreakdownsDashboard({
                 <BreakdownsTable breakdowns={activeBreakdowns} showStatus={false} />
               </div>
             </div>
+          )}
+
+          {activeTab === 'diagnostics' && (
+            <BreakdownDiagnosticAssistant onSearchDiagnostics={onSearchDiagnostics} />
           )}
 
           {activeTab === 'bookin' && (

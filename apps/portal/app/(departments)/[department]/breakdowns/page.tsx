@@ -1,3 +1,4 @@
+import { searchBreakdownDiagnosticsAction } from '@/app/actions/vector-search';
 import type { Breakdown, BreakdownMetrics, Machine } from '@/features/departments';
 import { BreakdownsDashboard } from '@/features/departments';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
@@ -64,6 +65,7 @@ export default async function BreakdownsPage({
       breakdowns={allBreakdowns}
       metrics={metrics}
       machines={(machines ?? []) as Machine[]}
+      onSearchDiagnostics={searchBreakdownDiagnosticsAction}
     />
   );
 }
