@@ -69,8 +69,17 @@ function HeroSlide({
   if (diff < -total / 2) diff += total;
 
   const isCenter = isActive || diff === 0;
-  const isLeft = diff === -1 || (diff < 0 && diff !== -1 && idx === 0 && activeIndex === total - 1);
-  const isRight = diff === 1 || (diff > 0 && diff !== 1 && idx === total - 1 && activeIndex === 0);
+  const isLeft1 =
+    diff === -1 || (diff < 0 && diff !== -1 && idx === 0 && activeIndex === total - 1);
+  const isLeft2 =
+    diff === -2 ||
+    (diff < -1 && diff !== -2 && idx === 0 && activeIndex === total - 1) ||
+    (diff === -(total - 1) && activeIndex === 1);
+  const isRight1 = diff === 1 || (diff > 0 && diff !== 1 && idx === total - 1 && activeIndex === 0);
+  const isRight2 =
+    diff === 2 ||
+    (diff > 1 && diff !== 2 && idx === total - 1 && activeIndex === 0) ||
+    (diff === total - 1 && activeIndex === total - 2);
 
   let transform = 'translate3d(0, 0, -250px) scale(0.7)';
   let opacity = 0;
@@ -86,29 +95,46 @@ function HeroSlide({
     zIndex = 30;
     filter = 'blur(0px)';
     pointerEvents = 'auto';
-  } else if (isLeft) {
-    transform = 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)';
+  } else if (isLeft1 || isRight1) {
+    // Immediate left/right preview slides
+    const isLeft = isLeft1;
+    transform = isLeft
+      ? 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)'
+      : 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)';
     opacity = 0.42;
-    zIndex = 10;
+    zIndex = 20;
     filter = 'blur(0px)';
     pointerEvents = 'auto';
     cursorClass = 'cursor-pointer hover:opacity-65';
     maskStyle = {
-      maskImage: 'linear-gradient(to right, transparent, black 40%)',
-      WebkitMaskImage: 'linear-gradient(to right, transparent, black 40%)',
+      maskImage: isLeft
+        ? 'linear-gradient(to right, transparent, black 40%)'
+        : 'linear-gradient(to left, transparent, black 40%)',
+      WebkitMaskImage: isLeft
+        ? 'linear-gradient(to right, transparent, black 40%)'
+        : 'linear-gradient(to left, transparent, black 40%)',
     };
-  } else if (isRight) {
-    transform = 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)';
-    opacity = 0.42;
+  } else if (isLeft2 || isRight2) {
+    // Secondary left/right preview slides
+    const isLeft = isLeft2;
+    transform = isLeft
+      ? 'translate3d(-85%, 0, -200px) rotateY(18deg) scale(0.75)'
+      : 'translate3d(85%, 0, -200px) rotateY(-18deg) scale(0.75)';
+    opacity = 0.25;
     zIndex = 10;
-    filter = 'blur(0px)';
+    filter = 'blur(2px)';
     pointerEvents = 'auto';
-    cursorClass = 'cursor-pointer hover:opacity-65';
+    cursorClass = 'cursor-pointer hover:opacity-50';
     maskStyle = {
-      maskImage: 'linear-gradient(to left, transparent, black 40%)',
-      WebkitMaskImage: 'linear-gradient(to left, transparent, black 40%)',
+      maskImage: isLeft
+        ? 'linear-gradient(to right, transparent, black 30%)'
+        : 'linear-gradient(to left, transparent, black 30%)',
+      WebkitMaskImage: isLeft
+        ? 'linear-gradient(to right, transparent, black 30%)'
+        : 'linear-gradient(to left, transparent, black 30%)',
     };
   } else {
+    // Far slides - keep hidden
     transform =
       diff < 0
         ? 'translate3d(-100%, 0, -250px) rotateY(35deg) scale(0.7)'
@@ -120,7 +146,7 @@ function HeroSlide({
   }
 
   const handleClick = () => {
-    if (!isCenter && (isLeft || isRight)) {
+    if (!isCenter && (isLeft1 || isLeft2 || isRight1 || isRight2)) {
       onJumpTo(idx);
     }
   };
