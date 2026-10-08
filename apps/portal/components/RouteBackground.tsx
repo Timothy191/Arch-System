@@ -22,7 +22,7 @@ function RouteBackgroundPoster() {
           fill
           priority
           sizes="100vw"
-          className="route-bg-image object-cover object-center filter brightness-105"
+          className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125"
         />
       </div>
       <div className="route-bg-grain" aria-hidden="true" />
@@ -115,7 +115,7 @@ function RouteBackgroundInner() {
           <video
             id="route-bg-light-video"
             ref={videoRef}
-            className="route-bg-video filter brightness-105 object-cover object-center w-full h-full"
+            className="route-bg-video filter invert brightness-75 contrast-125 object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: 'opacity 1.5s ease-in-out',

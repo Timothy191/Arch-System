@@ -15,13 +15,13 @@ import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import type { AlertEvent, TrendDataPoint } from '@/features/hub';
 import {
+  ActiveMetricsCharts,
   AlertTicker,
   CoreOperationalModules,
   DepartmentReviews,
   HeroBackground,
   HeroRotator,
   ProductionTrendWrapper as ProductionTrend,
-  ToolBanner,
 } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
 import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departments';
@@ -416,28 +416,26 @@ export default async function HubPage() {
         <CoreOperationalModules departments={departments} />
       )}
 
-      {/* Productivity & Workflow Tools - Marquee Banner */}
-      {tools.length > 0 && (
-        <section
-          className="space-y-4 animate-fade-up group/row relative rounded-card liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
-          style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
-        >
-          <div className="flex items-center justify-between pb-4 border-b border-arch-border-subtle">
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
-              <span className="p-1 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue">
-                <WrenchIcon className="w-4 h-4" />
-              </span>
-              Daily Workflow &amp; Efficiency Tools
-            </h2>
-          </div>
+      {/* Active Operational Metrics Charts */}
+      <section
+        className="space-y-4 animate-fade-up group/row relative rounded-card liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
+        style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
+      >
+        <div className="flex items-center justify-between pb-4 border-b border-arch-border-subtle">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
+            <span className="p-1 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue">
+              <Activity className="w-4 h-4" />
+            </span>
+            Active Portal Metrics
+          </h2>
+        </div>
 
-          <Suspense
-            fallback={<div className="h-28 animate-pulse bg-arch-surface-tertiary rounded-card" />}
-          >
-            <ToolBanner tools={tools} />
-          </Suspense>
-        </section>
-      )}
+        <Suspense
+          fallback={<div className="h-40 animate-pulse bg-arch-surface-tertiary rounded-card" />}
+        >
+          <ActiveMetricsCharts />
+        </Suspense>
+      </section>
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
       {pluginWidgets.length > 0 && (
