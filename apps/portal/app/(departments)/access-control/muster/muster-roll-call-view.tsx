@@ -40,11 +40,37 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const { isOnline } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
 
-  // Compute live counts
-  const totalSouls = records.length;
-  const accounted = records.filter((r) => r.status === 'accounted').length;
-  const unaccounted = records.filter((r) => r.status === 'unaccounted').length;
-  const evacuated = records.filter((r) => r.status === 'evacuated').length;
+  // Single-pass computation of live counts and per-station verified counts
+  // Performance optimization: Replaces multiple .filter() calls across records array (O(N * S))
+  // with a single O(N) pass per render/update.
+  const { totalSouls, accounted, unaccounted, evacuated, stationCounts } = useMemo(() => {
+    let acc = 0;
+    let unacc = 0;
+    let evac = 0;
+    const counts = new Map<string, number>();
+
+    for (let i = 0; i < records.length; i++) {
+      const r = records[i];
+      if (r.status === 'accounted') {
+        acc++;
+        if (r.station) {
+          counts.set(r.station, (counts.get(r.station) || 0) + 1);
+        }
+      } else if (r.status === 'unaccounted') {
+        unacc++;
+      } else if (r.status === 'evacuated') {
+        evac++;
+      }
+    }
+
+    return {
+      totalSouls: records.length,
+      accounted: acc,
+      unaccounted: unacc,
+      evacuated: evac,
+      stationCounts: counts,
+    };
+  }, [records]);
 
   const handleToggleStatus = async (record: MusterPersonnelRecord) => {
     const nextStatus: MusterPersonnelRecord['status'] =
@@ -276,9 +302,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       {/* Muster Point Stations Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {summary.musterStations.map((station) => {
-          const stationCount = records.filter(
-            (r) => r.status === 'accounted' && r.station === station.name
-          ).length;
+          const stationCount = stationCounts.get(station.name) || 0;
           return (
             <div
               key={station.id}
