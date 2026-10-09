@@ -175,7 +175,7 @@ test.describe('Asset Integrity & CSP Gating', () => {
           if (!video) return [];
           return Array.from(video.querySelectorAll('source')).map((s) => s.src);
         });
-        expect(sourceUrls.some((u) => u.includes('res.cloudinary.com'))).toBe(true);
+        expect(sourceUrls.some((u) => u.includes('/background/video-loop'))).toBe(true);
       }
       expect(mediaRequestBlocked).toBe(false);
     }
