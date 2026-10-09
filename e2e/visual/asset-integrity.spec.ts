@@ -147,9 +147,7 @@ test.describe('Asset Integrity & CSP Gating', () => {
     console.log(
       `[RELEASE-GATE EVIDENCE] Asset Network Health: failedImageUrls=${failedImageUrls.length}`
     );
-    console.log(
-      `[RELEASE-GATE EVIDENCE] CSP Violations: count=${cspViolations.length}`
-    );
+    console.log(`[RELEASE-GATE EVIDENCE] CSP Violations: count=${cspViolations.length}`);
 
     // 4. Assertion: Asset network health (zero failed image requests)
     expect(failedImageUrls).toEqual([]);

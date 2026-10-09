@@ -43,7 +43,7 @@ async function main() {
   const protectedDeployments = new Set();
 
   for (const proj of projectsData.projects || []) {
-    if (proj.targets && proj.targets.production && proj.targets.production.id) {
+    if (proj.targets?.production?.id) {
       protectedDeployments.add(proj.targets.production.id);
       console.log(
         `🛡️  Active Production for [${proj.name}]: ${proj.targets.production.id} (${proj.targets.production.url})`

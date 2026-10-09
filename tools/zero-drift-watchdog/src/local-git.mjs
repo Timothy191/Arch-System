@@ -1,8 +1,8 @@
 // @ts-check
 import { execFile, execFileSync } from 'node:child_process';
-import { promisify } from 'node:util';
 import fs from 'node:fs';
-import { GitError, BranchNotFoundError, GitHubApiError, RateLimitError } from './errors.mjs';
+import { promisify } from 'node:util';
+import { BranchNotFoundError, GitError, GitHubApiError, RateLimitError } from './errors.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -86,7 +86,7 @@ export function parseRenamedPath(rawPath) {
  * @returns {{ isClean: boolean, uncommittedFiles: string[], entries: Array<any> }}
  */
 export function parsePorcelainStatus(rawOutput) {
-  if (!rawOutput || !rawOutput.trim()) return { isClean: true, uncommittedFiles: [], entries: [] };
+  if (!rawOutput?.trim()) return { isClean: true, uncommittedFiles: [], entries: [] };
 
   // CRITICAL: Do NOT run rawOutput.trim() before split!
   // Doing so removes the leading space on line 0 when line 0 is an unstaged modification (' M file').

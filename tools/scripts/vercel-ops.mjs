@@ -83,7 +83,7 @@ async function main() {
     }
 
     case 'invalidate': {
-      const tagIndex = extraArgs.findIndex((a) => a === '--tag');
+      const tagIndex = extraArgs.indexOf('--tag');
       const tag = tagIndex !== -1 ? extraArgs[tagIndex + 1] : extraArgs[0];
       if (!tag) {
         console.error(

@@ -1,13 +1,14 @@
 // @ts-check
-import { describe, it } from 'node:test';
+
 import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 import {
-  parseCommandLineArgs,
-  getHelpText,
-  formatConsoleOutput,
-  runCli,
   CLI_OPTIONS,
+  formatConsoleOutput,
+  getHelpText,
+  parseCommandLineArgs,
+  runCli,
 } from '../../src/cli.mjs';
 
 function createMockIo(envOverrides = {}) {

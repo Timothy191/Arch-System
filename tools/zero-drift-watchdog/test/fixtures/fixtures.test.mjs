@@ -1,9 +1,10 @@
 // @ts-check
-import { describe, it, before, after } from 'node:test';
+
 import assert from 'node:assert/strict';
+import { after, before, describe, it } from 'node:test';
+import { createMockGitRepo } from './mock-git.mjs';
 import { createMockGitHubServer } from './mock-github.mjs';
 import { createMockVercelServer } from './mock-vercel.mjs';
-import { createMockGitRepo } from './mock-git.mjs';
 
 describe('Test Infrastructure Fixtures Verification', () => {
   describe('Mock GitHub Server', () => {

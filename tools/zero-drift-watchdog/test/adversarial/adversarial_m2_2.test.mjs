@@ -1,31 +1,30 @@
 // @ts-check
-import { describe, it, before, after, beforeEach } from 'node:test';
+
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import net from 'node:net';
-
+import { after, before, beforeEach, describe, it } from 'node:test';
 import {
-  discoverVercelContext,
-  inspectVercelDeployment,
-  extractCommitSha,
-  createVercelHeaders,
-  buildVercelUrl,
-  resolveVercelToken,
-  fetchDeployments,
-  fetchProject,
-  resolveDeployHookUrl,
-  triggerDeployHook,
-  COMMIT_SHA_REGEX,
-} from '../../src/vercel-inspector.mjs';
-
-import {
-  WatchdogError,
   VercelApiError,
-  VercelError,
   VercelAuthError,
+  VercelError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  buildVercelUrl,
+  COMMIT_SHA_REGEX,
+  createVercelHeaders,
+  discoverVercelContext,
+  extractCommitSha,
+  fetchDeployments,
+  fetchProject,
+  inspectVercelDeployment,
+  resolveDeployHookUrl,
+  resolveVercelToken,
+  triggerDeployHook,
+} from '../../src/vercel-inspector.mjs';
 
 import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
 
@@ -625,7 +624,7 @@ describe('Empirical Adversarial Stress Test Harness - Challenger M2-2', () => {
       for (const bad of badUrls) {
         await assert.rejects(
           async () => {
-            // @ts-ignore
+            // @ts-expect-error
             await triggerDeployHook(bad);
           },
           (err) => {

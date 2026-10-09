@@ -266,7 +266,7 @@ export function createMockVercelServer(options = {}) {
         // Team ID validation: If project belongs to team and request lacks teamId
         if (queryProjectId) {
           const proj = projects.get(queryProjectId);
-          if (proj && proj.teamId && queryTeamId !== proj.teamId) {
+          if (proj?.teamId && queryTeamId !== proj.teamId) {
             // Team scoping mismatch returns empty list or not found
             filtered = [];
           }

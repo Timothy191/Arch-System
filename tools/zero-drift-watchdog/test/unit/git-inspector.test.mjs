@@ -1,18 +1,17 @@
 // @ts-check
-import { describe, it, afterEach } from 'node:test';
+
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-
-import {
-  inspectLocalGit,
-  parsePorcelainStatus,
-  getUpstreamStatus,
-  isGitRepository,
-} from '../../src/git-inspector.mjs';
-
+import { afterEach, describe, it } from 'node:test';
 import { GitError } from '../../src/errors.mjs';
+import {
+  getUpstreamStatus,
+  inspectLocalGit,
+  isGitRepository,
+  parsePorcelainStatus,
+} from '../../src/git-inspector.mjs';
 import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 
 describe('Unit: Local Git State Inspector', () => {

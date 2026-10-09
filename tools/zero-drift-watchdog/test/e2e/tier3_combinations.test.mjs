@@ -1,11 +1,12 @@
 // @ts-check
-import { describe, it, before, after, beforeEach } from 'node:test';
+
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { after, before, beforeEach, describe, it } from 'node:test';
+import { hasModule, PROJECT_ROOT, requireCli, runWatchdog } from '../fixtures/cli-helper.mjs';
+import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 import { createMockGitHubServer } from '../fixtures/mock-github.mjs';
 import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
-import { createMockGitRepo } from '../fixtures/mock-git.mjs';
-import { runWatchdog, requireCli, hasModule, PROJECT_ROOT } from '../fixtures/cli-helper.mjs';
 
 describe('Tier 3: Pairwise Combinations (Tri-State Drift Matrix)', () => {
   /** @type {ReturnType<typeof createMockGitHubServer>} */

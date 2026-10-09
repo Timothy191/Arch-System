@@ -1,29 +1,28 @@
 // @ts-check
-import { describe, it, afterEach, before, after } from 'node:test';
+
 import assert from 'node:assert/strict';
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
-
+import { after, afterEach, before, describe, it } from 'node:test';
 import {
-  inspectLocalGit,
-  parsePorcelainStatus,
-  parseRenamedPath,
-  getUpstreamStatus,
-  isGitRepository,
-  parseGitHubRemoteUrl,
-  discoverGitHubContext,
-  inspectGitHubRemote,
-} from '../../src/git-inspector.mjs';
-
-import {
-  WatchdogError,
-  GitError,
   BranchNotFoundError,
+  GitError,
   GitHubApiError,
   RateLimitError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  discoverGitHubContext,
+  getUpstreamStatus,
+  inspectGitHubRemote,
+  inspectLocalGit,
+  isGitRepository,
+  parseGitHubRemoteUrl,
+  parsePorcelainStatus,
+  parseRenamedPath,
+} from '../../src/git-inspector.mjs';
 
 import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 import { createMockGitHubServer } from '../fixtures/mock-github.mjs';

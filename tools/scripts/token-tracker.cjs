@@ -351,16 +351,17 @@ function main() {
       break;
 
     case '--budget-check':
-    case 'budget-check':
+    case 'budget-check': {
       const withinBudget = checkBudget();
       process.exit(withinBudget ? 0 : 1);
       break;
+    }
 
     case '--set-budget':
-    case 'set-budget':
+    case 'set-budget': {
       const key = args[1];
       const value = parseInt(args[2], 10);
-      if (!key || isNaN(value)) {
+      if (!key || Number.isNaN(value)) {
         console.error('Usage: token-tracker.cjs --set-budget <key> <value>');
         console.error(
           'Keys: maxRetrospectives, maxRetrospectiveSize, maxRulesSize, maxSkillsSize, maxSessionContext'
@@ -372,6 +373,7 @@ function main() {
       saveContextBudget(budget);
       console.log(`✅ Set ${key} = ${value}`);
       break;
+    }
 
     default:
       console.log('Token Usage Tracker & Context Budget Manager');

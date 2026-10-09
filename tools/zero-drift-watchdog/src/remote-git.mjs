@@ -1,6 +1,6 @@
 // @ts-check
 import { execFileSync } from 'node:child_process';
-import { GitError, BranchNotFoundError, GitHubApiError, RateLimitError } from './errors.mjs';
+import { BranchNotFoundError, GitError, GitHubApiError, RateLimitError } from './errors.mjs';
 import { runGit } from './local-git.mjs';
 
 export function parseGitHubRemoteUrl(url) {
@@ -25,14 +25,14 @@ export async function discoverGitHubContext(cwd = process.cwd(), options = {}) {
   let repo = '';
   let branch = '';
 
-  if (env.GITHUB_REPOSITORY && env.GITHUB_REPOSITORY.includes('/')) {
+  if (env.GITHUB_REPOSITORY?.includes('/')) {
     const parts = env.GITHUB_REPOSITORY.split('/');
     owner = parts[0];
     repo = parts[1];
   }
   if (env.GITHUB_REF_NAME) {
     branch = env.GITHUB_REF_NAME;
-  } else if (env.GITHUB_REF && env.GITHUB_REF.startsWith('refs/heads/')) {
+  } else if (env.GITHUB_REF?.startsWith('refs/heads/')) {
     branch = env.GITHUB_REF.replace('refs/heads/', '');
   }
 
@@ -128,7 +128,7 @@ export function createGitHubHeaders(token) {
     'User-Agent': 'zero-drift-watchdog/1.0.0 (anti-drift synchronization watchdog)',
   };
   if (token && typeof token === 'string' && token.trim()) {
-    headers['Authorization'] = `Bearer ${token.trim()}`;
+    headers.Authorization = `Bearer ${token.trim()}`;
   }
   return headers;
 }
@@ -245,7 +245,7 @@ export async function fetchBranchHeadSha(context, options = {}) {
     }
 
     const data = await res.json();
-    if (!data.commit || !data.commit.sha) {
+    if (!data.commit?.sha) {
       throw new GitHubApiError('Invalid branch response from GitHub API: missing commit.sha', {
         statusCode: res.status,
         endpoint: url,
@@ -363,7 +363,7 @@ export async function compareCommits(context, base, head, options = {}) {
 
 export async function inspectGitHubRemote(context, token, options = {}) {
   let effectiveToken = typeof token === 'string' ? token : undefined;
-  let effectiveOptions =
+  const effectiveOptions =
     typeof token === 'object' && token !== null ? { ...token, ...options } : { ...options };
   if (effectiveToken === undefined && effectiveOptions.token !== undefined) {
     effectiveToken = effectiveOptions.token;

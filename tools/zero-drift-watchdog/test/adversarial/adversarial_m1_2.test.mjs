@@ -1,24 +1,25 @@
 // @ts-check
-import { describe, it, before, after } from 'node:test';
+
 import assert from 'node:assert/strict';
+import { after, before, describe, it } from 'node:test';
 import {
-  parseGitHubRemoteUrl,
-  discoverGitHubContext,
-  createGitHubHeaders,
-  resolveGitHubToken,
-  fetchBranchHeadSha,
-  compareCommits,
-  inspectGitHubRemote,
-  inspectLocalGit,
-  runGit,
-} from '../../src/git-inspector.mjs';
-import {
-  WatchdogError,
-  GitError,
   BranchNotFoundError,
+  GitError,
   GitHubApiError,
   RateLimitError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  compareCommits,
+  createGitHubHeaders,
+  discoverGitHubContext,
+  fetchBranchHeadSha,
+  inspectGitHubRemote,
+  inspectLocalGit,
+  parseGitHubRemoteUrl,
+  resolveGitHubToken,
+  runGit,
+} from '../../src/git-inspector.mjs';
 import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 import { createMockGitHubServer } from '../fixtures/mock-github.mjs';
 

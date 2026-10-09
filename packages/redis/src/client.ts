@@ -73,7 +73,7 @@ export async function closeRedis(): Promise<void> {
     client = null;
     connecting = null;
   }
-  
+
   for (const sub of subscribers) {
     if (sub.isOpen) {
       await sub.quit();

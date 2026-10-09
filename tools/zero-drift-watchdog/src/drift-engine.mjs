@@ -1,31 +1,31 @@
 // @ts-check
 import path from 'node:path';
 import {
-  runGit,
-  inspectLocalGit,
-  discoverGitHubContext,
-  inspectGitHubRemote,
-  resolveGitHubToken,
-} from './git-inspector.mjs';
-import {
-  discoverVercelContext,
-  inspectVercelDeployment,
-  triggerDeployHook,
-  resolveDeployHookUrl,
-  createVercelHeaders,
-  resolveVercelToken,
-  IN_FLIGHT_STATES,
-  DEFAULT_VERCEL_API_URL,
-} from './vercel-inspector.mjs';
-import {
-  WatchdogError,
   GitError,
+  TimeoutError,
   UncommittedChangesError,
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,
-  TimeoutError,
+  WatchdogError,
 } from './errors.mjs';
+import {
+  discoverGitHubContext,
+  inspectGitHubRemote,
+  inspectLocalGit,
+  resolveGitHubToken,
+  runGit,
+} from './git-inspector.mjs';
+import {
+  createVercelHeaders,
+  DEFAULT_VERCEL_API_URL,
+  discoverVercelContext,
+  IN_FLIGHT_STATES,
+  inspectVercelDeployment,
+  resolveDeployHookUrl,
+  resolveVercelToken,
+  triggerDeployHook,
+} from './vercel-inspector.mjs';
 
 export { IN_FLIGHT_STATES, TimeoutError };
 
@@ -206,10 +206,10 @@ export function evaluateDrift(local, github, vercel, targetContext = {}) {
     branch: target.branch || safeLocal.branch || safeGithub.branch || 'main',
     repository:
       target.repository ||
-      (safeGithub['owner'] && safeGithub['repo']
-        ? `${safeGithub['owner']}/${safeGithub['repo']}`
+      (safeGithub.owner && safeGithub.repo
+        ? `${safeGithub.owner}/${safeGithub.repo}`
         : 'unknown/unknown'),
-    vercelProject: target.vercelProject || target['project'] || 'unknown',
+    vercelProject: target.vercelProject || target.project || 'unknown',
   };
 
   return {
@@ -711,7 +711,7 @@ export async function resolveDrift(report, options = {}) {
     );
   }
 
-  let currentTargetSha = report.state.local.commit;
+  const currentTargetSha = report.state.local.commit;
   let pushedToOrigin = false;
 
   // 1. Local ahead -> Push to GitHub origin
@@ -846,7 +846,7 @@ export async function reconcileDrift(options = {}) {
   const localGit = await inspectLocalGit(cwd, options);
 
   // 2. Discover & Inspect GitHub
-  let githubContext = await discoverGitHubContext(cwd, options).catch((err) => {
+  const githubContext = await discoverGitHubContext(cwd, options).catch((err) => {
     if (!options.team || !options.project) {
       throw new Error(
         'Unable to infer GitHub repository context. Please specify --repo or run inside a GitHub repository.'
@@ -859,7 +859,7 @@ export async function reconcileDrift(options = {}) {
     };
   });
   if (options.branch) githubContext.branch = options.branch;
-  if (options.repo && options.repo.includes('/')) {
+  if (options.repo?.includes('/')) {
     const [o, r] = options.repo.split('/');
     githubContext.owner = o;
     githubContext.repo = r;

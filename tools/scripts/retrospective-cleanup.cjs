@@ -197,7 +197,7 @@ function main() {
 
   if (olderThanIdx !== -1 && args[olderThanIdx + 1]) {
     const days = parseInt(args[olderThanIdx + 1], 10);
-    if (isNaN(days)) {
+    if (Number.isNaN(days)) {
       console.error('Invalid days value for --older-than');
       process.exit(1);
     }

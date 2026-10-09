@@ -1,13 +1,13 @@
 // @ts-check
 import fs from 'node:fs';
-import path from 'node:path';
 import os from 'node:os';
+import path from 'node:path';
 import {
-  WatchdogError,
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
+  WatchdogError,
 } from './errors.mjs';
 
 export const COMMIT_SHA_REGEX = /^[0-9a-f]{40,64}$/i;

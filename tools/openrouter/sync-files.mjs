@@ -24,7 +24,7 @@ function getApiKey() {
     if (fs.existsSync(envPath)) {
       const content = fs.readFileSync(envPath, 'utf8');
       const match = content.match(/OPENROUTER_API_KEY=([^\r\n]+)/);
-      if (match && match[1]) return match[1].trim();
+      if (match?.[1]) return match[1].trim();
     }
   }
   return '';

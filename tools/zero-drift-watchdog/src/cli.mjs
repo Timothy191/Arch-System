@@ -1,23 +1,21 @@
 // @ts-check
-import { parseArgs } from 'node:util';
-import path from 'node:path';
-import fs from 'node:fs';
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { parseArgs } from 'node:util';
+import { evaluateDrift, formatDriftReport, resolveDrift } from './drift-engine.mjs';
+import { GitError, GitHubApiError, VercelApiError, WatchdogError } from './errors.mjs';
 import {
-  inspectLocalGit,
   discoverGitHubContext,
   inspectGitHubRemote,
+  inspectLocalGit,
   resolveGitHubToken,
 } from './git-inspector.mjs';
-
 import {
   discoverVercelContext,
   inspectVercelDeployment,
   resolveVercelToken,
 } from './vercel-inspector.mjs';
-
-import { evaluateDrift, resolveDrift, formatDriftReport } from './drift-engine.mjs';
-import { WatchdogError, GitError, VercelApiError, GitHubApiError } from './errors.mjs';
 
 export const CLI_OPTIONS = {
   'audit-only': { type: 'boolean', default: false },
@@ -158,7 +156,7 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   // 4. Validate Flag Formats
   let ghOwner = '';
   let ghRepoName = '';
-  let targetBranch = values.branch || '';
+  const targetBranch = values.branch || '';
 
   if (values.repo) {
     const parts = values.repo.split('/');

@@ -222,11 +222,7 @@ async function main() {
     }
 
     // Verify script exists if passing a local script file
-    if (
-      server.args &&
-      server.args[0] &&
-      (server.args[0].endsWith('.js') || server.args[0].endsWith('.cjs'))
-    ) {
+    if (server.args?.[0] && (server.args[0].endsWith('.js') || server.args[0].endsWith('.cjs'))) {
       if (!fs.existsSync(server.args[0])) {
         console.log(`${RED}✗ Target script "${server.args[0]}" not found${NC}`);
         errorsCount++;

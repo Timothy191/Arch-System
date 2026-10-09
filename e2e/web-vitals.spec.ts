@@ -67,7 +67,9 @@ test.describe('Vercel Speed Insights & Real Experience Score (RES)', () => {
             } catch {
               // Fallback to Navigation Timing API for FCP & TTFB if web-vitals package isn't bundled on window
               try {
-                const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+                const nav = performance.getEntriesByType(
+                  'navigation'
+                )[0] as PerformanceNavigationTiming;
                 if (nav) {
                   results.ttfb = nav.responseStart - nav.requestStart;
                 }
@@ -85,24 +87,67 @@ test.describe('Vercel Speed Insights & Real Experience Score (RES)', () => {
             // Allow observations to settle
             setTimeout(() => {
               // Compute local RES score
-              const fcpScore = results.fcp != null ? (results.fcp <= 1800 ? 100 : results.fcp <= 3000 ? 70 : 30) : null;
-              const lcpScore = results.lcp != null ? (results.lcp <= 2500 ? 100 : results.lcp <= 4000 ? 70 : 30) : null;
-              const inpScore = (results.inp ?? results.fid) != null
-                ? ((results.inp ?? results.fid)! <= 200 ? 100 : (results.inp ?? results.fid)! <= 500 ? 70 : 30)
-                : null;
-              const clsScore = results.cls != null ? (results.cls <= 0.1 ? 100 : results.cls <= 0.25 ? 70 : 30) : null;
+              const fcpScore =
+                results.fcp != null
+                  ? results.fcp <= 1800
+                    ? 100
+                    : results.fcp <= 3000
+                      ? 70
+                      : 30
+                  : null;
+              const lcpScore =
+                results.lcp != null
+                  ? results.lcp <= 2500
+                    ? 100
+                    : results.lcp <= 4000
+                      ? 70
+                      : 30
+                  : null;
+              const inpScore =
+                (results.inp ?? results.fid) != null
+                  ? (results.inp ?? results.fid)! <= 200
+                    ? 100
+                    : (results.inp ?? results.fid)! <= 500
+                      ? 70
+                      : 30
+                  : null;
+              const clsScore =
+                results.cls != null
+                  ? results.cls <= 0.1
+                    ? 100
+                    : results.cls <= 0.25
+                      ? 70
+                      : 30
+                  : null;
 
               let weightedSum = 0;
               let totalWeight = 0;
 
-              if (fcpScore != null) { weightedSum += fcpScore * 0.15; totalWeight += 0.15; }
-              if (lcpScore != null) { weightedSum += lcpScore * 0.30; totalWeight += 0.30; }
-              if (inpScore != null) { weightedSum += inpScore * 0.30; totalWeight += 0.30; }
-              if (clsScore != null) { weightedSum += clsScore * 0.25; totalWeight += 0.25; }
+              if (fcpScore != null) {
+                weightedSum += fcpScore * 0.15;
+                totalWeight += 0.15;
+              }
+              if (lcpScore != null) {
+                weightedSum += lcpScore * 0.3;
+                totalWeight += 0.3;
+              }
+              if (inpScore != null) {
+                weightedSum += inpScore * 0.3;
+                totalWeight += 0.3;
+              }
+              if (clsScore != null) {
+                weightedSum += clsScore * 0.25;
+                totalWeight += 0.25;
+              }
 
               if (totalWeight > 0) {
                 results.resScore = Math.round(weightedSum / totalWeight);
-                results.resRating = results.resScore >= 90 ? 'good' : results.resScore >= 50 ? 'needs-improvement' : 'poor';
+                results.resRating =
+                  results.resScore >= 90
+                    ? 'good'
+                    : results.resScore >= 50
+                      ? 'needs-improvement'
+                      : 'poor';
               }
 
               resolve(results);
@@ -128,16 +173,16 @@ test.describe('Vercel Speed Insights & Real Experience Score (RES)', () => {
         expect(metrics.lcp).toBeLessThanOrEqual(4000); // Must not be 'poor' (>4s)
       }
       if (metrics.inp != null) {
-        expect(metrics.inp).toBeLessThanOrEqual(500);  // Must not be 'poor' (>500ms)
+        expect(metrics.inp).toBeLessThanOrEqual(500); // Must not be 'poor' (>500ms)
       }
       if (metrics.cls != null) {
         expect(metrics.cls).toBeLessThanOrEqual(0.25); // Must not be 'poor' (>0.25)
       }
       if (metrics.fid != null) {
-        expect(metrics.fid).toBeLessThanOrEqual(300);  // Must not be 'poor' (>300ms)
+        expect(metrics.fid).toBeLessThanOrEqual(300); // Must not be 'poor' (>300ms)
       }
       if (metrics.ttfb != null) {
-        expect(metrics.ttfb).toBeLessThanOrEqual(1800);// Must not be 'poor' (>1.8s)
+        expect(metrics.ttfb).toBeLessThanOrEqual(1800); // Must not be 'poor' (>1.8s)
       }
       if (metrics.resScore != null) {
         expect(metrics.resScore).toBeGreaterThanOrEqual(50); // Acceptable Real Experience Score

@@ -1,11 +1,12 @@
 // @ts-check
-import { describe, it, before, after } from 'node:test';
+
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { after, before, describe, it } from 'node:test';
+import { hasModule, PROJECT_ROOT, requireCli, runWatchdog } from '../fixtures/cli-helper.mjs';
+import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 import { createMockGitHubServer } from '../fixtures/mock-github.mjs';
 import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
-import { createMockGitRepo } from '../fixtures/mock-git.mjs';
-import { runWatchdog, requireCli, hasModule, PROJECT_ROOT } from '../fixtures/cli-helper.mjs';
 
 describe('Tier 2: Boundary & Corner Cases (Resilience & Error Handling)', () => {
   /** @type {ReturnType<typeof createMockGitHubServer>} */

@@ -1,25 +1,24 @@
 // @ts-check
-import { describe, it } from 'node:test';
+
 import assert from 'node:assert/strict';
-
+import { describe, it } from 'node:test';
 import {
-  parseGitHubRemoteUrl,
-  discoverGitHubContext,
-  resolveGitHubToken,
-  createGitHubHeaders,
-  fetchBranchHeadSha,
-  compareCommits,
-  inspectGitHubRemote,
-} from '../../src/git-inspector.mjs';
-
-import {
-  WatchdogError,
-  GitError,
-  UncommittedChangesError,
   BranchNotFoundError,
+  GitError,
   GitHubApiError,
   RateLimitError,
+  UncommittedChangesError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  compareCommits,
+  createGitHubHeaders,
+  discoverGitHubContext,
+  fetchBranchHeadSha,
+  inspectGitHubRemote,
+  parseGitHubRemoteUrl,
+  resolveGitHubToken,
+} from '../../src/git-inspector.mjs';
 
 describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
   describe('parseGitHubRemoteUrl', () => {
@@ -73,15 +72,15 @@ describe('Unit: GitHub Remote Client & Protocol Invariants', () => {
     it('enforces mandatory User-Agent, API version 2022-11-28, and Accept headers', () => {
       const headers = createGitHubHeaders('mock-token-xyz');
 
-      assert.equal(headers['Accept'], 'application/vnd.github+json');
+      assert.equal(headers.Accept, 'application/vnd.github+json');
       assert.equal(headers['X-GitHub-Api-Version'], '2022-11-28');
       assert.ok(headers['User-Agent'].startsWith('zero-drift-watchdog/'));
-      assert.equal(headers['Authorization'], 'Bearer mock-token-xyz');
+      assert.equal(headers.Authorization, 'Bearer mock-token-xyz');
     });
 
     it('omits Authorization header when token is null or undefined', () => {
       const headers = createGitHubHeaders();
-      assert.equal(headers['Authorization'], undefined);
+      assert.equal(headers.Authorization, undefined);
       assert.equal(headers['X-GitHub-Api-Version'], '2022-11-28');
     });
   });

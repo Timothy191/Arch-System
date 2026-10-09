@@ -1,34 +1,33 @@
 // @ts-check
-import { describe, it, before, after, beforeEach } from 'node:test';
+
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-
+import { after, before, beforeEach, describe, it } from 'node:test';
 import {
-  discoverVercelContext,
-  inspectVercelDeployment,
-  extractCommitSha,
-  createVercelHeaders,
-  buildVercelUrl,
-  getVercelCliConfigDirs,
-  resolveVercelToken,
-  findVercelProjectConfig,
-  fetchDeployments,
-  fetchProject,
-  resolveDeployHookUrl,
-  triggerDeployHook,
-  IN_FLIGHT_STATES,
-  COMMIT_SHA_REGEX,
-} from '../../src/vercel-inspector.mjs';
-
-import {
-  WatchdogError,
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  buildVercelUrl,
+  COMMIT_SHA_REGEX,
+  createVercelHeaders,
+  discoverVercelContext,
+  extractCommitSha,
+  fetchDeployments,
+  fetchProject,
+  findVercelProjectConfig,
+  getVercelCliConfigDirs,
+  IN_FLIGHT_STATES,
+  inspectVercelDeployment,
+  resolveDeployHookUrl,
+  resolveVercelToken,
+  triggerDeployHook,
+} from '../../src/vercel-inspector.mjs';
 
 import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
 
@@ -229,12 +228,12 @@ describe('Unit: Vercel Deployment Inspector & Protocol Invariants', () => {
       assert.equal(state.commit, readySha);
       assert.equal(state.state, 'READY');
       assert.equal(state.inFlightCommit, null);
-      assert.ok(state.deploymentId && state.deploymentId.startsWith('dpl_'));
-      assert.ok(state.url && state.url.includes('vercel.app'));
+      assert.ok(state.deploymentId?.startsWith('dpl_'));
+      assert.ok(state.url?.includes('vercel.app'));
 
       const reqs = vc.getRequests();
       const lastReq = reqs[reqs.length - 1];
-      assert.equal(lastReq.headers['authorization'], `Bearer ${testToken}`);
+      assert.equal(lastReq.headers.authorization, `Bearer ${testToken}`);
       assert.match(lastReq.headers['user-agent'], /zero-drift-watchdog/);
     });
 
@@ -619,12 +618,12 @@ describe('Unit: Vercel Deployment Inspector & Protocol Invariants', () => {
   describe('Deploy Hook & Utility Functions', () => {
     it('creates standard Vercel headers with User-Agent and Authorization', () => {
       const headersWithToken = createVercelHeaders('my-secret-token');
-      assert.equal(headersWithToken['Accept'], 'application/json');
+      assert.equal(headersWithToken.Accept, 'application/json');
       assert.match(headersWithToken['User-Agent'], /zero-drift-watchdog/);
-      assert.equal(headersWithToken['Authorization'], 'Bearer my-secret-token');
+      assert.equal(headersWithToken.Authorization, 'Bearer my-secret-token');
 
       const headersNoToken = createVercelHeaders(undefined);
-      assert.equal(headersNoToken['Authorization'], undefined);
+      assert.equal(headersNoToken.Authorization, undefined);
     });
 
     it('builds Vercel URL with query params and teamId scoping', () => {
@@ -677,7 +676,7 @@ describe('Unit: Vercel Deployment Inspector & Protocol Invariants', () => {
       const last = reqs[reqs.length - 1];
       assert.equal(last.method, 'POST');
       assert.equal(
-        last.headers['authorization'],
+        last.headers.authorization,
         undefined,
         'Deploy hook must not pass authorization header'
       );

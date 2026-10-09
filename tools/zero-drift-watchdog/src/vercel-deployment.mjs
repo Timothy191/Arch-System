@@ -1,18 +1,18 @@
 // @ts-check
 import {
-  WatchdogError,
-  VercelAuthError,
   VercelApiError,
+  VercelAuthError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
+  WatchdogError,
 } from './errors.mjs';
 import {
   COMMIT_SHA_REGEX,
-  VERCEL_DOMAIN_REGEX,
-  IN_FLIGHT_STATES,
   DEFAULT_VERCEL_API_URL,
+  IN_FLIGHT_STATES,
+  resolveVercelToken,
+  VERCEL_DOMAIN_REGEX,
 } from './vercel-context.mjs';
-import { resolveVercelToken } from './vercel-context.mjs';
 
 export function buildVercelUrl(baseUrl, endpointPath, queryParams = {}, context) {
   const cleanBase = (baseUrl || DEFAULT_VERCEL_API_URL).replace(/\/+$/, '');
@@ -46,7 +46,7 @@ export function createVercelHeaders(token) {
     'User-Agent': 'zero-drift-watchdog/1.0.0 (anti-drift synchronization watchdog)',
   };
   if (token && typeof token === 'string' && token.trim()) {
-    headers['Authorization'] = `Bearer ${token.trim()}`;
+    headers.Authorization = `Bearer ${token.trim()}`;
   }
   return headers;
 }

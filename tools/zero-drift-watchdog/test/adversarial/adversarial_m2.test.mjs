@@ -1,28 +1,27 @@
 // @ts-check
-import { describe, it, before, after, beforeEach } from 'node:test';
+
 import assert from 'node:assert/strict';
-
+import { after, before, beforeEach, describe, it } from 'node:test';
 import {
-  discoverVercelContext,
-  inspectVercelDeployment,
-  extractCommitSha,
-  createVercelHeaders,
-  buildVercelUrl,
-  fetchDeployments,
-  fetchProject,
-  resolveDeployHookUrl,
-  triggerDeployHook,
-  IN_FLIGHT_STATES,
-  COMMIT_SHA_REGEX,
-} from '../../src/vercel-inspector.mjs';
-
-import {
-  WatchdogError,
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
+  WatchdogError,
 } from '../../src/errors.mjs';
+import {
+  buildVercelUrl,
+  COMMIT_SHA_REGEX,
+  createVercelHeaders,
+  discoverVercelContext,
+  extractCommitSha,
+  fetchDeployments,
+  fetchProject,
+  IN_FLIGHT_STATES,
+  inspectVercelDeployment,
+  resolveDeployHookUrl,
+  triggerDeployHook,
+} from '../../src/vercel-inspector.mjs';
 
 import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
 

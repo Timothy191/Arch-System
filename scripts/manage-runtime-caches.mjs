@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, rmSync, statSync, readdirSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 const REPO_ROOT = resolve(process.cwd());
 

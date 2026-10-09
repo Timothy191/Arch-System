@@ -2,63 +2,43 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/home/tim"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
       "description": "Safe local filesystem operations and directory tree inspection",
       "type": "stdio"
     },
     "memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "description": "Persistent Knowledge Graph Memory across conversations and agents",
       "type": "stdio"
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
       "type": "stdio"
     },
     "skills-mcp": {
       "command": "node",
-      "args": [
-        "/home/tim/Fork/skills-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
       "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
       "type": "stdio"
     },
     "memory-gateway-mcp": {
       "command": "node",
-      "args": [
-        "/home/tim/Fork/memory-gateway-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
       "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },
     "slim-tooling-mcp": {
       "command": "node",
-      "args": [
-        "/home/tim/Fork/slim-tooling-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
       "description": "Virtual Tool Router & Proxy Gateway preventing tool definition bloat across MCP servers",
       "type": "stdio"
     },
     "code-index": {
       "command": "/home/tim/.local/bin/code-index",
-      "args": [
-        "serve",
-        "--path",
-        "/home/tim/Fork/Arch-System"
-      ],
+      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
       "env": {
         "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
       },
@@ -67,26 +47,19 @@
     },
     "cie": {
       "command": "/home/tim/Fork/cie/bin/cie",
-      "args": [
-        "--mcp"
-      ],
+      "args": ["--mcp"],
       "description": "CIE (Code Intelligence Engine): Datalog-powered graph database and semantic code analysis",
       "type": "stdio"
     },
     "git": {
       "command": "uvx",
-      "args": [
-        "mcp-server-git"
-      ],
+      "args": ["mcp-server-git"],
       "description": "Git repository operations, diffs, branches, and commit tracking",
       "type": "stdio"
     },
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@4.1.1"
-      ]
+      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
     },
     "firecrawl": {
       "command": "/home/tim/.local/bin/firecrawl-mcp",
@@ -104,73 +77,49 @@
     },
     "ripgrep": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-ripgrep"
-      ],
+      "args": ["-y", "mcp-ripgrep"],
       "description": "Blazing fast AST and regex code search across local projects",
       "type": "stdio"
     },
     "fetch": {
       "command": "uvx",
-      "args": [
-        "mcp-server-fetch"
-      ],
+      "args": ["mcp-server-fetch"],
       "description": "Web Content Fetcher (Zero-Auth)",
       "type": "stdio"
     },
     "codemap": {
       "command": "/home/tim/.local/bin/codemap",
-      "args": [
-        "mcp",
-        "--root",
-        "/home/tim/Fork/Arch-System"
-      ],
+      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
     "docker": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-docker"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
       "description": "Docker container management and introspection",
       "type": "stdio"
     },
     "postgres": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres@0.6.2",
-        "${SUPABASE_DATABASE_URL}"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"],
       "description": "PostgreSQL database introspection and query execution",
       "type": "stdio"
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "chrome-devtools-mcp@1.10.1"
-      ],
+      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
       "description": "Chrome DevTools MCP for browser inspection and automation",
       "type": "stdio"
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@0.4.0"
-      ],
+      "args": ["-y", "next-devtools-mcp@0.4.0"],
       "description": "Next.js DevTools AST & routing inspector",
       "type": "stdio"
     },
     "agent-mcp": {
       "command": "node",
-      "args": [
-        "/home/tim/Fork/agent-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/agent-mcp/dist/index.js"],
       "description": "Swarming and orchestration MCP for multi-agent delegation",
       "type": "stdio"
     },

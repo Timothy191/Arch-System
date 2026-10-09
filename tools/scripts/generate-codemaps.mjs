@@ -46,7 +46,7 @@ function listCodeFiles(dir) {
     if (e.name.startsWith('.') || e.name === 'node_modules') continue;
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
-      if (e.name.startsWith('(') || e.name === '_' ) continue; // route groups handled at parent
+      if (e.name.startsWith('(') || e.name === '_') continue; // route groups handled at parent
       out = out.concat(listCodeFiles(full));
     } else if (CODE_EXTS.has(path.extname(e.name))) {
       out.push(full);
@@ -147,23 +147,37 @@ function build(dir) {
   const lines = [];
   lines.push(`# ${dirName}/`);
   lines.push('');
-  lines.push(`**Kind:** ${kind} · **Files:** ${sources.length}${tests.length ? ` (+${tests.length} test)` : ''}`);
+  lines.push(
+    `**Kind:** ${kind} · **Files:** ${sources.length}${tests.length ? ` (+${tests.length} test)` : ''}`
+  );
   lines.push('');
   lines.push('## Responsibility');
   lines.push('');
   if (kind === 'api-route') {
-    lines.push(`Next.js App Router route handler serving \`${[...methods].join(', ') || 'HTTP'}\` requests.`);
-    lines.push('Route handlers own the HTTP contract: request parsing (Zod), authorization, rate limiting,');
-    lines.push('and JSON response shaping. Business logic stays in `lib/` or packages; no DB access from client components.');
+    lines.push(
+      `Next.js App Router route handler serving \`${[...methods].join(', ') || 'HTTP'}\` requests.`
+    );
+    lines.push(
+      'Route handlers own the HTTP contract: request parsing (Zod), authorization, rate limiting,'
+    );
+    lines.push(
+      'and JSON response shaping. Business logic stays in `lib/` or packages; no DB access from client components.'
+    );
   } else if (kind === 'page') {
     lines.push(`React Server Component page under the ${dirName} route.`);
-    lines.push('Server Components fetch data directly (no client-side fetching), pass props down to client islands.');
+    lines.push(
+      'Server Components fetch data directly (no client-side fetching), pass props down to client islands.'
+    );
   } else if (kind === 'layout') {
     lines.push(`Shared layout for the ${dirName} route subtree.`);
-    lines.push('Owns persistent chrome (nav, providers, error boundaries) that survives child navigation.');
+    lines.push(
+      'Owns persistent chrome (nav, providers, error boundaries) that survives child navigation.'
+    );
   } else if (kind === 'error-boundary') {
     lines.push(`Error boundary for the ${dirName} route subtree.`);
-    lines.push('Renders the fallback UI and logs the failure; must never swallow the reset affordance.');
+    lines.push(
+      'Renders the fallback UI and logs the failure; must never swallow the reset affordance.'
+    );
   } else if (kind === 'loading') {
     lines.push(`Streaming fallback for ${dirName}; rendered while the RSC tree suspends.`);
   } else {
@@ -175,7 +189,8 @@ function build(dir) {
   if (methods.size) lines.push(`- HTTP methods: ${[...methods].join(', ')}`);
   if (clients.length) lines.push(`- Client components ("use client"): ${clients.join(', ')}`);
   if (hooks.size) lines.push(`- Hooks referenced: ${[...hooks].slice(0, 12).join(', ')}`);
-  if (!methods.size && !hooks.size && !clients.length) lines.push('- (No client hooks or route methods detected — pure server/data module.)');
+  if (!methods.size && !hooks.size && !clients.length)
+    lines.push('- (No client hooks or route methods detected — pure server/data module.)');
   if (tables.size) lines.push(`- Database tables touched: ${[...tables].join(', ')}`);
   if (allExports.size) {
     lines.push('- Exports:');
@@ -185,25 +200,36 @@ function build(dir) {
   lines.push('## Flow');
   lines.push('');
   if (kind === 'api-route') {
-    lines.push('Request → auth check → rate limit → parse body/params → validate (Zod) → execute (queue/RPC/service) → JSON response.');
-    lines.push('Errors are logged via `logError` and surfaced as structured JSON, never as silent 2xx.');
+    lines.push(
+      'Request → auth check → rate limit → parse body/params → validate (Zod) → execute (queue/RPC/service) → JSON response.'
+    );
+    lines.push(
+      'Errors are logged via `logError` and surfaced as structured JSON, never as silent 2xx.'
+    );
   } else if (kind === 'page' || kind === 'layout') {
     lines.push('Route params/segments → server data fetch → RSC render → client island hydration.');
   } else {
     lines.push('Imported by the parent route; exposes the exports listed above.');
   }
   if (allImports.size) lines.push('');
-  if (allImports.size) lines.push(`- Local imports consumed: ${[...allImports].slice(0, 15).join(', ')}`);
+  if (allImports.size)
+    lines.push(`- Local imports consumed: ${[...allImports].slice(0, 15).join(', ')}`);
   lines.push('');
   lines.push('## Integration');
   lines.push('');
   if (tables.size) {
-    lines.push('- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).');
+    lines.push(
+      '- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).'
+    );
   }
   if (kind === 'api-route') {
-    lines.push('- Consumed by the portal UI and/or the n8n workflow dispatcher (BullMQ `n8n-workflow-queue`).');
+    lines.push(
+      '- Consumed by the portal UI and/or the n8n workflow dispatcher (BullMQ `n8n-workflow-queue`).'
+    );
   }
-  lines.push('- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.');
+  lines.push(
+    '- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.'
+  );
   lines.push('');
 
   return lines.join('\n');
@@ -242,4 +268,6 @@ function walk(dir) {
 }
 
 walk(TARGET);
-console.log(`\nDone. Filled: ${filled}, already-complete: ${skipped}${DRY ? ' (dry run — nothing written)' : ''}`);
+console.log(
+  `\nDone. Filled: ${filled}, already-complete: ${skipped}${DRY ? ' (dry run — nothing written)' : ''}`
+);

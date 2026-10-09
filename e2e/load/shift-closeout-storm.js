@@ -1,6 +1,6 @@
 import { check } from 'k6';
-import http from 'k6/http';
 import encoding from 'k6/encoding';
+import http from 'k6/http';
 
 export const options = {
   scenarios: {
@@ -33,15 +33,15 @@ const TEST_EMAIL = __ENV.TEST_EMAIL || 'admin@plantcormining.os';
 const TEST_PASSWORD = __ENV.TEST_PASSWORD;
 
 function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    let r = (Math.random() * 16) | 0,
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0,
       v = c == 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 function base64urlEncode(str) {
-  let base64 = encoding.b64encode(str);
+  const base64 = encoding.b64encode(str);
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 

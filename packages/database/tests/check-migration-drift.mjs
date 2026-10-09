@@ -30,8 +30,8 @@
  * Exit code: 0 (pass) or 1 (fail)
  */
 
-import { readdirSync, readFileSync, existsSync, lstatSync, realpathSync } from 'node:fs';
-import { dirname, join, resolve, relative } from 'node:path';
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -96,7 +96,7 @@ const COMMENT_ON_RE =
 const GRANT_TABLE_RE = /\bON\s+TABLE\s+(?:public\.)?([A-Za-z_][A-Za-z0-9_]*)/i;
 const POLICY_ON_RE =
   /^\s*(?:CREATE|ALTER|DROP)\s+POLICY\s+(?:IF\s+NOT\s+EXISTS\s+)?["']?[A-Za-z_][A-Za-z0-9_]*["']?\s+ON\s+(?:public\.)?([A-Za-z_][A-Za-z0-9_]*)/i;
-const REFERENCES_RE = /\bREFERENCES\s+(?:public\.)?([A-Za-z_][A-Za-z0-9_]*)\s*[\(,]/i;
+const REFERENCES_RE = /\bREFERENCES\s+(?:public\.)?([A-Za-z_][A-Za-z0-9_]*)\s*[(,]/i;
 const CONCURRENTLY_RE = /REFRESH\s+MATERIALIZED\s+VIEW\s+CONCURRENTLY/i;
 const BARE_CONCURRENTLY_RE = /^\s*REFRESH\s+MATERIALIZED\s+VIEW\s+CONCURRENTLY/i;
 const TO_REGCLASS_RE = /to_regclass\(['"](?:public\.)?([A-Za-z_][A-Za-z0-9_]*)['"]\)/gi;

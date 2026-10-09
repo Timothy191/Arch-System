@@ -1,22 +1,23 @@
 // @ts-check
-import { describe, it } from 'node:test';
+
 import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 import {
   evaluateDrift,
   formatDriftReport,
+  IN_FLIGHT_STATES,
+  pollVercelDeploymentConvergence,
+  reconcileDrift,
+  resolveDrift,
   triggerGitPush,
   triggerVercelDeploy,
-  pollVercelDeploymentConvergence,
-  resolveDrift,
-  reconcileDrift,
-  IN_FLIGHT_STATES,
 } from '../../src/drift-engine.mjs';
 
 import {
-  UncommittedChangesError,
   GitError,
   TimeoutError,
+  UncommittedChangesError,
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,

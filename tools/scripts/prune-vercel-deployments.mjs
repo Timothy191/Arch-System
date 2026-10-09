@@ -28,7 +28,7 @@ function runVercelApi(endpoint) {
 }
 
 async function fetchAllDeployments() {
-  let allDeployments = [];
+  const allDeployments = [];
   let nextTimestamp = null;
   let page = 1;
 
@@ -44,7 +44,7 @@ async function fetchAllDeployments() {
       `  Page ${page}: fetched ${deployments.length} deployments (total so far: ${allDeployments.length})`
     );
 
-    if (res.pagination && res.pagination.next && res.pagination.next !== nextTimestamp) {
+    if (res.pagination?.next && res.pagination.next !== nextTimestamp) {
       nextTimestamp = res.pagination.next;
       page++;
     } else {

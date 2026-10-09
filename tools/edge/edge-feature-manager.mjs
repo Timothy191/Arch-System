@@ -5,10 +5,10 @@
  * Allows agents and swarms to autonomously scaffold, inspect, test, and deploy edge features.
  */
 
+import { execSync, spawn } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync, spawn } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -133,8 +133,8 @@ export async function testEdgeFeature(name, options = {}) {
     'Content-Type': 'application/json',
   };
   if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
-    headers['apikey'] = apiKey;
+    headers.Authorization = `Bearer ${apiKey}`;
+    headers.apikey = apiKey;
   }
 
   const startTime = Date.now();
