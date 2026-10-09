@@ -1,19 +1,26 @@
-# apps/portal/app/docs/
+# docs/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 4
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the docs route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): page.tsx
+- Database tables touched: employees
+- Exports:
+  - `page.tsx` → DocsLandingPage, metadata, default
+  - `swagger-ui-react.d.ts` → SwaggerUI, default
+  - `layout.tsx` → DocsLayout, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

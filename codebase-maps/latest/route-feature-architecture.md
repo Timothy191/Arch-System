@@ -1,6 +1,6 @@
 # 🗺️ Route & Feature Architecture Map
 
-**Generated:** 9/22/2026, 5:42:36 AM UTC  
+**Generated:** 10/9/2026, 9:22:23 AM UTC  
 **System:** Arch-Systems Mining Operations Portal (Next.js 16 App Router)
 
 ---
@@ -25,7 +25,6 @@
 ---
 
 ## 🔒 Authentication & Middleware Flow
-
 - **Proxy Delegate**: `middleware.ts` delegates token authentication and RBAC checks to `server/proxy.ts`.
 - **Exempt Routes**: Auth endpoints (`/login`, `/reset-password`) and system check APIs (`/api/c66`).
 - **User Validation**: Server Actions validate credentials at entry via Zod contracts from `@repo/contract`.

@@ -1,230 +1,184 @@
 {
   "mcpServers": {
-    "firecrawl": {
-      "command": "/home/tim/.local/bin/firecrawl-mcp",
-      "args": [],
-      "env": {
-        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
-      },
-      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
-      "type": "stdio"
-    },
-    "upstash": {
-      "type": "remote",
-      "url": "https://mcp.upstash.com/mcp",
-      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob"
-    },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/tim"
+      ],
       "description": "Safe local filesystem operations and directory tree inspection",
       "type": "stdio"
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
       "description": "Persistent Knowledge Graph Memory across conversations and agents",
       "type": "stdio"
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
       "type": "stdio"
     },
-    "ripgrep": {
-      "command": "npx",
-      "args": ["-y", "mcp-ripgrep"],
-      "description": "Blazing fast AST and regex code search across local projects",
-      "type": "stdio"
-    },
-    "git": {
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "description": "Git repository operations, diffs, branches, and commit tracking",
-      "type": "stdio"
-    },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web Content Fetcher (Zero-Auth)",
-      "type": "stdio"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
-    },
-    "knowledge-rail": {
-      "command": "npx",
-      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"]
-    },
-    "next-devtools": {
-      "command": "npx",
-      "args": ["-y", "next-devtools-mcp@0.4.0"]
-    },
     "skills-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "args": [
+        "/home/tim/Fork/skills-mcp/dist/index.js"
+      ],
       "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
       "type": "stdio"
     },
     "memory-gateway-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "args": [
+        "/home/tim/Fork/memory-gateway-mcp/dist/index.js"
+      ],
       "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },
     "slim-tooling-mcp": {
       "command": "node",
-      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
+      "args": [
+        "/home/tim/Fork/slim-tooling-mcp/dist/index.js"
+      ],
       "description": "Virtual Tool Router & Proxy Gateway preventing tool definition bloat across MCP servers",
-      "type": "stdio"
-    },
-    "time": {
-      "command": "uvx",
-      "args": ["mcp-server-time"],
-      "description": "Timezone conversions, ISO timestamps, and date-time operations",
-      "type": "stdio"
-    },
-    "everything": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-everything"],
-      "description": "Foundational reference server exercising all protocol features",
-      "type": "stdio"
-    },
-    "codemap": {
-      "command": "/home/tim/.local/bin/codemap",
-      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
-      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
     "code-index": {
       "command": "/home/tim/.local/bin/code-index",
-      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
+      "args": [
+        "serve",
+        "--path",
+        "/home/tim/Fork/Arch-System"
+      ],
       "env": {
         "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
       },
       "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
       "type": "stdio"
     },
-    "docker": {
-      "command": "npx",
-      "args": ["-y", "mcp-docker-server"],
-      "description": "Docker container management and introspection",
-      "type": "stdio"
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
-      "description": "Chrome DevTools MCP for browser inspection and automation",
-      "type": "stdio"
-    },
-    "agent-mcp": {
-      "command": "node",
-      "args": ["/home/tim/Fork/agent-mcp/dist/index.js"],
-      "description": "Swarming and orchestration MCP for multi-agent delegation",
-      "type": "stdio"
-    },
-    "github-knowledge-base-mcp": {
-      "command": "/home/tim/Fork/github-knowledge-base-mcp/.venv/bin/python",
-      "args": ["/home/tim/Fork/github-knowledge-base-mcp/server.py"],
-      "env": {
-        "KB_GITHUB_REPO": "vercel-labs/agent-skills"
-      },
-      "description": "Connect to and query public GitHub repositories as knowledge bases (markdown, documentation, and notebooks)",
-      "type": "stdio"
-    },
-    "gluestack-mcp": {
-      "command": "node",
-      "args": ["/home/tim/Fork/gluestack-mcp/index.js"],
-      "description": "Gluestack UI component generation, docs, and metadata MCP server",
-      "type": "stdio"
-    },
-    "ui-ux-suite": {
-      "command": "node",
-      "args": ["/home/tim/Fork/ui-ux-suite/bin/ui-ux-suite.js", "--mcp"],
-      "description": "UI/UX design audit tool: WCAG 2.2, APCA, and OKLCH color science inspection",
-      "type": "stdio"
-    },
-    "shadcn-ui-jpisnice": {
-      "command": "node",
-      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-jpisnice/build/index.js"],
-      "description": "Shadcn UI v4 components, blocks, demos, and themes MCP server (Jpisnice)",
-      "type": "stdio"
-    },
-    "shadcn-ui-ymadd": {
-      "command": "node",
-      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-ymadd/build/index.js"],
-      "description": "Shadcn UI component references and documentation MCP server (ymadd)",
-      "type": "stdio"
-    },
-    "shadcn-ui-heilgar": {
-      "command": "node",
-      "args": ["/home/tim/Fork/shadcn-ui-mcp-server-heilgar/dist/index.js"],
-      "description": "Shadcn UI component installation and blocks MCP server (heilgar)",
-      "type": "stdio"
-    },
-    "agentic-tools": {
-      "command": "node",
-      "args": ["/home/tim/Fork/agentic-tools-mcp/dist/index.js"],
-      "description": "Agentic Tools MCP: Task management and agent memories with JSON file storage",
-      "type": "stdio"
-    },
     "cie": {
       "command": "/home/tim/Fork/cie/bin/cie",
-      "args": ["--mcp"],
+      "args": [
+        "--mcp"
+      ],
       "description": "CIE (Code Intelligence Engine): Datalog-powered graph database and semantic code analysis",
       "type": "stdio"
     },
-    "codesight": {
-      "command": "node",
-      "args": ["/home/tim/Fork/codesight/dist/index.js", "--mcp"],
-      "description": "Codesight: Universal AI context generator mapping routes, schemas, components, and dependencies",
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git"
+      ],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
       "type": "stdio"
     },
-    "coding-tools-mcp": {
-      "command": "/home/tim/Fork/coding-tools-mcp/.venv/bin/coding-tools-mcp",
-      "args": ["--stdio"],
-      "description": "Coding Tools MCP: Workspace-confined coding tools with line edits, patching, and execution",
-      "type": "stdio"
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.1.1"
+      ]
     },
-    "agent-lsp": {
-      "command": "/home/tim/Fork/agent-lsp/bin/agent-lsp",
-      "description": "Agent LSP: Language Server Protocol orchestrating 66 code-intelligence tools across 31 languages",
-      "type": "stdio"
-    },
-    "code-reason": {
-      "command": "/home/tim/Fork/code-reason/build/install/code-reason/bin/code-reason",
-      "args": ["--stdio"],
+    "firecrawl": {
+      "command": "/home/tim/.local/bin/firecrawl-mcp",
+      "args": [],
       "env": {
-        "JAVA_HOME": "/home/tim/.local/share/junie/versions/3419.29/junie-app/lib/runtime"
+        "FIRECRAWL_API_KEY": "fc-625192b8955c4c25afba4e30d9f1bce4"
       },
-      "description": "Code-Reason: Program analysis primitives, call-graph traversal, data-flow reachability, and evidence chains",
+      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
       "type": "stdio"
     },
-    "layermap": {
-      "command": "pnpm",
-      "args": ["--dir", "/home/tim/Fork/layermap", "exec", "tsx", "src/cli.ts", "mcp"],
-      "description": "LayerMap: Call graph, impact analysis, declarations, callers, and callees across TS, Go, Python, and Java",
+    "upstash": {
+      "url": "https://mcp.upstash.com/mcp",
+      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
+      "type": "remote"
+    },
+    "ripgrep": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-ripgrep"
+      ],
+      "description": "Blazing fast AST and regex code search across local projects",
       "type": "stdio"
     },
-    "appsai": {
-      "command": "node",
-      "args": ["/home/tim/Fork/appsai-mcp-server/dist/index.js"],
-      "description": "AppsAI: Full-stack React, AWS, MongoDB, and Next.js project integration MCP server",
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "description": "Web Content Fetcher (Zero-Auth)",
       "type": "stdio"
     },
-    "hyperbrowser": {
-      "command": "node",
-      "args": ["/home/tim/Fork/hyperbrowser-mcp/dist/server.js"],
-      "description": "Hyperbrowser: Cloud browser automation, web scraping, and content extraction MCP server",
+    "codemap": {
+      "command": "/home/tim/.local/bin/codemap",
+      "args": [
+        "mcp",
+        "--root",
+        "/home/tim/Fork/Arch-System"
+      ],
+      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
+      "type": "stdio"
+    },
+    "docker": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-docker"
+      ],
+      "description": "Docker container management and introspection",
       "type": "stdio"
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "${SUPABASE_DATABASE_URL}"
+      ],
       "description": "PostgreSQL database introspection and query execution",
       "type": "stdio"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@1.10.1"
+      ],
+      "description": "Chrome DevTools MCP for browser inspection and automation",
+      "type": "stdio"
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@0.4.0"
+      ],
+      "description": "Next.js DevTools AST & routing inspector",
+      "type": "stdio"
+    },
+    "agent-mcp": {
+      "command": "node",
+      "args": [
+        "/home/tim/Fork/agent-mcp/dist/index.js"
+      ],
+      "description": "Swarming and orchestration MCP for multi-agent delegation",
+      "type": "stdio"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "type": "remote"
     }
-  }
+  },
+  "enableAllProjectMcpServers": false
 }

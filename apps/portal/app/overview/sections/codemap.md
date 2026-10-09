@@ -1,19 +1,31 @@
-# apps/portal/app/overview/sections/
+# overview/sections/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** module · **Files:** 8
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Supporting module directory for overview/sections.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): AgenticMonitor.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
+- Hooks referenced: useState, useEffect, useEdgesState, useNodesState, useCallback, useMemo
+- Exports:
+  - `AgenticMonitor.tsx` → AgenticMonitor, default
+  - `AuditReportsSection.tsx` → AuditReportsSection, default
+  - `BackendArchitecture.tsx` → BackendArchitecture, default
+  - `DatabaseSchema.tsx` → DatabaseSchema, default
+  - `DepartmentBreakdown.tsx` → DepartmentBreakdown, default
+  - `DocumentationMaps.tsx` → DocumentationMaps, default
+  - `SystemArchitecture.tsx` → SystemArchitecture, default
+  - `TechStack.tsx` → TechStack, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Imported by the parent route; exposes the exports listed above.
+
+- Local imports consumed: data
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

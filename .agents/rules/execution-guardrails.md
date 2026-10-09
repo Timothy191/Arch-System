@@ -76,3 +76,11 @@ Before marking any task, feature, or refactor complete, the agent **MUST autonom
   2. Lease the active instructions via `acquire_skill(skillName, agentId)` or `acquire_context(contextId, agentId)`.
   3. Execute the scoped subtask.
   4. Promptly invoke `return_skill` / `release_context` upon completion to release tokens and unbloat the agent context window.
+
+## 10. Architectural Extractions (Resiliency & Modularity)
+
+To maintain system robustness and operational speed based on federated architectural extraction:
+- **Error Segregation (Node Best Practices):** Distinguish between Operational Errors (retriable, external failures) and Programmer Errors (bugs, unhandled promise rejections). Fail fast on the latter.
+- **Circuit Breakers & Multi-Tier Caching:** Rely on L1/L2 Circuit Breakers and SWR (Stale-While-Revalidate) with Adaptive TTL (Avalanche Jitter) in `@repo/redis` to protect against backend database thundering herds.
+- **Strict Web Vitals:** Enforce Core Web Vitals (LCP/CLS) using layout-matching `loading.tsx` skeletons for heavy routes to eliminate layout shift.
+- **Idempotency (Conductor pattern):** Webhook processors, background queues (BullMQ), and federated jobs must map to idempotent execution paths (`idem_<key>`) to ensure safe retries without side-effects.

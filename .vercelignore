@@ -58,8 +58,7 @@ REVIEW.md
 **/AGENTS.md
 
 # Non-production tooling and scripts
-tools/
-scripts/
+.tools/
 .github/
 
 # Indexers and AST structural databases

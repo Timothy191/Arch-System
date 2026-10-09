@@ -88,6 +88,7 @@ jest.mock('@repo/redis', () => ({
 // ── Hub feature components (heavy — render stubs) ────────────────────────────
 
 jest.mock('@/features/hub', () => ({
+  ActiveMetricsCharts: () => <div data-testid="active-metrics" />,
   AlertTicker: () => <div data-testid="alert-ticker" />,
   ProductionTrendWrapper: () => <div data-testid="production-trend" />,
   HeroBackground: () => <div data-testid="hero-bg" />,

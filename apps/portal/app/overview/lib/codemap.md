@@ -1,19 +1,21 @@
-# apps/portal/app/overview/lib/
+# overview/lib/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** module · **Files:** 1
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Supporting module directory for overview/lib.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- (No client hooks or route methods detected — pure server/data module.)
+- Exports:
+  - `data.ts` → DEPARTMENTS, TECH_STACK, DATABASE_SCHEMA, BACKEND_SERVICES, BACKEND_CONNECTIONS
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Imported by the parent route; exposes the exports listed above.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

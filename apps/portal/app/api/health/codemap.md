@@ -1,19 +1,27 @@
-# apps/portal/app/api/health/
+# api/health/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** api-route · **Files:** 8 (+7 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Next.js App Router route handler serving `GET` requests.
+Route handlers own the HTTP contract: request parsing (Zod), authorization, rate limiting,
+and JSON response shaping. Business logic stays in `lib/` or packages; no DB access from client components.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- HTTP methods: GET
+- Database tables touched: machines, employees, departments
+- Exports:
+  - `route.ts` → GET
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Request → auth check → rate limit → parse body/params → validate (Zod) → execute (queue/RPC/service) → JSON response.
+Errors are logged via `logError` and surfaced as structured JSON, never as silent 2xx.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Consumed by the portal UI and/or the n8n workflow dispatcher (BullMQ `n8n-workflow-queue`).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

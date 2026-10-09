@@ -27,8 +27,8 @@
     "react-dom": "catalog:react19"
   },
   "peerDependencies": {
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19"
   },
   "scripts": {
     "type-check": "tsc --noEmit",

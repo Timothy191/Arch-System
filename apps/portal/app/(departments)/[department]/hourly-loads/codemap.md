@@ -1,19 +1,29 @@
-# apps/portal/app/(departments)/[department]/hourly-loads/
+# (departments)/[department]/hourly-loads/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 5 (+2 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/[department]/hourly-loads route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): HourlyLoadsGrid.tsx
+- Hooks referenced: useSupabaseRealtime, useCallback, useEffect, useMemo, useRef, useState
+- Database tables touched: machines, sites, hourly_loads, daily_logs
+- Exports:
+  - `actions.ts` → updateMachineSite, updateExcavatorSite, updateHourlyLoadExcavator, splitMachineHourlyLoad, saveHourlyLoad
+  - `loads-utils.ts` → HOUR_PROP, loadKey, buildHourlyLoadsMap, buildHourlyLoadsGroupedMap, isHourEditable, sumHourlyTotal, HOURS_12
+  - `page.tsx` → HourlyLoadsPage, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, loads-utils, HourlyLoadsGrid
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

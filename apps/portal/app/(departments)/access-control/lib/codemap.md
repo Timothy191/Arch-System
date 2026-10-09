@@ -1,19 +1,21 @@
-# apps/portal/app/(departments)/access-card-actions/lib/
+# (departments)/access-control/lib/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** module · **Files:** 1 (+1 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Supporting module directory for (departments)/access-control/lib.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- (No client hooks or route methods detected — pure server/data module.)
+- Exports:
+  - `printer-detection.ts` → scanCupsPrinters, getPrinterQueue, getPrinterStatus, scanUsbDevices, submitCupsPrintJob, detectAllPrinters
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Imported by the parent route; exposes the exports listed above.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

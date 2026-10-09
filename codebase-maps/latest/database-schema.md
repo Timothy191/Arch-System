@@ -1,6 +1,6 @@
 # 🔒 Database Schema & Topology Map
 
-**Generated:** 9/22/2026, 5:42:36 AM UTC  
+**Generated:** 10/9/2026, 9:22:23 AM UTC  
 **Engine:** PostgreSQL via Supabase
 
 ---
@@ -14,7 +14,6 @@
 ---
 
 ## 🛡️ Security & Row Level Security (RLS) Mandates
-
-- **Source of Truth**: `packages/database/migrations/` contains all numbered SQL migrations.
-- **100% RLS Enforcement**: Every table has active RLS policy enabled.
-- **Department Isolation**: Multi-tenant separation enforced via `auth.uid()` and `accessible_departments` mapping.
+* **Source of Truth**: `packages/database/migrations/` contains all numbered SQL migrations.
+* **100% RLS Enforcement**: Every table has active RLS policy enabled.
+* **Department Isolation**: Multi-tenant separation enforced via `auth.uid()` and `accessible_departments` mapping.

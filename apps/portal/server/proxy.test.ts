@@ -42,7 +42,9 @@ function buildProxyMock(
 
   const supabase = {
     auth: {
-      getUser: jest.fn().mockResolvedValue({ data: { user } }),
+      getClaims: jest.fn().mockResolvedValue({
+        data: user ? { claims: { sub: (user as { id: string }).id } } : null,
+      }),
       signOut: jest.fn().mockResolvedValue({}),
     },
     from: jest.fn().mockImplementation((table: string) => {
@@ -345,9 +347,9 @@ describe('proxy', () => {
 
   it('signs out and redirects to /login on expired/invalid refresh token on protected route', async () => {
     const { supabase } = buildProxyMock();
-    supabase.auth.getUser.mockResolvedValue({
+    supabase.auth.getClaims.mockResolvedValue({
       error: { message: 'Invalid Refresh Token' },
-      data: { user: null },
+      data: null,
     });
     supabase.auth.signOut = jest.fn().mockResolvedValue({});
 
@@ -362,9 +364,9 @@ describe('proxy', () => {
 
   it('signs out and returns base response when /login is accessed with expired session cookie', async () => {
     const { supabase, mockResponse } = buildProxyMock();
-    supabase.auth.getUser.mockResolvedValue({
+    supabase.auth.getClaims.mockResolvedValue({
       error: { message: 'Refresh Token Not Found' },
-      data: { user: null },
+      data: null,
     });
     supabase.auth.signOut = jest.fn().mockResolvedValue({});
 
@@ -381,7 +383,7 @@ describe('proxy', () => {
     const req = makeRequest('/drilling', false);
     const res = await proxy(req);
 
-    expect(supabase.auth.getUser).not.toHaveBeenCalled();
+    expect(supabase.auth.getClaims).not.toHaveBeenCalled();
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2Fdrilling');
   });

@@ -1,13 +1,39 @@
-name: n8n Keep-Warm & Synthetic Health Monitor
+name: Keep-Warm & Synthetic Health Monitor
+
+# Vercel Hobby limits vercel.json crons to once per day, so keep-warm pings
+# for the portal and n8n run from GitHub Actions instead.
+# Note: GitHub scheduled runs are best-effort and can start several minutes late.
 
 on:
   schedule:
-    # Runs every 5 minutes to maintain container warmth and prevent scale-to-zero dormancy
+    # Runs every 5 minutes to maintain warmth and prevent scale-to-zero dormancy
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
-  ping:
+  ping-portal:
+    name: Warm portal serverless functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      PORTAL_URL: https://arch-system-theta.vercel.app
+    steps:
+      - name: Ping portal routes
+        run: |
+          # /api/health/warmup boots the Node runtime and touches Postgres + Redis.
+          # /login warms the auth page render. Protected routes are skipped: without
+          # a session cookie they only exercise the proxy redirect.
+          for path in /api/health/warmup /login; do
+            RESULT=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" --max-time 30 "${PORTAL_URL}${path}")
+            echo "${path} -> HTTP ${RESULT%% *} in ${RESULT##* }s"
+            CODE=${RESULT%% *}
+            if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 400 ]; then
+              # warmup returns 503 when a dependency is degraded; the function is still warm.
+              echo "::warning ::${path} returned HTTP ${CODE}"
+            fi
+          done
+
+  ping-n8n:
     name: Ping n8n Health Probe
     runs-on: ubuntu-latest
     timeout-minutes: 2

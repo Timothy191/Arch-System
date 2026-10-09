@@ -1,19 +1,27 @@
-# apps/portal/app/(departments)/access-control/visitors/
+# (departments)/access-control/visitors/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 3
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/access-control/visitors route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): visitor-form.tsx
+- Hooks referenced: useRef, useState, useFormStatus
+- Exports:
+  - `loading.tsx` → VisitorsLoading, default
+  - `page.tsx` → VisitorsPage, default
+  - `visitor-form.tsx` → VisitorForm
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, visitor-form
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

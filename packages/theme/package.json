@@ -25,7 +25,7 @@
     "./motion": "./src/tokens/motion.ts"
   },
   "peerDependencies": {
-    "react": "^19"
+    "react": "catalog:react19"
   },
   "private": true,
   "scripts": {

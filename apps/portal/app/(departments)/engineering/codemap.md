@@ -1,19 +1,27 @@
-# apps/portal/app/(departments)/engineering/
+# (departments)/engineering/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 5
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/engineering route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): error.tsx
+- Database tables touched: breakdowns, tire_inspections, tires, machines
+- Exports:
+  - `error.tsx` → EngineeringError, default
+  - `layout.tsx` → EngineeringLayout, default
+  - `loading.tsx` → EngineeringLoading, default
+  - `page.tsx` → TireManagementPage, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

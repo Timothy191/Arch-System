@@ -206,11 +206,11 @@ export async function proxy(request: NextRequest) {
 
     // Has a session cookie — verify it and redirect if valid
     const client = await createMiddlewareClient(request as any);
-    let sessionUser = null;
+    let sessionUser: { id: string } | null = null;
     let shouldSignOut = false;
     try {
-      const result = await client.supabase.auth.getUser();
-      sessionUser = result.data.user;
+      const result = await client.supabase.auth.getClaims();
+      sessionUser = result.data?.claims?.sub ? { id: result.data.claims.sub } : null;
       if (result.error && isTokenExpiredError(result.error)) {
         shouldSignOut = true;
       }
@@ -258,11 +258,11 @@ export async function proxy(request: NextRequest) {
   }
 
   const client = await createMiddlewareClient(request as any);
-  let user = null;
+  let user: { id: string } | null = null;
   let shouldSignOut = false;
   try {
-    const result = await client.supabase.auth.getUser();
-    user = result.data.user;
+    const result = await client.supabase.auth.getClaims();
+    user = result.data?.claims?.sub ? { id: result.data.claims.sub } : null;
     if (result.error && isTokenExpiredError(result.error)) {
       shouldSignOut = true;
     }

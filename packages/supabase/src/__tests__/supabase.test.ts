@@ -283,13 +283,13 @@ describe('getUserSafely', () => {
     const mockClaims = { sub: 'user-123', email: 'test@example.com' };
     const mockSupabase = {
       auth: {
-        getClaims: jest.fn().mockResolvedValue({ data: mockClaims, error: null }),
+        getClaims: jest.fn().mockResolvedValue({ data: { claims: mockClaims }, error: null }),
       },
     };
 
     const result = await getUserSafely(mockSupabase as any);
 
-    expect(result).toEqual(mockClaims);
+    expect(result).toEqual({ id: 'user-123', email: 'test@example.com' });
     expect(mockSupabase.auth.getClaims).toHaveBeenCalled();
   });
 

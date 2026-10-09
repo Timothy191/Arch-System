@@ -1,19 +1,23 @@
-# apps/portal/app/(auth)/login/
+# (auth)/login/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 2 (+1 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (auth)/login route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- (No client hooks or route methods detected — pure server/data module.)
+- Exports:
+  - `loading.tsx` → LoginLoading, default
+  - `page.tsx` → LoginPage, instant, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

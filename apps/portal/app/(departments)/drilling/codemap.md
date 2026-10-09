@@ -1,19 +1,33 @@
-# apps/portal/app/(departments)/drilling/
+# (departments)/drilling/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 12 (+1 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/drilling route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): DrillingOperationsTable.tsx, error.tsx, RealtimeDrillTelemetryStream.tsx
+- Hooks referenced: useRouter, useCallback, useState, useEffect
+- Database tables touched: drill_operations, departments, machines, employees, machine_telemetry_archive, daily_logs, operational_delays
+- Exports:
+  - `DrillingOperationsTable.tsx` → DrillingOperationsTable
+  - `actions.ts` → upsertDrillOperationAction
+  - `loading.tsx` → MachineTelemetryLoading, default
+  - `page.tsx` → DrillingReportsPage, default
+  - `error.tsx` → DrillingError, default
+  - `layout.tsx` → DrillingLayout, default
+  - `RealtimeDrillTelemetryStream.tsx` → RealtimeDrillTelemetryStream
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, DrillingOperationsTable, RealtimeDrillTelemetryStream
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

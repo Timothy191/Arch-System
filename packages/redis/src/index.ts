@@ -1,4 +1,15 @@
 export {
+  type AdaptiveTtlOptions,
+  type CircuitState,
+  computeAdaptiveTtl,
+  getKeyFrequency,
+  mutateCache,
+  recordKeyAccess,
+  redisCircuitBreaker,
+  type SwrOptions,
+  swrCacheWrap,
+} from './adaptive';
+export {
   cacheDelete,
   cacheDeletePattern,
   cacheEvictL1ByPrefix,

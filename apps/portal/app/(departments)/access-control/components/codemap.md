@@ -1,19 +1,32 @@
-# apps/portal/app/(departments)/access-control/components/
+# (departments)/access-control/components/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** module · **Files:** 9
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Supporting module directory for (departments)/access-control/components.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): DashboardChartsRow.tsx, HeadcountMusterBanner.tsx, HourlyAccessChart.tsx, PerimeterGateHUD.tsx, QRStatusDistributionChart.tsx, QuickActionHub.tsx
+- Hooks referenced: useState
+- Exports:
+  - `DashboardActivityFeed.tsx` → DashboardActivityFeed, default
+  - `DashboardChartsRow.tsx` → DashboardChartsRow, default
+  - `DashboardEntityStatus.tsx` → DashboardEntityStatus, default
+  - `DashboardKPIGrid.tsx` → DashboardKPIGrid, default
+  - `HeadcountMusterBanner.tsx` → HeadcountMusterBanner
+  - `HourlyAccessChart.tsx` → HourlyAccessChart, default
+  - `PerimeterGateHUD.tsx` → PerimeterGateHUD
+  - `QRStatusDistributionChart.tsx` → QRStatusDistributionChart, default
+  - `QuickActionHub.tsx` → QuickActionHub
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Imported by the parent route; exposes the exports listed above.
+
+- Local imports consumed: actions
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

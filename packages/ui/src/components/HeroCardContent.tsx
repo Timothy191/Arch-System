@@ -122,7 +122,7 @@ export function HeroCardContent({
           <div
             className={cn(
               'mt-4 flex flex-wrap items-center gap-2',
-              !isActive && 'opacity-0 pointer-events-none'
+              !isActive && 'opacity-60 pointer-events-none'
             )}
           >
             <Link

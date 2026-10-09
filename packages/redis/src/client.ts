@@ -4,6 +4,7 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
+let subscribers: RedisClientType[] = [];
 
 /**
  * Get or create the singleton Redis client.
@@ -72,6 +73,13 @@ export async function closeRedis(): Promise<void> {
     client = null;
     connecting = null;
   }
+  
+  for (const sub of subscribers) {
+    if (sub.isOpen) {
+      await sub.quit();
+    }
+  }
+  subscribers = [];
 }
 
 /**
@@ -80,6 +88,7 @@ export async function closeRedis(): Promise<void> {
 export async function createRedisSubscriber(): Promise<RedisClientType> {
   const baseClient = await getRedisClient();
   const sub = baseClient.duplicate();
+  subscribers.push(sub);
   await sub.connect();
   return sub;
 }

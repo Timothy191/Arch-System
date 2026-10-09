@@ -27,7 +27,7 @@ export function AdminTabs({ defaultValue, value, onValueChange, children }: Admi
       defaultValue={defaultValue}
       value={value}
       onValueChange={onValueChange}
-      className="w-full"
+      className="w-full space-y-6"
     >
       <TabsList className="w-full justify-start bg-[var(--bg-secondary)] border border-[var(--border-default)]">
         {TABS.map((tab) => (

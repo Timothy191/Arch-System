@@ -1,19 +1,34 @@
-# apps/portal/app/overview/
+# overview/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 11
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the overview route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): AuditReportsSection.tsx, page.tsx, AgenticMonitor.tsx, AuditReportsSection.tsx, BackendArchitecture.tsx, DocumentationMaps.tsx, SystemArchitecture.tsx
+- Hooks referenced: useEffect, useState, useEdgesState, useNodesState, useCallback, useMemo
+- Exports:
+  - `AuditReportsSection.tsx` → AuditReportsSection, default
+  - `data.ts` → DEPARTMENTS, TECH_STACK, DATABASE_SCHEMA, BACKEND_SERVICES, BACKEND_CONNECTIONS
+  - `page.tsx` → OverviewPage, default
+  - `AgenticMonitor.tsx` → AgenticMonitor, default
+  - `BackendArchitecture.tsx` → BackendArchitecture, default
+  - `DatabaseSchema.tsx` → DatabaseSchema, default
+  - `DepartmentBreakdown.tsx` → DepartmentBreakdown, default
+  - `DocumentationMaps.tsx` → DocumentationMaps, default
+  - `SystemArchitecture.tsx` → SystemArchitecture, default
+  - `TechStack.tsx` → TechStack, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: data
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

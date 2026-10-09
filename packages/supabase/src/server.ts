@@ -2,7 +2,6 @@
 
 import { serverLogger } from '@repo/logger';
 import { createServerClient } from '@supabase/ssr';
-import type { User } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
@@ -159,24 +158,37 @@ export function createBearerSupabaseClient(token: string) {
 }
 
 /**
- * Safely gets the current user from Supabase auth.
+ * Verified identity derived from the session JWT.
+ * Only the fields callers actually rely on are exposed.
+ */
+export interface AuthIdentity {
+  id: string;
+  email: string | null;
+}
+
+/**
+ * Safely gets the current user's verified identity from Supabase auth.
  *
- * Calls `auth.getUser()` (which validates the JWT signature against the
- * Supabase JWKS) and swallows any error into a `null` result, so callers
- * can treat an unauthenticated request and a transient Supabase error
- * the same way.
+ * Uses `auth.getClaims()`, which verifies the JWT signature:
+ * - with asymmetric signing keys: locally against the cached JWKS (no Auth round-trip)
+ * - with a legacy symmetric secret: by falling back to `getUser()` (Auth round-trip)
+ * Either way the identity is verified — unlike `getSession()`, which trusts the
+ * cookie as-is and must never be used for authorization on the server.
  *
- * Returns `null` if the user is not authenticated or if the call fails.
+ * Swallows any error into `null` so callers can treat an unauthenticated
+ * request and a transient Supabase error the same way.
  */
 export async function getUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
-): Promise<User | null> {
+): Promise<AuthIdentity | null> {
   try {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data?.user) {
+    const { data, error } = await supabase.auth.getClaims();
+    const sub = data?.claims?.sub;
+    if (error || !sub) {
       return null;
     }
-    return data.user;
+    const email = data.claims.email;
+    return { id: sub, email: typeof email === 'string' ? email : null };
   } catch (_error) {
     return null;
   }

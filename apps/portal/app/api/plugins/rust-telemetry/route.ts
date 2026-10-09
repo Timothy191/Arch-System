@@ -123,10 +123,14 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       const z = (wear - 45.0) / 10.0;
       const prob = (1.0 / (1.0 + Math.exp(-z))) * 100.0;
 
+      // Mirror the Rust engine's wear-rate projection exactly so the JS
+      // fallback and native binary never diverge on the same input.
+      const wearRate = 1.0 + wear * 0.05;
+      const rulHours = Math.max(0.0, (1200.0 - h) / wearRate);
       return NextResponse.json({
         wearIndex: parseFloat(wear.toFixed(2)),
         probability: parseFloat(prob.toFixed(1)),
-        rulHours: parseFloat(Math.max(0.0, 1200.0 - h).toFixed(1)),
+        rulHours: parseFloat(rulHours.toFixed(1)),
         status: prob > 75.0 ? 'critical' : prob > 35.0 ? 'warning' : 'optimal',
         isNative: false,
       });

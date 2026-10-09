@@ -220,18 +220,18 @@ describe('HeroRotator', () => {
       zIndex: '30',
     });
 
-    // Right slide (index 1 - Drilling): angled away right, scale(0.86), opacity 0.42, z-index 10
+    // Right slide (index 1 - Drilling): angled away right, scale(0.86), opacity 0.42, z-index 20
     expect(slides[1]).toHaveStyle({
       transform: 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)',
       opacity: '0.42',
-      zIndex: '10',
+      zIndex: '20',
     });
 
-    // Left slide (index 2 - Production): angled away left, scale(0.86), opacity 0.42, z-index 10
+    // Left slide (index 2 - Production): angled away left, scale(0.86), opacity 0.42, z-index 20
     expect(slides[2]).toHaveStyle({
       transform: 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)',
       opacity: '0.42',
-      zIndex: '10',
+      zIndex: '20',
     });
   });
 

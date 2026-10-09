@@ -67,7 +67,6 @@
     "js-yaml@^3.0.0": ">=3.14.2",
     "js-yaml@^4.0.0": ">=4.1.1"
   },
-  "packageManager": "pnpm@9.15.9",
   "private": true,
   "scripts": {
     "review": "bash tools/scripts/kilo-review.sh",
@@ -112,7 +111,6 @@
     "token:analyze": "node tools/scripts/token-tracker.cjs analyze",
     "token:prune": "node tools/scripts/token-tracker.cjs prune",
     "token:budget-check": "node tools/scripts/token-tracker.cjs budget-check",
-    "context:debloat": "node tools/scripts/context-debloat.cjs",
     "context:debloat:aggressive": "node tools/scripts/context-debloat.cjs --aggressive",
     "retro:cleanup": "node tools/scripts/retrospective-cleanup.cjs",
     "retro:cleanup:old": "node tools/scripts/retrospective-cleanup.cjs --older-than 30",
@@ -121,7 +119,7 @@
     "agent:workflow": "node tools/scripts/agent-workflow-wrapper.cjs",
     "agents:cleanup": "node tools/scripts/agents-cleanup.cjs",
     "agents:cleanup:aggressive": "node tools/scripts/agents-cleanup.cjs --aggressive",
-    "build": "node scripts/sync-assets-smart.cjs && turbo run build",
+    "build": "node scripts/sync-assets-smart.cjs && node scripts/patch-glass-css.mjs && turbo run build",
     "build:vercel": "node scripts/sync-assets-smart.cjs && pnpm turbo run build --filter=portal",
     "commitlint": "commitlint --edit",
     "clean:caches": "node scripts/manage-runtime-caches.mjs --clean",
@@ -198,7 +196,6 @@
     "policy:gen": "node tools/repo/policy-compiler.cjs",
     "policy:security": "node tools/audits/enforce-security-checks.cjs",
     "prepare": "husky",
-    "postinstall": "node scripts/patch-glass-css.mjs",
     "pre-configure": "echo 'No pre-configure needed'",
     "verify:gates": "bash tools/scripts/enforce-quality-gates.sh",
     "quality": "turbo run lint type-check test lint:tokens lint:css && pnpm lint:styles && pnpm lint:css-perf && pnpm lint:spelling && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:compliance && pnpm html:check && pnpm verify:gates",
@@ -228,7 +225,8 @@
     "mcp:onboard": "node tools/scripts/mcp-onboard.cjs",
     "mcp:verify": "node tools/scripts/mcp-onboard.cjs --check",
     "mcp:harness": "node ../tools/mcp-harness/run-harness.mjs",
-    "audit:contract": "pnpm --filter @repo/contract audit:contract"
+    "audit:contract": "pnpm --filter @repo/contract audit:contract",
+    "codemaps:gen": "node tools/scripts/generate-codemaps.mjs"
   },
   "syncpack": {
     "config": "config/tools/.syncpackrc.js"

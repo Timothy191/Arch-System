@@ -17,8 +17,8 @@
   },
   "peerDependencies": {
     "next": "^16.3.8",
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19"
   },
   "scripts": {
     "type-check": "tsc --noEmit",

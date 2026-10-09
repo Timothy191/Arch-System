@@ -145,3 +145,10 @@ Every task must strictly adhere to the 6-pillar accuracy protocol (`.agents/rule
 6. **Continuous Invariant Auditing**: Continuously run the corresponding domain audit (`policy:check`, `audit:tokens`, `audit:routing`, `audit:caching`, `audit:vercel`, etc.).
 
 **Version control**: use plain `git` by default. GitButler (`but`) is the intended workflow, but it is **not initialized in this repo** — `but` fails with _"No GitButler project found"_, and no `.gitbutler/` config exists. Initializing it (`but setup`) mutates the global GitButler registry and adds a `gb-local` remote, so it is a human decision, not an autonomous one. Until someone runs `but setup`, plain `git` is the only working path. The current branch is `gitbutler/workspace` despite this.
+
+## Architectural Extractions (System Robustness)
+- **Error Segregation:** Isolate operational vs programmer errors.
+- **Idempotency:** Webhooks and distributed queues must be idempotent (`idem_<key>`).
+- **Resiliency:** Enforce L1/L2 Circuit Breakers & SWR Caching.
+- **Web Vitals:** Implement layout-matching Skeletons (`loading.tsx`) to prevent CLS.
+(See `.agents/rules/execution-guardrails.md` for details).

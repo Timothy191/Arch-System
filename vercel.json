@@ -2,16 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm build:vercel",
-  "outputDirectory": "apps/portal/.next",
-  "functions": {
-    "app/api/queues/process-order/route.ts": {
-      "experimentalTriggers": [
-        {
-          "type": "queue/v2beta",
-          "topic": "orders"
-        }
-      ]
-    }
-  }
+  "buildCommand": "node scripts/sync-assets-smart.cjs && node scripts/patch-glass-css.mjs && pnpm turbo run build --filter=portal",
+  "outputDirectory": "apps/portal/.next"
 }

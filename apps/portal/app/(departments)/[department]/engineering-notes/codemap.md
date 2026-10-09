@@ -1,19 +1,31 @@
-# apps/portal/app/(departments)/[department]/engineering-notes/
+# (departments)/[department]/engineering-notes/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 6
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/[department]/engineering-notes route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): EngineeringNotesForm.tsx, EngineeringNotesList.tsx, PredictiveAlertsWidget.tsx
+- Hooks referenced: useOfflineQueue, useAutoSave, useRouter, useState, useEffect
+- Database tables touched: engineering_notes, machines, breakdowns_control_room_view
+- Exports:
+  - `EngineeringNotesForm.tsx` → EngineeringNotesForm
+  - `PredictiveAlertsWidget.tsx` → PredictiveAlertsWidget
+  - `actions.ts` → createEngineeringNote
+  - `loading.tsx` → EngineeringNotesLoading, default
+  - `page.tsx` → EngineeringNotesPage, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, EngineeringNotesForm, EngineeringNotesList, PredictiveAlertsWidget
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

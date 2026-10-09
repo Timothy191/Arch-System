@@ -1,19 +1,31 @@
-# apps/portal/app/(departments)/[department]/shift-compilation/
+# (departments)/[department]/shift-compilation/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 5
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/[department]/shift-compilation route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): ShiftCompilationClient.tsx
+- Hooks referenced: useRouter, useState
+- Database tables touched: employees, shift_status
+- Exports:
+  - `ShiftCompilationClient.tsx` → ShiftCompilationClient
+  - `actions.ts` → getUnifiedShiftReport, getMultiSiteShiftReport, lockAndSignUnifiedShift
+  - `loading.tsx` → ShiftCompilationLoading, default
+  - `page.tsx` → ShiftCompilationPage, default
+  - `pdf-actions.ts` → exportSignedShiftReportPdf
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, pdf-actions, ShiftCompilationClient
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.

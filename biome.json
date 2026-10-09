@@ -59,8 +59,7 @@
         "noConfusingLabels": "off",
         "noShadowRestrictedNames": "off",
         "noDoubleEquals": "off",
-        "noUndeclaredEnvVars": "off",
-        "noDuplicateCustomProperties": "off"
+        "noUndeclaredEnvVars": "off"
       },
       "style": {
         "noNonNullAssertion": "off",

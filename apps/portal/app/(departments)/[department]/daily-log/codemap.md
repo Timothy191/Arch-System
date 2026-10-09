@@ -1,19 +1,30 @@
-# apps/portal/app/(departments)/[department]/daily-log/
+# (departments)/[department]/daily-log/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+**Kind:** page · **Files:** 4 (+1 test)
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+React Server Component page under the (departments)/[department]/daily-log route.
+Server Components fetch data directly (no client-side fetching), pass props down to client islands.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Client components ("use client"): DailyLogForm.tsx
+- Hooks referenced: useOfflineQueue, useRouter, useEffect, useMemo, useState, useForm, useUnsavedChangesWarning
+- Database tables touched: daily_logs, production_logs, machines
+- Exports:
+  - `DailyLogForm.tsx` → DailyLogForm
+  - `actions.ts` → createDailyLog
+  - `loading.tsx` → DailyLogLoading, default
+  - `page.tsx` → DailyLogPage, default
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Route params/segments → server data fetch → RSC render → client island hydration.
+
+- Local imports consumed: actions, DailyLogForm
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Data layer: Supabase Postgres via `@repo/supabase` (RLS enforced; service role never reaches the client).
+- Cross-check against `codebase-maps/latest/` for the current architectural snapshot.
