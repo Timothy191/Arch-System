@@ -133,9 +133,9 @@ function RouteBackgroundInner() {
             crossOrigin="anonymous"
           >
             {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}
-            <source src="https://res.cloudinary.com/zwevvryv/video/upload/v1791356557/background/global-background.webm" type="video/webm" />
+            <source src="/background/video-loop.webm" type="video/webm" />
             {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}
-            <source src="https://res.cloudinary.com/zwevvryv/video/upload/v1791356554/background/global-background.mp4" type="video/mp4" />
+            <source src="/background/video-loop.mp4" type="video/mp4" />
           </video>
         </div>
       )}
