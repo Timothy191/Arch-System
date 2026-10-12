@@ -230,7 +230,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               type="button"
               onClick={togglePin}
               aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-              className="p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
+              className="p-1.5 rounded hover:bg-black/5 text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
               title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
             >
               <Pin

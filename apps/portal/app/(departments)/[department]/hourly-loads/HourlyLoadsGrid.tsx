@@ -925,7 +925,7 @@ function HourlyLoadsGrid({
                     {
                       type: 'button',
                       class:
-                        'hour-btn-up relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
+                        'hour-btn-up relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
                       'data-row': String(rowIndex),
                       'data-hour': hourProp,
                       'data-action': 'up',
@@ -956,7 +956,7 @@ function HourlyLoadsGrid({
                     {
                       type: 'button',
                       class:
-                        'hour-btn-down relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
+                        'hour-btn-down relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
                       'data-row': String(rowIndex),
                       'data-hour': hourProp,
                       'data-action': 'down',

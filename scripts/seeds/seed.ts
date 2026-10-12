@@ -29,6 +29,8 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+import { seedOperators } from './generators/operators';
+
 async function run() {
   const args = process.argv.slice(2);
   const targetDept = args.find((a) => !a.startsWith('-')) || 'all';
@@ -49,6 +51,9 @@ async function run() {
   }
 
   try {
+    if (targetDept === 'all' || targetDept === 'operators') {
+      await seedOperators(supabase);
+    }
     if (targetDept === 'all' || targetDept === 'control-room') {
       await seedControlRoom(supabase);
     }
