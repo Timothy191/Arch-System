@@ -59,7 +59,7 @@ describe('POST /api/sync/playback – validation', () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toContain('Missing required fields');
+    expect(body.error.message).toContain('Missing required fields');
   });
 
   it('returns 400 when actionType is missing', async () => {
@@ -182,6 +182,6 @@ describe('POST /api/sync/playback – queuing', () => {
     const res = await POST(req);
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.error).toContain('Inngest down');
+    expect(body.error.message).toContain('Inngest down');
   });
 });

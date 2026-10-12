@@ -1,5 +1,6 @@
 import '@repo/ui/globals.css';
 import { ArchThemeProvider } from '@repo/theme/react';
+import { AnimationProvider } from '@repo/ui';
 import { EveLogo } from '@repo/ui/EveLogo';
 import { Toaster } from '@repo/ui/Toaster';
 import { Analytics } from '@vercel/analytics/react';
@@ -142,61 +143,63 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
         <ArchThemeProvider>
           <ClientProviders>
-            {/* Global ambient background wallpaper */}
-            <RouteBackground />
+            <AnimationProvider>
+              {/* Global ambient background wallpaper */}
+              <RouteBackground />
 
-            {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
-            <header aria-label="Global navigation">
-              <MacMenuBar
-                rightSlot={
-                  <nav id="navigation" aria-label="Main menu">
-                    <div className="flex items-center gap-3">
-                      <SystemTrayPill />
-                      <HeaderWidgets />
+              {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
+              <header aria-label="Global navigation">
+                <MacMenuBar
+                  rightSlot={
+                    <nav id="navigation" aria-label="Main menu">
+                      <div className="flex items-center gap-3">
+                        <SystemTrayPill />
+                        <HeaderWidgets />
+                      </div>
+                    </nav>
+                  }
+                />
+              </header>
+
+              {/* Content wrapper with main landmark (WCAG 1.3.1) */}
+              <div className="relative z-primary-card max-w-[1920px] mx-auto shadow-window">
+                <main id="main-content" aria-label="Main content" className="relative pt-16">
+                  <SplitWindowLayout>{children}</SplitWindowLayout>
+                </main>
+
+                {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}
+                <footer
+                  role="contentinfo"
+                  aria-label="Site footer"
+                  className="relative z-10 mt-4 px-6 py-4 border-t border-[var(--border-subtle)] text-[10px] text-[var(--text-muted)] select-none"
+                >
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="uppercase tracking-wider font-medium text-[var(--text-secondary)]">
+                        Arch OS
+                      </span>
+                      <span className="text-[var(--text-muted)]/60">·</span>
+                      <span>v{APP_VERSION}</span>
                     </div>
-                  </nav>
-                }
-              />
-            </header>
-
-            {/* Content wrapper with main landmark (WCAG 1.3.1) */}
-            <div className="relative z-primary-card max-w-[1920px] mx-auto shadow-window">
-              <main id="main-content" aria-label="Main content" className="relative pt-16">
-                <SplitWindowLayout>{children}</SplitWindowLayout>
-              </main>
-
-              {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}
-              <footer
-                role="contentinfo"
-                aria-label="Site footer"
-                className="relative z-10 mt-4 px-6 py-4 border-t border-[var(--border-subtle)] text-[10px] text-[var(--text-muted)] select-none"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="uppercase tracking-wider font-medium text-[var(--text-secondary)]">
-                      Arch OS
-                    </span>
-                    <span className="text-[var(--text-muted)]/60">·</span>
-                    <span>v{APP_VERSION}</span>
+                    <div className="flex items-center gap-1.5">
+                      <EveLogo className="h-3 w-auto text-[var(--text-secondary)]" />
+                      <span className="text-[var(--text-muted)]">eve</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <EveLogo className="h-3 w-auto text-[var(--text-secondary)]" />
-                    <span className="text-[var(--text-muted)]">eve</span>
-                  </div>
-                </div>
-                <p className="mt-2 text-center sm:text-left text-[9px] leading-relaxed text-[var(--text-muted)]/80">
-                  Vercel, the Vercel design, Next.js and related marks, designs and logos are
-                  trademarks or registered trademarks of Vercel, Inc. or its affiliates in the US
-                  and other countries.
-                </p>
-              </footer>
-            </div>
+                  <p className="mt-2 text-center sm:text-left text-[9px] leading-relaxed text-[var(--text-muted)]/80">
+                    Vercel, the Vercel design, Next.js and related marks, designs and logos are
+                    trademarks or registered trademarks of Vercel, Inc. or its affiliates in the US
+                    and other countries.
+                  </p>
+                </footer>
+              </div>
 
-            <CommandBar />
-            <ClientOverlays />
-            <Analytics />
-            <SpeedInsights />
-            <Toaster />
+              <CommandBar />
+              <ClientOverlays />
+              <Analytics />
+              <SpeedInsights />
+              <Toaster />
+            </AnimationProvider>
           </ClientProviders>
         </ArchThemeProvider>
         <ServiceWorkerRegister />

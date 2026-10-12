@@ -71,7 +71,10 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   }
 
   try {
@@ -79,7 +82,10 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     const body = await reqClone.json().catch(() => ({}));
     const { idempotencyKey, actionType, payload, departmentId } = body;
     if (!idempotencyKey || !actionType || !payload || !departmentId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Missing required fields', code: 'API_ERROR' } },
+        { status: 400 }
+      );
     }
 
     const parsed = await validateBody(req, syncPlaybackSchema);

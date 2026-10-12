@@ -255,6 +255,31 @@ export const DEPARTMENTS = [
     ],
     roles: ['control_room_operator', 'admin', 'supervisor', 'operator'],
   },
+  {
+    id: 'database',
+    name: 'Database',
+    slug: 'database',
+    description: 'PostgreSQL schema definitions, migrations, and live telemetry panels',
+    color: '#10b981',
+    routes: [
+      {
+        path: '/database',
+        name: 'Dashboard',
+        description: 'Database telemetry and stats',
+      },
+      {
+        path: '/database/schemas',
+        name: 'Schemas',
+        description: 'PostgreSQL schema definitions',
+      },
+      {
+        path: '/database/panels',
+        name: 'Panels',
+        description: 'Live Metabase dashboards',
+      },
+    ],
+    roles: ['admin', 'engineer'],
+  },
 ];
 
 // Navigation graph nodes and edges for XYFlow
@@ -306,16 +331,24 @@ const _NAVIGATION_GRAPH = {
       y: 200,
     },
     {
+      id: 'database',
+      type: 'department',
+      label: 'Database',
+      color: '#10b981',
+      x: 850,
+      y: 200,
+    },
+    {
       id: 'access-card-actions',
       type: 'department',
       label: 'Access Card Actions',
       color: '#f59e0b',
-      x: 850,
+      x: 1000,
       y: 200,
     },
 
     // Admin
-    { id: 'admin', type: 'admin', label: 'Admin', x: 1000, y: 50 },
+    { id: 'admin', type: 'admin', label: 'Admin', x: 1150, y: 50 },
   ],
   edges: [
     // Hub connections
@@ -323,6 +356,8 @@ const _NAVIGATION_GRAPH = {
     { id: 'e2', source: 'hub', target: 'production' },
     { id: 'e3', source: 'hub', target: 'access-control' },
     { id: 'e4', source: 'hub', target: 'engineering' },
+    { id: 'e5', source: 'hub', target: 'control-room' },
+    { id: 'e6', source: 'hub', target: 'database' },
     { id: 'e5', source: 'hub', target: 'control-room' },
     { id: 'e9', source: 'hub', target: 'access-card-actions' },
 

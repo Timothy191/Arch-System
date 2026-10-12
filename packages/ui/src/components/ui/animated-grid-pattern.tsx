@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   type ComponentPropsWithoutRef,
   useCallback,
@@ -136,7 +136,7 @@ export function AnimatedGridPattern({
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
         {squares.map(({ pos: [squareX, squareY], id, iteration }, index) => (
-          <motion.rect
+          <m.rect
             initial={{ opacity: 0 }}
             animate={{ opacity: maxOpacity }}
             transition={{

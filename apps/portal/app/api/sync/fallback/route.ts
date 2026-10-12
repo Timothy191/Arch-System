@@ -37,11 +37,17 @@ export async function POST(req: NextRequest) {
         break;
       }
       default:
-        return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Unknown action', code: 'API_ERROR' } },
+          { status: 400 }
+        );
     }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: err.message, code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

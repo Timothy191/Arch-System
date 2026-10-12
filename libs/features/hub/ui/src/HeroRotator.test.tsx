@@ -25,14 +25,6 @@ function _makeMotionValue(initial: number): MV {
   };
 }
 
-jest.mock('@repo/ui/ThreeHeroRotatorDynamic', () => ({
-  ThreeHeroRotatorDynamic: (props: any) => {
-    const React = jest.requireActual('react') as typeof import('react');
-    const { ThreeHeroRotator } = jest.requireActual('@repo/ui/ThreeHeroRotator');
-    return React.createElement(ThreeHeroRotator, props);
-  },
-}));
-
 jest.mock('@react-three/fiber', () => {
   const React = jest.requireActual('react') as typeof import('react');
   return {

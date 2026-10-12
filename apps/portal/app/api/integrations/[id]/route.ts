@@ -100,15 +100,25 @@ function canView(
 
 async function handleGet(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const { id } = await params;
   const installation = await getInstallation(id);
   if (!canView(principal.employee, installation)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+      { status: 403 }
+    );
   }
 
   const auditLogs = principal.employee.role === 'admin' ? await listAuditLogs(id) : [];
@@ -122,9 +132,16 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
 async function handlePatch(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (principal.employee?.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Admin access required', code: 'API_ERROR' } },
+      { status: 403 }
+    );
   }
 
   const parsed = await validateBody(request, updateInstallationSchema);
@@ -142,9 +159,16 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
 async function handleDelete(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (principal.employee?.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Admin access required', code: 'API_ERROR' } },
+      { status: 403 }
+    );
   }
 
   const { id } = await params;
@@ -159,6 +183,9 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     return applyCors(request, response);
   } catch (error) {
     await logError(error, { context: 'integrations_delete_route' });
-    return NextResponse.json({ error: 'Failed to delete installation' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to delete installation', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

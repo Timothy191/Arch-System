@@ -42,7 +42,10 @@ describe('DELETE /api/printers/[id]', () => {
       params: Promise.resolve({ id: '1' }),
     });
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Unauthorized' },
+    });
   });
 
   it('returns 403 if user lacks required role', async () => {
@@ -60,7 +63,10 @@ describe('DELETE /api/printers/[id]', () => {
       params: Promise.resolve({ id: '1' }),
     });
     expect(res.status).toBe(403);
-    expect(await res.json()).toEqual({ error: 'Forbidden' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Forbidden' },
+    });
   });
 
   it('returns 200 on successful soft delete', async () => {
@@ -102,6 +108,9 @@ describe('DELETE /api/printers/[id]', () => {
       params: Promise.resolve({ id: '1' }),
     });
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'Failed to delete printer' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Failed to delete printer' },
+    });
   });
 });

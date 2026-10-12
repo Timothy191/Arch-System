@@ -1,3 +1,4 @@
+import { workflowDispatchSchema } from '@repo/contract';
 import { Queue } from 'bullmq';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -45,9 +46,6 @@ if (process.env.QUEUE_REDIS_URL || process.env.REDIS_URL || process.env.REDIS_HO
 }
 
 export async function POST(req: NextRequest) {
-  // Default-deny: require a valid bearer token unless explicitly configured
-  // to run open. The previous behaviour accepted any request when
-  // REQUIRE_API_KEY was unset, which silently disabled the auth boundary.
   const apiKey = process.env.DISPATCH_API_KEY;
   if (apiKey) {
     const authHeader = req.headers.get('authorization');
@@ -59,7 +57,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
-  const payload = await req.json().catch(() => ({}));
+  const rawPayload = await req.json().catch(() => ({}));
+  const parseResult = workflowDispatchSchema.safeParse(rawPayload);
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid payload schema', details: parseResult.error } },
+      { status: 400 }
+    );
+  }
+  const payload = parseResult.data;
+
   const idempotencyKey = payload.idempotencyKey?.trim();
   const jobId = idempotencyKey
     ? `idem_${idempotencyKey}`

@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { type HTMLMotionProps, motion } from 'framer-motion';
+import { type HTMLMotionProps, m } from 'framer-motion';
 import type * as React from 'react';
 
 interface CyberButtonProps extends HTMLMotionProps<'button'> {
@@ -56,7 +56,7 @@ export function CyberButton({
   const colors = colorMap[variant];
 
   return (
-    <motion.button
+    <m.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
@@ -87,6 +87,6 @@ export function CyberButton({
 
       {/* Glitch text wrapper */}
       <span className="relative z-10 flex items-center gap-2">{children}</span>
-    </motion.button>
+    </m.button>
   );
 }

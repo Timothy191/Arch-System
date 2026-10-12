@@ -49,9 +49,7 @@ const SERVICE_META: Record<
 
 /* ─────────────────────────── SplitWindowLayout ─────────────────────────── */
 
-export const SplitWindowLayout = React.memo(function SplitWindowLayout({
-  children,
-}: SplitWindowLayoutProps) {
+export const SplitWindowLayout = function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
   const { isOpen, tabs, activeTabId, openTab, toggleTab, closeTab, activateTab, closeAll } =
     useSplitWindow();
 
@@ -227,7 +225,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
       </div>
     </div>
   );
-});
+};
 
 /* ─────────────────────────── GitHub Mock View ─────────────────────────── */
 

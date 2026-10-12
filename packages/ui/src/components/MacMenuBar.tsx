@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   // Menu: Help
   BookOpen,
@@ -169,7 +169,7 @@ export function MacMenuBar({
   }
 
   return (
-    <motion.div
+    <m.div
       initial={false}
       animate={{
         opacity: 1,
@@ -649,6 +649,6 @@ export function MacMenuBar({
       <div className="flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
         {rightSlot}
       </div>
-    </motion.div>
+    </m.div>
   );
 }

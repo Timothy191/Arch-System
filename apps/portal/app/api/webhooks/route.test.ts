@@ -93,14 +93,14 @@ describe('GET /api/webhooks', () => {
     buildMock({ user: null });
     const res = await GET(mockReq);
     expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe('Unauthorized');
+    expect((await res.json()).error.message).toBe('Unauthorized');
   });
 
   it('returns 404 when employee not found', async () => {
     buildMock({ employee: null });
     const res = await GET(mockReq);
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Employee not found');
+    expect((await res.json()).error.message).toBe('Employee not found');
   });
 
   it('returns 200 with webhooks for non-admin (with .or filter)', async () => {
@@ -313,6 +313,6 @@ describe('POST /api/webhooks', () => {
     });
     const res = await POST(req);
     expect(res.status).toBe(500);
-    expect((await res.json()).error).toBe('Failed to create webhook');
+    expect((await res.json()).error.message).toBe('Failed to create webhook');
   });
 });

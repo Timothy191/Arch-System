@@ -7,7 +7,7 @@ import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { fetchClient } from '@repo/utils/client';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { CheckCircle, Plus, RefreshCw, Trash2, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -158,7 +158,7 @@ export function WebhookManager() {
 
   return (
     <div className="space-y-8">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -183,11 +183,11 @@ export function WebhookManager() {
           <Plus className="w-4 h-4 mr-2" />
           Add Webhook
         </Button>
-      </motion.div>
+      </m.div>
 
       <AnimatePresence mode="wait">
         {showForm && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.98, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -10 }}
@@ -260,7 +260,7 @@ export function WebhookManager() {
                             }`}
                           >
                             {isSelected && (
-                              <motion.div
+                              <m.div
                                 layoutId="active-indicator"
                                 className="absolute left-0 top-0 bottom-0 w-1 bg-arch-accent-green"
                                 initial={{ opacity: 0 }}
@@ -312,19 +312,19 @@ export function WebhookManager() {
                 </form>
               </div>
             </GlassCard>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       <div className="space-y-4">
         {webhooks.length === 0 ? (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="p-12 text-center rounded-2xl border border-dashed border-arch-border-subtle bg-arch-surface-primary/30"
           >
             <p className="text-arch-text-tertiary">No webhooks are currently configured</p>
-          </motion.div>
+          </m.div>
         ) : (
           <AnimeStagger staggerDelay={80} distance={15} childClassName="w-full">
             {webhooks.map((webhook) => (

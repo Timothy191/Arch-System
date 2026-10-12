@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 /**
  * @jest-environment node
  */
@@ -5,18 +6,39 @@
 import { NextRequest } from 'next/server';
 import { GET } from './route';
 
+// Mock next/server
+jest.mock('next/server', () => {
+  return {
+    NextRequest: jest.fn().mockImplementation((url: string) => {
+      return {
+        nextUrl: new URL(url),
+      } as unknown as NextRequest;
+    }),
+    NextResponse: {
+      json: (body: any, init: any = {}) => ({
+        status: init?.status || 200,
+        json: async () => body,
+        headers: new Headers(init?.headers || {}),
+      }),
+    },
+  };
+});
+
+// Mock supabase/server
 jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
 const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
+// Mock shift-completeness lib
 jest.mock('@/lib/shift-completeness', () => ({
   getShiftCompleteness: jest.fn(),
 }));
 
 const { getShiftCompleteness } = jest.requireMock('@/lib/shift-completeness');
 
+// Helper function to mock authenticated Supabase response
 function buildSupabaseAuth(user: unknown) {
   return {
     auth: {
@@ -37,7 +59,13 @@ describe('GET /api/control-room/shift-completeness', () => {
     const res = await GET(req);
 
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: {
+        message: 'Unauthorized',
+        code: 'API_ERROR',
+      },
+    });
   });
 
   it('returns 400 when required query params are missing', async () => {
@@ -48,7 +76,11 @@ describe('GET /api/control-room/shift-completeness', () => {
 
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({
-      error: 'Missing required params: deptId, deptSlug, date, shift',
+      success: false,
+      error: {
+        message: 'Missing required params: deptId, deptSlug, date, shift',
+        code: 'API_ERROR',
+      },
     });
   });
 

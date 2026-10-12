@@ -17,6 +17,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, payload });
   } catch (error) {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Invalid payload', code: 'API_ERROR' } },
+      { status: 400 }
+    );
   }
 }

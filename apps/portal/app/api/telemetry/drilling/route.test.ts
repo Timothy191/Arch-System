@@ -55,7 +55,7 @@ describe('POST /api/telemetry/drilling', () => {
     const res = await POST(req);
     expect(res.status).toBe(404);
     const json = await res.json();
-    expect(json.error).toBe('Machine not found');
+    expect(json.error.message).toBe('Machine not found');
   });
 
   it('successfully ingests drill telemetry payload', async () => {

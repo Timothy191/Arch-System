@@ -1,18 +1,8 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, AlertTriangle, RefreshCw } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { Activity, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-// DataGrid requires client-side environment (StencilJS Web Components)
-const DataGrid = dynamic(
-  () => import('@repo/ui/components/ui/data-grid').then((mod) => mod.DataGrid),
-  {
-    ssr: false,
-    loading: () => <div className="h-96 animate-pulse bg-arch-surface-tertiary rounded-xl" />,
-  }
-);
 
 interface TelemetryRow {
   id: string;
@@ -46,10 +36,10 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
       if (res.ok) {
         const json = await res.json();
         setGatewayStatus({
-          healthy: Boolean(json.reportedFuxaHealthy),
+          healthy: Boolean(json.redis_connected),
           tripped: Boolean(json.breakerTripped),
           latencyMs: json.latencyMs || 0,
-          tagCount: json.cachedTagCount || 8,
+          tagCount: json.cached_tag_count || 8,
         });
       }
     } catch {
@@ -158,42 +148,6 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     return () => clearInterval(interval);
   }, []);
 
-  const columns = [
-    { prop: 'machine', name: 'Equipment', size: 150 },
-    { prop: 'sensor', name: 'Sensor ID', size: 120 },
-    { prop: 'parameter', name: 'Parameter', size: 150 },
-    {
-      prop: 'value',
-      name: 'Reading',
-      size: 100,
-      cellTemplate: (createElement: any, props: any) => {
-        const val = props.model[props.prop];
-        return createElement('span', { class: 'font-mono font-bold text-arch-text-primary' }, val);
-      },
-    },
-    { prop: 'unit', name: 'Unit', size: 80 },
-    {
-      prop: 'status',
-      name: 'Status',
-      size: 100,
-      cellTemplate: (createElement: any, props: any) => {
-        const status = props.model[props.prop];
-        let colorClass = 'bg-accent-green/10 text-accent-green border-accent-green/20';
-        if (status === 'warning')
-          colorClass = 'bg-accent-orange/10 text-accent-orange border-accent-orange/20';
-        if (status === 'critical')
-          colorClass = 'bg-accent-red/10 text-accent-red border-accent-red/20';
-        return createElement(
-          'span',
-          {
-            class: `px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md border ${colorClass}`,
-          },
-          status
-        );
-      },
-    },
-  ];
-
   return (
     <GlassCard variant="spotlight" className="p-0 overflow-hidden flex flex-col h-full">
       <div className="p-4 border-b border-arch-border-subtle bg-arch-surface-secondary/50 flex justify-between items-center">
@@ -234,7 +188,53 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
       </div>
       <div className="flex-1 p-4">
         {data.length > 0 ? (
-          <DataGrid columns={columns} source={data} height="320px" stretch={true} />
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-arch-text-secondary uppercase bg-arch-surface-tertiary">
+                <tr>
+                  <th className="px-4 py-3">Equipment</th>
+                  <th className="px-4 py-3">Sensor ID</th>
+                  <th className="px-4 py-3">Parameter</th>
+                  <th className="px-4 py-3">Reading</th>
+                  <th className="px-4 py-3">Unit</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row) => {
+                  let colorClass = 'bg-accent-green/10 text-accent-green border-accent-green/20';
+                  if (row.status === 'warning')
+                    colorClass = 'bg-accent-orange/10 text-accent-orange border-accent-orange/20';
+                  if (row.status === 'critical')
+                    colorClass = 'bg-accent-red/10 text-accent-red border-accent-red/20';
+
+                  return (
+                    <tr
+                      key={row.id}
+                      className="border-b border-arch-border-subtle hover:bg-arch-surface-tertiary/50"
+                    >
+                      <td className="px-4 py-3 font-medium text-arch-text-primary">
+                        {row.machine}
+                      </td>
+                      <td className="px-4 py-3 text-arch-text-secondary">{row.sensor}</td>
+                      <td className="px-4 py-3 text-arch-text-primary">{row.parameter}</td>
+                      <td className="px-4 py-3 font-mono font-bold text-arch-text-primary">
+                        {row.value}
+                      </td>
+                      <td className="px-4 py-3 text-arch-text-secondary">{row.unit}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded-md border ${colorClass}`}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <div className="h-80 flex items-center justify-center">
             <div className="animate-spin w-8 h-8 border-2 border-arch-brand-blue border-t-transparent rounded-full" />

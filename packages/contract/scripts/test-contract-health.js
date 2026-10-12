@@ -22,12 +22,6 @@ const healthCheckResponseSchema = z.object({
       latencyMs: z.number().nonnegative(),
       error: z.string().optional(),
     }),
-    fuxa: z.object({
-      status: z.enum(['healthy', 'degraded', 'unhealthy']),
-      latencyMs: z.number().nonnegative(),
-      statusCode: z.number().optional().nullable(),
-      error: z.string().optional(),
-    }),
   }),
 });
 
@@ -42,7 +36,6 @@ async function main() {
     services: {
       supabase: { status: 'healthy', latencyMs: 5 },
       redis: { status: 'healthy', latencyMs: 2 },
-      fuxa: { status: 'healthy', latencyMs: 4, statusCode: 200 },
     },
   };
 

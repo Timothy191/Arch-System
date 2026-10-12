@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
@@ -291,7 +291,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 )}
               >
                 {isActive && (
-                  <motion.div
+                  <m.div
                     layoutId="active-sidebar-tab"
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
                   />
@@ -335,13 +335,13 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
           isPinned ? 'pl-64' : 'pl-12'
         )}
       >
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
-        </motion.div>
+        </m.div>
       </main>
     </div>
   );

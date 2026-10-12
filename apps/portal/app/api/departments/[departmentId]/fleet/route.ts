@@ -17,11 +17,17 @@ export async function GET(
       .order('code');
 
     if (error && error.code !== '42P01') {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: { message: error.message, code: 'API_ERROR' } },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(data || []);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch fleet' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to fetch fleet', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

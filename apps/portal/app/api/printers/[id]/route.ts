@@ -7,10 +7,16 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params;
     const principal = await getAuthenticatedEmployee();
     if (!principal?.employee) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+        { status: 401 }
+      );
     }
     if (!['admin', 'access_control'].includes(principal.employee.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
 
     const supabase = await createServerSupabaseClient();
@@ -24,6 +30,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to delete printer:', error);
-    return NextResponse.json({ error: 'Failed to delete printer' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to delete printer', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

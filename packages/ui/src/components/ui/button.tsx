@@ -9,23 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Geist core variants
         default:
-          'bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs border border-transparent',
+          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs border border-transparent',
+        destructive:
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs border border-transparent',
+        outline:
+          'border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-2xs',
         secondary:
-          'bg-neutral-100 text-neutral-900 border border-neutral-200 hover:bg-neutral-200/80 shadow-2xs',
-        tertiary:
-          'bg-transparent text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 border border-transparent',
-        error: 'bg-red-600 text-white hover:bg-red-700 border border-transparent shadow-xs',
-        warning: 'bg-amber-500 text-black hover:bg-amber-600 border border-transparent shadow-xs',
-
-        // Shadcn backward-compatible
-        destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-xs border border-transparent',
-        outline: 'border border-neutral-200 bg-transparent hover:bg-neutral-100 text-neutral-900',
-        ghost: 'bg-transparent hover:bg-neutral-100 text-neutral-900 border border-transparent',
-        link: 'text-neutral-900 underline-offset-4 hover:underline border border-transparent bg-transparent',
-
-        // Glass translucent variant
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-transparent',
+        ghost: 'hover:bg-accent hover:text-accent-foreground border border-transparent',
+        link: 'text-primary underline-offset-4 hover:underline border border-transparent bg-transparent',
         glass:
           'bg-white/70 backdrop-blur-md text-neutral-900 border border-white/40 hover:bg-white/85 shadow-xs active:scale-[0.98]',
       },
@@ -102,9 +95,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const possibleVariants: ButtonVariant[] = [
       'default',
       'secondary',
-      'tertiary',
-      'error',
-      'warning',
       'destructive',
       'outline',
       'ghost',

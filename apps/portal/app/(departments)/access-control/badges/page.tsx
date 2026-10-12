@@ -11,6 +11,8 @@ import {
 } from '@repo/ui/components/ui/table';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Plus, QrCode, ShieldOff, UserCheck } from 'lucide-react';
+import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
+import { EmployeeProvisioningModal } from '@/components/employee/EmployeeProvisioningModal';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { getBadgesForDepartment } from '../actions';
 
@@ -40,7 +42,10 @@ export default async function BadgesPage({
     department: 'access-control',
   });
 
-  const { badges, totalCount } = await getBadgesForDepartment(deptId, page, pageSize);
+  const [{ badges, totalCount }, { departments }] = await Promise.all([
+    getBadgesForDepartment(deptId, page, pageSize),
+    getProvisioningReferenceData(),
+  ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -69,10 +74,10 @@ export default async function BadgesPage({
             Issue, print, and revoke physical QR access credentials.
           </p>
         </div>
-        <Button className="bg-accent-blue text-bg-secondary hover:bg-accent-blue/90 shadow-diffusion-cyan">
-          <Plus className="w-4 h-4 mr-2" />
-          Issue New Badge
-        </Button>
+        <EmployeeProvisioningModal
+          departments={departments}
+          triggerLabel="Add Employee & Issue Badge"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

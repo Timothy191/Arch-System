@@ -10,7 +10,6 @@ export * from './components/Divider';
 export * from './components/EmptyState';
 export * from './components/EveLogo';
 export * from './components/EveStatusBar';
-export * from './components/edges/FlowEdge';
 export * from './components/FormFields';
 // Composite & Industrial UI Primitives
 export * from './components/GlassCard';
@@ -20,14 +19,13 @@ export * from './components/KPI';
 export * from './components/Logo';
 export * from './components/MacMenuBar';
 export * from './components/MacTitleBar';
+export * from './components/motion/AnimationProvider';
 // Motion Primitives
 export * from './components/motion/AnimeNumber';
 export * from './components/motion/AnimeStagger';
 export * from './components/motion/AnimeTimeline';
 export * from './components/N8nIcon';
 // Topology Nodes & Edges
-export * from './components/nodes/PluginNode';
-export * from './components/nodes/TriggerNode';
 export * from './components/PageHeader';
 export * from './components/RedisIcon';
 export * from './components/SecondaryButton';
@@ -62,7 +60,6 @@ export * from './components/ui/context-card';
 export * from './components/ui/context-menu';
 export * from './components/ui/copy-button';
 export * from './components/ui/cyber-button';
-export * from './components/ui/data-grid';
 export * from './components/ui/description';
 export * from './components/ui/dialog';
 export * from './components/ui/dock';
@@ -103,7 +100,6 @@ export * from './components/ui/sonner';
 export * from './components/ui/table';
 export * from './components/ui/tabs';
 export * from './components/ui/telemetry-chart';
-export * from './components/WorkflowBuilder';
 export * from './components/WorkflowStatusBadge';
 export * from './hooks/useAutoSave';
 // Utilities & Hooks

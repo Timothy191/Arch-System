@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import type React from 'react';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 
@@ -63,7 +63,7 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
     }));
 
     return (
-      <motion.div
+      <m.div
         variants={containerVariants}
         initial="hidden"
         animate={autoPlay ? 'visible' : 'hidden'}
@@ -72,12 +72,12 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
       >
         {Array.isArray(children)
           ? children.map((child, i) => (
-              <motion.div key={i} variants={itemVariants} className={childClassName}>
+              <m.div key={i} variants={itemVariants} className={childClassName}>
                 {child}
-              </motion.div>
+              </m.div>
             ))
           : children}
-      </motion.div>
+      </m.div>
     );
   }
 );

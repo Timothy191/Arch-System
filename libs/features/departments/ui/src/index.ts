@@ -27,6 +27,5 @@ export * from './engineering/breakdowns/BreakdownStats';
 export * from './engineering/breakdowns/BreakdownsDashboard';
 export * from './engineering/breakdowns/BreakdownsTable';
 export * from './engineering/breakdowns/types';
-export * from './engineering/tires';
 export * from './tools/ToolCard';
 export * from './tools/ToolsPageClient';

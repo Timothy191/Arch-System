@@ -68,12 +68,6 @@ export const healthCheckResponseSchema = z.object({
       latencyMs: z.number().nonnegative(),
       error: z.string().optional(),
     }),
-    fuxa: z.object({
-      status: z.enum(['healthy', 'degraded', 'unhealthy']),
-      latencyMs: z.number().nonnegative(),
-      statusCode: z.number().optional().nullable(),
-      error: z.string().optional(),
-    }),
   }),
 });
 

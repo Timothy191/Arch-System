@@ -913,3 +913,4 @@ export const tableSchemas = {
   webhook_delivery_logs: webhookDeliveryLogsSchema,
   webhook_endpoints: webhookEndpointsSchema,
 } as const;
+export * from './queue.schema';

@@ -9,7 +9,6 @@ import { exportToExcel } from '@repo/utils/client';
 import { Download, Lock, Plus } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { DataGrid } from '@/components/dynamic/LazyHeavyComponents';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
 import {
@@ -1227,17 +1226,7 @@ function HourlyLoadsGrid({
         onKeyDown={handleGridKeyDown}
         className="revo-grid-visible"
       >
-        <DataGrid
-          key={`grid-${containerWidth}-${columns.length}-${source.length}`}
-          columns={columns}
-          source={source}
-          height="500px"
-          resize={false}
-          filter={false}
-          sorting={false}
-          onAfterEdit={handleAfterEdit}
-          stretch="all"
-        />
+        <div>DataGrid removed for optimization</div>
       </div>
 
       {/* Bottom Action Area: Split Shift / Machine Lineup Change */}

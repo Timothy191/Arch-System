@@ -92,6 +92,9 @@ export async function GET(req: Request) {
     return applyCors(req, NextResponse.json(tags));
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to read SCADA tags';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: message, code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

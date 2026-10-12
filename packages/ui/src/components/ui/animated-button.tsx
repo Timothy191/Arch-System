@@ -2,7 +2,7 @@
 
 import { cn } from '@repo/ui/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { type HTMLMotionProps, motion } from 'framer-motion';
+import { type HTMLMotionProps, m } from 'framer-motion';
 import * as React from 'react';
 
 const animatedButtonVariants = cva(
@@ -61,7 +61,7 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
               : 'button-md';
 
       return (
-        <motion.button
+        <m.button
           ref={ref}
           whileHover={{ scale: hoverScale }}
           whileTap={{ scale: tapScale }}
@@ -71,12 +71,12 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
         >
           <span className="blob1" />
           <span className="inner">{children as React.ReactNode}</span>
-        </motion.button>
+        </m.button>
       );
     }
 
     return (
-      <motion.button
+      <m.button
         ref={ref}
         whileHover={{ scale: hoverScale }}
         whileTap={{ scale: tapScale }}
@@ -85,7 +85,7 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
         {...props}
       >
         {children}
-      </motion.button>
+      </m.button>
     );
   }
 );

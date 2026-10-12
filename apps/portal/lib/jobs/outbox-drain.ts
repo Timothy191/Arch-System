@@ -49,15 +49,16 @@ export const outboxDrainFn = inngest.createFunction(
 
           try {
             // Attempt the SCADA write (Simulated here)
-            const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || 'http://localhost:1881';
-            const res = await fetch(`${fuxaUrl}/api/${item.target_entity}`, {
-              method: item.operation,
+            // Writing to the Portal telemetry push endpoint directly.
+            const portalUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+            const res = await fetch(`${portalUrl}/api/telemetry/push`, {
+              method: 'POST',
               body: JSON.stringify(item.payload),
               headers: { 'Content-Type': 'application/json' },
               signal: AbortSignal.timeout(2000),
             });
 
-            if (!res.ok) throw new Error(`SCADA rejected write: ${res.status}`);
+            if (!res.ok) throw new Error(`Portal rejected telemetry push: ${res.status}`);
 
             // Success: Mark completed
             await supabase

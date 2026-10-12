@@ -49,7 +49,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     if (!body.id || !body.name) {
-      return NextResponse.json({ error: 'Missing required fields: id, name' }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: 'Missing required fields: id, name', code: 'API_ERROR' },
+        },
+        { status: 400 }
+      );
     }
 
     const workflow = {

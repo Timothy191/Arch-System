@@ -25,15 +25,15 @@ describe('Geist Button Primitive', () => {
 
   it('renders Geist variants (secondary, tertiary, error, warning)', () => {
     const { rerender } = render(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-neutral-100');
+    expect(screen.getByRole('button')).toHaveClass('bg-arch-surface-secondary');
 
-    rerender(<Button variant="tertiary">Tertiary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-transparent');
+    rerender(<Button variant="ghost">Tertiary</Button>);
+    expect(screen.getByRole('button')).toHaveClass('hover:bg-arch-surface-tertiary');
 
-    rerender(<Button variant="error">Error</Button>);
+    rerender(<Button variant="destructive">Error</Button>);
     expect(screen.getByRole('button')).toHaveClass('bg-red-600');
 
-    rerender(<Button variant="warning">Warning</Button>);
+    rerender(<Button variant="secondary">Warning</Button>);
     expect(screen.getByRole('button')).toHaveClass('bg-amber-500');
   });
 

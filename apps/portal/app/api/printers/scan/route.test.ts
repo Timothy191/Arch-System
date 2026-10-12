@@ -44,7 +44,10 @@ describe('GET /api/printers/scan', () => {
 
     const res = await GET();
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Unauthorized' },
+    });
   });
 
   it('returns 403 if user lacks required role', async () => {
@@ -63,7 +66,10 @@ describe('GET /api/printers/scan', () => {
 
     const res = await GET();
     expect(res.status).toBe(403);
-    expect(await res.json()).toEqual({ error: 'Forbidden' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Forbidden' },
+    });
   });
 
   it('returns detected printers with registration status', async () => {

@@ -80,7 +80,10 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   }
 
   try {

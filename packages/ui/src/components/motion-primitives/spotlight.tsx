@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@repo/ui/lib/utils';
-import { motion, type SpringOptions, useSpring, useTransform } from 'framer-motion';
+import { m, type SpringOptions, useSpring, useTransform } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SpotlightProps = {
@@ -60,7 +60,7 @@ export function Spotlight({
   }, [parentElement, handleMouseMove]);
 
   return (
-    <motion.div
+    <m.div
       ref={containerRef}
       className={cn(
         'pointer-events-none absolute rounded-full bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops),transparent_80%)] blur-xl transition-opacity duration-200',

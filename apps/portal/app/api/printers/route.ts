@@ -29,7 +29,13 @@ async function authorizePrinterRequest(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return { ok: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+        { status: 401 }
+      ),
+    };
   }
   const { data: employee } = await supabase
     .from('employees')
@@ -37,7 +43,13 @@ async function authorizePrinterRequest(
     .eq('auth_id', user.id)
     .single();
   if (!employee || !allowedRoles.includes(employee.role)) {
-    return { ok: false, response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      ),
+    };
   }
   return { ok: true, supabase, userId: user.id, role: employee.role };
 }
@@ -78,7 +90,13 @@ export async function POST(request: NextRequest) {
     const { cups_name, name, model, connection_type, vendor_id, product_id, device_path } = body;
 
     if (!cups_name || !name) {
-      return NextResponse.json({ error: 'cups_name and name are required' }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: 'cups_name and name are required', code: 'API_ERROR' },
+        },
+        { status: 400 }
+      );
     }
     const { data, error } = await supabase
       .from('card_printers')
@@ -111,6 +129,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to register printer:', error);
-    return NextResponse.json({ error: 'Failed to register printer' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to register printer', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

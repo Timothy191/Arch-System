@@ -87,7 +87,10 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       .maybeSingle();
 
     if (!machine) {
-      return NextResponse.json({ error: 'Machine not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Machine not found', code: 'API_ERROR' } },
+        { status: 404 }
+      );
     }
 
     // 2. Insert into machine_telemetry log table

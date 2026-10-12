@@ -27,7 +27,7 @@ const buttonVariants = cva(
         accent:
           'text-white [--lq-tint:color-mix(in_srgb,var(--lq-accent)_82%,transparent)] [--lq-tint-deep:color-mix(in_srgb,var(--lq-accent)_62%,transparent)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]',
         danger:
-          'text-white [--lq-tint:rgba(229,72,77,0.82)] [--lq-tint-deep:rgba(229,72,77,0.62)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]',
+          'text-white [--lq-tint:hsl(var(--destructive) / 0.82)] [--lq-tint-deep:hsl(var(--destructive) / 0.62)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]',
       },
       size: {
         sm: '',

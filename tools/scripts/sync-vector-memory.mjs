@@ -27,6 +27,24 @@ function ensureDatabase() {
   }
 
   const db = new DatabaseSync(SWARM_DB_PATH);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS memory_entries (
+      id TEXT PRIMARY KEY,
+      key TEXT NOT NULL,
+      namespace TEXT NOT NULL,
+      content TEXT,
+      type TEXT,
+      tags TEXT,
+      metadata TEXT,
+      provenance_type TEXT,
+      created_at INTEGER,
+      updated_at INTEGER,
+      status TEXT,
+      UNIQUE(namespace, key)
+    );
+  `);
+
   if (fs.existsSync(SCHEMA_PATH)) {
     const schemaSql = fs.readFileSync(SCHEMA_PATH, 'utf-8');
     db.exec(schemaSql);

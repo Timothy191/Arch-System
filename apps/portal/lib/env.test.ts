@@ -49,7 +49,6 @@ describe('env validation', () => {
     'NEXT_PUBLIC_SENTRY_DSN',
     'SENTRY_DSN',
     'FLOWISE_URL',
-    'NEXT_PUBLIC_FUXA_URL',
     'NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID',
     'RATE_LIMIT_IP_WHITELIST',
     'DISABLE_CORS',

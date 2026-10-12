@@ -282,7 +282,6 @@ RUN_E2E=false
 STRICT_MODE=false
 HEADLESS_MODE=false
 CLOUD_MODE=false
-START_FUXA=false
 
 if [ "${HEADLESS:-false}" = "true" ] || [ "${CI:-false}" = "true" ] || [ "${NO_OPEN:-false}" = "true" ]; then
   HEADLESS_MODE=true
@@ -310,9 +309,6 @@ while [ $# -gt 0 ]; do
     CLOUD_MODE=true
     shift
     ;;
-  --fuxa | --scada)
-    START_FUXA=true
-    shift
     ;;
   --cms)
     START_CMS=true
@@ -767,61 +763,12 @@ elif [ "$CLOUD_MODE" = "true" ]; then
   # fi
 fi
 
-if [ "$START_FUXA" = "true" ] && [ "$QUICK_MODE" != "true" ]; then
-  # FUXA SCADA dev-sim — opt-in via --fuxa (local and cloud).
-  # Lightweight local container (frangoteam/fuxa), not real hardware. Heavy tools
-  # remain opt-in via -t (compose.tools.yml). Reverse-flow ingest (D2-a): the
-  # portal exposes /api/scada/tags which FUXA pulls via host.docker.internal.
-  if [ -f "$REPO_ROOT/infra/docker/compose.scada.yml" ]; then
-    timeout 30 $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.scada.yml" up -d >/dev/null 2>&1 || true
-  fi
-fi
-
-# ── Phase 2.6: Security & Exposure ────────────────────────
-# Read-only inspections. NEVER print secret values — only presence/status +
-# templated fix commands. NEVER mutate DB/RLS/auth.
-phase "2.6" "Security & Exposure"
-
-# Redis bind — warn only if REDIS_URL points beyond localhost.
-sec_redis_host="localhost"
-if [ -n "${REDIS_URL:-}" ]; then
-  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E \
-    's#^[[:alpha:]][[:alnum:]+.-]*://##; s#^.*@##; s#[:/].*$##')
-  [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
-fi
-case "$sec_redis_host" in
-localhost | 127.0.0.1 | 0.0.0.0)
-  check "Redis bind" "pass" "localhost-only ($sec_redis_host)"
   ;;
 *)
   check "Redis bind" "warn" "$sec_redis_host is non-local — bind 127.0.0.1 + set a password if exposed"
   ;;
 esac
 
-# FUXA SCADA — only probe when explicitly enabled; dev-sim has no auth by design.
-if [ "$START_FUXA" = "true" ]; then
-  sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
-  sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null || true)
-  [ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
-  case "$sec_fuxa_code" in
-  200 | 301 | 302)
-    check "FUXA SCADA" "pass" "$sec_fuxa_url reachable (dev-sim, auth disabled by design)"
-    ;;
-  000)
-    check "FUXA SCADA" "warn" "$sec_fuxa_url not reachable"
-    ;;
-  *)
-    check "FUXA SCADA" "info" "$sec_fuxa_url HTTP $sec_fuxa_code"
-    ;;
-  esac
-else
-  check "FUXA SCADA" "skip" "pass --fuxa to start dev-sim"
-fi
-
-# Supabase anon key presence + RLS advisory (read-only reminder, never a mutation).
-if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
-  check "Anon key" "pass" "NEXT_PUBLIC_SUPABASE_ANON_KEY present"
-else
   check "Anon key" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env"
 fi
 check "RLS advisory" "info" "ensure RLS ENABLED on every non-public table (employees.role/department_id policies)"
@@ -953,30 +900,6 @@ else
   check "Static assets" "skip"
 fi
 
-# 4f. FUXA SCADA — only self-heal and probe when explicitly enabled.
-# AGENT-TRACE: `restart: unless-stopped` never revives an explicitly-stopped
-# container, so a single `docker stop`/`make clean-docker` would leave FUXA dead
-# forever. Detect exited -> start -> wait healthy before probing.
-if [ "$START_FUXA" = "true" ]; then
-  FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
-  fuxa_state="$(docker inspect --format='{{.State.Status}}' plantcor-fuxa 2>/dev/null || true)"
-  if [ "$fuxa_state" = "exited" ]; then
-    echo -e "  ${INFO} FUXA stopped — self-healing..."
-    docker start plantcor-fuxa >/dev/null 2>&1 || true
-  fi
-  for i in $(seq 1 15); do
-    docker inspect --format='{{.State.Health.Status}}' plantcor-fuxa 2>/dev/null | grep -q healthy && break
-    sleep 2
-  done
-  if curl -fs "$FUXA_URL" >/dev/null 2>&1; then
-    check "FUXA SCADA" "pass" "$FUXA_URL"
-  else
-    check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
-  fi
-fi
-
-# 4g. Database reachability (Cloud REST + anon key + RLS end-to-end).
-# 200 = reachable + anon accepted; 401/403 = reachable but RLS-gated (still proves
 # connectivity + auth wiring); 000 = network error / paused project (warn, never block).
 if [ "$QUICK_MODE" = "true" ]; then
   check "Database" "skip" "quick mode"

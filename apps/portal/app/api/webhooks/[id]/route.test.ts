@@ -109,14 +109,14 @@ describe('PUT /api/webhooks/[id]', () => {
     buildMock({ employee: null });
     const res = await PUT(makeRequest({ url: 'https://new.com' }), { params });
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Employee not found');
+    expect((await res.json()).error.message).toBe('Employee not found');
   });
 
   it('returns 404 when webhook not found', async () => {
     buildMock({ existingWebhook: null });
     const res = await PUT(makeRequest({ url: 'https://new.com' }), { params });
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Webhook not found');
+    expect((await res.json()).error.message).toBe('Webhook not found');
   });
 
   it('returns 403 when non-admin tries to update webhook from different dept', async () => {
@@ -168,7 +168,7 @@ describe('DELETE /api/webhooks/[id]', () => {
     buildMock({ existingWebhook: null });
     const res = await DELETE(makeDeleteRequest(), { params });
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Webhook not found');
+    expect((await res.json()).error.message).toBe('Webhook not found');
   });
 
   it('returns 403 when non-admin tries to delete webhook from different dept', async () => {
@@ -276,7 +276,7 @@ describe('DELETE /api/webhooks/[id]', () => {
 
     const res = await DELETE(makeDeleteRequest(), { params });
     expect(res.status).toBe(500);
-    expect((await res.json()).error).toBe('Failed to delete webhook');
+    expect((await res.json()).error.message).toBe('Failed to delete webhook');
   });
 });
 

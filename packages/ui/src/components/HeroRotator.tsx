@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -300,7 +300,7 @@ export function HeroRotator({
           transformStyle: 'preserve-3d',
         }}
       >
-        <motion.div
+        <m.div
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
@@ -333,7 +333,7 @@ export function HeroRotator({
               offlineMachineCount={offlineMachineCount}
             />
           ))}
-        </motion.div>
+        </m.div>
       </div>
 
       {total > 1 && (

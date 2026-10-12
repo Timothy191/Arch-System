@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import type React from 'react';
 
 interface AnimeStaggerProps {
@@ -55,7 +55,7 @@ export function AnimeStagger({
   };
 
   return (
-    <motion.div
+    <m.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -63,11 +63,11 @@ export function AnimeStagger({
     >
       {Array.isArray(children)
         ? children.map((child, i) => (
-            <motion.div key={i} variants={itemVariants} className={childClassName}>
+            <m.div key={i} variants={itemVariants} className={childClassName}>
               {child}
-            </motion.div>
+            </m.div>
           ))
         : children}
-    </motion.div>
+    </m.div>
   );
 }

@@ -34,10 +34,10 @@ export const WithRightSlot: Story = {
     title: 'Operations Log',
     rightSlot: (
       <>
-        <button type="button" className="p-1 hover:bg-black/5 rounded">
+        <button type="button" aria-label="Search" className="p-1 hover:bg-black/5 rounded">
           <Search className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
         </button>
-        <button type="button" className="p-1 hover:bg-black/5 rounded">
+        <button type="button" aria-label="More options" className="p-1 hover:bg-black/5 rounded">
           <MoreHorizontal className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
         </button>
       </>

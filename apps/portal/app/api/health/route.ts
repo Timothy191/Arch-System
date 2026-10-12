@@ -49,36 +49,13 @@ export async function GET() {
   }
   const redisLatencyMs = Date.now() - redisStart;
 
-  // 3. FUXA SCADA Check (2.5s timeout)
-  const fuxaStart = Date.now();
-  let fuxaStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  let fuxaStatusCode: number | null = null;
-  let fuxaError: string | undefined;
-  const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || 'http://localhost:1881';
-
-  try {
-    const res = await fetch(fuxaUrl, {
-      method: 'HEAD',
-      signal: AbortSignal.timeout(2500),
-    });
-    fuxaStatusCode = res.status;
-    if (!res.ok) {
-      fuxaStatus = 'degraded';
-      fuxaError = `FUXA HTTP status ${res.status}`;
-    }
-  } catch (err) {
-    fuxaStatus = 'degraded';
-    fuxaError = err instanceof Error ? err.message : 'FUXA timeout or connection error';
-  }
-  const fuxaLatencyMs = Date.now() - fuxaStart;
-
   const totalLatencyMs = Date.now() - startedAt;
 
   // Aggregate overall status
   const overallStatus: 'healthy' | 'degraded' | 'unhealthy' =
     supabaseStatus === 'unhealthy'
       ? 'unhealthy'
-      : supabaseStatus === 'degraded' || redisStatus === 'degraded' || fuxaStatus === 'degraded'
+      : supabaseStatus === 'degraded' || redisStatus === 'degraded'
         ? 'degraded'
         : 'healthy';
 
@@ -96,12 +73,6 @@ export async function GET() {
         status: redisStatus,
         latencyMs: redisLatencyMs,
         ...(redisError ? { error: redisError } : {}),
-      },
-      fuxa: {
-        status: fuxaStatus,
-        latencyMs: fuxaLatencyMs,
-        statusCode: fuxaStatusCode,
-        ...(fuxaError ? { error: fuxaError } : {}),
       },
     },
   };

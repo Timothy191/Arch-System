@@ -1,7 +1,7 @@
 'use client';
 
 import { type GlassVariant, glassVariants } from '@repo/theme';
-import { type HTMLMotionProps, motion, useReducedMotion } from 'framer-motion';
+import { type HTMLMotionProps, m, useReducedMotion } from 'framer-motion';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/utils';
 
@@ -433,7 +433,7 @@ export function GlassCard({
     : undefined;
 
   return (
-    <motion.div
+    <m.div
       ref={(node) => {
         localRef.current = node;
         if (typeof ref === 'function') {
@@ -655,6 +655,6 @@ export function GlassCard({
       >
         {children}
       </div>
-    </motion.div>
+    </m.div>
   );
 }

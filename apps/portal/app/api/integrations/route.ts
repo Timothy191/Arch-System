@@ -87,9 +87,16 @@ import { installIntegration, listCatalog, listInstallations } from '@/lib/integr
 
 export async function handleGetIntegrations(): Promise<NextResponse> {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
   const { employee } = principal;
 
@@ -114,9 +121,16 @@ export async function GET(request: NextRequest) {
 
 async function handleInstall(request: NextRequest): Promise<NextResponse> {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (principal.employee?.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Admin access required', code: 'API_ERROR' } },
+      { status: 403 }
+    );
   }
 
   const parsed = await validateBody(request, installIntegrationSchema);

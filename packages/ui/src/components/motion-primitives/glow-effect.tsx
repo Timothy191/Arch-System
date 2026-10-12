@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@repo/ui/lib/utils';
-import { motion, type Transition } from 'framer-motion';
+import { m, type Transition } from 'framer-motion';
 
 export type GlowEffectProps = {
   className?: string;
@@ -114,7 +114,7 @@ export function GlowEffect({
   };
 
   return (
-    <motion.div
+    <m.div
       style={
         {
           ...style,

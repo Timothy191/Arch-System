@@ -53,8 +53,15 @@ import { getShiftCompleteness } from '@/lib/shift-completeness';
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
  *                 error:
- *                   type: string
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     code:
+ *                       type: string
  *       401:
  *         description: Unauthorized
  *         content:
@@ -62,8 +69,31 @@ import { getShiftCompleteness } from '@/lib/shift-completeness';
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
  *                 error:
- *                   type: string
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     code:
+ *                       type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     code:
+ *                       type: string
  */
 
 export async function GET(req: NextRequest) {
@@ -73,7 +103,10 @@ export async function GET(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   }
 
   const { searchParams } = req.nextUrl;
@@ -84,7 +117,13 @@ export async function GET(req: NextRequest) {
 
   if (!deptId || !deptSlug || !date || !shift) {
     return NextResponse.json(
-      { error: 'Missing required params: deptId, deptSlug, date, shift' },
+      {
+        success: false,
+        error: {
+          message: 'Missing required params: deptId, deptSlug, date, shift',
+          code: 'API_ERROR',
+        },
+      },
       { status: 400 }
     );
   }

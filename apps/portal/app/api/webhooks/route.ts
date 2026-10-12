@@ -139,9 +139,16 @@ interface _WebhookEndpoint {
 
 async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const supabase = await createServerSupabaseClient();
@@ -159,7 +166,10 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   const { data: webhooks, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Database query failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ webhooks });
@@ -173,9 +183,16 @@ export async function GET(request: NextRequest) {
 
 async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const parsed = await validateBody(request, createWebhookSchema);
@@ -191,7 +208,10 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
       targetDept !== employee.department_id &&
       !employee.accessible_departments?.includes(targetDept)
     ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
   }
 
@@ -209,7 +229,10 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
     .single();
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to create webhook', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   revalidatePath('/admin/tools');

@@ -2,7 +2,7 @@
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { cn } from '@repo/ui/lib/utils';
-import { AnimatePresence, type MotionProps, motion } from 'framer-motion';
+import { AnimatePresence, type MotionProps, m } from 'framer-motion';
 import React, { type ComponentPropsWithoutRef, useEffect, useMemo, useState } from 'react';
 
 export function AnimatedListItem({ children }: { children: React.ReactNode }) {
@@ -14,9 +14,9 @@ export function AnimatedListItem({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <motion.div {...animations} layout className="mx-auto w-full">
+    <m.div {...animations} layout className="mx-auto w-full">
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -79,7 +79,7 @@ export function AnimatedFeed({ children, className, ...props }: AnimatedFeedProp
     <div className={cn('flex flex-col items-center gap-2', className)} {...props}>
       <AnimatePresence initial={false}>
         {React.Children.toArray(children).map((item) => (
-          <motion.div
+          <m.div
             key={(item as React.ReactElement).key}
             initial={{ scale: 0.95, opacity: 0, y: 8 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -89,7 +89,7 @@ export function AnimatedFeed({ children, className, ...props }: AnimatedFeedProp
             className="mx-auto w-full"
           >
             {item}
-          </motion.div>
+          </m.div>
         ))}
       </AnimatePresence>
     </div>

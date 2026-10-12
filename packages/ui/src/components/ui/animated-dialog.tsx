@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { X } from 'lucide-react';
 import type * as React from 'react';
 import { useCallback, useEffect, useId, useRef } from 'react';
@@ -119,7 +119,7 @@ export function AnimatedDialog({
           onKeyDown={handleKeyDown}
         >
           {/* Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -130,7 +130,7 @@ export function AnimatedDialog({
           />
 
           {/* Dialog panel */}
-          <motion.div
+          <m.div
             ref={panelRef}
             role="dialog"
             aria-modal="true"
@@ -179,7 +179,7 @@ export function AnimatedDialog({
 
             {/* Content */}
             {children}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

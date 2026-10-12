@@ -69,7 +69,10 @@ const MAX_BODY_BYTES = 1024 * 1024;
 export async function POST(req: Request): Promise<NextResponse> {
   const contentLength = Number(req.headers.get('content-length'));
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Request body too large', code: 'API_ERROR' } },
+      { status: 413 }
+    );
   }
 
   try {
@@ -77,30 +80,48 @@ export async function POST(req: Request): Promise<NextResponse> {
     const principal = await getAuthenticatedEmployee(supabase);
 
     if (!principal) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+        { status: 401 }
+      );
     }
     if (!principal.employee?.department_id) {
-      return NextResponse.json({ error: 'Employee department not found' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Employee department not found', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
     if (principal.employee.role === 'viewer') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Insufficient permissions', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
 
     const rawBody = await req.text();
     if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Request body too large', code: 'API_ERROR' } },
+        { status: 413 }
+      );
     }
 
     let body: unknown;
     try {
       body = JSON.parse(rawBody);
     } catch {
-      return NextResponse.json({ error: 'Malformed JSON' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Malformed JSON', code: 'API_ERROR' } },
+        { status: 400 }
+      );
     }
 
     const parsed = offlineMutationBatchSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid offline mutation batch' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Invalid offline mutation batch', code: 'API_ERROR' } },
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase.rpc('apply_offline_mutations', {
@@ -109,20 +130,38 @@ export async function POST(req: Request): Promise<NextResponse> {
     });
 
     if (error?.code === '42501') {
-      return NextResponse.json({ error: 'Department access denied' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Department access denied', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
     if (error?.code === '22023' || error?.code === '22P02') {
-      return NextResponse.json({ error: 'Invalid offline mutation batch' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Invalid offline mutation batch', code: 'API_ERROR' } },
+        { status: 400 }
+      );
     }
     if (error) {
       await logError(error, { context: 'offline_mutations_rpc' });
-      return NextResponse.json({ error: 'Failed to persist offline mutations' }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: 'Failed to persist offline mutations', code: 'API_ERROR' },
+        },
+        { status: 500 }
+      );
     }
 
     revalidateTag('offline-mutations', 'max');
     return NextResponse.json(data);
   } catch (error) {
     await logError(error, { context: 'offline_mutations_route' });
-    return NextResponse.json({ error: 'Failed to process offline mutations' }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: 'Failed to process offline mutations', code: 'API_ERROR' },
+      },
+      { status: 500 }
+    );
   }
 }

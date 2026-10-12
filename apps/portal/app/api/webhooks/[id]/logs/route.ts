@@ -69,9 +69,16 @@ async function handleGetLogs(
 ): Promise<NextResponse> {
   const { id } = await params;
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
   const { employee } = principal;
 
@@ -85,7 +92,10 @@ async function handleGetLogs(
     .single();
 
   if (!existingWebhook) {
-    return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Webhook not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   // Check if user has permission to view logs for this webhook
@@ -94,7 +104,10 @@ async function handleGetLogs(
       existingWebhook.department_id !== employee.department_id &&
       !employee.accessible_departments?.includes(existingWebhook.department_id)
     ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
   }
 
@@ -107,7 +120,10 @@ async function handleGetLogs(
     .limit(50);
 
   if (error) {
-    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Database query failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ logs });

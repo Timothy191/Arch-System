@@ -112,9 +112,16 @@ async function handlePutWebhook(
 ): Promise<NextResponse> {
   const { id } = await params;
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
   const { employee } = principal;
 
@@ -132,7 +139,10 @@ async function handlePutWebhook(
     .single();
 
   if (!existingWebhook) {
-    return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Webhook not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   // Check if user has permission to update this webhook
@@ -141,7 +151,10 @@ async function handlePutWebhook(
       existingWebhook.department_id !== employee.department_id &&
       !employee.accessible_departments?.includes(existingWebhook.department_id)
     ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
   }
 
@@ -159,7 +172,10 @@ async function handlePutWebhook(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to update webhook', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   revalidatePath('/admin/tools');
@@ -180,9 +196,16 @@ async function handleDeleteWebhook(
 ): Promise<NextResponse> {
   const { id } = await params;
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (!principal.employee) {
-    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Employee not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
   const { employee } = principal;
 
@@ -196,7 +219,10 @@ async function handleDeleteWebhook(
     .single();
 
   if (!existingWebhook) {
-    return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Webhook not found', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   // Check if user has permission to delete this webhook
@@ -205,7 +231,10 @@ async function handleDeleteWebhook(
       existingWebhook.department_id !== employee.department_id &&
       !employee.accessible_departments?.includes(existingWebhook.department_id)
     ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Forbidden', code: 'API_ERROR' } },
+        { status: 403 }
+      );
     }
   }
 
@@ -216,7 +245,10 @@ async function handleDeleteWebhook(
     .eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to delete webhook', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   revalidatePath('/admin/tools');

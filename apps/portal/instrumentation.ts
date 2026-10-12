@@ -14,3 +14,17 @@ export async function register() {
     });
   }
 }
+
+import type { Instrumentation } from 'next';
+
+export const onRequestError = async (err: any, request: any, context: any) => {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { serverLogger } = await import('@repo/logger');
+    serverLogger.error(
+      { err, request: { method: request.method }, context },
+      'Global request error'
+    );
+  } else {
+    console.error('Global edge request error:', err);
+  }
+};

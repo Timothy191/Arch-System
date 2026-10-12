@@ -10,7 +10,10 @@ export async function GET() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+        { status: 401 }
+      );
     }
 
     // Get breakdowns from the last 30 days
@@ -23,7 +26,10 @@ export async function GET() {
       .is('deleted_at', null);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: { message: error.message, code: 'API_ERROR' } },
+        { status: 500 }
+      );
     }
 
     // Heuristic ML Mock:
@@ -63,6 +69,9 @@ export async function GET() {
 
     return NextResponse.json({ predictions });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: error.message, code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

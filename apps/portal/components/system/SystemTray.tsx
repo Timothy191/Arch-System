@@ -674,7 +674,7 @@ function OfflineQueueRow() {
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
-const SystemTrayPillInner = React.memo(function SystemTrayPillInner() {
+const SystemTrayPillInner = function SystemTrayPillInner() {
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
   const volume = useAppVolume();
@@ -840,7 +840,7 @@ const SystemTrayPillInner = React.memo(function SystemTrayPillInner() {
       </Popover.Root>
     </div>
   );
-});
+};
 
 export function SystemTrayPill() {
   return (

@@ -278,7 +278,10 @@ async function handleGetRequest(
   const { table: rawTable } = await params;
   const table = rawTable.toLowerCase();
   if (!OPERATIONAL_TABLES.has(table)) {
-    return NextResponse.json({ error: 'Unknown table' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unknown table', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const { searchParams } = _request.nextUrl;
@@ -297,7 +300,10 @@ async function handleGetRequest(
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Database query failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ data, count, limit, offset });
@@ -322,14 +328,20 @@ async function handlePutRequest(
   const { table: rawTable } = await params;
   const table = rawTable.toLowerCase();
   if (!OPERATIONAL_TABLES.has(table)) {
-    return NextResponse.json({ error: 'Unknown table' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unknown table', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const body = await request.json();
   const { id, ...data } = body;
 
   if (!id) {
-    return NextResponse.json({ error: 'Missing record id' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Missing record id', code: 'API_ERROR' } },
+      { status: 400 }
+    );
   }
 
   // AGENT-TRACE: Per-machine rate limiting for status updates
@@ -356,7 +368,10 @@ async function handlePutRequest(
   const { error } = await serviceRole.from(table).update(data).eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Update failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   await serviceRole.from('audit_logs').insert({
@@ -390,13 +405,19 @@ async function handleDeleteRequest(
   const { table: rawTable } = await params;
   const table = rawTable.toLowerCase();
   if (!OPERATIONAL_TABLES.has(table)) {
-    return NextResponse.json({ error: 'Unknown table' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Unknown table', code: 'API_ERROR' } },
+      { status: 404 }
+    );
   }
 
   const { searchParams } = request.nextUrl;
   const id = searchParams.get('id');
   if (!id) {
-    return NextResponse.json({ error: 'Missing id query parameter' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Missing id query parameter', code: 'API_ERROR' } },
+      { status: 400 }
+    );
   }
 
   const serviceRole = createServiceRoleClient();
@@ -406,7 +427,10 @@ async function handleDeleteRequest(
   const { error } = await serviceRole.from(table).delete().eq('id', id);
 
   if (error) {
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Delete failed', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 
   await serviceRole.from('audit_logs').insert({

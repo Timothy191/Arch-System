@@ -7,7 +7,13 @@ export async function POST(request: Request) {
     const { equipmentId, description } = await request.json();
 
     if (!equipmentId || !description) {
-      return NextResponse.json({ error: 'Missing equipmentId or description' }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: 'Missing equipmentId or description', code: 'API_ERROR' },
+        },
+        { status: 400 }
+      );
     }
 
     // Start the durable workflow asynchronously
@@ -19,6 +25,9 @@ export async function POST(request: Request) {
       runId,
     });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to start workflow' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Failed to start workflow', code: 'API_ERROR' } },
+      { status: 500 }
+    );
   }
 }

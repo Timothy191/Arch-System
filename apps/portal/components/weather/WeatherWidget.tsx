@@ -14,7 +14,7 @@ interface WeatherWidgetProps {
   variant?: 'compact' | 'full' | 'header';
 }
 
-export const WeatherWidget = React.memo(function WeatherWidget({
+export const WeatherWidget = function WeatherWidget({
   lat: _lat = -26.35914,
   lon: _lon = 28.79267,
   locationName = 'Delmas, Mpumalanga',
@@ -278,4 +278,4 @@ export const WeatherWidget = React.memo(function WeatherWidget({
       </div>
     </GlassCard>
   );
-});
+};

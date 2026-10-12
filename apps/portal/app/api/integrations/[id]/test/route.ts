@@ -55,9 +55,16 @@ import { invokeIntegrationTool } from '@/lib/integrations/tool-bridge';
 
 async function handleTest(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const principal = await getAuthenticatedEmployee();
-  if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!principal)
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+      { status: 401 }
+    );
   if (principal.employee?.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    return NextResponse.json(
+      { success: false, error: { message: 'Admin access required', code: 'API_ERROR' } },
+      { status: 403 }
+    );
   }
 
   const parsed = await validateBody(request, testIntegrationToolSchema);

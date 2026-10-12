@@ -96,6 +96,6 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
     const res = await GET(req);
     expect(res.status).toBe(500);
     const json = await res.json();
-    expect(json.error).toBe('Redis down');
+    expect(json.error.message).toBe('Redis down');
   });
 });

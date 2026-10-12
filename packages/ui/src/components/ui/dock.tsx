@@ -3,7 +3,7 @@
 import { cn } from '@repo/ui/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { MotionProps } from 'framer-motion';
-import { type MotionValue, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { type MotionValue, m, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import React, { type PropsWithChildren, useRef } from 'react';
 
 export interface DockProps extends VariantProps<typeof dockVariants> {
@@ -59,7 +59,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     };
 
     return (
-      <motion.div
+      <m.div
         ref={ref}
         onMouseMove={() => {}}
         onMouseLeave={() => {}}
@@ -71,7 +71,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
         })}
       >
         {renderChildren()}
-      </motion.div>
+      </m.div>
     );
   }
 );
@@ -124,7 +124,7 @@ const DockIcon = ({
   });
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       style={{ width: scaleSize, height: scaleSize, padding }}
       className={cn(
@@ -135,7 +135,7 @@ const DockIcon = ({
       {...props}
     >
       <div>{children}</div>
-    </motion.div>
+    </m.div>
   );
 };
 

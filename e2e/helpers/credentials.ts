@@ -5,5 +5,5 @@
  * to the local dev-seed defaults. Never hardcode these strings in spec files —
  * import from here so CI can override per-environment (S4: secrets hygiene).
  */
-export const TEST_EMAIL = process.env.TEST_EMAIL || 'Admin@plantcormining.os';
-export const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@1234#';
+export const TEST_EMAIL = process.env.TEST_EMAIL || 'admin@plantcormining.co.za';
+export const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@123#';

@@ -45,22 +45,6 @@
       "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
       "type": "stdio"
     },
-    "cie": {
-      "command": "/home/tim/Fork/cie/bin/cie",
-      "args": ["--mcp"],
-      "description": "CIE (Code Intelligence Engine): Datalog-powered graph database and semantic code analysis",
-      "type": "stdio"
-    },
-    "git": {
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "description": "Git repository operations, diffs, branches, and commit tracking",
-      "type": "stdio"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
-    },
     "firecrawl": {
       "command": "/home/tim/.local/bin/firecrawl-mcp",
       "args": [],
@@ -75,16 +59,33 @@
       "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
       "type": "remote"
     },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "type": "remote"
+    },
     "ripgrep": {
       "command": "npx",
       "args": ["-y", "mcp-ripgrep"],
       "description": "Blazing fast AST and regex code search across local projects",
       "type": "stdio"
     },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "description": "Git repository operations, diffs, branches, and commit tracking",
+      "type": "stdio"
+    },
     "fetch": {
       "command": "uvx",
       "args": ["mcp-server-fetch"],
       "description": "Web Content Fetcher (Zero-Auth)",
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
     },
     "codemap": {
@@ -122,11 +123,6 @@
       "args": ["/home/tim/Fork/agent-mcp/dist/index.js"],
       "description": "Swarming and orchestration MCP for multi-agent delegation",
       "type": "stdio"
-    },
-    "supabase": {
-      "url": "https://mcp.supabase.com/mcp",
-      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
-      "type": "remote"
     }
   },
   "enableAllProjectMcpServers": false

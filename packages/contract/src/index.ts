@@ -82,6 +82,7 @@ export {
   machineOperatorScanRequestSchema,
   machineOperatorScanResponseSchema,
 } from './schemas/machine-operator-scan.schema';
+export { embedDashboardSchema } from './schemas/metabase.schema';
 export {
   ancillaryReportEntrySchema,
   breakdownReportEntrySchema,
@@ -146,6 +147,7 @@ export type {
   MachineOperatorScanRequest,
   MachineOperatorScanResponse,
 } from './schemas/machine-operator-scan.schema';
+export type { EmbedDashboardInput } from './schemas/metabase.schema';
 export type {
   OfflineMutationBatch,
   OfflineMutationHlc,

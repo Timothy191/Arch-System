@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { X } from 'lucide-react';
 import type React from 'react';
 import { useEffect } from 'react';
@@ -93,7 +93,7 @@ export function Drawer({
       {show && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           {/* Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -104,7 +104,7 @@ export function Drawer({
           />
 
           {/* Drawer Panel */}
-          <motion.div
+          <m.div
             role="dialog"
             aria-modal="true"
             initial="hidden"
@@ -136,7 +136,7 @@ export function Drawer({
             </button>
 
             <div className="flex-1 overflow-y-auto">{children}</div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

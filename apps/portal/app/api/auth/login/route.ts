@@ -115,7 +115,13 @@ export async function POST(request: NextRequest) {
   // ── Content-Type validation ──────────────────────────────────────────
   const contentType = request.headers.get('content-type') ?? '';
   if (!contentType.includes('application/json')) {
-    return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 415 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: 'Content-Type must be application/json', code: 'API_ERROR' },
+      },
+      { status: 415 }
+    );
   }
 
   // ── CSRF protection (production only) ────────────────────────────────
@@ -127,7 +133,10 @@ export async function POST(request: NextRequest) {
       try {
         appOrigin = new URL(appUrl).origin;
       } catch {
-        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Invalid request origin', code: 'API_ERROR' } },
+          { status: 403 }
+        );
       }
 
       const origin = request.headers.get('origin');
@@ -143,7 +152,10 @@ export async function POST(request: NextRequest) {
           : null;
 
         if (origin !== appOrigin && origin !== hostOrigin) {
-          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+          return NextResponse.json(
+            { success: false, error: { message: 'Invalid request origin', code: 'API_ERROR' } },
+            { status: 403 }
+          );
         }
       } else if (referer) {
         // Referer includes full path; parse it and compare origins to
@@ -157,15 +169,24 @@ export async function POST(request: NextRequest) {
               : `https://${host}`
             : null;
           if (refUrl.origin !== appOrigin && refUrl.origin !== hostOrigin) {
-            return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+            return NextResponse.json(
+              { success: false, error: { message: 'Invalid request origin', code: 'API_ERROR' } },
+              { status: 403 }
+            );
           }
         } catch {
           // Invalid Referer URL — reject
-          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+          return NextResponse.json(
+            { success: false, error: { message: 'Invalid request origin', code: 'API_ERROR' } },
+            { status: 403 }
+          );
         }
       } else {
         // Neither Origin nor Referer present — reject
-        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Invalid request origin', code: 'API_ERROR' } },
+          { status: 403 }
+        );
       }
     }
   }
@@ -180,7 +201,13 @@ export async function POST(request: NextRequest) {
 
           // Validate input
           if (!email || !password) {
-            return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+            return NextResponse.json(
+              {
+                success: false,
+                error: { message: 'Email and password are required', code: 'API_ERROR' },
+              },
+              { status: 400 }
+            );
           }
 
           const supabase = await createServerSupabaseClient();
@@ -263,7 +290,13 @@ export async function POST(request: NextRequest) {
           // Distinguish malformed JSON from internal server errors
           if (err instanceof SyntaxError) {
             span.setStatus({ code: 2, message: 'Invalid JSON' });
-            return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+            return NextResponse.json(
+              {
+                success: false,
+                error: { message: 'Invalid JSON in request body', code: 'API_ERROR' },
+              },
+              { status: 400 }
+            );
           }
 
           const isNetworkOrTimeout =
@@ -285,7 +318,13 @@ export async function POST(request: NextRequest) {
 
           span.recordException(err as Error);
           span.setStatus({ code: 2, message: 'Internal server error' });
-          return NextResponse.json({ error: 'An error occurred during sign in' }, { status: 500 });
+          return NextResponse.json(
+            {
+              success: false,
+              error: { message: 'An error occurred during sign in', code: 'API_ERROR' },
+            },
+            { status: 500 }
+          );
         } finally {
           span.end();
         }

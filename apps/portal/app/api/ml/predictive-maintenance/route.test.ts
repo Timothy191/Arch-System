@@ -52,7 +52,10 @@ describe('GET /api/ml/predictive-maintenance', () => {
 
     const res = await GET();
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Unauthorized' },
+    });
   });
 
   it('returns 500 when breakdowns query fails', async () => {
@@ -64,7 +67,10 @@ describe('GET /api/ml/predictive-maintenance', () => {
 
     const res = await GET();
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'database unavailable' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'database unavailable' },
+    });
   });
 
   it('returns empty predictions when there are no breakdowns', async () => {
@@ -149,6 +155,9 @@ describe('GET /api/ml/predictive-maintenance', () => {
 
     const res = await GET();
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'unexpected failure' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'unexpected failure' },
+    });
   });
 });

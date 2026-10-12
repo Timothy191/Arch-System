@@ -26,6 +26,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "axe-playwright": "*",
     "cspell": "catalog:",
+    "esbuild": "0.28.1",
     "glob": "^13.0.6",
     "husky": "^9.1.7",
     "knip": "^5.45.0",
@@ -54,7 +55,7 @@
     "config": "config/tools/.markdownlint.json"
   },
   "overrides": {
-    "handlebars": ">=4.7.9",
+    "handlebars": ">=4.7.10",
     "minimatch": ">=9.0.7",
     "glob": "^13.0.6",
     "serialize-javascript": ">=7.0.3",
@@ -366,7 +367,8 @@
       "devalue@<=5.9.2": ">=5.9.3",
       "devalue@>=1.0.0 <=5.9.2": ">=5.9.3",
       "devalue@>=5.8.0 <=5.9.2": ">=5.9.3",
-      "dompurify@<=3.4.11": ">=3.4.12"
+      "dompurify@<=3.4.11": ">=3.4.12",
+      "handlebars@<=4.7.9": ">=4.7.10"
     }
   }
 }

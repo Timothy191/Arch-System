@@ -14,7 +14,13 @@ export async function GET(
   { params }: { params: Promise<{ command: string[] }> }
 ) {
   if (!verifyToken(req)) {
-    return NextResponse.json({ error: 'Unauthorized: Invalid Redis token' }, { status: 401 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: 'Unauthorized: Invalid Redis token', code: 'API_ERROR' },
+      },
+      { status: 401 }
+    );
   }
 
   try {
@@ -29,7 +35,10 @@ export async function GET(
 
     return NextResponse.json({ result });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Execution error' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: { message: err.message || 'Execution error', code: 'API_ERROR' } },
+      { status: 400 }
+    );
   }
 }
 
@@ -38,7 +47,13 @@ export async function POST(
   { params }: { params: Promise<{ command: string[] }> }
 ) {
   if (!verifyToken(req)) {
-    return NextResponse.json({ error: 'Unauthorized: Invalid Redis token' }, { status: 401 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: 'Unauthorized: Invalid Redis token', code: 'API_ERROR' },
+      },
+      { status: 401 }
+    );
   }
 
   try {
@@ -57,6 +72,9 @@ export async function POST(
 
     return NextResponse.json({ result });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Execution error' }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: { message: err.message || 'Execution error', code: 'API_ERROR' } },
+      { status: 400 }
+    );
   }
 }

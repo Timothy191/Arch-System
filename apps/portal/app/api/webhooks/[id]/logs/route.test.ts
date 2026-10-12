@@ -81,21 +81,21 @@ describe('GET /api/webhooks/[id]/logs', () => {
     buildMock({ user: null });
     const res = await GET(new NextRequest('http://localhost'), { params });
     expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe('Unauthorized');
+    expect((await res.json()).error.message).toBe('Unauthorized');
   });
 
   it('returns 404 when employee not found', async () => {
     buildMock({ employee: null });
     const res = await GET(new NextRequest('http://localhost'), { params });
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Employee not found');
+    expect((await res.json()).error.message).toBe('Employee not found');
   });
 
   it('returns 404 when webhook not found', async () => {
     buildMock({ existingWebhook: null });
     const res = await GET(new NextRequest('http://localhost'), { params });
     expect(res.status).toBe(404);
-    expect((await res.json()).error).toBe('Webhook not found');
+    expect((await res.json()).error.message).toBe('Webhook not found');
   });
 
   it('returns 403 when non-admin tries to view logs from different dept', async () => {
@@ -109,14 +109,14 @@ describe('GET /api/webhooks/[id]/logs', () => {
     });
     const res = await GET(new NextRequest('http://localhost'), { params });
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe('Forbidden');
+    expect((await res.json()).error.message).toBe('Forbidden');
   });
 
   it('returns 500 when logs query fails', async () => {
     buildMock({ logsError: { message: 'Query failed' } });
     const res = await GET(new NextRequest('http://localhost'), { params });
     expect(res.status).toBe(500);
-    expect((await res.json()).error).toBe('Database query failed');
+    expect((await res.json()).error.message).toBe('Database query failed');
   });
 
   it('returns logs array on success for admin', async () => {

@@ -144,6 +144,23 @@ export const DEPARTMENTS: Department[] = [
       { label: 'Departments', href: '/admin?tab=departments' },
     ],
   },
+  {
+    name: 'database',
+    displayName: 'Database',
+    route: '/database',
+    icon: 'Database',
+    description: 'PostgreSQL schema definitions, migrations, and live telemetry panels',
+    color: 'emerald',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Queries/s', value: '342' },
+    trend: [300, 310, 315, 320, 330, 342, 340, 345],
+    actions: [
+      { label: 'Schemas', href: '/database/schemas' },
+      { label: 'Panels', href: '/database/panels' },
+    ],
+  },
 ];
 
 export const PRODUCTIVITY_TOOLS = [
@@ -247,6 +264,16 @@ export const ACCESS_CONTROL_TABS = [
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 
+/**
+ * Database specific tabs - focused on schema definitions and telemetry
+ */
+export const DATABASE_TABS = [
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'schemas', label: 'Schemas', icon: 'Database' },
+  { name: 'panels', label: 'Panels', icon: 'Activity' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -255,6 +282,7 @@ const DEPARTMENT_TABS_MAP: Record<
   'access-control': ACCESS_CONTROL_TABS,
   engineering: ENGINEERING_TABS,
   drilling: DRILLING_TABS,
+  database: DATABASE_TABS,
 };
 
 /**

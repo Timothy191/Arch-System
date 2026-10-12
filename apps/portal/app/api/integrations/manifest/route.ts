@@ -97,7 +97,10 @@ export async function GET(request: NextRequest) {
     if (!(manifestToken && bearer === manifestToken)) {
       const principal = await getAuthenticatedEmployee();
       if (principal?.employee?.role !== 'admin') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+          { status: 401 }
+        );
       }
     }
 

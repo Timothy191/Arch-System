@@ -62,6 +62,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
   return (
     <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent bg-[radial-gradient(circle_at_2px_2px,rgba(0,0,0,0.03)_1px,transparent_0)] bg-[size:32px_32px]">
+      {/* Animated Gradient Background - Arch System Amber/Gold Theme */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-br from-[#71440d] via-[#a36c1e] to-[#c59837] animate-gradient-flow opacity-15"
+      />
       {/* Ambient Gold Accents */}
       <div
         aria-hidden="true"

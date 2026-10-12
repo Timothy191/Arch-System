@@ -96,7 +96,13 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return applyCors(req, NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
+    return applyCors(
+      req,
+      NextResponse.json(
+        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+        { status: 401 }
+      )
+    );
   }
 
   const { searchParams } = req.nextUrl;
@@ -135,7 +141,13 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
 
   const { data, error, count } = await query;
   if (error) {
-    return applyCors(req, NextResponse.json({ error: 'Database query failed' }, { status: 500 }));
+    return applyCors(
+      req,
+      NextResponse.json(
+        { success: false, error: { message: 'Database query failed', code: 'API_ERROR' } },
+        { status: 500 }
+      )
+    );
   }
 
   if (format === 'csv') {

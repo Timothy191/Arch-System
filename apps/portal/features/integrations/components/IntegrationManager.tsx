@@ -6,7 +6,7 @@ import { Button } from '@repo/ui/components/ui/button';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { fetchClient } from '@repo/utils/client';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import {
   CheckCircle,
   ChevronDown,
@@ -282,7 +282,7 @@ export function IntegrationManager() {
 
         <AnimatePresence>
           {showForm && (
-            <motion.form
+            <m.form
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
@@ -392,7 +392,7 @@ export function IntegrationManager() {
                   Install integration
                 </Button>
               </div>
-            </motion.form>
+            </m.form>
           )}
         </AnimatePresence>
       </GlassCard>
@@ -488,7 +488,7 @@ export function IntegrationManager() {
 
                 <AnimatePresence>
                   {isExpanded && (
-                    <motion.div
+                    <m.div
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
@@ -594,7 +594,7 @@ export function IntegrationManager() {
                           )}
                         </div>
                       </div>
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
               </GlassCard>

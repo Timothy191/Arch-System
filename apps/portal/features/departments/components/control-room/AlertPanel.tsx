@@ -66,7 +66,11 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                 <span>{alert.time}</span>
               </div>
             </div>
-            <button type="button" className="p-1.5 hover:bg-black/5 rounded-md transition-colors">
+            <button
+              type="button"
+              aria-label="View alert details"
+              className="p-1.5 hover:bg-black/5 rounded-md transition-colors"
+            >
               <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>

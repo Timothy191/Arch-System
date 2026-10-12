@@ -30,7 +30,10 @@ describe('GET /api/tools/status', () => {
     const res = await GET(req);
 
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Unauthorized' },
+    });
     expect(cacheWrap).not.toHaveBeenCalled();
   });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedNumberProps {
@@ -60,7 +60,7 @@ function SingleDigit({
 
   if (isSymbol) {
     return (
-      <motion.span
+      <m.span
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
@@ -68,7 +68,7 @@ function SingleDigit({
         className="inline-block"
       >
         {value}
-      </motion.span>
+      </m.span>
     );
   }
 
@@ -112,7 +112,7 @@ function DigitStrip({
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+      <m.div
         key={value}
         initial={{ y: dir }}
         animate={{ y: 0 }}
@@ -140,7 +140,7 @@ function DigitStrip({
               <span key={`${val}_${idx}`}>{val}</span>
             ))}
         </span>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

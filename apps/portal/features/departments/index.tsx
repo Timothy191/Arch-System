@@ -7,8 +7,6 @@ export {
   BreakdownsTable,
   type Machine,
   ShiftCoverageWidget,
-  TireManagementDashboard,
-  type TireWithInspections,
 } from '@repo/departments/ui';
 export * from './components/control-room/AlertPanel';
 export * from './components/control-room/ControlRoomActivityFeed';

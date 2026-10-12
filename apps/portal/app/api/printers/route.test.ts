@@ -35,7 +35,10 @@ describe('GET /api/printers', () => {
 
     const res = await GET();
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Unauthorized' },
+    });
   });
 
   it('returns 403 if user lacks required role', async () => {
@@ -51,7 +54,10 @@ describe('GET /api/printers', () => {
 
     const res = await GET();
     expect(res.status).toBe(403);
-    expect(await res.json()).toEqual({ error: 'Forbidden' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Forbidden' },
+    });
   });
 
   it('returns printers on successful query', async () => {
@@ -147,7 +153,10 @@ describe('POST /api/printers', () => {
     });
     const res = await POST(req);
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: 'cups_name and name are required' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'cups_name and name are required' },
+    });
   });
 
   it('returns 409 on unique constraint violation', async () => {
@@ -223,6 +232,9 @@ describe('POST /api/printers', () => {
     });
     const res = await POST(req);
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'Failed to register printer' });
+    expect(await res.json()).toEqual({
+      success: false,
+      error: { code: 'API_ERROR', message: 'Failed to register printer' },
+    });
   });
 });

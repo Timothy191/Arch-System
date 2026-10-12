@@ -32,27 +32,45 @@ export async function POST(req: NextRequest) {
     try {
       const idempotencyKey = req.headers.get('Idempotency-Key');
       if (!idempotencyKey) {
-        return NextResponse.json({ error: 'Missing Idempotency-Key header' }, { status: 400 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: { message: 'Missing Idempotency-Key header', code: 'API_ERROR' },
+          },
+          { status: 400 }
+        );
       }
 
       const supabase = await createServerSupabaseClient();
       const principal = await getAuthenticatedEmployee(supabase);
       if (!principal) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
+          { status: 401 }
+        );
       }
       if (!principal.employee) {
-        return NextResponse.json({ error: 'Employee record not found' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Employee record not found', code: 'API_ERROR' } },
+          { status: 403 }
+        );
       }
 
       const rawBody = await req.text();
       if (new TextEncoder().encode(rawBody).byteLength > 1024 * 1024) {
-        return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Request body too large', code: 'API_ERROR' } },
+          { status: 413 }
+        );
       }
       let body;
       try {
         body = JSON.parse(rawBody);
       } catch (e) {
-        return NextResponse.json({ error: 'Malformed JSON' }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Malformed JSON', code: 'API_ERROR' } },
+          { status: 400 }
+        );
       }
 
       const parseResult = shiftCloseoutPayloadSchema.safeParse(body);
@@ -78,17 +96,26 @@ export async function POST(req: NextRequest) {
 
       const { employee, user } = principal;
       if (!['admin', 'operator', 'supervisor'].includes(employee.role)) {
-        return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Insufficient permissions', code: 'API_ERROR' } },
+          { status: 403 }
+        );
       }
       if (
         employee.role !== 'admin' &&
         employee.department_id !== payload.deptId &&
         !employee.accessible_departments?.includes(payload.deptId)
       ) {
-        return NextResponse.json({ error: 'Department access denied' }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Department access denied', code: 'API_ERROR' } },
+          { status: 403 }
+        );
       }
       if (payload.idempotencyKey !== idempotencyKey) {
-        return NextResponse.json({ error: 'Idempotency key mismatch' }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: { message: 'Idempotency key mismatch', code: 'API_ERROR' } },
+          { status: 400 }
+        );
       }
 
       // Execute atomic RPC
@@ -115,7 +142,10 @@ export async function POST(req: NextRequest) {
 
       if (rpcError) {
         if (rpcError.message.includes('conflict')) {
-          return NextResponse.json({ error: 'Idempotency conflict' }, { status: 409 });
+          return NextResponse.json(
+            { success: false, error: { message: 'Idempotency conflict', code: 'API_ERROR' } },
+            { status: 409 }
+          );
         }
         if (rpcError.message.includes('unique_violation')) {
           return NextResponse.json(
@@ -175,7 +205,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(closeoutResult, { status: 200 });
     } catch (error: unknown) {
       logError(error, { context: 'shift_closeout_route' });
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: { message: 'Internal server error', code: 'API_ERROR' } },
+        { status: 500 }
+      );
     }
   });
 }
