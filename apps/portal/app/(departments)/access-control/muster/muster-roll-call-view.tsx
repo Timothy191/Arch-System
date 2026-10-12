@@ -40,11 +40,35 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const { isOnline } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
 
-  // Compute live counts
-  const totalSouls = records.length;
-  const accounted = records.filter((r) => r.status === 'accounted').length;
-  const unaccounted = records.filter((r) => r.status === 'unaccounted').length;
-  const evacuated = records.filter((r) => r.status === 'evacuated').length;
+  // Single-pass memoized aggregation of headcount metrics and per-station counts
+  const { totalSouls, accounted, unaccounted, evacuated, stationCounts } = useMemo(() => {
+    let accountedCount = 0;
+    let unaccountedCount = 0;
+    let evacuatedCount = 0;
+    const countsByStation = new Map<string, number>();
+
+    for (let i = 0; i < records.length; i++) {
+      const r = records[i];
+      if (r.status === 'accounted') {
+        accountedCount++;
+        if (r.station) {
+          countsByStation.set(r.station, (countsByStation.get(r.station) || 0) + 1);
+        }
+      } else if (r.status === 'unaccounted') {
+        unaccountedCount++;
+      } else if (r.status === 'evacuated') {
+        evacuatedCount++;
+      }
+    }
+
+    return {
+      totalSouls: records.length,
+      accounted: accountedCount,
+      unaccounted: unaccountedCount,
+      evacuated: evacuatedCount,
+      stationCounts: countsByStation,
+    };
+  }, [records]);
 
   const handleToggleStatus = async (record: MusterPersonnelRecord) => {
     const nextStatus: MusterPersonnelRecord['status'] =
@@ -276,9 +300,8 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       {/* Muster Point Stations Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {summary.musterStations.map((station) => {
-          const stationCount = records.filter(
-            (r) => r.status === 'accounted' && r.station === station.name
-          ).length;
+          // O(1) station count lookup from memoized stationCounts Map
+          const stationCount = stationCounts.get(station.name) || 0;
           return (
             <div
               key={station.id}
