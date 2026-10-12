@@ -25,6 +25,7 @@ if (isProduction && !process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.IGNORE
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactCompiler: true,
   // AGENT-TRACE: Next.js 16 Cache Components enabled for 'use cache' directives and granular component prerendering
   cacheComponents: true,
   // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds
@@ -113,6 +114,9 @@ const nextConfig = {
     '@liqui-design/glass',
   ],
   images: {
+    // Fix: Disable built-in Vercel image optimization to prevent hitting storage/optimization quotas.
+    // Cloudinary and Supabase provide their own optimization, so Vercel's is redundant.
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
