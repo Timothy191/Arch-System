@@ -8,6 +8,11 @@ test-results/
 backups/
 *.log
 
+# Secrets and environment files
+.env*
+.env.local
+.env.*.local
+
 # Documentation and heavy media
 docs/
 documentation/
