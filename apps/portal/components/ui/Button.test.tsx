@@ -6,7 +6,7 @@ describe('Geist Button Primitive', () => {
     render(<Button>Upload</Button>);
     const btn = screen.getByRole('button', { name: 'Upload' });
     expect(btn).toBeInTheDocument();
-    expect(btn).toHaveClass('h-9', 'bg-neutral-900');
+    expect(btn).toHaveClass('h-9', 'bg-primary');
   });
 
   it('renders different sizes (tiny, small, medium, large)', () => {
@@ -23,18 +23,18 @@ describe('Geist Button Primitive', () => {
     expect(screen.getByRole('button')).toHaveClass('h-10');
   });
 
-  it('renders Geist variants (secondary, tertiary, error, warning)', () => {
+  it('renders Geist variants (secondary, ghost, destructive, outline)', () => {
     const { rerender } = render(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-arch-surface-secondary');
+    expect(screen.getByRole('button')).toHaveClass('bg-secondary');
 
     rerender(<Button variant="ghost">Tertiary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('hover:bg-arch-surface-tertiary');
+    expect(screen.getByRole('button')).toHaveClass('hover:bg-accent');
 
     rerender(<Button variant="destructive">Error</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-red-600');
+    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
 
-    rerender(<Button variant="secondary">Warning</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-amber-500');
+    rerender(<Button variant="outline">Outline</Button>);
+    expect(screen.getByRole('button')).toHaveClass('border');
   });
 
   it('renders shapes (square, circle, rounded with shadow)', () => {

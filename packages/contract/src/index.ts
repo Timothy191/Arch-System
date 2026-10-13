@@ -52,6 +52,10 @@ export {
   shiftCompletenessSchema,
 } from './schemas/control-room.schema';
 export { drillOperationSchema, drillTelemetryIngestSchema } from './schemas/drill.schema';
+export {
+  departmentAccessLevelSchema,
+  employeeDepartmentAccessSchema,
+} from './schemas/employee-department-access.schema';
 export { exportQuerySchema } from './schemas/export.schema';
 export {
   equipmentSchema,
@@ -79,9 +83,11 @@ export {
   machineTimeAllocationSchema,
 } from './schemas/machine-ledger.schema';
 export {
+  machineCapabilitiesSchema,
   machineOperatorScanRequestSchema,
   machineOperatorScanResponseSchema,
 } from './schemas/machine-operator-scan.schema';
+export { machineTypeSchema } from './schemas/machine-types.schema';
 export { embedDashboardSchema } from './schemas/metabase.schema';
 export {
   ancillaryReportEntrySchema,
@@ -137,6 +143,10 @@ export type {
 export type { HealthCheckResponse, ShiftCloseoutInput } from './schemas/control-room.schema';
 export type { DrillOperationInput, DrillTelemetryIngestInput } from './schemas/drill.schema';
 export type {
+  DepartmentAccessLevel,
+  EmployeeDepartmentAccess,
+} from './schemas/employee-department-access.schema';
+export type {
   Equipment,
   EquipmentStatus,
   Fleet,
@@ -144,9 +154,11 @@ export type {
   FleetStatus,
 } from './schemas/fleet-equipment.schema';
 export type {
+  MachineCapabilities,
   MachineOperatorScanRequest,
   MachineOperatorScanResponse,
 } from './schemas/machine-operator-scan.schema';
+export type { MachineType } from './schemas/machine-types.schema';
 export type { EmbedDashboardInput } from './schemas/metabase.schema';
 export type {
   OfflineMutationBatch,

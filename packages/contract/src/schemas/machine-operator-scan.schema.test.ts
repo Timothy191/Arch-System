@@ -100,4 +100,24 @@ describe('machineOperatorScanResponseSchema', () => {
       }).success
     ).toBe(true);
   });
+
+  it('validates machineCapabilities object attached to machine payload', () => {
+    const machineWithCapabilities = {
+      ...machine,
+      machineCapabilities: {
+        requiresHourlyLoads: true,
+        tracksTonnage: true,
+        tracksCycleTime: true,
+        tracksFuel: true,
+        tracksBenchClearance: false,
+        tracksDrillDepth: false,
+      },
+    };
+    const parsed = machineOperatorScanResponseSchema.parse({
+      stage: 'machine',
+      machine: machineWithCapabilities,
+    });
+    expect(parsed.machine.machineCapabilities?.requiresHourlyLoads).toBe(true);
+    expect(parsed.machine.machineCapabilities?.tracksBenchClearance).toBe(false);
+  });
 });

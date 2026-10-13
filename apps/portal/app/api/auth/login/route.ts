@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: { message: 'Content-Type must be application/json', code: 'API_ERROR' },
+        error: 'Content-Type must be application/json',
       },
       { status: 415 }
     );
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
               {
                 success: false,
-                error: { message: 'Email and password are required', code: 'API_ERROR' },
+                error: 'Email and password are required',
               },
               { status: 400 }
             );

@@ -1,4 +1,5 @@
 import { MachineTimeAllocationInput } from '@repo/contract';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { GlassCard } from '@repo/ui/components/GlassCard';
 import { Divider } from '@repo/ui/Divider';
@@ -9,6 +10,7 @@ import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ShiftCloseoutForm } from '../components/ShiftCloseoutForm';
+import { ShiftReportSummary, SupervisorApprovalPanel } from '../components/SupervisorApprovalPanel';
 
 export const metadata: Metadata = {
   title: 'Shift Closeout | Control Room | Arch OS',
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
 async function ShiftCloseoutSection() {
   const { deptId, today } = await getDepartmentContext({ department: 'control-room' });
   const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
 
   const { data: machines } = await supabase.from('machines').select('id, name').eq('active', true);
 
@@ -52,7 +55,43 @@ async function ShiftCloseoutSection() {
         })
       : [];
 
-  return <ShiftCloseoutForm deptId={deptId} shiftDate={today} initialFleet={fleetData} />;
+  const { data: recentReportsData } = await supabase
+    .from('control_room_shift_reports')
+    .select(
+      'id, report_date, shift_type, operator_name, status, submitter_id, approver_id, approval_note, approved_at, created_at'
+    )
+    .eq('department_id', deptId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const recentReports: ShiftReportSummary[] = (recentReportsData ?? []).map((r) => ({
+    id: r.id,
+    reportDate: r.report_date,
+    shiftType: r.shift_type,
+    operatorName: r.operator_name,
+    status: (r.status ?? 'submitted') as ShiftReportSummary['status'],
+    submitterId: r.submitter_id,
+    approverId: r.approver_id,
+    approvalNote: r.approval_note,
+    approvedAt: r.approved_at,
+    createdAt: r.created_at,
+  }));
+
+  const isSupervisorOrAdmin =
+    principal?.employee?.role && ['supervisor', 'admin'].includes(principal.employee.role);
+
+  return (
+    <div className="space-y-8">
+      {isSupervisorOrAdmin && (
+        <SupervisorApprovalPanel
+          reports={recentReports}
+          currentEmployeeId={principal?.employee?.id}
+          currentRole={principal?.employee?.role}
+        />
+      )}
+      <ShiftCloseoutForm deptId={deptId} shiftDate={today} initialFleet={fleetData} />
+    </div>
+  );
 }
 
 function ShiftCloseoutSkeleton() {

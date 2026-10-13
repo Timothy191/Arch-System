@@ -146,7 +146,7 @@ describe('GET /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(404);
     const json = await res.json();
-    expect(json.error).toBe('Unknown table');
+    expect(json.error.message).toBe('Unknown table');
   });
 
   it('returns paginated data for allowed table', async () => {
@@ -177,7 +177,7 @@ describe('GET /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(500);
     const json = await res.json();
-    expect(json.error).toBe('Database query failed');
+    expect(json.error.message).toBe('Database query failed');
   });
 });
 
@@ -212,7 +212,7 @@ describe('PUT /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toBe('Missing record id');
+    expect(json.error.message).toBe('Missing record id');
   });
 
   it('returns 404 for unknown table', async () => {
@@ -245,7 +245,7 @@ describe('PUT /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(500);
     const json = await res.json();
-    expect(json.error).toBe('Update failed');
+    expect(json.error.message).toBe('Update failed');
   });
 
   it('returns success and writes audit log on successful update', async () => {
@@ -330,7 +330,7 @@ describe('DELETE /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toBe('Missing id query parameter');
+    expect(json.error.message).toBe('Missing id query parameter');
   });
 
   it('returns 404 for unknown table', async () => {
@@ -359,7 +359,7 @@ describe('DELETE /api/admin/data/[table]', () => {
 
     expect(res.status).toBe(500);
     const json = await res.json();
-    expect(json.error).toBe('Delete failed');
+    expect(json.error.message).toBe('Delete failed');
   });
 
   it('returns success and writes audit log on successful delete', async () => {

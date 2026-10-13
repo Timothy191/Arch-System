@@ -32,6 +32,8 @@ const personnelRowsSchema = serviceRow(
   })
 );
 
+import type { MachineCapabilities } from '@repo/contract';
+
 type ScanMachine = {
   id: string;
   name: string;
@@ -39,7 +41,69 @@ type ScanMachine = {
   site_id: string | null;
   bin_factor: number | null;
   active: boolean;
+  machine_type_id?: string | null;
+  machine_types?:
+    | {
+        requires_hourly_loads?: boolean | null;
+        tracks_tonnage?: boolean | null;
+        tracks_cycle_time?: boolean | null;
+        tracks_fuel?: boolean | null;
+        tracks_bench_clearance?: boolean | null;
+        tracks_drill_depth?: boolean | null;
+      }
+    | Array<{
+        requires_hourly_loads?: boolean | null;
+        tracks_tonnage?: boolean | null;
+        tracks_cycle_time?: boolean | null;
+        tracks_fuel?: boolean | null;
+        tracks_bench_clearance?: boolean | null;
+        tracks_drill_depth?: boolean | null;
+      }>
+    | null;
 };
+
+export function getMachineCapabilities(machine: ScanMachine): MachineCapabilities {
+  const mt = Array.isArray(machine.machine_types)
+    ? machine.machine_types[0]
+    : machine.machine_types;
+  if (mt) {
+    return {
+      requiresHourlyLoads: Boolean(mt.requires_hourly_loads),
+      tracksTonnage: Boolean(mt.tracks_tonnage),
+      tracksCycleTime: Boolean(mt.tracks_cycle_time),
+      tracksFuel: Boolean(mt.tracks_fuel ?? true),
+      tracksBenchClearance: Boolean(mt.tracks_bench_clearance),
+      tracksDrillDepth: Boolean(mt.tracks_drill_depth),
+    };
+  }
+  const type = machine.machine_type.toLowerCase();
+  const isDumpTruck = type.includes('dump') || type.includes('adt') || type.includes('truck');
+  const isDozer = type.includes('dozer');
+  const isExcavator = type.includes('excavator');
+  const isDrill = type.includes('drill');
+
+  return {
+    requiresHourlyLoads: isDumpTruck,
+    tracksTonnage: isDumpTruck || isExcavator,
+    tracksCycleTime: isDumpTruck || isExcavator,
+    tracksFuel: true,
+    tracksBenchClearance: isDozer,
+    tracksDrillDepth: isDrill,
+  };
+}
+
+export function buildMachineDto(machine: ScanMachine) {
+  const capabilities = getMachineCapabilities(machine);
+  return {
+    id: machine.id,
+    name: machine.name,
+    machineType: machine.machine_type,
+    siteId: machine.site_id,
+    requiresHourlyLoads: capabilities.requiresHourlyLoads,
+    machineCapabilities: capabilities,
+    capabilities,
+  };
+}
 
 function jsonError(error: string, status: number, code: string) {
   return NextResponse.json({ error, code }, { status });
@@ -103,7 +167,8 @@ async function findMachine(
   code: string | undefined,
   machineId?: string
 ) {
-  const columns = 'id, name, machine_type, site_id, bin_factor, active';
+  const columns =
+    'id, name, machine_type, site_id, bin_factor, active, machine_type_id, machine_types(requires_hourly_loads, tracks_tonnage, tracks_cycle_time, tracks_fuel, tracks_bench_clearance, tracks_drill_depth)';
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (machineId) {
     const { data, error } = await supabase
@@ -237,13 +302,7 @@ export async function GET(request: Request) {
 
     const response = machineOperatorScanResponseSchema.parse({
       stage: 'operators',
-      machine: {
-        id: machine.id,
-        name: machine.name,
-        machineType: machine.machine_type,
-        siteId: machine.site_id,
-        requiresHourlyLoads: machine.machine_type === 'Dump Truck',
-      },
+      machine: buildMachineDto(machine),
       operators: (operators ?? []).flatMap((operator) => {
         const person = personnel.find((candidate) => candidate.emp_code === operator.employee_code);
         return person?.job_title
@@ -293,13 +352,7 @@ export async function POST(request: Request) {
       return jsonError('Active machine was not found for this scan', 404, 'MACHINE_NOT_FOUND');
     }
 
-    const machineDto = {
-      id: machine.id,
-      name: machine.name,
-      machineType: machine.machine_type,
-      siteId: machine.site_id,
-      requiresHourlyLoads: machine.machine_type === 'Dump Truck',
-    };
+    const machineDto = buildMachineDto(machine);
 
     if (!input.operatorCode && !input.operatorId) {
       const preview = machineOperatorScanResponseSchema.parse({
@@ -432,6 +485,90 @@ export async function POST(request: Request) {
 
     const shiftDate = getOperationalToday('Africa/Johannesburg');
     const shiftType = getCurrentShift(now, 'Africa/Johannesburg');
+
+    // Attempt atomic database dispatch RPC if available in current schema environment
+    if (typeof supabase.rpc === 'function') {
+      try {
+        const { data: rpcData, error: rpcError } = await supabase.rpc(
+          'atomic_machine_operator_dispatch',
+          {
+            p_machine_id: machine.id,
+            p_operator_id: operator.id,
+            p_site_id: siteId,
+            p_department_id: input.departmentId,
+            p_shift_date: shiftDate,
+            p_shift_type: shiftType,
+            p_start_time: operationalTime(now),
+            p_created_by: employee.id,
+          }
+        );
+
+        if (!rpcError && rpcData && typeof rpcData === 'object') {
+          const rpcObj = rpcData as {
+            allowed?: boolean;
+            code?: string;
+            reason?: string;
+            alreadyAssigned?: boolean;
+            operationId?: string;
+            machineCapabilities?: Record<string, boolean>;
+          };
+
+          if (rpcObj.allowed === false) {
+            if (rpcObj.code === 'MACHINE_OCCUPIED') {
+              return jsonError(
+                rpcObj.reason ?? 'Machine already has an active operator this shift',
+                409,
+                'MACHINE_ASSIGNED'
+              );
+            }
+            if (rpcObj.code === 'CLEARANCE_EXPIRED') {
+              return jsonError(
+                rpcObj.reason ?? 'Assignment blocked: medical or induction expired',
+                403,
+                'OPERATOR_NOT_CLEARED'
+              );
+            }
+            return jsonError(
+              rpcObj.reason ?? 'Machine dispatch could not be authorized',
+              403,
+              rpcObj.code ?? 'DISPATCH_BLOCKED'
+            );
+          }
+
+          if (rpcObj.allowed === true && rpcObj.operationId) {
+            const capabilities = {
+              ...machineDto.capabilities,
+              ...(rpcObj.machineCapabilities ?? {}),
+            };
+
+            const result = machineOperatorScanResponseSchema.parse({
+              stage: 'assignment',
+              machine: {
+                ...machineDto,
+                capabilities,
+              },
+              operator: { id: operator.id, name: operator.full_name },
+              operationId: rpcObj.operationId,
+              assignedAt: now.toISOString(),
+              alreadyAssigned: Boolean(rpcObj.alreadyAssigned),
+              checks: {
+                machineActive: true,
+                badgeValid,
+                badgeScanned: badgeValid,
+                operatorActive: true,
+                medicalValid: true,
+                inductionValid: true,
+                machineQualification: 'not_configured',
+              },
+            });
+            return NextResponse.json(result, { status: rpcObj.alreadyAssigned ? 200 : 201 });
+          }
+        }
+      } catch (rpcErr) {
+        logError(rpcErr, { context: 'control_room_atomic_dispatch_rpc_fallback' });
+      }
+    }
+
     const { data: currentOperation, error: currentOperationError } = await supabase
       .from('machine_operations')
       .select('id, operator_id, site_id')

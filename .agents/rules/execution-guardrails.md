@@ -1,86 +1,97 @@
+---
+name: execution-guardrails
+description: Always-on pre-completion audits and quality gates for industrial-grade software
+paths:
+  - '**/*'
+alwaysApply: true
+---
+
 # Autonomous Agent Execution Guardrails
 
-This rule is permanently and autonomously active across all agent sessions operating within this codebase.
+This rule is permanently and autonomously active across all agent sessions.
 
----
+## Real-World Production Mandate
 
-## 1. Automated Compliance & Drift Mandate
+Arch-System controls real mining operations. Every agent must:
 
-Before marking any task, feature, or refactor complete, the agent **MUST autonomously execute**:
+- **Treat the repository as production-grade operational software** — never as a playground
+- **Assume real-world consequences** — a single wrong RLS policy or migration can halt production
+- **Verify before claiming** — never assert "works" without empirical evidence (runtime tests, live probes)
+- **Own the full lifecycle** — from design through deployment verification
 
-1. `pnpm audit:drift`: Verifies that database schema definitions and `@repo/contract` Zod schemas remain 100% synchronized.
-2. `pnpm audit:compliance`: Verifies all 110 SQL migrations, RLS policies, rollback safety (`@repo/database:test:migration-rollback`), and design tokens.
+## Anti-Assumption Mandate (CRITICAL)
 
----
+**NEVER guess, assume, or speculate about errors or issues.**
 
-## 2. Fast Inner-Loop Feedback Before Monorepo Gates
+Before claiming any error, blocker, or issue exists, the agent **MUST**:
 
-- When editing components, server actions, or feature hooks, **always** run targeted unit tests first:
+1. **Identify with empirical evidence** — Run the actual command that would fail:
+   - Build errors: Run `pnpm build`, `vercel build`, or `make pipeline`
+   - Runtime errors: Run the dev server, execute the failing code path, or run E2E tests
+   - Dependency errors: Run `pnpm install`, `pnpm audit`, or check lockfile
+   - Type errors: Run `pnpm type-check` (never guess from memory)
+   - Lint errors: Run `pnpm lint` (never guess from memory)
 
-  ```bash
-  pnpm --filter portal test -- --testPathPatterns="<name>"
-  ```
+2. **Provide the exact error output** — Quote the actual terminal output, log message, or exception trace
+   - Do not summarize or paraphrase errors
+   - Do not say "might be X" or "could be Y"
+   - Do not rely on memory of similar past issues
 
-- Do not run heavy monorepo builds or production builds (`next build`) inside interactive agent sessions; always keep the development server (`pnpm dev` or `pnpm dev:quick`) active to preserve Hot Module Replacement (HMR).
+3. **Do not suggest fixes without evidence** — Only propose solutions after:
+   - The actual error is reproduced and captured
+   - The root cause is traced to specific code/configuration
+   - A minimal test confirms the issue
 
----
+**Violations**: Stating "I suspect X might be broken" without running the actual verification command is a critical failure. Always measure twice, claim once.
 
-## 3. Data & Migration Invariants
+## Grounded Reasoning Mandate (CRITICAL)
 
-- **Zero-Padded Migrations**: SQL files in `packages/database/migrations/` must follow `NNN_description.sql`.
-- **Mandatory Rollback Tests**: Any modification to database migrations requires running:
+**All reasoning, thoughts, and claims must be grounded in real-world proven data.**
 
-  ```bash
-  pnpm --filter @repo/database test
-  ```
+Before building any reasoning, analysis, or proposal, the agent **MUST**:
 
-- **RLS Isolation**: RLS must be enabled on every table, strictly consulting `auth.uid()` and cross-referencing `public.employees`.
+1. **Ground premises in actual codebase state**:
+   - Read the actual files before reasoning about their contents
+   - Verify function signatures, types, and imports with AST/tools (codemap, ast-grep)
+   - Check git status to understand current working tree state
+   - Do not reason from memory or assumptions about file structure
 
----
+2. **Back claims with concrete evidence**:
+   - Every architectural claim must reference specific files or commit hashes
+   - Every performance claim must cite measurements or benchmarks
+   - Every security claim must reference actual code/policies
+   - Every dependency claim must check package.json/lockfile
 
-## 4. Architectural Boundaries (SSoT)
+3. **Label speculative reasoning explicitly**:
+   - If you must reason hypothetically, prefix with: `HYPOTHETICAL: [reasoning]`
+   - Hypothetical reasoning must be followed by empirical verification
+   - Never treat hypothetical scenarios as proven facts
 
-- `tools/repo/policy-compiler.cjs` is the Single Source of Truth for monorepo scope tags:
-  - UI packages (`@repo/ui`) must remain pure presentation—no direct database or Supabase imports.
-  - Apps cannot import `@repo/database-internal`; queries flow through `@repo/supabase`.
-  - Feature modules cannot import app packages.
+4. **Validate assumptions before building on them**:
+   - List all assumptions at the start of any non-trivial task
+   - Run verification commands to prove or disprove each assumption
+   - Discard assumptions that fail verification before proceeding
 
----
+**Violations**: Building multi-step reasoning on unverified assumptions is a critical failure. Ground first, reason second.
 
-## 5. Agent Tracing & Context Handover
+## Mandatory Pre-Completion Audits
 
-- Every modified package or application root contains an `AGENT_TRACER.md`.
-- Assistants must append an ISO 8601 timestamped entry documenting changes, reasons, and next-agent handover notes.
-- Complex logic must include inline `// AGENT-TRACE: <explanation>` breadcrumbs.
+Before marking any task complete, the agent **MUST autonomously execute**:
 
----
+1. `pnpm audit:drift`: Verifies database schema and `@repo/contract` Zod schema synchronization
+2. `pnpm audit:compliance`: Verifies SQL migrations, RLS policies, rollback safety, and design tokens
 
-## 6. Tooling Drift Resolution
+## Essential Invariants
 
-- Running `pnpm format` will format auto-generated policy files and break the strict drift verification. If `pnpm policy:check` or `agent:verify` fails due to drift on generated files (e.g., `eslint-boundaries.generated.cjs`), you **MUST** autonomously run `pnpm policy:gen` to regenerate them and realign the pipeline before proceeding.
+- **Zero-Padded Migrations**: SQL files in `packages/database/migrations/` must follow `NNN_description.sql`
+- **RLS Isolation**: RLS must be enabled on every table, consulting `auth.uid()` and `public.employees`
+- **Architectural Boundaries**: `tools/repo/policy-compiler.cjs` is SSoT — UI packages pure presentation, apps route via `@repo/supabase`
+- **Tooling Drift**: If `pnpm policy:check` fails on generated files, run `pnpm policy:gen` to regenerate
+- **Agent Tracing**: Modified packages must append ISO 8601 entries to `AGENT_TRACER.md`
+- **Backlog Zero**: Check and complete outstanding tasks before starting new work
+- **Anti-Bloat Leases**: Use `skills-mcp` acquire/return for dynamic context leasing
 
-## 7. Finish What You Start Invariant
+## Fast Inner-Loop
 
-- **Strict Completion Enforcement**: Nothing new may be added or started until all past or outstanding actions, tasks, or other requirements are fully completed. You must always finish what you start before moving on to parallel integrations or new feature mappings.
-
-## 8. Backlog Zero Invariant
-
-- **Mandatory Backlog Check**: At the start of new sessions or when switching contexts, you must autonomously check for any backlog, unfinished tasks, or incomplete `temp/tasks.md` items.
-- **Autonomous Completion**: If an outstanding backlog is detected, you must prompt/inform the user and immediately autonomously complete the required tasks. You must maintain a "zero outstanding" state so you can assist the user with new requests without forgotten or hanging tasks.
-
-## 9. Anti-Bloat Dynamic Leases via `skills-mcp`
-
-- **No Static Context Flooding**: Agents MUST NOT inject entire markdown skill manuals, architectural guides, or schemas into prompts or persistent system rules.
-- **Lease-and-Return Lifecycle**:
-  1. Inspect metadata via `list_available_skills` or `list_available_context`.
-  2. Lease the active instructions via `acquire_skill(skillName, agentId)` or `acquire_context(contextId, agentId)`.
-  3. Execute the scoped subtask.
-  4. Promptly invoke `return_skill` / `release_context` upon completion to release tokens and unbloat the agent context window.
-
-## 10. Architectural Extractions (Resiliency & Modularity)
-
-To maintain system robustness and operational speed based on federated architectural extraction:
-- **Error Segregation (Node Best Practices):** Distinguish between Operational Errors (retriable, external failures) and Programmer Errors (bugs, unhandled promise rejections). Fail fast on the latter.
-- **Circuit Breakers & Multi-Tier Caching:** Rely on L1/L2 Circuit Breakers and SWR (Stale-While-Revalidate) with Adaptive TTL (Avalanche Jitter) in `@repo/redis` to protect against backend database thundering herds.
-- **Strict Web Vitals:** Enforce Core Web Vitals (LCP/CLS) using layout-matching `loading.tsx` skeletons for heavy routes to eliminate layout shift.
-- **Idempotency (Conductor pattern):** Webhook processors, background queues (BullMQ), and federated jobs must map to idempotent execution paths (`idem_<key>`) to ensure safe retries without side-effects.
+- Run targeted unit tests first: `pnpm --filter portal test -- --testPathPatterns="<name>"`
+- Keep dev server active; avoid heavy monorepo builds in interactive sessions

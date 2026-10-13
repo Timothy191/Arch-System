@@ -1637,55 +1637,6 @@
         }
       }
     },
-    "/api/export/tires": {
-      "get": {
-        "summary": "Export fleet tire inspection history and scrap logs",
-        "description": "Export fleet tire inspection data, wear profiles, and decommissioning/scrap logs for regulatory and maintenance audits.",
-        "tags": [
-          "Export"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "type",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "fleet",
-                "inspections",
-                "scrap",
-                "all"
-              ],
-              "default": "all"
-            },
-            "description": "Type of export dataset"
-          },
-          {
-            "in": "query",
-            "name": "format",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "json",
-                "csv"
-              ],
-              "default": "csv"
-            },
-            "description": "Export format"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Export data (CSV or JSON)"
-          }
-        }
-      }
-    },
     "/api/export/production": {
       "get": {
         "summary": "Export production logs",

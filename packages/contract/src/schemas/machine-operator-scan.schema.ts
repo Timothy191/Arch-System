@@ -26,12 +26,25 @@ export const machineOperatorScanRequestSchema = z
     'Choose either an operator selection or operator badge scan'
   );
 
-const scannedMachineSchema = z.object({
+export const machineCapabilitiesSchema = z.object({
+  requiresHourlyLoads: z.boolean(),
+  tracksTonnage: z.boolean(),
+  tracksCycleTime: z.boolean(),
+  tracksFuel: z.boolean(),
+  tracksBenchClearance: z.boolean(),
+  tracksDrillDepth: z.boolean(),
+});
+
+export type MachineCapabilities = z.infer<typeof machineCapabilitiesSchema>;
+
+export const scannedMachineSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   machineType: z.string(),
   siteId: z.string().uuid().nullable(),
   requiresHourlyLoads: z.boolean(),
+  machineCapabilities: machineCapabilitiesSchema.optional(),
+  capabilities: machineCapabilitiesSchema.optional(),
 });
 
 export const machineOperatorScanResponseSchema = z.discriminatedUnion('stage', [

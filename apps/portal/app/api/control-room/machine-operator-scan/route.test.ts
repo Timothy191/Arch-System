@@ -403,4 +403,104 @@ describe('POST /api/control-room/machine-operator-scan', () => {
     await expect(response.json()).resolves.toMatchObject({ alreadyAssigned: true, operationId });
     expect(insertQuery.insert).not.toHaveBeenCalled();
   });
+
+  it('derives machineCapabilities directly from database machine_types relation', async () => {
+    const { supabase } = createSupabaseMock({
+      machineRow: {
+        ...machine,
+        machine_type: 'Articulated Dump Truck',
+        machine_types: {
+          requires_hourly_loads: true,
+          tracks_tonnage: true,
+          tracks_cycle_time: true,
+          tracks_fuel: true,
+          tracks_bench_clearance: false,
+          tracks_drill_depth: false,
+        },
+      },
+    });
+    jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);
+
+    const response = await POST(makeRequest({ departmentId, machineCode: machineId }));
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.machine.requiresHourlyLoads).toBe(true);
+    expect(body.machine.machineCapabilities).toEqual({
+      requiresHourlyLoads: true,
+      tracksTonnage: true,
+      tracksCycleTime: true,
+      tracksFuel: true,
+      tracksBenchClearance: false,
+      tracksDrillDepth: false,
+    });
+  });
+
+  it('derives dozer capabilities with tracksBenchClearance=true and requiresHourlyLoads=false', async () => {
+    const { supabase } = createSupabaseMock({
+      machineRow: {
+        ...machine,
+        name: 'Dozer 202',
+        machine_type: 'Track Dozer',
+        machine_types: {
+          requires_hourly_loads: false,
+          tracks_tonnage: false,
+          tracks_cycle_time: false,
+          tracks_fuel: true,
+          tracks_bench_clearance: true,
+          tracks_drill_depth: false,
+        },
+      },
+    });
+    jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);
+
+    const response = await POST(makeRequest({ departmentId, machineCode: machineId }));
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.machine.requiresHourlyLoads).toBe(false);
+    expect(body.machine.machineCapabilities.tracksBenchClearance).toBe(true);
+    expect(body.machine.machineCapabilities.requiresHourlyLoads).toBe(false);
+  });
+
+  it('delegates dispatch to atomic_machine_operator_dispatch RPC when available', async () => {
+    setPersonnelDirectory();
+    const { supabase, insertQuery } = createSupabaseMock();
+    const mockRpc = jest.fn().mockResolvedValue({
+      data: {
+        allowed: true,
+        alreadyAssigned: false,
+        operationId: 'd290f1ee-6c54-4b01-90e6-d701748f0899',
+        machineCapabilities: {
+          requiresHourlyLoads: true,
+          tracksTonnage: true,
+          tracksCycleTime: true,
+          tracksFuel: true,
+          tracksBenchClearance: false,
+          tracksDrillDepth: false,
+        },
+      },
+      error: null,
+    });
+    (supabase as { rpc: typeof mockRpc }).rpc = mockRpc;
+    jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);
+
+    const response = await POST(
+      makeRequest({ departmentId, machineCode: machineId, operatorCode: 'BADGE-101' })
+    );
+
+    expect(response.status).toBe(201);
+    expect(mockRpc).toHaveBeenCalledWith(
+      'atomic_machine_operator_dispatch',
+      expect.objectContaining({
+        p_machine_id: machineId,
+        p_operator_id: operatorId,
+        p_department_id: departmentId,
+      })
+    );
+    const body = await response.json();
+    expect(body.operationId).toBe('d290f1ee-6c54-4b01-90e6-d701748f0899');
+    expect(body.machine.machineCapabilities.requiresHourlyLoads).toBe(true);
+    expect(insertQuery.insert).not.toHaveBeenCalled();
+  });
 });

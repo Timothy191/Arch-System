@@ -503,8 +503,12 @@ export function C66MachineOperatorScanner({
             {assignment.checks.badgeScanned
               ? ' The badge was verified.'
               : ' The operator was selected from the cleared personnel list.'}
-            {assignment.machine.requiresHourlyLoads &&
-              ' This dump truck is included automatically in Hourly Loads.'}
+            {(assignment.machine.machineCapabilities?.requiresHourlyLoads ??
+            assignment.machine.requiresHourlyLoads)
+              ? ' This machine is included automatically in Hourly Loads.'
+              : assignment.machine.machineCapabilities?.tracksBenchClearance
+                ? ' This machine tracks bench clearance and blade push metrics.'
+                : ''}
           </span>
         </div>
       )}

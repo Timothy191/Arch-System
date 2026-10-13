@@ -182,6 +182,6 @@ describe('POST /api/sync/playback – queuing', () => {
     const res = await POST(req);
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.error.message).toContain('Inngest down');
+    expect(body.error).toContain('Inngest down');
   });
 });
