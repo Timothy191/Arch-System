@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Button } from './ui/button';
 
 export function CookieConsent() {
   // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the
@@ -27,8 +28,8 @@ export function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 bg-white/70 backdrop-blur-xl border-t border-black/[0.08] shadow-window flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div className="flex-1 text-sm text-[var(--text-muted)]">
+    <div className="fixed inset-x-0 bottom-0 z-[100] flex max-h-[45vh] flex-col gap-4 overflow-y-auto border-t border-border bg-background/95 p-4 shadow-lg backdrop-blur-xl sm:max-h-none sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="flex-1 text-sm text-muted-foreground">
         <p>
           We use cookies to improve your experience, analyze site traffic, and support operational
           security. By continuing to use the Arch Portal, you consent to our use of cookies as
@@ -39,29 +40,28 @@ export function CookieConsent() {
           .
         </p>
       </div>
-      <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
-        <button
+      <div className="flex w-full shrink-0 items-center gap-3 sm:w-auto">
+        <Button
           type="button"
           onClick={() => setShowBanner(false)}
-          className="flex-1 sm:flex-none px-4 py-2 bg-transparent hover:bg-black/5 text-[var(--text-heading)] rounded-lg font-medium transition-colors"
+          variant="ghost"
+          className="flex-1 sm:flex-none"
         >
           Decline Optional
-        </button>
-        <button
-          type="button"
-          onClick={acceptCookies}
-          className="flex-1 sm:flex-none px-6 py-2 bg-[var(--text-heading)] hover:bg-[var(--text-heading)]/90 text-white rounded-lg font-medium transition-colors shadow-card"
-        >
+        </Button>
+        <Button type="button" onClick={acceptCookies} className="flex-1 sm:flex-none">
           Accept All
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => setShowBanner(false)}
-          className="p-2 text-[var(--text-muted)] hover:bg-black/5 rounded-full transition-colors hidden sm:block"
+          variant="ghost"
+          size="icon"
+          className="hidden sm:inline-flex"
           aria-label="Close"
         >
-          <X className="w-5 h-5" />
-        </button>
+          <X data-icon="inline-start" />
+        </Button>
       </div>
     </div>
   );

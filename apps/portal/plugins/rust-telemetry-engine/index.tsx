@@ -1,6 +1,7 @@
 'use client';
 
 import { APIError } from '@repo/errors';
+import { Badge, Card, CardContent, CardHeader, CardTitle, Skeleton } from '@repo/ui';
 import { useEffect, useState } from 'react';
 import type { ArchPlugin } from '@/lib/plugins/types';
 
@@ -43,14 +44,15 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
             },
           });
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to contact native engine';
         setData({
           wearIndex: 45.2,
           probability: 48.6,
           rulHours: 780.0,
           status: 'warning',
           isNative: false,
-          error: err.message || 'Failed to contact native engine',
+          error: message,
         });
       } finally {
         setLoading(false);
@@ -60,84 +62,76 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
     fetchRustTelemetry();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-diffusion-xl animate-pulse h-[220px] flex items-center justify-center">
-        <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wider">
-          Loading Rust Telemetry...
-        </span>
-      </div>
-    );
-  }
-
   const isCritical = data?.status === 'critical';
   const isWarning = data?.status === 'warning';
 
-  const statusColor = isCritical
-    ? 'text-accent-red border-accent-red/20 bg-accent-red/10'
-    : isWarning
-      ? 'text-accent-blue border-accent-blue/20 bg-accent-blue/10'
-      : 'text-[#3ecf8e] border-[#3ecf8e]/20 bg-[#3ecf8e]/10';
+  const statusVariant = isCritical ? 'destructive' : isWarning ? 'secondary' : 'default';
+  const probability = Math.min(Math.max(data?.probability ?? 0, 0), 100);
 
   return (
-    <div className="relative group overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0c0914] to-[#07050d] p-5 shadow-diffusion-xl backdrop-blur-xl transition-all duration-300 hover:border-violet-500/30">
-      {/* Dynamic Glow effect */}
-      <div className="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-violet-500/10 blur-2xl transition-all duration-500 group-hover:bg-violet-500/15" />
-
-      <div className="flex items-center justify-between border-b border-violet-500/10 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-violet-400 border border-violet-500/30 rounded px-1.5 py-0.5 uppercase bg-violet-500/5">
-            Rust Native
-          </span>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-heading)]">
+    <Card className="overflow-hidden">
+      <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b">
+        <div className="flex min-w-0 items-center gap-2">
+          <Badge variant="outline">Rust Native</Badge>
+          <CardTitle className="truncate text-xs uppercase tracking-wider">
             Telemetry stress
-          </h4>
+          </CardTitle>
         </div>
-        <span
-          className={`rounded px-2 py-0.5 text-[9px] font-medium uppercase border ${statusColor}`}
-        >
-          {data?.status}
-        </span>
-      </div>
+        <Badge variant={statusVariant}>{data?.status}</Badge>
+      </CardHeader>
 
-      <div className="mt-4 space-y-3">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
-              Wear Index
-            </p>
-            <p className="text-lg font-bold text-[var(--text-heading)] mt-0.5">{data?.wearIndex}</p>
+      <CardContent className="flex flex-col gap-4 pt-5">
+        {loading ? (
+          <div className="flex flex-col gap-3" aria-label="Loading Rust telemetry">
+            <Skeleton className="h-5 w-1/2" />
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-2 w-full" />
           </div>
-          <div>
-            <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
-              Est. Lifetime (RUL)
-            </p>
-            <p className="text-lg font-bold text-[var(--text-heading)] mt-0.5">
-              {data?.rulHours} hrs
-            </p>
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Wear Index</p>
+                <p className="mt-1 text-lg font-bold">{data?.wearIndex}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Est. Lifetime (RUL)
+                </p>
+                <p className="mt-1 text-lg font-bold">{data?.rulHours} hrs</p>
+              </div>
+            </div>
 
-        <div>
-          <div className="flex justify-between items-center text-[10px] mb-1">
-            <span className="text-[var(--text-secondary)] uppercase tracking-wider">
-              Failure Probability
-            </span>
-            <span className="text-violet-400 font-semibold">{data?.probability}%</span>
-          </div>
-          <div className="w-full bg-[var(--bg-primary)] h-1.5 rounded-full overflow-hidden border border-[var(--border-default)]">
-            <div className="bg-gradient-to-r from-violet-600 to-violet-400 h-full rounded-full transition-all duration-500 w-[88%]" />
-          </div>
-        </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground uppercase tracking-wider">
+                  Failure Probability
+                </span>
+                <span className="font-semibold">{probability}%</span>
+              </div>
+              <div
+                className="bg-muted h-2 overflow-hidden rounded-full"
+                role="progressbar"
+                aria-label="Failure probability"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={probability}
+              >
+                <div
+                  className="bg-primary h-full rounded-full transition-[width] duration-500"
+                  style={{ width: `${probability}%` }}
+                />
+              </div>
+            </div>
 
-        <div className="flex justify-between items-center border-t border-[#1c1c1c] pt-2 text-[10px] text-[var(--text-secondary)]">
-          <span>Engine type: {data?.isNative ? 'Rust binary (compiled)' : 'JS fallback'}</span>
-          {data?.error && (
-            <span className="text-accent-red italic text-[9px]">Sensor read timeout</span>
-          )}
-        </div>
-      </div>
-    </div>
+            <div className="flex items-center justify-between border-t pt-2 text-xs text-muted-foreground">
+              <span>Engine: {data?.isNative ? 'Rust binary' : 'JS fallback'}</span>
+              {data?.error && <span className="text-destructive">Sensor read timeout</span>}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
