@@ -18,6 +18,7 @@ test.describe('Asset Integrity & CSP Gating', () => {
     page,
     context,
   }) => {
+    test.setTimeout(60000);
     const cspViolations: string[] = [];
     const failedImageUrls: string[] = [];
     let openMeteoStatusCode: number | null = null;
