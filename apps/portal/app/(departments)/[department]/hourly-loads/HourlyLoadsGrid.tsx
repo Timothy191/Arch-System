@@ -6,7 +6,7 @@ import { AnimatedDialog } from '@repo/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import { exportToExcel } from '@repo/utils/client';
-import { Download, Lock, Plus } from 'lucide-react';
+import { Download, Lock, Minus, Plus } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
@@ -60,6 +60,127 @@ interface HourlyLoadsGridProps {
 
 const DAY_HOUR_LABELS = ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17'];
 const NIGHT_HOUR_LABELS = ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
+
+interface HourCellProps {
+  value: number;
+  rowIndex: number;
+  hourProp: string;
+  hourLabel?: string;
+  editable: boolean;
+  isLocked: boolean;
+  startHour?: number;
+  endHour?: number;
+  onStep: (rowIndex: number, hourProp: string, delta: number) => void;
+  onDirectEdit: (rowIndex: number, hourProp: string, value: number) => void;
+}
+
+const HourCell = memo(function HourCell({
+  value,
+  rowIndex,
+  hourProp,
+  hourLabel,
+  editable,
+  isLocked,
+  startHour,
+  endHour,
+  onStep,
+  onDirectEdit,
+}: HourCellProps) {
+  const [localVal, setLocalVal] = useState<string>(String(value));
+
+  useEffect(() => {
+    setLocalVal(String(value));
+  }, [value]);
+
+  if (!editable) {
+    return (
+      <td
+        className="py-2 px-1 text-center bg-black/[0.02]"
+        title={
+          isLocked ? 'Segment locked' : `Active hours: ${startHour ?? 1}:00 - ${endHour ?? 12}:59`
+        }
+      >
+        <div className="flex items-center justify-center gap-1 text-[var(--text-muted)] opacity-60">
+          <span className="font-mono text-xs">{value > 0 ? value : '-'}</span>
+          <Lock className="w-2.5 h-2.5 opacity-50" />
+        </div>
+      </td>
+    );
+  }
+
+  const commitValue = () => {
+    const parsed = parseInt(localVal, 10);
+    const valid = Number.isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed));
+    setLocalVal(String(valid));
+    if (valid !== value) {
+      onDirectEdit(rowIndex, hourProp, valid);
+    }
+  };
+
+  return (
+    <td className="py-1.5 px-1 text-center">
+      <div
+        className="inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]"
+        data-row={String(rowIndex)}
+        data-hour={hourProp}
+      >
+        <button
+          type="button"
+          data-row={String(rowIndex)}
+          data-hour={hourProp}
+          data-action="down"
+          onClick={(e) => {
+            e.stopPropagation();
+            onStep(rowIndex, hourProp, -1);
+          }}
+          disabled={value <= 0}
+          aria-label={`Decrease ${hourLabel}:00 loads`}
+          title={`Decrease ${hourLabel}:00 loads`}
+          className="h-6 w-5 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+        >
+          <Minus className="w-3 h-3" />
+        </button>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={localVal}
+          onChange={(e) => setLocalVal(e.target.value)}
+          onBlur={commitValue}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              commitValue();
+              (e.target as HTMLInputElement).blur();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              onStep(rowIndex, hourProp, 1);
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              onStep(rowIndex, hourProp, -1);
+            }
+          }}
+          className="w-7 text-center font-mono text-xs font-semibold py-0.5 bg-transparent text-[var(--text-heading)] focus:outline-none"
+        />
+        <button
+          type="button"
+          data-row={String(rowIndex)}
+          data-hour={hourProp}
+          data-action="up"
+          onClick={(e) => {
+            e.stopPropagation();
+            onStep(rowIndex, hourProp, 1);
+          }}
+          disabled={value >= 100}
+          aria-label={`Increase ${hourLabel}:00 loads`}
+          title={`Increase ${hourLabel}:00 loads`}
+          className="h-6 w-5 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+        >
+          <Plus className="w-3 h-3" />
+        </button>
+      </div>
+    </td>
+  );
+});
 
 function HourlyLoadsGrid({
   departmentId,
@@ -671,427 +792,64 @@ function HourlyLoadsGrid({
     [handleCellChange]
   );
 
-  // Build RevoGrid columns
-  const columns = useMemo(() => {
-    const width = containerWidth || 1150;
-
-    let machineColSize = 140;
-    let excavatorColSize = 140;
-    let materialColSize = 100;
-    let hourColSize = 88;
-    let totalColSize = 70;
-    let binFactorColSize = 80;
-    let totalMaterialColSize = 100;
-
-    if (hasBinFactors) {
-      machineColSize = Math.max(160, Math.floor(width * 0.12));
-      excavatorColSize = Math.max(130, Math.floor(width * 0.1));
-      materialColSize = Math.max(90, Math.floor(width * 0.08));
-      hourColSize = Math.max(88, Math.floor(width * 0.045));
-      totalColSize = Math.max(76, Math.floor(width * 0.055));
-      binFactorColSize = Math.max(76, Math.floor(width * 0.055));
-      totalMaterialColSize = Math.max(95, Math.floor(width * 0.075));
-    } else {
-      machineColSize = Math.max(160, Math.floor(width * 0.14));
-      excavatorColSize = Math.max(130, Math.floor(width * 0.12));
-      materialColSize = Math.max(90, Math.floor(width * 0.08));
-      hourColSize = Math.max(88, Math.floor(width * 0.055));
-      totalColSize = Math.max(76, Math.floor(width * 0.045));
-    }
-
-    const cols = [
-      {
-        prop: 'machineName',
-        name: 'Machine',
-        size: machineColSize,
-        pin: 'colPinStart' as const,
-        cellTemplate: (h: any, { model }: { model: any }) => {
-          const isLocked = Boolean(model?.isLocked);
-          const isSplit = Boolean(model?.isSplit);
-          return h('div', { class: 'flex items-center gap-1.5 h-full w-full px-2 text-xs' }, [
-            h(
-              'span',
-              {
-                class: `font-medium truncate ${
-                  isLocked
-                    ? 'text-[var(--text-muted)] line-through decoration-black/20'
-                    : 'text-[var(--text-heading)]'
-                }`,
-              },
-              model?.machineName ?? ''
-            ),
-            isLocked
-              ? h(
-                  'span',
-                  {
-                    class:
-                      'inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-semibold bg-black/[0.06] text-[var(--text-muted)]',
-                    title: 'Previous segment locked',
-                  },
-                  [
-                    h(
-                      'svg',
-                      {
-                        xmlns: 'http://www.w3.org/2000/svg',
-                        width: '9',
-                        height: '9',
-                        viewBox: '0 0 24 24',
-                        fill: 'none',
-                        stroke: 'currentColor',
-                        'stroke-width': '2.5',
-                        'stroke-linecap': 'round',
-                        'stroke-linejoin': 'round',
-                      },
-                      [
-                        h('rect', { width: '18', height: '11', x: '3', y: '11', rx: '2', ry: '2' }),
-                        h('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }),
-                      ]
-                    ),
-                    'Locked',
-                  ]
-                )
-              : isSplit
-                ? h(
-                    'span',
-                    {
-                      class:
-                        'px-1 py-0.2 rounded text-[10px] font-semibold bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]',
-                    },
-                    'Split'
-                  )
-                : null,
-          ]);
-        },
-      },
-      {
-        prop: 'excavatorId',
-        name: 'Excavator Assigned',
-        size: excavatorColSize,
-        pin: 'colPinStart' as const,
-        sortable: false,
-        readonly: true,
-        cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
-          const currentExcavatorId = model?.excavatorId || '';
-          const isLocked = Boolean(model?.isLocked);
-          return h('div', { class: 'flex items-center justify-center h-full w-full px-1' }, [
-            h(
-              'select',
-              {
-                class: `w-full bg-transparent border-0 text-xs font-semibold ${
-                  isLocked
-                    ? 'text-[var(--text-muted)] cursor-not-allowed opacity-60'
-                    : 'text-arch-text-secondary cursor-pointer hover:bg-[var(--overlay-subtle)]'
-                } focus:ring-0 focus:outline-none py-1 px-1 rounded transition-all`,
-                'data-row': String(rowIndex),
-                'data-action': 'select-excavator',
-                disabled: isLocked ? true : undefined,
-              },
-              [
-                h(
-                  'option',
-                  {
-                    value: '',
-                    selected: !currentExcavatorId ? 'selected' : undefined,
-                  },
-                  'Select Excavator'
-                ),
-                ...excavators.map((e) =>
-                  h(
-                    'option',
-                    {
-                      value: e.id,
-                      selected: e.id === currentExcavatorId ? 'selected' : undefined,
-                    },
-                    e.name
-                  )
-                ),
-              ]
-            ),
-          ]);
-        },
-      },
-      {
-        prop: 'materialType',
-        name: 'Material',
-        size: materialColSize,
-        pin: 'colPinStart' as const,
-        sortable: false,
-        readonly: true,
-        cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
-          const value = model?.materialType ?? 'Waste';
-          const isCoal = value === 'Coal';
-          const isLocked = Boolean(model?.isLocked);
-          return h('div', { class: 'flex items-center justify-center h-full w-full px-1' }, [
-            h(
-              'button',
-              {
-                class: `px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 ${
-                  isLocked
-                    ? 'opacity-60 cursor-not-allowed bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle'
-                    : isCoal
-                      ? 'cursor-pointer bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary'
-                      : 'cursor-pointer bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary'
-                }`,
-                'data-row': String(rowIndex),
-                'data-action': 'toggle-material',
-                disabled: isLocked ? true : undefined,
-                title: isLocked ? 'Segment locked' : 'Click to toggle between Waste and Coal',
-              },
-              value
-            ),
-          ]);
-        },
-      },
-      ...HOURS_12.map((_, index) => {
-        const hourProp = HOUR_PROP(index);
-        const hourNum = index + 1;
-        return {
-          prop: hourProp,
-          name: `${hourLabels[index]}:00`,
-          size: hourColSize,
-          sortable: false,
-          readonly: false,
-          cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
-            const value = model?.[hourProp] ?? 0;
-            const startHour = model?.startHour ?? 1;
-            const endHour = model?.endHour ?? 12;
-            const isEditable = !model?.isLocked && hourNum >= startHour && hourNum <= endHour;
-
-            if (!isEditable) {
-              return h(
-                'div',
-                {
-                  class:
-                    'flex items-center justify-between px-1 gap-1 h-full bg-black/[0.02] select-none text-[var(--text-muted)]',
-                  title: model?.isLocked
-                    ? 'Segment locked'
-                    : `Active hours: ${hourLabels[startHour - 1]}:00 - ${hourLabels[endHour - 1]}:59`,
-                },
-                [
-                  h(
-                    'span',
-                    { class: 'text-xs font-mono tabular-nums px-1 opacity-70' },
-                    value > 0 ? value : '-'
-                  ),
-                  h(
-                    'svg',
-                    {
-                      xmlns: 'http://www.w3.org/2000/svg',
-                      width: '10',
-                      height: '10',
-                      viewBox: '0 0 24 24',
-                      fill: 'none',
-                      stroke: 'currentColor',
-                      'stroke-width': '2.5',
-                      'stroke-linecap': 'round',
-                      'stroke-linejoin': 'round',
-                      class: 'opacity-40 mr-1',
-                    },
-                    [
-                      h('rect', { width: '18', height: '11', x: '3', y: '11', rx: '2', ry: '2' }),
-                      h('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }),
-                    ]
-                  ),
-                ]
-              );
-            }
-
-            const isMax = value >= 100;
-            const isMin = value <= 0;
-            return h(
-              'div',
-              {
-                class:
-                  'flex items-center justify-between px-1 gap-1 h-full outline-none focus-within:ring-1 focus-within:ring-[var(--accent-blue)] focus:ring-1 focus:ring-[var(--accent-blue)] rounded-sm',
-                tabIndex: 0,
-                'data-row': String(rowIndex),
-                'data-hour': hourProp,
-                'data-cell-type': 'hour-load',
-                role: 'gridcell',
-                'aria-label': `${hourLabels[index]}:00 loads: ${value}. Use Arrow Up or Arrow Down to adjust`,
-              },
-              [
-                h(
-                  'span',
-                  {
-                    class:
-                      'text-sm font-medium font-mono tabular-nums px-1 cursor-text select-none',
-                  },
-                  value
-                ),
-                h('div', { class: 'flex items-center gap-0.5' }, [
-                  h(
-                    'button',
-                    {
-                      type: 'button',
-                      class:
-                        'hour-btn-up relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
-                      'data-row': String(rowIndex),
-                      'data-hour': hourProp,
-                      'data-action': 'up',
-                      'aria-label': `Increase loads for hour ${hourLabels[index]}:00 (currently ${value})`,
-                      title: `Increase loads for hour ${hourLabels[index]}:00`,
-                      disabled: isMax,
-                      style: isMax ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
-                    },
-                    h(
-                      'svg',
-                      {
-                        xmlns: 'http://www.w3.org/2000/svg',
-                        width: '14',
-                        height: '14',
-                        viewBox: '0 0 24 24',
-                        fill: 'none',
-                        stroke: 'currentColor',
-                        'stroke-width': '2.5',
-                        'stroke-linecap': 'round',
-                        'stroke-linejoin': 'round',
-                        'aria-hidden': 'true',
-                      },
-                      h('path', { d: 'm18 15-6-6-6 6' })
-                    )
-                  ),
-                  h(
-                    'button',
-                    {
-                      type: 'button',
-                      class:
-                        'hour-btn-down relative flex items-center justify-center min-w-[32px] min-h-[32px] w-8 h-8 p-1 rounded hover:bg-black/5 hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] touch-manipulation after:absolute after:-inset-1',
-                      'data-row': String(rowIndex),
-                      'data-hour': hourProp,
-                      'data-action': 'down',
-                      'aria-label': `Decrease loads for hour ${hourLabels[index]}:00 (currently ${value})`,
-                      title: `Decrease loads for hour ${hourLabels[index]}:00`,
-                      disabled: isMin,
-                      style: isMin ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
-                    },
-                    h(
-                      'svg',
-                      {
-                        xmlns: 'http://www.w3.org/2000/svg',
-                        width: '14',
-                        height: '14',
-                        viewBox: '0 0 24 24',
-                        fill: 'none',
-                        stroke: 'currentColor',
-                        'stroke-width': '2.5',
-                        'stroke-linecap': 'round',
-                        'stroke-linejoin': 'round',
-                        'aria-hidden': 'true',
-                      },
-                      h('path', { d: 'm6 9 6 6 6-6' })
-                    )
-                  ),
-                ]),
-              ]
-            );
-          },
-        };
-      }),
-      {
-        prop: 'total',
-        name: 'Total',
-        size: totalColSize,
-        readonly: true,
-        cellTemplate: (h: any, { model }: { model: any }) => {
-          return h(
-            'div',
-            {
-              class:
-                'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums font-semibold',
-            },
-            model?.total ?? 0
-          );
-        },
-      },
-    ];
-
-    if (hasBinFactors) {
-      cols.push({
-        prop: 'binFactor',
-        name: 'Bin Factor',
-        size: binFactorColSize,
-        readonly: true,
-        cellTemplate: (h: any, { model }: { model: any }) => {
-          return h(
-            'div',
-            {
-              class:
-                'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums text-[var(--text-muted)]',
-            },
-            model?.binFactor ?? '-'
-          );
-        },
-      });
-      cols.push({
-        prop: 'totalMaterial',
-        name: 'Total Material (t)',
-        size: totalMaterialColSize,
-        readonly: true,
-        cellTemplate: (h: any, { model }: { model: any }) => {
-          return h(
-            'div',
-            {
-              class:
-                'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums font-medium',
-            },
-            model?.totalMaterial ?? '-'
-          );
-        },
-      });
-    }
-
-    return cols;
-  }, [hourLabels, hasBinFactors, containerWidth, excavators]);
-
-  const handleAfterEdit = useCallback(
-    async (e: any) => {
-      const detail = e?.detail ?? e;
-      const prop: string = detail?.prop;
-      const rowIndex: number = detail?.rowIndex ?? detail?.row?.index;
-      const val = detail?.val;
-
-      if (typeof rowIndex !== 'number' || !prop?.startsWith('hour_') || val === undefined) return;
-
+  const handleDirectNumberEdit = useCallback(
+    async (rowIndex: number, hourProp: string, value: number) => {
       const row = source[rowIndex];
       if (!row) return;
 
-      const hourIndex = parseInt(prop.split('_')[1] ?? '0', 10) - 1;
+      const hourIndex = parseInt(hourProp.split('_')[1] ?? '0', 10) - 1;
       const hourNum = hourIndex + 1;
 
       if (!isHourEditable(row, hourNum)) {
         toast.warning('This hour is locked for this machine segment.');
         applyLoadState(row.loadId, row.machineId, selectedShift, {
-          [prop]: row[hourPropName(hourIndex)],
+          [hourProp]: row[hourPropName(hourIndex)],
         });
         return;
       }
 
-      const currentValue = (row[prop] as number) || 0;
-      const value = parseInt(String(val), 10) || 0;
+      const currentValue = (row[hourProp] as number) || 0;
+      const clampedValue = Math.max(0, Math.min(100, Number.isNaN(value) ? 0 : value));
 
-      if (value < 0 || value > 100) {
-        toast.warning('Please enter a value between 0 and 100');
-        applyLoadState(row.loadId, row.machineId, selectedShift, { [prop]: currentValue });
-        return;
-      }
-
-      if (value === currentValue) return;
+      if (clampedValue === currentValue) return;
 
       await commitLoadChange(
         row.loadId,
         row.machineId,
         selectedShift,
-        prop,
+        hourProp,
         currentValue,
-        value,
-        { [prop]: value },
+        clampedValue,
+        { [hourProp]: clampedValue },
         'hourly_loads_direct_edit',
-        { hour_prop: prop, value, operation: 'direct_edit' }
+        { hour_prop: hourProp, value: clampedValue, operation: 'direct_edit' }
       );
     },
     [source, selectedShift, applyLoadState, commitLoadChange]
   );
+
+  const { hourTotals, grandTotalLoads, grandTotalMaterial } = useMemo(() => {
+    const totals = HOURS_12.map((_, index) => {
+      const prop = HOUR_PROP(index);
+      return source.reduce((acc, row) => acc + (typeof row[prop] === 'number' ? row[prop] : 0), 0);
+    });
+
+    const grandLoads = source.reduce(
+      (acc, row) => acc + (typeof row.total === 'number' ? row.total : 0),
+      0
+    );
+
+    const grandMaterial = source.reduce((acc, row) => {
+      const val = typeof row.totalMaterial === 'number' ? row.totalMaterial : 0;
+      return acc + val;
+    }, 0);
+
+    return {
+      hourTotals: totals,
+      grandTotalLoads: grandLoads,
+      grandTotalMaterial: Math.round(grandMaterial * 10) / 10,
+    };
+  }, [source]);
 
   const handleExport = async () => {
     const exportData = source.map((row) => {
@@ -1226,7 +984,227 @@ function HourlyLoadsGrid({
         onKeyDown={handleGridKeyDown}
         className="revo-grid-visible"
       >
-        <div>DataGrid removed for optimization</div>
+        <GlassCard className="p-0 overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] shadow-sm">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-xs font-semibold text-[var(--text-muted)]">
+                  <th
+                    scope="col"
+                    className="py-3 px-3 text-left min-w-[160px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)]"
+                  >
+                    Machine
+                  </th>
+                  <th scope="col" className="py-3 px-3 text-left min-w-[150px]">
+                    Excavator Assigned
+                  </th>
+                  <th scope="col" className="py-3 px-2 text-center min-w-[90px]">
+                    Material
+                  </th>
+                  {HOURS_12.map((_, index) => (
+                    <th
+                      key={HOUR_PROP(index)}
+                      scope="col"
+                      className="py-3 px-1 text-center min-w-[80px]"
+                    >
+                      {hourLabels[index]}:00
+                    </th>
+                  ))}
+                  <th scope="col" className="py-3 px-3 text-right min-w-[70px]">
+                    Total
+                  </th>
+                  {hasBinFactors && (
+                    <>
+                      <th scope="col" className="py-3 px-2 text-right min-w-[70px]">
+                        Bin Factor
+                      </th>
+                      <th scope="col" className="py-3 px-3 text-right min-w-[100px]">
+                        Total Material (t)
+                      </th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]/60 text-xs text-[var(--text-heading)]">
+                {source.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3 + 12 + 1 + (hasBinFactors ? 2 : 0)}
+                      className="py-10 text-center text-sm text-[var(--text-muted)]"
+                    >
+                      No machine load records found for this shift.
+                    </td>
+                  </tr>
+                ) : (
+                  source.map((row, rowIndex) => {
+                    const isLocked = Boolean(row.isLocked);
+                    const isSplit = Boolean(row.isSplit);
+
+                    return (
+                      <tr
+                        key={row.rowKey || `row-${rowIndex}`}
+                        className={`transition-colors hover:bg-[var(--bg-secondary)]/40 ${
+                          isLocked ? 'bg-black/[0.015]' : ''
+                        }`}
+                      >
+                        {/* Machine Column (sticky left) */}
+                        <td className="py-2.5 px-3 font-medium sticky left-0 z-10 bg-[var(--bg-primary)] shadow-[1px_0_0_0_var(--border-default)]">
+                          <div className="flex items-center gap-1.5 min-w-[140px] max-w-[180px]">
+                            <span
+                              className={`truncate font-semibold text-xs ${
+                                isLocked
+                                  ? 'text-[var(--text-muted)] line-through decoration-black/20'
+                                  : 'text-[var(--text-heading)]'
+                              }`}
+                              title={row.machineName}
+                            >
+                              {row.machineName}
+                            </span>
+                            {isLocked ? (
+                              <span
+                                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-semibold bg-black/[0.06] text-[var(--text-muted)] shrink-0"
+                                title="Previous segment locked"
+                              >
+                                <Lock className="w-2.5 h-2.5" />
+                                Locked
+                              </span>
+                            ) : isSplit ? (
+                              <span className="px-1 py-0.5 rounded text-[10px] font-semibold bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] shrink-0">
+                                Split
+                              </span>
+                            ) : null}
+                          </div>
+                        </td>
+
+                        {/* Excavator Assigned Column */}
+                        <td className="py-2.5 px-3 min-w-[150px]">
+                          <select
+                            data-row={String(rowIndex)}
+                            data-action="select-excavator"
+                            value={row.excavatorId || ''}
+                            onChange={(e) => {
+                              handleExcavatorAssignment(rowIndex, e.target.value || null);
+                            }}
+                            disabled={isLocked}
+                            className={`w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2 py-1 text-xs font-medium ${
+                              isLocked
+                                ? 'text-[var(--text-muted)] cursor-not-allowed opacity-60'
+                                : 'text-[var(--text-heading)] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
+                            } transition-colors`}
+                          >
+                            <option value="">Select Excavator</option>
+                            {excavators.map((excavator) => (
+                              <option key={excavator.id} value={excavator.id}>
+                                {excavator.name}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+
+                        {/* Material Column */}
+                        <td className="py-2.5 px-2 text-center min-w-[90px]">
+                          <button
+                            type="button"
+                            data-row={String(rowIndex)}
+                            data-action="toggle-material"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMaterialToggle(rowIndex);
+                            }}
+                            disabled={isLocked}
+                            title={
+                              isLocked ? 'Segment locked' : 'Click to toggle between Waste and Coal'
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 ${
+                              isLocked
+                                ? 'opacity-60 cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border-default)]'
+                                : row.materialType === 'Coal'
+                                  ? 'cursor-pointer bg-neutral-800 text-white border border-neutral-700 hover:bg-neutral-900 shadow-xs'
+                                  : 'cursor-pointer bg-[var(--bg-secondary)] text-[var(--text-heading)] border border-[var(--border-default)] hover:bg-[var(--bg-tertiary)] shadow-xs'
+                            }`}
+                          >
+                            {row.materialType || 'Waste'}
+                          </button>
+                        </td>
+
+                        {/* 12 Hour Columns */}
+                        {HOURS_12.map((_, hourIdx) => {
+                          const hourProp = HOUR_PROP(hourIdx);
+                          const hourNum = hourIdx + 1;
+                          const value = (row[hourProp] as number) || 0;
+                          const editable = isHourEditable(row, hourNum);
+
+                          return (
+                            <HourCell
+                              key={`${row.rowKey || rowIndex}-${hourProp}`}
+                              value={value}
+                              rowIndex={rowIndex}
+                              hourProp={hourProp}
+                              hourLabel={hourLabels[hourIdx] ?? ''}
+                              editable={editable}
+                              isLocked={isLocked}
+                              startHour={row.startHour}
+                              endHour={row.endHour}
+                              onStep={handleCellChange}
+                              onDirectEdit={handleDirectNumberEdit}
+                            />
+                          );
+                        })}
+
+                        {/* Total Column */}
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-xs text-[var(--text-heading)] tabular-nums min-w-[70px]">
+                          {row.total ?? 0}
+                        </td>
+
+                        {/* Bin Factor & Total Material Columns */}
+                        {hasBinFactors && (
+                          <>
+                            <td className="py-2.5 px-2 text-right font-mono text-xs text-[var(--text-muted)] tabular-nums min-w-[70px]">
+                              {row.binFactor ?? '-'}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-mono font-semibold text-xs text-[var(--text-heading)] tabular-nums min-w-[100px]">
+                              {row.totalMaterial ?? '-'}
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+              <tfoot className="border-t-2 border-[var(--border-default)] bg-[var(--bg-secondary)]/80 text-xs font-semibold text-[var(--text-heading)]">
+                <tr>
+                  <td className="py-3 px-3 text-left sticky left-0 z-10 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] font-bold">
+                    Total Loads
+                  </td>
+                  <td className="py-3 px-3 text-left text-[var(--text-muted)]">—</td>
+                  <td className="py-3 px-2 text-center text-[var(--text-muted)]">—</td>
+                  {HOURS_12.map((_, index) => (
+                    <td
+                      key={`footer-hour-${HOUR_PROP(index)}`}
+                      className="py-3 px-1 text-center font-mono font-bold text-xs tabular-nums text-[var(--text-heading)]"
+                    >
+                      {hourTotals[index] ?? 0}
+                    </td>
+                  ))}
+                  <td className="py-3 px-3 text-right font-mono font-bold text-xs text-[var(--accent-blue)] tabular-nums">
+                    {grandTotalLoads}
+                  </td>
+                  {hasBinFactors && (
+                    <>
+                      <td className="py-3 px-2 text-right text-[var(--text-muted)] font-mono text-xs">
+                        —
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono font-bold text-xs text-[var(--accent-blue)] tabular-nums">
+                        {grandTotalMaterial > 0 ? `${grandTotalMaterial} t` : '-'}
+                      </td>
+                    </>
+                  )}
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </GlassCard>
       </div>
 
       {/* Bottom Action Area: Split Shift / Machine Lineup Change */}

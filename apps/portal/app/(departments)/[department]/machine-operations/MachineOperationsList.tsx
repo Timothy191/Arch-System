@@ -182,8 +182,9 @@ function OperationCard({
   todayLoads: HourlyLoadSummary[];
   activeBreakdowns: Breakdown[];
 }) {
-  const isComplete = operation.end_time !== null && operation.hours_worked !== null;
-  const isInProgress = operation.end_time === null;
+  const isComplete =
+    (operation.end_smu != null || operation.end_time !== null) && operation.hours_worked !== null;
+  const isInProgress = operation.end_smu == null && operation.end_time === null;
 
   // Calculate BCM metrics
   const binFactor = operation.machine?.bin_factor || 0;
@@ -275,15 +276,26 @@ function OperationCard({
           {/* Time, Hours & BCM */}
           <div className="text-right">
             <p className="text-[var(--text-heading)] text-sm">
-              {formatTime(operation.start_time)} -{' '}
-              {operation.end_time ? formatTime(operation.end_time) : 'In Progress'}
+              {operation.start_smu != null && operation.end_smu != null ? (
+                <>
+                  SMR {operation.start_smu.toFixed(1)} – {operation.end_smu.toFixed(1)}
+                </>
+              ) : operation.start_smu != null ? (
+                <>SMR {operation.start_smu.toFixed(1)} – In Progress</>
+              ) : (
+                <>
+                  {formatTime(operation.start_time)} -{' '}
+                  {operation.end_time ? formatTime(operation.end_time) : 'In Progress'}
+                </>
+              )}
             </p>
             <div className="flex items-center gap-3 mt-0.5 justify-end">
-              {operation.start_smu != null && operation.end_smu != null && (
+              {operation.start_smu != null ? (
                 <span className="text-[var(--text-muted)] text-xs font-mono">
-                  SMU: {operation.start_smu.toFixed(1)} - {operation.end_smu.toFixed(1)}
+                  {formatTime(operation.start_time)}
+                  {operation.end_time ? ` - ${formatTime(operation.end_time)}` : ''}
                 </span>
-              )}
+              ) : null}
               {operation.hours_worked !== null && (
                 <span className="text-accent-green text-xs">
                   {operation.hours_worked.toFixed(2)}h

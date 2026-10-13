@@ -61,29 +61,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   }
 
   return (
-    <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent bg-[radial-gradient(circle_at_2px_2px,rgba(0,0,0,0.03)_1px,transparent_0)] bg-[size:32px_32px]">
-      {/* Animated Gradient Background - Arch System Amber/Gold Theme */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-br from-[#71440d] via-[#a36c1e] to-[#c59837] animate-gradient-flow opacity-15"
-      />
-      {/* Ambient Gold Accents */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute w-[600px] h-[600px] rounded-full blur-[50px] -top-48 -left-48 -z-10 bg-[radial-gradient(circle,rgba(217,119,6,0.07)_0%,rgba(243,244,246,0)_70%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute w-[600px] h-[600px] rounded-full blur-[50px] -bottom-48 -right-48 -z-10 bg-[radial-gradient(circle,rgba(217,119,6,0.07)_0%,rgba(243,244,246,0)_70%)]"
-      />
-
+    <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent">
       <div className="relative w-full max-w-md z-10">
         {systemUnavailable ? (
           <div
             data-testid="login-card"
-            className="w-full bg-white/80 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-8 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-center space-y-4 animate-fade-up"
+            className="w-full bg-arch-surface-secondary/80 backdrop-blur-xl border border-arch-border-subtle rounded-card p-8 md:p-10 shadow-window text-center space-y-4 animate-fade-up"
           >
-            <AlertTriangle className="w-10 h-10 text-amber-600 mx-auto" strokeWidth={1.5} />
+            <AlertTriangle className="w-10 h-10 text-accent-amber mx-auto" strokeWidth={1.5} />
             <h1 className="text-xl font-semibold tracking-tight text-neutral-900 text-[var(--text-heading)]">
               System Unavailable
             </h1>
@@ -94,7 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <a
               href="/login"
               autoFocus
-              className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-gradient-to-b from-[#c59837] via-[#a36c1e] to-[#71440d] hover:from-[#d4a843] hover:via-[#b37824] hover:to-[#814e10] rounded-lg shadow-md shadow-amber-950/20 border border-amber-400/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+              className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 rounded-button shadow-sm border border-[var(--accent-blue)]/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
             >
               Retry
             </a>
@@ -102,12 +87,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         ) : (
           <div
             data-testid="login-card"
-            className="w-full bg-white/80 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-8 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] animate-fade-up"
+            className="w-full bg-arch-surface-secondary/80 backdrop-blur-xl border border-arch-border-subtle rounded-card p-8 md:p-10 shadow-window animate-fade-up"
           >
             {/* Branding */}
             <div className="flex flex-col items-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#c59837] via-[#a36c1e] to-[#71440d] border border-amber-400/30 flex items-center justify-center mb-3 shadow-md shadow-amber-900/20">
-                <Logo className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-sm text-arch-accent-blue">
+                <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
               </div>
               <div className="text-center">
                 <h1 className="text-xl font-semibold tracking-tight text-neutral-900 text-[var(--text-heading)]">
@@ -121,7 +106,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
             {/* Header */}
             <div className="mb-6">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-700 select-none">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--accent-blue)] select-none">
                 Welcome Back
               </span>
               <h2 className="text-lg font-semibold text-neutral-900 tracking-tight mt-0.5">
@@ -136,7 +121,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <Suspense
               fallback={
                 <div className="h-48 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-amber-600" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-blue)]" />
                 </div>
               }
             >
@@ -148,7 +133,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         {/* Footer */}
         <footer className="mt-8 text-center space-y-2 select-none">
           <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-600 ">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <ShieldCheck className="w-3.5 h-3.5 text-accent-green shrink-0" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
           <div className="flex justify-center gap-6 text-xs text-neutral-600 ">

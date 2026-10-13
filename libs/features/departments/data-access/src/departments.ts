@@ -129,19 +129,23 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: 'admin',
-    displayName: 'Admin',
+    displayName: 'Administration',
     route: '/admin',
-    icon: 'ShieldCheck',
-    description: 'Personnel management, shift oversight & quotas',
+    icon: 'Wrench',
+    description: 'Sites, machinery fleet, users & roles, settings & system integrations',
     color: 'violet',
     type: 'standard',
     status: 'active',
     gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'Employees', value: '248' },
+    stats: { label: 'Admin Tools', value: '6 Modules' },
     trend: [240, 242, 243, 245, 246, 247, 248, 249],
     actions: [
+      { label: 'Sites', href: '/admin?tab=sites' },
+      { label: 'Fleet', href: '/admin?tab=fleet' },
       { label: 'Users', href: '/admin?tab=users' },
       { label: 'Departments', href: '/admin?tab=departments' },
+      { label: 'Settings', href: '/admin?tab=settings' },
+      { label: 'Integrations', href: '/admin?tab=integrations' },
     ],
   },
   {
@@ -221,12 +225,12 @@ export const CONTROL_ROOM_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
   { name: 'machine-operations', label: 'Machine Ops', icon: 'Cpu' },
-  { name: 'shift-compilation', label: 'Shift Handover', icon: 'ClipboardCheck' },
-  { name: 'shift-coverage', label: 'Roster & Coverage', icon: 'Users' },
-  { name: 'shift-closeout', label: 'Shift Closeout', icon: 'CheckSquare' },
   { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
   { name: 'excavator-activity', label: 'Excavator', icon: 'Pickaxe' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
+  { name: 'shift-compilation', label: 'Shift Handover', icon: 'ClipboardCheck' },
+  { name: 'shift-coverage', label: 'Roster & Coverage', icon: 'Users' },
+  { name: 'shift-closeout', label: 'Shift Closeout', icon: 'CheckSquare' },
 ] as const;
 
 export const ENGINEERING_TABS = [

@@ -1,5 +1,7 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
+import { ArrowUpRight, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityList } from './ExcavatorActivityList';
@@ -27,7 +29,7 @@ export default async function ExcavatorActivityPage({
   ] = await Promise.all([
     supabase
       .from('machines')
-      .select('id, name, machine_type, serial_number, active')
+      .select('id, name, machine_type, serial_number, active, site_id')
       .eq('machine_type', 'Excavator')
       .eq('active', true)
       .order('name'),
@@ -98,7 +100,17 @@ export default async function ExcavatorActivityPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Excavator Activity" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="Excavator Activity" />
+        <Link
+          href="/hub/executive"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          Executive Dashboard
+          <ArrowUpRight className="w-3 h-3" />
+        </Link>
+      </div>
 
       <KPIGrid cols={3}>
         <KPICard label="Total BCM" value={totalBcm.toFixed(1)} color="green" />

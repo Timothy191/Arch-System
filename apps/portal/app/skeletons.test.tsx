@@ -17,16 +17,12 @@ describe('Next.js Skeleton UIs (loading.tsx)', () => {
       // Card container
       const card = container.querySelector('[data-testid="login-card-skeleton"]');
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass('rounded-2xl');
+      expect(card).toHaveClass('rounded-card');
       expect(card?.parentElement).toHaveClass('max-w-md');
 
       // Form skeleton fields & submit button
       const formSkeleton = card?.querySelector('[aria-hidden="true"]');
       expect(formSkeleton).toBeInTheDocument();
-
-      // Ambient blur decorations
-      const ambientAccents = container.querySelectorAll('[aria-hidden="true"].blur-\\[50px\\]');
-      expect(ambientAccents.length).toBe(2);
 
       // Footer
       const footer = container.querySelector('footer');

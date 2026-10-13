@@ -21,7 +21,7 @@ export default async function HourlyLoadsPage({
   const { data: machines } = await supabase
     .from('machines')
     .select('id, name, machine_type, bin_factor, site_id')
-    .eq('machine_type', 'Dump Truck')
+    .in('machine_type', ['Dump Truck', 'ADT', 'Articulated Dump Truck'])
     .eq('active', true)
     .order('name');
 

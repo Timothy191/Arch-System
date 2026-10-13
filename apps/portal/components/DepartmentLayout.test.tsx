@@ -33,12 +33,25 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Machine Ops/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Shift Handover/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Roster & Coverage/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Shift Closeout/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Shift Handover/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Roster & Coverage/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Shift Closeout/i })).toBeInTheDocument();
+
+    // Verify exact ordering (Shift Handover, Roster & Coverage, Shift Closeout at the bottom)
+    expect(controlRoomTabs.map((t) => t.label)).toEqual([
+      'Dashboard',
+      'Hourly Loads',
+      'Machine Ops',
+      'Eng Notes',
+      'Excavator',
+      'Reports',
+      'Shift Handover',
+      'Roster & Coverage',
+      'Shift Closeout',
+    ]);
   });
 
   it('reveals the sidebar when mouse enters proximity or hover zone and auto collapses after delay on mouse leave', () => {

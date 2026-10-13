@@ -3,6 +3,8 @@
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getCurrentShift } from '@repo/utils/client';
+import { Activity, ArrowUpRight, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -13,6 +15,7 @@ interface ExcavatorMachine {
   name: string;
   machine_type: string;
   serial_number: string | null;
+  site_id?: string | null;
 }
 
 interface DumperMachine {
@@ -53,7 +56,7 @@ interface ExcavatorActivityFormProps {
   excavators: ExcavatorMachine[];
   dumpers: DumperMachine[];
   operators: Operator[];
-  sites: Site[];
+  sites?: Site[];
   mineBlocks: MineBlock[];
   todayDumperLoads: HourlyLoadSummary[];
 }
@@ -77,7 +80,6 @@ export function ExcavatorActivityForm({
   const [formData, setFormData] = useState({
     excavatorId: '',
     operatorId: '',
-    siteId: '',
     shiftType: getCurrentShift(),
     blockMinedId: '',
     notes: '',
@@ -93,7 +95,7 @@ export function ExcavatorActivityForm({
   // Auto-save to localStorage every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      if (formData.excavatorId || formData.siteId) {
+      if (formData.excavatorId) {
         localStorage.setItem(
           getAutoSaveKey(departmentId),
           JSON.stringify({ formData, dumperAssignments })
@@ -128,13 +130,18 @@ export function ExcavatorActivityForm({
     }
   }, [operators, formData.operatorId]);
 
-  // Filter dumpers and mine blocks by selected site
-  const siteDumpers = formData.siteId
-    ? dumpers.filter((d) => d.site_id === formData.siteId || d.site_id === null)
-    : [];
+  // Determine site assigned to this excavator on Hourly Loads tab
+  const selectedExcavator = excavators.find((e) => e.id === formData.excavatorId);
+  const effectiveSiteId = selectedExcavator?.site_id ?? null;
+  const excavatorSite = sites?.find((s) => s.id === effectiveSiteId);
 
-  const siteMineBlocks = formData.siteId
-    ? mineBlocks.filter((mb) => mb.site_id === formData.siteId || mb.site_id === null)
+  // Filter dumpers and mine blocks by the excavator's assigned site
+  const siteDumpers = effectiveSiteId
+    ? dumpers.filter((d) => d.site_id === effectiveSiteId || d.site_id === null)
+    : dumpers;
+
+  const siteMineBlocks = effectiveSiteId
+    ? mineBlocks.filter((mb) => mb.site_id === effectiveSiteId || mb.site_id === null)
     : mineBlocks;
 
   // Auto-calculated metrics
@@ -153,9 +160,6 @@ export function ExcavatorActivityForm({
     }
     if (!formData.operatorId) {
       newErrors.operatorId = 'Select an operator';
-    }
-    if (!formData.siteId) {
-      newErrors.siteId = 'Select a site';
     }
     if (dumperAssignments.length === 0) {
       newErrors.dumperAssignments = 'Add at least one dumper assignment';
@@ -202,7 +206,7 @@ export function ExcavatorActivityForm({
           operator_id: formData.operatorId || null,
           activity_date: today,
           shift_type: formData.shiftType,
-          site_id: formData.siteId || null,
+          site_id: effectiveSiteId,
           block_mined_id: formData.blockMinedId || null,
           passes: 0,
           loads: totalLoads,
@@ -238,11 +242,10 @@ export function ExcavatorActivityForm({
         }
       }
 
-      // Clear form, keep shift/site/operator
+      // Clear form, keep shift/operator
       setFormData((prev) => ({
         excavatorId: '',
         operatorId: prev.operatorId,
-        siteId: prev.siteId,
         shiftType: prev.shiftType,
         blockMinedId: '',
         notes: '',
@@ -270,14 +273,29 @@ export function ExcavatorActivityForm({
   return (
     <GlassCard>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Log Excavator Activity</h3>
-          {lastSaved && (
-            <span className="text-[var(--text-muted)] text-xs">
-              Draft saved {lastSaved.toLocaleTimeString()}
+        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-between">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
+            <span className="p-1 rounded-full bg-accent-blue/10 text-[var(--accent-blue)] flex items-center justify-center">
+              <Activity className="w-4 h-4" />
             </span>
-          )}
-        </div>
+            Log Excavator Activity
+          </h2>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/hub/executive"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              Executive Dashboard
+              <ArrowUpRight className="w-3 h-3" />
+            </Link>
+            {lastSaved && (
+              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
+                Draft saved {lastSaved.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </header>
 
         {showSuccessPlus ? (
           <div className="flex flex-col items-center gap-4 py-6">
@@ -293,8 +311,8 @@ export function ExcavatorActivityForm({
           </div>
         ) : (
           <>
-            {/* Top row: Excavator, Operator, Site */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Top row: Excavator, Operator, Shift, Block Mined */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Excavator Dropdown */}
               <div className="space-y-2">
                 <label className="text-[var(--text-secondary)] text-sm block">
@@ -306,6 +324,7 @@ export function ExcavatorActivityForm({
                     setFormData((prev) => ({
                       ...prev,
                       excavatorId: e.target.value,
+                      blockMinedId: '',
                     }))
                   }
                   className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
@@ -319,6 +338,15 @@ export function ExcavatorActivityForm({
                 </select>
                 {errors.excavatorId && (
                   <p className="text-accent-red text-xs">{errors.excavatorId}</p>
+                )}
+                {excavatorSite && (
+                  <p className="text-[var(--text-muted)] text-xs">
+                    Site:{' '}
+                    <span className="text-[var(--text-heading)] font-medium">
+                      {excavatorSite.name}
+                    </span>{' '}
+                    (from Hourly Loads)
+                  </p>
                 )}
               </div>
 
@@ -349,57 +377,16 @@ export function ExcavatorActivityForm({
                 )}
               </div>
 
-              {/* Site Dropdown */}
-              <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
-                  Site/Location <span className="text-accent-red">*</span>
-                </label>
-                <select
-                  value={formData.siteId}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      siteId: e.target.value,
-                      blockMinedId: '',
-                    }))
-                  }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-                >
-                  <option value="">Select site...</option>
-                  {sites.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
-              </div>
-
-              {/* Shift Type */}
+              {/* Shift Pill (Auto-detected from System Time) */}
               <div className="space-y-2">
                 <label className="text-[var(--text-secondary)] text-sm block">
                   Shift <span className="text-accent-red">*</span>
                 </label>
-                <div className="flex gap-2">
-                  {(['day', 'night'] as const).map((shift) => (
-                    <button
-                      key={shift}
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          shiftType: shift,
-                        }))
-                      }
-                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                        formData.shiftType === shift
-                          ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
-                          : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                      }`}
-                    >
-                      {shift.charAt(0).toUpperCase() + shift.slice(1)}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-full border border-accent-green/20 bg-accent-green/5 w-fit backdrop-blur-xl shadow-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
+                  <p className="text-xs text-accent-green font-medium capitalize">
+                    {formData.shiftType} Shift · All systems operational
+                  </p>
                 </div>
               </div>
 

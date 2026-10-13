@@ -41,12 +41,6 @@ function RouteBackgroundInner() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // 0. Auth route bypass: login screen does not render video wallpaper
-    if (pathname === '/login' || pathname?.startsWith('/login')) {
-      setShouldLoadVideo(false);
-      return;
-    }
-
     // 1. Accessibility: reduced motion check
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (motionQuery.matches) {

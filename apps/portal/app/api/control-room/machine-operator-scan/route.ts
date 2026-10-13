@@ -138,7 +138,10 @@ async function readServiceRows<T extends z.ZodType>(
   schema: T
 ): Promise<z.infer<T>[]> {
   const baseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
+  const serviceKey =
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SERVICE_KEY;
   if (!baseUrl || !serviceKey) {
     throw new Error('Supabase service credentials are not configured');
   }
@@ -199,29 +202,104 @@ async function findMachine(
   return data as ScanMachine | null;
 }
 
-function matchesMachineType(jobTitle: string | null, machineType: string): boolean {
+export function isAdtOrDumpTruck(type: string): boolean {
+  const t = type
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const words = t.split(/\s+/);
+  return (
+    words.includes('adt') || t.includes('dump') || t.includes('truck') || t.includes('articulated')
+  );
+}
+
+export function isExcavator(type: string): boolean {
+  const t = type
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const words = t.split(/\s+/);
+  return words.includes('ex') || t.includes('excavator');
+}
+
+export function isDozer(type: string): boolean {
+  const t = type
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const words = t.split(/\s+/);
+  return words.includes('dz') || t.includes('dozer');
+}
+
+export function isDrill(type: string): boolean {
+  const t = type
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const words = t.split(/\s+/);
+  return words.includes('dr') || t.includes('drill');
+}
+
+export function matchesMachineType(jobTitle: string | null, machineType: string): boolean {
   if (!jobTitle) return false;
+
+  if (isAdtOrDumpTruck(machineType)) {
+    return isAdtOrDumpTruck(jobTitle);
+  }
+
+  if (isExcavator(machineType)) {
+    return isExcavator(jobTitle);
+  }
+
+  if (isDozer(machineType)) {
+    return isDozer(jobTitle);
+  }
+
+  if (isDrill(machineType)) {
+    return isDrill(jobTitle);
+  }
+
   const normalize = (value: string) =>
     value
       .toLocaleLowerCase()
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
-  return normalize(jobTitle).includes(normalize(machineType));
+  const normTitle = normalize(jobTitle);
+  const normType = normalize(machineType);
+  return normTitle.includes(normType) || normType.includes(normTitle);
 }
 
 async function readQualifiedPersonnel(machineType: string) {
   const baseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
+  const serviceKey =
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SERVICE_KEY;
   if (!baseUrl || !serviceKey) {
     throw new Error('Supabase service credentials are not configured');
   }
 
   const params = new URLSearchParams({
     select: 'emp_code,first_name,surname,job_title,status,medical_expiry,induction_expiry',
-    job_title: `ilike.*${machineType}*`,
     status: 'ilike.Active',
     limit: '1000',
   });
+
+  if (isAdtOrDumpTruck(machineType)) {
+    params.set(
+      'or',
+      '(job_title.ilike.*adt*,job_title.ilike.*dump*,job_title.ilike.*truck*,job_title.ilike.*articulated*)'
+    );
+  } else if (isExcavator(machineType)) {
+    params.set('job_title', 'ilike.*excavator*');
+  } else if (isDozer(machineType)) {
+    params.set('job_title', 'ilike.*dozer*');
+  } else if (isDrill(machineType)) {
+    params.set('job_title', 'ilike.*drill*');
+  } else {
+    params.set('job_title', `ilike.*${machineType}*`);
+  }
+
   const response = await fetch(`${baseUrl}/rest/v1/personnel?${params}`, {
     headers: {
       apikey: serviceKey,

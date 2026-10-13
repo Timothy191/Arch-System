@@ -228,6 +228,85 @@ describe('POST /api/control-room/machine-operator-scan', () => {
     expect(operatorQuery.in).toHaveBeenCalledWith('employee_code', ['EMP-101']);
   });
 
+  it('filters ADT and articulated dump truck operators when an ADT machine is selected', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          {
+            emp_code: 'EMP-ADT-1',
+            first_name: 'Alice',
+            surname: 'ADT',
+            job_title: 'ADT Operator',
+            status: 'Active',
+            medical_expiry: '2099-12-31',
+            induction_expiry: '2099-12-31',
+          },
+          {
+            emp_code: 'EMP-ADT-2',
+            first_name: 'Bob',
+            surname: 'Trucker',
+            job_title: 'Articulated Dump Truck Operator',
+            status: 'Active',
+            medical_expiry: '2099-12-31',
+            induction_expiry: '2099-12-31',
+          },
+          {
+            emp_code: 'EMP-EXC-1',
+            first_name: 'Charlie',
+            surname: 'Digger',
+            job_title: 'Excavator Operator',
+            status: 'Active',
+            medical_expiry: '2099-12-31',
+            induction_expiry: '2099-12-31',
+          },
+        ]),
+        { status: 200 }
+      )
+    );
+    const adtMachine = {
+      id: machineId,
+      name: 'ADT-01',
+      machine_type: 'ADT',
+      site_id: departmentId,
+      bin_factor: 28,
+      active: true,
+    };
+    const { supabase, operatorQuery } = createSupabaseMock({ machineData: adtMachine });
+    operatorQuery.then = jest.fn((resolve: (value: unknown) => unknown) =>
+      Promise.resolve({
+        data: [
+          { id: operatorId, full_name: 'Alice ADT', employee_code: 'EMP-ADT-1' },
+          {
+            id: 'd290f1ee-6c54-4b01-90e6-d701748f0899',
+            full_name: 'Bob Trucker',
+            employee_code: 'EMP-ADT-2',
+          },
+        ],
+        error: null,
+      }).then(resolve)
+    );
+    jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);
+
+    const response = await GET(
+      new Request(
+        `http://localhost/api/control-room/machine-operator-scan?departmentId=${departmentId}&machineId=${machineId}`
+      )
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.stage).toBe('operators');
+    expect(body.operators).toEqual([
+      { id: operatorId, name: 'Alice ADT', jobTitle: 'ADT Operator' },
+      {
+        id: 'd290f1ee-6c54-4b01-90e6-d701748f0899',
+        name: 'Bob Trucker',
+        jobTitle: 'Articulated Dump Truck Operator',
+      },
+    ]);
+    expect(operatorQuery.in).toHaveBeenCalledWith('employee_code', ['EMP-ADT-1', 'EMP-ADT-2']);
+  });
+
   it('returns machine type and load eligibility before the operator scan', async () => {
     const { supabase } = createSupabaseMock();
     jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);

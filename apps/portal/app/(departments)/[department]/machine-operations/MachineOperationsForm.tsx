@@ -123,7 +123,7 @@ export function MachineOperationsForm({
     }
   }, [todayOperations, formData.operatorId]);
 
-  // Calculate hours worked (SMU preferred when present to match Postgres computed column)
+  // Calculate hours worked based on SMR readings (matching Postgres computed column)
   const calculateHours = useCallback(() => {
     if (formData.startSmu && formData.endSmu) {
       const s = parseFloat(formData.startSmu);
@@ -132,17 +132,8 @@ export function MachineOperationsForm({
         return e - s;
       }
     }
-
-    if (!formData.startTime || !formData.endTime) return null;
-
-    const start = new Date(`2000-01-01T${formData.startTime}`);
-    const end = new Date(`2000-01-01T${formData.endTime}`);
-
-    if (end <= start) return null;
-
-    const diffMs = end.getTime() - start.getTime();
-    return diffMs / (1000 * 60 * 60);
-  }, [formData.startSmu, formData.endSmu, formData.startTime, formData.endTime]);
+    return null;
+  }, [formData.startSmu, formData.endSmu]);
 
   const hoursWorked = calculateHours();
 
@@ -162,32 +153,26 @@ export function MachineOperationsForm({
       newErrors.siteId = 'Select a site/location';
     }
 
-    if (!formData.startTime) {
-      newErrors.startTime = 'Enter start time';
-    }
-
-    if (formData.endTime && hoursWorked === null) {
-      newErrors.endTime = 'End time must be after start time';
-    }
-
-    if (formData.startSmu && Number.isNaN(parseFloat(formData.startSmu))) {
-      newErrors.startSmu = 'Start SMU must be a valid number';
+    if (!formData.startSmu) {
+      newErrors.startSmu = 'Enter start SMR';
+    } else if (Number.isNaN(parseFloat(formData.startSmu))) {
+      newErrors.startSmu = 'Start SMR must be a valid number';
     }
 
     if (formData.endSmu && Number.isNaN(parseFloat(formData.endSmu))) {
-      newErrors.endSmu = 'End SMU must be a valid number';
+      newErrors.endSmu = 'Stop SMR must be a valid number';
     }
 
     if (formData.startSmu && formData.endSmu) {
       const s = parseFloat(formData.startSmu);
       const e = parseFloat(formData.endSmu);
       if (e < s) {
-        newErrors.endSmu = 'End SMU cannot be less than Start SMU';
+        newErrors.endSmu = 'Stop SMR cannot be less than Start SMR';
       }
     }
 
     if (hoursWorked !== null && hoursWorked > 14) {
-      newErrors.endTime = 'Hours cannot exceed 14 per shift';
+      newErrors.endSmu = 'Hours cannot exceed 14 per shift';
     }
 
     setErrors(newErrors);
@@ -332,64 +317,10 @@ export function MachineOperationsForm({
             {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
           </div>
 
-          {/* Shift Type */}
+          {/* Start SMR */}
           <div className="space-y-2">
             <label className="text-[var(--text-secondary)] text-sm block">
-              Shift <span className="text-accent-red">*</span>
-            </label>
-            <div className="flex gap-2">
-              {['day', 'night'].map((shift) => (
-                <button
-                  key={shift}
-                  type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      shiftType: shift as 'day' | 'night',
-                    }))
-                  }
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                    formData.shiftType === shift
-                      ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                  }`}
-                >
-                  {shift.charAt(0).toUpperCase() + shift.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Start Time */}
-          <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
-              Start Time <span className="text-accent-red">*</span>
-            </label>
-            <input
-              type="time"
-              value={formData.startTime}
-              onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-            />
-            {errors.startTime && <p className="text-accent-red text-xs">{errors.startTime}</p>}
-          </div>
-
-          {/* End Time */}
-          <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">End Time</label>
-            <input
-              type="time"
-              value={formData.endTime}
-              onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-            />
-            {errors.endTime && <p className="text-accent-red text-xs">{errors.endTime}</p>}
-          </div>
-
-          {/* Start SMU */}
-          <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
-              Opening / Start SMU
+              Start SMR <span className="text-accent-red">*</span>
             </label>
             <input
               type="number"
@@ -403,9 +334,9 @@ export function MachineOperationsForm({
             {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
           </div>
 
-          {/* End SMU */}
+          {/* Stop SMR */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">Closing / End SMU</label>
+            <label className="text-[var(--text-secondary)] text-sm block">Stop SMR</label>
             <input
               type="number"
               step="0.1"
@@ -426,11 +357,7 @@ export function MachineOperationsForm({
             <span className="text-2xl font-medium text-[var(--accent-blue)]">
               {hoursWorked.toFixed(2)}h
             </span>
-            <span className="text-[var(--text-muted)] text-xs">
-              {formData.startSmu && formData.endSmu
-                ? '(SMU calculated: End - Start)'
-                : '(time duration estimate)'}
-            </span>
+            <span className="text-[var(--text-muted)] text-xs">(SMR calculated: Stop - Start)</span>
           </div>
         )}
 
@@ -447,7 +374,7 @@ export function MachineOperationsForm({
 
         {/* Help Text */}
         <p className="text-[var(--text-muted)] text-xs">
-          <span className="text-[var(--accent-blue)]">Tip:</span> End time is optional. You can come
+          <span className="text-[var(--accent-blue)]">Tip:</span> Stop SMR is optional. You can come
           back and add it later. Hours are calculated automatically.
         </p>
       </form>

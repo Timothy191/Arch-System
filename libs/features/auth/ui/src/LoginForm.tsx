@@ -63,7 +63,7 @@ export function LoginForm() {
         >
           Email Address
         </label>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-sm">
           <Mail className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="email"
@@ -101,12 +101,12 @@ export function LoginForm() {
           </label>
           <Link
             href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-            className="text-xs font-medium text-amber-700  hover:text-amber-800  hover:underline transition-colors select-none py-1 inline-flex items-center min-h-[32px]"
+            className="text-xs font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/80 hover:underline transition-colors select-none py-1 inline-flex items-center min-h-[32px]"
           >
             Forgot password?
           </Link>
         </div>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-sm">
           <Lock className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="password"
@@ -147,7 +147,7 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="flex items-center gap-1.5 text-xs text-amber-600 animate-fade-up mt-1"
+            className="flex items-center gap-1.5 text-xs text-accent-amber animate-fade-up mt-1"
             role="alert"
             aria-live="polite"
           >
@@ -157,7 +157,7 @@ export function LoginForm() {
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="flex items-center gap-1.5 text-xs text-amber-600 animate-fade-up mt-1"
+            className="flex items-center gap-1.5 text-xs text-accent-amber animate-fade-up mt-1"
             role="alert"
             aria-live="polite"
           >
@@ -170,7 +170,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading || isRateLimited}
-        className="w-full py-3.5 bg-gradient-to-b from-[#c59837] via-[#a36c1e] to-[#71440d] hover:from-[#d4a843] hover:via-[#b37824] hover:to-[#814e10] text-white text-xs font-semibold tracking-wider uppercase rounded-lg shadow-md shadow-amber-950/20 border border-amber-400/40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full py-3.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-xs font-semibold tracking-wider uppercase rounded-button shadow-card active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (
           <span className="flex items-center gap-2">

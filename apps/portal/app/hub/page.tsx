@@ -7,7 +7,7 @@ import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, ArrowUpRight, BarChart3, Shield, Wrench } from 'lucide-react';
+import { Activity, ArrowUpRight, BarChart3, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
@@ -308,11 +308,25 @@ export default async function HubPage() {
   // zero assigned departments get an explicit empty state instead of silently
   // seeing every department (authorization safety).
   const hasAssignedDepts = accessibleDeptIds && accessibleDeptIds.length > 0;
-  const rawDepartments = hasAssignedDepts
+  let rawDepartments = hasAssignedDepts
     ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
     : canSeeExecutive
       ? DEPARTMENTS
       : [];
+
+  // AGENT-TRACE: Administration department is strictly restricted to admin users:
+  // - For admin role, guarantee the admin department is included in Core Operational Modules
+  // - For non-admin roles, ensure admin department is never accessible or visible
+  if (userRole === 'admin') {
+    if (!rawDepartments.some((d) => d.name === 'admin')) {
+      const adminDept = DEPARTMENTS.find((d) => d.name === 'admin');
+      if (adminDept) {
+        rawDepartments = [...rawDepartments, adminDept];
+      }
+    }
+  } else {
+    rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
+  }
 
   const departments = rawDepartments.map((dept) => {
     const overlay = liveMetrics[dept.name];
@@ -374,159 +388,6 @@ export default async function HubPage() {
             Executive Dashboard
             <ArrowUpRight className="w-3 h-3" />
           </Link>
-        </div>
-      )}
-
-      {/* Administration Panel (admin only) */}
-      {userRole === 'admin' && (
-        <div
-          className="space-y-4 animate-fade-up group/row"
-          style={{ animationDelay: '0.15s', animationFillMode: 'both' }}
-        >
-          <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
-              <span className="p-1 rounded-full bg-accent-purple/10 text-accent-purple flex items-center justify-center">
-                <Wrench className="w-4 h-4" />
-              </span>
-              Administration Panel
-            </h2>
-          </header>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-                    Sites Management
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Add, edit, and manage operational sites
-                  </p>
-                </div>
-                <Link
-                  href="/admin"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Sites →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-                    Machines & Fleet
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Manage machinery, equipment, and fleet inventory
-                  </p>
-                </div>
-                <Link
-                  href="/admin?tab=fleet"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Fleet →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-                    Users & Roles
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Manage personnel accounts and permissions
-                  </p>
-                </div>
-                <Link
-                  href="/admin?tab=users"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Users →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">Departments</h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Configure department settings and access
-                  </p>
-                </div>
-                <Link
-                  href="/admin?tab=departments"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Departments →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-                    System Settings
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Adjust system-wide configurations and preferences
-                  </p>
-                </div>
-                <Link
-                  href="/admin?tab=settings"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Settings →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-            <GlassCard
-              variant="default"
-              padding
-              className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)]">Integrations</h3>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Manage third-party integrations and webhooks
-                  </p>
-                </div>
-                <Link
-                  href="/admin?tab=integrations"
-                  className="text-sm font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/90"
-                >
-                  Manage Integrations →
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-            </GlassCard>
-          </div>
         </div>
       )}
 
