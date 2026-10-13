@@ -4,6 +4,20 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
+type NetworkInformation = {
+  saveData?: boolean;
+  effectiveType?: string;
+};
+
+type NavigatorWithConnection = Navigator & {
+  connection?: NetworkInformation;
+};
+
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
 /**
  * RouteBackgroundPoster
  * Renders the primary LCP asset (94 KB WebP poster) and film grain overlay.
@@ -12,7 +26,7 @@ function RouteBackgroundPoster() {
   return (
     <>
       <div
-        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
+        className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
         <Image
@@ -53,12 +67,7 @@ function RouteBackgroundInner() {
     }
 
     // 3. Network connection constraints (Network Information API)
-    const nav = navigator as Navigator & {
-      connection?: {
-        saveData?: boolean;
-        effectiveType?: string;
-      };
-    };
+    const nav = navigator as NavigatorWithConnection;
 
     if (nav.connection) {
       if (nav.connection.saveData) {
@@ -78,13 +87,14 @@ function RouteBackgroundInner() {
       setShouldLoadVideo(true);
     };
 
-    if ('requestIdleCallback' in window) {
-      const handle = (window as any).requestIdleCallback(loadDeferredVideo, { timeout: 3500 });
-      return () => (window as any).cancelIdleCallback(handle);
-    } else {
-      const timer = setTimeout(loadDeferredVideo, 2000);
-      return () => clearTimeout(timer);
+    const idleWindow = window as WindowWithIdleCallback;
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 3500 });
+      return () => idleWindow.cancelIdleCallback?.(handle);
     }
+
+    const timer = setTimeout(loadDeferredVideo, 2000);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
@@ -103,7 +113,7 @@ function RouteBackgroundInner() {
       {/* ── Ambient Video Background (Deferred / Constrained-Safe) ── */}
       {shouldLoadVideo && (
         <div
-          className="route-bg-video-container fixed inset-0 -z-10 pointer-events-none"
+          className="route-bg-video-container fixed inset-0 z-route-bg pointer-events-none"
           aria-hidden="true"
         >
           <video
@@ -117,13 +127,16 @@ function RouteBackgroundInner() {
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
             }}
+            onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
+            onError={() => setIsVideoLoaded(false)}
             autoPlay
             loop
             muted
             playsInline
             disablePictureInPicture
-            preload="none"
+            preload="metadata"
+            poster="/background/global-background-poster.webp"
             crossOrigin="anonymous"
           >
             {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}

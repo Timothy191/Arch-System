@@ -1,7 +1,8 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
-import { GlassCard } from '@repo/ui/GlassCard';
+import { Card } from '@repo/ui/components/ui/card';
+import { Skeleton } from '@repo/ui/components/ui/skeleton';
 import { cn } from '@repo/ui/lib/utils';
 import { fetchClient } from '@repo/utils/client';
 import React, { useEffect, useState } from 'react';
@@ -46,18 +47,14 @@ export const WeatherWidget = function WeatherWidget({
   }, []);
 
   if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-20 bg-arch-surface-tertiary rounded-xl" />
-      </div>
-    );
+    return <Skeleton className="h-20 w-full rounded-xl" aria-label="Loading weather" />;
   }
 
   if (error || !weather) {
     return (
-      <GlassCard className="p-3">
+      <Card className="p-3">
         <p className="text-arch-text-tertiary text-sm">Weather unavailable</p>
-      </GlassCard>
+      </Card>
     );
   }
 
@@ -167,7 +164,7 @@ export const WeatherWidget = function WeatherWidget({
   // Compact variant
   if (variant === 'compact') {
     return (
-      <GlassCard className="p-4">
+      <Card className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-3xl">{weather.icon}</span>
@@ -196,13 +193,13 @@ export const WeatherWidget = function WeatherWidget({
             {alert.message}
           </div>
         )}
-      </GlassCard>
+      </Card>
     );
   }
 
   // Full variant with forecast
   return (
-    <GlassCard className="p-5">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-medium text-arch-text-primary">Weather Conditions</h3>
@@ -276,6 +273,6 @@ export const WeatherWidget = function WeatherWidget({
           ))}
         </div>
       </div>
-    </GlassCard>
+    </Card>
   );
 };
