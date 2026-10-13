@@ -3,13 +3,11 @@
  * @file tools/scripts/mcp-onboard.cjs
  * @description Master Agent MCP Server Onboarding & Verification Engine.
  * Ensures every incoming AI agent runtime registers and discovers all required
- * MCP servers (Firecrawl, Upstash, Filesystem, Memory, Sequential Thinking, Ripgrep, etc.).
+ * MCP servers (Upstash, Filesystem, Memory, Sequential Thinking, Ripgrep, etc.).
  */
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
-
 const HOME = process.env.HOME || '/home/tim';
 const REGISTRY_PATH = path.join(__dirname, '../mcp/mcp-registry.json');
 const MCP_ENV_PATH = path.join(HOME, '.config/mcp-env');
@@ -51,11 +49,6 @@ const servers = registry.servers || {};
 console.log('========================================================');
 console.log('🤖 [MCP ONBOARDING] Master Multi-Agent MCP Registry Gate');
 console.log('========================================================');
-
-const firecrawlKey = process.env.FIRECRAWL_API_KEY || 'fc-625192b8955c4c25afba4e30d9f1bce4';
-const firecrawlBin = fs.existsSync(path.join(HOME, '.local/bin/firecrawl-mcp'))
-  ? path.join(HOME, '.local/bin/firecrawl-mcp')
-  : 'npx';
 
 const clientConfigs = [
   {
@@ -131,47 +124,6 @@ for (const client of clientConfigs) {
   config[containerKey] = config[containerKey] || {};
 
   const missingServers = [];
-
-  // Verify and register Firecrawl
-  if (!config[containerKey].firecrawl) {
-    missingServers.push('firecrawl');
-    if (isCheckOnly) {
-      totalIssues++;
-    } else {
-      if (client.type === 'antigravity') {
-        config[containerKey].firecrawl = {
-          description: servers.firecrawl.description,
-          disabled: false,
-          autoApprove: servers.firecrawl.autoApprove,
-          command: firecrawlBin,
-          args: firecrawlBin === 'npx' ? ['-y', 'firecrawl-mcp'] : [],
-          env: { FIRECRAWL_API_KEY: firecrawlKey },
-        };
-      } else if (client.type === 'opencode') {
-        config[containerKey].firecrawl = {
-          type: 'remote',
-          url: servers.firecrawl.remoteUrl,
-          enabled: true,
-          headers: { Authorization: `Bearer {env:FIRECRAWL_API_KEY}` },
-        };
-      } else if (client.type === 'claude' || client.type === 'cursor' || client.type === 'vscode') {
-        config[containerKey].firecrawl = {
-          type: 'http',
-          url: servers.firecrawl.remoteUrl,
-          headers: { Authorization: `Bearer ${firecrawlKey}` },
-        };
-      } else {
-        config[containerKey].firecrawl = {
-          command: firecrawlBin,
-          args: firecrawlBin === 'npx' ? ['-y', 'firecrawl-mcp'] : [],
-          env: { FIRECRAWL_API_KEY: firecrawlKey },
-          description: servers.firecrawl.description,
-          type: 'stdio',
-        };
-      }
-      modified = true;
-    }
-  }
 
   // Verify and register Upstash
   if (!config[containerKey].upstash) {
@@ -269,64 +221,6 @@ for (const client of clientConfigs) {
     console.log(`✅ SYNCHRONIZED (Added: ${missingServers.join(', ')})`);
   } else {
     console.log('✅ PASS (Fully Registered)');
-  }
-}
-
-// Ensure Antigravity schema definitions exist for Firecrawl
-const antigravitySchemaDir = path.join(HOME, '.gemini/antigravity-cli/mcp/firecrawl');
-if (!fs.existsSync(antigravitySchemaDir) || fs.readdirSync(antigravitySchemaDir).length < 20) {
-  if (isCheckOnly) {
-    console.log('⚠️  Antigravity Firecrawl tool schemas missing or incomplete.');
-    totalIssues++;
-  } else {
-    process.stdout.write('📦 Generating Antigravity lazy tool schemas for Firecrawl... ');
-    const genRes = spawnSync(
-      'node',
-      [
-        '-e',
-        `
-      const fs = require('fs');
-      const path = require('path');
-      const { spawn } = require('child_process');
-      const target = '${antigravitySchemaDir}';
-      if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
-      const proc = spawn('${firecrawlBin}', [], { env: { ...process.env, FIRECRAWL_API_KEY: '${firecrawlKey}' } });
-      let buf = '';
-      proc.stdout.on('data', d => {
-        buf += d.toString();
-        const lines = buf.split('\\n');
-        buf = lines.pop();
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const msg = JSON.parse(line);
-            if (msg.id === 1) {
-              proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\\n');
-              proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }) + '\\n');
-            } else if (msg.id === 2) {
-              for (const tool of msg.result.tools) {
-                fs.writeFileSync(path.join(target, tool.name + '.json'), JSON.stringify(tool, null, 2));
-              }
-              proc.kill();
-              process.exit(0);
-            }
-          } catch(e) {}
-        }
-      });
-      proc.stdin.write(JSON.stringify({
-        jsonrpc: '2.0', id: 1, method: 'initialize',
-        params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'gen', version: '1.0' } }
-      }) + '\\n');
-      setTimeout(() => { proc.kill(); process.exit(1); }, 6000);
-    `,
-      ],
-      { encoding: 'utf8' }
-    );
-    if (genRes.status === 0) {
-      console.log('✅ DONE');
-    } else {
-      console.log('⚠️  Failed to extract schemas automatically.');
-    }
   }
 }
 

@@ -45,15 +45,6 @@
       "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
       "type": "stdio"
     },
-    "firecrawl": {
-      "command": "/home/tim/.local/bin/firecrawl-mcp",
-      "args": [],
-      "env": {
-        "FIRECRAWL_API_KEY": "fc-625192b8955c4c25afba4e30d9f1bce4"
-      },
-      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
-      "type": "stdio"
-    },
     "upstash": {
       "url": "https://mcp.upstash.com/mcp",
       "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
