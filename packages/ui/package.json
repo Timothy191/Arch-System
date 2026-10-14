@@ -93,7 +93,6 @@
     "./TelemetryChart": "./src/components/ui/telemetry-chart.tsx",
     "./FreezeToggle": "./src/components/ui/freeze-toggle.tsx",
     "./Pagination": "./src/components/ui/pagination.tsx",
-    "./LiquiButton": "./src/components/ui/liqui-button.tsx",
     "./hooks/useAutoSave": "./src/hooks/useAutoSave.ts",
     "./nodes/PluginNode": "./src/components/nodes/PluginNode.tsx",
     "./nodes/TriggerNode": "./src/components/nodes/TriggerNode.tsx",

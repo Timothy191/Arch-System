@@ -97,6 +97,11 @@ pnpm agent:verify      # Mandatory gate (fails fast on first failure)
 
 For release-grade changes, run the full `pnpm quality` gate.
 
+## Context-First Execution & Auto-Compaction Mandate
+
+1. **Gather Context First (Pre-Action)**: After the user sends a message, FIRST gather all required context (research, prompting the user, or exploring the codebase — all approved). **DO NOT perform any action without the required context.** Once gathered, proceed with the task.
+2. **Auto-Compact & Ready Context (Post-Output)**: After each output produced, release dynamically leased skills/context, prune transient bloat, and ready/compact the context window (`/compact` when needed) for the next task. See `.agents/rules/context-lifecycle-and-compaction.md`.
+
 ## Where to Find Detailed Documentation
 
 Instead of reading large files, consult these focused references:

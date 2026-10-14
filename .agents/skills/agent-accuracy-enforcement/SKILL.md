@@ -1,3 +1,8 @@
+---
+name: agent-accuracy-enforcement
+description: Mandatory 6-pillar agent execution flow enforcing verification gates, dynamic context leasing, structured thinking, scoped progression, AST exploration, and invariant audits.
+---
+
 # Agent Accuracy Enforcement Mandate (6-Pillar Protocol)
 
 To maximize accuracy, eliminate context token bloat, and prevent regressions across the Arch-System monorepo, every AI coding agent MUST strictly follow this 6-pillar protocol for all tasks:

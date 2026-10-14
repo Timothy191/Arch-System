@@ -1,3 +1,8 @@
+---
+name: testing-rules
+description: Testing standards, unit isolation, network boundary mocking, and Jest/Playwright conventions for Arch-System.
+---
+
 # Testing Standards & Mocking Rules
 
 ## 1. Core Testing Philosophy

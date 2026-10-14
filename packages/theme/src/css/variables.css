@@ -65,8 +65,8 @@
      ─────────────────────────────────────────────────────────────────────── */
 
   /* Vivid Electric Blue — primary CTA, interactive highlights */
-  --accent-electric-blue: #D4AF37;
-  --accent-electric-blue-hover: #C5A017;
+  --accent-electric-blue: #d4af37;
+  --accent-electric-blue-hover: #c5a017;
   --accent-electric-blue-subtle: rgba(0, 122, 255, 0.08);
   --accent-electric-blue-border: rgba(0, 122, 255, 0.28);
 
@@ -255,7 +255,8 @@
   /* ═══════════════════════════════════════════════════════════════
        Z-INDEX MATRIX — Single Source of Truth
        ═══════════════════════════════════════════════════════════════ */
-  --z-background: 10;
+  --z-background: -10;
+  --z-route-bg: -9;
   --z-telemetry: 20;
   --z-primary-card: 30;
   --z-navigation: 40;
@@ -461,11 +462,11 @@
   --theme-transition-duration: 0ms;
 
   /* Font variables used in Tailwind config preset */
-  --font-sans: "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
   --font-inter:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    'SF Pro', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
   /* Fallback until next/font hydrates; portal layout overrides via Outfit.variable */
-  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-outfit: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;

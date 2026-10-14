@@ -1,3 +1,8 @@
+---
+name: todo-completion
+description: Enforces 100% TODO checklist execution and detailed post-task reporting (TODO-1 protocol).
+---
+
 # Mandatory TODO Completion & Detailed Reporting Protocol
 
 **Governing Rule:** `TODO-1 — All initialized TODO phases and checklist items must be executed to completion (5/5) with zero dangling tasks. Immediately following TODO completion, the agent MUST produce the Report in detail.`

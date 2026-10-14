@@ -1,3 +1,8 @@
+---
+name: structured-thinking
+description: Mandatory 5-phase Structured Thinking Protocol (STM-0: Comprehension, Evidence, Solution, Criticism, Execution Contract) before non-trivial code mutations.
+---
+
 # Structured Thinking Mandate (STM-0)
 
 **Governing Rule:** `STM-0 — All AI agents operating within this codebase MUST engage structured, extended thinking before executing ANY non-trivial action. Reflexive code generation without demonstrated reasoning is a quality gate violation.`

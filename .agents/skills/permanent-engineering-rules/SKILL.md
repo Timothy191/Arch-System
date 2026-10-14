@@ -1,3 +1,8 @@
+---
+name: permanent-engineering-rules
+description: Production reality, security by default, evidence-first protocols, and industrial reliability standards for Arch-System.
+---
+
 # Arch-System Permanent Engineering Rules
 
 These rules apply to every future coding agent working on `Timothy191/Arch-System`.

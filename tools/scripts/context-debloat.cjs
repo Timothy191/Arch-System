@@ -33,6 +33,11 @@ const ESSENTIAL_SKILLS = [
   'universal-agentic-execution',
   'real-world-checker',
   'self-reflection-loop',
+  'agent-accuracy-enforcement',
+  'permanent-engineering-rules',
+  'structured-thinking',
+  'testing-rules',
+  'todo-completion',
 ];
 
 // Skills that are likely unused or duplicates

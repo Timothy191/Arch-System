@@ -108,10 +108,6 @@ const nextConfig = {
     '@repo/departments/ui',
     '@repo/departments/data-access',
     '@repo/hub/ui',
-    // AGENT-TRACE: @liqui-design/glass ships glass.css with @layer base which
-    // requires @tailwind base to be present in the same PostCSS pass.
-    // transpiling it ensures Turbopack runs it through our full PostCSS pipeline.
-    '@liqui-design/glass',
   ],
   images: {
     // Fix: Disable built-in Vercel image optimization to prevent hitting storage/optimization quotas.
