@@ -231,7 +231,9 @@ export async function fetchDeployments(params, options = {}) {
 
   const data = await res.json();
   return {
-    deployments: Array.isArray(data.deployments) ? data.deployments : [],
+    deployments: Array.isArray(data.deployments)
+      ? data.deployments.filter((d) => d && typeof d === 'object')
+      : [],
     pagination: data.pagination || null,
   };
 }

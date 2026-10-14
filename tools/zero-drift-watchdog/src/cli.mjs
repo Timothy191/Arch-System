@@ -311,24 +311,11 @@ export async function runCli(args = process.argv.slice(2), io = {}) {
   }
 
   // 7. Tri-State Drift Evaluation
-  // Adapt git-inspector compare status (where 'ahead' means local is ahead)
-  // to canonical GitHubRemoteState (where 'behind' means remote is behind local)
-  let adaptedGhState = ghState;
-  if (ghState.statusWithLocal === 'ahead') {
-    adaptedGhState = {
-      ...ghState,
-      statusWithLocal: 'behind',
-      aheadBy: 0,
-      behindBy: ghState.aheadBy || 1,
-    };
-  } else if (ghState.statusWithLocal === 'behind') {
-    adaptedGhState = {
-      ...ghState,
-      statusWithLocal: 'ahead',
-      aheadBy: ghState.behindBy || 1,
-      behindBy: 0,
-    };
-  }
+  // compareCommits(remoteCommit, localCommit) returns status relative to remoteCommit (base):
+  // - 'ahead': localCommit is ahead of remoteCommit (localAhead = true)
+  // - 'behind': localCommit is behind remoteCommit (localBehind = true)
+  // - 'diverged': branches have diverged
+  const adaptedGhState = ghState;
 
   const allowDirty = Boolean(values['allow-dirty'] || values['ignore-dirty']);
   let report = evaluateDrift(localGit, adaptedGhState, vcState, {

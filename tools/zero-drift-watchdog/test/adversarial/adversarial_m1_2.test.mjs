@@ -87,15 +87,12 @@ describe('Empirical Adversarial Stress Test Harness - Challenger M1-2', () => {
       // GitHub SSH over 443 official endpoint
       const sshOver443 = 'ssh://git@ssh.github.com:443/plantcor/arch-system.git';
       const sshRes = parseGitHubRemoteUrl(sshOver443);
-      // Documenting exact behavior: does it match or return null?
-      // Since regex is (?:^|[/@])github\.com, ssh.github.com returns null.
-      assert.equal(sshRes, null, 'ssh.github.com returns null due to domain boundary');
+      assert.deepEqual(sshRes, { owner: 'plantcor', repo: 'arch-system' });
 
-      // Path containing github.com on external domain
+      // Path containing github.com on external domain must be rejected
       const pathContain = 'https://gitlab.com/github.com/plantcor/arch-system.git';
       const pathRes = parseGitHubRemoteUrl(pathContain);
-      // NOTE: Potential flaw: gitlab.com/github.com/owner/repo matches due to / preceding github.com
-      assert.ok(pathRes !== undefined);
+      assert.equal(pathRes, null, 'External domain with github.com in path must return null');
     });
 
     it('handles complex dotted, underscored, and hyphenated names', () => {

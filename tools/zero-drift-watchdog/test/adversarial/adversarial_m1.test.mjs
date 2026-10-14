@@ -119,16 +119,13 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
       assert.ok(parsed.uncommittedFiles.includes('new pit/plan B.doc'));
     });
 
-    it('identifies empirical limitation/hazard: literal " -> " in untracked/modified filenames', () => {
-      // Adversarial test documenting parseRenamedPath behavior when filename itself contains ' -> '
+    it('preserves literal " -> " in untracked/modified filenames without splitting as rename', () => {
       const raw = '?? step1 -> step2.txt\n';
       const parsed = parsePorcelainStatus(raw);
-      // parseRenamedPath currently splits ANY path containing ' -> ', even on '??' lines
-      // It returns filePath: 'step2.txt' and origPath: 'step1' instead of preserving full name
       assert.equal(parsed.isClean, false);
       assert.equal(parsed.uncommittedFiles.length, 1);
-      assert.equal(parsed.entries[0].origPath, 'step1');
-      assert.equal(parsed.entries[0].filePath, 'step2.txt');
+      assert.equal(parsed.entries[0].origPath, null);
+      assert.equal(parsed.entries[0].filePath, 'step1 -> step2.txt');
     });
   });
 
@@ -479,9 +476,12 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
       const peerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zdw-peer-'));
       try {
         execSync(`git clone "${bareDir}" "${peerDir}"`, { stdio: 'pipe' });
-        execSync('git config user.name "Peer Tester" && git config user.email "peer@example.com"', {
-          cwd: peerDir,
-        });
+        execSync(
+          'git config user.name "Peer Tester" && git config user.email "peer@example.com" && git config core.hooksPath .git/hooks',
+          {
+            cwd: peerDir,
+          }
+        );
         execSync('git checkout main', { cwd: peerDir, stdio: 'pipe' });
 
         fs.writeFileSync(path.join(peerDir, 'remote1.txt'), 'remote 1');
@@ -516,9 +516,12 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
       const peerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zdw-peer2-'));
       try {
         execSync(`git clone "${bareDir}" "${peerDir}"`, { stdio: 'pipe' });
-        execSync('git config user.name "Peer Tester" && git config user.email "peer@example.com"', {
-          cwd: peerDir,
-        });
+        execSync(
+          'git config user.name "Peer Tester" && git config user.email "peer@example.com" && git config core.hooksPath .git/hooks',
+          {
+            cwd: peerDir,
+          }
+        );
         execSync('git checkout main', { cwd: peerDir, stdio: 'pipe' });
         fs.writeFileSync(path.join(peerDir, 'peer.txt'), 'peer commit');
         execSync('git add . && git commit -m "peer commit" && git push origin main', {

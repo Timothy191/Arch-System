@@ -50,6 +50,7 @@ export function createMockGitRepo(options = {}) {
     runGit('config user.email "watchdog@example.com"');
     runGit('config commit.gpgSign false');
     runGit('config core.autocrlf false');
+    runGit('config core.hooksPath .git/hooks');
   } catch (err) {
     throw new Error(`Failed to initialize git repository at ${tmpDir}: ${err}`);
   }

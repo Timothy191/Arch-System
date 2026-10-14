@@ -7,7 +7,9 @@ export function parseGitHubRemoteUrl(url) {
   if (!url || typeof url !== 'string') return null;
   const clean = url.trim().replace(/\/+$/, '');
 
-  const match = clean.match(/(?:^|[/@])github\.com[:/](?:[0-9]+\/)?([^/]+)\/(.+?)(?:\.git)?$/);
+  const match = clean.match(
+    /^(?:(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?|(?:[^@/\s]+@))?(?:ssh\.)?github\.com[:/](?:[0-9]+\/)?([^/]+)\/(.+?)(?:\.git)?$/
+  );
   if (!match) return null;
 
   const owner = match[1];
@@ -15,6 +17,7 @@ export function parseGitHubRemoteUrl(url) {
   if (repo.endsWith('.git')) {
     repo = repo.slice(0, -4);
   }
+  if (owner.includes('/') || repo.includes('/')) return null;
 
   return { owner, repo };
 }

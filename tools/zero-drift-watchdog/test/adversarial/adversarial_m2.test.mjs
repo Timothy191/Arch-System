@@ -237,18 +237,20 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 2 (Vercel Inspec
       assert.ok(['READY', 'UNKNOWN'].includes(state.state));
     });
 
-    it('identifies empirical hazard: null elements in deployments array trigger TypeError', async () => {
+    it('safely filters null elements in deployments array without throwing TypeError', async () => {
       const proj = 'prj_null_in_array';
+      vc.setProject(proj, 'null-array-app', { prodCommitSha: shaA, teamId: testTeamId });
       vc.setError('/v6/deployments', 200, { deployments: [null] });
 
-      await assert.rejects(
-        () => inspectVercelDeployment({ projectId: proj, token: testToken, apiUrl: vc.url }),
-        (err) => {
-          assert.ok(err instanceof TypeError);
-          assert.ok(err.message.includes('null'));
-          return true;
-        }
-      );
+      const state = await inspectVercelDeployment({
+        projectId: proj,
+        teamId: testTeamId,
+        token: testToken,
+        apiUrl: vc.url,
+      });
+      assert.equal(state.state, 'READY');
+      assert.equal(state.commit, shaA);
+      assert.equal(state.inFlightCommit, null);
     });
   });
 

@@ -4,6 +4,17 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-14] - Zero-Drift Watchdog & Federated Audit Hardening
+
+- **Action:** Fixed 6 correctness and reliability defects across `tools/zero-drift-watchdog/`:
+  - Corrected inverted `ahead`/`behind` mapping in `src/cli.mjs` when comparing local HEAD against GitHub `compare/{remote}...{local}`.
+  - Isolated subprocess git calls in `src/local-git.mjs` and `test/fixtures/mock-git.mjs` via `-c core.hooksPath=.git/hooks` to prevent global host git hooks (`~/.git-hooks`) from hanging automated push resolution and E2E tests.
+  - Restricted `parseRenamedPath` in `src/local-git.mjs` to `R`/`C` porcelain status codes so untracked/modified filenames containing `->` are not corrupted.
+  - Filtered null/non-object entries in `/v6/deployments` array in `src/vercel-deployment.mjs`.
+  - Anchored `parseGitHubRemoteUrl` in `src/remote-git.mjs` to `(?:ssh\.)?github\.com` at the host boundary.
+  - Unified `bin/federated-audit.mjs` with `tools/federation-watchdog/config/federation.json` and enforced fail-closed exit semantics on fatal exit code `2`.
+- **Verification:** E2E suite (`54/54 PASS` in 2.06s, down from 127.5s), Unit + Adversarial suite (`191/191 PASS`), `pnpm agent:verify` (`8/8 PASS`).
+
 ## [2026-09-28] - Vercel Best Practices Audit, Deployment Pruning & Production Release
 
 - **Action:** Pruned all stale/preview/superseded Vercel deployments (14 removed). Applied Turborepo + Next.js 16 Vercel best practices:

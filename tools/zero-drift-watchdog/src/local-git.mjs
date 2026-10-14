@@ -34,13 +34,17 @@ export async function runGit(args, cwd = process.cwd(), options = {}) {
   }
 
   try {
-    const { stdout, stderr } = await execFileAsync('git', args, {
-      cwd,
-      encoding: 'utf8',
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: options.timeout || 30000,
-      env: { ...process.env, ...(options.env || {}) },
-    });
+    const { stdout, stderr } = await execFileAsync(
+      'git',
+      ['-c', 'core.hooksPath=.git/hooks', ...args],
+      {
+        cwd,
+        encoding: 'utf8',
+        maxBuffer: 10 * 1024 * 1024,
+        timeout: options.timeout || 30000,
+        env: { ...process.env, ...(options.env || {}) },
+      }
+    );
     return { success: true, stdout, stderr: stderr ? stderr.trim() : '', exitCode: 0 };
   } catch (err) {
     return {
@@ -102,7 +106,14 @@ export function parsePorcelainStatus(rawOutput) {
     const statusCode = line.slice(0, 2);
     const indexStatus = line[0];
     const workTreeStatus = line[1];
-    const { origPath, filePath } = parseRenamedPath(rawPath);
+    const isRenameOrCopy =
+      indexStatus === 'R' ||
+      workTreeStatus === 'R' ||
+      indexStatus === 'C' ||
+      workTreeStatus === 'C';
+    const { origPath, filePath } = isRenameOrCopy
+      ? parseRenamedPath(rawPath)
+      : { origPath: null, filePath: rawPath.replace(/^"|"$/g, '') };
 
     const isUntracked = statusCode === '??';
     const isStaged = indexStatus !== ' ' && indexStatus !== '?';
