@@ -11,6 +11,7 @@ import type {
   saveExcavatorActivitySchema,
   saveHourlyLoadSchema,
   splitHourlyLoadSchema,
+  updateExcavatorAssignmentConfigSchema,
   updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
 } from '../schemas/form.schema.js';
@@ -28,3 +29,6 @@ export type UpdateHourlyLoadExcavatorInput = z.infer<typeof updateHourlyLoadExca
 export type SplitHourlyLoadInput = z.infer<typeof splitHourlyLoadSchema>;
 export type SaveHourlyLoadInput = z.infer<typeof saveHourlyLoadSchema>;
 export type SaveExcavatorActivityInput = z.infer<typeof saveExcavatorActivitySchema>;
+export type UpdateExcavatorAssignmentConfigInput = z.infer<
+  typeof updateExcavatorAssignmentConfigSchema
+>;

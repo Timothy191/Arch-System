@@ -176,3 +176,13 @@ export const saveExcavatorActivitySchema = z.object({
     )
     .default([]),
 });
+
+export const updateExcavatorAssignmentConfigSchema = z.object({
+  departmentId: z.string().uuid('Invalid department ID format'),
+  excavatorId: z.string().uuid('Invalid excavator ID format'),
+  loadDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
+  shiftType: z.enum(['day', 'night']),
+  siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
+  blockMinedId: z.string().uuid('Invalid block mined ID format').nullable().optional(),
+  materialType: z.enum(['Waste', 'Coal']).optional(),
+});

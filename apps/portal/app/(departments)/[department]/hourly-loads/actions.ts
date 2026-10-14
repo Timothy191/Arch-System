@@ -3,10 +3,15 @@
 import {
   saveHourlyLoadSchema,
   splitHourlyLoadSchema,
+  updateExcavatorAssignmentConfigSchema,
   updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
 } from '@repo/contract/schemas/form.schema';
-import type { SaveHourlyLoadInput, SplitHourlyLoadInput } from '@repo/contract/types/form.types';
+import type {
+  SaveHourlyLoadInput,
+  SplitHourlyLoadInput,
+  UpdateExcavatorAssignmentConfigInput,
+} from '@repo/contract/types/form.types';
 import { cacheInvalidateTags } from '@repo/redis';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
@@ -36,7 +41,7 @@ export async function syncExcavatorActivityFromHourlyLoads(
 
   const { data: existingActivities } = await serviceClient
     .from('excavator_activity')
-    .select('id, site_id, operator_id')
+    .select('id, site_id, block_mined_id, material_type, operator_id')
     .eq('department_id', departmentId)
     .eq('machine_id', excavatorId)
     .eq('activity_date', loadDate)
@@ -73,6 +78,8 @@ export async function syncExcavatorActivityFromHourlyLoads(
     shiftType
   );
   const totalExcavatorLoads = derivedRows.reduce((sum, r) => sum + r.totalLoads, 0);
+  const effectiveMaterial =
+    existingActivity?.material_type ?? assignedLoads[0]?.material_type ?? 'Waste';
 
   let activityId = existingActivity?.id ?? null;
 
@@ -82,6 +89,8 @@ export async function syncExcavatorActivityFromHourlyLoads(
       .update({
         loads: totalExcavatorLoads,
         site_id: existingActivity?.site_id ?? excavatorMachine?.site_id ?? null,
+        block_mined_id: existingActivity?.block_mined_id ?? null,
+        material_type: effectiveMaterial,
       })
       .eq('id', activityId);
   } else {
@@ -113,6 +122,7 @@ export async function syncExcavatorActivityFromHourlyLoads(
         activity_date: loadDate,
         shift_type: shiftType,
         site_id: opSiteId,
+        material_type: effectiveMaterial,
         passes: 0,
         loads: totalExcavatorLoads,
       })
@@ -214,6 +224,88 @@ export async function updateMachineSite(machineId: string, siteId: string | null
 
 export async function updateExcavatorSite(excavatorId: string, siteId: string | null) {
   return updateMachineSite(excavatorId, siteId);
+}
+
+export async function updateExcavatorAssignmentConfig(
+  rawInput: UpdateExcavatorAssignmentConfigInput
+) {
+  const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
+
+  const principal = await getAuthenticatedEmployee();
+  if (!principal?.employee) {
+    throw new Error('Unauthorized');
+  }
+  assertDepartmentAccess(principal.employee, validated.departmentId, [
+    'admin',
+    'operator',
+    'supervisor',
+  ]);
+
+  const serviceClient = createServiceRoleClient();
+
+  if (validated.siteId !== undefined) {
+    await serviceClient
+      .from('machines')
+      .update({ site_id: validated.siteId })
+      .eq('id', validated.excavatorId);
+  }
+
+  if (validated.materialType) {
+    await serviceClient
+      .from('hourly_loads')
+      .update({ material_type: validated.materialType })
+      .eq('department_id', validated.departmentId)
+      .eq('excavator_id', validated.excavatorId)
+      .eq('load_date', validated.loadDate)
+      .eq('shift_type', validated.shiftType)
+      .eq('is_locked', false);
+  }
+
+  const { data: existingActivities } = await serviceClient
+    .from('excavator_activity')
+    .select('id, site_id, block_mined_id, material_type')
+    .eq('department_id', validated.departmentId)
+    .eq('machine_id', validated.excavatorId)
+    .eq('activity_date', validated.loadDate)
+    .eq('shift_type', validated.shiftType)
+    .order('created_at', { ascending: false });
+
+  const existingActivity = existingActivities?.[0] ?? null;
+
+  if (existingActivity) {
+    const patch: Record<string, unknown> = {};
+    if (validated.siteId !== undefined) patch.site_id = validated.siteId;
+    if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
+    if (validated.materialType !== undefined) patch.material_type = validated.materialType;
+    if (Object.keys(patch).length > 0) {
+      await serviceClient.from('excavator_activity').update(patch).eq('id', existingActivity.id);
+    }
+  } else {
+    await serviceClient.from('excavator_activity').insert({
+      department_id: validated.departmentId,
+      machine_id: validated.excavatorId,
+      activity_date: validated.loadDate,
+      shift_type: validated.shiftType,
+      site_id: validated.siteId ?? null,
+      block_mined_id: validated.blockMinedId ?? null,
+      material_type: validated.materialType ?? 'Waste',
+      passes: 0,
+      loads: 0,
+    });
+  }
+
+  try {
+    await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+      departmentId: validated.departmentId,
+      excavatorId: validated.excavatorId,
+      loadDate: validated.loadDate,
+      shiftType: validated.shiftType,
+    });
+  } catch {
+    // Best-effort sync
+  }
+
+  return { success: true };
 }
 
 export async function updateHourlyLoadExcavator(

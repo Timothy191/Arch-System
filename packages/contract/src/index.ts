@@ -76,6 +76,7 @@ export {
   saveExcavatorActivitySchema,
   saveHourlyLoadSchema,
   splitHourlyLoadSchema,
+  updateExcavatorAssignmentConfigSchema,
   updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
 } from './schemas/form.schema';
@@ -200,6 +201,7 @@ export type {
   SaveExcavatorActivityInput,
   SaveHourlyLoadInput,
   SplitHourlyLoadInput,
+  UpdateExcavatorAssignmentConfigInput,
   UpdateHourlyLoadExcavatorInput,
   UpdateMachineSiteInput,
 } from './types/form.types';

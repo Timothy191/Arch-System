@@ -51,6 +51,14 @@ interface MineBlock {
   site_id: string | null;
 }
 
+interface ExcavatorActivityConfig {
+  machine_id: string;
+  shift_type: string;
+  site_id?: string | null;
+  block_mined_id?: string | null;
+  material_type?: string | null;
+}
+
 interface ExcavatorActivityFormProps {
   departmentId: string;
   excavators: ExcavatorMachine[];
@@ -59,6 +67,7 @@ interface ExcavatorActivityFormProps {
   sites?: Site[];
   mineBlocks: MineBlock[];
   todayDumperLoads: HourlyLoadSegmentSummary[];
+  todayActivities?: ExcavatorActivityConfig[];
   today?: string;
 }
 
@@ -74,6 +83,7 @@ export function ExcavatorActivityForm({
   sites,
   mineBlocks,
   todayDumperLoads,
+  todayActivities = [],
   today,
 }: ExcavatorActivityFormProps) {
   const router = useRouter();
@@ -211,12 +221,26 @@ export function ExcavatorActivityForm({
     });
   }, [formData.excavatorId, formData.shiftType, loadsState, dumpers]);
 
-  // Determine site assigned to this excavator on Hourly Loads tab
+  // Determine site, block mined, and material assigned to this excavator on Hourly Loads tab
   const selectedExcavator = excavators.find((e) => e.id === formData.excavatorId);
-  const effectiveSiteId = selectedExcavator?.site_id ?? null;
+  const excavatorActivityConfig =
+    todayActivities.find(
+      (a) => a.machine_id === formData.excavatorId && a.shift_type === formData.shiftType
+    ) ?? todayActivities.find((a) => a.machine_id === formData.excavatorId);
+
+  const effectiveSiteId = excavatorActivityConfig?.site_id ?? selectedExcavator?.site_id ?? null;
   const excavatorSite = sites?.find((s) => s.id === effectiveSiteId);
 
-  // Filter dumpers and mine blocks by the excavator's assigned site (always include dumpers assigned to this excavator in hourly_loads)
+  const effectiveBlockMinedId =
+    excavatorActivityConfig?.block_mined_id ?? (formData.blockMinedId || null);
+  const excavatorBlock = mineBlocks.find((mb) => mb.id === effectiveBlockMinedId);
+
+  const effectiveMaterial =
+    excavatorActivityConfig?.material_type ??
+    loadsState.find((l) => l.excavator_id === formData.excavatorId)?.material_type ??
+    null;
+
+  // Filter dumpers by the excavator's assigned site (always include dumpers assigned to this excavator in hourly_loads)
   const assignedDumperIds = useMemo(
     () =>
       new Set(
@@ -230,10 +254,6 @@ export function ExcavatorActivityForm({
         (d) => d.site_id === effectiveSiteId || d.site_id === null || assignedDumperIds.has(d.id)
       )
     : dumpers;
-
-  const siteMineBlocks = effectiveSiteId
-    ? mineBlocks.filter((mb) => mb.site_id === effectiveSiteId || mb.site_id === null)
-    : mineBlocks;
 
   // Auto-calculated metrics
   const totalLoads = dumperAssignments.reduce((sum, a) => sum + a.totalLoads, 0);
@@ -296,7 +316,7 @@ export function ExcavatorActivityForm({
         activityDate,
         shiftType: formData.shiftType === 'night' ? 'night' : 'day',
         siteId: effectiveSiteId,
-        blockMinedId: formData.blockMinedId || null,
+        blockMinedId: effectiveBlockMinedId,
         notes: formData.notes || null,
         dumperAssignments: dumperAssignments
           .filter((a) => a.dumperMachineId)
@@ -383,8 +403,8 @@ export function ExcavatorActivityForm({
           </div>
         ) : (
           <>
-            {/* Top row: Excavator, Operator, Shift, Block Mined */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Top row: Excavator, Operator, Shift */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Excavator Dropdown */}
               <div className="space-y-2">
                 <label className="text-[var(--text-secondary)] text-sm block">
@@ -411,14 +431,34 @@ export function ExcavatorActivityForm({
                 {errors.excavatorId && (
                   <p className="text-accent-red text-xs">{errors.excavatorId}</p>
                 )}
-                {excavatorSite && (
-                  <p className="text-[var(--text-muted)] text-xs">
-                    Site:{' '}
-                    <span className="text-[var(--text-heading)] font-medium">
-                      {excavatorSite.name}
-                    </span>{' '}
-                    (from Hourly Loads)
-                  </p>
+                {(excavatorSite || excavatorBlock || effectiveMaterial) && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[var(--text-muted)] text-xs pt-0.5">
+                    {excavatorSite && (
+                      <span>
+                        Site:{' '}
+                        <span className="text-[var(--text-heading)] font-medium">
+                          {excavatorSite.name}
+                        </span>
+                      </span>
+                    )}
+                    {excavatorBlock && (
+                      <span>
+                        Block:{' '}
+                        <span className="text-[var(--text-heading)] font-medium">
+                          {excavatorBlock.name} ({excavatorBlock.code})
+                        </span>
+                      </span>
+                    )}
+                    {effectiveMaterial && (
+                      <span>
+                        Material:{' '}
+                        <span className="text-[var(--text-heading)] font-medium">
+                          {effectiveMaterial}
+                        </span>
+                      </span>
+                    )}
+                    <span className="text-[11px] opacity-80">(from Hourly Loads)</span>
+                  </div>
                 )}
               </div>
 
@@ -460,28 +500,6 @@ export function ExcavatorActivityForm({
                     {formData.shiftType} Shift · All systems operational
                   </p>
                 </div>
-              </div>
-
-              {/* Block Mined Dropdown */}
-              <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">Block Mined</label>
-                <select
-                  value={formData.blockMinedId}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      blockMinedId: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-                >
-                  <option value="">Select block...</option>
-                  {siteMineBlocks.map((mb) => (
-                    <option key={mb.id} value={mb.id}>
-                      {mb.name} ({mb.code})
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 

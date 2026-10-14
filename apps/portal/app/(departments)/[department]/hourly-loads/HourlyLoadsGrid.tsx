@@ -14,7 +14,7 @@ import { trackClientMetric } from '@/lib/observability/client-telemetry';
 import {
   saveHourlyLoad,
   splitMachineHourlyLoad,
-  updateExcavatorSite,
+  updateExcavatorAssignmentConfig,
   updateHourlyLoadExcavator,
 } from './actions';
 
@@ -46,12 +46,30 @@ interface Excavator {
   sites?: { name: string } | { name: string }[] | null;
 }
 
+interface MineBlockOption {
+  id: string;
+  name: string;
+  code: string;
+  site_id: string | null;
+}
+
+interface ExcavatorActivitySummary {
+  id: string;
+  machine_id: string;
+  site_id: string | null;
+  block_mined_id: string | null;
+  material_type: string | null;
+  shift_type: string;
+}
+
 interface HourlyLoadsGridProps {
   departmentId: string;
   machines: Machine[];
   excavators: Excavator[];
   hourlyLoads: HourlyLoad[];
   sites: { id: string; name: string; site_code: string }[];
+  mineBlocks?: MineBlockOption[];
+  excavatorActivities?: ExcavatorActivitySummary[];
   /** Operational date (Africa/Johannesburg) from the server — never derive on the client. */
   today: string;
   /** Shift active at first render, resolved on the server to avoid UTC drift. */
@@ -188,6 +206,8 @@ function HourlyLoadsGrid({
   excavators,
   hourlyLoads,
   sites,
+  mineBlocks = [],
+  excavatorActivities = [],
   today,
   initialShift,
 }: HourlyLoadsGridProps) {
@@ -198,7 +218,30 @@ function HourlyLoadsGrid({
   // persists in the background, so the page never reloads between values.
   const [loadsState, setLoadsState] = useState<HourlyLoad[]>(hourlyLoads);
   const [excavatorSites, setExcavatorSites] = useState<Record<string, string>>(() =>
-    Object.fromEntries(excavators.map((e) => [e.id, e.site_id ?? '']))
+    Object.fromEntries(
+      excavators.map((e) => {
+        const act = excavatorActivities.find((a) => a.machine_id === e.id);
+        return [e.id, e.site_id ?? act?.site_id ?? ''];
+      })
+    )
+  );
+  const [excavatorBlocks, setExcavatorBlocks] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      excavators.map((e) => {
+        const act = excavatorActivities.find((a) => a.machine_id === e.id);
+        return [e.id, act?.block_mined_id ?? ''];
+      })
+    )
+  );
+  const [excavatorMaterials, setExcavatorMaterials] = useState<Record<string, HourlyMaterial>>(() =>
+    Object.fromEntries(
+      excavators.map((e) => {
+        const act = excavatorActivities.find((a) => a.machine_id === e.id);
+        const load = hourlyLoads.find((l) => l.excavator_id === e.id && !l.is_locked);
+        const mat = act?.material_type || load?.material_type;
+        return [e.id, mat === 'Coal' ? 'Coal' : 'Waste'];
+      })
+    )
   );
 
   // Split Modal State
@@ -637,6 +680,10 @@ function HourlyLoadsGrid({
       const currentExcavatorId = row.excavatorId || null;
       if (newExcavatorId === currentExcavatorId) return;
 
+      const inheritedMaterial = newExcavatorId
+        ? (excavatorMaterials[newExcavatorId] ?? 'Waste')
+        : (row.materialType as HourlyMaterial) || 'Waste';
+
       await commitLoadChange(
         row.loadId,
         row.machineId,
@@ -644,7 +691,10 @@ function HourlyLoadsGrid({
         'excavator_id',
         currentExcavatorId,
         newExcavatorId,
-        { excavator_id: newExcavatorId },
+        {
+          excavator_id: newExcavatorId,
+          material_type: inheritedMaterial,
+        },
         'hourly_loads_excavator_assign',
         {
           field: 'excavator_id',
@@ -654,7 +704,7 @@ function HourlyLoadsGrid({
         }
       );
     },
-    [source, selectedShift, commitLoadChange]
+    [source, selectedShift, excavatorMaterials, commitLoadChange]
   );
 
   // Handle excavator site assignment change
@@ -663,16 +713,98 @@ function HourlyLoadsGrid({
       const prevSiteId = excavatorSites[excavatorId] ?? '';
       if ((newSiteId || '') === prevSiteId) return;
 
+      const prevBlockId = excavatorBlocks[excavatorId] ?? '';
+      const validBlockForNewSite = prevBlockId
+        ? mineBlocks.some(
+            (mb) => mb.id === prevBlockId && (!newSiteId || mb.site_id === newSiteId || !mb.site_id)
+          )
+        : false;
+      const nextBlockId = validBlockForNewSite ? prevBlockId : '';
+
       setExcavatorSites((prev) => ({ ...prev, [excavatorId]: newSiteId || '' }));
+      setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: nextBlockId }));
       try {
-        await updateExcavatorSite(excavatorId, newSiteId || null);
+        await updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: today,
+          shiftType: selectedShift,
+          siteId: newSiteId || null,
+          blockMinedId: nextBlockId || null,
+        });
       } catch (err) {
         logError(err, { context: 'update_excavator_site' });
         setExcavatorSites((prev) => ({ ...prev, [excavatorId]: prevSiteId }));
+        setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: prevBlockId }));
         toast.error('Failed to update excavator site.');
       }
     },
-    [excavatorSites]
+    [excavatorSites, excavatorBlocks, mineBlocks, departmentId, today, selectedShift]
+  );
+
+  // Handle excavator block mined / area change
+  const handleExcavatorBlockChange = useCallback(
+    async (excavatorId: string, newBlockId: string | null) => {
+      const prevBlockId = excavatorBlocks[excavatorId] ?? '';
+      if ((newBlockId || '') === prevBlockId) return;
+
+      setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: newBlockId || '' }));
+      try {
+        await updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: today,
+          shiftType: selectedShift,
+          blockMinedId: newBlockId || null,
+        });
+      } catch (err) {
+        logError(err, { context: 'update_excavator_block' });
+        setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: prevBlockId }));
+        toast.error('Failed to update excavator block mined.');
+      }
+    },
+    [excavatorBlocks, departmentId, today, selectedShift]
+  );
+
+  // Handle excavator material change (Waste / Coal)
+  const handleExcavatorMaterialChange = useCallback(
+    async (excavatorId: string, newMaterial: HourlyMaterial) => {
+      const prevMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
+      if (newMaterial === prevMaterial) return;
+
+      setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: newMaterial }));
+      setLoadsState((prev) =>
+        prev.map((load) =>
+          load.excavator_id === excavatorId && load.shift_type === selectedShift && !load.is_locked
+            ? { ...load, material_type: newMaterial }
+            : load
+        )
+      );
+
+      try {
+        await updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: today,
+          shiftType: selectedShift,
+          materialType: newMaterial,
+        });
+      } catch (err) {
+        logError(err, { context: 'update_excavator_material' });
+        setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: prevMaterial }));
+        setLoadsState((prev) =>
+          prev.map((load) =>
+            load.excavator_id === excavatorId &&
+            load.shift_type === selectedShift &&
+            !load.is_locked
+              ? { ...load, material_type: prevMaterial }
+              : load
+          )
+        );
+        toast.error('Failed to update excavator material.');
+      }
+    },
+    [excavatorMaterials, departmentId, today, selectedShift]
   );
 
   // Handle split creation
@@ -929,45 +1061,120 @@ function HourlyLoadsGrid({
         </div>
       </div>
 
-      {/* Excavator Site Assignment Panel */}
+      {/* Excavator Site, Block Mined & Material Assignment Panel */}
       <GlassCard className="p-4 bg-[var(--vibrancy-surface)] border border-black/[0.06]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div>
             <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-              Excavator Location / Site Mapping
+              Excavator Location, Block Mined & Material Mapping
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
-              Assign each Excavator to a Site. Hauling trucks assigned to the Excavator
-              automatically inherit this location.
+              Assign each Excavator to a Site, Block Mined / Area, and Material. Hauling trucks
+              assigned to the Excavator automatically inherit this location, block, and material.
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {excavators.map((excavator) => (
-            <div
-              key={excavator.id}
-              className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]"
-            >
-              <div className="flex flex-col pr-2">
-                <span className="text-xs font-semibold text-[var(--text-heading)]">
-                  {excavator.name}
-                </span>
-                <span className="text-[10px] text-[var(--text-muted)]">Excavator</span>
-              </div>
-              <select
-                value={excavatorSites[excavator.id] || ''}
-                onChange={(e) => handleExcavatorSiteChange(excavator.id, e.target.value || null)}
-                className="bg-transparent border border-[var(--border-default)] rounded px-2 py-1 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+          {excavators.map((excavator) => {
+            const currentSiteId = excavatorSites[excavator.id] || '';
+            const currentBlockId = excavatorBlocks[excavator.id] || '';
+            const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
+            const availableBlocks = currentSiteId
+              ? mineBlocks.filter((mb) => mb.site_id === currentSiteId || mb.site_id === null)
+              : mineBlocks;
+            const selectedSite = sites.find((s) => s.id === currentSiteId);
+            const selectedBlock = mineBlocks.find((mb) => mb.id === currentBlockId);
+
+            return (
+              <div
+                key={excavator.id}
+                className="flex flex-col gap-3 p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs"
               >
-                <option value="">No Site</option>
-                {sites.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
+                {/* Header: Excavator Name + Material Toggle */}
+                <div className="flex items-center justify-between gap-2 border-b border-[var(--border-default)]/60 pb-2.5">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-[var(--text-heading)]">
+                      {excavator.name}
+                    </span>
+                    <span className="text-[11px] text-[var(--text-muted)]">
+                      Excavator
+                      {selectedSite ? ` · ${selectedSite.name}` : ''}
+                      {selectedBlock ? ` · ${selectedBlock.code}` : ''}
+                    </span>
+                  </div>
+
+                  {/* Material Selector (Waste / Coal) */}
+                  <div className="flex items-center gap-1 rounded-full bg-[var(--bg-primary)] p-0.5 border border-[var(--border-default)]">
+                    <button
+                      type="button"
+                      onClick={() => handleExcavatorMaterialChange(excavator.id, 'Waste')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                        currentMaterial === 'Waste'
+                          ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                      }`}
+                    >
+                      Waste
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExcavatorMaterialChange(excavator.id, 'Coal')}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                        currentMaterial === 'Coal'
+                          ? 'bg-neutral-800 text-white shadow-xs'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                      }`}
+                    >
+                      Coal
+                    </button>
+                  </div>
+                </div>
+
+                {/* Site & Block Mined / Area Selectors */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                      Site / Location
+                    </label>
+                    <select
+                      value={currentSiteId}
+                      onChange={(e) =>
+                        handleExcavatorSiteChange(excavator.id, e.target.value || null)
+                      }
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    >
+                      <option value="">No Site</option>
+                      {sites.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                      Block Mined / Area
+                    </label>
+                    <select
+                      value={currentBlockId}
+                      onChange={(e) =>
+                        handleExcavatorBlockChange(excavator.id, e.target.value || null)
+                      }
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    >
+                      <option value="">Select block / area...</option>
+                      {availableBlocks.map((mb) => (
+                        <option key={mb.id} value={mb.id}>
+                          {mb.name} ({mb.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
           {excavators.length === 0 && (
             <p className="text-xs text-[var(--text-muted)] col-span-full">
               No active excavators found. Please add excavators in Machine DB.
@@ -998,9 +1205,6 @@ function HourlyLoadsGrid({
                   <th scope="col" className="py-3 px-3 text-left min-w-[150px]">
                     Excavator Assigned
                   </th>
-                  <th scope="col" className="py-3 px-2 text-center min-w-[90px]">
-                    Material
-                  </th>
                   {HOURS_12.map((_, index) => (
                     <th
                       key={HOUR_PROP(index)}
@@ -1029,7 +1233,7 @@ function HourlyLoadsGrid({
                 {source.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={3 + 12 + 1 + (hasBinFactors ? 2 : 0)}
+                      colSpan={2 + 12 + 1 + (hasBinFactors ? 2 : 0)}
                       className="py-10 text-center text-sm text-[var(--text-muted)]"
                     >
                       No machine load records found for this shift.
@@ -1101,32 +1305,6 @@ function HourlyLoadsGrid({
                           </select>
                         </td>
 
-                        {/* Material Column */}
-                        <td className="py-2.5 px-2 text-center min-w-[90px]">
-                          <button
-                            type="button"
-                            data-row={String(rowIndex)}
-                            data-action="toggle-material"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMaterialToggle(rowIndex);
-                            }}
-                            disabled={isLocked}
-                            title={
-                              isLocked ? 'Segment locked' : 'Click to toggle between Waste and Coal'
-                            }
-                            className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 ${
-                              isLocked
-                                ? 'opacity-60 cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border-default)]'
-                                : row.materialType === 'Coal'
-                                  ? 'cursor-pointer bg-neutral-800 text-white border border-neutral-700 hover:bg-neutral-900 shadow-xs'
-                                  : 'cursor-pointer bg-[var(--bg-secondary)] text-[var(--text-heading)] border border-[var(--border-default)] hover:bg-[var(--bg-tertiary)] shadow-xs'
-                            }`}
-                          >
-                            {row.materialType || 'Waste'}
-                          </button>
-                        </td>
-
                         {/* 12 Hour Columns */}
                         {HOURS_12.map((_, hourIdx) => {
                           const hourProp = HOUR_PROP(hourIdx);
@@ -1178,7 +1356,6 @@ function HourlyLoadsGrid({
                     Total Loads
                   </td>
                   <td className="py-3 px-3 text-left text-[var(--text-muted)]">—</td>
-                  <td className="py-3 px-2 text-center text-[var(--text-muted)]">—</td>
                   {HOURS_12.map((_, index) => (
                     <td
                       key={`footer-hour-${HOUR_PROP(index)}`}

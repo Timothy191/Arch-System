@@ -1,7 +1,6 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
-import { C66MachineOperatorScanner } from '@/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
 import { HAUL_TRUCK_MACHINE_TYPES } from './loads-utils';
@@ -23,12 +22,6 @@ export default async function HourlyLoadsPage({
     .from('machines')
     .select('id, name, machine_type, bin_factor, site_id')
     .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
-    .eq('active', true)
-    .order('name');
-
-  const { data: activeMachines } = await supabase
-    .from('machines')
-    .select('id, name, machine_type, site_id')
     .eq('active', true)
     .order('name');
 
@@ -54,6 +47,21 @@ export default async function HourlyLoadsPage({
     .eq('active', true)
     .order('name');
 
+  // Fetch active mine blocks / areas
+  const { data: mineBlocks } = await supabase
+    .from('mine_blocks')
+    .select('id, name, code, site_id')
+    .eq('active', true)
+    .order('name');
+
+  // Fetch today's excavator activity records (for block_mined_id and material_type)
+  const { data: excavatorActivities } = await supabase
+    .from('excavator_activity')
+    .select('id, machine_id, site_id, block_mined_id, material_type, shift_type')
+    .eq('department_id', deptId)
+    .eq('activity_date', today)
+    .order('created_at', { ascending: false });
+
   // Calculate totals
   const loadsByMachine = new Map();
   let grandTotal = 0;
@@ -76,18 +84,14 @@ export default async function HourlyLoadsPage({
         />
       </KPIGrid>
 
-      <C66MachineOperatorScanner
-        departmentId={deptId}
-        machines={activeMachines || []}
-        sites={sites || []}
-      />
-
       <HourlyLoadsGrid
         departmentId={deptId}
         machines={machines || []}
         excavators={excavators || []}
         hourlyLoads={hourlyLoads || []}
         sites={sites || []}
+        mineBlocks={mineBlocks || []}
+        excavatorActivities={excavatorActivities || []}
         today={today}
         initialShift={getCurrentShift()}
       />
