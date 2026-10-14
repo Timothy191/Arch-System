@@ -18,6 +18,15 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
   const [pinnedNames, setPinnedNames] = useState<Set<string>>(new Set());
 
+  const handlePinnedChange = (departmentName: string, pinned: boolean) => {
+    setPinnedNames((current) => {
+      const next = new Set(current);
+      if (pinned) next.add(departmentName);
+      else next.delete(departmentName);
+      return next;
+    });
+  };
+
   // Load pinned departments from localStorage on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -228,7 +237,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         >
           {filteredDepartments.map((dept, i) => (
             <div key={dept.name} role="listitem">
-              <DepartmentCard department={dept} index={i} />
+              <DepartmentCard department={dept} index={i} onPinnedChange={handlePinnedChange} />
             </div>
           ))}
         </div>
