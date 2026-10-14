@@ -5,8 +5,9 @@ import {
   machineOperatorScanResponseSchema,
   z,
 } from '@repo/contract';
+import { ContextCardTrigger } from '@repo/ui/components/ui/context-card';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { AlertTriangle, CheckCircle2, RefreshCw, UserCheck } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, RefreshCw, UserCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -190,15 +191,25 @@ export function C66MachineOperatorScanner({
     <GlassCard className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="flex items-center gap-2 text-lg font-medium text-[var(--text-heading)]">
-            <UserCheck size={20} className="text-[var(--accent-blue)]" />
-            Machine &amp; Operator Assignment
-          </h3>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Select a machine to filter and assign qualified operators. When an ADT machine is
-            selected, operators are automatically filtered to show certified ADT operators with
-            current medical and induction clearances.
-          </p>
+          <ContextCardTrigger
+            side="bottom"
+            align="center"
+            delay={100}
+            content={
+              <>
+                <h3 className="flex items-center gap-2 text-lg font-medium text-[var(--text-heading)]">
+                  <UserCheck size={20} className="text-[var(--accent-blue)]" />
+                  Machine &amp; Operator Assignment
+                </h3>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  Select a machine to filter and assign qualified operators. When an ADT machine is
+                  selected, operators are automatically filtered to show certified ADT operators
+                  with current medical and induction clearances.
+                </p>
+              </>
+            }
+            render={<Info className="h-4 w-4 text-[var(--accent-blue)]" />}
+          />
         </div>
         {(machine || assignment) && (
           <button

@@ -6,21 +6,36 @@ import { seedControlRoom } from './generators/control-room';
 import { seedDrilling } from './generators/drilling';
 import { seedProduction } from './generators/production';
 
-// Load from potential .env locations (cwd, root, apps/portal)
+// Load from the first available .env location with real credentials (prioritizing apps/portal/.env)
 const candidateEnvPaths = [
+  path.resolve(__dirname, '../../apps/portal/.env'),
   path.resolve(process.cwd(), '.env'),
   path.resolve(__dirname, '../../.env'),
-  path.resolve(__dirname, '../../apps/portal/.env'),
 ];
 
 for (const envPath of candidateEnvPaths) {
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath });
+    if (
+      (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) &&
+      (process.env.SUPABASE_SERVICE_KEY ||
+        process.env.SUPABASE_SECRET_KEY ||
+        process.env.SUPABASE_SERVICE_ROLE_KEY)
+    ) {
+      break;
+    }
   }
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const rawUrl = [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_URL].find(
+  (v) => v && /^https?:\/\//i.test(v.trim())
+);
+const SUPABASE_URL = rawUrl?.trim();
+const SUPABASE_SERVICE_KEY = (
+  process.env.SUPABASE_SERVICE_KEY ||
+  process.env.SUPABASE_SECRET_KEY ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)?.trim();
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('Missing Supabase credentials in .env');
