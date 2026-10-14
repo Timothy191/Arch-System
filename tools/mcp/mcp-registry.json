@@ -4,7 +4,6 @@
   "title": "Arch-System Master MCP Server Registry",
   "description": "Canonical Single Source of Truth for MCP server registration, tool discovery, and agent onboarding across all multi-agent runtimes (Antigravity CLI, Claude Code, OpenCode, Cursor, VS Code, and Hermes).",
   "requiredServers": [
-    "firecrawl",
     "upstash",
     "filesystem",
     "memory",
@@ -15,29 +14,6 @@
     "context7"
   ],
   "servers": {
-    "firecrawl": {
-      "name": "firecrawl",
-      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
-      "required": true,
-      "category": "research_and_web",
-      "command": "/home/tim/.local/bin/firecrawl-mcp",
-      "fallbackCommand": "npx",
-      "fallbackArgs": ["-y", "firecrawl-mcp"],
-      "remoteUrl": "https://mcp.firecrawl.dev/v2/mcp",
-      "env": {
-        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
-      },
-      "autoApprove": [
-        "firecrawl_search",
-        "firecrawl_scrape",
-        "firecrawl_map",
-        "firecrawl_find_tools",
-        "firecrawl_developer_search",
-        "firecrawl_research_search_papers"
-      ],
-      "toolsCount": 27,
-      "schemaDir": "/home/tim/.gemini/antigravity-cli/mcp/firecrawl"
-    },
     "upstash": {
       "name": "upstash",
       "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",

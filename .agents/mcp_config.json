@@ -1,14 +1,5 @@
 {
   "mcpServers": {
-    "firecrawl": {
-      "command": "/home/tim/.local/bin/firecrawl-mcp",
-      "args": [],
-      "env": {
-        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
-      },
-      "description": "Firecrawl Web Search, Scrape, Crawl, Paper Research, and Alexandria Contracts",
-      "type": "stdio"
-    },
     "upstash": {
       "type": "remote",
       "url": "https://mcp.upstash.com/mcp",

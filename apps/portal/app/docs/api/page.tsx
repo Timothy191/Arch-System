@@ -1,12 +1,12 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-import 'swagger-ui-react/swagger-ui.css';
-
-const SwaggerUI = dynamic(
-  () => import('swagger-ui-react').then((mod) => ({ default: mod.SwaggerUI })),
-  { ssr: false }
-);
+import { buttonVariants } from '@repo/ui/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@repo/ui/components/ui/card';
+import Link from 'next/link';
 
 // AGENT-TRACE: API documentation page using Swagger UI
 // This page provides an interactive interface for exploring the API
@@ -22,22 +22,19 @@ export default function ApiDocs() {
           Interactive API reference for Arch-Systems Portal
         </p>
       </div>
-      <SwaggerUI
-        url="/api/doc"
-        docExpansion="list"
-        defaultModelsExpandDepth={2}
-        defaultModelExpandDepth={2}
-        tryItOutEnabled={true}
-        persistAuthorization={true}
-        displayRequestDuration={true}
-        displayOperationId={false}
-        filter={true}
-        showExtensions={true}
-        showCommonExtensions={true}
-        syntaxHighlight={{
-          theme: 'nord',
-        }}
-      />
+      <main className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>OpenAPI specification</CardTitle>
+            <CardDescription>Download the current machine-readable API contract.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
+            <Link className={buttonVariants()} href="/api/doc" target="_blank" rel="noreferrer">
+              Open JSON specification
+            </Link>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }

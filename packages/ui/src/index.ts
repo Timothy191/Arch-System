@@ -78,11 +78,7 @@ export * from './components/ui/hero-video-dialog';
 export * from './components/ui/input';
 export * from './components/ui/json-view';
 export * from './components/ui/label';
-export {
-  LiquiButton,
-  type LiquiButtonProps,
-  liquiButtonVariants,
-} from './components/ui/liqui-button';
+
 export * from './components/ui/load-more-button';
 export * from './components/ui/loader';
 export * from './components/ui/loading-dots';

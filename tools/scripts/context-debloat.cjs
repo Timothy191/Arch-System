@@ -40,7 +40,6 @@ const DEPRECATED_SKILL_PATTERNS = [
   'weather',
   'presentation',
   'azure-', // External skills, load on demand
-  'firecrawl', // External skills, load on demand
   'upstash', // External skills, load on demand
   'composio', // External skills, load on demand
   'microsoft-foundry', // External skills, load on demand

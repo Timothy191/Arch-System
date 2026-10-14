@@ -6,7 +6,6 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
-    "@liqui-design/glass": "^0.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-scroll-area": "^1.2.10",

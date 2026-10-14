@@ -19,7 +19,6 @@
     "hooks": "@repo/ui/hooks"
   },
   "registries": {
-    "@magicui": "https://magicui.design/r/{name}",
-    "@liqui-design": "https://liqui.design/r/{name}.json"
+    "@magicui": "https://magicui.design/r/{name}"
   }
 }

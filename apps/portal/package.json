@@ -59,7 +59,6 @@
     "react-hook-form": "catalog:",
     "recharts": "catalog:",
     "sonner": "catalog:",
-    "swagger-ui-react": "^5.18.2",
     "workflow": "^4.8.9",
     "xstate": "catalog:",
     "zod": "catalog:",
