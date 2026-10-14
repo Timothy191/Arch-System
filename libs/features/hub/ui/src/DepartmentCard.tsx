@@ -22,7 +22,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { memo, useEffect, useState, useTransition } from 'react';
+import { memo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Sparkline } from './Sparkline';
 
@@ -78,25 +78,18 @@ interface DepartmentCardProps {
   department: Department;
   index: number;
   onPinnedChange?: (departmentName: string, pinned: boolean) => void;
+  isPinned: boolean;
 }
 
-function DepartmentCard({ department, index, onPinnedChange }: DepartmentCardProps) {
+function DepartmentCard({ department, index, onPinnedChange, isPinned }: DepartmentCardProps) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
-  const [isPinned, setIsPinned] = useState(false);
   const [imageError, setImageError] = useState(false);
-
-  useEffect(() => {
-    const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
-    setIsPinned(pinned === 'true');
-  }, [department.name]);
 
   const togglePin = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     const nextState = !isPinned;
-    localStorage.setItem(`pinned_dept_${department.name}`, String(nextState));
-    setIsPinned(nextState);
     onPinnedChange?.(department.name, nextState);
     if (nextState) {
       toast.success(`Pinned ${department.displayName} to dashboard`);
