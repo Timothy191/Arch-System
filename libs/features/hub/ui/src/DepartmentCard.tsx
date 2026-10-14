@@ -77,9 +77,10 @@ const COLOR_MAP: Record<string, { bg: string; text: string }> = {
 interface DepartmentCardProps {
   department: Department;
   index: number;
+  onPinnedChange?: (departmentName: string, pinned: boolean) => void;
 }
 
-function DepartmentCard({ department, index }: DepartmentCardProps) {
+function DepartmentCard({ department, index, onPinnedChange }: DepartmentCardProps) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
@@ -96,6 +97,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
     const nextState = !isPinned;
     localStorage.setItem(`pinned_dept_${department.name}`, String(nextState));
     setIsPinned(nextState);
+    onPinnedChange?.(department.name, nextState);
     if (nextState) {
       toast.success(`Pinned ${department.displayName} to dashboard`);
     } else {
@@ -122,7 +124,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
       className={cn('h-full', department.gridSpan)}
     >
       <div
-        className="uiverse-card group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35"
+        className="uiverse-card group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
         data-testid={`dept-card-${department.name}`}
       >
         {/* Navigation Loading Overlay */}
