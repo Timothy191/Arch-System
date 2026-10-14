@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { useMemo } from 'react';
 
 const SHIFT_HOURS = 12;
 
@@ -45,32 +46,52 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
-  // Group by site_id, then by shift
-  const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
-
-  for (const activity of todayActivity) {
-    const siteKey = activity.site_id ?? '__none__';
-    const siteName = activity.site?.name ?? 'No Site Assigned';
-    if (!siteMap.has(siteKey)) {
-      siteMap.set(siteKey, { siteName, activities: [] });
+  // Bolt Optimization: Pre-index todayAssignments into a Map by excavator_activity_id.
+  // Replaces O(A * D) nested array filtering across activities and sites with O(1) Map lookups.
+  const assignmentsByActivityId = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (let i = 0; i < todayAssignments.length; i++) {
+      const assignment = todayAssignments[i]!;
+      const list = map.get(assignment.excavator_activity_id);
+      if (list) {
+        list.push(assignment);
+      } else {
+        map.set(assignment.excavator_activity_id, [assignment]);
+      }
     }
-    siteMap.get(siteKey)!.activities.push(activity);
-  }
+    return map;
+  }, [todayAssignments]);
 
-  // Put "No Site Assigned" last
-  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === '__none__') return 1;
-    if (b === '__none__') return -1;
-    return 0;
-  });
+  // Bolt Optimization: Group activities by site_id and memoize results.
+  // Avoids re-grouping and sorting site arrays on un-related parent re-renders.
+  const siteEntries = useMemo(() => {
+    const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
+
+    for (let i = 0; i < todayActivity.length; i++) {
+      const activity = todayActivity[i]!;
+      const siteKey = activity.site_id ?? '__none__';
+      const siteName = activity.site?.name ?? 'No Site Assigned';
+      if (!siteMap.has(siteKey)) {
+        siteMap.set(siteKey, { siteName, activities: [] });
+      }
+      siteMap.get(siteKey)!.activities.push(activity);
+    }
+
+    // Put "No Site Assigned" last
+    return Array.from(siteMap.entries()).sort(([a], [b]) => {
+      if (a === '__none__') return 1;
+      if (b === '__none__') return -1;
+      return 0;
+    });
+  }, [todayActivity]);
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
+        const siteAssignments = activities.flatMap(
+          (a) => assignmentsByActivityId.get(a.id) || []
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -110,9 +131,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -131,9 +150,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) || []}
                     />
                   ))}
                 </div>
