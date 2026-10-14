@@ -276,8 +276,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         >
           {tabs.map((tab) => {
             const href = tab.name === 'dashboard' ? basePath : `${basePath}/${tab.name}`;
+            const isShiftOperationsActive =
+              tab.name === 'shift-compilation' &&
+              (pathname === `${basePath}/shift-compilation` ||
+                pathname === `${basePath}/shift-coverage` ||
+                pathname === `${basePath}/shift-closeout`);
             const isActive =
-              pathname === href || (tab.name === 'dashboard' && pathname === basePath);
+              pathname === href ||
+              (tab.name === 'dashboard' && pathname === basePath) ||
+              isShiftOperationsActive;
             const Icon = ICON_MAP[tab.icon];
             return (
               <Link

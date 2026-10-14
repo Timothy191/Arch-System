@@ -93,10 +93,10 @@ export default async function ControlRoomPage() {
             className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
           >
             <ClipboardCheck className="w-4 h-4" />
-            Shift Handover
+            Shift Operations
           </Link>
           <Link
-            href="/control-room/shift-closeout"
+            href="/control-room/shift-compilation?tab=closeout"
             className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
           >
             <CheckSquare className="w-4 h-4" />

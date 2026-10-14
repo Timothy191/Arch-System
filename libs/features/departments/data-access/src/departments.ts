@@ -228,9 +228,7 @@ export const CONTROL_ROOM_TABS = [
   { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
   { name: 'excavator-activity', label: 'Excavator', icon: 'Pickaxe' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
-  { name: 'shift-compilation', label: 'Shift Handover', icon: 'ClipboardCheck' },
-  { name: 'shift-coverage', label: 'Roster & Coverage', icon: 'Users' },
-  { name: 'shift-closeout', label: 'Shift Closeout', icon: 'CheckSquare' },
+  { name: 'shift-compilation', label: 'Shift Operations', icon: 'ClipboardCheck' },
 ] as const;
 
 export const ENGINEERING_TABS = [

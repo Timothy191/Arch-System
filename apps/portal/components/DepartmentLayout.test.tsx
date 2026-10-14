@@ -36,11 +36,9 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Shift Handover/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Roster & Coverage/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Shift Closeout/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
 
-    // Verify exact ordering (Shift Handover, Roster & Coverage, Shift Closeout at the bottom)
+    // Verify exact ordering (Shift Operations at the bottom)
     expect(controlRoomTabs.map((t) => t.label)).toEqual([
       'Dashboard',
       'Hourly Loads',
@@ -48,9 +46,7 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
       'Eng Notes',
       'Excavator',
       'Reports',
-      'Shift Handover',
-      'Roster & Coverage',
-      'Shift Closeout',
+      'Shift Operations',
     ]);
   });
 
