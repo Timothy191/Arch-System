@@ -582,4 +582,37 @@ describe('POST /api/control-room/machine-operator-scan', () => {
     expect(body.machine.machineCapabilities.requiresHourlyLoads).toBe(true);
     expect(insertQuery.insert).not.toHaveBeenCalled();
   });
+
+  it('falls back to base machine columns when machine_types relationship is absent in schema cache', async () => {
+    setPersonnelDirectory();
+    const { supabase, machineQuery } = createSupabaseMock();
+    machineQuery.maybeSingle = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data: null,
+        error: {
+          code: 'PGRST200',
+          message:
+            "Could not find a relationship between 'machines' and 'machine_types' in the schema cache",
+        },
+      })
+      .mockResolvedValueOnce({
+        data: machine,
+        error: null,
+      });
+    jest.mocked(createServerSupabaseClient).mockResolvedValue(supabase as never);
+
+    const response = await GET(
+      new Request(
+        `http://localhost/api/control-room/machine-operator-scan?departmentId=${departmentId}&machineId=${machineId}`
+      )
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      stage: 'operators',
+      operators: [{ id: operatorId, name: 'Operator One', jobTitle: 'Dump Truck Operator' }],
+    });
+    expect(machineQuery.maybeSingle).toHaveBeenCalledTimes(2);
+  });
 });

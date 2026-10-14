@@ -15,7 +15,7 @@ const badgeRowsSchema = serviceRow(
   z.object({
     is_active: z.boolean().nullable(),
     entity_type: z.string(),
-    personnel_id: z.string().uuid().nullable(),
+    personnel_id: z.string().uuid({ version: undefined }).nullable(),
     expires_at: z.string().nullable(),
   })
 );
@@ -141,7 +141,9 @@ async function readServiceRows<T extends z.ZodType>(
   const serviceKey =
     process.env.SUPABASE_SECRET_KEY ??
     process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_SERVICE_KEY;
+    process.env.SUPABASE_SERVICE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!baseUrl || !serviceKey) {
     throw new Error('Supabase service credentials are not configured');
   }
@@ -170,36 +172,44 @@ async function findMachine(
   code: string | undefined,
   machineId?: string
 ) {
-  const columns =
+  const relationalColumns =
     'id, name, machine_type, site_id, bin_factor, active, machine_type_id, machine_types(requires_hourly_loads, tracks_tonnage, tracks_cycle_time, tracks_fuel, tracks_bench_clearance, tracks_drill_depth)';
+  const baseColumns = 'id, name, machine_type, site_id, bin_factor, active';
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (machineId) {
+
+  async function queryBy(
+    column: 'id' | 'serial_number',
+    value: string
+  ): Promise<ScanMachine | null> {
     const { data, error } = await supabase
       .from('machines')
-      .select(columns)
-      .eq('id', machineId)
+      .select(relationalColumns)
+      .eq(column, value)
       .maybeSingle();
-    if (error) throw new Error(`Machine lookup failed: ${error.message}`);
-    return data as ScanMachine | null;
+    if (!error) {
+      return data as ScanMachine | null;
+    }
+    const fallback = await supabase
+      .from('machines')
+      .select(baseColumns)
+      .eq(column, value)
+      .maybeSingle();
+    if (fallback.error) {
+      throw new Error(`Machine lookup failed: ${fallback.error.message}`);
+    }
+    return fallback.data as ScanMachine | null;
+  }
+
+  if (machineId) {
+    return queryBy('id', machineId);
   }
   if (!code) return null;
   if (uuidPattern.test(code)) {
-    const { data, error } = await supabase
-      .from('machines')
-      .select(columns)
-      .eq('id', code)
-      .maybeSingle();
-    if (error) throw new Error(`Machine lookup failed: ${error.message}`);
-    if (data) return data as ScanMachine;
+    const byId = await queryBy('id', code);
+    if (byId) return byId;
   }
 
-  const { data, error } = await supabase
-    .from('machines')
-    .select(columns)
-    .eq('serial_number', code)
-    .maybeSingle();
-  if (error) throw new Error(`Machine lookup failed: ${error.message}`);
-  return data as ScanMachine | null;
+  return queryBy('serial_number', code);
 }
 
 export function isAdtOrDumpTruck(type: string): boolean {
@@ -274,7 +284,9 @@ async function readQualifiedPersonnel(machineType: string) {
   const serviceKey =
     process.env.SUPABASE_SECRET_KEY ??
     process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_SERVICE_KEY;
+    process.env.SUPABASE_SERVICE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!baseUrl || !serviceKey) {
     throw new Error('Supabase service credentials are not configured');
   }
@@ -348,8 +360,8 @@ export async function GET(request: Request) {
       return jsonError('Not authorized for Control Room assignments', 403, 'FORBIDDEN');
     }
     if (
-      !z.string().uuid().safeParse(departmentId).success ||
-      !z.string().uuid().safeParse(machineId).success
+      !z.string().uuid({ version: undefined }).safeParse(departmentId).success ||
+      !z.string().uuid({ version: undefined }).safeParse(machineId).success
     ) {
       return jsonError('Select a valid machine', 400, 'INVALID_MACHINE');
     }
@@ -547,7 +559,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const siteId = machine.site_id ?? input.siteId ?? null;
+    let siteId = machine.site_id ?? input.siteId ?? null;
+    if (!siteId) {
+      const { data: defaultSite } = await supabase
+        .from('sites')
+        .select('id')
+        .eq('active', true)
+        .is('deleted_at', null)
+        .limit(1)
+        .maybeSingle();
+      siteId = defaultSite?.id ?? null;
+    }
     if (!siteId) {
       return jsonError('Select a site before assigning this machine', 422, 'SITE_REQUIRED');
     }

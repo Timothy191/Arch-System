@@ -63,9 +63,7 @@ export function C66MachineOperatorScanner({
   const router = useRouter();
   const [selectedMachineId, setSelectedMachineId] = useState('');
   const [selectedOperatorId, setSelectedOperatorId] = useState('');
-  const [selectedSiteId, setSelectedSiteId] = useState(
-    sites.length === 1 ? (sites[0]?.id ?? '') : ''
-  );
+  const [selectedSiteId, setSelectedSiteId] = useState(sites[0]?.id ?? '');
   const [machine, setMachine] = useState<MachinePreview | null>(null);
   const [eligibleOperators, setEligibleOperators] = useState<EligibleOperator[]>([]);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
@@ -81,7 +79,7 @@ export function C66MachineOperatorScanner({
     return parsed.data.error;
   }
 
-  async function loadOperators(machineId: string, currentMachine: ControlRoomMachine) {
+  async function loadOperators(machineId: string, _currentMachine: ControlRoomMachine) {
     setIsLoadingOperators(true);
     setEligibleOperators([]);
     setSelectedOperatorId('');
@@ -132,7 +130,7 @@ export function C66MachineOperatorScanner({
       siteId: found.site_id,
       requiresHourlyLoads: isAdtOrDumpTruck(found.machine_type),
     });
-    setSelectedSiteId(found.site_id || (sites.length === 1 ? (sites[0]?.id ?? '') : ''));
+    setSelectedSiteId(found.site_id || (sites[0]?.id ?? ''));
     void loadOperators(found.id, found);
   }
 
@@ -279,36 +277,6 @@ export function C66MachineOperatorScanner({
           </div>
         </section>
       </div>
-
-      {machine && (
-        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3 text-sm">
-          <p className="font-medium text-[var(--text-heading)]">
-            {machine.name} · {machine.machineType}
-          </p>
-          {!machine.siteId && (
-            <label className="mt-2 block space-y-1 text-sm text-[var(--text-secondary)]">
-              <span>Machine site</span>
-              <select
-                value={selectedSiteId}
-                onChange={(event) => setSelectedSiteId(event.target.value)}
-                className="min-h-11 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[var(--text-heading)]"
-              >
-                <option value="">Select site…</option>
-                {sites.map((site) => (
-                  <option key={site.id} value={site.id}>
-                    {site.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <p className="mt-2 text-[var(--text-secondary)]">
-            {isAdtMachine
-              ? 'Filtered to operators cleared for Articulated Dump Trucks (ADT) with valid medical and induction certificates.'
-              : 'Type filtering uses the personnel job title; medical and induction clearances are verified.'}
-          </p>
-        </div>
-      )}
 
       {error && (
         <p role="alert" className="flex items-start gap-2 text-sm text-[var(--accent-red)]">
