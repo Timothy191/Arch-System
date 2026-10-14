@@ -95,6 +95,22 @@ describe('DepartmentCard', () => {
     expect(localStorage.getItem('pinned_dept_drilling')).toBe('false');
   });
 
+  it('invokes onPinnedChange when controlled via isPinned prop', () => {
+    const onPinnedChange = jest.fn();
+    render(
+      <DepartmentCard
+        department={mockDepartment}
+        index={0}
+        isPinned={false}
+        onPinnedChange={onPinnedChange}
+      />
+    );
+    const pinBtn = screen.getByTitle('Pin department');
+    fireEvent.click(pinBtn);
+    expect(onPinnedChange).toHaveBeenCalledWith('drilling', true);
+    expect(localStorage.getItem('pinned_dept_drilling')).toBe('true');
+  });
+
   it('renders outer card with test id', () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByTestId('dept-card-drilling')).toBeInTheDocument();

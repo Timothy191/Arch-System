@@ -27,6 +27,18 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
     });
   };
 
+  // Load pinned departments from localStorage on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const pinned = new Set<string>();
+    departments.forEach((dept) => {
+      if (localStorage.getItem(`pinned_dept_${dept.name}`) === 'true') {
+        pinned.add(dept.name);
+      }
+    });
+    setPinnedNames(pinned);
+  }, [departments]);
+
   // Filter and sort departments
   const filteredDepartments = useMemo(() => {
     return departments

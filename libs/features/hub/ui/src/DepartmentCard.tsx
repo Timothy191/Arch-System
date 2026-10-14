@@ -22,7 +22,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { memo, useState, useTransition } from 'react';
+import { memo, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Sparkline } from './Sparkline';
 
@@ -78,18 +78,38 @@ interface DepartmentCardProps {
   department: Department;
   index: number;
   onPinnedChange?: (departmentName: string, pinned: boolean) => void;
-  isPinned: boolean;
+  isPinned?: boolean;
 }
 
-function DepartmentCard({ department, index, onPinnedChange, isPinned }: DepartmentCardProps) {
+function DepartmentCard({
+  department,
+  index,
+  onPinnedChange,
+  isPinned: controlledIsPinned,
+}: DepartmentCardProps) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
+  const [uncontrolledIsPinned, setUncontrolledIsPinned] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  const isPinned = controlledIsPinned ?? uncontrolledIsPinned;
+
+  useEffect(() => {
+    if (controlledIsPinned !== undefined || typeof window === 'undefined') return;
+    const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
+    setUncontrolledIsPinned(pinned === 'true');
+  }, [controlledIsPinned, department.name]);
 
   const togglePin = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     const nextState = !isPinned;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`pinned_dept_${department.name}`, String(nextState));
+    }
+    if (controlledIsPinned === undefined) {
+      setUncontrolledIsPinned(nextState);
+    }
     onPinnedChange?.(department.name, nextState);
     if (nextState) {
       toast.success(`Pinned ${department.displayName} to dashboard`);
