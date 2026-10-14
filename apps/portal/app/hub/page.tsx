@@ -7,6 +7,7 @@ import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { TelemetryChart } from '@repo/ui/TelemetryChart';
 import { Activity, ArrowUpRight, BarChart3, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
@@ -26,7 +27,6 @@ import {
 import { withCache } from '@/lib/cache-utils';
 import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departments';
 import { getPluginWidgets } from '@/lib/plugins/consumers';
-import type { PluginWidget } from '@/lib/plugins/types';
 import { cachedRSC } from '@/lib/server-cache';
 import { MetabasePanel } from './components/MetabasePanel';
 
@@ -426,6 +426,62 @@ export default async function HubPage() {
       ) : (
         <CoreOperationalModules departments={departments} />
       )}
+
+      {/* Production Utilization Graph */}
+      <section
+        className="space-y-4 pb-6 animate-fade-up"
+        style={{ animationDelay: '0.25s', animationFillMode: 'both' }}
+      >
+        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
+            <span className="p-1 rounded-full bg-accent-green/10 text-accent-green flex items-center justify-center">
+              <Activity className="w-4 h-4" />
+            </span>
+            Production Utilization
+          </h2>
+        </header>
+        <GlassCard
+          variant="default"
+          padding
+          className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-5 sm:p-6"
+        >
+          <Suspense
+            fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-card" />}
+          >
+            <TelemetryChart
+              data={[
+                { timestamp: '00:00', value: 65 },
+                { timestamp: '01:00', value: 62 },
+                { timestamp: '02:00', value: 58 },
+                { timestamp: '03:00', value: 55 },
+                { timestamp: '04:00', value: 52 },
+                { timestamp: '05:00', value: 50 },
+                { timestamp: '06:00', value: 68 },
+                { timestamp: '07:00', value: 75 },
+                { timestamp: '08:00', value: 82 },
+                { timestamp: '09:00', value: 85 },
+                { timestamp: '10:00', value: 82 },
+                { timestamp: '11:00', value: 78 },
+                { timestamp: '12:00', value: 75 },
+                { timestamp: '13:00', value: 72 },
+                { timestamp: '14:00', value: 68 },
+                { timestamp: '15:00', value: 65 },
+                { timestamp: '16:00', value: 60 },
+                { timestamp: '17:00', value: 58 },
+                { timestamp: '18:00', value: 55 },
+                { timestamp: '19:00', value: 62 },
+                { timestamp: '20:00', value: 68 },
+                { timestamp: '21:00', value: 75 },
+                { timestamp: '22:00', value: 80 },
+                { timestamp: '23:00', value: 78 },
+              ]}
+              title="Production Utilization %"
+              unit="%"
+              color="var(--accent-green)"
+            />
+          </Suspense>
+        </GlassCard>
+      </section>
 
       {/* Active Operational Metrics Charts */}
       <section
