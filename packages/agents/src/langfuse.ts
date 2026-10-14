@@ -1,6 +1,8 @@
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { Langfuse } from 'langfuse';
 
 let langfuseInstance: Langfuse | null = null;
+const agentTracer = trace.getTracer('@repo/agents', '1.0.0');
 
 export interface LangfuseConfig {
   publicKey?: string;
@@ -37,4 +39,30 @@ export function getLangfuseClient(config?: LangfuseConfig): Langfuse | null {
   });
 
   return langfuseInstance;
+}
+
+/**
+ * Wraps an async agent or LLM operation in an OpenTelemetry span (`@opentelemetry/api`)
+ * so Next.js 16 (`@vercel/otel`), BullMQ, and Langfuse OTel collectors share unified trace trees.
+ */
+export async function withAgentSpan<T>(
+  spanName: string,
+  attributes: Record<string, string | number | boolean>,
+  fn: () => Promise<T>
+): Promise<T> {
+  return agentTracer.startActiveSpan(spanName, { attributes }, async (span) => {
+    try {
+      const res = await fn();
+      span.setStatus({ code: SpanStatusCode.OK });
+      return res;
+    } catch (error) {
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }

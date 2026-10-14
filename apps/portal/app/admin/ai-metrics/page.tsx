@@ -22,7 +22,7 @@ export default function AIMetricsPage() {
     <ErrorBoundary context="AI Metrics Dashboard">
       <Suspense
         fallback={
-          <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
+          <div className="fixed inset-0 flex items-center justify-center bg-transparent">
             <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
           </div>
         }

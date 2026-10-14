@@ -14,6 +14,19 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+let countTokensFn = null;
+try {
+  countTokensFn = require('gpt-tokenizer').countTokens;
+} catch {
+  try {
+    countTokensFn = require(
+      path.resolve(__dirname, '../../../skills-mcp/node_modules/gpt-tokenizer')
+    ).countTokens;
+  } catch {
+    countTokensFn = (str) => Math.ceil((str || '').length / 3.85);
+  }
+}
+
 const ROOT = path.resolve(__dirname, '..', '..');
 const MEMORY_DIR = path.join(ROOT, '.agents', 'memory_base');
 const TOKEN_TRACKER_FILE = path.join(MEMORY_DIR, 'token-usage.json');
@@ -93,6 +106,25 @@ function getDirSize(dirPath, excludeDirs = []) {
   return totalSize;
 }
 
+function getDirTokens(dirPath, excludeDirs = []) {
+  let totalTokens = 0;
+  if (!fs.existsSync(dirPath)) return totalTokens;
+
+  const files = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const file of files) {
+    const fullPath = path.join(dirPath, file.name);
+    if (file.isDirectory()) {
+      if (excludeDirs.includes(file.name)) continue;
+      totalTokens += getDirTokens(fullPath, excludeDirs);
+    } else if (file.name.endsWith('.md') || file.name.endsWith('.json')) {
+      try {
+        totalTokens += countTokensFn(fs.readFileSync(fullPath, 'utf-8'));
+      } catch {}
+    }
+  }
+  return totalTokens;
+}
+
 function analyzeRetrospectives() {
   const retroDir = path.join(MEMORY_DIR, 'retrospectives');
   if (!fs.existsSync(retroDir)) {
@@ -131,6 +163,7 @@ function analyzeRules() {
       ? fs.readdirSync(rulesDir).filter((f) => f.endsWith('.md')).length
       : 0,
     totalSize: getDirSize(rulesDir),
+    totalTokens: getDirTokens(rulesDir),
   };
 }
 
@@ -139,6 +172,7 @@ function analyzeSkills() {
   return {
     count: fs.existsSync(skillsDir) ? fs.readdirSync(skillsDir).length : 0,
     totalSize: getDirSize(skillsDir, ['.archived']),
+    totalTokens: getDirTokens(skillsDir, ['.archived']),
   };
 }
 
@@ -263,13 +297,13 @@ function checkBudget() {
   console.log('\nRules:');
   console.log(`  Count: ${rules.count}`);
   console.log(
-    `  Size: ${(rules.totalSize / 1024).toFixed(1)} KB / ${(budget.maxRulesSize / 1024).toFixed(1)} KB`
+    `  Size: ${(rules.totalSize / 1024).toFixed(1)} KB / ${(budget.maxRulesSize / 1024).toFixed(1)} KB (${rules.totalTokens} BPE tokens)`
   );
 
   console.log('\nSkills:');
   console.log(`  Count: ${skills.count}`);
   console.log(
-    `  Size: ${(skills.totalSize / 1024).toFixed(1)} KB / ${(budget.maxSkillsSize / 1024).toFixed(1)} KB`
+    `  Size: ${(skills.totalSize / 1024).toFixed(1)} KB / ${(budget.maxSkillsSize / 1024).toFixed(1)} KB (${skills.totalTokens} BPE tokens)`
   );
 
   const rootInstructions = analyzeRootInstructions();

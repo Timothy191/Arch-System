@@ -14,6 +14,7 @@ const DEPT_COLOR_MAP: Record<string, string> = {
   accesscontrol: 'bg-accent-blue/20 text-accent-blue',
   director: 'bg-accent-amber/20 text-accent-amber',
   supervisor: 'bg-accent-green/20 text-accent-green',
+  finance: 'bg-dept-finance/20 text-dept-finance',
 };
 
 const REVIEWS = [
@@ -64,6 +65,20 @@ const REVIEWS = [
     username: '@supervisor',
     body: 'Highly reliable system. The offline banner and resilient auth keep operators in focus.',
     img: 'https://avatar.vercel.sh/supervisor',
+    color: DEPT_COLOR_MAP.supervisor ?? 'bg-accent-blue/20 text-accent-blue',
+  },
+  {
+    name: 'Finance Team',
+    username: '@finance',
+    body: 'Budget tracking is precise and real-time. Monthly closeout processes have been streamlined significantly.',
+    img: 'https://avatar.vercel.sh/finance',
+    color: DEPT_COLOR_MAP.finance ?? 'bg-accent-blue/20 text-accent-blue',
+  },
+  {
+    name: 'Maintenance Crew',
+    username: '@maintenance',
+    body: 'Preventive maintenance scheduling has reduced unexpected equipment failures by 40%.',
+    img: 'https://avatar.vercel.sh/maintenance',
     color: DEPT_COLOR_MAP.supervisor ?? 'bg-accent-blue/20 text-accent-blue',
   },
 ];

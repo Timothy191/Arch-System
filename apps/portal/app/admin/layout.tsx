@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-heading)] flex flex-col">
+    <div className="min-h-screen bg-transparent text-[var(--text-heading)] flex flex-col">
       {/* Universal Admin Navigation Bar */}
       <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-white/80 backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between px-6 py-3 gap-4">

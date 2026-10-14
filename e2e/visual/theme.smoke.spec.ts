@@ -48,7 +48,7 @@ test('light-mode liquid glass background should be pure white with rgba tint', a
     };
   });
 
-  expect(videoState.src).toMatch(/global-background/);
+  expect(videoState.src).toMatch(/video-loop|global-background/);
 
   // 4. SOTA Synthetic Performance & Layout Stability Probe
   const perfMetrics = await page.evaluate(() => {

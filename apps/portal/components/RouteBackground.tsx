@@ -19,7 +19,7 @@ type WindowWithIdleCallback = Window & {
 
 /**
  * RouteBackgroundPoster
- * Renders the primary LCP asset (94 KB WebP poster) and film grain overlay.
+ * Renders the primary LCP asset (PS3 Wave desktop + mobile WebP poster) and film grain overlay.
  */
 function RouteBackgroundPoster() {
   return (
@@ -28,14 +28,21 @@ function RouteBackgroundPoster() {
         className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
-        <img
-          id="route-bg-light-image"
-          src="/background/global-background-poster.webp"
-          alt=""
-          fetchPriority="high"
-          decoding="async"
-          className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125 w-full h-full"
-        />
+        <picture>
+          <source
+            media="(max-width: 767px)"
+            srcSet="/background/global-background-poster-mobile.webp"
+            type="image/webp"
+          />
+          <img
+            id="route-bg-light-image"
+            src="/background/global-background-poster.webp"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125 w-full h-full"
+          />
+        </picture>
       </div>
       <div className="route-bg-grain" aria-hidden="true" />
     </>
@@ -44,11 +51,13 @@ function RouteBackgroundPoster() {
 
 /**
  * RouteBackgroundInner
- * Handles progressive enhancement video loading based on route, device, and network constraints.
+ * Handles progressive enhancement PS3 Wave video loading across desktop (1920x1080)
+ * and mobile (720x1280) viewports while respecting accessibility and network constraints.
  */
 function RouteBackgroundInner() {
   const pathname = usePathname();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -59,12 +68,7 @@ function RouteBackgroundInner() {
       return;
     }
 
-    // 2. Viewport: mobile devices do not render video wallpaper to save battery/data
-    if (window.innerWidth < 768) {
-      return;
-    }
-
-    // 3. Network connection constraints (Network Information API)
+    // 2. Network connection constraints (Network Information API)
     const nav = navigator as NavigatorWithConnection;
 
     if (nav.connection) {
@@ -80,6 +84,14 @@ function RouteBackgroundInner() {
       }
     }
 
+    // 3. Detect desktop vs mobile viewport for optimal PS3 Wave stream selection
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    setIsMobileViewport(mobileQuery.matches);
+    const handleViewportChange = (e: MediaQueryListEvent) => {
+      setIsMobileViewport(e.matches);
+    };
+    mobileQuery.addEventListener('change', handleViewportChange);
+
     // 4. Defer video mounting until browser is idle after LCP
     const loadDeferredVideo = () => {
       setShouldLoadVideo(true);
@@ -87,40 +99,54 @@ function RouteBackgroundInner() {
 
     const idleWindow = window as WindowWithIdleCallback;
     if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 3500 });
-      return () => idleWindow.cancelIdleCallback?.(handle);
+      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 2500 });
+      return () => {
+        idleWindow.cancelIdleCallback?.(handle);
+        mobileQuery.removeEventListener('change', handleViewportChange);
+      };
     }
 
-    const timer = setTimeout(loadDeferredVideo, 2000);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(loadDeferredVideo, 1200);
+    return () => {
+      clearTimeout(timer);
+      mobileQuery.removeEventListener('change', handleViewportChange);
+    };
   }, [pathname]);
 
   useEffect(() => {
     if (videoRef.current && shouldLoadVideo) {
-      if (videoRef.current.readyState >= 3) {
+      if (videoRef.current.readyState >= 2) {
         setIsVideoLoaded(true);
       }
       videoRef.current.play().catch(() => {});
     }
-  }, [shouldLoadVideo]);
+  }, [shouldLoadVideo, isMobileViewport]);
+
+  const webmSrc = isMobileViewport
+    ? '/background/video-loop-mobile.webm'
+    : '/background/video-loop.webm';
+  const mp4Src = isMobileViewport
+    ? '/background/video-loop-mobile.mp4'
+    : '/background/video-loop.mp4';
 
   return (
     <>
       <RouteBackgroundPoster />
 
-      {/* ── Ambient Video Background (Deferred / Constrained-Safe) ── */}
+      {/* ── Ambient PS3 Wave Video Background (Desktop & Mobile) ── */}
       {shouldLoadVideo && (
         <div
           className="route-bg-video-container fixed inset-0 z-route-bg pointer-events-none"
           aria-hidden="true"
         >
           <video
+            key={isMobileViewport ? 'ps3-wave-mobile' : 'ps3-wave-desktop'}
             id="route-bg-light-video"
             ref={videoRef}
             className="route-bg-video filter invert brightness-75 contrast-125 object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
-              transition: 'opacity 1.5s ease-in-out',
+              transition: 'opacity 1.2s ease-in-out',
               willChange: 'transform, opacity',
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
@@ -134,12 +160,9 @@ function RouteBackgroundInner() {
             playsInline
             disablePictureInPicture
             preload="metadata"
-            crossOrigin="anonymous"
           >
-            {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}
-            <source src="https://res.cloudinary.com/zwevvryv/video/upload/v1791356557/background/global-background.webm" type="video/webm" />
-            {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}
-            <source src="https://res.cloudinary.com/zwevvryv/video/upload/v1791356554/background/global-background.mp4" type="video/mp4" />
+            <source src={webmSrc} type="video/webm" />
+            <source src={mp4Src} type="video/mp4" />
           </video>
         </div>
       )}

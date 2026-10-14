@@ -38,6 +38,7 @@ const ESSENTIAL_SKILLS = [
   'structured-thinking',
   'testing-rules',
   'todo-completion',
+  'context-engineering',
 ];
 
 // Skills that are likely unused or duplicates

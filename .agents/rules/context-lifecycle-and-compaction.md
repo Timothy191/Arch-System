@@ -10,7 +10,7 @@ trigger: always_on
 
 # Context-First Execution & Auto-Compaction Lifecycle Mandate
 
-Every agent turn MUST strictly follow this two-phase lifecycle across all conversations and tasks:
+Every agent turn MUST strictly follow this two-phase lifecycle across all conversations and tasks. For full operational checklists, templates, and observation-masking protocols, invoke the [`context-engineering`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) skill (`skill://context-engineering`).
 
 ## Phase 1: Context-First Gate (Pre-Action — After User Sends Message)
 
@@ -18,25 +18,30 @@ Every agent turn MUST strictly follow this two-phase lifecycle across all conver
 
 Immediately upon receiving a user message:
 
-1. **Assess Required Context**: Identify all unknown files, schemas, configurations, external documentation, or ambiguous user requirements needed to complete the task safely and accurately.
-2. **Gather Required Context (All Approved Channels)**:
-   - **Codebase Exploration**: Inspect relevant files, AST symbols (`ast-grep`, `ripgrep`), directory structures, and git state (`view_file`, `find_by_name`, `grep_search`).
-   - **Research**: Query documentation, skills (`skills-mcp` `acquire_skill` / `acquire_context`), memory bases, or web sources (`search_web`, `read_url_content`).
-   - **Prompting User**: If requirements, intent, or design trade-offs are underspecified or ambiguous, prompt the user for clarification (`ask_question` or direct text response) before acting.
-3. **Gate Check**: Verify that all required context is gathered and verified in context. Never guess, assume, or act prematurely.
-4. **Proceed With Task**: Only after the required context is fully gathered may you proceed with executing the task (editing files, running commands, verifying gates).
+1. **Deterministic Preflight & Budget Triage**:
+   - Verify workspace toolchain alignment (Mise Node `v24.15.0`/`v26.8.1`, `pnpm 9.15.9` in `Arch-System/`), context budget health (`pnpm token:budget-check`), and active leases (`get_active_leases`).
+2. **Gather Required Context via Progressive Disclosure Funnel (Broad → Narrow)**:
+   - **Step 1 — Catalog & Memory Index**: Query `skills-mcp` (`list_available_context`, `list_available_skills`) and `.agents/memory_base/index.json` (~50–200 tokens).
+   - **Step 2 — Ephemeral Leasing**: Lease only relevant slices via `acquire_context` / `acquire_skill`.
+   - **Step 3 — Structural AST Search**: Locate exact symbols and call sites via `ast-grep` (`sg`) and `ripgrep` (`rg`) instead of reading whole files.
+   - **Step 4 — Surgical File Slice Reading**: Read targeted line ranges (`view_file` with `StartLine`/`EndLine`).
+   - **Step 5 — Prompting User**: If requirements, intent, or design trade-offs are underspecified or ambiguous, prompt the user for clarification (`ask_question` or direct text response) before acting.
+3. **Attention U-Curve & Poisoning Guard**:
+   - Place critical invariants and success predicates at the start and end of context (STM-0 Phase 5 Contract) to defeat _lost-in-the-middle_ degradation.
+   - If empirical verification (`E2`/`E3`) disproves an earlier claim or tool output, explicitly mark it `[POISONED / SUPERSEDED]` so downstream reasoning never self-references it.
+4. **Proceed With Task**: Only after the required context is fully gathered and verified in context may you proceed with executing the task.
 
 ## Phase 2: Post-Output Auto-Compaction & Context Readiness (After Each Output)
 
-**CRITICAL INVARIANT: After each output produced, ready the context window for the next task.**
+**CRITICAL INVARIANT: After each output produced, ready the context window for the next task. Optimize for Tokens-Per-Task (avoiding re-fetching costs), not just Tokens-Per-Request.**
 
 Before and upon concluding every turn / output:
 
 1. **Release Leased Context & Skills**:
-   - Return any dynamically leased skills (`return_skill`) or context slices (`release_context`) via `skills-mcp` so they do not bloat subsequent turns.
-2. **Prune & Debloat Workspace Context**:
-   - Ensure transient scratch data is stored in artifacts/scratch rather than dumped into conversation history.
+   - Return any dynamically leased skills (`return_skill` with `summary` and `learnings`) or context slices (`release_context`) via `skills-mcp` so they do not bloat subsequent turns.
+2. **Offload & Mask Verbose Observations**:
+   - Offload tool outputs `> 2,000` characters to `<appDataDir>/brain/<conversation-id>/scratch/` and retain only compact `[ObsRef]` summaries in active context.
    - When operating in `Arch-System`, keep token budgets clean (`pnpm token:budget-check` / `pnpm context:debloat` when thresholds are approached).
-3. **Compact & Hand Off Clean State**:
-   - Keep final output concise, structured, and self-contained (summarize state changes, file links, and verification results clearly) so the conversation state is compact.
-   - Recommend or trigger `/compact` whenever the conversation trajectory has accumulated heavy exploration or multi-step logs, ensuring the context window is clean and ready for the user's next message.
+3. **Save-Before-Compact & Anchored Iterative Summarization**:
+   - Before recommending or triggering `/compact` (or when context utilization exceeds ~70%), flush volatile state into an anchored handoff artifact (`HANDOFF.md` / `RESUME.md`) using the 6-section **Artifact Trail Checklist** defined in [`context-engineering/SKILL.md`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) (Session Intent, Artifact Trail with exact file paths & symbols, Key Decisions & Rejected Alternatives, Verification Ledger E0–E4, Active Leases, Immediate Next Actions).
+   - Keep final output concise, structured, and self-contained so the conversation state is clean and ready for the user's next message.

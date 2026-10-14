@@ -77,7 +77,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
   const appError = isAppError(error) ? (error as any) : null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="flex justify-center">
           <img

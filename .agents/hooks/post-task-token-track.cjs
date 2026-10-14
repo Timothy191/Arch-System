@@ -38,9 +38,25 @@ function main() {
   const tracker = loadTokenTracker();
   const taskTag = process.env.TASK_TAG || 'unknown';
   const taskDuration = process.env.TASK_DURATION || '0';
+  const taskPayload = process.env.TASK_PAYLOAD || '';
 
-  // Simulate token tracking (in production, this would come from the LLM API)
-  const estimatedTokens = Math.floor(parseInt(taskDuration, 10) * 100); // Rough estimate
+  let countTokensFn = null;
+  try {
+    countTokensFn = require('gpt-tokenizer').countTokens;
+  } catch {
+    try {
+      countTokensFn = require(
+        path.resolve(__dirname, '../../../skills-mcp/node_modules/gpt-tokenizer')
+      ).countTokens;
+    } catch {
+      countTokensFn = null;
+    }
+  }
+
+  const estimatedTokens =
+    taskPayload && countTokensFn
+      ? countTokensFn(taskPayload)
+      : Math.floor(parseInt(taskDuration, 10) * 100);
 
   tracker.totalSessions++;
   tracker.totalTokens += estimatedTokens;
@@ -50,6 +66,7 @@ function main() {
     taskTag,
     duration: taskDuration,
     estimatedTokens,
+    tokenizer: countTokensFn ? 'gpt-tokenizer:o200k_base' : 'duration-heuristic',
     timestamp: new Date().toISOString(),
   });
 

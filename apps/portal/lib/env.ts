@@ -1,1 +1,1 @@
-export { env, getEnvErrors, resetEnv } from '@repo/shared/utils';
+export { createT3Env, env, getEnvErrors, resetEnv } from '@repo/shared/utils';

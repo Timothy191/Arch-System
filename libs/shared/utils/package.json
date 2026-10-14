@@ -8,8 +8,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/redis": "1.0.0",
     "@repo/errors": "1.0.0",
+    "@repo/redis": "1.0.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "zod": "catalog:"
   },
   "scripts": {

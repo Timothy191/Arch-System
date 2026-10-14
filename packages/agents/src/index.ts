@@ -3,6 +3,7 @@ export * from './coordinator';
 export * from './fleet-runner';
 export * from './langfuse';
 export * from './memory';
+export * from './openrouter';
 export * from './prompt-envelope';
 export * from './quality-gate';
 export * from './reflection-engine';

@@ -101,18 +101,18 @@ function HeroSlide({
     transform = isLeft
       ? 'translate3d(-58%, 0, -140px) rotateY(26deg) scale(0.86)'
       : 'translate3d(58%, 0, -140px) rotateY(-26deg) scale(0.86)';
-    opacity = 0.42;
+    opacity = 0.78;
     zIndex = 20;
     filter = 'blur(0px)';
     pointerEvents = 'auto';
-    cursorClass = 'cursor-pointer hover:opacity-65';
+    cursorClass = 'cursor-pointer hover:opacity-95';
     maskStyle = {
       maskImage: isLeft
-        ? 'linear-gradient(to right, transparent, black 40%)'
-        : 'linear-gradient(to left, transparent, black 40%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, black 22%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, black 22%)',
       WebkitMaskImage: isLeft
-        ? 'linear-gradient(to right, transparent, black 40%)'
-        : 'linear-gradient(to left, transparent, black 40%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, black 22%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, black 22%)',
     };
   } else if (isLeft2 || isRight2) {
     // Secondary left/right preview slides
@@ -120,18 +120,18 @@ function HeroSlide({
     transform = isLeft
       ? 'translate3d(-85%, 0, -200px) rotateY(18deg) scale(0.75)'
       : 'translate3d(85%, 0, -200px) rotateY(-18deg) scale(0.75)';
-    opacity = 0.25;
+    opacity = 0.45;
     zIndex = 10;
-    filter = 'blur(2px)';
+    filter = 'blur(1.5px)';
     pointerEvents = 'auto';
-    cursorClass = 'cursor-pointer hover:opacity-50';
+    cursorClass = 'cursor-pointer hover:opacity-75';
     maskStyle = {
       maskImage: isLeft
-        ? 'linear-gradient(to right, transparent, black 30%)'
-        : 'linear-gradient(to left, transparent, black 30%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, black 25%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, black 25%)',
       WebkitMaskImage: isLeft
-        ? 'linear-gradient(to right, transparent, black 30%)'
-        : 'linear-gradient(to left, transparent, black 30%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, black 25%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, black 25%)',
     };
   } else {
     // Far slides - keep hidden
@@ -156,11 +156,10 @@ function HeroSlide({
       role="group"
       aria-roledescription="slide"
       aria-label={`${idx + 1} of ${total}: ${panel.title}`}
-      inert={!isCenter ? true : undefined}
       aria-hidden={!isCenter}
       onClick={handleClick}
       className={cn(
-        'absolute inset-x-0 mx-auto w-[86%] sm:w-[82%] lg:w-[76%] max-w-[840px] h-full will-change-[transform,opacity] transform-gpu',
+        'absolute inset-x-0 mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] h-full will-change-[transform,opacity] transform-gpu',
         cursorClass
       )}
       style={{
@@ -180,13 +179,14 @@ function HeroSlide({
       <div
         className={cn(
           'relative h-full w-full rounded-2xl overflow-hidden select-none',
-          'bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06]',
+          'bg-white/95 backdrop-blur-3xl liquid-glass-light border border-black/[0.08]',
           'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-          isCenter && 'hover:-translate-y-1'
+          isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
         )}
         style={{
-          boxShadow:
-            'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 20px 45px -12px rgba(15, 23, 42, 0.18)',
+          boxShadow: isCenter
+            ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 20px 45px -12px rgba(15, 23, 42, 0.18)'
+            : 'inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 12px 28px -8px rgba(15, 23, 42, 0.14)',
         }}
       >
         <HeroCardContent

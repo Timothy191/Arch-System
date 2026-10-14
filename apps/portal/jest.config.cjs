@@ -21,6 +21,7 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: ['node_modules/(?!(.*@t3-oss)/)'],
   moduleNameMapper: {
     '^@vercel/speed-insights/next$':
       '<rootDir>/node_modules/@vercel/speed-insights/dist/next/index.js',

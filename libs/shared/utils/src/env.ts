@@ -14,17 +14,22 @@
 
 /* eslint-disable no-console */
 
+import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
 // Schema
 // ---------------------------------------------------------------------------
 
-const envSchema = z.object({
-  // ── Public (embedded in client bundle — safe defaults for dev) ──────
+const clientEnvShape = {
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('https://mrwhtxbhrzyttlsyuofc.supabase.co'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).default('dummy-anon-key'),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+  NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
+  NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
+};
 
+const serverEnvShape = {
   // ── Server-side required ───────────────────────────────────────────
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
@@ -41,6 +46,8 @@ const envSchema = z.object({
   // ── LLM / AI providers (optional) ──────────────────────────────────
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_API_KEYS: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
@@ -50,12 +57,9 @@ const envSchema = z.object({
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 
   // ── External services (optional) ───────────────────────────────────
   FLOWISE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
-  NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
 
   // ── Feature flags ──────────────────────────────────────────────────
   ENABLE_LOAD_ADAPTIVE_TEST: z
@@ -97,6 +101,11 @@ const envSchema = z.object({
     .string()
     .default('false')
     .transform((v) => v === 'true'),
+};
+
+const envSchema = z.object({
+  ...clientEnvShape,
+  ...serverEnvShape,
 });
 
 // ---------------------------------------------------------------------------
@@ -107,6 +116,59 @@ type EnvVars = z.infer<typeof envSchema>;
 
 let _env: EnvVars | null = null;
 let _envError: z.ZodError | null = null;
+
+/**
+ * Creates a strict `@t3-oss/env-nextjs` validated environment instance
+ * enforcing client/server bundle boundaries.
+ */
+export function createT3Env(skipValidation = process.env.NODE_ENV !== 'production') {
+  return createEnv({
+    client: clientEnvShape,
+    server: serverEnvShape,
+    emptyStringAsUndefined: true,
+    skipValidation,
+    runtimeEnv: {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+      NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
+      NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+      DATABASE_URL: process.env.DATABASE_URL,
+      PORT: process.env.PORT,
+      NODE_ENV: process.env.NODE_ENV,
+      REDIS_URL: process.env.REDIS_URL,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      OPENAI_MODEL: process.env.OPENAI_MODEL,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      GEMINI_API_KEYS: process.env.GEMINI_API_KEYS,
+      GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
+      GOOGLE_PROJECT_ID: process.env.GOOGLE_PROJECT_ID,
+      SENTRY_ORG: process.env.SENTRY_ORG,
+      SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+      SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+      FLOWISE_URL: process.env.FLOWISE_URL,
+      ENABLE_LOAD_ADAPTIVE_TEST: process.env.ENABLE_LOAD_ADAPTIVE_TEST,
+      DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT,
+      RATE_LIMIT_IP_WHITELIST: process.env.RATE_LIMIT_IP_WHITELIST,
+      DISABLE_CORS: process.env.DISABLE_CORS,
+      ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+      INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+      NOVU_API_KEY: process.env.NOVU_API_KEY,
+      OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+      OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
+      ENABLE_DB_TRACING: process.env.ENABLE_DB_TRACING,
+      SLOW_QUERY_THRESHOLD_MS: process.env.SLOW_QUERY_THRESHOLD_MS,
+      PORTAL_VERSION: process.env.PORTAL_VERSION,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      CI: process.env.CI,
+    },
+  });
+}
 
 /**
  * Returns validated environment variables.
@@ -126,6 +188,8 @@ function parseEnv(): EnvVars {
     REDIS_URL: process.env.REDIS_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,

@@ -112,12 +112,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
-        {/* Preload primary LCP background asset off critical path */}
+        {/* Preload primary LCP background asset off critical path (Desktop & Mobile) */}
         <link
           rel="preload"
           href="/background/global-background-poster.webp"
           as="image"
           type="image/webp"
+          media="(min-width: 768px)"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href="/background/global-background-poster-mobile.webp"
+          as="image"
+          type="image/webp"
+          media="(max-width: 767px)"
           fetchPriority="high"
         />
         <link
