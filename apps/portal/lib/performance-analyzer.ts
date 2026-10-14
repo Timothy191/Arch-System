@@ -66,6 +66,53 @@ export function analyzePerformance(metrics?: { lcp?: number; inp?: number }): Pe
   };
 }
 
+function getRealLCPBreakdown(value: number): {
+  ttfb: number;
+  resourceLoadDelay: number;
+  resourceLoadTime: number;
+  elementRenderDelay: number;
+} | null {
+  if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function') {
+    return null;
+  }
+
+  try {
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const nav = navEntries[0];
+    if (!nav) return null;
+
+    const ttfb = Math.max(0, nav.responseStart - nav.startTime);
+    const lcpEntries = performance.getEntriesByType('largest-contentful-paint') as Array<
+      PerformanceEntry & { url?: string }
+    >;
+    const lastLcp = lcpEntries[lcpEntries.length - 1];
+    const lcpUrl = lastLcp?.url;
+
+    let resourceLoadDelay = 0;
+    let resourceLoadTime = 0;
+
+    if (lcpUrl) {
+      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      const matchingResource = resources.find((r) => r.name === lcpUrl);
+      if (matchingResource) {
+        resourceLoadDelay = Math.max(0, matchingResource.startTime - ttfb);
+        resourceLoadTime = Math.max(0, matchingResource.responseEnd - matchingResource.startTime);
+      }
+    }
+
+    const elementRenderDelay = Math.max(0, value - ttfb - resourceLoadDelay - resourceLoadTime);
+
+    return {
+      ttfb: Math.round(ttfb),
+      resourceLoadDelay: Math.round(resourceLoadDelay),
+      resourceLoadTime: Math.round(resourceLoadTime),
+      elementRenderDelay: Math.round(elementRenderDelay),
+    };
+  } catch {
+    return null;
+  }
+}
+
 function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): PerformanceBreakdown['lcp'] {
   const rating =
     value <= thresholds.good
@@ -74,13 +121,13 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
         ? 'needs-improvement'
         : 'poor';
 
-  // Simulate LCP breakdown (in real implementation, use Performance API)
-  const ttfb = Math.min(value * 0.15, 600); // 15% of LCP or max 600ms
-  const resourceLoadDelay = Math.min(value * 0.25, 800); // 25% or max 800ms
-  const resourceLoadTime = Math.max(value * 0.45, 1200); // 45% (typically longest)
+  const realBreakdown = getRealLCPBreakdown(value);
+  const ttfb = Math.min(value * 0.15, 600);
+  const resourceLoadDelay = Math.min(value * 0.25, 800);
+  const resourceLoadTime = Math.max(value * 0.45, 1200);
   const elementRenderDelay = value - ttfb - resourceLoadDelay - resourceLoadTime;
 
-  const breakdown = {
+  const breakdown = realBreakdown ?? {
     ttfb: Math.round(ttfb),
     resourceLoadDelay: Math.round(resourceLoadDelay),
     resourceLoadTime: Math.round(resourceLoadTime),

@@ -13,7 +13,9 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - Filtered null/non-object entries in `/v6/deployments` array in `src/vercel-deployment.mjs`.
   - Anchored `parseGitHubRemoteUrl` in `src/remote-git.mjs` to `(?:ssh\.)?github\.com` at the host boundary.
   - Unified `bin/federated-audit.mjs` with `tools/federation-watchdog/config/federation.json` and enforced fail-closed exit semantics on fatal exit code `2`.
-- **Verification:** E2E suite (`54/54 PASS` in 2.06s, down from 127.5s), Unit + Adversarial suite (`191/191 PASS`), `pnpm agent:verify` (`8/8 PASS`).
+  - Resolved Chromium DevTools font/poster preload warnings and `:root` CSS font-variable specificity overrides across `packages/theme/src/css/variables.css`, `apps/portal/app/layout.tsx`, and `apps/portal/components/RouteBackground.tsx`.
+  - Replaced simulated LCP subpart calculations with real `PerformanceNavigationTiming` / `PerformanceResourceTiming` telemetry in `apps/portal/lib/performance-analyzer.ts` and deduplicated Web Vitals console reports in `apps/portal/components/WebVitalsReporter.tsx`.
+- **Verification:** E2E suite (`54/54 PASS` in 2.06s, down from 127.5s), Unit + Adversarial suite (`191/191 PASS`), Chromium DevTools audit (`0 warnings, 0 errors`), `pnpm agent:verify` (`8/8 PASS`).
 
 ## [2026-09-28] - Vercel Best Practices Audit, Deployment Pruning & Production Release
 

@@ -45,10 +45,7 @@ const MacMenuBar = dynamic(
   }
 );
 
-const RouteBackground = dynamic(() =>
-  import('@/components/RouteBackground').then((m) => ({ default: m.RouteBackground }))
-);
-
+import { RouteBackground } from '@/components/RouteBackground';
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 
 const inter = Inter({
@@ -56,6 +53,7 @@ const inter = Inter({
   variable: '--font-sans',
   weight: ['400', '500', '600'],
   display: 'swap',
+  preload: false,
   adjustFontFallback: true,
 });
 
@@ -64,6 +62,7 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   weight: ['400', '500'],
   display: 'swap',
+  preload: false,
   adjustFontFallback: true,
 });
 
@@ -72,6 +71,7 @@ const outfit = Outfit({
   variable: '--font-outfit',
   weight: ['400', '500', '600'],
   display: 'swap',
+  preload: false,
   adjustFontFallback: true,
 });
 
@@ -120,8 +120,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           type="image/webp"
           fetchPriority="high"
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
@@ -133,7 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent"
+        className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent`}
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />

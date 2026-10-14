@@ -41,6 +41,7 @@ export function WebVitalsReporter() {
     }>
   >([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loggedIdsRef = useRef<Set<string>>(new Set());
 
   const flush = useCallback(() => {
     if (pendingRef.current.length === 0) return;
@@ -71,6 +72,11 @@ export function WebVitalsReporter() {
 
   useReportWebVitals((metric: Metric) => {
     const isDev = process.env.NODE_ENV === 'development';
+    const dedupeKey = `${metric.name}:${metric.id ?? metric.value.toFixed(0)}`;
+    if (loggedIdsRef.current.has(dedupeKey)) {
+      return;
+    }
+    loggedIdsRef.current.add(dedupeKey);
 
     // Dev-only: rich console breakdown for LCP and INP
     if (isDev && (metric.name === 'LCP' || metric.name === 'INP')) {

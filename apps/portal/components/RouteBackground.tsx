@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
@@ -29,14 +28,13 @@ function RouteBackgroundPoster() {
         className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
-        <Image
+        <img
           id="route-bg-light-image"
           src="/background/global-background-poster.webp"
           alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125"
+          fetchPriority="high"
+          decoding="async"
+          className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125 w-full h-full"
         />
       </div>
       <div className="route-bg-grain" aria-hidden="true" />
@@ -136,7 +134,6 @@ function RouteBackgroundInner() {
             playsInline
             disablePictureInPicture
             preload="metadata"
-            poster="/background/global-background-poster.webp"
             crossOrigin="anonymous"
           >
             {/* biome-ignore format: Cloudinary CDN URLs naturally exceed line width */}
