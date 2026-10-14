@@ -58,23 +58,52 @@ export function UsersTab() {
     role: string;
     department_id: string | null;
     accessible_departments: string[];
+    full_name: string;
   }) => {
-    if (!editingEmployee) return;
+    if (editingEmployee) {
+      // Update existing employee
+      const { error } = await supabase
+        .from('employees')
+        .update({
+          role: formData.role,
+          department_id: formData.department_id,
+          accessible_departments: formData.accessible_departments,
+        })
+        .eq('id', editingEmployee.id);
 
-    const { error } = await supabase
-      .from('employees')
-      .update({
+      if (error) {
+        logError(new Error(error.message), {
+          context: 'users_tab_update_employee',
+        });
+        return;
+      }
+    } else {
+      // Add new employee
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        logError(new Error('Unauthenticated'), {
+          context: 'users_tab_add_employee',
+        });
+        return;
+      }
+
+      const { error } = await supabase.from('employees').insert({
+        full_name: formData.full_name,
         role: formData.role,
         department_id: formData.department_id,
         accessible_departments: formData.accessible_departments,
-      })
-      .eq('id', editingEmployee.id);
-
-    if (error) {
-      logError(new Error(error.message), {
-        context: 'users_tab_update_employee',
+        auth_id: user.id,
       });
-      return;
+
+      if (error) {
+        logError(new Error(error.message), {
+          context: 'users_tab_add_employee',
+        });
+        return;
+      }
     }
 
     setShowEditDialog(false);
@@ -100,7 +129,13 @@ export function UsersTab() {
             className="pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
           />
         </div>
-        <Button className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]">
+        <Button
+          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          onClick={() => {
+            setEditingEmployee(null);
+            setShowEditDialog(true);
+          }}
+        >
           <UserPlus className="w-4 h-4 mr-2" />
           Add Employee
         </Button>
@@ -245,6 +280,7 @@ function EditEmployeeForm({
     role: string;
     department_id: string | null;
     accessible_departments: string[];
+    full_name: string;
   }) => void;
   onCancel: () => void;
 }) {
@@ -253,13 +289,15 @@ function EditEmployeeForm({
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
     employee?.accessible_departments || []
   );
+  const [fullName, setFullName] = useState(employee?.full_name || '');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     onSubmit({
       role,
       department_id: departmentId || null,
       accessible_departments: accessibleDepts,
+      full_name: fullName,
     });
   };
 
@@ -271,6 +309,23 @@ function EditEmployeeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label
+          htmlFor="fullName"
+          className="block text-sm font-medium text-[var(--text-body)] mb-2"
+        >
+          Full Name
+        </label>
+        <input
+          id="fullName"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
+          placeholder="Enter full name"
+        />
+      </div>
+
       <div>
         <label htmlFor="role" className="block text-sm font-medium text-[var(--text-body)] mb-2">
           Role
@@ -340,7 +395,7 @@ function EditEmployeeForm({
           type="submit"
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
         >
-          Save Changes
+          {employee ? 'Save Changes' : 'Add Employee'}
         </Button>
       </div>
     </form>

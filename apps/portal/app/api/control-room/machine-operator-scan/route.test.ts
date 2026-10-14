@@ -592,8 +592,7 @@ describe('POST /api/control-room/machine-operator-scan', () => {
         data: null,
         error: {
           code: 'PGRST200',
-          message:
-            "Could not find a relationship between 'machines' and 'machine_types' in the schema cache",
+          message: 'Machine types relationship not found',
         },
       })
       .mockResolvedValueOnce({
