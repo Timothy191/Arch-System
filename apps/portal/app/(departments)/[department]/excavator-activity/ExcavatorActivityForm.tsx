@@ -1,13 +1,19 @@
 'use client';
 
+import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getCurrentShift } from '@repo/utils/client';
-import { Activity, ArrowUpRight, BarChart3 } from 'lucide-react';
+import { Activity, ArrowUpRight, BarChart3, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  deriveExcavatorDumperAssignments,
+  type HourlyLoadSegmentSummary,
+} from '../hourly-loads/loads-utils';
+import { saveExcavatorActivity } from './actions';
 import { type DumperAssignmentRow, ExcavatorDumperTable } from './ExcavatorDumperTable';
 
 interface ExcavatorMachine {
@@ -45,12 +51,6 @@ interface MineBlock {
   site_id: string | null;
 }
 
-interface HourlyLoadSummary {
-  machine_id: string;
-  shift_type: string;
-  total_loads: number;
-}
-
 interface ExcavatorActivityFormProps {
   departmentId: string;
   excavators: ExcavatorMachine[];
@@ -58,7 +58,8 @@ interface ExcavatorActivityFormProps {
   operators: Operator[];
   sites?: Site[];
   mineBlocks: MineBlock[];
-  todayDumperLoads: HourlyLoadSummary[];
+  todayDumperLoads: HourlyLoadSegmentSummary[];
+  today?: string;
 }
 
 const getAutoSaveKey = (deptId: string) => `excavator-activity-draft-${deptId}`;
@@ -73,9 +74,42 @@ export function ExcavatorActivityForm({
   sites,
   mineBlocks,
   todayDumperLoads,
+  today,
 }: ExcavatorActivityFormProps) {
   const router = useRouter();
-  const supabase = createBrowserSupabaseClient();
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
+
+  const [loadsState, setLoadsState] = useState<HourlyLoadSegmentSummary[]>(todayDumperLoads);
+
+  useEffect(() => {
+    setLoadsState(todayDumperLoads);
+  }, [todayDumperLoads]);
+
+  useSupabaseRealtime<HourlyLoadSegmentSummary & { id?: string; load_date?: string }>({
+    supabaseClient: supabase,
+    table: 'hourly_loads',
+    filter: `department_id=eq.${departmentId}`,
+    onChange: (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        if (today && payload.new.load_date && payload.new.load_date !== today) {
+          return;
+        }
+        setLoadsState((prev) => {
+          if (payload.new.id) {
+            const index = prev.findIndex((item) => item.id === payload.new.id);
+            if (index >= 0) {
+              const next = [...prev];
+              next[index] = { ...next[index], ...payload.new };
+              return next;
+            }
+          }
+          return [...prev, payload.new];
+        });
+      } else if (payload.eventType === 'DELETE' && payload.old.id) {
+        setLoadsState((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    },
+  });
 
   const [formData, setFormData] = useState({
     excavatorId: '',
@@ -120,6 +154,28 @@ export function ExcavatorActivityForm({
     }
   }, [departmentId]);
 
+  // Auto-select excavator that has active Hourly Loads assignments (or sole excavator)
+  useEffect(() => {
+    if (formData.excavatorId || excavators.length === 0) return;
+
+    const shiftAssignedExcavator = excavators.find((ex) =>
+      loadsState.some((l) => l.excavator_id === ex.id && l.shift_type === formData.shiftType)
+    );
+    const anyAssignedExcavator = excavators.find((ex) =>
+      loadsState.some((l) => l.excavator_id === ex.id)
+    );
+    const defaultExcavator =
+      shiftAssignedExcavator ??
+      anyAssignedExcavator ??
+      (excavators.length === 1 ? excavators[0] : undefined);
+
+    if (defaultExcavator) {
+      setFormData((prev) =>
+        prev.excavatorId ? prev : { ...prev, excavatorId: defaultExcavator.id }
+      );
+    }
+  }, [excavators, loadsState, formData.excavatorId, formData.shiftType]);
+
   // Pre-populate operator from recent activity
   useEffect(() => {
     if (!formData.operatorId && operators.length > 0) {
@@ -130,14 +186,49 @@ export function ExcavatorActivityForm({
     }
   }, [operators, formData.operatorId]);
 
+  // Auto-place ADT, RDT, and Dump Truck rows assigned to the selected Excavator on Hourly Loads
+  useEffect(() => {
+    if (!formData.excavatorId) {
+      setDumperAssignments((prev) => prev.filter((row) => !row.autoPlaced));
+      return;
+    }
+
+    const derived = deriveExcavatorDumperAssignments(
+      loadsState,
+      dumpers,
+      formData.excavatorId,
+      formData.shiftType
+    );
+
+    setDumperAssignments((prev) => {
+      const derivedKeys = new Set(derived.map((d) => `${d.dumperMachineId}|${d.materialType}`));
+      const manualRows = prev.filter(
+        (row) =>
+          !row.autoPlaced &&
+          (!row.dumperMachineId || !derivedKeys.has(`${row.dumperMachineId}|${row.materialType}`))
+      );
+      return [...derived, ...manualRows];
+    });
+  }, [formData.excavatorId, formData.shiftType, loadsState, dumpers]);
+
   // Determine site assigned to this excavator on Hourly Loads tab
   const selectedExcavator = excavators.find((e) => e.id === formData.excavatorId);
   const effectiveSiteId = selectedExcavator?.site_id ?? null;
   const excavatorSite = sites?.find((s) => s.id === effectiveSiteId);
 
-  // Filter dumpers and mine blocks by the excavator's assigned site
+  // Filter dumpers and mine blocks by the excavator's assigned site (always include dumpers assigned to this excavator in hourly_loads)
+  const assignedDumperIds = useMemo(
+    () =>
+      new Set(
+        loadsState.filter((l) => l.excavator_id === formData.excavatorId).map((l) => l.machine_id)
+      ),
+    [loadsState, formData.excavatorId]
+  );
+
   const siteDumpers = effectiveSiteId
-    ? dumpers.filter((d) => d.site_id === effectiveSiteId || d.site_id === null)
+    ? dumpers.filter(
+        (d) => d.site_id === effectiveSiteId || d.site_id === null || assignedDumperIds.has(d.id)
+      )
     : dumpers;
 
   const siteMineBlocks = effectiveSiteId
@@ -150,6 +241,7 @@ export function ExcavatorActivityForm({
   const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
   const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
   const estimatedScoopTimeMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
+  const autoPlacedCount = dumperAssignments.filter((a) => a.autoPlaced).length;
 
   // Validation
   const validate = () => {
@@ -195,52 +287,26 @@ export function ExcavatorActivityForm({
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const activityDate = today || new Date().toISOString().split('T')[0] || '';
 
-      // Insert excavator_activity
-      const { data: activityData, error: activityError } = await supabase
-        .from('excavator_activity')
-        .insert({
-          department_id: departmentId,
-          machine_id: formData.excavatorId,
-          operator_id: formData.operatorId || null,
-          activity_date: today,
-          shift_type: formData.shiftType,
-          site_id: effectiveSiteId,
-          block_mined_id: formData.blockMinedId || null,
-          passes: 0,
-          loads: totalLoads,
-          notes: formData.notes || null,
-        })
-        .select('id')
-        .single();
-
-      if (activityError) throw activityError;
-
-      const activityId = activityData.id;
-
-      // Insert dumper assignments
-      if (dumperAssignments.length > 0) {
-        const assignmentRows = dumperAssignments
+      await saveExcavatorActivity({
+        departmentId,
+        excavatorId: formData.excavatorId,
+        operatorId: formData.operatorId,
+        activityDate,
+        shiftType: formData.shiftType === 'night' ? 'night' : 'day',
+        siteId: effectiveSiteId,
+        blockMinedId: formData.blockMinedId || null,
+        notes: formData.notes || null,
+        dumperAssignments: dumperAssignments
           .filter((a) => a.dumperMachineId)
           .map((a) => ({
-            excavator_activity_id: activityId,
-            dumper_machine_id: a.dumperMachineId,
-            material_type: a.materialType,
-            total_loads: a.totalLoads,
-            total_bcm: a.totalBcm || null,
-          }));
-
-        const { error: assignError } = await supabase
-          .from('excavator_dumper_assignments')
-          .insert(assignmentRows);
-
-        if (assignError) {
-          // Clean up the activity record if assignments fail
-          await supabase.from('excavator_activity').delete().eq('id', activityId);
-          throw assignError;
-        }
-      }
+            dumperMachineId: a.dumperMachineId,
+            materialType: a.materialType,
+            totalLoads: a.totalLoads,
+            totalBcm: a.totalBcm,
+          })),
+      });
 
       // Clear form, keep shift/operator
       setFormData((prev) => ({
@@ -281,6 +347,12 @@ export function ExcavatorActivityForm({
             Log Excavator Activity
           </h2>
           <div className="flex items-center gap-3">
+            {autoPlacedCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20">
+                <Sparkles className="w-3 h-3" />
+                {autoPlacedCount} ADT/RDT auto-placed
+              </span>
+            )}
             <Link
               href="/hub/executive"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
@@ -417,8 +489,9 @@ export function ExcavatorActivityForm({
             <div className="border-t border-[var(--border-default)] pt-4">
               <ExcavatorDumperTable
                 siteDumpers={siteDumpers}
+                excavatorId={formData.excavatorId}
                 shiftType={formData.shiftType}
-                todayDumperLoads={todayDumperLoads}
+                todayDumperLoads={loadsState}
                 assignments={dumperAssignments}
                 onAssignmentsChange={setDumperAssignments}
                 errors={errors}

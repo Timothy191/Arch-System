@@ -155,3 +155,24 @@ export const saveHourlyLoadSchema = z.object({
       .or(z.literal('')),
   }),
 });
+
+export const saveExcavatorActivitySchema = z.object({
+  departmentId: z.string().uuid('Invalid department ID format'),
+  excavatorId: z.string().uuid('Invalid excavator ID format'),
+  operatorId: z.string().uuid('Invalid operator ID format').nullable().optional(),
+  activityDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
+  shiftType: z.enum(['day', 'night']),
+  siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
+  blockMinedId: z.string().uuid('Invalid block mined ID format').nullable().optional(),
+  notes: z.string().nullable().optional(),
+  dumperAssignments: z
+    .array(
+      z.object({
+        dumperMachineId: z.string().uuid('Invalid dumper machine ID format'),
+        materialType: z.string().min(1),
+        totalLoads: z.number().int().min(0),
+        totalBcm: z.number().min(0).nullable().optional(),
+      })
+    )
+    .default([]),
+});

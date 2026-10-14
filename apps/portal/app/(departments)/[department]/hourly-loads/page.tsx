@@ -4,6 +4,7 @@ import { getCurrentShift } from '@repo/utils';
 import { C66MachineOperatorScanner } from '@/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
+import { HAUL_TRUCK_MACHINE_TYPES } from './loads-utils';
 
 export default async function HourlyLoadsPage({
   params,
@@ -17,11 +18,11 @@ export default async function HourlyLoadsPage({
     department,
   });
 
-  // Fetch dump trucks with bin_factor (centralised fleet)
+  // Fetch dump trucks (ADT, RDT, Dump Truck) with bin_factor (centralised fleet)
   const { data: machines } = await supabase
     .from('machines')
     .select('id, name, machine_type, bin_factor, site_id')
-    .in('machine_type', ['Dump Truck', 'ADT', 'Articulated Dump Truck'])
+    .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
     .eq('active', true)
     .order('name');
 

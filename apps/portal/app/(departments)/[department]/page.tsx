@@ -1,4 +1,5 @@
 import { Divider } from '@repo/ui/Divider';
+import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
@@ -61,19 +62,26 @@ export default async function DepartmentDashboard({
       <div className="space-y-6">
         {isControlRoom ? (
           <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-                Control Room Dashboard
-              </h2>
-              <p className="text-[var(--text-muted)] text-sm">
-                {new Date().toLocaleDateString('en-ZA', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </p>
-            </div>
+            <GlassCard hover accent="charcoal">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+                    Control Room Dashboard
+                  </h2>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
+                    Live SCADA monitoring, production metrics, and shift dispatch.
+                  </p>
+                </div>
+                <p className="text-[var(--text-muted)] text-sm">
+                  {new Date().toLocaleDateString('en-ZA', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+            </GlassCard>
 
             <Divider variant="fading" />
 
@@ -118,7 +126,9 @@ export default async function DepartmentDashboard({
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
+            <GlassCard hover accent="charcoal">
+              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
+            </GlassCard>
 
             <Divider variant="fading" />
 

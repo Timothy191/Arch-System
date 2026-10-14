@@ -10,6 +10,146 @@ import type { SaveHourlyLoadInput, SplitHourlyLoadInput } from '@repo/contract/t
 import { cacheInvalidateTags } from '@repo/redis';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { deriveExcavatorDumperAssignments, type HourlyShift } from './loads-utils';
+
+export async function syncExcavatorActivityFromHourlyLoads(
+  serviceClient: ReturnType<typeof createServiceRoleClient>,
+  params: {
+    departmentId: string;
+    excavatorId: string;
+    loadDate: string;
+    shiftType: HourlyShift;
+  }
+) {
+  const { departmentId, excavatorId, loadDate, shiftType } = params;
+  if (!excavatorId) return;
+
+  const { data: assignedLoads, error: loadsError } = await serviceClient
+    .from('hourly_loads')
+    .select('id, machine_id, material_type, shift_type, excavator_id, total_loads')
+    .eq('department_id', departmentId)
+    .eq('load_date', loadDate)
+    .eq('shift_type', shiftType)
+    .eq('excavator_id', excavatorId);
+
+  if (loadsError || !assignedLoads) return;
+
+  const { data: existingActivities } = await serviceClient
+    .from('excavator_activity')
+    .select('id, site_id, operator_id')
+    .eq('department_id', departmentId)
+    .eq('machine_id', excavatorId)
+    .eq('activity_date', loadDate)
+    .eq('shift_type', shiftType)
+    .order('created_at', { ascending: false });
+
+  const existingActivity = existingActivities?.[0] ?? null;
+
+  if (assignedLoads.length === 0) {
+    if (existingActivity) {
+      await serviceClient
+        .from('excavator_dumper_assignments')
+        .delete()
+        .eq('excavator_activity_id', existingActivity.id);
+      await serviceClient
+        .from('excavator_activity')
+        .update({ loads: 0 })
+        .eq('id', existingActivity.id);
+    }
+    return;
+  }
+
+  const machineIds = Array.from(new Set([excavatorId, ...assignedLoads.map((l) => l.machine_id)]));
+  const { data: machinesData } = await serviceClient
+    .from('machines')
+    .select('id, name, bin_factor, site_id')
+    .in('id', machineIds);
+
+  const excavatorMachine = machinesData?.find((m) => m.id === excavatorId);
+  const derivedRows = deriveExcavatorDumperAssignments(
+    assignedLoads,
+    machinesData ?? [],
+    excavatorId,
+    shiftType
+  );
+  const totalExcavatorLoads = derivedRows.reduce((sum, r) => sum + r.totalLoads, 0);
+
+  let activityId = existingActivity?.id ?? null;
+
+  if (activityId) {
+    await serviceClient
+      .from('excavator_activity')
+      .update({
+        loads: totalExcavatorLoads,
+        site_id: existingActivity?.site_id ?? excavatorMachine?.site_id ?? null,
+      })
+      .eq('id', activityId);
+  } else {
+    let operatorId: string | null = null;
+    let opSiteId: string | null = excavatorMachine?.site_id ?? null;
+    try {
+      const { data: machineOps } = await serviceClient
+        .from('machine_operations')
+        .select('operator_id, site_id')
+        .eq('department_id', departmentId)
+        .eq('machine_id', excavatorId)
+        .eq('shift_date', loadDate)
+        .eq('shift_type', shiftType)
+        .order('created_at', { ascending: false });
+      if (machineOps?.[0]) {
+        operatorId = machineOps[0].operator_id ?? null;
+        opSiteId = machineOps[0].site_id ?? opSiteId;
+      }
+    } catch {
+      // Optional operator lookup from machine_operations
+    }
+
+    const { data: insertedActivity, error: insertActivityErr } = await serviceClient
+      .from('excavator_activity')
+      .insert({
+        department_id: departmentId,
+        machine_id: excavatorId,
+        operator_id: operatorId,
+        activity_date: loadDate,
+        shift_type: shiftType,
+        site_id: opSiteId,
+        passes: 0,
+        loads: totalExcavatorLoads,
+      })
+      .select('id')
+      .single();
+
+    if (insertActivityErr || !insertedActivity) return;
+    activityId = insertedActivity.id;
+  }
+
+  await serviceClient
+    .from('excavator_dumper_assignments')
+    .delete()
+    .eq('excavator_activity_id', activityId);
+
+  if (derivedRows.length > 0) {
+    await serviceClient.from('excavator_dumper_assignments').insert(
+      derivedRows.map((row) => ({
+        excavator_activity_id: activityId,
+        dumper_machine_id: row.dumperMachineId,
+        material_type: row.materialType,
+        total_loads: row.totalLoads,
+        total_bcm: row.totalBcm || null,
+      }))
+    );
+  }
+
+  try {
+    await cacheInvalidateTags([
+      'table:excavator_activity',
+      'table:excavator_dumper_assignments',
+      `dept:${departmentId}`,
+    ]);
+  } catch {
+    // Best-effort cache invalidation
+  }
+}
 
 function assertDepartmentAccess(
   employee: EmployeeSummary | null | undefined,
@@ -135,6 +275,19 @@ export async function updateHourlyLoadExcavator(
     }
   }
 
+  if (validated.excavatorId) {
+    try {
+      await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+        departmentId: validated.departmentId,
+        excavatorId: validated.excavatorId,
+        loadDate: validated.loadDate,
+        shiftType: validated.shiftType,
+      });
+    } catch {
+      // Best-effort excavator activity sync
+    }
+  }
+
   return { success: true };
 }
 
@@ -170,6 +323,19 @@ export async function splitMachineHourlyLoad(input: SplitHourlyLoadInput) {
   const newLoad = data?.[0];
   if (!newLoad) {
     throw new Error('Hourly-load split RPC returned no new segment');
+  }
+
+  if (validated.excavatorId) {
+    try {
+      await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+        departmentId: validated.departmentId,
+        excavatorId: validated.excavatorId,
+        loadDate: validated.loadDate,
+        shiftType: validated.shiftType,
+      });
+    } catch {
+      // Best-effort excavator activity sync
+    }
   }
 
   return { success: true, newLoad };
@@ -230,6 +396,21 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
       // Best-effort cache invalidation
     }
 
+    const syncedExcavatorId =
+      (updated.excavator_id as string | null) ?? (cleanPatch.excavator_id as string | null) ?? null;
+    if (syncedExcavatorId) {
+      try {
+        await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+          departmentId: validated.departmentId,
+          excavatorId: syncedExcavatorId,
+          loadDate: validated.loadDate,
+          shiftType: validated.shiftType,
+        });
+      } catch {
+        // Best-effort excavator activity sync
+      }
+    }
+
     return { success: true, load: updated };
   }
 
@@ -248,6 +429,7 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
 
   if (existingRows && existingRows.length > 0) {
     const target = existingRows[0];
+    const previousExcavatorId = (target.excavator_id as string | null) ?? null;
     const { data: updated, error: updateError } = await serviceClient
       .from('hourly_loads')
       .update(cleanPatch)
@@ -266,6 +448,22 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
       await cacheInvalidateTags(['table:hourly_loads', `dept:${validated.departmentId}`]);
     } catch {
       // Best-effort cache invalidation
+    }
+
+    const excavatorIdsToSync = new Set<string>();
+    if (previousExcavatorId) excavatorIdsToSync.add(previousExcavatorId);
+    if (updated.excavator_id) excavatorIdsToSync.add(updated.excavator_id as string);
+    for (const exId of excavatorIdsToSync) {
+      try {
+        await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+          departmentId: validated.departmentId,
+          excavatorId: exId,
+          loadDate: validated.loadDate,
+          shiftType: validated.shiftType,
+        });
+      } catch {
+        // Best-effort excavator activity sync
+      }
     }
 
     return { success: true, load: updated };
@@ -362,6 +560,19 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
     ]);
   } catch {
     // Best-effort cache invalidation
+  }
+
+  if (inserted?.excavator_id) {
+    try {
+      await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+        departmentId: validated.departmentId,
+        excavatorId: inserted.excavator_id as string,
+        loadDate: validated.loadDate,
+        shiftType: validated.shiftType,
+      });
+    } catch {
+      // Best-effort excavator activity sync
+    }
   }
 
   return { success: true, load: inserted };

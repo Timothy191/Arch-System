@@ -77,8 +77,7 @@ export function HeroRotator({
       title: defaultTitle,
       description: defaultDescription,
       category: 'Central Command',
-      // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
-      image: 'https://res.cloudinary.com/zwevvryv/image/upload/images/departments/overview.jpg',
+      image: '/images/departments/overview.jpg',
       stats: { label: 'System Health', value: '100% Optimal' },
       status: 'active',
       icon: <Logo className="w-4 h-4 text-[var(--accent-blue)]" />,
@@ -128,8 +127,7 @@ export function HeroRotator({
             : dept.type === 'satellite'
               ? 'Orbital Intelligence'
               : 'Field Operations',
-        // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
-        image: `https://res.cloudinary.com/zwevvryv/image/upload/images/departments/${dept.name}.jpg`,
+        image: `/images/departments/${dept.name}.jpg`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',
         icon: <DeptIcon className={cn('w-4 h-4', style.iconColor)} />,

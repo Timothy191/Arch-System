@@ -65,6 +65,8 @@ module.exports = {
     '^@repo/ui/Logo$': '<rootDir>/../../packages/ui/src/components/Logo.tsx',
     '^@repo/ui/EveLogo$': '<rootDir>/../../packages/ui/src/components/EveLogo.tsx',
     '^@repo/ui/EveStatusBar$': '<rootDir>/../../packages/ui/src/components/EveStatusBar.tsx',
+    '^@repo/ui/TelemetryChart$':
+      '<rootDir>/../../packages/ui/src/components/ui/telemetry-chart.tsx',
     '^@repo/utils$': '<rootDir>/../../packages/utils/src/index.ts',
     '^@repo/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
     '^@repo/auth/ui$': '<rootDir>/../../libs/features/auth/ui/src/index.ts',

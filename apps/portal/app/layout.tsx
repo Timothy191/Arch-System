@@ -169,7 +169,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               </header>
 
               {/* Content wrapper with main landmark (WCAG 1.3.1) */}
-              <div className="relative z-primary-card max-w-[1920px] mx-auto shadow-window">
+              <div className="relative max-w-[1920px] mx-auto shadow-window">
                 <main id="main-content" aria-label="Main content" className="relative pt-16">
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>

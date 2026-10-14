@@ -495,7 +495,7 @@ function HourlyLoadsGrid({
           if (hasDbRow) {
             return prev.filter((l) => l.id !== loadId);
           }
-          return prev.map((l) => (l.id === loadId ? { ...l, ...res.load, id: res.load.id } : l));
+          return prev.map((l) => (l.id === loadId ? { ...res.load, ...l, id: res.load.id } : l));
         });
       }
 

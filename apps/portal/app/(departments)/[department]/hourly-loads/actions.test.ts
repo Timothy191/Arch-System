@@ -3,9 +3,11 @@ import { createServiceRoleClient } from '@repo/supabase/service-role';
 import {
   saveHourlyLoad,
   splitMachineHourlyLoad,
+  syncExcavatorActivityFromHourlyLoads,
   updateHourlyLoadExcavator,
   updateMachineSite,
 } from './actions';
+import { computeDumperLoadsAndBcm, deriveExcavatorDumperAssignments } from './loads-utils';
 
 jest.mock('@repo/redis', () => ({
   cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
@@ -30,7 +32,9 @@ function makeQuery(data: unknown = null) {
     select: jest.fn(() => query),
     update: jest.fn(() => query),
     insert: jest.fn(() => query),
+    delete: jest.fn(() => query),
     eq: jest.fn(() => query),
+    in: jest.fn(() => query),
     order: jest.fn(() => query),
     maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
     single: jest.fn().mockResolvedValue({ data, error: null }),
@@ -451,5 +455,159 @@ describe('Control Room Hourly Loads actions', () => {
         patch: { hour_01: 5 },
       })
     ).rejects.toThrow('Hourly load not found for the selected department, machine, date and shift');
+  });
+
+  describe('Automated ADT / RDT / Dump Truck Excavator Placement', () => {
+    const excavatorId = 'd290f1ee-6c54-4b01-90e6-d701748f0901';
+    const adtMachineId = 'd290f1ee-6c54-4b01-90e6-d701748f0902';
+    const rdtMachineId = 'd290f1ee-6c54-4b01-90e6-d701748f0903';
+
+    it('derives ADT and RDT dumper assignments across split hourly_loads segments', () => {
+      const dumpers = [
+        { id: adtMachineId, bin_factor: 18 },
+        { id: rdtMachineId, bin_factor: 40.5 },
+      ];
+
+      const hourlyLoads = [
+        {
+          id: 'seg-1',
+          machine_id: adtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Waste',
+          shift_type: 'day',
+          start_hour: 1,
+          end_hour: 6,
+          is_locked: true,
+          total_loads: 10,
+        },
+        {
+          id: 'seg-2',
+          machine_id: adtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Waste',
+          shift_type: 'day',
+          start_hour: 7,
+          end_hour: 12,
+          is_locked: false,
+          total_loads: 5,
+        },
+        {
+          id: 'seg-3',
+          machine_id: rdtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Coal',
+          shift_type: 'day',
+          start_hour: 1,
+          end_hour: 12,
+          is_locked: false,
+          total_loads: 8,
+        },
+      ];
+
+      const assignments = deriveExcavatorDumperAssignments(
+        hourlyLoads,
+        dumpers,
+        excavatorId,
+        'day'
+      );
+
+      expect(assignments).toEqual([
+        {
+          key: `auto-${excavatorId}-day-${adtMachineId}|Waste`,
+          dumperMachineId: adtMachineId,
+          materialType: 'Waste',
+          totalLoads: 15,
+          totalBcm: 270,
+          autoPlaced: true,
+          segmentCount: 2,
+        },
+        {
+          key: `auto-${excavatorId}-day-${rdtMachineId}|Coal`,
+          dumperMachineId: rdtMachineId,
+          materialType: 'Coal',
+          totalLoads: 8,
+          totalBcm: 324,
+          autoPlaced: true,
+          segmentCount: 1,
+        },
+      ]);
+    });
+
+    it('computes dumper loads and BCM scoped to excavator and material when present', () => {
+      const hourlyLoads = [
+        {
+          id: 'seg-1',
+          machine_id: adtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Waste',
+          shift_type: 'day',
+          total_loads: 6,
+        },
+        {
+          id: 'seg-2',
+          machine_id: adtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Coal',
+          shift_type: 'day',
+          total_loads: 4,
+        },
+      ];
+
+      expect(
+        computeDumperLoadsAndBcm(hourlyLoads, adtMachineId, 'day', 20, {
+          excavatorId,
+          materialType: 'Waste',
+        })
+      ).toEqual({
+        totalLoads: 6,
+        totalBcm: 120,
+      });
+    });
+
+    it('synchronizes excavator_activity and excavator_dumper_assignments from hourly_loads', async () => {
+      const hourlyLoadsQuery = makeQuery([
+        {
+          id: 'seg-1',
+          machine_id: adtMachineId,
+          excavator_id: excavatorId,
+          material_type: 'Waste',
+          shift_type: 'day',
+          total_loads: 12,
+        },
+      ]);
+      const machinesQuery = makeQuery([
+        { id: excavatorId, name: 'EX-501', bin_factor: null, site_id: siteId },
+        { id: adtMachineId, name: 'ADT-201', bin_factor: 20, site_id: siteId },
+      ]);
+      const activityQuery = makeQuery({ id: 'activity-1', loads: 0 });
+      const assignmentsDeleteQuery = makeQuery();
+
+      const customServiceClient = {
+        from: jest.fn((table: string) => {
+          if (table === 'hourly_loads') return hourlyLoadsQuery;
+          if (table === 'machines') return machinesQuery;
+          if (table === 'excavator_activity') return activityQuery;
+          if (table === 'excavator_dumper_assignments') return assignmentsDeleteQuery;
+          throw new Error(`Unexpected table: ${table}`);
+        }),
+      };
+
+      await syncExcavatorActivityFromHourlyLoads(customServiceClient as never, {
+        departmentId,
+        excavatorId,
+        loadDate: '2026-10-14',
+        shiftType: 'day',
+      });
+
+      expect(assignmentsDeleteQuery.insert).toHaveBeenCalledWith([
+        {
+          excavator_activity_id: 'activity-1',
+          dumper_machine_id: adtMachineId,
+          material_type: 'Waste',
+          total_loads: 12,
+          total_bcm: 240,
+        },
+      ]);
+    });
   });
 });

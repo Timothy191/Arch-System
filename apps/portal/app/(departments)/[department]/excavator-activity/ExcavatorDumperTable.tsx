@@ -1,6 +1,10 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import {
+  computeDumperLoadsAndBcm,
+  type HourlyLoadSegmentSummary,
+} from '../hourly-loads/loads-utils';
 
 const MATERIAL_TYPES = ['Overburden', 'Coal', 'Waste', 'Partings', 'Soil', 'Other'];
 
@@ -12,24 +16,21 @@ interface DumperMachine {
   site_id: string | null;
 }
 
-interface HourlyLoadSummary {
-  machine_id: string;
-  shift_type: string;
-  total_loads: number;
-}
-
 export interface DumperAssignmentRow {
   key: string;
   dumperMachineId: string;
   materialType: string;
   totalLoads: number;
   totalBcm: number;
+  autoPlaced?: boolean;
+  segmentCount?: number;
 }
 
 interface ExcavatorDumperTableProps {
+  excavatorId?: string;
   siteDumpers: DumperMachine[];
   shiftType: 'day' | 'night';
-  todayDumperLoads: HourlyLoadSummary[];
+  todayDumperLoads: HourlyLoadSegmentSummary[];
   assignments: DumperAssignmentRow[];
   onAssignmentsChange: (_updated: DumperAssignmentRow[]) => void;
   errors?: Record<string, string>;
@@ -41,6 +42,7 @@ function newRowKey(): string {
 }
 
 export function ExcavatorDumperTable({
+  excavatorId,
   siteDumpers,
   shiftType,
   todayDumperLoads,
@@ -54,9 +56,10 @@ export function ExcavatorDumperTable({
       {
         key: newRowKey(),
         dumperMachineId: '',
-        materialType: 'Overburden',
+        materialType: 'Waste',
         totalLoads: 0,
         totalBcm: 0,
+        autoPlaced: false,
       },
     ]);
   };
@@ -69,21 +72,37 @@ export function ExcavatorDumperTable({
     const dumper = siteDumpers.find((d) => d.id === dumperId);
     const binFactor = dumper?.bin_factor || 0;
 
-    // Look up total loads from hourly_loads for this dumper + shift
-    const loadEntry = todayDumperLoads.find(
-      (l) => l.machine_id === dumperId && l.shift_type === shiftType
-    );
-    const loads = loadEntry?.total_loads || 0;
-    const bcm = loads * binFactor;
-
     const updated = [...assignments];
     const existing = updated[index];
     if (!existing) return;
+
+    // Infer material from hourly_loads if this dumper has an assigned load for this excavator
+    const assignedLoad = todayDumperLoads.find(
+      (l) =>
+        l.machine_id === dumperId &&
+        l.shift_type === shiftType &&
+        (!excavatorId || !l.excavator_id || l.excavator_id === excavatorId)
+    );
+    const effectiveMaterial = assignedLoad?.material_type || existing.materialType || 'Waste';
+
+    const { totalLoads, totalBcm } = computeDumperLoadsAndBcm(
+      todayDumperLoads,
+      dumperId,
+      shiftType,
+      binFactor,
+      {
+        excavatorId,
+        materialType: effectiveMaterial,
+      }
+    );
+
     updated[index] = {
       ...existing,
       dumperMachineId: dumperId,
-      totalLoads: loads,
-      totalBcm: bcm,
+      materialType: effectiveMaterial,
+      totalLoads,
+      totalBcm,
+      autoPlaced: Boolean(assignedLoad?.excavator_id && assignedLoad.excavator_id === excavatorId),
     };
     onAssignmentsChange(updated);
   };
@@ -92,9 +111,25 @@ export function ExcavatorDumperTable({
     const updated = [...assignments];
     const existing = updated[index];
     if (!existing) return;
+
+    const dumper = siteDumpers.find((d) => d.id === existing.dumperMachineId);
+    const binFactor = dumper?.bin_factor || 0;
+    const { totalLoads, totalBcm } = computeDumperLoadsAndBcm(
+      todayDumperLoads,
+      existing.dumperMachineId,
+      shiftType,
+      binFactor,
+      {
+        excavatorId,
+        materialType: material,
+      }
+    );
+
     updated[index] = {
       ...existing,
       materialType: material,
+      totalLoads,
+      totalBcm,
     };
     onAssignmentsChange(updated);
   };
@@ -102,12 +137,27 @@ export function ExcavatorDumperTable({
   const handleDuplicateRow = (index: number) => {
     const row = assignments[index];
     if (!row) return;
+    const nextMaterial = row.materialType === 'Coal' ? 'Waste' : 'Coal';
+    const dumper = siteDumpers.find((d) => d.id === row.dumperMachineId);
+    const binFactor = dumper?.bin_factor || 0;
+    const { totalLoads, totalBcm } = computeDumperLoadsAndBcm(
+      todayDumperLoads,
+      row.dumperMachineId,
+      shiftType,
+      binFactor,
+      {
+        excavatorId,
+        materialType: nextMaterial,
+      }
+    );
+
     const newRow: DumperAssignmentRow = {
       key: newRowKey(),
       dumperMachineId: row.dumperMachineId,
-      materialType: 'Coal', // Default to a different material
-      totalLoads: 0,
-      totalBcm: 0,
+      materialType: nextMaterial,
+      totalLoads,
+      totalBcm,
+      autoPlaced: false,
     };
     const updated = [...assignments];
     updated.splice(index + 1, 0, newRow);
@@ -116,6 +166,7 @@ export function ExcavatorDumperTable({
 
   const runningTotalBcm = assignments.reduce((sum, a) => sum + a.totalBcm, 0);
   const runningTotalLoads = assignments.reduce((sum, a) => sum + a.totalLoads, 0);
+  const autoPlacedCount = assignments.filter((a) => a.autoPlaced).length;
 
   if (siteDumpers.length === 0) {
     return (
@@ -129,8 +180,18 @@ export function ExcavatorDumperTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-[var(--text-heading)]">Dumper Assignments</h4>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5">
+          <h4 className="text-sm font-medium text-[var(--text-heading)]">
+            Dumper Assignments (ADT / RDT)
+          </h4>
+          {autoPlacedCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse" />
+              {autoPlacedCount} auto-placed from Hourly Loads
+            </span>
+          )}
+        </div>
         <button
           type="button"
           onClick={handleAddRow}
@@ -143,7 +204,9 @@ export function ExcavatorDumperTable({
       {assignments.length === 0 ? (
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm text-center py-6">
-            No dumpers assigned yet. Click &quot;+ Add Dumper&quot; to add one.
+            No dumpers assigned yet. Assign an Excavator to ADT/RDT machines on{' '}
+            <span className="text-[var(--text-heading)] font-medium">Hourly Loads</span> to
+            auto-place them here, or click &quot;+ Add Dumper&quot;.
           </p>
         </GlassCard>
       ) : (
@@ -161,7 +224,7 @@ export function ExcavatorDumperTable({
                   scope="col"
                   className="text-left text-[var(--text-muted)] py-2 px-2 font-medium"
                 >
-                  Dumper
+                  Dumper (ADT / RDT)
                 </th>
                 <th
                   scope="col"
@@ -191,27 +254,47 @@ export function ExcavatorDumperTable({
             </thead>
             <tbody>
               {assignments.map((assignment, index) => {
+                const selectedDumper = siteDumpers.find((d) => d.id === assignment.dumperMachineId);
                 return (
                   <tr key={assignment.key} className="border-b border-[var(--border-default)]/50">
                     <td className="py-2 px-2 text-[var(--text-muted)]">{index + 1}</td>
                     <td className="py-2 px-2">
-                      <select
-                        value={assignment.dumperMachineId}
-                        onChange={(e) => handleDumperChange(index, e.target.value)}
-                        className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-                      >
-                        <option value="">
-                          {siteDumpers.length === 0
-                            ? 'No dumpers at this site'
-                            : 'Select dumper...'}
-                        </option>
-                        {siteDumpers.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name} ({d.machine_type}
-                            {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ''})
+                      <div className="flex flex-col gap-1">
+                        <select
+                          value={assignment.dumperMachineId}
+                          onChange={(e) => handleDumperChange(index, e.target.value)}
+                          className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                        >
+                          <option value="">
+                            {siteDumpers.length === 0
+                              ? 'No dumpers at this site'
+                              : 'Select dumper...'}
                           </option>
-                        ))}
-                      </select>
+                          {siteDumpers.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name} ({d.machine_type}
+                              {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ''})
+                            </option>
+                          ))}
+                        </select>
+                        {assignment.autoPlaced && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+                              Auto-placed from Hourly Loads
+                            </span>
+                            {selectedDumper && (
+                              <span className="text-[10px] text-[var(--text-muted)]">
+                                {selectedDumper.machine_type}
+                              </span>
+                            )}
+                            {(assignment.segmentCount ?? 1) > 1 && (
+                              <span className="text-[10px] text-[var(--text-muted)]">
+                                · {assignment.segmentCount} segments
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="py-2 px-2">
                       <select

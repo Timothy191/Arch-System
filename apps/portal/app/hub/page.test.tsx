@@ -108,6 +108,10 @@ jest.mock('@repo/ui/Logo', () => ({
   Logo: () => <svg data-testid="logo" />,
 }));
 
+jest.mock('@repo/ui/TelemetryChart', () => ({
+  TelemetryChart: () => <div data-testid="telemetry-chart" />,
+}));
+
 // ── Departments / tools ───────────────────────────────────────────────────────
 
 jest.mock('@repo/departments/data-access', () => ({

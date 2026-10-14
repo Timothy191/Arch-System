@@ -860,7 +860,12 @@ export type Database = {
       hourly_loads: {
         Row: {
           created_at: string;
+          created_by: string | null;
+          daily_log_date: string | null;
+          daily_log_id: string | null;
           department_id: string;
+          end_hour: number;
+          excavator_id: string | null;
           hour_01: number;
           hour_02: number;
           hour_03: number;
@@ -874,15 +879,24 @@ export type Database = {
           hour_11: number;
           hour_12: number;
           id: string;
+          is_locked: boolean;
           load_date: string;
           machine_id: string;
+          material_type: string;
           shift_type: string;
+          start_hour: number;
           total_loads: number | null;
           updated_at: string;
+          updated_by: string | null;
         };
         Insert: {
           created_at?: string;
+          created_by?: string | null;
+          daily_log_date?: string | null;
+          daily_log_id?: string | null;
           department_id: string;
+          end_hour?: number;
+          excavator_id?: string | null;
           hour_01?: number;
           hour_02?: number;
           hour_03?: number;
@@ -896,15 +910,24 @@ export type Database = {
           hour_11?: number;
           hour_12?: number;
           id?: string;
+          is_locked?: boolean;
           load_date: string;
           machine_id: string;
+          material_type?: string;
           shift_type: string;
+          start_hour?: number;
           total_loads?: number | null;
           updated_at?: string;
+          updated_by?: string | null;
         };
         Update: {
           created_at?: string;
+          created_by?: string | null;
+          daily_log_date?: string | null;
+          daily_log_id?: string | null;
           department_id?: string;
+          end_hour?: number;
+          excavator_id?: string | null;
           hour_01?: number;
           hour_02?: number;
           hour_03?: number;
@@ -918,11 +941,15 @@ export type Database = {
           hour_11?: number;
           hour_12?: number;
           id?: string;
+          is_locked?: boolean;
           load_date?: string;
           machine_id?: string;
+          material_type?: string;
           shift_type?: string;
+          start_hour?: number;
           total_loads?: number | null;
           updated_at?: string;
+          updated_by?: string | null;
         };
         Relationships: [
           {

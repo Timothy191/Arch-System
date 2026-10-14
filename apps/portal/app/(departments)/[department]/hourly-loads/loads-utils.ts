@@ -96,6 +96,154 @@ export function isHourEditable(
   return hourNumber >= start && hourNumber <= end;
 }
 
+export const HAUL_TRUCK_MACHINE_TYPES = [
+  'Dump Truck',
+  'ADT',
+  'Articulated Dump Truck',
+  'RDT',
+  'Rigid Dump Truck',
+] as const;
+
+export interface DerivedDumperAssignment {
+  key: string;
+  dumperMachineId: string;
+  materialType: string;
+  totalLoads: number;
+  totalBcm: number;
+  autoPlaced: boolean;
+  segmentCount: number;
+}
+
+export interface HourlyLoadSegmentSummary {
+  id?: string;
+  machine_id: string;
+  excavator_id?: string | null;
+  material_type?: string | null;
+  shift_type: string;
+  total_loads?: number | null;
+  start_hour?: number | null;
+  end_hour?: number | null;
+  is_locked?: boolean | null;
+}
+
+export interface DumperBinFactorRef {
+  id: string;
+  name?: string;
+  bin_factor?: number | null;
+}
+
+/**
+ * Derives auto-placed dumper assignments for a selected Excavator + Shift from hourly_loads.
+ * Aggregates multiple mid-shift segments by (machine_id, material_type) so a haul truck that
+ * hauled Waste in segment 1 and Coal in segment 2 produces two distinct rows with exact load & BCM totals.
+ */
+export function deriveExcavatorDumperAssignments(
+  hourlyLoads: readonly HourlyLoadSegmentSummary[],
+  dumpers: readonly DumperBinFactorRef[],
+  excavatorId: string,
+  shiftType: HourlyShift
+): DerivedDumperAssignment[] {
+  if (!excavatorId) return [];
+
+  const dumperMap = new Map<string, DumperBinFactorRef>();
+  for (const d of dumpers) {
+    dumperMap.set(d.id, d);
+  }
+
+  const grouped = new Map<
+    string,
+    {
+      dumperMachineId: string;
+      materialType: string;
+      totalLoads: number;
+      segmentCount: number;
+    }
+  >();
+
+  for (const load of hourlyLoads) {
+    if (load.excavator_id !== excavatorId || load.shift_type !== shiftType) {
+      continue;
+    }
+    const materialType = load.material_type || 'Waste';
+    const groupKey = `${load.machine_id}|${materialType}`;
+    const loads = typeof load.total_loads === 'number' ? load.total_loads : 0;
+
+    const existing = grouped.get(groupKey);
+    if (existing) {
+      existing.totalLoads += loads;
+      existing.segmentCount += 1;
+    } else {
+      grouped.set(groupKey, {
+        dumperMachineId: load.machine_id,
+        materialType,
+        totalLoads: loads,
+        segmentCount: 1,
+      });
+    }
+  }
+
+  const result: DerivedDumperAssignment[] = [];
+  for (const [groupKey, entry] of grouped.entries()) {
+    const dumper = dumperMap.get(entry.dumperMachineId);
+    const binFactor = dumper?.bin_factor ?? 0;
+    const totalBcm = Math.round(entry.totalLoads * binFactor * 100) / 100;
+
+    result.push({
+      key: `auto-${excavatorId}-${shiftType}-${groupKey}`,
+      dumperMachineId: entry.dumperMachineId,
+      materialType: entry.materialType,
+      totalLoads: entry.totalLoads,
+      totalBcm,
+      autoPlaced: true,
+      segmentCount: entry.segmentCount,
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Computes total loads and BCM for a specific dumper + shift (+ optional excavator and material)
+ * across all matching hourly_loads segments.
+ */
+export function computeDumperLoadsAndBcm(
+  hourlyLoads: readonly HourlyLoadSegmentSummary[],
+  dumperId: string,
+  shiftType: HourlyShift,
+  binFactor: number,
+  options?: { excavatorId?: string; materialType?: string }
+): { totalLoads: number; totalBcm: number } {
+  if (!dumperId) return { totalLoads: 0, totalBcm: 0 };
+
+  const matching = hourlyLoads.filter((l) => {
+    if (l.machine_id !== dumperId || l.shift_type !== shiftType) return false;
+    if (options?.excavatorId && l.excavator_id && l.excavator_id !== options.excavatorId) {
+      return false;
+    }
+    if (
+      options?.materialType &&
+      l.material_type &&
+      l.material_type.toLowerCase() !== options.materialType.toLowerCase()
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  // Fallback to all segments for that dumper+shift if material/excavator filter had no direct match
+  const sourceRows =
+    matching.length > 0
+      ? matching
+      : hourlyLoads.filter((l) => l.machine_id === dumperId && l.shift_type === shiftType);
+
+  const totalLoads = sourceRows.reduce(
+    (sum, row) => sum + (typeof row.total_loads === 'number' ? row.total_loads : 0),
+    0
+  );
+  const totalBcm = Math.round(totalLoads * (binFactor || 0) * 100) / 100;
+  return { totalLoads, totalBcm };
+}
+
 /**
  * Mirrors the DB's GENERATED ALWAYS AS (hour_01 + ... + hour_12) STORED column
  * for optimistic updates that happen before the write round-trips.

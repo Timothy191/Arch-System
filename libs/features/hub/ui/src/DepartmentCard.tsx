@@ -122,7 +122,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
       className={cn('h-full', department.gridSpan)}
     >
       <div
-        className="uiverse-card group outline-none h-full interactive-element relative"
+        className="uiverse-card group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35"
         data-testid={`dept-card-${department.name}`}
       >
         {/* Navigation Loading Overlay */}
@@ -163,11 +163,10 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
           <div className="absolute inset-0 z-0">
             <Image
-              // biome-ignore format: Cloudinary CDN URLs naturally exceed line width
               src={
                 imageError
-                  ? `/images/departments/${department.name}.jpg`
-                  : `https://res.cloudinary.com/zwevvryv/image/upload/images/departments/${department.name}.jpg`
+                  ? '/images/departments/overview.jpg'
+                  : `/images/departments/${department.name}.jpg`
               }
               alt=""
               aria-hidden="true"

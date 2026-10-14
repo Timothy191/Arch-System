@@ -19,33 +19,30 @@ type WindowWithIdleCallback = Window & {
 
 /**
  * RouteBackgroundPoster
- * Renders the primary LCP asset (PS3 Wave desktop + mobile WebP poster) and film grain overlay.
+ * Renders the primary LCP asset (PS3 Wave desktop + mobile WebP poster) in native color without overlays or filters.
  */
 function RouteBackgroundPoster() {
   return (
-    <>
-      <div
-        className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
-        aria-hidden="true"
-      >
-        <picture>
-          <source
-            media="(max-width: 767px)"
-            srcSet="/background/global-background-poster-mobile.webp"
-            type="image/webp"
-          />
-          <img
-            id="route-bg-light-image"
-            src="/background/global-background-poster.webp"
-            alt=""
-            fetchPriority="high"
-            decoding="async"
-            className="route-bg-image object-cover object-center filter invert brightness-75 contrast-125 w-full h-full"
-          />
-        </picture>
-      </div>
-      <div className="route-bg-grain" aria-hidden="true" />
-    </>
+    <div
+      className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
+      aria-hidden="true"
+    >
+      <picture>
+        <source
+          media="(max-width: 767px)"
+          srcSet="/background/global-background-poster-mobile.webp"
+          type="image/webp"
+        />
+        <img
+          id="route-bg-light-image"
+          src="/background/global-background-poster.webp"
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+          className="route-bg-image object-cover object-center w-full h-full"
+        />
+      </picture>
+    </div>
   );
 }
 
@@ -143,7 +140,7 @@ function RouteBackgroundInner() {
             key={isMobileViewport ? 'ps3-wave-mobile' : 'ps3-wave-desktop'}
             id="route-bg-light-video"
             ref={videoRef}
-            className="route-bg-video filter invert brightness-75 contrast-125 object-cover object-center w-full h-full"
+            className="route-bg-video object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: 'opacity 1.2s ease-in-out',

@@ -1,4 +1,5 @@
 import { Divider } from '@repo/ui/Divider';
+import { GlassCard } from '@repo/ui/GlassCard';
 import { CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -46,24 +47,26 @@ export default async function ControlRoomPage() {
     <ErrorBoundary context="Control Room Dashboard">
       <div className="space-y-6">
         {/* Page Title & Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
-              Control Room Dashboard
-            </h1>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
-              Live SCADA monitoring, production metrics, and shift dispatch.
+        <GlassCard hover accent="charcoal">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+                Control Room Dashboard
+              </h1>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                Live SCADA monitoring, production metrics, and shift dispatch.
+              </p>
+            </div>
+            <p className="text-[var(--text-muted)] text-sm">
+              {new Date().toLocaleDateString('en-ZA', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </p>
           </div>
-          <p className="text-[var(--text-muted)] text-sm">
-            {new Date().toLocaleDateString('en-ZA', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
+        </GlassCard>
 
         <Divider variant="fading" />
 

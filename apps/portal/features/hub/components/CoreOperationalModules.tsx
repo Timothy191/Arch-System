@@ -88,11 +88,11 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
   return (
     <section
-      className="space-y-4 animate-fade-up group/row relative rounded-card liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
+      className="space-y-5 animate-fade-up group/row relative rounded-card liquid-glass-light border border-black/[0.1] ring-1 ring-inset ring-white/60 shadow-window p-4 sm:p-6"
       style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-arch-border-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-black/[0.08]">
         <div className="flex items-center gap-2">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
             <span className="p-1 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue">

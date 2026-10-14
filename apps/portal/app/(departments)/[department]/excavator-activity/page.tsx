@@ -3,6 +3,7 @@ import { PageHeader } from '@repo/ui/PageHeader';
 import { ArrowUpRight, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { HAUL_TRUCK_MACHINE_TYPES } from '../hourly-loads/loads-utils';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityList } from './ExcavatorActivityList';
 
@@ -36,7 +37,7 @@ export default async function ExcavatorActivityPage({
     supabase
       .from('machines')
       .select('id, name, machine_type, serial_number, active, bin_factor, site_id')
-      .eq('machine_type', 'Dump Truck')
+      .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
       .eq('active', true)
       .order('name'),
     supabase
@@ -87,7 +88,9 @@ export default async function ExcavatorActivityPage({
       : Promise.resolve({ data: [] }),
     supabase
       .from('hourly_loads')
-      .select('machine_id, shift_type, total_loads')
+      .select(
+        'id, machine_id, excavator_id, material_type, shift_type, start_hour, end_hour, is_locked, total_loads'
+      )
       .eq('department_id', deptId)
       .eq('load_date', today),
   ]);
@@ -126,6 +129,7 @@ export default async function ExcavatorActivityPage({
         sites={sites || []}
         mineBlocks={mineBlocks || []}
         todayDumperLoads={todayLoads || []}
+        today={today}
       />
 
       {todayActivity && todayActivity.length > 0 && (
