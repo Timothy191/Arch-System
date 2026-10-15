@@ -178,6 +178,49 @@ export default async function ReportsPage({
       'Dozer Passes': r.dozerPasses,
     }));
 
+    const averageDelayPerRow = rows.length ? totalDelayMin / rows.length : 0;
+    const highestDelayRow = rows.reduce<CRRow | null>(
+      (highest, row) => (!highest || row.delayMin > highest.delayMin ? row : highest),
+      null
+    );
+    const productivity = totalHours > 0 ? totalBcm / totalHours : 0;
+    const reportInsights = [
+      {
+        label: 'Priority exception',
+        title: highestDelayRow?.delayMin
+          ? `${highestDelayRow.site || 'Unassigned'} has the highest delay load`
+          : 'No delay exceptions detected',
+        detail: highestDelayRow?.delayMin
+          ? `${highestDelayRow.delayMin} minutes recorded on ${highestDelayRow.date} (${highestDelayRow.shift} shift).`
+          : 'The selected period has no recorded operational delays.',
+        tone: highestDelayRow?.delayMin
+          ? 'border-accent-red/30 bg-accent-red/5'
+          : 'border-accent-green/30 bg-accent-green/5',
+      },
+      {
+        label: 'Recommendation',
+        title:
+          averageDelayPerRow > 30
+            ? 'Review delay causes before the next shift'
+            : 'Maintain current shift controls',
+        detail:
+          averageDelayPerRow > 30
+            ? `Average delay is ${averageDelayPerRow.toFixed(0)} minutes per reporting row. Assign an owner and capture the root cause.`
+            : `Average delay is ${averageDelayPerRow.toFixed(0)} minutes per reporting row across the selected period.`,
+        tone: 'border-accent-blue/30 bg-accent-blue/5',
+      },
+      {
+        label: 'Performance signal',
+        title:
+          productivity > 0
+            ? `${productivity.toFixed(1)} BCM per operating hour`
+            : 'Insufficient production data',
+        detail:
+          'Use this baseline with the operational detail table to compare sites and shifts consistently.',
+        tone: 'border-accent-green/30 bg-accent-green/5',
+      },
+    ];
+
     const pdfReportData = {
       title: `${dept.displayName} Department Report`,
       subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
@@ -314,6 +357,66 @@ export default async function ReportsPage({
             </p>
           </GlassCard>
         </div>
+
+        {/* Decision support */}
+        <section
+          aria-labelledby="report-insights-heading"
+          className="grid gap-4 lg:grid-cols-[1.15fr_1fr]"
+        >
+          <GlassCard className="border-[var(--border-default)] bg-[var(--bg-secondary)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-blue)]">
+                  Decision support
+                </p>
+                <h3
+                  id="report-insights-heading"
+                  className="mt-1 text-lg font-semibold text-[var(--text-heading)]"
+                >
+                  What needs attention
+                </h3>
+                <p className="mt-1 text-sm text-[var(--text-muted)]">
+                  Prioritised signals from the selected reporting period.
+                </p>
+              </div>
+              <span className="rounded-full border border-[var(--border-default)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
+                {rows.length} reporting rows
+              </span>
+            </div>
+            <div className="mt-5 grid gap-3">
+              {reportInsights.slice(0, 2).map((insight) => (
+                <div key={insight.label} className={`rounded-lg border p-4 ${insight.tone}`}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                    {insight.label}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--text-heading)]">
+                    {insight.title}
+                  </p>
+                  <p className="mt-1 text-sm leading-5 text-[var(--text-muted)]">
+                    {insight.detail}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+          <GlassCard>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-green">
+              Operational signal
+            </p>
+            <p className="mt-1 text-lg font-semibold text-[var(--text-heading)]">
+              {reportInsights[2].title}
+            </p>
+            <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">
+              {reportInsights[2].detail}
+            </p>
+            <div className="mt-5 border-t border-[var(--border-default)] pt-4">
+              <p className="text-xs text-[var(--text-muted)]">Reporting window</p>
+              <p className="mt-1 text-sm font-medium text-[var(--text-heading)]">
+                {fromDateStr} <span className="text-[var(--text-muted)]">to</span> {toDateStr}
+              </p>
+            </div>
+          </GlassCard>
+        </section>
 
         {/* Date Filter */}
         <GlassCard>
