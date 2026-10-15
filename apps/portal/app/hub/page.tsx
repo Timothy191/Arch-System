@@ -382,11 +382,13 @@ export default async function HubPage() {
         >
           <Link
             href="/hub/executive"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+            className="inline-flex items-center gap-2 pl-2 pr-3.5 py-1.5 rounded-full bg-arch-surface-secondary/80 hover:bg-arch-surface-secondary text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 backdrop-blur-md shadow-sm hover:shadow-card transition-all group"
           >
-            <BarChart3 className="w-3.5 h-3.5" />
-            Executive Dashboard
-            <ArrowUpRight className="w-3 h-3" />
+            <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
+              <BarChart3 className="w-3.5 h-3.5" />
+            </span>
+            <span>Executive Dashboard</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-arch-accent-blue transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       )}

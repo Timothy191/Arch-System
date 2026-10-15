@@ -3,9 +3,9 @@
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getCurrentShift } from '@repo/utils/client';
-import { ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Drill } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { DelayEntriesForm } from './DelayEntriesForm';
 
@@ -14,6 +14,7 @@ interface Machine {
   name: string;
   machine_type: string;
   serial_number: string | null;
+  site_id?: string | null;
 }
 
 interface Operator {
@@ -28,6 +29,13 @@ interface Site {
   site_code: string;
 }
 
+interface MineBlock {
+  id: string;
+  name: string;
+  code: string | null;
+  site_id: string | null;
+}
+
 interface MachineOperation {
   id: string;
   machine_id: string;
@@ -39,6 +47,9 @@ interface MachineOperation {
   hours_worked: number | null;
   start_smu?: number | null;
   end_smu?: number | null;
+  block_drilled?: string | null;
+  meters_drilled?: number | null;
+  holes_drilled?: number | null;
 }
 
 interface MachineOperationsFormProps {
@@ -46,6 +57,7 @@ interface MachineOperationsFormProps {
   machines: Machine[];
   operators: Operator[];
   sites: Site[];
+  mineBlocks?: MineBlock[];
   todayOperations: MachineOperation[];
 }
 
@@ -57,6 +69,7 @@ export function MachineOperationsForm({
   machines,
   operators,
   sites,
+  mineBlocks = [],
   todayOperations,
 }: MachineOperationsFormProps) {
   const router = useRouter();
@@ -79,6 +92,9 @@ export function MachineOperationsForm({
     endTime: '',
     startSmu: '',
     endSmu: '',
+    metersDrilled: '',
+    blockDrilled: '',
+    holesDrilled: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,6 +102,22 @@ export function MachineOperationsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDelaySection, setShowDelaySection] = useState(false);
   const [lastOperationId, setLastOperationId] = useState<string | null>(null);
+
+  const selectedMachine = useMemo(
+    () => machines.find((m) => m.id === formData.machineId) ?? null,
+    [machines, formData.machineId]
+  );
+
+  const isDrillRig =
+    selectedMachine?.machine_type === 'Drill Rig' ||
+    Boolean(selectedMachine?.machine_type?.toLowerCase().includes('drill'));
+
+  const availableBlocks = useMemo(() => {
+    if (!mineBlocks || mineBlocks.length === 0) return [];
+    if (!formData.siteId) return mineBlocks;
+    const siteBlocks = mineBlocks.filter((b) => !b.site_id || b.site_id === formData.siteId);
+    return siteBlocks.length > 0 ? siteBlocks : mineBlocks;
+  }, [mineBlocks, formData.siteId]);
 
   // Auto-save to localStorage every 30 seconds
   useEffect(() => {
@@ -175,6 +207,31 @@ export function MachineOperationsForm({
       newErrors.endSmu = 'Hours cannot exceed 14 per shift';
     }
 
+    if (isDrillRig) {
+      if (!formData.metersDrilled.trim()) {
+        newErrors.metersDrilled = 'Enter meters drilled';
+      } else if (
+        Number.isNaN(parseFloat(formData.metersDrilled)) ||
+        parseFloat(formData.metersDrilled) < 0
+      ) {
+        newErrors.metersDrilled = 'Meters must be a valid number >= 0';
+      }
+
+      if (!formData.blockDrilled.trim()) {
+        newErrors.blockDrilled = 'Enter or select block drilled';
+      }
+
+      if (!formData.holesDrilled.trim()) {
+        newErrors.holesDrilled = 'Enter holes drilled';
+      } else if (
+        Number.isNaN(Number(formData.holesDrilled)) ||
+        Number(formData.holesDrilled) < 0 ||
+        !Number.isInteger(Number(formData.holesDrilled))
+      ) {
+        newErrors.holesDrilled = 'Holes must be a valid whole number >= 0';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -195,20 +252,28 @@ export function MachineOperationsForm({
       const startSmuVal = formData.startSmu ? parseFloat(formData.startSmu) : null;
       const endSmuVal = formData.endSmu ? parseFloat(formData.endSmu) : null;
 
+      const insertPayload: Record<string, unknown> = {
+        department_id: departmentId,
+        machine_id: formData.machineId,
+        operator_id: formData.operatorId,
+        site_id: formData.siteId,
+        shift_date: today,
+        shift_type: formData.shiftType,
+        start_time: formData.startTime,
+        end_time: formData.endTime || null,
+        start_smu: startSmuVal,
+        end_smu: endSmuVal,
+      };
+
+      if (isDrillRig) {
+        insertPayload.block_drilled = formData.blockDrilled.trim();
+        insertPayload.meters_drilled = parseFloat(formData.metersDrilled);
+        insertPayload.holes_drilled = parseInt(formData.holesDrilled, 10);
+      }
+
       const { data, error } = await supabase
         .from('machine_operations')
-        .insert({
-          department_id: departmentId,
-          machine_id: formData.machineId,
-          operator_id: formData.operatorId,
-          site_id: formData.siteId,
-          shift_date: today,
-          shift_type: formData.shiftType,
-          start_time: formData.startTime,
-          end_time: formData.endTime || null,
-          start_smu: startSmuVal,
-          end_smu: endSmuVal,
-        })
+        .insert(insertPayload as never)
         .select()
         .single();
 
@@ -230,10 +295,17 @@ export function MachineOperationsForm({
         endTime: '',
         startSmu: formData.endSmu || '', // End SMU carries over to next start SMU
         endSmu: '',
+        metersDrilled: '',
+        blockDrilled: '',
+        holesDrilled: '',
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
-      toast.success('Machine operation logged successfully');
+      toast.success(
+        isDrillRig
+          ? 'Drill operation logged & synced to Drilling Department'
+          : 'Machine operation logged successfully'
+      );
       // Refresh page to show new data
       router.refresh();
     } catch (_err) {
@@ -264,7 +336,15 @@ export function MachineOperationsForm({
             </label>
             <select
               value={formData.machineId}
-              onChange={(e) => setFormData((prev) => ({ ...prev, machineId: e.target.value }))}
+              onChange={(e) => {
+                const nextMachineId = e.target.value;
+                const machineObj = machines.find((m) => m.id === nextMachineId);
+                setFormData((prev) => ({
+                  ...prev,
+                  machineId: nextMachineId,
+                  siteId: prev.siteId || machineObj?.site_id || '',
+                }));
+              }}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             >
               <option value="">Select machine...</option>
@@ -349,6 +429,121 @@ export function MachineOperationsForm({
             {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}
           </div>
         </div>
+
+        {/* Drill Rig Specific Fields: Meters, Site, Block, Holes */}
+        {isDrillRig && (
+          <div className="p-4 rounded-xl bg-[var(--bg-secondary)]/80 border border-[var(--accent-blue)]/30 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+                  <Drill className="w-4 h-4" />
+                </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-[var(--text-heading)]">
+                    Drilling Production Metrics
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Automatically populates Drilling Department shift logs and production reports
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
+                Auto-Syncs to Drilling Dept
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Meters */}
+              <div className="space-y-2">
+                <label className="text-[var(--text-secondary)] text-sm block">
+                  Meters <span className="text-accent-red">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="e.g. 185.5"
+                  value={formData.metersDrilled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
+                  }
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                />
+                {errors.metersDrilled && (
+                  <p className="text-accent-red text-xs">{errors.metersDrilled}</p>
+                )}
+              </div>
+
+              {/* Site */}
+              <div className="space-y-2">
+                <label className="text-[var(--text-secondary)] text-sm block">
+                  Site <span className="text-accent-red">*</span>
+                </label>
+                <select
+                  value={formData.siteId}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                >
+                  <option value="">Select site...</option>
+                  {sites.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
+              </div>
+
+              {/* Block */}
+              <div className="space-y-2">
+                <label className="text-[var(--text-secondary)] text-sm block">
+                  Block <span className="text-accent-red">*</span>
+                </label>
+                <input
+                  type="text"
+                  list="drill-mine-blocks"
+                  placeholder="e.g. BLK-A1 / A12"
+                  value={formData.blockDrilled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, blockDrilled: e.target.value }))
+                  }
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                />
+                {availableBlocks.length > 0 && (
+                  <datalist id="drill-mine-blocks">
+                    {availableBlocks.map((b) => (
+                      <option key={b.id} value={b.code ? `${b.code} - ${b.name}` : b.name} />
+                    ))}
+                  </datalist>
+                )}
+                {errors.blockDrilled && (
+                  <p className="text-accent-red text-xs">{errors.blockDrilled}</p>
+                )}
+              </div>
+
+              {/* Holes */}
+              <div className="space-y-2">
+                <label className="text-[var(--text-secondary)] text-sm block">
+                  Holes <span className="text-accent-red">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="e.g. 24"
+                  value={formData.holesDrilled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, holesDrilled: e.target.value }))
+                  }
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                />
+                {errors.holesDrilled && (
+                  <p className="text-accent-red text-xs">{errors.holesDrilled}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Hours Worked Display */}
         {hoursWorked !== null && (

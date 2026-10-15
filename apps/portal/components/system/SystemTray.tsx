@@ -795,7 +795,7 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             align="end"
             sideOffset={6}
             className={cn(
-              'w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card p-3 z-popover',
+              'w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card p-3 z-popover',
               'flex flex-col gap-2 select-none focus:outline-none'
             )}
           >

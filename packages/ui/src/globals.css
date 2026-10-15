@@ -123,49 +123,49 @@
 @layer utilities {
   /* ── Z-Index Matrix Utilities ── */
   .z-background {
-    z-index: var(--z-background);
+    z-index: var(--z-background, -10);
   }
   .z-route-bg {
-    z-index: var(--z-route-bg);
+    z-index: var(--z-route-bg, -9);
   }
   .z-telemetry {
-    z-index: var(--z-telemetry);
+    z-index: var(--z-telemetry, 20);
   }
   .z-primary-card {
-    z-index: var(--z-primary-card);
+    z-index: var(--z-primary-card, 30);
   }
   .z-dock {
-    z-index: var(--z-dock);
+    z-index: var(--z-dock, 35);
   }
   .z-dock-trigger {
-    z-index: var(--z-dock-trigger);
+    z-index: var(--z-dock-trigger, 36);
   }
   .z-navigation {
-    z-index: var(--z-navigation);
+    z-index: var(--z-navigation, 40);
   }
   .z-popover {
-    z-index: var(--z-popover);
+    z-index: var(--z-popover, 110);
   }
   .z-overlay {
-    z-index: var(--z-overlay);
+    z-index: var(--z-overlay, 50);
   }
   .z-ai-launcher {
-    z-index: var(--z-ai-launcher);
+    z-index: var(--z-ai-launcher, 120);
   }
   .z-offline-banner {
-    z-index: var(--z-offline-banner);
+    z-index: var(--z-offline-banner, 130);
   }
   .z-skip-link {
-    z-index: var(--z-skip-link);
+    z-index: var(--z-skip-link, 150);
   }
   .z-toast {
-    z-index: var(--z-toast);
+    z-index: var(--z-toast, 200);
   }
   .z-dev-overlay {
-    z-index: var(--z-dev-overlay);
+    z-index: var(--z-dev-overlay, 250);
   }
   .z-priority {
-    z-index: var(--z-priority);
+    z-index: var(--z-priority, 9999);
   }
 
   .aurora-shadow {
@@ -271,6 +271,11 @@
   .hide-cursor,
   .hide-cursor :where(*) {
     cursor: none;
+  }
+
+  /* Ensure Radix Portal popper wrappers always stack above page & navigation layers */
+  [data-radix-popper-content-wrapper] {
+    z-index: var(--z-popover, 110) !important;
   }
 }
 

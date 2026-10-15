@@ -185,7 +185,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'absolute left-0 -top-16 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-2xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
+          'absolute left-0 -top-16 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
@@ -209,7 +209,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         </div>
 
         {/* MacTitleBar with department name */}
-        <MacTitleBar title={department.displayName} />
+        <MacTitleBar title={department.displayName} className="bg-white/25" />
 
         {/* Back to Hub link & Pin toggle */}
         <div

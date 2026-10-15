@@ -45,13 +45,13 @@ interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
 
 export function Marquee({
   className,
-  reverse,
-  pauseOnHover,
+  reverse = false,
+  pauseOnHover = false,
   children,
-  vertical,
-  repeat,
+  vertical = false,
+  repeat = 4,
   duration,
-  enable3D,
+  enable3D = false,
   ...props
 }: MarqueeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,51 +83,47 @@ export function Marquee({
       {...props}
       ref={containerRef}
       className={cn(
-        'group relative overflow-hidden',
+        'group relative flex w-full overflow-hidden p-2 [--duration:40s] [--gap:1rem]',
         {
-          flex: !vertical,
+          'flex-row': !vertical,
           'flex-col': vertical,
         },
-        className
+        duration,
+        className,
+        'gap-[var(--gap)]'
       )}
     >
-      {/* Marquee track with enhanced animation */}
-      <div
-        className={cn(
-          'flex shrink-0 gap-[var(--gap)] overflow-hidden animate-marquee',
-          {
-            'flex-row': !vertical,
-            'flex-col': vertical,
-            '[animation-direction:reverse]': reverse,
-          },
-          duration
-        )}
-      >
-        {/* Repeat content 3 times for seamless loop and fullness */}
-        {Array(repeat)
-          .fill(0)
-          .map((_, i) => (
-            <div
-              key={i}
-              className={cn('flex shrink-0 justify-around gap-[var(--gap)]', {
-                'animate-marquee flex-row': !vertical,
-                'animate-marquee-vertical flex-col': vertical,
-                'group-hover:[animation-play-state:paused]': pauseOnHover,
-                '[animation-direction:reverse]': reverse,
-                // 3D hover effect: panel lifts on hover
-                ...(enable3D && {
-                  'hover:translate-y-1 hover:shadow-md': !isVisible,
-                  'group-hover:translate-y-0 group-hover:shadow-none': pauseOnHover,
-                }),
-              })}
-              // Inline style wins over the group-hover class, so off-screen
-              // always pauses regardless of hover state.
-              style={!isVisible ? { animationPlayState: 'paused' } : undefined}
-            >
-              {children}
-            </div>
-          ))}
-      </div>
+      {Array(repeat)
+        .fill(0)
+        .map((_, i) => (
+          <div
+            key={i}
+            className={cn('flex shrink-0 justify-around gap-[var(--gap)]', {
+              'animate-marquee flex-row': !vertical,
+              'animate-marquee-vertical flex-col': vertical,
+              'animate-marquee-pause group-hover:[animation-play-state:paused]': pauseOnHover,
+              'animate-marquee-reverse [animation-direction:reverse]': reverse,
+              // 3D hover effect: panel lifts on hover
+              ...(enable3D && {
+                'hover:translate-y-1 hover:shadow-md': !isVisible,
+                'group-hover:translate-y-0 group-hover:shadow-none': pauseOnHover,
+              }),
+            })}
+            // Inline style wins over the group-hover class, so off-screen
+            // always pauses regardless of hover state, and reverse direction
+            // is never overridden by the animation shorthand.
+            style={
+              reverse || !isVisible
+                ? {
+                    ...(reverse ? { animationDirection: 'reverse' } : undefined),
+                    ...(!isVisible ? { animationPlayState: 'paused' } : undefined),
+                  }
+                : undefined
+            }
+          >
+            {children}
+          </div>
+        ))}
     </div>
   );
 }

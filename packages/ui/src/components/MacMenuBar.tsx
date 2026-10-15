@@ -178,7 +178,7 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'fixed top-2 left-3 right-3 z-navigation h-10 flex items-center justify-between px-3.5',
+        'fixed top-2 left-3 right-3 z-navigation h-11 flex items-center justify-between px-3.5',
         'liquid-glass-light border border-white/20 shadow-window rounded-full',
         className
       )}
@@ -192,9 +192,9 @@ export function MacMenuBar({
               <button
                 aria-label="System Menu"
                 aria-haspopup="true"
-                className="relative w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
+                className="relative w-9 h-9 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
               >
-                <Logo className="w-5 h-5 text-[var(--accent-blue)]" />
+                <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
               </button>
             </DropdownMenuTrigger>
           </div>
@@ -202,8 +202,8 @@ export function MacMenuBar({
             align="start"
             sideOffset={5}
             className={cn(
-              'w-[560px] p-0 flex flex-col md:flex-row overflow-hidden',
-              'liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card'
+              'w-[560px] p-0 flex flex-col md:flex-row overflow-hidden z-popover',
+              'bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card'
             )}
           >
             {/* ── Left Column: Departments ── */}

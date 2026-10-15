@@ -33,7 +33,7 @@ export default function HubLoading() {
 
       {/* Executive Dashboard link placeholder */}
       <div className="flex justify-end">
-        <SkeletonBlock className="h-7 w-36 rounded-button" />
+        <SkeletonBlock className="h-8 w-44 rounded-full" />
       </div>
 
       {/* Department & Operational Testimonials Double Marquee */}

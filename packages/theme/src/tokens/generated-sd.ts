@@ -296,7 +296,7 @@ module.exports = {
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#D4AF37',
+      value: '#d4af37',
       type: 'color',
       description: 'deep charcoal — macOS system blue',
       key: '{arch15}',
@@ -584,7 +584,7 @@ module.exports = {
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#D4AF37',
+      value: '#d4af37',
       type: 'color',
       description: 'Canonical electric blue CTA accent',
       key: '{accent-electric-blue}',
@@ -602,7 +602,7 @@ module.exports = {
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#C5A017',
+      value: '#c5a017',
       type: 'color',
       key: '{accent-electric-blue-hover}',
     },
@@ -1050,12 +1050,12 @@ module.exports = {
     },
     vibrancy: {
       key: '{glass.vibrancy}',
-      value: '#f6f6fad1',
+      value: '#f6f6fa73',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
       original: {
-        value: 'rgba(246, 246, 250, 0.82)',
+        value: 'rgba(246, 246, 250, 0.45)',
         type: 'color',
         key: '{glass.vibrancy}',
       },
@@ -1124,12 +1124,12 @@ module.exports = {
   vibrancy: {
     surface: {
       key: '{vibrancy.surface}',
-      value: '#f6f6fad1',
+      value: '#f6f6fa73',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
       original: {
-        value: 'rgba(246, 246, 250, 0.82)',
+        value: 'rgba(246, 246, 250, 0.45)',
         type: 'color',
         key: '{vibrancy.surface}',
       },

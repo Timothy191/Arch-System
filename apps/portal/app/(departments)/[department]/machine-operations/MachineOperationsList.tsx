@@ -28,7 +28,15 @@ interface MachineOperation {
   hours_worked: number | null;
   start_smu?: number | null;
   end_smu?: number | null;
-  machine?: { name: string; bin_factor?: number; serial_number?: string | null } | null;
+  block_drilled?: string | null;
+  meters_drilled?: number | null;
+  holes_drilled?: number | null;
+  machine?: {
+    name: string;
+    machine_type?: string;
+    bin_factor?: number;
+    serial_number?: string | null;
+  } | null;
   operator?: { full_name: string } | null;
   site?: { name: string } | null;
   delay_entries?: DelayEntry[];
@@ -265,15 +273,23 @@ function OperationCard({
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-3 mt-0.5 text-xs text-[var(--text-muted)]">
+              <div className="flex items-center gap-3 mt-0.5 text-xs text-[var(--text-muted)] flex-wrap">
                 <span>{operation.operator?.full_name || 'No Operator'}</span>
                 <span className="text-[var(--border-emphasis)]">|</span>
                 <span>{operation.site?.name || 'No Site'}</span>
+                {operation.block_drilled && (
+                  <>
+                    <span className="text-[var(--border-emphasis)]">|</span>
+                    <span className="text-[var(--text-heading)] font-medium">
+                      Block: {operation.block_drilled}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Time, Hours & BCM */}
+          {/* Time, Hours, Drilling Metrics & BCM */}
           <div className="text-right">
             <p className="text-[var(--text-heading)] text-sm">
               {operation.start_smu != null && operation.end_smu != null ? (
@@ -289,7 +305,7 @@ function OperationCard({
                 </>
               )}
             </p>
-            <div className="flex items-center gap-3 mt-0.5 justify-end">
+            <div className="flex items-center gap-3 mt-0.5 justify-end flex-wrap">
               {operation.start_smu != null ? (
                 <span className="text-[var(--text-muted)] text-xs font-mono">
                   {formatTime(operation.start_time)}
@@ -300,6 +316,22 @@ function OperationCard({
                 <span className="text-accent-green text-xs">
                   {operation.hours_worked.toFixed(2)}h
                 </span>
+              )}
+              {operation.meters_drilled != null && (
+                <>
+                  <span className="text-[var(--border-emphasis)]">|</span>
+                  <span className="text-accent-green text-xs font-medium">
+                    {Number(operation.meters_drilled).toFixed(1)}m
+                  </span>
+                </>
+              )}
+              {operation.holes_drilled != null && (
+                <>
+                  <span className="text-[var(--border-emphasis)]">|</span>
+                  <span className="text-[var(--accent-blue)] text-xs font-medium">
+                    {operation.holes_drilled} holes
+                  </span>
+                </>
               )}
               {binFactor > 0 && (
                 <>

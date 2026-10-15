@@ -157,12 +157,16 @@ export function DepartmentReviews() {
         className="relative flex w-full flex-col items-center justify-center overflow-hidden"
         style={maskStyle}
       >
-        <Marquee pauseOnHover className="[--duration:30s] gap-4 sm:gap-6 py-1.5">
+        <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-1.5">
           {firstRow.map((review) => (
             <ReviewCard key={review.username} {...review} />
           ))}
         </Marquee>
-        <Marquee reverse pauseOnHover className="[--duration:30s] gap-4 sm:gap-6 py-1.5">
+        <Marquee
+          reverse
+          pauseOnHover
+          className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-1.5"
+        >
           {secondRow.map((review) => (
             <ReviewCard key={review.username} {...review} />
           ))}

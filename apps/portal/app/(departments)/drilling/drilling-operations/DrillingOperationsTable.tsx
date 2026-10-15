@@ -11,14 +11,22 @@ import {
 import { GlassCard } from '@repo/ui/GlassCard';
 import { cn } from '@repo/ui/lib/utils';
 import { getOperationalToday } from '@repo/utils/client';
-import { AlertCircle, Check, Loader2, Moon, Sun } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
-import { upsertDrillOperationAction } from './actions';
+import {
+  CheckCircle2,
+  ClipboardList,
+  Clock,
+  Drill,
+  FileText,
+  Moon,
+  Radio,
+  Sun,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 type Shift = 'day' | 'night';
 
-interface DrillOpRow {
+export interface DrillOpRow {
   id?: string;
   machine_id: string;
   shift_type: Shift;
@@ -26,6 +34,8 @@ interface DrillOpRow {
   open_hours: number | null;
   close_hours: number | null;
   total_hours: number | null;
+  holes?: number | null;
+  meters_drilled?: number | null;
   operator_name: string | null;
   block_drilled: string | null;
   site: string | null;
@@ -56,179 +66,35 @@ interface Props {
 
 const today = getOperationalToday();
 
-function numOrNull(v: string): number | null {
-  if (v === '' || v === '-') return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
 function fmt(n: number | null | undefined, digits = 2): string {
-  if (n === null || n === undefined) return '';
+  if (n === null || n === undefined) return '—';
   return Number(n).toFixed(digits);
 }
 
-export function DrillingOperationsTable({ departmentId, drills, operators, initialOps }: Props) {
-  const router = useRouter();
+export function DrillingOperationsTable({ drills, initialOps }: Props) {
+  const [selectedShift, setSelectedShift] = useState<'all' | Shift>('all');
 
-  // Local working copy: keyed by `${machine_id}:${shift_type}`
-  const [rows, setRows] = useState<Record<string, DrillOpRow>>(() => {
-    const map: Record<string, DrillOpRow> = {};
-    for (const o of initialOps) {
-      const k = `${o.machine_id}:${o.shift_type}`;
-      map[k] = {
-        ...map[k],
-        ...o,
-      };
-    }
-    return map;
-  });
+  // Map keyed by `${machine_id}:${shift_type}`
+  const opsByKey = new Map<string, DrillOpRow>();
+  for (const op of initialOps) {
+    opsByKey.set(`${op.machine_id}:${op.shift_type}`, op);
+  }
 
-  // Per-machine active shift toggle (defaults to "day" on first load)
-  const [activeShift, setActiveShift] = useState<Record<string, Shift>>(() => {
-    const m: Record<string, Shift> = {};
-    for (const d of drills) m[d.id] = 'day';
-    return m;
-  });
-
-  const [saving, setSaving] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Per-row live editing buffer — only committed on blur
-  const [draft, setDraft] = useState<Record<string, string>>({});
-
-  const draftKey = useCallback(
-    (machineId: string, shift: Shift, field: string) => `${machineId}:${shift}:${field}`,
-    []
+  // Calculate today's totals across all shifts (or selected shift)
+  const visibleOps = initialOps.filter(
+    (op) => selectedShift === 'all' || op.shift_type === selectedShift
   );
 
-  function getDraftValue(machineId: string, shift: Shift, field: keyof DrillOpRow): string {
-    const dk = draftKey(machineId, shift, field);
-    if (Object.hasOwn(draft, dk)) {
-      return draft[dk] ?? '';
+  const totalMeters = visibleOps.reduce((sum, op) => sum + Number(op.meters_drilled || 0), 0);
+  const totalHoles = visibleOps.reduce((sum, op) => sum + Number(op.holes || 0), 0);
+  const totalHours = visibleOps.reduce((sum, op) => {
+    if (op.total_hours != null) return sum + Number(op.total_hours);
+    if (op.open_hours != null && op.close_hours != null && op.close_hours >= op.open_hours) {
+      return sum + (Number(op.close_hours) - Number(op.open_hours));
     }
-    const row = rows[`${machineId}:${shift}`];
-    if (!row) return '';
-    const v = row[field];
-    if (v === null || v === undefined) return '';
-    return String(v);
-  }
-
-  function setDraftValue(machineId: string, shift: Shift, field: keyof DrillOpRow, value: string) {
-    const dk = draftKey(machineId, shift, field);
-    setDraft((d) => ({ ...d, [dk]: value }));
-  }
-
-  const upsertRow = useCallback(
-    async (
-      machineId: string,
-      shift: Shift,
-      patch: Partial<DrillOpRow>
-    ): Promise<DrillOpRow | null> => {
-      if (!departmentId) return null;
-      const key = `${machineId}:${shift}`;
-      const existing = rows[key];
-
-      // Compute standard_delays_hours default on first save only
-      const standardDefault = existing?.standard_delays_hours ?? 2.0;
-
-      const payload: Record<string, unknown> = {
-        department_id: departmentId,
-        machine_id: machineId,
-        shift_type: shift,
-        operation_date: today,
-        standard_delays_hours: standardDefault,
-        ...(existing ?? {}),
-        ...patch,
-      };
-
-      // Ensure numeric fields are sent as numbers, not strings
-      const numericFields: (keyof DrillOpRow)[] = [
-        'open_hours',
-        'close_hours',
-        'external_delays_minutes',
-        'standard_delays_hours',
-        'production_delays_minutes',
-        'engineering_delays_minutes',
-      ];
-      for (const f of numericFields) {
-        if (f in payload) {
-          const v = payload[f as string];
-          if (v === null || v === '' || v === undefined) {
-            payload[f as string] = null;
-          } else {
-            const n = Number(v);
-            payload[f as string] = Number.isFinite(n) ? n : null;
-          }
-        }
-      }
-
-      const res = await upsertDrillOperationAction(payload as any);
-
-      if (!res.success || !res.data) {
-        setErrors((e) => ({
-          ...e,
-          [key]: res.error || 'Save failed',
-        }));
-        return null;
-      }
-
-      const data = res.data as DrillOpRow;
-      setRows((r) => ({ ...r, [key]: data }));
-      setErrors((e) => {
-        const { [key]: _, ...rest } = e;
-        return rest;
-      });
-      return data;
-    },
-    [departmentId, rows]
-  );
-
-  async function commitField(machineId: string, shift: Shift, field: keyof DrillOpRow) {
-    const dk = draftKey(machineId, shift, field);
-    const value = draft[dk];
-    if (value === undefined) return; // nothing changed
-
-    // Clear the draft entry — the row will be re-rendered from `rows`
-    setDraft((d) => {
-      const { [dk]: _drop, ...rest } = d;
-      return rest;
-    });
-
-    setSaving(`${machineId}:${shift}`);
-    const parsed: Partial<DrillOpRow> = {} as Partial<DrillOpRow>;
-    if (
-      field === 'open_hours' ||
-      field === 'close_hours' ||
-      field === 'external_delays_minutes' ||
-      field === 'standard_delays_hours' ||
-      field === 'production_delays_minutes' ||
-      field === 'engineering_delays_minutes'
-    ) {
-      (parsed as Record<string, unknown>)[field] = numOrNull(value);
-    } else {
-      // text fields
-      (parsed as Record<string, unknown>)[field] = value === '' ? null : value;
-    }
-
-    await upsertRow(machineId, shift, parsed);
-    setSaving(null);
-    const key = `${machineId}:${shift}`;
-    setSaved(key);
-    setTimeout(() => setSaved((cur) => (cur === key ? null : cur)), 1500);
-    router.refresh();
-  }
-
-  function setShift(machineId: string, shift: Shift) {
-    setActiveShift((m) => ({ ...m, [machineId]: shift }));
-  }
-
-  const cellInputClass = cn(
-    'w-full bg-[var(--bg-secondary)] border border-[var(--border-default)]',
-    'rounded px-2 py-1 text-sm text-[var(--text-heading)]',
-    'focus:outline-none focus:border-[var(--accent-blue)]',
-    'min-w-0'
-  );
+    return sum;
+  }, 0);
+  const activeRigsCount = new Set(visibleOps.map((op) => op.machine_id)).size;
 
   if (drills.length === 0) {
     return (
@@ -240,289 +106,265 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
     );
   }
 
+  const shiftsToRender: Shift[] = selectedShift === 'all' ? ['day', 'night'] : [selectedShift];
+
   return (
-    <GlassCard className="overflow-hidden p-0">
-      <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-[var(--text-heading)]">{today} — Shift Log</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            One row per drill rig. Toggle Day/Night inside each row to switch the active shift.
+    <div className="space-y-6">
+      {/* Auto-Compiled KPI Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <GlassCard>
+          <div className="flex items-center gap-2">
+            <Drill className="w-4 h-4 text-accent-green" />
+            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+              Meters Drilled
+            </p>
+          </div>
+          <p className="text-2xl font-bold text-accent-green mt-2">{totalMeters.toFixed(1)}m</p>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
+            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+              Holes Drilled
+            </p>
+          </div>
+          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-2">{totalHoles}</p>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-cyan-500" />
+            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+              Operating Hours
+            </p>
+          </div>
+          <p className="text-2xl font-bold text-cyan-500 mt-2">{totalHours.toFixed(1)}h</p>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-accent-green" />
+            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+              Rigs Logged Today
+            </p>
+          </div>
+          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
+            {activeRigsCount} / {drills.length}
           </p>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-          {saving && (
-            <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="w-3 h-3 animate-spin" /> Saving…
-            </span>
-          )}
-          {saved && !saving && (
-            <span className="inline-flex items-center gap-1.5 text-accent-green">
-              <Check className="w-3 h-3" /> Saved
-            </span>
-          )}
-        </div>
+        </GlassCard>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider sticky left-0 bg-[var(--bg-primary)] z-10">
-                Machine
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
-                Shift
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
-                Block
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
-                Site
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Open
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Close
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Total
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
-                Operator
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Ext. (min)
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Std. (h)
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Prod (min)
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
-                Eng (min)
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
-                Comments
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {drills.map((drill) => {
-              const shift = activeShift[drill.id] ?? 'day';
-              const key = `${drill.id}:${shift}`;
-              const error = errors[key];
-              const isSaving = saving === key;
-              const isSaved = saved === key;
-              const openVal = getDraftValue(drill.id, shift, 'open_hours');
-              const closeVal = getDraftValue(drill.id, shift, 'close_hours');
-              const oN = numOrNull(openVal);
-              const cN = numOrNull(closeVal);
-              const liveTotal = oN !== null && cN !== null && cN >= oN ? cN - oN : null;
+      <GlassCard className="overflow-hidden p-0">
+        <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+                {today} — Auto-Compiled Shift Report
+              </h3>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
+                <Radio className="w-3 h-3" />
+                Synced from Control Room
+              </span>
+            </div>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              Built automatically from Control Room Machine Operations (Meters, Site, Block, Holes,
+              SMR &amp; Delays).
+            </p>
+          </div>
 
-              return (
-                <TableRow
-                  key={drill.id}
-                  className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/30"
-                >
-                  <TableCell className="font-medium text-[var(--text-heading)] sticky left-0 bg-[var(--bg-primary)] z-10">
-                    <div className="flex items-center gap-2">
-                      <span>{drill.name}</span>
-                      {error && (
-                        <span title={error} className="inline-flex items-center text-accent-red">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                        </span>
-                      )}
-                      {isSaving && (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
-                      )}
-                      {isSaved && !isSaving && <Check className="w-3.5 h-3.5 text-accent-green" />}
-                    </div>
-                  </TableCell>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Shift Filter */}
+            <div className="inline-flex rounded-lg border border-[var(--border-default)] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setSelectedShift('all')}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium transition-colors',
+                  selectedShift === 'all'
+                    ? 'bg-[var(--accent-blue)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
+                )}
+              >
+                All Shifts
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedShift('day')}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)] transition-colors',
+                  selectedShift === 'day'
+                    ? 'bg-[var(--accent-blue)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
+                )}
+              >
+                <Sun className="w-3 h-3" />
+                Day
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedShift('night')}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)] transition-colors',
+                  selectedShift === 'night'
+                    ? 'bg-[var(--accent-blue)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
+                )}
+              >
+                <Moon className="w-3 h-3" />
+                Night
+              </button>
+            </div>
 
-                  {/* Shift toggle */}
-                  <TableCell>
-                    <div className="inline-flex rounded border border-[var(--border-default)] overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => setShift(drill.id, 'day')}
-                        className={cn(
-                          'px-2 py-1 text-xs font-medium flex items-center gap-1',
-                          shift === 'day'
-                            ? 'bg-[var(--accent-blue)] text-white'
-                            : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
-                        )}
-                        aria-label="Day shift"
-                      >
-                        <Sun className="w-3 h-3" />
-                        Day
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShift(drill.id, 'night')}
-                        className={cn(
-                          'px-2 py-1 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)]',
-                          shift === 'night'
-                            ? 'bg-[var(--accent-blue)] text-white'
-                            : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
-                        )}
-                        aria-label="Night shift"
-                      >
-                        <Moon className="w-3 h-3" />
-                        Night
-                      </button>
-                    </div>
-                  </TableCell>
+            <Link
+              href="/drilling/reports"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-medium text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              Production Reports &amp; CSV
+            </Link>
+          </div>
+        </div>
 
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={getDraftValue(drill.id, shift, 'block_drilled')}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'block_drilled', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'block_drilled')}
-                      placeholder="—"
-                      className={cellInputClass}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={getDraftValue(drill.id, shift, 'site')}
-                      onChange={(e) => setDraftValue(drill.id, shift, 'site', e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, 'site')}
-                      placeholder="—"
-                      className={cellInputClass}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={openVal}
-                      onChange={(e) => setDraftValue(drill.id, shift, 'open_hours', e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, 'open_hours')}
-                      placeholder="—"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={closeVal}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'close_hours', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'close_hours')}
-                      placeholder="—"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell className="text-right font-medium text-[var(--accent-blue)] tabular-nums">
-                    {fmt(liveTotal, 2) || '—'}
-                  </TableCell>
-                  <TableCell>
-                    <select
-                      value={getDraftValue(drill.id, shift, 'operator_name')}
-                      onChange={(e) => {
-                        setDraftValue(drill.id, shift, 'operator_name', e.target.value);
-                        // commit immediately on select change
-                        // (avoids the focus-trap of commitField-on-blur on selects)
-                        const dk = draftKey(drill.id, shift, 'operator_name');
-                        setDraft((d) => {
-                          const { [dk]: _drop, ...rest } = d;
-                          return rest;
-                        });
-                        upsertRow(drill.id, shift, {
-                          operator_name: e.target.value || null,
-                        });
-                        router.refresh();
-                      }}
-                      className={cellInputClass}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider sticky left-0 bg-[var(--bg-primary)] z-10">
+                  Drill Rig
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                  Shift
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                  Site
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                  Block
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Meters
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Holes
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Open SMR
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Close SMR
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Hours
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                  Operator
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                  Delays (min)
+                </TableHead>
+                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-center">
+                  Status
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {drills.flatMap((drill) =>
+                shiftsToRender.map((shift) => {
+                  const key = `${drill.id}:${shift}`;
+                  const row = opsByKey.get(key);
+                  const totalHrs =
+                    row?.total_hours != null
+                      ? Number(row.total_hours)
+                      : row?.open_hours != null &&
+                          row?.close_hours != null &&
+                          row.close_hours >= row.open_hours
+                        ? Number(row.close_hours) - Number(row.open_hours)
+                        : null;
+
+                  const delayMins =
+                    Number(row?.external_delays_minutes || 0) +
+                    Number(row?.production_delays_minutes || 0) +
+                    Number(row?.engineering_delays_minutes || 0);
+
+                  return (
+                    <TableRow
+                      key={key}
+                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/30"
                     >
-                      <option value="">—</option>
-                      {operators.map((o) => (
-                        <option key={o.id} value={o.full_name}>
-                          {o.full_name}
-                        </option>
-                      ))}
-                    </select>
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={getDraftValue(drill.id, shift, 'external_delays_minutes')}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'external_delays_minutes', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'external_delays_minutes')}
-                      placeholder="0"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="0.25"
-                      min="0"
-                      value={getDraftValue(drill.id, shift, 'standard_delays_hours')}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'standard_delays_hours', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'standard_delays_hours')}
-                      placeholder="2.00"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={getDraftValue(drill.id, shift, 'production_delays_minutes')}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'production_delays_minutes', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'production_delays_minutes')}
-                      placeholder="0"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={getDraftValue(drill.id, shift, 'engineering_delays_minutes')}
-                      onChange={(e) =>
-                        setDraftValue(drill.id, shift, 'engineering_delays_minutes', e.target.value)
-                      }
-                      onBlur={() => commitField(drill.id, shift, 'engineering_delays_minutes')}
-                      placeholder="0"
-                      className={cn(cellInputClass, 'text-right')}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={getDraftValue(drill.id, shift, 'comments')}
-                      onChange={(e) => setDraftValue(drill.id, shift, 'comments', e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, 'comments')}
-                      placeholder="—"
-                      className={cn(cellInputClass, 'min-w-[160px]')}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-    </GlassCard>
+                      <TableCell className="font-medium text-[var(--text-heading)] sticky left-0 bg-[var(--bg-primary)] z-10">
+                        {drill.name}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
+                            shift === 'day'
+                              ? 'bg-amber-500/10 text-amber-600'
+                              : 'bg-indigo-500/10 text-indigo-600'
+                          )}
+                        >
+                          {shift === 'day' ? (
+                            <Sun className="w-3 h-3" />
+                          ) : (
+                            <Moon className="w-3 h-3" />
+                          )}
+                          {shift === 'day' ? 'Day' : 'Night'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-[var(--text-body)] text-sm">
+                        {row?.site || '—'}
+                      </TableCell>
+                      <TableCell className="text-[var(--text-heading)] font-medium text-sm">
+                        {row?.block_drilled || '—'}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-accent-green tabular-nums">
+                        {row?.meters_drilled != null ? `${fmt(row.meters_drilled, 1)}m` : '—'}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-[var(--accent-blue)] tabular-nums">
+                        {row?.holes != null ? row.holes : '—'}
+                      </TableCell>
+                      <TableCell className="text-right text-[var(--text-muted)] font-mono text-sm tabular-nums">
+                        {fmt(row?.open_hours, 1)}
+                      </TableCell>
+                      <TableCell className="text-right text-[var(--text-muted)] font-mono text-sm tabular-nums">
+                        {fmt(row?.close_hours, 1)}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-cyan-600 tabular-nums">
+                        {totalHrs != null ? `${totalHrs.toFixed(2)}h` : '—'}
+                      </TableCell>
+                      <TableCell className="text-[var(--text-body)] text-sm">
+                        {row?.operator_name || '—'}
+                      </TableCell>
+                      <TableCell className="text-right text-[var(--text-muted)] tabular-nums text-sm">
+                        {delayMins > 0 ? `${delayMins}m` : '—'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {row ? (
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full border',
+                              row.status === 'completed'
+                                ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
+                                : 'bg-blue-50/70 border-blue-200/50 text-blue-700'
+                            )}
+                          >
+                            {row.status ?? 'active'}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-[var(--text-muted)]">
+                            Awaiting Control Room
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </GlassCard>
+    </div>
   );
 }

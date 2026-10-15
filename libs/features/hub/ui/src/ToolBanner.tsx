@@ -62,7 +62,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
 
   return (
     <div className="relative w-full overflow-hidden" style={maskStyle}>
-      <Marquee pauseOnHover className="[--duration:25s] gap-4 sm:gap-6 py-2">
+      <Marquee pauseOnHover className="[--duration:25s] [--gap:1rem] sm:[--gap:1.5rem] py-2">
         {tools.map((tool) => {
           const Icon = ICON_MAP[tool.icon] || Factory;
           const config = COLOR_MAP[tool.color] || {

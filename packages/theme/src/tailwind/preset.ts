@@ -396,11 +396,11 @@ const archTheme: Config = {
       keyframes: {
         marquee: {
           from: { transform: 'translateX(0)' },
-          to: { transform: 'translateX(calc(-100% - var(--gap)))' },
+          to: { transform: 'translateX(calc(-100% - var(--gap, 1rem)))' },
         },
         'marquee-vertical': {
           from: { transform: 'translateY(0)' },
-          to: { transform: 'translateY(calc(-100% - var(--gap)))' },
+          to: { transform: 'translateY(calc(-100% - var(--gap, 1rem)))' },
         },
         'accordion-down': {
           from: { height: '0' },
@@ -497,8 +497,8 @@ const archTheme: Config = {
       },
       animation: {
         shine: 'shine var(--duration) infinite linear',
-        marquee: 'marquee var(--duration) infinite linear',
-        'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
+        marquee: 'marquee var(--duration, 40s) infinite linear',
+        'marquee-vertical': 'marquee-vertical var(--duration, 40s) linear infinite',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.8s ease-out 0.5s both',

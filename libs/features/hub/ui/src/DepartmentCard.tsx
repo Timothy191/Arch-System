@@ -171,12 +171,12 @@ function DepartmentCard({
         {/* Banner area with photographic / terrain visual background */}
         <div
           className={cn(
-            'uiverse-card-banner relative z-10 pointer-events-none overflow-hidden',
+            'uiverse-card-banner relative z-10 pointer-events-none',
             `uiverse-card-banner-${department.name}`
           )}
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[22px]">
             <Image
               src={
                 imageError
@@ -202,7 +202,13 @@ function DepartmentCard({
           <button
             type="button"
             onClick={togglePin}
-            className="uiverse-card-pin hover:scale-110 active:scale-95 pointer-events-auto relative z-20"
+            aria-pressed={isPinned}
+            className={cn(
+              'uiverse-card-pin absolute top-3 right-3 z-20 pointer-events-auto hover:scale-110 active:scale-95',
+              isPinned
+                ? 'bg-white border-arch-accent-blue/40 text-arch-accent-blue shadow-sm'
+                : 'text-arch-text-secondary hover:text-arch-text-primary hover:bg-white/95'
+            )}
             title={isPinned ? 'Unpin department' : 'Pin department'}
             aria-label={
               isPinned ? `Unpin ${department.displayName}` : `Pin ${department.displayName}`
@@ -211,7 +217,9 @@ function DepartmentCard({
             <Bookmark
               className={cn(
                 'w-3.5 h-3.5 transition-all duration-200',
-                isPinned ? 'fill-arch-accent-blue text-arch-accent-blue' : 'text-arch-text-tertiary'
+                isPinned
+                  ? 'fill-arch-accent-blue text-arch-accent-blue'
+                  : 'text-arch-text-secondary'
               )}
             />
           </button>
@@ -219,7 +227,7 @@ function DepartmentCard({
           {/* Department Icon Bubble */}
           <div
             className={cn(
-              'uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20',
+              'uiverse-card-icon-bubble absolute left-5 -bottom-5 z-20 border-arch-border-emphasis/25',
               config.bg
             )}
           >

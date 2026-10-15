@@ -100,7 +100,7 @@ export function SystemClock() {
           align="end"
           sideOffset={6}
           className={cn(
-            'liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-popover',
+            'bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-popover',
             'flex gap-5 select-none focus:outline-none'
           )}
         >

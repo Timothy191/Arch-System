@@ -47,6 +47,7 @@ export default async function MachineOperationsPage({
     { data: machines },
     { data: operators },
     { data: sites },
+    { data: mineBlocks },
     { data: todayOperations },
     { data: todayLoads },
     { data: _delayCategories },
@@ -63,10 +64,11 @@ export default async function MachineOperationsPage({
       .eq('active', true)
       .order('full_name'),
     supabase.from('sites').select('id, name, site_code').eq('active', true).order('name'),
+    supabase.from('mine_blocks').select('id, name, code, site_id').eq('active', true).order('name'),
     supabase
       .from('machine_operations')
       .select(
-        '*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))'
+        '*, machine:machines(name, machine_type, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))'
       )
       .eq('department_id', deptId)
       .eq('shift_date', today)
@@ -180,6 +182,7 @@ export default async function MachineOperationsPage({
           machines={machines || []}
           operators={operators || []}
           sites={sites || []}
+          mineBlocks={mineBlocks || []}
           todayOperations={todayOperations || []}
         />
       </Suspense>

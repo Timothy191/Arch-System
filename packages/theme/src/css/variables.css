@@ -249,7 +249,7 @@
     0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 24px 35px -5px rgba(15, 23, 42, 0.06);
 
   /* Vibrancy — macOS sidebar/toolbar tint */
-  --vibrancy-surface: rgba(246, 246, 250, 0.82);
+  --vibrancy-surface: rgba(246, 246, 250, 0.45);
   --vibrancy-border: rgba(0, 0, 0, 0.06);
 
   /* ═══════════════════════════════════════════════════════════════
@@ -259,8 +259,17 @@
   --z-route-bg: -9;
   --z-telemetry: 20;
   --z-primary-card: 30;
+  --z-dock: 35;
+  --z-dock-trigger: 36;
   --z-navigation: 40;
   --z-overlay: 50;
+  --z-popover: 110;
+  --z-ai-launcher: 120;
+  --z-offline-banner: 130;
+  --z-skip-link: 150;
+  --z-toast: 200;
+  --z-dev-overlay: 250;
+  --z-priority: 9999;
 
   /* ─── Canvas / Background Wave Tokens ──────────────────────────────────
      Used by RouteBackground for the animated wave canvas fallback.
@@ -448,7 +457,6 @@
   --z-sticky: 10;
   --z-dropdown: 50;
   --z-modal: 100;
-  --z-toast: 200;
 
   /* ---- Focus Mode Tokens (DESIGN.md lines 203-205) ---- */
   --transition-focus: 400ms cubic-bezier(0.16, 1, 0.3, 1);

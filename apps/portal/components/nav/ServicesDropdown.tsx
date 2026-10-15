@@ -172,7 +172,7 @@ export function ServicesDropdown() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl py-2"
+          className="w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-2 z-popover"
           align="end"
           sideOffset={5}
         >

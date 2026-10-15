@@ -1,3 +1,4 @@
+import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
@@ -73,7 +74,9 @@ export default async function HourlyLoadsPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Hourly Loads Sheet" />
+      <GlassCard className="relative overflow-hidden group">
+        <PageHeader title="Hourly Loads Sheet" />
+      </GlassCard>
 
       <KPIGrid cols={3}>
         <KPICard label="Total Loads Today" value={grandTotal.toLocaleString()} color="green" />
