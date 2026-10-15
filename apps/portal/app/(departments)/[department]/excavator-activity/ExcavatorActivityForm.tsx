@@ -11,7 +11,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   deriveExcavatorDumperAssignments,
+  formatExcavatorMaterial,
   type HourlyLoadSegmentSummary,
+  type HourlyShift,
+  parseExcavatorMaterial,
 } from '../hourly-loads/loads-utils';
 import { saveExcavatorActivity } from './actions';
 import { type DumperAssignmentRow, ExcavatorDumperTable } from './ExcavatorDumperTable';
@@ -52,11 +55,22 @@ interface MineBlock {
 }
 
 interface ExcavatorActivityConfig {
+  id?: string;
   machine_id: string;
   shift_type: string;
   site_id?: string | null;
   block_mined_id?: string | null;
   material_type?: string | null;
+  activity_date?: string;
+}
+
+interface SavedDumperAssignment {
+  id: string;
+  excavator_activity_id: string;
+  dumper_machine_id: string;
+  material_type: string;
+  total_loads: number;
+  total_bcm: number | null;
 }
 
 interface ExcavatorActivityFormProps {
@@ -68,6 +82,7 @@ interface ExcavatorActivityFormProps {
   mineBlocks: MineBlock[];
   todayDumperLoads: HourlyLoadSegmentSummary[];
   todayActivities?: ExcavatorActivityConfig[];
+  todayAssignments?: SavedDumperAssignment[];
   today?: string;
 }
 
@@ -84,16 +99,23 @@ export function ExcavatorActivityForm({
   mineBlocks,
   todayDumperLoads,
   todayActivities = [],
+  todayAssignments = [],
   today,
 }: ExcavatorActivityFormProps) {
   const router = useRouter();
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
   const [loadsState, setLoadsState] = useState<HourlyLoadSegmentSummary[]>(todayDumperLoads);
+  const [activitiesState, setActivitiesState] =
+    useState<ExcavatorActivityConfig[]>(todayActivities);
 
   useEffect(() => {
     setLoadsState(todayDumperLoads);
   }, [todayDumperLoads]);
+
+  useEffect(() => {
+    setActivitiesState(todayActivities);
+  }, [todayActivities]);
 
   useSupabaseRealtime<HourlyLoadSegmentSummary & { id?: string; load_date?: string }>({
     supabaseClient: supabase,
@@ -117,6 +139,32 @@ export function ExcavatorActivityForm({
         });
       } else if (payload.eventType === 'DELETE' && payload.old.id) {
         setLoadsState((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    },
+  });
+
+  useSupabaseRealtime<ExcavatorActivityConfig>({
+    supabaseClient: supabase,
+    table: 'excavator_activity',
+    filter: `department_id=eq.${departmentId}`,
+    onChange: (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        if (today && payload.new.activity_date && payload.new.activity_date !== today) {
+          return;
+        }
+        setActivitiesState((prev) => {
+          if (payload.new.id) {
+            const index = prev.findIndex((item) => item.id === payload.new.id);
+            if (index >= 0) {
+              const next = [...prev];
+              next[index] = { ...next[index], ...payload.new };
+              return next;
+            }
+          }
+          return [payload.new, ...prev];
+        });
+      } else if (payload.eventType === 'DELETE' && payload.old.id) {
+        setActivitiesState((prev) => prev.filter((item) => item.id !== payload.old.id));
       }
     },
   });
@@ -150,14 +198,20 @@ export function ExcavatorActivityForm({
     return () => clearInterval(interval);
   }, [formData, dumperAssignments, departmentId]);
 
-  // Restore from localStorage on mount
+  // Restore operator and notes from localStorage on mount without overwriting live Hourly Loads assignments
   useEffect(() => {
     const saved = localStorage.getItem(getAutoSaveKey(departmentId));
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.formData) setFormData(parsed.formData);
-        if (parsed.dumperAssignments) setDumperAssignments(parsed.dumperAssignments);
+        if (parsed.formData) {
+          setFormData((prev) => ({
+            ...prev,
+            excavatorId: parsed.formData.excavatorId || prev.excavatorId,
+            operatorId: parsed.formData.operatorId || prev.operatorId,
+            notes: parsed.formData.notes || prev.notes,
+          }));
+        }
       } catch {
         // ignore parse errors
       }
@@ -174,9 +228,13 @@ export function ExcavatorActivityForm({
     const anyAssignedExcavator = excavators.find((ex) =>
       loadsState.some((l) => l.excavator_id === ex.id)
     );
+    const configuredExcavator = excavators.find((ex) =>
+      activitiesState.some((a) => a.machine_id === ex.id)
+    );
     const defaultExcavator =
       shiftAssignedExcavator ??
       anyAssignedExcavator ??
+      configuredExcavator ??
       (excavators.length === 1 ? excavators[0] : undefined);
 
     if (defaultExcavator) {
@@ -184,7 +242,7 @@ export function ExcavatorActivityForm({
         prev.excavatorId ? prev : { ...prev, excavatorId: defaultExcavator.id }
       );
     }
-  }, [excavators, loadsState, formData.excavatorId, formData.shiftType]);
+  }, [excavators, loadsState, activitiesState, formData.excavatorId, formData.shiftType]);
 
   // Pre-populate operator from recent activity
   useEffect(() => {
@@ -196,37 +254,30 @@ export function ExcavatorActivityForm({
     }
   }, [operators, formData.operatorId]);
 
-  // Auto-place ADT, RDT, and Dump Truck rows assigned to the selected Excavator on Hourly Loads
-  useEffect(() => {
-    if (!formData.excavatorId) {
-      setDumperAssignments((prev) => prev.filter((row) => !row.autoPlaced));
-      return;
-    }
-
-    const derived = deriveExcavatorDumperAssignments(
-      loadsState,
-      dumpers,
-      formData.excavatorId,
-      formData.shiftType
+  // Resolve the effective shift that has Hourly Loads data for the selected excavator
+  const effectiveLoadsShift: HourlyShift = useMemo(() => {
+    if (!formData.excavatorId) return formData.shiftType;
+    const hasCurrentShift = loadsState.some(
+      (l) => l.excavator_id === formData.excavatorId && l.shift_type === formData.shiftType
     );
+    if (hasCurrentShift) return formData.shiftType;
+    const otherShiftLoad = loadsState.find((l) => l.excavator_id === formData.excavatorId);
+    if (otherShiftLoad?.shift_type === 'day' || otherShiftLoad?.shift_type === 'night') {
+      return otherShiftLoad.shift_type;
+    }
+    return formData.shiftType;
+  }, [formData.excavatorId, formData.shiftType, loadsState]);
 
-    setDumperAssignments((prev) => {
-      const derivedKeys = new Set(derived.map((d) => `${d.dumperMachineId}|${d.materialType}`));
-      const manualRows = prev.filter(
-        (row) =>
-          !row.autoPlaced &&
-          (!row.dumperMachineId || !derivedKeys.has(`${row.dumperMachineId}|${row.materialType}`))
-      );
-      return [...derived, ...manualRows];
-    });
-  }, [formData.excavatorId, formData.shiftType, loadsState, dumpers]);
-
-  // Determine site, block mined, and material assigned to this excavator on Hourly Loads tab
+  // Determine site, block mined, coal/waste, and subcategory assigned to this excavator on Hourly Loads tab
   const selectedExcavator = excavators.find((e) => e.id === formData.excavatorId);
   const excavatorActivityConfig =
-    todayActivities.find(
+    activitiesState.find(
       (a) => a.machine_id === formData.excavatorId && a.shift_type === formData.shiftType
-    ) ?? todayActivities.find((a) => a.machine_id === formData.excavatorId);
+    ) ??
+    activitiesState.find(
+      (a) => a.machine_id === formData.excavatorId && a.shift_type === effectiveLoadsShift
+    ) ??
+    activitiesState.find((a) => a.machine_id === formData.excavatorId);
 
   const effectiveSiteId = excavatorActivityConfig?.site_id ?? selectedExcavator?.site_id ?? null;
   const excavatorSite = sites?.find((s) => s.id === effectiveSiteId);
@@ -235,18 +286,103 @@ export function ExcavatorActivityForm({
     excavatorActivityConfig?.block_mined_id ?? (formData.blockMinedId || null);
   const excavatorBlock = mineBlocks.find((mb) => mb.id === effectiveBlockMinedId);
 
-  const effectiveMaterial =
+  const rawMaterialFromHourlyLoads =
     excavatorActivityConfig?.material_type ??
+    loadsState.find(
+      (l) => l.excavator_id === formData.excavatorId && l.shift_type === effectiveLoadsShift
+    )?.material_type ??
     loadsState.find((l) => l.excavator_id === formData.excavatorId)?.material_type ??
-    null;
+    'Waste';
+
+  const parsedMaterial = parseExcavatorMaterial(rawMaterialFromHourlyLoads);
+  const effectiveMaterial = formatExcavatorMaterial(
+    parsedMaterial.category,
+    parsedMaterial.subCategory || null
+  );
+
+  // Derive assigned machines for this excavator from Hourly Loads (with fallback to saved excavator_dumper_assignments)
+  const derivedAssignedRows = useMemo(() => {
+    if (!formData.excavatorId) return [];
+    const fromHourlyLoads = deriveExcavatorDumperAssignments(
+      loadsState,
+      dumpers,
+      formData.excavatorId,
+      effectiveLoadsShift
+    );
+    if (fromHourlyLoads.length > 0) {
+      return fromHourlyLoads;
+    }
+    if (excavatorActivityConfig?.id) {
+      const fromSavedAssignments = todayAssignments.filter(
+        (a) => a.excavator_activity_id === excavatorActivityConfig.id
+      );
+      if (fromSavedAssignments.length > 0) {
+        return fromSavedAssignments.map((a) => ({
+          key: `saved-${a.id}`,
+          dumperMachineId: a.dumper_machine_id,
+          materialType: a.material_type || parsedMaterial.category,
+          totalLoads: a.total_loads || 0,
+          totalBcm: a.total_bcm ?? 0,
+          autoPlaced: true,
+          segmentCount: 1,
+        }));
+      }
+    }
+    return [];
+  }, [
+    formData.excavatorId,
+    loadsState,
+    dumpers,
+    effectiveLoadsShift,
+    excavatorActivityConfig?.id,
+    todayAssignments,
+    parsedMaterial.category,
+  ]);
+
+  const assignedMachinesSummary = useMemo(() => {
+    return derivedAssignedRows.map((row) => {
+      const machine = dumpers.find((d) => d.id === row.dumperMachineId);
+      return {
+        id: row.dumperMachineId,
+        name: machine?.name ?? 'Unknown Machine',
+        type: machine?.machine_type ?? '',
+        totalLoads: row.totalLoads,
+        totalBcm: row.totalBcm,
+        materialType: row.materialType,
+      };
+    });
+  }, [derivedAssignedRows, dumpers]);
+
+  // Auto-place ADT, RDT, and Dump Truck rows assigned to the selected Excavator on Hourly Loads
+  useEffect(() => {
+    if (!formData.excavatorId) {
+      setDumperAssignments((prev) => prev.filter((row) => !row.autoPlaced));
+      return;
+    }
+
+    setDumperAssignments((prev) => {
+      const derivedKeys = new Set(
+        derivedAssignedRows.map((d) => `${d.dumperMachineId}|${d.materialType}`)
+      );
+      const manualRows = prev.filter(
+        (row) =>
+          !row.autoPlaced &&
+          (!row.dumperMachineId || !derivedKeys.has(`${row.dumperMachineId}|${row.materialType}`))
+      );
+      return [...derivedAssignedRows, ...manualRows];
+    });
+  }, [formData.excavatorId, derivedAssignedRows]);
 
   // Filter dumpers by the excavator's assigned site (always include dumpers assigned to this excavator in hourly_loads)
   const assignedDumperIds = useMemo(
     () =>
-      new Set(
-        loadsState.filter((l) => l.excavator_id === formData.excavatorId).map((l) => l.machine_id)
-      ),
-    [loadsState, formData.excavatorId]
+      new Set([
+        ...loadsState
+          .filter((l) => l.excavator_id === formData.excavatorId)
+          .map((l) => l.machine_id),
+        ...derivedAssignedRows.map((r) => r.dumperMachineId),
+      ]),
+    [loadsState, formData.excavatorId, derivedAssignedRows]
   );
 
   const siteDumpers = effectiveSiteId
@@ -317,6 +453,7 @@ export function ExcavatorActivityForm({
         shiftType: formData.shiftType === 'night' ? 'night' : 'day',
         siteId: effectiveSiteId,
         blockMinedId: effectiveBlockMinedId,
+        materialType: effectiveMaterial,
         notes: formData.notes || null,
         dumperAssignments: dumperAssignments
           .filter((a) => a.dumperMachineId)
@@ -431,32 +568,42 @@ export function ExcavatorActivityForm({
                 {errors.excavatorId && (
                   <p className="text-accent-red text-xs">{errors.excavatorId}</p>
                 )}
-                {(excavatorSite || excavatorBlock || effectiveMaterial) && (
+                {formData.excavatorId && (
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[var(--text-muted)] text-xs pt-0.5">
-                    {excavatorSite && (
-                      <span>
-                        Site:{' '}
-                        <span className="text-[var(--text-heading)] font-medium">
-                          {excavatorSite.name}
-                        </span>
+                    <span>
+                      Site:{' '}
+                      <span className="text-[var(--text-heading)] font-medium">
+                        {excavatorSite ? excavatorSite.name : 'Unassigned'}
                       </span>
-                    )}
-                    {excavatorBlock && (
-                      <span>
-                        Block:{' '}
-                        <span className="text-[var(--text-heading)] font-medium">
-                          {excavatorBlock.name} ({excavatorBlock.code})
-                        </span>
+                    </span>
+                    <span>
+                      Block Mined:{' '}
+                      <span className="text-[var(--text-heading)] font-medium">
+                        {excavatorBlock
+                          ? `${excavatorBlock.name} (${excavatorBlock.code})`
+                          : 'Unassigned'}
                       </span>
-                    )}
-                    {effectiveMaterial && (
-                      <span>
-                        Material:{' '}
-                        <span className="text-[var(--text-heading)] font-medium">
-                          {effectiveMaterial}
-                        </span>
+                    </span>
+                    <span>
+                      Coal/Waste:{' '}
+                      <span className="text-[var(--text-heading)] font-medium">
+                        {parsedMaterial.category}
                       </span>
-                    )}
+                    </span>
+                    <span>
+                      Subcategory:{' '}
+                      <span className="text-[var(--text-heading)] font-medium">
+                        {parsedMaterial.subCategory || 'Not specified'}
+                      </span>
+                    </span>
+                    <span>
+                      Assigned Machines:{' '}
+                      <span className="text-[var(--text-heading)] font-medium">
+                        {assignedMachinesSummary.length > 0
+                          ? assignedMachinesSummary.map((m) => m.name).join(', ')
+                          : 'None'}
+                      </span>
+                    </span>
                     <span className="text-[11px] opacity-80">(from Hourly Loads)</span>
                   </div>
                 )}
@@ -503,12 +650,81 @@ export function ExcavatorActivityForm({
               </div>
             </div>
 
+            {/* Hourly Loads Recorded Summary Panel (Site, Block Mined, Coal/Waste, Subcategory, Assigned Machines) */}
+            {formData.excavatorId && (
+              <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[var(--text-heading)]">
+                    Recorded on Hourly Loads Tab ({selectedExcavator?.name})
+                  </span>
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    Auto-synced from Hourly Loads
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
+                    <span className="text-[11px] text-[var(--text-muted)] block">Site</span>
+                    <span className="text-xs font-semibold text-[var(--text-heading)]">
+                      {excavatorSite ? excavatorSite.name : 'Unassigned'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
+                    <span className="text-[11px] text-[var(--text-muted)] block">Block Mined</span>
+                    <span className="text-xs font-semibold text-[var(--text-heading)]">
+                      {excavatorBlock
+                        ? `${excavatorBlock.name} (${excavatorBlock.code})`
+                        : 'Unassigned'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
+                    <span className="text-[11px] text-[var(--text-muted)] block">Coal / Waste</span>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold mt-0.5 ${
+                        parsedMaterial.category === 'Coal'
+                          ? 'bg-neutral-800 text-white'
+                          : 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
+                      }`}
+                    >
+                      {parsedMaterial.category}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
+                    <span className="text-[11px] text-[var(--text-muted)] block">Subcategory</span>
+                    <span className="text-xs font-semibold text-[var(--text-heading)]">
+                      {parsedMaterial.subCategory || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
+                    <span className="text-[11px] text-[var(--text-muted)] block">
+                      Assigned Machines
+                    </span>
+                    {assignedMachinesSummary.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {assignedMachinesSummary.map((m) => (
+                          <span
+                            key={`${m.id}-${m.materialType}`}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20"
+                          >
+                            {m.name} ({m.totalLoads} loads)
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs font-medium text-[var(--text-muted)]">
+                        None assigned
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Dumper Assignment Table */}
             <div className="border-t border-[var(--border-default)] pt-4">
               <ExcavatorDumperTable
                 siteDumpers={siteDumpers}
                 excavatorId={formData.excavatorId}
-                shiftType={formData.shiftType}
+                shiftType={effectiveLoadsShift}
                 todayDumperLoads={loadsState}
                 assignments={dumperAssignments}
                 onAssignmentsChange={setDumperAssignments}

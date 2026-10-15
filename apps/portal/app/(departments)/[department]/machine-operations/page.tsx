@@ -1,7 +1,6 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { C66MachineOperatorScanner } from '@/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 const MachineOperationsForm = dynamic(
@@ -123,23 +122,19 @@ export default async function MachineOperationsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Machine Operations</h2>
-        <p className="text-[var(--text-muted)] text-sm">
-          {new Date().toLocaleDateString('en-ZA', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
-      </div>
-
-      <C66MachineOperatorScanner
-        departmentId={deptId}
-        machines={machines || []}
-        sites={sites || []}
-      />
+      <GlassCard>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-medium text-[var(--text-heading)]">Machine Operations</h2>
+          <p className="text-[var(--text-muted)] text-sm">
+            {new Date().toLocaleDateString('en-ZA', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        </div>
+      </GlassCard>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

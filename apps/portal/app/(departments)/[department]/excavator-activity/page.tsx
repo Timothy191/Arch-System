@@ -130,6 +130,7 @@ export default async function ExcavatorActivityPage({
         mineBlocks={mineBlocks || []}
         todayDumperLoads={todayLoads || []}
         todayActivities={todayActivity || []}
+        todayAssignments={todayAssignments || []}
         today={today}
       />
 

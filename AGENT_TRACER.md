@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-15] - Control Room Material Subcategories, Excavator Activity Sync & Navigation Consolidation
+
+- **Action:** Consolidated Control Room workflow updates across Hourly Loads, Excavator Activity, Machine Operations, and Department Sidebar navigation:
+  - Added Coal (`2#Lower`, `2#Upper`, `4#Lower`, `4#Upper`, `Other`) and Waste (`Dyke`, `Overburden`, `Interburden`, `Other`) material subcategory selection to Excavator cards in `apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`, with lossless formatting/parsing in `loads-utils.ts` and persistence in `hourly-loads/actions.ts` and `@repo/contract`.
+  - Updated `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityForm.tsx`, `page.tsx`, and `actions.ts` to pull and display Site, Block Mined, Coal/Waste, Subcategory, and Assigned Machines recorded on the Hourly Loads tab with real-time CDC subscriptions.
+  - Wrapped the Machine Operations page header in `GlassCard` and removed the `C66MachineOperatorScanner` panel in `apps/portal/app/(departments)/[department]/machine-operations/page.tsx`.
+  - Promoted `Shift Operations` (`shift-compilation`) to the top of `CONTROL_ROOM_TABS` above `Dashboard` in `libs/features/departments/data-access/src/departments.ts`.
+- **Verification:** `hourly-loads` unit tests (`27/27 PASS`), `DepartmentLayout.test.tsx` (`5/5 PASS`), `pnpm agent:verify` (`8/8 PASS`).
+
 ## [2026-10-14] - Zero-Drift Watchdog & Federated Audit Hardening
 
 - **Action:** Fixed 6 correctness and reliability defects across `tools/zero-drift-watchdog/`:

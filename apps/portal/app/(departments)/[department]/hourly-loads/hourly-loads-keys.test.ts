@@ -1,9 +1,14 @@
 import {
   buildHourlyLoadsGroupedMap,
   buildHourlyLoadsMap,
+  COAL_MATERIAL_SUBCATEGORIES,
+  formatExcavatorMaterial,
+  getMaterialSubCategories,
   type HourlyLoad,
   isHourEditable,
+  parseExcavatorMaterial,
   sumHourlyTotal,
+  WASTE_MATERIAL_SUBCATEGORIES,
 } from './loads-utils';
 
 /** Regression: day/night rows must not overwrite each other in the grid map. */
@@ -151,5 +156,50 @@ describe('hourly loads helpers', () => {
     expect(isHourEditable(activeSplitSegment, 10)).toBe(true);
     expect(isHourEditable(activeSplitSegment, 11)).toBe(true);
     expect(isHourEditable(activeSplitSegment, 12)).toBe(true);
+  });
+
+  it('provides expected sub-categories for Coal and Waste and parses/formats them losslessly', () => {
+    expect(getMaterialSubCategories('Coal')).toEqual(COAL_MATERIAL_SUBCATEGORIES);
+    expect(COAL_MATERIAL_SUBCATEGORIES).toEqual([
+      '2#Lower',
+      '2#Upper',
+      '4#Lower',
+      '4#Upper',
+      'Other',
+    ]);
+
+    expect(getMaterialSubCategories('Waste')).toEqual(WASTE_MATERIAL_SUBCATEGORIES);
+    expect(WASTE_MATERIAL_SUBCATEGORIES).toEqual(['Dyke', 'Overburden', 'Interburden', 'Other']);
+
+    expect(formatExcavatorMaterial('Coal', '2#Lower')).toBe('Coal - 2#Lower');
+    expect(formatExcavatorMaterial('Waste', 'Overburden')).toBe('Waste - Overburden');
+    expect(formatExcavatorMaterial('Coal', 'Other')).toBe('Coal - Other');
+    expect(formatExcavatorMaterial('Waste', 'Other')).toBe('Waste - Other');
+    expect(formatExcavatorMaterial('Coal', null)).toBe('Coal');
+
+    expect(parseExcavatorMaterial('Coal - 2#Lower')).toEqual({
+      category: 'Coal',
+      subCategory: '2#Lower',
+    });
+    expect(parseExcavatorMaterial('Waste - Interburden')).toEqual({
+      category: 'Waste',
+      subCategory: 'Interburden',
+    });
+    expect(parseExcavatorMaterial('Coal - Other')).toEqual({
+      category: 'Coal',
+      subCategory: 'Other',
+    });
+    expect(parseExcavatorMaterial('Waste - Other')).toEqual({
+      category: 'Waste',
+      subCategory: 'Other',
+    });
+    expect(parseExcavatorMaterial('4#Upper')).toEqual({
+      category: 'Coal',
+      subCategory: '4#Upper',
+    });
+    expect(parseExcavatorMaterial('Dyke')).toEqual({
+      category: 'Waste',
+      subCategory: 'Dyke',
+    });
   });
 });

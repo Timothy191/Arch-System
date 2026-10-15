@@ -164,6 +164,7 @@ export const saveExcavatorActivitySchema = z.object({
   shiftType: z.enum(['day', 'night']),
   siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
   blockMinedId: z.string().uuid('Invalid block mined ID format').nullable().optional(),
+  materialType: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   dumperAssignments: z
     .array(
@@ -177,6 +178,32 @@ export const saveExcavatorActivitySchema = z.object({
     .default([]),
 });
 
+export const coalMaterialSubCategorySchema = z.enum([
+  '2#Lower',
+  '2#Upper',
+  '4#Lower',
+  '4#Upper',
+  'Other',
+]);
+
+export const wasteMaterialSubCategorySchema = z.enum([
+  'Dyke',
+  'Overburden',
+  'Interburden',
+  'Other',
+]);
+
+export const materialSubCategorySchema = z.enum([
+  '2#Lower',
+  '2#Upper',
+  '4#Lower',
+  '4#Upper',
+  'Dyke',
+  'Overburden',
+  'Interburden',
+  'Other',
+]);
+
 export const updateExcavatorAssignmentConfigSchema = z.object({
   departmentId: z.string().uuid('Invalid department ID format'),
   excavatorId: z.string().uuid('Invalid excavator ID format'),
@@ -185,4 +212,5 @@ export const updateExcavatorAssignmentConfigSchema = z.object({
   siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
   blockMinedId: z.string().uuid('Invalid block mined ID format').nullable().optional(),
   materialType: z.enum(['Waste', 'Coal']).optional(),
+  materialSubCategory: materialSubCategorySchema.nullable().optional(),
 });

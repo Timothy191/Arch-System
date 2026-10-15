@@ -15,7 +15,12 @@ import type {
 import { cacheInvalidateTags } from '@repo/redis';
 import { type EmployeeSummary, getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
-import { deriveExcavatorDumperAssignments, type HourlyShift } from './loads-utils';
+import {
+  deriveExcavatorDumperAssignments,
+  formatExcavatorMaterial,
+  type HourlyShift,
+  parseExcavatorMaterial,
+} from './loads-utils';
 
 export async function syncExcavatorActivityFromHourlyLoads(
   serviceClient: ReturnType<typeof createServiceRoleClient>,
@@ -271,12 +276,23 @@ export async function updateExcavatorAssignmentConfig(
     .order('created_at', { ascending: false });
 
   const existingActivity = existingActivities?.[0] ?? null;
+  const parsedExistingMaterial = parseExcavatorMaterial(existingActivity?.material_type);
+  const nextCategory = validated.materialType ?? parsedExistingMaterial.category;
+  const nextSubCategory =
+    validated.materialSubCategory !== undefined
+      ? validated.materialSubCategory
+      : validated.materialType && validated.materialType !== parsedExistingMaterial.category
+        ? null
+        : parsedExistingMaterial.subCategory || null;
+  const formattedActivityMaterial = formatExcavatorMaterial(nextCategory, nextSubCategory);
 
   if (existingActivity) {
     const patch: Record<string, unknown> = {};
     if (validated.siteId !== undefined) patch.site_id = validated.siteId;
     if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
-    if (validated.materialType !== undefined) patch.material_type = validated.materialType;
+    if (validated.materialType !== undefined || validated.materialSubCategory !== undefined) {
+      patch.material_type = formattedActivityMaterial;
+    }
     if (Object.keys(patch).length > 0) {
       await serviceClient.from('excavator_activity').update(patch).eq('id', existingActivity.id);
     }
@@ -288,7 +304,7 @@ export async function updateExcavatorAssignmentConfig(
       shift_type: validated.shiftType,
       site_id: validated.siteId ?? null,
       block_mined_id: validated.blockMinedId ?? null,
-      material_type: validated.materialType ?? 'Waste',
+      material_type: formattedActivityMaterial,
       passes: 0,
       loads: 0,
     });

@@ -38,15 +38,15 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
 
-    // Verify exact ordering (Shift Operations at the bottom)
+    // Verify exact ordering (Shift Operations at the top above Dashboard)
     expect(controlRoomTabs.map((t) => t.label)).toEqual([
+      'Shift Operations',
       'Dashboard',
       'Hourly Loads',
       'Machine Ops',
       'Eng Notes',
       'Excavator',
       'Reports',
-      'Shift Operations',
     ]);
   });
 

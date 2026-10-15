@@ -244,6 +244,108 @@ export function computeDumperLoadsAndBcm(
   return { totalLoads, totalBcm };
 }
 
+export const COAL_MATERIAL_SUBCATEGORIES = [
+  '2#Lower',
+  '2#Upper',
+  '4#Lower',
+  '4#Upper',
+  'Other',
+] as const;
+
+export const WASTE_MATERIAL_SUBCATEGORIES = ['Dyke', 'Overburden', 'Interburden', 'Other'] as const;
+
+export type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
+export type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
+export type MaterialSubCategory = CoalMaterialSubCategory | WasteMaterialSubCategory;
+
+export function getMaterialSubCategories(category: HourlyMaterial): readonly MaterialSubCategory[] {
+  return category === 'Coal' ? COAL_MATERIAL_SUBCATEGORIES : WASTE_MATERIAL_SUBCATEGORIES;
+}
+
+export function isValidSubCategoryForMaterial(
+  category: HourlyMaterial,
+  subCategory: string | null | undefined
+): subCategory is MaterialSubCategory {
+  if (!subCategory) return false;
+  const options = getMaterialSubCategories(category);
+  return (options as readonly string[]).includes(subCategory);
+}
+
+/**
+ * Parses a stored excavator_activity.material_type value (e.g. "Coal - 2#Lower",
+ * "Waste - Overburden", "2#Lower", "Overburden", "Coal", "Waste") into its
+ * primary category ('Waste' | 'Coal') and optional sub-category.
+ */
+export function parseExcavatorMaterial(raw: string | null | undefined): {
+  category: HourlyMaterial;
+  subCategory: MaterialSubCategory | '';
+} {
+  if (!raw || typeof raw !== 'string') {
+    return { category: 'Waste', subCategory: '' };
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return { category: 'Waste', subCategory: '' };
+  }
+
+  // Handle "Coal - 2#Lower", "Waste - Overburden", "Coal: 2#Lower", "Coal (2#Lower)"
+  const prefixMatch = /^(Coal|Waste)\s*(?:[-:/]|\()\s*([^)]+)\)?$/i.exec(trimmed);
+  if (prefixMatch) {
+    const rawCat = prefixMatch[1]?.toLowerCase() === 'coal' ? 'Coal' : 'Waste';
+    const rawSub = (prefixMatch[2] ?? '').trim();
+    const normalizedSub = rawSub.toLowerCase() === 'interburdern' ? 'Interburden' : rawSub;
+    const matchedSub = getMaterialSubCategories(rawCat).find(
+      (opt) => opt.toLowerCase() === normalizedSub.toLowerCase()
+    );
+    return {
+      category: rawCat,
+      subCategory: matchedSub ?? '',
+    };
+  }
+
+  if (trimmed.toLowerCase() === 'coal') {
+    return { category: 'Coal', subCategory: '' };
+  }
+  if (trimmed.toLowerCase() === 'waste') {
+    return { category: 'Waste', subCategory: '' };
+  }
+
+  // Check if raw directly matches a specific Coal sub-category (excluding 'Other')
+  const coalMatch = COAL_MATERIAL_SUBCATEGORIES.filter((s) => s !== 'Other').find(
+    (s) => s.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (coalMatch) {
+    return { category: 'Coal', subCategory: coalMatch };
+  }
+
+  // Check if raw directly matches a specific Waste sub-category
+  const normalizedTrimmed = trimmed.toLowerCase() === 'interburdern' ? 'Interburden' : trimmed;
+  const wasteMatch = WASTE_MATERIAL_SUBCATEGORIES.find(
+    (s) => s.toLowerCase() === normalizedTrimmed.toLowerCase()
+  );
+  if (wasteMatch) {
+    return { category: 'Waste', subCategory: wasteMatch };
+  }
+
+  return { category: 'Waste', subCategory: '' };
+}
+
+/**
+ * Formats a primary material category ('Waste' | 'Coal') and optional sub-category
+ * for persistence in excavator_activity.material_type while keeping lossless category info.
+ */
+export function formatExcavatorMaterial(
+  category: HourlyMaterial,
+  subCategory?: string | null
+): string {
+  const validCat: HourlyMaterial = category === 'Coal' ? 'Coal' : 'Waste';
+  if (subCategory && isValidSubCategoryForMaterial(validCat, subCategory)) {
+    return `${validCat} - ${subCategory}`;
+  }
+  return validCat;
+}
+
 /**
  * Mirrors the DB's GENERATED ALWAYS AS (hour_01 + ... + hour_12) STORED column
  * for optimistic updates that happen before the write round-trips.

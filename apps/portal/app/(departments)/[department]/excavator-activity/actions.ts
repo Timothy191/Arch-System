@@ -42,7 +42,7 @@ export async function saveExcavatorActivity(input: SaveExcavatorActivityInput) {
   // (which may have been auto-created by Hourly Loads excavator assignment sync)
   const { data: existingRows, error: findErr } = await serviceClient
     .from('excavator_activity')
-    .select('id')
+    .select('id, material_type')
     .eq('department_id', validated.departmentId)
     .eq('machine_id', validated.excavatorId)
     .eq('activity_date', validated.activityDate)
@@ -53,6 +53,11 @@ export async function saveExcavatorActivity(input: SaveExcavatorActivityInput) {
 
   let activityId: string;
   const existing = existingRows?.[0];
+  const resolvedMaterialType =
+    validated.materialType ||
+    existing?.material_type ||
+    validated.dumperAssignments[0]?.materialType ||
+    'Waste';
 
   if (existing) {
     const { data: updated, error: updateErr } = await serviceClient
@@ -61,6 +66,7 @@ export async function saveExcavatorActivity(input: SaveExcavatorActivityInput) {
         operator_id: validated.operatorId || null,
         site_id: validated.siteId || null,
         block_mined_id: validated.blockMinedId || null,
+        material_type: resolvedMaterialType,
         loads: totalLoads,
         notes: validated.notes || null,
         updated_at: new Date().toISOString(),
@@ -83,6 +89,7 @@ export async function saveExcavatorActivity(input: SaveExcavatorActivityInput) {
         shift_type: validated.shiftType,
         site_id: validated.siteId || null,
         block_mined_id: validated.blockMinedId || null,
+        material_type: resolvedMaterialType,
         passes: 0,
         loads: totalLoads,
         notes: validated.notes || null,

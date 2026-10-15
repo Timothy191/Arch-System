@@ -20,13 +20,17 @@ import {
 
 import {
   buildHourlyLoadsGroupedMap,
+  getMaterialSubCategories,
   HOUR_PROP,
   HOURS_12,
   type HourlyLoad,
   type HourlyMaterial,
   type HourlyShift,
   isHourEditable,
+  isValidSubCategoryForMaterial,
   loadKey,
+  type MaterialSubCategory,
+  parseExcavatorMaterial,
   sumHourlyTotal,
 } from './loads-utils';
 
@@ -239,7 +243,17 @@ function HourlyLoadsGrid({
         const act = excavatorActivities.find((a) => a.machine_id === e.id);
         const load = hourlyLoads.find((l) => l.excavator_id === e.id && !l.is_locked);
         const mat = act?.material_type || load?.material_type;
-        return [e.id, mat === 'Coal' ? 'Coal' : 'Waste'];
+        return [e.id, parseExcavatorMaterial(mat).category];
+      })
+    )
+  );
+  const [excavatorMaterialSubCategories, setExcavatorMaterialSubCategories] = useState<
+    Record<string, MaterialSubCategory | ''>
+  >(() =>
+    Object.fromEntries(
+      excavators.map((e) => {
+        const act = excavatorActivities.find((a) => a.machine_id === e.id);
+        return [e.id, parseExcavatorMaterial(act?.material_type).subCategory];
       })
     )
   );
@@ -772,7 +786,16 @@ function HourlyLoadsGrid({
       const prevMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
       if (newMaterial === prevMaterial) return;
 
+      const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
+      const nextSubCategory: MaterialSubCategory | '' = isValidSubCategoryForMaterial(
+        newMaterial,
+        prevSubCategory
+      )
+        ? prevSubCategory
+        : '';
+
       setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: newMaterial }));
+      setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: nextSubCategory }));
       setLoadsState((prev) =>
         prev.map((load) =>
           load.excavator_id === excavatorId && load.shift_type === selectedShift && !load.is_locked
@@ -788,10 +811,12 @@ function HourlyLoadsGrid({
           loadDate: today,
           shiftType: selectedShift,
           materialType: newMaterial,
+          materialSubCategory: nextSubCategory || null,
         });
       } catch (err) {
         logError(err, { context: 'update_excavator_material' });
         setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: prevMaterial }));
+        setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: prevSubCategory }));
         setLoadsState((prev) =>
           prev.map((load) =>
             load.excavator_id === excavatorId &&
@@ -804,7 +829,41 @@ function HourlyLoadsGrid({
         toast.error('Failed to update excavator material.');
       }
     },
-    [excavatorMaterials, departmentId, today, selectedShift]
+    [excavatorMaterials, excavatorMaterialSubCategories, departmentId, today, selectedShift]
+  );
+
+  // Handle excavator material sub-category change (Coal: 2#Lower, 2#Upper, 4#Lower, 4#Upper, Other | Waste: Dyke, Overburden, Interburden, Other)
+  const handleExcavatorMaterialSubCategoryChange = useCallback(
+    async (excavatorId: string, newSubCategory: string | null) => {
+      const currentMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
+      const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
+      const validNext: MaterialSubCategory | '' = isValidSubCategoryForMaterial(
+        currentMaterial,
+        newSubCategory
+      )
+        ? newSubCategory
+        : '';
+
+      if (validNext === prevSubCategory) return;
+
+      setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: validNext }));
+
+      try {
+        await updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: today,
+          shiftType: selectedShift,
+          materialType: currentMaterial,
+          materialSubCategory: validNext || null,
+        });
+      } catch (err) {
+        logError(err, { context: 'update_excavator_material_subcategory' });
+        setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: prevSubCategory }));
+        toast.error('Failed to update excavator material sub-category.');
+      }
+    },
+    [excavatorMaterials, excavatorMaterialSubCategories, departmentId, today, selectedShift]
   );
 
   // Handle split creation
@@ -989,11 +1048,13 @@ function HourlyLoadsGrid({
       const excavatorName =
         (assignedExcavatorId && excavators.find((e) => e.id === assignedExcavatorId)?.name) ||
         'None';
+      const subCategory =
+        (assignedExcavatorId && excavatorMaterialSubCategories[assignedExcavatorId]) || '';
       const data: any = {
         Machine: row.machineName,
         'Excavator Assigned': excavatorName,
         Type: row.machineType,
-        Material: row.materialType,
+        Material: subCategory ? `${row.materialType} (${subCategory})` : row.materialType,
         Status: row.isLocked ? 'Locked' : 'Active',
       };
       HOURS_12.forEach((_, index) => {
@@ -1079,6 +1140,8 @@ function HourlyLoadsGrid({
             const currentSiteId = excavatorSites[excavator.id] || '';
             const currentBlockId = excavatorBlocks[excavator.id] || '';
             const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
+            const currentSubCategory = excavatorMaterialSubCategories[excavator.id] || '';
+            const materialSubCategories = getMaterialSubCategories(currentMaterial);
             const availableBlocks = currentSiteId
               ? mineBlocks.filter((mb) => mb.site_id === currentSiteId || mb.site_id === null)
               : mineBlocks;
@@ -1100,6 +1163,7 @@ function HourlyLoadsGrid({
                       Excavator
                       {selectedSite ? ` · ${selectedSite.name}` : ''}
                       {selectedBlock ? ` · ${selectedBlock.code}` : ''}
+                      {currentSubCategory ? ` · ${currentMaterial} (${currentSubCategory})` : ''}
                     </span>
                   </div>
 
@@ -1130,8 +1194,8 @@ function HourlyLoadsGrid({
                   </div>
                 </div>
 
-                {/* Site & Block Mined / Area Selectors */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Site, Block Mined / Area & Material Sub-Category Selectors */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div className="space-y-1">
                     <label className="text-[11px] font-medium text-[var(--text-muted)] block">
                       Site / Location
@@ -1167,6 +1231,30 @@ function HourlyLoadsGrid({
                       {availableBlocks.map((mb) => (
                         <option key={mb.id} value={mb.id}>
                           {mb.name} ({mb.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                      Material ({currentMaterial})
+                    </label>
+                    <select
+                      value={currentSubCategory}
+                      onChange={(e) =>
+                        handleExcavatorMaterialSubCategoryChange(
+                          excavator.id,
+                          e.target.value || null
+                        )
+                      }
+                      aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    >
+                      <option value="">Select {currentMaterial.toLowerCase()} material...</option>
+                      {materialSubCategories.map((subCat) => (
+                        <option key={subCat} value={subCat}>
+                          {subCat}
                         </option>
                       ))}
                     </select>
@@ -1287,6 +1375,7 @@ function HourlyLoadsGrid({
                             data-action="select-excavator"
                             value={row.excavatorId || ''}
                             onChange={(e) => {
+                              e.stopPropagation();
                               handleExcavatorAssignment(rowIndex, e.target.value || null);
                             }}
                             disabled={isLocked}

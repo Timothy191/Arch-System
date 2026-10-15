@@ -2,11 +2,21 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
+  COAL_MATERIAL_SUBCATEGORIES,
   computeDumperLoadsAndBcm,
   type HourlyLoadSegmentSummary,
+  WASTE_MATERIAL_SUBCATEGORIES,
 } from '../hourly-loads/loads-utils';
 
-const MATERIAL_TYPES = ['Overburden', 'Coal', 'Waste', 'Partings', 'Soil', 'Other'];
+const MATERIAL_TYPES = [
+  'Waste',
+  'Coal',
+  ...COAL_MATERIAL_SUBCATEGORIES.filter((s) => s !== 'Other'),
+  ...WASTE_MATERIAL_SUBCATEGORIES.filter((s) => s !== 'Other'),
+  'Partings',
+  'Soil',
+  'Other',
+];
 
 interface DumperMachine {
   id: string;

@@ -1,11 +1,13 @@
 import type { z } from 'zod';
 import type {
   bookOutSchema,
+  coalMaterialSubCategorySchema,
   createBreakdownSchema,
   dailyLogSchema,
   directCheckoutSchema,
   dozerRollSchema,
   drillingDailyLogSchema,
+  materialSubCategorySchema,
   monthlyReportInputSchema,
   productionDailyLogSchema,
   saveExcavatorActivitySchema,
@@ -14,6 +16,7 @@ import type {
   updateExcavatorAssignmentConfigSchema,
   updateHourlyLoadExcavatorSchema,
   updateMachineSiteSchema,
+  wasteMaterialSubCategorySchema,
 } from '../schemas/form.schema.js';
 
 export type DailyLogFormValues = z.infer<typeof dailyLogSchema>;
@@ -29,6 +32,9 @@ export type UpdateHourlyLoadExcavatorInput = z.infer<typeof updateHourlyLoadExca
 export type SplitHourlyLoadInput = z.infer<typeof splitHourlyLoadSchema>;
 export type SaveHourlyLoadInput = z.infer<typeof saveHourlyLoadSchema>;
 export type SaveExcavatorActivityInput = z.infer<typeof saveExcavatorActivitySchema>;
+export type CoalMaterialSubCategory = z.infer<typeof coalMaterialSubCategorySchema>;
+export type WasteMaterialSubCategory = z.infer<typeof wasteMaterialSubCategorySchema>;
+export type MaterialSubCategory = z.infer<typeof materialSubCategorySchema>;
 export type UpdateExcavatorAssignmentConfigInput = z.infer<
   typeof updateExcavatorAssignmentConfigSchema
 >;
