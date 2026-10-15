@@ -220,6 +220,11 @@ export default async function ReportsPage({
         tone: 'border-accent-green/30 bg-accent-green/5',
       },
     ];
+    const operationalInsight = reportInsights[2] ?? {
+      title: 'No operational signal available',
+      detail:
+        'The selected reporting window does not contain enough data for an operational signal.',
+    };
 
     const pdfReportData = {
       title: `${dept.displayName} Department Report`,
@@ -404,10 +409,10 @@ export default async function ReportsPage({
               Operational signal
             </p>
             <p className="mt-1 text-lg font-semibold text-[var(--text-heading)]">
-              {reportInsights[2].title}
+              {operationalInsight.title}
             </p>
             <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">
-              {reportInsights[2].detail}
+              {operationalInsight.detail}
             </p>
             <div className="mt-5 border-t border-[var(--border-default)] pt-4">
               <p className="text-xs text-[var(--text-muted)]">Reporting window</p>
