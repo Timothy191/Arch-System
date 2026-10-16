@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { RealtimeDrillTelemetryStream } from './RealtimeDrillTelemetryStream';
 
 interface TelemetryRecord {
   period: string;
@@ -247,9 +246,6 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
           <p className="text-2xl font-bold text-accent-red mt-1">{totalAlerts}</p>
         </GlassCard>
       </div>
-
-      {/* Real-time SSE Stream Subscriber */}
-      <RealtimeDrillTelemetryStream />
 
       {/* Monthly Availability & Utilization Summary (auto-built from drill_operations) */}
       <GlassCard className="overflow-hidden p-0">
