@@ -4,7 +4,7 @@ import { AutoAnimateList } from '@repo/ui/AnimatedList';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { memo } from 'react';
 
-interface EngineeringNote {
+export interface EngineeringNote {
   id: string;
   shift_type: 'day' | 'night';
   issue_type: string;
@@ -15,6 +15,7 @@ interface EngineeringNote {
   requires_follow_up: boolean;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
+  source?: 'engineering_note' | 'breakdown' | 'engineering_activity' | 'tire_inspection';
   machine?: {
     name: string;
     sites?: { name: string }[] | { name: string } | null;
@@ -30,7 +31,34 @@ const ISSUE_TYPE_COLORS: Record<string, string> = {
   electrical: '#27272a',
   structural: '#3f3f46',
   hydraulic: '#52525b',
+  breakdown: '#dc2626',
+  activity: '#2563eb',
+  tire_inspection: '#0891b2',
   other: '#71717a',
+};
+
+const SOURCE_LABELS: Record<
+  NonNullable<EngineeringNote['source']>,
+  { label: string; className: string }
+> = {
+  engineering_note: {
+    label: 'Engineering Note',
+    className:
+      'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-default)]',
+  },
+  breakdown: {
+    label: 'Engineering Breakdown',
+    className: 'bg-accent-red/10 text-accent-red border-accent-red/20',
+  },
+  engineering_activity: {
+    label: 'Engineering Activity',
+    className:
+      'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border-[var(--accent-blue)]/20',
+  },
+  tire_inspection: {
+    label: 'Tire Inspection',
+    className: 'bg-accent-green/10 text-accent-green border-accent-green/20',
+  },
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -54,12 +82,17 @@ function formatTime(dateStr: string) {
   });
 }
 
+function formatIssueTypeLabel(issueType: string) {
+  const formatted = issueType.replace(/_/g, ' ');
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
 function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
   if (notes.length === 0) {
     return (
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm text-center py-8">
-          No engineering issues logged today.
+          No engineering issues, breakdowns, or activities logged today.
         </p>
       </GlassCard>
     );
@@ -106,18 +139,28 @@ function NoteCard({ note }: { note: EngineeringNote }) {
   const issueColor = ISSUE_TYPE_COLORS[note.issue_type] || 'var(--text-muted)';
   const severityColor = SEVERITY_COLORS[note.severity] || 'var(--text-muted)';
   const statusColor = STATUS_COLORS[note.status] || 'var(--text-muted)';
+  const sourceBadge = note.source ? SOURCE_LABELS[note.source] : null;
 
   return (
     <GlassCard className={`py-3 ${note.severity === 'critical' ? 'border-accent-red/30' : ''}`}>
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Source Badge */}
+          {sourceBadge && (
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium border ${sourceBadge.className}`}
+            >
+              {sourceBadge.label}
+            </span>
+          )}
+
           {/* Issue Type */}
           <span
             className="px-2 py-1 rounded text-xs font-medium text-[var(--bg-secondary)]"
             style={{ backgroundColor: issueColor }}
           >
-            {note.issue_type.charAt(0).toUpperCase() + note.issue_type.slice(1)}
+            {formatIssueTypeLabel(note.issue_type)}
           </span>
 
           {/* Severity */}

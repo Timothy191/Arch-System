@@ -624,3 +624,9 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: When a Dozer is selected in `MachineOperationsForm` or `EndSMRForm`, display the Roll-over amount at the bottom as a fixed number (`hours worked * 250 = total rollover (BCM)`), include Dozer rollover BCM in `MachineOperationsList` and `MachineOperationsPage`, and sync Dozer SMR entries to `dozer_rollover_logs`.
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T12:29:00+02:00: Include Engineering Department Breakdowns & Activities on Control Room Engineering Notes Page
+
+- **Agent**: Antigravity
+- **Purpose**: Populate `/control-room/engineering-notes` (`apps/portal/app/(departments)/[department]/engineering-notes/page.tsx` and `EngineeringNotesList.tsx`) with active/today Engineering Breakdowns (`breakdowns` + `breakdowns_control_room_view`), Engineering Daily Shift Logs (`daily_logs`), Engineering Tire Inspections (`tire_inspections`), and cross-department `engineering_notes`.
+- **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
