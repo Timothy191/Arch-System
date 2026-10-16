@@ -1,12 +1,13 @@
 import '@/styles/print-report.css';
-import { GlassCard } from '@repo/ui/GlassCard';
-import { Input } from '@repo/ui/Input';
-import Link from 'next/link';
-import { ExportButton } from '@/features/analytics/components/ExportButton';
-import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { getShiftCompleteness } from '@/lib/shift-completeness';
 import { getDepartmentContext } from '~/lib/dept-context';
-import { CopyReportButton } from './CopyReportButton';
+import {
+  type EngineeringLogItem,
+  type MachineOperationLogItem,
+  ReportsDashboardClient,
+  type ShiftCoverageMissingItem,
+  type ShiftReportRow,
+} from './ReportsDashboardClient';
 
 export default async function ReportsPage({
   params,
@@ -17,423 +18,94 @@ export default async function ReportsPage({
 }) {
   const { department: deptSlug } = await params;
   const { from: fromParam, to: toParam } = await searchParams;
-  const { dept, deptId, supabase } = await getDepartmentContext({
+  const { dept, deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
 
-  const todayStr = new Date().toISOString().split('T')[0]!;
+  const todayStr = today || new Date().toISOString().split('T')[0]!;
   const toDateStr = toParam || todayStr;
-  const fromDateStr = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  const fromDateStr =
+    fromParam || new Date(Date.now() - 60 * 86400000).toISOString().split('T')[0]!;
 
+  const currentHour = new Date().getHours();
+  const currentShift: 'day' | 'night' = currentHour >= 6 && currentHour < 18 ? 'day' : 'night';
   const isControlRoom = dept.type === 'control_room';
 
-  // ─── Control Room branch ───────────────────────────────────────────────────
-  if (isControlRoom) {
-    const [
-      { data: operations },
-      { data: loads },
-      { data: delays },
-      { data: excavatorAssignments },
-      { data: dozerRolls },
-    ] = await Promise.all([
-      supabase
-        .from('machine_operations')
-        .select('shift_date, shift_type, hours_worked')
-        .eq('department_id', deptId)
-        .gte('shift_date', fromDateStr)
-        .lte('shift_date', toDateStr)
-        .order('shift_date', { ascending: false }),
-      supabase
-        .from('hourly_loads')
-        .select(
-          'load_date, shift_type, total_loads, excavator:machines!excavator_id(name, site:sites(name))'
-        )
-        .eq('department_id', deptId)
-        .gte('load_date', fromDateStr)
-        .lte('load_date', toDateStr),
-      supabase
-        .from('operational_delays')
-        .select('delay_date, shift_type, delay_minutes')
-        .eq('department_id', deptId)
-        .gte('delay_date', fromDateStr)
-        .lte('delay_date', toDateStr),
-      supabase
-        .from('excavator_dumper_assignments')
-        .select(
-          'total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))'
-        )
-        .eq('excavator_activity.department_id', deptId)
-        .gte('excavator_activity.activity_date', fromDateStr)
-        .lte('excavator_activity.activity_date', toDateStr),
-      supabase
-        .from('dozer_rolls')
-        .select('roll_date, shift_type, blade_passes, hours_operated')
-        .eq('department_id', deptId)
-        .gte('roll_date', fromDateStr)
-        .lte('roll_date', toDateStr),
-    ]);
+  // Fetch data in parallel across Control Room & Department tables
+  const [
+    { data: operations },
+    { data: loads },
+    { data: delays },
+    { data: excavatorAssignments },
+    { data: dozerRolls },
+    { data: breakdowns },
+    { data: engNotes },
+    { data: dailyLogs },
+    completeness,
+  ] = await Promise.all([
+    supabase
+      .from('machine_operations')
+      .select(
+        'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, machine:machines(name, machine_type, bin_factor, sites(name)), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(duration_hours, deleted_at)'
+      )
+      .gte('shift_date', fromDateStr)
+      .lte('shift_date', toDateStr)
+      .order('shift_date', { ascending: false }),
+    supabase
+      .from('hourly_loads')
+      .select(
+        'id, machine_id, load_date, shift_type, total_loads, machine:machines!machine_id(name, bin_factor, sites(name)), excavator:machines!excavator_id(name, sites(name))'
+      )
+      .gte('load_date', fromDateStr)
+      .lte('load_date', toDateStr),
+    supabase
+      .from('operational_delays')
+      .select('delay_date, shift_type, delay_minutes')
+      .eq('department_id', deptId)
+      .gte('delay_date', fromDateStr)
+      .lte('delay_date', toDateStr),
+    supabase
+      .from('excavator_dumper_assignments')
+      .select(
+        'total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))'
+      )
+      .gte('excavator_activity.activity_date', fromDateStr)
+      .lte('excavator_activity.activity_date', toDateStr),
+    supabase
+      .from('dozer_rolls')
+      .select(
+        'id, machine_id, roll_date, shift_type, blade_passes, hours_operated, machine:machines(name, sites(name))'
+      )
+      .gte('roll_date', fromDateStr)
+      .lte('roll_date', toDateStr),
+    supabase
+      .from('breakdowns')
+      .select(
+        'id, fleet_id, machine_name, machine_type, reason, repair_notes, date_in, time_in, date_out, status, created_at'
+      )
+      .is('deleted_at', null)
+      .gte('date_in', fromDateStr)
+      .lte('date_in', toDateStr)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('engineering_notes')
+      .select(
+        'id, note_date, shift_type, issue_type, severity, description, action_taken, status, created_at, machine:machines(name)'
+      )
+      .gte('note_date', fromDateStr)
+      .lte('note_date', toDateStr)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('daily_logs')
+      .select('id, department_id, log_date, shift, notes, created_at')
+      .gte('log_date', fromDateStr)
+      .lte('log_date', toDateStr)
+      .order('log_date', { ascending: false }),
+    getShiftCompleteness(supabase, deptId, deptSlug, todayStr, currentShift),
+  ]);
 
-    // Aggregate totals for KPIs
-    const totalHours = operations?.reduce((sum, o) => sum + (o.hours_worked || 0), 0) || 0;
-    const totalLoads = loads?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
-    const totalDelayMin = delays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
-    const totalBcm = excavatorAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
-
-    // Build per-(site, date, shift) row map
-    type CRRow = {
-      site: string;
-      date: string;
-      shift: string;
-      hours: number;
-      loads: number;
-      bcm: number;
-      delayMin: number;
-      dozerPasses: number;
-    };
-    const rowMap = new Map<string, CRRow>();
-
-    const key = (site: string, date: string, shift: string) => `${site}|${date}|${shift}`;
-
-    const getOrCreate = (site: string, date: string, shift: string): CRRow => {
-      const k = key(site, date, shift);
-      if (!rowMap.has(k)) {
-        rowMap.set(k, {
-          site,
-          date,
-          shift,
-          hours: 0,
-          loads: 0,
-          bcm: 0,
-          delayMin: 0,
-          dozerPasses: 0,
-        });
-      }
-      return rowMap.get(k)!;
-    };
-
-    operations?.forEach((o) => {
-      getOrCreate('', o.shift_date, o.shift_type).hours += o.hours_worked || 0;
-    });
-    loads?.forEach((l) => {
-      const rawExcavator = l.excavator as unknown as
-        | { name?: string; site?: { name: string } | { name: string }[] | null }
-        | { name?: string; site?: { name: string } | { name: string }[] | null }[]
-        | null;
-      const excavatorObj = Array.isArray(rawExcavator) ? rawExcavator[0] : rawExcavator;
-      const rawSite = excavatorObj?.site;
-      const siteName = Array.isArray(rawSite) ? (rawSite[0]?.name ?? '') : (rawSite?.name ?? '');
-      getOrCreate(siteName, l.load_date, l.shift_type).loads += l.total_loads || 0;
-    });
-    delays?.forEach((d) => {
-      getOrCreate('', d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;
-    });
-    excavatorAssignments?.forEach((a) => {
-      const act = Array.isArray(a.excavator_activity)
-        ? a.excavator_activity[0]
-        : a.excavator_activity;
-      if (act) {
-        const rawSite = (act as unknown as { site?: unknown }).site;
-        const siteObj = Array.isArray(rawSite)
-          ? ((rawSite as { name: string }[])[0]?.name ?? '')
-          : ((rawSite as { name: string } | null | undefined)?.name ?? '');
-        getOrCreate(siteObj, act.activity_date, act.shift_type).bcm += a.total_bcm || 0;
-      }
-    });
-    dozerRolls?.forEach((r) => {
-      getOrCreate('', r.roll_date, r.shift_type).dozerPasses += r.blade_passes || 0;
-    });
-
-    const rows = Array.from(rowMap.values()).sort((a, b) => {
-      if (a.site !== b.site) return a.site.localeCompare(b.site);
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
-      return a.shift.localeCompare(b.shift);
-    });
-
-    const csvRows = [
-      ['Site', 'Date', 'Shift', 'Hours', 'Total Loads', 'BCM', 'Delay (min)', 'Dozer Passes'],
-      ...rows.map((r) => [
-        r.site || '—',
-        r.date,
-        r.shift,
-        r.hours.toFixed(2),
-        r.loads.toString(),
-        r.bcm.toFixed(2),
-        r.delayMin.toString(),
-        r.dozerPasses.toString(),
-      ]),
-    ];
-
-    const csvContent = csvRows
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const exportRows = rows.map((r) => ({
-      Site: r.site || '—',
-      Date: r.date,
-      Shift: r.shift,
-      Hours: Number(r.hours.toFixed(2)),
-      'Total Loads': r.loads,
-      BCM: Number(r.bcm.toFixed(2)),
-      'Delay (min)': r.delayMin,
-      'Dozer Passes': r.dozerPasses,
-    }));
-
-    const pdfReportData = {
-      title: `${dept.displayName} Department Report`,
-      subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
-      kpis: [
-        { label: 'Total Hours', value: `${totalHours.toFixed(1)} h` },
-        { label: 'Total Loads', value: `${totalLoads.toLocaleString()}` },
-        { label: 'Total BCM', value: `${totalBcm.toFixed(1)}` },
-        { label: 'Delay Minutes', value: `${totalDelayMin.toLocaleString()}` },
-      ],
-      tableHeaders: [
-        'Site',
-        'Date',
-        'Shift',
-        'Hours',
-        'Loads',
-        'BCM',
-        'Delay (min)',
-        'Dozer Passes',
-      ],
-      tableRows: exportRows.map((r) => [
-        r.Site,
-        r.Date,
-        r.Shift,
-        r.Hours.toString(),
-        r['Total Loads'].toString(),
-        r.BCM.toString(),
-        r['Delay (min)'].toString(),
-        r['Dozer Passes'].toString(),
-      ]),
-    };
-
-    // ── Shift completeness gate ──────────────────────────────────────────────
-    const currentHour = new Date().getHours();
-    const currentShift: 'day' | 'night' = currentHour >= 6 && currentHour < 18 ? 'day' : 'night';
-
-    const completeness = await getShiftCompleteness(
-      supabase,
-      deptId,
-      deptSlug,
-      todayStr,
-      currentShift
-    );
-
-    if (!completeness.complete) {
-      const missing = completeness.statuses.filter((s) => !s.exempt && !s.hasEntry);
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
-          </div>
-          <GlassCard className="border-accent-red/30 space-y-4">
-            <div className="flex items-start gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-accent-red mt-1 shrink-0" />
-              <div>
-                <p className="text-[var(--text-heading)] font-medium">
-                  Shift report cannot be generated
-                </p>
-                <p className="text-[var(--text-muted)] text-sm mt-0.5">
-                  {missing.length} machine
-                  {missing.length !== 1 ? 's are' : ' is'} missing entries for the current{' '}
-                  {currentShift} shift. Complete all entries first.
-                </p>
-              </div>
-            </div>
-            <div className="divide-y divide-[var(--border-default)] rounded-lg overflow-hidden border border-[var(--border-default)]">
-              {missing.map((s) => (
-                <div
-                  key={s.machineId}
-                  className="flex items-center justify-between px-4 py-3 bg-[var(--bg-secondary)]"
-                >
-                  <div>
-                    <p className="text-[var(--text-heading)] text-sm font-medium">
-                      {s.machineName}
-                    </p>
-                    <p className="text-[var(--text-muted)] text-xs">{s.machineType}</p>
-                  </div>
-                  <Link
-                    href={s.formPath}
-                    className="text-[var(--accent-blue)] text-sm hover:underline"
-                  >
-                    → {s.formLabel}
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <Link
-              href={`/${deptSlug}/machine-operations`}
-              className="inline-flex items-center gap-1.5 text-sm text-[var(--accent-blue)] hover:underline"
-            >
-              View full coverage checklist →
-            </Link>
-          </GlassCard>
-        </div>
-      );
-    }
-    // ─────────────────────────────────────────────────────────────────────────
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
-          <div className="flex items-center gap-2">
-            <CopyReportButton csvContent={csvContent} />
-            <PDFDownloadButton reportData={pdfReportData} departmentId={deptId} />
-            <ExportButton
-              filename={`control-room-report-${fromDateStr}-to-${toDateStr}`}
-              rows={exportRows}
-            />
-          </div>
-        </div>
-
-        {/* CR KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <GlassCard>
-            <p className="text-[var(--text-muted)] text-sm">Total Hours</p>
-            <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-              {totalHours.toFixed(1)}h
-            </p>
-          </GlassCard>
-          <GlassCard>
-            <p className="text-[var(--text-muted)] text-sm">Total Loads</p>
-            <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
-              {totalLoads.toLocaleString()}
-            </p>
-          </GlassCard>
-          <GlassCard>
-            <p className="text-[var(--text-muted)] text-sm">Total BCM</p>
-            <p className="text-2xl font-medium text-accent-green mt-1">{totalBcm.toFixed(1)}</p>
-          </GlassCard>
-          <GlassCard>
-            <p className="text-[var(--text-muted)] text-sm">Delay Minutes</p>
-            <p className="text-2xl font-medium text-accent-blue mt-1">
-              {totalDelayMin.toLocaleString()}
-            </p>
-          </GlassCard>
-        </div>
-
-        {/* Date Filter */}
-        <GlassCard>
-          <form method="GET" className="flex items-end gap-4">
-            <div>
-              <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
-              <Input type="date" name="from" defaultValue={fromDateStr} className="px-4 py-2" />
-            </div>
-            <div>
-              <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
-              <Input type="date" name="to" defaultValue={toDateStr} className="px-4 py-2" />
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-heading)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
-            >
-              Update
-            </button>
-          </form>
-        </GlassCard>
-
-        {/* CR Report Table */}
-        <GlassCard className="overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--border-default)]">
-                  {[
-                    'Site',
-                    'Date',
-                    'Shift',
-                    'Hours',
-                    'Loads',
-                    'BCM',
-                    'Delay (min)',
-                    'Dozer Passes',
-                  ].map((h, i) => (
-                    <th
-                      key={h}
-                      scope="col"
-                      className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider ${i > 2 ? 'text-right' : ''}`}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-default)]">
-                {rows.map((row) => (
-                  <tr
-                    key={`${row.site}-${row.date}-${row.shift}`}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {row.site ? (
-                        <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
-                          {row.site}
-                        </span>
-                      ) : (
-                        <span className="text-[var(--text-muted)] text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{row.date}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          row.shift === 'day'
-                            ? 'bg-accent-blue/10 text-accent-blue'
-                            : 'bg-indigo-500/10 text-indigo-400'
-                        }`}
-                      >
-                        {row.shift}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {row.hours.toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--accent-blue)] text-sm text-right">
-                      {row.loads.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-accent-green text-sm text-right">
-                      {row.bcm.toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 text-accent-blue text-sm text-right">
-                      {row.delayMin}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {row.dozerPasses.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={8}
-                      className="px-6 py-12 text-center text-[var(--text-muted)] text-sm"
-                    >
-                      No data found for the selected date range.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </GlassCard>
-      </div>
-    );
-  }
-
-  // ─── Generic department branch ────────────────────────────────────────────
-  const { data: logs } = await supabase
-    .from('daily_logs')
-    .select('id, log_date, shift, notes')
-    .eq('department_id', deptId)
-    .gte('log_date', fromDateStr)
-    .lte('log_date', toDateStr)
-    .order('log_date', { ascending: false });
-
-  const logIds = logs?.map((l) => l.id) || [];
-
+  // Also fetch machine_hours, fuel_logs, production_logs if dailyLogs exist
+  const logIds = (dailyLogs || []).map((l) => l.id);
   const [{ data: machineHours }, { data: fuelLogs }, { data: productionLogs }] = await Promise.all([
     logIds.length > 0
       ? supabase
@@ -451,11 +123,6 @@ export default async function ReportsPage({
           .in('daily_log_id', logIds)
       : Promise.resolve({ data: [] }),
   ]);
-
-  const totalHours = machineHours?.reduce((sum, m) => sum + (m.hours_worked || 0), 0) || 0;
-  const totalFuel = fuelLogs?.reduce((sum, f) => sum + (f.diesel_litres || 0), 0) || 0;
-  const totalCoal = productionLogs?.reduce((sum, p) => sum + (p.coal_tonnes || 0), 0) || 0;
-  const totalWaste = productionLogs?.reduce((sum, p) => sum + (p.waste_tonnes || 0), 0) || 0;
 
   const machineHoursByLog = new Map<string, number>();
   machineHours?.forEach((m) => {
@@ -478,213 +145,416 @@ export default async function ReportsPage({
     productionByLog.set(p.daily_log_id, p);
   });
 
-  const csvRows = [
-    ['Date', 'Shift', 'Notes', 'Total Hours', 'Total Fuel (L)', 'Coal (t)', 'Waste (t)'],
-    ...(logs || []).map((log) => {
-      const mh = machineHoursByLog.get(log.id) || 0;
-      const fl = fuelLogsByLog.get(log.id) || 0;
-      const pl = productionByLog.get(log.id);
-      return [
-        log.log_date,
-        log.shift,
-        log.notes || '',
-        mh.toFixed(2),
-        fl.toFixed(2),
-        (pl?.coal_tonnes || 0).toFixed(2),
-        (pl?.waste_tonnes || 0).toFixed(2),
-      ];
+  // Build per-machine load map for machine operation BCM calculation
+  const machineDateShiftLoadsMap = new Map<string, number>();
+  (loads || []).forEach((l) => {
+    const k = `${l.machine_id}|${l.load_date}|${l.shift_type}`;
+    machineDateShiftLoadsMap.set(k, (machineDateShiftLoadsMap.get(k) || 0) + (l.total_loads || 0));
+  });
+
+  // Build unified ShiftReportRow map keyed by `${site}|${date}|${shift}`
+  const rowMap = new Map<string, ShiftReportRow>();
+  const getOrCreate = (siteRaw: string, date: string, shiftRaw: string): ShiftReportRow => {
+    const site = siteRaw.trim() || 'General Pit';
+    const shift: 'day' | 'night' = shiftRaw === 'night' ? 'night' : 'day';
+    const k = `${site}|${date}|${shift}`;
+    if (!rowMap.has(k)) {
+      rowMap.set(k, {
+        id: k,
+        site,
+        date,
+        shift,
+        hours: 0,
+        loads: 0,
+        haulBcm: 0,
+        dozerRolloverBcm: 0,
+        totalBcm: 0,
+        delayMin: 0,
+        dozerPasses: 0,
+        fuelLitres: 0,
+        coalTonnes: 0,
+        wasteTonnes: 0,
+        notes: '',
+      });
+    }
+    return rowMap.get(k)!;
+  };
+
+  const machineOperationLogs: MachineOperationLogItem[] = [];
+
+  for (const op of (operations || []) as Array<{
+    id: string;
+    machine_id: string;
+    shift_date: string;
+    shift_type: string;
+    start_smu: number | null;
+    end_smu: number | null;
+    hours_worked: number | null;
+    machine?:
+      | {
+          name: string;
+          machine_type: string;
+          bin_factor: number | null;
+          sites?: { name: string }[] | { name: string } | null;
+        }
+      | {
+          name: string;
+          machine_type: string;
+          bin_factor: number | null;
+          sites?: { name: string }[] | { name: string } | null;
+        }[]
+      | null;
+    operator?: { full_name: string } | { full_name: string }[] | null;
+    site?: { name: string } | { name: string }[] | null;
+    delay_entries?: Array<{ duration_hours: number | null; deleted_at: string | null }> | null;
+  }>) {
+    const machineObj = Array.isArray(op.machine) ? op.machine[0] : op.machine;
+    const operatorObj = Array.isArray(op.operator) ? op.operator[0] : op.operator;
+    const opSiteObj = Array.isArray(op.site) ? op.site[0] : op.site;
+    const machineSites = machineObj?.sites;
+    const machineSiteName = Array.isArray(machineSites)
+      ? machineSites[0]?.name
+      : machineSites?.name;
+    const siteName = opSiteObj?.name || machineSiteName || 'General Pit';
+    const shift: 'day' | 'night' = op.shift_type === 'night' ? 'night' : 'day';
+
+    const hours =
+      op.hours_worked != null
+        ? Number(op.hours_worked)
+        : op.start_smu != null && op.end_smu != null && Number(op.end_smu) >= Number(op.start_smu)
+          ? Number(op.end_smu) - Number(op.start_smu)
+          : 0;
+
+    const isDozer =
+      machineObj?.machine_type === 'Dozer' ||
+      Boolean(machineObj?.machine_type?.toLowerCase().includes('dozer'));
+
+    const delayMin = (op.delay_entries || [])
+      .filter((d) => !d.deleted_at)
+      .reduce((s, d) => s + Math.round(Number(d.duration_hours || 0) * 60), 0);
+
+    const row = getOrCreate(siteName, op.shift_date, shift);
+    row.hours += hours;
+    row.delayMin += delayMin;
+
+    let bcmMoved = 0;
+    if (isDozer) {
+      bcmMoved = hours * 250;
+      row.dozerRolloverBcm += bcmMoved;
+    } else {
+      const mLoads =
+        machineDateShiftLoadsMap.get(`${op.machine_id}|${op.shift_date}|${shift}`) || 0;
+      const bf = Number(machineObj?.bin_factor || 0);
+      bcmMoved = mLoads * bf;
+    }
+
+    machineOperationLogs.push({
+      id: op.id,
+      date: op.shift_date,
+      shift,
+      machineName: machineObj?.name || 'Unknown Machine',
+      machineType: machineObj?.machine_type || 'Equipment',
+      operatorName: operatorObj?.full_name || 'Assigned Operator',
+      siteName,
+      startSmu: op.start_smu != null ? Number(op.start_smu) : null,
+      endSmu: op.end_smu != null ? Number(op.end_smu) : null,
+      hoursWorked: hours,
+      bcmMoved,
+      isDozer,
+      delayMinutes: delayMin,
+      status: op.end_smu != null ? 'completed' : 'active',
+    });
+  }
+
+  // Track hourly_loads & bin_factor BCM per (site, date, shift)
+  const loadBcmMap = new Map<string, number>();
+  for (const l of (loads || []) as Array<{
+    load_date: string;
+    shift_type: string;
+    total_loads: number | null;
+    machine?:
+      | {
+          name?: string;
+          bin_factor?: number | null;
+          sites?: { name: string }[] | { name: string } | null;
+        }
+      | {
+          name?: string;
+          bin_factor?: number | null;
+          sites?: { name: string }[] | { name: string } | null;
+        }[]
+      | null;
+    excavator?:
+      | {
+          name?: string;
+          sites?: { name: string }[] | { name: string } | null;
+        }
+      | {
+          name?: string;
+          sites?: { name: string }[] | { name: string } | null;
+        }[]
+      | null;
+  }>) {
+    const excObj = Array.isArray(l.excavator) ? l.excavator[0] : l.excavator;
+    const machObj = Array.isArray(l.machine) ? l.machine[0] : l.machine;
+    const excSites = excObj?.sites;
+    const machSites = machObj?.sites;
+    const siteName =
+      (Array.isArray(excSites) ? excSites[0]?.name : excSites?.name) ||
+      (Array.isArray(machSites) ? machSites[0]?.name : machSites?.name) ||
+      'General Pit';
+
+    const row = getOrCreate(siteName, l.load_date, l.shift_type);
+    const loadCount = Number(l.total_loads || 0);
+    row.loads += loadCount;
+
+    const bf = Number(machObj?.bin_factor || 40.5);
+    const k = `${row.site}|${row.date}|${row.shift}`;
+    loadBcmMap.set(k, (loadBcmMap.get(k) || 0) + loadCount * bf);
+  }
+
+  // Track excavator_dumper_assignments BCM per (site, date, shift)
+  const assignmentBcmMap = new Map<string, number>();
+  for (const a of excavatorAssignments || []) {
+    const act = Array.isArray(a.excavator_activity)
+      ? a.excavator_activity[0]
+      : a.excavator_activity;
+    if (act) {
+      const rawSite = (act as unknown as { site?: { name: string } | { name: string }[] | null })
+        .site;
+      const siteName = (Array.isArray(rawSite) ? rawSite[0]?.name : rawSite?.name) || 'General Pit';
+      const row = getOrCreate(siteName, act.activity_date, act.shift_type);
+      const k = `${row.site}|${row.date}|${row.shift}`;
+      assignmentBcmMap.set(k, (assignmentBcmMap.get(k) || 0) + Number(a.total_bcm || 0));
+    }
+  }
+
+  // Legacy operational_delays
+  for (const d of delays || []) {
+    getOrCreate('General Pit', d.delay_date, d.shift_type).delayMin += Number(d.delay_minutes || 0);
+  }
+
+  // Dozer rolls
+  for (const r of (dozerRolls || []) as Array<{
+    roll_date: string;
+    shift_type: string;
+    blade_passes: number | null;
+    hours_operated: number | null;
+    machine?:
+      | { name?: string; sites?: { name: string }[] | { name: string } | null }
+      | { name?: string; sites?: { name: string }[] | { name: string } | null }[]
+      | null;
+  }>) {
+    const machObj = Array.isArray(r.machine) ? r.machine[0] : r.machine;
+    const machSites = machObj?.sites;
+    const siteName =
+      (Array.isArray(machSites) ? machSites[0]?.name : machSites?.name) || 'General Pit';
+    const row = getOrCreate(siteName, r.roll_date, r.shift_type);
+    row.dozerPasses += Number(r.blade_passes || 0);
+    if (row.dozerRolloverBcm === 0 && Number(r.hours_operated || 0) > 0) {
+      row.dozerRolloverBcm += Number(r.hours_operated || 0) * 250;
+    }
+  }
+
+  // Daily logs (especially for non-Control Room or general shift notes)
+  for (const dl of dailyLogs || []) {
+    if (!isControlRoom && dl.department_id !== deptId) continue;
+    const mh = machineHoursByLog.get(dl.id) || 0;
+    const fl = fuelLogsByLog.get(dl.id) || 0;
+    const pl = productionByLog.get(dl.id);
+    if (mh > 0 || fl > 0 || pl || dl.notes) {
+      const row = getOrCreate('General Pit', dl.log_date, dl.shift);
+      if (row.hours === 0 && mh > 0) row.hours += mh;
+      row.fuelLitres += fl;
+      row.coalTonnes += Number(pl?.coal_tonnes || 0);
+      row.wasteTonnes += Number(pl?.waste_tonnes || 0);
+      if (dl.notes) {
+        row.notes = row.notes ? `${row.notes} | ${dl.notes}` : dl.notes;
+      }
+    }
+  }
+
+  // Finalize haulBcm & totalBcm on each row
+  for (const [k, row] of rowMap.entries()) {
+    const assignBcm = assignmentBcmMap.get(k) || 0;
+    const loadsBcm = loadBcmMap.get(k) || 0;
+    row.haulBcm = Math.max(assignBcm, loadsBcm);
+    row.totalBcm = row.haulBcm + row.dozerRolloverBcm;
+  }
+
+  const shiftRows = Array.from(rowMap.values()).sort((a, b) => {
+    if (a.date !== b.date) return b.date.localeCompare(a.date);
+    if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+    return a.site.localeCompare(b.site);
+  });
+
+  // Build Engineering & Breakdown logs
+  const engineeringLogs: EngineeringLogItem[] = [
+    ...(breakdowns || []).map((bd) => ({
+      id: `bd-${bd.id}`,
+      date: bd.date_in,
+      shift: (bd.time_in && Number.parseInt(bd.time_in.slice(0, 2), 10) >= 18 ? 'night' : 'day') as
+        | 'day'
+        | 'night',
+      source: 'breakdown' as const,
+      machineName: bd.machine_name || bd.fleet_id,
+      category: bd.machine_type || 'Breakdown',
+      severity: (bd.status === 'active' ? 'high' : 'medium') as 'high' | 'medium',
+      status: (bd.status === 'active' ? 'open' : 'resolved') as 'open' | 'resolved',
+      description: `[${bd.fleet_id}] ${bd.reason}`,
+      actionTaken:
+        bd.repair_notes ||
+        (bd.status === 'completed'
+          ? `Completed${bd.date_out ? ` on ${bd.date_out}` : ''}`
+          : 'Active Engineering breakdown'),
+    })),
+    ...(
+      (engNotes || []) as Array<{
+        id: string;
+        note_date: string;
+        shift_type: string;
+        issue_type: string;
+        severity: 'low' | 'medium' | 'high' | 'critical';
+        description: string;
+        action_taken: string | null;
+        status: string;
+        machine?: { name: string } | { name: string }[] | null;
+      }>
+    ).map((n) => {
+      const mObj = Array.isArray(n.machine) ? n.machine[0] : n.machine;
+      return {
+        id: `note-${n.id}`,
+        date: n.note_date,
+        shift: (n.shift_type === 'night' ? 'night' : 'day') as 'day' | 'night',
+        source: 'engineering_note' as const,
+        machineName: mObj?.name || 'General Plant / Pit',
+        category: n.issue_type,
+        severity: n.severity,
+        status: (n.status === 'resolved' || n.status === 'closed' ? 'resolved' : 'open') as
+          | 'open'
+          | 'resolved',
+        description: n.description,
+        actionTaken: n.action_taken || '',
+      };
     }),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  // Shift coverage stats (non-blocking)
+  const activeStatuses = completeness.statuses.filter((s) => !s.exempt);
+  const totalFleetCount = activeStatuses.length;
+  const coveredFleetCount = activeStatuses.filter((s) => s.hasEntry).length;
+  const missingCoverage: ShiftCoverageMissingItem[] = activeStatuses
+    .filter((s) => !s.hasEntry)
+    .map((s) => ({
+      machineId: s.machineId,
+      machineName: s.machineName,
+      machineType: s.machineType,
+      formPath: s.formPath,
+      formLabel: s.formLabel,
+    }));
+
+  // Export & PDF payloads
+  const totalHours = shiftRows.reduce((s, r) => s + r.hours, 0);
+  const totalLoads = shiftRows.reduce((s, r) => s + r.loads, 0);
+  const totalBcm = shiftRows.reduce((s, r) => s + r.totalBcm, 0);
+  const totalDelayMin = shiftRows.reduce((s, r) => s + r.delayMin, 0);
+
+  const csvRows = [
+    [
+      'Date',
+      'Shift',
+      'Site',
+      'Hours',
+      'Total Loads',
+      'Haul BCM',
+      'Dozer Roll-over BCM',
+      'Total BCM',
+      'Delay (min)',
+      'Dozer Passes',
+    ],
+    ...shiftRows.map((r) => [
+      r.date,
+      r.shift,
+      r.site,
+      r.hours.toFixed(2),
+      r.loads.toString(),
+      r.haulBcm.toFixed(2),
+      r.dozerRolloverBcm.toFixed(2),
+      r.totalBcm.toFixed(2),
+      r.delayMin.toString(),
+      r.dozerPasses.toString(),
+    ]),
   ];
 
   const csvContent = csvRows
     .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
     .join('\n');
 
-  const exportRows = (logs || []).map((log) => {
-    const mh = machineHoursByLog.get(log.id) || 0;
-    const fl = fuelLogsByLog.get(log.id) || 0;
-    const pl = productionByLog.get(log.id);
-    return {
-      Date: log.log_date,
-      Shift: log.shift,
-      Notes: log.notes || '',
-      'Total Hours': Number(mh.toFixed(2)),
-      'Total Fuel (L)': Number(fl.toFixed(2)),
-      'Coal (t)': Number((pl?.coal_tonnes || 0).toFixed(2)),
-      'Waste (t)': Number((pl?.waste_tonnes || 0).toFixed(2)),
-    };
-  });
+  const exportRows = shiftRows.map((r) => ({
+    Date: r.date,
+    Shift: r.shift,
+    Site: r.site,
+    Hours: Number(r.hours.toFixed(2)),
+    'Total Loads': r.loads,
+    'Haul BCM': Number(r.haulBcm.toFixed(2)),
+    'Dozer Roll-over BCM': Number(r.dozerRolloverBcm.toFixed(2)),
+    'Total BCM': Number(r.totalBcm.toFixed(2)),
+    'Delay (min)': r.delayMin,
+    'Dozer Passes': r.dozerPasses,
+  }));
 
   const pdfReportData = {
     title: `${dept.displayName} Department Report`,
     subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
     kpis: [
-      { label: 'Total Machine Hours', value: `${totalHours.toFixed(1)} h` },
-      { label: 'Diesel Consumed (L)', value: `${totalFuel.toFixed(1)} L` },
-      { label: 'Coal Removed (t)', value: `${totalCoal.toFixed(1)} t` },
-      { label: 'Waste Removed (t)', value: `${totalWaste.toFixed(1)} t` },
+      { label: 'Total Hours', value: `${totalHours.toFixed(1)} h` },
+      { label: 'Total Loads', value: `${totalLoads.toLocaleString()}` },
+      { label: 'Total Volume (BCM)', value: `${totalBcm.toFixed(1)} BCM` },
+      { label: 'Delay Minutes', value: `${totalDelayMin.toLocaleString()} min` },
     ],
-    tableHeaders: ['Date', 'Shift', 'Hours', 'Fuel (L)', 'Coal (t)', 'Waste (t)'],
+    tableHeaders: [
+      'Date',
+      'Shift',
+      'Site',
+      'Hours',
+      'Loads',
+      'Haul BCM',
+      'Roll-over BCM',
+      'Total BCM',
+      'Delay (min)',
+    ],
     tableRows: exportRows.map((r) => [
       r.Date,
       r.Shift,
-      r['Total Hours'].toString(),
-      r['Total Fuel (L)'].toString(),
-      r['Coal (t)'].toString(),
-      r['Waste (t)'].toString(),
+      r.Site,
+      r.Hours.toString(),
+      r['Total Loads'].toString(),
+      r['Haul BCM'].toString(),
+      r['Dozer Roll-over BCM'].toString(),
+      r['Total BCM'].toString(),
+      r['Delay (min)'].toString(),
     ]),
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
-        <div className="flex items-center gap-2">
-          <CopyReportButton csvContent={csvContent} />
-          <PDFDownloadButton reportData={pdfReportData} departmentId={deptId} />
-          <ExportButton
-            filename={`${deptSlug}-report-${fromDateStr}-to-${toDateStr}`}
-            rows={exportRows}
-          />
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Total Machine Hours</p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-            {totalHours.toFixed(1)}
-          </p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Diesel Consumed (L)</p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-            {totalFuel.toFixed(1)}
-          </p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Coal Removed (t)</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">{totalCoal.toFixed(1)}</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Waste Removed (t)</p>
-          <p className="text-2xl font-medium text-accent-blue mt-1">{totalWaste.toFixed(1)}</p>
-        </GlassCard>
-      </div>
-
-      {/* Date Filter */}
-      <GlassCard>
-        <form method="GET" className="flex items-end gap-4">
-          <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
-            <Input type="date" name="from" defaultValue={fromDateStr} className="px-4 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
-            <Input type="date" name="to" defaultValue={toDateStr} className="px-4 py-2" />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-heading)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
-            Update
-          </button>
-        </form>
-      </GlassCard>
-
-      {/* Report Table */}
-      <GlassCard className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-[var(--border-default)]">
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Shift
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Hours
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Fuel (L)
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Coal (t)
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Waste (t)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
-              {logs?.map((log) => {
-                const mh = machineHoursByLog.get(log.id) || 0;
-                const fl = fuelLogsByLog.get(log.id) || 0;
-                const pl = productionByLog.get(log.id);
-                return (
-                  <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{log.log_date}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          log.shift === 'day'
-                            ? 'bg-accent-blue/10 text-accent-blue'
-                            : 'bg-indigo-500/10 text-indigo-400'
-                        }`}
-                      >
-                        {log.shift}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {mh.toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {fl.toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 text-accent-green text-sm text-right">
-                      {(pl?.coal_tonnes || 0).toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 text-accent-blue text-sm text-right">
-                      {(pl?.waste_tonnes || 0).toFixed(1)}
-                    </td>
-                  </tr>
-                );
-              })}
-              {(!logs || logs.length === 0) && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-[var(--text-muted)] text-sm"
-                  >
-                    No data found for the selected date range.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
-    </div>
+    <ReportsDashboardClient
+      departmentId={deptId}
+      departmentSlug={deptSlug}
+      departmentName={dept.displayName}
+      isControlRoom={isControlRoom}
+      todayStr={todayStr}
+      currentShift={currentShift}
+      fromDateStr={fromDateStr}
+      toDateStr={toDateStr}
+      totalFleetCount={totalFleetCount}
+      coveredFleetCount={coveredFleetCount}
+      missingCoverage={missingCoverage}
+      shiftRows={shiftRows}
+      machineOperationLogs={machineOperationLogs}
+      engineeringLogs={engineeringLogs}
+      csvContent={csvContent}
+      exportRows={exportRows}
+      pdfReportData={pdfReportData}
+    />
   );
 }

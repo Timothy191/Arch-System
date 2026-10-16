@@ -630,3 +630,9 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Populate `/control-room/engineering-notes` (`apps/portal/app/(departments)/[department]/engineering-notes/page.tsx` and `EngineeringNotesList.tsx`) with active/today Engineering Breakdowns (`breakdowns` + `breakdowns_control_room_view`), Engineering Daily Shift Logs (`daily_logs`), Engineering Tire Inspections (`tire_inspections`), and cross-department `engineering_notes`.
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T12:41:00+02:00: Produce Reports Live Stats Dashboard with Shift, Day, and Archived Subtabs
+
+- **Agent**: Antigravity
+- **Purpose**: Replace the shift-completeness blocking gate on `/[department]/reports` with a comprehensive executive and operator dashboard (`ReportsDashboardClient.tsx` and `reports/page.tsx`) featuring live stats, visual indicators, and three subtabs (**Shift**, **Day**, and **Archived**) with production, machine SMR, and engineering logs.
+- **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
