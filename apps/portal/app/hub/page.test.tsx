@@ -88,19 +88,11 @@ jest.mock('@repo/redis', () => ({
 // ── Hub feature components (heavy — render stubs) ────────────────────────────
 
 jest.mock('@/features/hub', () => ({
-  AlertTicker: () => <div data-testid="alert-ticker" />,
-  ProductionTrendWrapper: () => <div data-testid="production-trend" />,
   HeroBackground: () => <div data-testid="hero-bg" />,
   HeroRotator: () => <div data-testid="hero-rotator" />,
   ToolBanner: () => <div data-testid="tool-banner" />,
   DepartmentReviews: () => <div data-testid="dept-reviews" />,
   CoreOperationalModules: () => <div data-testid="core-modules" />,
-}));
-
-jest.mock('@repo/ui/GlassCard', () => ({
-  GlassCard: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="glass-card">{children}</div>
-  ),
 }));
 
 jest.mock('@repo/ui/Logo', () => ({
@@ -135,6 +127,7 @@ jest.mock('@/lib/tools', () => ({
 jest.mock('@/lib/hub-departments', () => ({
   getAccessibleDepartmentNames: jest.fn(async () => ['drilling']),
   getEmployeeRole: jest.fn(async () => 'operator'),
+  getEmployeeClearance: jest.fn(async () => ({ state: 'clear', details: [] })),
 }));
 
 // ── Import the page AFTER all mocks are in place ──────────────────────────────
@@ -164,6 +157,9 @@ describe('HubPage — graceful degradation', () => {
     expect(screen.queryByText(/Try again/i)).toBeNull();
     expect(screen.queryByText(/Active Portal Metrics/i)).toBeNull();
     expect(screen.queryByText(/Production Utilization/i)).toBeNull();
+    expect(screen.queryByText(/Live System Urgency & Incident Controls/i)).toBeNull();
+    expect(screen.queryByText(/Operational Ingestion Telemetry/i)).toBeNull();
+    expect(screen.queryByText(/Analytics & Business Intelligence/i)).toBeNull();
   });
 
   it('resolves without throwing when getDashboardCounts rejects', async () => {

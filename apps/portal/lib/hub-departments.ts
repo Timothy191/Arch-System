@@ -80,3 +80,82 @@ export async function getEmployeeRole(
     }
   );
 }
+
+export interface EmployeeClearance {
+  state: 'clear' | 'missing' | 'expired' | 'unlinked';
+  details: string[];
+}
+
+/**
+ * Compute the current user's employee data-requirement clearance.
+ *
+ * Reads employees.employee_code → personnel.emp_code → medical/induction expiry.
+ * Returns 'unlinked' when no personnel row matches, 'expired' when any required
+ * date is missing or in the past, otherwise 'clear'.
+ */
+export async function getEmployeeClearance(
+  userId: string,
+  cookieList?: Array<{ name: string; value: string }>
+): Promise<EmployeeClearance> {
+  return cachedRSC(
+    ['user', userId, 'clearance'],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
+
+          const { data: emp } = await db
+            .from('employees')
+            .select('employee_code')
+            .eq('auth_id', userId)
+            .single();
+
+          if (!emp?.employee_code) {
+            return {
+              state: 'unlinked' as const,
+              details: ['No personnel record linked to your account.'],
+            };
+          }
+
+          const { data: personnel } = await db
+            .from('personnel')
+            .select('emp_code, induction_expiry, medical_expiry')
+            .eq('emp_code', emp.employee_code)
+            .single();
+
+          if (!personnel) {
+            return {
+              state: 'unlinked' as const,
+              details: ['No personnel record linked to your account.'],
+            };
+          }
+
+          const now = new Date();
+          const details: string[] = [];
+
+          if (!personnel.medical_expiry || new Date(personnel.medical_expiry) <= now) {
+            details.push('Medical clearance missing or expired');
+          }
+          if (!personnel.induction_expiry || new Date(personnel.induction_expiry) <= now) {
+            details.push('Induction clearance missing or expired');
+          }
+
+          if (details.length > 0) {
+            return { state: 'expired' as const, details };
+          }
+
+          return { state: 'clear' as const, details: [] };
+        },
+        {
+          category: CacheCategory.AUTH,
+          keyParts: ['user', userId, 'clearance'],
+          tags: [`auth:${userId}`, 'table:employees', 'table:personnel'],
+        }
+      );
+    },
+    {
+      revalidate: 3600,
+      tags: [`auth:${userId}`, 'table:employees', 'table:personnel'],
+    }
+  );
+}

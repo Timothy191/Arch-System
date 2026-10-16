@@ -6,27 +6,25 @@ import {
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, ArrowUpRight, BarChart3, Shield } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
-import type { AlertEvent, TrendDataPoint } from '@/features/hub';
 import {
-  AlertTicker,
   CoreOperationalModules,
   DepartmentReviews,
   HeroBackground,
   HeroRotator,
-  ProductionTrendWrapper as ProductionTrend,
 } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
-import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departments';
+import {
+  getAccessibleDepartmentNames,
+  getEmployeeClearance,
+  getEmployeeRole,
+} from '@/lib/hub-departments';
 import { getPluginWidgets } from '@/lib/plugins/consumers';
 import { cachedRSC } from '@/lib/server-cache';
-import { MetabasePanel } from './components/MetabasePanel';
 
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
@@ -69,135 +67,6 @@ async function getDashboardCounts(
     {
       revalidate: 300,
       tags: ['table:breakdowns', 'table:machines'],
-    }
-  );
-}
-
-interface ProductionTrendResult {
-  data: TrendDataPoint[];
-  isFallback: boolean;
-}
-
-const FALLBACK_TREND_DATA: TrendDataPoint[] = [
-  { date: '08:00', Drilling: 2890, Production: 2338, Engineering: 1200 },
-  { date: '09:00', Drilling: 2756, Production: 2103, Engineering: 1400 },
-  { date: '10:00', Drilling: 3322, Production: 2194, Engineering: 1100 },
-  { date: '11:00', Drilling: 3470, Production: 2108, Engineering: 1600 },
-  { date: '12:00', Drilling: 3475, Production: 1812, Engineering: 1300 },
-  { date: '13:00', Drilling: 3129, Production: 1726, Engineering: 1500 },
-];
-
-async function getProductionTrendData(
-  cookieList: Array<{ name: string; value: string }>
-): Promise<ProductionTrendResult> {
-  return cachedRSC(
-    ['hub', 'production-trend'],
-    async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const { data: trendData, error } = await db.rpc('get_production_trend', {
-            p_hours_back: 24,
-          });
-
-          if (error || !trendData || trendData.length === 0) {
-            return { data: FALLBACK_TREND_DATA, isFallback: true };
-          }
-
-          // Format RPC response into TrendDataPoint[]
-          const hourlyMap = new Map<string, TrendDataPoint>();
-
-          for (const row of trendData) {
-            const hour = row.hour_label;
-            if (!hourlyMap.has(hour)) {
-              hourlyMap.set(hour, {
-                date: hour,
-                Drilling: 0,
-                Production: 0,
-                Engineering: 0,
-              });
-            }
-            const point = hourlyMap.get(hour)!;
-            // Map department name to the specific key in TrendDataPoint
-            // If department name is not one of the keys, we skip or handle accordingly
-            const deptKey = row.department_name as keyof Omit<TrendDataPoint, 'date'>;
-            if (deptKey === 'Drilling' || deptKey === 'Production' || deptKey === 'Engineering') {
-              point[deptKey] = Number(row.tonnes);
-            }
-          }
-
-          const formatted = Array.from(hourlyMap.values());
-          return formatted.length > 0
-            ? { data: formatted, isFallback: false }
-            : { data: FALLBACK_TREND_DATA, isFallback: true };
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'production-trend'],
-          tags: ['table:hourly_loads', 'table:machines'],
-        }
-      );
-    },
-    {
-      revalidate: 300,
-      tags: ['table:hourly_loads', 'table:machines'],
-    }
-  );
-}
-
-async function getRecentAlertEvents(
-  today: string,
-  cookieList: Array<{ name: string; value: string }>
-): Promise<AlertEvent[]> {
-  return cachedRSC(
-    ['hub', 'alerts', today],
-    async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const events: AlertEvent[] = [];
-
-          // Fetch recent active breakdowns
-
-          const { data: breakdownsData } = await db
-            .from('breakdowns')
-            .select('id, machine_name, machine_type, reason, created_at, date_in')
-            .eq('status', 'active')
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-          if (breakdownsData) {
-            for (const b of breakdownsData) {
-              events.push({
-                id: `breakdown-${b.id}`,
-                type: 'breakdown',
-                title: b.machine_name
-                  ? `${b.machine_name} Breakdown`
-                  : `${b.machine_type} Breakdown`,
-                description: b.reason,
-                timestamp: b.created_at,
-                severity: 'warning',
-                href: '/engineering/breakdowns',
-              });
-            }
-          }
-
-          // Sort by timestamp descending and limit to 8 total
-          return events
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .slice(0, 8);
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'alerts', today],
-          tags: ['table:breakdowns'],
-        }
-      );
-    },
-    {
-      revalidate: 300,
-      tags: ['table:breakdowns'],
     }
   );
 }
@@ -260,9 +129,7 @@ export default async function HubPage() {
   const cookieList = cookieStore.getAll();
 
   // GAP-3: only fetch the fast, above-the-fold data in the main page so the
-  // shell streams immediately. The slow ProductionTrend fetch is hoisted into
-  // a Suspense child (`ProductionTrendSection`) so it streams after the shell
-  // paints. `AlertTicker` and live shift metrics stay fast and cached.
+  // shell streams immediately.
   //
   // AGENT-TRACE: Using Promise.allSettled so a single DB/network failure
   // (e.g. local Supabase down, Redis unavailable) never propagates an
@@ -271,15 +138,15 @@ export default async function HubPage() {
   const [
     dashboardCountsResult,
     accessibleDeptIdsResult,
-    alertEventsResult,
     liveMetricsResult,
     userRoleResult,
+    clearanceResult,
   ] = await Promise.allSettled([
     getDashboardCounts(today, cookieList),
     getAccessibleDepartmentNames(userId, cookieList),
-    getRecentAlertEvents(today, cookieList),
     getLiveDepartmentMetrics(today, cookieList),
     getEmployeeRole(userId, cookieList),
+    getEmployeeClearance(userId, cookieList),
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =
@@ -290,11 +157,14 @@ export default async function HubPage() {
   const accessibleDeptIds =
     accessibleDeptIdsResult.status === 'fulfilled' ? accessibleDeptIdsResult.value : [];
 
-  const alertEvents = alertEventsResult.status === 'fulfilled' ? alertEventsResult.value : [];
-
   const liveMetrics = liveMetricsResult.status === 'fulfilled' ? liveMetricsResult.value : {};
 
   const userRole = userRoleResult.status === 'fulfilled' ? userRoleResult.value : null;
+
+  const employeeClearance =
+    clearanceResult.status === 'fulfilled'
+      ? clearanceResult.value
+      : { state: 'clear' as const, details: [] as string[] };
 
   // Plugin widgets come from the failure-isolated consumers wrapper — a broken
   // plugin orchestrator degrades to an empty grid, never a broken hub page.
@@ -394,24 +264,6 @@ export default async function HubPage() {
       {/* Department & Operational Testimonials Double Marquee */}
       <DepartmentReviews />
 
-      {/* Operational Urgencies & Alerts */}
-      <div
-        className="space-y-4 animate-fade-up group/row"
-        style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
-      >
-        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
-            <span className="p-1 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center">
-              <Shield className="w-4 h-4" />
-            </span>
-            Live System Urgency & Incident Controls
-          </h2>
-        </header>
-        <div className="w-full flex justify-center">
-          <AlertTicker events={alertEvents} />
-        </div>
-      </div>
-
       {/* Core Operational Modules - Interactive Filtered Grid */}
       {departments.length === 0 ? (
         <div className="p-8 sm:p-12 text-center rounded-card bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
@@ -424,7 +276,7 @@ export default async function HubPage() {
           </p>
         </div>
       ) : (
-        <CoreOperationalModules departments={departments} />
+        <CoreOperationalModules departments={departments} clearance={employeeClearance} />
       )}
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
@@ -444,65 +296,6 @@ export default async function HubPage() {
           </div>
         </section>
       )}
-
-      {/* Industrial Insights & Production Trends */}
-      <section
-        className="space-y-4 animate-fade-up group/row"
-        style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
-      >
-        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
-            <span className="p-1 rounded-full bg-accent-green/10 text-accent-green flex items-center justify-center">
-              <Activity className="w-4 h-4" />
-            </span>
-            Operational Ingestion Telemetry
-          </h2>
-        </header>
-        <GlassCard
-          variant="default"
-          padding
-          className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-5 sm:p-6"
-        >
-          <Suspense
-            fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-card" />}
-          >
-            <ProductionTrendSection />
-          </Suspense>
-        </GlassCard>
-      </section>
-
-      {/* Analytics & Business Intelligence */}
-      <section
-        className="space-y-4 animate-fade-up group/row"
-        style={{ animationDelay: '0.45s', animationFillMode: 'both' }}
-      >
-        <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
-            <span className="p-1 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center">
-              <BarChart3 className="w-4 h-4" />
-            </span>
-            Analytics & Business Intelligence
-          </h2>
-        </header>
-        <Suspense
-          fallback={
-            <div className="h-[400px] animate-pulse bg-arch-surface-tertiary rounded-card" />
-          }
-        >
-          <MetabasePanel dashboardId={1} title="Global Operations Overview" />
-        </Suspense>
-      </section>
     </div>
   );
-}
-
-/**
- * Async server component — fetches its own data inside the Suspense boundary
- * (GAP-3) so the production trend streams after the shell paints.
- */
-async function ProductionTrendSection() {
-  const cookieStore = await cookies();
-  const cookieList = cookieStore.getAll();
-  const { data: productionTrendData, isFallback } = await getProductionTrendData(cookieList);
-  return <ProductionTrend data={productionTrendData} isFallback={isFallback} />;
 }

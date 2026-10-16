@@ -2,18 +2,24 @@
 
 import type { Department } from '@repo/departments/data-access';
 import { cn } from '@repo/ui/lib/utils';
-import { Boxes, Search, Star } from 'lucide-react';
+import { AlertTriangle, Boxes, Search, Star } from 'lucide-react';
+
 import { useEffect, useMemo, useState } from 'react';
 import { DepartmentCard } from '@/features/hub';
+import type { EmployeeClearance } from '@/lib/hub-departments';
 
 interface CoreOperationalModulesProps {
   departments: Department[];
+  clearance?: EmployeeClearance;
 }
 
 type FilterCategory = 'all' | 'pinned' | 'active' | 'critical';
 
 // AGENT-TRACE: Refactored Core Operational Modules component for Hub page with interactive search, category/status filtering, and pinned priority ordering.
-export function CoreOperationalModules({ departments }: CoreOperationalModulesProps) {
+export function CoreOperationalModules({
+  departments,
+  clearance = { state: 'clear', details: [] },
+}: CoreOperationalModulesProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
   const [pinnedNames, setPinnedNames] = useState<Set<string>>(new Set());
@@ -212,6 +218,24 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
           </div>
         </div>
       </div>
+      {/* Employee data-requirement clearance callout */}
+      {clearance.state !== 'clear' && (
+        <div
+          className="p-3 sm:p-4 rounded-lg border border-accent-amber/30 bg-accent-amber/5 text-[11px] font-medium text-accent-amber/90 flex items-center gap-2"
+          role="alert"
+          aria-label="Employee clearance required"
+        >
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            {clearance.state === 'unlinked'
+              ? 'No personnel record linked to your account.'
+              : `Employee data requirements need attention: ${clearance.details.join('; ')}.`}
+            {clearance.state === 'expired'
+              ? ' Contact your administrator — medical/induction edits are admin-controlled.'
+              : ''}
+          </span>
+        </div>
+      )}
 
       {/* Grid Display */}
       {filteredDepartments.length === 0 ? (

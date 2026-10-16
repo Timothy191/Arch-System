@@ -664,3 +664,17 @@ AIAssistant chat.
   1. Delete `apps/portal/features/hub/components/ActiveMetricsCharts.tsx` and remove its export from `apps/portal/features/hub/index.ts`.
   2. Fix `apps/portal/public/sw.js` and `apps/portal/app/ClientProviders.tsx` where `arch-system-offline-v1` used cache-first (`return cachedResponse || fetchPromise`) on HTML navigations and RSC payloads, causing browsers to display stale `/hub` HTML (`Active Portal Metrics`) across deployments. Switched HTML/RSC requests to network-first and bumped the cache key to `arch-system-offline-v2` (explicitly deleting `arch-system-offline-v1`).
 - **Verification**: Verified with `app/hub/page.test.tsx` (`7/7 PASS`) and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T20:17:00+02:00: Remove Operational Ingestion Telemetry, Analytics & Business Intelligence, and Live System Urgency & Incident Controls Sections from Hub
+
+- **Agent**: Antigravity
+- **Purpose**:
+  1. Remove the `Live System Urgency & Incident Controls` (`AlertTicker`), `Operational Ingestion Telemetry` (`ProductionTrendSection`), and `Analytics & Business Intelligence` (`MetabasePanel`) sections and their unused server-side data fetchers (`getRecentAlertEvents`, `getProductionTrendData`, `ProductionTrendSection`) from `/hub` (`apps/portal/app/hub/page.tsx`).
+  2. Add regression assertions in `apps/portal/app/hub/page.test.tsx` verifying those three sections are not rendered.
+- **Verification**: Verified with `app/hub/page.test.tsx` (`7/7 PASS`) and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T20:35:00+02:00: Control Room Quick Navigation Button to Other Tabs
+
+- **Agent**: Antigravity
+- **Purpose**: Add a Quick Navigation dropdown button in the Control Room header banner (`apps/portal/app/(departments)/control-room/page.tsx` and `apps/portal/app/(departments)/[department]/page.tsx`) enabling immediate one-click jump to any Control Room operational tab: Shift Operations, Dashboard, Hourly Loads, Machine Ops, Eng Notes, Excavator Activity, Reports, and Shift Closeout.
+- **Verification**: Verified with `ControlRoomQuickNav.test.tsx` (`3/3 PASS`), `app/hub/page.test.tsx` (`7/7 PASS`), and `pnpm agent:verify` (8/8 PASS).

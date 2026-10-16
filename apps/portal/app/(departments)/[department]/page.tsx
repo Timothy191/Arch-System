@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { ProductionDashboard } from '~/features/departments/components/production/ProductionDashboard';
 import { getDepartmentContext } from '~/lib/dept-context';
-
+import { ControlRoomQuickNav } from '../control-room/components/ControlRoomQuickNav';
 import { ControlRoomSummaryGridClient } from './ControlRoomSummaryGridClient';
 import { NonControlRoomSummaryGridClient } from './NonControlRoomSummaryGridClient';
 
@@ -63,7 +63,7 @@ export default async function DepartmentDashboard({
         {isControlRoom ? (
           <>
             <GlassCard hover accent="charcoal">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
                     Control Room Dashboard
@@ -72,14 +72,17 @@ export default async function DepartmentDashboard({
                     Live SCADA monitoring, production metrics, and shift dispatch.
                   </p>
                 </div>
-                <p className="text-[var(--text-muted)] text-sm">
-                  {new Date().toLocaleDateString('en-ZA', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
+                <div className="flex items-center gap-3 self-start sm:self-auto">
+                  <ControlRoomQuickNav />
+                  <p className="text-[var(--text-muted)] text-sm whitespace-nowrap">
+                    {new Date().toLocaleDateString('en-ZA', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+                </div>
               </div>
             </GlassCard>
 
