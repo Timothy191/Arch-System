@@ -572,3 +572,29 @@ AIAssistant chat.
 - **Verification**: Offline mutation and closeout route tests passed (11/11);
   portal/contract type-check and production build passed; `pnpm quality`,
   `pnpm audit:vercel` (0 warnings), and `pnpm agent:verify` (100% PASS) passed.
+
+## 2026-10-16T06:47:00+02:00: Remove Unified Dock, Shift Coverage, Equipment Dashboard, and Shift Control Checklist
+
+- **Agent**: Antigravity
+- **Purpose**: Remove the global `unified-dock` (`ViewportBoundaries` / `useDockPreferences`) from `ClientOverlays.tsx`, and remove `ControlRoomChecklistWidget`, `ShiftCoverageSectionClient` (`Shift Coverage`), and `EquipmentDashboard` (`Active Pit Assets` / `Live Equipment Map & Data Grid`) from `/control-room` (`ControlRoomWidgets.tsx`).
+- **Verification**: Verified with `pnpm agent:verify` (8/8 PASS) and `pnpm audit:routing`.
+
+## 2026-10-16T06:54:00+02:00: Fix Admin Search Input Sizing & Full-Width Expansion
+
+- **Agent**: Antigravity
+- **Purpose**: Remove `max-w-md` width restriction on the search bars in `UsersTab.tsx` and `AuditLogsTab.tsx` so they expand across the full available flex width (`flex-1`), ensure `Search` icons stack above the input background (`z-10 pointer-events-none`), and fix `@repo/ui/components/ui/input` wrapper double-padding (`408x40` inside `448x40`).
+- **Verification**: Verified with `GeistBatch4.test.tsx` and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T07:12:00+02:00: Sync Excavator Site, Block Mined & Centralised Fleet Dumpers from Hourly Loads to Excavator Activity
+
+- **Agent**: Antigravity
+- **Purpose**: Resolve `"Select a site to see available dumpers."` on `/control-room/excavator-activity` when an excavator's site (e.g., `Stockpile A`) is already defined on `/control-room/hourly-loads`.
+- **Changes**:
+  1. `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityForm.tsx`:
+     - Removed strict `d.site_id === effectiveSiteId` filter on `siteDumpers` that emptied the available dumpers list whenever an excavator was assigned to a site (`Stockpile A`, `Wash Plant`, etc.) that did not match a haul truck's static `machines.site_id`. Centralised fleet dumpers (`ADT`/`RDT`) remain available and are sorted with Hourly Loads assigned dumpers and site matches first.
+     - Updated default excavator auto-selection to include excavators with a configured `site_id` (`EX-501`) and defaulted `effectiveBlockMinedId` to the site's block when the assigned site has a single `mine_blocks` record (e.g., `Stockpile Area (STOCK-A)`).
+  2. `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx`:
+     - Replaced obsolete `"Select a site to see available dumpers."` empty state with `"No active haul trucks (ADT / RDT) found in fleet."`.
+  3. `apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx` & `actions.ts`:
+     - Ensured `updateExcavatorAssignmentConfig` and all excavator config handlers (`handleExcavatorSiteChange`, `handleExcavatorBlockChange`, `handleExcavatorMaterialChange`, `handleExcavatorMaterialSubCategoryChange`) persist `site_id` and `block_mined_id` together, fall back to `machines.site_id` when inserting/updating `excavator_activity`, and invalidate `table:machines` and `table:excavator_activity` cache tags.
+- **Verification**: Verified with `hourly-loads/actions.test.ts` and `pnpm agent:verify` (8/8 PASS).

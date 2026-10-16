@@ -125,7 +125,6 @@
     "commitlint": "commitlint --edit",
     "clean:caches": "node scripts/manage-runtime-caches.mjs --clean",
     "status:caches": "node scripts/manage-runtime-caches.mjs --status",
-    "corpos": "bash .agents/corpos/bin/corpos",
     "db:docs": "bash scripts/generate-db-docs.sh",
     "db:schema-reload": "pnpm --filter scripts-seeds run schema-reload",
     "db:seed": "pnpm --filter scripts-seeds run seed",

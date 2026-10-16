@@ -79,7 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <a
               href="/login"
               autoFocus
-              className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 rounded-button shadow-sm border border-[var(--accent-blue)]/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
+              className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 rounded-button shadow-diffusion-sm border border-[var(--accent-blue)]/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
             >
               Retry
             </a>
@@ -91,7 +91,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
           >
             {/* Branding */}
             <div className="flex flex-col items-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-sm text-arch-accent-blue">
+              <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-diffusion-sm text-arch-accent-blue">
                 <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
               </div>
               <div className="text-center">

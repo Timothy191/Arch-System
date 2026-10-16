@@ -5,5 +5,5 @@
   "maxSkillsSize": 350000,
   "maxSessionContext": 500000,
   "maxRootInstructionsSize": 20000,
-  "maxDirectMcpServers": 30
+  "maxDirectMcpServers": 10
 }

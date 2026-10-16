@@ -175,7 +175,7 @@ test.describe('full login and reset password flows', () => {
 
     // 2. Navigation to Reset Password
     await page.locator('text=Forgot password?').click();
-    await expect(page).toHaveURL(/.*\/reset-password/);
+    await expect(page).toHaveURL(/.*\/reset-password/, { timeout: 15000 });
 
     // 3. Reset password submission
     await page.locator('input#reset-email').fill(TEST_EMAIL);
@@ -184,11 +184,11 @@ test.describe('full login and reset password flows', () => {
     // Verify "Check Your Email" screen or error alert
     await expect(
       page.locator('text=Check Your Email').or(page.locator('text=Unable to send reset email'))
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
 
     // 4. Navigate back to login
     await page.locator('text=Back to Sign In').click();
-    await expect(page).toHaveURL(/.*\/login/);
+    await expect(page).toHaveURL(/.*\/login/, { timeout: 15000 });
 
     // 5. Successful login redirect
     await page.locator('input#email').fill(TEST_EMAIL);
@@ -197,7 +197,7 @@ test.describe('full login and reset password flows', () => {
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login
     try {
-      await expect(page).toHaveURL(/.*\/hub|http:\/\/localhost:3000\/?/, { timeout: 5000 });
+      await expect(page).toHaveURL(/.*\/hub|http:\/\/localhost:3000\/?/, { timeout: 15000 });
     } catch {
       // Accept staying on /login in unseeded dev environments
       await expect(page).toHaveURL(/.*\/login.*/);

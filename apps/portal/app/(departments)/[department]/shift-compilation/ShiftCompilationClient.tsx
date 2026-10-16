@@ -10,7 +10,6 @@ import {
   ProductionSummaryCard,
   ShiftCompilationHeader,
   ShiftIntelligenceWidget,
-  TireAlertsBanner,
   UnifiedShiftCloseoutModal,
 } from '@repo/departments/ui';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
@@ -239,11 +238,8 @@ export function ShiftCompilationClient({
               {/* Machine Performance & Delays */}
               <FleetKpiTable fleet={report.fleet_performance} />
 
-              {/* 2-Column Grid: Breakdowns & Tire Logs */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <BreakdownsShiftWidget breakdowns={report.breakdowns} />
-                <TireAlertsBanner tireEvents={report.tire_management} />
-              </div>
+              {/* Engineering Breakdowns & Stoppages */}
+              <BreakdownsShiftWidget breakdowns={report.breakdowns} />
 
               {/* Cross-Shift Operational Intelligence */}
               <ShiftIntelligenceWidget onSearchIntelligence={searchShiftIntelligenceAction} />

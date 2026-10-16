@@ -231,11 +231,13 @@ export function ExcavatorActivityForm({
     const configuredExcavator = excavators.find((ex) =>
       activitiesState.some((a) => a.machine_id === ex.id)
     );
+    const siteAssignedExcavator = excavators.find((ex) => Boolean(ex.site_id));
     const defaultExcavator =
       shiftAssignedExcavator ??
       anyAssignedExcavator ??
       configuredExcavator ??
-      (excavators.length === 1 ? excavators[0] : undefined);
+      siteAssignedExcavator ??
+      excavators[0];
 
     if (defaultExcavator) {
       setFormData((prev) =>
@@ -282,8 +284,13 @@ export function ExcavatorActivityForm({
   const effectiveSiteId = excavatorActivityConfig?.site_id ?? selectedExcavator?.site_id ?? null;
   const excavatorSite = sites?.find((s) => s.id === effectiveSiteId);
 
+  const siteSpecificBlocks = effectiveSiteId
+    ? mineBlocks.filter((mb) => mb.site_id === effectiveSiteId)
+    : [];
   const effectiveBlockMinedId =
-    excavatorActivityConfig?.block_mined_id ?? (formData.blockMinedId || null);
+    excavatorActivityConfig?.block_mined_id ??
+    (formData.blockMinedId ||
+      (siteSpecificBlocks.length === 1 ? (siteSpecificBlocks[0]?.id ?? null) : null));
   const excavatorBlock = mineBlocks.find((mb) => mb.id === effectiveBlockMinedId);
 
   const rawMaterialFromHourlyLoads =
@@ -373,7 +380,7 @@ export function ExcavatorActivityForm({
     });
   }, [formData.excavatorId, derivedAssignedRows]);
 
-  // Filter dumpers by the excavator's assigned site (always include dumpers assigned to this excavator in hourly_loads)
+  // Prioritise dumpers assigned to this excavator in hourly_loads or matching its site, while keeping the centralised fleet available
   const assignedDumperIds = useMemo(
     () =>
       new Set([
@@ -385,11 +392,18 @@ export function ExcavatorActivityForm({
     [loadsState, formData.excavatorId, derivedAssignedRows]
   );
 
-  const siteDumpers = effectiveSiteId
-    ? dumpers.filter(
-        (d) => d.site_id === effectiveSiteId || d.site_id === null || assignedDumperIds.has(d.id)
-      )
-    : dumpers;
+  const siteDumpers = useMemo(() => {
+    if (!effectiveSiteId && assignedDumperIds.size === 0) return dumpers;
+    return [...dumpers].sort((a, b) => {
+      const aAssigned = assignedDumperIds.has(a.id) ? 0 : 1;
+      const bAssigned = assignedDumperIds.has(b.id) ? 0 : 1;
+      if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+      const aSiteMatch = effectiveSiteId && a.site_id === effectiveSiteId ? 0 : 1;
+      const bSiteMatch = effectiveSiteId && b.site_id === effectiveSiteId ? 0 : 1;
+      if (aSiteMatch !== bSiteMatch) return aSiteMatch - bSiteMatch;
+      return a.name.localeCompare(b.name);
+    });
+  }, [dumpers, effectiveSiteId, assignedDumperIds]);
 
   // Auto-calculated metrics
   const totalLoads = dumperAssignments.reduce((sum, a) => sum + a.totalLoads, 0);
@@ -784,8 +798,8 @@ export function ExcavatorActivityForm({
             </div>
 
             <p className="text-[var(--text-muted)] text-xs">
-              <span className="text-[var(--accent-blue)]">Tip:</span> BCM is auto-calculated from
-              hourly loads data. Select a site to see available dumpers.
+              <span className="text-[var(--accent-blue)]">Tip:</span> Site, Block Mined, Material,
+              and BCM are auto-synced from the Hourly Loads sheet.
             </p>
           </>
         )}

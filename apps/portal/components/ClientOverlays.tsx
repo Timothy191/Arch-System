@@ -25,14 +25,6 @@ const WebVitalsReporter = dynamic(
   { ssr: false }
 );
 
-const ViewportBoundaries = dynamic(
-  () =>
-    import('@/components/system/ViewportBoundaries').then((m) => ({
-      default: m.ViewportBoundaries,
-    })),
-  { ssr: false }
-);
-
 export function ClientOverlays() {
   return (
     <>
@@ -40,7 +32,6 @@ export function ClientOverlays() {
       <CookieConsent />
       <OfflineBanner />
       <WebVitalsReporter />
-      <ViewportBoundaries />
     </>
   );
 }

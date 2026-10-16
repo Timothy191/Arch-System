@@ -175,7 +175,6 @@ for (const client of clientConfigs) {
     'postgres',
     'chrome-devtools',
     'next-devtools',
-    'agent-mcp',
   ];
   for (const toolName of coreStdio) {
     if (!config[containerKey][toolName] && servers[toolName]) {

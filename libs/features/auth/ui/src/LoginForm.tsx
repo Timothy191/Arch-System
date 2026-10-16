@@ -63,7 +63,7 @@ export function LoginForm() {
         >
           Email Address
         </label>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-sm">
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-diffusion-sm">
           <Mail className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="email"
@@ -106,7 +106,7 @@ export function LoginForm() {
             Forgot password?
           </Link>
         </div>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-sm">
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-diffusion-sm">
           <Lock className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
           <input
             id="password"

@@ -96,11 +96,15 @@ async function main() {
     throw new Error('Failed to insert required base data');
   }
 
-  // 5. Generate 20 days of operations and breakdowns
+  // 5. Generate 20 days of operations and breakdowns (chronological from oldest to newest so Close SMR becomes next Start SMR)
   const msPerDay = 24 * 60 * 60 * 1000;
   const now = new Date();
+  const runningSmrByMachine = new Map<string, number>();
+  insertedMachines.forEach((m, idx) => {
+    runningSmrByMachine.set(m.id, 1200 + idx * 450);
+  });
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 19; i >= 0; i--) {
     const date = new Date(now.getTime() - i * msPerDay);
     const dateStr = date.toISOString().split('T')[0];
 
@@ -122,8 +126,12 @@ async function main() {
     if (!dailyLog) continue;
 
     for (const machine of insertedMachines) {
-      // 50% chance of being active
-      if (Math.random() > 0.5) {
+      // Seed every machine on recent days or 50% on older days, carrying Close SMR -> Start SMR
+      if (i <= 1 || Math.random() > 0.5) {
+        const startSmu = runningSmrByMachine.get(machine.id) ?? 1200;
+        const endSmu = Number((startSmu + 10.5).toFixed(1));
+        runningSmrByMachine.set(machine.id, endSmu);
+
         await supabase.from('machine_operations').insert({
           daily_log_id: dailyLog.id,
           daily_log_date: dateStr,
@@ -135,7 +143,8 @@ async function main() {
           shift_type: 'day',
           start_time: '06:00:00',
           end_time: '18:00:00',
-          hours_worked: 12,
+          start_smu: startSmu,
+          end_smu: endSmu,
         });
 
         await supabase.from('hourly_loads').insert({
@@ -176,36 +185,6 @@ async function main() {
     repair_notes: 'Waiting on electrical team to diagnose alternator.',
     status: 'active',
   });
-
-  // Make sure the machine has operations today
-  const { data: todayLog, error: todayLogErr } = await supabase
-    .from('daily_logs')
-    .upsert(
-      {
-        department_id: deptId,
-        log_date: todayStr,
-        shift: 'day',
-      },
-      { onConflict: 'department_id, log_date, shift' }
-    )
-    .select()
-    .single();
-  if (todayLogErr) console.error('Today log error:', todayLogErr);
-
-  if (todayLog) {
-    await supabase.from('machine_operations').insert({
-      daily_log_id: todayLog.id,
-      daily_log_date: todayStr,
-      department_id: deptId,
-      machine_id: insertedMachines[0].id,
-      operator_id: insertedOperators[0].id,
-      site_id: siteId,
-      shift_date: todayStr,
-      shift_type: 'day',
-      start_time: '06:00:00',
-      hours_worked: 1, // In progress
-    });
-  }
 
   console.log('Data generated successfully!');
 }

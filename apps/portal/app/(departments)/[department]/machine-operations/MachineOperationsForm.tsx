@@ -15,6 +15,7 @@ interface Machine {
   machine_type: string;
   serial_number: string | null;
   site_id?: string | null;
+  latest_smu?: number | null;
 }
 
 interface Operator {
@@ -343,6 +344,8 @@ export function MachineOperationsForm({
                   ...prev,
                   machineId: nextMachineId,
                   siteId: prev.siteId || machineObj?.site_id || '',
+                  startSmu:
+                    machineObj?.latest_smu != null ? String(machineObj.latest_smu) : prev.startSmu,
                 }));
               }}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
@@ -351,6 +354,7 @@ export function MachineOperationsForm({
               {machines.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name} ({m.machine_type})
+                  {m.latest_smu != null ? ` — Close SMR: ${m.latest_smu}` : ''}
                 </option>
               ))}
             </select>

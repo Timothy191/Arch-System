@@ -45,6 +45,7 @@ export default async function MachineOperationsPage({
   // Parallel fetch of independent data
   const [
     { data: machines },
+    { data: previousSMRs },
     { data: operators },
     { data: sites },
     { data: mineBlocks },
@@ -58,6 +59,12 @@ export default async function MachineOperationsPage({
       .select('id, name, machine_type, serial_number, active, bin_factor, site_id')
       .eq('active', true)
       .order('name'),
+    supabase
+      .from('machine_operations')
+      .select('machine_id, end_smu')
+      .not('end_smu', 'is', null)
+      .order('shift_date', { ascending: false })
+      .order('end_smu', { ascending: false }),
     supabase
       .from('operators')
       .select('id, full_name, employee_code')
@@ -88,6 +95,18 @@ export default async function MachineOperationsPage({
       .select('id, fleet_id, reason, repair_notes, status, date_in, date_out')
       .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
+
+  const latestSMRMap = new Map<string, number>();
+  (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
+    if (!latestSMRMap.has(row.machine_id) && row.end_smu !== null && row.end_smu !== undefined) {
+      latestSMRMap.set(row.machine_id, Number(row.end_smu));
+    }
+  });
+
+  const machinesWithSmu = (machines || []).map((m) => ({
+    ...m,
+    latest_smu: latestSMRMap.get(m.id) ?? null,
+  }));
 
   // Calculate today's totals
   const totalHours =
@@ -179,7 +198,7 @@ export default async function MachineOperationsPage({
       >
         <MachineOperationsForm
           departmentId={deptId}
-          machines={machines || []}
+          machines={machinesWithSmu}
           operators={operators || []}
           sites={sites || []}
           mineBlocks={mineBlocks || []}

@@ -8,6 +8,8 @@ export const machinePerformanceSchema = z.object({
   hours_worked: z.number().nonnegative(),
   start_time: z.string().nullable().optional(),
   end_time: z.string().nullable().optional(),
+  start_smu: z.number().nullable().optional(),
+  end_smu: z.number().nullable().optional(),
   breakdown_hours: z.number().nonnegative(),
   delay_hours: z.number().nonnegative(),
   mechanical_availability_pct: z.number().min(0).max(100),

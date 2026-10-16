@@ -182,7 +182,7 @@ export function ExcavatorDumperTable({
     return (
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm text-center py-4">
-          Select a site to see available dumpers.
+          No active haul trucks (ADT / RDT) found in fleet.
         </p>
       </GlassCard>
     );

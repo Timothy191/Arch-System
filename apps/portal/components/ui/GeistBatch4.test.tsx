@@ -67,10 +67,13 @@ describe('Geist Batch 4 Components', () => {
     expect(screen.getByText('Main')).toBeInTheDocument();
   });
 
-  it('renders Input and SearchInput correctly', () => {
-    render(<Input placeholder="Text input" />);
+  it('renders Input and SearchInput correctly without duplicating padding onto wrapper div', () => {
+    render(<Input placeholder="Text input" className="pl-10" />);
     render(<SearchInput placeholder="Search input" />);
-    expect(screen.getByPlaceholderText('Text input')).toBeInTheDocument();
+    const textInput = screen.getByPlaceholderText('Text input');
+    expect(textInput).toBeInTheDocument();
+    expect(textInput.className).toContain('pl-10');
+    expect(textInput.parentElement?.className).not.toContain('pl-10');
     expect(screen.getByPlaceholderText('Search input')).toBeInTheDocument();
   });
 

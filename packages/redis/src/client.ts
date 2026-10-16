@@ -1,10 +1,54 @@
 import { createClient, type RedisClientType } from 'redis';
+import { ServerlessRedisClient } from './serverless-client';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
 let subscribers: RedisClientType[] = [];
+
+function createServerlessAdapter(restClient: ServerlessRedisClient): RedisClientType {
+  const adapter = {
+    isOpen: true,
+    ping: () => restClient.ping(),
+    get: (key: string) => restClient.get<string>(key),
+    set: (key: string, value: string) => restClient.set(key, value),
+    setEx: (key: string, seconds: number, value: string) => restClient.set(key, value, seconds),
+    del: (keys: string | string[]) => restClient.del(...(Array.isArray(keys) ? keys : [keys])),
+    unlink: (keys: string | string[]) => restClient.del(...(Array.isArray(keys) ? keys : [keys])),
+    exists: (key: string) => restClient.exists(key).then((ok) => (ok ? 1 : 0)),
+    expire: (key: string, seconds: number) => restClient.expire(key, seconds),
+    ttl: (key: string) => restClient.ttl(key),
+    incr: (key: string) => restClient.incr(key),
+    incrBy: (key: string, increment: number) => restClient.incrby(key, increment),
+    mGet: (keys: string[]) => restClient.mget(keys),
+    hGet: (key: string, field: string) => restClient.hget(key, field),
+    hGetAll: (key: string) => restClient.hgetall(key),
+    multi: () => {
+      const commands: string[][] = [];
+      const chain = {
+        sAdd: (key: string, member: string) => {
+          commands.push(['SADD', key, member]);
+          return chain;
+        },
+        exec: () => (commands.length > 0 ? restClient.pipeline(commands) : Promise.resolve([])),
+      };
+      return chain;
+    },
+    sScanIterator: async function* () {
+      // No-op iterator fallback for REST client
+    },
+    scanIterator: async function* () {
+      // No-op iterator fallback for REST client
+    },
+    publish: async () => 0,
+    subscribe: async () => {},
+    duplicate: () => adapter,
+    connect: async () => adapter,
+    quit: async () => {},
+  };
+  return adapter as unknown as RedisClientType;
+}
 
 /**
  * Get or create the singleton Redis client.
@@ -17,6 +61,27 @@ let subscribers: RedisClientType[] = [];
 export async function getRedisClient(): Promise<RedisClientType> {
   if (client?.isOpen) return client;
   if (connecting) return connecting;
+
+  const isHttpRedisUrl = REDIS_URL.startsWith('http://') || REDIS_URL.startsWith('https://');
+  const hasUpstashRest = Boolean(
+    process.env.UPSTASH_REDIS_REST_URL || process.env.SERVERLESS_REDIS_URL
+  );
+
+  // Use the HTTP REST adapter when REDIS_URL is an HTTP(S) endpoint (e.g. Upstash REST)
+  // or when running on Vercel without a TCP Redis URL but with Upstash REST configured.
+  if (
+    isHttpRedisUrl ||
+    (process.env.VERCEL === '1' && REDIS_URL.includes('localhost') && hasUpstashRest)
+  ) {
+    const restClient = new ServerlessRedisClient({
+      baseUrl: isHttpRedisUrl
+        ? REDIS_URL
+        : process.env.SERVERLESS_REDIS_URL || process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_AUTH_SECRET,
+    });
+    client = createServerlessAdapter(restClient);
+    return client;
+  }
 
   // Short-circuit on Vercel if no valid Redis URL is provided.
   // Avoids hanging for 15 seconds (3 retries * 5s timeout) on every edge function cold start.

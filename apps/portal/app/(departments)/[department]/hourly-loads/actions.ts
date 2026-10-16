@@ -224,6 +224,12 @@ export async function updateMachineSite(machineId: string, siteId: string | null
     throw error;
   }
 
+  try {
+    await cacheInvalidateTags(['table:machines', `dept:${machine.department_id}`]);
+  } catch {
+    // Best-effort cache invalidation
+  }
+
   return { success: true };
 }
 
@@ -248,11 +254,19 @@ export async function updateExcavatorAssignmentConfig(
 
   const serviceClient = createServiceRoleClient();
 
+  let excavatorSiteId: string | null = validated.siteId ?? null;
   if (validated.siteId !== undefined) {
     await serviceClient
       .from('machines')
       .update({ site_id: validated.siteId })
       .eq('id', validated.excavatorId);
+  } else {
+    const { data: excavatorMachine } = await serviceClient
+      .from('machines')
+      .select('site_id')
+      .eq('id', validated.excavatorId)
+      .maybeSingle();
+    excavatorSiteId = excavatorMachine?.site_id ?? null;
   }
 
   if (validated.materialType) {
@@ -288,7 +302,11 @@ export async function updateExcavatorAssignmentConfig(
 
   if (existingActivity) {
     const patch: Record<string, unknown> = {};
-    if (validated.siteId !== undefined) patch.site_id = validated.siteId;
+    if (validated.siteId !== undefined) {
+      patch.site_id = validated.siteId;
+    } else if (!existingActivity.site_id && excavatorSiteId) {
+      patch.site_id = excavatorSiteId;
+    }
     if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
     if (validated.materialType !== undefined || validated.materialSubCategory !== undefined) {
       patch.material_type = formattedActivityMaterial;
@@ -302,7 +320,7 @@ export async function updateExcavatorAssignmentConfig(
       machine_id: validated.excavatorId,
       activity_date: validated.loadDate,
       shift_type: validated.shiftType,
-      site_id: validated.siteId ?? null,
+      site_id: validated.siteId !== undefined ? validated.siteId : excavatorSiteId,
       block_mined_id: validated.blockMinedId ?? null,
       material_type: formattedActivityMaterial,
       passes: 0,
@@ -319,6 +337,17 @@ export async function updateExcavatorAssignmentConfig(
     });
   } catch {
     // Best-effort sync
+  }
+
+  try {
+    await cacheInvalidateTags([
+      'table:machines',
+      'table:excavator_activity',
+      'table:excavator_dumper_assignments',
+      `dept:${validated.departmentId}`,
+    ]);
+  } catch {
+    // Best-effort cache invalidation
   }
 
   return { success: true };

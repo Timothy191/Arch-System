@@ -17,7 +17,6 @@ export * from './control-room/ProductionSummaryCard';
 export * from './control-room/ShiftCompilationHeader';
 export * from './control-room/ShiftCoverageWidget';
 export * from './control-room/ShiftIntelligenceWidget';
-export * from './control-room/TireAlertsBanner';
 export * from './control-room/UnifiedShiftCloseoutModal';
 export * from './engineering/breakdowns/BookInForm';
 export * from './engineering/breakdowns/BookOutForm';

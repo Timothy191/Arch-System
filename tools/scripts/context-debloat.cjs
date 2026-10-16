@@ -22,23 +22,13 @@ const RULES_DIR = path.join(AGENTS_DIR, 'rules');
 
 // Skills that are essential and should never be pruned
 const ESSENTIAL_SKILLS = [
-  'orca-cli',
-  'orchestration',
-  'agents-md',
-  'ai-memory',
-  'smart-memory-indexing',
-  'agent-steering-anti-drift',
-  'ce-compound',
-  'ultragoal',
-  'universal-agentic-execution',
-  'real-world-checker',
-  'self-reflection-loop',
   'agent-accuracy-enforcement',
+  'agents-md',
+  'context-engineering',
   'permanent-engineering-rules',
   'structured-thinking',
   'testing-rules',
   'todo-completion',
-  'context-engineering',
 ];
 
 // Skills that are likely unused or duplicates

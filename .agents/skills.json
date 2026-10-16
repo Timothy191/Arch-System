@@ -3,28 +3,13 @@
     {
       "path": ".agents/skills",
       "include_only": [
-        "supabase",
-        "trailblazer",
-        "ce-compound",
-        "memory-retrieval",
-        "retrospective-recorder",
-        "llm-council",
-        "ultragoal",
-        "fresh-cli",
-        "quartermaster",
-        "real-world-checker",
-        "spec-driven-swarming",
-        "universal-agentic-execution",
-        "self-reflection-loop",
-        "dag-orchestrator",
-        "eval-loop",
-        "next-image-optimization",
-        "next-data-fetching",
-        "next-caching",
-        "next-turbopack",
-        "next-routing-and-actions",
-        "next-server-components",
-        "react-industrial-hooks"
+        "agent-accuracy-enforcement",
+        "agents-md",
+        "context-engineering",
+        "permanent-engineering-rules",
+        "structured-thinking",
+        "testing-rules",
+        "todo-completion"
       ]
     }
   ]

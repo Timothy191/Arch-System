@@ -46,10 +46,29 @@ async function formLogin(page: Page): Promise<boolean> {
   return true;
 }
 
-export async function loginWithTestUser(_context: BrowserContext, page: Page): Promise<boolean> {
+export async function loginWithTestUser(context: BrowserContext, page: Page): Promise<boolean> {
   const authDir = path.dirname(AUTH_FILE);
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
+  }
+
+  // 1. If context already has Supabase auth cookies from storageState, return immediately
+  const activeCookies = await context.cookies();
+  if (activeCookies.some((c) => c.name.startsWith('sb-'))) {
+    return true;
+  }
+
+  // 2. If AUTH_FILE exists with valid Supabase cookies, hydrate context directly without hitting /api/auth/login rate limits
+  if (fs.existsSync(AUTH_FILE)) {
+    try {
+      const saved = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+      if (saved.cookies?.some((c: { name?: string }) => c.name?.startsWith('sb-'))) {
+        await context.addCookies(saved.cookies);
+        return true;
+      }
+    } catch {
+      // Fallback to formLogin
+    }
   }
 
   // If session already valid

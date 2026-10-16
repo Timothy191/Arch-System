@@ -233,7 +233,12 @@ function HourlyLoadsGrid({
     Object.fromEntries(
       excavators.map((e) => {
         const act = excavatorActivities.find((a) => a.machine_id === e.id);
-        return [e.id, act?.block_mined_id ?? ''];
+        if (act?.block_mined_id) {
+          return [e.id, act.block_mined_id];
+        }
+        const siteId = e.site_id ?? act?.site_id ?? '';
+        const siteSpecificBlocks = siteId ? mineBlocks.filter((mb) => mb.site_id === siteId) : [];
+        return [e.id, siteSpecificBlocks.length === 1 ? (siteSpecificBlocks[0]?.id ?? '') : ''];
       })
     )
   );
@@ -733,7 +738,14 @@ function HourlyLoadsGrid({
             (mb) => mb.id === prevBlockId && (!newSiteId || mb.site_id === newSiteId || !mb.site_id)
           )
         : false;
-      const nextBlockId = validBlockForNewSite ? prevBlockId : '';
+      const siteSpecificBlocks = newSiteId
+        ? mineBlocks.filter((mb) => mb.site_id === newSiteId)
+        : [];
+      const nextBlockId = validBlockForNewSite
+        ? prevBlockId
+        : siteSpecificBlocks.length === 1
+          ? (siteSpecificBlocks[0]?.id ?? '')
+          : '';
 
       setExcavatorSites((prev) => ({ ...prev, [excavatorId]: newSiteId || '' }));
       setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: nextBlockId }));
@@ -762,6 +774,7 @@ function HourlyLoadsGrid({
       const prevBlockId = excavatorBlocks[excavatorId] ?? '';
       if ((newBlockId || '') === prevBlockId) return;
 
+      const currentSiteId = excavatorSites[excavatorId] || null;
       setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: newBlockId || '' }));
       try {
         await updateExcavatorAssignmentConfig({
@@ -769,6 +782,7 @@ function HourlyLoadsGrid({
           excavatorId,
           loadDate: today,
           shiftType: selectedShift,
+          siteId: currentSiteId,
           blockMinedId: newBlockId || null,
         });
       } catch (err) {
@@ -777,7 +791,7 @@ function HourlyLoadsGrid({
         toast.error('Failed to update excavator block mined.');
       }
     },
-    [excavatorBlocks, departmentId, today, selectedShift]
+    [excavatorSites, excavatorBlocks, departmentId, today, selectedShift]
   );
 
   // Handle excavator material change (Waste / Coal)
@@ -793,6 +807,9 @@ function HourlyLoadsGrid({
       )
         ? prevSubCategory
         : '';
+
+      const currentSiteId = excavatorSites[excavatorId] || null;
+      const currentBlockId = excavatorBlocks[excavatorId] || null;
 
       setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: newMaterial }));
       setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: nextSubCategory }));
@@ -810,6 +827,8 @@ function HourlyLoadsGrid({
           excavatorId,
           loadDate: today,
           shiftType: selectedShift,
+          siteId: currentSiteId,
+          blockMinedId: currentBlockId,
           materialType: newMaterial,
           materialSubCategory: nextSubCategory || null,
         });
@@ -829,7 +848,15 @@ function HourlyLoadsGrid({
         toast.error('Failed to update excavator material.');
       }
     },
-    [excavatorMaterials, excavatorMaterialSubCategories, departmentId, today, selectedShift]
+    [
+      excavatorSites,
+      excavatorBlocks,
+      excavatorMaterials,
+      excavatorMaterialSubCategories,
+      departmentId,
+      today,
+      selectedShift,
+    ]
   );
 
   // Handle excavator material sub-category change (Coal: 2#Lower, 2#Upper, 4#Lower, 4#Upper, Other | Waste: Dyke, Overburden, Interburden, Other)
@@ -846,6 +873,9 @@ function HourlyLoadsGrid({
 
       if (validNext === prevSubCategory) return;
 
+      const currentSiteId = excavatorSites[excavatorId] || null;
+      const currentBlockId = excavatorBlocks[excavatorId] || null;
+
       setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: validNext }));
 
       try {
@@ -854,6 +884,8 @@ function HourlyLoadsGrid({
           excavatorId,
           loadDate: today,
           shiftType: selectedShift,
+          siteId: currentSiteId,
+          blockMinedId: currentBlockId,
           materialType: currentMaterial,
           materialSubCategory: validNext || null,
         });
@@ -863,7 +895,15 @@ function HourlyLoadsGrid({
         toast.error('Failed to update excavator material sub-category.');
       }
     },
-    [excavatorMaterials, excavatorMaterialSubCategories, departmentId, today, selectedShift]
+    [
+      excavatorSites,
+      excavatorBlocks,
+      excavatorMaterials,
+      excavatorMaterialSubCategories,
+      departmentId,
+      today,
+      selectedShift,
+    ]
   );
 
   // Handle split creation

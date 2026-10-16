@@ -110,13 +110,13 @@ export function AuditLogsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
           <Input
             placeholder="Search logs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
           />
         </div>
         <div className="flex gap-2">

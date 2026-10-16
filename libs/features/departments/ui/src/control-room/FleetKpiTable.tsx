@@ -117,9 +117,11 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
                   {item.machine_type}
                 </div>
                 <div className="px-4 text-[var(--text-muted)] font-mono text-[11px] truncate">
-                  {item.start_time
-                    ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`
-                    : 'Not logged'}
+                  {item.start_smu != null
+                    ? `SMR ${item.start_smu.toFixed(1)} – ${item.end_smu != null ? item.end_smu.toFixed(1) : 'Active'}`
+                    : item.start_time
+                      ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`
+                      : 'Not logged'}
                 </div>
                 <div className="px-4 text-right font-mono font-medium text-[var(--text-heading)]">
                   {item.hours_worked.toFixed(1)}h

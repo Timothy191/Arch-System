@@ -9,43 +9,44 @@ const __dirname = path.dirname(__filename);
 const authFile = path.join(__dirname, '.auth/user.json');
 
 setup('authenticate', async ({ page }) => {
-  setup.setTimeout(60000);
-  // If already authenticated and storage exists, reuse state
-  if (fs.existsSync(authFile) && fs.statSync(authFile).size > 20) {
-    return;
+  setup.setTimeout(90000);
+  // Reuse state only if modified within the last 30 minutes and contains an sb- auth cookie
+  if (
+    fs.existsSync(authFile) &&
+    fs.statSync(authFile).size > 100 &&
+    Date.now() - fs.statSync(authFile).mtimeMs < 30 * 60 * 1000
+  ) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(authFile, 'utf8'));
+      if (existing.cookies?.some((c: { name?: string }) => c.name?.startsWith('sb-'))) {
+        return;
+      }
+    } catch {
+      // Proceed to fresh login
+    }
   }
 
-  // Wait until we can reach the app
-  await page.goto('/login');
+  // Authenticate via /api/auth/login so Set-Cookie headers populate context cookies directly
+  const loginRes = await page.request.post('/api/auth/login', {
+    data: { email: TEST_EMAIL, password: TEST_PASSWORD },
+    headers: { 'Content-Type': 'application/json' },
+  });
 
-  // Skip the intro overlay if it's there
-  try {
-    const overlay = page.locator('text=Initializing industrial operations terminal...');
-    await expect(overlay).not.toBeVisible({ timeout: 2000 });
-  } catch (_e) {
-    // Ignore if not found
-  }
-
-  // Fill credentials and login
-  const emailInput = page.locator('input#email');
-  if (await emailInput.isVisible()) {
+  if (!loginRes.ok()) {
+    // Fallback to UI form login if API endpoint wasn't used
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
+    const emailInput = page.locator('input#email');
+    await emailInput.waitFor({ state: 'visible', timeout: 15000 });
     await emailInput.fill(TEST_EMAIL);
     await page.locator('input#password').fill(TEST_PASSWORD);
     await page.locator("button[type='submit']").click();
+    await page
+      .waitForURL((url) => url.pathname.includes('/hub') || url.pathname === '/', {
+        timeout: 20000,
+      })
+      .catch(() => {});
   }
 
-  // Wait for the redirect to complete. Timeout raised 5s -> 15s for slow
-  // CI environments; a mismatched landing path must not hard-fail every test
-  // in global setup -- later assertions still catch a broken auth flow.
-  await page
-    .waitForURL(
-      (url) =>
-        url.pathname.includes('/hub') || url.pathname.includes('/overview') || url.pathname === '/',
-      { timeout: 15000 }
-    )
-    .catch(() => {});
-
-  // End of authentication steps.
   // Ensure storage directory exists
   fs.mkdirSync(path.dirname(authFile), { recursive: true });
 

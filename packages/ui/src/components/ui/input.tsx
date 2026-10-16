@@ -6,14 +6,21 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
   errored?: boolean;
+  wrapperClassName?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, prefix, suffix, errored, ...props }, ref) => {
+  ({ className, wrapperClassName, type, prefix, suffix, errored, ...props }, ref) => {
+    const gridSpanClass = className
+      ?.split(/\s+/)
+      .filter((c) => c.includes('col-span'))
+      .join(' ');
     return (
-      <div className={cn('relative flex items-center w-full group', className)}>
+      <div
+        className={cn('relative flex items-center w-full group', gridSpanClass, wrapperClassName)}
+      >
         {prefix && (
-          <span className="absolute left-3 flex items-center justify-center text-muted-foreground">
+          <span className="absolute left-3 z-10 flex items-center justify-center text-muted-foreground pointer-events-none">
             {prefix}
           </span>
         )}
@@ -32,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {suffix && (
-          <span className="absolute right-3 flex items-center justify-center text-muted-foreground">
+          <span className="absolute right-3 z-10 flex items-center justify-center text-muted-foreground pointer-events-none">
             {suffix}
           </span>
         )}

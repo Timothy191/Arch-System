@@ -40,13 +40,13 @@ export default async function ShiftCompilationPage({
     getUnifiedShiftReport(deptId, shiftDate, shiftType),
     getMultiSiteShiftReport(deptId, shiftDate, shiftType),
     getAuthenticatedEmployee(supabase),
-    supabase.from('machines').select('id, name').eq('active', true),
+    supabase.from('machines').select('id, name').eq('active', true).order('name'),
     supabase
       .from('machine_operations')
       .select('machine_id, end_smu')
-      .eq('department_id', deptId)
       .not('end_smu', 'is', null)
-      .order('shift_date', { ascending: false }),
+      .order('shift_date', { ascending: false })
+      .order('end_smu', { ascending: false }),
     supabase
       .from('control_room_shift_reports')
       .select(

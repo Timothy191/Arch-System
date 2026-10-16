@@ -1,23 +1,8 @@
-import { getCurrentShift } from '@repo/utils';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 
 // AGENT-TRACE: ControlRoomWidgets groups all dynamic widgets exclusive to the control room dashboard.
 // Co-locating them prevents bundle fragmentation on non-control room department routes.
-
-const ShiftCoverageSectionClient = dynamic(
-  () => import('./ShiftCoverageSectionClient').then((m) => m.ShiftCoverageSectionClient),
-  {
-    loading: () => <div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />,
-  }
-);
-
-const ControlRoomChecklistWidget = dynamic(
-  () => import('@/features/departments').then((m) => m.ControlRoomChecklistWidget),
-  {
-    loading: () => <div className="h-96 animate-pulse bg-bg-tertiary rounded-card" />,
-  }
-);
 
 const ScadaPanel = dynamic(() => import('@/features/departments').then((m) => m.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
@@ -36,16 +21,11 @@ const ControlRoomActivityFeed = dynamic(
 
 interface ControlRoomWidgetsProps {
   deptId: string;
-  deptSlug: string;
-  today: string;
+  deptSlug?: string;
+  today?: string;
 }
 
-const EquipmentDashboard = dynamic(
-  () => import('@repo/departments/ui').then((m) => m.EquipmentDashboard),
-  { loading: () => <div className="h-64 animate-pulse bg-bg-tertiary rounded-card" /> }
-);
-
-export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidgetsProps) {
+export function ControlRoomWidgets({ deptId }: ControlRoomWidgetsProps) {
   return (
     <div className="space-y-6">
       {/* SCADA and Alert Telemetry Panels (Elevated to top for 24/7 Situational Awareness) */}
@@ -61,26 +41,6 @@ export function ControlRoomWidgets({ deptId, deptSlug, today }: ControlRoomWidge
           <AlertPanel departmentId={deptId} />
         </Suspense>
       </div>
-
-      {/* Equipment Dashboard with Breakdown Workflow Triggers */}
-      <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
-        <EquipmentDashboard departmentId={deptId} />
-      </Suspense>
-
-      {/* Shift Coverage - Client-side with React Query */}
-      <Suspense fallback={<div className="h-64 animate-pulse bg-bg-tertiary rounded-card" />}>
-        <ShiftCoverageSectionClient deptId={deptId} deptSlug={deptSlug} today={today} />
-      </Suspense>
-
-      {/* Control Room Shift Checklist & Operational KPIs */}
-      <Suspense fallback={<div className="h-96 animate-pulse bg-bg-tertiary rounded-card" />}>
-        <ControlRoomChecklistWidget
-          departmentId={deptId}
-          departmentSlug={deptSlug}
-          date={today}
-          shift={getCurrentShift()}
-        />
-      </Suspense>
 
       {/* Activity Feed */}
       <Suspense fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}>

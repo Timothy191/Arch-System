@@ -469,3 +469,10 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Changes**:
   - Refactored `AcknowledgeButton` to use non-blocking optimistic UI with an Undo toast action (via `sonner`), replacing the blocking `ActionConfirmDialog`.
   - **Reason**: Implement Heuristic #2 from UX_UI_AUDIT.md and follow Next.js modern UI guidelines for optimistic updates.
+
+## 2026-10-16T06:54:00+02:00 - Fix Input Wrapper Double-Padding & Sizing
+
+- **Agent**: Antigravity
+- **Changes**:
+  - `packages/ui/src/components/ui/input.tsx`: Stopped forwarding `className` (such as `pl-10`, `bg-*`, `border-*`) onto the outer `<div class="relative flex items-center w-full group">` wrapper so the inner `<input>` fills 100% of the wrapper width without a 40px left gutter. Added `wrapperClassName` and grid `col-span-*` forwarding for layout containers.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="GeistBatch4"` and `pnpm agent:verify` (8/8 PASS).

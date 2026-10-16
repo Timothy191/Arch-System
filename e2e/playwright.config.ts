@@ -33,8 +33,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Limit parallel workers locally so Next.js dev server on-demand compilation is not overloaded. */
+  workers: process.env.CI ? 1 : 2,
+  timeout: 60000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {

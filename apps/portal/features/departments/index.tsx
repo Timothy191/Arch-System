@@ -10,5 +10,4 @@ export {
 } from '@repo/departments/ui';
 export * from './components/control-room/AlertPanel';
 export * from './components/control-room/ControlRoomActivityFeed';
-export * from './components/control-room/ControlRoomChecklistWidget';
 export * from './components/control-room/ScadaPanel';

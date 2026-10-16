@@ -4,8 +4,7 @@ import { Avatar } from '@repo/ui';
 import { Marquee } from '@repo/ui/Marquee';
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors.
-// Each review includes a `color` for the initials-based avatar fallback, which renders
-// if the external avatar.vercel.sh URL fails (network blocked, service down, etc.).
+// Avatars use local /images/departments/*.jpg photos; `color` styles the initials fallback if an image fails to load.
 const DEPT_COLOR_MAP: Record<string, string> = {
   drilling: 'bg-dept-drilling/20 text-dept-drilling',
   production: 'bg-dept-production/20 text-dept-production',
@@ -17,68 +16,80 @@ const DEPT_COLOR_MAP: Record<string, string> = {
   finance: 'bg-dept-finance/20 text-dept-finance',
 };
 
+const REVIEW_IMAGE_MAP = {
+  drilling: '/images/departments/drilling.jpg',
+  production: '/images/departments/production.jpg',
+  controlroom: '/images/departments/control-room.jpg',
+  engineering: '/images/departments/engineering.jpg',
+  accesscontrol: '/images/departments/access-control.jpg',
+  director: '/images/departments/overview.jpg',
+  supervisor: '/images/departments/overview.jpg',
+  finance: '/images/departments/overview.jpg',
+  maintenance: '/images/departments/engineering.jpg',
+};
+
 const REVIEWS = [
   {
     name: 'Drilling Dept',
     username: '@drilling',
     body: 'Rig 4 telemetry tracking is extremely fast now. Makes scheduling down-hole operations trivial.',
-    img: 'https://avatar.vercel.sh/drilling',
+    img: REVIEW_IMAGE_MAP.drilling,
     color: DEPT_COLOR_MAP.drilling ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Production Unit',
     username: '@production',
     body: 'Tonnage logs are highly accurate. It makes shift handovers much cleaner.',
-    img: 'https://avatar.vercel.sh/production',
+    img: REVIEW_IMAGE_MAP.production,
     color: DEPT_COLOR_MAP.production ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Control Room Shift',
     username: '@controlroom',
     body: "SCADA panel integrations are incredibly responsive. Best portal we've used.",
-    img: 'https://avatar.vercel.sh/controlroom',
+    img: REVIEW_IMAGE_MAP.controlroom,
     color: DEPT_COLOR_MAP.controlroom ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Engineering Lead',
     username: '@engineering',
     body: 'Tire management calculations are highly precise. Prevented multiple haul truck flats.',
-    img: 'https://avatar.vercel.sh/engineering',
+    img: REVIEW_IMAGE_MAP.engineering,
     color: DEPT_COLOR_MAP.engineering ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Access Control Crew',
     username: '@accesscontrol',
     body: 'Visitor logs are super easy to check. Temp badges compile in seconds.',
-    img: 'https://avatar.vercel.sh/accesscontrol',
+    img: REVIEW_IMAGE_MAP.accesscontrol,
     color: DEPT_COLOR_MAP.accesscontrol ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Operations Director',
     username: '@director',
     body: 'Excellent visibility into plant metrics and shift logs. Real-time monitoring works perfectly.',
-    img: 'https://avatar.vercel.sh/director',
+    img: REVIEW_IMAGE_MAP.director,
     color: DEPT_COLOR_MAP.director ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Site Supervisor',
     username: '@supervisor',
     body: 'Highly reliable system. The offline banner and resilient auth keep operators in focus.',
-    img: 'https://avatar.vercel.sh/supervisor',
+    img: REVIEW_IMAGE_MAP.supervisor,
     color: DEPT_COLOR_MAP.supervisor ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Finance Team',
     username: '@finance',
     body: 'Budget tracking is precise and real-time. Monthly closeout processes have been streamlined significantly.',
-    img: 'https://avatar.vercel.sh/finance',
+    img: REVIEW_IMAGE_MAP.finance,
     color: DEPT_COLOR_MAP.finance ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
     name: 'Maintenance Crew',
     username: '@maintenance',
     body: 'Preventive maintenance scheduling has reduced unexpected equipment failures by 40%.',
-    img: 'https://avatar.vercel.sh/maintenance',
+    img: REVIEW_IMAGE_MAP.maintenance,
     color: DEPT_COLOR_MAP.supervisor ?? 'bg-accent-blue/20 text-accent-blue',
   },
 ];

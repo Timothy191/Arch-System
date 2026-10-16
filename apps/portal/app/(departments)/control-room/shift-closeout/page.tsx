@@ -22,16 +22,20 @@ async function ShiftCloseoutSection() {
   const supabase = await createServerSupabaseClient();
   const principal = await getAuthenticatedEmployee(supabase);
 
-  const { data: machines } = await supabase.from('machines').select('id, name').eq('active', true);
+  const { data: machines } = await supabase
+    .from('machines')
+    .select('id, name')
+    .eq('active', true)
+    .order('name');
 
   // AGENT-TRACE: Dynamic Opening SMR Resolution
   // Queries latest closing SMR per machine from machine_operations.end_smu instead of defaulting to 0.
   const { data: previousSMRs } = await supabase
     .from('machine_operations')
     .select('machine_id, end_smu')
-    .eq('department_id', deptId)
     .not('end_smu', 'is', null)
-    .order('shift_date', { ascending: false });
+    .order('shift_date', { ascending: false })
+    .order('end_smu', { ascending: false });
 
   const latestSMRMap = new Map<string, number>();
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {

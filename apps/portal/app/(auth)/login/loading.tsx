@@ -12,7 +12,7 @@ export default function LoginLoading() {
         >
           {/* Branding Skeleton */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-sm animate-pulse">
+            <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-diffusion-sm animate-pulse">
               <div className="w-6 h-6 rounded-md bg-arch-accent-blue/30" />
             </div>
             <div className="flex flex-col items-center gap-1.5 w-full">

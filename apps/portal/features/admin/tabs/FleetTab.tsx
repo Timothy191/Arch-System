@@ -201,12 +201,12 @@ export function FleetTab() {
       {/* Search + filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, type, serial…"
-            className="pl-9 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full pl-9 bg-[var(--bg-secondary)] border-[var(--border-default)]"
           />
         </div>
         <select

@@ -1,10 +1,6 @@
 ---
 name: agents-md
-description: >-
-  Standard guidelines, conventions, and operational runbooks for AI coding agents
-  implementing tasks in the codebase based on the open AGENTS.md specification
-  (https://github.com/agentsmd/agents.md). Use this skill when authoring, updating,
-  interpreting, or auditing AGENTS.md guidelines and agent execution workflows.
+description: 'Standard guidelines, conventions, and operational runbooks for AI coding agents implementing tasks in the codebase based on the open AGENTS.md specification (https://github.com/agentsmd/agents.md). Use this skill when authoring, updating, interpreting, or auditing AGENTS.md guidelines and agent execution workflows.'
 ---
 
 # AGENTS.md Standard & Agent Execution Guide

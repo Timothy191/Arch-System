@@ -108,12 +108,6 @@
       "args": ["-y", "next-devtools-mcp@0.4.0"],
       "description": "Next.js DevTools AST & routing inspector",
       "type": "stdio"
-    },
-    "agent-mcp": {
-      "command": "node",
-      "args": ["/home/tim/Fork/agent-mcp/dist/index.js"],
-      "description": "Swarming and orchestration MCP for multi-agent delegation",
-      "type": "stdio"
     }
   },
   "enableAllProjectMcpServers": false
