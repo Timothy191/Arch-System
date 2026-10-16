@@ -623,47 +623,6 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
           </Table>
         </div>
       </GlassCard>
-
-      {/* Archive Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <GlassCard className="p-4">
-          <h4 className="font-semibold text-[var(--text-heading)] mb-2 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-accent-green" />
-            How Archival Works
-          </h4>
-          <ul className="text-sm text-[var(--text-body)] space-y-1 list-disc list-inside">
-            <li>Telemetry data is captured continuously during operation</li>
-            <li>At month end, data is automatically summarized and archived</li>
-            <li>Active table holds only current month for fast queries</li>
-            <li>Archived data includes daily averages and maximums</li>
-            <li>Historical data is preserved indefinitely for analysis</li>
-          </ul>
-        </GlassCard>
-
-        <GlassCard className="p-4">
-          <h4 className="font-semibold text-[var(--text-heading)] mb-2 flex items-center gap-2">
-            <Gauge className="w-4 h-4 text-[var(--accent-blue)]" />
-            Telemetry Metrics
-          </h4>
-          <ul className="text-sm text-[var(--text-body)] space-y-1 list-disc list-inside">
-            <li>
-              <strong>Engine:</strong> RPM, temperature, operating hours
-            </li>
-            <li>
-              <strong>Hydraulics:</strong> Pressure, temperature, flow rate
-            </li>
-            <li>
-              <strong>Drilling:</strong> Bit depth, penetration rate, WOB
-            </li>
-            <li>
-              <strong>Environment:</strong> Ambient temp, vibration levels
-            </li>
-            <li>
-              <strong>Alerts:</strong> Warning codes and fault conditions
-            </li>
-          </ul>
-        </GlassCard>
-      </div>
     </div>
   );
 }

@@ -613,8 +613,8 @@ AIAssistant chat.
      - Updated `deriveExcavatorDumperAssignments` to omit 0-load segments when the same machine already has a positive-load segment (preventing duplicate `DT-101 (0 loads)` rows alongside `DT-101 (5 loads)`).
 - **Verification**: Verified with unit tests and `pnpm agent:verify` (8/8 PASS).
 
-## 2026-10-16T11:54:00+02:00: Remove Live Rig Telemetry Stream (Redis SSE) from Drilling Machine Telemetry
+## 2026-10-16T11:54:00+02:00: Remove Live Rig Telemetry Stream (Redis SSE) & Archive Info Cards from Drilling Machine Telemetry
 
 - **Agent**: Antigravity
-- **Purpose**: Remove the `Live Rig Telemetry Stream (Redis SSE)` card (`RealtimeDrillTelemetryStream`) from `/drilling/machine-telemetry` (`apps/portal/app/(departments)/drilling/machine-telemetry/page.tsx`).
+- **Purpose**: Remove the `Live Rig Telemetry Stream (Redis SSE)` card (`RealtimeDrillTelemetryStream`) and the bottom `How Archival Works` & `Telemetry Metrics` info grid from `/drilling/machine-telemetry` (`apps/portal/app/(departments)/drilling/machine-telemetry/page.tsx`).
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
