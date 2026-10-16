@@ -175,8 +175,8 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
       setError('Select a dozer');
       return;
     }
-    if (!lengthM || !widthM) {
-      setError('Enter both length and width');
+    if (!hoursOperated && (!lengthM || !widthM)) {
+      setError('Enter hours operated or both length and width');
       return;
     }
 

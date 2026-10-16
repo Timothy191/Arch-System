@@ -1,46 +1,49 @@
 import '@/styles/print-report.css';
-import { GlassCard } from '@repo/ui/GlassCard';
-import { Input } from '@repo/ui/Input';
-import { SecondaryButton } from '@repo/ui/SecondaryButton';
-import { AlertTriangle, ClipboardList, Clock, Drill, Radio } from 'lucide-react';
+import { getCurrentShift } from '@repo/utils';
 import { getDepartmentContext } from '~/lib/dept-context';
+import {
+  type CompiledDrillReportRow,
+  DrillingReportsDashboardClient,
+} from './DrillingReportsDashboardClient';
 
 interface DrillingReportsPageProps {
   params: Promise<{ department: string }>;
   searchParams: Promise<{ from?: string; to?: string }>;
 }
 
-interface CompiledDrillReportRow {
+interface ControlRoomDrillOpRow {
   id: string;
   machine_id: string;
-  machine_name: string;
-  operation_date: string;
-  shift_type: string;
-  operator_name: string | null;
-  site: string | null;
+  shift_type: string | null;
+  shift_date: string;
+  start_smu: number | null;
+  end_smu: number | null;
+  hours_worked: number | null;
   block_drilled: string | null;
-  total_hours: number | null;
-  holes: number;
-  meters_drilled: number;
-  production_delays: number;
-  non_productional_delays: number;
-  engineering_delays: number;
-  status: string;
+  meters_drilled: number | null;
+  holes_drilled: number | null;
+  operator: { full_name: string } | { full_name: string }[] | null;
+  site: { name: string } | { name: string }[] | null;
+  delay_entries: Array<{
+    duration_hours: number | null;
+    deleted_at: string | null;
+    delay_category: { name: string } | { name: string }[] | null;
+  }> | null;
 }
 
 export default async function DrillingReportsPage({
   params,
   searchParams,
 }: DrillingReportsPageProps) {
-  // Use params but specify "drilling" for dept context since this is the dedicated drilling directory
   await params;
   const { from: fromParam, to: toParam } = await searchParams;
-  const { deptId, supabase } = await getDepartmentContext({
+  const { deptId, supabase, today } = await getDepartmentContext({
     department: 'drilling',
   });
 
-  const to = toParam || new Date().toISOString().split('T')[0];
-  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  const to: string = toParam || today || new Date().toISOString().slice(0, 10);
+  const from: string = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const currentShift = getCurrentShift();
 
   const [{ data: drills }, { data: rawDrillOps }] = await Promise.all([
     supabase.from('machines').select('id, name').eq('machine_type', 'Drill Rig'),
@@ -90,6 +93,7 @@ export default async function DrillingReportsPage({
   ]);
 
   const drillIds = (drills ?? []).map((d) => d.id);
+  const drillRigNames = (drills ?? []).map((d) => d.name);
   const drillNameMap = new Map((drills ?? []).map((d) => [d.id, d.name]));
 
   // Also fetch Control Room machine_operations for Drill Rigs across [from, to]
@@ -158,23 +162,27 @@ export default async function DrillingReportsPage({
     });
   }
 
-  for (const cr of (controlRoomOps ?? []) as any[]) {
+  for (const cr of (controlRoomOps ?? []) as unknown as ControlRoomDrillOpRow[]) {
     const shift = cr.shift_type || 'day';
     const key = `${cr.machine_id}:${cr.shift_date}:${shift}`;
     const existing = compiledMap.get(key);
 
     const delays = Array.isArray(cr.delay_entries)
-      ? cr.delay_entries.filter((d: any) => !d.deleted_at)
+      ? cr.delay_entries.filter((d) => !d.deleted_at)
       : [];
+    const getCategoryName = (
+      cat: { name: string } | { name: string }[] | null | undefined
+    ): string | undefined => (Array.isArray(cat) ? cat[0]?.name : cat?.name);
+
     const extMin = delays
-      .filter((d: any) => d.delay_category?.name === 'External')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => getCategoryName(d.delay_category) === 'External')
+      .reduce((s, d) => s + Number(d.duration_hours || 0) * 60, 0);
     const prodMin = delays
-      .filter((d: any) => d.delay_category?.name === 'Production')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => getCategoryName(d.delay_category) === 'Production')
+      .reduce((s, d) => s + Number(d.duration_hours || 0) * 60, 0);
     const engMin = delays
-      .filter((d: any) => d.delay_category?.name === 'Engineering')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => getCategoryName(d.delay_category) === 'Engineering')
+      .reduce((s, d) => s + Number(d.duration_hours || 0) * 60, 0);
 
     const startSmu = cr.start_smu != null ? Number(cr.start_smu) : null;
     const endSmu = cr.end_smu != null ? Number(cr.end_smu) : null;
@@ -185,14 +193,19 @@ export default async function DrillingReportsPage({
           ? endSmu - startSmu
           : (existing?.total_hours ?? null);
 
+    const operatorName = Array.isArray(cr.operator)
+      ? cr.operator[0]?.full_name
+      : cr.operator?.full_name;
+    const siteName = Array.isArray(cr.site) ? cr.site[0]?.name : cr.site?.name;
+
     compiledMap.set(key, {
       id: existing?.id ?? cr.id,
       machine_id: cr.machine_id,
       machine_name: existing?.machine_name || drillNameMap.get(cr.machine_id) || 'Unknown',
       operation_date: cr.shift_date,
       shift_type: shift,
-      operator_name: cr.operator?.full_name ?? existing?.operator_name ?? null,
-      site: cr.site?.name ?? existing?.site ?? null,
+      operator_name: operatorName ?? existing?.operator_name ?? null,
+      site: siteName ?? existing?.site ?? null,
       block_drilled: cr.block_drilled ?? existing?.block_drilled ?? null,
       total_hours: calcHours,
       holes: cr.holes_drilled != null ? Number(cr.holes_drilled) : (existing?.holes ?? 0),
@@ -208,26 +221,6 @@ export default async function DrillingReportsPage({
   const operations = Array.from(compiledMap.values()).sort((a, b) =>
     b.operation_date.localeCompare(a.operation_date)
   );
-
-  const totalMeters =
-    operations.reduce((sum, op) => sum + (Number(op.meters_drilled) || 0), 0) || 0;
-  const totalHoles = operations.reduce((sum, op) => sum + (Number(op.holes) || 0), 0) || 0;
-  const totalHours = operations.reduce((sum, op) => sum + (Number(op.total_hours) || 0), 0) || 0;
-  const totalDelays =
-    operations.reduce(
-      (sum, op) => sum + op.production_delays + op.non_productional_delays + op.engineering_delays,
-      0
-    ) || 0;
-
-  function formatDelay(minutes: number): string {
-    if (!minutes || minutes === 0) return '—';
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
-  }
 
   const csvRows = [
     [
@@ -267,226 +260,14 @@ export default async function DrillingReportsPage({
     .join('\n');
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-              Drilling Production Report
-            </h2>
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
-              <Radio className="w-3 h-3" />
-              Auto-Built from Control Room
-            </span>
-          </div>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Automatically compiled from Control Room machine operations (Meters, Site, Block, Holes
-            &amp; Operating Hours)
-          </p>
-        </div>
-        <SecondaryButton variant="rounded-lg" size="sm" asChild>
-          <a
-            href={`data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`}
-            download={`drilling-report-${from}-to-${to}.csv`}
-          >
-            Download CSV
-          </a>
-        </SecondaryButton>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Drill className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">Total Meters Drilled</p>
-          </div>
-          <p className="text-2xl font-semibold text-accent-green mt-2">{totalMeters.toFixed(1)}m</p>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">Total Holes Drilled</p>
-          </div>
-          <p className="text-2xl font-semibold text-[var(--accent-blue)] mt-2">{totalHoles}</p>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-cyan-400" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">Total Operating Hours</p>
-          </div>
-          <p className="text-2xl font-semibold text-cyan-400 mt-2">{totalHours.toFixed(1)}h</p>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-accent-blue" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">Total Delays</p>
-          </div>
-          <p className="text-2xl font-semibold text-accent-blue mt-2">{formatDelay(totalDelays)}</p>
-        </GlassCard>
-      </div>
-
-      {/* Date Filter */}
-      <GlassCard>
-        <form method="GET" className="flex items-end gap-4">
-          <div className="flex-1 max-w-[200px]">
-            <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
-            <Input type="date" name="from" defaultValue={from} className="px-4 py-2" />
-          </div>
-          <div className="flex-1 max-w-[200px]">
-            <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
-            <Input type="date" name="to" defaultValue={to} className="px-4 py-2" />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-heading)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
-            Update
-          </button>
-        </form>
-      </GlassCard>
-
-      {/* Report Table */}
-      <GlassCard className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-[var(--border-subtle)]">
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Shift
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Drill Rig
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Operator
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Site
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Block
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Hours
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Holes
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Meters
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Delays
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-center"
-                >
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
-              {operations.map((op) => {
-                const totalOpDelays =
-                  op.production_delays + op.non_productional_delays + op.engineering_delays;
-                return (
-                  <tr key={op.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                      {op.operation_date}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-body)] text-sm capitalize">
-                      {op.shift_type}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-body)] text-sm font-medium">
-                      {op.machine_name}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-body)] text-sm">
-                      {op.operator_name || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-body)] text-sm">{op.site || '—'}</td>
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
-                      {op.block_drilled || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {op.total_hours ? op.total_hours.toFixed(1) : '—'}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--accent-blue)] text-sm text-right font-medium">
-                      {op.holes || 0}
-                    </td>
-                    <td className="px-6 py-4 text-accent-green text-sm text-right font-medium">
-                      {op.meters_drilled ? Number(op.meters_drilled).toFixed(1) : '—'}
-                    </td>
-                    <td className="px-6 py-4 text-accent-blue text-sm text-right">
-                      {formatDelay(totalOpDelays)}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                          op.status === 'active' || op.status === 'completed'
-                            ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
-                            : op.status === 'maintenance'
-                              ? 'bg-amber-50/70 border-amber-200/50 text-amber-700'
-                              : 'bg-red-50/70 border-red-200/50 text-red-700'
-                        }`}
-                      >
-                        {op.status === 'active' && (
-                          <span className="badge-pulse-dot bg-emerald-500" />
-                        )}
-                        {op.status}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-              {operations.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={11}
-                    className="px-6 py-12 text-center text-[var(--text-muted)] text-sm"
-                  >
-                    No drilling data found for the selected date range.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
-    </div>
+    <DrillingReportsDashboardClient
+      todayStr={today || to}
+      fromDateStr={from}
+      toDateStr={to}
+      currentShift={currentShift}
+      operations={operations}
+      drillRigNames={drillRigNames}
+      csvContent={csvContent}
+    />
   );
 }

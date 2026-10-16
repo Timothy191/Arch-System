@@ -648,3 +648,11 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Remove the `Production Utilization` (`section.space-y-4.pb-6`) and `Active Portal Metrics` (`ActiveMetricsCharts`) sections from `/hub` (`apps/portal/app/hub/page.tsx`).
 - **Verification**: Verified with `app/hub/page.test.tsx` (`7/7 PASS`) and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T13:19:00+02:00: Complete Roll Over (Dozers) Fixed BCM Display & Drilling Reports Live Stats Dashboard
+
+- **Agent**: Antigravity
+- **Purpose**:
+  1. `apps/portal/app/(departments)/[department]/roll-over/page.tsx`: Include Dozer `machine_operations` alongside `dozer_rolls`, add a `Total Roll-over (BCM)` summary card (`hours * 250`), and display fixed `Roll-over: X BCM` in site headers and individual shift roll cards.
+  2. `apps/portal/app/(departments)/drilling/reports/page.tsx` & `DrillingReportsDashboardClient.tsx`: Upgrade the dedicated `/drilling/reports` route with Live Stats KPI cards, visual indicators, and **Shift**, **Day**, and **Archived** subtabs, and eliminate all `any` types.
+- **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).

@@ -29,5 +29,5 @@
 ## 2026-10-16T12:22:00+02:00: Display Dozer Roll-over Amount as Fixed Number in DozerRollForm
 
 - **Agent**: Antigravity
-- **Purpose**: Display the Roll-over amount (`hours worked * 250 = total rollover (BCM)`) as a fixed number at the bottom of `DozerRollForm` (`src/control-room/DozerRollForm.tsx`) when a Dozer is selected.
+- **Purpose**: Display the Roll-over amount (`hours worked * 250 = total rollover (BCM)`) as a fixed number at the bottom of `DozerRollForm` (`src/control-room/DozerRollForm.tsx`) when a Dozer is selected, and allow submitting a Dozer Roll with `hoursOperated` without requiring `lengthM` and `widthM`.
 - **Verification**: Verified with unit tests and `pnpm agent:verify` (8/8 PASS).
