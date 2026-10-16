@@ -636,3 +636,9 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Replace the shift-completeness blocking gate on `/[department]/reports` with a comprehensive executive and operator dashboard (`ReportsDashboardClient.tsx` and `reports/page.tsx`) featuring live stats, visual indicators, and three subtabs (**Shift**, **Day**, and **Archived**) with production, machine SMR, and engineering logs.
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T12:57:00+02:00: Consolidate Remote Branches/PRs (#162, #163, v0) & Update Vercel Production
+
+- **Agent**: Antigravity
+- **Purpose**: Consolidate PR #162 (`MusterRollCallView` single-pass `useMemo` aggregation + unit tests), PR #163 (`MachineOperationsList` pre-indexed `loadsByMachine` and `breakdownsByFleetId` maps + unit tests combined with Dozer `hours_worked * 250` rollover BCM), and `v0/onboard-report-insights-fedaf190` into `main`, sync build version metadata (`version.json`, `apps/portal/lib/version.generated.ts`), prune merged remote branches, and deploy to Vercel production (`https://arch-system-kappa.vercel.app`).
+- **Verification**: Verified with unit tests (`9/9 PASS`) and `pnpm agent:verify` (8/8 PASS).

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MachineOperationsList } from './MachineOperationsList';
 
@@ -132,9 +132,7 @@ describe('MachineOperationsList', () => {
     );
 
     expect(screen.getByText('Active Breakdown')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Engineering Breakdown: Hydraulic leak/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Engineering Breakdown: Hydraulic leak/i)).toBeInTheDocument();
   });
 
   it('toggles delay summary view on button click', () => {
@@ -154,5 +152,40 @@ describe('MachineOperationsList', () => {
 
     expect(screen.getByText('Refueling')).toBeInTheDocument();
     expect(screen.getByText('0.50h')).toBeInTheDocument();
+  });
+
+  it('displays fixed Dozer Roll-over amount (hours worked * 250 BCM)', () => {
+    render(
+      <MachineOperationsList
+        operations={[
+          {
+            id: 'op-dozer',
+            machine_id: 'dz-1',
+            operator_id: 'op-3',
+            site_id: 'site-a',
+            shift_type: 'day',
+            start_time: '06:00:00',
+            end_time: '14:00:00',
+            hours_worked: 8.0,
+            start_smu: 2000,
+            end_smu: 2008,
+            machine: {
+              name: 'DZ-401 (CAT D10T)',
+              machine_type: 'Dozer',
+              bin_factor: 0,
+              serial_number: 'SN-DZ401',
+            },
+            operator: { full_name: 'Sam Dozer' },
+            site: { name: 'Stockpile A' },
+          },
+        ]}
+        todayLoads={[]}
+        activeBreakdowns={[]}
+      />
+    );
+
+    // 8.0 hours * 250 = 2000.0 BCM
+    expect(screen.getByText(/Roll-over: 2000\.0 BCM/i)).toBeInTheDocument();
+    expect(screen.getByText('250.0 BCM/h')).toBeInTheDocument();
   });
 });
