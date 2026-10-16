@@ -598,3 +598,17 @@ AIAssistant chat.
   3. `apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx` & `actions.ts`:
      - Ensured `updateExcavatorAssignmentConfig` and all excavator config handlers (`handleExcavatorSiteChange`, `handleExcavatorBlockChange`, `handleExcavatorMaterialChange`, `handleExcavatorMaterialSubCategoryChange`) persist `site_id` and `block_mined_id` together, fall back to `machines.site_id` when inserting/updating `excavator_activity`, and invalidate `table:machines` and `table:excavator_activity` cache tags.
 - **Verification**: Verified with `hourly-loads/actions.test.ts` and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T08:25:00+02:00: Align Excavator Activity Controls & Introduce Structured Table Format for Assigned Machines & Logged Information
+
+- **Agent**: Antigravity
+- **Purpose**: Eliminate vertical skew across row controls on `/control-room/excavator-activity` and present Excavator & Assigned Machines logged information in a unified, horizontally aligned table format.
+- **Changes**:
+  1. `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx`:
+     - Replaced the vertically stacked `<select>` + badge `flex-col` inside `<td>` 2 (which skewed the machine `<select>` relative to the material `<select>`) with dedicated, horizontally aligned `align-middle` columns (`#`, `Assigned Machine`, `Type & Bin Factor`, `Source`, `Material Logged`, `Loads`, `Volume (BCM)`, `Actions`) and uniform `h-9` selects.
+  2. `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityForm.tsx`:
+     - Aligned the top `Excavator`, `Operator`, and `Shift` controls side-by-side (`h-10`) without multi-line text underneath column 1.
+     - Consolidated `Site / Location`, `Block Mined`, `Coal / Waste`, `Subcategory`, `Assigned Machines`, `Total Hauled`, `BCM / Hr`, `Loads / Hr`, and `Est. Scoop Time` into a single structured table.
+  3. `apps/portal/app/(departments)/[department]/hourly-loads/loads-utils.ts`:
+     - Updated `deriveExcavatorDumperAssignments` to omit 0-load segments when the same machine already has a positive-load segment (preventing duplicate `DT-101 (0 loads)` rows alongside `DT-101 (5 loads)`).
+- **Verification**: Verified with unit tests and `pnpm agent:verify` (8/8 PASS).

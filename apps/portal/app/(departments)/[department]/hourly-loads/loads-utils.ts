@@ -182,8 +182,26 @@ export function deriveExcavatorDumperAssignments(
     }
   }
 
+  const machinesWithPositiveLoads = new Set<string>();
+  for (const entry of grouped.values()) {
+    if (entry.totalLoads > 0) {
+      machinesWithPositiveLoads.add(entry.dumperMachineId);
+    }
+  }
+
+  const seenZeroLoadMachines = new Set<string>();
   const result: DerivedDumperAssignment[] = [];
   for (const [groupKey, entry] of grouped.entries()) {
+    if (entry.totalLoads === 0) {
+      if (
+        machinesWithPositiveLoads.has(entry.dumperMachineId) ||
+        seenZeroLoadMachines.has(entry.dumperMachineId)
+      ) {
+        continue;
+      }
+      seenZeroLoadMachines.add(entry.dumperMachineId);
+    }
+
     const dumper = dumperMap.get(entry.dumperMachineId);
     const binFactor = dumper?.bin_factor ?? 0;
     const totalBcm = Math.round(entry.totalLoads * binFactor * 100) / 100;

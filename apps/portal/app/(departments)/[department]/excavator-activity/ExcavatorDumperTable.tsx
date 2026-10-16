@@ -189,11 +189,11 @@ export function ExcavatorDumperTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <h4 className="text-sm font-medium text-[var(--text-heading)]">
-            Dumper Assignments (ADT / RDT)
+          <h4 className="text-sm font-semibold text-[var(--text-heading)]">
+            Assigned Machines &amp; Logged Loads (ADT / RDT / Dump Truck)
           </h4>
           {autoPlacedCount > 0 && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
@@ -205,9 +205,9 @@ export function ExcavatorDumperTable({
         <button
           type="button"
           onClick={handleAddRow}
-          className="flex items-center gap-1.5 text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/80 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20 border border-[var(--accent-blue)]/20 text-xs font-semibold transition-colors"
         >
-          <span className="text-lg leading-none">+</span> Add Dumper
+          <span className="text-sm leading-none">+</span> Add Machine
         </button>
       </div>
 
@@ -216,101 +216,131 @@ export function ExcavatorDumperTable({
           <p className="text-[var(--text-muted)] text-sm text-center py-6">
             No dumpers assigned yet. Assign an Excavator to ADT/RDT machines on{' '}
             <span className="text-[var(--text-heading)] font-medium">Hourly Loads</span> to
-            auto-place them here, or click &quot;+ Add Dumper&quot;.
+            auto-place them here, or click &quot;+ Add Machine&quot;.
           </p>
         </GlassCard>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="border-b border-[var(--border-default)]">
+              <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/80">
                 <th
                   scope="col"
-                  className="text-left text-[var(--text-muted)] py-2 px-2 font-medium w-8"
+                  className="text-center text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider w-12 align-middle"
                 >
                   #
                 </th>
                 <th
                   scope="col"
-                  className="text-left text-[var(--text-muted)] py-2 px-2 font-medium"
+                  className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider min-w-[220px] align-middle"
                 >
-                  Dumper (ADT / RDT)
+                  Assigned Machine
                 </th>
                 <th
                   scope="col"
-                  className="text-left text-[var(--text-muted)] py-2 px-2 font-medium"
+                  className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider min-w-[160px] align-middle"
                 >
-                  Material
+                  Type &amp; Bin Factor
                 </th>
                 <th
                   scope="col"
-                  className="text-right text-[var(--text-muted)] py-2 px-2 font-medium"
+                  className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider min-w-[150px] align-middle"
+                >
+                  Source
+                </th>
+                <th
+                  scope="col"
+                  className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider min-w-[170px] align-middle"
+                >
+                  Material Logged
+                </th>
+                <th
+                  scope="col"
+                  className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider w-28 align-middle"
                 >
                   Loads
                 </th>
                 <th
                   scope="col"
-                  className="text-right text-[var(--text-muted)] py-2 px-2 font-medium"
+                  className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider w-32 align-middle"
                 >
-                  BCM
+                  Volume (BCM)
                 </th>
                 <th
                   scope="col"
-                  className="text-right text-[var(--text-muted)] py-2 px-2 font-medium w-24"
+                  className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider w-24 align-middle"
                 >
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--border-default)]/60">
               {assignments.map((assignment, index) => {
                 const selectedDumper = siteDumpers.find((d) => d.id === assignment.dumperMachineId);
                 return (
-                  <tr key={assignment.key} className="border-b border-[var(--border-default)]/50">
-                    <td className="py-2 px-2 text-[var(--text-muted)]">{index + 1}</td>
-                    <td className="py-2 px-2">
-                      <div className="flex flex-col gap-1">
-                        <select
-                          value={assignment.dumperMachineId}
-                          onChange={(e) => handleDumperChange(index, e.target.value)}
-                          className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-                        >
-                          <option value="">
-                            {siteDumpers.length === 0
-                              ? 'No dumpers at this site'
-                              : 'Select dumper...'}
-                          </option>
-                          {siteDumpers.map((d) => (
-                            <option key={d.id} value={d.id}>
-                              {d.name} ({d.machine_type}
-                              {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ''})
-                            </option>
-                          ))}
-                        </select>
-                        {assignment.autoPlaced && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-                              Auto-placed from Hourly Loads
-                            </span>
-                            {selectedDumper && (
-                              <span className="text-[10px] text-[var(--text-muted)]">
-                                {selectedDumper.machine_type}
-                              </span>
-                            )}
-                            {(assignment.segmentCount ?? 1) > 1 && (
-                              <span className="text-[10px] text-[var(--text-muted)]">
-                                · {assignment.segmentCount} segments
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                  <tr
+                    key={assignment.key}
+                    className="hover:bg-[var(--bg-secondary)]/40 transition-colors"
+                  >
+                    <td className="py-2.5 px-3 text-center text-[var(--text-muted)] font-mono text-xs align-middle">
+                      {index + 1}
                     </td>
-                    <td className="py-2 px-2">
+                    <td className="py-2.5 px-3 align-middle">
+                      <select
+                        value={assignment.dumperMachineId}
+                        onChange={(e) => handleDumperChange(index, e.target.value)}
+                        className="h-9 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2.5 text-[var(--text-heading)] text-sm font-medium focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                      >
+                        <option value="">
+                          {siteDumpers.length === 0 ? 'No dumpers in fleet' : 'Select machine...'}
+                        </option>
+                        {siteDumpers.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name} ({d.machine_type}
+                            {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ''})
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="py-2.5 px-3 align-middle whitespace-nowrap">
+                      {selectedDumper ? (
+                        <div className="inline-flex items-center gap-1.5 text-xs">
+                          <span className="font-medium text-[var(--text-heading)]">
+                            {selectedDumper.machine_type}
+                          </span>
+                          {selectedDumper.bin_factor ? (
+                            <span className="text-[var(--text-muted)] font-mono">
+                              · {selectedDumper.bin_factor} BCM
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-[var(--text-muted)]">—</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3 align-middle whitespace-nowrap">
+                      {assignment.autoPlaced ? (
+                        <div className="inline-flex items-center gap-1.5">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+                            Hourly Loads
+                          </span>
+                          {(assignment.segmentCount ?? 1) > 1 && (
+                            <span className="text-[11px] text-[var(--text-muted)] font-mono">
+                              ({assignment.segmentCount} seg)
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border-default)]">
+                          Manual
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3 align-middle">
                       <select
                         value={assignment.materialType}
                         onChange={(e) => handleMaterialChange(index, e.target.value)}
-                        className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                        className="h-9 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2.5 text-[var(--text-heading)] text-sm font-medium focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
                       >
                         {MATERIAL_TYPES.map((mt) => (
                           <option key={mt} value={mt}>
@@ -319,29 +349,31 @@ export function ExcavatorDumperTable({
                         ))}
                       </select>
                     </td>
-                    <td className="py-2 px-2 text-right text-[var(--text-heading)]">
+                    <td className="py-2.5 px-3 text-right font-mono tabular-nums align-middle">
                       {assignment.totalLoads > 0 ? (
-                        <span>{assignment.totalLoads}</span>
+                        <span className="text-[var(--text-heading)] font-semibold">
+                          {assignment.totalLoads}
+                        </span>
                       ) : (
                         <span className="text-[var(--text-muted)]">0</span>
                       )}
                     </td>
-                    <td className="py-2 px-2 text-right">
+                    <td className="py-2.5 px-3 text-right font-mono tabular-nums align-middle">
                       {assignment.totalBcm > 0 ? (
-                        <span className="text-[var(--accent-blue)] font-medium">
+                        <span className="text-[var(--accent-blue)] font-semibold">
                           {assignment.totalBcm.toFixed(1)}
                         </span>
                       ) : (
                         <span className="text-[var(--text-muted)]">0.0</span>
                       )}
                     </td>
-                    <td className="py-2 px-2 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                    <td className="py-2.5 px-3 text-right align-middle">
+                      <div className="inline-flex items-center justify-end gap-1">
                         <button
                           type="button"
                           onClick={() => handleDuplicateRow(index)}
                           title="Duplicate for different material"
-                          className="p-1 text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors text-xs"
+                          className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--accent-blue)] hover:bg-[var(--bg-secondary)] transition-colors text-xs"
                         >
                           ⧉
                         </button>
@@ -349,7 +381,7 @@ export function ExcavatorDumperTable({
                           type="button"
                           onClick={() => handleRemoveRow(index)}
                           title="Remove"
-                          className="p-1 text-[var(--text-muted)] hover:text-accent-red transition-colors text-xs"
+                          className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-accent-red hover:bg-[var(--bg-secondary)] transition-colors text-xs"
                         >
                           ✕
                         </button>
@@ -360,17 +392,24 @@ export function ExcavatorDumperTable({
               })}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-[var(--border-default)]">
-                <td colSpan={3} className="py-2 px-2 text-[var(--text-heading)] font-medium">
-                  Total
+              <tr className="border-t border-[var(--border-default)] bg-[var(--bg-secondary)]/60">
+                <td
+                  colSpan={5}
+                  className="py-2.5 px-3 text-[var(--text-heading)] font-semibold text-xs uppercase tracking-wider align-middle"
+                >
+                  Total ({assignments.filter((a) => Boolean(a.dumperMachineId)).length} Assigned{' '}
+                  {assignments.filter((a) => Boolean(a.dumperMachineId)).length === 1
+                    ? 'Machine'
+                    : 'Machines'}
+                  )
                 </td>
-                <td className="py-2 px-2 text-right text-[var(--text-heading)] font-medium">
+                <td className="py-2.5 px-3 text-right text-[var(--text-heading)] font-semibold font-mono tabular-nums align-middle">
                   {runningTotalLoads}
                 </td>
-                <td className="py-2 px-2 text-right text-[var(--accent-blue)] font-medium">
-                  {runningTotalBcm.toFixed(1)}
+                <td className="py-2.5 px-3 text-right text-[var(--accent-blue)] font-semibold font-mono tabular-nums align-middle">
+                  {runningTotalBcm.toFixed(1)} BCM
                 </td>
-                <td />
+                <td className="py-2.5 px-3 align-middle" />
               </tr>
             </tfoot>
           </table>

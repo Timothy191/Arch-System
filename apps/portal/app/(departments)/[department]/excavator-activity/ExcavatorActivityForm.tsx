@@ -554,11 +554,11 @@ export function ExcavatorActivityForm({
           </div>
         ) : (
           <>
-            {/* Top row: Excavator, Operator, Shift */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Top row: Excavator, Operator, Shift — strictly aligned side-by-side */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
               {/* Excavator Dropdown */}
-              <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+              <div className="space-y-1.5">
+                <label className="text-[var(--text-secondary)] text-xs font-medium uppercase tracking-wider block">
                   Excavator <span className="text-accent-red">*</span>
                 </label>
                 <select
@@ -570,7 +570,7 @@ export function ExcavatorActivityForm({
                       blockMinedId: '',
                     }))
                   }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="h-10 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 text-[var(--text-heading)] text-sm font-medium focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
                 >
                   <option value="">Select excavator...</option>
                   {excavators.map((ex) => (
@@ -582,50 +582,11 @@ export function ExcavatorActivityForm({
                 {errors.excavatorId && (
                   <p className="text-accent-red text-xs">{errors.excavatorId}</p>
                 )}
-                {formData.excavatorId && (
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[var(--text-muted)] text-xs pt-0.5">
-                    <span>
-                      Site:{' '}
-                      <span className="text-[var(--text-heading)] font-medium">
-                        {excavatorSite ? excavatorSite.name : 'Unassigned'}
-                      </span>
-                    </span>
-                    <span>
-                      Block Mined:{' '}
-                      <span className="text-[var(--text-heading)] font-medium">
-                        {excavatorBlock
-                          ? `${excavatorBlock.name} (${excavatorBlock.code})`
-                          : 'Unassigned'}
-                      </span>
-                    </span>
-                    <span>
-                      Coal/Waste:{' '}
-                      <span className="text-[var(--text-heading)] font-medium">
-                        {parsedMaterial.category}
-                      </span>
-                    </span>
-                    <span>
-                      Subcategory:{' '}
-                      <span className="text-[var(--text-heading)] font-medium">
-                        {parsedMaterial.subCategory || 'Not specified'}
-                      </span>
-                    </span>
-                    <span>
-                      Assigned Machines:{' '}
-                      <span className="text-[var(--text-heading)] font-medium">
-                        {assignedMachinesSummary.length > 0
-                          ? assignedMachinesSummary.map((m) => m.name).join(', ')
-                          : 'None'}
-                      </span>
-                    </span>
-                    <span className="text-[11px] opacity-80">(from Hourly Loads)</span>
-                  </div>
-                )}
               </div>
 
               {/* Operator Dropdown */}
-              <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+              <div className="space-y-1.5">
+                <label className="text-[var(--text-secondary)] text-xs font-medium uppercase tracking-wider block">
                   Operator <span className="text-accent-red">*</span>
                 </label>
                 <select
@@ -636,7 +597,7 @@ export function ExcavatorActivityForm({
                       operatorId: e.target.value,
                     }))
                   }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="h-10 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 text-[var(--text-heading)] text-sm font-medium focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
                 >
                   <option value="">Select operator...</option>
                   {operators.map((op) => (
@@ -651,84 +612,149 @@ export function ExcavatorActivityForm({
               </div>
 
               {/* Shift Pill (Auto-detected from System Time) */}
-              <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+              <div className="space-y-1.5">
+                <label className="text-[var(--text-secondary)] text-xs font-medium uppercase tracking-wider block">
                   Shift <span className="text-accent-red">*</span>
                 </label>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-full border border-accent-green/20 bg-accent-green/5 w-fit backdrop-blur-xl shadow-sm">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-                  <p className="text-xs text-accent-green font-medium capitalize">
+                <div className="h-10 w-full flex items-center gap-2 px-3.5 rounded-lg border border-accent-green/25 bg-accent-green/5 backdrop-blur-xl">
+                  <div className="w-2 h-2 rounded-full bg-accent-green animate-pulse shrink-0" />
+                  <p className="text-xs text-accent-green font-semibold capitalize truncate">
                     {formData.shiftType} Shift · All systems operational
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Hourly Loads Recorded Summary Panel (Site, Block Mined, Coal/Waste, Subcategory, Assigned Machines) */}
+            {/* Hourly Loads Recorded Summary & Shift Performance Table */}
             {formData.excavatorId && (
-              <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2.5">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-semibold text-[var(--text-heading)]">
-                    Recorded on Hourly Loads Tab ({selectedExcavator?.name})
+                    Excavator &amp; Assigned Machines Information ({selectedExcavator?.name})
                   </span>
                   <span className="text-[11px] text-[var(--text-muted)]">
                     Auto-synced from Hourly Loads
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
-                    <span className="text-[11px] text-[var(--text-muted)] block">Site</span>
-                    <span className="text-xs font-semibold text-[var(--text-heading)]">
-                      {excavatorSite ? excavatorSite.name : 'Unassigned'}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
-                    <span className="text-[11px] text-[var(--text-muted)] block">Block Mined</span>
-                    <span className="text-xs font-semibold text-[var(--text-heading)]">
-                      {excavatorBlock
-                        ? `${excavatorBlock.name} (${excavatorBlock.code})`
-                        : 'Unassigned'}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
-                    <span className="text-[11px] text-[var(--text-muted)] block">Coal / Waste</span>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold mt-0.5 ${
-                        parsedMaterial.category === 'Coal'
-                          ? 'bg-neutral-800 text-white'
-                          : 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
-                      }`}
-                    >
-                      {parsedMaterial.category}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
-                    <span className="text-[11px] text-[var(--text-muted)] block">Subcategory</span>
-                    <span className="text-xs font-semibold text-[var(--text-heading)]">
-                      {parsedMaterial.subCategory || 'Not specified'}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)]">
-                    <span className="text-[11px] text-[var(--text-muted)] block">
-                      Assigned Machines
-                    </span>
-                    {assignedMachinesSummary.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        {assignedMachinesSummary.map((m) => (
+                <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] overflow-x-auto">
+                  <table className="w-full text-xs sm:text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/80">
+                        <th
+                          scope="col"
+                          className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Site / Location
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Block Mined
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Coal / Waste
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Subcategory
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-left text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Assigned Machines
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Total Hauled
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          BCM / Hr
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Loads / Hr
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-right text-[var(--text-muted)] py-2.5 px-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap align-middle"
+                        >
+                          Est. Scoop Time
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-2.5 px-3 font-semibold text-[var(--text-heading)] whitespace-nowrap align-middle">
+                          {excavatorSite ? excavatorSite.name : 'Unassigned'}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-[var(--text-heading)] whitespace-nowrap align-middle">
+                          {excavatorBlock
+                            ? `${excavatorBlock.name} (${excavatorBlock.code})`
+                            : 'Unassigned'}
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap align-middle">
                           <span
-                            key={`${m.id}-${m.materialType}`}
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20"
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                              parsedMaterial.category === 'Coal'
+                                ? 'bg-neutral-800 text-white'
+                                : 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
+                            }`}
                           >
-                            {m.name} ({m.totalLoads} loads)
+                            {parsedMaterial.category}
                           </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-xs font-medium text-[var(--text-muted)]">
-                        None assigned
-                      </span>
-                    )}
-                  </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-[var(--text-heading)] whitespace-nowrap align-middle">
+                          {parsedMaterial.subCategory || 'Not specified'}
+                        </td>
+                        <td className="py-2.5 px-3 align-middle">
+                          {assignedMachinesSummary.length > 0 ? (
+                            <div className="inline-flex flex-wrap items-center gap-1.5">
+                              {assignedMachinesSummary.map((m) => (
+                                <span
+                                  key={`${m.id}-${m.materialType}`}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 whitespace-nowrap"
+                                >
+                                  {m.name} ({m.totalLoads} loads · {m.totalBcm.toFixed(1)} BCM)
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs font-medium text-[var(--text-muted)]">
+                              None assigned
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-[var(--accent-blue)] whitespace-nowrap align-middle">
+                          {totalBcm.toFixed(1)} BCM
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-[var(--accent-blue)] whitespace-nowrap align-middle">
+                          {bcmPerHour.toFixed(1)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-accent-green whitespace-nowrap align-middle">
+                          {loadsPerHour.toFixed(1)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-[var(--text-heading)] whitespace-nowrap align-middle">
+                          {estimatedScoopTimeMinutes > 0
+                            ? `${estimatedScoopTimeMinutes.toFixed(1)} min/load`
+                            : '—'}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -745,34 +771,6 @@ export function ExcavatorActivityForm({
                 errors={errors}
               />
             </div>
-
-            {/* Auto-calculated Metrics */}
-            {dumperAssignments.length > 0 && dumperAssignments.some((a) => a.dumperMachineId) && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-                <div>
-                  <p className="text-[var(--text-muted)] text-xs">Total Hauled</p>
-                  <p className="text-lg font-medium text-[var(--accent-blue)]">
-                    {totalBcm.toFixed(1)} BCM
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[var(--text-muted)] text-xs">BCM/Hour</p>
-                  <p className="text-lg font-medium text-accent-blue">{bcmPerHour.toFixed(1)}</p>
-                </div>
-                <div>
-                  <p className="text-[var(--text-muted)] text-xs">Loads/Hour</p>
-                  <p className="text-lg font-medium text-accent-green">{loadsPerHour.toFixed(1)}</p>
-                </div>
-                <div>
-                  <p className="text-[var(--text-muted)] text-xs">Est. Scoop Time</p>
-                  <p className="text-lg font-medium text-[var(--text-heading)]">
-                    {estimatedScoopTimeMinutes > 0
-                      ? `${estimatedScoopTimeMinutes.toFixed(1)} min/load`
-                      : '--'}
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Notes */}
             <div className="space-y-2">
