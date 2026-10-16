@@ -642,3 +642,9 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Consolidate PR #162 (`MusterRollCallView` single-pass `useMemo` aggregation + unit tests), PR #163 (`MachineOperationsList` pre-indexed `loadsByMachine` and `breakdownsByFleetId` maps + unit tests combined with Dozer `hours_worked * 250` rollover BCM), and `v0/onboard-report-insights-fedaf190` into `main`, sync build version metadata (`version.json`, `apps/portal/lib/version.generated.ts`), prune merged remote branches, and deploy to Vercel production (`https://arch-system-kappa.vercel.app`).
 - **Verification**: Verified with unit tests (`9/9 PASS`) and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T13:06:00+02:00: Remove Production Utilization & Active Portal Metrics Sections from Hub
+
+- **Agent**: Antigravity
+- **Purpose**: Remove the `Production Utilization` (`section.space-y-4.pb-6`) and `Active Portal Metrics` (`ActiveMetricsCharts`) sections from `/hub` (`apps/portal/app/hub/page.tsx`).
+- **Verification**: Verified with `app/hub/page.test.tsx` (`7/7 PASS`) and `pnpm agent:verify` (8/8 PASS).
