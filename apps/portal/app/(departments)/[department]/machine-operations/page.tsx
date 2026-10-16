@@ -126,9 +126,16 @@ export default async function MachineOperationsPage({
       );
     }, 0) || 0;
 
-  // Calculate total material moved (BCM) - sum of (loads × bin_factor)
+  // Calculate total material moved (BCM) - sum of (loads × bin_factor) or Dozer rollover (hours × 250)
   let totalMaterialBCM = 0;
   todayOperations?.forEach((op) => {
+    const isDozerOp =
+      op.machine?.machine_type === 'Dozer' ||
+      Boolean(op.machine?.machine_type?.toLowerCase().includes('dozer'));
+    if (isDozerOp) {
+      totalMaterialBCM += (op.hours_worked || 0) * 250;
+      return;
+    }
     const binFactor = op.machine?.bin_factor || 0;
     // Find loads for this machine across both shifts
     const machineLoads =

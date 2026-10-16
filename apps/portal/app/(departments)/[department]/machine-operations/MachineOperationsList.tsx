@@ -107,6 +107,12 @@ function MachineOperationsList({
       {siteEntries.map(([siteKey, { siteName, operations: siteOps }]) => {
         const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
+          const isDozerOp =
+            op.machine?.machine_type === 'Dozer' ||
+            Boolean(op.machine?.machine_type?.toLowerCase().includes('dozer'));
+          if (isDozerOp) {
+            return sum + (op.hours_worked || 0) * 250;
+          }
           const bf = op.machine?.bin_factor || 0;
           const loads = todayLoads
             .filter((l) => l.machine_id === op.machine_id)
@@ -194,15 +200,22 @@ function OperationCard({
     (operation.end_smu != null || operation.end_time !== null) && operation.hours_worked !== null;
   const isInProgress = operation.end_smu == null && operation.end_time === null;
 
+  const isDozer =
+    operation.machine?.machine_type === 'Dozer' ||
+    Boolean(operation.machine?.machine_type?.toLowerCase().includes('dozer'));
+
   // Calculate BCM metrics
   const binFactor = operation.machine?.bin_factor || 0;
   const machineLoads =
     todayLoads
       ?.filter((l) => l.machine_id === operation.machine_id)
       ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
-  const materialBCM = machineLoads * binFactor;
-  const bcmPerHour =
-    (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
+  const materialBCM = isDozer ? (operation.hours_worked || 0) * 250 : machineLoads * binFactor;
+  const bcmPerHour = isDozer
+    ? 250
+    : (operation.hours_worked || 0) > 0
+      ? materialBCM / (operation.hours_worked || 1)
+      : 0;
 
   // AGENT-TRACE: Match breakdown by serial_number or machine_id
   const machineBreakdown = activeBreakdowns?.find(
@@ -333,11 +346,13 @@ function OperationCard({
                   </span>
                 </>
               )}
-              {binFactor > 0 && (
+              {(binFactor > 0 || isDozer) && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
                   <span className="text-[var(--accent-blue)] text-xs">
-                    {materialBCM.toFixed(1)} BCM
+                    {isDozer
+                      ? `Roll-over: ${materialBCM.toFixed(1)} BCM`
+                      : `${materialBCM.toFixed(1)} BCM`}
                   </span>
                   <span className="text-[var(--border-emphasis)]">|</span>
                   <span className="text-accent-blue text-xs">{bcmPerHour.toFixed(1)} BCM/h</span>

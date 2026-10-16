@@ -406,6 +406,39 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               </div>
             </div>
 
+            {machineId && (
+              <div
+                data-testid="dozer-rollover-summary"
+                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                    Roll-over Amount:
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    (
+                    {(Number.isNaN(parseFloat(hoursOperated))
+                      ? 0
+                      : parseFloat(hoursOperated)
+                    ).toFixed(2)}
+                    h &times; 250 = Total Roll-over)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
+                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
+                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                    {Number(
+                      (
+                        (Number.isNaN(parseFloat(hoursOperated)) ? 0 : parseFloat(hoursOperated)) *
+                        250
+                      ).toFixed(1)
+                    ).toLocaleString()}{' '}
+                    BCM
+                  </span>
+                </div>
+              </div>
+            )}
+
             {error && (
               <p className="text-accent-red text-sm" role="alert" aria-live="assertive">
                 {error}

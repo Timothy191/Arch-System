@@ -40,6 +40,18 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
   }, [formData.machineId, machines]);
 
   const isDrillRig = selectedMachine?.machine_type === 'Drill Rig';
+  const isDozer =
+    selectedMachine?.machine_type === 'Dozer' ||
+    Boolean(selectedMachine?.machine_type?.toLowerCase().includes('dozer'));
+
+  const hoursWorked =
+    formData.startSmu &&
+    formData.endSmu &&
+    !Number.isNaN(Number(formData.startSmu)) &&
+    !Number.isNaN(Number(formData.endSmu)) &&
+    Number(formData.endSmu) >= Number(formData.startSmu)
+      ? Number(formData.endSmu) - Number(formData.startSmu)
+      : null;
 
   const validate = () => {
     if (!formData.machineId) return 'Machine is required.';
@@ -333,6 +345,44 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {(hoursWorked !== null || isDozer) && (
+          <div className="space-y-3">
+            {hoursWorked !== null && (
+              <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
+                <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
+                <span className="text-2xl font-medium text-[var(--accent-blue)]">
+                  {hoursWorked.toFixed(2)}h
+                </span>
+                <span className="text-[var(--text-muted)] text-xs">
+                  (SMR calculated: End - Start)
+                </span>
+              </div>
+            )}
+
+            {isDozer && (
+              <div
+                data-testid="dozer-rollover-summary"
+                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                    Roll-over Amount:
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    ({(hoursWorked ?? 0).toFixed(2)}h &times; 250 = Total Roll-over)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
+                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
+                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                    {Number(((hoursWorked ?? 0) * 250).toFixed(1)).toLocaleString()} BCM
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

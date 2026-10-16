@@ -618,3 +618,9 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Remove the `Live Rig Telemetry Stream (Redis SSE)` card (`RealtimeDrillTelemetryStream`) and the bottom `How Archival Works` & `Telemetry Metrics` info grid from `/drilling/machine-telemetry` (`apps/portal/app/(departments)/drilling/machine-telemetry/page.tsx`).
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T12:22:00+02:00: Display Dozer Roll-over Amount as Fixed Number at Bottom of Machine Operations & End SMR Forms
+
+- **Agent**: Antigravity
+- **Purpose**: When a Dozer is selected in `MachineOperationsForm` or `EndSMRForm`, display the Roll-over amount at the bottom as a fixed number (`hours worked * 250 = total rollover (BCM)`), include Dozer rollover BCM in `MachineOperationsList` and `MachineOperationsPage`, and sync Dozer SMR entries to `dozer_rollover_logs`.
+- **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).

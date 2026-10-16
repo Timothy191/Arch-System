@@ -113,6 +113,12 @@ export function MachineOperationsForm({
     selectedMachine?.machine_type === 'Drill Rig' ||
     Boolean(selectedMachine?.machine_type?.toLowerCase().includes('drill'));
 
+  const isDozer =
+    selectedMachine?.machine_type === 'Dozer' ||
+    Boolean(selectedMachine?.machine_type?.toLowerCase().includes('dozer'));
+
+  const DOZER_PUSH_FACTOR_BCM_PER_HOUR = 250;
+
   const availableBlocks = useMemo(() => {
     if (!mineBlocks || mineBlocks.length === 0) return [];
     if (!formData.siteId) return mineBlocks;
@@ -279,6 +285,22 @@ export function MachineOperationsForm({
         .single();
 
       if (error) throw error;
+
+      if (isDozer && startSmuVal !== null && endSmuVal !== null && endSmuVal >= startSmuVal) {
+        const selectedSite = sites.find((s) => s.id === formData.siteId);
+        const selectedOperator = operators.find((op) => op.id === formData.operatorId);
+        await supabase.from('dozer_rollover_logs').insert({
+          department_id: departmentId,
+          shift_date: today,
+          shift_type: formData.shiftType,
+          site_code: selectedSite?.site_code || 'EXT',
+          machine_id: formData.machineId,
+          operator_name: selectedOperator?.full_name || null,
+          start_smu: startSmuVal,
+          end_smu: endSmuVal,
+          push_factor_bcm_per_hour: DOZER_PUSH_FACTOR_BCM_PER_HOUR,
+        } as never);
+      }
 
       // Store the operation ID for delay entries
       if (data?.id) {
@@ -549,14 +571,46 @@ export function MachineOperationsForm({
           </div>
         )}
 
-        {/* Hours Worked Display */}
-        {hoursWorked !== null && (
-          <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-            <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
-            <span className="text-2xl font-medium text-[var(--accent-blue)]">
-              {hoursWorked.toFixed(2)}h
-            </span>
-            <span className="text-[var(--text-muted)] text-xs">(SMR calculated: Stop - Start)</span>
+        {/* Hours Worked & Dozer Roll-over Display */}
+        {(hoursWorked !== null || isDozer) && (
+          <div className="space-y-3">
+            {hoursWorked !== null && (
+              <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
+                <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
+                <span className="text-2xl font-medium text-[var(--accent-blue)]">
+                  {hoursWorked.toFixed(2)}h
+                </span>
+                <span className="text-[var(--text-muted)] text-xs">
+                  (SMR calculated: Stop - Start)
+                </span>
+              </div>
+            )}
+
+            {isDozer && (
+              <div
+                data-testid="dozer-rollover-summary"
+                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                    Roll-over Amount:
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    ({(hoursWorked ?? 0).toFixed(2)}h &times; {DOZER_PUSH_FACTOR_BCM_PER_HOUR} =
+                    Total Roll-over)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
+                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
+                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                    {Number(
+                      ((hoursWorked ?? 0) * DOZER_PUSH_FACTOR_BCM_PER_HOUR).toFixed(1)
+                    ).toLocaleString()}{' '}
+                    BCM
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
