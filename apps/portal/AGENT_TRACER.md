@@ -656,3 +656,11 @@ AIAssistant chat.
   1. `apps/portal/app/(departments)/[department]/roll-over/page.tsx`: Include Dozer `machine_operations` alongside `dozer_rolls`, add a `Total Roll-over (BCM)` summary card (`hours * 250`), and display fixed `Roll-over: X BCM` in site headers and individual shift roll cards.
   2. `apps/portal/app/(departments)/drilling/reports/page.tsx` & `DrillingReportsDashboardClient.tsx`: Upgrade the dedicated `/drilling/reports` route with Live Stats KPI cards, visual indicators, and **Shift**, **Day**, and **Archived** subtabs, and eliminate all `any` types.
 - **Verification**: Verified with `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-16T13:40:00+02:00: Delete ActiveMetricsCharts & Fix Service Worker Stale HTML/RSC Caching
+
+- **Agent**: Antigravity
+- **Purpose**:
+  1. Delete `apps/portal/features/hub/components/ActiveMetricsCharts.tsx` and remove its export from `apps/portal/features/hub/index.ts`.
+  2. Fix `apps/portal/public/sw.js` and `apps/portal/app/ClientProviders.tsx` where `arch-system-offline-v1` used cache-first (`return cachedResponse || fetchPromise`) on HTML navigations and RSC payloads, causing browsers to display stale `/hub` HTML (`Active Portal Metrics`) across deployments. Switched HTML/RSC requests to network-first and bumped the cache key to `arch-system-offline-v2` (explicitly deleting `arch-system-offline-v1`).
+- **Verification**: Verified with `app/hub/page.test.tsx` (`7/7 PASS`) and `pnpm agent:verify` (8/8 PASS).

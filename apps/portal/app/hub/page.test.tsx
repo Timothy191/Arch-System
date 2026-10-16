@@ -88,7 +88,6 @@ jest.mock('@repo/redis', () => ({
 // ── Hub feature components (heavy — render stubs) ────────────────────────────
 
 jest.mock('@/features/hub', () => ({
-  ActiveMetricsCharts: () => <div data-testid="active-metrics" />,
   AlertTicker: () => <div data-testid="alert-ticker" />,
   ProductionTrendWrapper: () => <div data-testid="production-trend" />,
   HeroBackground: () => <div data-testid="hero-bg" />,
@@ -106,10 +105,6 @@ jest.mock('@repo/ui/GlassCard', () => ({
 
 jest.mock('@repo/ui/Logo', () => ({
   Logo: () => <svg data-testid="logo" />,
-}));
-
-jest.mock('@repo/ui/TelemetryChart', () => ({
-  TelemetryChart: () => <div data-testid="telemetry-chart" />,
 }));
 
 // ── Departments / tools ───────────────────────────────────────────────────────
@@ -167,6 +162,8 @@ describe('HubPage — graceful degradation', () => {
     expect(container.firstChild).not.toBeNull();
     expect(screen.queryByText(/Hub Error/i)).toBeNull();
     expect(screen.queryByText(/Try again/i)).toBeNull();
+    expect(screen.queryByText(/Active Portal Metrics/i)).toBeNull();
+    expect(screen.queryByText(/Production Utilization/i)).toBeNull();
   });
 
   it('resolves without throwing when getDashboardCounts rejects', async () => {
