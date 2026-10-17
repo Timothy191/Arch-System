@@ -147,22 +147,43 @@ export function ReportsDashboardClient({
   }, [shiftRows, machineOperationLogs]);
 
   // Live / Period KPI Totals
+  // Performance Optimization: Replaced 10 array iterations (7 reduces, 1 filter, 2 reduces) over shiftRows
+  // and 2 filter iterations over engineeringLogs with single-pass accumulators.
   const kpiStats = useMemo(() => {
-    const totalHours = shiftRows.reduce((s, r) => s + r.hours, 0);
-    const totalLoads = shiftRows.reduce((s, r) => s + r.loads, 0);
-    const totalHaulBcm = shiftRows.reduce((s, r) => s + r.haulBcm, 0);
-    const totalDozerBcm = shiftRows.reduce((s, r) => s + r.dozerRolloverBcm, 0);
-    const totalBcm = shiftRows.reduce((s, r) => s + r.totalBcm, 0);
-    const totalDelayMin = shiftRows.reduce((s, r) => s + r.delayMin, 0);
-    const totalPasses = shiftRows.reduce((s, r) => s + r.dozerPasses, 0);
+    let totalHours = 0;
+    let totalLoads = 0;
+    let totalHaulBcm = 0;
+    let totalDozerBcm = 0;
+    let totalBcm = 0;
+    let totalDelayMin = 0;
+    let totalPasses = 0;
+    let todayBcm = 0;
+    let todayLoads = 0;
+    let todayHours = 0;
 
-    const todayRows = shiftRows.filter((r) => r.date === todayStr);
-    const todayBcm = todayRows.reduce((s, r) => s + r.totalBcm, 0);
-    const todayLoads = todayRows.reduce((s, r) => s + r.loads, 0);
-    const todayHours = todayRows.reduce((s, r) => s + r.hours, 0);
+    for (const r of shiftRows) {
+      totalHours += r.hours;
+      totalLoads += r.loads;
+      totalHaulBcm += r.haulBcm;
+      totalDozerBcm += r.dozerRolloverBcm;
+      totalBcm += r.totalBcm;
+      totalDelayMin += r.delayMin;
+      totalPasses += r.dozerPasses;
 
-    const openIssues = engineeringLogs.filter((e) => e.status === 'open').length;
-    const resolvedIssues = engineeringLogs.filter((e) => e.status === 'resolved').length;
+      if (r.date === todayStr) {
+        todayBcm += r.totalBcm;
+        todayLoads += r.loads;
+        todayHours += r.hours;
+      }
+    }
+
+    let openIssues = 0;
+    let resolvedIssues = 0;
+    for (const e of engineeringLogs) {
+      if (e.status === 'open') openIssues++;
+      else if (e.status === 'resolved') resolvedIssues++;
+    }
+
     const coveragePct =
       totalFleetCount > 0 ? Math.round((coveredFleetCount / totalFleetCount) * 100) : 100;
     const bcmPerHour = totalHours > 0 ? totalBcm / totalHours : 0;
@@ -238,18 +259,30 @@ export function ReportsDashboardClient({
   }, [engineeringLogs, shiftFilter, searchQuery]);
 
   // Day vs Night comparison metrics
+  // Performance Optimization: Replaced separate array filter step and 8 reduces with single-pass accumulator.
   const shiftComparison = useMemo(() => {
-    const dayRows = filteredShiftRows.filter((r) => r.shift === 'day');
-    const nightRows = filteredShiftRows.filter((r) => r.shift === 'night');
+    let dayBcm = 0;
+    let nightBcm = 0;
+    let dayLoads = 0;
+    let nightLoads = 0;
+    let dayHours = 0;
+    let nightHours = 0;
+    let dayDelays = 0;
+    let nightDelays = 0;
 
-    const dayBcm = dayRows.reduce((s, r) => s + r.totalBcm, 0);
-    const nightBcm = nightRows.reduce((s, r) => s + r.totalBcm, 0);
-    const dayLoads = dayRows.reduce((s, r) => s + r.loads, 0);
-    const nightLoads = nightRows.reduce((s, r) => s + r.loads, 0);
-    const dayHours = dayRows.reduce((s, r) => s + r.hours, 0);
-    const nightHours = nightRows.reduce((s, r) => s + r.hours, 0);
-    const dayDelays = dayRows.reduce((s, r) => s + r.delayMin, 0);
-    const nightDelays = nightRows.reduce((s, r) => s + r.delayMin, 0);
+    for (const r of filteredShiftRows) {
+      if (r.shift === 'day') {
+        dayBcm += r.totalBcm;
+        dayLoads += r.loads;
+        dayHours += r.hours;
+        dayDelays += r.delayMin;
+      } else if (r.shift === 'night') {
+        nightBcm += r.totalBcm;
+        nightLoads += r.loads;
+        nightHours += r.hours;
+        nightDelays += r.delayMin;
+      }
+    }
 
     const maxBcm = Math.max(dayBcm + nightBcm, 1);
     return {
