@@ -22,7 +22,7 @@ import {
   Sun,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type Shift = 'day' | 'night';
 
@@ -74,27 +74,51 @@ function fmt(n: number | null | undefined, digits = 2): string {
 export function DrillingOperationsTable({ drills, initialOps }: Props) {
   const [selectedShift, setSelectedShift] = useState<'all' | Shift>('all');
 
-  // Map keyed by `${machine_id}:${shift_type}`
-  const opsByKey = new Map<string, DrillOpRow>();
-  for (const op of initialOps) {
-    opsByKey.set(`${op.machine_id}:${op.shift_type}`, op);
-  }
-
-  // Calculate today's totals across all shifts (or selected shift)
-  const visibleOps = initialOps.filter(
-    (op) => selectedShift === 'all' || op.shift_type === selectedShift
-  );
-
-  const totalMeters = visibleOps.reduce((sum, op) => sum + Number(op.meters_drilled || 0), 0);
-  const totalHoles = visibleOps.reduce((sum, op) => sum + Number(op.holes || 0), 0);
-  const totalHours = visibleOps.reduce((sum, op) => {
-    if (op.total_hours != null) return sum + Number(op.total_hours);
-    if (op.open_hours != null && op.close_hours != null && op.close_hours >= op.open_hours) {
-      return sum + (Number(op.close_hours) - Number(op.open_hours));
+  // Map keyed by `${machine_id}:${shift_type}` pre-indexed via useMemo
+  const opsByKey = useMemo(() => {
+    const map = new Map<string, DrillOpRow>();
+    for (const op of initialOps) {
+      map.set(`${op.machine_id}:${op.shift_type}`, op);
     }
-    return sum;
-  }, 0);
-  const activeRigsCount = new Set(visibleOps.map((op) => op.machine_id)).size;
+    return map;
+  }, [initialOps]);
+
+  // Single-pass computation for KPI summary totals to avoid multiple array allocations and passes
+  const { totalMeters, totalHoles, totalHours, activeRigsCount } = useMemo(() => {
+    let meters = 0;
+    let holes = 0;
+    let hours = 0;
+    const activeRigs = new Set<string>();
+
+    for (const op of initialOps) {
+      if (selectedShift !== 'all' && op.shift_type !== selectedShift) {
+        continue;
+      }
+      meters += Number(op.meters_drilled || 0);
+      holes += Number(op.holes || 0);
+
+      if (op.total_hours != null) {
+        hours += Number(op.total_hours);
+      } else if (
+        op.open_hours != null &&
+        op.close_hours != null &&
+        op.close_hours >= op.open_hours
+      ) {
+        hours += Number(op.close_hours) - Number(op.open_hours);
+      }
+
+      if (op.machine_id) {
+        activeRigs.add(op.machine_id);
+      }
+    }
+
+    return {
+      totalMeters: meters,
+      totalHoles: holes,
+      totalHours: hours,
+      activeRigsCount: activeRigs.size,
+    };
+  }, [initialOps, selectedShift]);
 
   if (drills.length === 0) {
     return (
