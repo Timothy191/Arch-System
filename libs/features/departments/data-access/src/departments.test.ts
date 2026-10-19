@@ -43,9 +43,11 @@ describe('DEPARTMENTS registry', () => {
     }
   });
 
-  it('contains critical operational departments with admin first', () => {
+  it('contains critical operational departments with admin first, control-room second, and drilling last', () => {
     const departmentNames = DEPARTMENTS.map((d) => d.name);
     expect(departmentNames[0]).toBe('admin');
+    expect(departmentNames[1]).toBe('control-room');
+    expect(departmentNames[departmentNames.length - 1]).toBe('drilling');
     expect(departmentNames).toContain('drilling');
     expect(departmentNames).toContain('production');
     expect(departmentNames).toContain('access-control');

@@ -185,6 +185,7 @@ export default async function HubPage() {
   // AGENT-TRACE: Administration department is strictly restricted to admin users:
   // - For admin role, guarantee the admin department is included first in Core Operational Modules
   // - For non-admin roles, ensure admin department is never accessible or visible
+  // - Ensure Control Room is 2nd (immediately after Administration) and Drilling is last
   if (userRole === 'admin') {
     const adminDept = DEPARTMENTS.find((d) => d.name === 'admin');
     if (adminDept) {
@@ -193,6 +194,19 @@ export default async function HubPage() {
   } else {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
   }
+
+  const controlRoomDept = rawDepartments.find((d) => d.name === 'control-room');
+  const drillingDept = rawDepartments.find((d) => d.name === 'drilling');
+  const middleDepts = rawDepartments.filter(
+    (d) => d.name !== 'admin' && d.name !== 'control-room' && d.name !== 'drilling'
+  );
+  const leadingAdmin = rawDepartments.filter((d) => d.name === 'admin');
+  rawDepartments = [
+    ...leadingAdmin,
+    ...(controlRoomDept ? [controlRoomDept] : []),
+    ...middleDepts,
+    ...(drillingDept ? [drillingDept] : []),
+  ];
 
   const departments = rawDepartments.map((dept) => {
     const overlay = liveMetrics[dept.name];
