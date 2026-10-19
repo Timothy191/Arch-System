@@ -88,6 +88,7 @@ Before marking any task complete, the agent **MUST autonomously execute**:
 - **Architectural Boundaries**: `tools/repo/policy-compiler.cjs` is SSoT — UI packages pure presentation, apps route via `@repo/supabase`
 - **Tooling Drift**: If `pnpm policy:check` fails on generated files, run `pnpm policy:gen` to regenerate
 - **Agent Tracing**: Modified packages must append ISO 8601 entries to `AGENT_TRACER.md`
+- **Token & Bug Telemetry**: After completing any non-trivial task, record the session so Claude Code ZAR cost, tokens, and bugs-resolved stay current: `pnpm token:record -- --agent <name> --input <n> --output <n> --bugs <n>` (or set `TASK_TAG`/`TASK_BUGS_RESOLVED` and run `pnpm agent:hook:post-task`). The `/admin/ai-metrics` dashboard and `pnpm token:sync` both read this ledger (`.agents/memory_base/token-usage.json`).
 - **Backlog Zero**: Check and complete outstanding tasks before starting new work
 - **Anti-Bloat Leases**: Use `skills-mcp` acquire/return for dynamic context leasing
 

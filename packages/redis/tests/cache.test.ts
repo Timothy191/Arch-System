@@ -20,17 +20,26 @@ const mockRedisGet = jest.fn();
 const mockRedisSetEx = jest.fn();
 const mockRedisDel = jest.fn();
 
+// The client is imported statically by src/cache.ts, so this factory is evaluated
+// during module load — before the `const` mocks below are initialised. Each
+// property therefore defers to call time.
 jest.mock('../src/client', () => ({
-  getRedisClient: jest.fn().mockResolvedValue({
-    get: mockRedisGet,
-    setEx: mockRedisSetEx,
-    del: mockRedisDel,
+  getRedisClient: jest.fn(async () => ({
+    get: (...args: unknown[]) => mockRedisGet(...args),
+    setEx: (...args: unknown[]) => mockRedisSetEx(...args),
+    del: (...args: unknown[]) => mockRedisDel(...args),
     isOpen: true,
-  }),
-  createRedisSubscriber: jest.fn().mockResolvedValue({
-    subscribe: jest.fn().mockResolvedValue(undefined),
-  }),
+  })),
+  createRedisSubscriber: jest.fn(async () => ({
+    subscribe: jest.fn(async () => undefined),
+  })),
 }));
+
+/**
+ * Unique key per invocation so repeated runs never share Redis state.
+ * `clearMemoryCache()` only resets the in-process L1 layer.
+ */
+const testKey = () => `test:xfetch:${Math.random().toString(36).slice(2, 10)}`;
 
 describe('X-Fetch Cache Wrapper', () => {
   beforeEach(() => {
@@ -43,23 +52,25 @@ describe('X-Fetch Cache Wrapper', () => {
   });
 
   test('Standard Miss & Set', async () => {
+    const key = testKey();
     mockRedisGet.mockResolvedValueOnce(null);
     const mockFn = jest.fn().mockResolvedValue('test-data');
 
-    const result = await cacheWrap('test-key', mockFn, 10);
+    const result = await cacheWrap(key, mockFn, 10);
 
     expect(result).toBe('test-data');
     expect(mockFn).toHaveBeenCalledTimes(1);
 
     // Check that it was saved as XFetchWrapper in Redis
     expect(mockRedisSetEx).toHaveBeenCalledWith(
-      'test-key',
+      key,
       10,
       expect.stringContaining('"__isXFetchWrapper":true')
     );
   });
 
   test('Early Expiration Triggered (Stale Return)', async () => {
+    const key = testKey();
     // Math.random() = 0 means it will definitely trigger if Math.log(random) is used (log(0) = -Infinity)
     // Wait, log(0) is -Infinity, so -1 * delta * -Infinity = Infinity > ttlRemaining (true)
     jest.spyOn(Math, 'random').mockReturnValue(0.0001);
@@ -78,7 +89,7 @@ describe('X-Fetch Cache Wrapper', () => {
     const mockFn = jest.fn().mockResolvedValue('fresh-data');
 
     const start = performance.now();
-    const result = await cacheWrap('test-key', mockFn, 10);
+    const result = await cacheWrap(key, mockFn, 10);
     const latency = performance.now() - start;
 
     // Should return stale immediately
@@ -93,20 +104,21 @@ describe('X-Fetch Cache Wrapper', () => {
 
     expect(mockRedisSetEx).toHaveBeenCalledTimes(1);
     expect(mockRedisSetEx).toHaveBeenCalledWith(
-      'test-key',
+      key,
       10,
       expect.stringContaining('"value":"fresh-data"')
     );
   });
 
   test('Single-Flight Coalescing', async () => {
+    const key = testKey();
     jest.spyOn(Math, 'random').mockReturnValue(0.0001); // Always trigger early expiration
 
     const wrapper: XFetchWrapper<string> = {
       value: 'stale-data',
       ttl: 10,
       delta: 1000,
-      computedAt: Date.now() - 5000,
+      computedAt: Date.now() - 5000, // 5 seconds ago
       __isXFetchWrapper: true,
     };
 
@@ -118,7 +130,7 @@ describe('X-Fetch Cache Wrapper', () => {
     });
 
     // 100 concurrent requests
-    const promises = Array.from({ length: 100 }).map(() => cacheWrap('test-key', mockFn, 10));
+    const promises = Array.from({ length: 100 }).map(() => cacheWrap(key, mockFn, 10));
     const results = await Promise.all(promises);
 
     // All should return the stale data immediately
@@ -132,6 +144,7 @@ describe('X-Fetch Cache Wrapper', () => {
   });
 
   test('Early Expiration Not Triggered', async () => {
+    const key = testKey();
     // Math.random() = 0.99 means log(0.99) is close to 0, so -delta * log(0.99) is small < ttlRemaining
     jest.spyOn(Math, 'random').mockReturnValue(0.99);
 
@@ -147,7 +160,7 @@ describe('X-Fetch Cache Wrapper', () => {
 
     const mockFn = jest.fn().mockResolvedValue('fresh-data');
 
-    const result = await cacheWrap('test-key', mockFn, 10);
+    const result = await cacheWrap(key, mockFn, 10);
 
     expect(result).toBe('cached-data');
 

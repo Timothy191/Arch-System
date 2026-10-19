@@ -38,27 +38,76 @@ global.Response =
 jest.mock('@repo/redis', () => {
   const actual = jest.requireActual('@repo/redis');
   const mockCache = new Map<string, string>();
+  const mockHashes = new Map<string, Map<string, string>>();
+  const mockLists = new Map<string, string[]>();
+  const mockSets = new Map<string, Set<string>>();
   const mockRedisClient = {
     get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
     set: jest.fn(async (key: string, value: string) => {
       mockCache.set(key, value);
+      return 'OK';
     }),
-    del: jest.fn(async (key: string) => {
-      mockCache.delete(key);
+    setEx: jest.fn(async (key: string, _seconds: number, value: string) => {
+      mockCache.set(key, value);
+      return 'OK';
+    }),
+    del: jest.fn(async (keys: string | string[]) => {
+      const arr = Array.isArray(keys) ? keys : [keys];
+      let removed = 0;
+      for (const k of arr) {
+        if (mockCache.delete(k)) removed++;
+      }
+      return removed;
     }),
     incr: jest.fn(async (key: string) => {
       const val = parseInt(mockCache.get(key) || '0', 10) + 1;
       mockCache.set(key, val.toString());
       return val;
     }),
-    // AGENT-TRACE: Mock expire function - parameters prefixed with underscore to fix ESLint warnings
-    // These are unused in the mock implementation but required for interface compatibility
-    expire: jest.fn(async (_key: string, _seconds: number) => {
-      return true;
+    expire: jest.fn(async (_key: string, _seconds: number) => true),
+    hIncrBy: jest.fn(async (key: string, field: string, increment: number) => {
+      const hash = mockHashes.get(key) ?? new Map<string, string>();
+      const next = (parseInt(hash.get(field) || '0', 10) || 0) + increment;
+      hash.set(field, String(next));
+      mockHashes.set(key, hash);
+      return next;
     }),
-    // AGENT-TRACE: Align flushDb name with actual client type
+    hGetAll: jest.fn(async (key: string) => {
+      const hash = mockHashes.get(key);
+      return hash ? Object.fromEntries(hash.entries()) : {};
+    }),
+    lPush: jest.fn(async (key: string, elements: string | string[]) => {
+      const list = mockLists.get(key) ?? [];
+      const items = Array.isArray(elements) ? elements : [elements];
+      list.unshift(...items);
+      mockLists.set(key, list);
+      return list.length;
+    }),
+    lTrim: jest.fn(async (key: string, start: number, stop: number) => {
+      const list = mockLists.get(key) ?? [];
+      mockLists.set(key, list.slice(start, stop + 1));
+      return 'OK';
+    }),
+    lRange: jest.fn(async (key: string, start: number, stop: number) => {
+      const list = mockLists.get(key) ?? [];
+      return stop === -1 ? list.slice(start) : list.slice(start, stop + 1);
+    }),
+    sAdd: jest.fn(async (key: string, members: string | string[]) => {
+      const set = mockSets.get(key) ?? new Set<string>();
+      const arr = Array.isArray(members) ? members : [members];
+      for (const m of arr) set.add(m);
+      mockSets.set(key, set);
+      return arr.length;
+    }),
+    sMembers: jest.fn(async (key: string) => Array.from(mockSets.get(key) ?? [])),
+    scan: jest.fn(async () => ({ cursor: 0, keys: Array.from(mockCache.keys()) })),
+    publish: jest.fn(async () => 1),
+    ping: jest.fn(async () => 'PONG'),
     flushDb: jest.fn(async () => {
       mockCache.clear();
+      mockHashes.clear();
+      mockLists.clear();
+      mockSets.clear();
     }),
     isOpen: true,
   };
@@ -75,21 +124,23 @@ jest.mock('../../packages/redis/src/client', () => {
     get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
     set: jest.fn(async (key: string, value: string) => {
       mockCache.set(key, value);
+      return 'OK';
+    }),
+    setEx: jest.fn(async (key: string, _seconds: number, value: string) => {
+      mockCache.set(key, value);
+      return 'OK';
     }),
     del: jest.fn(async (key: string) => {
       mockCache.delete(key);
+      return 1;
     }),
     incr: jest.fn(async (key: string) => {
       const val = parseInt(mockCache.get(key) || '0', 10) + 1;
       mockCache.set(key, val.toString());
       return val;
     }),
-    // AGENT-TRACE: Mock expire function - parameters prefixed with underscore to fix ESLint warnings
-    // These are unused in the mock implementation but required for interface compatibility
-    expire: jest.fn(async (_key: string, _seconds: number) => {
-      return true;
-    }),
-    // AGENT-TRACE: Align flushDb name with actual client type
+    expire: jest.fn(async (_key: string, _seconds: number) => true),
+    ping: jest.fn(async () => 'PONG'),
     flushDb: jest.fn(async () => {
       mockCache.clear();
     }),
@@ -98,6 +149,7 @@ jest.mock('../../packages/redis/src/client', () => {
   return {
     getRedisClient: jest.fn(async () => mockRedisClient),
     closeRedis: jest.fn(async () => {}),
+    isServerlessRedis: jest.fn(() => false),
   };
 });
 

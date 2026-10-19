@@ -9,7 +9,7 @@ services:
     container_name: arch_system_n8n
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5678:5678"
+      - '127.0.0.1:5678:5678'
     environment:
       - N8N_HOST=${N8N_HOST:-localhost}
       - N8N_PORT=5678
@@ -40,16 +40,17 @@ services:
   # Redis - In-Memory Cache & Pub/Sub
   # ----------------------------------------
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: arch_system_redis
     restart: unless-stopped
     ports:
-      - "127.0.0.1:6379:6379"
+      - '127.0.0.1:6379:6379'
     command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be configured} --appendonly yes
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?REDIS_PASSWORD must be configured}", "ping"]
+      test:
+        ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD:?REDIS_PASSWORD must be configured}', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,7 +63,7 @@ services:
     container_name: arch_system_postgres
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5432:5432"
+      - '127.0.0.1:5432:5432'
     environment:
       - POSTGRES_USER=${DB_POSTGRESDB_USER:-postgres}
       - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD:?DB_POSTGRESDB_PASSWORD must be configured}
@@ -70,7 +71,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_POSTGRESDB_USER:-postgres} -d ${DB_POSTGRESDB_DATABASE:-n8n}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DB_POSTGRESDB_USER:-postgres} -d ${DB_POSTGRESDB_DATABASE:-n8n}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

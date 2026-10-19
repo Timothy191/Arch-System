@@ -26,6 +26,9 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana-provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../observability/grafana-dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - plantcor-monitoring
 

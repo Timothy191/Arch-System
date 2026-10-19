@@ -144,6 +144,18 @@ export async function createDepartment(payload: Record<string, unknown>) {
     });
   }
 
+  const { data: callerEmployee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_id', user.id)
+    .single();
+
+  if (callerEmployee?.role !== 'admin') {
+    throw new AuthError('Forbidden: admin role required', {
+      context: { action: 'createDepartment', userId: user.id },
+    });
+  }
+
   const { error } = await supabase.from('departments').insert(payload);
 
   if (error) {
@@ -175,6 +187,18 @@ export async function getUsersAdminData(): Promise<{
   if (!user) {
     throw new AuthError('Unauthorized', {
       context: { action: 'getUsersAdminData' },
+    });
+  }
+
+  const { data: callerEmployee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_id', user.id)
+    .single();
+
+  if (callerEmployee?.role !== 'admin') {
+    throw new AuthError('Forbidden: admin role required', {
+      context: { action: 'getUsersAdminData', userId: user.id },
     });
   }
 
@@ -313,6 +337,16 @@ export async function upsertEmployeeAdmin(
 
   if (!user) {
     return { success: false, error: 'Unauthorized' };
+  }
+
+  const { data: callerEmployee } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_id', user.id)
+    .single();
+
+  if (callerEmployee?.role !== 'admin') {
+    return { success: false, error: 'Forbidden: admin role required' };
   }
 
   const resolvedFullName =

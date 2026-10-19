@@ -110,6 +110,8 @@
     "memory:index": "node tools/scripts/smart-indexer.cjs",
     "memory:recall": "node tools/scripts/smart-indexer.cjs --query",
     "token:analyze": "node tools/scripts/token-tracker.cjs analyze",
+    "token:sync": "node tools/scripts/token-tracker.cjs sync",
+    "token:record": "node tools/scripts/token-tracker.cjs record",
     "token:prune": "node tools/scripts/token-tracker.cjs prune",
     "token:budget-check": "node tools/scripts/token-tracker.cjs budget-check",
     "context:debloat:aggressive": "node tools/scripts/context-debloat.cjs --aggressive",

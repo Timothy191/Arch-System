@@ -9,7 +9,7 @@
  * - InterviewReady System Design: Cache penetration defense (negative/null caching)
  */
 
-import { cacheGet, cacheSet, memoryGet, memorySet } from './cache';
+import { cacheGet, cacheSet } from './cache';
 
 // -----------------------------------------------------------------------------
 // 1. TinyLFU Frequency Tracker (Dragonfly / Redis Cache Design)
@@ -176,6 +176,21 @@ interface SwrEntry<T> {
 const swrInFlight = new Map<string, Promise<any>>();
 const lastDedupedTimes = new Map<string, number>();
 
+/**
+ * `lastDedupedTimes` was previously never pruned: every distinct key ever
+ * passed to swrCacheWrap leaked an entry for the lifetime of the process.
+ */
+const MAX_DEDUPE_TRACKERS = 5000;
+
+function recordDedupedTime(key: string, at: number): void {
+  if (lastDedupedTimes.size >= MAX_DEDUPE_TRACKERS) {
+    // Map preserves insertion order; the head is the oldest tracker.
+    const oldest = lastDedupedTimes.keys().next();
+    if (!oldest.done) lastDedupedTimes.delete(oldest.value);
+  }
+  lastDedupedTimes.set(key, at);
+}
+
 export interface SwrOptions {
   baseTtlSeconds?: number;
   dedupingIntervalMs?: number; // SWR deduping window (default: 2000ms)
@@ -230,7 +245,9 @@ export function swrCacheWrap<T>(
         }
 
         // Stale: Return stale data immediately, revalidate asynchronously in background (SWR pattern)
-        const bgReplaced = false;
+        // `slot.promise` breaks the self-reference so the finally block can
+        // compare identity without referencing `bgPromise` before assignment.
+        const slot: { promise: Promise<T> | undefined } = { promise: undefined };
         const bgPromise = (async () => {
           try {
             const freshData = await fetcher();
@@ -246,16 +263,18 @@ export function swrCacheWrap<T>(
             // Keep serving stale data on revalidation error
             return cached.data;
           } finally {
-            if (!bgReplaced) {
+            // The background revalidation owns the slot until it settles.
+            if (swrInFlight.get(key) === slot.promise) {
               swrInFlight.delete(key);
             }
           }
         })();
 
         // Replace the current lookup promise with the background fetch promise for deduping
+        slot.promise = bgPromise;
         isReplaced = true;
         swrInFlight.set(key, bgPromise);
-        lastDedupedTimes.set(key, Date.now());
+        recordDedupedTime(key, Date.now());
 
         return cached.data;
       }
@@ -298,7 +317,7 @@ export function swrCacheWrap<T>(
   })();
 
   swrInFlight.set(key, promise);
-  lastDedupedTimes.set(key, now);
+  recordDedupedTime(key, now);
 
   return promise;
 }

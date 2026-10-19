@@ -15,7 +15,12 @@ scrape_configs:
     static_configs:
       - targets: ['otel-collector:8889']
 
-  # - job_name: "plantcor-portal"
-  #   metrics_path: "/api/metrics"
-  #   static_configs:
-  #     - targets: ["host.docker.internal:3000"] # Next.js portal running locally (commented out until active on port 3000)
+  - job_name: 'plantcor-portal'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+
+  - job_name: 'plantcor-portal-control-room'
+    metrics_path: '/api/metrics/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:3000']

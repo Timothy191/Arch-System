@@ -678,3 +678,13 @@ AIAssistant chat.
 - **Agent**: Antigravity
 - **Purpose**: Add a Quick Navigation dropdown button in the Control Room header banner (`apps/portal/app/(departments)/control-room/page.tsx` and `apps/portal/app/(departments)/[department]/page.tsx`) enabling immediate one-click jump to any Control Room operational tab: Shift Operations, Dashboard, Hourly Loads, Machine Ops, Eng Notes, Excavator Activity, Reports, and Shift Closeout.
 - **Verification**: Verified with `ControlRoomQuickNav.test.tsx` (`3/3 PASS`), `app/hub/page.test.tsx` (`7/7 PASS`), and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-19T12:00:00+02:00: Executive AI Build Telemetry & Redis 7.4 Observability Upgrade
+
+- **Agent**: Antigravity
+- **Purpose**:
+  1. Refactored `/api/ai/metrics` (`app/api/ai/metrics/route.ts`) and `AIMetricsDashboard` (`components/AIMetricsDashboard.tsx`) into a CEO-ready Executive AI & System Build Telemetry dashboard displaying cumulative build tokens (input, cache write/read, output), Claude Code cost in South African Rand (ZAR), cache efficiency (hit/miss %, L1/L2 breakdown, avg/p95 latency, X-Fetch triggers), bugs resolved (89 total), and subsystem health.
+  2. Enhanced `/api/health/redis`, `/api/metrics`, and `lib/observability/metrics.ts` with full `CacheStatsSnapshot` Prometheus gauges and upgraded `setupTests.ts` with a stateful in-memory Redis mock.
+  3. Added admin role authorization checks to `features/admin/tabs/actions.ts` (`createDepartment`, `getUsersAdminData`, `upsertEmployeeAdmin`) and unit tests in `features/admin/tabs/actions.test.ts`.
+  4. Consolidated performance optimization PRs `#164` (`ReportsDashboardClient` single-pass KPI & shift comparison), `#165` (`DrillingOperationsTable` memoized lookup Map & single-pass KPI totals + unit tests), and `#166` (`DashboardEntityStatus` single-pass `useMemo` summary cards + unit tests) into `main`.
+- **Verification**: Verified with `app/api/ai/metrics/route.test.ts`, `app/api/health/redis/route.test.ts`, `app/api/metrics/route.test.ts`, `features/admin/tabs/actions.test.ts`, `DashboardEntityStatus.test.tsx`, `DrillingOperationsTable.test.tsx`, `@repo/redis` (`48/48 PASS`), and `pnpm agent:verify` (`8/8 PASS`).

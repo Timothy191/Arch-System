@@ -6,22 +6,56 @@ import {
   recordKeyAccess,
   swrCacheWrap,
 } from '../src/adaptive';
-import { clearMemoryCache } from '../src/cache';
+import { cacheDelete, clearMemoryCache } from '../src/cache';
+
+const rawStore = new Map<string, string>();
+
+jest.mock('../src/stats', () => ({
+  recordCacheHit: jest.fn(),
+  recordCacheMiss: jest.fn(),
+  recordRedisError: jest.fn(),
+  recordXFetchTrigger: jest.fn(),
+}));
+
+jest.mock('../src/client', () => ({
+  getRedisClient: jest.fn(async () => ({
+    get: jest.fn(async (key: string) => rawStore.get(key) ?? null),
+    setEx: jest.fn(async (key: string, _ttl: number, value: string) => {
+      rawStore.set(key, value);
+      return 'OK';
+    }),
+    del: jest.fn(async (key: string) => (rawStore.delete(key) ? 1 : 0)),
+    isOpen: true,
+  })),
+  createRedisSubscriber: jest.fn(async () => ({
+    subscribe: jest.fn(async () => undefined),
+  })),
+  closeRedis: jest.fn(async () => undefined),
+}));
+
+const runId = `${process.pid.toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+const keyFor = (label: string) => `test:swr:${label}:${runId}`;
+
+const createdKeys: string[] = [];
+const track = (key: string) => {
+  createdKeys.push(key);
+  return key;
+};
 
 describe('Autonomously Adaptive Caching Engine', () => {
   beforeEach(() => {
+    rawStore.clear();
     clearMemoryCache();
     jest.clearAllMocks();
   });
 
-  afterAll(async () => {
-    const { closeRedis } = await import('../src/client');
-    await closeRedis();
+  afterEach(async () => {
+    await Promise.all(createdKeys.splice(0).map((key) => cacheDelete(key)));
   });
 
   describe('TinyLFU Frequency Tracker (Dragonfly/Redis)', () => {
     it('accurately increments and tracks access frequency', () => {
-      const key = 'test:dept:drilling:frequency';
+      const key = track(keyFor('frequency'));
       expect(getKeyFrequency(key)).toBe(0);
 
       const score1 = recordKeyAccess(key);
@@ -35,7 +69,7 @@ describe('Autonomously Adaptive Caching Engine', () => {
 
   describe('Adaptive TTL with Avalanche Jitter', () => {
     it('computes dynamic TTL scaled by key access frequency', () => {
-      const key = 'test:metrics:telemetry';
+      const key = track(keyFor('metrics'));
       const baseTtl = 60;
 
       // Single access -> baseline TTL with +/- 10% jitter
@@ -94,7 +128,7 @@ describe('Autonomously Adaptive Caching Engine', () => {
         return { status: 'operational', timestamp: Date.now() };
       };
 
-      const key = 'test:swr:coalesce';
+      const key = track(keyFor('coalesce'));
 
       // 5 concurrent requests executed at the exact same moment
       const results = await Promise.all([
@@ -117,7 +151,7 @@ describe('Autonomously Adaptive Caching Engine', () => {
         return null;
       };
 
-      const key = 'test:swr:null-penetration';
+      const key = track(keyFor('null-penetration'));
 
       const res1 = await swrCacheWrap(key, nullFetcher, { negativeCacheTtl: 10 });
       expect(res1).toBeNull();
@@ -130,7 +164,7 @@ describe('Autonomously Adaptive Caching Engine', () => {
     });
 
     it('supports optimistic mutation via mutateCache', async () => {
-      const key = 'test:swr:mutation';
+      const key = track(keyFor('mutation'));
       const initial = { count: 1 };
       await mutateCache(key, initial);
 

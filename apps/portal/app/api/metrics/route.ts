@@ -34,8 +34,11 @@ portal_cache_errors_total ${cacheStats.redisErrors}
 portal_cache_latency_ms{metric="avg"} ${cacheStats.avgLatencyMs}
 portal_cache_latency_ms{metric="p95"} ${cacheStats.p95LatencyMs}
 
-`;
+# HELP portal_cache_xfetch_triggers_total Cumulative X-Fetch probabilistic early expirations.
+# TYPE portal_cache_xfetch_triggers_total counter
+portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 
+`;
   // 2. Inngest Job Metrics
   body += `# HELP portal_inngest_job_executions_total Total number of Inngest job executions.
 # TYPE portal_inngest_job_executions_total counter

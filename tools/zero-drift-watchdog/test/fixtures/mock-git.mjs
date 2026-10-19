@@ -14,10 +14,12 @@ import path from 'node:path';
  * @param {boolean} [options.initialCommit=true]
  * @param {string} [options.remoteUrl]
  * @param {string} [options.prefix='zdw-repo-']
+ * @param {boolean} [options.noRemote]
  */
 export function createMockGitRepo(options = {}) {
   const targetBranch = options.branch ?? 'main';
   const prefix = options.prefix ?? 'zdw-repo-';
+  // Use the operating system's temporary directory (respects TMPDIR env var)
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 
   let bareOriginDir = /** @type {string|null} */ (null);
@@ -56,12 +58,10 @@ export function createMockGitRepo(options = {}) {
   }
 
   // 2. Initial Commit if requested
-  let initialSha = '';
   if (options.initialCommit) {
     fs.writeFileSync(path.join(tmpDir, 'README.md'), '# Zero Drift Sandbox\n');
     runGit('add README.md');
     runGit('commit -m "chore: initial repository commit"');
-    initialSha = runGit('rev-parse HEAD');
   }
 
   // 3. Set remote if requested directly or default fallback

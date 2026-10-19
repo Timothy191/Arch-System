@@ -1,4 +1,4 @@
-import { getRedisClient } from '@repo/redis';
+import { getCacheStats, getRedisClient, isServerlessRedis } from '@repo/redis';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest) {
@@ -17,10 +17,24 @@ export async function GET(_req: NextRequest) {
     degraded = true;
   }
 
+  let cacheStats = null;
+  try {
+    if (typeof getCacheStats === 'function') {
+      cacheStats = await getCacheStats();
+    }
+  } catch {
+    // Non-fatal in health check
+  }
+
+  const serverless = typeof isServerlessRedis === 'function' ? isServerlessRedis() : false;
+
   return NextResponse.json(
     {
       status: degraded ? 'degraded' : 'healthy',
+      engine: 'redis-7.x',
+      mode: serverless ? 'serverless-rest' : 'tcp',
       latencyMs: Date.now() - startedAt,
+      cacheStats,
       timestamp: new Date().toISOString(),
     },
     { status: degraded ? 503 : 200 }

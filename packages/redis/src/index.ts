@@ -20,15 +20,53 @@ export {
   cacheSet,
   cacheSetWithTags,
   cacheWrap,
+  cacheWriteThroughSupabase,
   clearMemoryCache,
+  memoryDeleteByPrefix,
+  memoryGet,
+  memoryLiveSize,
+  memorySet,
+  memorySweep,
 } from './cache';
-export { closeRedis, createRedisSubscriber, getRedisClient } from './client';
-export { buildCacheKey, CACHE_TTL_REGISTRY, CacheCategory, type CacheTtlConfig } from './registry';
-export { ServerlessRedisClient, serverlessRedis } from './serverless-client';
 export {
+  closeRedis,
+  createRedisSubscriber,
+  getRedisClient,
+  isServerlessRedis,
+} from './client';
+export {
+  assertDurabilityBoundary,
+  buildCacheKey,
+  CACHE_TTL_REGISTRY,
+  CacheCategory,
+  type CacheTtlConfig,
+  cacheCategoryFromKey,
+  clearSupabaseFallbacks,
+  DEFAULT_L1_TTL_SECONDS,
+  type DurabilityPolicy,
+  isDurableKey,
+  l1TtlForKey,
+  MAX_L1_TTL_SECONDS,
+  registerSupabaseFallback,
+  resolveSupabaseFallback,
+  type SupabaseFallbackResolver,
+  unregisterSupabaseFallback,
+} from './registry';
+export {
+  ServerlessRedisClient,
+  type ServerlessRedisConfig,
+  serverlessRedis,
+} from './serverless-client';
+export {
+  type CacheStatsSnapshot,
+  flushStats,
   getCacheStats,
+  persistCacheStatsSnapshot,
   recordCacheHit,
   recordCacheMiss,
   recordRedisError,
+  recordXFetchTrigger,
+  registerStatsPersistenceSink,
   resetCacheStats,
 } from './stats';
+export { shouldEarlyExpire, type XFetchWrapper } from './xfetch';

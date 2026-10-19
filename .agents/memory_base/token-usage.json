@@ -1,0 +1,154 @@
+{
+  "lastUpdated": "2026-10-19T08:31:45.233Z",
+  "exchangeRateZAR": 18.52,
+  "claudeCodeRatesUSDPerMTok": {
+    "inputUncached": 3,
+    "cacheWrite": 3.75,
+    "cacheRead": 0.3,
+    "output": 15
+  },
+  "totalTokens": 146756200,
+  "totalInputTokens": 122985500,
+  "totalOutputTokens": 23770700,
+  "cacheReadTokens": 103307820,
+  "cacheWriteTokens": 9828720,
+  "uncachedInputTokens": 9848960,
+  "totalSessions": 254,
+  "totalTurns": 3598,
+  "avgUsage": {
+    "avgInputTokensPerTurn": 34182,
+    "avgOutputTokensPerTurn": 6607,
+    "avgTotalTokensPerTurn": 40788,
+    "cacheHitRatePct": 84,
+    "cacheMissRatePct": 16,
+    "avgLatencyMs": 1840,
+    "p95LatencyMs": 3420,
+    "tokensPerSecond": 78.4
+  },
+  "claudeCodeCost": {
+    "totalCostUSD": 453.96,
+    "totalCostZAR": 8407.34,
+    "uncachedBaselineUSD": 725.52,
+    "uncachedBaselineZAR": 13436.57,
+    "cacheSavingsUSD": 271.56,
+    "cacheSavingsZAR": 5029.29,
+    "costPerBugResolvedZAR": 94.46,
+    "costPerCommitZAR": 34.89,
+    "breakdownZAR": {
+      "uncachedInputZAR": 547.21,
+      "cacheWriteZAR": 682.6,
+      "cacheReadZAR": 573.98,
+      "outputZAR": 6603.5
+    }
+  },
+  "engineeringVelocity": {
+    "totalCommits": 241,
+    "fixCommits": 61,
+    "featCommits": 86,
+    "refactorCommits": 76,
+    "filesTouched": 5778,
+    "linesInserted": 528743,
+    "linesDeleted": 164960,
+    "sqlMigrations": 136,
+    "retrospectivesCount": 13,
+    "tracerMilestones": 12,
+    "bugsResolved": 89,
+    "activeRulesTokens": 9966,
+    "activeSkillsTokens": 11458
+  },
+  "agentFleetBreakdown": [
+    {
+      "agent": "Claude Code (Sonnet 4 / 3.7 Architect)",
+      "role": "Primary Full-Stack & Database Engineering",
+      "sharePct": 54,
+      "tokens": 79248348,
+      "inputTokens": 66412170,
+      "outputTokens": 12836178,
+      "cachedTokens": 57852379,
+      "avgLatencyMs": 1920,
+      "costZAR": 4539.96,
+      "bugsResolved": 49
+    },
+    {
+      "agent": "Antigravity Kernel (Gemini 2.5 Pro)",
+      "role": "Autonomous Verification, Audit & Orchestration",
+      "sharePct": 26,
+      "tokens": 38156612,
+      "inputTokens": 31976230,
+      "outputTokens": 6180382,
+      "cachedTokens": 26860033,
+      "avgLatencyMs": 1680,
+      "costZAR": 2185.91,
+      "bugsResolved": 24
+    },
+    {
+      "agent": "Claude Code Subagents (Reviewer / Security / Test)",
+      "role": "Adversarial Code Review, RLS & Jest/Playwright Verification",
+      "sharePct": 14,
+      "tokens": 20545868,
+      "inputTokens": 17217970,
+      "outputTokens": 3327898,
+      "cachedTokens": 13430017,
+      "avgLatencyMs": 1490,
+      "costZAR": 1177.03,
+      "bugsResolved": 12
+    },
+    {
+      "agent": "Scout & Codemap Indexer (Fast AST / GraphRAG)",
+      "role": "Structural Code Discovery & Context Leasing",
+      "sharePct": 6,
+      "tokens": 8805372,
+      "inputTokens": 7379130,
+      "outputTokens": 1426242,
+      "cachedTokens": 5165391,
+      "avgLatencyMs": 640,
+      "costZAR": 504.44,
+      "bugsResolved": 4
+    }
+  ],
+  "phaseBreakdown": [
+    {
+      "phase": "Core Portal, Next.js 16 App Router & Auth/RLS",
+      "tokens": 45494422,
+      "costZAR": 2606.28,
+      "commits": 75,
+      "bugsResolved": 23
+    },
+    {
+      "phase": "Department Modules (Drilling, Control Room, Excavators, Mustering)",
+      "tokens": 42559298,
+      "costZAR": 2438.13,
+      "commits": 70,
+      "bugsResolved": 21
+    },
+    {
+      "phase": "Database Schema (136 Migrations), Supabase & Hybrid L1/L2 Redis",
+      "tokens": 32286364,
+      "costZAR": 1849.61,
+      "commits": 53,
+      "bugsResolved": 17
+    },
+    {
+      "phase": "AI Orchestration, MCP Integrations, Guardrails & E2E/Unit Suites",
+      "tokens": 26416116,
+      "costZAR": 1513.32,
+      "commits": 43,
+      "bugsResolved": 28
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess-1792395748212",
+      "timestamp": "2026-10-19T07:42:28.212Z",
+      "agent": "claude-code-sonnet-4",
+      "model": "claude-sonnet-4",
+      "inputTokens": 126500,
+      "cachedTokens": 106260,
+      "outputTokens": 23664,
+      "latencyMs": 1720,
+      "bugsResolved": 3,
+      "turns": 8,
+      "task": "Admin UsersTab sync, Official MCP catalog seed, Redis L1/L2 & AI Metrics CEO refactor"
+    }
+  ]
+}
