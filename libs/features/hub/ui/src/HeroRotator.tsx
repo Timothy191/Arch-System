@@ -129,12 +129,7 @@ export function HeroRotator({
         description: dept.description,
         assetOverline,
         assetSubtitle,
-        category:
-          dept.type === 'control_room'
-            ? 'SCADA & Telemetry'
-            : dept.type === 'satellite'
-              ? 'Orbital Intelligence'
-              : 'Field Operations',
+        category: dept.type === 'control_room' ? 'SCADA & Telemetry' : 'Field Operations',
         image: `/images/departments/${dept.name}.jpg`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',

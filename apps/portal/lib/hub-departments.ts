@@ -4,6 +4,20 @@ import { withCache } from '@/lib/cache-utils';
 import { cachedRSC } from '@/lib/server-cache';
 
 /**
+ * Hub department access and employee data utilities.
+ *
+ * This module centralizes department-related data fetching logic used across
+ * the Hub route (layout.tsx and page.tsx). All functions implement dual-layer
+ * caching (RSC cache + Redis) to ensure consistent cache coherency and prevent
+ * redundant database queries during navigation.
+ *
+ * Functions:
+ * - getAccessibleDepartmentNames: Department access control
+ * - getEmployeeRole: User role authorization
+ * - getEmployeeClearance: Employee data compliance status
+ */
+
+/**
  * Fetch the list of department names the given user can access.
  *
  * AGENT-TRACE: Shared between hub/layout.tsx and hub/page.tsx so both use the

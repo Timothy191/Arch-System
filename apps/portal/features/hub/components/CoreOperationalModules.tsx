@@ -4,8 +4,12 @@ import type { Department } from '@repo/departments/data-access';
 import { cn } from '@repo/ui/lib/utils';
 import { ArrowUpRight, BarChart3, Boxes, Search, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { DepartmentCard } from '@/features/hub';
+import { useClearanceNotification } from '@/hooks/useClearanceNotification';
+import { useDepartmentFilter } from '@/hooks/useDepartmentFilter';
+import { usePinnedDepartments } from '@/hooks/usePinnedDepartments';
+import { dispatchActiveModuleChange } from '@/lib/event-manager';
 import type { EmployeeClearance } from '@/lib/hub-departments';
 
 interface CoreOperationalModulesProps {
@@ -14,47 +18,34 @@ interface CoreOperationalModulesProps {
   canSeeExecutive?: boolean;
 }
 
-type FilterCategory = 'all' | 'pinned' | 'active' | 'critical';
-
 // AGENT-TRACE: Refactored Core Operational Modules component for Hub page with interactive search, category/status filtering, and pinned priority ordering.
+// Business logic extracted to custom hooks for cleaner separation of concerns.
 export function CoreOperationalModules({
   departments,
   clearance = { state: 'clear', details: [] },
   canSeeExecutive = false,
 }: CoreOperationalModulesProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
-  const [pinnedNames, setPinnedNames] = useState<Set<string>>(new Set());
+  // Custom hooks for business logic
+  const { pinnedNames, handlePinnedChange } = usePinnedDepartments({ departments });
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeFilter,
+    setActiveFilter,
+    filteredDepartments,
+    pinnedCount,
+    activeCount,
+    criticalCount,
+  } = useDepartmentFilter({ departments, pinnedNames });
 
-  const handlePinnedChange = (departmentName: string, pinned: boolean) => {
-    setPinnedNames((current) => {
-      const next = new Set(current);
-      if (pinned) next.add(departmentName);
-      else next.delete(departmentName);
-      return next;
-    });
-    const targetDept = departments.find((d) => d.name === departmentName);
-    if (targetDept && typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('arch:active-module-change', {
-          detail: {
-            name: targetDept.name,
-            title: targetDept.displayName,
-          },
-        })
-      );
-    }
-  };
+  // Route clearance notices to the Top Taskbar Bell Notification Center
+  useClearanceNotification(clearance);
 
-  const handleFilterSelect = (filter: FilterCategory) => {
+  const handleFilterSelect = (filter: typeof activeFilter) => {
     setActiveFilter(filter);
     if (typeof window === 'undefined') return;
     if (filter === 'all') {
-      window.dispatchEvent(
-        new CustomEvent('arch:active-module-change', {
-          detail: { name: 'overview', title: 'Central Hub' },
-        })
-      );
+      dispatchActiveModuleChange({ name: 'overview', title: 'Central Hub' });
       return;
     }
     const matching = departments.find((d) => {
@@ -64,97 +55,9 @@ export function CoreOperationalModules({
       return false;
     });
     if (matching) {
-      window.dispatchEvent(
-        new CustomEvent('arch:active-module-change', {
-          detail: { name: matching.name, title: matching.displayName },
-        })
-      );
+      dispatchActiveModuleChange({ name: matching.name, title: matching.displayName });
     }
   };
-
-  // Load pinned departments from localStorage on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const pinned = new Set<string>();
-    departments.forEach((dept) => {
-      if (localStorage.getItem(`pinned_dept_${dept.name}`) === 'true') {
-        pinned.add(dept.name);
-      }
-    });
-    setPinnedNames(pinned);
-  }, [departments]);
-
-  // Route clearance notices to the Top Taskbar Bell Notification Center
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (clearance.state === 'clear') return;
-
-    const message =
-      clearance.state === 'unlinked'
-        ? 'No personnel record linked to your account.'
-        : `Employee data requirements need attention: ${clearance.details.join('; ')}.${
-            clearance.state === 'expired'
-              ? ' Contact your administrator — medical/induction edits are admin-controlled.'
-              : ''
-          }`;
-
-    window.dispatchEvent(
-      new CustomEvent('arch-system-notification', {
-        detail: {
-          id: `clearance-${clearance.state}`,
-          title: 'Employee Clearance Notice',
-          message,
-          unread: true,
-        },
-      })
-    );
-  }, [clearance]);
-
-  // Filter and sort departments
-  const filteredDepartments = useMemo(() => {
-    return departments
-      .filter((dept) => {
-        // Search query filter
-        const matchesSearch =
-          searchQuery.trim() === '' ||
-          dept.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          dept.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          dept.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-        if (!matchesSearch) return false;
-
-        // Category filter
-        if (activeFilter === 'pinned') {
-          return pinnedNames.has(dept.name);
-        }
-        if (activeFilter === 'active') {
-          return dept.status === 'active';
-        }
-        if (activeFilter === 'critical') {
-          return dept.status === 'alert' || dept.status === 'maintenance';
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        // Pinned modules float to the top
-        const aPinned = pinnedNames.has(a.name);
-        const bPinned = pinnedNames.has(b.name);
-        if (aPinned && !bPinned) return -1;
-        if (!aPinned && bPinned) return 1;
-        return 0;
-      });
-  }, [departments, searchQuery, activeFilter, pinnedNames]);
-
-  const pinnedCount = pinnedNames.size;
-  const activeCount = useMemo(
-    () => departments.filter((d) => d.status === 'active').length,
-    [departments]
-  );
-  const criticalCount = useMemo(
-    () => departments.filter((d) => d.status === 'alert' || d.status === 'maintenance').length,
-    [departments]
-  );
 
   // Keyboard shortcut: Press '/' or 'Cmd+K' to focus module search
   useEffect(() => {
