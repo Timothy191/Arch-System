@@ -10,12 +10,7 @@ import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import {
-  CoreOperationalModules,
-  DepartmentReviews,
-  HeroBackground,
-  HeroRotator,
-} from '@/features/hub';
+import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
 import {
   getAccessibleDepartmentNames,
@@ -275,9 +270,6 @@ export default async function HubPage() {
           canSeeExecutive={canSeeExecutive}
         />
       )}
-
-      {/* Department & Operational Testimonials Double Marquee */}
-      <DepartmentReviews />
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
       {pluginWidgets.length > 0 && (

@@ -50,7 +50,7 @@ describe('Next.js Skeleton UIs (loading.tsx)', () => {
       // Operational modules grid with 8 uiverse-cards
       const deptCards = container.querySelectorAll('.uiverse-card');
       expect(deptCards.length).toBe(8);
-      expect(deptCards[0]).toHaveClass('h-[290px]');
+      expect(deptCards[0]).toHaveClass('h-[250px]');
 
       // Active metrics chart placeholder
       const metricsChart = container.querySelector('.h-40');

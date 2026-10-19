@@ -94,9 +94,6 @@ const REVIEWS = [
   },
 ];
 
-const firstRow = REVIEWS.slice(0, REVIEWS.length / 2);
-const secondRow = REVIEWS.slice(REVIEWS.length / 2);
-
 import { MessageSquareQuote } from 'lucide-react';
 
 interface ReviewCardProps {
@@ -107,7 +104,7 @@ interface ReviewCardProps {
   color: string;
 }
 
-function ReviewCard({ img, name, username, body }: ReviewCardProps) {
+function ReviewTickerItem({ img, name, username, body }: ReviewCardProps) {
   const initials = name
     .split(' ')
     .map((word) => word[0])
@@ -116,77 +113,52 @@ function ReviewCard({ img, name, username, body }: ReviewCardProps) {
     .toUpperCase();
 
   return (
-    <div className="w-[320px] shrink-0 [perspective:1000px] py-1">
-      <div className="uiverse-card group/card relative h-full rounded-2xl bg-white/85 backdrop-blur-xl border border-white/65 ring-1 ring-black/[0.08] shadow-[0_14px_28px_-6px_rgba(15,23,42,0.18),0_6px_12px_-3px_rgba(15,23,42,0.1),inset_0_1.5px_0_0_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(15,23,42,0.06)] [transform-style:preserve-3d] [transform:perspective(1000px)_rotateX(2deg)_translateZ(0)] hover:[transform:perspective(1000px)_rotateX(5deg)_rotateY(-3deg)_translateY(-6px)_translateZ(12px)] hover:shadow-[0_24px_44px_-8px_rgba(15,23,42,0.26),0_10px_20px_-4px_rgba(15,23,42,0.14),inset_0_1.5px_0_0_rgba(255,255,255,1),inset_0_-2px_4px_rgba(15,23,42,0.08)] hover:border-arch-accent-blue/40 transition-all duration-300 ease-out will-change-transform">
-        <div className="p-4 sm:p-5 flex flex-col justify-between h-full select-none [transform:translateZ(10px)]">
-          <div className="flex flex-row items-center gap-3">
-            <Avatar
-              size={36}
-              src={img}
-              letter={initials}
-              title={name}
-              className="shrink-0 shadow-md ring-1 ring-white/80"
-            />
-            <div className="flex flex-col text-left min-w-0">
-              <span className="text-xs sm:text-sm font-semibold text-arch-text-primary group-hover/card:text-arch-accent-blue transition-colors truncate">
-                {name}
-              </span>
-              <p className="text-[11px] font-medium text-arch-text-tertiary truncate">{username}</p>
-            </div>
-          </div>
-          <blockquote className="mt-3 text-xs text-arch-text-secondary leading-relaxed text-left line-clamp-2 italic">
-            &ldquo;{body}&rdquo;
-          </blockquote>
-        </div>
-      </div>
+    <div className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-xs hover:border-arch-accent-blue/35 transition-colors select-none">
+      <Avatar
+        size={18}
+        src={img}
+        letter={initials}
+        title={name}
+        className="shrink-0 ring-1 ring-white/80"
+      />
+      <span className="text-[11px] font-semibold text-arch-text-primary">{name}</span>
+      <span className="text-[10px] font-mono text-arch-text-tertiary">{username}</span>
+      <span className="text-arch-text-tertiary/40" aria-hidden="true">
+        ·
+      </span>
+      <span className="text-[11px] text-arch-text-secondary italic">&ldquo;{body}&rdquo;</span>
     </div>
   );
 }
 
 export function DepartmentReviews() {
-  // AGENT-TRACE: Using CSS mask-image gradient to smoothly fade marquee edges over the dynamic background video
+  // AGENT-TRACE: Single-line animated marquee ticker with smooth horizontal edge fade
   const maskStyle = {
-    maskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
-    WebkitMaskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
+    maskImage: 'linear-gradient(to right, transparent, white 6%, white 94%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, white 6%, white 94%, transparent)',
   };
 
   return (
     <div
-      className="space-y-4 animate-fade-up group/row"
-      style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
+      className="flex items-center gap-2.5 w-full min-w-0 overflow-hidden"
+      aria-label="Operational Feedback & Department Logs"
     >
-      <header className="w-full rounded-2xl liquid-glass-light border border-white/45 ring-1 ring-inset ring-white/75 shadow-window px-5 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-          <span className="p-1.5 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-xs flex items-center justify-center">
-            <MessageSquareQuote className="w-4 h-4" />
-          </span>
-          Operational Feedback &amp; Department Logs
-        </h2>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-green/10 border border-accent-green/25 text-accent-green text-[10px] font-mono font-semibold uppercase tracking-wider">
-          <span
-            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
-            aria-hidden="true"
-          />
-          Verified Shift Logs · 9 Units
-        </span>
-      </header>
+      <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-arch-accent-blue/10 border border-arch-accent-blue/20 text-arch-accent-blue text-[10px] font-semibold tracking-tight shrink-0">
+        <MessageSquareQuote className="w-3 h-3" aria-hidden="true" />
+        Department Logs
+      </span>
+      <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-green/10 border border-accent-green/25 text-accent-green text-[10px] font-mono font-semibold uppercase tracking-wider shrink-0">
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
+          aria-hidden="true"
+        />
+        9 Units
+      </span>
 
-      <div
-        className="relative flex w-full flex-col items-center justify-center overflow-hidden [perspective:1200px]"
-        style={maskStyle}
-      >
-        <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-3">
-          {firstRow.map((review) => (
-            <ReviewCard key={review.username} {...review} />
-          ))}
-        </Marquee>
-        <Marquee
-          reverse
-          pauseOnHover
-          className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-3"
-        >
-          {secondRow.map((review) => (
-            <ReviewCard key={review.username} {...review} />
+      <div className="relative flex-1 min-w-0 overflow-hidden" style={maskStyle}>
+        <Marquee pauseOnHover className="[--duration:45s] [--gap:0.75rem] py-0.5">
+          {REVIEWS.map((review) => (
+            <ReviewTickerItem key={review.username} {...review} />
           ))}
         </Marquee>
       </div>

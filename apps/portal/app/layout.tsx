@@ -12,6 +12,7 @@ import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
 import { SystemTrayPill } from '@/components/system/SystemTray';
+import { DepartmentReviews } from '@/features/hub';
 import ClientProviders from './ClientProviders';
 
 const HeaderWidgets = dynamic(
@@ -174,30 +175,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>
 
-                {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}
+                {/* Global footer landmark (WCAG 1.3.1) merged with single-line animated operational logs & eve branding */}
                 <footer
                   role="contentinfo"
                   aria-label="Site footer"
-                  className="relative z-10 mt-4 px-6 py-4 border-t border-[var(--border-subtle)] text-[10px] text-[var(--text-muted)] select-none"
+                  className="relative z-10 mt-4 px-4 sm:px-6 py-2.5 border-t border-[var(--border-subtle)] bg-white/55 backdrop-blur-md text-[10px] text-[var(--text-muted)] select-none"
                 >
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-3 w-full">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="uppercase tracking-wider font-medium text-[var(--text-secondary)]">
                         Arch OS
                       </span>
                       <span className="text-[var(--text-muted)]/60">·</span>
                       <span>v{APP_VERSION}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <DepartmentReviews />
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <EveLogo className="h-3 w-auto text-[var(--text-secondary)]" />
                       <span className="text-[var(--text-muted)]">eve</span>
                     </div>
                   </div>
-                  <p className="mt-2 text-center sm:text-left text-[9px] leading-relaxed text-[var(--text-muted)]/80">
-                    Vercel, the Vercel design, Next.js and related marks, designs and logos are
-                    trademarks or registered trademarks of Vercel, Inc. or its affiliates in the US
-                    and other countries.
-                  </p>
                 </footer>
               </div>
 

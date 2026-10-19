@@ -42,7 +42,7 @@ export default function HubLoading() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 auto-rows-fr">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="uiverse-card h-[250px] flex flex-col justify-between">
               <div className="uiverse-card-banner h-[110px] w-full bg-arch-surface-secondary relative flex items-start justify-end p-3.5">
                 <div className="w-8 h-8 rounded-lg bg-arch-surface-tertiary animate-pulse" />
@@ -63,6 +63,12 @@ export default function HubLoading() {
             </div>
           ))}
         </div>
+
+        {/* Active metrics chart placeholder */}
+        <div className="mt-4 h-40 w-full bg-arch-surface-tertiary rounded animate-pulse" />
+
+        {/* Operational telemetry card placeholder */}
+        <div className="mt-4 h-64 w-full bg-arch-surface-tertiary rounded animate-pulse" />
       </section>
 
       {/* Department & Operational Testimonials Double Marquee */}
