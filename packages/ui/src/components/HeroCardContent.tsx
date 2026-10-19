@@ -56,9 +56,9 @@ export function HeroCardContent({
     : 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 font-medium shadow-xs';
 
   return (
-    <div className="relative h-full w-full flex flex-row z-10 bg-white">
+    <div className="relative h-full w-full flex flex-row z-10">
       {/* Left Column: Text, Controls & Telemetry Bus */}
-      <div className="relative z-20 flex flex-col justify-between w-[55%] h-full p-5 sm:p-7 bg-white/90 backdrop-blur-md border-r border-slate-200/60">
+      <div className="relative z-20 flex flex-col justify-between w-[55%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
         <div>
           {/* Top Status Bar with Monospace Readouts */}
           <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono tabular-nums mb-3.5">
@@ -161,7 +161,7 @@ export function HeroCardContent({
 
       {/* Right Column: Full Bleed Image with Live Camera Feed HUD */}
       <div className="absolute top-0 right-0 w-[55%] h-full group/img overflow-hidden rounded-r-2xl z-10">
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white/25 to-transparent z-10 pointer-events-none" />
         <img
           src={
             failedImages.has(panel.image)

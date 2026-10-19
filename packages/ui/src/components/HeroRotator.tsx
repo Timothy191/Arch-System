@@ -179,15 +179,10 @@ function HeroSlide({
       <div
         className={cn(
           'relative h-full w-full rounded-2xl overflow-hidden select-none',
-          'bg-white/95 backdrop-blur-3xl liquid-glass-light border border-black/[0.08]',
+          'liquid-glass-light border border-white/20 shadow-window',
           'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
           isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
         )}
-        style={{
-          boxShadow: isCenter
-            ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 20px 45px -12px rgba(15, 23, 42, 0.18)'
-            : 'inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 12px 28px -8px rgba(15, 23, 42, 0.14)',
-        }}
       >
         <HeroCardContent
           panel={panel}
