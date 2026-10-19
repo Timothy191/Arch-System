@@ -111,12 +111,9 @@ export interface BuildTelemetrySummary {
 }
 
 function resolveTokenUsagePath(): string | null {
-  const candidates = [
-    path.resolve(process.cwd(), '.agents/memory_base/token-usage.json'),
-    path.resolve(process.cwd(), '../../.agents/memory_base/token-usage.json'),
-  ];
+  const candidates = [path.join(process.cwd(), '.agents', 'memory_base', 'token-usage.json')];
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
+    if (fs.existsSync(/*turbopackIgnore: true*/ candidate)) {
       return candidate;
     }
   }
@@ -127,7 +124,7 @@ function loadBuildTelemetryBase(): Omit<BuildTelemetrySummary, 'redisCacheStats'
   const filePath = resolveTokenUsagePath();
   if (filePath) {
     try {
-      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const parsed = JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ filePath, 'utf-8'));
       if (parsed && typeof parsed.totalTokens === 'number' && parsed.claudeCodeCost) {
         return parsed;
       }

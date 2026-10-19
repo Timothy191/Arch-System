@@ -35,7 +35,6 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { getServiceUrls } from '../lib/urls';
 import { cn } from '../lib/utils';
@@ -157,7 +156,7 @@ export function MacMenuBar({
   rightSlot,
   className,
 }: MacMenuBarProps) {
-  const pathname = usePathname();
+  const [pathname, setPathname] = React.useState('/hub');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [systemMenuOpen, setSystemMenuOpen] = React.useState(false);
   const [focusedModule, setFocusedModule] = React.useState<{
@@ -166,22 +165,27 @@ export function MacMenuBar({
   } | null>(null);
 
   React.useEffect(() => {
-    setSystemMenuOpen(false);
-  }, [pathname]);
-
-  React.useEffect(() => {
+    setPathname(window.location.pathname);
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+      setSystemMenuOpen(false);
+    };
     const handleModuleChange = (e: Event) => {
       const detail = (e as CustomEvent<{ name?: string; title?: string }>).detail;
       if (detail?.name && detail?.title) {
         setFocusedModule({ name: detail.name, title: detail.title });
       }
     };
+    window.addEventListener('popstate', handlePopState);
     window.addEventListener('arch:active-module-change', handleModuleChange);
-    return () => window.removeEventListener('arch:active-module-change', handleModuleChange);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('arch:active-module-change', handleModuleChange);
+    };
   }, []);
 
   const routeDept = React.useMemo(
-    () => DEPARTMENTS_LIST.find((d) => pathname?.startsWith(`/${d.name}`)) ?? null,
+    () => DEPARTMENTS_LIST.find((d) => pathname.startsWith(`/${d.name}`)) ?? null,
     [pathname]
   );
 
@@ -193,7 +197,7 @@ export function MacMenuBar({
 
   const activeDeptSlug = routeDept?.name ?? focusedDept?.name ?? DEPARTMENTS_LIST[0].name;
   const isHubRoute = pathname === '/hub' || pathname === '/';
-  const isAdminRoute = Boolean(pathname?.startsWith('/admin'));
+  const isAdminRoute = pathname.startsWith('/admin');
 
   const currentContextLabel = isAdminRoute
     ? 'Admin Panel'
@@ -253,6 +257,18 @@ export function MacMenuBar({
                 />
               </button>
             </DropdownMenuTrigger>
+            <button
+              type="button"
+              onClick={() => setSystemMenuOpen((open) => !open)}
+              className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none"
+              title="Open System Menu"
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse shrink-0"
+                aria-hidden="true"
+              />
+              <span className="truncate max-w-[140px]">{currentContextLabel}</span>
+            </button>
           </div>
           <DropdownMenuContent
             align="start"
@@ -281,6 +297,7 @@ export function MacMenuBar({
               <Link
                 href="/hub"
                 onClick={() => {
+                  setPathname('/hub');
                   setFocusedModule({ name: 'overview', title: 'Central Hub' });
                   setSystemMenuOpen(false);
                 }}
@@ -314,13 +331,14 @@ export function MacMenuBar({
               <div className="grid grid-cols-1 gap-0.5">
                 {DEPARTMENTS_LIST.map((dept) => {
                   const Icon = dept.icon;
-                  const isRouteActive = Boolean(pathname?.startsWith(`/${dept.name}`));
+                  const isRouteActive = pathname.startsWith(`/${dept.name}`);
                   const isFocused = !isRouteActive && focusedModule?.name === dept.name;
                   return (
                     <Link
                       key={dept.name}
                       href={`/${dept.name}`}
                       onClick={() => {
+                        setPathname(`/${dept.name}`);
                         setFocusedModule({ name: dept.name, title: dept.displayName });
                         setSystemMenuOpen(false);
                       }}
@@ -402,7 +420,10 @@ export function MacMenuBar({
                     <Link
                       key={tool.name}
                       href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
-                      onClick={() => setSystemMenuOpen(false)}
+                      onClick={() => {
+                        setPathname(`/${activeDeptSlug}/tools`);
+                        setSystemMenuOpen(false);
+                      }}
                       className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <Icon
@@ -511,6 +532,7 @@ export function MacMenuBar({
                 <Link
                   href="/admin/ai-metrics"
                   onClick={() => {
+                    setPathname('/admin/ai-metrics');
                     setFocusedModule({ name: 'admin', title: 'AI & Build Metrics' });
                     setSystemMenuOpen(false);
                   }}
@@ -528,6 +550,7 @@ export function MacMenuBar({
                 <Link
                   href="/admin"
                   onClick={() => {
+                    setPathname('/admin');
                     setFocusedModule({ name: 'admin', title: 'Admin Panel' });
                     setSystemMenuOpen(false);
                   }}
