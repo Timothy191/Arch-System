@@ -13,11 +13,11 @@ import {
   Bell,
   BellDot,
   CheckCircle2,
-  CheckSquare,
   Clock,
   CloudOff,
   Database,
   HardDrive,
+  Home,
   MinusCircle,
   RefreshCw,
   SignalHigh,
@@ -882,15 +882,17 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
         <>
           <TaskbarNotificationBell />
           <Link
-            href="/drilling/tools?tab=tasks"
+            href="/hub"
+            aria-label="Return to Hub"
+            data-testid="taskbar-home-button"
             className={cn(
               'flex items-center justify-center w-7 h-7 rounded-full',
               'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
               'transition-colors active:scale-[0.97]'
             )}
-            title="Task Manager"
+            title="Home — Return to Hub"
           >
-            <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+            <Home className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
           </Link>
         </>
       )}
