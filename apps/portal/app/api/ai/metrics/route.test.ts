@@ -202,4 +202,44 @@ describe('GET /api/ai/metrics', () => {
     expect(json.error).toBe('db failure');
     expect(logError).toHaveBeenCalledWith(expect.any(Error), { context: 'ai_metrics_route' });
   });
+
+  it('returns 200 with zeroed metrics when ai_token_usage table is missing from schema cache (PGRST205)', async () => {
+    const promise = Promise.resolve({
+      data: null,
+      error: {
+        code: 'PGRST205',
+        details: null,
+        hint: null,
+        message: "Could not find the table 'public.ai_token_usage' in the schema cache",
+      },
+    });
+
+    const builder = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+    };
+
+    Object.assign(builder, {
+      then: promise.then.bind(promise),
+      catch: promise.catch.bind(promise),
+      finally: promise.finally.bind(promise),
+    });
+
+    createServerSupabaseClient.mockResolvedValue({
+      from: jest.fn(() => builder),
+    });
+
+    const res = await GET(buildRequest());
+    expect(res.status).toBe(200);
+
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.metrics.totalTokens).toBe(0);
+    expect(json.metrics.totalRequests).toBe(0);
+    expect(json.metrics.byModel).toEqual([]);
+    expect(json.metrics.recentUsage).toEqual([]);
+  });
 });

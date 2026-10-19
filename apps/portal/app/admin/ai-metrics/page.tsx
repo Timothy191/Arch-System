@@ -19,16 +19,18 @@ const AIMetricsDashboard = dynamic(
 
 export default function AIMetricsPage() {
   return (
-    <ErrorBoundary context="AI Metrics Dashboard">
-      <Suspense
-        fallback={
-          <div className="fixed inset-0 flex items-center justify-center bg-transparent">
-            <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
-          </div>
-        }
-      >
-        <AIMetricsDashboard />
-      </Suspense>
-    </ErrorBoundary>
+    <div className="p-4 lg:p-6 max-w-7xl mx-auto w-full">
+      <ErrorBoundary context="AI Metrics Dashboard">
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+              <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
+            </div>
+          }
+        >
+          <AIMetricsDashboard />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 }

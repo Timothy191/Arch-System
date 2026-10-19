@@ -237,53 +237,70 @@ export default function AIMetricsDashboard() {
             <span>Total: {(metrics.totalTokens / 1_000_000).toFixed(2)}M tokens</span>
           </div>
           <div className="h-3 w-full bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
-            {metrics.byModel.map((model) => (
-              <div
-                key={model.name}
-                style={{ width: `${model.percentage}%` }}
-                className="h-full transition-all duration-500"
-                title={`${model.name}: ${model.percentage}%`}
-              />
-            ))}
+            {metrics.byModel.map((model, idx) => {
+              const barColors = [
+                'bg-[var(--accent-blue)]',
+                'bg-accent-green',
+                'bg-accent-amber',
+                'bg-sky-500',
+                'bg-indigo-500',
+              ];
+              return (
+                <div
+                  key={model.name}
+                  style={{ width: `${model.percentage}%` }}
+                  className={`h-full transition-all duration-500 ${barColors[idx % barColors.length]}`}
+                  title={`${model.name}: ${model.percentage}%`}
+                />
+              );
+            })}
           </div>
         </div>
 
         {/* Model cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {metrics.byModel.map((model) => (
-            <div
-              key={model.name}
-              className="p-4 bg-[var(--bg-tertiary)]/50 rounded-xl border border-[var(--border-subtle)]"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="text-xs font-bold font-mono text-[var(--text-heading)]">
-                    {model.name}
-                  </h4>
-                  <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
-                    {model.requests} requests
-                  </p>
+        {metrics.byModel.length === 0 ? (
+          <div className="p-6 text-center bg-[var(--bg-tertiary)]/30 rounded-xl border border-[var(--border-subtle)]">
+            <p className="text-xs font-medium text-[var(--text-secondary)]">
+              No model token usage recorded for the selected time window.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {metrics.byModel.map((model) => (
+              <div
+                key={model.name}
+                className="p-4 bg-[var(--bg-tertiary)]/50 rounded-xl border border-[var(--border-subtle)]"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold font-mono text-[var(--text-heading)]">
+                      {model.name}
+                    </h4>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+                      {model.requests} requests
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-bold font-mono text-accent-green">
+                      R {(model.cost / 100).toFixed(2)}
+                    </div>
+                    <div className="text-[10px] text-[var(--text-secondary)] font-mono">
+                      {model.percentage}% share
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs font-bold font-mono text-accent-green">
-                    R {(model.cost / 100).toFixed(2)}
-                  </div>
-                  <div className="text-[10px] text-[var(--text-secondary)] font-mono">
-                    {model.percentage}% share
-                  </div>
+                <div className="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-[var(--text-secondary)]">
+                    {(model.tokens / 1_000_000).toFixed(3)}M tokens
+                  </span>
+                  <span className="text-[var(--text-secondary)]">
+                    {(model.cachedTokens / 1_000).toFixed(1)}K cached
+                  </span>
                 </div>
               </div>
-              <div className="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px] font-mono">
-                <span className="text-[var(--text-secondary)]">
-                  {(model.tokens / 1_000_000).toFixed(3)}M tokens
-                </span>
-                <span className="text-[var(--text-secondary)]">
-                  {(model.cachedTokens / 1_000).toFixed(1)}K cached
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </GlassCard>
 
       {/* Recent Usage Feed */}
@@ -293,35 +310,44 @@ export default function AIMetricsDashboard() {
           <h3 className="text-sm font-semibold text-[var(--text-heading)]">Recent AI Requests</h3>
         </div>
 
-        <div className="space-y-2">
-          {metrics.recentUsage.slice(0, 10).map((usage) => (
-            <div
-              key={usage.id}
-              className="flex items-center justify-between p-3 bg-[var(--bg-tertiary)]/30 rounded-lg"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    usage.status === 'success' ? 'bg-accent-green' : 'bg-accent-red'
-                  }`}
-                />
-                <div>
-                  <p className="text-xs font-mono text-[var(--text-heading)]">{usage.model}</p>
-                  <p className="text-[10px] text-[var(--text-secondary)]">
-                    {new Date(usage.timestamp).toLocaleString()}
-                  </p>
+        {metrics.recentUsage.length === 0 ? (
+          <div className="p-6 text-center bg-[var(--bg-tertiary)]/30 rounded-xl border border-[var(--border-subtle)]">
+            <p className="text-xs font-medium text-[var(--text-secondary)]">
+              No AI requests recorded in this window. Token telemetry will populate automatically as
+              AI requests are processed.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {metrics.recentUsage.slice(0, 10).map((usage) => (
+              <div
+                key={usage.id}
+                className="flex items-center justify-between p-3 bg-[var(--bg-tertiary)]/30 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      usage.status === 'success' ? 'bg-accent-green' : 'bg-accent-red'
+                    }`}
+                  />
+                  <div>
+                    <p className="text-xs font-mono text-[var(--text-heading)]">{usage.model}</p>
+                    <p className="text-[10px] text-[var(--text-secondary)]">
+                      {new Date(usage.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-mono">
+                  <span className="text-[var(--text-secondary)]">
+                    {(usage.tokens / 1_000).toFixed(1)}K tokens
+                  </span>
+                  <span className="text-[var(--text-secondary)]">{usage.latency}ms</span>
+                  <span className="text-accent-green">R {(usage.costCents / 100).toFixed(3)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-xs font-mono">
-                <span className="text-[var(--text-secondary)]">
-                  {(usage.tokens / 1_000).toFixed(1)}K tokens
-                </span>
-                <span className="text-[var(--text-secondary)]">{usage.latency}ms</span>
-                <span className="text-accent-green">R {(usage.costCents / 100).toFixed(3)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </GlassCard>
     </div>
   );
