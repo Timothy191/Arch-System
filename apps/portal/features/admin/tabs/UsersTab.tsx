@@ -1,6 +1,5 @@
 'use client';
 
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
@@ -11,29 +10,15 @@ import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
+import {
+  type AdminDepartmentOption,
+  type AdminEmployeeRecord,
+  getUsersAdminData,
+  upsertEmployeeAdmin,
+} from './actions';
 import { DEFAULT_ADMIN_AREAS, getSavedAdminAreas } from './DepartmentsTab';
 
-interface Employee {
-  id: string;
-  full_name: string;
-  first_name?: string | null;
-  last_name?: string | null;
-  national_id?: string | null;
-  job_title?: string | null;
-  areas?: string[] | null;
-  medical_expiry_date?: string | null;
-  induction_expiry_date?: string | null;
-  employee_code?: string | null;
-  qr_code_data?: string | null;
-  photo_url?: string | null;
-  role: string;
-  department_id: string | null;
-  accessible_departments: string[] | null;
-  created_at: string;
-  departments?: {
-    display_name: string;
-  };
-}
+type Employee = AdminEmployeeRecord;
 
 interface EmployeeFormPayload {
   names: string;
@@ -52,95 +37,34 @@ interface EmployeeFormPayload {
   accessible_departments: string[];
 }
 
+function formatDateShort(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
+  const parsed = new Date(dateStr);
+  if (Number.isNaN(parsed.getTime())) return '—';
+  return parsed.toISOString().split('T')[0] ?? '—';
+}
+
 export function UsersTab() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departments, setDepartments] = useState<{ id: string; display_name: string }[]>([]);
+  const [departments, setDepartments] = useState<AdminDepartmentOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const supabase = createBrowserSupabaseClient();
 
   const loadData = useCallback(async () => {
-    const [empData, deptData, persData] = await Promise.all([
-      supabase
-        .from('employees')
-        .select('*, departments(display_name)')
-        .order('created_at', { ascending: false }),
-      supabase.from('departments').select('id, display_name'),
-      supabase
-        .from('personnel')
-        .select(
-          'emp_code, first_name, surname, id_number, job_title, area, medical_expiry, induction_expiry, photo_url, badges(qr_code)'
-        ),
-    ]);
-
-    const persByCode = new Map<
-      string,
-      {
-        emp_code: string;
-        first_name: string;
-        surname: string;
-        id_number: string;
-        job_title: string | null;
-        area: string | null;
-        medical_expiry: string | null;
-        induction_expiry: string | null;
-        photo_url: string | null;
-        qr_code: string | null;
-      }
-    >();
-
-    if (persData.data) {
-      for (const p of persData.data as Array<{
-        emp_code: string;
-        first_name: string;
-        surname: string;
-        id_number: string;
-        job_title: string | null;
-        area: string | null;
-        medical_expiry: string | null;
-        induction_expiry: string | null;
-        photo_url: string | null;
-        badges?: Array<{ qr_code: string }> | { qr_code: string } | null;
-      }>) {
-        const badgeObj = Array.isArray(p.badges) ? p.badges[0] : p.badges;
-        persByCode.set(p.emp_code, {
-          emp_code: p.emp_code,
-          first_name: p.first_name,
-          surname: p.surname,
-          id_number: p.id_number,
-          job_title: p.job_title,
-          area: p.area,
-          medical_expiry: p.medical_expiry,
-          induction_expiry: p.induction_expiry,
-          photo_url: p.photo_url,
-          qr_code: badgeObj?.qr_code ?? null,
-        });
-      }
+    try {
+      const data = await getUsersAdminData();
+      setEmployees(data.employees);
+      setDepartments(data.departments);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to load employee records');
+      logError(error, { context: 'users_tab_load_data' });
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-
-    if (empData.data) {
-      const enriched = (empData.data as Employee[]).map((emp) => {
-        const linked = emp.employee_code ? persByCode.get(emp.employee_code) : undefined;
-        return {
-          ...emp,
-          first_name: emp.first_name ?? linked?.first_name ?? null,
-          last_name: emp.last_name ?? linked?.surname ?? null,
-          national_id: emp.national_id ?? linked?.id_number ?? null,
-          job_title: emp.job_title ?? linked?.job_title ?? null,
-          areas: emp.areas?.length ? emp.areas : linked?.area ? [linked.area] : null,
-          medical_expiry_date: emp.medical_expiry_date ?? linked?.medical_expiry ?? null,
-          induction_expiry_date: emp.induction_expiry_date ?? linked?.induction_expiry ?? null,
-          qr_code_data: emp.qr_code_data ?? linked?.qr_code ?? null,
-          photo_url: emp.photo_url ?? linked?.photo_url ?? null,
-        };
-      });
-      setEmployees(enriched);
-    }
-    if (deptData.data) setDepartments(deptData.data);
-    setLoading(false);
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -151,195 +75,38 @@ export function UsersTab() {
     setShowEditDialog(true);
   };
 
-  const syncPersonnelAndBadge = async (formData: EmployeeFormPayload, empCode: string) => {
-    const firstName =
-      formData.names.trim() || formData.full_name.trim().split(/\s+/)[0] || 'Employee';
-    const surname =
-      formData.surname.trim() ||
-      formData.full_name.trim().split(/\s+/).slice(1).join(' ') ||
-      'Record';
-    const idNumber = formData.id_number.trim() || empCode;
-    const qrCode = formData.qr_code.trim() || `QR-${empCode}`;
-
-    const { data: existingPers } = await supabase
-      .from('personnel')
-      .select('id')
-      .eq('emp_code', empCode)
-      .maybeSingle();
-
-    let personnelId = existingPers?.id ?? null;
-
-    if (personnelId) {
-      await supabase
-        .from('personnel')
-        .update({
-          first_name: firstName,
-          surname,
-          id_number: idNumber,
-          job_title: formData.job_title.trim() || null,
-          area: formData.area.trim() || null,
-          department_id: formData.department_id,
-          medical_expiry: formData.medical_expiry || null,
-          induction_expiry: formData.induction_expiry || null,
-          photo_url: formData.photo_url || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', personnelId);
-    } else if (formData.id_number.trim() || formData.coy_number.trim() || formData.qr_code.trim()) {
-      const { data: insertedPers } = await supabase
-        .from('personnel')
-        .insert({
-          emp_code: empCode,
-          first_name: firstName,
-          surname,
-          id_number: idNumber,
-          job_title: formData.job_title.trim() || null,
-          area: formData.area.trim() || null,
-          department_id: formData.department_id,
-          medical_expiry: formData.medical_expiry || null,
-          induction_expiry: formData.induction_expiry || null,
-          photo_url: formData.photo_url || null,
-          status: 'Active',
-        })
-        .select('id')
-        .maybeSingle();
-
-      personnelId = insertedPers?.id ?? null;
-    }
-
-    if (personnelId && qrCode) {
-      const { data: existingBadge } = await supabase
-        .from('badges')
-        .select('id')
-        .eq('personnel_id', personnelId)
-        .maybeSingle();
-
-      if (existingBadge?.id) {
-        await supabase
-          .from('badges')
-          .update({
-            qr_code: qrCode,
-            department_id: formData.department_id,
-            expires_at: formData.induction_expiry || formData.medical_expiry || null,
-          })
-          .eq('id', existingBadge.id);
-      } else {
-        await supabase.from('badges').insert({
-          qr_code: qrCode,
-          entity_type: 'personnel',
-          personnel_id: personnelId,
-          department_id: formData.department_id,
-          is_active: true,
-          issued_at: new Date().toISOString(),
-          expires_at: formData.induction_expiry || formData.medical_expiry || null,
-        });
-      }
-    }
-  };
-
   const handleUpdate = async (formData: EmployeeFormPayload) => {
-    const resolvedFullName =
-      formData.full_name.trim() || `${formData.names.trim()} ${formData.surname.trim()}`.trim();
-    const resolvedCoyNumber =
-      formData.coy_number.trim() ||
-      editingEmployee?.employee_code ||
-      `EMP-${Math.floor(10000 + Math.random() * 90000)}`;
+    const result = await upsertEmployeeAdmin({
+      id: editingEmployee?.id ?? null,
+      ...formData,
+    });
 
-    const extendedColumns = {
-      full_name: resolvedFullName,
-      first_name: formData.names.trim() || null,
-      last_name: formData.surname.trim() || null,
-      national_id: formData.id_number.trim() || null,
-      job_title: formData.job_title.trim() || null,
-      areas: formData.area.trim() ? [formData.area.trim()] : [],
-      medical_expiry_date: formData.medical_expiry || null,
-      induction_expiry_date: formData.induction_expiry || null,
-      employee_code: resolvedCoyNumber,
-      qr_code_data: formData.qr_code.trim() || null,
-      photo_url: formData.photo_url || null,
-      role: formData.role,
-      department_id: formData.department_id,
-      accessible_departments: formData.accessible_departments,
-    };
-
-    if (editingEmployee) {
-      // Update existing employee
-      let { error } = await supabase
-        .from('employees')
-        .update(extendedColumns)
-        .eq('id', editingEmployee.id);
-
-      if (error) {
-        // Fallback to core columns if any extended migration column is missing
-        const fallback = await supabase
-          .from('employees')
-          .update({
-            full_name: resolvedFullName,
-            role: formData.role,
-            department_id: formData.department_id,
-            accessible_departments: formData.accessible_departments,
-          })
-          .eq('id', editingEmployee.id);
-        error = fallback.error;
-      }
-
-      if (error) {
-        logError(new Error(error.message), {
-          context: 'users_tab_update_employee',
-        });
-        toast.error(error.message);
-        return;
-      }
-
-      await syncPersonnelAndBadge(formData, resolvedCoyNumber);
-    } else {
-      // Add new employee
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) {
-        logError(new Error('Unauthenticated'), {
-          context: 'users_tab_add_employee',
-        });
-        return;
-      }
-
-      let { error } = await supabase.from('employees').insert({
-        ...extendedColumns,
-        auth_id: user.id,
+    if (!result.success) {
+      const message = result.error || 'Failed to save employee';
+      logError(new Error(message), {
+        context: editingEmployee ? 'users_tab_update_employee' : 'users_tab_add_employee',
       });
-
-      if (error) {
-        const fallback = await supabase.from('employees').insert({
-          full_name: resolvedFullName,
-          role: formData.role,
-          department_id: formData.department_id,
-          accessible_departments: formData.accessible_departments,
-          auth_id: user.id,
-        });
-        error = fallback.error;
-      }
-
-      if (error) {
-        logError(new Error(error.message), {
-          context: 'users_tab_add_employee',
-        });
-        toast.error(error.message);
-        return;
-      }
-
-      await syncPersonnelAndBadge(formData, resolvedCoyNumber);
+      toast.error(message);
+      return;
     }
 
+    toast.success(editingEmployee ? 'Employee updated' : 'Employee added');
     setShowEditDialog(false);
     setEditingEmployee(null);
-    loadData();
+    await loadData();
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const query = searchTerm.trim().toLowerCase();
+  const filteredEmployees = employees.filter((emp) => {
+    if (!query) return true;
+    return (
+      emp.full_name.toLowerCase().includes(query) ||
+      (emp.employee_code?.toLowerCase().includes(query) ?? false) ||
+      (emp.national_id?.toLowerCase().includes(query) ?? false) ||
+      (emp.job_title?.toLowerCase().includes(query) ?? false) ||
+      (emp.qr_code_data?.toLowerCase().includes(query) ?? false)
+    );
+  });
 
   const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
 
@@ -349,7 +116,7 @@ export function UsersTab() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
           <Input
-            placeholder="Search employees..."
+            placeholder="Search employees by name, Coy No, ID, job title, or QR..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
@@ -374,37 +141,43 @@ export function UsersTab() {
               <tr className="border-b border-[var(--border-default)]">
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
                 >
-                  Name
+                  Employee
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
                 >
-                  Role
+                  Coy / ID Number
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
                 >
-                  Department
+                  Job Title & Area
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
                 >
-                  Accessible Depts
+                  Department & Access
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
                 >
-                  Created
+                  Medical / Induction
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                >
+                  QR Code & Role
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
                 >
                   Actions
                 </th>
@@ -413,61 +186,120 @@ export function UsersTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
                   </td>
                 </tr>
               ) : filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No employees found.
                   </td>
                 </tr>
               ) : (
-                filteredEmployees.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
-                      {emp.full_name}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge
-                        variant="outline"
-                        className={
-                          emp.role === 'admin'
-                            ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
-                            : emp.role === 'supervisor'
-                              ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
-                              : ''
-                        }
-                      >
-                        {emp.role}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {emp.department_id ? deptMap.get(emp.department_id) : 'Unassigned'}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {emp.accessible_departments?.length || 0} departments
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {new Date(emp.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(emp)}>
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-accent-red hover:text-accent-red/80"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filteredEmployees.map((emp) => {
+                  const primaryArea = emp.areas?.[0] || '—';
+                  const primaryDept = emp.department_id
+                    ? (deptMap.get(emp.department_id) ??
+                      emp.departments?.display_name ??
+                      'Unassigned')
+                    : (emp.departments?.display_name ?? 'Unassigned');
+
+                  return (
+                    <tr key={emp.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] overflow-hidden shrink-0 relative flex items-center justify-center text-xs font-semibold text-[var(--text-muted)]">
+                            {emp.photo_url ? (
+                              <Image
+                                src={emp.photo_url}
+                                alt={emp.full_name}
+                                fill
+                                sizes="36px"
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <span>
+                                {(emp.first_name?.[0] ?? emp.full_name[0] ?? 'E').toUpperCase()}
+                                {(emp.last_name?.[0] ?? '').toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-[var(--text-heading)] text-sm font-medium">
+                              {emp.full_name}
+                            </div>
+                            <div className="text-xs text-[var(--text-muted)]">
+                              {emp.first_name || '—'} {emp.last_name || ''}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="text-xs font-mono text-[var(--text-heading)]">
+                          {emp.employee_code || '—'}
+                        </div>
+                        <div className="text-xs font-mono text-[var(--text-muted)]">
+                          ID: {emp.national_id || '—'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="text-sm text-[var(--text-heading)]">
+                          {emp.job_title || '—'}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">Area: {primaryArea}</div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="text-sm text-[var(--text-heading)]">{primaryDept}</div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          {emp.accessible_departments?.length || 0} accessible depts
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="text-xs text-[var(--text-heading)]">
+                          Med: {formatDateShort(emp.medical_expiry_date)}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          Ind: {formatDateShort(emp.induction_expiry_date)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex flex-col items-start gap-1">
+                          <Badge
+                            variant="outline"
+                            className={
+                              emp.role === 'admin'
+                                ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                                : emp.role === 'supervisor'
+                                  ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                                  : ''
+                            }
+                          >
+                            {emp.role}
+                          </Badge>
+                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                            {emp.qr_code_data || 'No QR'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(emp)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-accent-red hover:text-accent-red/80"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -477,7 +309,7 @@ export function UsersTab() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogTitle>{editingEmployee ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
           </DialogHeader>
           <EditEmployeeForm
             employee={editingEmployee}
@@ -553,12 +385,12 @@ function EditEmployeeForm({
   };
 
   const handleGenerateQR = () => {
-    const random = Math.floor(100000 + Math.random() * 900000);
+    const suffix = Date.now().toString(36).slice(-6).toUpperCase();
     const prefix = (coyNumber || names || 'EMP')
       .replace(/[^a-zA-Z0-9]/g, '')
       .substring(0, 6)
       .toUpperCase();
-    setQrCode(`QR-${prefix}-${random}`);
+    setQrCode(`QR-${prefix}-${suffix}`);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
