@@ -63,8 +63,11 @@ REVIEW.md
 **/AGENTS.md
 
 # Non-production tooling and scripts
+tools/
 .tools/
 .github/
+scripts/seeds/
+# scripts/ build helpers: sync-assets-smart.cjs, patch-glass-css.mjs used by buildCommand
 
 # Indexers and AST structural databases
 **/.code-index/
