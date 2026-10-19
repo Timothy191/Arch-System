@@ -1098,40 +1098,55 @@ export type Database = {
         Row: {
           active: boolean;
           bin_factor: number | null;
+          bin_factor_coal: number | null;
+          bin_factor_waste: number | null;
           created_at: string;
           deleted_at: string | null;
           department_id: string;
           id: string;
           machine_type: string;
+          manufacturer: string | null;
           name: string;
+          report_exempt?: boolean;
           serial_number: string | null;
           site_id: string | null;
+          starting_smr: number | null;
           updated_at: string | null;
         };
         Insert: {
           active?: boolean;
           bin_factor?: number | null;
+          bin_factor_coal?: number | null;
+          bin_factor_waste?: number | null;
           created_at?: string;
           deleted_at?: string | null;
           department_id: string;
           id?: string;
           machine_type: string;
+          manufacturer?: string | null;
           name: string;
+          report_exempt?: boolean;
           serial_number?: string | null;
           site_id?: string | null;
+          starting_smr?: number | null;
           updated_at?: string | null;
         };
         Update: {
           active?: boolean;
           bin_factor?: number | null;
+          bin_factor_coal?: number | null;
+          bin_factor_waste?: number | null;
           created_at?: string;
           deleted_at?: string | null;
           department_id?: string;
           id?: string;
           machine_type?: string;
+          manufacturer?: string | null;
           name?: string;
+          report_exempt?: boolean;
           serial_number?: string | null;
           site_id?: string | null;
+          starting_smr?: number | null;
           updated_at?: string | null;
         };
         Relationships: [

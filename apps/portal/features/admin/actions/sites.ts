@@ -25,12 +25,32 @@ async function assertAdmin() {
   return { supabase, employee };
 }
 
+function buildSiteCode(name: string): string {
+  const words = name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]+/g, '')
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length >= 2) {
+    return words
+      .map((w) => w.slice(0, 4))
+      .join('-')
+      .slice(0, 20);
+  }
+  return (words[0] || 'SITE').slice(0, 12);
+}
+
 export async function adminAddSite(rawInput: {
   name: string;
-  site_code: string;
+  site_code?: string;
   active?: boolean;
 }) {
-  const parseResult = adminAddSiteSchema.safeParse(rawInput);
+  const normalizedInput = {
+    ...rawInput,
+    site_code: rawInput.site_code?.trim() || buildSiteCode(rawInput.name || ''),
+  };
+  const parseResult = adminAddSiteSchema.safeParse(normalizedInput);
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid site data' };
   }
@@ -51,6 +71,31 @@ export async function adminAddSite(rawInput: {
   });
 
   if (error) return { error: 'Failed to add site' };
+
+  await cacheInvalidateTags(['table:sites']);
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function adminDeleteSite(id: string) {
+  if (!id.trim()) {
+    return { error: 'Site ID is required' };
+  }
+
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
+  const { supabase } = auth;
+
+  const { error } = await supabase.from('sites').delete().eq('id', id);
+  if (error) {
+    // Fallback to deactivating if foreign keys reference the site
+    const { error: updateErr } = await supabase
+      .from('sites')
+      .update({ active: false })
+      .eq('id', id);
+    if (updateErr) return { error: 'Failed to remove site' };
+  }
 
   await cacheInvalidateTags(['table:sites']);
   revalidatePath('/admin');

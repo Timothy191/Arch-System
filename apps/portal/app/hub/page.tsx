@@ -183,14 +183,12 @@ export default async function HubPage() {
       : [];
 
   // AGENT-TRACE: Administration department is strictly restricted to admin users:
-  // - For admin role, guarantee the admin department is included in Core Operational Modules
+  // - For admin role, guarantee the admin department is included first in Core Operational Modules
   // - For non-admin roles, ensure admin department is never accessible or visible
   if (userRole === 'admin') {
-    if (!rawDepartments.some((d) => d.name === 'admin')) {
-      const adminDept = DEPARTMENTS.find((d) => d.name === 'admin');
-      if (adminDept) {
-        rawDepartments = [...rawDepartments, adminDept];
-      }
+    const adminDept = DEPARTMENTS.find((d) => d.name === 'admin');
+    if (adminDept) {
+      rawDepartments = [adminDept, ...rawDepartments.filter((d) => d.name !== 'admin')];
     }
   } else {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');

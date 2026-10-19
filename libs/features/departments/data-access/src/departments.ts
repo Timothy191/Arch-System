@@ -24,6 +24,27 @@ export interface Department {
 
 export const DEPARTMENTS: Department[] = [
   {
+    name: 'admin',
+    displayName: 'Administration',
+    route: '/admin',
+    icon: 'Wrench',
+    description: 'Sites, machinery fleet, users & roles, settings & system integrations',
+    color: 'violet',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Admin Tools', value: '6 Modules' },
+    trend: [240, 242, 243, 245, 246, 247, 248, 249],
+    actions: [
+      { label: 'Sites', href: '/admin?tab=sites' },
+      { label: 'Fleet', href: '/admin?tab=fleet' },
+      { label: 'Users', href: '/admin?tab=users' },
+      { label: 'Departments', href: '/admin?tab=departments' },
+      { label: 'Settings', href: '/admin?tab=settings' },
+      { label: 'Integrations', href: '/admin?tab=integrations' },
+    ],
+  },
+  {
     name: 'overview',
     displayName: 'System Overview',
     route: '/overview',
@@ -125,27 +146,6 @@ export const DEPARTMENTS: Department[] = [
     actions: [
       { label: 'Hourly Loads', href: '/control-room/hourly-loads' },
       { label: 'Machine Ops', href: '/control-room/machine-operations' },
-    ],
-  },
-  {
-    name: 'admin',
-    displayName: 'Administration',
-    route: '/admin',
-    icon: 'Wrench',
-    description: 'Sites, machinery fleet, users & roles, settings & system integrations',
-    color: 'violet',
-    type: 'standard',
-    status: 'active',
-    gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'Admin Tools', value: '6 Modules' },
-    trend: [240, 242, 243, 245, 246, 247, 248, 249],
-    actions: [
-      { label: 'Sites', href: '/admin?tab=sites' },
-      { label: 'Fleet', href: '/admin?tab=fleet' },
-      { label: 'Users', href: '/admin?tab=users' },
-      { label: 'Departments', href: '/admin?tab=departments' },
-      { label: 'Settings', href: '/admin?tab=settings' },
-      { label: 'Integrations', href: '/admin?tab=integrations' },
     ],
   },
   {

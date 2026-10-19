@@ -15,8 +15,12 @@ interface Machine {
   id: string;
   name: string;
   machine_type: string;
+  manufacturer?: string | null;
   serial_number: string | null;
+  starting_smr?: number | null;
   bin_factor: number | null;
+  bin_factor_waste?: number | null;
+  bin_factor_coal?: number | null;
   active: boolean;
   report_exempt: boolean;
   department_id: string;
@@ -38,7 +42,35 @@ interface Site {
   active: boolean;
 }
 
-const DUMPER_TYPES = ['articulated dumper', 'rigid dumper', 'dump truck', 'hauler'];
+const MACHINE_TYPE_OPTIONS = [
+  'Articulated Dumper',
+  'Rigid Dumper',
+  'Excavator',
+  'Dozer',
+  'Drill Rig',
+  'Grader',
+  'Loader',
+  'Water Bowser',
+  'Support Equipment',
+] as const;
+
+const DUMPER_TYPES = [
+  'articulated dumper',
+  'articulated dump truck',
+  'rigid dumper',
+  'rigid dump truck',
+  'adt',
+  'rdt',
+  'dump truck',
+  'dump_truck',
+  'dumper',
+  'hauler',
+];
+
+function isArticulatedOrRigidDumper(machineType: string): boolean {
+  const lower = machineType.toLowerCase();
+  return DUMPER_TYPES.some((t) => lower.includes(t));
+}
 
 export function FleetTab() {
   const supabase = createBrowserSupabaseClient();
@@ -61,9 +93,7 @@ export function FleetTab() {
     const [{ data: machineData }, { data: deptData }, { data: siteData }] = await Promise.all([
       supabase
         .from('machines')
-        .select(
-          'id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)'
-        )
+        .select('*, department:departments(display_name), site:sites(name, site_code)')
         .order('name'),
       supabase.from('departments').select('id, display_name').order('display_name'),
       supabase.from('sites').select('id, name, site_code, active').order('name'),
@@ -92,6 +122,7 @@ export function FleetTab() {
         !q ||
         m.name.toLowerCase().includes(q) ||
         m.machine_type.toLowerCase().includes(q) ||
+        (m.manufacturer ?? '').toLowerCase().includes(q) ||
         (m.serial_number ?? '').toLowerCase().includes(q);
       const matchDept = !filterDept || m.department_id === filterDept;
       const matchSite =
@@ -132,8 +163,11 @@ export function FleetTab() {
   const handleSave = async (data: {
     name: string;
     machine_type: string;
-    serial_number: string;
-    bin_factor: string;
+    manufacturer: string;
+    machine_id: string;
+    starting_smr: string;
+    bin_factor_waste: string;
+    bin_factor_coal: string;
     department_id: string;
     site_id: string;
     active: boolean;
@@ -142,11 +176,22 @@ export function FleetTab() {
     setSaving(true);
     setDialogError('');
 
+    const parsedWaste = data.bin_factor_waste ? parseFloat(data.bin_factor_waste) : null;
+    const parsedCoal = data.bin_factor_coal ? parseFloat(data.bin_factor_coal) : null;
+    const parsedSmr = data.starting_smr !== '' ? parseFloat(data.starting_smr) : 0;
+    const resolvedName =
+      data.name.trim() ||
+      `${data.manufacturer.trim()} ${data.machine_type.trim()} (${data.machine_id.trim()})`;
+
     const payload = {
-      name: data.name,
+      name: resolvedName,
       machine_type: data.machine_type,
-      serial_number: data.serial_number || undefined,
-      bin_factor: data.bin_factor ? parseFloat(data.bin_factor) : null,
+      manufacturer: data.manufacturer,
+      serial_number: data.machine_id || undefined,
+      starting_smr: parsedSmr,
+      bin_factor: parsedWaste ?? parsedCoal ?? null,
+      bin_factor_waste: parsedWaste,
+      bin_factor_coal: parsedCoal,
       department_id: data.department_id,
       site_id: data.site_id || null,
       active: data.active,
@@ -205,7 +250,7 @@ export function FleetTab() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, type, serial…"
+            placeholder="Search machine ID, manufacturer, type…"
             className="w-full pl-9 bg-[var(--bg-secondary)] border-[var(--border-default)]"
           />
         </div>
@@ -257,13 +302,13 @@ export function FleetTab() {
             <thead>
               <tr className="border-b border-[var(--border-default)]">
                 {[
-                  'Name',
-                  'Type / Bin Factor',
-                  'Serial No',
+                  'Machine Id / Name',
+                  'Type / Bin Factor (Waste & Coal)',
+                  'Manufacture',
+                  'Starting SMR',
                   'Department',
                   'Site',
                   'Status',
-                  'Exempt',
                   'Actions',
                 ].map((h) => (
                   <th
@@ -293,29 +338,46 @@ export function FleetTab() {
                 </tr>
               ) : (
                 filtered.map((m) => {
-                  const isDumper = DUMPER_TYPES.some((t) =>
-                    m.machine_type.toLowerCase().includes(t)
-                  );
+                  const isDumper = isArticulatedOrRigidDumper(m.machine_type);
+                  const wasteFactor = m.bin_factor_waste ?? m.bin_factor;
+                  const coalFactor = m.bin_factor_coal;
                   return (
                     <tr key={m.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                       <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
-                        {m.name}
+                        <div>{m.serial_number || m.name}</div>
+                        {m.serial_number && m.name !== m.serial_number && (
+                          <div className="text-xs text-[var(--text-muted)] font-normal">
+                            {m.name}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span className="text-[var(--text-muted)] font-mono">{m.machine_type}</span>
-                        {isDumper && m.bin_factor != null && (
-                          <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 font-mono">
-                            {m.bin_factor} BCM
-                          </span>
+                        {isDumper && (wasteFactor != null || coalFactor != null) && (
+                          <div className="flex flex-wrap gap-1.5 mt-1">
+                            {wasteFactor != null && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 font-mono">
+                                Waste: {wasteFactor}
+                              </span>
+                            )}
+                            {coalFactor != null && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-green/10 text-accent-green border border-accent-green/20 font-mono">
+                                Coal: {coalFactor}
+                              </span>
+                            )}
+                          </div>
                         )}
-                        {isDumper && m.bin_factor == null && (
+                        {isDumper && wasteFactor == null && coalFactor == null && (
                           <span className="ml-2 text-[10px] text-accent-amber">
                             ⚠ no bin factor
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {m.serial_number || '—'}
+                        {m.manufacturer || '—'}
+                      </td>
+                      <td className="px-6 py-4 text-[var(--text-muted)] text-sm font-mono">
+                        {m.starting_smr != null ? `${m.starting_smr} hrs` : '—'}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                         {m.department?.display_name || '—'}
@@ -331,25 +393,23 @@ export function FleetTab() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <Badge
-                          variant="outline"
-                          className={
-                            m.active
-                              ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
-                              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
-                          }
-                        >
-                          {m.active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        {m.report_exempt ? (
-                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
-                            Exempt
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-muted)] text-xs">—</span>
-                        )}
+                        <div className="flex flex-col gap-1 items-start">
+                          <Badge
+                            variant="outline"
+                            className={
+                              m.active
+                                ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
+                            }
+                          >
+                            {m.active ? 'Active' : 'Inactive'}
+                          </Badge>
+                          {m.report_exempt && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
+                              Exempt
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex gap-2 justify-end">
@@ -388,7 +448,7 @@ export function FleetTab() {
 
       {/* Add / Edit dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-lg">
+        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingMachine ? 'Edit Machine' : 'Add Machine'}</DialogTitle>
           </DialogHeader>
@@ -456,8 +516,11 @@ function MachineForm({
   onSubmit: (_data: {
     name: string;
     machine_type: string;
-    serial_number: string;
-    bin_factor: string;
+    manufacturer: string;
+    machine_id: string;
+    starting_smr: string;
+    bin_factor_waste: string;
+    bin_factor_coal: string;
     department_id: string;
     site_id: string;
     active: boolean;
@@ -465,26 +528,38 @@ function MachineForm({
   }) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState(machine?.name || '');
   const [machineType, setMachineType] = useState(machine?.machine_type || '');
-  const [serialNumber, setSerialNumber] = useState(machine?.serial_number || '');
-  const [binFactor, setBinFactor] = useState(machine?.bin_factor?.toString() || '');
-  const [departmentId, setDepartmentId] = useState(machine?.department_id || '');
+  const [manufacturer, setManufacturer] = useState(machine?.manufacturer || '');
+  const [machineId, setMachineId] = useState(machine?.serial_number || machine?.name || '');
+  const [startingSmr, setStartingSmr] = useState(
+    machine?.starting_smr != null ? machine.starting_smr.toString() : ''
+  );
+  const [name, setName] = useState(machine?.name || '');
+  const [binFactorWaste, setBinFactorWaste] = useState(
+    (machine?.bin_factor_waste ?? machine?.bin_factor)?.toString() || ''
+  );
+  const [binFactorCoal, setBinFactorCoal] = useState(machine?.bin_factor_coal?.toString() || '');
+  const [departmentId, setDepartmentId] = useState(
+    machine?.department_id || departments[0]?.id || ''
+  );
   const [siteId, setSiteId] = useState(machine?.site_id || '');
   const [active, setActive] = useState(machine?.active ?? true);
   const [reportExempt, setReportExempt] = useState(machine?.report_exempt ?? false);
 
-  const isDumperType = DUMPER_TYPES.some((t) => machineType.toLowerCase().includes(t));
+  const isDumperType = isArticulatedOrRigidDumper(machineType);
 
   const activeSites = sites.filter((s) => s.active || s.id === siteId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      name,
+      name: name || machineId,
       machine_type: machineType,
-      serial_number: serialNumber,
-      bin_factor: binFactor,
+      manufacturer,
+      machine_id: machineId,
+      starting_smr: startingSmr,
+      bin_factor_waste: isDumperType ? binFactorWaste : '',
+      bin_factor_coal: isDumperType ? binFactorCoal : '',
       department_id: departmentId,
       site_id: siteId,
       active,
@@ -494,100 +569,189 @@ function MachineForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Name <span className="text-accent-red">*</span>
-        </label>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Haul Truck 3"
-          className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Type <span className="text-accent-red">*</span>
-        </label>
-        <Input
-          value={machineType}
-          onChange={(e) => setMachineType(e.target.value)}
-          placeholder="e.g. dump_truck, excavator, dozer"
-          className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
-          required
-        />
-      </div>
-
-      {isDumperType && (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-            Bin Factor (BCM / load) <span className="text-accent-red">*</span>
+          <label
+            htmlFor="machineType"
+            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+          >
+            Machine Type <span className="text-accent-red">*</span>
+          </label>
+          <select
+            id="machineType"
+            value={machineType}
+            onChange={(e) => setMachineType(e.target.value)}
+            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+            required
+          >
+            <option value="">Select machine type…</option>
+            {MACHINE_TYPE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+            {machineType &&
+              !MACHINE_TYPE_OPTIONS.includes(
+                machineType as (typeof MACHINE_TYPE_OPTIONS)[number]
+              ) && <option value={machineType}>{machineType}</option>}
+          </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="manufacturer"
+            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+          >
+            Machine Manufacture <span className="text-accent-red">*</span>
           </label>
           <Input
-            type="number"
-            step="0.1"
-            min="0.1"
-            value={binFactor}
-            onChange={(e) => setBinFactor(e.target.value)}
-            placeholder="e.g. 25.5"
+            id="manufacturer"
+            value={manufacturer}
+            onChange={(e) => setManufacturer(e.target.value)}
+            placeholder="e.g. Caterpillar, Bell, Komatsu, Volvo"
             className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
             required
           />
-          <p className="text-[var(--text-muted)] text-xs mt-1">
-            Bank Cubic Meters per truckload — used for BCM/hour calculations.
-          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="machineId"
+            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+          >
+            Machine Id <span className="text-accent-red">*</span>
+          </label>
+          <Input
+            id="machineId"
+            value={machineId}
+            onChange={(e) => {
+              setMachineId(e.target.value);
+              if (!machine) setName(e.target.value);
+            }}
+            placeholder="e.g. ADT-001, RDT-104, EX-02"
+            className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="startingSmr"
+            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+          >
+            Starting SMR on Site <span className="text-accent-red">*</span>
+          </label>
+          <Input
+            id="startingSmr"
+            type="number"
+            step="0.1"
+            min="0"
+            value={startingSmr}
+            onChange={(e) => setStartingSmr(e.target.value)}
+            placeholder="e.g. 1250.0"
+            className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+            required
+          />
+        </div>
+      </div>
+
+      {isDumperType && (
+        <div
+          className="p-4 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/5 space-y-3"
+          data-testid="dumper-bin-factor-block"
+        >
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-heading)]">
+              Bin Factor Configuration (Dumper Payload)
+            </h4>
+            <p className="text-xs text-[var(--text-muted)]">
+              Separate payload factors for Waste and Coal material loads.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="binFactorWaste"
+                className="block text-xs font-medium text-[var(--text-body)] mb-1.5"
+              >
+                Waste Bin Factor <span className="text-accent-red">*</span>
+              </label>
+              <Input
+                id="binFactorWaste"
+                type="number"
+                step="0.1"
+                min="0.1"
+                value={binFactorWaste}
+                onChange={(e) => setBinFactorWaste(e.target.value)}
+                placeholder="e.g. 28.5"
+                className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="binFactorCoal"
+                className="block text-xs font-medium text-[var(--text-body)] mb-1.5"
+              >
+                Coal Bin Factor <span className="text-accent-red">*</span>
+              </label>
+              <Input
+                id="binFactorCoal"
+                type="number"
+                step="0.1"
+                min="0.1"
+                value={binFactorCoal}
+                onChange={(e) => setBinFactorCoal(e.target.value)}
+                placeholder="e.g. 22.0"
+                className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+                required
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Serial Number
-        </label>
-        <Input
-          value={serialNumber}
-          onChange={(e) => setSerialNumber(e.target.value)}
-          placeholder="e.g. HT-2024-003"
-          className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
-        />
-      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+            Department <span className="text-accent-red">*</span>
+          </label>
+          <select
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            aria-label="Department"
+            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+            required
+          >
+            <option value="">Select department…</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.display_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Department <span className="text-accent-red">*</span>
-        </label>
-        <select
-          value={departmentId}
-          onChange={(e) => setDepartmentId(e.target.value)}
-          aria-label="Department"
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
-          required
-        >
-          <option value="">Select department…</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.display_name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">Site</label>
-        <select
-          value={siteId}
-          onChange={(e) => setSiteId(e.target.value)}
-          aria-label="Site"
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
-        >
-          <option value="">No site assigned</option>
-          {activeSites.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.site_code} — {s.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">Site</label>
+          <select
+            value={siteId}
+            onChange={(e) => setSiteId(e.target.value)}
+            aria-label="Site"
+            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+          >
+            <option value="">No site assigned</option>
+            {activeSites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.site_code} — {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

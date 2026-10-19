@@ -1,367 +1,114 @@
 'use client';
 
-import { useOfflineQueue } from '@repo/shared/hooks';
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
-import { Badge } from '@repo/ui/components/ui/badge';
 import { Button } from '@repo/ui/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
 import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Edit2, Plus, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { logError } from '@/lib/errors/error-logger';
-import { createDepartment } from './actions';
+import { MapPin, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-interface Department {
-  id: string;
-  name: string;
-  display_name: string;
-  icon: string;
-  description: string;
-  color: string;
-  created_at: string;
-}
+export const DEFAULT_ADMIN_AREAS = ['Office', 'Plant', 'Pit Area', 'All Areas'] as const;
+const AREAS_STORAGE_KEY = 'arch_admin_areas';
 
-const COLORS = ['blue', 'emerald', 'blue', 'violet', 'red', 'cyan', 'indigo'];
-
-const ICONS = [
-  'Drill',
-  'Factory',
-  'Shield',
-  'Wrench',
-  'Monitor',
-  'HeartPulse',
-  'GraduationCap',
-  'Satellite',
-];
-
-export function DepartmentsTab() {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editingDept, setEditingDept] = useState<Department | null>(null);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const supabase = createBrowserSupabaseClient();
-
-  const loadDepartments = useCallback(async () => {
-    const { data } = await supabase.from('departments').select('*').order('display_name');
-    if (data) setDepartments(data);
-    setLoading(false);
-  }, [supabase]);
-
-  useEffect(() => {
-    loadDepartments();
-  }, [loadDepartments]);
-
-  const handleEdit = (dept: Department) => {
-    setEditingDept(dept);
-    setShowEditDialog(true);
-  };
-
-  const handleCreate = () => {
-    setEditingDept(null);
-    setShowEditDialog(true);
-  };
-
-  const handleSave = async (formData: {
-    name: string;
-    display_name: string;
-    icon: string;
-    color: string;
-    description: string;
-  }) => {
-    if (editingDept) {
-      const { error } = await supabase
-        .from('departments')
-        .update(formData)
-        .eq('id', editingDept.id);
-      if (error)
-        logError(new Error(error.message), {
-          context: 'departments_tab_update',
-        });
-    } else {
-      if (!navigator.onLine) {
-        useOfflineQueue.getState().enqueue({
-          url: '/api/sync/fallback',
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'createDepartment',
-            payload: formData,
-          }),
-          description: `Create Department: ${formData.name}`,
-        });
-      } else {
-        try {
-          await createDepartment(formData);
-        } catch (err: any) {
-          logError(err, { context: 'departments_tab_create' });
-        }
+export function getSavedAdminAreas(): string[] {
+  if (typeof window === 'undefined') {
+    return [...DEFAULT_ADMIN_AREAS];
+  }
+  try {
+    const raw = localStorage.getItem(AREAS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter((item): item is string => typeof item === 'string');
       }
     }
-    setShowEditDialog(false);
-    setEditingDept(null);
-    loadDepartments();
+  } catch {
+    // Fallback to defaults if storage cannot be parsed
+  }
+  return [...DEFAULT_ADMIN_AREAS];
+}
+
+export function DepartmentsTab() {
+  const [areas, setAreas] = useState<string[]>([...DEFAULT_ADMIN_AREAS]);
+  const [newArea, setNewArea] = useState('');
+
+  useEffect(() => {
+    setAreas(getSavedAdminAreas());
+  }, []);
+
+  const persistAreas = (nextAreas: string[]) => {
+    setAreas(nextAreas);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(AREAS_STORAGE_KEY, JSON.stringify(nextAreas));
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this department?')) return;
-    const { error } = await supabase.from('departments').delete().eq('id', id);
-    if (error) logError(new Error(error.message), { context: 'departments_tab_delete' });
-    loadDepartments();
+  const handleAddArea = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newArea.trim();
+    if (!trimmed) return;
+    if (areas.some((a) => a.toLowerCase() === trimmed.toLowerCase())) {
+      setNewArea('');
+      return;
+    }
+    persistAreas([...areas, trimmed]);
+    setNewArea('');
+  };
+
+  const handleRemoveArea = (areaToRemove: string) => {
+    persistAreas(areas.filter((area) => area !== areaToRemove));
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">Departments</h2>
-        <Button
-          onClick={handleCreate}
-          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Department
-        </Button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-lg font-medium text-[var(--text-heading)]">Areas</h2>
+
+        <form onSubmit={handleAddArea} className="flex items-center gap-2 w-full sm:w-auto">
+          <Input
+            placeholder="Add new area..."
+            value={newArea}
+            onChange={(e) => setNewArea(e.target.value)}
+            className="w-full sm:w-64 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+          />
+          <Button
+            type="submit"
+            className="shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Area
+          </Button>
+        </form>
       </div>
 
       <GlassCard className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-[var(--border-default)]">
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+        {areas.length === 0 ? (
+          <div className="px-6 py-12 text-center text-[var(--text-muted)]">No areas added.</div>
+        ) : (
+          <ul className="divide-y divide-[var(--border-default)]" aria-label="Areas list">
+            {areas.map((area) => (
+              <li
+                key={area}
+                className="flex items-center justify-between px-6 py-4 hover:bg-[var(--bg-tertiary)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-4 h-4 text-[var(--accent-emerald)] shrink-0" />
+                  <span className="text-sm font-medium text-[var(--text-heading)]">{area}</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  aria-label={`Remove ${area}`}
+                  className="text-accent-red hover:text-accent-red/80"
+                  onClick={() => handleRemoveArea(area)}
                 >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Slug
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Icon
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Color
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
-                >
-                  Description
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
-                    Loading...
-                  </td>
-                </tr>
-              ) : departments.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
-                    No departments found.
-                  </td>
-                </tr>
-              ) : (
-                departments.map((dept) => (
-                  <tr key={dept.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
-                      {dept.display_name}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm font-mono">
-                      {dept.name}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm">{dept.icon}</td>
-                    <td className="px-6 py-4">
-                      <Badge
-                        variant="outline"
-                        className={`bg-${dept.color}-500/10 text-${dept.color}-400 border-${dept.color}-500/20`}
-                      >
-                        {dept.color}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm max-w-xs truncate">
-                      {dept.description}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(dept)}>
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-accent-red hover:text-accent-red/80"
-                          onClick={() => handleDelete(dept.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
       </GlassCard>
-
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)]">
-          <DialogHeader>
-            <DialogTitle>{editingDept ? 'Edit Department' : 'Create Department'}</DialogTitle>
-          </DialogHeader>
-          <DepartmentForm
-            department={editingDept}
-            onSubmit={handleSave}
-            onCancel={() => {
-              setShowEditDialog(false);
-              setEditingDept(null);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
-  );
-}
-
-function DepartmentForm({
-  department,
-  onSubmit,
-  onCancel,
-}: {
-  department: Department | null;
-  onSubmit: (_data: {
-    name: string;
-    display_name: string;
-    icon: string;
-    color: string;
-    description: string;
-  }) => void;
-  onCancel: () => void;
-}) {
-  const [name, setName] = useState(department?.name || '');
-  const [displayName, setDisplayName] = useState(department?.display_name || '');
-  const [icon, setIcon] = useState(department?.icon || 'Building2');
-  const [color, setColor] = useState(department?.color || 'blue');
-  const [description, setDescription] = useState(department?.description || '');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ name, display_name: displayName, icon, color, description });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="displayName"
-          className="block text-sm font-medium text-[var(--text-body)] mb-2"
-        >
-          Display Name
-        </label>
-        <Input
-          id="displayName"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Slug (URL-friendly name)
-        </label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-          className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="icon" className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Icon
-        </label>
-        <select
-          id="icon"
-          value={icon}
-          onChange={(e) => setIcon(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
-        >
-          {ICONS.map((iconName) => (
-            <option key={iconName} value={iconName}>
-              {iconName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="color" className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Color
-        </label>
-        <select
-          id="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
-        >
-          {COLORS.map((colorName) => (
-            <option key={colorName} value={colorName}>
-              {colorName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-[var(--text-body)] mb-2"
-        >
-          Description
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          placeholder="Brief description of the department"
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
-        />
-      </div>
-
-      <div className="flex gap-2 justify-end pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
-        >
-          {department ? 'Update' : 'Create'}
-        </Button>
-      </div>
-    </form>
   );
 }
