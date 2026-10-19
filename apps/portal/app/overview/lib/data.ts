@@ -1,16 +1,72 @@
 // Departments data
 export const DEPARTMENTS = [
   {
+    id: 'admin',
+    name: 'Administration',
+    slug: 'admin',
+    description:
+      'Sites, machinery fleet, users & roles, settings, system integrations & AI telemetry',
+    color: '#7c3aed',
+    routes: [
+      {
+        path: '/admin?tab=sites',
+        name: 'Sites',
+        description: 'Mining sites & operational complexes',
+      },
+      {
+        path: '/admin?tab=fleet',
+        name: 'Fleet',
+        description: 'Heavy machinery & bin factor registry',
+      },
+      {
+        path: '/admin?tab=users',
+        name: 'Users',
+        description: 'Employee RBAC & department assignments',
+      },
+      {
+        path: '/admin?tab=departments',
+        name: 'Departments',
+        description: 'Operational module configuration',
+      },
+      {
+        path: '/admin?tab=settings',
+        name: 'Settings',
+        description: 'Global tenant & security settings',
+      },
+      {
+        path: '/admin?tab=integrations',
+        name: 'Integrations',
+        description: 'SCADA, printer & webhook connectors',
+      },
+      {
+        path: '/admin/ai-metrics',
+        name: 'AI Metrics',
+        description: 'LLM token cache & ZAR cost telemetry',
+      },
+    ],
+    roles: ['admin', 'super_admin', 'executive'],
+  },
+  {
     id: 'drilling',
     name: 'Drilling',
     slug: 'drilling',
     description: 'Drilling operations, penetration rates, and rig telemetry',
-    color: '#3ecf8e',
+    color: '#2563eb',
     routes: [
       {
         path: '/drilling',
         name: 'Dashboard',
         description: "Today's summary and status",
+      },
+      {
+        path: '/drilling/drilling-operations',
+        name: 'Drilling Operations',
+        description: 'Rig shift logs & blast pattern tracking',
+      },
+      {
+        path: '/drilling/machine-telemetry',
+        name: 'Machine Telemetry',
+        description: 'Real-time Pit Viper down-hole telemetry',
       },
       {
         path: '/drilling/daily-log',
@@ -33,16 +89,6 @@ export const DEPARTMENTS = [
         description: 'Aggregate data + CSV',
       },
       {
-        path: '/drilling/operational-delays',
-        name: 'Operational Delays',
-        description: 'Drill delay logging and tracking',
-      },
-      {
-        path: '/drilling/shift-coverage',
-        name: 'Shift Coverage',
-        description: 'Crew and rig roster assignments',
-      },
-      {
         path: '/drilling/tools',
         name: 'Tools',
         description: 'Flowise / tool embeds',
@@ -55,7 +101,7 @@ export const DEPARTMENTS = [
     name: 'Production',
     slug: 'production',
     description: 'Coal production, pit excavation, and haulage tracking',
-    color: '#00c573',
+    color: '#34c759',
     routes: [
       {
         path: '/production',
@@ -105,7 +151,7 @@ export const DEPARTMENTS = [
     name: 'Access Control',
     slug: 'access-control',
     description: 'Mine gate entry/exit, RFID badge verification, and personnel tracking',
-    color: '#60a5fa',
+    color: '#0284c7',
     routes: [
       {
         path: '/access-control',
@@ -113,44 +159,39 @@ export const DEPARTMENTS = [
         description: "Today's summary and real-time gate muster",
       },
       {
-        path: '/access-control/daily-log',
-        name: 'Daily Log',
-        description: 'Submit shift logs',
+        path: '/access-control/muster',
+        name: 'Muster Station',
+        description: 'Emergency roll call & zone occupancy',
       },
       {
-        path: '/access-control/machines',
-        name: 'Machines',
-        description: 'Turnstiles, boom gates & scanners',
+        path: '/access-control/print-cards',
+        name: 'Print Cards',
+        description: 'Industrial CR80 card print jobs & spooler',
       },
       {
-        path: '/access-control/history',
-        name: 'History',
-        description: 'Past daily logs & entry timestamps',
+        path: '/access-control/qr-codes',
+        name: 'QR Codes',
+        description: 'Batch QR generation and C66 verification',
+      },
+      {
+        path: '/access-control/access-logs',
+        name: 'Access Logs',
+        description: 'Turnstile & boom gate scan audit trail',
+      },
+      {
+        path: '/access-control/visitors',
+        name: 'Visitors',
+        description: 'Contractor & visitor induction registry',
+      },
+      {
+        path: '/access-control/badges',
+        name: 'Badges',
+        description: 'Active RFID/QR credential management',
       },
       {
         path: '/access-control/reports',
         name: 'Reports',
         description: 'Aggregate data + CSV muster reports',
-      },
-      {
-        path: '/access-control/card-actions',
-        name: 'Card Actions',
-        description: 'Card search, badge assignment, and instant printing',
-      },
-      {
-        path: '/access-control/print-cards',
-        name: 'Print Cards',
-        description: 'Industrial card print jobs and batch queues',
-      },
-      {
-        path: '/access-control/qr-codes',
-        name: 'QR Codes',
-        description: 'Batch QR generation and encoding',
-      },
-      {
-        path: '/access-control/tools',
-        name: 'Tools',
-        description: 'Flowise / tool embeds',
       },
     ],
     roles: ['access_control_officer', 'access_control', 'supervisor', 'admin'],
@@ -160,12 +201,22 @@ export const DEPARTMENTS = [
     name: 'Engineering',
     slug: 'engineering',
     description: 'Technical support, predictive maintenance, and breakdown dispatch',
-    color: '#a78bfa',
+    color: '#7c3aed',
     routes: [
       {
         path: '/engineering',
         name: 'Dashboard',
         description: "Today's summary and status",
+      },
+      {
+        path: '/engineering/breakdowns',
+        name: 'Breakdowns',
+        description: 'Active mechanical/electrical breakdown tickets',
+      },
+      {
+        path: '/engineering/tire-management',
+        name: 'Tire Management',
+        description: 'Haul fleet tire pressure & tread lifecycle',
       },
       {
         path: '/engineering/daily-log',
@@ -176,21 +227,6 @@ export const DEPARTMENTS = [
         path: '/engineering/machines',
         name: 'Machines',
         description: 'Department equipment & health',
-      },
-      {
-        path: '/engineering/breakdowns',
-        name: 'Breakdowns',
-        description: 'Active mechanical/electrical breakdown tickets',
-      },
-      {
-        path: '/engineering/engineering-notes',
-        name: 'Engineering Notes',
-        description: 'Maintenance logs & predictive alerts',
-      },
-      {
-        path: '/engineering/machine-operations',
-        name: 'Machine Operations',
-        description: 'OEM operating limits and compliance',
       },
       {
         path: '/engineering/history',
@@ -215,70 +251,116 @@ export const DEPARTMENTS = [
     name: 'Control Room',
     slug: 'control-room',
     description: 'Central monitoring, real-time SCADA telemetry, and shift closeouts',
-    color: '#007aff',
+    color: '#dc2626',
     routes: [
+      {
+        path: '/control-room/shift-compilation',
+        name: 'Shift Operations',
+        description: 'Atomic shift compilation & closeout signing',
+      },
       {
         path: '/control-room',
         name: 'Dashboard',
         description: 'Live SCADA overview and alarm status',
       },
       {
-        path: '/control-room/daily-log',
-        name: 'Daily Log',
-        description: 'Submit shift logs',
+        path: '/control-room/hourly-loads',
+        name: 'Hourly Loads',
+        description: 'Real-time excavator-to-truck load matrix',
       },
       {
-        path: '/control-room/machines',
-        name: 'Machines',
-        description: 'Pit-wide heavy machinery telemetry',
+        path: '/control-room/machine-operations',
+        name: 'Machine Operations',
+        description: 'SMR hours, diesel burn & delay logging',
       },
       {
-        path: '/control-room/roll-over',
-        name: 'Roll Over',
-        description: 'End-of-shift handover & closeout signing',
+        path: '/control-room/engineering-notes',
+        name: 'Engineering Notes',
+        description: 'Cross-shift engineering handover notes',
       },
       {
-        path: '/control-room/history',
-        name: 'History',
-        description: 'Past daily logs',
+        path: '/control-room/excavator-activity',
+        name: 'Excavator Activity',
+        description: 'Live digger utilization & BCM/hr',
       },
       {
         path: '/control-room/reports',
         name: 'Reports',
         description: 'Aggregate data + CSV',
       },
-      {
-        path: '/control-room/tools',
-        name: 'Tools',
-        description: 'Flowise / tool embeds',
-      },
     ],
     roles: ['control_room_operator', 'admin', 'supervisor', 'operator'],
+  },
+  {
+    id: 'overview',
+    name: 'System Overview',
+    slug: 'overview',
+    description: 'Architecture visualizer, tech stack, database schema, and system telemetry',
+    color: '#0284c7',
+    routes: [
+      {
+        path: '/overview',
+        name: 'System Architecture',
+        description: 'End-to-end monorepo & layer architecture',
+      },
+      {
+        path: '/overview?tab=backend',
+        name: 'Backend Topology',
+        description: 'Supabase, Redis, Inngest & SCADA service mesh',
+      },
+      {
+        path: '/overview?tab=departments',
+        name: 'Departments',
+        description: '8 operational modules & RBAC matrix',
+      },
+      {
+        path: '/overview?tab=database',
+        name: 'Database Schema',
+        description: 'PostgreSQL 17 tables & RLS InitPlan catalog',
+      },
+      {
+        path: '/overview?tab=audit',
+        name: 'Audit & Compliance',
+        description: 'Automated drift, security & quality reports',
+      },
+      {
+        path: '/overview?tab=agentic',
+        name: 'Agentic Monitor',
+        description: 'Multi-agent token cache & ZAR cost telemetry',
+      },
+    ],
+    roles: ['admin', 'executive', 'supervisor', 'engineer'],
   },
   {
     id: 'database',
     name: 'Database',
     slug: 'database',
-    description: 'PostgreSQL schema definitions, migrations, and live telemetry panels',
+    description:
+      'PostgreSQL 17 schema definitions, 186 migrations, and live Supabase telemetry panels',
     color: '#10b981',
     routes: [
       {
         path: '/database',
         name: 'Dashboard',
-        description: 'Database telemetry and stats',
+        description: 'Live Supabase PostgreSQL 17 telemetry & row counts',
       },
       {
         path: '/database/schemas',
         name: 'Schemas',
-        description: 'PostgreSQL schema definitions',
+        description: 'PostgreSQL 17 schema & RLS policy definitions',
       },
       {
         path: '/database/panels',
         name: 'Panels',
-        description: 'Live Metabase dashboards',
+        description: 'Direct personnel & badge provisioning console',
+      },
+      {
+        path: '/database/reports',
+        name: 'Reports',
+        description: 'Database audit & compliance exports',
       },
     ],
-    roles: ['admin', 'engineer'],
+    roles: ['admin', 'engineer', 'super_admin'],
   },
 ];
 
@@ -294,7 +376,7 @@ const _NAVIGATION_GRAPH = {
       id: 'drilling',
       type: 'department',
       label: 'Drilling',
-      color: '#3ecf8e',
+      color: '#2563eb',
       x: 100,
       y: 200,
     },
@@ -302,7 +384,7 @@ const _NAVIGATION_GRAPH = {
       id: 'production',
       type: 'department',
       label: 'Production',
-      color: '#00c573',
+      color: '#34c759',
       x: 250,
       y: 200,
     },
@@ -310,7 +392,7 @@ const _NAVIGATION_GRAPH = {
       id: 'access-control',
       type: 'department',
       label: 'Access Control',
-      color: '#60a5fa',
+      color: '#0284c7',
       x: 400,
       y: 200,
     },
@@ -318,7 +400,7 @@ const _NAVIGATION_GRAPH = {
       id: 'engineering',
       type: 'department',
       label: 'Engineering',
-      color: '#a78bfa',
+      color: '#7c3aed',
       x: 550,
       y: 200,
     },
@@ -326,8 +408,16 @@ const _NAVIGATION_GRAPH = {
       id: 'control-room',
       type: 'department',
       label: 'Control Room',
-      color: '#007aff',
+      color: '#dc2626',
       x: 700,
+      y: 200,
+    },
+    {
+      id: 'overview',
+      type: 'department',
+      label: 'System Overview',
+      color: '#0284c7',
+      x: 850,
       y: 200,
     },
     {
@@ -335,14 +425,6 @@ const _NAVIGATION_GRAPH = {
       type: 'department',
       label: 'Database',
       color: '#10b981',
-      x: 850,
-      y: 200,
-    },
-    {
-      id: 'access-card-actions',
-      type: 'department',
-      label: 'Access Card Actions',
-      color: '#f59e0b',
       x: 1000,
       y: 200,
     },
@@ -357,9 +439,8 @@ const _NAVIGATION_GRAPH = {
     { id: 'e3', source: 'hub', target: 'access-control' },
     { id: 'e4', source: 'hub', target: 'engineering' },
     { id: 'e5', source: 'hub', target: 'control-room' },
-    { id: 'e6', source: 'hub', target: 'database' },
-    { id: 'e5', source: 'hub', target: 'control-room' },
-    { id: 'e9', source: 'hub', target: 'access-card-actions' },
+    { id: 'e6', source: 'hub', target: 'overview' },
+    { id: 'e7', source: 'hub', target: 'database' },
 
     // Auth
     { id: 'e10', source: 'login', target: 'hub' },
@@ -377,18 +458,18 @@ export const TECH_STACK = [
     items: [
       {
         name: 'Next.js 16',
-        version: '16.2.6',
-        description: 'App Router, React Server Components & Server Actions',
+        version: '16.3.8',
+        description: 'App Router, Cache Components, React Server Components & Server Actions',
       },
       {
         name: 'React 19',
-        version: '19.0.0',
-        description: 'Action hooks, React compiler optimization & Transitions',
+        version: '19.2.0',
+        description: 'Action hooks, React compiler optimization & concurrent transitions',
       },
       {
         name: 'Tailwind CSS & OKLCH',
         version: '3.4.17',
-        description: 'Perceptually uniform OKLCH palette via @repo/theme design tokens',
+        description: 'Perceptually uniform light-mode OKLCH palette via @repo/theme design tokens',
       },
       {
         name: 'Framer Motion',
@@ -396,9 +477,9 @@ export const TECH_STACK = [
         description: 'Single standardized GPU-accelerated motion engine across @repo/ui',
       },
       {
-        name: '@xyflow/react',
-        version: '12.6.0',
-        description: 'Interactive node-based system topology and telemetry visualizers',
+        name: 'TanStack Query',
+        version: '5.x',
+        description: 'Authoritative client-side async state & optimistic cache synchronization',
       },
       {
         name: 'Lucide React',
@@ -413,18 +494,19 @@ export const TECH_STACK = [
     items: [
       {
         name: 'Supabase PostgreSQL',
-        version: '16.x',
-        description: 'Primary ACID relational database with 109 migrations & pgvector',
+        version: '17.x',
+        description: 'Primary ACID relational database with 186 versioned migrations & pgvector',
       },
       {
         name: 'Row Level Security (RLS)',
-        version: 'Active',
-        description: 'Declarative Postgres security policies with 100% table coverage (86 tables)',
+        version: '100% InitPlan',
+        description:
+          'Declarative Postgres security policies with 100% (select auth.uid()) InitPlan coverage',
       },
       {
-        name: 'Kysely Query Builder',
-        version: '0.27.x',
-        description: 'Type-safe SQL dialect wrapper with direct Supabase SSR auth propagation',
+        name: '@repo/contract (Zod)',
+        version: '3.24.x',
+        description: 'Canonical runtime schema validation and drift-audited database contracts',
       },
       {
         name: 'Inngest',
@@ -438,14 +520,16 @@ export const TECH_STACK = [
     color: '#007aff',
     items: [
       {
-        name: 'Redis 7 / L1+L2 Cache',
-        version: '7.x',
-        description: 'In-memory session, department UUID cache, and Redlock distributed locks',
+        name: 'Redis 7 / Hybrid L1+L2',
+        version: '7.4 / Upstash',
+        description:
+          'In-memory LRU L1 cache + Upstash REST L2 pipeline and Redlock distributed locks',
       },
       {
         name: 'Turborepo 2.x',
         version: '2.10.12',
-        description: 'Affected task graph, cached pipeline execution & monorepo enforcement',
+        description:
+          'Affected task graph, cached pipeline execution & monorepo boundary enforcement',
       },
       {
         name: 'pnpm',
@@ -453,9 +537,9 @@ export const TECH_STACK = [
         description: 'Strict content-addressable dependency graph and workspace manager',
       },
       {
-        name: 'Docker & Supabase Local',
-        version: 'Local/Prod',
-        description: 'Isolated database, storage, and edge function execution environments',
+        name: 'Vercel & Supabase Cloud',
+        version: 'Production',
+        description: 'Zero-downtime edge deployment, read-replica routing, and local Docker parity',
       },
     ],
   },
@@ -463,7 +547,16 @@ export const TECH_STACK = [
     category: 'Testing & Quality',
     color: '#ec4899',
     items: [
-      { name: 'Jest & ts-jest', version: '29.x', description: 'Unit and integration test suites' },
+      {
+        name: 'Jest 30 & ts-jest',
+        version: '30.x',
+        description: 'Workspace-wide unit and integration test suites',
+      },
+      {
+        name: 'Biome',
+        version: '1.9.4',
+        description: 'Rust-powered sub-second linter, import organizer, and code formatter',
+      },
       {
         name: 'Playwright',
         version: '1.56.1',
@@ -505,7 +598,7 @@ export const DATABASE_SCHEMA = [
     name: 'departments',
     rls: true,
     columns: ['id (UUID PK)', 'name (text)', 'slug (text)', 'created_at'],
-    description: '9 operational departments with strict routing and access boundaries',
+    description: '8 core operational departments with strict routing and RLS access boundaries',
   },
   {
     name: 'employees',
@@ -520,6 +613,37 @@ export const DATABASE_SCHEMA = [
       'created_at',
     ],
     description: 'Authoritative employee records linked to auth.users with cross-department access',
+  },
+  {
+    name: 'personnel',
+    rls: true,
+    columns: [
+      'id (UUID PK)',
+      'emp_code',
+      'first_name',
+      'surname',
+      'id_number',
+      'job_title',
+      'area_name',
+      'medical_expiry',
+      'induction_expiry',
+      'photo_url',
+      'status',
+    ],
+    description: 'Site personnel registry with medical & safety induction compliance interlocks',
+  },
+  {
+    name: 'badges',
+    rls: true,
+    columns: [
+      'id (UUID PK)',
+      'personnel_id (FK)',
+      'qr_code',
+      'card_number',
+      'is_active',
+      'issued_at',
+    ],
+    description: 'Physical CR80 QR & RFID credentials bound to Chainway C66 turnstile scanners',
   },
   {
     name: 'machines',
@@ -594,21 +718,6 @@ export const DATABASE_SCHEMA = [
     description: 'Time-series payload and pass metrics partitioned for high-speed aggregations',
   },
   {
-    name: 'satellite_insar_deformations',
-    rls: true,
-    columns: [
-      'id (UUID PK)',
-      'scene_id (FK)',
-      'pit_zone',
-      'displacement_mm',
-      'velocity_mm_yr',
-      'coherence',
-      'coordinates (GeoJSON)',
-      'measured_at',
-    ],
-    description: 'InSAR interferometric displacement point clouds and slope subsidence records',
-  },
-  {
     name: 'scada_telemetry_records',
     rls: true,
     columns: [
@@ -670,6 +779,7 @@ const _DB_RELATIONSHIPS = [
   { from: 'employees', to: 'departments', type: 'many-to-one' },
   { from: 'machines', to: 'departments', type: 'many-to-one' },
   { from: 'daily_logs', to: 'departments', type: 'many-to-one' },
+  { from: 'badges', to: 'personnel', type: 'many-to-one' },
   { from: 'machine_hours', to: 'daily_logs', type: 'many-to-one' },
   { from: 'machine_hours', to: 'machines', type: 'many-to-one' },
   { from: 'fuel_logs', to: 'daily_logs', type: 'many-to-one' },
@@ -737,8 +847,8 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: 'client',
     role: 'Primary Industrial UI',
     description:
-      'Next.js 16 App Router UI for mining operators, supervisors, and control room dispatchers.',
-    tech: 'Next.js 16 + React 19 + TanStack Query',
+      'Next.js 16.3.8 App Router UI for mining operators, supervisors, and control room dispatchers.',
+    tech: 'Next.js 16.3.8 + React 19.2 + TanStack Query',
     color: '#3ecf8e',
     protocols: ['HTTPS', 'WSS'],
     security: 'HttpOnly Session Cookies, PKCE OAuth',
@@ -746,7 +856,7 @@ export const BACKEND_SERVICES: BackendService[] = [
     features: [
       'Control Room SCADA Feed',
       'Daily Shift Logs',
-      'Department Dashboards',
+      '8 Department Dashboards',
       'FUXA HMI Embed',
     ],
   },
@@ -756,8 +866,8 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: 'client',
     role: 'Visual Architecture & Telemetry Topology',
     description:
-      'Integrated React Flow visualizer for end-to-end architecture topology, SCADA stream flow inspection, database schema mapping, and automated drift compliance auditing.',
-    tech: 'React Flow (@xyflow/react) + Server Actions',
+      'Integrated architecture visualizer for end-to-end topology, SCADA stream flow inspection, database schema mapping, and automated drift compliance auditing.',
+    tech: 'React 19 Server Components + Server Actions',
     color: '#007aff',
     protocols: ['HTTPS', 'React Server Components', 'Server Actions'],
     security: 'Supabase Session JWT + Role Gating',
@@ -778,10 +888,10 @@ export const BACKEND_SERVICES: BackendService[] = [
     role: 'Direct Type-Safe RPC & Auth Gateway',
     description:
       'Direct server-side mutation and RPC layer enforcing strict runtime Zod schema validation and forwarding authenticated user session context directly to Supabase PostgreSQL RLS with zero middleman proxy overhead.',
-    tech: 'Node.js Edge / Serverless + Zod + Supabase Server SDK',
+    tech: 'Node.js 24 Serverless + @repo/contract Zod + Supabase SSR SDK',
     color: '#3b82f6',
     protocols: ['Direct Server RPC', 'HTTPS', 'Supabase Session Claims'],
-    security: 'Server-side Session & 354 RLS Policy Enforcement (Zero-Proxy)',
+    security: 'Server-side Session & 100% RLS InitPlan Enforcement (Zero-Proxy)',
     sla: '<25ms Execution',
     features: [
       'Direct Supabase RLS Session Forwarding',
@@ -814,21 +924,21 @@ export const BACKEND_SERVICES: BackendService[] = [
   // Primary Data Layer (Supabase / Postgres)
   {
     id: 'supabase-db',
-    name: 'Supabase PostgreSQL',
+    name: 'Supabase PostgreSQL 17',
     category: 'database',
-    role: 'Primary ACID Data Store',
+    role: 'Primary ACID Data Store + Read Replica',
     description:
-      'PostgreSQL 15 cluster with 150 versioned migrations, partition pruning, and strict Row Level Security policies.',
-    tech: 'PostgreSQL 15 + PostgREST + pgvector',
+      'PostgreSQL 17 cluster with 186 versioned migrations, partition pruning, read-replica routing, and 100% Row Level Security InitPlan policies.',
+    tech: 'PostgreSQL 17 + PostgREST + pgvector',
     color: '#3ecf8e',
     protocols: ['PostgreSQL Wire (5432)', 'HTTPS / PostgREST'],
-    security: '354 RLS Policies, Encrypted at rest (AES-256)',
+    security: '100% RLS InitPlan Policies, Encrypted at rest (AES-256)',
     sla: '<10ms Query p95',
     features: [
       'Partitioned Production Logs',
       'Supervisor PIN Hashes',
-      'Material Density Constants',
-      'Vector Embeddings',
+      'Personnel & Badge Interlocks',
+      'Vector Embeddings (HNSW)',
     ],
   },
   {
@@ -867,21 +977,21 @@ export const BACKEND_SERVICES: BackendService[] = [
   // Caching & In-Memory Layer
   {
     id: 'redis-cluster',
-    name: 'Redis Cache & Locks',
+    name: 'Hybrid L1/L2 Redis 7.4',
     category: 'cache',
     role: 'High-Speed Cache & Distributed Locking',
     description:
-      'In-memory key-value data store for shift roll-over concurrency locks (Redlock), query caching, and rate limiting.',
-    tech: 'Redis 7 / Upstash',
+      'Hybrid LRU L1 in-memory cache + Upstash REST L2 pipeline for shift roll-over concurrency locks (Redlock), query caching, and rate limiting.',
+    tech: 'Redis 7.4 / Upstash REST Pipeline',
     color: '#ef4444',
-    protocols: ['RESP (Redis Protocol, 6379)', 'HTTPS REST'],
+    protocols: ['RESP (Redis Protocol, 6379)', 'HTTPS REST Pipeline'],
     security: 'TLS + Auth Token / VPC Peering',
     sla: '<2ms Retrieval',
     features: [
       'Sliding-Window Rate Limiting',
       'Redlock Shift Closeout Mutex',
       'Machine Status Cache',
-      'Session Store',
+      'Department UUID Cache',
     ],
   },
 
@@ -1021,21 +1131,21 @@ export const BACKEND_SERVICES: BackendService[] = [
     },
   },
   {
-    id: 'satellite-tiles',
-    name: 'Satellite Tile Service',
+    id: 'c66-badge-scanner',
+    name: 'Chainway C66 & Magicard Spooler',
     category: 'iot',
-    role: 'Geospatial Pit Mapping',
+    role: 'Gate Turnstile & CR80 Badge Hardware',
     description:
-      'High-resolution orthomosaic tile server for visual pit exploration and mining progression monitoring.',
-    tech: 'XYZ Raster Tiles + WebGL Deck.gl',
-    color: '#6366f1',
-    protocols: ['HTTPS / XYZ Web Mercator'],
-    security: 'Signed Pit Layer API Tokens',
-    sla: '<80ms Tile Cache Response',
+      'Industrial 2-step QR/RFID handheld gate scanners and 300 DPI CR80 card printing spooler enforcing medical and induction compliance at mine gates.',
+    tech: 'WebHID / TCP Raw 9100 + Supabase RPC',
+    color: '#0284c7',
+    protocols: ['HTTPS / RPC', 'TCP Raw 9100', 'CUPS / IPP'],
+    security: 'Signed QR Payloads & 2-Step Gate Interlock',
+    sla: '<80ms Scan Verification',
     features: [
-      'High-Res Pit Topography',
-      'Excavation Boundary Overlays',
-      'Fleet GPS Vector Layers',
+      '2-Step Scan-Confirm Gate',
+      'CR80 300 DPI Badge Spooler',
+      'Medical & Induction Interlock',
     ],
   },
 
@@ -1104,14 +1214,14 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     color: '#06b6d4',
   },
   {
-    id: 'conn-portal-tiles',
+    id: 'conn-portal-c66',
     source: 'portal-app',
-    target: 'satellite-tiles',
-    label: 'Pit Raster Tiles',
-    protocol: 'HTTPS / XYZ',
+    target: 'c66-badge-scanner',
+    label: 'Gate Scan & CR80 Print Spooler',
+    protocol: 'HTTPS / TCP 9100',
     flowType: 'iot',
-    description: 'High-resolution geospatial tile rendering for mining terrain visualization.',
-    color: '#6366f1',
+    description: '2-step C66 QR/RFID gate verification and 300 DPI Magicard badge printing.',
+    color: '#0284c7',
   },
 
   // Gateways -> Data & Cache
@@ -1123,7 +1233,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     protocol: 'Server RPC ──► Postgres / RLS',
     flowType: 'data',
     description:
-      'Direct zero-middleman mutations forwarding authenticated user session tokens to Supabase PostgreSQL, enforcing 354 Row Level Security policies with strict Zod validation.',
+      'Direct zero-middleman mutations forwarding authenticated user session tokens to Supabase PostgreSQL 17, enforcing 100% Row Level Security InitPlan policies with strict Zod validation.',
     color: '#3ecf8e',
   },
   {
@@ -1131,7 +1241,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     source: 'server-actions',
     target: 'redis-cluster',
     label: 'Redlock & Rate Limiting',
-    protocol: 'RESP / TLS (6379)',
+    protocol: 'RESP / HTTPS Pipeline',
     flowType: 'cache',
     description:
       'Acquires distributed lock for shift rollover and checks sliding-window rate limit.',
@@ -1188,7 +1298,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     protocol: 'Postgres Wire / SSL',
     flowType: 'data',
     description:
-      'Real-time schema graph rendering from 109 migration definitions and RLS policy catalog.',
+      'Real-time schema graph rendering from 186 migration definitions and RLS policy catalog.',
     color: '#3ecf8e',
   },
 

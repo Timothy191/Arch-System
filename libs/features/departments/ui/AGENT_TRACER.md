@@ -1,5 +1,12 @@
 # Departments UI Agent Tracer
 
+## 2026-10-19 - Remove Legacy Satellite Channel Wording in ControlRoomChecklistWidget
+
+- **Purpose**: Replace legacy satellite channel wording in `ControlRoomChecklistWidget.tsx` with cellular LTE failover wording.
+- **Changes**:
+  - `src/control-room/ControlRoomChecklistWidget.tsx`: Updated `weekly-1` checklist item label.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## 2026-08-25 - Workspace Dependency Link
 
 **Purpose**: Declare the shared hooks package imported by the departments UI.

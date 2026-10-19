@@ -23,7 +23,7 @@ import { cachedRSC } from '@/lib/server-cache';
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
   description:
-    'Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, and satellite monitoring dashboards.',
+    'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, engineering, control room, system overview, and database dashboards.',
 };
 
 async function getDashboardCounts(
@@ -187,6 +187,17 @@ export default async function HubPage() {
     }
   } else {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
+  }
+
+  // AGENT-TRACE: Unhide System Overview ('overview') and Database ('database')
+  // Core Operational Modules so they always appear on /hub alongside DB-assigned departments.
+  if (rawDepartments.length > 0 || canSeeExecutive) {
+    for (const sysModuleName of ['overview', 'database'] as const) {
+      const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
+      if (sysDept && !rawDepartments.some((d) => d.name === sysModuleName)) {
+        rawDepartments = [...rawDepartments, sysDept];
+      }
+    }
   }
 
   const HUB_MODULE_ORDER = [

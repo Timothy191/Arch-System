@@ -1,5 +1,14 @@
 # Shared Data Access Agent Tracer
 
+## 2026-10-19 - Remove Dead Satellite Monitoring API (`monitoring-api.ts`)
+
+- **Purpose**: Remove unused legacy Satellite Monitoring API (`src/monitoring-api.ts` and `src/monitoring-api.test.ts`) and its re-export from `src/index.ts`.
+- **Changes**:
+  - `src/monitoring-api.ts` & `src/monitoring-api.test.ts`: Removed dead files.
+  - `src/index.ts`: Removed `export * from './monitoring-api'`.
+  - `src/telemetry-circuit-breaker.ts`: Updated header docstring.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## Session 2026-08-27 (Universal Edge Telemetry Circuit Breaker)
 
 - **Purpose**: Provide resilient telemetry ingestion with full-jitter exponential backoff, state transitions (CLOSED, OPEN, HALF_OPEN), and cached fallbacks for erratic SCADA Modbus / IoT satellite telemetry streams.

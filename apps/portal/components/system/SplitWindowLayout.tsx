@@ -414,7 +414,7 @@ const CHANNELS = [
   { id: 'weighbridge', name: 'Weighbridge Inbound/Out', icon: '⚖️', unread: 0 },
   { id: 'security', name: 'Security & Turnstile Gates', icon: '🛡️', unread: 1 },
   { id: 'pit', name: 'Pit Haul Road & Heavy Plant', icon: '🚜', unread: 0 },
-  { id: 'safety', name: 'Safety & Emergency Line', icon: '🚨', unread: 0 },
+  { id: 'engineering', name: 'Engineering & Breakdown Dispatch', icon: '🔧', unread: 0 },
 ];
 
 const INITIAL_MESSAGES: MessageItem[] = [

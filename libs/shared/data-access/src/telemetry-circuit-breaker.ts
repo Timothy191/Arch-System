@@ -2,7 +2,7 @@
  * Universal Edge Telemetry Circuit Breaker
  *
  * Resilient circuit breaker and exponential backoff engine for industrial
- * mining telemetry streams, SCADA Modbus ingest, and InSAR satellite pipelines.
+ * mining telemetry streams, SCADA Modbus ingest, and edge sensor pipelines.
  */
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';

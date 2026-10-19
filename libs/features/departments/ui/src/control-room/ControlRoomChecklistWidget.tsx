@@ -111,7 +111,7 @@ const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
   // Weekly
   {
     id: 'weekly-1',
-    label: 'Perform end-to-end failover test of backup radio and satellite channels',
+    label: 'Perform end-to-end failover test of backup radio and cellular LTE channels',
     category: 'weekly',
     completed: false,
     completedAt: null,

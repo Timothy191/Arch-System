@@ -11,7 +11,7 @@ export interface Department {
   icon: string;
   description: string;
   color: string;
-  type: 'standard' | 'control_room' | 'satellite';
+  type: 'standard' | 'control_room';
   status?: 'active' | 'maintenance' | 'alert';
   gridSpan?: string;
   stats?: {
@@ -346,19 +346,4 @@ export interface ProductionYieldRecord {
   coalTonnes: number;
   wasteTonnes: number;
   totalYieldPercentage?: number;
-}
-
-export interface SatelliteDeformationRecord {
-  id: string;
-  departmentId: string;
-  satelliteName: 'Sentinel-1' | 'TerraSAR-X' | 'Capella' | 'PAZ';
-  acquisitionDate: string;
-  referenceDate: string;
-  locationName: string;
-  latitude: number;
-  longitude: number;
-  displacementMm: number;
-  coherenceIndex: number;
-  riskLevel: 'none' | 'minor' | 'moderate' | 'critical';
-  cogUrl?: string | null;
 }

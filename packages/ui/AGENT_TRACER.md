@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-19 - Unhide System Overview & Database in MacMenuBar & HeroCardContent + Legacy Trace Cleanup
+
+- **Purpose**: Add `overview` and `database` to `MacMenuBar` (`DEPARTMENTS_LIST`) and `HeroCardContent` (`getHeroBannerFeatures`), and remove remaining `safety`, `satellite`, and `training` icon/token traces from `DepartmentLayout.tsx` and `MacMenuBar.tsx`.
+- **Changes**:
+  - `packages/ui/src/components/MacMenuBar.tsx`: Added `overview` (`System Overview`) and `database` (`Database`) to `DEPARTMENTS_LIST`; replaced `text-dept-safety` with `text-accent-amber`.
+  - `packages/ui/src/components/HeroCardContent.tsx`: Added `'overview'` and `'database'` capability strips in `getHeroBannerFeatures()`.
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Removed unused `GraduationCap`, `HardHat`, and `Satellite` icons from `ICON_MAP`.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## 2026-10-19 - Hero Banner Feature Strip & Interactive System Menu
 
 - **Purpose**: Replace `<TrustLogos />` in `HeroCardContent.tsx` with contextual enterprise hero banner capability cards, and make `MacMenuBar.tsx` System Menu reactive to route changes, carousel/module button interactions, and menu item clicks.

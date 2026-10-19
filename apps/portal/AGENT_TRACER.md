@@ -1,3 +1,9 @@
+## 2026-10-19: Unhide System Overview & Database, Prune Legacy Dept Traces, Update Database & Overview
+
+- Unhid `overview` (**System Overview**) and `database` (**Database**) in `apps/portal/app/hub/page.tsx` so all 8/8 Core Operational Modules appear on `/hub`.
+- Upgraded `apps/portal/app/(departments)/database/page.tsx` and `apps/portal/app/(departments)/database/schemas/page.tsx` to query live Supabase row counts via `createReadReplicaClient` and render the complete PostgreSQL 17 schema, 186 migrations, and 100% RLS InitPlan catalog.
+- Updated `apps/portal/app/overview/lib/data.ts`, `SystemArchitecture.tsx`, `BackendArchitecture.tsx`, `DepartmentBreakdown.tsx`, `DatabaseSchema.tsx`, and `TechStack.tsx` to reflect all 8 current modules, Next.js 16.3.8, PostgreSQL 17 (186 migrations), and Hybrid L1/L2 Redis 7.4, removing all remaining `safety`, `satellite`, and `training` traces.
+
 ## 2026-10-19: Hub Footer OS Capsule Redesign & Module Button Menu Sync
 
 - Redesigned `<footer aria-label="Site footer">` in `apps/portal/app/layout.tsx` from loose text into a slim `py-1.5` glass bar with a compact OS Identity Capsule (`Arch OS` + live green indicator dot + monospace `v1.6.2` pill) and matched right-side `eve` status capsule.

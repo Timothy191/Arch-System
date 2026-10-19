@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-19 - Unhide System Overview & Database in Hub Cards & HeroRotator + Legacy Trace Cleanup
+
+- **Purpose**: Add `Database` icon to `DepartmentCard.tsx`, add `overview` and `database` styling/overlines to `HeroRotator.tsx`, and remove legacy `GraduationCap`, `HardHat`, and `Satellite` icon mappings.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Added `Database` to `ICON_MAP` and removed `GraduationCap`, `HardHat`, and `Satellite`.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Added `overview` and `database` to `DEPT_STYLE_MAP` and `assetOverline`, and gave `overviewPanel` id `'central-command'` to avoid key collision with the `'overview'` department slide.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## 2026-10-19 - Codebase Telemetry Footer Marquee & Hero Banner Feature Tests
 
 - **Purpose**: Replace fictional department review quotes in `DepartmentReviews.tsx` with Arch-System codebase & architecture performance telemetry (`+88% Faster Reads` Hybrid L1/L2 Redis, `-96% Network RTT` Upstash Pipeline, `100% Coalesced` X-Fetch, `84.0% Cache Hit` Prompt Cache, `186 Migrations` Supabase RLS, `+65% Faster LCP` Next.js 16, `89 Bugs Resolved`, `8/8 Gates Passing`), and align `HeroRotator.test.tsx` with the new Hero Banner Feature Strip.

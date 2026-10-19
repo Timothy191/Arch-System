@@ -83,7 +83,7 @@ export default function DatabaseSchema() {
 
             {/* Connected tables */}
             <div className="flex flex-wrap gap-4 justify-center">
-              {['employees', 'machines', 'daily_logs'].map((table) => (
+              {['employees', 'personnel', 'machines', 'daily_logs', 'breakdowns'].map((table) => (
                 <div key={table} className="flex flex-col items-center">
                   <div className="px-4 py-2 bg-accent-blue/10 border border-accent-blue rounded-lg text-accent-blue font-mono text-sm font-medium">
                     {table}
@@ -96,10 +96,18 @@ export default function DatabaseSchema() {
           {/* Child tables */}
           <div className="mt-8 pt-6 border-t border-default">
             <div className="text-xs text-text-muted mb-3 text-center uppercase tracking-wider">
-              Child Tables (reference daily_logs)
+              Child & Telemetry Tables (reference daily_logs, machines & personnel)
             </div>
             <div className="flex flex-wrap justify-center gap-4">
-              {['machine_hours', 'fuel_logs', 'production_logs'].map((table) => (
+              {[
+                'badges',
+                'hourly_loads',
+                'delay_entries',
+                'scada_telemetry_records',
+                'card_print_jobs',
+                'access_logs',
+                'audit_logs',
+              ].map((table) => (
                 <div key={table} className="flex flex-col items-center">
                   <div className="px-4 py-2 bg-accent-amber/10 border border-accent-amber rounded-lg text-accent-amber font-mono text-sm font-medium">
                     {table}
@@ -118,30 +126,37 @@ export default function DatabaseSchema() {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-2">
             <Lock className="w-5 h-5 text-accent-green" />
-            <span className="text-sm font-medium text-text-heading">Row Level Security</span>
+            <span className="text-sm font-medium text-text-heading">
+              100% RLS InitPlan Security
+            </span>
           </div>
           <p className="text-xs text-text-secondary">
-            All tables have RLS enabled with department-based access policies
+            Every table enforces Row Level Security with cached (select auth.uid()) InitPlan
+            department policies
           </p>
         </Card>
 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-2">
             <Key className="w-5 h-5 text-accent-blue" />
-            <span className="text-sm font-medium text-text-heading">Auth Integration</span>
+            <span className="text-sm font-medium text-text-heading">186 Versioned Migrations</span>
           </div>
           <p className="text-xs text-text-secondary">
-            employees table linked to auth.users via auth_id with trigger on signup
+            Supabase PostgreSQL 17 schema managed via zero-padded declarative migrations & atomic
+            RPCs
           </p>
         </Card>
 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-2">
             <Table2 className="w-5 h-5 text-accent-blue" />
-            <span className="text-sm font-medium text-text-heading">7 Tables Total</span>
+            <span className="text-sm font-medium text-text-heading">
+              {DATABASE_SCHEMA.length} Core Domain Tables
+            </span>
           </div>
           <p className="text-xs text-text-secondary">
-            Core tables: departments, employees, machines, daily_logs + 3 child tables
+            Departments, employees, personnel, badges, machines, daily_logs, breakdowns, loads &
+            audit trails
           </p>
         </Card>
       </div>

@@ -7,13 +7,11 @@ import {
   ArrowUpRight,
   Bookmark,
   CreditCard,
+  Database,
   Factory,
-  GraduationCap,
-  HardHat,
   Loader2,
   Monitor,
   Pickaxe,
-  Satellite,
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
@@ -27,14 +25,12 @@ import { Sparkline } from './Sparkline';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
+  Database,
   Drill: Pickaxe,
   Factory,
   ShieldCheck,
   Wrench,
   Monitor,
-  HardHat,
-  GraduationCap,
-  Satellite,
   CreditCard,
 };
 

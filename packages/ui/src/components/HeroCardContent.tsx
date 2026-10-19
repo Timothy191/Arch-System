@@ -152,6 +152,48 @@ function getHeroBannerFeatures(panelName: string, primaryHref: string): HeroBann
           icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
         },
       ];
+    case 'overview':
+      return [
+        {
+          label: '8 Core Departments',
+          badge: 'Architecture',
+          href: '/overview',
+          icon: <Layers className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+        {
+          label: 'Next.js 16 + Supabase',
+          badge: 'Tech Stack',
+          href: '/overview',
+          icon: <Cpu className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'Zero-Trust RLS & Cache',
+          badge: '100% Verified',
+          href: '/overview',
+          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+      ];
+    case 'database':
+      return [
+        {
+          label: 'Supabase PostgreSQL 17',
+          badge: '186 Migrations',
+          href: '/database',
+          icon: <Layers className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'Schema & RLS Catalog',
+          badge: '100% InitPlan',
+          href: '/database/schemas',
+          icon: <ShieldCheck className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+        {
+          label: 'Telemetry & Replica Sync',
+          badge: 'Live Panels',
+          href: '/database/panels',
+          icon: <Activity className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+      ];
     default:
       return [
         {

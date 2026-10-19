@@ -13,6 +13,7 @@ import {
   // Menu: Operations dropdown icons
   ChevronRight,
   Command,
+  Database,
   // General
   ExternalLink,
   FileText,
@@ -98,6 +99,22 @@ const DEPARTMENTS_LIST = [
     bgColor: 'bg-dept-control-room/10 hover:bg-dept-control-room/15',
     description: 'Real-time operations monitor',
   },
+  {
+    name: 'overview',
+    displayName: 'System Overview',
+    icon: Activity,
+    iconColor: 'text-dept-access-control',
+    bgColor: 'bg-dept-access-control/10 hover:bg-dept-access-control/15',
+    description: 'Architecture, tech stack & telemetry',
+  },
+  {
+    name: 'database',
+    displayName: 'Database',
+    icon: Database,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
+    description: 'Supabase PostgreSQL, RLS & schemas',
+  },
 ] as const;
 
 const PRODUCTIVITY_LIST = [
@@ -129,7 +146,7 @@ const PRODUCTIVITY_LIST = [
     name: 'notes',
     displayName: 'Notes',
     icon: StickyNote,
-    colorClass: 'text-dept-safety',
+    colorClass: 'text-accent-amber',
   },
 ] as const;
 

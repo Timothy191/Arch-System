@@ -5,8 +5,8 @@ import { TECH_STACK } from '../lib/data';
 const categoryIcons: Record<string, string> = {
   Frontend: '🎨',
   Backend: '⚙️',
-  DevOps: '🚀',
-  Testing: '🧪',
+  'DevOps & Caching': '🚀',
+  'Testing & Quality': '🧪',
   'Integration Tools': '🔗',
 };
 
@@ -16,7 +16,7 @@ export default function TechStack() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-text-heading">Technology Stack</h2>
         <p className="text-text-secondary mt-1">
-          Complete overview of technologies used in Arch Systems
+          Complete overview of technologies used in Arch Systems Enterprise OS
         </p>
       </div>
 
@@ -82,15 +82,15 @@ export default function TechStack() {
             {/* Frontend Layer */}
             <div className="flex flex-col items-center">
               <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">Frontend</div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
-                  Next.js 14
+                  Next.js 16.3.8
                 </div>
                 <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
-                  React 18
+                  React 19.2
                 </div>
                 <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
-                  Tailwind
+                  Tailwind OKLCH
                 </div>
               </div>
             </div>
@@ -99,9 +99,16 @@ export default function TechStack() {
 
             {/* API Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">API</div>
-              <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
-                Supabase Client
+              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
+                RPC & Boundary
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                  Server Actions + @repo/contract
+                </div>
+                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                  @repo/supabase SSR
+                </div>
               </div>
             </div>
 
@@ -109,13 +116,18 @@ export default function TechStack() {
 
             {/* Backend Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">Backend</div>
-              <div className="flex gap-2">
+              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
+                Data & Cache
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
-                  PostgreSQL
+                  PostgreSQL 17 (186 Migrations)
                 </div>
                 <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
-                  Auth (RLS)
+                  100% RLS InitPlan
+                </div>
+                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                  Hybrid L1/L2 Redis 7.4
                 </div>
               </div>
             </div>
@@ -125,14 +137,17 @@ export default function TechStack() {
             {/* Integration Layer */}
             <div className="flex flex-col items-center">
               <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
-                Integrations
+                Industrial Mesh
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
+                  FUXA SCADA
+                </div>
                 <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
                   Inngest
                 </div>
                 <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
-                  Flowise
+                  Flowise & Langfuse
                 </div>
               </div>
             </div>
@@ -141,8 +156,9 @@ export default function TechStack() {
           {/* Data Flow */}
           <div className="mt-6 pt-6 border-t border-default">
             <div className="text-xs text-text-muted text-center">
-              Data Flow: User → Middleware → Server Component → Supabase → PostgreSQL (RLS) →
-              Response
+              Data Flow: Operator → Next.js 16 Proxy → RSC / Server Action (@repo/contract) →
+              @repo/supabase (Primary / Read Replica) → PostgreSQL 17 (100% RLS InitPlan) → Hybrid
+              L1/L2 Cache
             </div>
           </div>
         </div>
@@ -158,35 +174,48 @@ export default function TechStack() {
             &nbsp;&nbsp;├── <span className="text-accent-blue">apps/</span>
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">portal/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 16 application
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 16.3.8 App Router portal
+            (8 Core Operational Modules)
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{' '}
-            <span className="text-text-muted">app/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App Router routes
+            &nbsp;&nbsp;├── <span className="text-accent-blue">libs/</span>
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{' '}
-            <span className="text-text-muted">features/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Co-located components
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">features/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Domain libraries (departments, hub, auth,
+            equipment)
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──{' '}
-            <span className="text-text-muted">lib/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App constants
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">shared/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Shared data-access, circuit
+            breakers & utilities
             <br />
             &nbsp;&nbsp;├── <span className="text-accent-blue">packages/</span>
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">ui/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Shared
-            components
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">contract/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Canonical Zod schemas & API/DB drift
+            contracts
+            <br />
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">database/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 186 Supabase PostgreSQL 17 migrations &
+            generated types
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">supabase/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SSR clients (server/client split)
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SSR auth, Primary & Read-Replica client
+            boundary
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">database/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Migrations & types
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">redis/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Hybrid L1 LRU + L2 Upstash
+            REST cache & Redlock
             <br />
-            &nbsp;&nbsp;└── <span className="text-accent-blue">overview/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# This
-            visualizer
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">theme/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Semantic light-mode OKLCH
+            design tokens
+            <br />
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">ui/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Pure
+            presentational React 19 component library
+            <br />
+            &nbsp;&nbsp;└── <span className="text-accent-blue">tools/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Policy
+            compiler, drift auditor & codebase map generators
           </div>
         </div>
       </div>

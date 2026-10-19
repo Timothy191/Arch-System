@@ -6,7 +6,9 @@ import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
+  Activity,
   ArrowUpRight,
+  Database,
   Layers,
   Pickaxe,
   ScanFace,
@@ -60,6 +62,16 @@ const DEPT_STYLE_MAP: Record<
     iconColor: 'text-dept-control-room',
     bgColor: 'bg-dept-control-room/10',
   },
+  overview: {
+    icon: Activity,
+    iconColor: 'text-dept-access-control',
+    bgColor: 'bg-dept-access-control/10',
+  },
+  database: {
+    icon: Database,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10',
+  },
 };
 
 export function HeroRotator({
@@ -78,8 +90,8 @@ export function HeroRotator({
     const arrowIcon = <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />;
 
     const overviewPanel: Panel = {
-      id: 'overview',
-      name: 'overview',
+      id: 'central-command',
+      name: 'central-command',
       title: defaultTitle,
       description: defaultDescription,
       category: 'Central Command',
@@ -115,7 +127,11 @@ export function HeroRotator({
                   ? 'PLANT MAINTENANCE // WORKSHOP-03'
                   : dept.name === 'control-room'
                     ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                    : 'FIELD OPERATIONS // MINE-UNIT';
+                    : dept.name === 'overview'
+                      ? 'SYSTEM ARCHITECTURE // ARCH-OS'
+                      : dept.name === 'database'
+                        ? 'SUPABASE POSTGRESQL // DB-CORE'
+                        : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'
@@ -137,7 +153,11 @@ export function HeroRotator({
         iconBgColor: style.bgColor,
         primary: dept.actions?.[0]
           ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
-          : { href: `/${dept.name}`, label: `Launch ${dept.displayName}`, icon: arrowIcon },
+          : {
+              href: dept.route || `/${dept.name}`,
+              label: `Launch ${dept.displayName}`,
+              icon: arrowIcon,
+            },
         secondary: dept.actions?.[1]
           ? { href: dept.actions[1].href, label: dept.actions[1].label, icon: arrowIcon }
           : undefined,

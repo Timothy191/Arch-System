@@ -7,18 +7,28 @@ import {
   CardTitle,
 } from '@repo/ui/components/ui/card';
 import {
+  Activity,
   AlertTriangle,
   BarChart3,
+  Bot,
   Building2,
+  ClipboardCheck,
   Cpu,
+  CreditCard,
+  Database,
   FileText,
   History,
-  Image,
   Layers,
   LayoutDashboard,
+  LifeBuoy,
+  Network,
+  Pickaxe,
+  Printer,
+  QrCode,
   RefreshCw,
-  Satellite,
+  Server,
   Settings,
+  ShieldCheck,
   Truck,
   Users,
   Wrench,
@@ -32,9 +42,23 @@ const routeIcons: Record<string, React.ReactNode> = {
   History: <History className="w-4 h-4" />,
   Reports: <BarChart3 className="w-4 h-4" />,
   Tools: <Wrench className="w-4 h-4" />,
-  'SAR Analysis': <Satellite className="w-4 h-4" />,
-  'High-Res Imagery': <Image className="w-4 h-4" />,
-  Hyperspectral: <Layers className="w-4 h-4" />,
+  Sites: <Building2 className="w-4 h-4" />,
+  Fleet: <Truck className="w-4 h-4" />,
+  Users: <Users className="w-4 h-4" />,
+  Departments: <Layers className="w-4 h-4" />,
+  Settings: <Settings className="w-4 h-4" />,
+  Integrations: <Server className="w-4 h-4" />,
+  'AI Metrics': <Bot className="w-4 h-4" />,
+  'Drilling Operations': <Pickaxe className="w-4 h-4" />,
+  'Machine Telemetry': <Activity className="w-4 h-4" />,
+  'Muster Station': <LifeBuoy className="w-4 h-4" />,
+  'Print Cards': <Printer className="w-4 h-4" />,
+  'QR Codes': <QrCode className="w-4 h-4" />,
+  'Access Logs': <ShieldCheck className="w-4 h-4" />,
+  Visitors: <Users className="w-4 h-4" />,
+  Badges: <CreditCard className="w-4 h-4" />,
+  'Tire Management': <AlertTriangle className="w-4 h-4" />,
+  'Shift Operations': <ClipboardCheck className="w-4 h-4" />,
   'Operational Delays': <AlertTriangle className="w-4 h-4" />,
   'Shift Coverage': <Users className="w-4 h-4" />,
   'Roll Over': <RefreshCw className="w-4 h-4" />,
@@ -43,16 +67,26 @@ const routeIcons: Record<string, React.ReactNode> = {
   'Machine Operations': <Cpu className="w-4 h-4" />,
   'Hourly Loads': <Truck className="w-4 h-4" />,
   'Excavator Activity': <Cpu className="w-4 h-4" />,
+  'System Architecture': <Network className="w-4 h-4" />,
+  'Backend Topology': <Server className="w-4 h-4" />,
+  'Database Schema': <Database className="w-4 h-4" />,
+  'Audit & Compliance': <ShieldCheck className="w-4 h-4" />,
+  'Agentic Monitor': <Bot className="w-4 h-4" />,
+  Schemas: <Database className="w-4 h-4" />,
+  Panels: <Activity className="w-4 h-4" />,
 };
 
 export default function DepartmentBreakdown() {
+  const totalRoutes = DEPARTMENTS.reduce((acc, d) => acc + d.routes.length, 0);
+  const avgRoutes = Math.round(totalRoutes / DEPARTMENTS.length);
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-text-heading">Department Breakdown</h2>
         <p className="text-text-secondary mt-1">
-          All {DEPARTMENTS.length} departments with their routes, role requirements, and access
-          levels
+          All {DEPARTMENTS.length} core operational modules with their routes, role requirements,
+          and access levels
         </p>
       </div>
 
@@ -82,7 +116,7 @@ export default function DepartmentBreakdown() {
               {/* Routes */}
               <div className="space-y-2">
                 <div className="text-xs font-medium text-text-muted uppercase tracking-wider">
-                  Routes
+                  Routes ({dept.routes.length})
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {dept.routes.map((route) => (
@@ -131,23 +165,21 @@ export default function DepartmentBreakdown() {
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="text-3xl font-bold text-accent-green">{DEPARTMENTS.length}</div>
-          <div className="text-sm text-text-secondary">Total Departments</div>
+          <div className="text-sm text-text-secondary">Core Operational Modules</div>
         </Card>
         <Card className="p-4">
-          <div className="text-3xl font-bold text-accent-blue">
-            {DEPARTMENTS.reduce((acc, d) => acc + d.routes.length, 0)}
-          </div>
-          <div className="text-sm text-text-secondary">Total Routes</div>
+          <div className="text-3xl font-bold text-accent-blue">{totalRoutes}</div>
+          <div className="text-sm text-text-secondary">Total Department Routes</div>
         </Card>
         <Card className="p-4">
           <div className="text-3xl font-bold text-accent-blue">
             {new Set(DEPARTMENTS.flatMap((d) => d.roles)).size}
           </div>
-          <div className="text-sm text-text-secondary">Unique Roles</div>
+          <div className="text-sm text-text-secondary">Unique RBAC Roles</div>
         </Card>
         <Card className="p-4">
-          <div className="text-3xl font-bold text-accent-amber">6</div>
-          <div className="text-sm text-text-secondary">Routes per Department</div>
+          <div className="text-3xl font-bold text-accent-amber">{avgRoutes}</div>
+          <div className="text-sm text-text-secondary">Avg Routes per Module</div>
         </Card>
       </div>
     </div>
