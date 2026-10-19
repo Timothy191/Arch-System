@@ -116,19 +116,19 @@ function ReviewCard({ img, name, username, body }: ReviewCardProps) {
     .toUpperCase();
 
   return (
-    <div className="w-[320px] shrink-0">
-      <div className="h-full rounded-2xl bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300">
-        <div className="p-4 sm:p-5 flex flex-col justify-between h-full select-none">
+    <div className="w-[320px] shrink-0 [perspective:1000px] py-1">
+      <div className="uiverse-card group/card relative h-full rounded-2xl bg-white/85 backdrop-blur-xl border border-white/65 ring-1 ring-black/[0.08] shadow-[0_14px_28px_-6px_rgba(15,23,42,0.18),0_6px_12px_-3px_rgba(15,23,42,0.1),inset_0_1.5px_0_0_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(15,23,42,0.06)] [transform-style:preserve-3d] [transform:perspective(1000px)_rotateX(2deg)_translateZ(0)] hover:[transform:perspective(1000px)_rotateX(5deg)_rotateY(-3deg)_translateY(-6px)_translateZ(12px)] hover:shadow-[0_24px_44px_-8px_rgba(15,23,42,0.26),0_10px_20px_-4px_rgba(15,23,42,0.14),inset_0_1.5px_0_0_rgba(255,255,255,1),inset_0_-2px_4px_rgba(15,23,42,0.08)] hover:border-arch-accent-blue/40 transition-all duration-300 ease-out will-change-transform">
+        <div className="p-4 sm:p-5 flex flex-col justify-between h-full select-none [transform:translateZ(10px)]">
           <div className="flex flex-row items-center gap-3">
             <Avatar
               size={36}
               src={img}
               letter={initials}
               title={name}
-              className="shrink-0 shadow-sm"
+              className="shrink-0 shadow-md ring-1 ring-white/80"
             />
             <div className="flex flex-col text-left min-w-0">
-              <span className="text-xs sm:text-sm font-semibold text-arch-text-primary truncate">
+              <span className="text-xs sm:text-sm font-semibold text-arch-text-primary group-hover/card:text-arch-accent-blue transition-colors truncate">
                 {name}
               </span>
               <p className="text-[11px] font-medium text-arch-text-tertiary truncate">{username}</p>
@@ -165,10 +165,10 @@ export function DepartmentReviews() {
       </header>
 
       <div
-        className="relative flex w-full flex-col items-center justify-center overflow-hidden"
+        className="relative flex w-full flex-col items-center justify-center overflow-hidden [perspective:1200px]"
         style={maskStyle}
       >
-        <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-1.5">
+        <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-3">
           {firstRow.map((review) => (
             <ReviewCard key={review.username} {...review} />
           ))}
@@ -176,7 +176,7 @@ export function DepartmentReviews() {
         <Marquee
           reverse
           pauseOnHover
-          className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-1.5"
+          className="[--duration:30s] [--gap:1rem] sm:[--gap:1.5rem] py-3"
         >
           {secondRow.map((review) => (
             <ReviewCard key={review.username} {...review} />

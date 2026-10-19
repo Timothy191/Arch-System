@@ -1,7 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
@@ -329,39 +329,31 @@ export function HeroRotator({
             />
           ))}
         </m.div>
-      </div>
 
-      {total > 1 && (
-        <div className="mt-5 flex items-center justify-between px-1">
-          <div className="flex items-center gap-1 liquid-glass-light border border-black/10 shadow-window p-1 rounded-full">
+        {total > 1 && (
+          <div className="pointer-events-none absolute inset-y-0 inset-x-0 mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] z-40">
             <button
+              type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -left-11 sm:-left-14 top-1/2 -translate-y-1/2 p-2.5 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
+              type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -right-11 sm:-right-14 top-1/2 -translate-y-1/2 p-2.5 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
-            <div className="w-px h-3.5 bg-black/10 mx-0.5" />
-            <button
-              onClick={() => setIsManuallyPaused((p) => !p)}
-              aria-label={isManuallyPaused ? 'Resume auto rotation' : 'Pause auto rotation'}
-              className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
-            >
-              {isManuallyPaused ? (
-                <Play className="w-3.5 h-3.5 fill-current" />
-              ) : (
-                <Pause className="w-3.5 h-3.5 fill-current" />
-              )}
-            </button>
           </div>
+        )}
+      </div>
 
+      {total > 1 && (
+        <div className="mt-5 flex items-center justify-center px-1">
           <div className="flex items-center gap-1.5">
             {panels.map((p, idx) => (
               <button
