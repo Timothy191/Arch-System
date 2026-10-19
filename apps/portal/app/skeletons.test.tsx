@@ -43,10 +43,6 @@ describe('Next.js Skeleton UIs (loading.tsx)', () => {
       expect(heroSection).toBeInTheDocument();
       expect(container.querySelector('.h-\\[460px\\]')).toBeInTheDocument();
 
-      // Double marquee review cards
-      const reviewCards = container.querySelectorAll('.shadow-card');
-      expect(reviewCards.length).toBe(8); // 2 rows of 4 cards
-
       // Operational modules grid with 8 uiverse-cards
       const deptCards = container.querySelectorAll('.uiverse-card');
       expect(deptCards.length).toBe(8);

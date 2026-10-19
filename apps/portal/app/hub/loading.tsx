@@ -70,59 +70,6 @@ export default function HubLoading() {
         {/* Operational telemetry card placeholder */}
         <div className="mt-4 h-64 w-full bg-arch-surface-tertiary rounded animate-pulse" />
       </section>
-
-      {/* Department & Operational Testimonials Double Marquee */}
-      <div className="space-y-4">
-        <header className="w-full rounded-2xl liquid-glass-light border border-white/45 shadow-window px-5 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-arch-accent-blue/10 animate-pulse" />
-            <div className="h-4 w-64 bg-arch-surface-tertiary rounded animate-pulse" />
-          </div>
-          <div className="h-4 w-36 bg-arch-surface-tertiary rounded-full animate-pulse" />
-        </header>
-        <div className="relative flex w-full flex-col gap-3 overflow-hidden py-1.5">
-          <div className="flex gap-4 sm:gap-6 overflow-hidden">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="w-[320px] shrink-0 h-[122px] rounded-2xl bg-white/85 border border-black/[0.08] shadow-card p-4 sm:p-5 flex flex-col justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-arch-surface-tertiary animate-pulse shrink-0" />
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <div className="h-3.5 w-24 bg-arch-surface-tertiary rounded animate-pulse" />
-                    <div className="h-2.5 w-16 bg-arch-surface-tertiary/70 rounded animate-pulse" />
-                  </div>
-                </div>
-                <div className="space-y-1.5 mt-2">
-                  <div className="h-2.5 w-full bg-arch-surface-tertiary/60 rounded animate-pulse" />
-                  <div className="h-2.5 w-4/5 bg-arch-surface-tertiary/60 rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-4 sm:gap-6 overflow-hidden">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="w-[320px] shrink-0 h-[122px] rounded-2xl bg-white/85 border border-black/[0.08] shadow-card p-4 sm:p-5 flex flex-col justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-arch-surface-tertiary animate-pulse shrink-0" />
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <div className="h-3.5 w-24 bg-arch-surface-tertiary rounded animate-pulse" />
-                    <div className="h-2.5 w-16 bg-arch-surface-tertiary/70 rounded animate-pulse" />
-                  </div>
-                </div>
-                <div className="space-y-1.5 mt-2">
-                  <div className="h-2.5 w-full bg-arch-surface-tertiary/60 rounded animate-pulse" />
-                  <div className="h-2.5 w-4/5 bg-arch-surface-tertiary/60 rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
