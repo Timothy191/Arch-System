@@ -146,9 +146,10 @@ describe('HeroRotator', () => {
     expect(screen.getByLabelText('3 of 3: Production')).toHaveAttribute('aria-hidden', 'false');
   });
 
-  it('jumps to the target slide when a dot indicator is clicked', () => {
+  it('jumps to the target slide when a triangle indicator is clicked', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
     const jumpToProduction = screen.getByLabelText('Jump to Production');
+    expect(jumpToProduction).toHaveClass('[clip-path:polygon(50%_0%,0%_100%,100%_100%)]');
 
     fireEvent.click(jumpToProduction);
     expect(screen.getByLabelText('3 of 3: Production')).toHaveAttribute('aria-hidden', 'false');

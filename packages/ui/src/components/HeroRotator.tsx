@@ -354,17 +354,18 @@ export function HeroRotator({
 
       {total > 1 && (
         <div className="mt-5 flex items-center justify-center px-1">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {panels.map((p, idx) => (
               <button
                 key={p.id}
+                type="button"
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  'h-1.5 rounded-full transition-all duration-300',
+                  '[clip-path:polygon(50%_0%,0%_100%,100%_100%)] transition-all duration-300',
                   idx === activeIndex
-                    ? 'w-6 bg-[var(--accent-blue)]'
-                    : 'w-1.5 bg-black/20 hover:bg-black/40'
+                    ? 'w-3.5 h-3 bg-[var(--accent-blue)] scale-110'
+                    : 'w-2.5 h-2 bg-black/25 hover:bg-black/45'
                 )}
               />
             ))}

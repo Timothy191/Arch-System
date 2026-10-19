@@ -18,11 +18,11 @@ export default function HubLoading() {
             <SkeletonBlock className="h-[460px] w-full" />
           </div>
           <div className="mt-5 flex items-center justify-center px-1">
-            <div className="flex items-center gap-1.5">
-              <SkeletonBlock className="h-1.5 w-6 rounded-full bg-[var(--accent-blue)]" />
-              <SkeletonBlock className="h-1.5 w-1.5 rounded-full" />
-              <SkeletonBlock className="h-1.5 w-1.5 rounded-full" />
-              <SkeletonBlock className="h-1.5 w-1.5 rounded-full" />
+            <div className="flex items-center gap-2">
+              <SkeletonBlock className="h-3 w-3.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none bg-[var(--accent-blue)]" />
+              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
+              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
+              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
             </div>
           </div>
         </div>
