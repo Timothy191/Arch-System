@@ -33,6 +33,43 @@ export function CoreOperationalModules({
       else next.delete(departmentName);
       return next;
     });
+    const targetDept = departments.find((d) => d.name === departmentName);
+    if (targetDept && typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('arch:active-module-change', {
+          detail: {
+            name: targetDept.name,
+            title: targetDept.displayName,
+          },
+        })
+      );
+    }
+  };
+
+  const handleFilterSelect = (filter: FilterCategory) => {
+    setActiveFilter(filter);
+    if (typeof window === 'undefined') return;
+    if (filter === 'all') {
+      window.dispatchEvent(
+        new CustomEvent('arch:active-module-change', {
+          detail: { name: 'overview', title: 'Central Hub' },
+        })
+      );
+      return;
+    }
+    const matching = departments.find((d) => {
+      if (filter === 'pinned') return pinnedNames.has(d.name);
+      if (filter === 'active') return d.status === 'active';
+      if (filter === 'critical') return d.status === 'alert' || d.status === 'maintenance';
+      return false;
+    });
+    if (matching) {
+      window.dispatchEvent(
+        new CustomEvent('arch:active-module-change', {
+          detail: { name: matching.name, title: matching.displayName },
+        })
+      );
+    }
   };
 
   // Load pinned departments from localStorage on mount
@@ -212,7 +249,7 @@ export function CoreOperationalModules({
             <button
               type="button"
               aria-pressed={activeFilter === 'all'}
-              onClick={() => setActiveFilter('all')}
+              onClick={() => handleFilterSelect('all')}
               className={cn(
                 'px-2.5 py-1 rounded-full transition-all text-xs tabular-nums',
                 activeFilter === 'all'
@@ -226,7 +263,7 @@ export function CoreOperationalModules({
               <button
                 type="button"
                 aria-pressed={activeFilter === 'pinned'}
-                onClick={() => setActiveFilter('pinned')}
+                onClick={() => handleFilterSelect('pinned')}
                 className={cn(
                   'px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1 tabular-nums',
                   activeFilter === 'pinned'
@@ -241,7 +278,7 @@ export function CoreOperationalModules({
             <button
               type="button"
               aria-pressed={activeFilter === 'active'}
-              onClick={() => setActiveFilter('active')}
+              onClick={() => handleFilterSelect('active')}
               className={cn(
                 'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
                 activeFilter === 'active'
@@ -255,7 +292,7 @@ export function CoreOperationalModules({
             <button
               type="button"
               aria-pressed={activeFilter === 'critical'}
-              onClick={() => setActiveFilter('critical')}
+              onClick={() => handleFilterSelect('critical')}
               className={cn(
                 'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
                 activeFilter === 'critical'

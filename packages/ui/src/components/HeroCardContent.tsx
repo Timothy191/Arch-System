@@ -1,10 +1,180 @@
 'use client';
 
-import { Activity, AlertTriangle, Power, Wrench } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
+  Cpu,
+  Layers,
+  Power,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+} from 'lucide-react';
 import Link from 'next/link';
+import type * as React from 'react';
 import { cn } from '../lib/utils';
 import type { Panel } from './HeroRotator';
-import { TrustLogos } from './TrustLogos';
+
+interface HeroBannerFeature {
+  label: string;
+  badge: string;
+  href: string;
+  icon: React.ReactNode;
+}
+
+function getHeroBannerFeatures(panelName: string, primaryHref: string): HeroBannerFeature[] {
+  switch (panelName) {
+    case 'admin':
+      return [
+        {
+          label: 'Users & RBAC Sync',
+          badge: 'RLS Active',
+          href: '/admin?tab=users',
+          icon: <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'Fleet & Bin Factors',
+          badge: 'Live Fleet',
+          href: '/admin?tab=machinery',
+          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+        {
+          label: 'AI & ZAR Telemetry',
+          badge: '84% Cache',
+          href: '/admin/ai-metrics',
+          icon: <Cpu className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+      ];
+    case 'control-room':
+      return [
+        {
+          label: 'Hourly Loads Grid',
+          badge: 'Live Sync',
+          href: '/control-room/hourly-loads',
+          icon: <Layers className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'Machine SMR & Ops',
+          badge: '250 BCM/h',
+          href: '/control-room/machine-operations',
+          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+        {
+          label: 'Atomic Shift Closeout',
+          badge: 'RPC Locked',
+          href: '/control-room/shift-closeout',
+          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+      ];
+    case 'access-control':
+      return [
+        {
+          label: 'Muster Roll Call',
+          badge: 'Real-Time',
+          href: '/access-control/roll-call',
+          icon: <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'C66 Key Interlocks',
+          badge: '2-Step Scan',
+          href: '/access-control/key-control',
+          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+        {
+          label: 'CR80 Badge Studio',
+          badge: '300 DPI',
+          href: '/access-control/card-maker',
+          icon: <Sparkles className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+      ];
+    case 'production':
+      return [
+        {
+          label: 'Daily Yield & Tonnage',
+          badge: 'Coal/Waste',
+          href: '/production/daily-log',
+          icon: <Activity className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'Excavator Activity',
+          badge: 'BCM/Hr',
+          href: '/production/excavator-activity',
+          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+        {
+          label: 'Dozer Roll-Over',
+          badge: 'Fixed BCM',
+          href: '/production/roll-over',
+          icon: <CheckCircle2 className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+      ];
+    case 'drilling':
+      return [
+        {
+          label: 'Rig Shift Operations',
+          badge: 'Day/Night',
+          href: '/drilling/drilling-operations',
+          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+        {
+          label: 'Pattern & Blast Plan',
+          badge: 'B-14 Grid',
+          href: '/drilling/blast-schedule',
+          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+        {
+          label: 'Down-Hole Telemetry',
+          badge: 'Sub-ms',
+          href: '/drilling/machine-telemetry',
+          icon: <Cpu className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+      ];
+    case 'engineering':
+      return [
+        {
+          label: 'Breakdown Dispatch',
+          badge: 'Live SLA',
+          href: '/engineering/breakdowns',
+          icon: <Wrench className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+        {
+          label: 'Tire Life & Pressure',
+          badge: 'Fleet Guard',
+          href: '/engineering/tires',
+          icon: <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'MTBF & Reliability',
+          badge: 'Predictive',
+          href: '/engineering/reports',
+          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+      ];
+    default:
+      return [
+        {
+          label: 'SCADA Control Room',
+          badge: '24/7 Live',
+          href: '/control-room',
+          icon: <Activity className="w-3 h-3 text-emerald-600 shrink-0" />,
+        },
+        {
+          label: 'AI & ZAR Intelligence',
+          badge: '+88% Cache',
+          href: '/admin/ai-metrics',
+          icon: <Cpu className="w-3 h-3 text-cyan-600 shrink-0" />,
+        },
+        {
+          label: 'Shift & Fleet Reports',
+          badge: 'Direct Launch',
+          href: primaryHref || '/control-room/reports',
+          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
+        },
+      ];
+  }
+}
 
 export interface HeroCardContentProps {
   panel: Panel;
@@ -70,9 +240,11 @@ export function HeroCardContent({
     ? 'bg-amber-400 text-stone-950 hover:bg-amber-300 font-semibold shadow-xs'
     : 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 font-medium shadow-xs';
 
+  const bannerFeatures = getHeroBannerFeatures(panel.name, panel.primary.href);
+
   return (
     <div className="relative h-full w-full flex flex-row z-10">
-      {/* Left Column: Text, Controls & Telemetry Bus */}
+      {/* Left Column: Text, Controls & Enterprise Hero Banner Features */}
       <div className="relative z-20 flex flex-col justify-between w-[52%] sm:w-[50%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
         <div>
           {/* Top Status Bar with Monospace Readouts */}
@@ -166,10 +338,44 @@ export function HeroCardContent({
           </div>
         </div>
 
-        {/* Telemetry Bus Footer (Active Card Only) */}
+        {/* Enterprise Hero Banner Feature Strip (Active Card Only) */}
         {isActive && (
-          <div className="mt-auto pt-3 opacity-90 origin-left scale-95 sm:scale-100">
-            <TrustLogos />
+          <div className="mt-auto pt-2.5 border-t border-slate-200/70">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <p className="text-[9px] uppercase tracking-wider text-slate-600 font-mono font-semibold flex items-center gap-1.5">
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
+                  aria-hidden="true"
+                />
+                MODULE CAPABILITIES & DIRECT ACCESS
+              </p>
+              <span className="hidden xl:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-semibold text-emerald-700">
+                99.95% SLA · 24/7 Shift Ready
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1.5">
+              {bannerFeatures.map((feat) => (
+                <Link
+                  key={feat.label}
+                  href={feat.href}
+                  className="group/feat flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/80 hover:bg-white backdrop-blur-md border border-slate-200/80 hover:border-[var(--accent-blue)]/45 shadow-2xs transition-all duration-200"
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {feat.icon}
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-semibold text-slate-800 group-hover/feat:text-[var(--text-heading)] truncate leading-tight">
+                        {feat.label}
+                      </span>
+                      <span className="text-[8.5px] font-mono text-slate-500 truncate leading-tight">
+                        {feat.badge}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="w-2.5 h-2.5 text-slate-400 group-hover/feat:text-[var(--accent-blue)] group-hover/feat:translate-x-0.5 group-hover/feat:-translate-y-0.5 transition-transform shrink-0" />
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>

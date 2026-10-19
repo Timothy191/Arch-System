@@ -240,6 +240,20 @@ export function HeroRotator({
     return () => clearInterval(id);
   }, [total, isHovering, isManuallyPaused, nextSlide]);
 
+  useEffect(() => {
+    const activePanel = panels[activeIndex];
+    if (!activePanel || typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent('arch:active-module-change', {
+        detail: {
+          name: activePanel.name,
+          title: activePanel.title,
+          category: activePanel.category,
+        },
+      })
+    );
+  }, [activeIndex, panels]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (total <= 1) return;

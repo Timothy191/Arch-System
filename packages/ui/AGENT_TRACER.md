@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-19 - Hero Banner Feature Strip & Interactive System Menu
+
+- **Purpose**: Replace `<TrustLogos />` in `HeroCardContent.tsx` with contextual enterprise hero banner capability cards, and make `MacMenuBar.tsx` System Menu reactive to route changes, carousel/module button interactions, and menu item clicks.
+- **Changes**:
+  - `packages/ui/src/components/HeroCardContent.tsx`: Replaced `SYSTEM DIAGNOSTICS & TELEMETRY BUS` with `MODULE CAPABILITIES & DIRECT ACCESS` + `getHeroBannerFeatures()` contextual feature strip per slide.
+  - `packages/ui/src/components/HeroRotator.tsx`: Broadcasts `arch:active-module-change` when active carousel slide changes.
+  - `packages/ui/src/components/MacMenuBar.tsx`: Added controlled `systemMenuOpen` state, `usePathname()` + `arch:active-module-change` active context sync, Central Hub return row, dynamic department tool links, Command Palette (`⌘K`), and AI & Build Metrics action.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## 2026-09-15 - UI Hook Dependency & Jest Resolution Alignment (--task-257)
 
 - **Purpose**: Fix React Hook dependency in `collapse.tsx` to clear ESLint warnings, and verify `@repo/ui` test resolution across monorepo packages.

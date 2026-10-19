@@ -1,3 +1,8 @@
+## 2026-10-19: Hub Footer OS Capsule Redesign & Module Button Menu Sync
+
+- Redesigned `<footer aria-label="Site footer">` in `apps/portal/app/layout.tsx` from loose text into a slim `py-1.5` glass bar with a compact OS Identity Capsule (`Arch OS` + live green indicator dot + monospace `v1.6.2` pill) and matched right-side `eve` status capsule.
+- Wired `CoreOperationalModules.tsx` filter and pin buttons to dispatch `arch:active-module-change` so the `MacMenuBar` System Menu updates its active context when interacting with module buttons on `/hub`.
+
 ## 2026-10-06: C66 Camera and Dropdown Machine/Operator Shift Assignment
 
 - Both Control Room Machine Operations and Hourly Loads offer active central-fleet dropdown selection, keyboard-wedge scans, and browser-camera barcode scanning when supported. Fleet assets may belong to the shared `admin` registry while the shift record belongs to `control-room`.

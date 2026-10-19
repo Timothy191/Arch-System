@@ -246,7 +246,7 @@ describe('HeroRotator', () => {
     );
   });
 
-  it('renders authentic telemetry bus badges and live video HUD overlays', () => {
+  it('renders enterprise hero banner capability features and live video HUD overlays', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
     // Assert live video HUD overlays on the active card
@@ -254,11 +254,10 @@ describe('HeroRotator', () => {
     expect(screen.getByText('30 FPS')).toBeInTheDocument();
     expect(screen.getByText('1080p')).toBeInTheDocument();
 
-    // Assert telemetry bus heading and live protocol badges
-    expect(screen.getByText(/SYSTEM DIAGNOSTICS & TELEMETRY BUS/i)).toBeInTheDocument();
-    expect(screen.getByText('Modbus TCP Active')).toBeInTheDocument();
-    expect(screen.getByText('CAN-Bus 250kbps')).toBeInTheDocument();
-    expect(screen.getByText('Latency: 14ms')).toBeInTheDocument();
-    expect(screen.getByText('ISO 27001')).toBeInTheDocument();
+    // Assert enterprise hero banner capability features strip on active card
+    expect(screen.getByText(/MODULE CAPABILITIES & DIRECT ACCESS/i)).toBeInTheDocument();
+    expect(screen.getByText('SCADA Control Room')).toBeInTheDocument();
+    expect(screen.getByText('AI & ZAR Intelligence')).toBeInTheDocument();
+    expect(screen.getByText('Shift & Fleet Reports')).toBeInTheDocument();
   });
 });

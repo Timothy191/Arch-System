@@ -2,6 +2,7 @@
 
 import { m } from 'framer-motion';
 import {
+  Activity,
   // Menu: Help
   BookOpen,
   Bot,
@@ -11,10 +12,12 @@ import {
   CheckSquare,
   // Menu: Operations dropdown icons
   ChevronRight,
+  Command,
   // General
   ExternalLink,
   FileText,
   Info,
+  LayoutGrid,
   MailOpen,
   Maximize2,
   // Departments
@@ -32,6 +35,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { getServiceUrls } from '../lib/urls';
 import { cn } from '../lib/utils';
@@ -153,8 +157,51 @@ export function MacMenuBar({
   rightSlot,
   className,
 }: MacMenuBarProps) {
-  // Navigation text labels intentionally removed; only logo + search + tray remain
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [systemMenuOpen, setSystemMenuOpen] = React.useState(false);
+  const [focusedModule, setFocusedModule] = React.useState<{
+    name: string;
+    title: string;
+  } | null>(null);
+
+  React.useEffect(() => {
+    setSystemMenuOpen(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    const handleModuleChange = (e: Event) => {
+      const detail = (e as CustomEvent<{ name?: string; title?: string }>).detail;
+      if (detail?.name && detail?.title) {
+        setFocusedModule({ name: detail.name, title: detail.title });
+      }
+    };
+    window.addEventListener('arch:active-module-change', handleModuleChange);
+    return () => window.removeEventListener('arch:active-module-change', handleModuleChange);
+  }, []);
+
+  const routeDept = React.useMemo(
+    () => DEPARTMENTS_LIST.find((d) => pathname?.startsWith(`/${d.name}`)) ?? null,
+    [pathname]
+  );
+
+  const focusedDept = React.useMemo(
+    () =>
+      focusedModule ? (DEPARTMENTS_LIST.find((d) => d.name === focusedModule.name) ?? null) : null,
+    [focusedModule]
+  );
+
+  const activeDeptSlug = routeDept?.name ?? focusedDept?.name ?? DEPARTMENTS_LIST[0].name;
+  const isHubRoute = pathname === '/hub' || pathname === '/';
+  const isAdminRoute = Boolean(pathname?.startsWith('/admin'));
+
+  const currentContextLabel = isAdminRoute
+    ? 'Admin Panel'
+    : routeDept
+      ? routeDept.displayName
+      : focusedModule && focusedModule.name !== 'overview'
+        ? focusedModule.title
+        : 'Central Hub';
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -186,15 +233,24 @@ export function MacMenuBar({
       {/* Left: System Menu Trigger + Navigation items */}
       <nav className="flex items-center gap-1 shrink-0" aria-label="Main Navigation">
         {/* ── System Logo Dropdown ── */}
-        <DropdownMenu>
-          <div className="flex items-center gap-2">
+        <DropdownMenu open={systemMenuOpen} onOpenChange={setSystemMenuOpen}>
+          <div className="flex items-center gap-1.5">
             <DropdownMenuTrigger asChild>
               <button
+                type="button"
                 aria-label="System Menu"
                 aria-haspopup="true"
-                className="relative w-9 h-9 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
+                title={`System Menu · Active: ${currentContextLabel}`}
+                className="relative w-9 h-9 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer"
               >
                 <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
+                <span
+                  className={cn(
+                    'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white shadow-2xs transition-colors',
+                    systemMenuOpen ? 'bg-[var(--accent-blue)]' : 'bg-accent-green'
+                  )}
+                  aria-hidden="true"
+                />
               </button>
             </DropdownMenuTrigger>
           </div>
@@ -207,18 +263,75 @@ export function MacMenuBar({
             )}
           >
             {/* ── Left Column: Departments ── */}
-            <div className="flex-1 p-3.5 space-y-2.5">
-              <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
-                System Departments
-              </p>
+            <div className="flex-1 p-3.5 space-y-2">
+              <div className="flex items-center justify-between px-2">
+                <p className="text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
+                  System Departments
+                </p>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-[9.5px] font-mono font-semibold text-[var(--accent-blue)] truncate max-w-[165px]">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse"
+                    aria-hidden="true"
+                  />
+                  {currentContextLabel}
+                </span>
+              </div>
+
+              {/* Central Hub Quick Return */}
+              <Link
+                href="/hub"
+                onClick={() => {
+                  setFocusedModule({ name: 'overview', title: 'Central Hub' });
+                  setSystemMenuOpen(false);
+                }}
+                className={cn(
+                  'flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all group border',
+                  isHubRoute && (!focusedModule || focusedModule.name === 'overview')
+                    ? 'bg-[var(--accent-blue)]/10 border-[var(--accent-blue)]/25'
+                    : 'border-transparent hover:bg-black/[0.04] active:bg-black/[0.08]'
+                )}
+              >
+                <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] transition-transform group-hover:scale-105">
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[13px] font-medium text-[var(--text-heading)] truncate leading-tight">
+                    Central Operations Hub
+                  </span>
+                  <span className="text-[10.5px] text-[var(--text-muted)] truncate leading-tight">
+                    Executive overview &amp; shift telemetry
+                  </span>
+                </div>
+                {isHubRoute && (!focusedModule || focusedModule.name === 'overview') ? (
+                  <span className="ml-auto px-1.5 py-0.5 rounded-md bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                    Active
+                  </span>
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                )}
+              </Link>
+
               <div className="grid grid-cols-1 gap-0.5">
                 {DEPARTMENTS_LIST.map((dept) => {
                   const Icon = dept.icon;
+                  const isRouteActive = Boolean(pathname?.startsWith(`/${dept.name}`));
+                  const isFocused = !isRouteActive && focusedModule?.name === dept.name;
                   return (
                     <Link
                       key={dept.name}
                       href={`/${dept.name}`}
-                      className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                      onClick={() => {
+                        setFocusedModule({ name: dept.name, title: dept.displayName });
+                        setSystemMenuOpen(false);
+                      }}
+                      className={cn(
+                        'flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all group border',
+                        isRouteActive
+                          ? 'bg-[var(--accent-blue)]/10 border-[var(--accent-blue)]/25'
+                          : isFocused
+                            ? 'bg-black/[0.035] border-black/[0.08]'
+                            : 'border-transparent hover:bg-black/[0.04] active:bg-black/[0.08]'
+                      )}
                     >
                       <div
                         className={cn(
@@ -236,7 +349,17 @@ export function MacMenuBar({
                           {dept.description}
                         </span>
                       </div>
-                      <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                      {isRouteActive ? (
+                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                          Active
+                        </span>
+                      ) : isFocused ? (
+                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-black/[0.06] text-[var(--text-secondary)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                          Focused
+                        </span>
+                      ) : (
+                        <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                      )}
                     </Link>
                   );
                 })}
@@ -244,7 +367,7 @@ export function MacMenuBar({
             </div>
 
             {/* ── Right Column: User + Tools + Admin ── */}
-            <div className="w-[195px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
+            <div className="w-[205px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
               {/* User Identity */}
               <div className="px-3.5 py-3 flex items-center gap-2.5 border-b border-black/[0.06]">
                 <Avatar
@@ -265,15 +388,21 @@ export function MacMenuBar({
 
               {/* Tools */}
               <div className="px-2.5 pt-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1">
-                  Tools
-                </p>
+                <div className="flex items-center justify-between px-2 mb-1">
+                  <p className="text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
+                    Tools
+                  </p>
+                  <span className="text-[9.5px] font-mono text-[var(--text-muted)] truncate max-w-[95px]">
+                    /{activeDeptSlug}
+                  </span>
+                </div>
                 {PRODUCTIVITY_LIST.map((tool) => {
                   const Icon = tool.icon;
                   return (
                     <Link
                       key={tool.name}
-                      href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
+                      href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
+                      onClick={() => setSystemMenuOpen(false)}
                       className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <Icon
@@ -289,21 +418,23 @@ export function MacMenuBar({
 
               <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
 
-              {/* Split View */}
+              {/* Split View & Quick Actions */}
               <div className="px-2.5 pb-1 space-y-0.5">
                 <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
-                  Split View
+                  Workspace
                 </p>
                 <DropdownMenuItem asChild>
                   <button
+                    type="button"
                     onClick={() => {
                       window.dispatchEvent(
                         new CustomEvent('open-split-view', {
                           detail: { service: 'whatsapp', action: 'toggle' },
                         })
                       );
+                      setSystemMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
+                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-pointer"
                   >
                     <svg
                       className="w-3.5 h-3.5 shrink-0 text-dept-engineering"
@@ -320,6 +451,31 @@ export function MacMenuBar({
                     <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                       New Split Tab
                     </span>
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.dispatchEvent(
+                        new KeyboardEvent('keydown', {
+                          key: 'k',
+                          metaKey: true,
+                          ctrlKey: true,
+                          bubbles: true,
+                        })
+                      );
+                      setSystemMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Command className="w-3.5 h-3.5 shrink-0 text-[var(--accent-blue)]" />
+                      <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                        Command Palette
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-mono text-[var(--text-muted)]">⌘K</span>
                   </button>
                 </DropdownMenuItem>
               </div>
@@ -339,6 +495,7 @@ export function MacMenuBar({
                       href={tool.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => setSystemMenuOpen(false)}
                       className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
@@ -351,18 +508,47 @@ export function MacMenuBar({
                     </a>
                   );
                 })}
+                <Link
+                  href="/admin/ai-metrics"
+                  onClick={() => {
+                    setFocusedModule({ name: 'admin', title: 'AI & Build Metrics' });
+                    setSystemMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                >
+                  <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)] shrink-0" />
+                  <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                    AI &amp; Build Metrics
+                  </span>
+                </Link>
               </div>
 
               {/* Admin Panel */}
               <div className="mt-auto px-2.5 py-2.5 border-t border-black/[0.06]">
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-dept-admin/10 active:bg-dept-admin/15 transition-all group"
+                  onClick={() => {
+                    setFocusedModule({ name: 'admin', title: 'Admin Panel' });
+                    setSystemMenuOpen(false);
+                  }}
+                  className={cn(
+                    'flex items-center justify-between gap-2.5 px-2 py-1.5 rounded-lg transition-all group',
+                    isAdminRoute || focusedModule?.name === 'admin'
+                      ? 'bg-dept-admin/15 text-dept-admin'
+                      : 'hover:bg-dept-admin/10 active:bg-dept-admin/15'
+                  )}
                 >
-                  <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
-                  <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
-                    Admin Panel
+                  <span className="flex items-center gap-2.5">
+                    <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
+                    <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
+                      Admin Panel
+                    </span>
                   </span>
+                  {(isAdminRoute || focusedModule?.name === 'admin') && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-dept-admin/15 text-dept-admin text-[9px] font-mono font-semibold uppercase tracking-wider">
+                      Active
+                    </span>
+                  )}
                 </Link>
               </div>
             </div>
