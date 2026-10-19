@@ -185,28 +185,32 @@ export default async function HubPage() {
   // AGENT-TRACE: Administration department is strictly restricted to admin users:
   // - For admin role, guarantee the admin department is included first in Core Operational Modules
   // - For non-admin roles, ensure admin department is never accessible or visible
-  // - Ensure Control Room is 2nd (immediately after Administration) and Drilling is last
+  // - Enforce Hub module ordering: 1. Administration, 2. Access Control, 3. Production, 4. Drilling
   if (userRole === 'admin') {
     const adminDept = DEPARTMENTS.find((d) => d.name === 'admin');
-    if (adminDept) {
-      rawDepartments = [adminDept, ...rawDepartments.filter((d) => d.name !== 'admin')];
+    if (adminDept && !rawDepartments.some((d) => d.name === 'admin')) {
+      rawDepartments = [adminDept, ...rawDepartments];
     }
   } else {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
   }
 
-  const controlRoomDept = rawDepartments.find((d) => d.name === 'control-room');
-  const drillingDept = rawDepartments.find((d) => d.name === 'drilling');
-  const middleDepts = rawDepartments.filter(
-    (d) => d.name !== 'admin' && d.name !== 'control-room' && d.name !== 'drilling'
-  );
-  const leadingAdmin = rawDepartments.filter((d) => d.name === 'admin');
-  rawDepartments = [
-    ...leadingAdmin,
-    ...(controlRoomDept ? [controlRoomDept] : []),
-    ...middleDepts,
-    ...(drillingDept ? [drillingDept] : []),
+  const HUB_MODULE_ORDER = [
+    'admin',
+    'access-control',
+    'production',
+    'drilling',
+    'engineering',
+    'control-room',
+    'overview',
+    'database',
   ];
+
+  rawDepartments = [...rawDepartments].sort((a, b) => {
+    const idxA = HUB_MODULE_ORDER.indexOf(a.name);
+    const idxB = HUB_MODULE_ORDER.indexOf(b.name);
+    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+  });
 
   const departments = rawDepartments.map((dept) => {
     const overlay = liveMetrics[dept.name];

@@ -47,14 +47,14 @@ describe('DepartmentCard', () => {
     jest.clearAllMocks();
   });
 
-  it('renders department information correctly', () => {
+  it('renders department information without action tag pills', () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByText('Drilling Operations')).toBeInTheDocument();
     expect(
       screen.getByText('Core drilling operations telemetry and systems control.')
     ).toBeInTheDocument();
     expect(screen.getByText('1,240 m')).toBeInTheDocument();
-    expect(screen.getByText('Daily Logs')).toBeInTheDocument();
+    expect(screen.queryByText('Daily Logs')).not.toBeInTheDocument();
   });
 
   it('renders a semantic Link targeting the department route', () => {
@@ -70,17 +70,6 @@ describe('DepartmentCard', () => {
     render(<DepartmentCard department={deptWithoutRoute} index={0} />);
     const link = screen.getByTestId('dept-link-drilling');
     expect(link).toHaveAttribute('href', '/drilling');
-  });
-
-  it('renders quick-action links with correct hrefs', () => {
-    render(<DepartmentCard department={mockDepartment} index={0} />);
-    const dailyLogAction = screen.getByTestId('dept-action-daily-logs');
-    expect(dailyLogAction).toBeInTheDocument();
-    expect(dailyLogAction).toHaveAttribute('href', '/drilling/daily-log');
-
-    const telemetryAction = screen.getByTestId('dept-action-telemetry');
-    expect(telemetryAction).toBeInTheDocument();
-    expect(telemetryAction).toHaveAttribute('href', '/drilling/machine-telemetry');
   });
 
   it('toggles pin status in localStorage on pin click', () => {

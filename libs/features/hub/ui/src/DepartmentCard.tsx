@@ -4,11 +4,9 @@ import type { Department } from '@repo/departments/data-access';
 import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
-  ArrowUpRight,
   Bookmark,
   CreditCard,
   Factory,
-  FileText,
   GraduationCap,
   HardHat,
   Loader2,
@@ -257,24 +255,6 @@ function DepartmentCard({
               )}
             </div>
             <p className="uiverse-card-subtitle">{department.description}</p>
-
-            {department.actions && department.actions.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1.5 pointer-events-auto">
-                {department.actions.map((action) => (
-                  <Link
-                    key={action.label}
-                    href={action.href}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[10.5px] font-medium text-arch-text-primary hover:text-arch-accent-blue bg-arch-surface-secondary/60 hover:bg-arch-surface-tertiary/90 border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-card hover:shadow-card-hover transition-all duration-200 ease-out hover:scale-105 active:scale-95 interactive-element relative z-20 group/action"
-                    data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <FileText className="w-3 h-3 shrink-0 text-arch-accent-blue opacity-80 group-hover/action:opacity-100 transition-opacity" />
-                    <span>{action.label}</span>
-                    <ArrowUpRight className="w-3 h-3 opacity-60 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-transform duration-200 shrink-0 text-arch-accent-blue" />
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Tag / Stats row */}

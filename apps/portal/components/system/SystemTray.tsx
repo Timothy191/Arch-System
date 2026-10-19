@@ -674,6 +674,158 @@ function OfflineQueueRow() {
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
+interface SystemNotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  unread: boolean;
+}
+
+const DEFAULT_NOTIFICATIONS: SystemNotificationItem[] = [
+  {
+    id: 'clearance-unlinked',
+    title: 'Employee Clearance Notice',
+    message: 'No personnel record linked to your account.',
+    unread: true,
+  },
+];
+
+function TaskbarNotificationBell() {
+  const [items, setItems] = useState<SystemNotificationItem[]>(DEFAULT_NOTIFICATIONS);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = window.localStorage.getItem('arch-system-notification-items');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setItems(parsed);
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+
+    const handleNotification = (event: Event) => {
+      const custom = event as CustomEvent<SystemNotificationItem>;
+      const detail = custom.detail;
+      if (!detail?.id || !detail?.message) return;
+
+      setItems((prev) => {
+        const exists = prev.some((item) => item.id === detail.id);
+        const next = exists
+          ? prev.map((item) => (item.id === detail.id ? { ...item, ...detail } : item))
+          : [detail, ...prev];
+        try {
+          window.localStorage.setItem('arch-system-notification-items', JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+        return next;
+      });
+    };
+
+    window.addEventListener('arch-system-notification', handleNotification);
+    return () => window.removeEventListener('arch-system-notification', handleNotification);
+  }, []);
+
+  const unreadCount = items.filter((i) => i.unread).length;
+
+  const markAllRead = () => {
+    setItems((prev) => {
+      const next = prev.map((item) => ({ ...item, unread: false }));
+      try {
+        window.localStorage.setItem('arch-system-notification-items', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          aria-label="Notifications"
+          title="Notifications"
+          data-testid="taskbar-notifications-bell"
+          className={cn(
+            'relative flex items-center justify-center w-7 h-7 rounded-full',
+            'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
+            'transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50'
+          )}
+        >
+          <Bell className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          {unreadCount > 0 && (
+            <span
+              data-testid="notification-unread-dot"
+              aria-label={`${unreadCount} unread notifications`}
+              className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--accent-red)] ring-1 ring-white"
+            />
+          )}
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align="end"
+          sideOffset={6}
+          className={cn(
+            'w-72 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card p-3 z-popover',
+            'flex flex-col gap-2 select-none focus:outline-none'
+          )}
+        >
+          <div className="flex items-center justify-between px-1 pb-1.5 border-b border-black/[0.06]">
+            <span className="text-xs font-semibold text-[var(--text-heading)]">Notifications</span>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={markAllRead}
+                className="text-[10px] font-medium text-[var(--accent-blue)] hover:underline"
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
+          {items.length === 0 ? (
+            <p className="text-[11px] text-[var(--text-muted)] py-3 text-center">
+              No notifications
+            </p>
+          ) : (
+            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    'p-2.5 rounded-lg border text-left transition-colors',
+                    item.unread
+                      ? 'bg-accent-amber/5 border-accent-amber/25'
+                      : 'bg-black/[0.02] border-black/[0.05]'
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-[var(--text-heading)]">
+                      {item.title}
+                    </span>
+                    {item.unread && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-red)] shrink-0" />
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                    {item.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+
 const SystemTrayPillInner = function SystemTrayPillInner() {
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
@@ -727,17 +879,20 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
   return (
     <div className="flex items-center gap-1.5">
       {!isAuthRoute && (
-        <Link
-          href="/drilling/tools?tab=tasks"
-          className={cn(
-            'flex items-center justify-center w-7 h-7 rounded-full',
-            'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
-            'transition-colors active:scale-[0.97]'
-          )}
-          title="Task Manager"
-        >
-          <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-        </Link>
+        <>
+          <TaskbarNotificationBell />
+          <Link
+            href="/drilling/tools?tab=tasks"
+            className={cn(
+              'flex items-center justify-center w-7 h-7 rounded-full',
+              'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
+              'transition-colors active:scale-[0.97]'
+            )}
+            title="Task Manager"
+          >
+            <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          </Link>
+        </>
       )}
 
       <Popover.Root>

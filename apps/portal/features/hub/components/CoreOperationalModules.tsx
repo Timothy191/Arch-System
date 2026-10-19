@@ -2,7 +2,7 @@
 
 import type { Department } from '@repo/departments/data-access';
 import { cn } from '@repo/ui/lib/utils';
-import { AlertTriangle, Boxes, Search, Star } from 'lucide-react';
+import { Boxes, Search, Star } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 import { DepartmentCard } from '@/features/hub';
@@ -44,6 +44,32 @@ export function CoreOperationalModules({
     });
     setPinnedNames(pinned);
   }, [departments]);
+
+  // Route clearance notices to the Top Taskbar Bell Notification Center
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (clearance.state === 'clear') return;
+
+    const message =
+      clearance.state === 'unlinked'
+        ? 'No personnel record linked to your account.'
+        : `Employee data requirements need attention: ${clearance.details.join('; ')}.${
+            clearance.state === 'expired'
+              ? ' Contact your administrator — medical/induction edits are admin-controlled.'
+              : ''
+          }`;
+
+    window.dispatchEvent(
+      new CustomEvent('arch-system-notification', {
+        detail: {
+          id: `clearance-${clearance.state}`,
+          title: 'Employee Clearance Notice',
+          message,
+          unread: true,
+        },
+      })
+    );
+  }, [clearance]);
 
   // Filter and sort departments
   const filteredDepartments = useMemo(() => {
@@ -218,24 +244,6 @@ export function CoreOperationalModules({
           </div>
         </div>
       </div>
-      {/* Employee data-requirement clearance callout */}
-      {clearance.state !== 'clear' && (
-        <div
-          className="p-3 sm:p-4 rounded-lg border border-accent-amber/30 bg-accent-amber/5 text-[11px] font-medium text-accent-amber/90 flex items-center gap-2"
-          role="alert"
-          aria-label="Employee clearance required"
-        >
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>
-            {clearance.state === 'unlinked'
-              ? 'No personnel record linked to your account.'
-              : `Employee data requirements need attention: ${clearance.details.join('; ')}.`}
-            {clearance.state === 'expired'
-              ? ' Contact your administrator — medical/induction edits are admin-controlled.'
-              : ''}
-          </span>
-        </div>
-      )}
 
       {/* Grid Display */}
       {filteredDepartments.length === 0 ? (

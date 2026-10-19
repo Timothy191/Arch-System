@@ -154,16 +154,12 @@ describe('HeroRotator', () => {
     expect(screen.getByLabelText('3 of 3: Production')).toHaveAttribute('aria-hidden', 'false');
   });
 
-  it('toggles manual pause state via the play/pause button', () => {
+  it('renders Previous/Next buttons outside the card without a play/pause button', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
-    const pauseBtn = screen.getByLabelText('Pause auto rotation');
-    expect(pauseBtn).toBeInTheDocument();
-
-    fireEvent.click(pauseBtn);
-    expect(screen.getByLabelText('Resume auto rotation')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByLabelText('Resume auto rotation'));
-    expect(screen.getByLabelText('Pause auto rotation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Previous highlight')).toBeInTheDocument();
+    expect(screen.getByLabelText('Next highlight')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Pause auto rotation')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Resume auto rotation')).not.toBeInTheDocument();
   });
 
   it('renders operational urgency badges when counts are non-zero', () => {
