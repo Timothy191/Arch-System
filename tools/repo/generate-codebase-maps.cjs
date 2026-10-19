@@ -88,16 +88,16 @@ function buildCodebaseMaps(dateInfo) {
     - \`/drilling\` — Drill rig operations & bit depth telemetry
     - \`/production\` — Yield, tonnage & extraction tracking
     - \`/engineering\` — Maintenance logs, breakdowns & predictive alerts
-    - \`/access-control\` — On-site visitor badging & access logs
-    - \`/access-card-actions\` — Badge printing & QR code generation
-    - \`/training\` — Operator safety certifications & schedules
+    - \`/access-control\` — On-site visitor badging, card actions, QR codes & access logs
+  - \`/database\` — Supabase PostgreSQL 17 schema explorer, live query metrics & backups
+  - \`/admin\` — User provisioning, RBAC governance, Redis cache & workflow administration
   - \`/api/\`: Audit endpoints (\`/api/audit\`), health checks, webhook handlers
 
 ---
 
 ## 🔒 Authentication & Middleware Flow
 
-- **Proxy Delegate**: \`middleware.ts\` delegates token authentication and RBAC checks to \`server/proxy.ts\`.
+- **Proxy Delegate**: \`proxy.ts\` delegates token authentication and RBAC checks to \`server/proxy.ts\`.
 - **Exempt Routes**: Auth endpoints (\`/login\`, \`/reset-password\`) and system check APIs (\`/api/c66\`).
 - **User Validation**: Server Actions validate credentials at entry via Zod contracts from \`@repo/contract\`.
 `,
@@ -119,7 +119,7 @@ function buildCodebaseMaps(dateInfo) {
 ## 📊 Core Entity Relationship Overview
 
 - **Employees & Access**: \`employees\`, \`departments\`, \`operators\`
-- **Operational Data**: \`safety_incidents\`, \`breakdowns\`, \`hourly_loads\`, \`machine_operations\`
+- **Operational Data**: \`daily_logs\`, \`breakdowns\`, \`hourly_loads\`, \`machine_operations\`
 - **Telemetry & Assets**: \`machines\`, \`sites\`, \`mine_blocks\`, \`material_density\`
 
 ---

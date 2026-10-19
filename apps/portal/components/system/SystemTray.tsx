@@ -284,14 +284,31 @@ interface HealthState {
   lastFetched: number | null;
 }
 
-// AGENT-TRACE: Replaced manual useEffect+setInterval polling with React Query
-// for automatic deduplication, stale-while-revalidate, visibility-aware refetch,
-// and proper cleanup on unmount. Reduces redundant API calls across tab switches.
-function useServerHealth() {
+interface RawServiceHealth {
+  status?: 'healthy' | 'degraded' | 'unhealthy' | 'down';
+  latencyMs?: number;
+  error?: string;
+}
+
+export interface RawHealthApiResponse {
+  status?: 'healthy' | 'degraded' | 'unhealthy' | 'down';
+  latencyMs?: number;
+  latency_ms?: number;
+  timestamp?: string;
+  last_check?: string;
+  services?: {
+    supabase?: RawServiceHealth | null;
+    supabase_realtime?: RawServiceHealth | null;
+    redis?: RawServiceHealth | null;
+    fuxa?: RawServiceHealth | null;
+  };
+}
+
+export function mapHealthResponseToState(json: RawHealthApiResponse): HealthState {
   const mapServiceStatus = (
-    s: { status: 'healthy' | 'degraded' | 'down' } | null | undefined
+    s: RawServiceHealth | null | undefined
   ): 'ok' | 'degraded' | 'unavailable' => {
-    if (!s) return 'unavailable';
+    if (!s?.status) return 'unavailable';
     if (s.status === 'healthy') return 'ok';
     if (s.status === 'degraded') return 'degraded';
     return 'unavailable';
@@ -300,9 +317,33 @@ function useServerHealth() {
   const statusMap = {
     healthy: 'healthy',
     degraded: 'degraded',
+    unhealthy: 'error',
     down: 'error',
   } as const;
 
+  const overallStatus = json.status
+    ? (statusMap[json.status as keyof typeof statusMap] ?? 'error')
+    : 'error';
+  const rawLatency = json.latencyMs ?? json.latency_ms ?? 0;
+
+  return {
+    status: overallStatus,
+    db: mapServiceStatus(json.services?.supabase ?? json.services?.supabase_realtime),
+    redis: mapServiceStatus(json.services?.redis),
+    // AGENT-TRACE: SCADA (FUXA) uses reverse-flow Redis tag ingest (/api/scada/tags);
+    // prefer explicit services.fuxa and fall back to services.redis when rolling across deploys.
+    fuxa: mapServiceStatus(json.services?.fuxa ?? json.services?.redis),
+    responseTime: rawLatency > 0 ? rawLatency : overallStatus !== 'error' ? 1 : 0,
+    timestamp: json.timestamp ?? json.last_check ?? '',
+    loading: false,
+    lastFetched: Date.now(),
+  };
+}
+
+// AGENT-TRACE: Replaced manual useEffect+setInterval polling with React Query
+// for automatic deduplication, stale-while-revalidate, visibility-aware refetch,
+// and proper cleanup on unmount. Reduces redundant API calls across tab switches.
+function useServerHealth() {
   const { data, isLoading } = useQuery({
     queryKey: ['server-health'],
     queryFn: async (): Promise<HealthState> => {
@@ -310,19 +351,8 @@ function useServerHealth() {
         method: 'GET',
         cache: 'no-store',
       });
-      const json = await res.json();
-      return {
-        status: json.status
-          ? (statusMap[json.status as keyof typeof statusMap] ?? 'error')
-          : 'error',
-        db: mapServiceStatus(json.services?.supabase_realtime),
-        redis: mapServiceStatus(json.services?.redis),
-        fuxa: mapServiceStatus(json.services?.fuxa),
-        responseTime: json.latency_ms ?? 0,
-        timestamp: json.last_check ?? '',
-        loading: false,
-        lastFetched: Date.now(),
-      };
+      const json = (await res.json()) as RawHealthApiResponse;
+      return mapHealthResponseToState(json);
     },
     // AGENT-TRACE: 60s interval + refetchOnWindowFocus avoids hammering the
     // health endpoint when the tray popover is closed or the tab is hidden.

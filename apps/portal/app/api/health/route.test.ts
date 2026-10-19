@@ -41,6 +41,7 @@ describe('GET /api/health', () => {
     expect(['healthy', 'degraded']).toContain(json.status);
     expect(json.services.supabase.status).toBe('healthy');
     expect(json.services.redis.status).toBe('healthy');
+    expect(json.services.fuxa.status).toBe('healthy');
     expect(typeof json.latencyMs).toBe('number');
     expect(new Date(json.timestamp).getTime()).not.toBeNaN();
   });

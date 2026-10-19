@@ -72,7 +72,6 @@ scripts/seeds/
 # Indexers and AST structural databases
 **/.code-index/
 **/.codemap/
-**/.repowise/
 *.db
 *.db-shm
 *.db-wal

@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-19] - System Tray Health Contract Alignment, Shift Compilation UI Cleanup & Root Consolidation
+
+- **Action:**
+  - Fixed System Tray health popover (`apps/portal/components/system/SystemTray.tsx`, `apps/portal/app/api/health/route.ts`, `packages/contract/src/schemas/control-room.schema.ts`) by extracting `mapHealthResponseToState()` and restoring `services.fuxa` in `/api/health`, resolving false `Unavailable` statuses for `Database`, `SCADA (FUXA)`, and response latency on Vercel.
+  - Removed duplicate header metric pills (`Total SMU`, `Breakdowns`, `Avg MA`, `Total Shift Loads`) from `FleetKpiTable.tsx` and `ProductionSummaryCard.tsx`, and removed `<ShiftIntelligenceWidget />` from `ShiftCompilationClient.tsx` on `/control-room/shift-compilation`.
+  - Consolidated root workspace configuration and documentation: merged `DESIGN.md` into `docs/DESIGN.md`, moved `docker-compose.production.yml` to `infra/docker/compose.n8n-production.yml`, set `tsconfig.json` to extend `./tsconfig.base.json`, symlinked `config/env/.env.tools.example`, added `.agents/INDEX.md`, and removed obsolete root files (`.env`, `.env.vercel.production`, `.env.researcher`, `hooks.json`, `TODO.md`, `mise.toml`, `.repowise`).
+- **Verification:** `SystemTray.test.tsx` & `app/api/health/route.test.ts` (`19/19 PASS`), `FleetKpiTable.test.tsx` & `ProductionSummaryCard.test.tsx` (`4/4 PASS`), `pnpm agent:verify` (`9/9 PASS`).
+
 ## [2026-10-15] - Control Room Material Subcategories, Excavator Activity Sync & Navigation Consolidation
 
 - **Action:** Consolidated Control Room workflow updates across Hourly Loads, Excavator Activity, Machine Operations, and Department Sidebar navigation:

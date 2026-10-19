@@ -1,3 +1,8 @@
+## 2026-10-19: System Tray Health Contract Alignment & Shift Compilation UI Cleanup
+
+- Extracted `mapHealthResponseToState()` in `apps/portal/components/system/SystemTray.tsx` and included `services.fuxa` in `apps/portal/app/api/health/route.ts` and `@repo/contract` (`healthCheckResponseSchema`) so `Database` (`services.supabase`), `Redis` (`services.redis`), `SCADA (FUXA)` (`services.fuxa`), and `latencyMs` report accurate operational states in the System Tray popover.
+- Removed duplicate header metric pills (`Total SMU`, `Breakdowns`, `Avg MA`, `Total Shift Loads`) from `FleetKpiTable.tsx` and `ProductionSummaryCard.tsx`, and removed `<ShiftIntelligenceWidget />` (`Cross-Shift Operational Intelligence`) from `ShiftCompilationClient.tsx`.
+
 ## 2026-10-19: Unhide System Overview & Database, Prune Legacy Dept Traces, Update Database & Overview
 
 - Unhid `overview` (**System Overview**) and `database` (**Database**) in `apps/portal/app/hub/page.tsx` so all 8/8 Core Operational Modules appear on `/hub`.

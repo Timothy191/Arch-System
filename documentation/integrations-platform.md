@@ -89,7 +89,7 @@ node scripts/sync-integrations-mcp.mjs
 
 Fetches the manifest and idempotently writes managed entries (prefixed
 `integration:`) into `.mcp.json`, `.agents/mcp_config.json`, `.vscode/mcp.json`,
-and `.junie` / `.repowise` configs when present. Hand-authored server entries are
+and `.junie` configs when present. Hand-authored server entries are
 never touched. Secrets are written **only** to the gitignored `.env.integrations`
 and referenced as `${ENV_VAR}` placeholders in header values. Restart your coding
 agent afterwards.

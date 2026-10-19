@@ -106,6 +106,7 @@ For release-grade changes, run the full `pnpm quality` gate.
 
 Instead of reading large files, consult these focused references:
 
+- `.agents/INDEX.md` — Overview of the .agents/ directory structure to save tokens on exploration
 - `Arch-System/AGENTS.md` — 12 always-on invariants (each with enforcing `audit:*` gate)
 - `Arch-System/docs/agents/{architecture,commands,invariants,patterns}.md` — Full reference
 - `Arch-System/apps/portal/AGENTS.md` — Endpoints, auth, queue/job contract, latency budgets

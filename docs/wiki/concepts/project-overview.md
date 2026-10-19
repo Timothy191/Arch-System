@@ -16,20 +16,19 @@ Welcome to the **Arch-Systems (Plantcor) Mining Operations Portal** knowledge ba
 
 ## 1. Executive Summary & Domain Context
 
-Arch-Systems is an enterprise-scale, **on-premises first, multi-departmental mining operations portal** built for industrial vigilance and operational precision. The portal functions as a high-density control center, aggregating real-time telemetry, production yields, safety compliance, access control logs, and satellite mapping data.
+Arch-Systems is an enterprise-scale, **on-premises first, multi-departmental mining operations portal** built for industrial vigilance and operational precision. The portal functions as a high-density control center, aggregating real-time SCADA telemetry, production yields, equipment maintenance, access control logs, architectural topology, and live database diagnostics.
 
-### The 8 Operational Departments
+### The 7 Core Operational Modules
 
-The portal segregates operations into eight specialized departments, each featuring dedicated dashboards, daily logs, reports, and specialized tooling:
+The portal segregates operations into seven specialized operational modules on `/hub`, each featuring dedicated dashboards, daily logs, reports, and specialized tooling:
 
 1. **Drilling Department**: Coordinates drill rig operations, borehole statuses, and real-time bit depth telemetry.
 2. **Production Department**: Tracks coal yields, tonnage extracted, dump trucks, and overall extraction velocity.
-3. **Access Control Department**: Manages site access logs, security badging, active personnel lists, and shift rosters.
-4. **Engineering Department**: Houses equipment specifications, breakdowns tracking, preventative maintenance logs, and CAD reference attachments.
+3. **Access Control Department**: Manages site access logs, security badging, QR code verification, active personnel lists, and emergency muster roll calls.
+4. **Engineering Department**: Houses equipment specifications, breakdown tracking, tire management, and preventative maintenance logs.
 5. **Control Room Department**: Acts as the central SCADA interface, monitoring conveyor belts, operational delays, rollover incidents, and machinery status.
-6. **Safety Department**: Governs compliance audits, safety incidents reporting, risk assessments, and environmental inspection checklists.
-7. **Training Department**: Manages the Learning Management System (LMS), equipment certifications, training schedules, and employee competency checks.
-8. **Satellite Monitoring Department**: Integrates synthetic aperture radar (SAR), InSAR ground deformation, hyperspectral analysis, and high-resolution optical imagery to monitor pit stability and environmental impacts.
+6. **System Overview (`/overview`)**: Interactive React Flow architecture visualizer, live audit compliance dashboards, and codebase topology maps.
+7. **Database (`/database`)**: Live Supabase PostgreSQL 17 schema explorer, table row counts, RLS policy verification, and backup management.
 
 ---
 

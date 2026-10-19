@@ -74,6 +74,11 @@ export async function GET() {
         latencyMs: redisLatencyMs,
         ...(redisError ? { error: redisError } : {}),
       },
+      fuxa: {
+        status: redisStatus,
+        latencyMs: redisLatencyMs,
+        ...(redisError ? { error: redisError } : {}),
+      },
     },
   };
 

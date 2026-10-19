@@ -9,7 +9,6 @@ import {
   MultiSiteShiftReportClient,
   ProductionSummaryCard,
   ShiftCompilationHeader,
-  ShiftIntelligenceWidget,
   UnifiedShiftCloseoutModal,
 } from '@repo/departments/ui';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
@@ -17,7 +16,6 @@ import { cn } from '@repo/ui/lib/utils';
 import { CheckSquare, ClipboardCheck, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { searchShiftIntelligenceAction } from '@/app/actions/vector-search';
 import { ShiftCloseoutForm } from '../../control-room/components/ShiftCloseoutForm';
 import {
   type ShiftReportSummary,
@@ -240,9 +238,6 @@ export function ShiftCompilationClient({
 
               {/* Engineering Breakdowns & Stoppages */}
               <BreakdownsShiftWidget breakdowns={report.breakdowns} />
-
-              {/* Cross-Shift Operational Intelligence */}
-              <ShiftIntelligenceWidget onSearchIntelligence={searchShiftIntelligenceAction} />
             </>
           )}
 

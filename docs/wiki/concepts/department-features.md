@@ -10,20 +10,19 @@ confidence: high
 
 # Department Features
 
-The portal supports 8 departments, each with specialized tabs, data entry forms, and real-time views. Department configuration is centralized in `lib/departments.ts`.
+The portal supports 7 core operational modules on `/hub` (5 operational departments plus System Overview and Database), each with specialized tabs, data entry forms, and real-time views. Department configuration is centralized in `libs/features/departments/data-access/src/departments.ts`.
 
-## Department List
+## Operational Modules List
 
-| Slug                 | Display Name         | Color   | Focus                                       |
-| -------------------- | -------------------- | ------- | ------------------------------------------- |
-| drilling             | Drilling             | blue    | Drill rig operations & bit depth telemetry  |
-| production           | Production           | emerald | Coal yield, tonnage & extraction tracking   |
-| access-control       | Access Control       | blue    | Site access, badging & security             |
-| engineering          | Engineering          | violet  | Equipment specs, maintenance & CAD          |
-| control-room         | Control Room         | red     | SCADA systems & real-time monitoring        |
-| safety               | Safety               | blue    | Incident logs, compliance & inspections     |
-| training             | Training             | cyan    | LMS, certifications & competency tracking   |
-| satellite-monitoring | Satellite Monitoring | indigo  | SAR/InSAR, hyperspectral & high-res imagery |
+| Slug            | Display Name    | Color   | Focus                                                   |
+| --------------- | --------------- | ------- | ------------------------------------------------------- |
+| drilling        | Drilling        | blue    | Drill rig operations & bit depth telemetry              |
+| production      | Production      | emerald | Coal yield, tonnage & extraction tracking               |
+| access-control  | Access Control  | blue    | Site access, badging, QR verification & muster roll call |
+| engineering     | Engineering     | violet  | Equipment specs, breakdowns, tire management & maintenance |
+| control-room    | Control Room    | red     | SCADA systems, hourly loads & real-time monitoring      |
+| system-overview | System Overview | cyan    | React Flow architecture diagrams, codebase maps & audits |
+| database        | Database        | indigo  | Live Supabase PostgreSQL 17 schema explorer & metrics   |
 
 ## Standard Tabs
 
@@ -53,7 +52,6 @@ The control room has the most specialized tab set, optimized for real-time minin
 | roll-over          | [[dozer-rolls]] table                       | Dozer roll-over event logging                              |
 | machines           | [[machines]] table                          | Full machine database with bin_factor for dumpers          |
 | reports            | [[report-templates]], [[generated-reports]] | Template-based report generation                           |
-| satellite          | [[monitoring-api]]                          | SAR/InSAR deformation, Copernicus STAC scenes, map tiles   |
 
 ### Control Room Data Entry Forms
 
@@ -80,39 +78,10 @@ Forms use the four-state pattern (`idle`/`submitting`/`success`/`error`) with `c
 
 All operations are audited. See [[breakdowns-actions]] for server action details.
 
-## Safety
+## System Overview & Database Modules
 
-| Tab       | Data Model           | Key Features                                  |
-| --------- | -------------------- | --------------------------------------------- |
-| dashboard | Aggregated KPIs      | Incident severity distribution, LTI-free days |
-| daily-log | [[daily-logs]]       | Standard shift logging                        |
-| machines  | [[machines]]         | Equipment registry                            |
-| history   | [[safety-incidents]] | Incident history with investigation status    |
-| reports   | [[report-templates]] | Compliance reports                            |
-| tools     | External tools       | Flowise, Univer                               |
-
-### Safety Incident Workflow
-
-| Status              | Meaning                           |
-| ------------------- | --------------------------------- |
-| open                | New incident, needs investigation |
-| under-investigation | Root cause analysis in progress   |
-| resolved            | Corrective action applied         |
-| closed              | Final review complete             |
-
-Severity levels: low, medium, high, critical (with weights 1-4).
-Categories: Slip/Trip/Fall, Equipment Contact, Vehicle Incident, Hazardous Material, Environmental, Near Miss, Other.
-
-## Satellite Monitoring
-
-| Tab           | Data Source        | Key Features                                      |
-| ------------- | ------------------ | ------------------------------------------------- |
-| overview      | [[monitoring-api]] | Deformation summary, latest imagery               |
-| sar           | Copernicus STAC    | Sentinel-1 SAR scenes, InSAR deformation readings |
-| hyperspectral | Copernicus STAC    | Sentinel-2 optical, NDVI composites               |
-| highres       | Copernicus STAC    | High-resolution scene browser                     |
-
-Uses `react-map-gl` + `maplibre-gl` for map visualization. Tile layers from EOX WMTS (free, no API key).
+- **System Overview (`/overview`)**: Interactive React Flow architecture topology across Overview, Architecture, Database, Dependencies, Flows, Security, Performance, and Codebase Maps tabs.
+- **Database (`/database`, `/database/schemas`)**: Live Supabase PostgreSQL 17 telemetry, schema explorer (`public`, `auth`, `storage`, `realtime`, `supabase_migrations`, `extensions`), and backup history.
 
 ## Productivity Tools (Hub)
 

@@ -11,15 +11,15 @@
 
 ## Product
 
-Arch-Systems (Plantcor) Mining Operations Portal. Multi-departmental dashboard and data-entry system for surface mining operations. Authenticated access to department-specific tools for drilling, production, access control, engineering, control room, safety, training, and satellite monitoring.
+Arch-Systems (Plantcor) Mining Operations Portal. Multi-departmental dashboard and data-entry system for surface mining operations. Authenticated access to department-specific tools for drilling, production, access control, engineering, control room, system overview, and database administration.
 
 ## Users
 
 1. **Control Room Operators** (primary). 24/7 shift work. Need at-a-glance machine status, hourly load grids, real-time alerts. Low tolerance for navigation friction; every click costs seconds during active operations.
-2. **Engineering Staff**. Review breakdowns, log notes, analyze equipment performance. Need dense data tables, historical trends, form-based data entry.
-3. **Safety Officers**. Incident reporting, compliance documentation. Need clear forms, signature capture, straightforward workflows.
-4. **Satellite Monitoring Analysts**. GIS maps, SAR/InSAR data, scene catalogs. Need large visual surfaces, map interactions, time-series overlays.
-5. **Department Supervisors / Management**. Cross-department visibility. Need summary KPIs, report generation, high-level status.
+2. **Engineering Staff**. Review breakdowns, log notes, analyze equipment performance, and track tire management. Need dense data tables, historical trends, form-based data entry.
+3. **Drilling & Production Crews**. Track drill bit depth telemetry, rig hours, daily tonnage yields, and excavator/dozer activity.
+4. **Access Control & Security Operators**. Visitor badging, QR code generation, perimeter gate logs, and emergency muster roll calls.
+5. **Department Supervisors & System Administrators**. Cross-department visibility, executive KPIs, system overview architecture topology, and live PostgreSQL database telemetry.
 
 ## Tone
 
@@ -48,9 +48,9 @@ Direct, industrial, functional. No marketing fluff. Labels are terse ("Hourly Lo
 | Surface               | Register | Notes                                                                                          |
 | --------------------- | -------- | ---------------------------------------------------------------------------------------------- |
 | Login page            | product  | Functional light-mode blueprint video background, glassmorphic login card. No brand posturing. |
-| Hub (department grid) | product  | Navigation surface. Dense grid, clear status indicators.                                       |
+| Hub (department grid) | product  | Navigation surface. Dense grid, clear status indicators across 7 core modules.                 |
 | Department dashboards | product  | KPIs + live data + tables. Highest information density.                                        |
 | Data entry forms      | product  | Form state machine (idle/submitting/success/error). Inline validation.                         |
-| Maps (satellite)      | product  | Full-bleed map surfaces, overlay panels for controls.                                          |
-| Admin panel           | product  | Table-heavy management UI.                                                                     |
-| AI chat               | product  | Embedded assistant, streaming responses, code highlighting.                                    |
+| System Overview       | product  | Interactive React Flow architecture diagrams, audit telemetry, and codebase maps.              |
+| Database Telemetry    | product  | Live Supabase PostgreSQL 17 schema explorer, RLS coverage, and query health.                   |
+| Admin panel           | product  | Table-heavy user, department, Redis, and workflow management UI.                               |

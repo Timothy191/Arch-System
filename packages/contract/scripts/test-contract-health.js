@@ -22,6 +22,13 @@ const healthCheckResponseSchema = z.object({
       latencyMs: z.number().nonnegative(),
       error: z.string().optional(),
     }),
+    fuxa: z
+      .object({
+        status: z.enum(['healthy', 'degraded', 'unhealthy']),
+        latencyMs: z.number().nonnegative(),
+        error: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 

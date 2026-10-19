@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import {
   BatteryStatusRow,
   formatTimeSeconds,
+  mapHealthResponseToState,
   NetworkStatusRow,
   NotificationRow,
   ServerHealthRow,
@@ -203,5 +204,23 @@ describe('ServerHealthRow', () => {
     );
     expect(screen.getByText('Error')).toBeInTheDocument();
     expect(screen.getByText('Checking…')).toBeInTheDocument();
+  });
+
+  it('maps canonical /api/health response payload to healthy db, redis, and fuxa state', () => {
+    const mapped = mapHealthResponseToState({
+      status: 'healthy',
+      timestamp: '2026-10-19T11:27:52.548Z',
+      latencyMs: 430,
+      services: {
+        supabase: { status: 'healthy', latencyMs: 418 },
+        redis: { status: 'healthy', latencyMs: 12 },
+      },
+    });
+    expect(mapped.status).toBe('healthy');
+    expect(mapped.db).toBe('ok');
+    expect(mapped.redis).toBe('ok');
+    expect(mapped.fuxa).toBe('ok');
+    expect(mapped.responseTime).toBe(430);
+    expect(mapped.timestamp).toBe('2026-10-19T11:27:52.548Z');
   });
 });

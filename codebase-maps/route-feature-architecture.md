@@ -1,6 +1,6 @@
 # 🗺️ Route & Feature Architecture Map
 
-**Generated:** 10/19/2026, 11:14:10 AM UTC  
+**Generated:** 10/19/2026, 11:51:17 AM UTC  
 **System:** Arch-Systems Mining Operations Portal (Next.js 16 App Router)
 
 ---
@@ -17,15 +17,15 @@
     - `/drilling` — Drill rig operations & bit depth telemetry
     - `/production` — Yield, tonnage & extraction tracking
     - `/engineering` — Maintenance logs, breakdowns & predictive alerts
-    - `/access-control` — On-site visitor badging & access logs
-    - `/access-card-actions` — Badge printing & QR code generation
-    - `/training` — Operator safety certifications & schedules
+    - `/access-control` — On-site visitor badging, card actions, QR codes & access logs
+  - `/database` — Supabase PostgreSQL 17 schema explorer, live query metrics & backups
+  - `/admin` — User provisioning, RBAC governance, Redis cache & workflow administration
   - `/api/`: Audit endpoints (`/api/audit`), health checks, webhook handlers
 
 ---
 
 ## 🔒 Authentication & Middleware Flow
 
-- **Proxy Delegate**: `middleware.ts` delegates token authentication and RBAC checks to `server/proxy.ts`.
+- **Proxy Delegate**: `proxy.ts` delegates token authentication and RBAC checks to `server/proxy.ts`.
 - **Exempt Routes**: Auth endpoints (`/login`, `/reset-password`) and system check APIs (`/api/c66`).
 - **User Validation**: Server Actions validate credentials at entry via Zod contracts from `@repo/contract`.

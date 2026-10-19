@@ -1,6 +1,6 @@
 # 🔒 Database Schema & Topology Map
 
-**Generated:** 10/19/2026, 11:14:10 AM UTC  
+**Generated:** 10/19/2026, 11:51:17 AM UTC  
 **Engine:** PostgreSQL via Supabase
 
 ---
@@ -8,7 +8,7 @@
 ## 📊 Core Entity Relationship Overview
 
 - **Employees & Access**: `employees`, `departments`, `operators`
-- **Operational Data**: `safety_incidents`, `breakdowns`, `hourly_loads`, `machine_operations`
+- **Operational Data**: `daily_logs`, `breakdowns`, `hourly_loads`, `machine_operations`
 - **Telemetry & Assets**: `machines`, `sites`, `mine_blocks`, `material_density`
 
 ---

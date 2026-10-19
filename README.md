@@ -1,7 +1,7 @@
 # Arch-Systems (Plantcor) Mining Operations Portal
 
 [![Coverage Status](https://coveralls.io/repos/github/Timothy191/Arch-System/badge.svg?branch=main)](https://coveralls.io/github/Timothy191/Arch-System?branch=main)
-A high-performance, multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, engineering, control room, safety, training, and satellite monitoring.
+A high-performance, multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, engineering, control room, system overview, and database administration.
 
 ## 🏗️ Architecture
 

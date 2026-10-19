@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
  * Syncs active integration-platform MCP connectors into dev coding-agent
- * configs (.mcp.json, .agents/mcp_config.json, .vscode/mcp.json, and the
- * .junie / .repowise configs when present).
+ * configs (.mcp.json, .agents/mcp_config.json, .vscode/mcp.json, and
+ * .junie configs when present).
  *
  * Managed entries are prefixed `integration:` and are idempotently replaced on
  * every run; hand-authored server entries are never touched. Secrets are NOT
  * written into the configs — headers reference ${ENV_VAR} placeholders and the
  * values land in a gitignored `.env.integrations` file.
  *
- * Auth: requires INTEGRATIONS_MANIFEST_TOKEN (see GET /api/integrations/manifest)
+ * Auth: requires INTEGRATIONS_MANIFEST_TOKEN (see .env.example)
  * and the portal base URL (NEXT_PUBLIC_APP_URL, default http://localhost:3000).
  *
  * Usage: node scripts/sync-integrations-mcp.mjs
@@ -82,7 +82,7 @@ function writeEnvIntegrations(env) {
 
 async function main() {
   const env = {
-    ...parseEnvFile(path.join(REPO_ROOT, '.env')),
+    ...parseEnvFile(path.join(REPO_ROOT, '.env.local')),
     ...parseEnvFile(path.join(REPO_ROOT, 'apps/portal/.env')),
     ...process.env,
   };
@@ -141,7 +141,7 @@ async function main() {
   }));
 
   // 4. Editor-specific configs — only merged when the directory already exists
-  for (const configPath of ['.junie/mcp/mcp.json', '.repowise/mcp.json']) {
+  for (const configPath of ['.junie/mcp/mcp.json']) {
     const absolute = path.join(REPO_ROOT, configPath);
     if (!fs.existsSync(path.dirname(absolute))) continue;
     writeJsonPreserving(absolute, (existing) => ({

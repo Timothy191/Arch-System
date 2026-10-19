@@ -158,6 +158,14 @@ function RouteBackgroundInner() {
             disablePictureInPicture
             preload="metadata"
           >
+            <source
+              src={
+                isMobileViewport
+                  ? '/background/video-loop-mobile-av1.webm'
+                  : '/background/video-loop-av1.webm'
+              }
+              type="video/webm"
+            />
             <source src={webmSrc} type="video/webm" />
             <source src={mp4Src} type="video/mp4" />
           </video>

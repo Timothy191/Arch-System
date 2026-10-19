@@ -383,7 +383,7 @@ docker build -t arch-systems:latest -f apps/portal/docker/Dockerfile .
 
 ```bash
 # Start with production overrides
-docker compose -f docker-compose.tools.yml -f docker-compose.production.yml up -d
+docker compose --env-file .env.tools -f infra/docker/compose.tools.yml -f infra/docker/compose.production.yml up -d
 ```
 
 Services included:

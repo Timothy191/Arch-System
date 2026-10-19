@@ -49,11 +49,13 @@ const mockProduction: UnifiedShiftReport['production'] = {
 };
 
 describe('ProductionSummaryCard', () => {
-  it('renders total shift loads correctly', () => {
+  it('renders machine production loads correctly without duplicate header pill', () => {
     render(<ProductionSummaryCard production={mockProduction} shiftType="day" />);
-    expect(screen.getByText('142')).toBeInTheDocument();
+    expect(screen.getByText('Excavator & Hauling Output')).toBeInTheDocument();
     expect(screen.getByText('EX01 - Hitachi 1200')).toBeInTheDocument();
+    expect(screen.getByText('82')).toBeInTheDocument();
     expect(screen.getByText('EX02 - CAT 390F')).toBeInTheDocument();
+    expect(screen.getByText('60')).toBeInTheDocument();
   });
 
   it('renders empty state when no machines are present', () => {

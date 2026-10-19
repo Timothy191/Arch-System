@@ -1005,3 +1005,20 @@ The panels are the functional heart of the hub—transforming the ethereal hero 
 - ❌ Animating padding or margins on hover – causes layout shift.
 - ❌ Overriding border colours with raw hex values – breaks semantic consistency.
 - ❌ Combining `depth` with `ring-*` variants – `ring` replaces shadow‑based depth.
+
+---
+
+## Anti-Slop Constraints & Reference Implementations
+
+To maintain a high craft floor and avoid generic AI-generated UI artifacts:
+
+1. **No Layout Animation:** `will-change: transform` and `opacity` are the only acceptable animation targets. Layout properties (`width`, `height`, `margin`) must not transition.
+2. **Custom Curves:** Use custom `cubic-bezier` curves or Framer springs. `ease-in-out` and `linear` are banned for layout motions.
+3. **Physical Interactions:** Interactive elements must have visual feedback (e.g., `active:scale-95`).
+4. **Nested Cards:** Avoid generic "card inside a card inside a card" syndrome. Use spacing and typography for hierarchy instead of borders and backgrounds.
+
+### Reference Implementations
+
+- `HeroRotator.tsx`: 3D perspective cover-flow carousel with strict transform/opacity animations, correct hardware acceleration, and dynamic variants.
+- `SplitWindowLayout.tsx`: The primary layout shell representing industrial data portal aesthetics.
+

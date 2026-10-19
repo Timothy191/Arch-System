@@ -2,7 +2,7 @@
 
 import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { BarChart2, Layers, Truck } from 'lucide-react';
+import { BarChart2, Truck } from 'lucide-react';
 
 interface ProductionSummaryCardProps {
   production: UnifiedShiftReport['production'];
@@ -26,13 +26,6 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Total loads hauled and hourly loader production rates
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-lg bg-[var(--surface-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-mono text-xs flex items-center gap-2">
-            <Layers className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            <span>Total Shift Loads:</span>
-            <span className="text-sm font-bold text-emerald-400">{production.total_loads}</span>
-          </div>
         </div>
       </div>
 

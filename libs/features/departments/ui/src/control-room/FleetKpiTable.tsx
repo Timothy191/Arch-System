@@ -3,7 +3,7 @@
 import type { MachinePerformance } from '@repo/contract/types/shift-compilation.types';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Activity, AlertTriangle, CheckCircle2, Clock, Wrench } from 'lucide-react';
+import { Activity, AlertTriangle } from 'lucide-react';
 import { useRef } from 'react';
 
 interface FleetKpiTableProps {
@@ -33,13 +33,6 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
     );
   }
 
-  const avgAvailability = (
-    fleet.reduce((acc, curr) => acc + curr.mechanical_availability_pct, 0) / fleet.length
-  ).toFixed(1);
-
-  const totalSmuHours = fleet.reduce((acc, curr) => acc + curr.hours_worked, 0).toFixed(1);
-  const totalBreakdownHours = fleet.reduce((acc, curr) => acc + curr.breakdown_hours, 0).toFixed(1);
-
   return (
     <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
       <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
@@ -51,22 +44,6 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Machine operating hours, recorded operational delays, and mechanical availability
           </p>
-        </div>
-        <div className="flex items-center gap-4 text-xs font-medium">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-            <Clock className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            Total SMU:{' '}
-            <strong className="font-mono text-[var(--text-heading)]">{totalSmuHours}h</strong>
-          </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-            <Wrench className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-            Breakdowns:{' '}
-            <strong className="font-mono text-[var(--text-heading)]">{totalBreakdownHours}h</strong>
-          </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-green)]/10 text-[var(--accent-green)] border border-[var(--accent-green)]/20">
-            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--accent-green)]" />
-            Avg MA: <strong className="font-mono">{avgAvailability}%</strong>
-          </span>
         </div>
       </div>
 

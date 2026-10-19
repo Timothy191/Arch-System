@@ -2,8 +2,8 @@
 
 > Content catalog for the Arch-Systems (Plantcor) company knowledge base.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-09-18 | Total pages: 87 (16 concepts + 9 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
-> Current project version: Phase 5.2 (Localisation & Turborepo) | Next.js 16 | React 19.2.7 | Supabase | Light Theme | 113 Migrations
+> Last updated: 2026-10-19 | Total pages: 84 (16 concepts + 6 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
+> Current project version: v1.6.2 (Industrial Command & Turborepo) | Next.js 16 | React 19 | Supabase PostgreSQL 17 | Light Theme | 185 Migrations
 
 ## Quick Reference
 
@@ -35,9 +35,9 @@
 
 ---
 
-## Entities (9)
+## Entities (6)
 
-- [[arch-systems|Arch-Systems (Plantcor)]] — Multi-departmental mining operations portal built as an Turborepo monorepo
+- [[arch-systems|Arch-Systems (Plantcor)]] — Multi-departmental mining operations portal built as a Turborepo monorepo
 - [[drilling-department|Drilling Department]] — Drill rig operations & bit depth telemetry
 - [[production-department|Production Department]] — Coal yield, tonnage & extraction tracking
 - [[access-control-department|Access Control Department]] — Site access, badging & security
@@ -74,16 +74,16 @@
 
 ### Database & Security
 
-- [[database-schema|Database Schema]] — Full PostgreSQL schema (113 migrations) with RLS policies, tables, and views
+- [[database-schema|Database Schema]] — Full PostgreSQL schema (185 migrations) with RLS policies, tables, and views
 - [[rls-policy|RLS Policy Standards]] — Row Level Security requirements and auth helpers
 - [[auth-middleware|Auth and Middleware]] — Supabase auth flow, middleware, role-based access, cross-department permissions
 - [[database-optimization|Database Optimization & Scaling]] — Partitioning, PgBouncer, read replicas, materialized views
 
 ### Features
 
-- [[department-features|Department Features]] — Control room, engineering, safety, satellite monitoring capabilities
+- [[department-features|Department Features]] — Control room, engineering, drilling, production, access control, system overview, and database capabilities
 - [[external-tools|External Tools Integration]] — Flowise, Univer embedding, Inngest background jobs, Novu notifications, health checks
-- [[monitoring-error-tracking|Monitoring and Error Tracking]] — Sentry, Highlight session replay, OpenTelemetry tracing, Prometheus/Grafana, real-time subscriptions, satellite monitoring API
+- [[monitoring-error-tracking|Monitoring and Error Tracking]] — Sentry, Highlight session replay, OpenTelemetry tracing, Prometheus/Grafana, real-time subscriptions
 - [[analytics-reporting|Advanced Analytics & Reporting]] — Executive KPI dashboard, PDF/Excel export, trend analysis, ML predictive maintenance
 
 ### Quality & Design

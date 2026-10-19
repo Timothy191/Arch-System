@@ -1,11 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "mcpServers": {
-    "upstash": {
-      "type": "remote",
-      "url": "https://mcp.upstash.com/mcp",
-      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob"
-    },
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
@@ -36,12 +31,6 @@
       "description": "Git repository operations, diffs, branches, and commit tracking",
       "type": "stdio"
     },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web Content Fetcher (Zero-Auth)",
-      "type": "stdio"
-    },
     "codebase-memory": {
       "command": "npx",
       "args": ["-y", "codebase-memory-mcp@0.11.0"],
@@ -49,18 +38,6 @@
         "CODEBASE_MEMORY_PERSIST": "true",
         "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
       }
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
-    },
-    "knowledge-rail": {
-      "command": "npx",
-      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"]
-    },
-    "next-devtools": {
-      "command": "npx",
-      "args": ["-y", "next-devtools-mcp@0.4.0"]
     },
     "postgres": {
       "command": "npx",
