@@ -1,4 +1,5 @@
 import { Car, ChevronRight, type LucideIcon, Users, Wrench } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface EntityRow {
   type: string;
@@ -19,6 +20,40 @@ const typeToIcon: Record<string, LucideIcon> = {
 };
 
 export default function DashboardEntityStatus({ entityStatus }: DashboardEntityStatusProps) {
+  // Optimization: Single-pass accumulation of entity totals to avoid 3 separate .reduce() traversals on render
+  const summaryCards = useMemo(() => {
+    let totalActive = 0;
+    let totalExpiring = 0;
+    let totalExpired = 0;
+
+    for (const r of entityStatus) {
+      totalActive += r.active;
+      totalExpiring += r.expiring;
+      totalExpired += r.expired;
+    }
+
+    return [
+      {
+        id: 'sum-active',
+        label: 'Total Active',
+        value: totalActive.toLocaleString(),
+        color: 'text-success',
+      },
+      {
+        id: 'sum-expiring',
+        label: 'Expiring',
+        value: totalExpiring.toLocaleString(),
+        color: 'text-warning',
+      },
+      {
+        id: 'sum-expired',
+        label: 'Expired',
+        value: totalExpired.toLocaleString(),
+        color: 'text-danger',
+      },
+    ];
+  }, [entityStatus]);
+
   return (
     <div className="bg-card rounded-xl border border-border shadow-card h-full">
       <div className="px-5 py-4 border-b border-border">
@@ -69,26 +104,7 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
       </div>
       <div className="px-5 py-4 border-t border-border">
         <div className="grid grid-cols-3 gap-3">
-          {[
-            {
-              id: 'sum-active',
-              label: 'Total Active',
-              value: entityStatus.reduce((s, r) => s + r.active, 0).toLocaleString(),
-              color: 'text-success',
-            },
-            {
-              id: 'sum-expiring',
-              label: 'Expiring',
-              value: entityStatus.reduce((s, r) => s + r.expiring, 0).toLocaleString(),
-              color: 'text-warning',
-            },
-            {
-              id: 'sum-expired',
-              label: 'Expired',
-              value: entityStatus.reduce((s, r) => s + r.expired, 0).toLocaleString(),
-              color: 'text-danger',
-            },
-          ].map((s) => (
+          {summaryCards.map((s) => (
             <div key={s.id} className="text-center">
               <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
