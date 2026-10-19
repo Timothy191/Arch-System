@@ -96,6 +96,7 @@ function buildCodebaseMaps(dateInfo) {
 ---
 
 ## 🔒 Authentication & Middleware Flow
+
 - **Proxy Delegate**: \`middleware.ts\` delegates token authentication and RBAC checks to \`server/proxy.ts\`.
 - **Exempt Routes**: Auth endpoints (\`/login\`, \`/reset-password\`) and system check APIs (\`/api/c66\`).
 - **User Validation**: Server Actions validate credentials at entry via Zod contracts from \`@repo/contract\`.
@@ -124,9 +125,10 @@ function buildCodebaseMaps(dateInfo) {
 ---
 
 ## 🛡️ Security & Row Level Security (RLS) Mandates
-* **Source of Truth**: \`packages/database/migrations/\` contains all numbered SQL migrations.
-* **100% RLS Enforcement**: Every table has active RLS policy enabled.
-* **Department Isolation**: Multi-tenant separation enforced via \`auth.uid()\` and \`accessible_departments\` mapping.
+
+- **Source of Truth**: \`packages/database/migrations/\` contains all numbered SQL migrations.
+- **100% RLS Enforcement**: Every table has active RLS policy enabled.
+- **Department Isolation**: Multi-tenant separation enforced via \`auth.uid()\` and \`accessible_departments\` mapping.
 `,
     },
     {
@@ -158,6 +160,7 @@ function buildCodebaseMaps(dateInfo) {
 ---
 
 ## 🚢 Deployment Workflow (\`scripts/deploy.sh\`)
+
 - Supports local, staging, and production zero-downtime deployment runs.
 - Includes automatic cache purge and rollback triggers on verification failure.
 `,
@@ -314,6 +317,7 @@ graph TD
 ---
 
 ## ⚙️ Turborepo Configuration Overview (\`turbo.json\`)
+
 - **Task Pipelines**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\`, \`sync-assets\`
 - **Task Hashing**: Inputs hash includes \`globalDependencies\`, \`globalEnv\`, and \`$TURBO_DEFAULT$\`
 - **Caching**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\` set to \`cache: true\`
@@ -477,7 +481,8 @@ flowchart TD
 ---
 
 ## 🔬 Architectural Pre-Flight Research Gate Mandate
-- **Rule Source**: Codified in \`docs/GEMINI.md\` and \`docs/AGENTS.md\`.
+
+- **Rule Source**: \`docs/GEMINI.md\` and \`docs/AGENTS.md\`.
 - **Implementation**: \`SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)\`.
 - **Benchmark Evaluation Surface**:
   - **Airbnb / PayPal**: Semantic Data Contracts (Zero database-to-contract drift).
@@ -493,19 +498,51 @@ flowchart TD
  * Main execution function.
  */
 function main() {
+  const args = process.argv.slice(2);
+  const isCheck = args.includes('--check');
+  const isLatestOnly = args.includes('--latest-only');
+
+  const dateInfo = getFormattedDate();
+  const maps = buildCodebaseMaps(dateInfo);
+  const latestDir = path.join(MAPS_ROOT, 'latest');
+
+  if (isCheck) {
+    if (!fs.existsSync(latestDir)) {
+      console.error('❌ codebase-maps/latest/ directory does not exist.');
+      process.exit(1);
+    }
+    for (const map of maps) {
+      const p = path.join(latestDir, map.filename);
+      if (!fs.existsSync(p)) {
+        console.error(`❌ Missing map in codebase-maps/latest/: ${map.filename}`);
+        process.exit(1);
+      }
+    }
+    console.log('✅ [CODEBASE MAPS] codebase-maps/latest/ verified and complete.');
+    process.exit(0);
+  }
+
   console.log('==================================================');
   console.log('🗺️  Generating Codebase Maps & Metadata Index');
   console.log('==================================================\n');
 
-  const logNum = getNextLogNumber();
-  const dateInfo = getFormattedDate();
-  const folderName = `log-${logNum}(${dateInfo.folderDate})`;
-  const targetDir = path.join(MAPS_ROOT, folderName);
+  let folderName;
+  let targetDir;
+  let logNum;
 
-  fs.mkdirSync(targetDir, { recursive: true });
-  console.log(`📁 Codebase Maps Directory: codebase-maps/${folderName}/\n`);
+  if (isLatestOnly) {
+    folderName = 'latest';
+    targetDir = latestDir;
+    logNum = getNextLogNumber() - 1;
+    console.log(`📁 Updating codebase-maps/latest/ directly (fast-refresh)\n`);
+  } else {
+    logNum = getNextLogNumber();
+    folderName = `log-${logNum}(${dateInfo.folderDate})`;
+    targetDir = path.join(MAPS_ROOT, folderName);
+    fs.mkdirSync(targetDir, { recursive: true });
+    console.log(`📁 Codebase Maps Directory: codebase-maps/${folderName}/\n`);
+  }
 
-  const maps = buildCodebaseMaps(dateInfo);
   const mapsCatalog = [];
 
   for (const map of maps) {
@@ -527,13 +564,11 @@ function main() {
     );
   }
 
-  // Update codebase-maps/latest/ directory
-  const latestDir = path.join(MAPS_ROOT, 'latest');
+  // Update codebase-maps/latest/ and root directory
   fs.mkdirSync(latestDir, { recursive: true });
 
   for (const map of maps) {
     fs.writeFileSync(path.join(latestDir, map.filename), map.content);
-    // Also update root file for backwards compatibility
     fs.writeFileSync(path.join(MAPS_ROOT, map.filename), map.content);
   }
 
@@ -548,26 +583,27 @@ function main() {
     }
   }
 
-  // Filter out any existing entry with the same folderName to prevent duplicates
-  manifest = manifest.filter((entry) => entry.folderName !== folderName && entry.id !== folderName);
+  if (!isLatestOnly) {
+    manifest = manifest.filter((entry) => entry.folderName !== folderName && entry.id !== folderName);
 
-  manifest.unshift({
-    id: folderName,
-    logNumber: logNum,
-    folderName,
-    folderDate: dateInfo.folderDate,
-    isoDate: dateInfo.isoDate,
-    displayDate: dateInfo.displayDate,
-    mapCount: maps.length,
-    status: 'Verified & Active',
-    maps: mapsCatalog,
-  });
+    manifest.unshift({
+      id: folderName,
+      logNumber: logNum,
+      folderName,
+      folderDate: dateInfo.folderDate,
+      isoDate: dateInfo.isoDate,
+      displayDate: dateInfo.displayDate,
+      mapCount: maps.length,
+      status: 'Verified & Active',
+      maps: mapsCatalog,
+    });
+  }
 
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
   fs.writeFileSync(path.join(latestDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
   console.log('\n==================================================');
-  console.log(`✅ Codebase Maps Generated Successfully! Log #${logNum}`);
+  console.log(`✅ Codebase Maps Synchronized Successfully!`);
   console.log(`📋 Metadata Manifest Index: codebase-maps/manifest.json`);
   console.log(`⚡ Instant Active Access: codebase-maps/latest/`);
   console.log('==================================================\n');

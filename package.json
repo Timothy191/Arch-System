@@ -107,6 +107,8 @@
     "audit:explain": "node tools/ops/explain-query-plans.cjs",
     "audit:rls": "node tools/audits/audit-rls.cjs",
     "maps:gen": "node tools/repo/generate-codebase-maps.cjs",
+    "maps:sync": "node tools/repo/generate-codebase-maps.cjs --latest-only",
+    "maps:check": "node tools/repo/generate-codebase-maps.cjs --check",
     "memory:index": "node tools/scripts/smart-indexer.cjs",
     "memory:recall": "node tools/scripts/smart-indexer.cjs --query",
     "token:analyze": "node tools/scripts/token-tracker.cjs analyze",
