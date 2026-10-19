@@ -153,15 +153,22 @@ export function DepartmentReviews() {
   return (
     <div
       className="space-y-4 animate-fade-up group/row"
-      style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
+      style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
     >
-      <header className="w-full rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle backdrop-blur-md shadow-sm px-6 py-2.5 flex items-center justify-center">
-        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center justify-center gap-2.5 text-center">
-          <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
+      <header className="w-full rounded-2xl liquid-glass-light border border-white/45 ring-1 ring-inset ring-white/75 shadow-window px-5 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
+          <span className="p-1.5 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-xs flex items-center justify-center">
             <MessageSquareQuote className="w-4 h-4" />
           </span>
           Operational Feedback &amp; Department Logs
         </h2>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-green/10 border border-accent-green/25 text-accent-green text-[10px] font-mono font-semibold uppercase tracking-wider">
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
+            aria-hidden="true"
+          />
+          Verified Shift Logs · 9 Units
+        </span>
       </header>
 
       <div

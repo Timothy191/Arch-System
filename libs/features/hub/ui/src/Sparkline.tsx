@@ -50,8 +50,8 @@ export function Sparkline({
   const pathD = `M${points.join(' L')}`;
   const trend = data[data.length - 1]! - data[0]!;
 
-  // Neon cyan for steady metrics, high-saturation neon coral for alerts
-  const strokeColor = trend >= 0 ? '#00f0ff' : '#ff4b5c';
+  // High-contrast industrial sky blue for steady/positive metrics, crimson rose for alerts on light mode
+  const strokeColor = trend >= 0 ? '#0284c7' : '#e11d48';
 
   const endX = points[points.length - 1]?.split(',')[0] ?? '0';
   const endY = points[points.length - 1]?.split(',')[1] ?? '0';

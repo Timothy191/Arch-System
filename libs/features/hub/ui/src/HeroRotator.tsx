@@ -10,6 +10,7 @@ import {
   Layers,
   Pickaxe,
   ScanFace,
+  ShieldCheck,
   TowerControl,
   TrendingUp,
   Wrench,
@@ -33,6 +34,11 @@ const DEPT_STYLE_MAP: Record<
   string,
   { icon: React.ComponentType<{ className?: string }>; iconColor: string; bgColor: string }
 > = {
+  admin: {
+    icon: ShieldCheck,
+    iconColor: 'text-[var(--accent-blue)]',
+    bgColor: 'bg-[var(--accent-blue)]/10',
+  },
   drilling: { icon: Pickaxe, iconColor: 'text-dept-drilling', bgColor: 'bg-dept-drilling/10' },
   production: {
     icon: TrendingUp,
@@ -97,17 +103,19 @@ export function HeroRotator({
       const DeptIcon = style.icon;
 
       const assetOverline =
-        dept.name === 'drilling'
-          ? 'FIELD OPERATIONS // UNIT-PV351'
-          : dept.name === 'production'
-            ? 'EXTRACTION & YIELD // PLANT-EXT01'
-            : dept.name === 'access-control'
-              ? 'SITE SECURITY // SEC-GATE01'
-              : dept.name === 'engineering'
-                ? 'PLANT MAINTENANCE // WORKSHOP-03'
-                : dept.name === 'control-room'
-                  ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                  : 'FIELD OPERATIONS // MINE-UNIT';
+        dept.name === 'admin'
+          ? 'ENTERPRISE GOVERNANCE // ADM-CORE'
+          : dept.name === 'drilling'
+            ? 'FIELD OPERATIONS // UNIT-PV351'
+            : dept.name === 'production'
+              ? 'EXTRACTION & YIELD // PLANT-EXT01'
+              : dept.name === 'access-control'
+                ? 'SITE SECURITY // SEC-GATE01'
+                : dept.name === 'engineering'
+                  ? 'PLANT MAINTENANCE // WORKSHOP-03'
+                  : dept.name === 'control-room'
+                    ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
+                    : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'

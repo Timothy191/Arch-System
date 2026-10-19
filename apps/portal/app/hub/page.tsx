@@ -6,10 +6,9 @@ import {
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { ArrowUpRight, BarChart3, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   CoreOperationalModules,
@@ -258,29 +257,7 @@ export default async function HubPage() {
         />
       </section>
 
-      {/* Executive Dashboard link (admin/manager only) */}
-      {canSeeExecutive && (
-        <div
-          className="flex justify-end animate-fade-up"
-          style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
-        >
-          <Link
-            href="/hub/executive"
-            className="inline-flex items-center gap-2 pl-2 pr-3.5 py-1.5 rounded-full bg-arch-surface-secondary/80 hover:bg-arch-surface-secondary text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 backdrop-blur-md shadow-sm hover:shadow-card transition-all group"
-          >
-            <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
-              <BarChart3 className="w-3.5 h-3.5" />
-            </span>
-            <span>Executive Dashboard</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-arch-accent-blue transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
-        </div>
-      )}
-
-      {/* Department & Operational Testimonials Double Marquee */}
-      <DepartmentReviews />
-
-      {/* Core Operational Modules - Interactive Filtered Grid */}
+      {/* Core Operational Modules - Primary Workspace Above the Fold (Fitts's Law & Primacy Effect) */}
       {departments.length === 0 ? (
         <div className="p-8 sm:p-12 text-center rounded-card bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
           <Shield className="w-8 h-8 mx-auto text-accent-amber" />
@@ -292,8 +269,15 @@ export default async function HubPage() {
           </p>
         </div>
       ) : (
-        <CoreOperationalModules departments={departments} clearance={employeeClearance} />
+        <CoreOperationalModules
+          departments={departments}
+          clearance={employeeClearance}
+          canSeeExecutive={canSeeExecutive}
+        />
       )}
+
+      {/* Department & Operational Testimonials Double Marquee */}
+      <DepartmentReviews />
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
       {pluginWidgets.length > 0 && (

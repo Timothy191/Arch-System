@@ -39,13 +39,28 @@ export function HeroCardContent({
             ? 'PLANT MAINTENANCE // WORKSHOP-03'
             : panel.name === 'control-room'
               ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-              : `${(panel.category || 'CENTRAL COMMAND').toUpperCase()} // SYS-MAIN`);
+              : panel.name === 'admin'
+                ? 'ENTERPRISE GOVERNANCE // ADM-CORE'
+                : `${(panel.category || 'CENTRAL COMMAND').toUpperCase()} // SYS-MAIN`);
 
   const assetSubtitle =
     panel.assetSubtitle ||
     (panel.name === 'drilling'
       ? 'Epiroc Pit Viper 351 · Bit Depth Telemetry · Pattern B-14'
       : panel.description);
+
+  const targetMeta =
+    panel.name === 'production'
+      ? { label: 'Shift Target: 12,500t [94%]', width: '94%' }
+      : panel.name === 'access-control'
+        ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
+        : panel.name === 'engineering'
+          ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
+          : panel.name === 'control-room'
+            ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
+            : panel.name === 'admin'
+              ? { label: 'System Compliance: 100% [100%]', width: '100%' }
+              : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||
@@ -58,7 +73,7 @@ export function HeroCardContent({
   return (
     <div className="relative h-full w-full flex flex-row z-10">
       {/* Left Column: Text, Controls & Telemetry Bus */}
-      <div className="relative z-20 flex flex-col justify-between w-[55%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
+      <div className="relative z-20 flex flex-col justify-between w-[52%] sm:w-[50%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
         <div>
           {/* Top Status Bar with Monospace Readouts */}
           <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono tabular-nums mb-3.5">
@@ -160,8 +175,8 @@ export function HeroCardContent({
       </div>
 
       {/* Right Column: Full Bleed Image with Live Camera Feed HUD */}
-      <div className="absolute top-0 right-0 w-[55%] h-full group/img overflow-hidden rounded-r-2xl z-10">
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white/25 to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[48%] sm:w-[50%] h-full group/img overflow-hidden rounded-r-2xl z-10">
+        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white/20 to-transparent z-10 pointer-events-none" />
         <img
           src={
             failedImages.has(panel.image)
@@ -208,9 +223,12 @@ export function HeroCardContent({
 
           {isActive && (
             <div className="flex flex-col items-end gap-0.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-mono text-white/80">
-              <span className="tabular-nums font-semibold text-white/90">Target: 1,300m [95%]</span>
+              <span className="tabular-nums font-semibold text-white/90">{targetMeta.label}</span>
               <div className="w-24 h-1 bg-white/20 rounded-full overflow-hidden mt-0.5">
-                <div className="h-full bg-emerald-400 rounded-full" style={{ width: '95%' }} />
+                <div
+                  className="h-full bg-emerald-400 rounded-full"
+                  style={{ width: targetMeta.width }}
+                />
               </div>
             </div>
           )}

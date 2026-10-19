@@ -4,6 +4,7 @@ import type { Department } from '@repo/departments/data-access';
 import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
+  ArrowUpRight,
   Bookmark,
   CreditCard,
   Factory,
@@ -239,7 +240,17 @@ function DepartmentCard({
             <div className="uiverse-card-title-row">
               <h3 className="uiverse-card-title">{department.displayName}</h3>
               {department.status && (
-                <span className="flex items-center gap-1.5 shrink-0">
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-[0.05em]',
+                    department.status === 'active' &&
+                      'bg-accent-green/10 text-accent-green border-accent-green/25',
+                    department.status === 'maintenance' &&
+                      'bg-accent-amber/12 text-accent-amber border-accent-amber/30',
+                    department.status === 'alert' &&
+                      'bg-accent-red/12 text-accent-red border-accent-red/30'
+                  )}
+                >
                   <span
                     className={cn(
                       'w-1.5 h-1.5 rounded-full animate-pulse',
@@ -248,9 +259,7 @@ function DepartmentCard({
                       department.status === 'alert' && 'bg-accent-red'
                     )}
                   />
-                  <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-arch-text-tertiary">
-                    {department.status}
-                  </span>
+                  <span>{department.status}</span>
                 </span>
               )}
             </div>
@@ -259,16 +268,22 @@ function DepartmentCard({
 
           {/* Tag / Stats row */}
           {department.stats && (
-            <div className="uiverse-card-tag-row">
+            <div className="uiverse-card-tag-row group-hover:border-arch-accent-blue/25 group-hover:bg-white/95">
               <div className="flex items-center gap-2">
                 <span className="uiverse-card-tag-row-text">{department.stats.label}</span>
                 {department.trend && (
-                  <div className="opacity-80">
+                  <div className="opacity-90">
                     <Sparkline data={department.trend} width={52} height={14} />
                   </div>
                 )}
               </div>
-              <span className="uiverse-card-tag-row-value">{department.stats.value}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="uiverse-card-tag-row-value">{department.stats.value}</span>
+                <ArrowUpRight
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 text-arch-text-tertiary group-hover:text-arch-accent-blue group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+                />
+              </div>
             </div>
           )}
         </div>
