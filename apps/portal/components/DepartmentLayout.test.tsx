@@ -32,9 +32,9 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     // Verify all Control Room tabs are present in the side menu
     expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Machine Ops/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Machine Operations/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Excavator/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Excavator Activity/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
 
@@ -43,9 +43,9 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
       'Shift Operations',
       'Dashboard',
       'Hourly Loads',
-      'Machine Ops',
+      'Machine Operations',
       'Eng Notes',
-      'Excavator',
+      'Excavator Activity',
       'Reports',
     ]);
   });

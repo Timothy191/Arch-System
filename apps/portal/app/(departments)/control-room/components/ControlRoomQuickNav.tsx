@@ -57,7 +57,7 @@ export const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
   },
   {
     name: 'machine-operations',
-    label: 'Machine Ops',
+    label: 'Machine Operations',
     href: '/control-room/machine-operations',
     description: 'Fleet machinery status, delays & SMR',
     icon: Cpu,

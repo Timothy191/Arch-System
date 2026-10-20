@@ -103,10 +103,16 @@ export default async function MachineOperationsPage({
     }
   });
 
-  const machinesWithSmu = (machines || []).map((m) => ({
-    ...m,
-    latest_smu: latestSMRMap.get(m.id) ?? null,
-  }));
+  const siteMap = new Map((sites || []).map((s) => [s.id, s]));
+  const machinesWithSmu = (machines || []).map((m) => {
+    const rawSite = Array.isArray((m as any).site) ? (m as any).site[0] : (m as any).site;
+    const resolvedSite = rawSite || (m.site_id ? siteMap.get(m.site_id) : null);
+    return {
+      ...m,
+      site: resolvedSite ? { name: resolvedSite.name, site_code: resolvedSite.site_code } : null,
+      latest_smu: latestSMRMap.get(m.id) ?? null,
+    };
+  });
 
   // Calculate today's totals
   const totalHours =
@@ -200,22 +206,31 @@ export default async function MachineOperationsPage({
       </Suspense>
 
       {/* Add Operation Form */}
-      <Suspense
-        fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-      >
-        <MachineOperationsForm
-          departmentId={deptId}
-          machines={machinesWithSmu}
-          operators={operators || []}
-          sites={sites || []}
-          mineBlocks={mineBlocks || []}
-          todayOperations={todayOperations || []}
-        />
-      </Suspense>
+      <div id="machine-operations-form" className="scroll-mt-6">
+        <Suspense
+          fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+        >
+          <MachineOperationsForm
+            departmentId={deptId}
+            machines={machinesWithSmu}
+            operators={operators || []}
+            sites={sites || []}
+            mineBlocks={mineBlocks || []}
+            todayOperations={todayOperations || []}
+          />
+        </Suspense>
+      </div>
 
       {/* Today's Operations List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Operations</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">
+            Today&apos;s Operations
+          </h3>
+          <span className="text-xs text-[var(--text-muted)] font-mono">
+            {machinesWithSmu.length} fleet machine{machinesWithSmu.length === 1 ? '' : 's'}
+          </span>
+        </div>
         <Suspense
           fallback={
             <div className="space-y-4">
@@ -226,6 +241,7 @@ export default async function MachineOperationsPage({
           }
         >
           <MachineOperationsList
+            machines={machinesWithSmu}
             operations={todayOperations || []}
             todayLoads={todayLoads || []}
             activeBreakdowns={activeBreakdowns || []}

@@ -23,7 +23,7 @@ describe('ControlRoomQuickNav', () => {
     expect(screen.getByRole('menuitem', { name: /^Dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^Shift Operations/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^Hourly Loads/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /^Machine Ops/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /^Machine Operations/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^Excavator Activity/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /^Reports/i })).toBeInTheDocument();

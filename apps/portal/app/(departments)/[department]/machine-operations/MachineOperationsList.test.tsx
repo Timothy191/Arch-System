@@ -188,4 +188,123 @@ describe('MachineOperationsList', () => {
     expect(screen.getByText(/Roll-over: 2000\.0 BCM/i)).toBeInTheDocument();
     expect(screen.getByText('250.0 BCM/h')).toBeInTheDocument();
   });
+
+  describe('Fleet Machines Mode (when machines prop is provided)', () => {
+    const mockMachines = [
+      {
+        id: 'm-1',
+        name: 'EX-101 (CAT 6060)',
+        machine_type: 'Excavator',
+        serial_number: 'SN-EX101',
+        site_id: 'site-a',
+        latest_smu: 1012,
+        site: { name: 'Pit North' },
+      },
+      {
+        id: 'm-2',
+        name: 'DT-201 (CAT 777)',
+        machine_type: 'Dumper',
+        serial_number: 'SN-DT201',
+        site_id: 'site-a',
+        latest_smu: 500,
+        site: { name: 'Pit North' },
+      },
+      {
+        id: 'm-3',
+        name: 'DR-301 (Sandvik DR410i)',
+        machine_type: 'Drill Rig',
+        serial_number: 'SN-DR301',
+        site_id: 'site-b',
+        latest_smu: 1420.5,
+        site: { name: 'South Ridge' },
+      },
+    ];
+
+    it('lists all fleet machines even when operations array is empty', () => {
+      render(
+        <MachineOperationsList
+          machines={mockMachines}
+          operations={[]}
+          todayLoads={[]}
+          activeBreakdowns={[]}
+        />
+      );
+
+      // Does not show empty message
+      expect(
+        screen.queryByText(/No operations logged today. Use the form above to add operations./i)
+      ).not.toBeInTheDocument();
+
+      // Renders all machines
+      expect(screen.getByText('EX-101 (CAT 6060)')).toBeInTheDocument();
+      expect(screen.getByText('DT-201 (CAT 777)')).toBeInTheDocument();
+      expect(screen.getByText('DR-301 (Sandvik DR410i)')).toBeInTheDocument();
+
+      // Displays latest SMR values
+      expect(screen.getByText('SMR 1012.0')).toBeInTheDocument();
+      expect(screen.getByText('SMR 500.0')).toBeInTheDocument();
+      expect(screen.getByText('SMR 1420.5')).toBeInTheDocument();
+
+      // Shows standby status for all machines
+      expect(screen.getAllByText('Standby').length).toBe(3);
+      expect(screen.getAllByText(/Standby — No operations logged today/i).length).toBe(3);
+    });
+
+    it('displays operating status and shifts when machine has operations logged', () => {
+      render(
+        <MachineOperationsList
+          machines={mockMachines}
+          operations={[mockOperations[0]]}
+          todayLoads={mockTodayLoads}
+          activeBreakdowns={[]}
+        />
+      );
+
+      // EX-101 should be operating
+      expect(screen.getByText('12.0h logged')).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+
+      // Other 2 machines should remain in standby
+      expect(screen.getAllByText('Standby').length).toBe(2);
+    });
+
+    it('filters machines by status tab when clicked', () => {
+      render(
+        <MachineOperationsList
+          machines={mockMachines}
+          operations={[mockOperations[0]]}
+          todayLoads={mockTodayLoads}
+          activeBreakdowns={mockActiveBreakdowns}
+        />
+      );
+
+      // Click "Standby (2)" filter
+      const standbyBtn = screen.getByRole('button', { name: /Standby \(2\)/i });
+      fireEvent.click(standbyBtn);
+
+      // Operating machine should be filtered out
+      expect(screen.queryByText('EX-101 (CAT 6060)')).not.toBeInTheDocument();
+      // Standby machines should remain visible
+      expect(screen.getByText('DT-201 (CAT 777)')).toBeInTheDocument();
+      expect(screen.getByText('DR-301 (Sandvik DR410i)')).toBeInTheDocument();
+    });
+
+    it('searches and filters machines by query string', () => {
+      render(
+        <MachineOperationsList
+          machines={mockMachines}
+          operations={[]}
+          todayLoads={[]}
+          activeBreakdowns={[]}
+        />
+      );
+
+      const searchInput = screen.getByPlaceholderText(/Search machine, type, or SN.../i);
+      fireEvent.change(searchInput, { target: { value: 'Sandvik' } });
+
+      expect(screen.getByText('DR-301 (Sandvik DR410i)')).toBeInTheDocument();
+      expect(screen.queryByText('EX-101 (CAT 6060)')).not.toBeInTheDocument();
+      expect(screen.queryByText('DT-201 (CAT 777)')).not.toBeInTheDocument();
+    });
+  });
 });

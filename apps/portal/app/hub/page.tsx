@@ -9,6 +9,7 @@ import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server
 import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
@@ -280,6 +281,32 @@ export default async function HubPage() {
           clearance={employeeClearance}
           canSeeExecutive={canSeeExecutive}
         />
+      )}
+
+      {/* Availability & Utilization Report */}
+      {canSeeExecutive && (
+        <section className="space-y-5 animate-fade-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary">
+              Availability & Utilization Report
+            </h2>
+            <Link
+              href="/control-room/reports"
+              className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-white/85 hover:bg-white text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-xs hover:shadow-card transition-all"
+            >
+              <Shield className="w-3 h-3 mx-auto text-arch-accent-blue" />
+              <span>View Report</span>
+            </Link>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Placeholder for report widgets - could be expanded */}
+              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
