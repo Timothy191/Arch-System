@@ -274,17 +274,26 @@ export function MacMenuBar({
                 />
               </button>
             </DropdownMenuTrigger>
+            {/* WhatsApp Web Split-Screen trigger */}
             <button
               type="button"
-              onClick={() => setSystemMenuOpen((open) => !open)}
-              className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none"
-              title="Open System Menu"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('open-split-view', {
+                    detail: { service: 'whatsapp', action: 'toggle' },
+                  })
+                );
+              }}
+              className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
+              title="WhatsApp Web (Split Screen)"
             >
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse shrink-0"
-                aria-hidden="true"
+              <Image
+                src="/whatsapp-logo.jpeg"
+                alt="WhatsApp Logo"
+                width={18}
+                height={18}
+                className="rounded-full object-cover shrink-0"
               />
-              <span className="truncate max-w-[140px]">{currentContextLabel}</span>
             </button>
           </div>
           <DropdownMenuContent
@@ -595,26 +604,18 @@ export function MacMenuBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* WhatsApp Web Split-Screen trigger */}
+        {/* Context label pill button */}
         <button
           type="button"
-          onClick={() => {
-            window.dispatchEvent(
-              new CustomEvent('open-split-view', {
-                detail: { service: 'whatsapp', action: 'toggle' },
-              })
-            );
-          }}
-          className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-1 shrink-0"
-          title="WhatsApp Web (Split Screen)"
+          onClick={() => setSystemMenuOpen((open) => !open)}
+          className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none ml-1"
+          title="Open System Menu"
         >
-          <Image
-            src="/whatsapp-logo.jpeg"
-            alt="WhatsApp Logo"
-            width={18}
-            height={18}
-            className="rounded-full object-cover shrink-0"
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse shrink-0"
+            aria-hidden="true"
           />
+          <span className="truncate max-w-[140px]">{currentContextLabel}</span>
         </button>
 
         {/* ── Menu Bar Items ── */}
