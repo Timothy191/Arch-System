@@ -2,7 +2,7 @@
 -- Ports the QR-System models (Employees, Visitors, GateLogs) into the portal.
 
 -- 1. Personnel (Maps to QR-System 'Employee' model)
-CREATE TABLE personnel (
+CREATE TABLE IF NOT EXISTS personnel (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     emp_code text UNIQUE NOT NULL,
     first_name text NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE personnel (
 );
 
 -- 2. Visitors
-CREATE TABLE visitors (
+CREATE TABLE IF NOT EXISTS visitors (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name text NOT NULL,
     company text,
@@ -31,7 +31,7 @@ CREATE TABLE visitors (
 );
 
 -- 3. Badges (Manages the QR_Code assignments globally)
-CREATE TABLE badges (
+CREATE TABLE IF NOT EXISTS badges (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     qr_code text UNIQUE NOT NULL,
     entity_type text NOT NULL CHECK (entity_type IN ('personnel', 'visitor', 'vehicle')),
@@ -43,7 +43,7 @@ CREATE TABLE badges (
 );
 
 -- 4. Access Logs (Maps to QR-System 'GateLog')
-CREATE TABLE access_logs (
+CREATE TABLE IF NOT EXISTS access_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     badge_id uuid REFERENCES badges(id),
     access_type text NOT NULL,

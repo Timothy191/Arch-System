@@ -21,7 +21,7 @@ ALTER TABLE hourly_loads RENAME TO hourly_loads_legacy;
 --     UNIQUE constraint must include the partition key (load_date) — it does.
 --     FK references (department_id, machine_id) are declared on parent only;
 --     PostgreSQL 12+ propagates constraints to child partitions automatically.
-CREATE TABLE hourly_loads (
+CREATE TABLE IF NOT EXISTS hourly_loads (
   id UUID NOT NULL DEFAULT uuid_generate_v4(),
   department_id UUID NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
   machine_id UUID NOT NULL REFERENCES machines(id) ON DELETE CASCADE,
@@ -71,9 +71,9 @@ CREATE POLICY "hourly_loads_update_access"
   USING (public.has_department_access(department_id));
 
 -- 1f. Indexes on partitioned parent (inherited by all partitions)
-CREATE INDEX idx_hourly_loads_department_date ON hourly_loads(department_id, load_date DESC);
-CREATE INDEX idx_hourly_loads_machine_date    ON hourly_loads(machine_id, load_date DESC);
-CREATE INDEX idx_hourly_loads_shift_type      ON hourly_loads(shift_type);
+CREATE INDEX IF NOT EXISTS idx_hourly_loads_department_date ON hourly_loads(department_id, load_date DESC);
+CREATE INDEX IF NOT EXISTS idx_hourly_loads_machine_date    ON hourly_loads(machine_id, load_date DESC);
+CREATE INDEX IF NOT EXISTS idx_hourly_loads_shift_type      ON hourly_loads(shift_type);
 
 -- 1g. Create monthly partitions: 2025-01 through 2027-12
 DO $$

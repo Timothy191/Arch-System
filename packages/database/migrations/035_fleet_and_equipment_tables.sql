@@ -3,7 +3,7 @@
 -- ============================================
 -- 1. Fleet table (mining vehicles/heavy machinery)
 -- ============================================
-CREATE TABLE fleet (
+CREATE TABLE IF NOT EXISTS fleet (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   fleet_code text UNIQUE NOT NULL,
   vehicle_type text NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE fleet (
 -- ============================================
 -- 2. Equipment table (non-vehicle portable/fixed assets)
 -- ============================================
-CREATE TABLE equipment (
+CREATE TABLE IF NOT EXISTS equipment (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   equip_code text UNIQUE NOT NULL,
   equipment_type text NOT NULL,

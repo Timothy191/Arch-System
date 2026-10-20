@@ -50,6 +50,7 @@ import { RouteBackground } from '@/components/RouteBackground';
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 
 const inter = Inter({
+  path: './public/fonts/Inter.var.woff2',
   subsets: ['latin'],
   variable: '--font-sans',
   weight: ['400', '500', '600'],
@@ -59,6 +60,7 @@ const inter = Inter({
 });
 
 const jetbrainsMono = JetBrains_Mono({
+  path: './public/fonts/JetBrainsMono.woff2',
   subsets: ['latin'],
   variable: '--font-mono',
   weight: ['400', '500'],
@@ -68,6 +70,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const outfit = Outfit({
+  path: './public/fonts/Outfit.var.woff2',
   subsets: ['latin'],
   variable: '--font-outfit',
   weight: ['400', '500', '600'],

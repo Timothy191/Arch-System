@@ -48,6 +48,8 @@ From `Arch-System/`:
 - `./setup.sh --dev` — One-command setup and launch dev server
 - `pnpm policy:check` — Architectural boundary enforcement
 - `pnpm audit:compliance` — Run all audit gates
+- `pnpm test` — Run unit tests (Jest)
+- `pnpm test -- <path/to/file.test.ts>` — Specific test file
 - `pnpm context:pack` — Create workspace bundle for analysis
 - `make help` — List all commands
 - `make verify` — Same as: pnpm --dir Arch-System agent:verify
@@ -71,7 +73,7 @@ From `Arch-System/`:
 - **Never install packages at root**: Root is zero-dependency delegation runner only
 - **Never move/rename service directories**: Hardcoded in federation watchdog configs
 
-## Mandatory Verification Protocol (6-Pillar)
+## Mandatory Verification Protocol (Enhanced 12-Pillar)
 
 Before declaring any task complete:
 
@@ -87,13 +89,14 @@ Before declaring any task complete:
 ```
 pnpm type-check        # Turbo type-check --concurrency=2
 pnpm lint              # Turbo lint (biome check)
+pnpm test              # Unit tests (Jest)
 pnpm policy:check      # Architectural boundary compiler
 pnpm audit:drift       # Contract vs DB/API alignment
 pnpm agent:verify      # Mandatory gate (fails fast on first failure)
 ```
 
-`pnpm agent:verify` fails fast on:
-`type-check` → `lint` → `policy:check` → `audit:drift` → skill-spector → `mcp:verify` → `token:budget-check`
+`pnpm agent:verify` now includes 12 verification steps that fail fast on:
+`type-check` → `lint` → `test` → `policy:check` → `audit:drift` → skill-spector → `mcp:verify` → `token:budget-check` → `audit-agent-rules-drift` → `architecture-maps-parity` → `audit:hooks` → `deps:lint`
 
 For release-grade changes, run the full `pnpm quality` gate.
 
