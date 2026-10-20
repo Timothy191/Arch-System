@@ -271,7 +271,7 @@ function DepartmentCard({
                 <span className="uiverse-card-tag-row-text">{department.stats.label}</span>
                 {department.trend && (
                   <div className="opacity-90">
-                    <Sparkline data={department.trend} width={52} height={14} />
+                    <Sparkline data={department.trend} width={52} height={14} color="#d4af37" />
                   </div>
                 )}
               </div>

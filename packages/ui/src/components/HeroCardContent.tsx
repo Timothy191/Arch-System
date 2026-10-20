@@ -22,6 +22,9 @@ function getHeroTelemetrySeries(
   panelName: string,
   stats?: { label: string; value: string }
 ): HeroTelemetrySeries {
+  // System Gold Branding: #d4af37 (rich metallic gold) for all hero card telemetry graphs
+  const goldStroke = '#d4af37';
+
   switch (panelName) {
     case 'admin':
       return {
@@ -31,7 +34,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+12.4% Efficiency',
         peakValue: '264',
         avgValue: '245',
-        strokeColor: '#0284c7',
+        strokeColor: goldStroke,
         fillId: 'grad-admin',
         points: [62, 68, 65, 74, 79, 83, 80, 88, 92, 89, 95, 98],
       };
@@ -43,7 +46,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+9.2% Shift Target',
         peakValue: '42/h',
         avgValue: '34/h',
-        strokeColor: '#10b981',
+        strokeColor: goldStroke,
         fillId: 'grad-control-room',
         points: [54, 62, 70, 66, 78, 84, 81, 89, 93, 87, 94, 97],
       };
@@ -55,7 +58,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '99.8% Gate SLA',
         peakValue: '156',
         avgValue: '139',
-        strokeColor: '#0ea5e9',
+        strokeColor: goldStroke,
         fillId: 'grad-access-control',
         points: [48, 58, 72, 84, 88, 91, 89, 93, 95, 92, 94, 96],
       };
@@ -67,7 +70,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+6.8% vs Plan',
         peakValue: '1,420t',
         avgValue: '1,180t',
-        strokeColor: '#059669',
+        strokeColor: goldStroke,
         fillId: 'grad-production',
         points: [58, 64, 61, 70, 75, 73, 82, 85, 88, 91, 89, 95],
       };
@@ -79,7 +82,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+14.1% ROP',
         peakValue: '58m/h',
         avgValue: '49m/h',
-        strokeColor: '#0284c7',
+        strokeColor: goldStroke,
         fillId: 'grad-drilling',
         points: [50, 55, 63, 68, 72, 77, 74, 83, 87, 90, 93, 97],
       };
@@ -91,7 +94,7 @@ function getHeroTelemetrySeries(
         deltaBadge: 'MTBF +18.5%',
         peakValue: '99.2%',
         avgValue: '96.8%',
-        strokeColor: '#d97706',
+        strokeColor: goldStroke,
         fillId: 'grad-engineering',
         points: [76, 79, 75, 82, 85, 88, 86, 90, 92, 94, 95, 98],
       };
@@ -103,7 +106,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '0.42ms L1 p95',
         peakValue: '100%',
         avgValue: '99.9%',
-        strokeColor: '#10b981',
+        strokeColor: goldStroke,
         fillId: 'grad-overview',
         points: [82, 85, 87, 89, 91, 93, 94, 96, 97, 98, 99, 100],
       };
@@ -115,7 +118,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '18ms Avg RTT',
         peakValue: '410/s',
         avgValue: '328/s',
-        strokeColor: '#059669',
+        strokeColor: goldStroke,
         fillId: 'grad-database',
         points: [60, 66, 71, 68, 75, 80, 78, 85, 88, 92, 90, 96],
       };
@@ -127,7 +130,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+4.3% Shift OEE',
         peakValue: '98.1%',
         avgValue: '93.4%',
-        strokeColor: '#0284c7',
+        strokeColor: goldStroke,
         fillId: 'grad-reports',
         points: [64, 69, 73, 76, 80, 84, 82, 88, 91, 93, 95, 97],
       };
@@ -139,7 +142,7 @@ function getHeroTelemetrySeries(
         deltaBadge: '+88% Cache Hit',
         peakValue: '99.95%',
         avgValue: '98.7%',
-        strokeColor: '#d4af37',
+        strokeColor: goldStroke,
         fillId: `grad-${panelName || 'default'}`,
         points: [56, 63, 68, 72, 76, 81, 79, 86, 90, 93, 96, 99],
       };

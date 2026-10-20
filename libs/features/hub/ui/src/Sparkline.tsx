@@ -9,6 +9,7 @@ interface SparklineProps {
   height?: number;
   strokeWidth?: number;
   className?: string;
+  color?: string;
 }
 
 export function Sparkline({
@@ -17,6 +18,7 @@ export function Sparkline({
   height = 28,
   strokeWidth = 1.5,
   className,
+  color,
 }: SparklineProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const id = useId();
@@ -50,8 +52,8 @@ export function Sparkline({
   const pathD = `M${points.join(' L')}`;
   const trend = data[data.length - 1]! - data[0]!;
 
-  // High-contrast industrial sky blue for steady/positive metrics, crimson rose for alerts on light mode
-  const strokeColor = trend >= 0 ? '#0284c7' : '#e11d48';
+  // System Gold Branding (#d4af37) default for department card sparkline telemetry
+  const strokeColor = color || (trend >= 0 ? '#d4af37' : '#e11d48');
 
   const endX = points[points.length - 1]?.split(',')[0] ?? '0';
   const endY = points[points.length - 1]?.split(',')[1] ?? '0';
