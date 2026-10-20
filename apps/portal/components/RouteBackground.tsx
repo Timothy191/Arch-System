@@ -96,14 +96,14 @@ function RouteBackgroundInner() {
 
     const idleWindow = window as WindowWithIdleCallback;
     if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 2500 });
+      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 800 });
       return () => {
         idleWindow.cancelIdleCallback?.(handle);
         mobileQuery.removeEventListener('change', handleViewportChange);
       };
     }
 
-    const timer = setTimeout(loadDeferredVideo, 1200);
+    const timer = setTimeout(loadDeferredVideo, 350);
     return () => {
       clearTimeout(timer);
       mobileQuery.removeEventListener('change', handleViewportChange);
@@ -119,6 +119,9 @@ function RouteBackgroundInner() {
     }
   }, [shouldLoadVideo, isMobileViewport]);
 
+  const posterSrc = isMobileViewport
+    ? '/background/global-background-poster-mobile.webp'
+    : '/background/global-background-poster.webp';
   const webmSrc = isMobileViewport
     ? '/background/video-loop-mobile.webm'
     : '/background/video-loop.webm';
@@ -140,10 +143,11 @@ function RouteBackgroundInner() {
             key={isMobileViewport ? 'ps3-wave-mobile' : 'ps3-wave-desktop'}
             id="route-bg-light-video"
             ref={videoRef}
+            poster={posterSrc}
             className="route-bg-video object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
-              transition: 'opacity 1.2s ease-in-out',
+              transition: 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
               willChange: 'transform, opacity',
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
@@ -156,18 +160,18 @@ function RouteBackgroundInner() {
             muted
             playsInline
             disablePictureInPicture
-            preload="metadata"
+            preload="auto"
           >
+            <source src={mp4Src} type="video/mp4" />
+            <source src={webmSrc} type="video/webm" />
             <source
               src={
                 isMobileViewport
                   ? '/background/video-loop-mobile-av1.webm'
                   : '/background/video-loop-av1.webm'
               }
-              type="video/webm"
+              type="video/webm; codecs=av01.0.05M.08"
             />
-            <source src={webmSrc} type="video/webm" />
-            <source src={mp4Src} type="video/mp4" />
           </video>
         </div>
       )}

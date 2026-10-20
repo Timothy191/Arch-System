@@ -1018,7 +1018,8 @@
 }
 
 /* Video element — fills the container and maintains aspect ratio with object-fit */
-.route-bg-video {
+.route-bg-video,
+.route-bg-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1028,11 +1029,12 @@
   image-rendering: high-quality;
   image-rendering: -webkit-optimize-contrast;
   opacity: 1;
-  filter: none;
+  filter: contrast(1.06) brightness(1.03);
 }
 
 @media (width <= 768px) {
-  .route-bg-video {
+  .route-bg-video,
+  .route-bg-image {
     opacity: 1;
   }
 }
@@ -1046,8 +1048,8 @@
   z-index: -8;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==');
   background-size: 140px 140px;
-  opacity: 0.024;
-  /* extremely subtle but prevents gradient banding and feels sharp */
+  opacity: 0.016;
+  /* extremely subtle but prevents gradient banding and keeps black canvas crisp */
   animation: grain-dance 8s steps(10) infinite;
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
