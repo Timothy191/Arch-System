@@ -56,10 +56,18 @@ export default async function AccessControlDashboardPage() {
       {/* 1. Real-Time Headcount & Emergency Blast/Muster Command Strip */}
       <HeadcountMusterBanner
         totalSouls={musterSummary.totalSoulsOnSite}
-        employeesCount={entityStatus.find((e) => e.type === 'Employees')?.active || 88}
-        contractorsCount={42}
-        visitorsCount={metrics.accessEventsToday ? Math.min(metrics.accessEventsToday, 14) : 12}
-        vehiclesCount={entityStatus.find((e) => e.type === 'Vehicles')?.active || 34}
+        employeesCount={
+          entityStatus.find((e) => e.type === 'Employees')?.active ??
+          musterSummary.records.filter((r) => r.entityType === 'personnel').length
+        }
+        contractorsCount={
+          entityStatus.find((e) => e.type === 'Contractors')?.active ??
+          musterSummary.records.filter(
+            (r) => r.company !== 'Mine Operations' && r.company !== 'Internal'
+          ).length
+        }
+        visitorsCount={musterSummary.records.filter((r) => r.entityType === 'visitor').length}
+        vehiclesCount={entityStatus.find((e) => e.type === 'Vehicles')?.active ?? 0}
         blastStatus={musterSummary.blastStatus}
       />
 

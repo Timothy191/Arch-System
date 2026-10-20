@@ -577,7 +577,48 @@ export async function upsertEmployeeAdmin(
     }
   }
 
-  await cacheInvalidateTags(['table:employees', 'table:personnel', 'table:badges']);
+  // Synchronize with `operators` so employee is selectable across Control Room, Drilling, Production
+  if (resolvedCoyNumber && resolvedFullName) {
+    try {
+      const opTable = supabase.from('operators');
+      if (typeof opTable?.select === 'function') {
+        const { data: existingOp } = await opTable
+          .select('id')
+          .eq('employee_code', resolvedCoyNumber)
+          .maybeSingle();
+
+        if (existingOp?.id) {
+          await supabase
+            .from('operators')
+            .update({
+              full_name: resolvedFullName,
+              role: formData.job_title || 'operator',
+              active: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingOp.id);
+        } else {
+          await supabase.from('operators').insert({
+            full_name: resolvedFullName,
+            employee_code: resolvedCoyNumber,
+            role: formData.job_title || 'operator',
+            active: true,
+          });
+        }
+      }
+    } catch {
+      // Database trigger trg_sync_employee_to_operators serves as automated synchronization fallback
+    }
+  }
+
+  await cacheInvalidateTags([
+    'table:employees',
+    'table:personnel',
+    'table:badges',
+    'table:operators',
+  ]);
   revalidatePath('/admin');
+  revalidatePath('/control-room/machine-operations');
+  revalidatePath('/control-room/shift-compilation');
   return { success: true };
 }

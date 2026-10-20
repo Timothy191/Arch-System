@@ -30,8 +30,28 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
     });
   }
 
+  // Resolve machine_id from machines table for cross-department link to Control Room & Mining
+  let matchedMachineId: string | null = null;
+  try {
+    const query = supabase.from('machines').select('id');
+    if (typeof query?.or === 'function') {
+      const { data: matchedMachine } = await query
+        .or(
+          `name.eq."${input.fleet_id.toUpperCase()}",serial_number.eq."${input.fleet_id.toUpperCase()}"`
+        )
+        .limit(1)
+        .maybeSingle();
+      if (matchedMachine?.id) {
+        matchedMachineId = matchedMachine.id;
+      }
+    }
+  } catch {
+    // Fallback machine link handled by trigger trg_resolve_breakdown_machine_id
+  }
+
   const { error } = await supabase.from('breakdowns').insert({
     department_id: departmentId,
+    machine_id: matchedMachineId,
     fleet_id: input.fleet_id.toUpperCase(),
     machine_name: input.machine_name || input.fleet_id.toUpperCase(),
     machine_type: input.machine_type,
@@ -68,7 +88,7 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
     notifySms: true,
   });
 
-  await cacheInvalidateTags(['table:breakdowns']);
+  await cacheInvalidateTags(['table:breakdowns', 'table:machines']);
   await triggerPluginHook('onBreakdownAdded', {
     department_id: departmentId,
     fleet_id: input.fleet_id.toUpperCase(),
@@ -81,6 +101,9 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
   });
   revalidatePath('/engineering/breakdowns');
   revalidatePath('/control-room/engineering-notes');
+  revalidatePath('/control-room/machine-operations');
+  revalidatePath('/control-room/excavator-activity');
+  revalidatePath('/control-room/shift-compilation');
   return { success: true };
 }
 

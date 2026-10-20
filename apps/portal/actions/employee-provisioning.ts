@@ -246,10 +246,48 @@ export async function provisionNewEmployee(
     console.error('Personnel created but badge registration failed:', badgeError);
   }
 
+  // 3. Synchronize with operators table so personnel is selectable in Control Room, Drilling, Production
+  const fullName = `${input.first_name} ${input.surname}`.trim();
+  if (empCode && fullName) {
+    const { data: existingOp } = await supabase
+      .from('operators')
+      .select('id')
+      .eq('employee_code', empCode)
+      .maybeSingle();
+
+    if (existingOp?.id) {
+      await supabase
+        .from('operators')
+        .update({
+          full_name: fullName,
+          role: input.job_title || 'operator',
+          active: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingOp.id);
+    } else {
+      await supabase.from('operators').insert({
+        full_name: fullName,
+        employee_code: empCode,
+        role: input.job_title || 'operator',
+        active: true,
+      });
+    }
+  }
+
+  await cacheInvalidateTags([
+    'table:personnel',
+    'table:badges',
+    'table:operators',
+    'table:employees',
+  ]);
+
   // Revalidate respective consumer routes
   revalidatePath('/access-control/badges');
   revalidatePath('/access-control/card-actions');
   revalidatePath('/access-control/qr-codes');
+  revalidatePath('/control-room/machine-operations');
+  revalidatePath('/control-room/shift-compilation');
   revalidatePath('/database/panels');
 
   return {

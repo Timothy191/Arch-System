@@ -58,12 +58,10 @@ export default async function ReportsPage({
       )
       .gte('load_date', fromDateStr)
       .lte('load_date', toDateStr),
-    supabase
-      .from('operational_delays')
-      .select('delay_date, shift_type, delay_minutes')
-      .eq('department_id', deptId)
-      .gte('delay_date', fromDateStr)
-      .lte('delay_date', toDateStr),
+    // operational_delays table is deprecated; delay_entries are fetched via machine_operations
+    Promise.resolve({
+      data: [] as Array<{ delay_date: string; shift_type: string; delay_minutes: number }>,
+    }),
     supabase
       .from('excavator_dumper_assignments')
       .select(

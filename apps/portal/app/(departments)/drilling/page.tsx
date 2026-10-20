@@ -16,11 +16,8 @@ async function getDrillingDashboardData(deptId: string, today: string) {
       .select('machine_id, shift_type, total_hours, holes, meters_drilled, status')
       .eq('department_id', deptId)
       .eq('operation_date', today),
-    db
-      .from('operational_delays')
-      .select('delay_minutes, status')
-      .eq('department_id', deptId)
-      .eq('delay_date', today),
+    // operational_delays table is deprecated; delays are tracked via machine_operations delay_entries
+    Promise.resolve({ data: [] as Array<{ delay_minutes: number; status: string }> }),
   ]);
 
   const drillIds = (drills ?? []).map((d) => d.id);

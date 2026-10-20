@@ -90,7 +90,7 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
       const { data: invalidOps, error: invalidOpsError } = await serviceRole
         .from('machine_operations')
         .select('id, operator_id, operation_date')
-        .not('operator_id', 'in', serviceRole.from('employees').select('id'));
+        .not('operator_id', 'in', serviceRole.from('operators').select('id'));
 
       if (invalidOpsError) throw invalidOpsError;
 

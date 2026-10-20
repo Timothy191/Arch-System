@@ -60,10 +60,10 @@ export async function fetchLiveDepartmentMetrics(
           .is('deleted_at', null),
 
         // 4. Engineering Machines
-        db.from('machines').select('id, name, status').is('deleted_at', null),
+        db.from('machines').select('id, name, active').is('deleted_at', null),
 
         // 5. Access Control active badges on-site
-        db.from('badges').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        db.from('badges').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
     // --- Control Room Overlay ---

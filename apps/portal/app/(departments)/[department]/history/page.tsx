@@ -57,7 +57,9 @@ export default async function HistoryPage({
           .order('shift_date', { ascending: false }),
         supabase
           .from('machine_operations')
-          .select('shift_date, shift_type, hours_worked')
+          .select(
+            'shift_date, shift_type, hours_worked, delay_entries:delay_entries(duration_hours, deleted_at)'
+          )
           .eq('department_id', deptId)
           .gte('shift_date', from)
           .lte('shift_date', to),
@@ -67,33 +69,34 @@ export default async function HistoryPage({
           .eq('department_id', deptId)
           .gte('load_date', from)
           .lte('load_date', to),
-        supabase
-          .from('operational_delays')
-          .select('delay_date, shift_type, delay_minutes')
-          .eq('department_id', deptId)
-          .gte('delay_date', from)
-          .lte('delay_date', to),
+        // operational_delays is deprecated in favor of delay_entries on machine_operations
+        Promise.resolve({ data: [] }),
       ]);
 
     type ShiftKey = string;
     const keyOf = (date: string, shift: string): ShiftKey => `${date}|${shift}`;
 
     const hoursMap = new Map<ShiftKey, number>();
+    const delayMap = new Map<ShiftKey, number>();
     operations?.forEach((o) => {
       const k = keyOf(o.shift_date, o.shift_type);
       hoursMap.set(k, (hoursMap.get(k) || 0) + (o.hours_worked || 0));
+      const delays =
+        (
+          o as unknown as {
+            delay_entries?: Array<{ duration_hours: number | null; deleted_at: string | null }>;
+          }
+        ).delay_entries || [];
+      const delayMin = delays
+        .filter((d) => !d.deleted_at)
+        .reduce((sum, d) => sum + (Number(d.duration_hours) || 0) * 60, 0);
+      delayMap.set(k, (delayMap.get(k) || 0) + delayMin);
     });
 
     const loadsMap = new Map<ShiftKey, number>();
     loads?.forEach((l) => {
       const k = keyOf(l.load_date, l.shift_type);
       loadsMap.set(k, (loadsMap.get(k) || 0) + (l.total_loads || 0));
-    });
-
-    const delayMap = new Map<ShiftKey, number>();
-    delays?.forEach((d) => {
-      const k = keyOf(d.delay_date, d.shift_type);
-      delayMap.set(k, (delayMap.get(k) || 0) + (d.delay_minutes || 0));
     });
 
     return (
