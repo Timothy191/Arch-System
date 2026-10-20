@@ -19,10 +19,10 @@ export default function HubLoading() {
           </div>
           <div className="mt-5 flex items-center justify-center px-1">
             <div className="flex items-center gap-2">
-              <SkeletonBlock className="h-3 w-3.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none bg-[var(--accent-blue)]" />
-              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
-              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
-              <SkeletonBlock className="h-2 w-2.5 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] rounded-none" />
+              <SkeletonBlock className="h-3.5 w-3.5 rounded-sm bg-[var(--accent-blue)] opacity-80" />
+              <SkeletonBlock className="h-2.5 w-2.5 rounded-sm opacity-40" />
+              <SkeletonBlock className="h-2.5 w-2.5 rounded-sm opacity-40" />
+              <SkeletonBlock className="h-2.5 w-2.5 rounded-sm opacity-40" />
             </div>
           </div>
         </div>
