@@ -148,9 +148,7 @@ function RouteBackgroundInner() {
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
-              willChange: 'transform, opacity',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
+              willChange: 'opacity',
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
@@ -162,8 +160,7 @@ function RouteBackgroundInner() {
             disablePictureInPicture
             preload="auto"
           >
-            <source src={mp4Src} type="video/mp4" />
-            <source src={webmSrc} type="video/webm" />
+            {/* 1. Prioritize ultra-efficient AV1 (instant stream, ~2.0MB) */}
             <source
               src={
                 isMobileViewport
@@ -172,6 +169,10 @@ function RouteBackgroundInner() {
               }
               type="video/webm; codecs=av01.0.05M.08"
             />
+            {/* 2. High-performance VP9 hardware-accelerated stream (~3.4MB) */}
+            <source src={webmSrc} type="video/webm; codecs=vp09.00.41.08" />
+            {/* 3. Universal H.264 MP4 fallback for Safari/iOS */}
+            <source src={mp4Src} type="video/mp4" />
           </video>
         </div>
       )}

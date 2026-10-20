@@ -1017,19 +1017,16 @@
   background-color: transparent;
 }
 
-/* Video element — fills the container and maintains aspect ratio with object-fit */
+/* Video element — fills the container and maintains aspect ratio with object-fit.
+   Pristine native rendering: no -webkit-optimize-contrast (which forces jagged pixelation)
+   and no per-frame CSS filter shaders (which block zero-copy hardware video overlays). */
 .route-bg-video,
 .route-bg-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-  image-rendering: high-quality;
-  image-rendering: -webkit-optimize-contrast;
   opacity: 1;
-  filter: contrast(1.06) brightness(1.03);
 }
 
 @media (width <= 768px) {
