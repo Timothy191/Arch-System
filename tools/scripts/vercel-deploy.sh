@@ -37,12 +37,12 @@ node tools/scripts/vercel-preflight.cjs --env="${MODE}"
 # Step 2: Check project linkage
 if [ ! -f ".vercel/project.json" ]; then
   echo "⚠️  No .vercel/project.json found. Linking project..."
-  pnpm dlx vercel link --yes
+  vercel link --yes
 fi
 
 # Step 3: Trigger deployment
 echo "🚀 Step 2: Triggering Vercel deployment (${DEPLOY_FLAGS})..."
-pnpm dlx vercel deploy ${DEPLOY_FLAGS}
+vercel deploy ${DEPLOY_FLAGS}
 
 echo "========================================================"
 echo "✅ [VERCEL DEPLOY] Deployment initiated successfully."
