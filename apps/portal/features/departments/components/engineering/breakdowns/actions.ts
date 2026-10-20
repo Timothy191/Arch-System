@@ -49,6 +49,11 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
     // Fallback machine link handled by trigger trg_resolve_breakdown_machine_id
   }
 
+  const formattedReason =
+    input.delay_hours && input.delay_hours > 0 && !input.reason.includes('[Shift Delay:')
+      ? `[Shift Delay: ${Number(input.delay_hours).toFixed(1)}h] ${input.reason}`
+      : input.reason;
+
   const { error } = await supabase.from('breakdowns').insert({
     department_id: departmentId,
     machine_id: matchedMachineId,
@@ -57,7 +62,9 @@ export async function createBreakdown(departmentId: string, rawInput: CreateBrea
     machine_type: input.machine_type,
     date_in: input.date_in,
     time_in: input.time_in,
-    reason: input.reason,
+    reason: formattedReason,
+    ...(input.delay_hours !== undefined ? { delay_hours: input.delay_hours } : {}),
+    ...(input.shift_type ? { shift_type: input.shift_type } : {}),
     status: 'active',
     missing_book_in: false,
     created_by: user.id,

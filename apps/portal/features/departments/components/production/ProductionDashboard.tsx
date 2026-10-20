@@ -1,126 +1,92 @@
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { PageHeader } from '@repo/ui/PageHeader';
-import { classifyReconciliationDrift, RECONCILIATION_UI } from '~/lib/production-reconciliation';
+import { Target } from 'lucide-react';
+import Link from 'next/link';
+import { getProductionDepartmentData } from './actions';
+import { ProductionCommandCenterClient } from './ProductionCommandCenterClient';
 
-export async function ProductionDashboard({ deptId }: { deptId: string }) {
-  const supabase = await createServerSupabaseClient();
+export async function ProductionDashboard({ deptId, month }: { deptId: string; month?: string }) {
+  const initialData = await getProductionDepartmentData(month, deptId);
 
-  // Get today's start and end boundaries
-  const today = new Date().toISOString().split('T')[0]!;
+  return <ProductionCommandCenterClient initialData={initialData} deptId={deptId} />;
+}
 
-  // Fetch from the materialized view using the RPC function
-  const { data: productionData } = await supabase.rpc('get_production_summary', {
-    p_start_date: today,
-    p_end_date: today,
-  });
-
-  // Aggregate today's shifts
-  let actualCoal = 0;
-  let actualWaste = 0;
-  let totalBcm = 0;
-  let expectedTotalTonnes = 0;
-
-  if (productionData && productionData.length > 0) {
-    for (const shift of productionData) {
-      if (shift.department_id === deptId) {
-        actualCoal += shift.actual_coal_tonnes || 0;
-        actualWaste += shift.actual_waste_tonnes || 0;
-        totalBcm += shift.total_bcm || 0;
-        expectedTotalTonnes += shift.expected_total_tonnes || 0;
-      }
-    }
-  }
-
-  const actualTotalTonnes = actualCoal + actualWaste;
-
-  // Strip Ratio: Waste / Coal
-  const stripRatio = actualCoal > 0 ? (actualWaste / actualCoal).toFixed(2) : '0.00';
-
-  // Calculate Drift Pct globally for today's aggregated shifts
-  const driftPct =
-    expectedTotalTonnes > 0
-      ? ((actualTotalTonnes - expectedTotalTonnes) / expectedTotalTonnes) * 100
-      : 0;
-
-  const driftLevel = classifyReconciliationDrift(driftPct);
-  const driftUI = RECONCILIATION_UI[driftLevel];
+/**
+ * Shared cross-department Monthly Production Target Banner so Control Room, Drilling,
+ * and other departments automatically pull the monthly Coal & Waste targets set in Production.
+ */
+export async function MonthlyProductionTargetBanner() {
+  const data = await getProductionDepartmentData();
+  const { target, totals, monthLabel } = data;
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Production Dashboard" />
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <GlassCard>
-          <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
-            Actual Coal (t)
-          </p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-            {actualCoal.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-          </p>
-        </GlassCard>
-
-        <GlassCard>
-          <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
-            Actual Waste (t)
-          </p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-            {actualWaste.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-          </p>
-        </GlassCard>
-
-        <GlassCard>
-          <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
-            Strip Ratio (W:C)
-          </p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">{stripRatio}:1</p>
-        </GlassCard>
-
-        <GlassCard>
-          <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
-            Total Extraction (BCM)
-          </p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
-            {totalBcm.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-          </p>
-        </GlassCard>
-      </div>
-
-      {/* Reconciliation Drift Alert */}
-      <GlassCard
-        className={`border-l-4 ${driftLevel === 'critical' ? 'border-accent-red' : driftLevel === 'moderate' ? 'border-accent-orange' : driftLevel === 'minor' ? 'border-accent-amber' : 'border-accent-green'}`}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-heading)]">
-              Reconciliation Drift
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] mt-1">{driftUI.description}</p>
+    <GlassCard className="p-4 border border-[var(--border-subtle)]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-500/25">
+            <Target className="w-5 h-5" />
           </div>
-          <div className="text-right">
-            <span
-              className={`text-xl font-bold ${driftLevel === 'critical' ? 'text-accent-red' : driftLevel === 'moderate' ? 'text-accent-orange' : driftLevel === 'minor' ? 'text-accent-amber' : 'text-accent-green'}`}
-            >
-              {driftPct > 0 ? '+' : ''}
-              {driftPct.toFixed(2)}%
-            </span>
-            <p className="text-xs text-[var(--text-secondary)] mt-1 uppercase tracking-wider">
-              {driftUI.label}
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold text-[var(--text-heading)]">
+                Monthly Production Targets — {monthLabel}
+              </h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                Pulled from /production
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              Live MTD progress against monthly ROM Coal and Overburden Waste targets
             </p>
           </div>
         </div>
-      </GlassCard>
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
-        <a
-          href={`/production/daily-log`}
-          className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
-        >
-          + Log Production Shift
-        </a>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1 max-w-3xl">
+          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+            <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+              Coal Target ({totals.coalTargetProgressPct}%)
+            </div>
+            <div className="text-sm font-bold font-mono text-emerald-700 mt-0.5">
+              {totals.coalTonnes.toLocaleString()} / {target.coal_target_tonnes.toLocaleString()} t
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+            <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+              Waste Target ({totals.wasteTargetProgressPct}%)
+            </div>
+            <div className="text-sm font-bold font-mono text-blue-700 mt-0.5">
+              {totals.wasteTonnes.toLocaleString()} / {target.waste_target_tonnes.toLocaleString()}{' '}
+              t
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+            <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+              Bank Volume ({totals.bcmTargetProgressPct}%)
+            </div>
+            <div className="text-sm font-bold font-mono text-[var(--text-heading)] mt-0.5">
+              {totals.totalBcm.toLocaleString()} / {target.bcm_target.toLocaleString()} BCM
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex flex-col justify-between">
+            <div className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+              Strip Ratio (W:C)
+            </div>
+            <div className="flex items-center justify-between mt-0.5">
+              <span className="text-sm font-bold font-mono text-[var(--text-heading)]">
+                {totals.stripRatio.toFixed(2)}:1
+              </span>
+              <Link
+                href="/production"
+                className="text-[10px] font-semibold text-[var(--accent-blue)] hover:underline"
+              >
+                Adjust →
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }

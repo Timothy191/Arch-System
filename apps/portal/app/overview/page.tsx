@@ -6,13 +6,16 @@ import {
   BookOpen,
   Bot,
   Building2,
+  Clock,
   Database,
+  GitCommit,
   Layers,
   Network,
   Server,
   ShieldCheck,
 } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
+import { GIT_PROVENANCE_METRICS } from './lib/data';
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import('./sections/SystemArchitecture'));
@@ -37,11 +40,12 @@ function SectionLoader() {
 
 export default function OverviewPage() {
   const [activeTab, setActiveTab] = useState('architecture');
+  const timeWorked = GIT_PROVENANCE_METRICS.calculateTimeWorked();
 
   return (
     <div className="space-y-6 animate-fade-up max-w-[1600px] mx-auto pb-12">
       {/* Header with Official Arch Systems Branding */}
-      <header className="rounded-xl border border-[var(--border-subtle)] bg-white/70 backdrop-blur-xl p-5 shadow-card">
+      <header className="rounded-xl border border-[var(--border-subtle)] bg-white/70 backdrop-blur-xl p-5 shadow-card space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo className="w-9 h-9 text-[var(--accent-blue)]" />
@@ -53,24 +57,48 @@ export default function OverviewPage() {
                 </span>
               </h1>
               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                Opencast Coal Mine Operations Portal — Interactive React Flow Topology & Audit
-                Intelligence
+                Opencast Coal Mine Operations Portal — Interactive Block-and-Line Flow Diagrams &
+                Audit Intelligence
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
             <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
               Next.js 16
             </span>
             <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              Supabase RLS
+              Supabase RLS ({GIT_PROVENANCE_METRICS.totalMigrations} Migrations)
             </span>
             <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
               Redis Cluster
             </span>
             <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              8 Specialist Agents
+              {GIT_PROVENANCE_METRICS.activeConnectorCount} Connectors
             </span>
+          </div>
+        </div>
+
+        {/* GitHub First Commit & Engineering Time Worked Strip */}
+        <div
+          data-testid="github-provenance-strip"
+          className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs"
+        >
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono font-semibold">
+              <Clock className="w-3.5 h-3.5 text-emerald-600" />
+              Time Worked Since First GitHub Commit: {timeWorked.formattedActiveWork} ·{' '}
+              {timeWorked.formattedSpan}
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-mono">
+              <GitCommit className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              First Commit: #{GIT_PROVENANCE_METRICS.firstCommitShortHash} (
+              {GIT_PROVENANCE_METRICS.firstCommitDateFormatted})
+            </span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[11px] text-[var(--text-muted)]">
+            <span>{GIT_PROVENANCE_METRICS.totalCommits}+ Commits on main</span>
+            <span>·</span>
+            <span>{GIT_PROVENANCE_METRICS.totalMigrations} SQL Migrations</span>
           </div>
         </div>
       </header>

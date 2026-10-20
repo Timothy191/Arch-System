@@ -71,12 +71,15 @@ export const createBreakdownSchema = z.object({
   date_in: z.string().min(1, 'Date in is required'),
   time_in: z.string().min(1, 'Time in is required'),
   reason: z.string().min(1, 'Reason is required'),
+  delay_hours: z.number().min(0).max(12, 'Shift delay cannot exceed 12 hours').optional(),
+  shift_type: z.enum(['day', 'night']).optional(),
 });
 
 export const bookOutSchema = z.object({
   date_out: z.string().min(1, 'Date out is required'),
   time_out: z.string().min(1, 'Time out is required'),
   repair_notes: z.string().optional(),
+  delay_hours: z.number().min(0).max(12, 'Shift delay cannot exceed 12 hours').optional(),
 });
 
 export const directCheckoutSchema = z.object({
@@ -86,6 +89,8 @@ export const directCheckoutSchema = z.object({
   time_out: z.string().min(1, 'Time out is required'),
   reason: z.string().min(1, 'Reason is required'),
   repair_notes: z.string().optional(),
+  delay_hours: z.number().min(0).max(12, 'Shift delay cannot exceed 12 hours').optional(),
+  shift_type: z.enum(['day', 'night']).optional(),
 });
 
 export const monthlyReportInputSchema = z.object({

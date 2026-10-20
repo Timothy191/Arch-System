@@ -23,6 +23,7 @@ export interface EmployeeCardProfile {
   surname: string;
   id_number: string;
   job_title: string | null;
+  area?: string | null;
   department_id: string | null;
   department_name?: string;
   induction_expiry: string | null;
@@ -32,6 +33,29 @@ export interface EmployeeCardProfile {
   rfid_code: string | null;
   has_card: boolean;
   photo_url?: string | null;
+}
+
+export interface CardStudioDepartment {
+  id: string;
+  name: string;
+  display_name: string;
+}
+
+export interface UpsertEmployeeCardInput {
+  id?: string;
+  emp_code: string;
+  first_name: string;
+  surname: string;
+  id_number: string;
+  job_title: string;
+  department_id: string | null;
+  area?: string | null;
+  status?: string;
+  induction_expiry?: string | null;
+  medical_expiry?: string | null;
+  photo_url?: string | null;
+  rfid_code?: string | null;
+  qr_code?: string | null;
 }
 
 export interface CardPrintJob {
@@ -50,7 +74,7 @@ async function assertAccessControlRole() {
   const principal = await getAuthenticatedEmployee(supabase);
   if (!principal?.employee) throw new AuthError('Unauthorized');
 
-  if (!['admin', 'access_control'].includes(principal.employee.role)) {
+  if (!['admin', 'access_control', 'supervisor'].includes(principal.employee.role)) {
     throw new ForbiddenError('Forbidden: access_control or admin role required', {
       resource: 'neo300_print',
       action: 'assert_role',
@@ -58,6 +82,23 @@ async function assertAccessControlRole() {
   }
 
   return { supabase, user: principal.user, employee: principal.employee };
+}
+
+/**
+ * Retrieve departments list for employee card assignment
+ */
+export async function getDepartmentsForCardStudio(): Promise<CardStudioDepartment[]> {
+  const { supabase } = await assertAccessControlRole();
+  const { data } = await supabase
+    .from('departments')
+    .select('id, name, display_name')
+    .order('display_name', { ascending: true });
+
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    display_name: d.display_name || d.name,
+  }));
 }
 
 /**
@@ -132,10 +173,12 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       surname,
       id_number,
       job_title,
+      area,
       department_id,
       induction_expiry,
       medical_expiry,
       status,
+      photo_path,
       departments:department_id(display_name)
     `
     )
@@ -181,6 +224,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
   return personnelList.map((p) => {
     const badge = badgeMap.get(p.id);
     const deptRecord = p.departments as unknown as { display_name: string } | null;
+    const rawPhotoPath = (p as Record<string, unknown>).photo_path as string | null | undefined;
     return {
       id: p.id,
       emp_code: p.emp_code,
@@ -188,6 +232,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       surname: p.surname,
       id_number: p.id_number,
       job_title: p.job_title,
+      area: (p as Record<string, unknown>).area as string | null | undefined,
       department_id: p.department_id,
       department_name: deptRecord?.display_name ?? 'General Operations',
       induction_expiry: p.induction_expiry,
@@ -196,8 +241,152 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       qr_code: badge?.qr_code ?? null,
       rfid_code: badge?.rfid_code ?? null,
       has_card: !!badge,
+      photo_url: rawPhotoPath ?? null,
     };
   });
+}
+
+/**
+ * Create or update an employee in `personnel`, issue/update their active `badges` row
+ * (QR + RFID), and sync them into `operators` so they are available across all departments.
+ */
+export async function upsertEmployeeForCardPrinting(
+  input: UpsertEmployeeCardInput
+): Promise<EmployeeCardProfile> {
+  const { supabase, employee } = await assertAccessControlRole();
+
+  const empCode = input.emp_code.trim().toUpperCase();
+  const firstName = input.first_name.trim();
+  const surname = input.surname.trim();
+  const idNumber = input.id_number.trim();
+  const jobTitle = input.job_title.trim() || 'Site Operator';
+  const targetDeptId = input.department_id || employee.department_id || null;
+
+  if (!empCode || !firstName || !surname || !idNumber) {
+    throw new DatabaseError('Employee Code, First Name, Surname, and ID Number are required', {
+      table: 'personnel',
+    });
+  }
+
+  let personnelId = input.id;
+
+  const personnelPayload: Record<string, unknown> = {
+    emp_code: empCode,
+    first_name: firstName,
+    surname,
+    id_number: idNumber,
+    job_title: jobTitle,
+    department_id: targetDeptId,
+    area: input.area?.trim() || 'Main Complex',
+    status: input.status || 'Active',
+    induction_expiry: input.induction_expiry || null,
+    medical_expiry: input.medical_expiry || null,
+    photo_path: input.photo_url || null,
+  };
+
+  if (personnelId) {
+    const { error: updateErr } = await supabase
+      .from('personnel')
+      .update(personnelPayload)
+      .eq('id', personnelId);
+
+    if (updateErr) {
+      throw new DatabaseError('Failed to update employee profile for card printing', {
+        table: 'personnel',
+        cause: updateErr,
+      });
+    }
+  } else {
+    const { data: inserted, error: insertErr } = await supabase
+      .from('personnel')
+      .insert(personnelPayload)
+      .select('id')
+      .single();
+
+    if (insertErr || !inserted) {
+      throw new DatabaseError('Failed to create employee in database', {
+        table: 'personnel',
+        cause: insertErr,
+      });
+    }
+    personnelId = inserted.id;
+  }
+
+  // Ensure active badge (QR + RFID) is provisioned for the card
+  const desiredQr = input.qr_code?.trim() || `EMP-${empCode}`;
+  const desiredRfid = input.rfid_code?.trim() || null;
+
+  const { data: existingBadge } = await supabase
+    .from('badges')
+    .select('id, qr_code, rfid_code')
+    .eq('personnel_id', personnelId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (existingBadge) {
+    await supabase
+      .from('badges')
+      .update({
+        qr_code: desiredQr,
+        rfid_code: desiredRfid,
+        department_id: targetDeptId,
+      })
+      .eq('id', existingBadge.id);
+  } else {
+    await supabase.from('badges').insert({
+      qr_code: desiredQr,
+      rfid_code: desiredRfid,
+      entity_type: 'personnel',
+      personnel_id: personnelId,
+      department_id: targetDeptId,
+      is_active: true,
+    });
+  }
+
+  // Also sync directly to operators table so Control Room, Drilling & Production see this employee immediately
+  try {
+    await supabase.from('operators').upsert(
+      {
+        full_name: `${firstName} ${surname}`,
+        employee_code: empCode,
+        role: jobTitle,
+        active: (input.status || 'Active').toLowerCase() === 'active',
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'employee_code' }
+    );
+  } catch {
+    // Handled by DB trigger trg_sync_personnel_to_operators when migration 189 is active
+  }
+
+  revalidatePath('/access-control/print-cards');
+  revalidatePath('/access-control/card-actions');
+  revalidatePath('/access-control/badges');
+  revalidatePath('/access-control/muster');
+  revalidatePath('/control-room/machine-operations');
+
+  const updatedList = await getEmployeeCardProfiles(empCode);
+  const found = updatedList.find((p) => p.id === personnelId) ?? updatedList[0];
+  if (found) return found;
+
+  return {
+    id: personnelId!,
+    emp_code: empCode,
+    first_name: firstName,
+    surname,
+    id_number: idNumber,
+    job_title: jobTitle,
+    area: input.area?.trim() || 'Main Complex',
+    department_id: targetDeptId,
+    department_name: 'Assigned Department',
+    induction_expiry: input.induction_expiry || null,
+    medical_expiry: input.medical_expiry || null,
+    status: input.status || 'Active',
+    qr_code: desiredQr,
+    rfid_code: desiredRfid,
+    has_card: true,
+    photo_url: input.photo_url || null,
+  };
 }
 
 /**

@@ -10,6 +10,8 @@ export interface Breakdown {
   time_out: string | null;
   reason: string;
   repair_notes: string | null;
+  delay_hours?: number | null;
+  shift_type?: 'day' | 'night' | null;
   status: 'active' | 'completed';
   missing_book_in: boolean;
   created_by: string | null;
@@ -26,12 +28,15 @@ export interface CreateBreakdownInput {
   date_in: string;
   time_in: string;
   reason: string;
+  delay_hours?: number;
+  shift_type?: 'day' | 'night';
 }
 
 export interface BookOutInput {
   date_out: string;
   time_out: string;
   repair_notes?: string;
+  delay_hours?: number;
 }
 
 export interface DirectCheckoutInput {
@@ -41,6 +46,8 @@ export interface DirectCheckoutInput {
   repair_notes?: string;
   date_out: string;
   time_out: string;
+  delay_hours?: number;
+  shift_type?: 'day' | 'night';
 }
 
 export interface Machine {

@@ -47,6 +47,8 @@ interface DelayEntriesFormProps {
   onDelayChange?: (_delays: DelayEntry[]) => void;
   existingDelays?: DelayEntry[];
   readOnly?: boolean;
+  engineeringDelayHours?: number;
+  engineeringDelayReasons?: string[];
 }
 
 export function DelayEntriesForm({
@@ -55,6 +57,8 @@ export function DelayEntriesForm({
   onDelayChange,
   existingDelays: _existingDelays = [],
   readOnly = false,
+  engineeringDelayHours = 0,
+  engineeringDelayReasons = [],
 }: DelayEntriesFormProps) {
   const supabase = createBrowserSupabaseClient();
 
@@ -175,13 +179,17 @@ export function DelayEntriesForm({
         return sum + d;
       }, 0);
 
-      if (totalDuration + duration > 12) {
+      const maxRemainingHours = Math.max(0, Number((12 - engineeringDelayHours).toFixed(2)));
+      if (engineeringDelayHours + totalDuration + duration > 12) {
+        if (engineeringDelayHours > 0) {
+          return `Total delay hours cannot exceed 12h shift limit (Engineering logged ${engineeringDelayHours.toFixed(2)}h; Control Room remaining cap is ${maxRemainingHours.toFixed(2)}h). Current CR: ${totalDuration.toFixed(2)}h, This entry: ${duration.toFixed(2)}h`;
+        }
         return `Total delay hours cannot exceed 12 hours. Current: ${totalDuration.toFixed(2)}h, This entry: ${duration.toFixed(2)}h`;
       }
 
       return null;
     },
-    [delayEntries, calculateDuration]
+    [delayEntries, calculateDuration, engineeringDelayHours]
   );
 
   // Add new empty delay entry
@@ -462,11 +470,17 @@ export function DelayEntriesForm({
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-[var(--text-muted)] text-xs">Total Delay Hours</p>
+              <p className="text-[var(--text-muted)] text-xs">Total Delay Hours (12h Shift)</p>
               <p className="text-2xl font-medium text-accent-red">
-                {totalDelayHours.toFixed(2)}h
+                {(totalDelayHours + engineeringDelayHours).toFixed(2)}h
                 <span className="text-xs text-[var(--text-muted)] ml-1">/ 12h max</span>
               </p>
+              {engineeringDelayHours > 0 && (
+                <p className="text-[11px] text-amber-700 font-mono">
+                  Eng: {engineeringDelayHours.toFixed(1)}h + CR: {totalDelayHours.toFixed(1)}h (Max
+                  CR: {Math.max(0, 12 - engineeringDelayHours).toFixed(1)}h)
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -488,6 +502,23 @@ export function DelayEntriesForm({
             )}
           </div>
         </div>
+
+        {engineeringDelayHours > 0 && (
+          <div className="p-3 rounded-lg bg-amber-50/90 border border-amber-300/70 text-xs text-amber-900 space-y-1">
+            <div className="flex items-center justify-between font-semibold">
+              <span>
+                Engineering Breakdown Delay Synced ({engineeringDelayHours.toFixed(1)}h logged)
+              </span>
+              <span className="font-mono">
+                Remaining Control Room Shift Cap:{' '}
+                {Math.max(0, 12 - engineeringDelayHours).toFixed(1)}h
+              </span>
+            </div>
+            {engineeringDelayReasons.length > 0 && (
+              <p className="text-[11px] text-amber-800">{engineeringDelayReasons.join(' | ')}</p>
+            )}
+          </div>
+        )}
 
         {/* Help Section */}
         {showHelp && (

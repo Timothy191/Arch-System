@@ -11,8 +11,10 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
+  Clock,
   Cpu,
   Database,
+  GitCommit,
   Layers,
   Lock,
   Network,
@@ -21,7 +23,13 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
-import { BACKEND_SERVICES, DATABASE_SCHEMA, DEPARTMENTS } from '../lib/data';
+import {
+  BACKEND_SERVICES,
+  DATABASE_SCHEMA,
+  DEPARTMENTS,
+  EXAMPLE_BACKEND_FLOW_PIPELINES,
+  GIT_PROVENANCE_METRICS,
+} from '../lib/data';
 
 const ARCHITECTURAL_PILLARS = [
   {
@@ -36,7 +44,7 @@ const ARCHITECTURAL_PILLARS = [
   },
   {
     title: 'Zero-Trust Supabase PostgreSQL 17',
-    subtitle: '186 Versioned Migrations',
+    subtitle: '189 Versioned Migrations',
     badge: '100% RLS InitPlan',
     description:
       'Every table enforces Row Level Security with cached (select auth.uid()) InitPlan policies, atomic PL/pgSQL RPCs, and read-replica routing.',
@@ -68,6 +76,7 @@ const ARCHITECTURAL_PILLARS = [
 
 export default function SystemArchitecture() {
   const totalRoutes = DEPARTMENTS.reduce((sum, d) => sum + d.routes.length, 0);
+  const timeWorked = GIT_PROVENANCE_METRICS.calculateTimeWorked();
 
   return (
     <div className="p-6 space-y-8">
@@ -84,7 +93,7 @@ export default function SystemArchitecture() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="px-3.5 py-2 rounded-lg bg-bg-secondary border border-border-subtle">
             <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
               Core Modules
@@ -101,13 +110,24 @@ export default function SystemArchitecture() {
             <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
               DB Migrations
             </div>
-            <div className="text-lg font-bold text-accent-green">186</div>
+            <div className="text-lg font-bold text-accent-green">
+              {GIT_PROVENANCE_METRICS.totalMigrations}
+            </div>
           </div>
           <div className="px-3.5 py-2 rounded-lg bg-bg-secondary border border-border-subtle">
             <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
               Backend Nodes
             </div>
             <div className="text-lg font-bold text-text-heading">{BACKEND_SERVICES.length}</div>
+          </div>
+          <div className="px-3.5 py-2 rounded-lg bg-emerald-50/90 border border-emerald-200 col-span-2 sm:col-span-1">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Time Worked
+            </div>
+            <div className="text-lg font-bold text-emerald-900">
+              {timeWorked.activeEngineeringHours}h ({timeWorked.calendarDays}d)
+            </div>
           </div>
         </div>
       </div>
@@ -252,8 +272,8 @@ export default function SystemArchitecture() {
                 PostgreSQL 17 + Redis + SCADA
               </div>
               <p className="text-xs text-text-secondary mt-2">
-                186 migrations, {DATABASE_SCHEMA.length} core tables, Hybrid L1/L2 Redis 7.4, FUXA
-                Modbus/OPC-UA, and C66 gate hardware.
+                {GIT_PROVENANCE_METRICS.totalMigrations} migrations, {DATABASE_SCHEMA.length} core
+                tables, Hybrid L1/L2 Redis 7.4, FUXA Modbus/OPC-UA, and C66 gate hardware.
               </p>
             </div>
             <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
@@ -261,6 +281,113 @@ export default function SystemArchitecture() {
               <Cpu className="w-3.5 h-3.5 text-accent-amber" />
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* Visual Block-and-Line Example Backend Flow Diagrams */}
+      <Card className="p-6" data-testid="visual-block-line-diagrams">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h3 className="text-base font-semibold text-text-heading flex items-center gap-2">
+              <GitCommit className="w-4 h-4 text-accent-blue" />
+              Visual Block-and-Line Architecture & Cross-Department Data Flows
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              End-to-end block-and-line illustrations showing how field telemetry, shift budgets,
+              and badge credentials flow across backend services
+            </p>
+          </div>
+          <Badge
+            variant="outline"
+            className="text-[10px] font-mono text-accent-blue border-accent-blue/30 bg-accent-blue/10"
+          >
+            3 Live Inter-Department Pipelines
+          </Badge>
+        </div>
+
+        <div className="space-y-6">
+          {EXAMPLE_BACKEND_FLOW_PIPELINES.map((pipeline) => (
+            <div
+              key={pipeline.id}
+              className="p-4 rounded-xl bg-bg-secondary/60 border border-border-subtle space-y-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-text-heading">{pipeline.title}</h4>
+                  <p className="text-xs text-text-secondary">{pipeline.subtitle}</p>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-mono w-fit">
+                  {pipeline.badge}
+                </Badge>
+              </div>
+
+              {/* Connected Blocks & Directional Lines */}
+              <div className="grid grid-cols-1 lg:grid-cols-9 gap-2 items-center">
+                {pipeline.nodes.map((node, idx) => (
+                  <div key={node.id} className="contents">
+                    {/* Block Node */}
+                    <div
+                      className="lg:col-span-1 p-3 rounded-xl bg-white border-2 shadow-sm flex flex-col justify-between min-h-[148px] relative"
+                      style={{ borderColor: `${node.color}55` }}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span
+                            className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
+                            style={{
+                              backgroundColor: `${node.color}18`,
+                              color: node.color,
+                            }}
+                          >
+                            {node.step}
+                          </span>
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: node.color }}
+                          />
+                        </div>
+                        <div className="text-xs font-semibold text-text-heading mt-1.5 leading-snug">
+                          {node.title}
+                        </div>
+                        <div className="text-[10px] font-mono text-text-muted mt-0.5">
+                          {node.role}
+                        </div>
+                        <p className="text-[11px] text-text-secondary mt-1.5 leading-relaxed">
+                          {node.detail}
+                        </p>
+                      </div>
+                      <div className="mt-2 pt-1.5 border-t border-border-subtle text-[9px] font-mono text-accent-blue truncate">
+                        {node.protocol}
+                      </div>
+                    </div>
+
+                    {/* Connecting Line + Arrow between blocks */}
+                    {idx < pipeline.nodes.length - 1 && (
+                      <div className="lg:col-span-1 flex lg:flex-col items-center justify-center py-1 lg:py-0">
+                        <div className="hidden lg:flex items-center w-full">
+                          <div
+                            className="h-0.5 flex-1"
+                            style={{
+                              background: `linear-gradient(90deg, ${node.color}, ${
+                                pipeline.nodes[idx + 1]?.color ?? node.color
+                              })`,
+                            }}
+                          />
+                          <ArrowRight
+                            className="w-4 h-4 -ml-1 shrink-0"
+                            style={{ color: pipeline.nodes[idx + 1]?.color ?? node.color }}
+                          />
+                        </div>
+                        <span className="text-[9px] font-mono text-text-muted px-1.5 py-0.5 rounded bg-bg-tertiary border border-border-subtle mt-1">
+                          {node.protocol}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
 

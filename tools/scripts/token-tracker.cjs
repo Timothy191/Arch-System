@@ -295,9 +295,9 @@ function collectGitAndRepoMetrics() {
   let fixCommits = 61;
   let featCommits = 86;
   let refactorCommits = 76;
-  let filesTouched = 5778;
-  let linesInserted = 528743;
-  let linesDeleted = 164960;
+  const filesTouched = 5778;
+  const linesInserted = 528743;
+  const linesDeleted = 164960;
 
   try {
     totalCommits =

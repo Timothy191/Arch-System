@@ -584,7 +584,9 @@ function main() {
   }
 
   if (!isLatestOnly) {
-    manifest = manifest.filter((entry) => entry.folderName !== folderName && entry.id !== folderName);
+    manifest = manifest.filter(
+      (entry) => entry.folderName !== folderName && entry.id !== folderName
+    );
 
     manifest.unshift({
       id: folderName,

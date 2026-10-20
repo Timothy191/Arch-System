@@ -4,7 +4,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
-import { ProductionDashboard } from '~/features/departments/components/production/ProductionDashboard';
+import {
+  MonthlyProductionTargetBanner,
+  ProductionDashboard,
+} from '~/features/departments/components/production/ProductionDashboard';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ControlRoomQuickNav } from '../control-room/components/ControlRoomQuickNav';
 import { ControlRoomSummaryGridClient } from './ControlRoomSummaryGridClient';
@@ -102,6 +105,13 @@ export default async function DepartmentDashboard({
               }
             >
               <ControlRoomSummaryGridClient deptId={deptId} today={today} />
+            </Suspense>
+
+            {/* Cross-Department Monthly Coal & Waste Target Pulled from Production */}
+            <Suspense
+              fallback={<div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+            >
+              <MonthlyProductionTargetBanner />
             </Suspense>
 
             {/* AGENT-TRACE: Quick Actions - UX improvements based on heuristics:

@@ -74,6 +74,7 @@ export interface MachineOperationsListProps {
   todayLoads?: HourlyLoadSummary[];
   activeBreakdowns?: Breakdown[];
   machines?: MachineItem[];
+  engineeringDelaysByMachine?: Record<string, { hours: number; reasons: string[]; status: string }>;
 }
 
 function formatTime(timeStr: string) {
@@ -87,6 +88,7 @@ function MachineOperationsList({
   todayLoads = [],
   activeBreakdowns = [],
   machines,
+  engineeringDelaysByMachine = {},
 }: MachineOperationsListProps) {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -524,6 +526,12 @@ function MachineOperationsList({
                         totalHours={totalHours}
                         loadsByMachine={loadsByMachine}
                         breakdownsByFleetId={breakdownsByFleetId}
+                        engineeringDelay={
+                          engineeringDelaysByMachine[machine.id] ||
+                          (machine.serial_number
+                            ? engineeringDelaysByMachine[machine.serial_number]
+                            : undefined)
+                        }
                       />
                     )
                   )}
@@ -545,6 +553,7 @@ function FleetMachineCard({
   totalHours,
   loadsByMachine,
   breakdownsByFleetId,
+  engineeringDelay,
 }: {
   machine: MachineItem;
   breakdown?: Breakdown;
@@ -553,6 +562,7 @@ function FleetMachineCard({
   totalHours: number;
   loadsByMachine: Map<string, number>;
   breakdownsByFleetId: Map<string, Breakdown>;
+  engineeringDelay?: { hours: number; reasons: string[]; status: string };
 }) {
   const [isExpanded, setIsExpanded] = useState(operations.length > 0);
 
@@ -651,16 +661,24 @@ function FleetMachineCard({
         {/* Breakdown Alert Banner */}
         {breakdown && breakdown.status === 'active' && (
           <div className="p-2.5 rounded-lg bg-accent-red/10 border border-accent-red/20 text-xs">
-            <div className="flex items-start gap-2">
-              <AlertCircle size={14} className="text-accent-red shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-accent-red">
-                  Engineering Breakdown: {breakdown.reason}
-                </p>
-                {breakdown.repair_notes && (
-                  <p className="text-[var(--text-secondary)] mt-0.5">{breakdown.repair_notes}</p>
-                )}
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div className="flex items-start gap-2">
+                <AlertCircle size={14} className="text-accent-red shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-accent-red">
+                    Engineering Breakdown: {breakdown.reason}
+                  </p>
+                  {breakdown.repair_notes && (
+                    <p className="text-[var(--text-secondary)] mt-0.5">{breakdown.repair_notes}</p>
+                  )}
+                </div>
               </div>
+              {engineeringDelay && engineeringDelay.hours > 0 && (
+                <span className="px-2 py-0.5 rounded-full font-mono text-[11px] bg-amber-100 text-amber-900 border border-amber-300 font-semibold">
+                  Eng Delay: {engineeringDelay.hours.toFixed(1)}h · Remaining Shift Cap:{' '}
+                  {Math.max(0, 12 - engineeringDelay.hours).toFixed(1)}h
+                </span>
+              )}
             </div>
           </div>
         )}

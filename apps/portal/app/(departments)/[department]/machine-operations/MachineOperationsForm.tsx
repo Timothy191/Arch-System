@@ -53,6 +53,12 @@ interface MachineOperation {
   holes_drilled?: number | null;
 }
 
+export interface EngineeringDelaySummary {
+  hours: number;
+  reasons: string[];
+  status: string;
+}
+
 interface MachineOperationsFormProps {
   departmentId: string;
   machines: Machine[];
@@ -60,6 +66,7 @@ interface MachineOperationsFormProps {
   sites: Site[];
   mineBlocks?: MineBlock[];
   todayOperations: MachineOperation[];
+  engineeringDelaysByMachine?: Record<string, EngineeringDelaySummary>;
 }
 
 // Auto-save key for localStorage
@@ -72,6 +79,7 @@ export function MachineOperationsForm({
   sites,
   mineBlocks = [],
   todayOperations,
+  engineeringDelaysByMachine = {},
 }: MachineOperationsFormProps) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
@@ -103,11 +111,37 @@ export function MachineOperationsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDelaySection, setShowDelaySection] = useState(false);
   const [lastOperationId, setLastOperationId] = useState<string | null>(null);
+  const [lastOperationMachineId, setLastOperationMachineId] = useState<string>('');
 
   const selectedMachine = useMemo(
     () => machines.find((m) => m.id === formData.machineId) ?? null,
     [machines, formData.machineId]
   );
+
+  const selectedMachineEngineeringDelay = useMemo(() => {
+    if (!selectedMachine) return null;
+    return (
+      engineeringDelaysByMachine[selectedMachine.id] ||
+      (selectedMachine.serial_number
+        ? engineeringDelaysByMachine[selectedMachine.serial_number]
+        : null) ||
+      null
+    );
+  }, [selectedMachine, engineeringDelaysByMachine]);
+
+  const lastOperationEngineeringDelay = useMemo(() => {
+    const targetMachineId = lastOperationMachineId || formData.machineId;
+    if (!targetMachineId) return null;
+    const machineObj = machines.find((m) => m.id === targetMachineId);
+    return (
+      engineeringDelaysByMachine[targetMachineId] ||
+      (machineObj?.serial_number ? engineeringDelaysByMachine[machineObj.serial_number] : null) ||
+      null
+    );
+  }, [lastOperationMachineId, formData.machineId, machines, engineeringDelaysByMachine]);
+
+  const engDelayHours = selectedMachineEngineeringDelay?.hours || 0;
+  const maxAllowedShiftHours = Math.max(0, Number((12 - engDelayHours).toFixed(2)));
 
   const isDrillRig =
     selectedMachine?.machine_type === 'Drill Rig' ||
@@ -210,7 +244,9 @@ export function MachineOperationsForm({
       }
     }
 
-    if (hoursWorked !== null && hoursWorked > 14) {
+    if (engDelayHours > 0 && hoursWorked !== null && hoursWorked > maxAllowedShiftHours) {
+      newErrors.endSmu = `Engineering logged ${engDelayHours.toFixed(1)}h breakdown delay on this 12h shift. Max remaining shift hours: ${maxAllowedShiftHours.toFixed(1)}h.`;
+    } else if (hoursWorked !== null && hoursWorked > 14) {
       newErrors.endSmu = 'Hours cannot exceed 14 per shift';
     }
 
@@ -302,9 +338,10 @@ export function MachineOperationsForm({
         } as never);
       }
 
-      // Store the operation ID for delay entries
+      // Store the operation ID and machine ID for delay entries
       if (data?.id) {
         setLastOperationId(data.id);
+        setLastOperationMachineId(formData.machineId);
         setShowDelaySection(true);
       }
 
@@ -455,6 +492,46 @@ export function MachineOperationsForm({
             {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}
           </div>
         </div>
+
+        {/* Engineering Cross-Department 12h Shift Budget Banner */}
+        {selectedMachine && engDelayHours > 0 && (
+          <div
+            data-testid="engineering-shift-budget-banner"
+            className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-300/70 space-y-2"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-700" />
+                <span className="text-xs font-semibold text-amber-900">
+                  Cross-Department 12-Hour Shift Budget ({selectedMachine.name})
+                </span>
+              </div>
+              <span className="text-xs font-mono font-semibold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
+                Engineering Logged: {engDelayHours.toFixed(1)}h / Remaining Budget:{' '}
+                {maxAllowedShiftHours.toFixed(1)}h
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-amber-200/70 overflow-hidden flex">
+              <div
+                className="h-full bg-red-500 transition-all"
+                style={{ width: `${Math.min(100, (engDelayHours / 12) * 100)}%` }}
+                title={`Engineering Breakdown Delay: ${engDelayHours.toFixed(1)}h`}
+              />
+              <div
+                className="h-full bg-emerald-500 transition-all"
+                style={{ width: `${Math.max(0, ((12 - engDelayHours) / 12) * 100)}%` }}
+                title={`Available Shift Budget: ${maxAllowedShiftHours.toFixed(1)}h`}
+              />
+            </div>
+            {selectedMachineEngineeringDelay?.reasons &&
+              selectedMachineEngineeringDelay.reasons.length > 0 && (
+                <p className="text-[11px] text-amber-800">
+                  <strong>Engineering Breakdown Reason:</strong>{' '}
+                  {selectedMachineEngineeringDelay.reasons.join(' | ')}
+                </p>
+              )}
+          </div>
+        )}
 
         {/* Drill Rig Specific Fields: Meters, Site, Block, Holes */}
         {isDrillRig && (
@@ -649,7 +726,12 @@ export function MachineOperationsForm({
 
           {showDelaySection && (
             <div className="mt-4">
-              <DelayEntriesForm machineOperationId={lastOperationId} departmentId={departmentId} />
+              <DelayEntriesForm
+                machineOperationId={lastOperationId}
+                departmentId={departmentId}
+                engineeringDelayHours={lastOperationEngineeringDelay?.hours || 0}
+                engineeringDelayReasons={lastOperationEngineeringDelay?.reasons || []}
+              />
             </div>
           )}
         </div>

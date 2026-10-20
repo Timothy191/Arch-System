@@ -22,9 +22,12 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
   const [selectedMachineId, setSelectedMachineId] = useState('');
   const [dateIn, setDateIn] = useState(new Date().toISOString().slice(0, 10));
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
+  const [delayHours, setDelayHours] = useState<string>('');
   const [reason, setReason] = useState('');
 
   const selectedMachine = machines.find((m) => m.id === selectedMachineId);
+  const parsedDelayHours = delayHours ? Math.min(12, Math.max(0, Number(delayHours) || 0)) : 0;
+  const remainingControlRoomHours = Math.max(0, 12 - parsedDelayHours);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +44,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
       });
       return;
     }
+    if (delayHours && (Number(delayHours) < 0 || Number(delayHours) > 12)) {
+      setMessage({
+        type: 'error',
+        text: 'Shift delay hours cannot exceed the 12.0 hour shift length',
+      });
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -51,6 +61,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           date_in: dateIn,
           time_in: timeIn,
           reason,
+          ...(parsedDelayHours > 0 ? { delay_hours: parsedDelayHours } : {}),
         });
         setMessage({
           type: 'success',
@@ -74,6 +85,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         setSelectedMachineId('');
         setDateIn(new Date().toISOString().slice(0, 10));
         setTimeIn(new Date().toTimeString().slice(0, 5));
+        setDelayHours('');
         setReason('');
       } catch (_err) {
         setMessage({ type: 'error', text: 'Failed to book in machine.' });
@@ -179,6 +191,32 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
               />
             </div>
+          </div>
+
+          {/* Engineering Shift Delay Hours (Synced to Control Room 12h Shift Budget) */}
+          <div className="p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <label
+                htmlFor="engineering-delay-hours"
+                className="text-xs font-medium text-[var(--text-secondary)]"
+              >
+                Shift Delay Hours (0–12.0h, synced to Control Room)
+              </label>
+              <span className="text-[11px] font-mono text-violet-600 font-semibold">
+                Control Room Max Remaining: {remainingControlRoomHours.toFixed(1)}h / 12.0h
+              </span>
+            </div>
+            <input
+              id="engineering-delay-hours"
+              type="number"
+              min="0"
+              max="12"
+              step="0.5"
+              value={delayHours}
+              onChange={(e) => setDelayHours(e.target.value)}
+              placeholder="e.g. 6.0 (deducts from Control Room 12h shift budget)"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-violet-500/50"
+            />
           </div>
 
           {/* Reason */}

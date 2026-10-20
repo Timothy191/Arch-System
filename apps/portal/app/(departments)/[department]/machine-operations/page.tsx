@@ -92,9 +92,69 @@ export default async function MachineOperationsPage({
       .order('name'),
     supabase
       .from('breakdowns')
-      .select('id, fleet_id, reason, repair_notes, status, date_in, date_out')
+      .select('id, fleet_id, reason, repair_notes, status, date_in, time_in, date_out, time_out')
       .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
+
+  const parseBreakdownDelayHours = (b: {
+    reason?: string | null;
+    date_in?: string | null;
+    time_in?: string | null;
+    date_out?: string | null;
+    time_out?: string | null;
+    delay_hours?: number | null;
+  }): number => {
+    if (typeof b.delay_hours === 'number' && !Number.isNaN(b.delay_hours) && b.delay_hours > 0) {
+      return Math.min(12, Math.max(0, b.delay_hours));
+    }
+    const tagMatch = b.reason?.match(/\[Shift Delay:\s*([\d.]+)h\]/i);
+    if (tagMatch?.[1]) {
+      const parsed = parseFloat(tagMatch[1]);
+      if (!Number.isNaN(parsed) && parsed > 0) return Math.min(12, parsed);
+    }
+    if (b.date_in && b.time_in && b.date_out && b.time_out) {
+      const startMs = new Date(`${b.date_in}T${b.time_in.slice(0, 8)}`).getTime();
+      const endMs = new Date(`${b.date_out}T${b.time_out.slice(0, 8)}`).getTime();
+      if (!Number.isNaN(startMs) && !Number.isNaN(endMs) && endMs > startMs) {
+        return Math.min(12, Number(((endMs - startMs) / 3600000).toFixed(2)));
+      }
+    }
+    return 0;
+  };
+
+  // Map Engineering breakdown delay hours by machine.id and serial_number
+  const engineeringDelaysByMachine: Record<
+    string,
+    { hours: number; reasons: string[]; status: string }
+  > = {};
+  const machineBySerialOrId = new Map<string, string>();
+  for (const m of machines || []) {
+    machineBySerialOrId.set(m.id, m.id);
+    if (m.serial_number) {
+      machineBySerialOrId.set(m.serial_number, m.id);
+    }
+    machineBySerialOrId.set(m.name, m.id);
+  }
+  for (const b of (activeBreakdowns || []) as Array<Record<string, any>>) {
+    const fleetKey = String(b.fleet_id || '');
+    const resolvedMachineId = machineBySerialOrId.get(fleetKey) || fleetKey;
+    if (!resolvedMachineId) continue;
+    const hrs = parseBreakdownDelayHours(b);
+    const existing = engineeringDelaysByMachine[resolvedMachineId] || {
+      hours: 0,
+      reasons: [],
+      status: String(b.status || 'active'),
+    };
+    existing.hours = Math.min(12, Number((existing.hours + hrs).toFixed(2)));
+    if (b.reason) existing.reasons.push(String(b.reason));
+    if (b.status === 'active') existing.status = 'active';
+    engineeringDelaysByMachine[resolvedMachineId] = existing;
+  }
+
+  const totalEngineeringDelayHours = Object.values(engineeringDelaysByMachine).reduce(
+    (sum, item) => sum + item.hours,
+    0
+  );
 
   const latestSMRMap = new Map<string, number>();
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
@@ -122,8 +182,8 @@ export default async function MachineOperationsPage({
 
   const activeMachines = new Set(todayOperations?.map((op) => op.machine_id)).size;
 
-  // AGENT-TRACE: Calculate total delay hours across all operations
-  const totalDelayHours =
+  // AGENT-TRACE: Calculate total delay hours across all operations + Engineering logged breakdown delays
+  const controlRoomDelayHours =
     todayOperations?.reduce((sum, op) => {
       const operationDelays = (op as any).delay_entries || [];
       return (
@@ -131,6 +191,7 @@ export default async function MachineOperationsPage({
         operationDelays.reduce((delaySum: number, d: any) => delaySum + (d.duration_hours || 0), 0)
       );
     }, 0) || 0;
+  const totalDelayHours = controlRoomDelayHours + totalEngineeringDelayHours;
 
   // Calculate total material moved (BCM) - sum of (loads × bin_factor) or Dozer rollover (hours × 250)
   let totalMaterialBCM = 0;
@@ -195,6 +256,12 @@ export default async function MachineOperationsPage({
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Total Delays</p>
           <p className="text-2xl font-medium text-accent-red mt-1">{totalDelayHours.toFixed(1)}h</p>
+          {totalEngineeringDelayHours > 0 && (
+            <p className="text-[11px] text-[var(--text-muted)] font-mono mt-0.5">
+              CR: {controlRoomDelayHours.toFixed(1)}h + Eng: {totalEngineeringDelayHours.toFixed(1)}
+              h
+            </p>
+          )}
         </GlassCard>
       </div>
 
@@ -217,6 +284,7 @@ export default async function MachineOperationsPage({
             sites={sites || []}
             mineBlocks={mineBlocks || []}
             todayOperations={todayOperations || []}
+            engineeringDelaysByMachine={engineeringDelaysByMachine}
           />
         </Suspense>
       </div>
@@ -245,6 +313,7 @@ export default async function MachineOperationsPage({
             operations={todayOperations || []}
             todayLoads={todayLoads || []}
             activeBreakdowns={activeBreakdowns || []}
+            engineeringDelaysByMachine={engineeringDelaysByMachine}
           />
         </Suspense>
       </div>

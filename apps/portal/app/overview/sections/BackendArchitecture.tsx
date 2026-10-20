@@ -14,12 +14,18 @@ import {
   Globe,
   HardDrive,
   Lock,
+  Network,
   Radio,
   Server,
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { BACKEND_CONNECTIONS, BACKEND_SERVICES } from '../lib/data';
+import {
+  BACKEND_CONNECTIONS,
+  BACKEND_SERVICES,
+  EXAMPLE_BACKEND_FLOW_PIPELINES,
+  GIT_PROVENANCE_METRICS,
+} from '../lib/data';
 
 const CATEGORY_META: Record<
   string,
@@ -80,7 +86,7 @@ export default function BackendArchitecture() {
             variant="outline"
             className="text-xs font-mono text-accent-green border-accent-green/30 bg-accent-green/10"
           >
-            PostgreSQL 17 · 186 Migrations
+            PostgreSQL 17 · {GIT_PROVENANCE_METRICS.totalMigrations} Migrations
           </Badge>
           <Badge
             variant="outline"
@@ -96,6 +102,157 @@ export default function BackendArchitecture() {
           </Badge>
         </div>
       </div>
+
+      {/* Example Backend Block-and-Line Visual Topology Diagram */}
+      <Card className="p-6" data-testid="backend-block-line-illustration">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div>
+            <h3 className="text-base font-semibold text-text-heading flex items-center gap-2">
+              <Network className="w-4 h-4 text-accent-blue" />
+              Example Backend Block-and-Line Connection Topology
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Visual block-and-line diagram illustrating how Client, Edge RPC Gateway, Hybrid Redis,
+              Supabase PostgreSQL 17, and Industrial IoT connect
+            </p>
+          </div>
+          <Badge
+            variant="outline"
+            className="text-[10px] font-mono text-accent-green border-accent-green/30 bg-accent-green/10"
+          >
+            Zero-Proxy Direct RLS Architecture
+          </Badge>
+        </div>
+
+        {/* 3-Column Connected Block & Line Architecture Canvas */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-center p-4 rounded-xl bg-bg-secondary/60 border border-border-subtle">
+          {/* Column 1: Client & Industrial Edge */}
+          <div className="space-y-3">
+            <div className="p-3 rounded-xl bg-white border-2 border-emerald-400/60 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-emerald-700 uppercase">
+                Client Tier
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                Portal Web App (:3000)
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                Next.js 16.3.8 · React 19
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-white border-2 border-sky-400/60 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-sky-700 uppercase">
+                Industrial IoT Tier
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                FUXA SCADA & C66 Gate
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                OPC-UA · Modbus · TCP 9100
+              </div>
+            </div>
+          </div>
+
+          {/* Line Connector 1 -> 2 */}
+          <div className="flex flex-col items-center justify-center py-2">
+            <div className="hidden lg:flex items-center w-full">
+              <div className="h-0.5 flex-1 bg-gradient-to-r from-emerald-500 to-blue-600" />
+              <ArrowRight className="w-4 h-4 text-blue-600 -ml-1" />
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-border-subtle text-text-secondary mt-1">
+              HTTPS / WSS / RPC
+            </span>
+          </div>
+
+          {/* Column 2: Gateway & Orchestration */}
+          <div className="space-y-3">
+            <div className="p-3.5 rounded-xl bg-white border-2 border-blue-500/70 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-blue-700 uppercase">
+                RPC Gateway
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                Next.js Server Actions
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                Auth → RBAC → @repo/contract Zod
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-white border-2 border-amber-400/70 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-amber-700 uppercase">
+                Async Event Bus
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                Inngest Durable Workers
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                Shift Rollups & Telemetry Sync
+              </div>
+            </div>
+          </div>
+
+          {/* Line Connector 2 -> 3 */}
+          <div className="flex flex-col items-center justify-center py-2">
+            <div className="hidden lg:flex items-center w-full">
+              <div className="h-0.5 flex-1 bg-gradient-to-r from-blue-600 to-emerald-600" />
+              <ArrowRight className="w-4 h-4 text-emerald-600 -ml-1" />
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-border-subtle text-text-secondary mt-1">
+              PgWire 5432 + RESP 6379
+            </span>
+          </div>
+
+          {/* Column 3: Data, Cache & Observability */}
+          <div className="space-y-2.5">
+            <div className="p-3 rounded-xl bg-white border-2 border-emerald-500/70 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-emerald-700 uppercase">
+                Primary ACID Store
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                Supabase PostgreSQL 17
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                189 Migrations · 100% RLS InitPlan
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-white border-2 border-red-400/70 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-red-700 uppercase">
+                State & Mutex
+              </div>
+              <div className="text-xs font-semibold text-text-heading mt-0.5">
+                Hybrid L1/L2 Redis 7.4
+              </div>
+              <div className="text-[10px] font-mono text-text-muted mt-1">
+                Sub-2ms LRU + Upstash Redlock
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border-2 border-purple-400/60 shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-purple-700 uppercase">
+                Observability
+              </div>
+              <div className="text-xs font-semibold text-text-heading">
+                Langfuse AI + Sentry OTel
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Summary of Example Pipelines */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+          {EXAMPLE_BACKEND_FLOW_PIPELINES.map((p) => (
+            <div
+              key={p.id}
+              className="p-3 rounded-lg bg-bg-tertiary border border-border-subtle text-xs space-y-1.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-text-heading">{p.title.split('·')[0]}</span>
+                <span className="font-mono text-[10px] text-accent-blue">{p.badge}</span>
+              </div>
+              <p className="text-[11px] text-text-secondary">
+                {p.nodes.map((n) => n.title).join(' ──► ')}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Backend Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
