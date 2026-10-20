@@ -174,7 +174,7 @@ function HeroSlide({
       aria-hidden={!isCenter}
       onClick={handleClick}
       className={cn(
-        'absolute inset-x-0 mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] h-full will-change-[transform,opacity] transform-gpu',
+        'absolute inset-x-0 mx-auto w-[92%] sm:w-[88%] lg:w-[82%] max-w-[1060px] h-full will-change-[transform,opacity] transform-gpu',
         cursorClass
       )}
       style={{

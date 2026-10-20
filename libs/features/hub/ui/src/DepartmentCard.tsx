@@ -176,7 +176,9 @@ function DepartmentCard({
               src={
                 imageError
                   ? '/images/departments/overview.jpg'
-                  : `/images/departments/${department.name}.jpg`
+                  : department.name === 'reports'
+                    ? '/images/departments/control-room.jpg'
+                    : `/images/departments/${department.name}.jpg`
               }
               alt=""
               aria-hidden="true"

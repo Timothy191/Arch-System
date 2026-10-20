@@ -247,7 +247,7 @@ describe('HeroRotator', () => {
     );
   });
 
-  it('renders enterprise hero banner capability features and live video HUD overlays', () => {
+  it('renders live telemetry graphs across all hero cards and live video HUD overlays', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
     // Assert live video HUD overlays on the active card
@@ -255,10 +255,12 @@ describe('HeroRotator', () => {
     expect(screen.getByText('30 FPS')).toBeInTheDocument();
     expect(screen.getByText('1080p')).toBeInTheDocument();
 
-    // Assert enterprise hero banner capability features strip on active card
-    expect(screen.getByText(/MODULE CAPABILITIES & DIRECT ACCESS/i)).toBeInTheDocument();
-    expect(screen.getByText('SCADA Control Room')).toBeInTheDocument();
-    expect(screen.getByText('AI & ZAR Intelligence')).toBeInTheDocument();
-    expect(screen.getByText('Shift & Fleet Reports')).toBeInTheDocument();
+    // Assert live telemetry graphs are rendered across all hero cards
+    expect(screen.getByTestId('hero-telemetry-graph-central-command')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-production')).toBeInTheDocument();
+    expect(screen.getByText('Central Operations Telemetry')).toBeInTheDocument();
+    expect(screen.getByText('Rig Penetration & Bit Depth')).toBeInTheDocument();
+    expect(screen.getByText('Coal & ROM Extraction Yield')).toBeInTheDocument();
   });
 });

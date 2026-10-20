@@ -85,11 +85,11 @@ export function CoreOperationalModules({
       {/* Section Header with Live Filtering & Executive Quick-Access */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-black/[0.08]">
         <div className="flex items-center justify-between sm:justify-start gap-3 flex-wrap">
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-xs">
-              <Boxes className="w-4 h-4" />
+          <h2 className="inline-flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-full bg-white/85 backdrop-blur-md border border-arch-border-subtle ring-1 ring-inset ring-white/80 shadow-xs text-sm sm:text-base font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue group-hover/row:border-arch-accent-blue/40 transition-all duration-300">
+            <span className="p-1.5 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-2xs flex items-center justify-center">
+              <Boxes className="w-3.5 h-3.5" />
             </span>
-            Core Operational Modules
+            <span>Core Operational Modules</span>
             <span className="ml-0.5 px-2.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary text-[11px] font-mono tabular-nums">
               {filteredDepartments.length} / {departments.length}
             </span>

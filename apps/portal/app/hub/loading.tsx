@@ -14,7 +14,7 @@ export default function HubLoading() {
       {/* Light-theme glass hero section */}
       <section className="relative w-full pt-2 pb-2 px-4 sm:px-6 mx-auto">
         <div className="relative w-full py-4">
-          <div className="mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] overflow-hidden rounded-2xl liquid-glass-light border border-white/20 shadow-window">
+          <div className="mx-auto w-[92%] sm:w-[88%] lg:w-[82%] max-w-[1060px] overflow-hidden rounded-2xl liquid-glass-light border border-white/20 shadow-window">
             <SkeletonBlock className="h-[460px] w-full" />
           </div>
           <div className="mt-5 flex items-center justify-center px-1">

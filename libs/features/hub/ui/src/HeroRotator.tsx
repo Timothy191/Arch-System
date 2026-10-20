@@ -146,7 +146,10 @@ export function HeroRotator({
         assetOverline,
         assetSubtitle,
         category: dept.type === 'control_room' ? 'SCADA & Telemetry' : 'Field Operations',
-        image: `/images/departments/${dept.name}.jpg`,
+        image:
+          dept.name === 'reports'
+            ? '/images/departments/control-room.jpg'
+            : `/images/departments/${dept.name}.jpg`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',
         icon: <DeptIcon className={cn('w-4 h-4', style.iconColor)} />,

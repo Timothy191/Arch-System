@@ -1,5 +1,6 @@
 import {
   DEPARTMENTS,
+  type Department,
   type DepartmentLiveMetricsMap,
   fetchLiveDepartmentMetrics,
 } from '@repo/departments/data-access';
@@ -9,7 +10,6 @@ import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server
 import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
@@ -190,14 +190,37 @@ export default async function HubPage() {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
   }
 
-  // AGENT-TRACE: Unhide System Overview ('overview') and Database ('database')
-  // Core Operational Modules so they always appear on /hub alongside DB-assigned departments.
+  // AGENT-TRACE: Unhide System Overview ('overview'), Database ('database'), and
+  // Availability & Utilization ('reports') Core Operational Modules so they appear on /hub
+  // alongside DB-assigned departments, with Availability & Utilization positioned after Database.
   if (rawDepartments.length > 0 || canSeeExecutive) {
     for (const sysModuleName of ['overview', 'database'] as const) {
       const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
       if (sysDept && !rawDepartments.some((d) => d.name === sysModuleName)) {
         rawDepartments = [...rawDepartments, sysDept];
       }
+    }
+
+    if (!rawDepartments.some((d) => d.name === 'reports')) {
+      const availabilityModule: Department = {
+        name: 'reports',
+        displayName: 'Availability & Utilization',
+        route: '/control-room/reports',
+        icon: 'Activity',
+        description:
+          'Fleet mechanical availability, equipment utilization & shift OEE analytics reports',
+        color: 'blue',
+        type: 'control_room',
+        status: 'active',
+        gridSpan: 'md:col-span-1 xl:col-span-1',
+        stats: liveMetrics.engineering?.stats || { label: 'Utilization', value: '94.6%' },
+        trend: liveMetrics.engineering?.trend || [91, 92, 93, 92, 94, 95, 94, 96],
+        actions: [
+          { label: 'View Report', href: '/control-room/reports' },
+          { label: 'Shift Closeout', href: '/control-room/shift-closeout' },
+        ],
+      };
+      rawDepartments = [...rawDepartments, availabilityModule];
     }
   }
 
@@ -210,6 +233,7 @@ export default async function HubPage() {
     'control-room',
     'overview',
     'database',
+    'reports',
   ];
 
   rawDepartments = [...rawDepartments].sort((a, b) => {
@@ -281,32 +305,6 @@ export default async function HubPage() {
           clearance={employeeClearance}
           canSeeExecutive={canSeeExecutive}
         />
-      )}
-
-      {/* Availability & Utilization Report */}
-      {canSeeExecutive && (
-        <section className="space-y-5 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary">
-              Availability & Utilization Report
-            </h2>
-            <Link
-              href="/control-room/reports"
-              className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-white/85 hover:bg-white text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-xs hover:shadow-card transition-all"
-            >
-              <Shield className="w-3 h-3 mx-auto text-arch-accent-blue" />
-              <span>View Report</span>
-            </Link>
-          </div>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Placeholder for report widgets - could be expanded */}
-              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-              <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-            </div>
-          </div>
-        </section>
       )}
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}

@@ -1,221 +1,295 @@
 'use client';
 
-import {
-  Activity,
-  AlertTriangle,
-  ArrowUpRight,
-  CheckCircle2,
-  Cpu,
-  Layers,
-  Power,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from 'lucide-react';
+import { Activity, AlertTriangle, Power, TrendingUp, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import type * as React from 'react';
 import { cn } from '../lib/utils';
 import type { Panel } from './HeroRotator';
 
-interface HeroBannerFeature {
-  label: string;
-  badge: string;
-  href: string;
-  icon: React.ReactNode;
+interface HeroTelemetrySeries {
+  title: string;
+  unit: string;
+  currentValue: string;
+  deltaBadge: string;
+  peakValue: string;
+  avgValue: string;
+  strokeColor: string;
+  fillId: string;
+  points: number[];
 }
 
-function getHeroBannerFeatures(panelName: string, primaryHref: string): HeroBannerFeature[] {
+function getHeroTelemetrySeries(
+  panelName: string,
+  stats?: { label: string; value: string }
+): HeroTelemetrySeries {
   switch (panelName) {
     case 'admin':
-      return [
-        {
-          label: 'Users & RBAC Sync',
-          badge: 'RLS Active',
-          href: '/admin?tab=users',
-          icon: <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'Fleet & Bin Factors',
-          badge: 'Live Fleet',
-          href: '/admin?tab=machinery',
-          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-        {
-          label: 'AI & ZAR Telemetry',
-          badge: '84% Cache',
-          href: '/admin/ai-metrics',
-          icon: <Cpu className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'RBAC & Governance Throughput',
+        unit: 'ops/min',
+        currentValue: stats?.value || '249 ops/m',
+        deltaBadge: '+12.4% Efficiency',
+        peakValue: '264',
+        avgValue: '245',
+        strokeColor: '#0284c7',
+        fillId: 'grad-admin',
+        points: [62, 68, 65, 74, 79, 83, 80, 88, 92, 89, 95, 98],
+      };
     case 'control-room':
-      return [
-        {
-          label: 'Hourly Loads Grid',
-          badge: 'Live Sync',
-          href: '/control-room/hourly-loads',
-          icon: <Layers className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'Machine SMR & Ops',
-          badge: '250 BCM/h',
-          href: '/control-room/machine-operations',
-          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-        {
-          label: 'Atomic Shift Closeout',
-          badge: 'RPC Locked',
-          href: '/control-room/shift-closeout',
-          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'SCADA Hourly Load Velocity',
+        unit: 'loads/hr',
+        currentValue: stats?.value || '384 Loads',
+        deltaBadge: '+9.2% Shift Target',
+        peakValue: '42/h',
+        avgValue: '34/h',
+        strokeColor: '#10b981',
+        fillId: 'grad-control-room',
+        points: [54, 62, 70, 66, 78, 84, 81, 89, 93, 87, 94, 97],
+      };
     case 'access-control':
-      return [
-        {
-          label: 'Muster Roll Call',
-          badge: 'Real-Time',
-          href: '/access-control/roll-call',
-          icon: <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'C66 Key Interlocks',
-          badge: '2-Step Scan',
-          href: '/access-control/key-control',
-          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-        {
-          label: 'CR80 Badge Studio',
-          badge: '300 DPI',
-          href: '/access-control/card-maker',
-          icon: <Sparkles className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Site Gate & Muster Telemetry',
+        unit: 'personnel',
+        currentValue: stats?.value || '142 On-Site',
+        deltaBadge: '99.8% Gate SLA',
+        peakValue: '156',
+        avgValue: '139',
+        strokeColor: '#0ea5e9',
+        fillId: 'grad-access-control',
+        points: [48, 58, 72, 84, 88, 91, 89, 93, 95, 92, 94, 96],
+      };
     case 'production':
-      return [
-        {
-          label: 'Daily Yield & Tonnage',
-          badge: 'Coal/Waste',
-          href: '/production/daily-log',
-          icon: <Activity className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'Excavator Activity',
-          badge: 'BCM/Hr',
-          href: '/production/excavator-activity',
-          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-        {
-          label: 'Dozer Roll-Over',
-          badge: 'Fixed BCM',
-          href: '/production/roll-over',
-          icon: <CheckCircle2 className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Coal & ROM Extraction Yield',
+        unit: 'tonnes/hr',
+        currentValue: stats?.value || '85% Yield',
+        deltaBadge: '+6.8% vs Plan',
+        peakValue: '1,420t',
+        avgValue: '1,180t',
+        strokeColor: '#059669',
+        fillId: 'grad-production',
+        points: [58, 64, 61, 70, 75, 73, 82, 85, 88, 91, 89, 95],
+      };
     case 'drilling':
-      return [
-        {
-          label: 'Rig Shift Operations',
-          badge: 'Day/Night',
-          href: '/drilling/drilling-operations',
-          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-        {
-          label: 'Pattern & Blast Plan',
-          badge: 'B-14 Grid',
-          href: '/drilling/blast-schedule',
-          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-        {
-          label: 'Down-Hole Telemetry',
-          badge: 'Sub-ms',
-          href: '/drilling/machine-telemetry',
-          icon: <Cpu className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Rig Penetration & Bit Depth',
+        unit: 'meters',
+        currentValue: stats?.value || '1,240m',
+        deltaBadge: '+14.1% ROP',
+        peakValue: '58m/h',
+        avgValue: '49m/h',
+        strokeColor: '#0284c7',
+        fillId: 'grad-drilling',
+        points: [50, 55, 63, 68, 72, 77, 74, 83, 87, 90, 93, 97],
+      };
     case 'engineering':
-      return [
-        {
-          label: 'Breakdown Dispatch',
-          badge: 'Live SLA',
-          href: '/engineering/breakdowns',
-          icon: <Wrench className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-        {
-          label: 'Tire Life & Pressure',
-          badge: 'Fleet Guard',
-          href: '/engineering/tires',
-          icon: <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'MTBF & Reliability',
-          badge: 'Predictive',
-          href: '/engineering/reports',
-          icon: <Activity className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Fleet Mechanical Availability',
+        unit: 'uptime %',
+        currentValue: stats?.value || '98% Ready',
+        deltaBadge: 'MTBF +18.5%',
+        peakValue: '99.2%',
+        avgValue: '96.8%',
+        strokeColor: '#d97706',
+        fillId: 'grad-engineering',
+        points: [76, 79, 75, 82, 85, 88, 86, 90, 92, 94, 95, 98],
+      };
     case 'overview':
-      return [
-        {
-          label: '8 Core Departments',
-          badge: 'Architecture',
-          href: '/overview',
-          icon: <Layers className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-        {
-          label: 'Next.js 16 + Supabase',
-          badge: 'Tech Stack',
-          href: '/overview',
-          icon: <Cpu className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'Zero-Trust RLS & Cache',
-          badge: '100% Verified',
-          href: '/overview',
-          icon: <ShieldCheck className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Federation & Edge Node Health',
+        unit: 'score',
+        currentValue: stats?.value || '100% Optimal',
+        deltaBadge: '0.42ms L1 p95',
+        peakValue: '100%',
+        avgValue: '99.9%',
+        strokeColor: '#10b981',
+        fillId: 'grad-overview',
+        points: [82, 85, 87, 89, 91, 93, 94, 96, 97, 98, 99, 100],
+      };
     case 'database':
-      return [
-        {
-          label: 'Supabase PostgreSQL 17',
-          badge: '186 Migrations',
-          href: '/database',
-          icon: <Layers className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'Schema & RLS Catalog',
-          badge: '100% InitPlan',
-          href: '/database/schemas',
-          icon: <ShieldCheck className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-        {
-          label: 'Telemetry & Replica Sync',
-          badge: 'Live Panels',
-          href: '/database/panels',
-          icon: <Activity className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'PostgreSQL 17 Query Throughput',
+        unit: 'queries/s',
+        currentValue: stats?.value || '342 qps',
+        deltaBadge: '18ms Avg RTT',
+        peakValue: '410/s',
+        avgValue: '328/s',
+        strokeColor: '#059669',
+        fillId: 'grad-database',
+        points: [60, 66, 71, 68, 75, 80, 78, 85, 88, 92, 90, 96],
+      };
+    case 'reports':
+      return {
+        title: 'Fleet Availability & Utilization',
+        unit: 'utilization',
+        currentValue: stats?.value || '94.6% Util',
+        deltaBadge: '+4.3% Shift OEE',
+        peakValue: '98.1%',
+        avgValue: '93.4%',
+        strokeColor: '#0284c7',
+        fillId: 'grad-reports',
+        points: [64, 69, 73, 76, 80, 84, 82, 88, 91, 93, 95, 97],
+      };
     default:
-      return [
-        {
-          label: 'SCADA Control Room',
-          badge: '24/7 Live',
-          href: '/control-room',
-          icon: <Activity className="w-3 h-3 text-emerald-600 shrink-0" />,
-        },
-        {
-          label: 'AI & ZAR Intelligence',
-          badge: '+88% Cache',
-          href: '/admin/ai-metrics',
-          icon: <Cpu className="w-3 h-3 text-cyan-600 shrink-0" />,
-        },
-        {
-          label: 'Shift & Fleet Reports',
-          badge: 'Direct Launch',
-          href: primaryHref || '/control-room/reports',
-          icon: <Layers className="w-3 h-3 text-amber-600 shrink-0" />,
-        },
-      ];
+      return {
+        title: 'Central Operations Telemetry',
+        unit: 'index',
+        currentValue: stats?.value || '100% Optimal',
+        deltaBadge: '+88% Cache Hit',
+        peakValue: '99.95%',
+        avgValue: '98.7%',
+        strokeColor: '#d4af37',
+        fillId: `grad-${panelName || 'default'}`,
+        points: [56, 63, 68, 72, 76, 81, 79, 86, 90, 93, 96, 99],
+      };
   }
+}
+
+function HeroTelemetryGraph({
+  panelName,
+  stats,
+}: {
+  panelName: string;
+  stats?: { label: string; value: string };
+}) {
+  const series = getHeroTelemetrySeries(panelName, stats);
+  const width = 360;
+  const height = 68;
+  const padX = 6;
+  const padY = 8;
+  const minVal = Math.min(...series.points) - 8;
+  const maxVal = Math.max(...series.points) + 4;
+  const range = Math.max(maxVal - minVal, 1);
+
+  const coords = series.points.map((pt, i) => {
+    const x = padX + (i / (series.points.length - 1)) * (width - padX * 2);
+    const y = height - padY - ((pt - minVal) / range) * (height - padY * 2);
+    return { x, y, val: pt };
+  });
+
+  const linePath = coords
+    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
+    .join(' ');
+  const firstX = (coords[0]?.x ?? padX).toFixed(1);
+  const lastX = (coords[coords.length - 1]?.x ?? width - padX).toFixed(1);
+  const areaPath = `${linePath} L ${lastX} ${height} L ${firstX} ${height} Z`;
+
+  return (
+    <div
+      className="mt-auto pt-2.5 border-t border-slate-200/70"
+      data-testid={`hero-telemetry-graph-${panelName}`}
+    >
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse shrink-0"
+            aria-hidden="true"
+          />
+          <span className="text-[10px] uppercase tracking-wider text-slate-700 font-mono font-semibold truncate">
+            {series.title}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-semibold text-emerald-700">
+            <TrendingUp className="w-2.5 h-2.5" aria-hidden="true" />
+            {series.deltaBadge}
+          </span>
+          <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full bg-slate-900/5 border border-slate-300/60 text-[9px] font-mono font-bold text-slate-800 tabular-nums">
+            {series.currentValue}
+          </span>
+        </div>
+      </div>
+
+      <div className="relative rounded-xl bg-white/85 backdrop-blur-md border border-slate-200/80 px-3 py-2 shadow-2xs">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-14 overflow-visible"
+          role="img"
+          aria-label={`${series.title} telemetry trend graph`}
+        >
+          <defs>
+            <linearGradient id={series.fillId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={series.strokeColor} stopOpacity="0.32" />
+              <stop offset="100%" stopColor={series.strokeColor} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+
+          {/* Subtle horizontal reference grid lines */}
+          <line
+            x1={padX}
+            y1={height * 0.25}
+            x2={width - padX}
+            y2={height * 0.25}
+            stroke="currentColor"
+            className="text-slate-200/80"
+            strokeDasharray="3 3"
+            strokeWidth="0.75"
+          />
+          <line
+            x1={padX}
+            y1={height * 0.6}
+            x2={width - padX}
+            y2={height * 0.6}
+            stroke="currentColor"
+            className="text-slate-200/80"
+            strokeDasharray="3 3"
+            strokeWidth="0.75"
+          />
+
+          {/* Subtle background telemetry bars */}
+          {coords.map((c, i) => {
+            const barHeight = Math.max(height - padY - c.y, 4);
+            return (
+              <rect
+                key={i}
+                x={c.x - 4}
+                y={c.y}
+                width={8}
+                height={barHeight}
+                rx={2}
+                fill={series.strokeColor}
+                fillOpacity={i === coords.length - 1 ? 0.22 : 0.08}
+              />
+            );
+          })}
+
+          {/* Shaded area under curve */}
+          <path d={areaPath} fill={`url(#${series.fillId})`} />
+
+          {/* Smooth telemetry polyline */}
+          <path
+            d={linePath}
+            fill="none"
+            stroke={series.strokeColor}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Data nodes */}
+          {coords.map((c, i) => (
+            <circle
+              key={i}
+              cx={c.x}
+              cy={c.y}
+              r={i === coords.length - 1 ? 3.5 : 2}
+              fill={i === coords.length - 1 ? series.strokeColor : '#ffffff'}
+              stroke={series.strokeColor}
+              strokeWidth={i === coords.length - 1 ? 2 : 1.5}
+            />
+          ))}
+        </svg>
+
+        <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 pt-1 border-t border-slate-100 tabular-nums">
+          <span>00:00 SHIFT START</span>
+          <span>AVG {series.avgValue}</span>
+          <span>PEAK {series.peakValue}</span>
+          <span className="text-emerald-700 font-semibold">LIVE · NOW</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export interface HeroCardContentProps {
@@ -239,22 +313,6 @@ export function HeroCardContent({
   breakdownCount,
   offlineMachineCount,
 }: HeroCardContentProps) {
-  const assetOverline =
-    panel.assetOverline ||
-    (panel.name === 'drilling'
-      ? 'FIELD OPERATIONS // UNIT-PV351'
-      : panel.name === 'production'
-        ? 'EXTRACTION & YIELD // PLANT-EXT01'
-        : panel.name === 'access-control'
-          ? 'SITE SECURITY // SEC-GATE01'
-          : panel.name === 'engineering'
-            ? 'PLANT MAINTENANCE // WORKSHOP-03'
-            : panel.name === 'control-room'
-              ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-              : panel.name === 'admin'
-                ? 'ENTERPRISE GOVERNANCE // ADM-CORE'
-                : `${(panel.category || 'CENTRAL COMMAND').toUpperCase()} // SYS-MAIN`);
-
   const assetSubtitle =
     panel.assetSubtitle ||
     (panel.name === 'drilling'
@@ -282,11 +340,9 @@ export function HeroCardContent({
     ? 'bg-amber-400 text-stone-950 hover:bg-amber-300 font-semibold shadow-xs'
     : 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 font-medium shadow-xs';
 
-  const bannerFeatures = getHeroBannerFeatures(panel.name, panel.primary.href);
-
   return (
     <div className="relative h-full w-full flex flex-row z-10">
-      {/* Left Column: Text, Controls & Enterprise Hero Banner Features */}
+      {/* Left Column: Text, Controls & Live Telemetry Graph */}
       <div className="relative z-20 flex flex-col justify-between w-[52%] sm:w-[50%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
         <div>
           {/* Top Status Bar with Monospace Readouts */}
@@ -325,20 +381,8 @@ export function HeroCardContent({
             )}
           </div>
 
-          {/* Operational Asset Labeling & Title */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-wider text-slate-500 uppercase font-semibold">
-              <div
-                className={cn(
-                  'w-5 h-5 rounded-md shrink-0 flex items-center justify-center border border-black/5 shadow-xs',
-                  panel.iconBgColor
-                )}
-              >
-                {panel.icon}
-              </div>
-              <span>{assetOverline}</span>
-            </div>
-
+          {/* Operational Title & Subtitle (Asset Overline Removed per Design Feedback) */}
+          <div className="space-y-1.5">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)] leading-snug pr-4">
               {panel.title}
             </h2>
@@ -380,46 +424,8 @@ export function HeroCardContent({
           </div>
         </div>
 
-        {/* Enterprise Hero Banner Feature Strip (Active Card Only) */}
-        {isActive && (
-          <div className="mt-auto pt-2.5 border-t border-slate-200/70">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <p className="text-[9px] uppercase tracking-wider text-slate-600 font-mono font-semibold flex items-center gap-1.5">
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
-                  aria-hidden="true"
-                />
-                MODULE CAPABILITIES & DIRECT ACCESS
-              </p>
-              <span className="hidden xl:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-semibold text-emerald-700">
-                99.95% SLA · 24/7 Shift Ready
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-1.5">
-              {bannerFeatures.map((feat) => (
-                <Link
-                  key={feat.label}
-                  href={feat.href}
-                  className="group/feat flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/80 hover:bg-white backdrop-blur-md border border-slate-200/80 hover:border-[var(--accent-blue)]/45 shadow-2xs transition-all duration-200"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    {feat.icon}
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-semibold text-slate-800 group-hover/feat:text-[var(--text-heading)] truncate leading-tight">
-                        {feat.label}
-                      </span>
-                      <span className="text-[8.5px] font-mono text-slate-500 truncate leading-tight">
-                        {feat.badge}
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowUpRight className="w-2.5 h-2.5 text-slate-400 group-hover/feat:text-[var(--accent-blue)] group-hover/feat:translate-x-0.5 group-hover/feat:-translate-y-0.5 transition-transform shrink-0" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Live Telemetry Graph Across All Hero Cards */}
+        <HeroTelemetryGraph panelName={panel.name} stats={panel.stats} />
       </div>
 
       {/* Right Column: Full Bleed Image with Live Camera Feed HUD */}

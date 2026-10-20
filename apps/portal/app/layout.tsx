@@ -182,7 +182,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   className="relative z-10 mt-3 px-3 sm:px-5 py-1.5 border-t border-white/45 liquid-glass-light bg-white/45 backdrop-blur-xl text-[10px] text-[var(--text-muted)] select-none"
                 >
                   <div className="flex items-center justify-between gap-2.5 w-full">
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
                       <span
                         className="w-1.5 h-1.5 rounded-full bg-accent-green shrink-0"
                         aria-hidden="true"
@@ -193,13 +193,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       <span className="px-1.5 py-px rounded-full bg-arch-accent-blue/10 border border-arch-accent-blue/25 font-mono text-[9px] font-semibold text-arch-accent-blue tabular-nums">
                         v{APP_VERSION}
                       </span>
+                      <span className="hidden sm:inline-flex items-center gap-1 pl-1 border-l border-black/10 font-mono text-[9px] text-[var(--text-secondary)] tabular-nums">
+                        99.95% SLA · 9 Modules
+                      </span>
                     </div>
 
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <DepartmentReviews />
                     </div>
 
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                      <span className="hidden md:inline-flex items-center gap-1 pr-1.5 border-r border-black/10 font-mono text-[9px] text-accent-green font-semibold">
+                        ● Sync Active
+                      </span>
                       <EveLogo className="h-2.5 w-auto text-[var(--text-secondary)]" />
                       <span className="font-mono font-medium text-[9.5px] text-[var(--text-secondary)]">
                         eve
