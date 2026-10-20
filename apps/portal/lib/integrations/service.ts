@@ -43,7 +43,357 @@ export interface CatalogRecord {
   auth_type: string;
   verified: boolean;
   docs_url: string | null;
+  capabilities?: {
+    domains?: string[];
+    transport?: string;
+    federated_service?: string;
+    [key: string]: unknown;
+  } | null;
 }
+
+export const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
+  {
+    id: 'sentry',
+    name: 'Sentry Error & Performance MCP',
+    description:
+      'Official Sentry MCP connector for real-time issue triage, release health, and stacktrace analysis across portal and edge telemetry.',
+    author: 'Sentry.io',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.sentry.dev/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://docs.sentry.io/product/sentry-mcp/',
+    capabilities: {
+      domains: ['errors', 'releases', 'performance'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'supabase-mcp',
+    name: 'Supabase Database, RLS & Edge Inspector',
+    description:
+      'Official Supabase MCP server for live schema introspection, RLS policy auditing across all 8 departments, PostgREST diagnostics, and migration drift verification.',
+    author: 'Supabase',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.supabase.com/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://supabase.com/docs/guides/getting-started/mcp',
+    capabilities: {
+      domains: ['database', 'rls-audit', 'migrations', 'postgrest-logs'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'vercel-mcp',
+    name: 'Vercel Deployment, Edge Logs & Speed Insights',
+    description:
+      'Official Vercel MCP connector for production deployment inspection, serverless runtime logs, Core Web Vitals telemetry, and edge cache invalidation.',
+    author: 'Vercel',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.vercel.com',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://vercel.com/docs/mcp',
+    capabilities: {
+      domains: ['deployments', 'runtime-logs', 'web-vitals', 'edge-cache'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'cloudflare-observability',
+    name: 'Cloudflare Observability & Radar',
+    description:
+      'Official Cloudflare remote MCP server for Workers logs, edge analytics, DNS, and WAF security telemetry.',
+    author: 'Cloudflare',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://observability.mcp.cloudflare.com/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://developers.cloudflare.com/agents/model-context-protocol/',
+    capabilities: {
+      domains: ['edge', 'waf', 'logs', 'dns'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'upstash-redis',
+    name: 'Upstash Serverless Redis & QStash',
+    description:
+      'Official Upstash MCP server for serverless Redis key inspection, rate-limit diagnostics, and QStash queue monitoring.',
+    author: 'Upstash',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.upstash.com/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://upstash.com/docs/oss/sdks/ts/mcp',
+    capabilities: {
+      domains: ['redis', 'queues', 'ratelimit'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'linear',
+    name: 'Linear Issue & Dispatch Tracker',
+    description:
+      'Official Linear Streamable-HTTP MCP endpoint for engineering issue tracking, incident triage, and sprint velocity.',
+    author: 'Linear',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.linear.app/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://linear.app/docs/mcp',
+    capabilities: {
+      domains: ['issues', 'projects', 'incidents'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'github-mcp',
+    name: 'GitHub Copilot MCP Server',
+    description:
+      'Official GitHub remote MCP server for repository pull requests, workflow runs, code scanning alerts, and commit history.',
+    author: 'GitHub',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://api.githubcopilot.com/mcp/',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://docs.github.com/en/copilot/customizing-copilot/using-model-context-protocol',
+    capabilities: {
+      domains: ['repos', 'pull_requests', 'actions', 'security'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'grafana-mcp',
+    name: 'Grafana & Prometheus Fleet Telemetry',
+    description:
+      'Time-series observability MCP server for haul truck SMR utilization curves, compressor temperatures, Loki log streams, and Prometheus alert rules.',
+    author: 'Grafana Labs',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.grafana.com/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://grafana.com/docs/grafana/latest/administration/mcp/',
+    capabilities: {
+      domains: ['prometheus', 'loki-logs', 'alert-rules', 'dashboards'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'slack-incident-mcp',
+    name: 'Slack & Opsgenie Control Room Pager',
+    description:
+      'Automated control-room incident paging and P1 breakdown notifications to engineering and shift superintendent channels.',
+    author: 'Slack',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.slack.com/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://api.slack.com/automation',
+    capabilities: {
+      domains: ['incident-paging', 'shift-handover', 'channel-alerts'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'postgres-analytics-mcp',
+    name: 'Read-Replica SQL & Production Analytics',
+    description:
+      'Read-only analytical PostgreSQL MCP connector for month-to-date tonnage rollups, BCM bank volume audits, and query-plan inspection.',
+    author: 'PostgreSQL / Neon',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.neon.tech/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://neon.tech/docs/ai/neon-mcp-server',
+    capabilities: {
+      domains: ['read-only-sql', 'query-plan', 'production-rollups'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'sixtyfour-intelligence',
+    name: 'SixtyFour Intelligence',
+    description:
+      'Data enrichment and operational intelligence MCP connector for supplier verification and entity research.',
+    author: 'SixtyFour',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://api.sixtyfour.ai/mcp',
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: 'https://docs.sixtyfour.ai',
+    capabilities: {
+      domains: ['enrichment', 'intelligence'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'windsor-ai',
+    name: 'Windsor.ai Telemetry & Analytics',
+    description:
+      'Multi-source analytics and operational data connector for executive reporting and KPI aggregation.',
+    author: 'Windsor.ai',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://mcp.windsor.ai/mcp',
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: 'https://windsor.ai/documentation/',
+    capabilities: {
+      domains: ['analytics', 'attribution', 'reporting'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'firecrawl-lan-mcp',
+    name: 'Firecrawl LAN OEM & DMRE Regulatory Scraper',
+    description:
+      'High-speed unauthenticated LAN Firecrawl MCP bridge for Epiroc Pit Viper 351 / Caterpillar parts manuals and DMRE Mine Health & Safety regulatory extraction.',
+    author: 'Plantcor LAN Infrastructure',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'http://192.168.0.215:3002/mcp',
+    auth_type: 'none',
+    verified: true,
+    docs_url: 'https://docs.firecrawl.dev/mcp',
+    capabilities: {
+      domains: ['oem-manuals', 'dmre-compliance', 'web-extraction'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'nestjs-scada-proxy',
+    name: 'NestJS Modbus TCP & SCADA Telemetry Proxy',
+    description:
+      'Federated action bridge to arch-system-nest-proxy for polling live Pit Viper 351 drill rig and excavator PLC registers (RPM, pull-down pressure, air pressure, penetration rate).',
+    author: 'Plantcor Mining Engineering',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://arch-system-nest-proxy.vercel.app/api/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: '/drilling/machine-telemetry',
+    capabilities: {
+      domains: ['modbus-tcp', 'pit-viper-351', 'plc-registers', 'scada-ingest'],
+      federated_service: 'arch-system-nest-proxy',
+    },
+  },
+  {
+    id: 'n8n-workflow-engine',
+    name: 'n8n Autonomous Shift & Escalation Workflows',
+    description:
+      'Federated action bridge to n8n-vercel for automated shift-closeout PDF distribution, overdue breakdown escalation webhooks, and threshold alerts.',
+    author: 'Plantcor Automation',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://n8n-vercel-arch.vercel.app/mcp',
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: '/admin/workflows',
+    capabilities: {
+      domains: ['workflow-triggers', 'shift-pdf-dispatch', 'breakdown-escalation'],
+      federated_service: 'n8n-vercel',
+    },
+  },
+  {
+    id: 'whatsapp-shift-dispatch',
+    name: 'WhatsApp Operations & Muster Dispatch Bridge',
+    description:
+      'Action bridge connecting the Portal WhatsApp Split-Screen workspace to broadcast shift compilation summaries, emergency muster roll-calls, and breakdown job cards.',
+    author: 'Plantcor Control Room',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://arch-system-kappa.vercel.app/api/webhooks',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: '/control-room/shift-compilation',
+    capabilities: {
+      domains: ['whatsapp-dispatch', 'muster-alerts', 'shift-handover'],
+      transport: 'webhook-action',
+    },
+  },
+  {
+    id: 'rust-telemetry-engine',
+    name: 'Rust High-Frequency Telemetry Engine',
+    description:
+      'First-party native ArchPlugin for sub-millisecond haul-truck and drill rig telemetry ingestion.',
+    author: 'Plantcor Mining Engineering',
+    icon_url: null,
+    kind: 'native',
+    server_url: null,
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/docs/api',
+    capabilities: {
+      domains: ['telemetry-ingest', 'sub-ms-pipeline', 'rust-ffi'],
+      hooks: ['onLogCreated', 'onBreakdownAdded'],
+      widgets: true,
+    },
+  },
+  {
+    id: 'langfuse-openrouter-ai',
+    name: 'Langfuse & OpenRouter AI FinOps Telemetry',
+    description:
+      'First-party @repo/agents native integration for LLM trace observability, prompt cache hit-rate tracking, and ZAR cost attribution with multi-model fallback routing.',
+    author: 'Plantcor AI Platform',
+    icon_url: null,
+    kind: 'native',
+    server_url: null,
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: '/admin/ai-metrics',
+    capabilities: {
+      domains: ['llm-tracing', 'zar-cost-attribution', 'prompt-cache', 'model-routing'],
+      widgets: true,
+    },
+  },
+  {
+    id: 'c66-cr80-hardware-bridge',
+    name: 'C66 Key Cabinet & CR80 Badge Printer Bridge',
+    description:
+      'First-party Access Control hardware bridge for 2-step QR + RFID C66 key-cabinet interlock release and dual-sided 300 DPI CR80 PVC badge printing.',
+    author: 'Plantcor Access Control',
+    icon_url: null,
+    kind: 'native',
+    server_url: null,
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/access-control/print-cards',
+    capabilities: {
+      domains: ['c66-key-interlock', 'cr80-300dpi-print', 'rfid-qr-verify'],
+      hardware: true,
+    },
+  },
+  {
+    id: 'fleet-smr-reconciler',
+    name: 'Automated SMR Meter & Bin-Factor Reconciler',
+    description:
+      'Native reconciliation plugin validating closing vs. opening SMR machine hours across shift rollovers and auditing haul-truck bin factors against weighbridge tonnages.',
+    author: 'Plantcor Production & Control Room',
+    icon_url: null,
+    kind: 'native',
+    server_url: null,
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/control-room/reports',
+    capabilities: {
+      domains: ['smr-meter-sync', 'bin-factor-audit', 'shift-rollover'],
+      hooks: ['onShiftCloseout', 'onHourlyLoadLogged'],
+    },
+  },
+];
 
 const INSTALLATION_SELECT = `
   id, catalog_id, scope, department_id, status, config, tool_allowlist,
@@ -51,7 +401,7 @@ const INSTALLATION_SELECT = `
 `;
 
 const CATALOG_SELECT = `
-  id, name, description, author, icon_url, kind, server_url, auth_type, verified, docs_url
+  id, name, description, author, icon_url, kind, server_url, auth_type, verified, docs_url, capabilities
 `;
 
 function parseAllowlist(value: unknown): string[] {
@@ -68,7 +418,23 @@ export async function listCatalog(): Promise<CatalogRecord[]> {
       context: { error: error.message },
     });
   }
-  return (data ?? []) as unknown as CatalogRecord[];
+  const dbRows = (data ?? []) as unknown as CatalogRecord[];
+  const byId = new Map<string, CatalogRecord>();
+  for (const curated of CURATED_INTEGRATION_CATALOG) {
+    byId.set(curated.id, curated);
+  }
+  for (const row of dbRows) {
+    const fallback = byId.get(row.id);
+    byId.set(row.id, {
+      ...fallback,
+      ...row,
+      capabilities:
+        row.capabilities && Object.keys(row.capabilities).length > 0
+          ? row.capabilities
+          : (fallback?.capabilities ?? null),
+    });
+  }
+  return Array.from(byId.values());
 }
 
 export async function listInstallations(): Promise<InstallationRecord[]> {
@@ -123,23 +489,41 @@ export async function installIntegration(
     .eq('id', input.catalog_id)
     .single();
 
+  const curatedEntry = CURATED_INTEGRATION_CATALOG.find((item) => item.id === input.catalog_id);
+  const inlineEntry =
+    input.catalog_entry ??
+    (curatedEntry
+      ? {
+          name: curatedEntry.name,
+          description: curatedEntry.description ?? undefined,
+          author: curatedEntry.author ?? undefined,
+          icon_url: curatedEntry.icon_url ?? undefined,
+          kind: curatedEntry.kind,
+          server_url: curatedEntry.server_url ?? undefined,
+          auth_type: curatedEntry.auth_type,
+          docs_url: curatedEntry.docs_url ?? undefined,
+          verified: curatedEntry.verified,
+        }
+      : undefined);
+
   if (!catalogEntry) {
-    if (!input.catalog_entry) {
+    if (!inlineEntry) {
       throw new NotFoundError(`Catalog entry "${input.catalog_id}" not found`, {
         resource: 'integration_catalog',
       });
     }
     const { error: insertError } = await supabase.from('integration_catalog').insert({
       id: input.catalog_id,
-      name: input.catalog_entry.name,
-      description: input.catalog_entry.description ?? null,
-      author: input.catalog_entry.author ?? null,
-      icon_url: input.catalog_entry.icon_url ?? null,
-      kind: input.catalog_entry.kind,
-      server_url: input.catalog_entry.server_url ?? null,
-      auth_type: input.catalog_entry.auth_type,
-      docs_url: input.catalog_entry.docs_url ?? null,
-      verified: input.catalog_entry.verified ?? false,
+      name: inlineEntry.name,
+      description: inlineEntry.description ?? null,
+      author: inlineEntry.author ?? null,
+      icon_url: inlineEntry.icon_url ?? null,
+      kind: inlineEntry.kind,
+      server_url: inlineEntry.server_url ?? null,
+      auth_type: inlineEntry.auth_type,
+      docs_url: inlineEntry.docs_url ?? null,
+      verified: inlineEntry.verified ?? false,
+      capabilities: curatedEntry?.capabilities ?? {},
     });
     if (insertError) {
       throw new DatabaseError('Failed to create catalog entry', {
@@ -149,9 +533,9 @@ export async function installIntegration(
   }
 
   const effective = catalogEntry ?? {
-    kind: input.catalog_entry!.kind,
-    server_url: input.catalog_entry!.server_url ?? null,
-    auth_type: input.catalog_entry!.auth_type,
+    kind: inlineEntry!.kind,
+    server_url: inlineEntry!.server_url ?? null,
+    auth_type: inlineEntry!.auth_type,
   };
 
   const { data: installation, error } = await supabase
