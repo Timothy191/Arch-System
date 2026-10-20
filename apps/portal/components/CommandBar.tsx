@@ -3,7 +3,7 @@
 import { getServiceUrls } from '@repo/ui/lib/urls';
 import { cn } from '@repo/ui/lib/utils';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { logout } from '~/app/actions';
 
 const urls = getServiceUrls();
@@ -139,17 +139,38 @@ export function CommandBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const filtered = ALL_COMMANDS.filter((cmd) =>
-    cmd.label.toLowerCase().includes(query.toLowerCase())
-  );
+  // BOLT-OPTIMIZATION: Memoize filtered items, category grouping, flatList, and itemIndexMap.
+  // Prevents re-executing array filtering, reduce grouping, and linear indexOf searches on every render.
+  const { grouped, flatList, itemIndexMap } = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? ALL_COMMANDS.filter((cmd) => cmd.label.toLowerCase().includes(q))
+      : ALL_COMMANDS;
 
-  const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
-    const list = (acc[cmd.category] ??= []);
-    list.push(cmd);
-    return acc;
-  }, {});
+    const grouped: Record<string, CommandItem[]> = {};
+    for (let i = 0; i < filtered.length; i++) {
+      const cmd = filtered[i]!;
+      const list = (grouped[cmd.category] ??= []);
+      list.push(cmd);
+    }
 
-  const flatList = Object.values(grouped).flat();
+    const flatList = Object.values(grouped).flat();
+    const itemIndexMap = new Map<string, number>();
+    for (let i = 0; i < flatList.length; i++) {
+      const item = flatList[i]!;
+      itemIndexMap.set(item.id, i);
+    }
+
+    return { grouped, flatList, itemIndexMap };
+  }, [query]);
+
+  // BOLT-OPTIMIZATION: Store refs for rapidly changing state so the keydown event listener closure
+  // accesses fresh state without re-registering window event listeners on every arrow keypress.
+  const flatListRef = useRef(flatList);
+  flatListRef.current = flatList;
+
+  const selectedIndexRef = useRef(selectedIndex);
+  selectedIndexRef.current = selectedIndex;
 
   const handleSelect = useCallback(
     (item: CommandItem) => {
@@ -181,34 +202,40 @@ export function CommandBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  // BOLT-OPTIMIZATION: Stable keydown listener attached only when open state changes.
+  // Prevents event listener teardown and re-registration on every arrow key state change.
   useEffect(() => {
-    setSelectedIndex(0);
-  }, []);
-
-  useEffect(() => {
-    if (!open || flatList.length === 0) return;
+    if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
+      const list = flatListRef.current;
+      if (list.length === 0) return;
+
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((i) => (i + 1) % flatList.length);
+        setSelectedIndex((i) => (i + 1) % list.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((i) => (i - 1 + flatList.length) % flatList.length);
+        setSelectedIndex((i) => (i - 1 + list.length) % list.length);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const item = flatList[selectedIndex];
+        const item = list[selectedIndexRef.current];
         if (item) handleSelect(item);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, flatList, selectedIndex, handleSelect]);
+  }, [open, handleSelect]);
 
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
     }
   }, [open]);
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    setSelectedIndex(0);
+  };
 
   if (!open) return null;
 
@@ -234,7 +261,7 @@ export function CommandBar() {
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
             placeholder="Search departments, tools, or pages..."
             className="flex-1 bg-transparent text-sm text-arch-text-primary placeholder:text-arch-text-tertiary outline-none"
           />
@@ -259,7 +286,7 @@ export function CommandBar() {
                   {category}
                 </div>
                 {items.map((item) => {
-                  const globalIndex = flatList.indexOf(item);
+                  const globalIndex = itemIndexMap.get(item.id) ?? 0;
                   const isSelected = globalIndex === selectedIndex;
                   return (
                     <button
