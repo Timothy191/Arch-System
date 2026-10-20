@@ -308,7 +308,7 @@ export function HeroRotator({
 
   return (
     <div
-      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl max-w-6xl mx-auto"
+      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
@@ -360,22 +360,22 @@ export function HeroRotator({
         </m.div>
 
         {total > 1 && (
-          <div className="pointer-events-none absolute inset-y-0 inset-x-0 mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] z-40">
+          <div className="pointer-events-none absolute inset-y-0 inset-x-0 w-full z-40">
             <button
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-11 sm:-left-14 top-1/2 -translate-y-1/2 p-2.5 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
-              <ArchEmblemIcon className="w-3.5 h-3.5 -rotate-90 transition-transform" />
+              <ArchEmblemIcon className="w-5 h-5 -rotate-90 transition-transform" />
             </button>
             <button
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-11 sm:-right-14 top-1/2 -translate-y-1/2 p-2.5 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
-              <ArchEmblemIcon className="w-3.5 h-3.5 rotate-90 transition-transform" />
+              <ArchEmblemIcon className="w-5 h-5 rotate-90 transition-transform" />
             </button>
           </div>
         )}

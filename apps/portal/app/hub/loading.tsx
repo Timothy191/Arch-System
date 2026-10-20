@@ -12,7 +12,7 @@ export default function HubLoading() {
       aria-label="Loading Operations Hub"
     >
       {/* Light-theme glass hero section */}
-      <section className="relative w-full pt-2 pb-2 px-4 sm:px-6 max-w-6xl mx-auto">
+      <section className="relative w-full pt-2 pb-2 px-4 sm:px-6 mx-auto">
         <div className="relative w-full py-4">
           <div className="mx-auto w-[84%] sm:w-[78%] lg:w-[68%] max-w-[760px] overflow-hidden rounded-2xl liquid-glass-light border border-white/20 shadow-window">
             <SkeletonBlock className="h-[460px] w-full" />
