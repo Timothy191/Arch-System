@@ -586,13 +586,14 @@ export function DelayEntriesForm({
                           title="Start Time"
                           type="datetime-local"
                           value={entry.delay_start_time.slice(0, 16)}
-                          onChange={(e) =>
-                            updateDelayEntry(
-                              index,
-                              'delay_start_time',
-                              new Date(e.target.value).toISOString()
-                            )
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            const d = new Date(val);
+                            if (!Number.isNaN(d.getTime())) {
+                              updateDelayEntry(index, 'delay_start_time', d.toISOString());
+                            }
+                          }}
                           disabled={
                             readOnly || entry.status === 'committed' || entry.is_manual_override
                           }
@@ -613,13 +614,14 @@ export function DelayEntriesForm({
                           title="End Time"
                           type="datetime-local"
                           value={entry.delay_end_time.slice(0, 16)}
-                          onChange={(e) =>
-                            updateDelayEntry(
-                              index,
-                              'delay_end_time',
-                              new Date(e.target.value).toISOString()
-                            )
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            const d = new Date(val);
+                            if (!Number.isNaN(d.getTime())) {
+                              updateDelayEntry(index, 'delay_end_time', d.toISOString());
+                            }
+                          }}
                           disabled={
                             readOnly || entry.status === 'committed' || entry.is_manual_override
                           }

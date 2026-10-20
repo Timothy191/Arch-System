@@ -19,6 +19,7 @@ import {
   GitCommit,
   Layers,
   LifeBuoy,
+  Menu,
   Monitor,
   Pickaxe,
   Pin,
@@ -172,8 +173,29 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         )}
         onMouseEnter={openSidebar}
         onMouseMove={openSidebar}
+        onClick={openSidebar}
         aria-hidden="true"
+        data-testid="edge-trigger"
       />
+
+      {/* Mobile sidebar toggle button for touchscreen / pit tablet usability */}
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-label="Toggle department navigation"
+        className="fixed bottom-4 left-4 z-50 md:hidden p-2.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border-default)] shadow-lg text-[var(--text-heading)] hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile backdrop overlay */}
+      {isOpen && !isPinned && (
+        <div
+          className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* macOS Sidebar — Auto-hide/reveal style with proximity reveal, delayed collapse, and manual pin */}
       <aside
@@ -331,9 +353,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
 
       {/* Main content area */}
       <main
+        aria-label={`${department.displayName} content`}
         className={cn(
           'flex-1 h-full overflow-auto p-lg transition-all duration-300',
-          isPinned ? 'pl-64' : 'pl-12'
+          isPinned ? 'pl-64' : 'pl-12',
+          'max-md:pl-4'
         )}
       >
         <m.div

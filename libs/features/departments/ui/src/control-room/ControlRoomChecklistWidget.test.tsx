@@ -55,7 +55,7 @@ describe('ControlRoomChecklistWidget', () => {
     fireEvent.click(weeklyTab);
 
     expect(
-      screen.getByText(/Perform end-to-end failover test of backup radio and satellite channels/)
+      screen.getByText(/Perform end-to-end failover test of backup radio and cellular LTE channels/)
     ).toBeInTheDocument();
   });
 

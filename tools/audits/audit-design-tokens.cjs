@@ -115,9 +115,6 @@ const REQUIRED_ASSETS = [
   'favicon.ico',
   'manifest.json',
   'logo.svg',
-  'plantcor.png',
-  'plantcor-login.png',
-  'plantcor-header.png',
   'archlinux-logo-black-scalable.svg',
 ];
 

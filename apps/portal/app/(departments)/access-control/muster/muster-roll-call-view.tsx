@@ -400,13 +400,27 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
           <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-black/[0.03] border-b border-black/[0.08] text-[var(--text-muted)] font-mono text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Entity / Personnel</th>
-                <th className="py-3 px-4">Organization & Role</th>
-                <th className="py-3 px-4">Assigned Pit Zone</th>
-                <th className="py-3 px-4">Last Gate Swipe</th>
-                <th className="py-3 px-4">Compliance</th>
-                <th className="py-3 px-4">Muster Station</th>
-                <th className="py-3 px-4 text-right">Reconciliation Action</th>
+                <th scope="col" className="py-3 px-4">
+                  Entity / Personnel
+                </th>
+                <th scope="col" className="py-3 px-4">
+                  Organization & Role
+                </th>
+                <th scope="col" className="py-3 px-4">
+                  Assigned Pit Zone
+                </th>
+                <th scope="col" className="py-3 px-4">
+                  Last Gate Swipe
+                </th>
+                <th scope="col" className="py-3 px-4">
+                  Compliance
+                </th>
+                <th scope="col" className="py-3 px-4">
+                  Muster Station
+                </th>
+                <th scope="col" className="py-3 px-4 text-right">
+                  Reconciliation Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.06] bg-white/50">

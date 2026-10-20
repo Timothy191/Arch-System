@@ -72,7 +72,7 @@ export default async function TireManagementPage({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <CircleDot className="w-6 h-6 text-dept-engineering" />
+            <CircleDot className="w-6 h-6 text-dept-engineering" aria-hidden="true" />
             <h2 className="text-2xl font-bold text-[var(--text-heading)]">Tire Management</h2>
           </div>
           <p className="text-sm text-[var(--text-muted)] mt-1">
@@ -84,9 +84,9 @@ export default async function TireManagementPage({
             href="/engineering/breakdowns"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:border-[var(--border-emphasis)] transition-colors"
           >
-            <Wrench className="w-4 h-4 text-dept-engineering" />
+            <Wrench className="w-4 h-4 text-dept-engineering" aria-hidden="true" />
             Breakdowns
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
           <Link
             href="/admin"
@@ -104,7 +104,7 @@ export default async function TireManagementPage({
             <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
               Total Tires
             </span>
-            <Layers className="w-4 h-4 text-[var(--text-muted)]" />
+            <Layers className="w-4 h-4 text-[var(--text-muted)]" aria-hidden="true" />
           </div>
           <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{totalTires}</p>
           <span className="text-xs text-[var(--text-secondary)] mt-1 block">In fleet tracking</span>
@@ -115,7 +115,7 @@ export default async function TireManagementPage({
             <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
               Installed Active
             </span>
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
+            <CheckCircle className="w-4 h-4 text-emerald-600" aria-hidden="true" />
           </div>
           <p className="text-2xl font-bold text-emerald-600 mt-2">{installedTires}</p>
           <span className="text-xs text-[var(--text-secondary)] mt-1 block">
@@ -128,7 +128,7 @@ export default async function TireManagementPage({
             <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
               Inventory / Spares
             </span>
-            <Clock className="w-4 h-4 text-blue-600" />
+            <Clock className="w-4 h-4 text-blue-600" aria-hidden="true" />
           </div>
           <p className="text-2xl font-bold text-blue-600 mt-2">{inventoryTires}</p>
           <span className="text-xs text-[var(--text-secondary)] mt-1 block">
@@ -141,7 +141,7 @@ export default async function TireManagementPage({
             <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
               Critical Alerts
             </span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <AlertTriangle className="w-4 h-4 text-amber-600" aria-hidden="true" />
           </div>
           <p
             className={`text-2xl font-bold mt-2 ${criticalTires > 0 ? 'text-amber-600' : 'text-[var(--text-heading)]'}`}
@@ -171,7 +171,10 @@ export default async function TireManagementPage({
         ) : (
           <GlassCard className="overflow-hidden p-0">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table
+                className="w-full text-left text-sm"
+                aria-label="Tire fleet inventory and telemetry table"
+              >
                 <thead>
                   <tr className="border-b border-[var(--border-default)] bg-black/[0.02]">
                     <th
@@ -275,7 +278,10 @@ export default async function TireManagementPage({
                             >
                               {tread} mm
                               {isCritical && (
-                                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <AlertTriangle
+                                  className="w-3.5 h-3.5 text-amber-600 shrink-0"
+                                  aria-hidden="true"
+                                />
                               )}
                             </span>
                           ) : (
@@ -285,7 +291,10 @@ export default async function TireManagementPage({
                         <td className="px-5 py-3.5 text-xs">
                           {psi !== null ? (
                             <span className="inline-flex items-center gap-1 text-[var(--text-heading)]">
-                              <Gauge className="w-3 h-3 text-[var(--text-muted)]" />
+                              <Gauge
+                                className="w-3 h-3 text-[var(--text-muted)]"
+                                aria-hidden="true"
+                              />
                               {psi} PSI
                             </span>
                           ) : (

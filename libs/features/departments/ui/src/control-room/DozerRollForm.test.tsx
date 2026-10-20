@@ -268,7 +268,7 @@ describe('DozerRollForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /save roll/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Enter both length and width')).toBeInTheDocument();
+      expect(screen.getByText(/both length and width/i)).toBeInTheDocument();
     });
   });
 

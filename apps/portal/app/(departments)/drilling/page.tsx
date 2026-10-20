@@ -206,12 +206,14 @@ export default async function DrillingDashboardPage() {
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-cyan-400" />
+            <Clock className="w-4 h-4 text-[var(--accent-blue)]" />
             <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
               Hours Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-cyan-400 mt-2">{totalHours.toFixed(1)}h</p>
+          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-2">
+            {totalHours.toFixed(1)}h
+          </p>
         </GlassCard>
 
         <BorderBox variant="patterned-caution" padding="none" className="overflow-hidden">

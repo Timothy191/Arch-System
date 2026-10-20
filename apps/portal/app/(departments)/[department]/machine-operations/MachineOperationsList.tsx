@@ -345,7 +345,7 @@ function MachineOperationsList({
               {/* Shift Subsections */}
               {dayOps.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider pl-4 border-l-2 border-[var(--accent-yellow)]">
+                  <h5 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider pl-4 border-l-2 border-[var(--accent-amber)]">
                     Day Shift ({dayOps.length})
                   </h5>
                   <div className="space-y-2">
@@ -784,8 +784,8 @@ function OperationCard({
                 <span
                   className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${
                     operation.shift_type === 'day'
-                      ? 'bg-[var(--accent-yellow)]/15 text-[var(--accent-yellow)] border border-[var(--accent-yellow)]/30'
-                      : 'bg-[var(--accent-purple)]/15 text-[var(--accent-purple)] border border-[var(--accent-purple)]/30'
+                      ? 'bg-[var(--accent-amber)]/15 text-[var(--accent-amber)] border border-[var(--accent-amber)]/30'
+                      : 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30'
                   }`}
                 >
                   {operation.shift_type} shift
@@ -919,7 +919,7 @@ function OperationCard({
               </span>
               <span className="text-accent-red">{totalDelayHours.toFixed(2)}h total</span>
               {draftDelayHours > 0 && (
-                <span className="text-[var(--accent-yellow)]">
+                <span className="text-[var(--accent-amber)]">
                   ({draftDelayHours.toFixed(2)}h draft)
                 </span>
               )}
@@ -934,7 +934,7 @@ function OperationCard({
                   </div>
                 ))}
                 {delayEntries.some((d) => d.is_manual_override) && (
-                  <div className="flex items-center gap-1 text-xs text-[var(--accent-yellow)]">
+                  <div className="flex items-center gap-1 text-xs text-[var(--accent-amber)]">
                     <AlertCircle size={12} />
                     <span>Includes manual override entries</span>
                   </div>

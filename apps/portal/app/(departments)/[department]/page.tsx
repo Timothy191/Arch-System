@@ -1,6 +1,7 @@
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { ProductionDashboard } from '~/features/departments/components/production/ProductionDashboard';
@@ -110,18 +111,18 @@ export default async function DepartmentDashboard({
                  - Action labels are self-evident and match system capabilities
             */}
             <div className="flex flex-wrap gap-3">
-              <a
+              <Link
                 href={`/${deptSlug}/machine-operations`}
                 className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
               >
                 Machine Operations
-              </a>
-              <a
+              </Link>
+              <Link
                 href={`/${deptSlug}/hourly-loads`}
                 className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
               >
                 Update Loads
-              </a>
+              </Link>
             </div>
 
             {/* Consolidated Dynamic Control Room Widgets */}

@@ -393,22 +393,22 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
       {/* ── Modal: Issue New QR / RFID Pass ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-xl bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 text-white">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-xl bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-2xl p-6 shadow-2xl space-y-5 text-[var(--text-heading)]">
+            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
               <div>
                 <h3 className="font-bold text-base flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
                   Issue New QR / RFID Credential
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Credential will be saved to the database and verifiable via Chainway C66 scanner.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -417,8 +417,10 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
             <form onSubmit={handleSubmitNewBadge} className="space-y-4">
               {/* Entity Type Selector Tabs */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300">Target Entity Type</label>
-                <div className="grid grid-cols-5 gap-1.5 bg-slate-950 p-1 rounded-lg border border-white/10">
+                <label className="text-xs font-medium text-[var(--text-secondary)]">
+                  Target Entity Type
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-[var(--bg-secondary)] p-1 rounded-lg border border-[var(--border-default)]">
                   {[
                     { id: 'personnel', label: 'Employee', icon: Users },
                     { id: 'coal_truck', label: 'Coal Truck', icon: Truck },
@@ -440,8 +442,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                         }}
                         className={`flex flex-col items-center justify-center p-2 rounded text-[11px] font-medium transition-all ${
                           active
-                            ? 'bg-emerald-600 text-white shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5 mb-1" />
@@ -455,11 +457,13 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               {/* Select Existing or Create New */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300">Assign Target Entity</label>
+                  <label className="text-xs font-medium text-[var(--text-secondary)]">
+                    Assign Target Entity
+                  </label>
                   <button
                     type="button"
                     onClick={() => setIsCustomEntity(!isCustomEntity)}
-                    className="text-[11px] text-blue-400 hover:underline"
+                    className="text-[11px] text-[var(--accent-blue)] hover:underline"
                   >
                     {isCustomEntity ? 'Select Existing Entity' : '+ Register New On-The-Fly'}
                   </button>
@@ -469,7 +473,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                   <select
                     value={selectedEntityId}
                     onChange={(e) => setSelectedEntityId(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-white/15 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-xs text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
                     <option value="">-- Choose {formEntityType.replace('_', ' ')} --</option>
                     {currentOptions.map((opt) => (
@@ -479,7 +483,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     ))}
                   </select>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-lg border border-white/10">
+                  <div className="grid grid-cols-2 gap-2 bg-[var(--bg-secondary)]/50 p-3 rounded-lg border border-[var(--border-default)]">
                     {formEntityType === 'coal_truck' || formEntityType === 'vehicle' ? (
                       <>
                         <input
@@ -487,21 +491,21 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                           placeholder="Fleet / Truck Code (e.g. CT-99)"
                           value={customCode}
                           onChange={(e) => setCustomCode(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                         <input
                           type="text"
                           placeholder="Registration (e.g. ABC 999 GP)"
                           value={customReg}
                           onChange={(e) => setCustomReg(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                         <input
                           type="text"
                           placeholder="Make & Model (e.g. Scania R500)"
                           value={customMake}
                           onChange={(e) => setCustomMake(e.target.value)}
-                          className="col-span-2 px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="col-span-2 px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                       </>
                     ) : formEntityType === 'visitor' ? (
@@ -511,14 +515,14 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                           placeholder="Visitor Full Name"
                           value={customName}
                           onChange={(e) => setCustomName(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                         <input
                           type="text"
                           placeholder="Company (e.g. TransCol Logistics)"
                           value={customMake}
                           onChange={(e) => setCustomMake(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                       </>
                     ) : (
@@ -528,14 +532,14 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                           placeholder="Code (e.g. EQP-991)"
                           value={customCode}
                           onChange={(e) => setCustomCode(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                         <input
                           type="text"
                           placeholder="Type / Description"
                           value={customMake}
                           onChange={(e) => setCustomMake(e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
+                          className="px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
                         />
                       </>
                     )}
@@ -547,11 +551,13 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-300">QR Code String</label>
+                    <label className="text-xs font-medium text-[var(--text-secondary)]">
+                      QR Code String
+                    </label>
                     <button
                       type="button"
                       onClick={() => handleAutoGenerateCode(formEntityType)}
-                      className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1"
+                      className="text-[10px] text-emerald-600 hover:underline flex items-center gap-1 font-medium"
                     >
                       <Sparkles className="w-2.5 h-2.5" /> Auto
                     </button>
@@ -562,13 +568,13 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     value={qrCodeInput}
                     onChange={(e) => setQrCodeInput(e.target.value)}
                     placeholder="e.g. TRK-COAL-1002"
-                    className="w-full px-3 py-2 bg-slate-950 border border-white/15 rounded-lg text-xs font-mono text-emerald-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-xs font-mono text-emerald-700 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-slate-300 flex items-center gap-1">
-                    <Radio className="w-3 h-3 text-blue-400" />
+                  <label className="text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1">
+                    <Radio className="w-3 h-3 text-blue-600" />
                     RFID Chip Tag UID (Optional)
                   </label>
                   <input
@@ -576,20 +582,22 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     value={rfidCodeInput}
                     onChange={(e) => setRfidCodeInput(e.target.value)}
                     placeholder="e.g. E28011606000021"
-                    className="w-full px-3 py-2 bg-slate-950 border border-white/15 rounded-lg text-xs font-mono text-blue-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-xs font-mono text-blue-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {/* Live QR Preview Thumbnail */}
-              <div className="flex items-center gap-4 bg-slate-950/80 p-3 rounded-xl border border-white/10">
-                <div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0 shadow-inner">
+              <div className="flex items-center gap-4 bg-[var(--bg-secondary)]/60 p-3 rounded-xl border border-[var(--border-default)]">
+                <div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0 shadow-inner border border-[var(--border-default)]">
                   <QRCodeSection data={qrCodeInput || 'SAMPLE'} size={56} />
                 </div>
                 <div className="text-xs space-y-1">
-                  <p className="font-semibold text-white">Live Code Preview</p>
-                  <p className="font-mono text-[11px] text-emerald-400 truncate">{qrCodeInput}</p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="font-semibold text-[var(--text-heading)]">Live Code Preview</p>
+                  <p className="font-mono text-[11px] text-emerald-700 font-bold truncate">
+                    {qrCodeInput}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)]">
                     Verifiable by optical 2D barcode imager and Chainway C66 RFID reader.
                   </p>
                 </div>
@@ -597,7 +605,9 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
               {/* Validity Period */}
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-300 font-medium">Validity Expiration</span>
+                <span className="text-[var(--text-secondary)] font-medium">
+                  Validity Expiration
+                </span>
                 <div className="flex items-center gap-2">
                   {[
                     { label: '24 Hours', days: 1 },
@@ -611,7 +621,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                       className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                         validityDays === p.days
                           ? 'bg-blue-600 text-white'
-                          : 'bg-slate-800 text-slate-400 hover:text-white'
+                          : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] border border-[var(--border-default)]'
                       }`}
                     >
                       {p.label}
@@ -621,7 +631,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-default)]">
                 <Button
                   type="button"
                   variant="outline"
@@ -646,31 +656,31 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
       {/* ── Modal: Inspect & Print Single Badge ── */}
       {inspectBadge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-sm bg-slate-900 border border-white/15 rounded-2xl p-6 shadow-2xl text-center space-y-4 text-white">
-            <div className="flex justify-between items-center pb-2 border-b border-white/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-2xl p-6 shadow-2xl text-center space-y-4 text-[var(--text-heading)]">
+            <div className="flex justify-between items-center pb-2 border-b border-[var(--border-default)]">
               <span className="font-bold text-sm">Badge Credential Detail</span>
               <button
                 type="button"
                 onClick={() => setInspectBadge(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-[var(--text-muted)] hover:text-[var(--text-heading)]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mx-auto w-48 h-48 bg-white p-3 rounded-2xl shadow-xl flex items-center justify-center">
+            <div className="mx-auto w-48 h-48 bg-white p-3 rounded-2xl border border-[var(--border-default)] shadow-md flex items-center justify-center">
               <QRCodeSection data={inspectBadge.qr_code} size={160} />
             </div>
 
             <div className="space-y-1">
-              <p className="font-mono font-bold text-base text-emerald-400">
+              <p className="font-mono font-bold text-base text-emerald-700">
                 {inspectBadge.qr_code}
               </p>
-              <p className="font-semibold text-white">{inspectBadge.entity_name}</p>
-              <p className="text-xs text-slate-400">{inspectBadge.entity_subtitle}</p>
+              <p className="font-semibold text-[var(--text-heading)]">{inspectBadge.entity_name}</p>
+              <p className="text-xs text-[var(--text-muted)]">{inspectBadge.entity_subtitle}</p>
               {inspectBadge.rfid_code && (
-                <p className="text-xs font-mono text-blue-400 pt-1">
+                <p className="text-xs font-mono text-blue-700 pt-1 font-medium">
                   RFID Tag: {inspectBadge.rfid_code}
                 </p>
               )}

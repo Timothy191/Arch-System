@@ -285,15 +285,21 @@ export function UsersTab() {
                       </td>
                       <td className="px-4 py-3.5 text-right">
                         <div className="flex gap-2 justify-end">
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(emp)}>
-                            <Edit2 className="w-4 h-4" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(emp)}
+                            aria-label={`Edit ${emp.full_name}`}
+                          >
+                            <Edit2 className="w-4 h-4" aria-hidden="true" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             className="text-accent-red hover:text-accent-red/80"
+                            aria-label={`Delete ${emp.full_name}`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </Button>
                         </div>
                       </td>
