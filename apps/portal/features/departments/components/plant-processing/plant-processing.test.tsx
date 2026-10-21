@@ -106,6 +106,34 @@ describe('Plant & Processing Workspace Components', () => {
       expect(screen.getByText('18:00 - 19:00')).toBeInTheDocument();
       expect(screen.getByText('05:00 - 06:00')).toBeInTheDocument();
     });
+
+    it('should separate Dashboard mode (/plant-processing) and Hourly Sheet mode (/plant-processing/hourly-sheet)', () => {
+      const { unmount } = render(
+        <PlantHourlySheetClient
+          initialDate="2026-10-21"
+          initialSheets={[sampleSheet]}
+          mode="dashboard"
+        />
+      );
+      expect(screen.getByTestId('card-rom-scale')).toBeInTheDocument();
+      expect(screen.getByTestId('card-live-production-pulse')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('table', { name: /Plant and Processing Hourly Input Sheet/i })
+      ).not.toBeInTheDocument();
+      unmount();
+
+      render(
+        <PlantHourlySheetClient
+          initialDate="2026-10-21"
+          initialSheets={[sampleSheet]}
+          mode="sheet"
+        />
+      );
+      expect(
+        screen.getByRole('table', { name: /Plant and Processing Hourly Input Sheet/i })
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('card-rom-scale')).not.toBeInTheDocument();
+    });
   });
 
   describe('PlantDelaysClient (Delays Tab)', () => {

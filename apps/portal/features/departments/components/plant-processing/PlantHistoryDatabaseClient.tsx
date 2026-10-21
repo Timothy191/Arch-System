@@ -394,7 +394,7 @@ export function PlantHistoryDatabaseClient({
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
-            href="/plant-processing"
+            href="/plant-processing/hourly-sheet"
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600" />

@@ -111,7 +111,7 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: 'Plant Yield', value: '91.4%' },
     trend: [87, 88, 89, 90, 89, 91, 91, 92],
     actions: [
-      { label: 'Hourly Sheet', href: '/plant-processing' },
+      { label: 'Hourly Sheet', href: '/plant-processing/hourly-sheet' },
       { label: 'Log Delays', href: '/plant-processing/delays' },
     ],
   },
@@ -295,10 +295,11 @@ export const DATABASE_TABS = [
 ] as const;
 
 /**
- * Plant & Processing specific tabs - Hourly Input Sheet dashboard, Daily Log, Delays, and History database
+ * Plant & Processing specific tabs - Dashboard, Hourly Sheet, Daily Log, Delays, and History database
  */
 export const PLANT_PROCESSING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'hourly-sheet', label: 'Hourly Sheet', icon: 'Clock' },
   { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
   { name: 'delays', label: 'Delays', icon: 'AlertTriangle' },
   { name: 'history', label: 'History', icon: 'History' },

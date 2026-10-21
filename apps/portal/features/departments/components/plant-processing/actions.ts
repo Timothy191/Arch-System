@@ -222,6 +222,7 @@ export async function savePlantHourlySheetAction(
       () => undefined
     );
     revalidatePath('/plant-processing');
+    revalidatePath('/plant-processing/hourly-sheet');
     revalidatePath('/plant-processing/history');
   } catch {
     // Graceful fallback when running against read-only or preview DB
