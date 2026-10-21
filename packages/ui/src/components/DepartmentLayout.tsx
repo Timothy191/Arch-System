@@ -168,7 +168,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       {/* Hover / proximity trigger zone at the far left (disabled when pinned) */}
       <div
         className={cn(
-          'absolute left-0 -top-16 bottom-0 w-12 z-40',
+          'absolute left-0 top-0 bottom-0 w-12 z-40',
           isPinned ? 'pointer-events-none' : 'cursor-pointer'
         )}
         onMouseEnter={openSidebar}
@@ -201,7 +201,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'absolute left-0 -top-16 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
+          'absolute left-0 top-0 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
@@ -230,13 +230,13 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Back to Hub link & Pin toggle */}
         <div
           className={cn(
-            'px-3 pt-3 pb-1 flex items-center justify-between transition-opacity duration-200',
+            'px-3 pt-3.5 pb-1.5 flex items-center justify-between transition-opacity duration-200',
             isPinned || isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           )}
         >
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
+            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
           >
             <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
             <span>Back to Hub</span>
@@ -273,7 +273,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               department.color === 'blue' && 'bg-dept-drilling/10 text-dept-drilling',
               department.color === 'emerald' && 'bg-dept-production/10 text-dept-production',
               department.color === 'violet' && 'bg-dept-engineering/10 text-dept-engineering',
-              department.color === 'red' && 'bg-dept-control-room/10 text-dept-control-room'
+              department.color === 'red' && 'bg-dept-control-room/10 text-dept-control-room',
+              department.color === 'amber' && 'bg-accent-amber/10 text-accent-amber'
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />

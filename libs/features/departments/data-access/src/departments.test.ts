@@ -1,4 +1,9 @@
-import { DEPARTMENTS, PRODUCTIVITY_TOOLS } from './departments';
+import {
+  DEPARTMENTS,
+  getDepartmentTabs,
+  PLANT_PROCESSING_TABS,
+  PRODUCTIVITY_TOOLS,
+} from './departments';
 
 describe('DEPARTMENTS registry', () => {
   it('defines all active departments with valid configurations', () => {
@@ -75,5 +80,11 @@ describe('DEPARTMENTS registry', () => {
       expect(tool.displayName).toBeDefined();
       expect(tool.icon).toBeDefined();
     }
+  });
+
+  it('returns dedicated Plant & Processing tabs (Dashboard, Daily Log, Delays, History) without Machines, Reports, or Tools', () => {
+    const tabs = getDepartmentTabs('plant-processing');
+    expect(tabs).toBe(PLANT_PROCESSING_TABS);
+    expect(tabs.map((t) => t.name)).toEqual(['dashboard', 'daily-log', 'delays', 'history']);
   });
 });

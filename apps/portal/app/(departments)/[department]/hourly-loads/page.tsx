@@ -18,50 +18,37 @@ export default async function HourlyLoadsPage({
     department,
   });
 
-  // Fetch dump trucks (ADT, RDT, Dump Truck) with bin_factor (centralised fleet)
-  const { data: machines } = await supabase
-    .from('machines')
-    .select('id, name, machine_type, bin_factor, site_id')
-    .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
-    .eq('active', true)
-    .order('name');
-
-  // Fetch active excavators with their site associations
-  const { data: excavators } = await supabase
-    .from('machines')
-    .select('id, name, machine_type, site_id, sites(name)')
-    .eq('machine_type', 'Excavator')
-    .eq('active', true)
-    .order('name');
-
-  // Fetch today's hourly loads
-  const { data: hourlyLoads } = await supabase
-    .from('hourly_loads')
-    .select('*')
-    .eq('department_id', deptId)
-    .eq('load_date', today);
-
-  // Fetch active sites
-  const { data: sites } = await supabase
-    .from('sites')
-    .select('id, name, site_code')
-    .eq('active', true)
-    .order('name');
-
-  // Fetch active mine blocks / areas
-  const { data: mineBlocks } = await supabase
-    .from('mine_blocks')
-    .select('id, name, code, site_id')
-    .eq('active', true)
-    .order('name');
-
-  // Fetch today's excavator activity records (for block_mined_id and material_type)
-  const { data: excavatorActivities } = await supabase
-    .from('excavator_activity')
-    .select('id, machine_id, site_id, block_mined_id, material_type, shift_type')
-    .eq('department_id', deptId)
-    .eq('activity_date', today)
-    .order('created_at', { ascending: false });
+  // Parallel fetch of fleet dump trucks, excavators, today's loads, sites, mine blocks, and excavator activities
+  const [
+    { data: machines },
+    { data: excavators },
+    { data: hourlyLoads },
+    { data: sites },
+    { data: mineBlocks },
+    { data: excavatorActivities },
+  ] = await Promise.all([
+    supabase
+      .from('machines')
+      .select('id, name, machine_type, bin_factor, site_id')
+      .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
+      .eq('active', true)
+      .order('name'),
+    supabase
+      .from('machines')
+      .select('id, name, machine_type, site_id, sites(name)')
+      .eq('machine_type', 'Excavator')
+      .eq('active', true)
+      .order('name'),
+    supabase.from('hourly_loads').select('*').eq('department_id', deptId).eq('load_date', today),
+    supabase.from('sites').select('id, name, site_code').eq('active', true).order('name'),
+    supabase.from('mine_blocks').select('id, name, code, site_id').eq('active', true).order('name'),
+    supabase
+      .from('excavator_activity')
+      .select('id, machine_id, site_id, block_mined_id, material_type, shift_type')
+      .eq('department_id', deptId)
+      .eq('activity_date', today)
+      .order('created_at', { ascending: false }),
+  ]);
 
   // Calculate totals
   const loadsByMachine = new Map();

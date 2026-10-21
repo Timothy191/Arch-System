@@ -191,7 +191,7 @@ export async function getShiftCompleteness(
   return withCache(
     async () => {
       const [
-        { data: machines },
+        machinesResult,
         { data: machineOps },
         { data: excavatorActs },
         { data: dozerRolls },
@@ -229,6 +229,24 @@ export async function getShiftCompleteness(
           .eq('shift_type', shift),
       ]);
 
+      let machines: Array<{
+        id: string;
+        name: string;
+        machine_type: string;
+        report_exempt?: boolean | null;
+      }> | null = machinesResult.data;
+
+      if (machinesResult.error || !machines || machines.length === 0) {
+        const centralFallback = await supabase
+          .from('machines')
+          .select('id, name, machine_type')
+          .eq('active', true)
+          .order('name');
+        if (centralFallback.data && centralFallback.data.length > 0) {
+          machines = centralFallback.data;
+        }
+      }
+
       const machineOpIds = new Set(
         (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id)
       );
@@ -261,7 +279,7 @@ export async function getShiftCompleteness(
       }
 
       const statuses: MachineCoverageStatus[] = (machines ?? []).map(
-        (m: { id: string; name: string; machine_type: string; report_exempt: boolean | null }) => {
+        (m: { id: string; name: string; machine_type: string; report_exempt?: boolean | null }) => {
           const requiredForm = requiredFormFor(m.machine_type);
           const meta = FORM_META[requiredForm];
 

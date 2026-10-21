@@ -184,6 +184,7 @@ function MachineOperationsList({
     return fleetMachines.map((machine) => {
       const breakdown =
         breakdownsByFleetId.get(machine.id) ||
+        breakdownsByFleetId.get(machine.name) ||
         (machine.serial_number ? breakdownsByFleetId.get(machine.serial_number) : undefined);
       const isBreakdown = breakdown?.status === 'active';
 
@@ -601,9 +602,14 @@ function FleetMachineCard({
                 <span className="px-2 py-0.5 rounded-md text-[11px] bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] font-medium">
                   {machine.machine_type}
                 </span>
+                {machine.bin_factor != null && machine.bin_factor > 0 && (
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-[var(--accent-blue)] font-medium">
+                    {machine.bin_factor} BCM/load
+                  </span>
+                )}
                 {machine.serial_number && (
                   <span className="text-[11px] font-mono text-[var(--text-muted)]">
-                    SN: {machine.serial_number}
+                    {machine.serial_number}
                   </span>
                 )}
               </div>
@@ -743,9 +749,10 @@ function OperationCard({
       ? materialBCM / (operation.hours_worked || 1)
       : 0;
 
-  // Match breakdown by machine_id or serial_number using pre-indexed Map (O(1) lookup)
+  // Match breakdown by machine_id, machine name, or serial_number using pre-indexed Map (O(1) lookup)
   const machineBreakdown =
     breakdownsByFleetId.get(operation.machine_id) ||
+    (operation.machine?.name ? breakdownsByFleetId.get(operation.machine.name) : undefined) ||
     (operation.machine?.serial_number
       ? breakdownsByFleetId.get(operation.machine.serial_number)
       : undefined);

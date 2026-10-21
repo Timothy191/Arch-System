@@ -1,9 +1,13 @@
+import { redirect } from 'next/navigation';
 import ToolsPageClient from '~/features/departments/components/tools/ToolsPageClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { EXTERNAL_TOOLS } from '~/lib/tools';
 
 export default async function ToolsPage({ params }: { params: Promise<{ department: string }> }) {
   const { department } = await params;
+  if (department === 'plant-processing') {
+    redirect('/plant-processing');
+  }
   const { dept } = await getDepartmentContext({ department });
 
   const initialTools = EXTERNAL_TOOLS.map((tool) => ({

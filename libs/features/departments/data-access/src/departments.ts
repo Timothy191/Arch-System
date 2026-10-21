@@ -111,8 +111,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: 'Plant Yield', value: '91.4%' },
     trend: [87, 88, 89, 90, 89, 91, 91, 92],
     actions: [
-      { label: 'Daily Log', href: '/plant-processing/daily-log' },
-      { label: 'Reports', href: '/plant-processing/reports' },
+      { label: 'Hourly Sheet', href: '/plant-processing' },
+      { label: 'Log Delays', href: '/plant-processing/delays' },
     ],
   },
   {
@@ -294,6 +294,16 @@ export const DATABASE_TABS = [
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 
+/**
+ * Plant & Processing specific tabs - Hourly Input Sheet dashboard, Daily Log, Delays, and History database
+ */
+export const PLANT_PROCESSING_TABS = [
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'delays', label: 'Delays', icon: 'AlertTriangle' },
+  { name: 'history', label: 'History', icon: 'History' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -303,6 +313,7 @@ const DEPARTMENT_TABS_MAP: Record<
   engineering: ENGINEERING_TABS,
   drilling: DRILLING_TABS,
   database: DATABASE_TABS,
+  'plant-processing': PLANT_PROCESSING_TABS,
 };
 
 /**

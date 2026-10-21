@@ -178,7 +178,7 @@ async function findMachine(
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   async function queryBy(
-    column: 'id' | 'serial_number',
+    column: 'id' | 'serial_number' | 'name',
     value: string
   ): Promise<ScanMachine | null> {
     const { data, error } = await supabase
@@ -209,7 +209,9 @@ async function findMachine(
     if (byId) return byId;
   }
 
-  return queryBy('serial_number', code);
+  const bySerial = await queryBy('serial_number', code);
+  if (bySerial) return bySerial;
+  return queryBy('name', code);
 }
 
 export function isAdtOrDumpTruck(type: string): boolean {
@@ -217,6 +219,7 @@ export function isAdtOrDumpTruck(type: string): boolean {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+  if (t.includes('water')) return false;
   const words = t.split(/\s+/);
   return (
     words.includes('adt') || t.includes('dump') || t.includes('truck') || t.includes('articulated')

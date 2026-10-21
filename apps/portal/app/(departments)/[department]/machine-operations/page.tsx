@@ -46,6 +46,7 @@ export default async function MachineOperationsPage({
   const [
     { data: machines },
     { data: previousSMRs },
+    { data: baselineSmrReadings },
     { data: operators },
     { data: sites },
     { data: mineBlocks },
@@ -64,7 +65,13 @@ export default async function MachineOperationsPage({
       .select('machine_id, end_smu')
       .not('end_smu', 'is', null)
       .order('shift_date', { ascending: false })
-      .order('end_smu', { ascending: false }),
+      .order('end_smu', { ascending: false })
+      .limit(500),
+    supabase
+      .from('smr_readings')
+      .select('machine_id, reading_hours')
+      .order('reading_date', { ascending: false })
+      .limit(200),
     supabase
       .from('operators')
       .select('id, full_name, employee_code')
@@ -160,6 +167,17 @@ export default async function MachineOperationsPage({
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
     if (!latestSMRMap.has(row.machine_id) && row.end_smu !== null && row.end_smu !== undefined) {
       latestSMRMap.set(row.machine_id, Number(row.end_smu));
+    }
+  });
+  (
+    baselineSmrReadings as Array<{ machine_id: string; reading_hours: number | null }> | null
+  )?.forEach((row) => {
+    if (
+      !latestSMRMap.has(row.machine_id) &&
+      row.reading_hours !== null &&
+      row.reading_hours !== undefined
+    ) {
+      latestSMRMap.set(row.machine_id, Number(row.reading_hours));
     }
   });
 

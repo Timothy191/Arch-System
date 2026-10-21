@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
+import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
+import { PlantHourlySheetClient } from '~/features/departments/components/plant-processing/PlantHourlySheetClient';
 import {
   MonthlyProductionTargetBanner,
   ProductionDashboard,
@@ -43,7 +45,17 @@ export default async function DepartmentDashboard({
     department: deptSlug,
   });
 
-  if (deptSlug === 'production' || deptSlug === 'plant-processing') {
+  if (deptSlug === 'plant-processing') {
+    const plantData = await getPlantProcessingWorkspaceData(today);
+    return (
+      <PlantHourlySheetClient
+        initialDate={plantData.currentDate}
+        initialSheets={plantData.initialSheets}
+      />
+    );
+  }
+
+  if (deptSlug === 'production') {
     return (
       <Suspense
         fallback={

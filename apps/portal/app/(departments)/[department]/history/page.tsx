@@ -1,6 +1,8 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
 import Link from 'next/link';
+import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
+import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 
 export default async function HistoryPage({
@@ -12,9 +14,20 @@ export default async function HistoryPage({
 }) {
   const { department: deptSlug } = await params;
   const { from: fromParam, to: toParam } = await searchParams;
-  const { dept, deptId, supabase } = await getDepartmentContext({
+  const { dept, deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
+
+  if (deptSlug === 'plant-processing') {
+    const plantData = await getPlantProcessingWorkspaceData(today);
+    return (
+      <PlantHistoryDatabaseClient
+        initialDate={plantData.currentDate}
+        initialSheets={plantData.initialSheets}
+        initialDelays={plantData.initialDelays}
+      />
+    );
+  }
 
   const to = toParam || new Date().toISOString().split('T')[0];
   const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];

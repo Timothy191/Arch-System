@@ -85,22 +85,18 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
           const monthStart = `${today.slice(0, 7)}-01`;
           const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
 
-          // Step 1: Fetch Unified Production Summary (RPC)
-          const { data: summaryData } = await db.rpc('get_production_summary', {
-            p_start_date: thirtyDaysAgo,
-            p_end_date: today,
-          });
-
-          const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
-          const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
-
-          // Step 2: parallel fetch of remaining KPI data
+          // Parallel fetch of Unified Production Summary (RPC) and all KPI counters
           const [
+            { data: summaryData },
             { count: activeMachines },
             { count: totalMachines },
             { count: activeEmployees },
             { data: breakdownsMtd },
           ] = await Promise.all([
+            db.rpc('get_production_summary', {
+              p_start_date: thirtyDaysAgo,
+              p_end_date: today,
+            }),
             db
               .from('machines')
               .select('id', { count: 'exact', head: true })
@@ -117,6 +113,9 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
               .gte('date_in', monthStart)
               .is('deleted_at', null),
           ]);
+
+          const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
+          const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
 
           // Compute MTD aggregates
           const totalCoalMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_coal_tonnes), 0);

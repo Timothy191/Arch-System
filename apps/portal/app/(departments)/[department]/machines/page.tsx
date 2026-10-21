@@ -1,5 +1,6 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getDepartmentContext } from '~/lib/dept-context';
 
 export default async function MachinesPage({
@@ -8,17 +9,22 @@ export default async function MachinesPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  const { supabase, deptId } = await getDepartmentContext({
+  if (deptSlug === 'plant-processing') {
+    redirect('/plant-processing/delays');
+  }
+  const { supabase } = await getDepartmentContext({
     department: deptSlug,
   });
 
-  const { data: machines } = await supabase
+  let machinesQuery = supabase
     .from('machines')
     .select(
-      'id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)'
-    )
-    .eq('department_id', deptId)
-    .order('name');
+      'id, name, machine_type, serial_number, bin_factor, active, created_at, site:sites(name, site_code)'
+    );
+  if (deptSlug === 'drilling') {
+    machinesQuery = machinesQuery.eq('machine_type', 'Drill Rig');
+  }
+  const { data: machines } = await machinesQuery.order('name');
 
   const activeCount = machines?.filter((m) => m.active).length || 0;
 
@@ -126,35 +132,44 @@ export default async function MachinesPage({
                     </span>
                   </div>
 
-                  {sms.map((machine) => (
-                    <GlassCard key={machine.id}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[var(--text-heading)] font-medium">{machine.name}</p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[var(--text-muted)] text-xs">
-                              {machine.machine_type}
-                            </span>
-                            {machine.serial_number && (
-                              <span className="text-[var(--text-muted)] text-xs">
-                                SN: {machine.serial_number}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {sms.map((machine) => (
+                      <GlassCard key={machine.id} className="py-3.5 px-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-[var(--text-heading)] font-semibold text-sm">
+                              {machine.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="px-2 py-0.5 rounded text-[11px] bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] font-medium">
+                                {machine.machine_type}
                               </span>
-                            )}
+                              {machine.bin_factor != null && machine.bin_factor > 0 && (
+                                <span className="px-2 py-0.5 rounded font-mono text-[11px] bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+                                  Bin: {machine.bin_factor} BCM
+                                </span>
+                              )}
+                              {machine.serial_number && (
+                                <span className="text-[var(--text-muted)] font-mono text-[11px]">
+                                  {machine.serial_number}
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          <span
+                            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border shrink-0 ${
+                              machine.active
+                                ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
+                            }`}
+                          >
+                            {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
+                            {machine.active ? 'Active' : 'Inactive'}
+                          </span>
                         </div>
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                            machine.active
-                              ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
-                              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
-                          }`}
-                        >
-                          {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
-                          {machine.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </GlassCard>
-                  ))}
+                      </GlassCard>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

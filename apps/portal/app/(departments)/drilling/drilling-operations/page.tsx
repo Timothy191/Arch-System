@@ -21,26 +21,44 @@ async function getDrillingOpsData() {
 
   const today = getOperationalToday();
 
-  const [{ data: drills }, { data: drillOps }, { data: operators }] = await Promise.all([
-    supabase
-      .from('machines')
-      .select('id, name')
-      .eq('machine_type', 'Drill Rig')
-      .eq('active', true)
-      .order('name'),
-    supabase
-      .from('drill_operations')
-      .select(
-        'id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, holes, meters_drilled, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, non_productional_delays, production_delays, engineering_delays, comments, notes, status'
-      )
-      .eq('department_id', dept.id)
-      .eq('operation_date', today),
-    supabase
-      .from('employees')
-      .select('id, full_name')
-      .eq('department_id', dept.id)
-      .order('full_name'),
-  ]);
+  const [{ data: drills }, { data: drillOps }, { data: employees }, { data: fleetOperators }] =
+    await Promise.all([
+      supabase
+        .from('machines')
+        .select('id, name')
+        .eq('machine_type', 'Drill Rig')
+        .eq('active', true)
+        .order('name'),
+      supabase
+        .from('drill_operations')
+        .select(
+          'id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, holes, meters_drilled, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, non_productional_delays, production_delays, engineering_delays, comments, notes, status'
+        )
+        .eq('department_id', dept.id)
+        .eq('operation_date', today),
+      supabase
+        .from('employees')
+        .select('id, full_name')
+        .eq('department_id', dept.id)
+        .order('full_name'),
+      supabase
+        .from('operators')
+        .select('id, full_name, employee_code')
+        .eq('active', true)
+        .ilike('employee_code', 'OP-DR-%')
+        .order('full_name'),
+    ]);
+
+  const operatorMap = new Map<string, { id: string; full_name: string }>();
+  for (const op of fleetOperators ?? []) {
+    operatorMap.set(op.full_name, { id: op.id, full_name: op.full_name });
+  }
+  for (const emp of employees ?? []) {
+    if (!operatorMap.has(emp.full_name)) {
+      operatorMap.set(emp.full_name, { id: emp.id, full_name: emp.full_name });
+    }
+  }
+  const operators = Array.from(operatorMap.values());
 
   const drillIds = (drills ?? []).map((d) => d.id);
 

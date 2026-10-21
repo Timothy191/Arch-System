@@ -1,4 +1,5 @@
 import '@/styles/print-report.css';
+import { redirect } from 'next/navigation';
 import { getShiftCompleteness } from '@/lib/shift-completeness';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {
@@ -17,6 +18,9 @@ export default async function ReportsPage({
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
   const { department: deptSlug } = await params;
+  if (deptSlug === 'plant-processing') {
+    redirect('/plant-processing/history');
+  }
   const { from: fromParam, to: toParam } = await searchParams;
   const { dept, deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,

@@ -22,25 +22,50 @@ async function ShiftCloseoutSection() {
   const supabase = await createServerSupabaseClient();
   const principal = await getAuthenticatedEmployee(supabase);
 
-  const { data: machines } = await supabase
-    .from('machines')
-    .select('id, name')
-    .eq('active', true)
-    .order('name');
-
-  // AGENT-TRACE: Dynamic Opening SMR Resolution
-  // Queries latest closing SMR per machine from machine_operations.end_smu instead of defaulting to 0.
-  const { data: previousSMRs } = await supabase
-    .from('machine_operations')
-    .select('machine_id, end_smu')
-    .not('end_smu', 'is', null)
-    .order('shift_date', { ascending: false })
-    .order('end_smu', { ascending: false });
+  const [
+    { data: machines },
+    { data: previousSMRs },
+    { data: baselineSmrReadings },
+    { data: recentReportsData },
+  ] = await Promise.all([
+    supabase.from('machines').select('id, name').eq('active', true).order('name'),
+    supabase
+      .from('machine_operations')
+      .select('machine_id, end_smu')
+      .not('end_smu', 'is', null)
+      .order('shift_date', { ascending: false })
+      .order('end_smu', { ascending: false })
+      .limit(500),
+    supabase
+      .from('smr_readings')
+      .select('machine_id, reading_hours')
+      .order('reading_date', { ascending: false })
+      .limit(200),
+    supabase
+      .from('control_room_shift_reports')
+      .select(
+        'id, report_date, shift_type, operator_name, status, submitter_id, approver_id, approval_note, approved_at, created_at'
+      )
+      .eq('department_id', deptId)
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ]);
 
   const latestSMRMap = new Map<string, number>();
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
     if (!latestSMRMap.has(row.machine_id) && row.end_smu !== null && row.end_smu !== undefined) {
       latestSMRMap.set(row.machine_id, Number(row.end_smu));
+    }
+  });
+  (
+    baselineSmrReadings as Array<{ machine_id: string; reading_hours: number | null }> | null
+  )?.forEach((row) => {
+    if (
+      !latestSMRMap.has(row.machine_id) &&
+      row.reading_hours !== null &&
+      row.reading_hours !== undefined
+    ) {
+      latestSMRMap.set(row.machine_id, Number(row.reading_hours));
     }
   });
 
@@ -58,15 +83,6 @@ async function ShiftCloseoutSection() {
           };
         })
       : [];
-
-  const { data: recentReportsData } = await supabase
-    .from('control_room_shift_reports')
-    .select(
-      'id, report_date, shift_type, operator_name, status, submitter_id, approver_id, approval_note, approved_at, created_at'
-    )
-    .eq('department_id', deptId)
-    .order('created_at', { ascending: false })
-    .limit(10);
 
   const recentReports: ShiftReportSummary[] = (recentReportsData ?? []).map((r) => ({
     id: r.id,

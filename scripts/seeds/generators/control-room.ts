@@ -96,15 +96,39 @@ export async function seedControlRoom(supabase: SupabaseClient): Promise<void> {
   }
 
   // 2. Machine Operations with continuous SMR (Previous Close SMR -> Current Start SMR -> Current Close SMR)
+  const { data: latestSmrReadings } = await supabase
+    .from('smr_readings')
+    .select('machine_id, reading_hours, reading_date')
+    .order('reading_date', { ascending: false });
+
+  const latestSmrByMachine = new Map<string, number>();
+  for (const r of latestSmrReadings ?? []) {
+    if (
+      r.machine_id &&
+      typeof r.reading_hours === 'number' &&
+      !latestSmrByMachine.has(r.machine_id)
+    ) {
+      latestSmrByMachine.set(r.machine_id, Number(r.reading_hours));
+    }
+  }
+
   let seededCount = 0;
   for (let i = 0; i < machines.length; i++) {
     const m = machines[i]!;
-    const fallbackStart = 1000.0 + (i + 1) * 250.0;
-    const smr = MACHINE_BASELINE_SMR[m.name] ?? {
-      prevStart: fallbackStart,
-      prevClose: fallbackStart + 10.5,
-      currClose: fallbackStart + 21.0,
-    };
+    const existingSmr = latestSmrByMachine.get(m.id);
+    const fallbackStart = existingSmr ?? 1000.0 + (i + 1) * 250.0;
+    const smr =
+      existingSmr !== undefined
+        ? {
+            prevStart: existingSmr,
+            prevClose: Number((existingSmr + 8.5).toFixed(1)),
+            currClose: Number((existingSmr + 17.0).toFixed(1)),
+          }
+        : (MACHINE_BASELINE_SMR[m.name] ?? {
+            prevStart: fallbackStart,
+            prevClose: fallbackStart + 10.5,
+            currClose: fallbackStart + 21.0,
+          });
     const isDrill = m.machine_type === 'Drill Rig';
 
     const shiftRows = [

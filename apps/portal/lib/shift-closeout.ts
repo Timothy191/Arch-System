@@ -193,11 +193,17 @@ async function validateShiftData(
         .eq('load_date', date)
         .eq('shift_type', shiftType);
 
-      // AGENT-TRACE: Fetch machine data for bin_factor validation
-      const { data: machines } = await supabase
+      // AGENT-TRACE: Fetch machine data for bin_factor validation (with centralised fleet fallback)
+      const { data: deptMachines } = await supabase
         .from('machines')
         .select('id, name, bin_factor')
         .eq('department_id', departmentId);
+
+      const { data: fleetMachines } =
+        !deptMachines || deptMachines.length === 0
+          ? await supabase.from('machines').select('id, name, bin_factor').eq('active', true)
+          : { data: deptMachines };
+      const machines = deptMachines && deptMachines.length > 0 ? deptMachines : fleetMachines;
 
       const machineMap = new Map((machines || []).map((m) => [m.id, m]));
 
