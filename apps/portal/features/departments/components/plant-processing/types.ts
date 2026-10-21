@@ -10,6 +10,7 @@ export interface PlantHourlyRow {
   cleanCoalTonnes: number;
   discardTonnes: number;
   yieldPct: number;
+  productAshPct: number;
   cycloneRd: number;
   moisturePct: number;
   runMinutes: number;
@@ -64,6 +65,7 @@ export interface PlantDailyRollupRecord {
   cleanCoalTonnes: number;
   discardTonnes: number;
   yieldPct: number;
+  avgProductAshPct?: number;
   avgCycloneRd: number;
   avgMoisturePct: number;
   runHours: number;
@@ -79,6 +81,7 @@ export interface PlantMonthlyRollupRecord {
   cleanCoalTonnes: number;
   discardTonnes: number;
   yieldPct: number;
+  avgProductAshPct?: number;
   avgCycloneRd: number;
   avgMoisturePct: number;
   totalRunHours: number;
@@ -159,6 +162,7 @@ export function buildDefaultHourlyRows(shift: PlantShiftType = 'day'): PlantHour
   const slots = shift === 'day' ? DAY_SHIFT_HOUR_SLOTS : NIGHT_SHIFT_HOUR_SLOTS;
   const baseFeeds = [420, 445, 460, 455, 470, 430, 465, 480, 475, 390, 460, 450];
   const baseClean = [382, 408, 422, 417, 431, 392, 426, 441, 436, 353, 421, 412];
+  const baseAsh = [14.1, 13.9, 13.8, 14.0, 13.9, 14.2, 14.0, 13.7, 13.8, 14.5, 13.9, 14.0];
   const baseRd = [1.48, 1.48, 1.49, 1.49, 1.48, 1.47, 1.48, 1.49, 1.48, 1.5, 1.48, 1.48];
   const baseMoisture = [8.1, 8.0, 7.9, 8.2, 8.1, 8.3, 8.0, 7.8, 7.9, 8.4, 8.0, 7.9];
   const baseRunMins = [58, 60, 60, 60, 60, 54, 60, 60, 60, 46, 60, 58];
@@ -189,6 +193,7 @@ export function buildDefaultHourlyRows(shift: PlantShiftType = 'day'): PlantHour
       cleanCoalTonnes,
       discardTonnes,
       yieldPct: calculateRowYield(romFeedTonnes, cleanCoalTonnes),
+      productAshPct: baseAsh[idx] ?? 14.0,
       cycloneRd: baseRd[idx] ?? 1.48,
       moisturePct: baseMoisture[idx] ?? 8.0,
       runMinutes: baseRunMins[idx] ?? 60,

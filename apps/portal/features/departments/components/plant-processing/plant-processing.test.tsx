@@ -50,10 +50,29 @@ describe('Plant & Processing Workspace Components', () => {
     window.localStorage.clear();
   });
 
-  describe('PlantHourlySheetClient (Dashboard Excel Grid)', () => {
-    it('should render the 12-row hourly input sheet grid and recalculate yield and discard when ROM feed changes', async () => {
+  describe('PlantHourlySheetClient (Telemetry Cards, Pulse Graph, Pie Chart & Excel Grid)', () => {
+    it('should render the 6 telemetry and chart cards (ROM Scale, Product Yield, Product Ash, Running Density, Live Production Pulse Graph, Production Mix Pie Chart) and update when cells change', async () => {
       render(<PlantHourlySheetClient initialDate="2026-10-21" initialSheets={[sampleSheet]} />);
 
+      // Verify all 6 requested telemetry & visual cards render
+      expect(screen.getByTestId('card-rom-scale')).toHaveTextContent(
+        /ROM Scale \(t \/ Latest Hour\)/i
+      );
+      expect(screen.getByTestId('card-product-yield')).toHaveTextContent(
+        /Product Yield \(% Recovery\)/i
+      );
+      expect(screen.getByTestId('card-product-ash')).toHaveTextContent(/Product Ash \(% ADB\)/i);
+      expect(screen.getByTestId('card-running-density')).toHaveTextContent(/Running Density/i);
+      expect(screen.getByTestId('card-live-production-pulse')).toHaveTextContent(
+        /Live Production Pulse Graph — Current Throughput \(t\/h\)/i
+      );
+      expect(screen.getByTestId('card-live-production-pulse')).toHaveTextContent(/vs Prior Shift/i);
+      expect(screen.getByTestId('card-production-mix')).toHaveTextContent(
+        /Production Mix — Product, Discard & Recovery/i
+      );
+      expect(screen.getByRole('img', { name: /Production Mix Pie Chart/i })).toBeInTheDocument();
+
+      // Verify Excel-style Hourly Input Sheet renders and updates calculations
       expect(
         screen.getByRole('table', { name: /Plant and Processing Hourly Input Sheet/i })
       ).toBeInTheDocument();
@@ -63,11 +82,14 @@ describe('Plant & Processing Workspace Components', () => {
       const row1RomInput = screen.getByLabelText('Row 1 ROM Feed') as HTMLInputElement;
       const row1CleanInput = screen.getByLabelText('Row 1 Clean Coal') as HTMLInputElement;
       const row1DiscardInput = screen.getByLabelText('Row 1 Discard') as HTMLInputElement;
+      const row1AshInput = screen.getByLabelText('Row 1 Product Ash') as HTMLInputElement;
 
       fireEvent.change(row1RomInput, { target: { value: '500' } });
       fireEvent.change(row1CleanInput, { target: { value: '450' } });
+      fireEvent.change(row1AshInput, { target: { value: '13.5' } });
 
       expect(row1DiscardInput.value).toBe('50');
+      expect(row1AshInput.value).toBe('13.5');
 
       const saveBtn = screen.getByTestId('save-plant-hourly-sheet');
       fireEvent.click(saveBtn);

@@ -1,6 +1,9 @@
 'use client';
 
+import { Badge } from '@repo/ui/components/ui/badge';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
+  Activity,
   AlertTriangle,
   Calendar,
   CheckCircle2,
@@ -8,9 +11,14 @@ import {
   Database,
   Download,
   FileSpreadsheet,
+  Flame,
+  Gauge,
+  PieChart,
   RotateCcw,
   Save,
+  Scale,
   Sparkles,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState, useTransition } from 'react';
@@ -36,6 +44,7 @@ type EditableColumnKey =
   | 'romFeedTonnes'
   | 'cleanCoalTonnes'
   | 'discardTonnes'
+  | 'productAshPct'
   | 'cycloneRd'
   | 'moisturePct'
   | 'runMinutes'
@@ -53,16 +62,16 @@ const COLUMN_META: ReadonlyArray<{
   {
     letter: 'C',
     key: 'romFeedTonnes',
-    label: 'ROM Feed',
+    label: 'ROM Scale',
     unit: 't/hr',
     formulaHint: 'Input Value',
   },
   {
     letter: 'D',
     key: 'cleanCoalTonnes',
-    label: 'Clean Coal',
+    label: 'Clean Product',
     unit: 't/hr',
-    formulaHint: 'Input Value (Auto-updates Discard & Yield)',
+    formulaHint: 'Input Value (Auto-updates Discard & Recovery %)',
   },
   {
     letter: 'E',
@@ -74,33 +83,40 @@ const COLUMN_META: ReadonlyArray<{
   {
     letter: 'F',
     key: 'yieldPct',
-    label: 'Plant Yield',
-    unit: '%',
+    label: 'Product Yield',
+    unit: '% Rec',
     formulaHint: '=ROUND((D{row} / C{row}) * 100, 1)',
   },
   {
     letter: 'G',
-    key: 'cycloneRd',
-    label: 'DMS Cyclone RD',
-    unit: 'g/cm³',
-    formulaHint: 'Medium Relative Density Setpoint',
+    key: 'productAshPct',
+    label: 'Product Ash',
+    unit: '% ADB',
+    formulaHint: 'Washed Product Ash % (Spec <= 15.0%)',
   },
   {
     letter: 'H',
+    key: 'cycloneRd',
+    label: 'Running Density',
+    unit: 'g/cm³',
+    formulaHint: 'DMS Cyclone Medium Relative Density',
+  },
+  {
+    letter: 'I',
     key: 'moisturePct',
     label: 'Moisture',
     unit: '%',
     formulaHint: 'Clean Product Total Moisture',
   },
   {
-    letter: 'I',
+    letter: 'J',
     key: 'runMinutes',
     label: 'Run Time',
     unit: 'min',
     formulaHint: 'Operating Minutes in Hour (0-60)',
   },
   {
-    letter: 'J',
+    letter: 'K',
     key: 'notes',
     label: 'Circuit & Operator Notes',
     formulaHint: 'Process observations, density trims, or screen checks',
@@ -147,7 +163,12 @@ export function PlantHourlySheetClient({
         (s.date === selectedDate && s.shift === selectedShift && s.moduleId === selectedModule)
     );
     if (match && match.rows.length > 0) {
-      setRows(match.rows);
+      setRows(
+        match.rows.map((r) => ({
+          ...r,
+          productAshPct: typeof r.productAshPct === 'number' ? r.productAshPct : 14.0,
+        }))
+      );
     } else {
       setRows(buildDefaultHourlyRows(selectedShift));
     }
@@ -181,6 +202,8 @@ export function PlantHourlySheetClient({
           updated.yieldPct = calculateRowYield(rom, clean);
         } else if (key === 'discardTonnes') {
           updated.discardTonnes = num;
+        } else if (key === 'productAshPct') {
+          updated.productAshPct = Number(Math.min(45, num).toFixed(1));
         } else if (key === 'runMinutes') {
           updated.runMinutes = Math.min(60, Math.round(num));
         } else if (key === 'cycloneRd') {
@@ -199,6 +222,15 @@ export function PlantHourlySheetClient({
     const totalClean = rows.reduce((sum, r) => sum + (Number(r.cleanCoalTonnes) || 0), 0);
     const totalDiscard = rows.reduce((sum, r) => sum + (Number(r.discardTonnes) || 0), 0);
     const weightedYield = calculateRowYield(totalRom, totalClean);
+    const discardPct = totalRom > 0 ? Number((100 - weightedYield).toFixed(1)) : 0;
+    const avgAsh =
+      rows.length > 0
+        ? Number(
+            (
+              rows.reduce((sum, r) => sum + (Number(r.productAshPct) || 14.0), 0) / rows.length
+            ).toFixed(1)
+          )
+        : 14.0;
     const avgRd =
       rows.length > 0
         ? Number((rows.reduce((sum, r) => sum + r.cycloneRd, 0) / rows.length).toFixed(2))
@@ -211,18 +243,107 @@ export function PlantHourlySheetClient({
     const runHours = Number((totalRunMins / 60).toFixed(1));
     const avgTph = runHours > 0 ? Math.round(totalRom / runHours) : 0;
 
+    // Latest active hour slot with non-zero ROM feed
+    const activeRows = rows.filter((r) => r.romFeedTonnes > 0);
+    const latestRow = activeRows[activeRows.length - 1] ?? rows[rows.length - 1];
+    const latestHourRom = latestRow?.romFeedTonnes ?? 450;
+    const latestHourSlot = latestRow?.hourSlot ?? '17:00 - 18:00';
+    const latestHourRd = latestRow?.cycloneRd ?? 1.48;
+    const nominalRomTph = 460;
+    const romCapacityPct = Number(Math.min(125, Math.round((latestHourRom / nominalRomTph) * 100)));
+
+    // Prior shift comparison for Live Production Pulse Graph
+    const priorShiftSheet = savedSheets.find(
+      (s) => s.shift !== selectedShift || s.date !== selectedDate
+    );
+    const priorShiftRomTotal = priorShiftSheet
+      ? priorShiftSheet.rows.reduce((sum, r) => sum + (Number(r.romFeedTonnes) || 0), 0)
+      : 5180;
+    const priorShiftRunHours = priorShiftSheet
+      ? Math.max(
+          1,
+          priorShiftSheet.rows.reduce((sum, r) => sum + (Number(r.runMinutes) || 0), 0) / 60
+        )
+      : 11.8;
+    const priorShiftTph = Math.round(priorShiftRomTotal / priorShiftRunHours);
+    const throughputDeltaPct =
+      priorShiftTph > 0 ? Number((((avgTph - priorShiftTph) / priorShiftTph) * 100).toFixed(1)) : 0;
+    const peakHourRom = Math.max(...rows.map((r) => r.romFeedTonnes), 1);
+
     return {
       totalRom,
       totalClean,
       totalDiscard,
       weightedYield,
+      discardPct,
+      avgAsh,
       avgRd,
       avgMoisture,
       totalRunMins,
       runHours,
       avgTph,
+      latestHourRom,
+      latestHourSlot,
+      latestHourRd,
+      nominalRomTph,
+      romCapacityPct,
+      priorShiftTph,
+      throughputDeltaPct,
+      peakHourRom,
     };
-  }, [rows]);
+  }, [rows, savedSheets, selectedShift, selectedDate]);
+
+  // SVG Pulse Graph coordinates (Card 5)
+  const pulseChartGeometry = useMemo(() => {
+    const width = 560;
+    const height = 110;
+    const padX = 16;
+    const padY = 14;
+    const usableW = width - padX * 2;
+    const usableH = height - padY * 2;
+    const minVal = 250;
+    const maxVal = Math.max(540, totals.peakHourRom + 20);
+
+    const toPoint = (val: number, idx: number) => {
+      const x = padX + (idx / Math.max(1, rows.length - 1)) * usableW;
+      const clamped = Math.max(minVal, Math.min(maxVal, val));
+      const y = padY + usableH - ((clamped - minVal) / (maxVal - minVal)) * usableH;
+      return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
+    };
+
+    const romPoints = rows.map((r, idx) => toPoint(r.romFeedTonnes, idx));
+    const cleanPoints = rows.map((r, idx) => toPoint(r.cleanCoalTonnes, idx));
+    const romLine = romPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+    const cleanLine = cleanPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+    const romArea = `${romLine} L${romPoints[romPoints.length - 1]?.x ?? width},${height - padY} L${romPoints[0]?.x ?? padX},${height - padY} Z`;
+    const priorY = toPoint(totals.priorShiftTph, 0).y;
+
+    return {
+      width,
+      height,
+      romPoints,
+      cleanPoints,
+      romLine,
+      cleanLine,
+      romArea,
+      priorY,
+    };
+  }, [rows, totals.peakHourRom, totals.priorShiftTph]);
+
+  // SVG Pie / Donut Chart geometry for Production Mix (Card 6)
+  const pieGeometry = useMemo(() => {
+    const radius = 44;
+    const circumference = 2 * Math.PI * radius;
+    const recoveryFraction = Math.max(0, Math.min(1, totals.weightedYield / 100));
+    const productArc = Number((recoveryFraction * circumference).toFixed(2));
+    const discardArc = Number(((1 - recoveryFraction) * circumference).toFixed(2));
+    return {
+      radius,
+      circumference: Number(circumference.toFixed(2)),
+      productArc,
+      discardArc,
+    };
+  }, [totals.weightedYield]);
 
   const activeRow = rows[activeCell.rowIndex] ?? rows[0];
   const activeColMeta =
@@ -275,11 +396,12 @@ export function PlantHourlySheetClient({
       'Row',
       'Hour Window',
       'Feed Seam',
-      'ROM Feed (t/hr)',
-      'Clean Coal (t/hr)',
+      'ROM Scale (t/hr)',
+      'Clean Product (t/hr)',
       'Discard (t/hr)',
-      'Plant Yield (%)',
-      'DMS Cyclone RD (g/cm3)',
+      'Product Yield (% Rec)',
+      'Product Ash (% ADB)',
+      'Running Density (g/cm3)',
       'Moisture (%)',
       'Run Time (min)',
       'Notes',
@@ -295,6 +417,7 @@ export function PlantHourlySheetClient({
           r.cleanCoalTonnes,
           r.discardTonnes,
           r.yieldPct,
+          r.productAshPct,
           r.cycloneRd,
           r.moisturePct,
           r.runMinutes,
@@ -309,6 +432,7 @@ export function PlantHourlySheetClient({
         totals.totalClean,
         totals.totalDiscard,
         totals.weightedYield,
+        totals.avgAsh,
         totals.avgRd,
         totals.avgMoisture,
         totals.totalRunMins,
@@ -353,65 +477,69 @@ export function PlantHourlySheetClient({
     });
   };
 
-  return (
-    <div className="p-4 sm:p-6 max-w-[1650px] mx-auto space-y-5">
-      {/* Top Workbook Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-700 border border-amber-500/30">
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              Excel Grid Mode · Hourly Input Sheet
-            </span>
-            <span className="text-xs text-[var(--text-muted)] font-mono">
-              Workbook: PLANT_WASH_LOG_{selectedDate.replaceAll('-', '_')}
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)] tracking-tight">
-            Plant &amp; Processing — Hourly Input Sheet
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-            Interactive spreadsheet grid for ROM coal feed, DMS cyclone relative density, clean coal
-            recovery, and hourly plant run-time tracking.
-          </p>
-        </div>
+  const recoveryDelta = Number((totals.weightedYield - 90.0).toFixed(1));
+  const densityDelta = Number((totals.avgRd - 1.48).toFixed(2));
 
-        {/* Controls & Quick Navigation */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            href="/plant-processing/delays"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 transition-colors"
-          >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            Log Plant Delay
-          </Link>
-          <Link
-            href="/plant-processing/history"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
-          >
-            <Database className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-            History Database
-          </Link>
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={handleSaveSheet}
-            disabled={isPending}
-            data-testid="save-plant-hourly-sheet"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
-          >
-            <Save className="w-3.5 h-3.5" />
-            {isPending ? 'Saving Sheet...' : 'Save Hourly Sheet'}
-          </button>
+  return (
+    <div className="space-y-6">
+      {/* Top Header GlassCard */}
+      <GlassCard className="p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+                Plant &amp; Processing — Wash Plant Telemetry &amp; Hourly Sheet
+              </h1>
+              <Badge
+                variant="outline"
+                className="text-xs font-mono bg-amber-500/15 text-amber-800 border-amber-500/30"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                Live DMS &amp; Belt Scale SSoT
+              </Badge>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)]">
+              Real-time ROM belt-scale throughput, product recovery yield, washed ash quality,
+              running medium density, and hourly workbook logging.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/plant-processing/delays"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 transition-colors"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Log Plant Delay
+            </Link>
+            <Link
+              href="/plant-processing/history"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+            >
+              <Database className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              History Database
+            </Link>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveSheet}
+              disabled={isPending}
+              data-testid="save-plant-hourly-sheet"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              {isPending ? 'Saving Sheet...' : 'Save Hourly Sheet'}
+            </button>
+          </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Status Banner */}
       {statusBanner && (
@@ -433,85 +561,555 @@ export function PlantHourlySheetClient({
         </div>
       )}
 
-      {/* KPI Summary Ribbon */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Σ ROM Feed (Col C)
+      {/* ── 4 Primary Plant Telemetry GlassCards (ROM Scale, Product Yield, Product Ash, Running Density) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* Card 1: ROM Scale (t/latest hour + graphs and visuals) */}
+        <GlassCard className="p-5 space-y-3" data-testid="card-rom-scale">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+              <Scale className="w-3.5 h-3.5 text-emerald-600" />
+              ROM Scale (t / Latest Hour)
+            </span>
+            <Badge className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-xs font-mono">
+              {totals.romCapacityPct}% of {totals.nominalRomTph} t/h
+            </Badge>
           </div>
-          <div className="mt-1 text-xl font-bold font-mono text-[var(--text-heading)]">
-            {totals.totalRom.toLocaleString()} <span className="text-xs font-normal">t</span>
-          </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            Avg {totals.avgTph.toLocaleString()} t/hr effective
-          </div>
-        </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Σ Clean Coal (Col D)
-          </div>
-          <div className="mt-1 text-xl font-bold font-mono text-emerald-700">
-            {totals.totalClean.toLocaleString()} <span className="text-xs font-normal">t</span>
-          </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            Washed product to stockpile
-          </div>
-        </div>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                {totals.latestHourRom.toLocaleString()} t/hr
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Shift Σ:{' '}
+                <strong className="text-[var(--text-heading)]">
+                  {totals.totalRom.toLocaleString()} t
+                </strong>{' '}
+                · Slot: {totals.latestHourSlot.split(' - ')[0]}
+              </p>
+            </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Σ Discard (Col E)
+            {/* Mini 12-Hour ROM Scale Bar Graph Visual */}
+            <svg
+              viewBox="0 0 120 34"
+              className="w-28 h-9 shrink-0 overflow-visible"
+              aria-label="ROM Scale 12-hour mini bar graph"
+            >
+              {rows.map((r, idx) => {
+                const barH = Math.max(4, Math.min(30, Math.round((r.romFeedTonnes / 520) * 30)));
+                const x = idx * 9.8 + 2;
+                const y = 32 - barH;
+                const isLatest = idx === rows.length - 1;
+                return (
+                  <rect
+                    key={r.hourSlot}
+                    x={x}
+                    y={y}
+                    width={6.8}
+                    height={barH}
+                    rx={1.5}
+                    className={isLatest ? 'fill-emerald-600' : 'fill-emerald-500/45'}
+                  />
+                );
+              })}
+            </svg>
           </div>
-          <div className="mt-1 text-xl font-bold font-mono text-amber-700">
-            {totals.totalDiscard.toLocaleString()} <span className="text-xs font-normal">t</span>
-          </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            Coarse rejects + fine tailings
-          </div>
-        </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Weighted Plant Yield
+          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+            <div
+              className="h-full bg-emerald-600 rounded-full transition-all"
+              style={{ width: `${Math.min(100, totals.romCapacityPct)}%` }}
+            />
           </div>
-          <div className="mt-1 text-xl font-bold font-mono text-[var(--accent-blue)]">
-            {totals.weightedYield.toFixed(1)}%
-          </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            Formula: =(ΣD / ΣC) × 100
-          </div>
-        </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Mean DMS RD &amp; Moisture
+          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+            Avg Run-Rate: {totals.avgTph.toLocaleString()} t/hr · Peak: {totals.peakHourRom} t/hr
+          </p>
+        </GlassCard>
+
+        {/* Card 2: Product Yield (% Recovery) */}
+        <GlassCard className="p-5 space-y-3" data-testid="card-product-yield">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+              Product Yield (% Recovery)
+            </span>
+            <Badge className="bg-blue-500/15 text-blue-700 border border-blue-500/30 text-xs font-mono">
+              {recoveryDelta >= 0 ? `+${recoveryDelta}%` : `${recoveryDelta}%`} vs Target
+            </Badge>
           </div>
-          <div className="mt-1 text-xl font-bold font-mono text-[var(--text-heading)]">
-            {totals.avgRd.toFixed(2)}{' '}
-            <span className="text-xs font-normal text-[var(--text-secondary)]">
-              g/cm³ · {totals.avgMoisture.toFixed(1)}%
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                {totals.weightedYield.toFixed(1)}% Recovery
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Target: <strong className="text-[var(--text-heading)]">90.0%</strong> · Clean:{' '}
+                {totals.totalClean.toLocaleString()} t
+              </p>
+            </div>
+
+            {/* Mini Recovery Sparkline */}
+            <svg
+              viewBox="0 0 110 32"
+              className="w-24 h-8 shrink-0"
+              aria-label="Product Yield recovery trend sparkline"
+            >
+              <polyline
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={rows
+                  .map((r, i) => {
+                    const x = (i / Math.max(1, rows.length - 1)) * 102 + 4;
+                    const y = 28 - Math.max(0, Math.min(24, ((r.yieldPct - 75) / 25) * 24));
+                    return `${x.toFixed(1)},${y.toFixed(1)}`;
+                  })
+                  .join(' ')}
+              />
+            </svg>
+          </div>
+
+          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+            <div
+              className="h-full bg-blue-600 rounded-full transition-all"
+              style={{ width: `${Math.min(100, totals.weightedYield)}%` }}
+            />
+          </div>
+
+          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+            Clean Product: {totals.totalClean.toLocaleString()} t · Discard:{' '}
+            {totals.totalDiscard.toLocaleString()} t
+          </p>
+        </GlassCard>
+
+        {/* Card 3: Product Ash (% ADB) */}
+        <GlassCard className="p-5 space-y-3" data-testid="card-product-ash">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-indigo-600" />
+              Product Ash (% ADB)
+            </span>
+            <Badge
+              variant="outline"
+              className={`text-xs font-mono ${
+                totals.avgAsh <= 15.0
+                  ? 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30'
+                  : 'bg-red-500/15 text-red-700 border-red-500/30'
+              }`}
+            >
+              Spec ≤ 15.0% Ash
+            </Badge>
+          </div>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                {totals.avgAsh.toFixed(1)}% Ash
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Raw Feed Ash: <strong className="text-[var(--text-heading)]">28.4%</strong> ·
+                Moisture: {totals.avgMoisture.toFixed(1)}%
+              </p>
+            </div>
+
+            {/* Mini Ash Profile Bars */}
+            <svg
+              viewBox="0 0 110 32"
+              className="w-24 h-8 shrink-0"
+              aria-label="Product Ash hourly quality profile"
+            >
+              {rows.map((r, i) => {
+                const ash = r.productAshPct || 14.0;
+                const h = Math.max(5, Math.min(28, Math.round(((ash - 10) / 8) * 28)));
+                return (
+                  <rect
+                    key={r.hourSlot}
+                    x={i * 8.8 + 2}
+                    y={30 - h}
+                    width={6}
+                    height={h}
+                    rx={1.5}
+                    className={ash <= 15.0 ? 'fill-indigo-500/65' : 'fill-red-500/75'}
+                  />
+                );
+              })}
+            </svg>
+          </div>
+
+          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+            <div
+              className="h-full bg-indigo-600 rounded-full transition-all"
+              style={{ width: `${Math.min(100, Math.round((totals.avgAsh / 20) * 100))}%` }}
+            />
+          </div>
+
+          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+            Ash Reduction: -{(28.4 - totals.avgAsh).toFixed(1)}% pts via DMS Cyclones
+          </p>
+        </GlassCard>
+
+        {/* Card 4: Running Density (DMS RD g/cm³) */}
+        <GlassCard className="p-5 space-y-3" data-testid="card-running-density">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+              <Gauge className="w-3.5 h-3.5 text-amber-600" />
+              Running Density
+            </span>
+            <Badge
+              variant="outline"
+              className="text-xs font-mono bg-amber-500/15 text-amber-800 border-amber-500/30"
+            >
+              Setpoint: 1.48 g/cm³
+            </Badge>
+          </div>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                {totals.avgRd.toFixed(2)} g/cm³
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Latest Hour:{' '}
+                <strong className="text-[var(--text-heading)]">
+                  {totals.latestHourRd.toFixed(2)} g/cm³
+                </strong>{' '}
+                · Drift: {densityDelta >= 0 ? `+${densityDelta}` : densityDelta}
+              </p>
+            </div>
+
+            {/* Mini Running Density Trace */}
+            <svg
+              viewBox="0 0 110 32"
+              className="w-24 h-8 shrink-0"
+              aria-label="Running Density hourly trace"
+            >
+              <line
+                x1="2"
+                y1="16"
+                x2="108"
+                y2="16"
+                stroke="#d97706"
+                strokeDasharray="3 2"
+                strokeWidth="1"
+              />
+              <polyline
+                fill="none"
+                stroke="#b45309"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={rows
+                  .map((r, i) => {
+                    const x = (i / Math.max(1, rows.length - 1)) * 102 + 4;
+                    const y = 16 - (r.cycloneRd - 1.48) * 180;
+                    return `${x.toFixed(1)},${Math.max(4, Math.min(28, y)).toFixed(1)}`;
+                  })
+                  .join(' ')}
+              />
+            </svg>
+          </div>
+
+          <div className="pt-1 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+            <span className="text-[var(--text-muted)]">Plant Operating Hours:</span>
+            <span className="font-mono font-semibold text-[var(--text-heading)]">
+              {totals.runHours} / 12.0 hrs ({totals.totalRunMins} min)
             </span>
           </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            Target RD: 1.48 g/cm³
-          </div>
-        </div>
-
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Shift Run Time (Col I)
-          </div>
-          <div className="mt-1 text-xl font-bold font-mono text-[var(--text-heading)]">
-            {totals.runHours} <span className="text-xs font-normal">/ 12.0 hrs</span>
-          </div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-            {totals.totalRunMins} / 720 operating mins
-          </div>
-        </div>
+        </GlassCard>
       </div>
 
-      {/* Workbook Toolbar & Formula Bar */}
+      {/* ── Row 2: Live Production Pulse Graph (lg:col-span-7) & Production Mix Pie Chart (lg:col-span-5) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Card 5: Live Production Pulse Graph (Current throughput t/h + % vs prior shift) */}
+        <GlassCard
+          className="lg:col-span-7 p-5 flex flex-col justify-between gap-4"
+          data-testid="card-live-production-pulse"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+                Live Production Pulse Graph — Current Throughput (t/h)
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Hourly ROM belt scale feed vs. washed clean coal output across active shift windows
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
+                  totals.throughputDeltaPct >= 0
+                    ? 'text-emerald-700 bg-emerald-500/10 border-emerald-500/25'
+                    : 'text-amber-800 bg-amber-500/15 border-amber-500/30'
+                }`}
+              >
+                {totals.throughputDeltaPct >= 0
+                  ? `+${totals.throughputDeltaPct}% vs Prior Shift`
+                  : `${totals.throughputDeltaPct}% vs Prior Shift`}
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive SVG Pulse Chart */}
+          <div className="relative rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-3">
+            <svg
+              viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
+              className="w-full h-28 overflow-visible"
+              role="img"
+              aria-label="Live Production Pulse Graph showing hourly throughput in tonnes per hour"
+            >
+              <defs>
+                <linearGradient id="romPulseGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
+
+              {/* Prior shift average dashed reference line */}
+              <line
+                x1="16"
+                y1={pulseChartGeometry.priorY}
+                x2={pulseChartGeometry.width - 16}
+                y2={pulseChartGeometry.priorY}
+                stroke="#94a3b8"
+                strokeWidth="1.2"
+                strokeDasharray="4 4"
+              />
+              <text
+                x={pulseChartGeometry.width - 18}
+                y={Math.max(12, pulseChartGeometry.priorY - 4)}
+                textAnchor="end"
+                className="fill-[var(--text-muted)] text-[9px] font-mono"
+              >
+                Prior Shift Avg: {totals.priorShiftTph} t/h
+              </text>
+
+              {/* ROM Feed Area & Line */}
+              <path d={pulseChartGeometry.romArea} fill="url(#romPulseGrad)" />
+              <path
+                d={pulseChartGeometry.romLine}
+                fill="none"
+                stroke="#059669"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Clean Coal Output Line */}
+              <path
+                d={pulseChartGeometry.cleanLine}
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="2"
+                strokeDasharray="5 3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Hourly Data Nodes */}
+              {pulseChartGeometry.romPoints.map((pt, idx) => {
+                const isLast = idx === pulseChartGeometry.romPoints.length - 1;
+                return (
+                  <g key={rows[idx]?.hourSlot ?? idx}>
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isLast ? 4.5 : 2.5}
+                      className={
+                        isLast ? 'fill-emerald-600 stroke-white stroke-2' : 'fill-emerald-600'
+                      }
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] pt-1 border-t border-[var(--border-subtle)]">
+              <span>{rows[0]?.hourSlot.split(' - ')[0] ?? '06:00'}</span>
+              <div className="flex items-center gap-4">
+                <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  ROM Throughput (t/h)
+                </span>
+                <span className="inline-flex items-center gap-1 text-blue-700 font-semibold">
+                  <span className="w-2 h-0.5 bg-blue-600" />
+                  Clean Coal (t/h)
+                </span>
+              </div>
+              <span>{rows[rows.length - 1]?.hourSlot.split(' - ')[1] ?? '18:00'}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                Current Throughput
+              </p>
+              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+                {totals.avgTph.toLocaleString()} t/h
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                Latest Hour Scale
+              </p>
+              <p className="font-bold text-emerald-700 mt-0.5 font-mono">
+                {totals.latestHourRom.toLocaleString()} t/h
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                Prior Shift Avg
+              </p>
+              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+                {totals.priorShiftTph.toLocaleString()} t/h
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                vs Prior Shift
+              </p>
+              <p
+                className={`font-bold mt-0.5 font-mono ${
+                  totals.throughputDeltaPct >= 0 ? 'text-emerald-700' : 'text-amber-700'
+                }`}
+              >
+                {totals.throughputDeltaPct >= 0
+                  ? `+${totals.throughputDeltaPct}%`
+                  : `${totals.throughputDeltaPct}%`}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Card 6: Production Mix (Pie Chart with Product, Discard, Recovery) */}
+        <GlassCard
+          className="lg:col-span-5 p-5 flex flex-col justify-between gap-4"
+          data-testid="card-production-mix"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+                <PieChart className="w-3.5 h-3.5 text-emerald-600" />
+                Production Mix — Product, Discard &amp; Recovery
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Wash plant mass-balance split across Clean Product, Rejects Discard, and % Recovery
+              </p>
+            </div>
+            <Badge className="bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 font-mono text-xs">
+              {totals.weightedYield.toFixed(1)}% Recovery
+            </Badge>
+          </div>
+
+          {/* Pie Chart + Mass Balance Breakdown */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 my-auto py-1">
+            {/* SVG Donut / Pie Chart */}
+            <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+              <svg
+                viewBox="0 0 110 110"
+                className="w-32 h-32 -rotate-90"
+                role="img"
+                aria-label={`Production Mix Pie Chart: Product ${totals.weightedYield.toFixed(1)}%, Discard ${totals.discardPct.toFixed(1)}%`}
+              >
+                {/* Background / Discard Ring */}
+                <circle
+                  cx="55"
+                  cy="55"
+                  r={pieGeometry.radius}
+                  fill="transparent"
+                  stroke="#f59e0b"
+                  strokeWidth="16"
+                />
+                {/* Foreground / Clean Coal Product Slice */}
+                <circle
+                  cx="55"
+                  cy="55"
+                  r={pieGeometry.radius}
+                  fill="transparent"
+                  stroke="#10b981"
+                  strokeWidth="16"
+                  strokeDasharray={`${pieGeometry.productArc} ${pieGeometry.circumference}`}
+                  strokeLinecap="butt"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+                  Recovery
+                </span>
+                <span className="text-base font-bold font-mono text-[var(--text-heading)]">
+                  {totals.weightedYield.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+
+            {/* Product / Discard / Recovery Breakdown Pills */}
+            <div className="flex-1 w-full space-y-2 text-xs">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="font-semibold text-[var(--text-heading)]">
+                    Product (Clean Coal)
+                  </span>
+                </div>
+                <span className="font-mono font-bold text-emerald-700">
+                  {totals.totalClean.toLocaleString()} t ({totals.weightedYield.toFixed(1)}%)
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                  <span className="font-semibold text-[var(--text-heading)]">
+                    Discard (Rejects)
+                  </span>
+                </div>
+                <span className="font-mono font-bold text-amber-800">
+                  {totals.totalDiscard.toLocaleString()} t ({totals.discardPct.toFixed(1)}%)
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" />
+                  <span className="font-semibold text-[var(--text-heading)]">Recovery Yield</span>
+                </div>
+                <span className="font-mono font-bold text-blue-700">
+                  {totals.weightedYield.toFixed(1)}% (Ash {totals.avgAsh.toFixed(1)}%)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-1 border-t border-[var(--border-subtle)]">
+            <Link
+              className="px-3 py-1.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg text-xs transition-all"
+              href="/plant-processing/daily-log"
+            >
+              + Daily Shift Log
+            </Link>
+            <Link
+              className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
+              href="/plant-processing/delays"
+            >
+              Log Plant Delays
+            </Link>
+            <Link
+              className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
+              href="/plant-processing/history"
+            >
+              Reports Database
+            </Link>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* ── Excel-Style Hourly Input Sheet Workbook ── */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl overflow-hidden shadow-sm">
         {/* Sheet Parameters Row */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border-default)] bg-black/[0.015]">
@@ -712,7 +1310,7 @@ export function PlantHourlySheetClient({
                     </td>
 
                     {/* Col B: Seam Source */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[150px]">
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[145px]">
                       <select
                         aria-label={`Row ${row.rowNumber} Feed Seam`}
                         value={row.seamSource}
@@ -731,7 +1329,7 @@ export function PlantHourlySheetClient({
                     </td>
 
                     {/* Col C: ROM Feed */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[110px]">
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
                       <input
                         type="number"
                         min={0}
@@ -748,7 +1346,7 @@ export function PlantHourlySheetClient({
                     </td>
 
                     {/* Col D: Clean Coal */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[110px]">
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
                       <input
                         type="number"
                         min={0}
@@ -765,7 +1363,7 @@ export function PlantHourlySheetClient({
                     </td>
 
                     {/* Col E: Discard Tonnes */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[110px]">
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
                       <input
                         type="number"
                         min={0}
@@ -781,10 +1379,10 @@ export function PlantHourlySheetClient({
                       />
                     </td>
 
-                    {/* Col F: Computed Plant Yield (%) */}
+                    {/* Col F: Computed Plant Yield (% Recovery) */}
                     <td
                       onClick={() => setActiveCell({ rowIndex, colLetter: 'F', key: 'yieldPct' })}
-                      className="py-1.5 px-2.5 border-r border-[var(--border-default)] text-right bg-black/[0.015] min-w-[105px]"
+                      className="py-1.5 px-2.5 border-r border-[var(--border-default)] text-right bg-black/[0.015] min-w-[100px]"
                     >
                       <span
                         className={`inline-block px-2 py-0.5 rounded border text-[11px] font-semibold ${yieldBadgeClass}`}
@@ -793,8 +1391,25 @@ export function PlantHourlySheetClient({
                       </span>
                     </td>
 
-                    {/* Col G: DMS Cyclone RD */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[115px]">
+                    {/* Col G: Product Ash (% ADB) */}
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
+                      <input
+                        type="number"
+                        min={5}
+                        max={40}
+                        step={0.1}
+                        aria-label={`Row ${row.rowNumber} Product Ash`}
+                        value={row.productAshPct}
+                        onFocus={() =>
+                          setActiveCell({ rowIndex, colLetter: 'G', key: 'productAshPct' })
+                        }
+                        onChange={(e) => updateCell(rowIndex, 'productAshPct', e.target.value)}
+                        className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-indigo-700 font-semibold focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
+                      />
+                    </td>
+
+                    {/* Col H: Running Density (DMS Cyclone RD) */}
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[110px]">
                       <input
                         type="number"
                         min={1.2}
@@ -803,15 +1418,15 @@ export function PlantHourlySheetClient({
                         aria-label={`Row ${row.rowNumber} DMS Cyclone RD`}
                         value={row.cycloneRd}
                         onFocus={() =>
-                          setActiveCell({ rowIndex, colLetter: 'G', key: 'cycloneRd' })
+                          setActiveCell({ rowIndex, colLetter: 'H', key: 'cycloneRd' })
                         }
                         onChange={(e) => updateCell(rowIndex, 'cycloneRd', e.target.value)}
                         className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
                       />
                     </td>
 
-                    {/* Col H: Product Moisture % */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[100px]">
+                    {/* Col I: Product Moisture % */}
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[95px]">
                       <input
                         type="number"
                         min={0}
@@ -820,15 +1435,15 @@ export function PlantHourlySheetClient({
                         aria-label={`Row ${row.rowNumber} Moisture`}
                         value={row.moisturePct}
                         onFocus={() =>
-                          setActiveCell({ rowIndex, colLetter: 'H', key: 'moisturePct' })
+                          setActiveCell({ rowIndex, colLetter: 'I', key: 'moisturePct' })
                         }
                         onChange={(e) => updateCell(rowIndex, 'moisturePct', e.target.value)}
                         className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
                       />
                     </td>
 
-                    {/* Col I: Run Time (mins) */}
-                    <td className="p-0 border-r border-[var(--border-default)] min-w-[95px]">
+                    {/* Col J: Run Time (mins) */}
+                    <td className="p-0 border-r border-[var(--border-default)] min-w-[90px]">
                       <input
                         type="number"
                         min={0}
@@ -837,21 +1452,21 @@ export function PlantHourlySheetClient({
                         aria-label={`Row ${row.rowNumber} Run Time`}
                         value={row.runMinutes}
                         onFocus={() =>
-                          setActiveCell({ rowIndex, colLetter: 'I', key: 'runMinutes' })
+                          setActiveCell({ rowIndex, colLetter: 'J', key: 'runMinutes' })
                         }
                         onChange={(e) => updateCell(rowIndex, 'runMinutes', e.target.value)}
                         className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
                       />
                     </td>
 
-                    {/* Col J: Notes */}
-                    <td className="p-0 min-w-[260px]">
+                    {/* Col K: Notes */}
+                    <td className="p-0 min-w-[240px]">
                       <input
                         type="text"
                         aria-label={`Row ${row.rowNumber} Notes`}
                         value={row.notes}
                         placeholder="Add hourly circuit note..."
-                        onFocus={() => setActiveCell({ rowIndex, colLetter: 'J', key: 'notes' })}
+                        onFocus={() => setActiveCell({ rowIndex, colLetter: 'K', key: 'notes' })}
                         onChange={(e) => updateCell(rowIndex, 'notes', e.target.value)}
                         className="w-full py-2 px-2.5 bg-transparent font-sans text-xs text-[var(--text-secondary)] focus:text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
                       />
@@ -884,6 +1499,9 @@ export function PlantHourlySheetClient({
                 </td>
                 <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-[var(--accent-blue)]">
                   {totals.weightedYield.toFixed(1)}%
+                </td>
+                <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-indigo-700">
+                  {totals.avgAsh.toFixed(1)}%
                 </td>
                 <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)]">
                   {totals.avgRd.toFixed(2)} g/cm³
