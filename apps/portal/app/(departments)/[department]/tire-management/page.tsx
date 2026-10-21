@@ -55,16 +55,27 @@ export default async function TireManagementPage({
     };
   });
 
+  // Performance Optimization: Calculate total, installed, inventory, and critical counts in a single pass O(N) loop
+  // instead of multiple array .filter() passes over tires.
   const totalTires = tires.length;
-  const installedTires = tires.filter((t) => t.status === 'installed').length;
-  const inventoryTires = tires.filter((t) => t.status === 'inventory').length;
-  const criticalTires = tires.filter(
-    (t) =>
-      t.status === 'installed' &&
-      t.latestInspection &&
-      (t.latestInspection.condition_status === 'critical' ||
-        Number(t.latestInspection.tread_depth_mm) < 15)
-  ).length;
+  let installedTires = 0;
+  let inventoryTires = 0;
+  let criticalTires = 0;
+
+  for (const t of tires) {
+    if (t.status === 'installed') {
+      installedTires++;
+      if (
+        t.latestInspection &&
+        (t.latestInspection.condition_status === 'critical' ||
+          Number(t.latestInspection.tread_depth_mm) < 15)
+      ) {
+        criticalTires++;
+      }
+    } else if (t.status === 'inventory') {
+      inventoryTires++;
+    }
+  }
 
   return (
     <div className="space-y-6">
