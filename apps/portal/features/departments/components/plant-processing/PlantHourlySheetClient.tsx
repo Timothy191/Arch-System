@@ -299,42 +299,72 @@ export function PlantHourlySheetClient({
     };
   }, [rows, savedSheets, selectedShift, selectedDate]);
 
-  // SVG Pulse Graph coordinates (Card 5) — increased height & vertical padding for spacious layout
+  // SVG Pulse Graph coordinates (Card 5) — Alternative Paired-Column & Smooth Spline Matrix Design
   const pulseChartGeometry = useMemo(() => {
-    const width = 560;
-    const height = 132;
-    const padX = 20;
-    const padY = 22;
-    const usableW = width - padX * 2;
-    const usableH = height - padY * 2;
-    const minVal = 260;
-    const maxVal = Math.max(530, totals.peakHourRom + 25);
+    const width = 580;
+    const height = 164;
+    const padLeft = 38;
+    const padRight = 14;
+    const padTop = 18;
+    const padBottom = 26;
+    const usableW = width - padLeft - padRight;
+    const usableH = height - padTop - padBottom;
+    const minVal = 330;
+    const maxVal = Math.max(510, totals.peakHourRom + 20);
 
-    const toPoint = (val: number, idx: number) => {
-      const x = padX + (idx / Math.max(1, rows.length - 1)) * usableW;
+    const toY = (val: number) => {
       const clamped = Math.max(minVal, Math.min(maxVal, val));
-      const y = padY + usableH - ((clamped - minVal) / (maxVal - minVal)) * usableH;
-      return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
+      const y = padTop + usableH - ((clamped - minVal) / (maxVal - minVal)) * usableH;
+      return Number(y.toFixed(1));
     };
 
-    const romPoints = rows.map((r, idx) => toPoint(r.romFeedTonnes, idx));
-    const cleanPoints = rows.map((r, idx) => toPoint(r.cleanCoalTonnes, idx));
-    const romLine = romPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-    const cleanLine = cleanPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-    const romArea = `${romLine} L${romPoints[romPoints.length - 1]?.x ?? width},${height - padY} L${romPoints[0]?.x ?? padX},${height - padY} Z`;
-    const priorY = toPoint(totals.priorShiftTph, 0).y;
+    const slotStep = usableW / Math.max(1, rows.length);
+    const bars = rows.map((r, idx) => {
+      const centerX = Number((padLeft + idx * slotStep + slotStep / 2).toFixed(1));
+      const romY = toY(r.romFeedTonnes);
+      const cleanY = toY(r.cleanCoalTonnes);
+      const baselineY = padTop + usableH;
+      return {
+        hourLabel: r.hourSlot.split(' - ')[0] ?? `${idx + 6}:00`,
+        centerX,
+        romY,
+        romH: Number(Math.max(4, baselineY - romY).toFixed(1)),
+        cleanY,
+        cleanH: Number(Math.max(4, baselineY - cleanY).toFixed(1)),
+        romVal: r.romFeedTonnes,
+        cleanVal: r.cleanCoalTonnes,
+        yieldPct: r.yieldPct,
+      };
+    });
+
+    // Smooth cubic bezier curve through ROM feed tops
+    const smoothRomPath = bars
+      .map((b, i) => {
+        if (i === 0) return `M${b.centerX},${b.romY}`;
+        const prev = bars[i - 1]!;
+        const cpx = Number(((prev.centerX + b.centerX) / 2).toFixed(1));
+        return `C${cpx},${prev.romY} ${cpx},${b.romY} ${b.centerX},${b.romY}`;
+      })
+      .join(' ');
+
+    const priorY = toY(totals.priorShiftTph);
+    const gridLevels = [500, 450, 400, 350].map((v) => ({
+      val: v,
+      y: toY(v),
+    }));
 
     return {
       width,
       height,
-      padX,
-      padY,
-      romPoints,
-      cleanPoints,
-      romLine,
-      cleanLine,
-      romArea,
+      padLeft,
+      padRight,
+      padTop,
+      padBottom,
+      baselineY: padTop + usableH,
+      bars,
+      smoothRomPath,
       priorY,
+      gridLevels,
     };
   }, [rows, totals.peakHourRom, totals.priorShiftTph]);
 
@@ -490,36 +520,39 @@ export function PlantHourlySheetClient({
 
   return (
     <div className="space-y-6">
-      {/* Top Header GlassCard */}
+      {/* Top Header GlassCard — Redesigned Command Banner without redundant badge */}
       <GlassCard className="p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
-                {mode === 'sheet'
-                  ? 'Plant & Processing — Hourly Input Sheet'
-                  : 'Plant & Processing — Wash Plant Telemetry'}
-              </h1>
-              <Badge
-                variant="outline"
-                className="text-xs font-mono bg-amber-500/15 text-amber-800 border-amber-500/30"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 mr-1" />
-                {mode === 'sheet' ? 'Excel Grid Workbook' : 'Live DMS & Belt Scale SSoT'}
-              </Badge>
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0 mt-0.5">
+              <Activity className="w-5 h-5 text-emerald-700" />
             </div>
-            <p className="text-xs text-[var(--text-secondary)]">
-              {mode === 'sheet'
-                ? 'Interactive hourly wash plant workbook for ROM belt-scale feed, clean coal recovery, product ash, and running density.'
-                : 'Real-time ROM belt-scale throughput, product recovery yield, washed ash quality, running medium density, and production mix.'}
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+                  {mode === 'sheet'
+                    ? 'Plant & Processing — Hourly Input Sheet'
+                    : 'Plant & Processing — Wash Plant Telemetry'}
+                </h1>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-800 border border-emerald-500/25">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                  {selectedModule} · {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'} ·{' '}
+                  {totals.runHours}h Run
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)]">
+                {mode === 'sheet'
+                  ? 'Interactive hourly wash plant workbook for ROM belt-scale feed, clean coal recovery, product ash, and running density.'
+                  : 'Real-time ROM belt-scale throughput, product recovery yield, washed ash quality, running medium density, and production mix.'}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[var(--bg-secondary)]/90 border border-[var(--border-default)] self-start xl:self-auto">
             {mode === 'sheet' ? (
               <Link
                 href="/plant-processing"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors shadow-2xs"
               >
                 <BarChart3 className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
                 Telemetry Dashboard
@@ -527,30 +560,30 @@ export function PlantHourlySheetClient({
             ) : (
               <Link
                 href="/plant-processing/hourly-sheet"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 transition-all shadow-xs"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
-                Open Hourly Sheet
+                Hourly Sheet
               </Link>
             )}
             <Link
               href="/plant-processing/delays"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 transition-colors"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
-              Log Plant Delay
+              Log Delay
             </Link>
             <Link
               href="/plant-processing/history"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors"
             >
               <Database className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-              History Database
+              History
             </Link>
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Export CSV
@@ -561,7 +594,7 @@ export function PlantHourlySheetClient({
                 onClick={handleSaveSheet}
                 disabled={isPending}
                 data-testid="save-plant-hourly-sheet"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 disabled:opacity-60 transition-all shadow-xs cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
                 {isPending ? 'Saving Sheet...' : 'Save Hourly Sheet'}
@@ -892,94 +925,154 @@ export function PlantHourlySheetClient({
                 </div>
               </div>
 
-              {/* Interactive SVG Pulse Chart — Positioned higher with expanded vertical breathing space & refined border */}
-              <div className="relative -mt-0.5 rounded-2xl bg-[var(--bg-primary)]/80 border border-[var(--border-default)]/60 px-4 pt-4 pb-3 shadow-sm">
+              {/* Alternative Design: Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
+              <div className="relative rounded-2xl bg-[var(--bg-secondary)]/70 border border-[var(--border-default)] p-3.5 space-y-2.5 shadow-xs">
+                {/* Top Legend & Benchmark Strip */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)] text-[10px] font-mono">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-800 font-semibold">
+                      <span className="w-2.5 h-2.5 rounded-xs bg-emerald-600 inline-block" />
+                      ROM Throughput (t/h)
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-blue-800 font-semibold">
+                      <span className="w-2.5 h-2.5 rounded-xs bg-blue-600 inline-block" />
+                      Clean Coal (t/h)
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-amber-800 font-medium">
+                      <span className="w-3 h-0 border-t-2 border-dashed border-amber-600 inline-block" />
+                      Prior Shift Avg: {totals.priorShiftTph} t/h
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-semibold">
+                    Peak: {totals.peakHourRom} t/h
+                  </span>
+                </div>
+
+                {/* Paired Hourly Columns + Cubic Bezier Pulse Spline SVG */}
                 <svg
                   viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
-                  className="w-full h-36 overflow-visible"
+                  className="w-full h-40 overflow-visible"
                   role="img"
                   aria-label="Live Production Pulse Graph showing hourly throughput in tonnes per hour"
                 >
                   <defs>
-                    <linearGradient id="romPulseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.28" />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                    <linearGradient id="romColGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#059669" stopOpacity="0.92" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.38" />
+                    </linearGradient>
+                    <linearGradient id="cleanColGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.9" />
+                      <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.38" />
                     </linearGradient>
                   </defs>
 
-                  {/* Prior shift average dashed reference line */}
-                  <line
-                    x1={pulseChartGeometry.padX}
-                    y1={pulseChartGeometry.priorY}
-                    x2={pulseChartGeometry.width - pulseChartGeometry.padX}
-                    y2={pulseChartGeometry.priorY}
-                    stroke="#94a3b8"
-                    strokeWidth="1.2"
-                    strokeDasharray="4 4"
-                  />
-                  <text
-                    x={pulseChartGeometry.width - pulseChartGeometry.padX}
-                    y={Math.max(14, pulseChartGeometry.priorY - 6)}
-                    textAnchor="end"
-                    className="fill-[var(--text-muted)] text-[9.5px] font-mono"
-                  >
-                    Prior Shift Avg: {totals.priorShiftTph} t/h
-                  </text>
+                  {/* Horizontal Y-Axis Gridlines & Labels */}
+                  {pulseChartGeometry.gridLevels.map((lvl) => (
+                    <g key={lvl.val}>
+                      <line
+                        x1={pulseChartGeometry.padLeft}
+                        y1={lvl.y}
+                        x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
+                        y2={lvl.y}
+                        stroke="currentColor"
+                        strokeOpacity="0.08"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={pulseChartGeometry.padLeft - 6}
+                        y={lvl.y + 3}
+                        textAnchor="end"
+                        className="fill-[var(--text-muted)] text-[9px] font-mono"
+                      >
+                        {lvl.val}
+                      </text>
+                    </g>
+                  ))}
 
-                  {/* ROM Feed Area & Line */}
-                  <path d={pulseChartGeometry.romArea} fill="url(#romPulseGrad)" />
-                  <path
-                    d={pulseChartGeometry.romLine}
-                    fill="none"
-                    stroke="#059669"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* Clean Coal Output Line */}
-                  <path
-                    d={pulseChartGeometry.cleanLine}
-                    fill="none"
-                    stroke="#2563eb"
-                    strokeWidth="2"
-                    strokeDasharray="5 3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* Hourly Data Nodes */}
-                  {pulseChartGeometry.romPoints.map((pt, idx) => {
-                    const isLast = idx === pulseChartGeometry.romPoints.length - 1;
+                  {/* Paired Hourly Columns (ROM Feed + Clean Coal) */}
+                  {pulseChartGeometry.bars.map((b, idx) => {
+                    const isLatest = idx === pulseChartGeometry.bars.length - 1;
                     return (
-                      <g key={rows[idx]?.hourSlot ?? idx}>
-                        <circle
-                          cx={pt.x}
-                          cy={pt.y}
-                          r={isLast ? 4.5 : 2.5}
-                          className={
-                            isLast ? 'fill-emerald-600 stroke-white stroke-2' : 'fill-emerald-600'
-                          }
+                      <g key={b.hourLabel}>
+                        {/* Subtle slot hover/active column backdrop */}
+                        {isLatest && (
+                          <rect
+                            x={b.centerX - 15}
+                            y={pulseChartGeometry.padTop - 4}
+                            width={30}
+                            height={pulseChartGeometry.baselineY - pulseChartGeometry.padTop + 6}
+                            rx={5}
+                            className="fill-emerald-500/8 stroke-emerald-500/25"
+                            strokeWidth="1"
+                          />
+                        )}
+                        {/* ROM Feed Bar */}
+                        <rect
+                          x={b.centerX - 10.5}
+                          y={b.romY}
+                          width={9.5}
+                          height={b.romH}
+                          rx={2.5}
+                          fill="url(#romColGrad)"
                         />
+                        {/* Clean Coal Bar */}
+                        <rect
+                          x={b.centerX + 1}
+                          y={b.cleanY}
+                          width={9.5}
+                          height={b.cleanH}
+                          rx={2.5}
+                          fill="url(#cleanColGrad)"
+                        />
+                        {/* X-Axis Hour Label */}
+                        <text
+                          x={b.centerX}
+                          y={pulseChartGeometry.baselineY + 15}
+                          textAnchor="middle"
+                          className={`text-[9px] font-mono ${
+                            isLatest ? 'fill-emerald-700 font-bold' : 'fill-[var(--text-muted)]'
+                          }`}
+                        >
+                          {b.hourLabel}
+                        </text>
                       </g>
                     );
                   })}
-                </svg>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] pt-2 mt-1 border-t border-[var(--border-subtle)]">
-                  <span>{rows[0]?.hourSlot.split(' - ')[0] ?? '06:00'}</span>
-                  <div className="flex items-center gap-4">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold">
-                      <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                      ROM Throughput (t/h)
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-blue-700 font-semibold">
-                      <span className="w-2.5 h-0.5 bg-blue-600" />
-                      Clean Coal (t/h)
-                    </span>
-                  </div>
-                  <span>{rows[rows.length - 1]?.hourSlot.split(' - ')[1] ?? '18:00'}</span>
-                </div>
+                  {/* Prior Shift Average Benchmark Dashed Line */}
+                  <line
+                    x1={pulseChartGeometry.padLeft}
+                    y1={pulseChartGeometry.priorY}
+                    x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
+                    y2={pulseChartGeometry.priorY}
+                    stroke="#d97706"
+                    strokeWidth="1.5"
+                    strokeDasharray="5 3"
+                  />
+
+                  {/* Smooth Cubic Bezier ROM Pulse Trend Line + Nodes */}
+                  <path
+                    d={pulseChartGeometry.smoothRomPath}
+                    fill="none"
+                    stroke="#047857"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  {pulseChartGeometry.bars.map((b, idx) => {
+                    const isLatest = idx === pulseChartGeometry.bars.length - 1;
+                    return (
+                      <circle
+                        key={`node-${b.hourLabel}`}
+                        cx={b.centerX - 5.75}
+                        cy={b.romY}
+                        r={isLatest ? 3.8 : 2.2}
+                        className={
+                          isLatest ? 'fill-emerald-600 stroke-white stroke-2' : 'fill-emerald-700'
+                        }
+                      />
+                    );
+                  })}
+                </svg>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs pt-0.5">

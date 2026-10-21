@@ -67,6 +67,12 @@ describe('Plant & Processing Workspace Components', () => {
         /Live Production Pulse Graph — Current Throughput \(t\/h\)/i
       );
       expect(screen.getByTestId('card-live-production-pulse')).toHaveTextContent(/vs Prior Shift/i);
+      expect(
+        screen.getByRole('img', {
+          name: /Live Production Pulse Graph showing hourly throughput in tonnes per hour/i,
+        })
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/Live DMS & Belt Scale SSoT/i)).not.toBeInTheDocument();
       expect(screen.getByTestId('card-production-mix')).toHaveTextContent(
         /Production Mix — Product, Discard & Recovery/i
       );
