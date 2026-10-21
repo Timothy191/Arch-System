@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Database,
   Download,
   FileSpreadsheet,
   Filter,
@@ -213,13 +212,6 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600" />
             Hourly Input Sheet
-          </Link>
-          <Link
-            href="/plant-processing/history"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
-          >
-            <Database className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-            History Database
           </Link>
           <button
             type="button"

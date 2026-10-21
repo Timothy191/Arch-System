@@ -313,14 +313,12 @@ export const DATABASE_TABS = [
 ] as const;
 
 /**
- * Plant & Processing specific tabs - Dashboard, Hourly Sheet, Daily Log, Delays, and History database
+ * Plant & Processing specific tabs - Dashboard, Hourly Sheet, and Delays
  */
 export const PLANT_PROCESSING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'hourly-sheet', label: 'Hourly Sheet', icon: 'Clock' },
-  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
   { name: 'delays', label: 'Delays', icon: 'AlertTriangle' },
-  { name: 'history', label: 'History', icon: 'History' },
 ] as const;
 
 const DEPARTMENT_TABS_MAP: Record<

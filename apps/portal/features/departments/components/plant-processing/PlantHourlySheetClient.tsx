@@ -9,7 +9,6 @@ import {
   Calendar,
   CheckCircle2,
   Copy,
-  Database,
   Download,
   FileSpreadsheet,
   Flame,
@@ -572,13 +571,6 @@ export function PlantHourlySheetClient({
             >
               <AlertTriangle className="w-3.5 h-3.5" />
               Log Delay
-            </Link>
-            <Link
-              href="/plant-processing/history"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors"
-            >
-              <Database className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-              History
             </Link>
             <button
               type="button"
@@ -1231,12 +1223,6 @@ export function PlantHourlySheetClient({
                   href="/plant-processing/delays"
                 >
                   Log Plant Delays
-                </Link>
-                <Link
-                  className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
-                  href="/plant-processing/history"
-                >
-                  Reports Database
                 </Link>
               </div>
             </GlassCard>
