@@ -5,7 +5,14 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { GET } from './route';
+
+jest.mock('@repo/supabase', () => ({
+  getAuthenticatedEmployee: jest.fn(),
+}));
+
+const mockGetAuthenticatedEmployee = jest.mocked(getAuthenticatedEmployee);
 
 // FIXTURE_ROOT is intentionally unused; tests use a temporary directory instead.
 
@@ -22,6 +29,13 @@ describe('GET /api/codebase-maps', () => {
 
   afterAll(() => {
     fs.rmSync(tempRoot, { recursive: true, force: true });
+  });
+
+  beforeEach(() => {
+    mockGetAuthenticatedEmployee.mockResolvedValue({
+      user: { id: 'user-1' },
+      employee: { id: 'employee-1', role: 'operator' },
+    } as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
   });
 
   it('returns defaults when no query params are provided', async () => {
@@ -95,5 +109,38 @@ describe('GET /api/codebase-maps', () => {
     expect(res.status).toBe(200);
     expect(json.manifest).toEqual([]);
     expect(json.content).toBe('# map');
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    mockGetAuthenticatedEmployee.mockResolvedValueOnce(null);
+
+    const res = await GET(makeRequest(), { mapsRoot: tempRoot });
+
+    expect(res.status).toBe(401);
+  });
+
+  it.each([
+    'file=../../../../.env',
+    'file=..%2F..%2F..%2F.env',
+    'file=/etc/passwd',
+    'file=..%2Froute-feature-architecture.md',
+    'log=../../etc',
+    'log=..%2F..',
+  ])('rejects traversal payload %s', async (query) => {
+    const res = await GET(makeRequest(query), { mapsRoot: tempRoot });
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json).toEqual({
+      success: false,
+      error: expect.any(String),
+      code: 'INVALID_REQUEST',
+    });
+  });
+
+  it('only serves markdown map files', async () => {
+    const res = await GET(makeRequest('file=manifest.json'), { mapsRoot: tempRoot });
+
+    expect(res.status).toBe(400);
   });
 });

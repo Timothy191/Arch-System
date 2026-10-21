@@ -84,7 +84,7 @@ describe('env validation', () => {
     setEnvVar('DISABLE_RATE_LIMIT', undefined);
     resetEnv();
 
-    expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe('https://mrwhtxbhrzyttlsyuofc.supabase.co');
+    expect(env.NEXT_PUBLIC_SUPABASE_URL).toBeUndefined();
     expect(env.PORT).toBe(3000);
     expect(env.NODE_ENV).toBe('development');
     expect(env.OTEL_SERVICE_NAME).toBe('arch-portal');
@@ -95,12 +95,14 @@ describe('env validation', () => {
 
   it('picks up custom env var values', () => {
     setEnvVar('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    setEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key');
     setEnvVar('PORT', '8080');
     setEnvVar('NODE_ENV', 'production');
     setEnvVar('OTEL_SERVICE_NAME', 'my-custom-service');
     resetEnv();
 
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe('https://example.supabase.co');
+    expect(env.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe('test-anon-key');
     expect(env.PORT).toBe(8080);
     expect(env.NODE_ENV).toBe('production');
     expect(env.OTEL_SERVICE_NAME).toBe('my-custom-service');

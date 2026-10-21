@@ -97,6 +97,49 @@ describe('POST /api/telemetry/push (reverse-flow ingest — Redis is system of r
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
+  it('rejects unsigned writes when an ingest secret is configured', async () => {
+    const originalSecret = process.env.TELEMETRY_INGEST_SECRET;
+    process.env.TELEMETRY_INGEST_SECRET = 'ingest-secret';
+
+    try {
+      const res = await POST(createRequest({ name: 'machine_1_engine_rpm', value: 1200 }));
+
+      expect(res.status).toBe(401);
+    } finally {
+      if (originalSecret === undefined) {
+        delete process.env.TELEMETRY_INGEST_SECRET;
+      } else {
+        process.env.TELEMETRY_INGEST_SECRET = originalSecret;
+      }
+    }
+  });
+
+  it('accepts a matching x-telemetry-secret header', async () => {
+    const originalSecret = process.env.TELEMETRY_INGEST_SECRET;
+    process.env.TELEMETRY_INGEST_SECRET = 'ingest-secret';
+
+    try {
+      const req = new Request('http://localhost/api/telemetry/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-telemetry-secret': 'ingest-secret',
+        },
+        body: JSON.stringify({ name: 'machine_1_engine_rpm', value: 1200 }),
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(200);
+    } finally {
+      if (originalSecret === undefined) {
+        delete process.env.TELEMETRY_INGEST_SECRET;
+      } else {
+        process.env.TELEMETRY_INGEST_SECRET = originalSecret;
+      }
+    }
+  });
+
   it('skips storing duplicate tag values (L1 delta-diff caching)', async () => {
     const mockFetch = jest.fn();
     global.fetch = mockFetch;

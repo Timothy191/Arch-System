@@ -1,16 +1,17 @@
-# 📋 Required Actions & Remediation Plan — Log #5 (26-10-12)
+# 📋 Required Actions & Remediation Plan — Log #8 (26-10-21)
 
-**Generated:** 10/12/2026, 4:18:41 AM UTC
+**Generated:** 10/21/2026, 11:03:41 AM UTC
 
-**Associated Audit Log:** `documentation/03-audit-reports/log-5(26-10-12)/`
-**Total Pending Action Items:** 2 (0 Critical, 2 Warnings)
+**Associated Audit Log:** `documentation/03-audit-reports/log-8(26-10-21)/`
+**Total Pending Action Items:** 6 (1 Critical, 5 Warnings)
 
 ---
 
 ## 🚨 Priority Action Checklist
 
-- [ ] **[NON-BLOCKING - PRODUCTION DEPENDENCIES]** Review: sprintf-js (moderate). These lower-severity advisories remain visible; deployment blocks on high/critical findings.
-- [ ] **[NON-BLOCKING - NON-PRODUCTION DEPENDENCIES]** Review: braces (high). These findings are outside the production dependency graph.
+- [ ] **[CRITICAL - DEPENDENCIES]** Resolve high/critical dependency advisories or restore vulnerability audit availability before deployment.
+- [ ] **[NON-BLOCKING - PRODUCTION DEPENDENCIES]** Review: @modelcontextprotocol/sdk (moderate), @modelcontextprotocol/sdk (moderate). These lower-severity advisories remain visible; deployment blocks on high/critical findings.
+- [ ] **[NON-BLOCKING - NON-PRODUCTION DEPENDENCIES]** Review: braces (high), vite (high), markdown-it (high). These findings are outside the production dependency graph.
 
 ---
 

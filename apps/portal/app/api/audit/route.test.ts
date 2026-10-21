@@ -4,7 +4,14 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { GET } from './route';
+
+jest.mock('@repo/supabase', () => ({
+  getAuthenticatedEmployee: jest.fn(),
+}));
+
+const mockGetAuthenticatedEmployee = jest.mocked(getAuthenticatedEmployee);
 
 jest.mock('node:fs', () => ({
   existsSync: jest.fn(),
@@ -49,6 +56,15 @@ function createRequest(url: string): Request {
 describe('GET /api/audit', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthenticatedEmployee.mockResolvedValue({
+      user: { id: 'user-1' },
+      employee: {
+        id: 'employee-1',
+        role: 'admin',
+        department_id: 'dept-1',
+        accessible_departments: [],
+      },
+    } as Awaited<ReturnType<typeof getAuthenticatedEmployee>>);
   });
 
   it('returns manifest and report contents for the latest log', async () => {
@@ -202,6 +218,23 @@ describe('GET /api/audit', () => {
     expect(res.status).toBe(200);
     expect(body.manifest).toEqual([]);
   });
+
+  it('rejects unauthenticated requests', async () => {
+    mockGetAuthenticatedEmployee.mockResolvedValueOnce(null);
+
+    const res = await GET(createRequest('http://localhost:3000/api/audit'));
+
+    expect(res.status).toBe(401);
+  });
+
+  it.each(['../../etc', '..%2F..', '/etc/passwd', '.hidden'])(
+    'rejects invalid log identifier %s',
+    async (logId) => {
+      const res = await GET(createRequest(`http://localhost:3000/api/audit?log=${logId}`));
+
+      expect(res.status).toBe(400);
+    }
+  );
 
   it('returns placeholder text when a report file is missing', async () => {
     buildFsScenario({

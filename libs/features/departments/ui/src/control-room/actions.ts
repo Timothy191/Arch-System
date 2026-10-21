@@ -1,33 +1,55 @@
 'use server';
 
-import { AuthError, DatabaseError } from '@repo/errors';
+import { dozerRollSchema } from '@repo/contract';
+import { AuthError, DatabaseError, ValidationError } from '@repo/errors';
 import { cacheInvalidateTags } from '@repo/redis';
-import { logAuditEvent } from '@repo/shared/data-access';
+import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
-export async function createDozerRoll(payload: any) {
+// AGENT-TRACE: The form additionally captures the worked area dimensions for
+// the notes column. Everything else is the canonical contract schema.
+const createDozerRollSchema = dozerRollSchema.extend({
+  lengthM: z.number().min(0).max(10_000).optional(),
+  widthM: z.number().min(0).max(10_000).optional(),
+});
+
+export async function createDozerRoll(payload: unknown) {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
+  const principal = await getAuthenticatedEmployee(supabase);
+  if (!principal) {
     throw new AuthError('Unauthorized', {
       context: { action: 'createDozerRoll' },
     });
   }
 
+  const parsed = createDozerRollSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new ValidationError('Invalid dozer roll payload', {
+      context: {
+        action: 'createDozerRoll',
+        issues: parsed.error.issues.map((issue) => issue.path.join('.')).join(', '),
+      },
+    });
+  }
+
+  const roll = parsed.data;
+
   const { error: insertError } = await supabase.from('dozer_rolls').insert({
-    department_id: payload.departmentId,
-    machine_id: payload.machineId,
-    roll_date: payload.today,
-    shift_type: payload.shiftType,
-    blade_passes: payload.bladePasses,
-    push_count: payload.pushCount,
-    hours_operated: payload.hoursOperated,
-    area_covered_sqm: payload.area,
-    notes: `Length: ${payload.lengthM}m, Width: ${payload.widthM}m`,
+    department_id: roll.departmentId,
+    machine_id: roll.machineId,
+    roll_date: roll.today,
+    shift_type: roll.shiftType,
+    blade_passes: roll.bladePasses,
+    push_count: roll.pushCount,
+    hours_operated: roll.hoursOperated,
+    area_covered_sqm: roll.area,
+    notes:
+      roll.lengthM !== undefined && roll.widthM !== undefined
+        ? `Length: ${roll.lengthM}m, Width: ${roll.widthM}m`
+        : null,
   });
 
   if (insertError) {

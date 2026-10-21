@@ -13,6 +13,8 @@
     "@repo/errors": "1.0.0",
     "@repo/logger": "1.0.0",
     "@repo/redis": "1.0.0",
+    "@repo/shared/data-access": "1.0.0",
+    "@repo/shared/hooks": "1.0.0",
     "@repo/supabase": "1.0.0",
     "@repo/ui": "1.0.0",
     "@repo/utils": "1.0.0",
@@ -24,7 +26,8 @@
     "lucide-react": "catalog:",
     "next": "^16.3.8",
     "react": "catalog:react19",
-    "react-dom": "catalog:react19"
+    "react-dom": "catalog:react19",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:react19",

@@ -90,15 +90,71 @@
  *         description: Internal server error
  */
 
+import { timingSafeEqual } from 'node:crypto';
 import { telemetryPushSchema } from '@repo/contract/schemas/telemetry.schema';
 import { withValidation } from '@repo/contract/validation';
 import { getRedisClient } from '@repo/redis';
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
 
 // L1 cache (in-memory)
 const localLastValues = new Map<string, number>();
+
+// AGENT-TRACE: Supabase database-webhook payloads use { table, record } rather
+// than the direct { name, value } shape. Only the wrapper is validated here;
+// individual metric values are coerced and finiteness-checked below.
+const webhookPayloadSchema = z
+  .object({
+    table: z.literal('machine_telemetry'),
+    record: z
+      .object({
+        machine_id: z.union([z.string().min(1).max(128), z.number()]),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+
+function getIngestSecret(): string | null {
+  const secret = process.env.TELEMETRY_INGEST_SECRET || process.env.TELEMETRY_WEBHOOK_SECRET;
+  return secret && secret.trim().length > 0 ? secret : null;
+}
+
+function secretsMatch(provided: string, expected: string): boolean {
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+  return timingSafeEqual(providedBuffer, expectedBuffer);
+}
+
+/**
+ * Telemetry writes are a safety-relevant ingest path: unsigned callers could
+ * poison the values SCADA views read. Require a shared secret.
+ *
+ * In non-production environments an unconfigured secret is tolerated so local
+ * development and tests keep working; production fails closed.
+ */
+function authorizeIngest(req: Request): NextResponse | null {
+  const secret = getIngestSecret();
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ error: 'Telemetry ingest is not configured.' }, { status: 503 });
+    }
+    return null;
+  }
+
+  const authHeader = req.headers.get('authorization');
+  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const provided =
+    req.headers.get('x-telemetry-secret') || req.headers.get('x-webhook-secret') || bearer;
+
+  if (!provided || !secretsMatch(provided, secret)) {
+    return NextResponse.json({ error: 'Unauthorized telemetry ingest.' }, { status: 401 });
+  }
+
+  return null;
+}
 
 export function clearTelemetryCache() {
   localLastValues.clear();
@@ -153,6 +209,11 @@ const handleDirectTag = withValidation(telemetryPushSchema, async (_req, data) =
 });
 
 export async function POST(req: Request) {
+  const unauthorized = authorizeIngest(req);
+  if (unauthorized) {
+    return applyCors(req, unauthorized);
+  }
+
   return withBodyLimit(
     req,
     async () => {
@@ -167,37 +228,31 @@ export async function POST(req: Request) {
 
 async function handlePost(req: Request) {
   try {
-    const body = await req.clone().json();
+    const body: unknown = await req.clone().json();
 
     // 1. Check if this is a Supabase Database Webhook payload
-    if (body.table === 'machine_telemetry' && body.record) {
-      const {
-        machine_id,
-        engine_rpm,
-        engine_temp,
-        hydraulic_pressure,
-        vibration_level,
-        fuel_level,
-        bit_depth,
-      } = body.record;
+    const webhook = webhookPayloadSchema.safeParse(body);
+    if (webhook.success) {
+      const record = webhook.data.record;
+      const { machine_id } = record;
 
       const metrics = {
-        engine_rpm,
-        engine_temp,
-        hydraulic_pressure,
-        vibration_level,
-        fuel_level,
-        bit_depth,
+        engine_rpm: record.engine_rpm,
+        engine_temp: record.engine_temp,
+        hydraulic_pressure: record.hydraulic_pressure,
+        vibration_level: record.vibration_level,
+        fuel_level: record.fuel_level,
+        bit_depth: record.bit_depth,
       };
 
-      const entries = Object.entries(metrics).filter(
-        ([, value]) => value !== null && value !== undefined
-      );
+      const entries = Object.entries(metrics)
+        .filter(([, value]) => value !== null && value !== undefined && value !== '')
+        .map(([key, value]) => [key, Number(value)] as const)
+        .filter(([, value]) => Number.isFinite(value));
 
       const results = await Promise.all(
-        entries.map(async ([key, value]) => {
+        entries.map(async ([key, numValue]) => {
           const tagName = `machine_${machine_id}_${key}`;
-          const numValue = Number(value);
 
           // L1 Check
           if (localLastValues.has(tagName) && localLastValues.get(tagName) === numValue) {
@@ -235,9 +290,9 @@ async function handlePost(req: Request) {
       }),
       { params: Promise.resolve({}) }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err.message || 'Failed to store telemetry' },
+      { error: err instanceof Error ? err.message : 'Failed to store telemetry' },
       { status: 500 }
     );
   }

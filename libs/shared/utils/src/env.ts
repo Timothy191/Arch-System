@@ -22,8 +22,11 @@ import { z } from 'zod';
 // ---------------------------------------------------------------------------
 
 const clientEnvShape = {
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('https://mrwhtxbhrzyttlsyuofc.supabase.co'),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).default('dummy-anon-key'),
+  // No silent fallbacks: a dummy key or a hardcoded project would let the app
+  // boot against the wrong backend. Production requires these explicitly.
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
   NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
@@ -103,10 +106,37 @@ const serverEnvShape = {
     .transform((v) => v === 'true'),
 };
 
-const envSchema = z.object({
-  ...clientEnvShape,
-  ...serverEnvShape,
-});
+const envSchema = z
+  .object({
+    ...clientEnvShape,
+    ...serverEnvShape,
+  })
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV !== 'production') return;
+
+    const supabaseUrl = data.NEXT_PUBLIC_SUPABASE_URL ?? data.SUPABASE_URL;
+    if (!supabaseUrl) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['NEXT_PUBLIC_SUPABASE_URL'],
+        message:
+          'Supabase URL is required in production (NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL)',
+      });
+    }
+
+    const supabaseKey =
+      data.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+      data.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+      data.SUPABASE_ANON_KEY;
+    if (!supabaseKey) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+        message:
+          'Supabase key is required in production (NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)',
+      });
+    }
+  });
 
 // ---------------------------------------------------------------------------
 // Parsed result (cached singleton)
@@ -130,6 +160,7 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
     runtimeEnv: {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
       NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
       NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
       NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
@@ -173,12 +204,14 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
 /**
  * Returns validated environment variables.
  * In production, throws on missing required vars.
- * In dev/test, uses defaults where possible and logs warnings.
+ * In dev/test, logs warnings and returns whatever was provided (no secret
+ * fallbacks — features that need a value must fail at their own boundary).
  */
 function parseEnv(): EnvVars {
   const raw = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
@@ -190,6 +223,12 @@ function parseEnv(): EnvVars {
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
     OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
+    // AGENT-TRACE: These four were present in the schema and createT3Env but
+    // missing here, so parseEnv() silently dropped them.
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_API_KEYS: process.env.GEMINI_API_KEYS,
+    GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
+    GOOGLE_PROJECT_ID: process.env.GOOGLE_PROJECT_ID,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
@@ -227,12 +266,15 @@ function parseEnv(): EnvVars {
     _envError = result.error;
 
     if (raw.NODE_ENV === 'production') {
-      const missing = result.error.issues
-        .filter((i) => i.code === 'invalid_type' && 'received' in i && i.received === 'undefined')
-        .map((i) => i.path.join('.'));
-      if (missing.length > 0) {
-        console.error(`[env] Missing required environment variables:\n  ${missing.join('\n  ')}`);
-        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+      const fatal = result.error.issues.filter(
+        (i) =>
+          i.code === 'custom' ||
+          (i.code === 'invalid_type' && 'received' in i && i.received === 'undefined')
+      );
+      if (fatal.length > 0) {
+        const messages = fatal.map((i) => `${i.path.join('.')}: ${i.message}`);
+        console.error(`[env] Invalid production environment:\n  ${messages.join('\n  ')}`);
+        throw new Error(`Invalid production environment: ${messages.join(', ')}`);
       }
     }
 
