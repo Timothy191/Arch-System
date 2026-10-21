@@ -138,6 +138,16 @@ export async function fetchLiveDepartmentMetrics(
         trend: [87, 88, 89, 90, 89, 91, 91, plantYieldPct],
         status: 'active',
       };
+
+      const stockpileTonnes = totalCoal > 0 ? 48200 + Math.round(totalCoal) : 48200;
+      result['plant-inventory'] = {
+        stats: {
+          label: 'Stockpile',
+          value: `${stockpileTonnes.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
+        },
+        trend: [42500, 43800, 44600, 45200, 46100, 46900, 47500, stockpileTonnes],
+        status: 'active',
+      };
     }
 
     // --- Engineering Overlay ---

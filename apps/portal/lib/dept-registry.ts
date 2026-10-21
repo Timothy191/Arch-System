@@ -13,7 +13,7 @@ export async function getDeptId(slug: string): Promise<string | null> {
   const { data, error } = await supabase.from('departments').select('id').eq('name', slug).single();
 
   if (error || !data) {
-    if (slug === 'plant-processing') {
+    if (slug === 'plant-processing' || slug === 'plant-inventory') {
       const { data: fallbackData } = await supabase
         .from('departments')
         .select('id')

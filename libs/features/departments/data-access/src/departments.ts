@@ -116,6 +116,24 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    name: 'plant-inventory',
+    displayName: 'Plant Inventory',
+    route: '/plant-inventory',
+    icon: 'Database',
+    description:
+      'ROM & clean coal stockpiles, magnetite medium inventory, reagents, spares & consumables tracking',
+    color: 'emerald',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Stockpile', value: '48,200t' },
+    trend: [42500, 43800, 44600, 45200, 46100, 46900, 47500, 48200],
+    actions: [
+      { label: 'Daily Log', href: '/plant-inventory/daily-log' },
+      { label: 'History', href: '/plant-inventory/history' },
+    ],
+  },
+  {
     name: 'engineering',
     displayName: 'Engineering',
     route: '/engineering',

@@ -53,6 +53,11 @@ const DEPT_STYLE_MAP: Record<
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10',
   },
+  'plant-inventory': {
+    icon: Layers,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10',
+  },
   'access-control': {
     icon: ScanFace,
     iconColor: 'text-dept-access-control',
@@ -129,17 +134,19 @@ export function HeroRotator({
               ? 'EXTRACTION & YIELD // PLANT-EXT01'
               : dept.name === 'plant-processing'
                 ? 'WASH PLANT & BENEFICIATION // PLANT-WASH01'
-                : dept.name === 'access-control'
-                  ? 'SITE SECURITY // SEC-GATE01'
-                  : dept.name === 'engineering'
-                    ? 'PLANT MAINTENANCE // WORKSHOP-03'
-                    : dept.name === 'control-room'
-                      ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                      : dept.name === 'overview'
-                        ? 'SYSTEM ARCHITECTURE // ARCH-OS'
-                        : dept.name === 'database'
-                          ? 'SUPABASE POSTGRESQL // DB-CORE'
-                          : 'FIELD OPERATIONS // MINE-UNIT';
+                : dept.name === 'plant-inventory'
+                  ? 'STOCKPILE & REAGENTS // PLANT-INV01'
+                  : dept.name === 'access-control'
+                    ? 'SITE SECURITY // SEC-GATE01'
+                    : dept.name === 'engineering'
+                      ? 'PLANT MAINTENANCE // WORKSHOP-03'
+                      : dept.name === 'control-room'
+                        ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
+                        : dept.name === 'overview'
+                          ? 'SYSTEM ARCHITECTURE // ARCH-OS'
+                          : dept.name === 'database'
+                            ? 'SUPABASE POSTGRESQL // DB-CORE'
+                            : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'

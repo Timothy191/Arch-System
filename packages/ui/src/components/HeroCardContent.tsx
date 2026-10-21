@@ -86,6 +86,18 @@ function getHeroTelemetrySeries(
         fillId: 'grad-plant-processing',
         points: [64, 68, 71, 75, 78, 82, 80, 86, 89, 91, 93, 96],
       };
+    case 'plant-inventory':
+      return {
+        title: 'Stockpile & Medium Inventory',
+        unit: 'tonnes',
+        currentValue: stats?.value || '48,200t',
+        deltaBadge: '+3.8% Stock Buffer',
+        peakValue: '51,400t',
+        avgValue: '46,150t',
+        strokeColor: goldStroke,
+        fillId: 'grad-plant-inventory',
+        points: [62, 66, 70, 73, 77, 81, 84, 88, 90, 92, 95, 97],
+      };
     case 'drilling':
       return {
         title: 'Rig Penetration & Bit Depth',
@@ -339,15 +351,17 @@ export function HeroCardContent({
       ? { label: 'Shift Target: 12,500t [94%]', width: '94%' }
       : panel.name === 'plant-processing'
         ? { label: 'Plant Target: 8,500t [92%]', width: '92%' }
-        : panel.name === 'access-control'
-          ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
-          : panel.name === 'engineering'
-            ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
-            : panel.name === 'control-room'
-              ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
-              : panel.name === 'admin'
-                ? { label: 'System Compliance: 100% [100%]', width: '100%' }
-                : { label: 'Target: 1,300m [95%]', width: '95%' };
+        : panel.name === 'plant-inventory'
+          ? { label: 'Stockpile Capacity: 55,000t [88%]', width: '88%' }
+          : panel.name === 'access-control'
+            ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
+            : panel.name === 'engineering'
+              ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
+              : panel.name === 'control-room'
+                ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
+                : panel.name === 'admin'
+                  ? { label: 'System Compliance: 100% [100%]', width: '100%' }
+                  : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||

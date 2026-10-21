@@ -59,6 +59,7 @@ describe('DEPARTMENTS registry', () => {
     expect(departmentNames).toContain('drilling');
     expect(departmentNames).toContain('production');
     expect(departmentNames).toContain('plant-processing');
+    expect(departmentNames).toContain('plant-inventory');
     expect(departmentNames).toContain('access-control');
     expect(departmentNames).toContain('engineering');
     expect(departmentNames).toContain('control-room');

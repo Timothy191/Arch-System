@@ -24,7 +24,7 @@ import { cachedRSC } from '@/lib/server-cache';
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
   description:
-    'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, plant & processing, engineering, control room, system overview, and database dashboards.',
+    'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, plant & processing, plant inventory, engineering, control room, system overview, and database dashboards.',
 };
 
 async function getDashboardCounts(
@@ -190,11 +190,16 @@ export default async function HubPage() {
     rawDepartments = rawDepartments.filter((d) => d.name !== 'admin');
   }
 
-  // AGENT-TRACE: Unhide Plant & Processing ('plant-processing'), System Overview ('overview'),
-  // Database ('database'), and Availability & Utilization ('reports') Core Operational Modules
-  // so they appear on /hub alongside DB-assigned departments.
+  // AGENT-TRACE: Unhide Plant & Processing ('plant-processing'), Plant Inventory ('plant-inventory'),
+  // System Overview ('overview'), Database ('database'), and Availability & Utilization ('reports')
+  // Core Operational Modules so they appear on /hub alongside DB-assigned departments.
   if (rawDepartments.length > 0 || canSeeExecutive) {
-    for (const sysModuleName of ['plant-processing', 'overview', 'database'] as const) {
+    for (const sysModuleName of [
+      'plant-processing',
+      'plant-inventory',
+      'overview',
+      'database',
+    ] as const) {
       const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
       if (sysDept && !rawDepartments.some((d) => d.name === sysModuleName)) {
         rawDepartments = [...rawDepartments, sysDept];
@@ -230,6 +235,7 @@ export default async function HubPage() {
     'production',
     'drilling',
     'plant-processing',
+    'plant-inventory',
     'engineering',
     'control-room',
     'overview',

@@ -287,4 +287,28 @@ describe('HeroRotator', () => {
     expect(screen.getByTestId('hero-telemetry-graph-plant-processing')).toBeInTheDocument();
     expect(screen.getByText('Wash Plant Throughput & Recovery')).toBeInTheDocument();
   });
+
+  it('renders Plant Inventory slide and Stockpile & Medium Inventory telemetry', () => {
+    const plantInventoryDept: Department = {
+      name: 'plant-inventory',
+      displayName: 'Plant Inventory',
+      route: '/plant-inventory',
+      icon: 'Database',
+      description:
+        'ROM & clean coal stockpiles, magnetite medium inventory, reagents, spares & consumables tracking',
+      color: 'emerald',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Stockpile', value: '48,200t' },
+      actions: [
+        { label: 'Daily Log', href: '/plant-inventory/daily-log' },
+        { label: 'History', href: '/plant-inventory/history' },
+      ],
+    };
+
+    render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
+    expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
+    expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
+  });
 });

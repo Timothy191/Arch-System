@@ -1,4 +1,3 @@
-version: '3'
 services:
   kestra:
     image: kestra/kestra:latest
@@ -11,8 +10,20 @@ services:
       JAVA_OPTS: '-Xmx2048m'
       KESTRA_TRACER_EXPORTER: 'otlp'
       KESTRA_TRACER_OTLP_ENDPOINT: 'http://127.0.0.1:4317'
+      # Port 8080/8081 belong to mine-management (Access_Control_System);
+      # scanner devices are hard-wired to :8080, so Kestra runs on 8090/8091.
       KESTRA_CONFIGURATION: |
+        micronaut:
+          server:
+            port: 8090
+        endpoints:
+          all:
+            port: 8091
         kestra:
+          server:
+            basic-auth:
+              username: "${KESTRA_BASIC_AUTH_USERNAME}"
+              password: "${KESTRA_BASIC_AUTH_PASSWORD}"
           repository:
             type: postgres
           queue:
@@ -22,9 +33,6 @@ services:
               url: jdbc:postgresql://127.0.0.1:54322/kestra
               username: ${KESTRA_DB_USERNAME:-supabase_admin}
               password: ${KESTRA_DB_PASSWORD:-postgres}
-          webserver:
-            basic-auth:
-              enabled: false
     command: server local
     mem_limit: 2048m
     cpus: 2.0

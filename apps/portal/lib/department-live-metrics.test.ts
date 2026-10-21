@@ -90,6 +90,12 @@ describe('fetchLiveDepartmentMetrics', () => {
     expect(metrics['plant-processing']?.stats.value).toBe('777t');
     expect(metrics['plant-processing']?.status).toBe('active');
 
+    // Plant Inventory assertions
+    expect(metrics['plant-inventory']).toBeDefined();
+    expect(metrics['plant-inventory']?.stats.label).toBe('Stockpile');
+    expect(metrics['plant-inventory']?.stats.value).toBe('49,050t');
+    expect(metrics['plant-inventory']?.status).toBe('active');
+
     // Engineering assertions
     expect(metrics.engineering).toBeDefined();
     expect(metrics.engineering?.stats.label).toBe('Availability');

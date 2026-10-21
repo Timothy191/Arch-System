@@ -1,6 +1,6 @@
 # 🔒 Database Schema & Topology Map
 
-**Generated:** 10/21/2026, 11:07:57 AM UTC  
+**Generated:** 10/21/2026, 11:21:42 AM UTC  
 **Engine:** PostgreSQL via Supabase
 
 ---

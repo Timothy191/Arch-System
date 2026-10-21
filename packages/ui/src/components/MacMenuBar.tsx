@@ -85,6 +85,14 @@ const DEPARTMENTS_LIST = [
     description: 'Wash plant throughput & recovery',
   },
   {
+    name: 'plant-inventory',
+    displayName: 'Plant Inventory',
+    icon: Database,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
+    description: 'ROM stockpiles, magnetite & reagents',
+  },
+  {
     name: 'access-control',
     displayName: 'Access Control',
     icon: ScanFace,

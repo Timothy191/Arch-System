@@ -75,6 +75,7 @@ function isValidRedirect(path: string): boolean {
     /^\/drilling(\/|$)/, // Drilling department
     /^\/production(\/|$)/, // Production department
     /^\/plant-processing(\/|$)/, // Plant & Processing department
+    /^\/plant-inventory(\/|$)/, // Plant Inventory department
     /^\/access-control(\/|$)/, // Access control department
     /^\/engineering(\/|$)/, // Engineering department
     /^\/control-room(\/|$)/, // Control room department
