@@ -9,6 +9,7 @@ import {
   Activity,
   ArrowUpRight,
   Database,
+  Factory,
   Layers,
   Pickaxe,
   ScanFace,
@@ -44,6 +45,11 @@ const DEPT_STYLE_MAP: Record<
   drilling: { icon: Pickaxe, iconColor: 'text-dept-drilling', bgColor: 'bg-dept-drilling/10' },
   production: {
     icon: TrendingUp,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10',
+  },
+  'plant-processing': {
+    icon: Factory,
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10',
   },
@@ -121,17 +127,19 @@ export function HeroRotator({
             ? 'FIELD OPERATIONS // UNIT-PV351'
             : dept.name === 'production'
               ? 'EXTRACTION & YIELD // PLANT-EXT01'
-              : dept.name === 'access-control'
-                ? 'SITE SECURITY // SEC-GATE01'
-                : dept.name === 'engineering'
-                  ? 'PLANT MAINTENANCE // WORKSHOP-03'
-                  : dept.name === 'control-room'
-                    ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                    : dept.name === 'overview'
-                      ? 'SYSTEM ARCHITECTURE // ARCH-OS'
-                      : dept.name === 'database'
-                        ? 'SUPABASE POSTGRESQL // DB-CORE'
-                        : 'FIELD OPERATIONS // MINE-UNIT';
+              : dept.name === 'plant-processing'
+                ? 'WASH PLANT & BENEFICIATION // PLANT-WASH01'
+                : dept.name === 'access-control'
+                  ? 'SITE SECURITY // SEC-GATE01'
+                  : dept.name === 'engineering'
+                    ? 'PLANT MAINTENANCE // WORKSHOP-03'
+                    : dept.name === 'control-room'
+                      ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
+                      : dept.name === 'overview'
+                        ? 'SYSTEM ARCHITECTURE // ARCH-OS'
+                        : dept.name === 'database'
+                          ? 'SUPABASE POSTGRESQL // DB-CORE'
+                          : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'

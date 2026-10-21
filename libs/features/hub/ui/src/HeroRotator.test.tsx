@@ -263,4 +263,28 @@ describe('HeroRotator', () => {
     expect(screen.getByText('Rig Penetration & Bit Depth')).toBeInTheDocument();
     expect(screen.getByText('Coal & ROM Extraction Yield')).toBeInTheDocument();
   });
+
+  it('renders Plant & Processing slide and Wash Plant Throughput & Recovery telemetry', () => {
+    const plantDept: Department = {
+      name: 'plant-processing',
+      displayName: 'Plant & Processing',
+      route: '/plant-processing',
+      icon: 'Factory',
+      description:
+        'Coal wash plant operations, dense media separation, crusher throughput & yield telemetry',
+      color: 'amber',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Plant Yield', value: '91.4%' },
+      actions: [
+        { label: 'Daily Log', href: '/plant-processing/daily-log' },
+        { label: 'Reports', href: '/plant-processing/reports' },
+      ],
+    };
+
+    render(<HeroRotator {...baseProps} departments={[plantDept]} />);
+    expect(screen.getByText('Plant & Processing')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-graph-plant-processing')).toBeInTheDocument();
+    expect(screen.getByText('Wash Plant Throughput & Recovery')).toBeInTheDocument();
+  });
 });

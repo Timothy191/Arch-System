@@ -16,6 +16,7 @@ import {
   Database,
   // General
   ExternalLink,
+  Factory,
   FileText,
   Info,
   LayoutGrid,
@@ -74,6 +75,14 @@ const DEPARTMENTS_LIST = [
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
     description: 'Yield & tonnage monitoring',
+  },
+  {
+    name: 'plant-processing',
+    displayName: 'Plant & Processing',
+    icon: Factory,
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
+    description: 'Wash plant throughput & recovery',
   },
   {
     name: 'access-control',

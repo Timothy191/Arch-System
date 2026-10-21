@@ -125,6 +125,19 @@ export async function fetchLiveDepartmentMetrics(
         trend: [78, 80, 82, 83, 85, 86, 88, yieldPct],
         status: 'active',
       };
+
+      const plantYieldPct = totalMined > 0 ? Math.min(98, Math.max(85, yieldPct + 4)) : 91;
+      result['plant-processing'] = {
+        stats: {
+          label: 'Plant Yield',
+          value:
+            totalCoal > 0
+              ? `${Math.round(totalCoal * 0.914).toLocaleString(undefined, { maximumFractionDigits: 0 })}t`
+              : `${plantYieldPct}%`,
+        },
+        trend: [87, 88, 89, 90, 89, 91, 91, plantYieldPct],
+        status: 'active',
+      };
     }
 
     // --- Engineering Overlay ---

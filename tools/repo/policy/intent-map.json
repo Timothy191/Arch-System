@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-10-20T04:21:54.520Z",
+  "generatedAt": "2026-10-21T04:06:23.505Z",
   "capabilities": {
     "authentication": {
       "allowedClients": ["scope:app", "scope:package:supabase"],

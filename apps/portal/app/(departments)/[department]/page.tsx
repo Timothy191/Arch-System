@@ -43,7 +43,7 @@ export default async function DepartmentDashboard({
     department: deptSlug,
   });
 
-  if (deptSlug === 'production') {
+  if (deptSlug === 'production' || deptSlug === 'plant-processing') {
     return (
       <Suspense
         fallback={

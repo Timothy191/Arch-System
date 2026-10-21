@@ -13,6 +13,17 @@ export async function getDeptId(slug: string): Promise<string | null> {
   const { data, error } = await supabase.from('departments').select('id').eq('name', slug).single();
 
   if (error || !data) {
+    if (slug === 'plant-processing') {
+      const { data: fallbackData } = await supabase
+        .from('departments')
+        .select('id')
+        .eq('name', 'production')
+        .single();
+      if (fallbackData?.id) {
+        deptCache.set(slug, fallbackData.id);
+        return fallbackData.id;
+      }
+    }
     return null;
   }
 

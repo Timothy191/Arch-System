@@ -56,6 +56,10 @@
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(5, 150, 105, 0.85));
 }
 
+.uiverse-card-banner-plant-processing {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(16, 185, 129, 0.85));
+}
+
 .uiverse-card-banner-access-control {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(29, 78, 216, 0.85));
 }

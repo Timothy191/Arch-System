@@ -74,6 +74,18 @@ function getHeroTelemetrySeries(
         fillId: 'grad-production',
         points: [58, 64, 61, 70, 75, 73, 82, 85, 88, 91, 89, 95],
       };
+    case 'plant-processing':
+      return {
+        title: 'Wash Plant Throughput & Recovery',
+        unit: 'tonnes/hr',
+        currentValue: stats?.value || '91.4% Yield',
+        deltaBadge: '+5.4% Recovery',
+        peakValue: '94.2%',
+        avgValue: '90.8%',
+        strokeColor: goldStroke,
+        fillId: 'grad-plant-processing',
+        points: [64, 68, 71, 75, 78, 82, 80, 86, 89, 91, 93, 96],
+      };
     case 'drilling':
       return {
         title: 'Rig Penetration & Bit Depth',
@@ -325,15 +337,17 @@ export function HeroCardContent({
   const targetMeta =
     panel.name === 'production'
       ? { label: 'Shift Target: 12,500t [94%]', width: '94%' }
-      : panel.name === 'access-control'
-        ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
-        : panel.name === 'engineering'
-          ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
-          : panel.name === 'control-room'
-            ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
-            : panel.name === 'admin'
-              ? { label: 'System Compliance: 100% [100%]', width: '100%' }
-              : { label: 'Target: 1,300m [95%]', width: '95%' };
+      : panel.name === 'plant-processing'
+        ? { label: 'Plant Target: 8,500t [92%]', width: '92%' }
+        : panel.name === 'access-control'
+          ? { label: 'Gate Uptime: 99.8% [99%]', width: '99%' }
+          : panel.name === 'engineering'
+            ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
+            : panel.name === 'control-room'
+              ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
+              : panel.name === 'admin'
+                ? { label: 'System Compliance: 100% [100%]', width: '100%' }
+                : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||

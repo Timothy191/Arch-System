@@ -98,6 +98,24 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    name: 'plant-processing',
+    displayName: 'Plant & Processing',
+    route: '/plant-processing',
+    icon: 'Factory',
+    description:
+      'Coal wash plant operations, dense media separation, crusher throughput & yield telemetry',
+    color: 'amber',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Plant Yield', value: '91.4%' },
+    trend: [87, 88, 89, 90, 89, 91, 91, 92],
+    actions: [
+      { label: 'Daily Log', href: '/plant-processing/daily-log' },
+      { label: 'Reports', href: '/plant-processing/reports' },
+    ],
+  },
+  {
     name: 'engineering',
     displayName: 'Engineering',
     route: '/engineering',
