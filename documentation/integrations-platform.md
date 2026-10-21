@@ -6,7 +6,7 @@ One registry, three plugin kinds, all managed from **Admin → Integrations**:
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
 | `mcp`    | Remote **streamable-HTTP MCP servers** — third-party connectors in the same mould as ChatGPT Apps SDK apps (WorkOS-authed servers, SixtyFour, Windsor AI, …) | **Live (MVP)**         |
 | `native` | First-party in-process `ArchPlugin` modules in `apps/portal/plugins/*` (engine + hooks + widgets)                                                            | **Live (MVP)**         |
-| `action` | Authenticated HTTP action endpoints callable from n8n / Kestra / Inngest                                                                                     | Reserved (later phase) |
+| `action` | Authenticated HTTP action endpoints callable from n8n / Inngest                                                                                              | Reserved (later phase) |
 
 MCP is the universal protocol: any server that speaks streamable-HTTP MCP can be
 installed, which covers the bulk of the connector ecosystem including apps built
@@ -117,7 +117,7 @@ agent afterwards.
   to installed servers via the existing Postgres-trigger + outbox + Inngest
   pipeline; MCP notifications bridge.
 - **P6 — `action` kind**: per-installation authenticated HTTP endpoints callable
-  from n8n / Kestra / Inngest flows.
+  from n8n / Inngest flows.
 
 ## Security notes
 

@@ -1,32 +1,4 @@
-version: '3.8'
-
 services:
-  n8n:
-    image: docker.n8n.io/n8nio/n8n:latest
-    container_name: arch-n8n
-    restart: unless-stopped
-    network_mode: 'host'
-    environment:
-      - N8N_HOST=127.0.0.1
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - N8N_SECURE_COOKIE=false
-      - NODE_ENV=production
-      - N8N_WEBHOOK_URL=http://127.0.0.1:5678/
-      - GENERIC_TIMEZONE=UTC
-      - N8N_DIAGNOSTICS_ENABLED=false
-      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
-      - NODE_OPTIONS=--max-old-space-size=384
-      - EXECUTIONS_DATA_PRUNE=true
-      - EXECUTIONS_DATA_MAX_AGE=48
-      - EXECUTIONS_DATA_PRUNE_MAX_COUNT=500
-      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=none
-      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
-    volumes:
-      - n8n_data:/home/node/.n8n
-    mem_limit: 768m
-    cpus: 1.5
-
   qdrant:
     image: qdrant/qdrant:latest
     container_name: arch-qdrant
@@ -42,5 +14,4 @@ services:
     cpus: 1
 
 volumes:
-  n8n_data:
   qdrant_data:
