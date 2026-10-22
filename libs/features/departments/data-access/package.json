@@ -10,7 +10,8 @@
   "dependencies": {},
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "test": "jest --config jest.config.js --passWithNoTests --runInBand"
   },
   "devDependencies": {
     "typescript": "catalog:"

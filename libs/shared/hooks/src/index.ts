@@ -26,5 +26,4 @@ export * from './useSupabaseRealtime';
 export * from './useThrottle';
 export * from './useThrottledState';
 export * from './useWorkflowStatus';
-export * from './useWorkflowStatus';
 export * from './useWorkflowTrigger';

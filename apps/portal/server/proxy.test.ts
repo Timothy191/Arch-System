@@ -4,7 +4,7 @@
 
 import { NextRequest } from 'next/server';
 import { proxy as edgeProxy } from '../proxy';
-import { isTokenExpiredError, normalizeRole, proxy } from './proxy';
+import { DEPARTMENT_ROUTES, isTokenExpiredError, normalizeRole, proxy } from './proxy';
 
 jest.mock('@repo/supabase/middleware', () => ({
   createMiddlewareClient: jest.fn(),
@@ -435,5 +435,82 @@ describe('proxy', () => {
     expect(csp).toContain('https://api.open-meteo.com');
     expect(csp).toContain("connect-src 'self'");
     expect(csp).not.toContain('connect-src *');
+  });
+
+  describe('plant-processing and plant-inventory RBAC isolation', () => {
+    it('includes plant-processing and plant-inventory in DEPARTMENT_ROUTES', () => {
+      expect(DEPARTMENT_ROUTES).toContain('plant-processing');
+      expect(DEPARTMENT_ROUTES).toContain('plant-inventory');
+    });
+
+    it('redirects unauthorized operator away from /plant-processing and /plant-inventory', async () => {
+      buildProxyMock({
+        employee: {
+          role: 'operator',
+          department_id: 'dept-drilling',
+          accessible_departments: [],
+        },
+        deptData: { id: 'dept-production' },
+      });
+      (cacheGet as jest.Mock).mockResolvedValue(null);
+
+      const procRes = await proxy(makeRequest('/plant-processing'));
+      expect(procRes.status).toBe(307);
+      expect(procRes.headers.get('location')).toContain('unauthorized_department');
+
+      const invRes = await proxy(makeRequest('/plant-inventory'));
+      expect(invRes.status).toBe(307);
+      expect(invRes.headers.get('location')).toContain('unauthorized_department');
+    });
+
+    it('falls back to production department UUID when plant-processing or plant-inventory row is not yet seeded', async () => {
+      const { supabase } = buildProxyMock({
+        employee: {
+          role: 'operator',
+          department_id: 'dept-production-uuid',
+          accessible_departments: [],
+        },
+      });
+      (cacheGet as jest.Mock).mockResolvedValue(null);
+
+      supabase.from.mockImplementation((table: string) => {
+        if (table === 'employees') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                  data: {
+                    role: 'operator',
+                    department_id: 'dept-production-uuid',
+                    accessible_departments: [],
+                  },
+                }),
+              }),
+            }),
+          };
+        }
+        if (table === 'departments') {
+          return {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockImplementation((_col: string, val: string) => {
+                const resolved =
+                  val === 'production' ? { data: { id: 'dept-production-uuid' } } : { data: null };
+                return {
+                  single: jest.fn().mockResolvedValue(resolved),
+                  maybeSingle: jest.fn().mockResolvedValue(resolved),
+                };
+              }),
+            }),
+          };
+        }
+        return {};
+      });
+
+      const procRes = await proxy(makeRequest('/plant-processing'));
+      expect(procRes.status).not.toBe(307);
+
+      const invRes = await proxy(makeRequest('/plant-inventory'));
+      expect(invRes.status).not.toBe(307);
+    });
   });
 });

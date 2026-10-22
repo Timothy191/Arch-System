@@ -34,7 +34,7 @@ export function useThrottle<T>(value: T, delay: number): T {
  * Hook that wraps a function with a throttled controller.
  * Ensures the function is called at most once per delay duration.
  */
-export function useThrottleFn<T extends (...args: any[]) => any>(
+export function useThrottleFn<T extends (...args: never[]) => unknown>(
   fn: T,
   delay: number,
   options: ThrottleOptions = {}

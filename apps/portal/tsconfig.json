@@ -21,6 +21,7 @@
       "@repo/auth/data-access": ["../../libs/features/auth/data-access/src/index.ts"],
       "@repo/auth/utils": ["../../libs/features/auth/utils/src/index.ts"],
       "@repo/departments/ui": ["../../libs/features/departments/ui/src/index.ts"],
+      "@repo/departments/ui/server": ["../../libs/features/departments/ui/src/server.ts"],
       "@repo/departments/data-access": ["../../libs/features/departments/data-access/src/index.ts"],
       "@repo/hub/ui": ["../../libs/features/hub/ui/src/index.ts"],
       "@repo/shared/data-access": ["../../libs/shared/data-access/src/index.ts"],

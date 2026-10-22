@@ -123,7 +123,7 @@ async function main() {
         chalk.bold(chalk.blue('🧹 [PRUNE] Executing safe Vercel deployment storage pruner...'))
       );
       const isDryRun = extraArgs.includes('--dry-run');
-      const prunerPath = path.resolve(ROOT_DIR, '../tools/scripts/prune-vercel-deployments.mjs');
+      const prunerPath = path.resolve(__dirname, 'prune-vercel-deployments.mjs');
       const prunerArgs = [prunerPath];
       if (isDryRun) prunerArgs.push('--dry-run');
       else prunerArgs.push('--execute');

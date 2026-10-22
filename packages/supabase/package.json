@@ -18,6 +18,7 @@
   },
   "scripts": {
     "supabase:gen-types": "supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc > src/database.types.ts",
+    "test": "jest --config jest.config.js --passWithNoTests --runInBand",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

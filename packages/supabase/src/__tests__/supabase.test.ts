@@ -197,6 +197,7 @@ describe('instrumentedFetch', () => {
 });
 
 describe('createServerSupabaseClient', () => {
+  const originalEnv = process.env;
   const mockCookies = {
     getAll: jest.fn().mockReturnValue([]),
     set: jest.fn(),
@@ -204,6 +205,11 @@ describe('createServerSupabaseClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
+    };
     const { cookies } = require('next/headers');
     cookies.mockResolvedValue(mockCookies);
 
@@ -212,6 +218,10 @@ describe('createServerSupabaseClient', () => {
       auth: { getUser: jest.fn() },
       from: jest.fn(),
     });
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
   });
 
   test('creates Supabase client with correct configuration', async () => {
@@ -346,13 +356,20 @@ describe('getUserSafely', () => {
 
 describe('createBrowserSupabaseClient', () => {
   const originalWindow = global.window;
+  const originalEnv = process.env;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
+    };
   });
 
   afterEach(() => {
     global.window = originalWindow;
+    process.env = originalEnv;
   });
 
   test('creates browser client with correct configuration', () => {

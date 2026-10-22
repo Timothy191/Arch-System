@@ -91,9 +91,11 @@ function isValidRedirect(path: string): boolean {
 // DEPARTMENT_ROUTES intentionally excludes '/admin' because admin is a top-level
 // restricted route, not a sub-route under (departments). Admin access is handled
 // separately via its own auth check in RESTRICTED_ROUTES.
-const DEPARTMENT_ROUTES = [
+export const DEPARTMENT_ROUTES = [
   'drilling',
   'production',
+  'plant-processing',
+  'plant-inventory',
   'access-control',
   'engineering',
   'control-room',
@@ -141,8 +143,21 @@ async function resolveDeptUuid(
   const { data } = await supabase.from('departments').select('id').eq('name', slug).single();
   if (data?.id) {
     await cacheSet(cacheKey, data.id, 3600); // 1 hour
+    return data.id;
   }
-  return data?.id || null;
+
+  if (slug === 'plant-processing' || slug === 'plant-inventory') {
+    const fallbackQuery = supabase.from('departments').select('id').eq('name', 'production');
+    const { data: fallbackData } = await (typeof fallbackQuery.maybeSingle === 'function'
+      ? fallbackQuery.maybeSingle()
+      : fallbackQuery.single());
+    if (fallbackData?.id) {
+      await cacheSet(cacheKey, fallbackData.id, 3600);
+      return fallbackData.id;
+    }
+  }
+
+  return null;
 }
 
 export async function proxy(request: NextRequest) {

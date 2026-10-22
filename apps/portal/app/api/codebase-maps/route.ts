@@ -67,9 +67,9 @@ export async function GET(request: Request, options?: { mapsRoot?: string }) {
   }
 
   let manifest: unknown[] = [];
-  if (fs.existsSync(manifestPath)) {
+  if (fs.existsSync(/*turbopackIgnore: true*/ manifestPath)) {
     try {
-      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      manifest = JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ manifestPath, 'utf-8'));
     } catch {
       manifest = [];
     }
@@ -82,14 +82,17 @@ export async function GET(request: Request, options?: { mapsRoot?: string }) {
 
   const candidatePath = resolveWithin(requestedDir, fileKey);
   const fallbackPath = resolveWithin(mapsRoot, fileKey);
-  const filePath = candidatePath && fs.existsSync(candidatePath) ? candidatePath : fallbackPath;
+  const filePath =
+    candidatePath && fs.existsSync(/*turbopackIgnore: true*/ candidatePath)
+      ? candidatePath
+      : fallbackPath;
   if (!filePath) {
     return badRequest('Invalid map file name');
   }
 
   let mapContent = '';
-  if (fs.existsSync(filePath)) {
-    mapContent = fs.readFileSync(filePath, 'utf-8');
+  if (fs.existsSync(/*turbopackIgnore: true*/ filePath)) {
+    mapContent = fs.readFileSync(/*turbopackIgnore: true*/ filePath, 'utf-8');
   } else {
     mapContent = `# ${fileKey}\n\nMap content unavailable.`;
   }

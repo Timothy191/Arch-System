@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
 
     switch (action) {
       case 'createDozerRoll': {
-        const { createDozerRoll } = await import('@repo/departments/ui');
+        const { createDozerRoll } = await import('@repo/departments/ui/server');
         await createDozerRoll(payload);
         break;
       }
@@ -44,9 +44,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, error: { message: err.message, code: 'API_ERROR' } },
+      { success: false, error: { message, code: 'API_ERROR' } },
       { status: 500 }
     );
   }

@@ -12,9 +12,34 @@ export interface RealtimePayload<T = Record<string, unknown>> {
   schema: string;
 }
 
+export interface RealtimeChannelLike<T = Record<string, unknown>> {
+  on(
+    type: 'postgres_changes',
+    filter: {
+      event: string;
+      schema: string;
+      table: string;
+      filter?: string;
+    },
+    callback: (payload: {
+      eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+      new: T;
+      old: Partial<T>;
+      table: string;
+      schema: string;
+    }) => void
+  ): RealtimeChannelLike<T>;
+  subscribe(callback?: (status: string, err?: Error) => void): RealtimeChannelLike<T>;
+}
+
+export interface SupabaseRealtimeClientLike {
+  channel(name: string): unknown;
+  removeChannel(channel: never): Promise<unknown>;
+}
+
 export interface UseSupabaseRealtimeOptions<T = Record<string, unknown>> {
-  /** The Supabase client instance or client factory promise */
-  supabaseClient: any;
+  /** The Supabase client instance */
+  supabaseClient: SupabaseRealtimeClientLike | null | undefined;
   /** Name of the PostgreSQL table to subscribe to */
   table: string;
   /** Optional Postgres schema name, defaults to 'public' */
@@ -77,7 +102,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
     let isMounted = true;
     const channelName = `realtime:${schema}:${table}:${filter || 'all'}:${Date.now()}`;
 
-    const channel = supabaseClient.channel(channelName);
+    const channel = supabaseClient.channel(channelName) as RealtimeChannelLike<T>;
 
     const subscriptionConfig: {
       event: string;
@@ -143,7 +168,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
     return () => {
       isMounted = false;
       if (supabaseClient && channel) {
-        supabaseClient.removeChannel(channel).catch(() => {
+        (supabaseClient.removeChannel as (ch: unknown) => Promise<unknown>)(channel).catch(() => {
           // Silent cleanup catch
         });
       }

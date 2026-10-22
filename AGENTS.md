@@ -1,125 +1,90 @@
-# AGENTS.md — `/home/tim/Fork` (Federated Workspace Root)
+# AGENTS.md — Arch-System
 
-Scope: workspace root only. Each service has its own `AGENTS.md`; read it before touching that service. Root `CLAUDE.md` is a symlink to this file (single source of truth).
+Scope: this repository only. `CLAUDE.md` here is a symlink to this file, so edits here are the edits.
+`../AGENTS.md` holds workspace-wide notes plus a stale duplicate of Arch-System guidance; this file wins for `Arch-System/`.
 
-## 0. Session Bootstrap (do this before any command)
+## 0. Bootstrap (run before anything else)
 
-**`node`, `pnpm`, `npm` are not on `PATH`.** Every bare `node`/`pnpm`/`npm` call fails with `command not found`. Do not reinstall a toolchain and do not try to repair `~/.local/share/mise/shims` — those shims are **dangling symlinks** (they point at `/usr/bin/mise`, which no longer exists). The real toolchains are intact under `~/.local/share/mise/installs/`:
+`node`, `pnpm`, `npm` are **not on PATH**. Do not reinstall a toolchain and do not "fix" `~/.local/share/mise/shims` (dangling symlinks to a missing `/usr/bin/mise`). Use the intact installs:
 
 ```bash
-# Node 24 everywhere (matches Arch-System engines: node >=24) + pnpm from the 26.8.1 tree
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
 node -v   # v24.15.0
 ```
 
-The 24.15.0 tree ships `node`/`npm`/`npx` only; the 26.8.1 tree supplies `pnpm` (and `tsc`, `lighthouse`, `vercel`, `repomix`). Drop the 24.15.0 entry if you specifically need node 26.
+The 24.15.0 tree has `node`/`npm`/`npx`; the 26.8.1 tree supplies `pnpm` (plus `tsc`, `lighthouse`, `vercel`, `repomix`).
 
-**pnpm version is directory-dependent** (corepack resolves the nearest `packageManager`):
+pnpm version is directory-dependent via corepack: anywhere under `Arch-System/` resolves the pinned **9.15.9** (verified in the repo root and in `apps/portal`); outside it you get 12.6.0. Other versions hang Turborepo. Never run `mise activate` — there is no `mise` binary.
 
-| Directory                        | `pnpm -v`  | Why it matters                                                   |
-| :------------------------------- | :--------- | :--------------------------------------------------------------- |
-| `Arch-System/`                   | **9.15.9** | Hard-pinned in its `package.json`; other versions hang Turborepo |
-| `Arch-System/apps/portal/`, root | 12.6.0     | No `packageManager` field                                        |
+## 1. Layout
 
-Do not run `mise activate` / `eval "$(mise activate bash)"` — there is no `mise` binary.
+Turborepo + pnpm workspaces (`apps/*`, `packages/*`, `libs/features/*/*`, `libs/shared/*`, `tools/*`, `scripts`).
 
-## Essential Commands
+- `apps/portal` — the only app. Next.js 16 App Router, React 19, port 3000 (`0.0.0.0`), package name is **`portal`** (not `@repo/portal`).
+- `libs/features/{auth,departments,hub}/{ui,data-access,utils}` and `libs/shared/{data-access,hooks,utils}` — published as `@repo/<feature>/<layer>`.
+- `packages/{ui,theme,contract,supabase,database,redis,errors,logger,rate-limiter,agents,eval,utils,typescript-config}`; `tools/{repo,audits,scripts}` are build-time only; `e2e/` Playwright.
+- `apps/portal/proxy.ts` → `server/proxy.ts` gates routes (`DEPARTMENT_ROUTES`, `RESTRICTED_ROUTES`) and refreshes Supabase JWT + Redis-cached RBAC.
+- Migrations: `packages/database/migrations/NNN_description.sql`; `packages/supabase/migrations` is a **symlink** to it — never write there.
+- **Never rename or renumber an applied migration.** The filename prefix is the version key in `supabase_migrations.schema_migrations`, and the README states every migration is pushed to Cloud Supabase — renaming makes `supabase db push` re-apply it. `0145_`/`0146_` are deliberate 4-digit outliers; `check-migration-drift` warns about the ordering gap but reports 0 errors, and it cannot see applied state.
+- DB/contract parity is a gate: new tables/columns need a Zod schema in `packages/contract/src/schemas/` or `pnpm audit:drift` fails.
 
-From `Arch-System/`:
+## 2. Commands that are easy to get wrong
 
-- `pnpm dev` — Full dev system (0.0.0.0:3000)
-- `pnpm dev:quick` — Headless quick boot
-- `pnpm dev:turbo` — Portal dev via Turborepo
-- `pnpm build` — Full Turborepo build
-- `pnpm type-check` — Workspace TypeScript check
-- `pnpm lint` — Linting (Biome)
-- `pnpm quality` — Full quality gate
-- `pnpm agent:verify` — MANDATORY verification before completing any task
-- `pnpm audit:browser` — Closed-loop browser, devtools & a11y probe
-- `pnpm test` — All unit tests (Jest 30 SSoT)
-- `pnpm --filter portal test` — Portal unit tests
-- `pnpm test -- <path/to/file.test.ts>` — Specific test file
-- `pnpm test:e2e` — Playwright E2E (:3000)
-- `pnpm test:a11y` — Storybook accessibility tests
-- `pnpm --filter @repo/database db:types` — Regenerate Supabase types
-- `pnpm db:seed` — Seed dev database
-- `pnpm --filter @repo/database supabase:start` — Start local Supabase
-- `pnpm --filter @repo/database supabase:reset` — Reset local database
-- `./setup.sh --dev` — One-command setup and launch dev server
-- `pnpm policy:check` — Architectural boundary enforcement
-- `pnpm audit:compliance` — Run all audit gates
-- `pnpm test` — Run unit tests (Jest)
-- `pnpm test -- <path/to/file.test.ts>` — Specific test file
-- `pnpm context:pack` — Create workspace bundle for analysis
-- `make help` — List all commands
-- `make verify` — Same as: pnpm --dir Arch-System agent:verify
-- `make pipeline` — Full quality → preflight → local smoke → vercel preview → prod → audit
-
-## Critical Conventions & Boundaries (NON-NEGOTIABLE)
-
-- **Package Manager**: pnpm exclusively (v9.15.9 pinned in Arch-System/)
-- **Light Mode Only**: Strict light mode (#f3f4f6); semantic OKLCH tokens from `@repo/theme`; no `dark:` variants
-- **Architectural Boundaries** (enforced by policy compiler):
-  - `apps/*` MUST NOT import `packages/database` directly — route via `@repo/supabase`
-  - `packages/ui` must remain pure presentational (zero business logic)
-  - No imports from `apps/*` into `packages/*` or `tools/*`
-  - All primary data fetching in RSC / Server Actions / Handlers — never in `'use client'`
-- **Server Actions**: Authenticate → authorize → validate via `@repo/contract` → rate-limit → invalidate cache → `redirect()`
-- **Caching**: Next.js 16 cache components require named `cacheLife()` profile; mutations must invalidate tags
-- **Client State**: `@tanstack/react-query` SSoT; SWR is prohibited
-- **Commits**: Conventional commits via Husky/Commitlint; one commit per task
-- **Secrets**: Never print, edit, or commit `.env*` secrets
-- **Type Safety**: Strict TypeScript throughout; never use `any` or `@ts-ignore`
-- **Never install packages at root**: Root is zero-dependency delegation runner only
-- **Never move/rename service directories**: Hardcoded in federation watchdog configs
-
-## Mandatory Verification Protocol (Enhanced 12-Pillar)
-
-Before declaring any task complete:
-
-1. **Zero-Exception Verification**: Run `pnpm agent:verify` and self-heal any failures
-2. **Dynamic Context Leasing**: Lease skills via `skills-mcp` (`acquire_skill`/`return_skill`)
-3. **Structured Thinking (STM-0)**: Follow 5-phase protocol (Comprehension→Evidence→Solution→Criticism→Execution)
-4. **Scoped Progression**: Decompose large objectives into atomic tasks before multi-package mutations
-5. **AST Exploration**: Use `codemap`/`code-index`/`ast-grep` instead of catting large files
-6. **Continuous Auditing**: Run corresponding domain audits (e.g., `pnpm audit:routing` for route changes)
-
-**Verification Order** (use cheapest gate that can catch the change):
-
-```
-pnpm type-check        # Turbo type-check --concurrency=2
-pnpm lint              # Turbo lint (biome check)
-pnpm test              # Unit tests (Jest)
-pnpm policy:check      # Architectural boundary compiler
-pnpm audit:drift       # Contract vs DB/API alignment
-pnpm agent:verify      # Mandatory gate (fails fast on first failure)
+```bash
+pnpm --filter portal test -- components/CommandBar.test.tsx   # single file (jest path substring)
+pnpm --filter portal type-check                                # one workspace
+pnpm test                                                      # turbo: every package that defines "test"
+pnpm --filter @repo/database test                              # migration rollback/RLS checks only
+pnpm --filter @repo/database db:types                          # regenerate Supabase types
+pnpm --filter @repo/theme codegen                              # after editing tokens.json (output is committed)
+pnpm --filter @repo/ui storybook                               # port 6006, needed by test:a11y
 ```
 
-`pnpm agent:verify` now includes 12 verification steps that fail fast on:
-`type-check` → `lint` → `test` → `policy:check` → `audit:drift` → skill-spector → `mcp:verify` → `token:budget-check` → `audit-agent-rules-drift` → `architecture-maps-parity` → `audit:hooks` → `deps:lint`
+- `pnpm test` is `turbo run test`; packages with no `test`/`lint` script are silently skipped (e.g. `packages/supabase`), so "green" can mean "nothing ran". `@repo/database`'s `test` is Node scripts (migration drift, rollback safety, RLS), not Jest.
+- `pnpm test:e2e` auto-starts `pnpm --filter portal dev` on :3000 unless `BASE_URL` is set; it needs a seeded local Supabase plus the dev-seed admin (`TEST_EMAIL`/`TEST_PASSWORD` override it in `e2e/helpers/credentials.ts`) and writes `e2e/.auth/user.json` (reused for 30 min). Visual diffs allow `maxDiffPixelRatio: 0.02`.
+- `pnpm dev` → `scripts/dev-system-reimagined.sh` (asset sync + Supabase checks + `run/portal.log`). `pnpm dev:quick` is headless; `pnpm dev:turbo` is portal-only.
+- `make` here has `dev`, `build`, `test`, `quality`, `policy-check`, `audit-*`, docker helpers — but **no `make verify`/`make pipeline`**; those targets live in `../Makefile`.
 
-For release-grade changes, run the full `pnpm quality` gate.
+## 3. Verification
 
-## Context-First Execution & Auto-Compaction Mandate
+`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the completion gate; it fails fast on 12 steps:
+type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint.
 
-1. **Gather Context First (Pre-Action)**: After the user sends a message, FIRST gather all required context (research, prompting the user, or exploring the codebase — all approved). **DO NOT perform any action without the required context.** Once gathered, proceed with the task.
-2. **Auto-Compact & Ready Context (Post-Output)**: After each output produced, release dynamically leased skills/context, prune transient bloat, and ready/compact the context window (`/compact` when needed) for the next task. See `.agents/rules/context-lifecycle-and-compaction.md`.
+Failures with non-obvious fixes:
 
-## Where to Find Detailed Documentation
+- rule-drift: `.agents/rules/` here is canonical, `../.agents/rules/` is a mirror that must match (symlinks are accepted).
+- maps parity: added/removed directories ⇒ `pnpm maps:sync`.
+- token:budget-check ⇒ `pnpm context:debloat`.
+- policy:check ⇒ `tools/repo/policy/{dependency,architecture,security}.*.json`. `config/tools/eslint.boundaries.cjs` is **generated** by `pnpm policy:gen` — edit the compiler/rules, not the output.
 
-Instead of reading large files, consult these focused references:
+Cheapest gate that can catch your change: `pnpm type-check`, `pnpm lint` (Biome per package), `pnpm policy:check`, `pnpm audit:drift`. `pnpm quality` is the release-grade suite.
 
-- `.agents/INDEX.md` — Overview of the .agents/ directory structure to save tokens on exploration
-- `Arch-System/AGENTS.md` — 12 always-on invariants (each with enforcing `audit:*` gate)
-- `Arch-System/docs/agents/{architecture,commands,invariants,patterns}.md` — Full reference
-- `Arch-System/apps/portal/AGENTS.md` — Endpoints, auth, queue/job contract, latency budgets
-- `.agents/rules/evidence-based-verification-and-security.md` — E0–E4 evidence tiers, anti-assumption mandate
-- `.agents/rules/execution-guardrails.md` — Pre-completion audits, migration/RLS rules, policy boundaries
-- `Arch-System/.agents/rules/anti-mock-facade-invariants.md` — No mock returns/hardcoded IDs/bypasses in production code
-- `.agents/rules/structured-thinking-mandate.md` — STM-0 — read before multi-file mutations
+## 4. Hard invariants
 
-Note: `.agents/rules/` and `Arch-System/.agents/rules/` are hand-copied duplicates that have diverged — diff counterparts before editing either.
+- **Light mode only.** Canvas `#f3f4f6`; use semantic OKLCH tokens from `@repo/theme` (`color-bg-base`, `color-text-primary`, …). No `dark:` variants, ever (`pnpm audit:tokens` reports them).
+- Glass surfaces use `@repo/ui/GlassCard` (`default` | `window` | `spotlight` | `glowborder` | `liquid`).
+- Boundaries (enforced): `apps/*` must not import `packages/database` (use `@repo/supabase`); `packages/ui` must not touch db/supabase (presentational only); `packages/theme` must not import `packages/ui`; `packages/*` and `tools/*` must not import `apps/*`.
+- Import via canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/...`.
+- Server Components by default; push `'use client'` to leaves; no data fetching in client components; `@tanstack/react-query` is the client cache (SWR is prohibited).
+- Strict TypeScript; no `any`/`@ts-ignore`. Biome has `noExplicitAny` and several a11y rules turned off — absence of a lint error is not permission.
+- Conventional commits (commitlint); never print or commit `.env*` values (`apps/portal/.env`, `apps/portal/env/.env.example`).
 
-## Database Note
+## 5. Next.js 16 specifics
 
-Migrations are `NNN_description.sql` in `Arch-System/packages/database/migrations/` (`packages/supabase/migrations` is a symlink). RLS is enforced on every table with atomic RPCs. Agents adding tooling, contracts, ports, or dependencies to a service directory **must** update that directory's `AGENTS.md` in the same change.
+- **Do not trust training data for Next APIs.** Read `node_modules/next/dist/docs/` before writing route/cache/proxy code.
+- `apps/portal/proxy.ts` replaces `middleware.ts` (Next 16) and also injects the CSP/nonce headers; route gating + auth delegation stays in `server/proxy.ts`.
+- `apps/portal/AGENTS.md` holds a `nextjs-agent-rules` block that `next dev` regenerates — deleting it just recreates it uncommitted; keep it.
+- `cacheComponents: true`; dev runs **webpack** (`next dev --webpack`) while `next build` uses Turbopack. `output: 'standalone'` unless `VERCEL`. `images.unoptimized: true`. `/` redirects to `/hub`.
+- Server-side caching SSoT is `apps/portal/lib/server-cache.ts`: `cacheProfiles` (telemetry/departments/reports/minutes/…), `scopedTag`/`tagTenant`/`tagDepartment`, and `updateTag()` which clears Next's data cache **and** Redis L1/L2. Mutations in `actions.ts` pair `cacheInvalidateTags([...])` with `revalidatePath()`.
+- `SKIP_TYPE_CHECK=true` only works locally (blocked when `CI=true`) — never use it to make a build pass.
+
+## 6. Tests
+
+Jest 30 + `@swc/jest`; co-located `*.test.ts(x)`; run with `--runInBand`. `apps/portal/setupTests.ts` globally mocks `next/cache` and `@repo/redis`; `jest.config.cjs` maps `@repo/*` straight to `src/`, so no package build is required. Portal coverage thresholds are 40 statements / 27 branches / 28 functions / 40 lines — adding untested code can fail `test:coverage`.
+
+## 7. Reference map
+
+- `.agents/GUIDE.md` — provider-neutral operations guide (note: it still claims Node ≥22; `engines` says ≥24).
+- `docs/agents/{architecture,commands,invariants,patterns,testing,jest-diagnostics}.md` — deep reference; some entries predate current scripts, verify against `package.json`.
+- `.agents/rules/` (canonical, mirrored to `../.agents/rules/`), `.cursor/rules/*.mdc`, `apps/portal/AGENTS.md`.
+- `codemap` MCP tools index this repo (fresh as of `HEAD`) — prefer symbol/graph queries over grepping large trees. The `code-index` server has a stale, empty index for this repo; don't trust it.

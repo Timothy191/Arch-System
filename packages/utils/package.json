@@ -28,6 +28,7 @@
   "scripts": {
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
+    "test": "jest --config jest.config.js --passWithNoTests --runInBand",
     "type-check": "tsc --noEmit"
   }
 }

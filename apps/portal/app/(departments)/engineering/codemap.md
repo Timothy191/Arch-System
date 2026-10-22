@@ -1,6 +1,6 @@
 # (departments)/engineering/
 
-**Kind:** page · **Files:** 5
+**Kind:** page · **Files:** 5 (+1 test)
 
 ## Responsibility
 
@@ -15,7 +15,7 @@ Server Components fetch data directly (no client-side fetching), pass props down
   - `error.tsx` → EngineeringError, default
   - `layout.tsx` → EngineeringLayout, default
   - `loading.tsx` → EngineeringLoading, default
-  - `page.tsx` → TireManagementPage, default
+  - `page.tsx` → EngineeringDashboardPage, default
 
 ## Flow
 

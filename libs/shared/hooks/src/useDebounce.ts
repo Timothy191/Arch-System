@@ -22,7 +22,7 @@ export function useDebounce<T>(value: T, delay: number): T {
  * Hook that wraps a function with a debounced execution controller.
  * Supports leading/trailing execution, maxWait, cancel(), and flush().
  */
-export function useDebounceFn<T extends (...args: any[]) => any>(
+export function useDebounceFn<T extends (...args: never[]) => unknown>(
   fn: T,
   delay: number,
   options: DebounceOptions = {}

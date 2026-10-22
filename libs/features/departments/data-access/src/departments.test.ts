@@ -35,7 +35,9 @@ describe('DEPARTMENTS registry', () => {
         for (const action of dept.actions) {
           expect(action.label).toBeDefined();
           expect(action.label.length).toBeGreaterThan(0);
-          expect(action.href).toMatch(/^\/[a-z0-9-?=&]+$/);
+          expect(action.href).toMatch(
+            /^\/[a-z0-9-]+(?:\/[a-z0-9-]+)*(?:\?[a-z0-9-]+=[a-z0-9-]+(?:&[a-z0-9-]+=[a-z0-9-]+)*)?$/
+          );
 
           // Ensure no duplicate action labels or duplicate hrefs within the same department
           expect(actionLabels.has(action.label)).toBe(false);

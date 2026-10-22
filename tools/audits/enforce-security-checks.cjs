@@ -63,6 +63,26 @@ for (const check of checks) {
     filesToScan = filesToScan.concat(matched);
   }
 
+  // Pre-collect functions hardened via subsequent ALTER FUNCTION or catalog migration (e.g. 166 / 192)
+  const hardenedFunctions = new Set();
+  if (check.id === 'no-mutable-search-path') {
+    for (const file of filesToScan) {
+      const sqlContent = fs.readFileSync(file, 'utf-8');
+      const alterRe =
+        /ALTER\s+FUNCTION\s+(?:public\.)?([a-zA-Z0-9_]+)\s*\([^)]*\)\s*SET\s+search_path/gi;
+      let m;
+      while ((m = alterRe.exec(sqlContent)) !== null) {
+        hardenedFunctions.add(m[1].toLowerCase());
+      }
+      const arraySigRe = /'public\.([a-zA-Z0-9_]+)\([^']*'/gi;
+      if (/ALTER\s+FUNCTION\s+%s\s+SET\s+search_path/i.test(sqlContent)) {
+        while ((m = arraySigRe.exec(sqlContent)) !== null) {
+          hardenedFunctions.add(m[1].toLowerCase());
+        }
+      }
+    }
+  }
+
   for (const file of filesToScan) {
     // Skip checking this script itself and the policy compiler
     if (
@@ -78,9 +98,27 @@ for (const check of checks) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (regex.test(line)) {
-        // Exclude lines that are just comments (very basic check)
-        if (line.trim().startsWith('//') || line.trim().startsWith('*')) {
+        // Exclude lines that are just comments (JS or SQL)
+        const trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('--')) {
+          regex.lastIndex = 0;
           continue;
+        }
+
+        if (check.id === 'no-mutable-search-path') {
+          // Inspect multi-line function header up to AS $$ / LANGUAGE or check hardenedFunctions
+          const headerWindow = lines.slice(i, Math.min(lines.length, i + 25)).join(' ');
+          const fnMatch = line.match(
+            /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(?:public\.)?([a-zA-Z0-9_]+)/i
+          );
+          const fnName = fnMatch ? fnMatch[1].toLowerCase() : null;
+          if (
+            /SET\s+search_path/i.test(headerWindow) ||
+            (fnName && hardenedFunctions.has(fnName))
+          ) {
+            regex.lastIndex = 0;
+            continue;
+          }
         }
 
         const relativePath = path.relative(REPO_ROOT, file);

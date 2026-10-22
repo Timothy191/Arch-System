@@ -11,11 +11,17 @@ export interface MusterSummary {
   lastUpdated: string;
 }
 
+export type CachedMusterData<TData = MusterSummary> = TData & {
+  _cachedAt?: string;
+};
+
 const MUSTER_CACHE_KEY = 'arch_muster_cache_v1';
 
-export function useOfflineMuster(deptId: string, fetchAction: (id: string) => Promise<any>) {
+export function useOfflineMuster<
+  TData extends Record<string, unknown> | MusterSummary = MusterSummary,
+>(deptId: string, fetchAction: (id: string) => Promise<TData>) {
   const { isOnline } = usePitConnectivity();
-  const [offlineData, setOfflineData] = useState<MusterSummary | null>(null);
+  const [offlineData, setOfflineData] = useState<CachedMusterData<TData> | null>(null);
 
   // 1. Fetch live data via TanStack Query (Polling every 60s when online)
   const { data: liveData, error } = useQuery({
@@ -48,7 +54,7 @@ export function useOfflineMuster(deptId: string, fetchAction: (id: string) => Pr
       try {
         const cached = localStorage.getItem(MUSTER_CACHE_KEY);
         if (cached) {
-          setOfflineData(JSON.parse(cached));
+          setOfflineData(JSON.parse(cached) as CachedMusterData<TData>);
         }
       } catch (err) {
         console.error('Failed to parse offline muster data', err);
@@ -61,7 +67,7 @@ export function useOfflineMuster(deptId: string, fetchAction: (id: string) => Pr
   return {
     data: isOnline ? liveData : offlineData,
     isOffline: !isOnline,
-    staleSince: !isOnline && offlineData ? (offlineData as any)._cachedAt : null,
+    staleSince: !isOnline && offlineData ? (offlineData._cachedAt ?? null) : null,
     error,
   };
 }
