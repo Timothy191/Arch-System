@@ -11,9 +11,9 @@
   --arch5: rgba(60, 60, 67, 0.2);
   --arch6: rgba(60, 60, 67, 0.18);
   --arch7: rgba(60, 60, 67, 0.3);
-  --arch8: #8e8e93;
-  --arch9: #636366;
-  --arch10: #3c3c43;
+  --arch8: #48484a;
+  --arch9: #3a3a3c;
+  --arch10: #2c2c2e;
   --arch11: #1d1d1f;
   --arch12: #ff3b30;
   --arch13: #ff9500;
@@ -37,13 +37,19 @@
   --glass-surface-strong: rgba(255, 255, 255, 0.35);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-border-top: rgba(255, 255, 255, 0.5);
-  --glass-border-gradient: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3));
+  --glass-border-gradient: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.3)
+  );
   --glass-text: rgba(10, 10, 20, 0.92);
-  --glass-text-muted: rgba(10, 10, 20, 0.55);
+  --glass-text-muted: rgba(10, 10, 20, 0.78);
   --glass-vibrancy: rgba(246, 246, 250, 0.45);
-  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  --glass-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   --text-on-glass: rgba(10, 10, 20, 0.92);
-  --text-on-glass-muted: rgba(10, 10, 20, 0.55);
+  --text-on-glass-muted: rgba(10, 10, 20, 0.78);
   --vibrancy-surface: rgba(246, 246, 250, 0.45);
   --vibrancy-border: rgba(0, 0, 0, 0.06);
   --overlay-dim: rgba(0, 0, 0, 0.02);
@@ -60,7 +66,7 @@
   --secondary: 240 11% 91%;
   --secondary-foreground: 240 6% 12%;
   --muted: 240 11% 91%;
-  --muted-foreground: 240 3% 57%;
+  --muted-foreground: 240 5% 30%;
   --accent: 240 5% 91%;
   --accent-foreground: 240 6% 10%;
   --destructive: 4 100% 59%;
@@ -85,14 +91,18 @@
   --tremor-background-emphasis: 240 6% 10%;
   --tremor-border-default: 240 6% 87%;
   --tremor-ring-default: 240 6% 10%;
-  --tremor-content-subtle: 240 3% 63%;
-  --tremor-content-default: 240 3% 44%;
-  --tremor-content-emphasis: 240 6% 23%;
+  --tremor-content-subtle: 240 5% 34%;
+  --tremor-content-default: 240 5% 26%;
+  --tremor-content-emphasis: 240 6% 18%;
   --tremor-content-strong: 240 6% 10%;
   --tremor-content-inverted: 0 0% 100%;
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 2px 4px rgba(0,0,0,0.02), 0 6px 16px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.04), 0 28px 64px rgba(0,0,0,0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
-  --shadow-elevated: 0 2px 4px rgba(0,0,0,0.02), 0 8px 20px rgba(0,0,0,0.03), 0 20px 48px rgba(0,0,0,0.03), 0 32px 72px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-card-hover:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.04),
+    0 28px 64px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-elevated:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
+    0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
   --shadow-glow-blue: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
   --shadow-glow-primary: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
   --shadow-glow-electric: 0 0 24px rgba(0, 122, 255, 0.28), 0 0 80px rgba(0, 122, 255, 0.1);

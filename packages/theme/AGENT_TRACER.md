@@ -310,3 +310,4 @@
   - `packages/theme/src/css/glass.css`: Updated `.glass`, `.glass-card`, and `.layer-signin-card` to match the liquid glass recipe.
   - Re-ran `pnpm --filter @repo/theme build` to regenerate token maps and CSS variables.
 - **Status**: Completed, verified.
+- 2026-10-22T05:17:07Z | Council-Orchestrator | Darkened global muted/secondary text tokens (--arch8 #48484a, --arch9 #3a3a3c, --arch10 #2c2c2e) and regenerated theme artifacts for high-contrast legibility.

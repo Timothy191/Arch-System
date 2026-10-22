@@ -7,9 +7,9 @@
   "arch5": "rgba(60, 60, 67, 0.20)",
   "arch6": "rgba(60, 60, 67, 0.18)",
   "arch7": "rgba(60, 60, 67, 0.30)",
-  "arch8": "#8e8e93",
-  "arch9": "#636366",
-  "arch10": "#3c3c43",
+  "arch8": "#48484a",
+  "arch9": "#3a3a3c",
+  "arch10": "#2c2c2e",
   "arch11": "#1d1d1f",
   "arch12": "#ff3b30",
   "arch13": "#ff9500",
@@ -26,10 +26,10 @@
   "border-default": "rgba(60, 60, 67, 0.20)",
   "border-emphasis": "rgba(60, 60, 67, 0.18)",
   "text": {
-    "muted": "#8e8e93",
-    "secondary": "#636366",
-    "body": "#3c3c43",
-    "primary": "#3c3c43",
+    "muted": "#48484a",
+    "secondary": "#3a3a3c",
+    "body": "#2c2c2e",
+    "primary": "#2c2c2e",
     "heading": "#1d1d1f"
   },
   "accent-red": "#d22118",
@@ -61,12 +61,12 @@
     "border-top": "rgba(255, 255, 255, 0.5)",
     "border-gradient": "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
     "text": "rgba(10, 10, 20, 0.92)",
-    "text-muted": "rgba(10, 10, 20, 0.55)",
+    "text-muted": "rgba(10, 10, 20, 0.78)",
     "vibrancy": "rgba(246, 246, 250, 0.45)",
     "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)"
   },
   "text-on-glass": "rgba(10, 10, 20, 0.92)",
-  "text-on-glass-muted": "rgba(10, 10, 20, 0.55)",
+  "text-on-glass-muted": "rgba(10, 10, 20, 0.78)",
   "vibrancy": {
     "surface": "rgba(246, 246, 250, 0.45)",
     "border": "rgba(0, 0, 0, 0.06)"
@@ -85,7 +85,7 @@
   "secondary": "240 11% 91%",
   "secondary-foreground": "240 6% 12%",
   "muted": "240 11% 91%",
-  "muted-foreground": "240 3% 57%",
+  "muted-foreground": "240 5% 30%",
   "accent": "240 5% 91%",
   "accent-foreground": "240 6% 10%",
   "destructive": "4 100% 59%",
@@ -120,9 +120,9 @@
       "default": "240 6% 10%"
     },
     "content": {
-      "subtle": "240 3% 63%",
-      "default": "240 3% 44%",
-      "emphasis": "240 6% 23%",
+      "subtle": "240 5% 34%",
+      "default": "240 5% 26%",
+      "emphasis": "240 6% 18%",
       "strong": "240 6% 10%",
       "inverted": "0 0% 100%"
     }

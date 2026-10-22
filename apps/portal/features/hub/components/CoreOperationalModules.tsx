@@ -165,7 +165,7 @@ export function CoreOperationalModules({
                 'px-2.5 py-1 rounded-full transition-all text-xs tabular-nums',
                 activeFilter === 'all'
                   ? 'bg-white text-arch-text-primary shadow-card font-semibold'
-                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
+                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
               )}
             >
               All
@@ -179,7 +179,7 @@ export function CoreOperationalModules({
                   'px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1 tabular-nums',
                   activeFilter === 'pinned'
                     ? 'bg-white text-arch-accent-blue shadow-card font-semibold'
-                    : 'text-arch-text-tertiary hover:text-arch-text-secondary'
+                    : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
                 )}
               >
                 <Star className="w-3 h-3 fill-arch-accent-blue/20" />
@@ -194,11 +194,11 @@ export function CoreOperationalModules({
                 'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
                 activeFilter === 'active'
                   ? 'bg-white text-accent-green shadow-card font-semibold'
-                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
+                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
               )}
             >
               <span>Active</span>
-              <span className="text-[10px] font-mono opacity-75">{activeCount}</span>
+              <span className="text-[10px] font-mono opacity-95">{activeCount}</span>
             </button>
             <button
               type="button"
@@ -208,7 +208,7 @@ export function CoreOperationalModules({
                 'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
                 activeFilter === 'critical'
                   ? 'bg-white text-accent-amber shadow-card font-semibold'
-                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
+                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
               )}
             >
               {criticalCount > 0 && (

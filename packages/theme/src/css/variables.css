@@ -189,9 +189,9 @@
   --tremor-background-emphasis: 240 6% 10%;
   --tremor-border-default: 240 6% 87%;
   --tremor-ring-default: 240 6% 10%;
-  --tremor-content-subtle: 240 3% 63%;
-  --tremor-content-default: 240 3% 44%;
-  --tremor-content-emphasis: 240 6% 23%;
+  --tremor-content-subtle: 240 5% 34%;
+  --tremor-content-default: 240 5% 26%;
+  --tremor-content-emphasis: 240 6% 18%;
   --tremor-content-strong: 240 6% 10%;
   --tremor-content-inverted: 0 0% 100%;
 
@@ -204,7 +204,7 @@
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-border-top: rgba(255, 255, 255, 0.5);
   --text-on-glass: rgba(10, 10, 20, 0.92);
-  --text-on-glass-muted: rgba(10, 10, 20, 0.55);
+  --text-on-glass-muted: rgba(10, 10, 20, 0.78);
 
   /* ── Glass-on-Video (translucent light glass over dark media) ──────────
      These tokens produce a light-blurred-glass effect when layered over
@@ -221,7 +221,7 @@
   --glass-video-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   --glass-video-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
   --text-on-glass-video: rgba(10, 10, 20, 0.92);
-  --text-on-glass-video-muted: rgba(10, 10, 20, 0.55);
+  --text-on-glass-video-muted: rgba(10, 10, 20, 0.78);
   --glass-video-radius: 20px;
 
   /* Dark glass surface — opaque dark card for high-contrast sections
@@ -354,7 +354,7 @@
 
   /* Light mode liqui tokens */
   --lq-text: rgba(28, 28, 40, 0.95);
-  --lq-text-dim: rgba(28, 28, 40, 0.55);
+  --lq-text-dim: rgba(28, 28, 40, 0.78);
   --lq-tint: rgba(255, 255, 255, 0.48);
   --lq-tint-deep: rgba(255, 255, 255, 0.14);
   --lq-rim-hi: rgba(255, 255, 255, 0.85);

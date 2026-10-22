@@ -157,13 +157,13 @@ module.exports = {
   },
   arch8: {
     key: '{arch8}',
-    value: '#8e8e93',
+    value: '#48484a',
     type: 'color',
     description: 'muted / placeholder',
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#8e8e93',
+      value: '#48484a',
       type: 'color',
       description: 'muted / placeholder',
       key: '{arch8}',
@@ -176,13 +176,13 @@ module.exports = {
   },
   arch9: {
     key: '{arch9}',
-    value: '#636366',
+    value: '#3a3a3c',
     type: 'color',
     description: 'secondary / caption',
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#636366',
+      value: '#3a3a3c',
       type: 'color',
       description: 'secondary / caption',
       key: '{arch9}',
@@ -195,13 +195,13 @@ module.exports = {
   },
   arch10: {
     key: '{arch10}',
-    value: '#3c3c43',
+    value: '#2c2c2e',
     type: 'color',
     description: 'body',
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '#3c3c43',
+      value: '#2c2c2e',
       type: 'color',
       description: 'body',
       key: '{arch10}',
@@ -451,7 +451,7 @@ module.exports = {
   text: {
     muted: {
       key: '{text.muted}',
-      value: '#8e8e93',
+      value: '#48484a',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
@@ -469,7 +469,7 @@ module.exports = {
     },
     secondary: {
       key: '{text.secondary}',
-      value: '#636366',
+      value: '#3a3a3c',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
@@ -487,7 +487,7 @@ module.exports = {
     },
     body: {
       key: '{text.body}',
-      value: '#3c3c43',
+      value: '#2c2c2e',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
@@ -505,7 +505,7 @@ module.exports = {
     },
     primary: {
       key: '{text.primary}',
-      value: '#3c3c43',
+      value: '#2c2c2e',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
@@ -1032,12 +1032,12 @@ module.exports = {
     },
     'text-muted': {
       key: '{glass.text-muted}',
-      value: '#0a0a148c',
+      value: '#0a0a14c7',
       type: 'color',
       filePath: 'tokens.json',
       isSource: true,
       original: {
-        value: 'rgba(10, 10, 20, 0.55)',
+        value: 'rgba(10, 10, 20, 0.78)',
         type: 'color',
         key: '{glass.text-muted}',
       },
@@ -1106,12 +1106,12 @@ module.exports = {
   },
   'text-on-glass-muted': {
     key: '{text-on-glass-muted}',
-    value: '#0a0a148c',
+    value: '#0a0a14c7',
     type: 'color',
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: 'rgba(10, 10, 20, 0.55)',
+      value: 'rgba(10, 10, 20, 0.78)',
       type: 'color',
       key: '{text-on-glass-muted}',
     },
@@ -1399,12 +1399,12 @@ module.exports = {
   },
   'muted-foreground': {
     key: '{muted-foreground}',
-    value: '240 3% 57%',
+    value: '240 5% 30%',
     type: 'color',
     filePath: 'tokens.json',
     isSource: true,
     original: {
-      value: '240 3% 57%',
+      value: '240 5% 30%',
       type: 'color',
       key: '{muted-foreground}',
     },
@@ -1858,12 +1858,12 @@ module.exports = {
     content: {
       subtle: {
         key: '{tremor.content.subtle}',
-        value: '240 3% 63%',
+        value: '240 5% 34%',
         type: 'color',
         filePath: 'tokens.json',
         isSource: true,
         original: {
-          value: '240 3% 63%',
+          value: '240 5% 34%',
           type: 'color',
           key: '{tremor.content.subtle}',
         },
@@ -1877,12 +1877,12 @@ module.exports = {
       },
       default: {
         key: '{tremor.content.default}',
-        value: '240 3% 44%',
+        value: '240 5% 26%',
         type: 'color',
         filePath: 'tokens.json',
         isSource: true,
         original: {
-          value: '240 3% 44%',
+          value: '240 5% 26%',
           type: 'color',
           key: '{tremor.content.default}',
         },
@@ -1896,12 +1896,12 @@ module.exports = {
       },
       emphasis: {
         key: '{tremor.content.emphasis}',
-        value: '240 6% 23%',
+        value: '240 6% 18%',
         type: 'color',
         filePath: 'tokens.json',
         isSource: true,
         original: {
-          value: '240 6% 23%',
+          value: '240 6% 18%',
           type: 'color',
           key: '{tremor.content.emphasis}',
         },

@@ -118,7 +118,7 @@ export const glass = {
   border: 'rgba(255, 255, 255, 0.15)',
   borderTop: 'rgba(255, 255, 255, 0.25)',
   text: 'rgba(10, 10, 20, 0.92)',
-  textMuted: 'rgba(10, 10, 20, 0.55)',
+  textMuted: 'rgba(10, 10, 20, 0.78)',
   vibrancy: 'rgba(246, 246, 250, 0.82)',
   /** @deprecated use top-level properties */
   light: {
@@ -127,7 +127,7 @@ export const glass = {
     border: 'rgba(255, 255, 255, 0.15)',
     borderTop: 'rgba(255, 255, 255, 0.25)',
     text: 'rgba(10, 10, 20, 0.92)',
-    textMuted: 'rgba(10, 10, 20, 0.55)',
+    textMuted: 'rgba(10, 10, 20, 0.78)',
   },
 } as const;
 
