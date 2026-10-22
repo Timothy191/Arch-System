@@ -279,15 +279,26 @@ function DepartmentCard({
         <div className="uiverse-card-body relative z-10 pointer-events-none">
           <div className="space-y-1">
             <div className="uiverse-card-title-row">
-              <h3
-                className="uiverse-card-title font-anurati uppercase tracking-[0.08em]"
-                style={{
-                  fontFamily:
-                    "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
-                }}
-              >
-                {department.displayName}
-              </h3>
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center w-5 h-5 rounded-md text-xs font-semibold shrink-0 border shadow-2xs',
+                    config.bg
+                  )}
+                  aria-hidden="true"
+                >
+                  <Icon className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
+                </span>
+                <h3
+                  className="uiverse-card-title font-anurati uppercase tracking-[0.08em] truncate"
+                  style={{
+                    fontFamily:
+                      "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+                  }}
+                >
+                  {department.displayName}
+                </h3>
+              </div>
               {department.status && (
                 <span
                   className={cn(

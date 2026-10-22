@@ -281,7 +281,7 @@ export function MacMenuBar({
                 aria-label="System Menu"
                 aria-haspopup="true"
                 title={`System Menu · Active: ${currentContextLabel}`}
-                className="relative w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-md"
+                className="relative w-9 h-9 rounded-full bg-white/80 hover:bg-white data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/60 shadow-xs flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-sm"
               >
                 <Logo className="w-5 h-5 text-[var(--accent-blue)] drop-shadow-xs" />
                 <span
@@ -293,33 +293,31 @@ export function MacMenuBar({
                 />
               </button>
             </DropdownMenuTrigger>
-            {/* WhatsApp Web Split-Screen and Direct Web trigger */}
+            {/* WhatsApp Web Direct Web & Split-Screen trigger */}
             <button
               type="button"
-              onClick={(e) => {
+              onClick={() => {
                 if (typeof window !== 'undefined') {
-                  // Toggle split-screen pane
+                  // Direct shortcut: Spawn / navigate directly to official WhatsApp Web login
+                  window.open(WHATSAPP_WEB_DIRECT_URL, '_blank', 'noopener,noreferrer');
+                  // Also synchronize the docked split-screen pane
                   window.dispatchEvent(
                     new CustomEvent('open-split-view', {
-                      detail: { service: 'whatsapp', action: 'toggle' },
+                      detail: { service: 'whatsapp', action: 'open' },
                     })
                   );
-                  // If holding Alt/Option or Shift, or if double clicking, open direct WhatsApp Web login page
-                  if (e.altKey || e.shiftKey || e.metaKey) {
-                    window.open(WHATSAPP_WEB_DIRECT_URL, '_blank', 'noopener,noreferrer');
-                  }
                 }
               }}
-              className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
-              title="WhatsApp Web (Click: Split Screen · Shift+Click: Open web.whatsapp.com)"
-              aria-label="WhatsApp Web (Click: Split Screen · Shift+Click: Open web.whatsapp.com)"
+              className="w-8 h-8 rounded-full bg-white/70 hover:bg-white/95 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer shrink-0 hover:shadow-md"
+              title="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
+              aria-label="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
             >
               <Image
                 src="/whatsapp-logo.jpeg"
                 alt="WhatsApp Logo"
-                width={18}
-                height={18}
-                className="rounded-full object-cover shrink-0"
+                width={20}
+                height={20}
+                className="rounded-full object-cover shrink-0 drop-shadow-xs"
               />
             </button>
           </div>
