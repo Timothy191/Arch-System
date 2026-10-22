@@ -89,18 +89,41 @@ export function DrillingReportsDashboardClient({
     });
   }, [operations, shiftFilter, rigFilter, searchQuery]);
 
+  // Performance Optimization: Single-pass accumulator replaces 4 reduce calls and 2 array filter passes
+  // ($O(N)$ vs $O(6N)$ iteration overhead), preventing array allocations and CPU thrashing during filtering.
   const kpi = useMemo(() => {
-    const totalMeters = filteredOps.reduce((s, op) => s + (Number(op.meters_drilled) || 0), 0);
-    const totalHoles = filteredOps.reduce((s, op) => s + (Number(op.holes) || 0), 0);
-    const totalHours = filteredOps.reduce((s, op) => s + (Number(op.total_hours) || 0), 0);
-    const totalDelaysMin = filteredOps.reduce(
-      (s, op) => s + op.production_delays + op.non_productional_delays + op.engineering_delays,
-      0
-    );
-    const dayOps = filteredOps.filter((op) => op.shift_type.toLowerCase() === 'day');
-    const nightOps = filteredOps.filter((op) => op.shift_type.toLowerCase() === 'night');
-    const dayMeters = dayOps.reduce((s, op) => s + (Number(op.meters_drilled) || 0), 0);
-    const nightMeters = nightOps.reduce((s, op) => s + (Number(op.meters_drilled) || 0), 0);
+    let totalMeters = 0;
+    let totalHoles = 0;
+    let totalHours = 0;
+    let totalDelaysMin = 0;
+    let dayMeters = 0;
+    let nightMeters = 0;
+    let dayCount = 0;
+    let nightCount = 0;
+
+    for (const op of filteredOps) {
+      const meters = Number(op.meters_drilled) || 0;
+      const holes = Number(op.holes) || 0;
+      const hours = Number(op.total_hours) || 0;
+      const delays =
+        (op.production_delays || 0) +
+        (op.non_productional_delays || 0) +
+        (op.engineering_delays || 0);
+
+      totalMeters += meters;
+      totalHoles += holes;
+      totalHours += hours;
+      totalDelaysMin += delays;
+
+      if (op.shift_type.toLowerCase() === 'night') {
+        nightMeters += meters;
+        nightCount += 1;
+      } else if (op.shift_type.toLowerCase() === 'day') {
+        dayMeters += meters;
+        dayCount += 1;
+      }
+    }
+
     const penetrationRate = totalHours > 0 ? totalMeters / totalHours : 0;
     const avgHoleDepth = totalHoles > 0 ? totalMeters / totalHoles : 0;
 
@@ -111,8 +134,8 @@ export function DrillingReportsDashboardClient({
       totalDelaysMin,
       dayMeters,
       nightMeters,
-      dayCount: dayOps.length,
-      nightCount: nightOps.length,
+      dayCount,
+      nightCount,
       penetrationRate,
       avgHoleDepth,
     };
