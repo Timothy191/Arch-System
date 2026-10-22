@@ -46,9 +46,12 @@ export interface HeroRotatorProps {
   offlineMachineCount?: number;
 }
 
+const DEFAULT_AUTO_ROTATE_MS = 6000;
+const SWIPE_THRESHOLD_PX = 50;
+
 const CONFIG = {
-  autoRotateMs: 6000,
-  swipeThreshold: 50,
+  autoRotateMs: DEFAULT_AUTO_ROTATE_MS,
+  swipeThreshold: SWIPE_THRESHOLD_PX,
 };
 
 interface HeroSlideProps {

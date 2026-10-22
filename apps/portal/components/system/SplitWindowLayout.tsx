@@ -398,6 +398,9 @@ function GitHubMockView() {
 
 /* ─────────────────────────── WhatsApp Web View ─────────────────────────── */
 
+const WHATSAPP_WEB_URL = 'https://web.whatsapp.com/';
+const WHATSAPP_AUTO_ACK_DELAY_MS = 1200;
+
 interface MessageItem {
   id: string;
   sender: string;
@@ -495,7 +498,7 @@ function WhatsAppWebView() {
     // Simulate auto-acknowledgement from station
     setTimeout(() => {
       setMessages((prev) => prev.map((m) => (m.id === newMsg.id ? { ...m, status: 'read' } : m)));
-    }, 1200);
+    }, WHATSAPP_AUTO_ACK_DELAY_MS);
   };
 
   const filteredMessages = messages.filter(
@@ -532,14 +535,31 @@ function WhatsAppWebView() {
           </div>
         </div>
 
-        {/* View Mode Toggle: Operations Chat vs QR Linking */}
-        <div className="flex items-center gap-1 shrink-0">
+        {/* View Mode Toggle: Operations Chat vs QR Linking vs Open Web */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.open(WHATSAPP_WEB_URL, '_blank', 'noopener,noreferrer');
+              }
+            }}
+            className="px-2.5 py-1 rounded-lg text-[10.5px] font-semibold bg-white text-[#008069] hover:bg-emerald-50 active:scale-95 transition-all flex items-center gap-1 shadow-card cursor-pointer"
+            title="Open WhatsApp Web in Login / Direct Tab"
+            aria-label="Open WhatsApp Web in Login / Direct Tab"
+          >
+            <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.79-4.896c1.675.993 3.324 1.558 5.207 1.559 5.405 0 9.803-4.375 9.806-9.754.002-2.607-1.002-5.06-2.83-6.892-1.829-1.83-4.263-2.836-6.868-2.837-5.39 0-9.786 4.377-9.79 9.753-.001 2.03.535 3.738 1.555 5.262l-.994 3.63 3.74-.981z" />
+            </svg>
+            <span>Open Web</span>
+          </button>
+
           <div className="flex items-center bg-emerald-800/80 p-0.5 rounded-lg border border-emerald-700/60">
             <button
               type="button"
               onClick={() => setActiveTab('chat')}
               className={cn(
-                'px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1',
+                'px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1 cursor-pointer',
                 activeTab === 'chat'
                   ? 'bg-white text-emerald-800 shadow-card'
                   : 'text-emerald-200 hover:text-white'
@@ -552,14 +572,14 @@ function WhatsAppWebView() {
               type="button"
               onClick={() => setActiveTab('link')}
               className={cn(
-                'px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1',
+                'px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1 cursor-pointer',
                 activeTab === 'link'
                   ? 'bg-white text-emerald-800 shadow-card'
                   : 'text-emerald-200 hover:text-white'
               )}
             >
               <QrCode className="w-3 h-3" />
-              <span>Link Web</span>
+              <span>Link QR</span>
             </button>
           </div>
         </div>
@@ -811,17 +831,21 @@ function WhatsAppWebView() {
             {/* Direct Web Frame Option */}
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50/60 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-800">Embedded Web Session</p>
+                <p className="text-xs font-bold text-slate-800">Direct Web WhatsApp Login</p>
                 <p className="text-[10.5px] text-slate-500">
-                  Runs directly inside this split-screen panel
+                  Open web.whatsapp.com directly in a new dedicated window/tab
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setActiveTab('chat')}
-                className="px-3 py-1.5 rounded-lg bg-[#008069] text-white text-xs font-semibold hover:bg-[#00705a] transition-all shadow-card"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.open(WHATSAPP_WEB_URL, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+                className="px-3 py-1.5 rounded-lg bg-[#008069] text-white text-xs font-semibold hover:bg-[#00705a] transition-all shadow-card cursor-pointer"
               >
-                Return to Chat
+                Launch web.whatsapp.com ↗
               </button>
             </div>
           </div>

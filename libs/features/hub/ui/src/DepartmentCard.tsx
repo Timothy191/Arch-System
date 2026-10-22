@@ -61,38 +61,57 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   CreditCard,
 };
 
-const COLOR_MAP: Record<string, { bg: string; text: string }> = {
+const COLOR_MAP: Record<
+  string,
+  { bg: string; text: string; iconColor: string; ringColor: string }
+> = {
   amber: {
-    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
+    bg: 'border-accent-amber/35 bg-white/95 text-accent-amber shadow-sm',
     text: 'text-accent-amber',
+    iconColor: 'text-accent-amber',
+    ringColor: 'ring-accent-amber/30',
   },
   emerald: {
-    bg: 'border-accent-green/20 text-accent-green bg-accent-green/5',
+    bg: 'border-accent-green/35 bg-white/95 text-accent-green shadow-sm',
     text: 'text-accent-green',
+    iconColor: 'text-accent-green',
+    ringColor: 'ring-accent-green/30',
   },
   blue: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
+    bg: 'border-accent-blue/35 bg-white/95 text-accent-blue shadow-sm',
     text: 'text-accent-blue',
+    iconColor: 'text-accent-blue',
+    ringColor: 'ring-accent-blue/30',
   },
   violet: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-purple-400/35 bg-white/95 text-purple-600 shadow-sm',
+    text: 'text-purple-600',
+    iconColor: 'text-purple-600',
+    ringColor: 'ring-purple-400/30',
   },
   red: {
-    bg: 'border-accent-red/20 text-accent-red bg-accent-red/5',
+    bg: 'border-accent-red/35 bg-white/95 text-accent-red shadow-sm',
     text: 'text-accent-red',
+    iconColor: 'text-accent-red',
+    ringColor: 'ring-accent-red/30',
   },
   orange: {
-    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
-    text: 'text-accent-amber',
+    bg: 'border-amber-500/35 bg-white/95 text-amber-600 shadow-sm',
+    text: 'text-amber-600',
+    iconColor: 'text-amber-600',
+    ringColor: 'ring-amber-500/30',
   },
   cyan: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-cyan-400/35 bg-white/95 text-cyan-700 shadow-sm',
+    text: 'text-cyan-700',
+    iconColor: 'text-cyan-700',
+    ringColor: 'ring-cyan-400/30',
   },
   indigo: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-indigo-400/35 bg-white/95 text-indigo-600 shadow-sm',
+    text: 'text-indigo-600',
+    iconColor: 'text-indigo-600',
+    ringColor: 'ring-indigo-400/30',
   },
 };
 
@@ -142,8 +161,10 @@ function DepartmentCard({
 
   const Icon = ICON_MAP[department.icon] || Factory;
   const config = COLOR_MAP[department.color] || {
-    bg: 'border-arch-border-subtle text-arch-text-primary',
+    bg: 'border-arch-border-emphasis/30 bg-white/95 text-arch-accent-blue shadow-sm',
     text: 'text-arch-text-primary',
+    iconColor: 'text-arch-accent-blue',
+    ringColor: 'ring-arch-accent-blue/30',
   };
 
   const route = department.route || `/${department.name}`;
@@ -241,14 +262,16 @@ function DepartmentCard({
             <ArchBookmarkIcon isPinned={isPinned} />
           </button>
 
-          {/* Department Icon Bubble */}
+          {/* Department Icon Bubble with high-contrast badge */}
           <div
             className={cn(
-              'uiverse-card-icon-bubble absolute left-4 -bottom-4 z-20 border-arch-border-emphasis/25',
-              config.bg
+              'uiverse-card-icon-bubble absolute left-4 -bottom-4 z-20 flex items-center justify-center rounded-xl shadow-md ring-2 backdrop-blur-md',
+              config.bg,
+              config.ringColor
             )}
+            aria-hidden="true"
           >
-            <Icon className="w-4 h-4" />
+            <Icon className={cn('w-5 h-5 shrink-0 drop-shadow-xs', config.iconColor)} />
           </div>
         </div>
 

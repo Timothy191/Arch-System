@@ -50,6 +50,8 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
+const WHATSAPP_WEB_DIRECT_URL = 'https://web.whatsapp.com/';
+
 interface MacMenuBarProps {
   menuItems?: readonly string[];
   centerSlot?: React.ReactNode;
@@ -279,9 +281,9 @@ export function MacMenuBar({
                 aria-label="System Menu"
                 aria-haspopup="true"
                 title={`System Menu · Active: ${currentContextLabel}`}
-                className="relative w-9 h-9 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer"
+                className="relative w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-md"
               >
-                <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
+                <Logo className="w-5 h-5 text-[var(--accent-blue)] drop-shadow-xs" />
                 <span
                   className={cn(
                     'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white shadow-2xs transition-colors',
@@ -291,18 +293,26 @@ export function MacMenuBar({
                 />
               </button>
             </DropdownMenuTrigger>
-            {/* WhatsApp Web Split-Screen trigger */}
+            {/* WhatsApp Web Split-Screen and Direct Web trigger */}
             <button
               type="button"
-              onClick={() => {
-                window.dispatchEvent(
-                  new CustomEvent('open-split-view', {
-                    detail: { service: 'whatsapp', action: 'toggle' },
-                  })
-                );
+              onClick={(e) => {
+                if (typeof window !== 'undefined') {
+                  // Toggle split-screen pane
+                  window.dispatchEvent(
+                    new CustomEvent('open-split-view', {
+                      detail: { service: 'whatsapp', action: 'toggle' },
+                    })
+                  );
+                  // If holding Alt/Option or Shift, or if double clicking, open direct WhatsApp Web login page
+                  if (e.altKey || e.shiftKey || e.metaKey) {
+                    window.open(WHATSAPP_WEB_DIRECT_URL, '_blank', 'noopener,noreferrer');
+                  }
+                }
               }}
               className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
-              title="WhatsApp Web (Split Screen)"
+              title="WhatsApp Web (Click: Split Screen · Shift+Click: Open web.whatsapp.com)"
+              aria-label="WhatsApp Web (Click: Split Screen · Shift+Click: Open web.whatsapp.com)"
             >
               <Image
                 src="/whatsapp-logo.jpeg"
