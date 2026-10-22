@@ -37,6 +37,11 @@ label[for] {
   cursor: var(--cursor-arch-pointer);
 }
 
+[aria-busy='true'],
+[data-loading='true'] {
+  cursor: var(--cursor-arch-wait);
+}
+
 /* Custom scrollbar (dark theme) */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;

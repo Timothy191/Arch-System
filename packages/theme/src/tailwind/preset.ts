@@ -324,6 +324,8 @@ const archTheme: Config = {
         pointer: 'var(--cursor-arch-pointer)',
         grab: 'var(--cursor-arch-pointer)',
         grabbing: 'var(--cursor-arch-pointer)',
+        wait: 'var(--cursor-arch-wait)',
+        progress: 'var(--cursor-arch-wait)',
       },
       blur: {
         'focus-dim': 'var(--blur-focus-dim)',

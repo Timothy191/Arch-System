@@ -25,9 +25,18 @@ const WebVitalsReporter = dynamic(
   { ssr: false }
 );
 
+const ArchCursorWaitIndicator = dynamic(
+  () =>
+    import('@/components/ArchCursorWaitIndicator').then((m) => ({
+      default: m.ArchCursorWaitIndicator,
+    })),
+  { ssr: false }
+);
+
 export function ClientOverlays() {
   return (
     <>
+      <ArchCursorWaitIndicator />
       <PWAInstallButton />
       <CookieConsent />
       <OfflineBanner />
