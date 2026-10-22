@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { NextResponse } from 'next/server';
+import { CODEBASE_MAP_BY_KEY } from '../../overview/lib/codebase-maps-data';
 
 // AGENT-TRACE: Statically scoped to the repo-root codebase-maps folder so
 // Turbopack NFT does not trace the whole project. The mapsRoot option is
@@ -93,6 +94,8 @@ export async function GET(request: Request, options?: { mapsRoot?: string }) {
   let mapContent = '';
   if (fs.existsSync(/*turbopackIgnore: true*/ filePath)) {
     mapContent = fs.readFileSync(/*turbopackIgnore: true*/ filePath, 'utf-8');
+  } else if (!options?.mapsRoot && CODEBASE_MAP_BY_KEY[fileKey]) {
+    mapContent = CODEBASE_MAP_BY_KEY[fileKey].markdownContent;
   } else {
     mapContent = `# ${fileKey}\n\nMap content unavailable.`;
   }

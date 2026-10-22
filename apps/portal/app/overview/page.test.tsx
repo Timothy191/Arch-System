@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { CODEBASE_MAP_SPECS } from './lib/codebase-maps-data';
 import { STACK_ICON_MAP } from './OverviewHeaderVisuals';
 import OverviewPage from './page';
+import DocumentationMaps from './sections/DocumentationMaps';
 import SystemArchitecture from './sections/SystemArchitecture';
 
 describe('OverviewPage & SystemArchitecture (/overview)', () => {
@@ -121,5 +123,53 @@ describe('OverviewPage & SystemArchitecture (/overview)', () => {
     fireEvent.click(screen.getByTestId('view-toggle-both'));
     expect(screen.getByTestId('n8n-architecture-canvas')).toBeInTheDocument();
     expect(screen.getByTestId('architecture-cards-flow-view')).toBeInTheDocument();
+  });
+
+  it('should render DocumentationMaps immediately with Turbo Project Graph & Pipeline by default and switch across all 9 codebase maps with visual pipelines', () => {
+    render(<DocumentationMaps />);
+
+    // Never stuck on loading spinner
+    expect(screen.queryByText(/Loading codebase map content/i)).not.toBeInTheDocument();
+
+    // Header panel and 9 map selector buttons
+    const selectorGrid = screen.getByTestId('codebase-map-selector-grid');
+    expect(selectorGrid).toBeInTheDocument();
+    expect(CODEBASE_MAP_SPECS).toHaveLength(9);
+
+    for (const spec of CODEBASE_MAP_SPECS) {
+      expect(within(selectorGrid).getByTestId(`map-selector-${spec.key}`)).toBeInTheDocument();
+    }
+
+    // Default active map is Turbo Project Graph & Pipeline (turbo-graph.md)
+    const viewer = screen.getByTestId('active-codebase-map-viewer');
+    expect(within(viewer).getByText('Turbo Project Graph & Pipeline')).toBeInTheDocument();
+    expect(
+      within(viewer).getByText('Visual Turborepo Task Execution & Cache Pipeline')
+    ).toBeInTheDocument();
+
+    // Inspect a pipeline stage node on Turbo Project Graph & Pipeline
+    const codegenNode = screen.getByTestId('pipeline-node-turbo-codegen');
+    fireEvent.click(codegenNode);
+    const inspector = screen.getByTestId('codebase-map-node-inspector');
+    expect(within(inspector).getByText('Code & Asset Generation')).toBeInTheDocument();
+    expect(within(inspector).getByText('packages/theme/tokens.json')).toBeInTheDocument();
+
+    // Verify switching across all 9 codebase maps renders each map's pipeline & topology groups
+    for (const spec of CODEBASE_MAP_SPECS) {
+      fireEvent.click(within(selectorGrid).getByTestId(`map-selector-${spec.key}`));
+      expect(within(viewer).getByText(spec.pipelineTitle)).toBeInTheDocument();
+      expect(within(viewer).getByText(spec.topologyTitle)).toBeInTheDocument();
+      expect(screen.getByTestId('codebase-map-boundary-matrix')).toBeInTheDocument();
+      expect(screen.getByTestId('codebase-map-markdown-spec')).toBeInTheDocument();
+    }
+
+    // Verify view mode toggles (Pipeline Graph only vs Raw Markdown only)
+    fireEvent.click(screen.getByTestId('map-view-pipeline-only'));
+    expect(screen.getByTestId('codebase-map-visual-pipeline')).toBeInTheDocument();
+    expect(screen.queryByTestId('codebase-map-markdown-spec')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('map-view-markdown-only'));
+    expect(screen.queryByTestId('codebase-map-visual-pipeline')).not.toBeInTheDocument();
+    expect(screen.getByTestId('codebase-map-markdown-spec')).toBeInTheDocument();
   });
 });

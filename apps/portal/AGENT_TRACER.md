@@ -1,3 +1,14 @@
+## 2026-10-22T12:30:00Z: Overview Docs & Maps Redesign — Turbo Project Graph & Pipeline + All 9 Codebase Maps
+
+- **Purpose**: Resolve infinite `"Loading codebase map content..."` fetch loop in `DocumentationMaps.tsx`, embed serverless-ready canonical map topology specifications (`CODEBASE_MAP_SPECS`), default to `Turbo Project Graph & Pipeline` (`turbo-graph.md`), and redesign all 9 codebase maps with 5-stage interactive block-and-line visual pipelines, stage inspectors, 4-card topology hierarchies, boundary enforcement matrices, and markdown specifications.
+- **Changes**:
+  - `apps/portal/app/overview/lib/codebase-maps-data.ts`: Created canonical specifications (`CODEBASE_MAP_SPECS` / `CODEBASE_MAP_BY_KEY`) for all 9 codebase maps (`turbo-graph.md`, `dependencies-graph.md`, `route-feature-architecture.md`, `database-schema.md`, `multi-agent-architecture.md`, `ci-cd-pipeline.md`, `technology-stack.md`, `project-dependencies.md`, `package-structure.md`).
+  - `apps/portal/app/overview/sections/DocumentationMaps.tsx`: Memoized `fetchMapsData` with `useCallback`, eliminated blocking loading state, defaulted active map to `turbo-graph.md` (`Turbo Project Graph & Pipeline`), and rendered interactive 5-stage pipeline diagrams, stage inspectors, topology groups, boundary matrices, and markdown viewers across all 9 maps.
+  - `apps/portal/app/api/codebase-maps/route.ts`: Added fallback to `CODEBASE_MAP_BY_KEY[fileKey].markdownContent` when `DEFAULT_MAPS_ROOT` is not bundled in Vercel Serverless environments while preserving custom `options.mapsRoot` behavior for unit tests.
+  - `apps/portal/app/overview/page.test.tsx`: Added unit test coverage verifying immediate rendering of `Turbo Project Graph & Pipeline`, interactive stage inspection, and switching across all 9 codebase maps.
+- **Verification**:
+  - `pnpm --filter portal test -- --testPathPatterns="overview/page.test.tsx|api/codebase-maps/route.test.ts"` ✅ (18/18 tests passing)
+
 ## 2026-10-22T07:15:00Z: Plant Inventory Tab Renames & 4 Sub-Route Views (Inventory List, Item List, Stock Required, History of Used)
 
 - **Purpose**: Implement the 4 `/plant-inventory` design feedback changes: rename `Daily Log` → `Inventory List` (`/plant-inventory/daily-log`) with a `Stock`, `Description`, `Amount Required`, `Amount Present` table; rename `Machines` → `Item List` (`/plant-inventory/machines`) with an "Add New Item to Stock List" form; rename `History` → `Stock Required` (`/plant-inventory/history`) showing replenishment shortfalls; and rename `Tools` → `History of Used` (`/plant-inventory/tools`) showing shift consumption history.
