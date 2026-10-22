@@ -11,6 +11,7 @@ import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
 import {
@@ -307,11 +308,17 @@ export default async function HubPage() {
           </p>
         </div>
       ) : (
-        <CoreOperationalModules
-          departments={departments}
-          clearance={employeeClearance}
-          canSeeExecutive={canSeeExecutive}
-        />
+        <Suspense
+          fallback={
+            <div className="h-64 rounded-card bg-arch-surface-secondary/40 animate-pulse" />
+          }
+        >
+          <CoreOperationalModules
+            departments={departments}
+            clearance={employeeClearance}
+            canSeeExecutive={canSeeExecutive}
+          />
+        </Suspense>
       )}
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}

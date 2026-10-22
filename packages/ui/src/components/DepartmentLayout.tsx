@@ -34,7 +34,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
@@ -90,6 +90,8 @@ interface DepartmentLayoutProps {
 
 export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams?.() ?? null;
+  const activeTabParam = searchParams?.get?.('tab') ?? null;
   const basePath = `/${department.name}`;
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
@@ -298,40 +300,73 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               (pathname === `${basePath}/shift-compilation` ||
                 pathname === `${basePath}/shift-coverage` ||
                 pathname === `${basePath}/shift-closeout`);
-            const isActive =
+            const isRouteMatch =
               pathname === href ||
               (tab.name === 'dashboard' && pathname === basePath) ||
               isShiftOperationsActive;
+            const isPdfReportActive =
+              tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
+            const isActive = isRouteMatch && !isPdfReportActive;
             const Icon = ICON_MAP[tab.icon];
             return (
-              <Link
-                key={tab.name}
-                href={href}
-                className={cn(
-                  'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
-                  isActive
-                    ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+              <div key={tab.name} className="space-y-0.5">
+                <Link
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
+                    isActive
+                      ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                  )}
+                >
+                  {isActive && (
+                    <m.div
+                      layoutId="active-sidebar-tab"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
+                    />
+                  )}
+                  {Icon && (
+                    <Icon
+                      className={cn(
+                        'w-3.5 h-3.5 shrink-0 transition-colors',
+                        isActive
+                          ? 'text-[var(--accent-blue)]'
+                          : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                      )}
+                    />
+                  )}
+                  {tab.label}
+                </Link>
+                {tab.name === 'reports' && (
+                  <div className="pl-6 space-y-0.5">
+                    <Link
+                      href={`${basePath}/reports?tab=pdf-report`}
+                      className={cn(
+                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        isPdfReportActive
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                      )}
+                    >
+                      {isPdfReportActive && (
+                        <m.div
+                          layoutId="active-sidebar-tab"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                        />
+                      )}
+                      <FileText
+                        className={cn(
+                          'w-3 h-3 shrink-0 transition-colors',
+                          isPdfReportActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                        )}
+                      />
+                      <span>PDF Report</span>
+                    </Link>
+                  </div>
                 )}
-              >
-                {isActive && (
-                  <m.div
-                    layoutId="active-sidebar-tab"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
-                  />
-                )}
-                {Icon && (
-                  <Icon
-                    className={cn(
-                      'w-3.5 h-3.5 shrink-0 transition-colors',
-                      isActive
-                        ? 'text-[var(--accent-blue)]'
-                        : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
-                    )}
-                  />
-                )}
-                {tab.label}
-              </Link>
+              </div>
             );
           })}
         </nav>

@@ -118,6 +118,77 @@ export type UpdateInstallation = z.infer<typeof updateInstallationSchema>;
 
 export const integrationIdParamSchema = z.object({ id: uuidSchema });
 
+/** Canonical database row contract for `integration_catalog`. */
+export const integrationCatalogSchema = z.object({
+  id: slugSchema,
+  name: z.string().min(1).max(120),
+  description: z.string().max(1000).nullable().optional(),
+  author: z.string().max(120).nullable().optional(),
+  icon_url: z.string().url().max(2048).nullable().optional(),
+  kind: integrationKindSchema.default('mcp'),
+  server_url: z.string().url().max(2048).nullable().optional(),
+  auth_type: integrationAuthTypeSchema.default('none'),
+  verified: z.boolean().default(false),
+  docs_url: z.string().url().max(2048).nullable().optional(),
+  capabilities: z.record(z.string(), z.unknown()).default({}),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().nullable().optional(),
+});
+export type IntegrationCatalog = z.infer<typeof integrationCatalogSchema>;
+
+/** Canonical database row contract for `integration_installations`. */
+export const integrationInstallationsSchema = z
+  .object({
+    id: uuidSchema.optional(),
+    catalog_id: slugSchema,
+    scope: installationScopeSchema.default('global'),
+    department_id: uuidSchema.nullable().optional(),
+    status: installationStatusSchema.default('pending'),
+    config: z.record(z.string(), z.unknown()).default({}),
+    tool_allowlist: z.array(z.string().min(1)).max(200).default([]),
+    tool_cache: z.unknown().nullable().optional(),
+    tools_synced_at: z.string().datetime().nullable().optional(),
+    last_error: z.string().nullable().optional(),
+    installed_by: uuidSchema.nullable().optional(),
+    created_at: z.string().datetime().optional(),
+    updated_at: z.string().datetime().nullable().optional(),
+  })
+  .refine((data) => !(data.scope === 'department' && !data.department_id), {
+    message: 'department_id is required when scope is "department"',
+    path: ['department_id'],
+  });
+export type IntegrationInstallationRecord = z.infer<typeof integrationInstallationsSchema>;
+
+/** Canonical database row contract for `integration_credentials` (encrypted ciphertext only). */
+export const integrationCredentialsSchema = z.object({
+  id: uuidSchema.optional(),
+  installation_id: uuidSchema,
+  kind: z.enum(['api_key', 'bearer', 'custom_header']).default('api_key'),
+  ciphertext: z.string().min(1),
+  expires_at: z.string().datetime().nullable().optional(),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().nullable().optional(),
+});
+export type IntegrationCredentialRecord = z.infer<typeof integrationCredentialsSchema>;
+
+/** Canonical database row contract for `integration_audit_logs` (SHA-256 args digest only). */
+export const integrationAuditLogsSchema = z.object({
+  id: uuidSchema.optional(),
+  installation_id: uuidSchema.nullable().optional(),
+  tool_name: z.string().min(1).max(200),
+  invoked_by: uuidSchema.nullable().optional(),
+  args_digest: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/i, 'args_digest must be a 64-character SHA-256 hex digest')
+    .nullable()
+    .optional(),
+  duration_ms: z.number().int().nonnegative().nullable().optional(),
+  status: z.enum(['success', 'error', 'denied']),
+  error_message: z.string().nullable().optional(),
+  created_at: z.string().datetime().optional(),
+});
+export type IntegrationAuditLogRecord = z.infer<typeof integrationAuditLogsSchema>;
+
 /** Admin validation call against one installed MCP tool. */
 export const testIntegrationToolSchema = z.object({
   tool: z.string().min(1).max(200),

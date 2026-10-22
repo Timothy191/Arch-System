@@ -74,7 +74,7 @@
 ## 2026-10-06: Supabase CLI and Postgres MCP Repair Attempt
 
 - **CLI config initialized**: ran `npx supabase init --workdir packages/database
-  --yes`, creating `packages/database/supabase/config.toml`.
+--yes`, creating `packages/database/supabase/config.toml`.
 - **Project endpoint verified**: the provided project ref
   `mrwhtxbhrzyttlsyuofc` resolves to a Supabase Auth endpoint (HTTP 401 without
   an API key, expected for this unauthenticated health request).
@@ -160,3 +160,10 @@
 - **Deployment note**: No live migration was pushed; 174/175 are new versions
   for environments that never applied 165/166+ locally. Fresh-boot and
   already-applied environments both converge.
+
+## 2026-10-22T08:50:00+02:00: Post-165 Index Idempotency Hardening
+
+- **Purpose**: Ensure all post-165 migrations use idempotent `CREATE [UNIQUE] INDEX IF NOT EXISTS` statements in `migration-rollback-safety.mjs`.
+- **Changes**:
+  - Updated `smr_latest_tenant_meter_idx` index creation in `migrations/166_harden_legacy_migrations.sql` and `migrations/171_offline_crdt_mutation_log_and_smr.sql` to include `IF NOT EXISTS`.
+- **Verification**: `pnpm --filter @repo/database test` passed with 0 errors.

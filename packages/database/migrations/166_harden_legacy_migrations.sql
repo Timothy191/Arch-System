@@ -167,7 +167,7 @@ BEGIN
          AND indexname = 'smr_latest_tenant_meter_idx'
      )
   THEN
-    CREATE INDEX smr_latest_tenant_meter_idx
+    CREATE INDEX IF NOT EXISTS smr_latest_tenant_meter_idx
       ON smr_latest_tenant_meter (tenant_id, meter_type, recorded_at DESC);
   END IF;
 END $$;

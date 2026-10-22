@@ -126,6 +126,16 @@ const DOMAIN_MAP = {
   ai_usage_logs: ['aiChatSchema', 'aiSafetySchema', 'aiPredictSchema'],
   ai_token_usage: ['aiChatSchema', 'aiPredictSchema'],
   memory_embeddings: ['aiHandoffSchema', 'riskAssessmentSchema'],
+  integration_catalog: ['integrationCatalogSchema', 'createCatalogEntrySchema'],
+  integration_installations: [
+    'integrationInstallationsSchema',
+    'installIntegrationSchema',
+    'updateInstallationSchema',
+  ],
+  integration_credentials: ['integrationCredentialsSchema', 'installIntegrationSchema'],
+  integration_audit_logs: ['integrationAuditLogsSchema', 'integrationToolCallSchema'],
+  machine_types: ['machineTypesSchema', 'machineTypeSchema'],
+  production_monthly_targets: ['productionMonthlyTargetsSchema'],
 };
 
 const coveredTables = [];

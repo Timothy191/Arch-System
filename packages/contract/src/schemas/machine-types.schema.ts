@@ -23,5 +23,7 @@ export const machineTypeSchema = z.object({
   updatedAt: z.string().datetime().optional(),
 });
 
+export const machineTypesSchema = machineTypeSchema;
+
 export type MachineCapabilities = z.infer<typeof machineCapabilitiesSchema>;
 export type MachineType = z.infer<typeof machineTypeSchema>;

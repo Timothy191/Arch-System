@@ -132,7 +132,7 @@ DO $$ BEGIN
              hlc_counter DESC,
              node_id DESC;
 
-    CREATE UNIQUE INDEX smr_latest_tenant_meter_idx
+    CREATE UNIQUE INDEX IF NOT EXISTS smr_latest_tenant_meter_idx
       ON smr_latest (tenant_id, meter_id);
   END IF;
 END $$;

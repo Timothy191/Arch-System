@@ -95,8 +95,7 @@ export function ArchCursorWaitIndicator() {
       if (anchor instanceof HTMLAnchorElement) {
         const href = anchor.getAttribute('href');
         if (
-          href &&
-          href.startsWith('/') &&
+          href?.startsWith('/') &&
           !href.startsWith('//') &&
           anchor.target !== '_blank' &&
           !e.metaKey &&

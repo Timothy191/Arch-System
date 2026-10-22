@@ -81,6 +81,28 @@ export {
   updateMachineSiteSchema,
 } from './schemas/form.schema';
 export {
+  buildIntegrationToolName,
+  createCatalogEntrySchema,
+  INTEGRATION_TOOL_PREFIX,
+  installationScopeSchema,
+  installationStatusSchema,
+  installIntegrationSchema,
+  integrationAuditLogsSchema,
+  integrationAuthTypeSchema,
+  integrationCatalogSchema,
+  integrationCredentialsSchema,
+  integrationIdParamSchema,
+  integrationInstallationsSchema,
+  integrationKindSchema,
+  integrationManifestSchema,
+  integrationToolCallSchema,
+  integrationToolDescriptorSchema,
+  parseIntegrationToolName,
+  testIntegrationToolSchema,
+  toolRiskClassSchema,
+  updateInstallationSchema,
+} from './schemas/integration.schema';
+export {
   machineLedgerCloseoutSchema,
   machineTimeAllocationSchema,
 } from './schemas/machine-ledger.schema';
@@ -89,7 +111,7 @@ export {
   machineOperatorScanRequestSchema,
   machineOperatorScanResponseSchema,
 } from './schemas/machine-operator-scan.schema';
-export { machineTypeSchema } from './schemas/machine-types.schema';
+export { machineTypeSchema, machineTypesSchema } from './schemas/machine-types.schema';
 export { embedDashboardSchema } from './schemas/metabase.schema';
 export {
   ancillaryReportEntrySchema,
@@ -100,6 +122,7 @@ export {
   fleetSmuEntrySchema,
   multiSiteShiftReportSchema,
   operationalStatusEnum,
+  productionMonthlyTargetsSchema,
   truckTallySchema,
 } from './schemas/multi-site-production.schema';
 export {
@@ -137,7 +160,6 @@ export * from './agent-governance';
 export * from './codemod';
 export * from './control-room';
 export * from './schemas/_registry';
-export * from './schemas/_registry';
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,
@@ -156,12 +178,31 @@ export type {
   FleetStatus,
 } from './schemas/fleet-equipment.schema';
 export type {
+  CreateCatalogEntry,
+  InstallationScope,
+  InstallationStatus,
+  InstallIntegration,
+  IntegrationAuditLogRecord,
+  IntegrationAuthType,
+  IntegrationCatalog,
+  IntegrationCredentialRecord,
+  IntegrationInstallationRecord,
+  IntegrationKind,
+  IntegrationManifest,
+  IntegrationToolCall,
+  IntegrationToolDescriptor,
+  TestIntegrationTool,
+  ToolRiskClass,
+  UpdateInstallation,
+} from './schemas/integration.schema';
+export type {
   MachineCapabilities,
   MachineOperatorScanRequest,
   MachineOperatorScanResponse,
 } from './schemas/machine-operator-scan.schema';
 export type { MachineType } from './schemas/machine-types.schema';
 export type { EmbedDashboardInput } from './schemas/metabase.schema';
+export type { ProductionMonthlyTarget } from './schemas/multi-site-production.schema';
 export type {
   OfflineMutationBatch,
   OfflineMutationHlc,

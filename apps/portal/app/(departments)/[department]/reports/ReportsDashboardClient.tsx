@@ -10,6 +10,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  FileText,
   Layers,
   Moon,
   Radio,
@@ -19,11 +20,12 @@ import {
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { CopyReportButton } from './CopyReportButton';
-
+import { buildPdfSiteGroups, ShiftPdfReportTab } from './ShiftPdfReportTab';
 export interface ShiftReportRow {
   id: string;
   site: string;
@@ -56,6 +58,14 @@ export interface MachineOperationLogItem {
   bcmMoved: number;
   isDozer: boolean;
   delayMinutes: number;
+  productionDelayMinutes?: number;
+  engineeringDelayMinutes?: number;
+  naturalDelayMinutes?: number;
+  nonSiteDelayMinutes?: number;
+  excavatorActivity?: string;
+  siteGroupRole?: 'excavator' | 'rollover' | 'site_machine';
+  loadsCount?: number;
+  bladePasses?: number;
   status: 'completed' | 'active';
 }
 
@@ -85,6 +95,7 @@ export interface ReportsDashboardClientProps {
   departmentSlug: string;
   departmentName: string;
   isControlRoom: boolean;
+  initialTab?: ReportSubtab;
   todayStr: string;
   currentShift: 'day' | 'night';
   fromDateStr: string;
@@ -104,14 +115,16 @@ export interface ReportsDashboardClientProps {
     tableHeaders: string[];
     tableRows: string[][];
   };
+  queryWarnings?: string[];
 }
 
-type ReportSubtab = 'shift' | 'day' | 'archived';
+export type ReportSubtab = 'shift' | 'day' | 'archived' | 'pdf-report';
 
 export function ReportsDashboardClient({
   departmentId,
   departmentSlug,
   departmentName,
+  initialTab = 'shift',
   todayStr,
   currentShift,
   fromDateStr,
@@ -125,8 +138,9 @@ export function ReportsDashboardClient({
   csvContent,
   exportRows,
   pdfReportData,
+  queryWarnings = [],
 }: ReportsDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<ReportSubtab>('shift');
+  const [activeTab, setActiveTab] = useState<ReportSubtab>(initialTab);
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
   const [siteFilter, setSiteFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -134,6 +148,33 @@ export function ReportsDashboardClient({
 
   const currentMonthPrefix = todayStr.slice(0, 7);
 
+  const searchParams = useSearchParams?.() ?? null;
+  const urlTabParam = searchParams?.get('tab');
+  const lastSyncedUrlTabRef = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (lastSyncedUrlTabRef.current === urlTabParam) return;
+    lastSyncedUrlTabRef.current = urlTabParam;
+    if (
+      urlTabParam === 'pdf-report' ||
+      urlTabParam === 'day' ||
+      urlTabParam === 'archived' ||
+      urlTabParam === 'shift'
+    ) {
+      setActiveTab(urlTabParam);
+    } else if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [urlTabParam, initialTab]);
+
+  const handleSelectTab = (nextTab: ReportSubtab) => {
+    setActiveTab(nextTab);
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', nextTab);
+      window.history.replaceState(null, '', `${url.pathname}${url.search}`);
+    }
+  };
   // Extract unique sites
   const allSites = useMemo(() => {
     const set = new Set<string>();
@@ -462,10 +503,100 @@ export function ReportsDashboardClient({
     };
   }, [shiftRows, shiftFilter, siteFilter, searchQuery, todayStr]);
 
+  // Site-grouped Shift PDF Report data:
+  // Grouped by Site, ordered within each site:
+  // 1. Excavators first ('excavator')
+  // 2. Then Roll Over ('rollover')
+  // 3. Then Machines Worked on Site ('site_machine')
+  const pdfSiteGroups = useMemo(() => buildPdfSiteGroups(filteredMachineOps), [filteredMachineOps]);
+
+  const pdfShiftReportData = useMemo(() => {
+    if (pdfSiteGroups.length === 0) return pdfReportData;
+    const rows: string[][] = [];
+    let prod = 0;
+    let eng = 0;
+    let nat = 0;
+    let nonSite = 0;
+    let totalHours = 0;
+    for (const g of pdfSiteGroups) {
+      prod += g.productionDelayMin;
+      eng += g.engineeringDelayMin;
+      nat += g.naturalDelayMin;
+      nonSite += g.nonSiteDelayMin;
+      totalHours += g.totalHours;
+      for (const m of g.orderedMachines) {
+        const roleLabel =
+          m.siteGroupRole === 'excavator'
+            ? '1. Excavator'
+            : m.siteGroupRole === 'rollover'
+              ? '2. Roll Over'
+              : '3. Site Machine';
+        const smuRange =
+          m.startSmu != null && m.endSmu != null
+            ? `${m.startSmu.toFixed(1)} - ${m.endSmu.toFixed(1)}`
+            : m.startSmu != null
+              ? `${m.startSmu.toFixed(1)} - Active`
+              : '—';
+        rows.push([
+          g.site,
+          roleLabel,
+          `${m.machineName} (${m.machineType})`,
+          smuRange,
+          `${m.hoursWorked.toFixed(2)}h`,
+          m.operatorName,
+          `${m.productionDelayMinutes ?? 0}m`,
+          `${m.engineeringDelayMinutes ?? 0}m`,
+          `${m.naturalDelayMinutes ?? 0}m`,
+          `${m.nonSiteDelayMinutes ?? 0}m`,
+          m.excavatorActivity || '—',
+        ]);
+      }
+    }
+    return {
+      title: `${departmentName} — Site-Grouped Shift Report`,
+      subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr} (${shiftFilter === 'all' ? 'All Shifts' : `${shiftFilter.toUpperCase()} Shift`})`,
+      kpis: [
+        { label: 'Total Worked Hours', value: `${totalHours.toFixed(1)} h` },
+        { label: 'Production Delay', value: `${prod} min` },
+        { label: 'Engineering Delay', value: `${eng} min` },
+        {
+          label: 'Natural / Non-Site Delay',
+          value: `${nat}m / ${nonSite}m`,
+        },
+      ],
+      tableHeaders: [
+        'Site',
+        'Group',
+        'Machine',
+        'Hours Start - Stop',
+        'Total Worked',
+        'Operator',
+        'Prod Delay',
+        'Eng Delay',
+        'Natural Delays',
+        'Non-Site Delays',
+        'Excavator Activity',
+      ],
+      tableRows: rows,
+    };
+  }, [pdfSiteGroups, pdfReportData, departmentName, todayStr, fromDateStr, toDateStr, shiftFilter]);
   return (
     <div className="space-y-6">
+      {queryWarnings.length > 0 && (
+        <div
+          role="alert"
+          data-testid="reports-query-warning-banner"
+          className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 flex items-start gap-2.5 no-print"
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Partial Data Warning — Database Query Issue</p>
+            <p className="mt-0.5 font-mono text-[11px]">{queryWarnings.join(' · ')}</p>
+          </div>
+        </div>
+      )}
       {/* Executive & Operator Live Header */}
-      <GlassCard className="p-5">
+      <GlassCard className="p-5 no-print">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -493,7 +624,7 @@ export function ReportsDashboardClient({
 
           <div className="flex items-center gap-2 flex-wrap">
             <CopyReportButton csvContent={csvContent} />
-            <PDFDownloadButton reportData={pdfReportData} departmentId={departmentId} />
+            <PDFDownloadButton reportData={pdfShiftReportData} departmentId={departmentId} />
             <ExportButton
               filename={`${departmentSlug}-report-${fromDateStr}-to-${toDateStr}`}
               rows={exportRows}
@@ -503,7 +634,7 @@ export function ReportsDashboardClient({
       </GlassCard>
 
       {/* Live Stats KPI Grid with Visual Indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 no-print">
         {/* 1. Total Volume Moved (BCM) */}
         <GlassCard className="p-4 flex flex-col justify-between">
           <div>
@@ -667,7 +798,7 @@ export function ReportsDashboardClient({
 
       {/* Optional Expandable Pending Shift Coverage Drawer (Non-blocking!) */}
       {showMissingMachines && missingCoverage.length > 0 && (
-        <GlassCard className="border-[var(--accent-blue)]/30 p-4 space-y-3">
+        <GlassCard className="border-[var(--accent-blue)]/30 p-4 space-y-3 no-print">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-[var(--accent-blue)]" />
@@ -706,7 +837,7 @@ export function ReportsDashboardClient({
       )}
 
       {/* Subtabs Navigation: Shift | Day | Archived + Filter Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-default)] pb-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-default)] pb-3 no-print">
         <div
           role="tablist"
           aria-label="Report Views"
@@ -716,7 +847,7 @@ export function ReportsDashboardClient({
             type="button"
             role="tab"
             aria-selected={activeTab === 'shift'}
-            onClick={() => setActiveTab('shift')}
+            onClick={() => handleSelectTab('shift')}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               activeTab === 'shift'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
@@ -740,7 +871,7 @@ export function ReportsDashboardClient({
             type="button"
             role="tab"
             aria-selected={activeTab === 'day'}
-            onClick={() => setActiveTab('day')}
+            onClick={() => handleSelectTab('day')}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               activeTab === 'day'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
@@ -764,7 +895,7 @@ export function ReportsDashboardClient({
             type="button"
             role="tab"
             aria-selected={activeTab === 'archived'}
-            onClick={() => setActiveTab('archived')}
+            onClick={() => handleSelectTab('archived')}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               activeTab === 'archived'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
@@ -781,6 +912,30 @@ export function ReportsDashboardClient({
               }`}
             >
               {archivedData.monthlyRollups.length}m / {archivedData.historicalRows.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'pdf-report'}
+            onClick={() => handleSelectTab('pdf-report')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'pdf-report'
+                ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            PDF Report
+            <span
+              className={`text-xs px-1.5 py-0.2 rounded-full ${
+                activeTab === 'pdf-report'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+              }`}
+            >
+              {pdfSiteGroups.length} site{pdfSiteGroups.length === 1 ? '' : 's'}
             </span>
           </button>
         </div>
@@ -1640,6 +1795,24 @@ export function ReportsDashboardClient({
             </div>
           </GlassCard>
         </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════════
+          SUBTAB 4: PDF REPORT (Site-Grouped Shift Report PDF Preview)
+          Order per Site: 1. Excavators First -> 2. Roll Over -> 3. Machines Worked on Site
+         ═══════════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'pdf-report' && (
+        <ShiftPdfReportTab
+          departmentId={departmentId}
+          departmentName={departmentName}
+          todayStr={todayStr}
+          currentShift={currentShift}
+          fromDateStr={fromDateStr}
+          toDateStr={toDateStr}
+          shiftFilter={shiftFilter}
+          pdfSiteGroups={pdfSiteGroups}
+          pdfShiftReportData={pdfShiftReportData}
+        />
       )}
     </div>
   );

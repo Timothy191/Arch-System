@@ -103,3 +103,20 @@ export const multiSiteShiftReportSchema = z.object({
 });
 
 export type MultiSiteShiftReportInput = z.infer<typeof multiSiteShiftReportSchema>;
+
+/** Canonical database row contract for `production_monthly_targets` (Migration 189). */
+export const productionMonthlyTargetsSchema = z.object({
+  id: z.string().uuid().optional(),
+  target_month: z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'target_month must be in YYYY-MM format'),
+  coal_target_tonnes: z.number().nonnegative().default(125000),
+  waste_target_tonnes: z.number().nonnegative().default(350000),
+  bcm_target: z.number().nonnegative().default(160000),
+  notes: z.string().nullable().optional(),
+  updated_by: z.string().uuid().nullable().optional(),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().optional(),
+});
+
+export type ProductionMonthlyTarget = z.infer<typeof productionMonthlyTargetsSchema>;

@@ -1,6 +1,6 @@
 # 4-Operation Row-Level Security (RLS) Coverage Matrix Report
 
-Generated on 2026-10-21T10:44:01.923Z
+Generated on 2026-10-22T06:45:17.633Z
 
 ## Summary Metrics
 
@@ -39,9 +39,6 @@ Generated on 2026-10-21T10:44:01.923Z
 | `mine_blocks`                          | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `008_excavator_activity_redesign.sql`               |
 | `excavator_dumper_assignments`         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `008_excavator_activity_redesign.sql`               |
 | `memory_embeddings`                    | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `009_ai_memory.sql`                                 |
-| `shift_status`                         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `0145_shift_closeout.sql`                           |
-| `tires`                                | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `0146_tire_management.sql`                          |
-| `tire_inspections`                     | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `0146_tire_management.sql`                          |
 | `user_feedback`                        | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `015_user_feedback.sql`                             |
 | `quick_feedback`                       | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `015_user_feedback.sql`                             |
 | `webhook_endpoints`                    | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `017_webhooks.sql`                                  |
@@ -93,6 +90,9 @@ Generated on 2026-10-21T10:44:01.923Z
 | `ab_test_results`                      | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `093_feature_flags.sql`                             |
 | `control_room_shift_reports`           | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `097_control_room_shift_reports.sql`                |
 | `ai_token_usage`                       | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | 🟢        | `102_ai_token_usage_tracking.sql`                   |
+| `shift_status`                         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `145_shift_closeout.sql`                            |
+| `tires`                                | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `146_tire_management.sql`                           |
+| `tire_inspections`                     | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `146_tire_management.sql`                           |
 | `excavator_haul_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`              |
 | `excavator_truck_tallies`              | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`              |
 | `dozer_rollover_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`              |

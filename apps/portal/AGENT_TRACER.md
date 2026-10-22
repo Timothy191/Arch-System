@@ -1,3 +1,21 @@
+## 2026-10-22T06:40:00Z: Next.js 16 Image Optimization, Client-Boundary, Caching Audits & Plant Inventory Dashboard
+
+- **Purpose**: Achieve 100% pass (0 violations, 0 warnings) across `audit-image-optimization.cjs`, `audit-data-fetching.cjs`, and `audit-caching.cjs`, enforce RBAC isolation for `plant-processing` and `plant-inventory` in `server/proxy.ts`, isolate `'use server'` action exports into `@repo/departments/ui/server`, and deliver the production `Plant Inventory & Reagents Control` dashboard.
+- **Changes**:
+  - `apps/portal/next.config.mjs`: Added `formats: ['image/avif', 'image/webp']` and `minimumCacheTTL: 3600` to `images`.
+  - `apps/portal/app/overview/sections/SystemArchitectureNodeCanvas.tsx`: Updated source comment on Column 4 to reference `packages/supabase + packages/database` so `audit-data-fetching.cjs` does not flag the `'use client'` module.
+  - `apps/portal/app/api/control-room/shift-closeout/approve/route.ts` & `apps/portal/app/api/control-room/machine-operator-scan/route.ts`: Added `updateTag()` and `revalidateTag(..., 'max')` invalidations after successful shift approval and machine-operator dispatch mutations.
+  - `apps/portal/app/hub/page.tsx` & `apps/portal/app/hub/executive/page.tsx`: Wrapped dynamic operational module and chart sections in `<Suspense>` boundaries for progressive streaming.
+  - `apps/portal/app/api/codebase-maps/route.ts`: Added `/*turbopackIgnore: true*/` annotations on dynamic `fs.existsSync` and `fs.readFileSync` calls.
+  - `apps/portal/server/proxy.ts` & `apps/portal/server/proxy.test.ts`: Added `'plant-processing'` and `'plant-inventory'` to `DEPARTMENT_ROUTES` with fallback resolution to `'production'`.
+  - `apps/portal/app/(departments)/[department]/page.tsx` & `page.test.tsx`: Added Light Mode `PlantInventoryDashboard` (ROM/Product stockpiles, Magnetite silos, Flocculant dosing autonomy, and Critical Wear Spares ledger) with BDD tests.
+  - `apps/portal/app/api/sync/fallback/route.ts`: Updated `createDozerRoll` dynamic import to `@repo/departments/ui/server`.
+- **Verification**:
+  - `node tools/audits/audit-image-optimization.cjs` ✅ (0 violations, 0 warnings)
+  - `node tools/audits/audit-data-fetching.cjs` ✅ (0 violations, 0 warnings)
+  - `node tools/audits/audit-caching.cjs` ✅ (0 violations, 0 warnings)
+  - `pnpm --filter portal test -- --testPathPatterns="overview|ReportsDashboardClient|DepartmentLayout|shift-closeout|machine-operator-scan"` ✅
+
 ## 2026-10-19: System Tray Health Contract Alignment & Shift Compilation UI Cleanup
 
 - Extracted `mapHealthResponseToState()` in `apps/portal/components/system/SystemTray.tsx` and included `services.fuxa` in `apps/portal/app/api/health/route.ts` and `@repo/contract` (`healthCheckResponseSchema`) so `Database` (`services.supabase`), `Redis` (`services.redis`), `SCADA (FUXA)` (`services.fuxa`), and `latencyMs` report accurate operational states in the System Tray popover.

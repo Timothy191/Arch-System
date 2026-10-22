@@ -5,7 +5,13 @@ import {
   dailyLogSchema,
   dozerRollSchema,
   drillingDailyLogSchema,
+  integrationAuditLogsSchema,
+  integrationCatalogSchema,
+  integrationCredentialsSchema,
+  integrationInstallationsSchema,
+  machineTypesSchema,
   multiSiteShiftReportSchema,
+  productionMonthlyTargetsSchema,
 } from './index';
 
 describe('@repo/contract exports', () => {
@@ -155,5 +161,83 @@ describe('@repo/contract exports', () => {
 
     const result = multiSiteShiftReportSchema.safeParse(sampleMultiSiteReport);
     expect(result.success).toBe(true);
+  });
+
+  it('validates integration platform, machine_types, and production_monthly_targets contracts', () => {
+    expect(
+      integrationCatalogSchema.safeParse({
+        id: 'sixtyfour-intelligence',
+        name: 'Sixtyfour Intelligence',
+        kind: 'mcp',
+        auth_type: 'api_key',
+        server_url: 'https://mcp.sixtyfour.ai/v1',
+        verified: true,
+      }).success
+    ).toBe(true);
+
+    expect(
+      integrationInstallationsSchema.safeParse({
+        catalog_id: 'sixtyfour-intelligence',
+        scope: 'department',
+      }).success
+    ).toBe(false);
+
+    expect(
+      integrationInstallationsSchema.safeParse({
+        catalog_id: 'sixtyfour-intelligence',
+        scope: 'department',
+        department_id: '123e4567-e89b-12d3-a456-426614174000',
+        status: 'active',
+      }).success
+    ).toBe(true);
+
+    expect(
+      integrationCredentialsSchema.safeParse({
+        installation_id: '123e4567-e89b-12d3-a456-426614174000',
+        kind: 'api_key',
+        ciphertext: 'base64-aes-256-gcm-payload',
+      }).success
+    ).toBe(true);
+
+    expect(
+      integrationAuditLogsSchema.safeParse({
+        installation_id: '123e4567-e89b-12d3-a456-426614174000',
+        tool_name: 'query_telemetry',
+        args_digest: 'a'.repeat(64),
+        duration_ms: 142,
+        status: 'success',
+      }).success
+    ).toBe(true);
+
+    expect(
+      machineTypesSchema.safeParse({
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'Articulated Dump Truck',
+        code: 'ADT',
+        requiresHourlyLoads: true,
+        tracksTonnage: true,
+        tracksCycleTime: true,
+        tracksFuel: true,
+        tracksBenchClearance: false,
+        tracksDrillDepth: false,
+      }).success
+    ).toBe(true);
+
+    expect(
+      productionMonthlyTargetsSchema.safeParse({
+        target_month: '2026-10',
+        coal_target_tonnes: 130000,
+        waste_target_tonnes: 364000,
+        bcm_target: 168000,
+        notes: 'October 2026 Opencast ROM & Overburden Target',
+      }).success
+    ).toBe(true);
+
+    expect(
+      productionMonthlyTargetsSchema.safeParse({
+        target_month: '2026-13',
+        coal_target_tonnes: -10,
+      }).success
+    ).toBe(false);
   });
 });

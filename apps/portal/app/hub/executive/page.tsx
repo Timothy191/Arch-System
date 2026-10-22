@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { ProductionTrendChart } from '@/features/analytics/components/ProductionTrendChartWrapper';
@@ -369,7 +370,11 @@ export default async function ExecutiveDashboardPage() {
           <Activity className="w-3.5 h-3.5" /> 30-Day Production Trend
         </h2>
         <GlassCard>
-          <ProductionTrendChart data={chartData} />
+          <Suspense
+            fallback={<div className="h-72 rounded-xl bg-[var(--bg-tertiary)] animate-pulse" />}
+          >
+            <ProductionTrendChart data={chartData} />
+          </Suspense>
         </GlassCard>
       </section>
     </div>

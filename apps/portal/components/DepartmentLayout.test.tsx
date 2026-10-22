@@ -2,15 +2,19 @@ import { DEPARTMENTS, getDepartmentTabs } from '@repo/departments/data-access';
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(() => '/control-room'),
-}));
+const mockUsePathname = jest.fn(() => '/control-room');
+const mockUseSearchParams = jest.fn(() => new URLSearchParams());
 
+jest.mock('next/navigation', () => ({
+  usePathname: () => mockUsePathname(),
+  useSearchParams: () => mockUseSearchParams(),
+}));
 describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    mockUsePathname.mockReturnValue('/control-room');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
-
   afterEach(() => {
     jest.useRealTimers();
   });
@@ -36,6 +40,9 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator Activity/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
+    const pdfReportSubtab = screen.getByRole('link', { name: /PDF Report/i });
+    expect(pdfReportSubtab).toBeInTheDocument();
+    expect(pdfReportSubtab).toHaveAttribute('href', '/control-room/reports?tab=pdf-report');
     expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
 
     // Verify exact ordering (Shift Operations at the top above Dashboard)
@@ -186,5 +193,22 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     // Stays open and pinned
     expect(aside.className).toContain('translate-x-0');
     expect(main.className).toContain('pl-64');
+  });
+
+  it('highlights PDF Report sub-tab and unhighlights parent Reports link when ?tab=pdf-report is active', () => {
+    mockUsePathname.mockReturnValue('/control-room/reports');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('tab=pdf-report'));
+
+    render(
+      <DepartmentLayout department={controlRoomDept} tabs={controlRoomTabs}>
+        <div>Reports Content</div>
+      </DepartmentLayout>
+    );
+
+    const reportsLink = screen.getByRole('link', { name: /^Reports$/i });
+    const pdfReportLink = screen.getByRole('link', { name: /^PDF Report$/i });
+
+    expect(pdfReportLink.className).toContain('bg-[var(--accent-blue)]/10');
+    expect(reportsLink.className).not.toContain('bg-[var(--accent-blue)]/10');
   });
 });

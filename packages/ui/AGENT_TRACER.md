@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-22T06:40:00Z - Prune 8 Dangling Subpath Exports from package.json
+
+- **Purpose**: Remove 8 non-existent subpath export keys from `packages/ui/package.json` to ensure 100% export map integrity.
+- **Changes**:
+  - `packages/ui/package.json`: Removed `./FluidCanvas`, `./DataGrid`, `./WorkflowBuilder`, `./ThreeHeroRotator`, `./ThreeHeroRotatorDynamic`, `./nodes/PluginNode`, `./nodes/TriggerNode`, and `./edges/FlowEdge`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅ (0 errors).
+
 ## 2026-10-19 - Unhide System Overview & Database in MacMenuBar & HeroCardContent + Legacy Trace Cleanup
 
 - **Purpose**: Add `overview` and `database` to `MacMenuBar` (`DEPARTMENTS_LIST`) and `HeroCardContent` (`getHeroBannerFeatures`), and remove remaining `safety`, `satellite`, and `training` icon/token traces from `DepartmentLayout.tsx` and `MacMenuBar.tsx`.
@@ -494,3 +501,10 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Changes**:
   - `packages/ui/src/components/ui/input.tsx`: Stopped forwarding `className` (such as `pl-10`, `bg-*`, `border-*`) onto the outer `<div class="relative flex items-center w-full group">` wrapper so the inner `<input>` fills 100% of the wrapper width without a 40px left gutter. Added `wrapperClassName` and grid `col-span-*` forwarding for layout containers.
 - **Verification**: `pnpm --filter portal test -- --testPathPatterns="GeistBatch4"` and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-22T06:00:00Z - Add PDF Report Sub-Tab Under Reports in DepartmentLayout
+
+- **Agent**: Antigravity
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Added a nested `PDF Report` sub-tab (`${basePath}/reports?tab=pdf-report`) directly beneath the `Reports` sidebar item with `useSearchParams` active-state detection so `PDF Report` highlights when `?tab=pdf-report` is active and parent `Reports` highlights otherwise.
+- **Verification**: `DepartmentLayout.test.tsx` and `ReportsDashboardClient.test.tsx` (`10/10 PASS`).

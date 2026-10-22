@@ -113,6 +113,8 @@ const nextConfig = {
     // Fix: Disable built-in Vercel image optimization to prevent hitting storage/optimization quotas.
     // Cloudinary and Supabase provide their own optimization, so Vercel's is redundant.
     unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 3600,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

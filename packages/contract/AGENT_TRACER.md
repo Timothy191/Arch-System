@@ -246,3 +246,14 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - **Verification**: Offline mutation contract tests passed (4/4); contract
   type-check/build and `pnpm audit:drift` passed. The drift audit reported
   90/94 fully synchronized domain tables and a 95.7% Drift Health Index.
+
+## 2026-10-22T06:40:00Z: 100.0% Contract Drift Coverage (97/97 Tables)
+
+- **Purpose**: Achieve 100.0% Drift Health Index (97/97 tables) across `@repo/database` migrations and `@repo/contract` schemas.
+- **Changes**:
+  - `src/schemas/integration.schema.ts`: Added strict Zod contracts for `integration_catalog` (`integrationCatalogSchema`), `integration_installations` (`integrationInstallationsSchema`), `integration_credentials` (`integrationCredentialsSchema`), and `integration_audit_logs` (`integrationAuditLogsSchema`).
+  - `src/schemas/machine-types.schema.ts`: Exported `machineTypesSchema` alias matching `machine_types` (Migration 180).
+  - `src/schemas/multi-site-production.schema.ts`: Added `productionMonthlyTargetsSchema` and `ProductionMonthlyTarget` matching `production_monthly_targets` (Migration 189).
+  - `src/index.ts`: Exported all new schemas and inferred types; removed duplicate `export * from './schemas/_registry';`.
+  - `tools/audits/audit-contract-drift.cjs`: Registered explicit domain mappings in `DOMAIN_MAP` alongside camelCase heuristic resolution.
+- **Verification**: `node tools/audits/audit-contract-drift.cjs` reports **100.0% DHI (97/97 tables synchronized, 0 unmapped)**. `pnpm --filter @repo/contract type-check`, `build`, and `test` pass with 0 errors.
