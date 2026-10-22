@@ -9,6 +9,15 @@ describe('PlantInventoryWorkspaceClient', () => {
     window.localStorage.clear();
   });
 
+  describe('Given mode="dashboard" (/plant-inventory)', () => {
+    it('When rendered, Then it displays the Stock Dashboard and equipment overview', () => {
+      render(<PlantInventoryWorkspaceClient mode="dashboard" today="2026-10-22" />);
+
+      expect(screen.getByRole('heading', { name: 'Stock Dashboard' })).toBeInTheDocument();
+      expect(screen.getByRole('table', { name: 'Stock Required Quick List' })).toBeInTheDocument();
+    });
+  });
+
   describe('Given mode="inventory-list" (/plant-inventory/daily-log)', () => {
     it('When rendered, Then it displays the Inventory List heading and table columns for Stock, Description, Amount Required, and Amount Present', () => {
       render(<PlantInventoryWorkspaceClient mode="inventory-list" today="2026-10-22" />);
@@ -66,6 +75,9 @@ describe('PlantInventoryWorkspaceClient', () => {
       fireEvent.change(screen.getByLabelText('Unit'), {
         target: { value: 'spigots' },
       });
+      fireEvent.change(screen.getByLabelText(/Plant Equipment/i), {
+        target: { value: 'Secondary DMC Module CR-102' },
+      });
 
       fireEvent.click(screen.getByRole('button', { name: /Add Item to Stock List/i }));
 
@@ -96,7 +108,7 @@ describe('PlantInventoryWorkspaceClient', () => {
   });
 
   describe('Given mode="history-of-used" (/plant-inventory/tools)', () => {
-    it('When rendered, Then it displays the History of Used consumption log and records new stock usage', () => {
+    it('When rendered, Then it displays the History of Used log and records new stock usage', () => {
       render(<PlantInventoryWorkspaceClient mode="history-of-used" today="2026-10-22" />);
 
       expect(screen.getByRole('heading', { name: 'History of Used' })).toBeInTheDocument();
@@ -112,6 +124,20 @@ describe('PlantInventoryWorkspaceClient', () => {
       fireEvent.click(screen.getByRole('button', { name: /Record Used Stock/i }));
 
       expect(screen.getByText('Shift B medium density correction')).toBeInTheDocument();
+    });
+  });
+
+  describe('Given mode="reports" (/plant-inventory/reports)', () => {
+    it('When rendered, Then it displays Reports and consumption by plant equipment', () => {
+      render(<PlantInventoryWorkspaceClient mode="reports" today="2026-10-22" />);
+
+      expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Replenishment Demand Report' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Consumption by Plant Equipment' })
+      ).toBeInTheDocument();
     });
   });
 });

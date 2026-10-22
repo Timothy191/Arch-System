@@ -1,6 +1,7 @@
 import '@/styles/print-report.css';
 import { redirect } from 'next/navigation';
 import { getShiftCompleteness } from '@/lib/shift-completeness';
+import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {
   type EngineeringLogItem,
@@ -22,6 +23,10 @@ export default async function ReportsPage({
     redirect('/plant-processing/history');
   }
   const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
+  if (deptSlug === 'plant-inventory') {
+    const { today } = await getDepartmentContext({ department: deptSlug });
+    return <PlantInventoryWorkspaceClient mode="reports" today={today} />;
+  }
   const initialTab: 'shift' | 'day' | 'archived' | 'pdf-report' =
     tabParam === 'pdf-report' || tabParam === 'day' || tabParam === 'archived' ? tabParam : 'shift';
   const { dept, deptId, supabase, today } = await getDepartmentContext({

@@ -117,16 +117,16 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: 'plant-inventory',
-    displayName: 'Plant Inventory',
+    displayName: 'Stock Control Department',
     route: '/plant-inventory',
-    icon: 'Database',
+    icon: 'Package',
     description:
-      'ROM & clean coal stockpiles, magnetite medium inventory, reagents, spares & consumables tracking',
+      'Track stock at plant equipment level — consumables, reagents, and wear spares allocated to crushers, screens, pumps, cyclones, and other CHPP equipment (not mobile mining machines).',
     color: 'emerald',
     type: 'standard',
     status: 'active',
     gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'Stockpile', value: '48,200t' },
+    stats: { label: 'Equipment Stock Lines', value: '0' },
     trend: [42500, 43800, 44600, 45200, 46100, 46900, 47500, 48200],
     actions: [
       { label: 'Inventory List', href: '/plant-inventory/daily-log' },
@@ -322,15 +322,15 @@ export const PLANT_PROCESSING_TABS = [
 ] as const;
 
 /**
- * Plant Inventory specific tabs - Inventory List, Item List, Stock Required, Reports, and History of Used
+ * Plant Inventory specific tabs - Stock Control Department tracking stock at plant equipment
  */
 export const PLANT_INVENTORY_TABS = [
-  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart3' },
   { name: 'daily-log', label: 'Inventory List', icon: 'ClipboardList' },
-  { name: 'machines', label: 'Item List', icon: 'Cpu' },
-  { name: 'history', label: 'Stock Required', icon: 'History' },
+  { name: 'machines', label: 'Item List', icon: 'Package' },
+  { name: 'history', label: 'Stock Required', icon: 'AlertTriangle' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
-  { name: 'tools', label: 'History of Used', icon: 'Wrench' },
+  { name: 'tools', label: 'History of Used', icon: 'History' },
 ] as const;
 
 const DEPARTMENT_TABS_MAP: Record<
