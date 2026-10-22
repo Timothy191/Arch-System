@@ -475,6 +475,7 @@
     'Inter', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Fallback until next/font hydrates; portal layout overrides via Outfit.variable */
   --font-outfit: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-anurati: 'Anurati', var(--font-outfit), var(--font-sans), sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;

@@ -311,4 +311,24 @@ describe('HeroRotator', () => {
     expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
     expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
   });
+
+  it('applies Anurati font to all hero-card panel headers and Gold branding to Previous/Next highlight buttons', () => {
+    render(<HeroRotator {...baseProps} departments={mockDepartments} />);
+
+    const overviewHeading = screen.getByRole('heading', { name: 'System Overview', hidden: true });
+    const drillingHeading = screen.getByRole('heading', {
+      name: 'Drilling Operations',
+      hidden: true,
+    });
+    const productionHeading = screen.getByRole('heading', { name: 'Production', hidden: true });
+
+    expect(overviewHeading).toHaveClass('font-anurati');
+    expect(drillingHeading).toHaveClass('font-anurati');
+    expect(productionHeading).toHaveClass('font-anurati');
+
+    const prevBtn = screen.getByLabelText('Previous highlight');
+    const nextBtn = screen.getByLabelText('Next highlight');
+    expect(prevBtn).toHaveClass('text-[var(--accent-blue)]');
+    expect(nextBtn).toHaveClass('text-[var(--accent-blue)]');
+  });
 });

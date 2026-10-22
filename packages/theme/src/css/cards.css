@@ -149,8 +149,11 @@
 }
 
 .uiverse-card-title {
-  font-size: 16px;
+  font-family: Anurati, var(--font-outfit), var(--font-sans), system-ui, sans-serif;
+  font-size: 15px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-ink);
   transition: color var(--theme-transition-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1);
 }

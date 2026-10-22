@@ -100,8 +100,10 @@ describe('DepartmentCard', () => {
     expect(localStorage.getItem('pinned_dept_drilling')).toBe('true');
   });
 
-  it('renders outer card with test id', () => {
+  it('renders outer card with test id and Anurati header font', () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByTestId('dept-card-drilling')).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { name: 'Drilling Operations' });
+    expect(heading).toHaveClass('uiverse-card-title', 'font-anurati');
   });
 });

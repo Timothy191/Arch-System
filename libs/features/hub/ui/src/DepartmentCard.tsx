@@ -236,7 +236,15 @@ function DepartmentCard({
         <div className="uiverse-card-body relative z-10 pointer-events-none">
           <div className="space-y-2">
             <div className="uiverse-card-title-row">
-              <h3 className="uiverse-card-title">{department.displayName}</h3>
+              <h3
+                className="uiverse-card-title font-anurati uppercase tracking-[0.08em]"
+                style={{
+                  fontFamily:
+                    "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+                }}
+              >
+                {department.displayName}
+              </h3>
               {department.status && (
                 <span
                   className={cn(

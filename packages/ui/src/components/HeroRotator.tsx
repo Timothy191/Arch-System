@@ -365,7 +365,7 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-[var(--accent-blue)]/35 hover:border-[var(--accent-blue)]/60 shadow-window hover:bg-white/40 text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] transition-all active:scale-95"
             >
               <ArchEmblemIcon className="w-5 h-5 -rotate-90 transition-transform" />
             </button>
@@ -373,7 +373,7 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-white/30 shadow-window hover:bg-white/40 text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-[var(--accent-blue)]/35 hover:border-[var(--accent-blue)]/60 shadow-window hover:bg-white/40 text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] transition-all active:scale-95"
             >
               <ArchEmblemIcon className="w-5 h-5 rotate-90 transition-transform" />
             </button>

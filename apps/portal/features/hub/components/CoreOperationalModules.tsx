@@ -89,7 +89,15 @@ export function CoreOperationalModules({
             <span className="p-1.5 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-2xs flex items-center justify-center">
               <Boxes className="w-3.5 h-3.5" />
             </span>
-            <span>Core Operational Modules</span>
+            <span
+              className="font-anurati uppercase tracking-[0.08em]"
+              style={{
+                fontFamily:
+                  "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+              }}
+            >
+              Core Operational Modules
+            </span>
             <span className="ml-0.5 px-2.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary text-[11px] font-mono tabular-nums">
               {filteredDepartments.length} / {departments.length}
             </span>

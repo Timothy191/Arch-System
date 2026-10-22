@@ -92,6 +92,7 @@ const archTheme: Config = {
           'monospace',
         ],
         heading: ['var(--font-outfit)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+        anurati: ['Anurati', 'var(--font-outfit)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Arch palette — direct CSS variable references

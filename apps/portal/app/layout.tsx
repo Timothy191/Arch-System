@@ -113,6 +113,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
+        <link
+          rel="preload"
+          href="/fonts/Anurati-Regular.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin="anonymous"
+        />
         {/* Preload primary LCP background asset off critical path (Desktop & Mobile) */}
         <link
           rel="preload"
