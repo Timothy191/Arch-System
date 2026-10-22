@@ -8,8 +8,7 @@ Google Antigravity SDK with support for online (Gemini) and offline (LiteRT-LM) 
 
 import asyncio
 import os
-import sys
-from typing import AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
 
 try:
     from google.antigravity import Agent, AgentConfig
@@ -31,7 +30,9 @@ class TelemetryAnalysisHook:
         print(f"🛡️  [Policy Hook] Validating generated response ({len(output)} chars)...")
 
 
-async def run_telemetry_agent(prompt: str, local_model_path: Optional[str] = None) -> AsyncGenerator[str, None]:
+async def run_telemetry_agent(
+    prompt: str, local_model_path: str | None = None
+) -> AsyncGenerator[str, None]:
     """
     Executes an Antigravity agent task.
     Falls back gracefully if SDK or local model weights are absent.
@@ -64,8 +65,8 @@ async def run_telemetry_agent(prompt: str, local_model_path: Optional[str] = Non
                 full_response += token
                 yield token
             await hook.post_execution(full_response)
-    except Exception as exc:
-        yield f"[Error] Antigravity execution failed: {str(exc)}"
+    except Exception as exc:  # noqa: BLE001 - surface any SDK failure to the stream
+        yield f"[Error] Antigravity execution failed: {exc}"
 
 
 async def main() -> None:

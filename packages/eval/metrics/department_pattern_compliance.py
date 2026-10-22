@@ -49,38 +49,55 @@ class DepartmentPatternComplianceMetric(BaseMetric):
 
         # Check for getDepartmentContext usage
         total_checks += 1
-        if "createServerSupabaseClient" in code and "DEPARTMENTS.find" in code:
-            if "getDepartmentContext" not in code:
-                violations.append(
-                    "Department pages should use getDepartmentContext() from ~/lib/dept-context "
-                    "instead of manually looking up department and creating supabase client"
-                )
+        if (
+            "createServerSupabaseClient" in code
+            and "DEPARTMENTS.find" in code
+            and "getDepartmentContext" not in code
+        ):
+            violations.append(
+                "Department pages should use getDepartmentContext() from ~/lib/dept-context "
+                "instead of manually looking up department and creating supabase client"
+            )
 
         # Check for requireDepartment usage on restricted pages
         total_checks += 1
-        if "params.department !==" in code or "params.department ==" in code:
-            if "requireDepartment" not in code and "notFound()" in code:
-                violations.append(
-                    "Use requireDepartment() from ~/lib/dept-context instead of "
-                    "inline department checks with notFound()"
-                )
+        if (
+            ("params.department !==" in code or "params.department ==" in code)
+            and "requireDepartment" not in code
+            and "notFound()" in code
+        ):
+            violations.append(
+                "Use requireDepartment() from ~/lib/dept-context instead of "
+                "inline department checks with notFound()"
+            )
 
         # Check for KPI card usage
         total_checks += 1
-        if any(pattern in code for pattern in ["text-2xl font-medium", "text-2xl font-semibold", "text-[#898989] text-xs uppercase"]):
-            if "KPICard" not in code and "KPIGrid" not in code:
-                violations.append(
-                    "KPI summary cards should use KPICard/KPIGrid from @repo/ui/KPI "
-                    "instead of manual GlassCard + text patterns"
-                )
+        manual_kpi_cards = any(
+            pattern in code
+            for pattern in [
+                "text-2xl font-medium",
+                "text-2xl font-semibold",
+                "text-[#898989] text-xs uppercase",
+            ]
+        )
+        if manual_kpi_cards and "KPICard" not in code and "KPIGrid" not in code:
+            violations.append(
+                "KPI summary cards should use KPICard/KPIGrid from @repo/ui/KPI "
+                "instead of manual GlassCard + text patterns"
+            )
 
         # Check for PageHeader usage
         total_checks += 1
-        if "flex items-center justify-between" in code and "text-2xl" in code and "toLocaleDateString" in code:
-            if "PageHeader" not in code:
-                violations.append(
-                    "Page headers with title + date should use PageHeader from @repo/ui/PageHeader"
-                )
+        if (
+            "flex items-center justify-between" in code
+            and "text-2xl" in code
+            and "toLocaleDateString" in code
+            and "PageHeader" not in code
+        ):
+            violations.append(
+                "Page headers with title + date should use PageHeader from @repo/ui/PageHeader"
+            )
 
         # Check for form field patterns
         total_checks += 1
@@ -95,12 +112,16 @@ class DepartmentPatternComplianceMetric(BaseMetric):
 
         # Check for shift toggle pattern
         total_checks += 1
-        if '"day"' in code and '"night"' in code and "getCurrentShift" in code:
-            if "ShiftToggle" not in code:
-                violations.append(
-                    "Day/night shift toggle should use ShiftToggle from @repo/ui/ShiftToggle "
-                    "and getCurrentShift() helper"
-                )
+        if (
+            '"day"' in code
+            and '"night"' in code
+            and "getCurrentShift" in code
+            and "ShiftToggle" not in code
+        ):
+            violations.append(
+                "Day/night shift toggle should use ShiftToggle from @repo/ui/ShiftToggle "
+                "and getCurrentShift() helper"
+            )
 
         passed = total_checks - len(violations)
         self.score = passed / total_checks if total_checks > 0 else 1.0
@@ -119,5 +140,5 @@ class DepartmentPatternComplianceMetric(BaseMetric):
         return self.success
 
     @property
-    def __name__(self):
+    def __name__(self) -> str:
         return "DepartmentPatternComplianceMetric"

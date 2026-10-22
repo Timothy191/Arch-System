@@ -1,7 +1,6 @@
 """Translation AI service evaluation."""
 
 import pytest
-from conftest import requires_openai
 from deepeval import assert_test
 from deepeval.metrics import FaithfulnessMetric
 from deepeval.test_case import LLMTestCase
@@ -11,7 +10,6 @@ from helpers import call_ai_service, get_judge_model
 
 
 @pytest.mark.ai_service
-@requires_openai
 @pytest.mark.asyncio
 class TestTranslation:
     """Evaluate the translation AI prompt."""

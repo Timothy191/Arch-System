@@ -1,9 +1,8 @@
 """Shift handoff AI service evaluation."""
 
 import pytest
-from conftest import requires_openai
 from deepeval import assert_test
-from deepeval.metrics import HallucinationMetric, AnswerRelevancyMetric
+from deepeval.metrics import AnswerRelevancyMetric, HallucinationMetric
 from deepeval.test_case import LLMTestCase
 
 from datasets.golden_cases import SHIFT_HANDOFF_INPUTS
@@ -11,7 +10,6 @@ from helpers import call_ai_service, get_judge_model
 
 
 @pytest.mark.ai_service
-@requires_openai
 @pytest.mark.asyncio
 class TestShiftHandoff:
     """Evaluate the shift handoff AI prompt."""

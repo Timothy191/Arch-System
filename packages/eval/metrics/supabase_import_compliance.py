@@ -76,11 +76,13 @@ class SupabaseImportComplianceMetric(BaseMetric):
 
         # Check that service key is never in client code
         total_checks += 1
-        if "SUPABASE_SERVICE_KEY" in code or "service_role" in code:
-            if is_client or "NEXT_PUBLIC" not in code.split("SUPABASE_SERVICE_KEY")[0] if "SUPABASE_SERVICE_KEY" in code else True:
-                violations.append(
-                    "FORBIDDEN: Service key should never appear in client-side code"
-                )
+        key_prefix = code.split("SUPABASE_SERVICE_KEY")[0]
+        exposes_service_key = "service_role" in code or (
+            "SUPABASE_SERVICE_KEY" in code
+            and (is_client or "NEXT_PUBLIC" not in key_prefix)
+        )
+        if exposes_service_key:
+            violations.append("FORBIDDEN: Service key should never appear in client-side code")
 
         passed = total_checks - len(violations)
         self.score = passed / total_checks if total_checks > 0 else 1.0
@@ -99,5 +101,5 @@ class SupabaseImportComplianceMetric(BaseMetric):
         return self.success
 
     @property
-    def __name__(self):
+    def __name__(self) -> str:
         return "SupabaseImportComplianceMetric"

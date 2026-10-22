@@ -8,11 +8,10 @@ import pytest
 from deepeval import assert_test
 from deepeval.test_case import LLMTestCase
 
-from metrics.design_system_compliance import DesignSystemComplianceMetric
-from metrics.supabase_import_compliance import SupabaseImportComplianceMetric
-from metrics.rls_completeness import RLSCompletenessMetric
 from metrics.department_pattern_compliance import DepartmentPatternComplianceMetric
-
+from metrics.design_system_compliance import DesignSystemComplianceMetric
+from metrics.rls_completeness import RLSCompletenessMetric
+from metrics.supabase_import_compliance import SupabaseImportComplianceMetric
 
 # ============================================================
 # Design System Compliance Tests

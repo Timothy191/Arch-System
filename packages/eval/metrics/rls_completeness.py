@@ -32,22 +32,24 @@ class RLSCompletenessMetric(BaseMetric):
 
     def measure(self, test_case: LLMTestCase) -> float:
         sql = test_case.actual_output
+        sql_upper = sql.upper()
+        sql_lower = sql.lower()
         violations = []
         total_checks = 0
 
         # Check for RLS enable
         total_checks += 1
-        if "ENABLE ROW LEVEL SECURITY" not in sql.upper():
+        if "ENABLE ROW LEVEL SECURITY" not in sql_upper:
             violations.append("Missing ENABLE ROW LEVEL SECURITY")
 
         # Check for SELECT policy
         total_checks += 1
-        if "FOR SELECT" not in sql.upper() and "for select" not in sql.lower():
+        if "FOR SELECT" not in sql_upper:
             violations.append("Missing SELECT policy")
 
         # Check for INSERT policy
         total_checks += 1
-        if "FOR INSERT" not in sql.upper() and "for insert" not in sql.lower():
+        if "FOR INSERT" not in sql_upper:
             violations.append("Missing INSERT policy")
 
         # Check for auth helper function usage
@@ -64,21 +66,21 @@ class RLSCompletenessMetric(BaseMetric):
 
         # Check for department_id index
         total_checks += 1
-        has_dept_index = "INDEX" in sql.upper() and "department_id" in sql.lower()
+        has_dept_index = "INDEX" in sql_upper and "department_id" in sql_lower
         if not has_dept_index and "department_id" in sql:
             violations.append("Missing index on department_id")
 
         # Check for created_at index or ordering
         total_checks += 1
-        has_created_at_index = "INDEX" in sql.upper() and "created_at" in sql.lower()
+        has_created_at_index = "INDEX" in sql_upper and "created_at" in sql_lower
         if not has_created_at_index and "created_at" in sql:
             violations.append("Missing index on created_at")
 
         # Check DELETE policy is restricted (admin-only or absent)
         total_checks += 1
-        if "FOR DELETE" in sql.upper() or "for delete" in sql.lower():
+        if "FOR DELETE" in sql_upper:
             # DELETE policy exists — check it's restricted to admin
-            delete_section = sql[sql.upper().find("FOR DELETE"):]
+            delete_section = sql[sql_upper.find("FOR DELETE") :]
             if "admin" not in delete_section.lower() and "is_admin" not in delete_section:
                 violations.append(
                     "DELETE policy should be admin-only (role = 'admin' or auth.is_admin())"
@@ -86,7 +88,9 @@ class RLSCompletenessMetric(BaseMetric):
 
         # Check for employees table reference in policies (department isolation)
         total_checks += 1
-        if "employees" not in sql.lower() and ("FOR SELECT" in sql.upper() or "FOR INSERT" in sql.upper()):
+        if "employees" not in sql_lower and (
+            "FOR SELECT" in sql_upper or "FOR INSERT" in sql_upper
+        ):
             violations.append(
                 "Policies should reference employees table for department isolation"
             )
@@ -108,5 +112,5 @@ class RLSCompletenessMetric(BaseMetric):
         return self.success
 
     @property
-    def __name__(self):
+    def __name__(self) -> str:
         return "RLSCompletenessMetric"

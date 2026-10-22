@@ -59,17 +59,19 @@ class DesignSystemComplianceMetric(BaseMetric):
 
         # Check cn() usage for class merging
         total_checks += 1
-        if "className" in code and "cn(" not in code and ("${" in code or "?" in code.split("className")[0] if "className" in code else False):
-            # Only flag if there's conditional class logic without cn()
-            if any(x in code for x in ["? ", ": "]):
-                violations.append("Conditional className should use cn() from @repo/ui/lib/utils")
+        has_conditional_class = any(marker in code for marker in ["? ", ": "])
+        if "className" in code and "cn(" not in code and has_conditional_class:
+            violations.append("Conditional className should use cn() from @repo/ui/lib/utils")
 
         # Check GlassCard usage for card containers
         total_checks += 1
-        if "border border-[#" in code and "GlassCard" not in code:
-            # If they're creating card-like containers manually
-            if "rounded" in code and "p-6" in code:
-                violations.append("Card containers should use GlassCard from @repo/ui/GlassCard")
+        if (
+            "border border-[#" in code
+            and "GlassCard" not in code
+            and "rounded" in code
+            and "p-6" in code
+        ):
+            violations.append("Card containers should use GlassCard from @repo/ui/GlassCard")
 
         passed = total_checks - len(violations)
         self.score = passed / total_checks if total_checks > 0 else 1.0
@@ -88,5 +90,5 @@ class DesignSystemComplianceMetric(BaseMetric):
         return self.success
 
     @property
-    def __name__(self):
+    def __name__(self) -> str:
         return "DesignSystemComplianceMetric"

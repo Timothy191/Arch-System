@@ -11,9 +11,8 @@ import pytest
 from deepeval import assert_test
 from deepeval.test_case import LLMTestCase
 
-from metrics.supabase_import_compliance import SupabaseImportComplianceMetric
 from metrics.design_system_compliance import DesignSystemComplianceMetric
-
+from metrics.supabase_import_compliance import SupabaseImportComplianceMetric
 
 # ============================================================
 # Test fixtures

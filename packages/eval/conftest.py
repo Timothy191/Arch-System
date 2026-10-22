@@ -35,33 +35,23 @@ _load_root_dotenv()
 # `.env` above) — OPENAI_API_KEY for the default OpenAI judge, or
 # GEMINI_API_KEY to route the judge through GeminiModel (see helpers.py).
 
-_HAS_REAL_OPENAI_KEY = (
-    os.environ.get("OPENAI_API_KEY", "").startswith("sk-")
-    and not os.environ.get("OPENAI_API_KEY", "").startswith("sk-dummy")
-    and len(os.environ.get("OPENAI_API_KEY", "")) > 20
-)
-
 # Zero-external-cost policy: evaluations use the Gemini adapter (GEMINI_API_KEY)
 # or MockJudgeModel for deterministic CI execution without external API costs.
-requires_openai = pytest.mark.skipif(
-    False,
-    reason="LLM judge configured with Gemini adapter and zero-cost mock fallback",
-)
 
 
-def pytest_configure(config):
+def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
     config.addinivalue_line("markers", "ai_service: tests that call the portal AI service")
     config.addinivalue_line("markers", "code_gen: tests that evaluate code generation compliance")
 
 
 @pytest.fixture(scope="session")
-def portal_base_url():
+def portal_base_url() -> str:
     """Base URL for the running portal (for AI service tests)."""
     return os.environ.get("PORTAL_BASE_URL", "http://localhost:3000")
 
 
 @pytest.fixture(scope="session")
-def use_cache():
+def use_cache() -> bool:
     """Whether to use cached golden responses instead of live API calls."""
     return os.environ.get("EVAL_USE_CACHE", "true").lower() == "true"
