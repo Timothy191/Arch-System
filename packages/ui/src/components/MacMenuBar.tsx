@@ -266,7 +266,7 @@ export function MacMenuBar({
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         'fixed top-2 left-3 right-3 z-navigation h-11 flex items-center justify-between px-3.5',
-        'liquid-glass-light border border-white/20 shadow-window rounded-full',
+        'liquid-glass-light gold-steel-border border border-white/20 shadow-window rounded-full',
         className
       )}
     >
@@ -641,6 +641,13 @@ export function MacMenuBar({
             aria-hidden="true"
           />
           <span className="truncate max-w-[140px]">{currentContextLabel}</span>
+          <Logo
+            variant="gold"
+            className={cn(
+              'w-3 h-3 shrink-0 transition-transform duration-200 ease-out',
+              systemMenuOpen ? 'rotate-0' : 'rotate-180'
+            )}
+          />
         </button>
 
         {/* ── Menu Bar Items ── */}

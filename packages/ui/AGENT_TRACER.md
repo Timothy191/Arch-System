@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T01:50:00+02:00 - Hub Hero Card Video Loops, Department Icons, Slim KPI Banner, Arch Graph Nodes & Gold Steel Borders
+
+- **Purpose**: Implement `/hub` Hero Card and global navigation design feedback across `HeroCardContent`, `HeroRotator`, `MacMenuBar`, and `@repo/ui` dropdown/collapse primitives.
+- **Changes**:
+  - `packages/ui/src/components/HeroCardContent.tsx`: Removed `Sector-01` and `Nominal` badges when counts are zero, added canonical department icons (`data-testid="hero-dept-icon-..."`) next to `<h2>` titles, replaced `<circle>` graph dots with small Arch-System logo icons (`data-testid="hero-graph-arch-node"`), extracted `HeroOperationalKpiStrip` as a slim 3-column banner with `gold-steel-border`, and replaced static images in the right-hand camera feed with looping `.mp4` `<video autoPlay loop muted playsInline>` (`data-testid="hero-video-..."`).
+  - `packages/ui/src/components/HeroRotator.tsx`: Added `video?: string` to `Panel`, applied `gold-steel-border gold-steel-border-slim` to Hero Cards, and rendered `HeroOperationalKpiStrip` (`data-testid="hero-kpi-slim-banner"`) directly beneath the Hero Card carousel.
+  - `packages/ui/src/components/MacMenuBar.tsx`: Applied `gold-steel-border` to the top fixed navigation bar (`div.fixed.top-2`) and added the upside-down-when-collapsed Arch `<Logo variant="gold" />` indicator to the context pill button.
+  - `packages/ui/src/components/ui/{menu,combobox,collapse}.tsx`: Replaced `ChevronDown` indicators with `<Logo variant="gold" />` (`rotate-180` collapsed, `rotate-0` expanded).
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-22T14:10:00Z - Shared Design System Primitives & Central Lucide Icon Registry
 
 - **Purpose**: Establish a canonical Lucide department/action/status icon registry and shared operational UI components (`DataTable`, `StatusBadge`, `MetricCard`, `MachineStatusPanel`, `ActivityTimeline`, `FilterToolbar`, `Alert`, `LoadingState`, `ErrorState`) in `@repo/ui`.

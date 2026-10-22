@@ -1,6 +1,7 @@
-import { ChevronDown, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
+import { Logo } from '../Logo';
 import { Button } from './button';
 import {
   DropdownMenu,
@@ -49,7 +50,12 @@ export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
           {...props}
         >
           {children}
-          {showChevron && <ChevronDown className="ml-2 h-4 w-4 opacity-50" />}
+          {showChevron && (
+            <Logo
+              variant="gold"
+              className="ml-2 h-3.5 w-3.5 rotate-180 transition-transform duration-200 ease-out [[data-state=open]_&]:rotate-0"
+            />
+          )}
         </Button>
       </DropdownMenuTrigger>
     );

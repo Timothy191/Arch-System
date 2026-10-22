@@ -8,11 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@repo/ui/components/ui/dropdown-menu';
+import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
   BarChart3,
   CheckSquare,
-  ChevronDown,
   ClipboardCheck,
   ClipboardList,
   Clock,
@@ -106,7 +106,10 @@ export function ControlRoomQuickNav() {
         >
           <Compass className="w-4 h-4 text-[var(--accent-blue)] shrink-0" />
           <span>Quick Navigation</span>
-          <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+          <Logo
+            variant="gold"
+            className="w-3.5 h-3.5 shrink-0 rotate-180 transition-transform duration-200 ease-out [[data-state=open]_&]:rotate-0"
+          />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

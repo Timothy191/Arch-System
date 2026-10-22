@@ -1,6 +1,7 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
+import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -857,6 +858,7 @@ function TaskbarNotificationBell() {
 }
 
 const SystemTrayPillInner = function SystemTrayPillInner() {
+  const [trayOpen, setTrayOpen] = useState(false);
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
   const volume = useAppVolume();
@@ -927,7 +929,7 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
         </>
       )}
 
-      <Popover.Root>
+      <Popover.Root open={trayOpen} onOpenChange={setTrayOpen}>
         <Popover.Trigger asChild>
           <button
             type="button"
@@ -975,6 +977,14 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
                 </div>
               </>
             )}
+
+            <Logo
+              variant="gold"
+              className={cn(
+                'w-3 h-3 shrink-0 transition-transform duration-200 ease-out',
+                trayOpen ? 'rotate-0' : 'rotate-180'
+              )}
+            />
           </button>
         </Popover.Trigger>
         <Popover.Portal>

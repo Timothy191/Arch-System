@@ -1,3 +1,12 @@
+## 2026-10-23T01:50:00+02:00: Hub Department MP4 Loops, CoreOperationalModules Gold Border & Global Arch Logo Dropdown Indicators
+
+- **Purpose**: Implement `/hub` Batch 1 & Batch 2 design feedback across `CoreOperationalModules.tsx`, `SystemTray.tsx`, `ControlRoomQuickNav.tsx`, `ExportButton.tsx`, and department `.mp4` video assets.
+- **Changes**:
+  - `apps/portal/public/images/departments/*.mp4`: Added seamless looping `.mp4` department setup videos for all 10 department feeds.
+  - `apps/portal/features/hub/components/CoreOperationalModules.tsx`: Applied `gold-steel-border` to the `Core Operational Modules` section container.
+  - `apps/portal/components/system/SystemTray.tsx`, `apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx`, `apps/portal/features/analytics/components/ExportButton.tsx`: Replaced dropdown `ChevronDown` indicators with `<Logo variant="gold" />` (`rotate-180` when collapsed, `rotate-0` when expanded).
+- **Verification**: `pnpm --filter portal test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T00:59:00+02:00: Hourly Loads Live KPIs, Timeline Graph, Header Search/Filter, Excavator Gold Logo & Admin Sites/Blocks/Minerals Register
 
 - **Purpose**: Implement all 9 `/control-room/hourly-loads` design feedback items plus full Supabase integration for Administrator Sites, Mine Blocks, and Minerals Register (`/admin?tab=sites` & `/admin?tab=minerals`).

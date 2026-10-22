@@ -1,6 +1,8 @@
 'use client';
 
-import { ChevronDown, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { Logo } from '@repo/ui/Logo';
+import { cn } from '@repo/ui/lib/utils';
+import { Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface ExportButtonProps {
@@ -62,7 +64,13 @@ export function ExportButton({ filename, rows }: ExportButtonProps) {
       >
         <Download className="w-4 h-4" />
         <span>Export Report</span>
-        <ChevronDown className="w-4.5 h-4.5 text-[var(--text-muted)]" />
+        <Logo
+          variant="gold"
+          className={cn(
+            'w-3.5 h-3.5 shrink-0 transition-transform duration-200 ease-out',
+            isOpen ? 'rotate-0' : 'rotate-180'
+          )}
+        />
       </button>
 
       {isOpen && (

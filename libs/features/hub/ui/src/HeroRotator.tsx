@@ -3,6 +3,7 @@
 import type { Department } from '@repo/departments/data-access';
 import type { Panel } from '@repo/ui/HeroRotator';
 import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
+import { getDepartmentIcon } from '@repo/ui/icons/department-icons';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
@@ -11,11 +12,10 @@ import {
   Database,
   Factory,
   Layers,
+  Package,
   Pickaxe,
-  ScanFace,
   ShieldCheck,
   TowerControl,
-  TrendingUp,
   Wrench,
 } from 'lucide-react';
 import { useMemo } from 'react';
@@ -44,7 +44,7 @@ const DEPT_STYLE_MAP: Record<
   },
   drilling: { icon: Pickaxe, iconColor: 'text-dept-drilling', bgColor: 'bg-dept-drilling/10' },
   production: {
-    icon: TrendingUp,
+    icon: Factory,
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10',
   },
@@ -54,12 +54,12 @@ const DEPT_STYLE_MAP: Record<
     bgColor: 'bg-dept-production/10',
   },
   'plant-inventory': {
-    icon: Layers,
+    icon: Package,
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10',
   },
   'access-control': {
-    icon: ScanFace,
+    icon: ShieldCheck,
     iconColor: 'text-dept-access-control',
     bgColor: 'bg-dept-access-control/10',
   },
@@ -82,6 +82,11 @@ const DEPT_STYLE_MAP: Record<
     icon: Database,
     iconColor: 'text-dept-production',
     bgColor: 'bg-dept-production/10',
+  },
+  reports: {
+    icon: Activity,
+    iconColor: 'text-[var(--accent-blue)]',
+    bgColor: 'bg-[var(--accent-blue)]/10',
   },
 };
 
@@ -107,9 +112,10 @@ export function HeroRotator({
       description: defaultDescription,
       category: 'Central Command',
       image: '/images/departments/overview.jpg',
+      video: '/images/departments/overview.mp4',
       stats: { label: 'System Health', value: '100% Optimal' },
       status: 'active',
-      icon: <Logo className="w-4 h-4 text-[var(--accent-blue)]" />,
+      icon: <Logo variant="gold" className="w-4 h-4 text-[var(--accent-blue)]" />,
       iconBgColor: 'bg-[var(--accent-blue)]/10',
       primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
       secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
@@ -119,7 +125,7 @@ export function HeroRotator({
 
     const deptPanels = departments.map((dept): Panel => {
       const style = DEPT_STYLE_MAP[dept.name] || {
-        icon: Layers,
+        icon: getDepartmentIcon(dept.name) || Layers,
         iconColor: 'text-[var(--accent-blue)]',
         bgColor: 'bg-[var(--accent-blue)]/10',
       };
@@ -165,6 +171,10 @@ export function HeroRotator({
           dept.name === 'reports'
             ? '/images/departments/control-room.jpg'
             : `/images/departments/${dept.name}.jpg`,
+        video:
+          dept.name === 'reports'
+            ? '/images/departments/control-room.mp4'
+            : `/images/departments/${dept.name}.mp4`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',
         icon: <DeptIcon className={cn('w-4 h-4', style.iconColor)} />,

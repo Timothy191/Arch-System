@@ -180,9 +180,41 @@ describe('HeroRotator', () => {
     expect(screen.getAllByText('3 Offline').length).toBeGreaterThan(0);
   });
 
-  it('renders a Nominal badge when all counts are zero', () => {
+  it('omits Sector-01 and Nominal badges when all counts are zero', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
-    expect(screen.getAllByText('Nominal').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Sector-01')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nominal')).not.toBeInTheDocument();
+  });
+
+  it('renders department icons on each hero card, slim KPI banner under the hero card, and Arch logo nodes on telemetry graphs', () => {
+    const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
+
+    // Department icons on hero cards
+    expect(screen.getByTestId('hero-dept-icon-central-command')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-dept-icon-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-dept-icon-production')).toBeInTheDocument();
+
+    // Slim KPI banner under the hero card
+    const slimBanner = screen.getByTestId('hero-kpi-slim-banner');
+    expect(slimBanner).toBeInTheDocument();
+    expect(slimBanner).toContainElement(screen.getByTestId('hero-kpi-strip-central-command'));
+
+    // Small Arch-System logo icons on telemetry graphs instead of circle dots
+    const archNodes = screen.getAllByTestId('hero-graph-arch-node');
+    expect(archNodes.length).toBeGreaterThanOrEqual(12);
+    expect(
+      container.querySelectorAll('svg[aria-label*="telemetry trend graph"] circle')
+    ).toHaveLength(0);
+
+    // Looping MP4 videos on each hero card + slim gold steel borders
+    const overviewVideo = screen.getByTestId('hero-video-central-command');
+    const drillingVideo = screen.getByTestId('hero-video-drilling');
+    const productionVideo = screen.getByTestId('hero-video-production');
+    expect(overviewVideo).toHaveAttribute('src', '/images/departments/overview.mp4');
+    expect(drillingVideo).toHaveAttribute('src', '/images/departments/drilling.mp4');
+    expect(productionVideo).toHaveAttribute('src', '/images/departments/production.mp4');
+    expect(productionVideo).toHaveProperty('loop', true);
+    expect(container.querySelectorAll('.gold-steel-border').length).toBeGreaterThanOrEqual(3);
   });
 
   it('does not render the control HUD when there is only one panel', () => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
+import { Logo } from '../Logo';
 
 interface CollapseGroupContextValue {
   multiple?: boolean;
@@ -137,10 +137,11 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
               <span className="text-xs font-normal text-neutral-500 mt-0.5">{subtitle}</span>
             )}
           </div>
-          <ChevronDown
+          <Logo
+            variant="gold"
             className={cn(
-              'w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200',
-              isExpanded && 'rotate-180 text-neutral-900 '
+              'w-3.5 h-3.5 shrink-0 transition-transform duration-200 ease-out',
+              isExpanded ? 'rotate-0' : 'rotate-180'
             )}
             aria-hidden="true"
           />

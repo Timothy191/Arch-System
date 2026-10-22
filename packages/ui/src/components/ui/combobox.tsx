@@ -1,8 +1,9 @@
 'use client';
 
-import { Check, ChevronDown, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
+import { Logo } from '../Logo';
 
 interface OptionRegistration {
   value: string;
@@ -293,10 +294,11 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-          <ChevronDown
+          <Logo
+            variant="gold"
             className={cn(
-              'h-4 w-4 transition-transform duration-150 pointer-events-none',
-              isOpen && 'rotate-180'
+              'h-3.5 w-3.5 transition-transform duration-200 ease-out pointer-events-none',
+              isOpen ? 'rotate-0' : 'rotate-180'
             )}
           />
         </div>

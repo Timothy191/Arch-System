@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-23T01:50:00+02:00 - Hub HeroRotator MP4 Video Loops, Department Icons & Sparkline Arch Logo Nodes
+
+- **Purpose**: Wire looping department `.mp4` videos, canonical department icons, and Arch-System logo graph nodes into `@repo/hub/ui`.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Configured `video` paths (`/images/departments/${dept.name}.mp4`) and canonical department icons (`getDepartmentIcon` + `<Logo variant="gold" />`) across all Hero Card panels.
+  - `libs/features/hub/ui/src/Sparkline.tsx`: Replaced `<circle>` end nodes with small Arch-System logo `<svg>` icons.
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Added unit test assertions for removal of `Sector-01`/`Nominal`, presence of department icons, slim KPI banner under the Hero Card, Arch logo graph nodes, looping `.mp4` videos, and `gold-steel-border`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅ (23/23 passing).
+
 ## 2026-10-22T14:10:00Z - Canonical Department Icon Registry Integration
 
 - **Purpose**: Connect `DepartmentCard.tsx` to `getDepartmentIcon` from `@repo/ui/icons/department-icons` as the canonical department icon fallback.

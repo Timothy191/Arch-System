@@ -4,7 +4,7 @@ import { m } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
-import { HeroCardContent } from './HeroCardContent';
+import { HeroCardContent, HeroOperationalKpiStrip } from './HeroCardContent';
 
 function ArchEmblemIcon({ className }: { className?: string }) {
   return (
@@ -29,6 +29,7 @@ export interface Panel {
   description: string;
   category: string;
   image: string;
+  video?: string;
   stats?: { label: string; value: string };
   status: string;
   icon: React.ReactNode;
@@ -197,7 +198,7 @@ function HeroSlide({
       <div
         className={cn(
           'relative h-full w-full rounded-2xl overflow-hidden select-none',
-          'liquid-glass-light border border-white/20 shadow-window',
+          'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
           'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
           isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
         )}
@@ -342,7 +343,7 @@ export function HeroRotator({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className="relative w-full cursor-grab active:cursor-grabbing overflow-visible touch-pan-y"
-          style={{ height: 460, transformStyle: 'preserve-3d' }}
+          style={{ height: 400, transformStyle: 'preserve-3d' }}
         >
           {panels.map((panel, idx) => (
             <HeroSlide
@@ -384,8 +385,24 @@ export function HeroRotator({
         )}
       </div>
 
+      {/* Slim Operational Subsystem KPI Banner directly under the Hero Card */}
+      {panels.length > 0 && (
+        <div
+          className="w-[92%] sm:w-[88%] lg:w-[82%] max-w-[1060px] mx-auto mt-3.5"
+          data-testid="hero-kpi-slim-banner"
+        >
+          {panels.map((p, idx) => (
+            <HeroOperationalKpiStrip
+              key={p.id}
+              panelName={p.name}
+              className={idx === activeIndex ? '' : 'hidden'}
+            />
+          ))}
+        </div>
+      )}
+
       {total > 1 && (
-        <div className="mt-5 flex items-center justify-center px-1">
+        <div className="mt-4 flex items-center justify-center px-1">
           <div className="flex items-center gap-2.5 sm:gap-3">
             {panels.map((p, idx) => (
               <button

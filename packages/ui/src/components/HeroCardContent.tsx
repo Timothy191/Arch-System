@@ -3,6 +3,7 @@
 import { Activity, AlertTriangle, Power, TrendingUp, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import type * as React from 'react';
+import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import type { Panel } from './HeroRotator';
 
@@ -294,18 +295,33 @@ function HeroTelemetryGraph({
             strokeLinejoin="round"
           />
 
-          {/* Data nodes */}
-          {coords.map((c, i) => (
-            <circle
-              key={i}
-              cx={c.x}
-              cy={c.y}
-              r={i === coords.length - 1 ? 3.5 : 2}
-              fill={i === coords.length - 1 ? series.strokeColor : '#ffffff'}
-              stroke={series.strokeColor}
-              strokeWidth={i === coords.length - 1 ? 2 : 1.5}
-            />
-          ))}
+          {/* Data nodes: Small Arch-System logo icons */}
+          {coords.map((c, i) => {
+            const isLast = i === coords.length - 1;
+            const iconSize = isLast ? 11 : 8;
+            return (
+              <svg
+                key={i}
+                x={c.x - iconSize / 2}
+                y={c.y - iconSize / 2}
+                width={iconSize}
+                height={iconSize}
+                viewBox="22.75 16.625 166.16 166.19"
+                aria-hidden="true"
+                data-testid="hero-graph-arch-node"
+              >
+                <path
+                  d="m 105.8125,16.625 c -7.39687,18.135158 -11.858304,29.997682 -20.09375,47.59375 5.04936,5.35232 11.247211,11.585364 21.3125,18.625 C 96.210077,78.390904 88.828713,73.920352 83.3125,69.28125 72.7727,91.274163 56.259864,122.60209 22.75,182.8125 49.087628,167.60733 69.504089,158.23318 88.53125,154.65625 87.714216,151.1422 87.2497,147.34107 87.28125,143.375 l 0.03125,-0.84375 c 0.417917,-16.87382 9.195665,-29.84979 19.59375,-28.96875 10.39809,0.88104 18.48041,15.28242 18.0625,32.15625 -0.0786,3.17512 -0.43674,6.22955 -1.0625,9.0625 18.82058,3.68164 39.01873,13.03179 65,28.03125 -5.123,-9.4318 -9.69572,-17.93388 -14.0625,-26.03125 -6.87839,-5.33121 -14.05289,-12.2698 -28.6875,-19.78125 10.05899,2.61375 17.2611,5.62932 22.875,9 C 124.63297,63.338161 121.03766,52.354109 105.8125,16.625 z"
+                  fill={series.strokeColor}
+                  fillOpacity={isLast ? 1 : 0.9}
+                  stroke="#ffffff"
+                  strokeWidth="6"
+                  paintOrder="stroke"
+                  fillRule="evenodd"
+                />
+              </svg>
+            );
+          })}
         </svg>
 
         <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 pt-1 border-t border-slate-100 tabular-nums">
@@ -319,13 +335,15 @@ function HeroTelemetryGraph({
   );
 }
 
-interface HeroKpiTile {
+export interface HeroKpiTile {
   label: string;
   value: string;
   subtext: string;
 }
 
-function getHeroKpiTiles(panelName: string): readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile] {
+export function getHeroKpiTiles(
+  panelName: string
+): readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile] {
   switch (panelName) {
     case 'plant-inventory':
       return [
@@ -402,28 +420,42 @@ function getHeroKpiTiles(panelName: string): readonly [HeroKpiTile, HeroKpiTile,
   }
 }
 
-function HeroOperationalKpiStrip({ panelName }: { panelName: string }) {
+export function HeroOperationalKpiStrip({
+  panelName,
+  className,
+}: {
+  panelName: string;
+  className?: string;
+}) {
   const tiles = getHeroKpiTiles(panelName);
   return (
     <div
-      className="grid grid-cols-3 gap-2 my-2.5"
+      className={cn(
+        'grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 rounded-xl liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-slate-200/80 px-3.5 py-2 shadow-2xs sm:divide-x divide-slate-200/70',
+        className
+      )}
       data-testid={`hero-kpi-strip-${panelName}`}
       aria-label="Operational subsystem indicators"
     >
-      {tiles.map((tile) => (
+      {tiles.map((tile, index) => (
         <div
           key={tile.label}
-          className="rounded-xl bg-white/80 backdrop-blur-md border border-slate-200/80 px-2.5 py-2 shadow-2xs flex flex-col justify-between min-w-0"
+          className={cn(
+            'flex items-center justify-between gap-2 min-w-0 py-0.5',
+            index > 0 && 'sm:pl-3'
+          )}
         >
-          <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
             {tile.label}
           </span>
-          <span className="text-xs sm:text-[13px] font-mono font-bold text-[var(--text-heading)] tabular-nums truncate mt-0.5">
-            {tile.value}
-          </span>
-          <span className="text-[9px] font-mono text-[var(--accent-blue)] font-semibold truncate mt-0.5">
-            {tile.subtext}
-          </span>
+          <div className="flex items-baseline gap-2 shrink-0">
+            <span className="text-xs sm:text-[13px] font-mono font-bold text-[var(--text-heading)] tabular-nums">
+              {tile.value}
+            </span>
+            <span className="text-[10px] font-mono text-[var(--accent-blue)] font-semibold">
+              {tile.subtext}
+            </span>
+          </div>
         </div>
       ))}
     </div>
@@ -451,6 +483,7 @@ export function HeroCardContent({
   breakdownCount,
   offlineMachineCount,
 }: HeroCardContentProps) {
+  const FallbackDeptIcon = getDepartmentIcon(panel.name);
   const assetSubtitle =
     panel.assetSubtitle ||
     (panel.name === 'drilling'
@@ -482,58 +515,60 @@ export function HeroCardContent({
     ? 'bg-amber-400 text-stone-950 hover:bg-amber-300 font-semibold shadow-xs'
     : 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 font-medium shadow-xs';
 
+  const hasUrgentTelemetry = incidentCount > 0 || breakdownCount > 0 || offlineMachineCount > 0;
+
   return (
     <div className="relative h-full w-full flex flex-row z-10">
       {/* Left Column: Text, Controls & Live Telemetry Graph */}
       <div className="relative z-20 flex flex-col justify-between w-[52%] sm:w-[50%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
         <div>
-          {/* Top Status Bar with Monospace Readouts */}
-          <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono tabular-nums mb-3.5">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-black/5 bg-black/[0.03] text-[var(--text-secondary)] font-semibold">
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-accent-green animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-                aria-hidden="true"
-              />
-              Sector-01
-            </span>
+          {/* Urgent Telemetry Readouts (only shown when active incidents/breakdowns/offline exist) */}
+          {hasUrgentTelemetry && (
+            <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono tabular-nums mb-3">
+              {incidentCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red font-medium">
+                  <AlertTriangle className="w-3 h-3" />
+                  {incidentCount} Open
+                </span>
+              )}
+              {breakdownCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber font-medium">
+                  <Wrench className="w-3 h-3" />
+                  {breakdownCount} Breakdown
+                </span>
+              )}
+              {offlineMachineCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] font-medium">
+                  <Power className="w-3 h-3" />
+                  {offlineMachineCount} Offline
+                </span>
+              )}
+            </div>
+          )}
 
-            {/* Conditionally show urgent telemetry on active slide, or minimal on preview */}
-            {incidentCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red font-medium">
-                <AlertTriangle className="w-3 h-3" />
-                {incidentCount} Open
-              </span>
-            )}
-            {breakdownCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber font-medium">
-                <Wrench className="w-3 h-3" />
-                {breakdownCount} Breakdown
-              </span>
-            )}
-            {offlineMachineCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] font-medium">
-                <Power className="w-3 h-3" />
-                {offlineMachineCount} Offline
-              </span>
-            )}
-            {incidentCount === 0 && breakdownCount === 0 && offlineMachineCount === 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green font-medium">
-                Nominal
-              </span>
-            )}
-          </div>
-
-          {/* Operational Title & Subtitle (Asset Overline Removed per Design Feedback) */}
+          {/* Operational Title with Canonical Department Icon & Subtitle */}
           <div className="space-y-1.5">
-            <h2
-              className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
-              style={{
-                fontFamily:
-                  "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-              }}
-            >
-              {panel.title}
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center w-8 h-8 rounded-xl border border-black/[0.08] shadow-2xs shrink-0',
+                  panel.iconBgColor || 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
+                )}
+                aria-hidden="true"
+                data-testid={`hero-dept-icon-${panel.name}`}
+              >
+                {panel.icon ?? <FallbackDeptIcon className="w-4 h-4 text-[var(--accent-blue)]" />}
+              </span>
+              <h2
+                className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
+                style={{
+                  fontFamily:
+                    "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
+                }}
+              >
+                {panel.title}
+              </h2>
+            </div>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-[95%]">
               {assetSubtitle}
             </p>
@@ -572,31 +607,47 @@ export function HeroCardContent({
           </div>
         </div>
 
-        {/* Operational KPI Readout Strip filling the mid-card zone between CTAs and Telemetry Graph */}
-        <HeroOperationalKpiStrip panelName={panel.name} />
-
         {/* Live Telemetry Graph Across All Hero Cards */}
         <HeroTelemetryGraph panelName={panel.name} stats={panel.stats} />
       </div>
 
-      {/* Right Column: Full Bleed Image with Live Camera Feed HUD */}
+      {/* Right Column: Full Bleed Looping MP4 Video with Live Camera Feed HUD */}
       <div className="absolute top-0 right-0 w-[48%] sm:w-[50%] h-full group/img overflow-hidden rounded-r-2xl z-10">
         <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white/20 to-transparent z-10 pointer-events-none" />
-        <img
-          src={
-            failedImages.has(panel.image)
-              ? '/images/departments/overview.jpg'
-              : panel.image || '/images/departments/overview.jpg'
-          }
-          alt={`${panel.title} visual`}
-          className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
-          loading={isActive ? 'eager' : 'lazy'}
-          onError={() => {
-            if (!failedImages.has(panel.image)) {
-              onImageError(panel.image);
-            }
-          }}
-        />
+        {(() => {
+          const posterSrc = failedImages.has(panel.image)
+            ? '/images/departments/overview.jpg'
+            : panel.image || '/images/departments/overview.jpg';
+          const rawVideoSrc =
+            panel.video ||
+            (panel.image
+              ? panel.image.replace(/\.(jpg|jpeg|png|webp)$/i, '.mp4')
+              : '/images/departments/overview.mp4');
+          const resolvedVideoSrc = failedImages.has(rawVideoSrc)
+            ? '/images/departments/overview.mp4'
+            : rawVideoSrc;
+
+          return (
+            <video
+              key={resolvedVideoSrc}
+              src={resolvedVideoSrc}
+              poster={posterSrc}
+              aria-label={`${panel.title} visual`}
+              data-testid={`hero-video-${panel.name}`}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload={isActive ? 'auto' : 'metadata'}
+              className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
+              onError={() => {
+                if (!failedImages.has(rawVideoSrc)) {
+                  onImageError(rawVideoSrc);
+                }
+              }}
+            />
+          );
+        })()}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
 
         {/* Live Video HUD Pill (Top Left of Feed) */}

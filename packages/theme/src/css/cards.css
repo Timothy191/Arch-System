@@ -202,23 +202,27 @@
 }
 
 /* Gold animated steel border effect */
-.gold-steel-border {
+.gold-steel-border:not(.fixed, .absolute, .sticky) {
   position: relative;
-  border-radius: 20px;
+}
+
+.gold-steel-border-slim {
+  --gold-border-width: 1.5px;
 }
 
 .gold-steel-border::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 20px;
-  padding: 2px;
+  border-radius: inherit;
+  padding: var(--gold-border-width, 2px);
   background: linear-gradient(
     135deg,
     var(--arch15, #d4af37) 0%,
-    #f4d03f 25%,
-    var(--arch15, #d4af37) 50%,
-    #c5a017 75%,
+    #f4d03f 22%,
+    #fff6cc 45%,
+    var(--arch15, #d4af37) 65%,
+    #c5a017 82%,
     var(--arch15, #d4af37) 100%
   );
   background-size: 300% 300%;
@@ -228,7 +232,7 @@
   mask-composite: exclude;
   animation: gold-shimmer 3s ease-in-out infinite;
   animation-delay: var(--shimmer-delay, 0s);
-  opacity: 0.92;
+  opacity: 0.95;
   pointer-events: none;
   z-index: 25;
 }

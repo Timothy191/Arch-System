@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-23T01:50:00+02:00 - Inherited Border Radius & Fixed-Position Support for Gold Steel Border
+
+- **Purpose**: Allow `.gold-steel-border` and `.gold-steel-border-slim` to apply shiny animated metallic gold borders on `rounded-2xl` Hero Cards, `rounded-card` sections, and `fixed rounded-full` navigation bars (`MacMenuBar`) without overriding `position: fixed` or `border-radius`.
+- **Changes**:
+  - `packages/theme/src/css/cards.css`: Scoped `position: relative` to `.gold-steel-border:not(.fixed, .absolute, .sticky)`, changed `::before` `border-radius` to `inherit`, added specular highlight `#fff6cc`, and added `.gold-steel-border-slim` (`--gold-border-width: 1.5px`).
+- **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-22T14:10:00Z - IBM Plex Sans Primary Sans-Serif Typeface Alignment
 
 - **Purpose**: Standardize `IBM Plex Sans` as the primary sans-serif typeface in `@repo/theme` tokens and Tailwind preset while preserving `Inter`, `Outfit`, `Anurati`, and `JetBrains Mono` in the font stack.
