@@ -26,18 +26,22 @@ export interface SavePlantHourlySheetInput {
 }
 
 export interface LogPlantDelayInput {
+  id?: string;
   date: string;
   shift: PlantShiftType;
   circuit: string;
   category: PlantDelayCategory;
   impactType: PlantImpactType;
   startTime: string;
-  endTime: string;
-  durationMinutes: number;
+  endTime?: string;
+  durationMinutes?: number;
   reason: string;
   correctiveAction: string;
 }
 
+export interface QuickAddPlantEquipmentInput {
+  name: string;
+}
 export async function getPlantProcessingWorkspaceData(
   dateStr?: string
 ): Promise<PlantWorkspaceData> {
@@ -142,12 +146,14 @@ export async function getPlantProcessingWorkspaceData(
           category: (d.category as PlantDelayCategory) || 'Mechanical',
           impactType: 'Reduced Throughput',
           startTime: d.start_time ? d.start_time.slice(11, 16) : '08:00',
-          endTime: d.end_time ? d.end_time.slice(11, 16) : '08:20',
-          durationMinutes: Math.max(1, Math.round(Number(d.duration_hours ?? 0.25) * 60)),
+          endTime: d.end_time ? d.end_time.slice(11, 16) : '',
+          durationMinutes: d.end_time
+            ? Math.max(1, Math.round(Number(d.duration_hours ?? 0.25) * 60))
+            : 0,
           reason: d.reason || 'Plant operational delay logged',
           correctiveAction: 'Circuit inspected and restored to nominal feed rate',
           loggedBy: operatorLabel,
-          status: 'Resolved',
+          status: d.end_time ? 'Resolved' : 'Active',
         }));
         return {
           departmentId,
@@ -237,7 +243,7 @@ export async function savePlantHourlySheetAction(
 
 export async function logPlantDelayAction(
   input: LogPlantDelayInput
-): Promise<{ success: boolean; entry: PlantDelayEntry; message: string }> {
+): Promise<{ success: boolean; entry: PlantDelayEntry; message: string; isUpdate: boolean }> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -249,21 +255,29 @@ export async function logPlantDelayAction(
     user?.email?.split('@')[0] ||
     'Plant Control Operator';
 
+  const trimmedEndTime = (input.endTime ?? '').trim();
+  const hasEndTime = trimmedEndTime.length > 0;
+  const durationMinutes = hasEndTime ? Math.max(1, Number(input.durationMinutes) || 15) : 0;
+  const isUpdate = Boolean(input.id);
+
   const newEntry: PlantDelayEntry = {
-    id: `delay-pp-${Date.now()}`,
+    id: input.id || `delay-pp-${Date.now()}`,
     date: input.date,
     shift: input.shift,
     circuit: input.circuit,
     category: input.category,
     impactType: input.impactType,
     startTime: input.startTime,
-    endTime: input.endTime,
-    durationMinutes: Math.max(1, Number(input.durationMinutes) || 15),
+    endTime: trimmedEndTime,
+    durationMinutes,
     reason: input.reason.trim(),
     correctiveAction:
-      input.correctiveAction.trim() || 'Logged for metallurgical & maintenance review',
+      input.correctiveAction.trim() ||
+      (hasEndTime
+        ? 'Logged for metallurgical & maintenance review'
+        : 'Booked in — awaiting delay resolution and end time'),
     loggedBy,
-    status: 'Resolved',
+    status: hasEndTime ? 'Resolved' : 'Active',
   };
 
   try {
@@ -277,14 +291,32 @@ export async function logPlantDelayAction(
     const employeeId = authContext?.employee?.id ?? user?.id;
 
     if (departmentId && employeeId) {
-      await supabase.from('operational_delays').insert({
-        department_id: departmentId,
-        delay_type: input.circuit,
-        category: input.category,
-        duration_hours: Number((newEntry.durationMinutes / 60).toFixed(2)),
-        reason: `${input.reason} | Action: ${newEntry.correctiveAction}`,
-        logged_by: employeeId,
-      });
+      const startIso = `${input.date}T${input.startTime}:00.000Z`;
+      const endIso = hasEndTime ? `${input.date}T${trimmedEndTime}:00.000Z` : null;
+      if (isUpdate && input.id) {
+        await supabase
+          .from('operational_delays')
+          .update({
+            delay_type: input.circuit,
+            category: input.category,
+            start_time: startIso,
+            end_time: endIso,
+            duration_hours: hasEndTime ? Number((newEntry.durationMinutes / 60).toFixed(2)) : 0,
+            reason: `${input.reason} | Action: ${newEntry.correctiveAction}`,
+          })
+          .eq('id', input.id);
+      } else {
+        await supabase.from('operational_delays').insert({
+          department_id: departmentId,
+          delay_type: input.circuit,
+          category: input.category,
+          start_time: startIso,
+          end_time: endIso,
+          duration_hours: hasEndTime ? Number((newEntry.durationMinutes / 60).toFixed(2)) : 0,
+          reason: `${input.reason} | Action: ${newEntry.correctiveAction}`,
+          logged_by: employeeId,
+        });
+      }
     }
 
     await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(
@@ -296,9 +328,63 @@ export async function logPlantDelayAction(
     // Graceful fallback when running against preview DB
   }
 
+  const message = isUpdate
+    ? hasEndTime
+      ? `Updated delay on ${newEntry.circuit} — End Time ${newEntry.endTime} logged (${newEntry.durationMinutes} min, Resolved).`
+      : `Updated open delay on ${newEntry.circuit} (Booked in at ${newEntry.startTime}).`
+    : hasEndTime
+      ? `Logged ${newEntry.durationMinutes} min delay on ${newEntry.circuit}.`
+      : `Booked in active delay on ${newEntry.circuit} at ${newEntry.startTime} (awaiting End Time).`;
+
   return {
     success: true,
     entry: newEntry,
-    message: `Logged ${newEntry.durationMinutes} min delay on ${newEntry.circuit}.`,
+    message,
+    isUpdate,
+  };
+}
+
+export async function quickAddPlantEquipmentAction(
+  input: QuickAddPlantEquipmentInput
+): Promise<{ success: boolean; equipmentName: string; message: string }> {
+  const equipmentName = input.name.trim();
+  if (!equipmentName) {
+    return {
+      success: false,
+      equipmentName: '',
+      message: 'Equipment name is required.',
+    };
+  }
+
+  const supabase = await createServerSupabaseClient();
+
+  try {
+    const { data: deptRow } = await supabase
+      .from('departments')
+      .select('id')
+      .eq('name', 'plant-processing')
+      .maybeSingle();
+
+    const departmentId = (deptRow as { id?: string } | null)?.id ?? null;
+
+    await supabase.from('machines').insert({
+      name: equipmentName,
+      machine_type: 'Plant Equipment',
+      active: true,
+      ...(departmentId ? { department_id: departmentId } : {}),
+    });
+
+    await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(
+      () => undefined
+    );
+    revalidatePath('/plant-processing/delays');
+  } catch {
+    // Graceful fallback when running against preview DB
+  }
+
+  return {
+    success: true,
+    equipmentName,
+    message: `Added equipment "${equipmentName}" to Plant & Processing database.`,
   };
 }

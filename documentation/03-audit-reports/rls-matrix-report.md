@@ -1,6 +1,6 @@
 # 4-Operation Row-Level Security (RLS) Coverage Matrix Report
 
-Generated on 2026-10-22T06:45:17.633Z
+Generated on 2026-10-22T08:34:41.304Z
 
 ## Summary Metrics
 

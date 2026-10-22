@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
 import Link from 'next/link';
+import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
 import { getDepartmentContext } from '~/lib/dept-context';
@@ -18,6 +19,10 @@ export default async function HistoryPage({
     department: deptSlug,
   });
 
+  if (deptSlug === 'plant-inventory') {
+    return <PlantInventoryWorkspaceClient mode="stock-required" today={today} />;
+  }
+
   if (deptSlug === 'plant-processing') {
     const plantData = await getPlantProcessingWorkspaceData(today);
     return (
@@ -28,7 +33,6 @@ export default async function HistoryPage({
       />
     );
   }
-
   const to = toParam || new Date().toISOString().split('T')[0];
   const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 

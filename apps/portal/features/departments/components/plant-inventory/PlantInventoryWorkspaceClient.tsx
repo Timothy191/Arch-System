@@ -1,0 +1,1211 @@
+'use client';
+
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Input } from '@repo/ui/Input';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ClipboardList,
+  History,
+  PackagePlus,
+  Plus,
+  RefreshCw,
+  Search,
+} from 'lucide-react';
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+export type PlantInventoryViewMode =
+  | 'inventory-list'
+  | 'item-list'
+  | 'stock-required'
+  | 'history-of-used';
+
+export interface PlantInventoryStockItem {
+  id: string;
+  stock: string;
+  code: string;
+  category: 'Dense Medium' | 'Reagents' | 'Wear Spares' | 'Screening & Crushing' | 'Stockpiles';
+  description: string;
+  amountRequired: number;
+  amountPresent: number;
+  unit: string;
+}
+
+export interface PlantInventoryUsageEntry {
+  id: string;
+  date: string;
+  shift: 'Day' | 'Night';
+  stockId: string;
+  stock: string;
+  description: string;
+  amountUsed: number;
+  unit: string;
+  circuitArea: string;
+  loggedBy: string;
+}
+
+const STOCK_STORAGE_KEY = 'arch_plant_inventory_stock_v1';
+const USAGE_STORAGE_KEY = 'arch_plant_inventory_usage_v1';
+
+export const INITIAL_PLANT_STOCK_ITEMS: readonly PlantInventoryStockItem[] = [
+  {
+    id: 'mag-superfine-fe3o4',
+    stock: 'Magnetite Superfine Medium (96% Fe3O4)',
+    code: 'DM-MAG-45UM',
+    category: 'Dense Medium',
+    description: '45μm PSD dense medium separation magnetite for Primary & Secondary DMC circuits',
+    amountRequired: 180,
+    amountPresent: 148.5,
+    unit: 't',
+  },
+  {
+    id: 'floc-anionic-934sh',
+    stock: 'Anionic Flocculant SNF AN-934SH',
+    code: 'RG-FLOC-934',
+    category: 'Reagents',
+    description: 'High-molecular-weight polymer powder for tailings thickener clarification',
+    amountRequired: 40,
+    amountPresent: 44,
+    unit: 'bags (25kg)',
+  },
+  {
+    id: 'frother-mibc-bulk',
+    stock: 'MIBC Frother Reagent (IBC Bulk)',
+    code: 'RG-MIBC-1000',
+    category: 'Reagents',
+    description: 'Methyl Isobutyl Carbinol flotation frother for fines beneficiation cells',
+    amountRequired: 6000,
+    amountPresent: 4200,
+    unit: 'L',
+  },
+  {
+    id: 'dmc-vortex-finders',
+    stock: 'Dense Medium Cyclone Vortex Finders',
+    code: 'DMC-850-VF-NI',
+    category: 'Wear Spares',
+    description: 'Ni-Hard 4 high-chrome liner vortex finders for 850mm Primary DMC module',
+    amountRequired: 4,
+    amountPresent: 2,
+    unit: 'units',
+  },
+  {
+    id: 'banana-screen-panels-32',
+    stock: 'Banana Screen Polyurethane Panels (32mm)',
+    code: 'SC-PU-305x610-32',
+    category: 'Screening & Crushing',
+    description: 'Modular pin-and-sleeve polyurethane deck panels for desliming & sizing screens',
+    amountRequired: 48,
+    amountPresent: 48,
+    unit: 'panels',
+  },
+  {
+    id: 'jaw-toggle-plates',
+    stock: 'Primary Jaw Crusher Toggle Plates',
+    code: 'CR-JW-1104-TP',
+    category: 'Screening & Crushing',
+    description: 'Machined cast-steel overload protection toggle plates for primary ROM sizer',
+    amountRequired: 3,
+    amountPresent: 4,
+    unit: 'sets',
+  },
+  {
+    id: 'warman-impellers-10-8',
+    stock: 'Warman 10/8 Slurry Pump Impellers',
+    code: 'WP-10/8-AH-A05',
+    category: 'Wear Spares',
+    description: '5-vane high-chrome A05 alloy impellers for correct medium & underflow pumps',
+    amountRequired: 4,
+    amountPresent: 3,
+    unit: 'units',
+  },
+  {
+    id: 'centrifuge-baskets-w1400',
+    stock: ' Coarse Coal Centrifuge Wedge-Wire Baskets',
+    code: 'CF-WW-1400-05',
+    category: 'Wear Spares',
+    description: '0.5mm aperture stainless wedge-wire dewatering baskets for product centrifuges',
+    amountRequired: 2,
+    amountPresent: 2,
+    unit: 'baskets',
+  },
+];
+
+export const INITIAL_PLANT_USAGE_HISTORY: readonly PlantInventoryUsageEntry[] = [
+  {
+    id: 'use-101',
+    date: '2026-10-22',
+    shift: 'Day',
+    stockId: 'mag-superfine-fe3o4',
+    stock: 'Magnetite Superfine Medium (96% Fe3O4)',
+    description:
+      'Silo #1 top-up to Primary DMC correct medium sump during high-ash Seam 2 campaign',
+    amountUsed: 12.5,
+    unit: 't',
+    circuitArea: 'Primary DMC Module A',
+    loggedBy: 'S. Mokoena (Metallurgist)',
+  },
+  {
+    id: 'use-102',
+    date: '2026-10-21',
+    shift: 'Night',
+    stockId: 'banana-screen-panels-32',
+    stock: 'Banana Screen Polyurethane Panels (32mm)',
+    description: 'Replaced worn impact-zone panels on Secondary Sizing Screen Deck #2',
+    amountUsed: 8,
+    unit: 'panels',
+    circuitArea: 'Desliming & Sizing Deck #2',
+    loggedBy: 'T. Khumalo (Plant Artisan)',
+  },
+  {
+    id: 'use-103',
+    date: '2026-10-21',
+    shift: 'Day',
+    stockId: 'floc-anionic-934sh',
+    stock: 'Anionic Flocculant SNF AN-934SH',
+    description: 'Dosing skid Tank A batch make-up for 1.32 SG thickener underflow target',
+    amountUsed: 6,
+    unit: 'bags (25kg)',
+    circuitArea: 'Tailings Thickener Skid A',
+    loggedBy: 'L. Ndlovu (Process Operator)',
+  },
+  {
+    id: 'use-104',
+    date: '2026-10-20',
+    shift: 'Day',
+    stockId: 'dmc-vortex-finders',
+    stock: 'Dense Medium Cyclone Vortex Finders',
+    description: 'Scheduled wear changeout on Primary Cyclone #3 during planned maintenance window',
+    amountUsed: 1,
+    unit: 'units',
+    circuitArea: 'Primary & Secondary DMC Module',
+    loggedBy: 'R. Botha (Mechanical Foreman)',
+  },
+  {
+    id: 'use-105',
+    date: '2026-10-19',
+    shift: 'Night',
+    stockId: 'frother-mibc-bulk',
+    stock: 'MIBC Frother Reagent (IBC Bulk)',
+    description: 'Transferred to flotation header tank for ultra-fine coal recovery circuit',
+    amountUsed: 450,
+    unit: 'L',
+    circuitArea: 'Fines Flotation Bank',
+    loggedBy: 'L. Ndlovu (Process Operator)',
+  },
+];
+
+function formatQty(value: number): string {
+  return Number.isInteger(value)
+    ? value.toLocaleString()
+    : value.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+}
+
+export function PlantInventoryWorkspaceClient({
+  mode,
+  today,
+}: {
+  mode: PlantInventoryViewMode;
+  today: string;
+}) {
+  const [stockItems, setStockItems] = useState<PlantInventoryStockItem[]>(() => [
+    ...INITIAL_PLANT_STOCK_ITEMS,
+  ]);
+  const [usageHistory, setUsageHistory] = useState<PlantInventoryUsageEntry[]>(() => [
+    ...INITIAL_PLANT_USAGE_HISTORY,
+  ]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
+  // Add Item Form State (used in `item-list` view)
+  const [newStockName, setNewStockName] = useState('');
+  const [newStockCode, setNewStockCode] = useState('');
+  const [newCategory, setNewCategory] =
+    useState<PlantInventoryStockItem['category']>('Wear Spares');
+  const [newDescription, setNewDescription] = useState('');
+  const [newAmountRequired, setNewAmountRequired] = useState('');
+  const [newAmountPresent, setNewAmountPresent] = useState('');
+  const [newUnit, setNewUnit] = useState('units');
+  const [formFeedback, setFormFeedback] = useState<string | null>(null);
+
+  // Log Usage Form State (used in `history-of-used` view)
+  const [usageStockId, setUsageStockId] = useState<string>(
+    INITIAL_PLANT_STOCK_ITEMS[0]?.id ?? 'mag-superfine-fe3o4'
+  );
+  const [usageAmount, setUsageAmount] = useState('');
+  const [usageShift, setUsageShift] = useState<'Day' | 'Night'>('Day');
+  const [usageCircuit, setUsageCircuit] = useState('Primary DMC Module');
+  const [usageNotes, setUsageNotes] = useState('');
+  const [usageOperator, setUsageOperator] = useState('Plant Shift Supervisor');
+  const [usageFeedback, setUsageFeedback] = useState<string | null>(null);
+
+  // Hydrate persisted inventory & usage history from localStorage on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const rawStock = window.localStorage.getItem(STOCK_STORAGE_KEY);
+      if (rawStock) {
+        const parsed = JSON.parse(rawStock) as PlantInventoryStockItem[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStockItems(parsed);
+        }
+      }
+      const rawUsage = window.localStorage.getItem(USAGE_STORAGE_KEY);
+      if (rawUsage) {
+        const parsedUsage = JSON.parse(rawUsage) as PlantInventoryUsageEntry[];
+        if (Array.isArray(parsedUsage) && parsedUsage.length > 0) {
+          setUsageHistory(parsedUsage);
+        }
+      }
+    } catch {
+      // Ignore storage read errors in restricted environments
+    }
+  }, []);
+
+  const persistStockItems = (nextItems: PlantInventoryStockItem[]) => {
+    setStockItems(nextItems);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(nextItems));
+      } catch {
+        // Ignore storage quota errors
+      }
+    }
+  };
+
+  const persistUsageHistory = (nextHistory: PlantInventoryUsageEntry[]) => {
+    setUsageHistory(nextHistory);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(nextHistory));
+      } catch {
+        // Ignore storage quota errors
+      }
+    }
+  };
+
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedStock = newStockName.trim();
+    const trimmedDesc = newDescription.trim();
+    const reqNum = Number(newAmountRequired);
+    const presNum = Number(newAmountPresent);
+
+    if (
+      !trimmedStock ||
+      !trimmedDesc ||
+      Number.isNaN(reqNum) ||
+      reqNum < 0 ||
+      Number.isNaN(presNum) ||
+      presNum < 0
+    ) {
+      setFormFeedback(
+        'Please provide a valid stock name, description, amount required, and amount present.'
+      );
+      return;
+    }
+
+    const generatedCode =
+      newStockCode.trim().toUpperCase() ||
+      `PI-${trimmedStock
+        .slice(0, 4)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, 'X')}-${String(stockItems.length + 101)}`;
+
+    const createdItem: PlantInventoryStockItem = {
+      id: `item-${Date.now()}`,
+      stock: trimmedStock,
+      code: generatedCode,
+      category: newCategory,
+      description: trimmedDesc,
+      amountRequired: reqNum,
+      amountPresent: presNum,
+      unit: newUnit.trim() || 'units',
+    };
+
+    const updated = [createdItem, ...stockItems];
+    persistStockItems(updated);
+
+    setNewStockName('');
+    setNewStockCode('');
+    setNewDescription('');
+    setNewAmountRequired('');
+    setNewAmountPresent('');
+    setFormFeedback(`Added "${createdItem.stock}" to the Plant Inventory stock list.`);
+  };
+
+  const handleRestockItem = (itemId: string) => {
+    const updated = stockItems.map((item) =>
+      item.id === itemId ? { ...item, amountPresent: item.amountRequired } : item
+    );
+    persistStockItems(updated);
+  };
+
+  const handleRecordUsage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetItem = stockItems.find((i) => i.id === usageStockId);
+    const usedNum = Number(usageAmount);
+    if (!targetItem || Number.isNaN(usedNum) || usedNum <= 0) {
+      setUsageFeedback('Please enter a valid positive quantity used.');
+      return;
+    }
+
+    const entry: PlantInventoryUsageEntry = {
+      id: `use-${Date.now()}`,
+      date: today,
+      shift: usageShift,
+      stockId: targetItem.id,
+      stock: targetItem.stock,
+      description: usageNotes.trim() || targetItem.description,
+      amountUsed: usedNum,
+      unit: targetItem.unit,
+      circuitArea: usageCircuit.trim() || 'CHPP Main Circuit',
+      loggedBy: usageOperator.trim() || 'Plant Operator',
+    };
+
+    const nextHistory = [entry, ...usageHistory];
+    persistUsageHistory(nextHistory);
+
+    const nextStock = stockItems.map((item) =>
+      item.id === targetItem.id
+        ? { ...item, amountPresent: Math.max(0, Number((item.amountPresent - usedNum).toFixed(2))) }
+        : item
+    );
+    persistStockItems(nextStock);
+
+    setUsageAmount('');
+    setUsageNotes('');
+    setUsageFeedback(`Logged ${usedNum} ${targetItem.unit} of "${targetItem.stock}" used.`);
+  };
+
+  const filteredStockItems = useMemo(() => {
+    return stockItems.filter((item) => {
+      const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesQuery =
+        !q ||
+        item.stock.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.code.toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
+    });
+  }, [stockItems, selectedCategory, searchQuery]);
+
+  const stockRequiredItems = useMemo(
+    () => filteredStockItems.filter((item) => item.amountPresent < item.amountRequired),
+    [filteredStockItems]
+  );
+
+  const totalRequiredCount = useMemo(
+    () => stockItems.filter((item) => item.amountPresent < item.amountRequired).length,
+    [stockItems]
+  );
+
+  const nominalCount = stockItems.length - totalRequiredCount;
+
+  // ─── 1. INVENTORY LIST (/plant-inventory/daily-log) ────────────────────────
+  if (mode === 'inventory-list') {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <ClipboardList className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Inventory List</h2>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Live CHPP reagents, dense medium magnetite, crusher spares, and consumables balance
+              ledger.
+            </p>
+          </div>
+          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+            Operational Date:{' '}
+            <span className="font-semibold text-[var(--text-heading)]">{today}</span>
+          </div>
+        </div>
+
+        {/* Summary KPI Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <GlassCard>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Total Stock Lines
+            </p>
+            <p className="text-2xl font-bold font-mono text-[var(--text-heading)] mt-1">
+              {stockItems.length}
+            </p>
+          </GlassCard>
+          <GlassCard>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Nominal Stock Levels
+            </p>
+            <p className="text-2xl font-bold font-mono text-[var(--accent-green)] mt-1">
+              {nominalCount}
+            </p>
+          </GlassCard>
+          <GlassCard>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Stock Required Alerts
+            </p>
+            <p className="text-2xl font-bold font-mono text-[var(--accent-alert)] mt-1">
+              {totalRequiredCount}
+            </p>
+          </GlassCard>
+        </div>
+
+        {/* Filter Bar */}
+        <GlassCard className="p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="relative flex-1">
+              <Search
+                className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                aria-hidden="true"
+              />
+              <Input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search stock, code, or description..."
+                aria-label="Search inventory list"
+                className="pl-9 w-full"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(
+                ['ALL', 'Dense Medium', 'Reagents', 'Wear Spares', 'Screening & Crushing'] as const
+              ).map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    selectedCategory === cat
+                      ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30'
+                      : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:text-[var(--text-heading)]'
+                  }`}
+                >
+                  {cat === 'ALL' ? 'All Categories' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Inventory List Table: Stock, Description, Amount Required, Amount Present */}
+        <GlassCard className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left" aria-label="Plant Inventory List">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Stock
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Description
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Required
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Present
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]">
+                {filteredStockItems.map((item) => {
+                  const isShortfall = item.amountPresent < item.amountRequired;
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                    >
+                      <td className="px-6 py-4 align-top">
+                        <div className="font-semibold text-sm text-[var(--text-heading)]">
+                          {item.stock}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                            {item.code}
+                          </span>
+                          <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                            {item.category}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] max-w-md">
+                        {item.description}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-medium text-[var(--text-heading)] whitespace-nowrap">
+                        {formatQty(item.amountRequired)} {item.unit}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-2 justify-end">
+                          <span
+                            className={`font-mono text-sm font-bold ${
+                              isShortfall
+                                ? 'text-[var(--accent-alert)]'
+                                : 'text-[var(--accent-green)]'
+                            }`}
+                          >
+                            {formatQty(item.amountPresent)} {item.unit}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 text-[11px] font-medium rounded-full border ${
+                              isShortfall
+                                ? 'bg-[var(--accent-alert)]/10 border-[var(--accent-alert)]/30 text-[var(--accent-alert)]'
+                                : 'bg-[var(--accent-green)]/10 border-[var(--accent-green)]/30 text-[var(--accent-green)]'
+                            }`}
+                          >
+                            {isShortfall ? 'Replenish' : 'Nominal'}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filteredStockItems.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-8 text-center text-sm text-[var(--text-muted)]"
+                    >
+                      No stock items match the current filter criteria.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  // ─── 2. ITEM LIST (/plant-inventory/machines) ──────────────────────────────
+  if (mode === 'item-list') {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <PackagePlus className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Item List</h2>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Register new stock items, spare parts, or reagents into the Plant Inventory master
+              stock list.
+            </p>
+          </div>
+          <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+            Catalog Items:{' '}
+            <strong className="text-[var(--text-heading)]">{stockItems.length}</strong>
+          </span>
+        </div>
+
+        {/* Add New Item to Stock List Form */}
+        <GlassCard>
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
+              <Plus className="w-4 h-4 text-[var(--accent-blue)]" aria-hidden="true" />
+              Add New Item to Stock List
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+              New items added here are immediately synchronized with Inventory List and Stock
+              Required views.
+            </p>
+          </div>
+
+          <form onSubmit={handleAddItem} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="plant-item-stock"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                >
+                  Stock Name
+                </label>
+                <Input
+                  id="plant-item-stock"
+                  type="text"
+                  required
+                  value={newStockName}
+                  onChange={(e) => setNewStockName(e.target.value)}
+                  placeholder="e.g. Secondary Cyclone Apex Insert"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="plant-item-code"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                >
+                  Part / Stock Code
+                </label>
+                <Input
+                  id="plant-item-code"
+                  type="text"
+                  value={newStockCode}
+                  onChange={(e) => setNewStockCode(e.target.value)}
+                  placeholder="e.g. DMC-650-APX"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="plant-item-category"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                >
+                  Category
+                </label>
+                <select
+                  id="plant-item-category"
+                  value={newCategory}
+                  onChange={(e) =>
+                    setNewCategory(e.target.value as PlantInventoryStockItem['category'])
+                  }
+                  className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+                >
+                  <option value="Wear Spares">Wear Spares</option>
+                  <option value="Dense Medium">Dense Medium</option>
+                  <option value="Reagents">Reagents</option>
+                  <option value="Screening & Crushing">Screening &amp; Crushing</option>
+                  <option value="Stockpiles">Stockpiles</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="plant-item-description"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                >
+                  Description
+                </label>
+                <Input
+                  id="plant-item-description"
+                  type="text"
+                  required
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Circuit location, specification, and operational purpose"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="plant-item-required"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                >
+                  Amount Required
+                </label>
+                <Input
+                  id="plant-item-required"
+                  type="number"
+                  min="0"
+                  step="any"
+                  required
+                  value={newAmountRequired}
+                  onChange={(e) => setNewAmountRequired(e.target.value)}
+                  placeholder="e.g. 12"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label
+                    htmlFor="plant-item-present"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  >
+                    Amount Present
+                  </label>
+                  <Input
+                    id="plant-item-present"
+                    type="number"
+                    min="0"
+                    step="any"
+                    required
+                    value={newAmountPresent}
+                    onChange={(e) => setNewAmountPresent(e.target.value)}
+                    placeholder="e.g. 8"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="plant-item-unit"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  >
+                    Unit
+                  </label>
+                  <Input
+                    id="plant-item-unit"
+                    type="text"
+                    value={newUnit}
+                    onChange={(e) => setNewUnit(e.target.value)}
+                    placeholder="units / t / L"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+              {formFeedback ? (
+                <p className="text-xs font-medium text-[var(--accent-blue)]" role="status">
+                  {formFeedback}
+                </p>
+              ) : (
+                <span className="text-xs text-[var(--text-muted)]">
+                  All fields marked required must be completed before adding to stock list.
+                </span>
+              )}
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-blue)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" aria-hidden="true" />
+                Add Item to Stock List
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+
+        {/* Master Item List Table */}
+        <GlassCard className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left" aria-label="Registered Stock Item List">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Stock
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Description
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Required
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Present
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]">
+                {stockItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-[var(--bg-secondary)]/60 transition-colors">
+                    <td className="px-6 py-4 align-top">
+                      <div className="font-semibold text-sm text-[var(--text-heading)]">
+                        {item.stock}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs font-mono text-[var(--text-muted)]">
+                          {item.code}
+                        </span>
+                        <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                          {item.category}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)]">
+                      {item.description}
+                    </td>
+                    <td className="px-6 py-4 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                      {formatQty(item.amountRequired)} {item.unit}
+                    </td>
+                    <td className="px-6 py-4 align-top text-right font-mono text-sm font-semibold text-[var(--text-heading)] whitespace-nowrap">
+                      {formatQty(item.amountPresent)} {item.unit}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  // ─── 3. STOCK REQUIRED (/plant-inventory/history) ──────────────────────────
+  if (mode === 'stock-required') {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-6 h-6 text-[var(--accent-alert)]" aria-hidden="true" />
+              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Stock Required</h2>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Replenishment queue for plant consumables, reagents, and wear spares below required
+              par levels.
+            </p>
+          </div>
+          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+            Items Requiring Replenishment:{' '}
+            <strong className="text-[var(--accent-alert)]">{stockRequiredItems.length}</strong>
+          </div>
+        </div>
+
+        <GlassCard className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left" aria-label="Stock Required Table">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Stock
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                  >
+                    Description
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Required
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Amount Present
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Shortfall
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-default)]">
+                {stockRequiredItems.map((item) => {
+                  const shortfall = Math.max(
+                    0,
+                    Number((item.amountRequired - item.amountPresent).toFixed(2))
+                  );
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                    >
+                      <td className="px-6 py-4 align-top">
+                        <div className="font-semibold text-sm text-[var(--text-heading)]">
+                          {item.stock}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                            {item.code}
+                          </span>
+                          <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                            {item.category}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] max-w-md">
+                        {item.description}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                        {formatQty(item.amountRequired)} {item.unit}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                        {formatQty(item.amountPresent)} {item.unit}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                        -{formatQty(shortfall)} {item.unit}
+                      </td>
+                      <td className="px-6 py-4 align-top text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleRestockItem(item.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-default)] text-xs font-semibold text-[var(--text-heading)] hover:border-[var(--accent-blue)] transition-colors"
+                        >
+                          <RefreshCw
+                            className="w-3.5 h-3.5 text-[var(--accent-blue)]"
+                            aria-hidden="true"
+                          />
+                          Mark Restocked
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {stockRequiredItems.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center">
+                      <div className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent-green)]">
+                        <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                        All plant inventory items meet or exceed their required par quantities.
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  // ─── 4. HISTORY OF USED (/plant-inventory/tools) ───────────────────────────
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <History className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
+            <h2 className="text-2xl font-bold text-[var(--text-heading)]">History of Used</h2>
+          </div>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
+            Chronological consumption log of reagents, magnetite medium, and critical wear spares
+            drawn across shifts.
+          </p>
+        </div>
+        <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          Recorded Drawdowns:{' '}
+          <strong className="text-[var(--text-heading)]">{usageHistory.length}</strong>
+        </div>
+      </div>
+
+      {/* Log Stock Used Form */}
+      <GlassCard>
+        <div className="mb-4">
+          <h3 className="text-base font-bold text-[var(--text-heading)]">Record Stock Used</h3>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            Logging stock usage automatically deducts the quantity from Amount Present in the
+            Inventory List.
+          </p>
+        </div>
+
+        <form onSubmit={handleRecordUsage} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <label
+                htmlFor="usage-stock-select"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Stock Item
+              </label>
+              <select
+                id="usage-stock-select"
+                value={usageStockId}
+                onChange={(e) => setUsageStockId(e.target.value)}
+                className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+              >
+                {stockItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.stock} ({formatQty(item.amountPresent)} {item.unit} present)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="usage-amount-input"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Amount Used
+              </label>
+              <Input
+                id="usage-amount-input"
+                type="number"
+                min="0.1"
+                step="any"
+                required
+                value={usageAmount}
+                onChange={(e) => setUsageAmount(e.target.value)}
+                placeholder="e.g. 4"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="usage-shift-select"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Shift
+              </label>
+              <select
+                id="usage-shift-select"
+                value={usageShift}
+                onChange={(e) => setUsageShift(e.target.value as 'Day' | 'Night')}
+                className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+              >
+                <option value="Day">Day Shift</option>
+                <option value="Night">Night Shift</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="usage-circuit-input"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Circuit / Work Area
+              </label>
+              <Input
+                id="usage-circuit-input"
+                type="text"
+                value={usageCircuit}
+                onChange={(e) => setUsageCircuit(e.target.value)}
+                placeholder="e.g. Primary DMC Module"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="usage-notes-input"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Usage Description / Work Order
+              </label>
+              <Input
+                id="usage-notes-input"
+                type="text"
+                value={usageNotes}
+                onChange={(e) => setUsageNotes(e.target.value)}
+                placeholder="Reason for drawdown or maintenance note"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="usage-operator-input"
+                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+              >
+                Logged By
+              </label>
+              <Input
+                id="usage-operator-input"
+                type="text"
+                value={usageOperator}
+                onChange={(e) => setUsageOperator(e.target.value)}
+                placeholder="Operator / Metallurgist name"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            {usageFeedback ? (
+              <p className="text-xs font-medium text-[var(--accent-blue)]" role="status">
+                {usageFeedback}
+              </p>
+            ) : (
+              <span className="text-xs text-[var(--text-muted)]">
+                Each entry is recorded with shift timestamp and operator attribution.
+              </span>
+            )}
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-blue)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Record Used Stock
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+
+      {/* History of Used Table */}
+      <GlassCard className="overflow-hidden p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left" aria-label="History of Used Stock">
+            <thead>
+              <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                >
+                  Date &amp; Shift
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                >
+                  Stock
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                >
+                  Description
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                >
+                  Amount Used
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                >
+                  Logged By
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-default)]">
+              {usageHistory.map((entry) => (
+                <tr key={entry.id} className="hover:bg-[var(--bg-secondary)]/60 transition-colors">
+                  <td className="px-6 py-4 align-top whitespace-nowrap">
+                    <div className="text-sm font-mono font-semibold text-[var(--text-heading)]">
+                      {entry.date}
+                    </div>
+                    <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                      {entry.shift} Shift
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 align-top">
+                    <div className="font-semibold text-sm text-[var(--text-heading)]">
+                      {entry.stock}
+                    </div>
+                    <div className="text-xs text-[var(--accent-blue)] mt-0.5">
+                      {entry.circuitArea}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] max-w-md">
+                    {entry.description}
+                  </td>
+                  <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--text-heading)] whitespace-nowrap">
+                    {formatQty(entry.amountUsed)} {entry.unit}
+                  </td>
+                  <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                    {entry.loggedBy}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}

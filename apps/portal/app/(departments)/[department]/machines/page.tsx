@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 
 export default async function MachinesPage({
@@ -12,10 +13,12 @@ export default async function MachinesPage({
   if (deptSlug === 'plant-processing') {
     redirect('/plant-processing/delays');
   }
-  const { supabase } = await getDepartmentContext({
+  const { supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
-
+  if (deptSlug === 'plant-inventory') {
+    return <PlantInventoryWorkspaceClient mode="item-list" today={today} />;
+  }
   let machinesQuery = supabase
     .from('machines')
     .select(

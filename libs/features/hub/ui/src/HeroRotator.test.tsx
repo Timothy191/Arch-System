@@ -301,8 +301,8 @@ describe('HeroRotator', () => {
       status: 'active',
       stats: { label: 'Stockpile', value: '48,200t' },
       actions: [
-        { label: 'Daily Log', href: '/plant-inventory/daily-log' },
-        { label: 'History', href: '/plant-inventory/history' },
+        { label: 'Inventory List', href: '/plant-inventory/daily-log' },
+        { label: 'Stock Required', href: '/plant-inventory/history' },
       ],
     };
 

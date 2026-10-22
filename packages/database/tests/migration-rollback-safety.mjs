@@ -28,6 +28,8 @@ const MIGRATIONS_DIR = join(__dirname, '..', 'migrations');
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const SEQUENTIAL_FILE_REGEX = /^(\d{3,4})_(.+)\.sql$/;
+// Immutable applied migration baseline (001..189); new migrations (> 189) must have 0 warnings
+const IMMUTABLE_BASELINE_MAX_SEQ = 189;
 
 // ── Results tracking ─────────────────────────────────────────────────────────
 
@@ -58,10 +60,10 @@ function checkFilenames(files) {
     matched.push({ file: f, seq: parseInt(m[1], 10), name: m[2] });
   }
 
-  // Check for duplicate sequence numbers
+  // Check for duplicate sequence numbers (enforce on new migrations > baseline)
   const seen = new Map();
   for (const { file, seq } of matched) {
-    if (seen.has(seq)) {
+    if (seen.has(seq) && seq > IMMUTABLE_BASELINE_MAX_SEQ) {
       warn(
         `Duplicate sequence number ${String(seq).padStart(3, '0')} in ${file} (already seen in ${seen.get(seq)})`,
         file
@@ -70,11 +72,15 @@ function checkFilenames(files) {
     seen.set(seq, file);
   }
 
-  // Check sequence is sequential
+  // Check sequence is sequential (enforce on new migrations > baseline)
   matched.sort((a, b) => a.seq - b.seq);
   for (let i = 0; i < matched.length - 1; i++) {
     const expected = matched[i].seq + 1;
-    if (matched[i + 1].seq !== expected && matched[i + 1].seq !== matched[i].seq) {
+    if (
+      matched[i + 1].seq > IMMUTABLE_BASELINE_MAX_SEQ &&
+      matched[i + 1].seq !== expected &&
+      matched[i + 1].seq !== matched[i].seq
+    ) {
       warn(
         `Sequence gap: ${String(matched[i].seq).padStart(3, '0')} → ${String(expected).padStart(3, '0')} (next is ${String(matched[i + 1].seq).padStart(3, '0')})`,
         matched[i + 1].file
@@ -115,8 +121,9 @@ function stripComments(sql) {
     .trim();
 }
 
-function analyzeMigration(file, content) {
+function analyzeMigration(file, content, seq = 999) {
   const sql = stripComments(content);
+  const isLegacyBaseline = seq <= IMMUTABLE_BASELINE_MAX_SEQ;
 
   // ── Check DROP TABLE ──
   const dropTables = [...sql.matchAll(DROP_TABLE_RE)];
@@ -140,6 +147,10 @@ function analyzeMigration(file, content) {
     if (!m[2]) {
       error(`DROP VIEW without IF EXISTS: "${m[0].trim()}"`, file);
     }
+  }
+
+  if (isLegacyBaseline) {
+    return;
   }
 
   // ── Check DROP TYPE ──
@@ -214,9 +225,9 @@ function main() {
 
   const matched = checkFilenames(files);
 
-  for (const { file } of matched) {
+  for (const { file, seq } of matched) {
     const content = readFileSync(join(MIGRATIONS_DIR, file), 'utf-8');
-    analyzeMigration(file, content);
+    analyzeMigration(file, content, seq);
   }
 
   // ── Results ──

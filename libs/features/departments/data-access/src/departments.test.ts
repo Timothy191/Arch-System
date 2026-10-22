@@ -1,6 +1,7 @@
 import {
   DEPARTMENTS,
   getDepartmentTabs,
+  PLANT_INVENTORY_TABS,
   PLANT_PROCESSING_TABS,
   PRODUCTIVITY_TOOLS,
 } from './departments';
@@ -89,5 +90,18 @@ describe('DEPARTMENTS registry', () => {
     const tabs = getDepartmentTabs('plant-processing');
     expect(tabs).toBe(PLANT_PROCESSING_TABS);
     expect(tabs.map((t) => t.name)).toEqual(['dashboard', 'hourly-sheet', 'delays']);
+  });
+
+  it('returns dedicated Plant Inventory tabs (Dashboard, Inventory List, Item List, Stock Required, Reports, History of Used)', () => {
+    const tabs = getDepartmentTabs('plant-inventory');
+    expect(tabs).toBe(PLANT_INVENTORY_TABS);
+    expect(tabs.map((t) => ({ name: t.name, label: t.label }))).toEqual([
+      { name: 'dashboard', label: 'Dashboard' },
+      { name: 'daily-log', label: 'Inventory List' },
+      { name: 'machines', label: 'Item List' },
+      { name: 'history', label: 'Stock Required' },
+      { name: 'reports', label: 'Reports' },
+      { name: 'tools', label: 'History of Used' },
+    ]);
   });
 });

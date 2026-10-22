@@ -129,8 +129,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: 'Stockpile', value: '48,200t' },
     trend: [42500, 43800, 44600, 45200, 46100, 46900, 47500, 48200],
     actions: [
-      { label: 'Daily Log', href: '/plant-inventory/daily-log' },
-      { label: 'History', href: '/plant-inventory/history' },
+      { label: 'Inventory List', href: '/plant-inventory/daily-log' },
+      { label: 'Stock Required', href: '/plant-inventory/history' },
     ],
   },
   {
@@ -321,6 +321,18 @@ export const PLANT_PROCESSING_TABS = [
   { name: 'delays', label: 'Delays', icon: 'AlertTriangle' },
 ] as const;
 
+/**
+ * Plant Inventory specific tabs - Inventory List, Item List, Stock Required, Reports, and History of Used
+ */
+export const PLANT_INVENTORY_TABS = [
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'daily-log', label: 'Inventory List', icon: 'ClipboardList' },
+  { name: 'machines', label: 'Item List', icon: 'Cpu' },
+  { name: 'history', label: 'Stock Required', icon: 'History' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+  { name: 'tools', label: 'History of Used', icon: 'Wrench' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -331,6 +343,7 @@ const DEPARTMENT_TABS_MAP: Record<
   drilling: DRILLING_TABS,
   database: DATABASE_TABS,
   'plant-processing': PLANT_PROCESSING_TABS,
+  'plant-inventory': PLANT_INVENTORY_TABS,
 };
 
 /**

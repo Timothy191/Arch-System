@@ -63,6 +63,7 @@ ruvector.db-*
 skills-lock.json
 MCP/
 .playwright-mcp/
+.repowise/
 
 # Debug
 npm-debug.log*

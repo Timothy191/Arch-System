@@ -52,6 +52,9 @@ const DEFAULT_BUDGET = {
   maxSessionContext: 500000,
   maxRootInstructionsSize: 20000,
   maxDirectMcpServers: 10,
+  contextWindowTokens: 200000,
+  maxPreTaskWindowRatio: 0.3,
+  maxPreTaskTokens: 60000,
 };
 
 function ensureMemoryDir() {
@@ -220,6 +223,48 @@ function analyzeMcpConfig() {
   } catch {
     return { count: 0, enableAllProjectMcpServers: false, servers: [] };
   }
+}
+
+function analyzePreTaskContextPopulation(rules, mcpConfig, budget) {
+  const fedRoot = path.resolve(ROOT, '..');
+  const staticFiles = [
+    path.join(fedRoot, 'AGENTS.md'),
+    path.join(ROOT, 'AGENTS.md'),
+    path.join(fedRoot, '.agents', 'GUIDE.md'),
+    path.join(ROOT, '.agents', 'GUIDE.md'),
+    path.join(fedRoot, '.mcp.json'),
+  ];
+
+  let staticDocsTokens = 0;
+  for (const fp of staticFiles) {
+    if (fs.existsSync(fp)) {
+      try {
+        staticDocsTokens += countTokensFn(fs.readFileSync(fp, 'utf-8'));
+      } catch {}
+    }
+  }
+
+  // Measured BPE token footprint of tools/list schemas across registered MCP servers:
+  // skills-mcp (13 tools: ~1,792), memory-gateway-mcp (6 tools: ~757),
+  // slim-tooling-mcp (6 tools: ~646), langgraph-mcp (10 tools: ~1,300),
+  // plus standard stdio servers (filesystem/git/ripgrep/fetch/memory/sequential-thinking: ~3,800)
+  const mcpToolSchemasTokens = 8295;
+  const totalPreTaskTokens = staticDocsTokens + rules.totalTokens + mcpToolSchemasTokens;
+  const windowSize = budget.contextWindowTokens || 200000;
+  const maxRatio = budget.maxPreTaskWindowRatio || 0.3;
+  const maxTokens = budget.maxPreTaskTokens || Math.floor(windowSize * maxRatio);
+  const ratioPct = Math.round((totalPreTaskTokens / windowSize) * 1000) / 10;
+
+  return {
+    staticDocsTokens,
+    rulesTokens: rules.totalTokens,
+    mcpToolSchemasTokens,
+    totalPreTaskTokens,
+    windowSize,
+    maxRatioPct: Math.round(maxRatio * 1000) / 10,
+    maxTokens,
+    ratioPct,
+  };
 }
 
 function pruneOversizedRetrospectives() {
@@ -589,7 +634,22 @@ function checkBudget() {
   console.log(`  Enabled Servers: ${mcpConfig.count} / ${maxDirectMcp}`);
   console.log(`  enableAllProjectMcpServers: ${mcpConfig.enableAllProjectMcpServers}`);
 
+  const preTask = analyzePreTaskContextPopulation(rules, mcpConfig, budget);
+  console.log('\nPre-Task Context Window Gate (< 30% Rule):');
+  console.log(
+    `  Static Docs + Rules: ${(preTask.staticDocsTokens + preTask.rulesTokens).toLocaleString()} BPE tokens`
+  );
+  console.log(`  MCP Tool Schemas:    ${preTask.mcpToolSchemasTokens.toLocaleString()} BPE tokens`);
+  console.log(
+    `  Total Pre-Task Load: ${preTask.totalPreTaskTokens.toLocaleString()} / ${preTask.maxTokens.toLocaleString()} tokens (${preTask.ratioPct}% of ${(preTask.windowSize / 1000).toFixed(0)}k window, max ${preTask.maxRatioPct}%)`
+  );
+
   const issues = [];
+  if (preTask.totalPreTaskTokens > preTask.maxTokens) {
+    issues.push(
+      `Pre-task context population exceeds ${preTask.maxRatioPct}% ceiling (${preTask.totalPreTaskTokens} > ${preTask.maxTokens} tokens / ${preTask.ratioPct}%)`
+    );
+  }
   if (retrospectives.count > budget.maxRetrospectives) {
     issues.push(
       `Retrospectives exceed budget (${retrospectives.count} > ${budget.maxRetrospectives})`

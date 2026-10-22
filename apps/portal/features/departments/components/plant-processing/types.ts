@@ -33,12 +33,16 @@ export type PlantDelayCategory =
   | 'Process / Density Excursion'
   | 'Chute Blockage / Spillage'
   | 'No ROM Feed / Starvation'
-  | 'Planned Maintenance';
+  | 'Planned Maintenance'
+  | (string & {});
 
 export type PlantImpactType =
   | 'Full Plant Stoppage'
   | 'Reduced Throughput'
-  | 'Single Circuit Bypass';
+  | 'Single Circuit Bypass'
+  | (string & {});
+
+export type PlantDelayStatus = 'Active' | 'Monitoring' | 'Resolved';
 
 export interface PlantDelayEntry {
   id: string;
@@ -53,7 +57,7 @@ export interface PlantDelayEntry {
   reason: string;
   correctiveAction: string;
   loggedBy: string;
-  status: 'Resolved' | 'Monitoring';
+  status: PlantDelayStatus;
 }
 
 export interface PlantDailyRollupRecord {
@@ -114,7 +118,7 @@ export const PLANT_CIRCUIT_OPTIONS = [
   'ROM Feed Bunker & Apron Feeder (AF-100)',
 ] as const;
 
-export const PLANT_DELAY_CATEGORIES: readonly PlantDelayCategory[] = [
+export const PLANT_DELAY_CATEGORIES = [
   'Mechanical',
   'Electrical & PLC',
   'Process / Density Excursion',
@@ -123,6 +127,11 @@ export const PLANT_DELAY_CATEGORIES: readonly PlantDelayCategory[] = [
   'Planned Maintenance',
 ] as const;
 
+export const PLANT_IMPACT_OPTIONS = [
+  'Full Plant Stoppage',
+  'Reduced Throughput',
+  'Single Circuit Bypass',
+] as const;
 export const DAY_SHIFT_HOUR_SLOTS = [
   '06:00 - 07:00',
   '07:00 - 08:00',
@@ -257,12 +266,12 @@ export function buildInitialPlantDelays(todayStr: string): PlantDelayEntry[] {
       category: 'Electrical & PLC',
       impactType: 'Single Circuit Bypass',
       startTime: '09:40',
-      endTime: '10:05',
-      durationMinutes: 25,
+      endTime: '',
+      durationMinutes: 0,
       reason: 'Underflow slurry pump VFD over-torque trip during high slime surge',
-      correctiveAction: 'Reset VFD, increased flocculant dosing rate by 8%, ramped pump speed',
+      correctiveAction: 'Awaiting VFD torque recalibration and slurry line flush',
       loggedBy: 'K. Dlamini (Plant Supervisor)',
-      status: 'Monitoring',
+      status: 'Active',
     },
   ];
 }

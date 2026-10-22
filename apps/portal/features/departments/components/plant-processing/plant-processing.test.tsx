@@ -14,24 +14,35 @@ jest.mock('./actions', () => ({
     message: 'Saved 12 hourly rows for 2026-10-21 (DAY shift).',
     savedAt: '2026-10-21T12:00:00.000Z',
   })),
-  logPlantDelayAction: jest.fn(async (input) => ({
+  logPlantDelayAction: jest.fn(async (input) => {
+    const hasEnd = Boolean(input.endTime && input.endTime.trim().length > 0);
+    return {
+      success: true,
+      isUpdate: Boolean(input.id),
+      entry: {
+        id: input.id || 'delay-test-999',
+        date: input.date,
+        shift: input.shift,
+        circuit: input.circuit,
+        category: input.category,
+        impactType: input.impactType,
+        startTime: input.startTime,
+        endTime: input.endTime || '',
+        durationMinutes: hasEnd ? input.durationMinutes || 20 : 0,
+        reason: input.reason,
+        correctiveAction: input.correctiveAction || 'Inspected circuit',
+        loggedBy: 'Test Operator',
+        status: hasEnd ? 'Resolved' : 'Active',
+      },
+      message: input.id
+        ? `Updated delay on ${input.circuit} — End Time ${input.endTime} logged.`
+        : 'Logged delay on primary crusher.',
+    };
+  }),
+  quickAddPlantEquipmentAction: jest.fn(async (input) => ({
     success: true,
-    entry: {
-      id: 'delay-test-999',
-      date: input.date,
-      shift: input.shift,
-      circuit: input.circuit,
-      category: input.category,
-      impactType: input.impactType,
-      startTime: input.startTime,
-      endTime: input.endTime,
-      durationMinutes: input.durationMinutes,
-      reason: input.reason,
-      correctiveAction: input.correctiveAction || 'Inspected circuit',
-      loggedBy: 'Test Operator',
-      status: 'Resolved',
-    },
-    message: 'Logged delay on primary crusher.',
+    equipmentName: input.name,
+    message: `Added equipment "${input.name}" to Plant & Processing database.`,
   })),
 }));
 
@@ -143,13 +154,15 @@ describe('Plant & Processing Workspace Components', () => {
   });
 
   describe('PlantDelaysClient (Delays Tab)', () => {
-    it('should render initial plant delays and log a new plant delay entry', async () => {
+    it('should render initial plant delays and book in a new active delay without requiring an End Time', async () => {
       const initialDelays = buildInitialPlantDelays('2026-10-21');
       render(<PlantDelaysClient initialDate="2026-10-21" initialDelays={initialDelays} />);
 
       expect(
         screen.getByRole('heading', { name: /Plant & Processing Delays/i })
       ).toBeInTheDocument();
+      expect(screen.getByLabelText(/Booked In Time \(Time Occurred\)/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/End Time/i)).not.toBeRequired();
       expect(
         screen.getByText(/Oversize slab bridged across primary jaw crusher/i)
       ).toBeInTheDocument();
@@ -167,6 +180,72 @@ describe('Plant & Processing Workspace Components', () => {
         expect(
           screen.getByText('Magnetite medium pump seal flush interruption')
         ).toBeInTheDocument();
+      });
+    });
+
+    it('should allow quick-adding Equipment (+), Delay Category (+), and Operational Impact (+)', async () => {
+      const initialDelays = buildInitialPlantDelays('2026-10-21');
+      render(<PlantDelaysClient initialDate="2026-10-21" initialDelays={initialDelays} />);
+
+      // 1. Quick add Equipment (adds to database)
+      fireEvent.click(screen.getByTestId('quick-add-equipment-btn'));
+      fireEvent.change(screen.getByLabelText('New Equipment Name'), {
+        target: { value: 'Tertiary Cone Crusher (CR-103)' },
+      });
+      fireEvent.click(screen.getByTestId('confirm-add-equipment-btn'));
+
+      await waitFor(() => {
+        expect(
+          (screen.getByLabelText('Plant Circuit / Equipment Section') as HTMLSelectElement).value
+        ).toBe('Tertiary Cone Crusher (CR-103)');
+      });
+
+      // 2. Quick add Delay Category
+      fireEvent.click(screen.getByTestId('quick-add-category-btn'));
+      fireEvent.change(screen.getByLabelText('New Delay Category'), {
+        target: { value: 'Magnetite Medium Loss' },
+      });
+      fireEvent.click(screen.getByTestId('confirm-add-category-btn'));
+      expect((screen.getByLabelText('Delay Category') as HTMLSelectElement).value).toBe(
+        'Magnetite Medium Loss'
+      );
+
+      // 3. Quick add Operational Impact
+      fireEvent.click(screen.getByTestId('quick-add-impact-btn'));
+      fireEvent.change(screen.getByLabelText('New Operational Impact'), {
+        target: { value: 'Yield Recovery Drop' },
+      });
+      fireEvent.click(screen.getByTestId('confirm-add-impact-btn'));
+      expect((screen.getByLabelText('Operational Impact') as HTMLSelectElement).value).toBe(
+        'Yield Recovery Drop'
+      );
+    });
+
+    it('should allow selecting a booked-in delay from the database list to pull its details into the form and log End Time', async () => {
+      const initialDelays = buildInitialPlantDelays('2026-10-21');
+      render(<PlantDelaysClient initialDate="2026-10-21" initialDelays={initialDelays} />);
+
+      // Select the open delay (delay-pp-104 has no endTime)
+      fireEvent.click(screen.getByTestId('select-delay-delay-pp-104'));
+
+      expect(
+        (screen.getByLabelText('Plant Circuit / Equipment Section') as HTMLSelectElement).value
+      ).toBe('Tailings Thickener & Press (TH-501)');
+      expect(
+        (screen.getByLabelText(/Booked In Time \(Time Occurred\)/i) as HTMLInputElement).value
+      ).toBe('09:40');
+      expect((screen.getByLabelText(/End Time/i) as HTMLInputElement).value).toBe('');
+
+      // Enter End Time and submit update
+      fireEvent.change(screen.getByLabelText(/End Time/i), {
+        target: { value: '10:05' },
+      });
+      fireEvent.click(screen.getByTestId('submit-plant-delay-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent(
+          /Updated delay on Tailings Thickener & Press \(TH-501\) — End Time 10:05 logged/i
+        );
       });
     });
   });

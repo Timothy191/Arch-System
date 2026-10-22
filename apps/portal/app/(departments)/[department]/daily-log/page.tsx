@@ -1,4 +1,5 @@
 import { GlassCard } from '@repo/ui/GlassCard';
+import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { DailyLogForm } from './DailyLogForm';
 
@@ -12,7 +13,9 @@ export default async function DailyLogPage({
     department,
   });
 
-  // Standard daily log for non-safety departments (centralised fleet)
+  if (department === 'plant-inventory') {
+    return <PlantInventoryWorkspaceClient mode="inventory-list" today={today} />;
+  }
   const { data: machines } = await supabase
     .from('machines')
     .select('id, name, machine_type')

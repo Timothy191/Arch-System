@@ -2,7 +2,13 @@ import type { PlantDelayEntry, PlantHourlySheetRecord } from './types';
 
 export const PLANT_HOURLY_SHEETS_STORAGE_KEY = 'arch_plant_processing_hourly_sheets_v1';
 export const PLANT_DELAYS_STORAGE_KEY = 'arch_plant_processing_delays_v1';
+export const PLANT_DELAY_OPTIONS_STORAGE_KEY = 'arch_plant_processing_delay_options_v1';
 
+export interface StoredPlantDelayOptions {
+  circuits: string[];
+  categories: string[];
+  impacts: string[];
+}
 export function loadStoredPlantSheets(
   fallback: PlantHourlySheetRecord[]
 ): PlantHourlySheetRecord[] {
@@ -69,6 +75,40 @@ export function saveStoredPlantDelays(delays: PlantDelayEntry[]): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(PLANT_DELAYS_STORAGE_KEY, JSON.stringify(delays));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export function loadStoredPlantDelayOptions(
+  fallback: StoredPlantDelayOptions
+): StoredPlantDelayOptions {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = window.localStorage.getItem(PLANT_DELAY_OPTIONS_STORAGE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as Partial<StoredPlantDelayOptions>;
+    const mergeUnique = (base: string[], extra?: string[]) =>
+      Array.from(
+        new Set([
+          ...base,
+          ...(Array.isArray(extra) ? extra.filter((x) => typeof x === 'string' && x.trim()) : []),
+        ])
+      );
+    return {
+      circuits: mergeUnique(fallback.circuits, parsed.circuits),
+      categories: mergeUnique(fallback.categories, parsed.categories),
+      impacts: mergeUnique(fallback.impacts, parsed.impacts),
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+export function saveStoredPlantDelayOptions(options: StoredPlantDelayOptions): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PLANT_DELAY_OPTIONS_STORAGE_KEY, JSON.stringify(options));
   } catch {
     // Ignore storage quota errors
   }

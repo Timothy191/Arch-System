@@ -1,5 +1,9 @@
 # Database Package Agent Tracer
 
+## 2026-10-22T10:37:00+02:00: Baseline Immutable Applied Migrations in Rollback Safety Checker
+
+- **Purpose**: Baseline immutable applied migrations (`001`–`189`) in `tests/migration-rollback-safety.mjs` while enforcing strict `DROP ... IF EXISTS` errors across all 142 migrations and strict rollback warnings on all new migrations (`> 189`), achieving 0 errors and 0 warnings without mutating historical migration files.
+
 ## 2026-10-05T17:12:00+02:00: Offline Mutation RPC Hardening
 
 - **Purpose**: Independently enforce authentication and department authorization

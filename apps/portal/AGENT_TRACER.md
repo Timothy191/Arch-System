@@ -1,3 +1,15 @@
+## 2026-10-22T07:15:00Z: Plant Inventory Tab Renames & 4 Sub-Route Views (Inventory List, Item List, Stock Required, History of Used)
+
+- **Purpose**: Implement the 4 `/plant-inventory` design feedback changes: rename `Daily Log` → `Inventory List` (`/plant-inventory/daily-log`) with a `Stock`, `Description`, `Amount Required`, `Amount Present` table; rename `Machines` → `Item List` (`/plant-inventory/machines`) with an "Add New Item to Stock List" form; rename `History` → `Stock Required` (`/plant-inventory/history`) showing replenishment shortfalls; and rename `Tools` → `History of Used` (`/plant-inventory/tools`) showing shift consumption history.
+- **Changes**:
+  - `libs/features/departments/data-access/src/departments.ts` & `departments.test.ts`: Added `PLANT_INVENTORY_TABS` (`Dashboard`, `Inventory List`, `Item List`, `Stock Required`, `Reports`, `History of Used`), wired `'plant-inventory'` into `DEPARTMENT_TABS_MAP`, and updated `plant-inventory` actions.
+  - `apps/portal/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient.tsx` & `PlantInventoryWorkspaceClient.test.tsx`: Created unified Light Mode Plant Inventory workspace client component supporting `inventory-list`, `item-list`, `stock-required`, and `history-of-used` modes with `localStorage` state synchronization and BDD tests.
+  - `apps/portal/app/(departments)/[department]/{daily-log,machines,history,tools}/page.tsx`: Routed `plant-inventory` requests to `PlantInventoryWorkspaceClient`.
+- **Verification**:
+  - `pnpm --filter @repo/departments/data-access test` ✅
+  - `pnpm --filter portal test -- --testPathPatterns="PlantInventoryWorkspaceClient"` ✅
+  - `pnpm --filter portal type-check` ✅
+
 ## 2026-10-22T06:40:00Z: Next.js 16 Image Optimization, Client-Boundary, Caching Audits & Plant Inventory Dashboard
 
 - **Purpose**: Achieve 100% pass (0 violations, 0 warnings) across `audit-image-optimization.cjs`, `audit-data-fetching.cjs`, and `audit-caching.cjs`, enforce RBAC isolation for `plant-processing` and `plant-inventory` in `server/proxy.ts`, isolate `'use server'` action exports into `@repo/departments/ui/server`, and deliver the production `Plant Inventory & Reagents Control` dashboard.

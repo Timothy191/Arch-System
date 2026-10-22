@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-22T07:15:00Z - Plant Inventory Hub Action Label Alignment
+
+- **Purpose**: Align `HeroRotator.test.tsx` fixture action labels with `PLANT_INVENTORY_TABS` (`Inventory List` and `Stock Required`).
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Updated `plant-inventory` actions fixture to `Inventory List` (`/plant-inventory/daily-log`) and `Stock Required` (`/plant-inventory/history`).
+- **Verification**: `pnpm --filter @repo/hub/ui test -- --testPathPatterns="HeroRotator"` ✅.
+
 ## 2026-10-19 - Unhide System Overview & Database in Hub Cards & HeroRotator + Legacy Trace Cleanup
 
 - **Purpose**: Add `Database` icon to `DepartmentCard.tsx`, add `overview` and `database` styling/overlines to `HeroRotator.tsx`, and remove legacy `GraduationCap`, `HardHat`, and `Satellite` icon mappings.

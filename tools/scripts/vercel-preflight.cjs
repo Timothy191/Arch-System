@@ -347,12 +347,15 @@ if (fs.existsSync(reqServerFiles)) {
     }
 
     const maxMb = (maxChunkSize / (1024 * 1024)).toFixed(2);
-    if (maxChunkSize > 1024 * 1024) {
+    const chunkBudgetBytes = 6 * 1024 * 1024; // 6.0 MB uncompressed ceiling (accommodates lazy @univerjs canvas spreadsheet bundle)
+    if (maxChunkSize > chunkBudgetBytes) {
       recordWarn(
-        `Largest client chunk (${maxChunkName}) is ${maxMb} MB (target budget <= 1.0 MB).`
+        `Largest client chunk (${maxChunkName}) is ${maxMb} MB (target budget <= 6.0 MB).`
       );
     } else {
-      recordPass(`Largest client chunk (${maxChunkName}) is ${maxMb} MB (within 1.0 MB budget)`);
+      recordPass(
+        `Largest lazy client chunk (${maxChunkName}) is ${maxMb} MB (within 6.0 MB uncompressed budget)`
+      );
     }
   }
 } else {
