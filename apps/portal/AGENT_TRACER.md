@@ -741,3 +741,4 @@ AIAssistant chat.
 - 2026-10-22T05:59:38Z | Council-Orchestrator | Rotated /icons/arch-cursor.svg -45deg (45deg left) to match angled pointer orientation.
 - 2026-10-22T06:17:58Z | Council-Orchestrator | Added ArchCursorWaitIndicator component and /icons/antigravity-logo.svg to display a bouncing animated Google Antigravity logo next to the cursor during loading and operator-wait processes.
 - 2026-10-22T11:36:00+02:00 — feat(portal): replace Core Operational Modules header icon with Arch System Logo
+- 2026-10-22T11:54:00+02:00 — feat(portal): redesign FeedbackWidget to match Arch OS liquid-glass design system

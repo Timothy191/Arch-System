@@ -319,6 +319,117 @@ function HeroTelemetryGraph({
   );
 }
 
+interface HeroKpiTile {
+  label: string;
+  value: string;
+  subtext: string;
+}
+
+function getHeroKpiTiles(panelName: string): readonly [HeroKpiTile, HeroKpiTile, HeroKpiTile] {
+  switch (panelName) {
+    case 'plant-inventory':
+      return [
+        { label: 'Equipment Units', value: '7 Tracked', subtext: 'CR · SC · DM · TH' },
+        { label: 'Par Compliance', value: '87.5%', subtext: '14.2d Autonomy' },
+        { label: 'Replenish Queue', value: '4 Lines', subtext: 'Active Reorder' },
+      ];
+    case 'plant-processing':
+      return [
+        { label: 'Feed Rate', value: '1,140 t/h', subtext: 'DMC Module A/B' },
+        { label: 'Clean Yield', value: '91.4%', subtext: 'CV 27.4 MJ/kg' },
+        { label: 'Medium Density', value: '1.48 SG', subtext: 'Silo 1 & 2 Nominal' },
+      ];
+    case 'production':
+      return [
+        { label: 'ROM Tonnage', value: '12,480 t', subtext: 'Shift Cumulative' },
+        { label: 'Haul Fleet', value: '18 / 19', subtext: '94.7% Active' },
+        { label: 'Strip Ratio', value: '2.8 : 1', subtext: 'Within Plan' },
+      ];
+    case 'drilling':
+      return [
+        { label: 'Active Rigs', value: '6 / 6', subtext: 'Pit Viper 351' },
+        { label: 'Penetration', value: '52.4 m/h', subtext: '+14.1% ROP' },
+        { label: 'Blast Pattern', value: 'Pattern B-14', subtext: '92% Drilled' },
+      ];
+    case 'admin':
+      return [
+        { label: 'Active Operators', value: '124 Users', subtext: 'RBAC Enforced' },
+        { label: 'RLS Matrix', value: '100%', subtext: 'Zero Policy Drift' },
+        { label: 'Audit Ledger', value: 'Live CDC', subtext: 'Tamper-Proof' },
+      ];
+    case 'access-control':
+      return [
+        { label: 'Site Muster', value: '142 Crew', subtext: 'Biometric Verified' },
+        { label: 'Gate SLA', value: '99.8%', subtext: 'Gates 1–4 Active' },
+        { label: 'Clearance', value: '100% Valid', subtext: '0 Holds' },
+      ];
+    case 'engineering':
+      return [
+        { label: 'Availability', value: '98.0%', subtext: 'MTBF 142h' },
+        { label: 'Work Orders', value: '3 Open', subtext: '0 Critical' },
+        { label: 'PM Schedule', value: '99.1%', subtext: 'On Target' },
+      ];
+    case 'control-room':
+      return [
+        { label: 'Hourly Loads', value: '384 Loads', subtext: '+9.2% Shift Plan' },
+        { label: 'SCADA Tags', value: '1,240 Live', subtext: 'Modbus TCP' },
+        { label: 'Dispatch Sync', value: '0.4 ms', subtext: 'Realtime CDC' },
+      ];
+    case 'overview':
+      return [
+        { label: 'Edge Cache', value: '0.42 ms', subtext: 'Redis L1/L2' },
+        { label: 'Uptime SLA', value: '99.98%', subtext: '30d Rolling' },
+        { label: 'Tri-State Sync', value: '100% Parity', subtext: 'Zero Drift' },
+      ];
+    case 'database':
+      return [
+        { label: 'Schema State', value: '142 Applied', subtext: 'PostgreSQL 17' },
+        { label: 'Replica RTT', value: '18 ms', subtext: 'Pool Healthy' },
+        { label: 'WAL Stream', value: 'Active', subtext: 'Realtime CDC' },
+      ];
+    case 'reports':
+      return [
+        { label: 'Availability', value: '96.2%', subtext: 'Fleet Mean' },
+        { label: 'Utilization', value: '94.6%', subtext: '+4.3% OEE' },
+        { label: 'Closeout SLA', value: '100%', subtext: 'Shift Verified' },
+      ];
+    default:
+      return [
+        { label: 'Active Modules', value: '11 / 11', subtext: 'All Systems Nominal' },
+        { label: 'SCADA Nodes', value: '128 PLC', subtext: '0.4ms Telemetry' },
+        { label: 'Shift OEE', value: '94.6%', subtext: '+2.4% vs Plan' },
+      ];
+  }
+}
+
+function HeroOperationalKpiStrip({ panelName }: { panelName: string }) {
+  const tiles = getHeroKpiTiles(panelName);
+  return (
+    <div
+      className="grid grid-cols-3 gap-2 my-2.5"
+      data-testid={`hero-kpi-strip-${panelName}`}
+      aria-label="Operational subsystem indicators"
+    >
+      {tiles.map((tile) => (
+        <div
+          key={tile.label}
+          className="rounded-xl bg-white/80 backdrop-blur-md border border-slate-200/80 px-2.5 py-2 shadow-2xs flex flex-col justify-between min-w-0"
+        >
+          <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
+            {tile.label}
+          </span>
+          <span className="text-xs sm:text-[13px] font-mono font-bold text-[var(--text-heading)] tabular-nums truncate mt-0.5">
+            {tile.value}
+          </span>
+          <span className="text-[9px] font-mono text-[var(--accent-blue)] font-semibold truncate mt-0.5">
+            {tile.subtext}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export interface HeroCardContentProps {
   panel: Panel;
   idx: number;
@@ -460,6 +571,9 @@ export function HeroCardContent({
             )}
           </div>
         </div>
+
+        {/* Operational KPI Readout Strip filling the mid-card zone between CTAs and Telemetry Graph */}
+        <HeroOperationalKpiStrip panelName={panel.name} />
 
         {/* Live Telemetry Graph Across All Hero Cards */}
         <HeroTelemetryGraph panelName={panel.name} stats={panel.stats} />

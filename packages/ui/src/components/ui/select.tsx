@@ -32,10 +32,26 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 );
 Select.displayName = SelectPrimitive.Root.displayName;
 
-export { Select };
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      'relative flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2.5 text-xs font-medium text-[var(--text-heading)] outline-none hover:bg-black/[0.04] focus:bg-black/[0.04] data-[state=checked]:text-[var(--accent-blue)] data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      className
+    )}
+    {...props}
+  >
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+));
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+
+export { Select, SelectItem };
 export const SelectTrigger = SelectPrimitive.Trigger;
 export const SelectContent = SelectPrimitive.Content;
-export const SelectItem = SelectPrimitive.Item;
 export const SelectGroup = SelectPrimitive.Group;
 export const SelectLabel = SelectPrimitive.Label;
 export const SelectSeparator = SelectPrimitive.Separator;

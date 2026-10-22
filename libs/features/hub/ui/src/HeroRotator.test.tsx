@@ -308,6 +308,10 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
     expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-kpi-strip-plant-inventory')).toBeInTheDocument();
+    expect(screen.getByText('7 Tracked')).toBeInTheDocument();
+    expect(screen.getByText('87.5%')).toBeInTheDocument();
+    expect(screen.getByText('4 Lines')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-plant-inventory')).toBeInTheDocument();
     expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
   });
