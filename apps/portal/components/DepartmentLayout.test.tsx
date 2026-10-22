@@ -34,13 +34,20 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByText('Control Room Main Content')).toBeInTheDocument();
 
     // Verify all Control Room tabs are present in the side menu
-    expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
+    const dashboardLinks = screen.getAllByRole('link', { name: /Dashboard/i });
+    expect(dashboardLinks).toHaveLength(2);
+    expect(dashboardLinks[0]).toHaveAttribute('href', '/control-room');
+    expect(screen.getByTestId('reports-subtab-dashboard')).toHaveAttribute(
+      'href',
+      '/control-room/reports'
+    );
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Machine Operations/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator Activity/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
-    const pdfReportSubtab = screen.getByRole('link', { name: /PDF Report/i });
+    expect(screen.getByTestId('reports-subtabs-toggle')).toHaveAttribute('aria-expanded', 'true');
+    const pdfReportSubtab = screen.getByTestId('reports-subtab-pdf-report');
     expect(pdfReportSubtab).toBeInTheDocument();
     expect(pdfReportSubtab).toHaveAttribute('href', '/control-room/reports?tab=pdf-report');
     expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
@@ -195,7 +202,7 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(main.className).toContain('pl-64');
   });
 
-  it('highlights PDF Report sub-tab and unhighlights parent Reports link when ?tab=pdf-report is active', () => {
+  it('highlights Dashboard or PDF Report sub-tab under Reports and toggles sub-tabs via the small arrow button', () => {
     mockUsePathname.mockReturnValue('/control-room/reports');
     mockUseSearchParams.mockReturnValue(new URLSearchParams('tab=pdf-report'));
 
@@ -206,9 +213,22 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     );
 
     const reportsLink = screen.getByRole('link', { name: /^Reports$/i });
-    const pdfReportLink = screen.getByRole('link', { name: /^PDF Report$/i });
+    const reportsDashboardLink = screen.getByTestId('reports-subtab-dashboard');
+    const pdfReportLink = screen.getByTestId('reports-subtab-pdf-report');
+    const arrowToggle = screen.getByTestId('reports-subtabs-toggle');
 
     expect(pdfReportLink.className).toContain('bg-[var(--accent-blue)]/10');
+    expect(reportsDashboardLink.className).not.toContain('bg-[var(--accent-blue)]/10');
     expect(reportsLink.className).not.toContain('bg-[var(--accent-blue)]/10');
+
+    // Click the small arrow button to collapse sub-tabs
+    fireEvent.click(arrowToggle);
+    expect(arrowToggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('reports-subtabs')).not.toBeInTheDocument();
+
+    // Click the small arrow button again to expand sub-tabs
+    fireEvent.click(arrowToggle);
+    expect(arrowToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('reports-subtabs')).toBeInTheDocument();
   });
 });

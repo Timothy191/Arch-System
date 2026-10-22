@@ -95,6 +95,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   const basePath = `/${department.name}`;
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isReportsExpanded, setIsReportsExpanded] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
   const collapseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -306,41 +307,104 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               isShiftOperationsActive;
             const isPdfReportActive =
               tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
+            const isReportsDashboardActive =
+              tab.name === 'reports' && isRouteMatch && !isPdfReportActive;
             const isActive = isRouteMatch && !isPdfReportActive;
             const Icon = ICON_MAP[tab.icon];
             return (
               <div key={tab.name} className="space-y-0.5">
-                <Link
-                  href={href}
-                  className={cn(
-                    'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
-                    isActive
-                      ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
-                  )}
-                >
-                  {isActive && (
-                    <m.div
-                      layoutId="active-sidebar-tab"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
-                    />
-                  )}
-                  {Icon && (
-                    <Icon
+                <div className="flex items-center gap-0.5">
+                  <Link
+                    href={href}
+                    onClick={() => {
+                      if (tab.name === 'reports') {
+                        setIsReportsExpanded(true);
+                      }
+                    }}
+                    className={cn(
+                      'flex-1 flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
+                      isActive
+                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                    )}
+                  >
+                    {isActive && (
+                      <m.div
+                        layoutId="active-sidebar-tab"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
+                      />
+                    )}
+                    {Icon && (
+                      <Icon
+                        className={cn(
+                          'w-3.5 h-3.5 shrink-0 transition-colors',
+                          isActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                        )}
+                      />
+                    )}
+                    <span className="flex-1 truncate">{tab.label}</span>
+                  </Link>
+                  {tab.name === 'reports' && (
+                    <button
+                      type="button"
+                      data-testid="reports-subtabs-toggle"
+                      aria-label={
+                        isReportsExpanded ? 'Collapse Reports sub-tabs' : 'Expand Reports sub-tabs'
+                      }
+                      aria-expanded={isReportsExpanded}
+                      onClick={() => setIsReportsExpanded((prev) => !prev)}
                       className={cn(
-                        'w-3.5 h-3.5 shrink-0 transition-colors',
-                        isActive
-                          ? 'text-[var(--accent-blue)]'
-                          : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                        'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
+                        isRouteMatch
+                          ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
                       )}
-                    />
+                    >
+                      <ChevronRight
+                        className={cn(
+                          'w-3.5 h-3.5 transition-transform duration-200',
+                          isReportsExpanded && 'rotate-90'
+                        )}
+                      />
+                    </button>
                   )}
-                  {tab.label}
-                </Link>
-                {tab.name === 'reports' && (
-                  <div className="pl-6 space-y-0.5">
+                </div>
+                {tab.name === 'reports' && isReportsExpanded && (
+                  <div
+                    data-testid="reports-subtabs"
+                    className="pl-6 space-y-0.5 border-l border-black/[0.06] ml-4 mt-0.5"
+                  >
+                    <Link
+                      href={`${basePath}/reports`}
+                      data-testid="reports-subtab-dashboard"
+                      className={cn(
+                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        isReportsDashboardActive
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                      )}
+                    >
+                      {isReportsDashboardActive && (
+                        <m.div
+                          layoutId="active-sidebar-subtab"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                        />
+                      )}
+                      <BarChart3
+                        className={cn(
+                          'w-3 h-3 shrink-0 transition-colors',
+                          isReportsDashboardActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                        )}
+                      />
+                      <span>Dashboard</span>
+                    </Link>
                     <Link
                       href={`${basePath}/reports?tab=pdf-report`}
+                      data-testid="reports-subtab-pdf-report"
                       className={cn(
                         'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
                         isPdfReportActive
@@ -350,7 +414,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     >
                       {isPdfReportActive && (
                         <m.div
-                          layoutId="active-sidebar-tab"
+                          layoutId="active-sidebar-subtab"
                           className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
