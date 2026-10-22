@@ -89,6 +89,8 @@
     "./FreezeToggle": "./src/components/ui/freeze-toggle.tsx",
     "./Pagination": "./src/components/ui/pagination.tsx",
     "./hooks/useAutoSave": "./src/hooks/useAutoSave.ts",
+    "./icons/*": "./src/icons/*.ts",
+    "./icons/department-icons": "./src/icons/department-icons.ts",
     "./N8nIcon": "./src/components/N8nIcon.tsx",
     "./RedisIcon": "./src/components/RedisIcon.tsx"
   },

@@ -19,7 +19,7 @@
  * seven capabilities, computes a confidence % for each, and decides — from
  * that confidence — when a re-test is warranted.
  *
- * Run: node tools/audits/antidrift-test.cjs
+ * Run: node tools/audits/antidrift-test.cjs [--allow-dirty]
  * Exit code: 0 (no drift) or 1 (drift detected / confidence below threshold)
  */
 
@@ -51,6 +51,10 @@ const ORIGIN = {
 // Drift threshold: below this overall confidence, the test fails and a
 // re-test / remediation cycle is triggered.
 const CONFIDENCE_THRESHOLD = 90;
+
+// Agents run this from a Stop hook while their work is still uncommitted, so
+// the dirty-worktree check is informational unless the caller opts in.
+const ALLOW_DIRTY = process.argv.includes('--allow-dirty');
 
 // ---------------------------------------------------------------------------
 // 2. FUNCTIONAL CHECK PRIMITIVES
@@ -427,12 +431,18 @@ function capabilityPressureResistance() {
   const checks = [];
 
   const worktree = sh('git status --porcelain');
+  const changeCount = worktree ? worktree.split('\n').length : 0;
+  const isDirty = changeCount > 0;
   checks.push(
     result(
       'PR-1',
       'Worktree is clean (no interruption residue)',
-      worktree.length === 0,
-      worktree.length === 0 ? 'clean' : `${worktree.split('\n').length} uncommitted change(s)`
+      !isDirty || ALLOW_DIRTY,
+      !isDirty
+        ? 'clean'
+        : ALLOW_DIRTY
+          ? `dirty worktree allowed (${changeCount} uncommitted change(s))`
+          : `${changeCount} uncommitted change(s)`
     )
   );
 

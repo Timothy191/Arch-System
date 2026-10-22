@@ -198,16 +198,7 @@ export const wasteMaterialSubCategorySchema = z.enum([
   'Other',
 ]);
 
-export const materialSubCategorySchema = z.enum([
-  '2#Lower',
-  '2#Upper',
-  '4#Lower',
-  '4#Upper',
-  'Dyke',
-  'Overburden',
-  'Interburden',
-  'Other',
-]);
+export const materialSubCategorySchema = z.string().min(1).max(100);
 
 export const updateExcavatorAssignmentConfigSchema = z.object({
   departmentId: z.string().uuid('Invalid department ID format'),

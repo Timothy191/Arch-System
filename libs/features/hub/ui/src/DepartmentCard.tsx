@@ -1,6 +1,7 @@
 'use client';
 
 import type { Department } from '@repo/departments/data-access';
+import { getDepartmentIcon } from '@repo/ui/icons/department-icons';
 import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
@@ -159,7 +160,7 @@ function DepartmentCard({
     }
   };
 
-  const Icon = ICON_MAP[department.icon] || Factory;
+  const Icon = ICON_MAP[department.icon] || getDepartmentIcon(department.name) || Factory;
   const config = COLOR_MAP[department.color] || {
     bg: 'border-arch-border-emphasis/30 bg-white/95 text-arch-accent-blue shadow-sm',
     text: 'text-arch-text-primary',
@@ -180,7 +181,7 @@ function DepartmentCard({
       className={cn('h-full', department.gridSpan)}
     >
       <div
-        className="uiverse-card group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
+        className="uiverse-card gold-steel-border group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
         data-testid={`dept-card-${department.name}`}
       >
         {/* Navigation Loading Overlay */}
@@ -290,10 +291,10 @@ function DepartmentCard({
                   <Icon className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
                 </span>
                 <h3
-                  className="uiverse-card-title font-anurati uppercase tracking-[0.08em] truncate"
+                  className="uiverse-card-title font-anurati uppercase tracking-[0.055em] font-bold truncate"
                   style={{
                     fontFamily:
-                      "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+                      "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
                   }}
                 >
                   {department.displayName}

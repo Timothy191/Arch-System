@@ -526,10 +526,10 @@ export function HeroCardContent({
           {/* Operational Title & Subtitle (Asset Overline Removed per Design Feedback) */}
           <div className="space-y-1.5">
             <h2
-              className="font-anurati uppercase tracking-[0.08em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
+              className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
               style={{
                 fontFamily:
-                  "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+                  "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
               }}
             >
               {panel.title}

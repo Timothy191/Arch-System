@@ -4,9 +4,9 @@ import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { AnimatedDialog } from '@repo/ui';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { Logo } from '@repo/ui/Logo';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
-import { exportToExcel } from '@repo/utils/client';
-import { Download, Lock, Minus, Plus } from 'lucide-react';
+import { Activity, Lock, Minus, Plus, Search, TrendingUp, Truck, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
@@ -74,6 +74,10 @@ interface HourlyLoadsGridProps {
   sites: { id: string; name: string; site_code: string }[];
   mineBlocks?: MineBlockOption[];
   excavatorActivities?: ExcavatorActivitySummary[];
+  mineralRegistry?: {
+    waste: string[];
+    coal: string[];
+  };
   /** Operational date (Africa/Johannesburg) from the server — never derive on the client. */
   today: string;
   /** Shift active at first render, resolved on the server to avoid UTC drift. */
@@ -212,6 +216,7 @@ function HourlyLoadsGrid({
   sites,
   mineBlocks = [],
   excavatorActivities = [],
+  mineralRegistry,
   today,
   initialShift,
 }: HourlyLoadsGridProps) {
@@ -248,17 +253,17 @@ function HourlyLoadsGrid({
         const act = excavatorActivities.find((a) => a.machine_id === e.id);
         const load = hourlyLoads.find((l) => l.excavator_id === e.id && !l.is_locked);
         const mat = act?.material_type || load?.material_type;
-        return [e.id, parseExcavatorMaterial(mat).category];
+        return [e.id, parseExcavatorMaterial(mat, mineralRegistry).category];
       })
     )
   );
   const [excavatorMaterialSubCategories, setExcavatorMaterialSubCategories] = useState<
-    Record<string, MaterialSubCategory | ''>
+    Record<string, string>
   >(() =>
     Object.fromEntries(
       excavators.map((e) => {
         const act = excavatorActivities.find((a) => a.machine_id === e.id);
-        return [e.id, parseExcavatorMaterial(act?.material_type).subCategory];
+        return [e.id, parseExcavatorMaterial(act?.material_type, mineralRegistry).subCategory];
       })
     )
   );
@@ -801,9 +806,10 @@ function HourlyLoadsGrid({
       if (newMaterial === prevMaterial) return;
 
       const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
-      const nextSubCategory: MaterialSubCategory | '' = isValidSubCategoryForMaterial(
+      const nextSubCategory = isValidSubCategoryForMaterial(
         newMaterial,
-        prevSubCategory
+        prevSubCategory,
+        mineralRegistry
       )
         ? prevSubCategory
         : '';
@@ -856,19 +862,21 @@ function HourlyLoadsGrid({
       departmentId,
       today,
       selectedShift,
+      mineralRegistry,
     ]
   );
 
-  // Handle excavator material sub-category change (Coal: 2#Lower, 2#Upper, 4#Lower, 4#Upper, Other | Waste: Dyke, Overburden, Interburden, Other)
+  // Handle excavator material sub-category change
   const handleExcavatorMaterialSubCategoryChange = useCallback(
     async (excavatorId: string, newSubCategory: string | null) => {
       const currentMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
       const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
-      const validNext: MaterialSubCategory | '' = isValidSubCategoryForMaterial(
+      const validNext = isValidSubCategoryForMaterial(
         currentMaterial,
-        newSubCategory
+        newSubCategory,
+        mineralRegistry
       )
-        ? newSubCategory
+        ? (newSubCategory ?? '')
         : '';
 
       if (validNext === prevSubCategory) return;
@@ -903,6 +911,7 @@ function HourlyLoadsGrid({
       departmentId,
       today,
       selectedShift,
+      mineralRegistry,
     ]
   );
 
@@ -1059,11 +1068,47 @@ function HourlyLoadsGrid({
     [source, selectedShift, applyLoadState, commitLoadChange]
   );
 
-  const { hourTotals, grandTotalLoads, grandTotalMaterial } = useMemo(() => {
-    const totals = HOURS_12.map((_, index) => {
+  const [machineSearch, setMachineSearch] = useState('');
+  const [excavatorFilter, setExcavatorFilter] = useState('');
+
+  const {
+    hourTotals,
+    grandTotalLoads,
+    grandTotalMaterial,
+    hourlySeries,
+    activeMachinesCount,
+    avgLoadsPerMachine,
+    wasteTotalLoads,
+    coalTotalLoads,
+    peakHour,
+    maxHourLoads,
+  } = useMemo(() => {
+    let cumulative = 0;
+    const series = HOURS_12.map((_, index) => {
       const prop = HOUR_PROP(index);
-      return source.reduce((acc, row) => acc + (typeof row[prop] === 'number' ? row[prop] : 0), 0);
+      let waste = 0;
+      let coal = 0;
+      source.forEach((row) => {
+        const val = typeof row[prop] === 'number' ? row[prop] : 0;
+        if (row.materialType === 'Coal') {
+          coal += val;
+        } else {
+          waste += val;
+        }
+      });
+      const total = waste + coal;
+      cumulative += total;
+      return {
+        hourLabel: `${hourLabels[index] ?? '00'}:00`,
+        shortLabel: hourLabels[index] ?? '00',
+        wasteLoads: waste,
+        coalLoads: coal,
+        totalLoads: total,
+        cumulativeLoads: cumulative,
+      };
     });
+
+    const totals = series.map((s) => s.totalLoads);
 
     const grandLoads = source.reduce(
       (acc, row) => acc + (typeof row.total === 'number' ? row.total : 0),
@@ -1075,42 +1120,72 @@ function HourlyLoadsGrid({
       return acc + val;
     }, 0);
 
+    const activeMachineIds = new Set<string>();
+    let wasteLoadsSum = 0;
+    let coalLoadsSum = 0;
+
+    source.forEach((row) => {
+      const rowTotal = typeof row.total === 'number' ? row.total : 0;
+      if (rowTotal > 0 || row.excavatorId) {
+        activeMachineIds.add(String(row.machineId));
+      }
+      if (row.materialType === 'Coal') {
+        coalLoadsSum += rowTotal;
+      } else {
+        wasteLoadsSum += rowTotal;
+      }
+    });
+
+    const peak = series.reduce(
+      (best, curr) => (curr.totalLoads > best.totalLoads ? curr : best),
+      series[0] ?? {
+        hourLabel: `${hourLabels[0] ?? '06'}:00`,
+        shortLabel: hourLabels[0] ?? '06',
+        wasteLoads: 0,
+        coalLoads: 0,
+        totalLoads: 0,
+        cumulativeLoads: 0,
+      }
+    );
+
+    const maxLoads = Math.max(1, ...series.map((s) => s.totalLoads));
+
     return {
       hourTotals: totals,
       grandTotalLoads: grandLoads,
       grandTotalMaterial: Math.round(grandMaterial * 10) / 10,
+      hourlySeries: series,
+      activeMachinesCount: activeMachineIds.size,
+      avgLoadsPerMachine:
+        machines.length > 0 ? Math.round((grandLoads / machines.length) * 10) / 10 : 0,
+      wasteTotalLoads: wasteLoadsSum,
+      coalTotalLoads: coalLoadsSum,
+      peakHour: peak,
+      maxHourLoads: maxLoads,
     };
-  }, [source]);
+  }, [source, hourLabels, machines.length]);
 
-  const handleExport = async () => {
-    const exportData = source.map((row) => {
-      const assignedExcavatorId = row.excavatorId;
-      const excavatorName =
-        (assignedExcavatorId && excavators.find((e) => e.id === assignedExcavatorId)?.name) ||
-        'None';
-      const subCategory =
-        (assignedExcavatorId && excavatorMaterialSubCategories[assignedExcavatorId]) || '';
-      const data: any = {
-        Machine: row.machineName,
-        'Excavator Assigned': excavatorName,
-        Type: row.machineType,
-        Material: subCategory ? `${row.materialType} (${subCategory})` : row.materialType,
-        Status: row.isLocked ? 'Locked' : 'Active',
-      };
-      HOURS_12.forEach((_, index) => {
-        const label = `${hourLabels[index]}:00`;
-        data[label] = row[HOUR_PROP(index)] ?? 0;
+  const filteredRows = useMemo(() => {
+    const query = machineSearch.trim().toLowerCase();
+    return source
+      .map((row, originalRowIndex) => ({ row, originalRowIndex }))
+      .filter(({ row }) => {
+        const matchesMachine =
+          !query ||
+          String(row.machineName || '')
+            .toLowerCase()
+            .includes(query) ||
+          String(row.machineType || '')
+            .toLowerCase()
+            .includes(query);
+        const matchesExcavator =
+          !excavatorFilter ||
+          (excavatorFilter === '__unassigned__'
+            ? !row.excavatorId
+            : row.excavatorId === excavatorFilter);
+        return matchesMachine && matchesExcavator;
       });
-      data.Total = row.total ?? 0;
-      if (hasBinFactors) {
-        data['Bin Factor'] = row.binFactor;
-        data['Total Material (t)'] = row.totalMaterial;
-      }
-      return data;
-    });
-
-    await exportToExcel(exportData, `hourly-loads-${selectedShift}-${today}`, 'Hourly Loads');
-  };
+  }, [source, machineSearch, excavatorFilter]);
 
   if (machines.length === 0) {
     return (
@@ -1124,7 +1199,221 @@ function HourlyLoadsGrid({
 
   return (
     <div className="space-y-4">
-      {/* Shift Selector & Actions */}
+      {/* Live KPI Telemetry & Dynamic Shift Timeline Graph */}
+      <GlassCard className="p-4 sm:p-5 bg-[var(--vibrancy-surface)] border border-black/[0.06] space-y-4">
+        {/* Redesigned Live KPI Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          {/* KPI 1: Total Loads Captured */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                Total Shift Loads
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                  {grandTotalLoads}
+                </span>
+                <span className="text-[11px] font-medium text-[var(--accent-blue)]">
+                  {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'}
+                </span>
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] block">
+                {grandTotalMaterial > 0
+                  ? `${grandTotalMaterial.toLocaleString()} t total material`
+                  : 'Real-time shift tally'}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 flex items-center justify-center text-[var(--accent-blue)] shrink-0">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* KPI 2: Machines Active */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                Machines Active
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                  {activeMachinesCount}
+                </span>
+                <span className="text-xs font-medium text-[var(--text-muted)]">
+                  / {machines.length} fleet
+                </span>
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] block">
+                {machines.length > 0
+                  ? `${Math.round((activeMachinesCount / machines.length) * 100)}% fleet utilization`
+                  : 'No fleet configured'}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20 flex items-center justify-center text-[var(--accent-green)] shrink-0">
+              <Truck className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* KPI 3: Avg Loads / Machine */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                Avg Loads / Machine
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                  {avgLoadsPerMachine}
+                </span>
+                <span className="text-[11px] font-medium text-[var(--text-muted)]">loads/unit</span>
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] block">
+                Peak:{' '}
+                {peakHour.totalLoads > 0
+                  ? `${peakHour.hourLabel} (${peakHour.totalLoads})`
+                  : 'No loads yet'}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-amber)]/15 border border-[var(--accent-amber)]/30 flex items-center justify-center text-[var(--accent-amber)] shrink-0">
+              <Activity className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* KPI 4: Waste vs Coal Split */}
+          <div className="flex flex-col justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                Material Split
+              </span>
+              <span className="text-[11px] font-mono font-semibold text-[var(--text-heading)]">
+                W: {wasteTotalLoads} · C: {coalTotalLoads}
+              </span>
+            </div>
+            <div className="my-2 h-2 w-full rounded-full bg-black/[0.06] overflow-hidden flex">
+              <div
+                className="h-full bg-[var(--accent-blue)] transition-all duration-300"
+                style={{
+                  width: `${
+                    grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 50
+                  }%`,
+                }}
+                title={`Waste: ${wasteTotalLoads} loads`}
+              />
+              <div
+                className="h-full bg-neutral-800 transition-all duration-300"
+                style={{
+                  width: `${
+                    grandTotalLoads > 0
+                      ? 100 - Math.round((wasteTotalLoads / grandTotalLoads) * 100)
+                      : 50
+                  }%`,
+                }}
+                title={`Coal: ${coalTotalLoads} loads`}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent-blue)]" />
+                Waste (
+                {grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 0}%)
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-neutral-800" />
+                Coal (
+                {grandTotalLoads > 0 ? Math.round((coalTotalLoads / grandTotalLoads) * 100) : 0}%)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Hourly Timeline Graph */}
+        <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)]/80 border border-[var(--border-default)] space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Logo variant="gold" className="w-4 h-4 shrink-0" />
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)]">
+                  Live Hourly Production Timeline (
+                  {selectedShift === 'day' ? '06:00 – 17:00' : '18:00 – 05:00'})
+                </h3>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Updates dynamically as hourly machine loads are captured across the shift
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] font-medium text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[var(--accent-blue)]" />
+                Waste Loads
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-neutral-800" />
+                Coal Loads
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[var(--text-heading)]">
+                Cumulative: <strong>{grandTotalLoads}</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* 12-Hour Interactive Bar + Cumulative Progress Timeline */}
+          <div className="grid grid-cols-12 gap-1.5 sm:gap-2 pt-2 items-end h-28">
+            {hourlySeries.map((slot) => {
+              const heightPct =
+                slot.totalLoads > 0
+                  ? Math.max(12, Math.round((slot.totalLoads / maxHourLoads) * 100))
+                  : 4;
+              const wastePct =
+                slot.totalLoads > 0 ? Math.round((slot.wasteLoads / slot.totalLoads) * 100) : 100;
+              const coalPct = 100 - wastePct;
+
+              return (
+                <div
+                  key={slot.hourLabel}
+                  className="flex flex-col items-center h-full justify-end group"
+                  title={`${slot.hourLabel} — Total: ${slot.totalLoads} (Waste: ${slot.wasteLoads}, Coal: ${slot.coalLoads}) · Cumulative: ${slot.cumulativeLoads}`}
+                >
+                  <span
+                    className={`text-[10px] font-mono font-bold tabular-nums mb-1 transition-colors ${
+                      slot.totalLoads > 0
+                        ? 'text-[var(--text-heading)]'
+                        : 'text-[var(--text-muted)] opacity-50'
+                    }`}
+                  >
+                    {slot.totalLoads}
+                  </span>
+                  <div className="w-full max-w-[38px] bg-black/[0.04] rounded-t-md h-16 flex flex-col justify-end overflow-hidden border border-black/[0.05]">
+                    {slot.totalLoads > 0 ? (
+                      <div
+                        className="w-full flex flex-col justify-end transition-all duration-300 rounded-t-sm overflow-hidden"
+                        style={{ height: `${heightPct}%` }}
+                      >
+                        {slot.coalLoads > 0 && (
+                          <div
+                            className="w-full bg-neutral-800 transition-all duration-300"
+                            style={{ height: `${coalPct}%` }}
+                          />
+                        )}
+                        {slot.wasteLoads > 0 && (
+                          <div
+                            className="w-full bg-[var(--accent-blue)] transition-all duration-300"
+                            style={{ height: `${wastePct}%` }}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full h-1 bg-black/[0.08]" />
+                    )}
+                  </div>
+                  <span className="mt-1.5 text-[10px] font-mono font-medium text-[var(--text-muted)] group-hover:text-[var(--text-heading)]">
+                    {slot.shortLabel}:00
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Shift Selector */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <span className="text-[var(--text-muted)] text-sm">Shift:</span>
@@ -1153,13 +1442,6 @@ function HourlyLoadsGrid({
             </button>
           </div>
         </div>
-
-        <div className="flex gap-2">
-          <SecondaryButton size="sm" variant="rounded-lg" onClick={handleExport} disabled={saving}>
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </SecondaryButton>
-        </div>
       </div>
 
       {/* Excavator Site, Block Mined & Material Assignment Panel */}
@@ -1181,34 +1463,52 @@ function HourlyLoadsGrid({
             const currentBlockId = excavatorBlocks[excavator.id] || '';
             const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
             const currentSubCategory = excavatorMaterialSubCategories[excavator.id] || '';
-            const materialSubCategories = getMaterialSubCategories(currentMaterial);
+            const materialSubCategories = getMaterialSubCategories(
+              currentMaterial,
+              mineralRegistry
+            );
             const availableBlocks = currentSiteId
               ? mineBlocks.filter((mb) => mb.site_id === currentSiteId || mb.site_id === null)
               : mineBlocks;
-            const selectedSite = sites.find((s) => s.id === currentSiteId);
-            const selectedBlock = mineBlocks.find((mb) => mb.id === currentBlockId);
+
+            // Active machines assigned to this excavator in the current shift
+            const assignedMachineNames = Array.from(
+              new Set(
+                source
+                  .filter((r) => r.excavatorId === excavator.id && !r.isLocked)
+                  .map((r) => String(r.baseMachineName || r.machineName || ''))
+                  .filter(Boolean)
+              )
+            );
 
             return (
               <div
                 key={excavator.id}
                 className="flex flex-col gap-3 p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs"
               >
-                {/* Header: Excavator Name + Material Toggle */}
+                {/* Header: Excavator Name (with Gold Arch Logo) + Active Machines Subtitle + Material Toggle */}
                 <div className="flex items-center justify-between gap-2 border-b border-[var(--border-default)]/60 pb-2.5">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-[var(--text-heading)]">
-                      {excavator.name}
+                  <div className="flex flex-col min-w-0">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-heading)]">
+                      <Logo variant="gold" className="w-3.5 h-3.5 shrink-0" />
+                      <span>{excavator.name}</span>
                     </span>
-                    <span className="text-[11px] text-[var(--text-muted)]">
-                      Excavator
-                      {selectedSite ? ` · ${selectedSite.name}` : ''}
-                      {selectedBlock ? ` · ${selectedBlock.code}` : ''}
-                      {currentSubCategory ? ` · ${currentMaterial} (${currentSubCategory})` : ''}
+                    <span
+                      className="text-[11px] text-[var(--text-muted)] truncate"
+                      title={
+                        assignedMachineNames.length > 0
+                          ? `Active machines: ${assignedMachineNames.join(', ')}`
+                          : 'No active machine assigned'
+                      }
+                    >
+                      {assignedMachineNames.length > 0
+                        ? `Active: ${assignedMachineNames.join(', ')}`
+                        : 'No active machine assigned'}
                     </span>
                   </div>
 
                   {/* Material Selector (Waste / Coal) */}
-                  <div className="flex items-center gap-1 rounded-full bg-[var(--bg-primary)] p-0.5 border border-[var(--border-default)]">
+                  <div className="flex items-center gap-1 rounded-full bg-[var(--bg-primary)] p-0.5 border border-[var(--border-default)] shrink-0">
                     <button
                       type="button"
                       onClick={() => handleExcavatorMaterialChange(excavator.id, 'Waste')}
@@ -1326,12 +1626,55 @@ function HourlyLoadsGrid({
                 <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-xs font-semibold text-[var(--text-muted)]">
                   <th
                     scope="col"
-                    className="py-3 px-3 text-left min-w-[160px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)]"
+                    className="py-2.5 px-3 text-left min-w-[180px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] align-top"
                   >
-                    Machine
+                    <div className="space-y-1.5">
+                      <span className="block text-xs font-bold text-[var(--text-heading)]">
+                        Machine
+                      </span>
+                      <div className="relative">
+                        <Search className="w-3 h-3 text-[var(--text-muted)] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={machineSearch}
+                          onChange={(e) => setMachineSearch(e.target.value)}
+                          placeholder="Search machine..."
+                          aria-label="Search machine"
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md pl-6 pr-6 py-1 text-[11px] font-normal text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                        />
+                        {machineSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setMachineSearch('')}
+                            aria-label="Clear machine search"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </th>
-                  <th scope="col" className="py-3 px-3 text-left min-w-[150px]">
-                    Excavator Assigned
+                  <th scope="col" className="py-2.5 px-3 text-left min-w-[165px] align-top">
+                    <div className="space-y-1.5">
+                      <span className="block text-xs font-bold text-[var(--text-heading)]">
+                        Excavator Assigned
+                      </span>
+                      <select
+                        value={excavatorFilter}
+                        onChange={(e) => setExcavatorFilter(e.target.value)}
+                        aria-label="Filter by assigned excavator"
+                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-2 py-1 text-[11px] font-normal text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                      >
+                        <option value="">All Excavators</option>
+                        <option value="__unassigned__">Unassigned</option>
+                        {excavators.map((exc) => (
+                          <option key={exc.id} value={exc.id}>
+                            {exc.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </th>
                   {HOURS_12.map((_, index) => (
                     <th
@@ -1358,23 +1701,25 @@ function HourlyLoadsGrid({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]/60 text-xs text-[var(--text-heading)]">
-                {source.length === 0 ? (
+                {filteredRows.length === 0 ? (
                   <tr>
                     <td
                       colSpan={2 + 12 + 1 + (hasBinFactors ? 2 : 0)}
                       className="py-10 text-center text-sm text-[var(--text-muted)]"
                     >
-                      No machine load records found for this shift.
+                      {source.length === 0
+                        ? 'No machine load records found for this shift.'
+                        : 'No machines match the current search or excavator filter.'}
                     </td>
                   </tr>
                 ) : (
-                  source.map((row, rowIndex) => {
+                  filteredRows.map(({ row, originalRowIndex }) => {
                     const isLocked = Boolean(row.isLocked);
                     const isSplit = Boolean(row.isSplit);
 
                     return (
                       <tr
-                        key={row.rowKey || `row-${rowIndex}`}
+                        key={row.rowKey || `row-${originalRowIndex}`}
                         className={`transition-colors hover:bg-[var(--bg-secondary)]/40 ${
                           isLocked ? 'bg-black/[0.015]' : ''
                         }`}
@@ -1411,12 +1756,12 @@ function HourlyLoadsGrid({
                         {/* Excavator Assigned Column */}
                         <td className="py-2.5 px-3 min-w-[150px]">
                           <select
-                            data-row={String(rowIndex)}
+                            data-row={String(originalRowIndex)}
                             data-action="select-excavator"
                             value={row.excavatorId || ''}
                             onChange={(e) => {
                               e.stopPropagation();
-                              handleExcavatorAssignment(rowIndex, e.target.value || null);
+                              handleExcavatorAssignment(originalRowIndex, e.target.value || null);
                             }}
                             disabled={isLocked}
                             className={`w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2 py-1 text-xs font-medium ${
@@ -1443,9 +1788,9 @@ function HourlyLoadsGrid({
 
                           return (
                             <HourCell
-                              key={`${row.rowKey || rowIndex}-${hourProp}`}
+                              key={`${row.rowKey || originalRowIndex}-${hourProp}`}
                               value={value}
-                              rowIndex={rowIndex}
+                              rowIndex={originalRowIndex}
                               hourProp={hourProp}
                               hourLabel={hourLabels[hourIdx] ?? ''}
                               editable={editable}

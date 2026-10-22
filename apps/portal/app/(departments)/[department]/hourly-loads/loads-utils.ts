@@ -274,19 +274,32 @@ export const WASTE_MATERIAL_SUBCATEGORIES = ['Dyke', 'Overburden', 'Interburden'
 
 export type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
 export type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
-export type MaterialSubCategory = CoalMaterialSubCategory | WasteMaterialSubCategory;
+export type MaterialSubCategory = string;
 
-export function getMaterialSubCategories(category: HourlyMaterial): readonly MaterialSubCategory[] {
+export function getMaterialSubCategories(
+  category: HourlyMaterial,
+  customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
+): readonly string[] {
+  if (customRegistry) {
+    if (category === 'Coal' && customRegistry.coal && customRegistry.coal.length > 0) {
+      return customRegistry.coal;
+    }
+    if (category === 'Waste' && customRegistry.waste && customRegistry.waste.length > 0) {
+      return customRegistry.waste;
+    }
+  }
   return category === 'Coal' ? COAL_MATERIAL_SUBCATEGORIES : WASTE_MATERIAL_SUBCATEGORIES;
 }
 
 export function isValidSubCategoryForMaterial(
   category: HourlyMaterial,
-  subCategory: string | null | undefined
-): subCategory is MaterialSubCategory {
-  if (!subCategory) return false;
-  const options = getMaterialSubCategories(category);
-  return (options as readonly string[]).includes(subCategory);
+  subCategory: string | null | undefined,
+  customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
+): boolean {
+  if (!subCategory || typeof subCategory !== 'string' || !subCategory.trim()) return false;
+  const options = getMaterialSubCategories(category, customRegistry);
+  const trimmed = subCategory.trim().toLowerCase();
+  return options.some((opt) => opt.toLowerCase() === trimmed);
 }
 
 /**
@@ -294,9 +307,12 @@ export function isValidSubCategoryForMaterial(
  * "Waste - Overburden", "2#Lower", "Overburden", "Coal", "Waste") into its
  * primary category ('Waste' | 'Coal') and optional sub-category.
  */
-export function parseExcavatorMaterial(raw: string | null | undefined): {
+export function parseExcavatorMaterial(
+  raw: string | null | undefined,
+  customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
+): {
   category: HourlyMaterial;
-  subCategory: MaterialSubCategory | '';
+  subCategory: string;
 } {
   if (!raw || typeof raw !== 'string') {
     return { category: 'Waste', subCategory: '' };
@@ -313,12 +329,11 @@ export function parseExcavatorMaterial(raw: string | null | undefined): {
     const rawCat = prefixMatch[1]?.toLowerCase() === 'coal' ? 'Coal' : 'Waste';
     const rawSub = (prefixMatch[2] ?? '').trim();
     const normalizedSub = rawSub.toLowerCase() === 'interburdern' ? 'Interburden' : rawSub;
-    const matchedSub = getMaterialSubCategories(rawCat).find(
-      (opt) => opt.toLowerCase() === normalizedSub.toLowerCase()
-    );
+    const options = getMaterialSubCategories(rawCat, customRegistry);
+    const matchedSub = options.find((opt) => opt.toLowerCase() === normalizedSub.toLowerCase());
     return {
       category: rawCat,
-      subCategory: matchedSub ?? '',
+      subCategory: matchedSub ?? normalizedSub,
     };
   }
 
@@ -329,19 +344,17 @@ export function parseExcavatorMaterial(raw: string | null | undefined): {
     return { category: 'Waste', subCategory: '' };
   }
 
-  // Check if raw directly matches a specific Coal sub-category (excluding 'Other')
-  const coalMatch = COAL_MATERIAL_SUBCATEGORIES.filter((s) => s !== 'Other').find(
-    (s) => s.toLowerCase() === trimmed.toLowerCase()
-  );
+  // Check Coal options
+  const coalOptions = getMaterialSubCategories('Coal', customRegistry);
+  const coalMatch = coalOptions.find((s) => s.toLowerCase() === trimmed.toLowerCase());
   if (coalMatch) {
     return { category: 'Coal', subCategory: coalMatch };
   }
 
-  // Check if raw directly matches a specific Waste sub-category
+  // Check Waste options
   const normalizedTrimmed = trimmed.toLowerCase() === 'interburdern' ? 'Interburden' : trimmed;
-  const wasteMatch = WASTE_MATERIAL_SUBCATEGORIES.find(
-    (s) => s.toLowerCase() === normalizedTrimmed.toLowerCase()
-  );
+  const wasteOptions = getMaterialSubCategories('Waste', customRegistry);
+  const wasteMatch = wasteOptions.find((s) => s.toLowerCase() === normalizedTrimmed.toLowerCase());
   if (wasteMatch) {
     return { category: 'Waste', subCategory: wasteMatch };
   }
@@ -358,8 +371,9 @@ export function formatExcavatorMaterial(
   subCategory?: string | null
 ): string {
   const validCat: HourlyMaterial = category === 'Coal' ? 'Coal' : 'Waste';
-  if (subCategory && isValidSubCategoryForMaterial(validCat, subCategory)) {
-    return `${validCat} - ${subCategory}`;
+  const trimmed = subCategory?.trim();
+  if (trimmed) {
+    return `${validCat} - ${trimmed}`;
   }
   return validCat;
 }

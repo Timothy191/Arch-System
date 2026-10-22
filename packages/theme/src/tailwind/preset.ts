@@ -75,13 +75,7 @@ const archTheme: Config = {
         '4xl': '64px',
       },
       fontFamily: {
-        sans: [
-          'var(--font-sans)',
-          'var(--font-inter)',
-          'var(--font-outfit)',
-          'system-ui',
-          'sans-serif',
-        ],
+        sans: ['var(--font-sans)', 'IBM Plex Sans', 'Arial', 'Helvetica', 'sans-serif'],
         mono: [
           'var(--font-mono)',
           'ui-monospace',
@@ -91,8 +85,21 @@ const archTheme: Config = {
           'Consolas',
           'monospace',
         ],
-        heading: ['var(--font-outfit)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
-        anurati: ['Anurati', 'var(--font-outfit)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+        heading: [
+          'var(--font-outfit)',
+          'var(--font-sans)',
+          'IBM Plex Sans',
+          'Arial',
+          'Helvetica',
+          'sans-serif',
+        ],
+        anurati: [
+          'var(--font-outfit)',
+          'var(--font-sans)',
+          'IBM Plex Sans',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       colors: {
         // Arch palette — direct CSS variable references

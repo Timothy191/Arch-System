@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-22T14:10:00Z - Canonical Department Icon Registry Integration
+
+- **Purpose**: Connect `DepartmentCard.tsx` to `getDepartmentIcon` from `@repo/ui/icons/department-icons` as the canonical department icon fallback.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Imported `getDepartmentIcon` from `@repo/ui/icons/department-icons` and wired into icon resolution.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm --filter @repo/hub/ui type-check` ✅.
+
 ## 2026-10-22T07:15:00Z - Plant Inventory Hub Action Label Alignment
 
 - **Purpose**: Align `HeroRotator.test.tsx` fixture action labels with `PLANT_INVENTORY_TABS` (`Inventory List` and `Stock Required`).

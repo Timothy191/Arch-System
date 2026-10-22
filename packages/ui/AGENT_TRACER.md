@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-22T14:10:00Z - Shared Design System Primitives & Central Lucide Icon Registry
+
+- **Purpose**: Establish a canonical Lucide department/action/status icon registry and shared operational UI components (`DataTable`, `StatusBadge`, `MetricCard`, `MachineStatusPanel`, `ActivityTimeline`, `FilterToolbar`, `Alert`, `LoadingState`, `ErrorState`) in `@repo/ui`.
+- **Changes**:
+  - `packages/ui/src/icons/department-icons.ts`: Created `DEPARTMENT_ICON_REGISTRY`, `ACTION_ICON_REGISTRY`, `STATUS_ICON_REGISTRY`, and typed helper lookups (`getDepartmentIcon`, `getActionIcon`, `getStatusIcon`).
+  - `packages/ui/src/components/ui/{status-badge,metric-card,data-table,filter-toolbar,machine-status-panel,activity-timeline,alert,loading-state,error-state}.tsx`: Added light-mode glass operational primitives with semantic OKLCH tokens and WCAG accessibility attributes.
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Wired `getDepartmentIcon(department.name)` into the sidebar department header badge instead of a hardcoded `BarChart3` icon.
+  - `packages/ui/src/index.ts` & `packages/ui/package.json`: Exported all new operational primitives and `./icons/department-icons`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-22T06:40:00Z - Prune 8 Dangling Subpath Exports from package.json
 
 - **Purpose**: Remove 8 non-existent subpath export keys from `packages/ui/package.json` to ensure 100% export map integrity.
@@ -510,3 +520,4 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Verification**: `DepartmentLayout.test.tsx` and `ReportsDashboardClient.test.tsx` (`10/10 PASS`).
 - 2026-10-22T11:36:00+02:00 — feat(ui): remove grey circle on HeroRotator prev/next highlight arrows and enlarge/animate indicator emblems
 - 2026-10-22T11:54:00+02:00 — feat(ui): add HeroOperationalKpiStrip to HeroCardContent and fix SelectItem text rendering
+- 2026-10-23T00:59:00+02:00 — feat(ui): add `variant="gold"` metallic gold gradient option to `Logo.tsx` for top-bar dropdown and excavator emblems

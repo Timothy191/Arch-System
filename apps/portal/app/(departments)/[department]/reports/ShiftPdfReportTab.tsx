@@ -553,9 +553,6 @@ export function ShiftPdfReportTab({
                                 {roleBadgeLabel}
                               </span>
                             </div>
-                            <span className="text-[11px] text-[var(--text-muted)] font-mono">
-                              {op.machineType} · {op.date} ({op.shift.toUpperCase()})
-                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5 text-xs font-mono text-right text-[var(--text-secondary)] whitespace-nowrap">

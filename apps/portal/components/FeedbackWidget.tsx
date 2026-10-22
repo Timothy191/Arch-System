@@ -111,10 +111,10 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h3
-                className="font-anurati uppercase tracking-[0.08em] text-xs font-bold text-[var(--text-heading)] truncate"
+                className="font-anurati uppercase tracking-[0.055em] text-xs font-bold text-[var(--text-heading)] truncate"
                 style={{
                   fontFamily:
-                    "'Anurati', var(--font-outfit), var(--font-sans), system-ui, sans-serif",
+                    "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
                 }}
               >
                 Feedback &amp; Support

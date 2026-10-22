@@ -21,6 +21,10 @@ jest.mock('@repo/shared/data-access', () => ({
   logAuditEvent: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('@repo/redis', () => ({
+  cacheInvalidateTags: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
 // ---------------------------------------------------------------------------

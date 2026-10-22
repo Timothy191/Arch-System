@@ -1,8 +1,14 @@
 /**
  * Arch System — Typography overrides
  * Configures robust heading typography using the application's loaded font hierarchy
- * (Outfit / Inter / system-ui fallback) and registers the Anurati display typeface
- * for hero-card and operational module headers.
+ * (Outfit / IBM Plex Sans / Inter / system-ui fallback).
+ *
+ * NOTE: Anurati is a stylized missing-stroke stencil display font suited only for
+ * 1–2 word giant wordmarks (>36px). At 12–24px UI header sizes (e.g. "CORE OPERATIONAL MODULES",
+ * "STOCK CONTROL DEPARTMENT", "FEEDBACK & SUPPORT"), missing horizontal/diagonal strokes
+ * degrade human reading speed and sunlight scannability. `.font-anurati` therefore maps to
+ * geometric industrial display typography (`var(--font-outfit)`, `var(--font-sans)`) with
+ * balanced uppercase tracking (`0.06em`) and `600`/`700` weight.
  */
 
 @font-face {
@@ -14,9 +20,17 @@
 }
 
 .font-anurati {
+  font-family: var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.font-brand-wordmark {
   font-family: Anurati, var(--font-outfit), var(--font-sans), system-ui, sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
 }
 
 h1,

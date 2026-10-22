@@ -1,3 +1,21 @@
+## 2026-10-23T00:59:00+02:00: Hourly Loads Live KPIs, Timeline Graph, Header Search/Filter, Excavator Gold Logo & Admin Sites/Blocks/Minerals Register
+
+- **Purpose**: Implement all 9 `/control-room/hourly-loads` design feedback items plus full Supabase integration for Administrator Sites, Mine Blocks, and Minerals Register (`/admin?tab=sites` & `/admin?tab=minerals`).
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`: Added live shift KPI telemetry strip + 12-hour dynamic production timeline graph (`hourlySeries`), removed the `Export` button, added `<Logo variant="gold" />` prefix and active assigned machines subtitle on excavator cards, added machine search input inside `th "Machine"`, and added excavator filter select inside `th "Excavator Assigned"`.
+  - `apps/portal/app/(departments)/[department]/hourly-loads/page.tsx`: Set `<PageHeader title="Hourly Loads Sheet" showDate={false} />` and passed administrator-configured `mineralRegistry` to `HourlyLoadsGrid`.
+  - `apps/portal/components/nav/ServicesDropdown.tsx`: Replaced `ChevronDown` with `<Logo variant="gold" />` pointed down (`rotate-180` closed, `rotate-0` open).
+  - `apps/portal/features/admin/{actions/sites.ts,actions/minerals.ts,tabs/SitesTab.tsx,tabs/MineralsTab.tsx,components/AdminTabs.tsx}`: Wired real Supabase `sites`, `mine_blocks`, and `mineral_registry` (`report_templates`) management into `/admin` with unit tests in `sites-minerals.test.ts`.
+- **Verification**: `pnpm --filter portal type-check` ✅; `pnpm --filter portal test -- --testPathPatterns="sites-minerals|hourly-loads"` ✅; `pnpm agent:verify` ✅.
+
+## 2026-10-22T14:10:00Z: IBM Plex Sans Primary Font Integration & Operational UI Unit Tests
+
+- **Purpose**: Configure `IBM_Plex_Sans` via `next/font/google` as the primary `--font-sans` typeface in the portal root layout and add unit tests for the new `@repo/ui` operational primitives (`StatusBadge`, `MetricCard`, `DataTable`).
+- **Changes**:
+  - `apps/portal/app/layout.tsx`: Loaded `IBM_Plex_Sans` (`--font-sans`) alongside `Inter` (`--font-inter`), `JetBrains_Mono` (`--font-mono`), and `Outfit` (`--font-outfit`).
+  - `apps/portal/components/ui/{status-badge,metric-card,data-table}.test.tsx`: Added Jest unit tests verifying rendering, accessible roles, sorting, and empty states.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="status-badge|metric-card|data-table"` ✅; `pnpm --filter portal type-check` ✅.
+
 ## 2026-10-22T12:30:00Z: Overview Docs & Maps Redesign — Turbo Project Graph & Pipeline + All 9 Codebase Maps
 
 - **Purpose**: Resolve infinite `"Loading codebase map content..."` fetch loop in `DocumentationMaps.tsx`, embed serverless-ready canonical map topology specifications (`CODEBASE_MAP_SPECS`), default to `Turbo Project Graph & Pipeline` (`turbo-graph.md`), and redesign all 9 codebase maps with 5-stage interactive block-and-line visual pipelines, stage inspectors, 4-card topology hierarchies, boundary enforcement matrices, and markdown specifications.

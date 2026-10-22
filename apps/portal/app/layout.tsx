@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
-import { Inter, JetBrains_Mono, Outfit } from 'next/font/google';
+import { IBM_Plex_Sans, Inter, JetBrains_Mono, Outfit } from 'next/font/google';
 import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
@@ -49,9 +49,18 @@ const MacMenuBar = dynamic(
 import { RouteBackground } from '@/components/RouteBackground';
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 
-const inter = Inter({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: true,
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
   weight: ['400', '500', '600'],
   display: 'swap',
   preload: false,
@@ -70,7 +79,7 @@ const jetbrainsMono = JetBrains_Mono({
 const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
   preload: false,
   adjustFontFallback: true,
@@ -109,7 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} bg-[#f3f4f6]`}
+      className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} bg-[#f3f4f6]`}
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
@@ -148,7 +157,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent`}
+        className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent`}
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />

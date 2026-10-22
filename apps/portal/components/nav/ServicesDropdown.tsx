@@ -11,9 +11,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@repo/ui/components/ui/dropdown-menu';
+import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import {
-  ChevronDown,
   ClipboardList,
   CloudSun,
   Lock,
@@ -162,10 +162,11 @@ export function ServicesDropdown() {
               open && 'bg-[var(--material-thin)]'
             )}
           >
-            <ChevronDown
+            <Logo
+              variant="gold"
               className={cn(
-                'w-3.5 h-3.5 transition-transform duration-200 ease-out',
-                open && 'rotate-180'
+                'w-4 h-4 transition-transform duration-200 ease-out',
+                open ? 'rotate-0' : 'rotate-180'
               )}
             />
           </button>

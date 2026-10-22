@@ -1,7 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
-import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
+import { getMineralRegistry } from '~/features/admin/actions/minerals';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
 import { HAUL_TRUCK_MACHINE_TYPES } from './loads-utils';
@@ -18,7 +18,7 @@ export default async function HourlyLoadsPage({
     department,
   });
 
-  // Parallel fetch of fleet dump trucks, excavators, today's loads, sites, mine blocks, and excavator activities
+  // Parallel fetch of fleet dump trucks, excavators, today's loads, sites, mine blocks, excavator activities, and mineral registry
   const [
     { data: machines },
     { data: excavators },
@@ -26,6 +26,7 @@ export default async function HourlyLoadsPage({
     { data: sites },
     { data: mineBlocks },
     { data: excavatorActivities },
+    mineralRegistry,
   ] = await Promise.all([
     supabase
       .from('machines')
@@ -48,31 +49,14 @@ export default async function HourlyLoadsPage({
       .eq('department_id', deptId)
       .eq('activity_date', today)
       .order('created_at', { ascending: false }),
+    getMineralRegistry(),
   ]);
-
-  // Calculate totals
-  const loadsByMachine = new Map();
-  let grandTotal = 0;
-
-  hourlyLoads?.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load.total_loads);
-    grandTotal += load.total_loads || 0;
-  });
 
   return (
     <div className="space-y-6">
       <GlassCard className="relative overflow-hidden group">
-        <PageHeader title="Hourly Loads Sheet" />
+        <PageHeader title="Hourly Loads Sheet" showDate={false} />
       </GlassCard>
-
-      <KPIGrid cols={3}>
-        <KPICard label="Total Loads Today" value={grandTotal.toLocaleString()} color="green" />
-        <KPICard label="Machines Active" value={loadsByMachine.size} color="green" />
-        <KPICard
-          label="Avg Loads per Machine"
-          value={loadsByMachine.size > 0 ? Math.round(grandTotal / loadsByMachine.size) : 0}
-        />
-      </KPIGrid>
 
       <HourlyLoadsGrid
         departmentId={deptId}
@@ -82,6 +66,7 @@ export default async function HourlyLoadsPage({
         sites={sites || []}
         mineBlocks={mineBlocks || []}
         excavatorActivities={excavatorActivities || []}
+        mineralRegistry={mineralRegistry}
         today={today}
         initialShift={getCurrentShift()}
       />

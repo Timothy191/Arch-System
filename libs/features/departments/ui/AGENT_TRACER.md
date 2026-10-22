@@ -38,3 +38,9 @@
 - **Agent**: Antigravity
 - **Purpose**: Display the Roll-over amount (`hours worked * 250 = total rollover (BCM)`) as a fixed number at the bottom of `DozerRollForm` (`src/control-room/DozerRollForm.tsx`) when a Dozer is selected, and allow submitting a Dozer Roll with `hoursOperated` without requiring `lengthM` and `widthM`.
 - **Verification**: Verified with unit tests and `pnpm agent:verify` (8/8 PASS).
+
+## 2026-10-23T00:20:00+02:00: Mock Redis in Breakdown Actions Unit Tests
+
+- **Agent**: Antigravity
+- **Purpose**: Mock `@repo/redis` in `src/engineering/breakdowns/actions.test.ts` to prevent network timeouts during cache invalidation calls in Jest tests.
+- **Verification**: `pnpm test` and `pnpm agent:verify` ✅ (12/12 PASS).

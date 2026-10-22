@@ -36,6 +36,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
 import { MacTitleBar } from './MacTitleBar';
@@ -280,7 +281,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               department.color === 'amber' && 'bg-accent-amber/10 text-accent-amber'
             )}
           >
-            <BarChart3 className="w-3.5 h-3.5" />
+            {(() => {
+              const DeptIcon =
+                ICON_MAP[department.icon] || getDepartmentIcon(department.name) || BarChart3;
+              return <DeptIcon className="w-3.5 h-3.5" />;
+            })()}
           </div>
           <span className="text-[12px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">
             {department.displayName}

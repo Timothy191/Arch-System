@@ -5,6 +5,7 @@ import { AuditLogsTab } from '~/features/admin/tabs/AuditLogsTab';
 import { DepartmentsTab } from '~/features/admin/tabs/DepartmentsTab';
 import { FleetTab } from '~/features/admin/tabs/FleetTab';
 import { IntegrationsTab } from '~/features/admin/tabs/IntegrationsTab';
+import { MineralsTab } from '~/features/admin/tabs/MineralsTab';
 import { SettingsTab } from '~/features/admin/tabs/SettingsTab';
 import { SitesTab } from '~/features/admin/tabs/SitesTab';
 import { UsersTab } from '~/features/admin/tabs/UsersTab';
@@ -15,6 +16,7 @@ const TABS = [
   'departments',
   'fleet',
   'sites',
+  'minerals',
   'integrations',
   'webhooks',
   'audit-logs',
@@ -53,6 +55,7 @@ export default async function AdminPage({
         {activeTab === 'departments' && <DepartmentsTab />}
         {activeTab === 'fleet' && <FleetTab />}
         {activeTab === 'sites' && <SitesTab />}
+        {activeTab === 'minerals' && <MineralsTab />}
         {activeTab === 'integrations' && <IntegrationsTab />}
         {activeTab === 'webhooks' && <WebhooksTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}

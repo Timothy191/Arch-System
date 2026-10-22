@@ -616,19 +616,6 @@ export function ReportsDashboardClient({
                 Active Shift: {currentShift.toUpperCase()} ({todayStr})
               </span>
             </div>
-            <p className="text-xs text-[var(--text-muted)]">
-              Unified operational &amp; executive reporting across active Shift logs, Daily
-              consolidations, and Archived historical records ({fromDateStr} to {toDateStr}).
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <CopyReportButton csvContent={csvContent} />
-            <PDFDownloadButton reportData={pdfShiftReportData} departmentId={departmentId} />
-            <ExportButton
-              filename={`${departmentSlug}-report-${fromDateStr}-to-${toDateStr}`}
-              rows={exportRows}
-            />
           </div>
         </div>
       </GlassCard>
@@ -1814,6 +1801,14 @@ export function ReportsDashboardClient({
           pdfShiftReportData={pdfShiftReportData}
         />
       )}
+      <div className="flex items-center gap-2 flex-wrap justify-end no-print pt-4">
+        <CopyReportButton csvContent={csvContent} />
+        <PDFDownloadButton reportData={pdfShiftReportData} departmentId={departmentId} />
+        <ExportButton
+          filename={`${departmentSlug}-report-${fromDateStr}-to-${toDateStr}`}
+          rows={exportRows}
+        />
+      </div>
     </div>
   );
 }

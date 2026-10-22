@@ -257,3 +257,11 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
   - `src/index.ts`: Exported all new schemas and inferred types; removed duplicate `export * from './schemas/_registry';`.
   - `tools/audits/audit-contract-drift.cjs`: Registered explicit domain mappings in `DOMAIN_MAP` alongside camelCase heuristic resolution.
 - **Verification**: `node tools/audits/audit-contract-drift.cjs` reports **100.0% DHI (97/97 tables synchronized, 0 unmapped)**. `pnpm --filter @repo/contract type-check`, `build`, and `test` pass with 0 errors.
+
+## 2026-10-23T00:59:00+02:00: Admin Mine Blocks & Mineral Registry Contract Schemas
+
+- **Purpose**: Add Zod validation schemas for administrator mine block management (`adminAddMineBlockSchema`, `adminUpdateMineBlockSchema`) and custom Waste/Coal mineral subcategories (`adminMineralRegistrySchema`), and allow dynamic administrator-defined subcategories in `materialSubCategorySchema`.
+- **Changes**:
+  - `src/schemas/admin.schema.ts`: Added `adminAddMineBlockSchema`, `adminUpdateMineBlockSchema`, and `adminMineralRegistrySchema`.
+  - `src/schemas/form.schema.ts`: Relaxed `materialSubCategorySchema` to `z.string().min(1).max(100)` while retaining `WASTE_SUB_CATEGORIES` and `COAL_SUB_CATEGORIES` defaults.
+- **Verification**: `pnpm --filter @repo/contract build && pnpm --filter @repo/contract test` ✅.

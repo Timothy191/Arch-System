@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-22T14:10:00Z - IBM Plex Sans Primary Sans-Serif Typeface Alignment
+
+- **Purpose**: Standardize `IBM Plex Sans` as the primary sans-serif typeface in `@repo/theme` tokens and Tailwind preset while preserving `Inter`, `Outfit`, `Anurati`, and `JetBrains Mono` in the font stack.
+- **Changes**:
+  - `packages/theme/src/tokens/typography.ts`: Updated `fonts.sans` and `fonts.mono` token definitions and added `semibold`/`bold` weights.
+  - `packages/theme/src/tailwind/preset.ts`: Added `IBM Plex Sans` to `fontFamily.sans` and `fontFamily.heading` stacks.
+- **Verification**: `pnpm --filter @repo/theme type-check` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-08-26 - Fluid Typography CSS Clamp() Token Integration
 
 - **Purpose**: Implement fluid typography scaling via CSS `clamp()` in Tailwind preset according to responsive design constraints.

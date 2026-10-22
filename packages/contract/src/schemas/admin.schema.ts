@@ -27,3 +27,25 @@ export const adminUpdateSiteSchema = z.object({
   site_code: z.string().min(1, 'Site code cannot be empty').optional(),
   active: z.boolean().optional(),
 });
+
+export const adminAddMineBlockSchema = z.object({
+  name: z.string().min(1, 'Block name is required'),
+  code: z.string().min(1, 'Block code is required'),
+  site_id: z.string().uuid('Invalid site ID format').nullable().optional(),
+  active: z.boolean().optional().default(true),
+});
+
+export const adminUpdateMineBlockSchema = z.object({
+  id: z.string().uuid('Invalid block ID format'),
+  name: z.string().min(1, 'Block name cannot be empty').optional(),
+  code: z.string().min(1, 'Block code cannot be empty').optional(),
+  site_id: z.string().uuid('Invalid site ID format').nullable().optional(),
+  active: z.boolean().optional(),
+});
+
+export const adminMineralRegistrySchema = z.object({
+  waste: z.array(z.string().min(1)).min(1, 'At least one waste mineral is required'),
+  coal: z.array(z.string().min(1)).min(1, 'At least one coal mineral is required'),
+});
+
+export type AdminMineralRegistry = z.infer<typeof adminMineralRegistrySchema>;
