@@ -108,9 +108,11 @@ describe('DepartmentCard', () => {
     expect(localStorage.getItem('pinned_dept_drilling')).toBe('true');
   });
 
-  it('renders outer card with test id and Anurati header font', () => {
-    render(<DepartmentCard department={mockDepartment} index={0} />);
+  it('renders outer card with test id, Anurati header font, and slimmer rectangular geometry', () => {
+    const { container } = render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByTestId('dept-card-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('dept-link-drilling')).toHaveClass('rounded-[20px]');
+    expect(container.querySelector('.uiverse-card-icon-bubble')).toHaveClass('left-4', '-bottom-4');
     const heading = screen.getByRole('heading', { name: 'Drilling Operations' });
     expect(heading).toHaveClass('uiverse-card-title', 'font-anurati');
   });

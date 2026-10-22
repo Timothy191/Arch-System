@@ -165,7 +165,7 @@ function DepartmentCard({
         {/* Navigation Loading Overlay */}
         {isNavigating && (
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-arch-surface-primary/75 backdrop-blur-sm rounded-[24px] z-30 transition-all animate-fade-in"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-arch-surface-primary/75 backdrop-blur-sm rounded-[20px] z-30 transition-all animate-fade-in"
             data-testid={`dept-loading-${department.name}`}
             aria-live="polite"
           >
@@ -185,7 +185,7 @@ function DepartmentCard({
               router.push(route);
             });
           }}
-          className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[24px]"
+          className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[20px]"
           aria-label={`Open ${department.displayName} department`}
           data-testid={`dept-link-${department.name}`}
         />
@@ -198,7 +198,7 @@ function DepartmentCard({
           )}
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
-          <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[22px]">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[18px]">
             <Image
               src={
                 imageError
@@ -228,7 +228,7 @@ function DepartmentCard({
             onClick={togglePin}
             aria-pressed={isPinned}
             className={cn(
-              'uiverse-card-pin group/pin absolute top-3 right-3 z-20 pointer-events-auto hover:scale-110 active:scale-95',
+              'uiverse-card-pin group/pin absolute top-2.5 right-2.5 z-20 pointer-events-auto hover:scale-110 active:scale-95',
               isPinned
                 ? 'bg-white border-arch-accent-blue/40 text-arch-accent-blue shadow-sm'
                 : 'text-arch-text-secondary hover:text-arch-accent-blue hover:bg-white/95'
@@ -244,17 +244,17 @@ function DepartmentCard({
           {/* Department Icon Bubble */}
           <div
             className={cn(
-              'uiverse-card-icon-bubble absolute left-5 -bottom-5 z-20 border-arch-border-emphasis/25',
+              'uiverse-card-icon-bubble absolute left-4 -bottom-4 z-20 border-arch-border-emphasis/25',
               config.bg
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4" />
           </div>
         </div>
 
         {/* Card Body */}
         <div className="uiverse-card-body relative z-10 pointer-events-none">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="uiverse-card-title-row">
               <h3
                 className="uiverse-card-title font-anurati uppercase tracking-[0.08em]"

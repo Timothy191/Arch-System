@@ -158,3 +158,4 @@
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
 - 2026-10-22T11:36:00+02:00 — feat(hub): replace DepartmentCard bookmark icon with Arch Logo bookmark emblem
 - 2026-10-22T11:54:00+02:00 — test(hub): verify HeroOperationalKpiStrip readout tiles in HeroRotator tests
+- 2026-10-22T12:14:00+02:00 — feat(hub): align DepartmentCard geometry and spacing with slimmer rectangular uiverse-card
