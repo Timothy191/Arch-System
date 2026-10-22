@@ -63,6 +63,7 @@ module.exports = {
     '^@repo/ui/MacMenuBar$': '<rootDir>/../../packages/ui/src/components/MacMenuBar.tsx',
     '^@repo/ui/MacTitleBar$': '<rootDir>/../../packages/ui/src/components/MacTitleBar.tsx',
     '^@repo/ui/Logo$': '<rootDir>/../../packages/ui/src/components/Logo.tsx',
+    '^@repo/ui/HeroRotator$': '<rootDir>/../../packages/ui/src/components/HeroRotator.tsx',
     '^@repo/ui/EveLogo$': '<rootDir>/../../packages/ui/src/components/EveLogo.tsx',
     '^@repo/ui/EveStatusBar$': '<rootDir>/../../packages/ui/src/components/EveStatusBar.tsx',
     '^@repo/ui/TelemetryChart$':

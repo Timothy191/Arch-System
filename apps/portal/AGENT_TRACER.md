@@ -740,3 +740,4 @@ AIAssistant chat.
 - 2026-10-22T06:30:00Z | Antigravity | Hardened `PDF Report` sub-tab (`ShiftPdfReportTab.tsx`, `ShiftReportPdfDocument.tsx`, `ReportsDashboardClient.tsx`, `reports/page.tsx`) with A4 Landscape `@react-pdf/renderer` binary PDF download (`Download Shift PDF`), Shift Date filter selector, URL query synchronization (`?tab=pdf-report`), print isolation (`no-print` / `print-document`), and dozer roll-over deduplication.
 - 2026-10-22T05:59:38Z | Council-Orchestrator | Rotated /icons/arch-cursor.svg -45deg (45deg left) to match angled pointer orientation.
 - 2026-10-22T06:17:58Z | Council-Orchestrator | Added ArchCursorWaitIndicator component and /icons/antigravity-logo.svg to display a bouncing animated Google Antigravity logo next to the cursor during loading and operator-wait processes.
+- 2026-10-22T11:36:00+02:00 — feat(portal): replace Core Operational Modules header icon with Arch System Logo

@@ -328,7 +328,19 @@ describe('HeroRotator', () => {
 
     const prevBtn = screen.getByLabelText('Previous highlight');
     const nextBtn = screen.getByLabelText('Next highlight');
-    expect(prevBtn).toHaveClass('text-[var(--accent-blue)]');
-    expect(nextBtn).toHaveClass('text-[var(--accent-blue)]');
+    expect(prevBtn).toHaveClass('text-[var(--accent-blue)]', 'bg-transparent', 'border-0');
+    expect(nextBtn).toHaveClass('text-[var(--accent-blue)]', 'bg-transparent', 'border-0');
+    expect(prevBtn).not.toHaveClass('liquid-glass-light', 'rounded-full', 'shadow-window');
+    expect(nextBtn).not.toHaveClass('liquid-glass-light', 'rounded-full', 'shadow-window');
+
+    const activeIndicator = screen.getByLabelText('Jump to System Overview');
+    const inactiveIndicator = screen.getByLabelText('Jump to Drilling Operations');
+    expect(activeIndicator).toHaveClass('scale-125');
+    expect(activeIndicator.querySelector('svg')).toHaveClass(
+      'w-4',
+      'h-4',
+      'motion-safe:animate-pulse'
+    );
+    expect(inactiveIndicator.querySelector('svg')).toHaveClass('w-3.5', 'h-3.5');
   });
 });

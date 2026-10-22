@@ -156,3 +156,4 @@
 - **Agent**: Antigravity
 - **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
+- 2026-10-22T11:36:00+02:00 — feat(hub): replace DepartmentCard bookmark icon with Arch Logo bookmark emblem

@@ -365,17 +365,17 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-[var(--accent-blue)]/35 hover:border-[var(--accent-blue)]/60 shadow-window hover:bg-white/40 text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-2 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-110 active:scale-95"
             >
-              <ArchEmblemIcon className="w-5 h-5 -rotate-90 transition-transform" />
+              <ArchEmblemIcon className="w-6 h-6 sm:w-7 sm:h-7 -rotate-90 transition-transform duration-300 drop-shadow-[0_2px_6px_rgba(212,175,55,0.35)]" />
             </button>
             <button
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 rounded-full liquid-glass-light border border-[var(--accent-blue)]/35 hover:border-[var(--accent-blue)]/60 shadow-window hover:bg-white/40 text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] transition-all active:scale-95"
+              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-2 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-110 active:scale-95"
             >
-              <ArchEmblemIcon className="w-5 h-5 rotate-90 transition-transform" />
+              <ArchEmblemIcon className="w-6 h-6 sm:w-7 sm:h-7 rotate-90 transition-transform duration-300 drop-shadow-[0_2px_6px_rgba(212,175,55,0.35)]" />
             </button>
           </div>
         )}
@@ -383,7 +383,7 @@ export function HeroRotator({
 
       {total > 1 && (
         <div className="mt-5 flex items-center justify-center px-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             {panels.map((p, idx) => (
               <button
                 key={p.id}
@@ -391,16 +391,18 @@ export function HeroRotator({
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  'transition-all duration-300 flex items-center justify-center p-0.5 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-95',
+                  'group/ind transition-all duration-300 ease-out flex items-center justify-center p-1 rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'text-[var(--accent-blue)] scale-110'
-                    : 'text-black/25 hover:text-black/50 hover:scale-105'
+                    ? 'text-[var(--accent-blue)] scale-125 -translate-y-0.5 drop-shadow-[0_2px_6px_rgba(212,175,55,0.45)]'
+                    : 'text-black/25 hover:text-[var(--accent-blue)]/80 hover:scale-115 hover:-translate-y-0.5'
                 )}
               >
                 <ArchEmblemIcon
                   className={cn(
-                    'transition-all duration-300',
-                    idx === activeIndex ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'
+                    'transition-all duration-300 ease-out',
+                    idx === activeIndex
+                      ? 'w-4 h-4 sm:w-[18px] sm:h-[18px] motion-safe:animate-pulse'
+                      : 'w-3.5 h-3.5 group-hover/ind:rotate-12'
                   )}
                 />
               </button>

@@ -1,6 +1,6 @@
 # 🗺️ Route & Feature Architecture Map
 
-**Generated:** 10/22/2026, 9:12:12 AM UTC  
+**Generated:** 10/22/2026, 9:36:10 AM UTC  
 **System:** Arch-Systems Mining Operations Portal (Next.js 16 App Router)
 
 ---

@@ -72,13 +72,21 @@ describe('DepartmentCard', () => {
     expect(link).toHaveAttribute('href', '/drilling');
   });
 
-  it('toggles pin status in localStorage on pin click', () => {
+  it('toggles pin status in localStorage on pin click and renders Arch Logo bookmark icon', () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     const pinBtn = screen.getByTitle('Pin department');
     expect(pinBtn).toBeInTheDocument();
 
+    const bookmarkSvg = screen.getByTestId('arch-bookmark-icon');
+    expect(bookmarkSvg).toHaveAttribute('viewBox', '22.75 16.625 166.16 166.19');
+    expect(bookmarkSvg).toHaveClass('fill-none');
+
     fireEvent.click(pinBtn);
     expect(localStorage.getItem('pinned_dept_drilling')).toBe('true');
+    expect(screen.getByTestId('arch-bookmark-icon')).toHaveClass(
+      'fill-current',
+      'text-arch-accent-blue'
+    );
 
     fireEvent.click(pinBtn);
     expect(localStorage.getItem('pinned_dept_drilling')).toBe('false');

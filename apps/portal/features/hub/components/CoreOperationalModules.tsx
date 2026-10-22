@@ -1,8 +1,9 @@
 'use client';
 
 import type { Department } from '@repo/departments/data-access';
+import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import { ArrowUpRight, BarChart3, Boxes, Search, Star } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { DepartmentCard } from '@/features/hub';
@@ -87,7 +88,7 @@ export function CoreOperationalModules({
         <div className="flex items-center justify-between sm:justify-start gap-3 flex-wrap">
           <h2 className="inline-flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-full bg-white/85 backdrop-blur-md border border-arch-border-subtle ring-1 ring-inset ring-white/80 shadow-xs text-sm sm:text-base font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue group-hover/row:border-arch-accent-blue/40 transition-all duration-300">
             <span className="p-1.5 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-2xs flex items-center justify-center">
-              <Boxes className="w-3.5 h-3.5" />
+              <Logo className="w-3.5 h-3.5 text-arch-accent-blue" />
             </span>
             <span
               className="font-anurati uppercase tracking-[0.08em]"

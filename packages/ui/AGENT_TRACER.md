@@ -508,3 +508,4 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Changes**:
   - `packages/ui/src/components/DepartmentLayout.tsx`: Added a nested `PDF Report` sub-tab (`${basePath}/reports?tab=pdf-report`) directly beneath the `Reports` sidebar item with `useSearchParams` active-state detection so `PDF Report` highlights when `?tab=pdf-report` is active and parent `Reports` highlights otherwise.
 - **Verification**: `DepartmentLayout.test.tsx` and `ReportsDashboardClient.test.tsx` (`10/10 PASS`).
+- 2026-10-22T11:36:00+02:00 — feat(ui): remove grey circle on HeroRotator prev/next highlight arrows and enlarge/animate indicator emblems
