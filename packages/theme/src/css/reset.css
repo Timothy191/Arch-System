@@ -16,8 +16,25 @@ textarea {
   font-family: var(--font-sans);
 }
 
+html,
+body {
+  cursor: var(--cursor-arch);
+}
+
 body {
   @apply bg-background text-foreground;
+}
+
+a,
+button,
+[role='button'],
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+summary,
+select,
+label[for] {
+  cursor: var(--cursor-arch-pointer);
 }
 
 /* Custom scrollbar (dark theme) */

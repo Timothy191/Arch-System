@@ -318,6 +318,13 @@ const archTheme: Config = {
         disabled: 'var(--opacity-disabled)',
         hover: 'var(--opacity-hover)',
       },
+      cursor: {
+        auto: 'var(--cursor-arch)',
+        default: 'var(--cursor-arch)',
+        pointer: 'var(--cursor-arch-pointer)',
+        grab: 'var(--cursor-arch-pointer)',
+        grabbing: 'var(--cursor-arch-pointer)',
+      },
       blur: {
         'focus-dim': 'var(--blur-focus-dim)',
       },

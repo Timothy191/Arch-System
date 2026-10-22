@@ -311,3 +311,4 @@
   - Re-ran `pnpm --filter @repo/theme build` to regenerate token maps and CSS variables.
 - **Status**: Completed, verified.
 - 2026-10-22T05:17:07Z | Council-Orchestrator | Darkened global muted/secondary text tokens (--arch8 #48484a, --arch9 #3a3a3c, --arch10 #2c2c2e) and regenerated theme artifacts for high-contrast legibility.
+- 2026-10-22T05:38:58Z | Council-Orchestrator | Added global Gold Arch icon cursor tokens (--cursor-arch, --cursor-arch-pointer) in variables.css, reset.css, and Tailwind preset.ts.
