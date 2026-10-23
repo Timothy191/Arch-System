@@ -5,6 +5,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../lib/utils';
 import { HeroCardContent, HeroOperationalKpiStrip } from './HeroCardContent';
+import type { Panel } from './hero-types';
+
+export type { Panel } from './hero-types';
 
 function ArchEmblemIcon({ className }: { className?: string }) {
   return (
@@ -20,24 +23,6 @@ function ArchEmblemIcon({ className }: { className?: string }) {
       />
     </svg>
   );
-}
-
-export interface Panel {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  category: string;
-  image: string;
-  video?: string;
-  stats?: { label: string; value: string };
-  status: string;
-  icon: React.ReactNode;
-  iconBgColor: string;
-  primary: { href: string; label: string; icon: React.ReactNode };
-  secondary?: { href: string; label: string; icon: React.ReactNode };
-  assetOverline?: string;
-  assetSubtitle?: string;
 }
 
 export interface HeroRotatorProps {
@@ -424,16 +409,16 @@ export function HeroRotator({
                 className={cn(
                   'group/ind transition-all duration-300 ease-out flex items-center justify-center p-1 rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'text-amber-400 brightness-125 scale-125 -translate-y-0.5 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
-                    : 'text-accent-amber/80 hover:text-amber-400 hover:brightness-125 hover:scale-115 hover:-translate-y-0.5 drop-shadow-[0_0_4px_rgba(212,175,55,0.35)]'
+                    ? 'opacity-100 visible text-amber-400 brightness-125 scale-125 -translate-y-0.5 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
+                    : 'opacity-0 invisible pointer-events-none text-accent-amber/80'
                 )}
               >
                 <ArchEmblemIcon
                   className={cn(
                     'transition-all duration-300 ease-out',
                     idx === activeIndex
-                      ? 'w-6 h-6 sm:w-7 sm:h-7 motion-safe:animate-pulse'
-                      : 'w-5 h-5 sm:w-[22px] sm:h-[22px] group-hover/ind:rotate-12'
+                      ? 'w-6 h-6 sm:w-7 sm:h-7 opacity-100 visible motion-safe:animate-pulse'
+                      : 'w-5 h-5 sm:w-[22px] sm:h-[22px] opacity-0 invisible'
                   )}
                 />
               </button>

@@ -445,12 +445,26 @@ describe('HeroRotator', () => {
 
     const activeIndicator = screen.getByLabelText('Jump to System Overview');
     const inactiveIndicator = screen.getByLabelText('Jump to Drilling Operations');
-    expect(activeIndicator).toHaveClass('scale-125', 'text-amber-400', 'brightness-125');
+    expect(activeIndicator).toHaveClass(
+      'opacity-100',
+      'visible',
+      'scale-125',
+      'text-amber-400',
+      'brightness-125'
+    );
+    expect(inactiveIndicator).toHaveClass('opacity-0', 'invisible');
     expect(activeIndicator.querySelector('svg')).toHaveClass(
       'w-6',
       'h-6',
+      'opacity-100',
+      'visible',
       'motion-safe:animate-pulse'
     );
-    expect(inactiveIndicator.querySelector('svg')).toHaveClass('w-5', 'h-5');
+    expect(inactiveIndicator.querySelector('svg')).toHaveClass(
+      'w-5',
+      'h-5',
+      'opacity-0',
+      'invisible'
+    );
   });
 });

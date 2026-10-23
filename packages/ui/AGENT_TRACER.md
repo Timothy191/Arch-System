@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T08:42:00+02:00 - Hide Inactive Hero Carousel Indicator Icons Until Card Is Presented
+
+- **Purpose**: Keep only the active slide's `ArchEmblemIcon` indicator visible (`opacity-100 visible`) on `/hub` while hiding all inactive indicator icons (`opacity-0 invisible`) until their respective Hero card is presented.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`: Applied `opacity-100 visible` to the active slide indicator button and `ArchEmblemIcon` (`idx === activeIndex`) and `opacity-0 invisible` to all inactive slide indicators (`idx !== activeIndex`).
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T07:53:00+02:00 - Control Room SCADA Dashboard Sub-tab & Global Dark Black Sidebar Typography with Gold Active Tabs
 
 - **Purpose**: Add `SCADA Dashboard` sub-tab (`dashboard-subtab-scada`) under `Dashboard` in `DepartmentLayout.tsx`, set global sidebar text/icons to Dark Black (`var(--text-heading)`), and highlight selected tabs/sub-tabs in Gold (`var(--accent-blue)`).
