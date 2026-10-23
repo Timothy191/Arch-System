@@ -1,3 +1,11 @@
+## 2026-10-23T02:51:00+02:00: Hub Module Search Typewriter Placeholder Integration
+
+- **Purpose**: Add an animated typewriter placeholder hook (`useTypewriterPlaceholder`) to `input#hub-module-search` in `CoreOperationalModules.tsx` while preserving static `Search modules... (/)` fallback under `prefers-reduced-motion` and during user input.
+- **Changes**:
+  - `apps/portal/hooks/useTypewriterPlaceholder.ts`: Added SSR-safe typewriter placeholder hook with focus pause and `prefers-reduced-motion` support.
+  - `apps/portal/features/hub/components/CoreOperationalModules.tsx`: Wired `useTypewriterPlaceholder` into `input#hub-module-search`.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="CoreOperationalModules"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:32:00+02:00: Gold Steel Borders Across All 11 Department Pages, Headers, Sidebars & Panels
 
 - **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all 11 department pages (`/admin`, `/access-control`, `/production`, `/drilling`, `/plant-processing`, `/overview`, `/plant-inventory`, `/database`, `/control-room/reports`, `/engineering`, `/control-room`) and their panels, headers, sidebars, and quick-action pills.

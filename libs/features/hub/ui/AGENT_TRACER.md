@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-23T05:51:00+02:00 - DepartmentCard Arch Logo Badge & Pin Gold Border
+
+- **Purpose**: Standardize `DepartmentCard.tsx` banner and title icon badges on the Arch-System `<Logo />` component and add `.gold-steel-border .gold-steel-border-slim` to the pin button (`uiverse-card-pin`).
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Replaced Lucide department icon references with `<Logo />` and added `gold-steel-border gold-steel-border-slim` to `uiverse-card-pin`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T01:50:00+02:00 - Hub HeroRotator MP4 Video Loops, Department Icons & Sparkline Arch Logo Nodes
 
 - **Purpose**: Wire looping department `.mp4` videos, canonical department icons, and Arch-System logo graph nodes into `@repo/hub/ui`.

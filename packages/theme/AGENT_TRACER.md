@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-23T02:51:00+02:00 - Hero Telemetry Graph Keyframes & Reduced Motion Rules
+
+- **Purpose**: Add compositor-friendly keyframe animations (`scanline`, `draw-line`, `telemetry-fade-in`) and `prefers-reduced-motion` overrides for the Hub Hero Telemetry Graph in `animations.css`.
+- **Changes**:
+  - `packages/theme/src/css/animations.css`: Added `@keyframes scanline`, `@keyframes draw-line`, `@keyframes telemetry-fade-in`, and reduced-motion safeguards.
+- **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:15:00+02:00 - Input Element Support for Animated Gold Steel Border
 
 - **Purpose**: Allow void `<input>` elements (such as `input[aria-label="Search"]` and `input#hub-module-search`) to render the animated `.gold-steel-border` gradient border alongside their wrapper pill containers.

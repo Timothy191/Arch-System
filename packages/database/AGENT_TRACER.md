@@ -1,5 +1,12 @@
 # Database Package Agent Tracer
 
+## 2026-10-23T02:51:00+02:00: Active Operational Sites Consolidation Migration (193)
+
+- **Purpose**: Deactivate legacy placeholder sites (`PIT-01`, `PIT-02`, `STOCK-A`, `BRD-01`, `NP-01`, `UMALAZI`, `WIT-01`) and ensure the three operational sites (`Brakfontein Pit` `BRAK-PIT`, `Brakfontein Plant` `BRAK-PLANT`, `Extension Pit` `EXT-PIT`) are active in `sites`.
+- **Changes**:
+  - `packages/database/migrations/193_correct_active_sites.sql`: Added idempotent update and `ON CONFLICT (code) DO UPDATE` upsert for the active sites.
+- **Verification**: `pnpm --filter @repo/database test` ✅.
+
 ## 2026-10-22T10:37:00+02:00: Baseline Immutable Applied Migrations in Rollback Safety Checker
 
 - **Purpose**: Baseline immutable applied migrations (`001`–`189`) in `tests/migration-rollback-safety.mjs` while enforcing strict `DROP ... IF EXISTS` errors across all 142 migrations and strict rollback warnings on all new migrations (`> 189`), achieving 0 errors and 0 warnings without mutating historical migration files.

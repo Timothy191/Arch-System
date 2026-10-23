@@ -5,11 +5,12 @@ import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import { ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DepartmentCard } from '@/features/hub';
 import { useClearanceNotification } from '@/hooks/useClearanceNotification';
 import { useDepartmentFilter } from '@/hooks/useDepartmentFilter';
 import { usePinnedDepartments } from '@/hooks/usePinnedDepartments';
+import { useTypewriterPlaceholder } from '@/hooks/useTypewriterPlaceholder';
 import { dispatchActiveModuleChange } from '@/lib/event-manager';
 import type { EmployeeClearance } from '@/lib/hub-departments';
 
@@ -38,6 +39,12 @@ export function CoreOperationalModules({
     activeCount,
     criticalCount,
   } = useDepartmentFilter({ departments, pinnedNames });
+
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchPlaceholder = useTypewriterPlaceholder(
+    'Search modules... (/)',
+    isSearchFocused || searchQuery.length > 0
+  );
 
   // Route clearance notices to the Top Taskbar Bell Notification Center
   useClearanceNotification(clearance);
@@ -128,9 +135,11 @@ export function CoreOperationalModules({
               type="text"
               aria-label="Search operational modules"
               aria-describedby="hub-module-search-hint"
-              placeholder="Search modules... (/)"
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               className="w-full h-8 pl-9 pr-9 text-xs rounded-full gold-steel-border gold-steel-border-slim bg-white/85 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/25 text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">

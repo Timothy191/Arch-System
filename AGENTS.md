@@ -1,20 +1,18 @@
 # AGENTS.md — Arch-System
 
 Scope: this repository only. `CLAUDE.md` here is a symlink to this file, so edits here are the edits.
-`../AGENTS.md` holds workspace-wide notes plus a stale duplicate of Arch-System guidance; this file wins for `Arch-System/`.
+`../AGENTS.md` holds workspace-wide notes plus a longer synthesis of Arch-System guidance; this file wins for anything under `Arch-System/`.
 
 ## 0. Bootstrap (run before anything else)
 
-`node`, `pnpm`, `npm` are **not on PATH**. Do not reinstall a toolchain and do not "fix" `~/.local/share/mise/shims` (dangling symlinks to a missing `/usr/bin/mise`). Use the intact installs:
+`node` resolves to `/usr/bin/node` (**v26.8.1**) and `pnpm` through `~/.local/share/mise/shims/pnpm` (**9.15.9**, pinned by `packageManager`). Do not reinstall the toolchain. If a non-login shell lacks `pnpm`, prepend the intact mise installs:
 
 ```bash
 export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
-node -v   # v24.15.0
+pnpm -v   # 9.15.9
 ```
 
-The 24.15.0 tree has `node`/`npm`/`npx`; the 26.8.1 tree supplies `pnpm` (plus `tsc`, `lighthouse`, `vercel`, `repomix`).
-
-pnpm version is directory-dependent via corepack: anywhere under `Arch-System/` resolves the pinned **9.15.9** (verified in the repo root and in `apps/portal`); outside it you get 12.6.0. Other versions hang Turborepo. Never run `mise activate` — there is no `mise` binary.
+The 24.15.0 tree supplies `node`/`npm`/`npx`; the 26.8.1 tree supplies `pnpm` (plus `tsc`, `lighthouse`, `vercel`, `repomix`). Other pnpm majors can hang Turborepo, so rely on the pinned 9.15.9.
 
 ## 1. Layout
 

@@ -1,21 +1,9 @@
 'use client';
 
 import type { Department } from '@repo/departments/data-access';
-import { getDepartmentIcon } from '@repo/ui/icons/department-icons';
+import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import {
-  Activity,
-  ArrowUpRight,
-  CreditCard,
-  Database,
-  Factory,
-  Loader2,
-  Monitor,
-  Package,
-  Pickaxe,
-  ShieldCheck,
-  Wrench,
-} from 'lucide-react';
+import { ArrowUpRight, Loader2 } from 'lucide-react';
 // eslint-disable-next-line no-redeclare
 import Image from 'next/image';
 import Link from 'next/link';
@@ -49,18 +37,6 @@ function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; classNam
     </svg>
   );
 }
-
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Activity,
-  Database,
-  Drill: Pickaxe,
-  Factory,
-  Package,
-  ShieldCheck,
-  Wrench,
-  Monitor,
-  CreditCard,
-};
 
 const COLOR_MAP: Record<
   string,
@@ -160,7 +136,6 @@ function DepartmentCard({
     }
   };
 
-  const Icon = ICON_MAP[department.icon] || getDepartmentIcon(department.name) || Factory;
   const config = COLOR_MAP[department.color] || {
     bg: 'border-arch-border-emphasis/30 bg-white/95 text-arch-accent-blue shadow-sm',
     text: 'text-arch-text-primary',
@@ -250,9 +225,9 @@ function DepartmentCard({
             onClick={togglePin}
             aria-pressed={isPinned}
             className={cn(
-              'uiverse-card-pin group/pin absolute top-2.5 right-2.5 z-20 pointer-events-auto hover:scale-110 active:scale-95',
+              'uiverse-card-pin gold-steel-border gold-steel-border-slim group/pin absolute top-2.5 right-2.5 z-20 pointer-events-auto border border-transparent hover:scale-110 active:scale-95',
               isPinned
-                ? 'bg-white border-arch-accent-blue/40 text-arch-accent-blue shadow-sm'
+                ? 'bg-white text-arch-accent-blue shadow-sm'
                 : 'text-arch-text-secondary hover:text-arch-accent-blue hover:bg-white/95'
             )}
             title={isPinned ? 'Unpin department' : 'Pin department'}
@@ -272,7 +247,7 @@ function DepartmentCard({
             )}
             aria-hidden="true"
           >
-            <Icon className={cn('w-5 h-5 shrink-0 drop-shadow-xs', config.iconColor)} />
+            <Logo className={cn('w-5 h-5 shrink-0 drop-shadow-xs', config.iconColor)} />
           </div>
         </div>
 
@@ -288,7 +263,7 @@ function DepartmentCard({
                   )}
                   aria-hidden="true"
                 >
-                  <Icon className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
+                  <Logo className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
                 </span>
                 <h3
                   className="uiverse-card-title font-anurati uppercase tracking-[0.055em] font-bold truncate"

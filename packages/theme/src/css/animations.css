@@ -563,6 +563,47 @@
   animation-play-state: paused;
 }
 
+/* ── Hero Telemetry Graph Animations ── */
+
+@keyframes scanline {
+  0% {
+    background-position: 0% -100%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes telemetry-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-scanline {
+  background-size: 100% 200%;
+  animation: scanline 3s linear infinite;
+}
+
+.animate-draw-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-line 2s ease-out forwards;
+}
+
+.animate-telemetry-fade-in {
+  animation: telemetry-fade-in 1s ease-out both;
+}
+
 /* ── Prefers Reduced Motion Audited Overrides ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-window-open,
@@ -574,7 +615,10 @@
   .animate-ken-burns,
   .animate-gradient-shift,
   .animate-marquee,
-  .animate-marquee-vertical {
+  .animate-marquee-vertical,
+  .animate-scanline,
+  .animate-draw-line,
+  .animate-telemetry-fade-in {
     animation: none;
     transition: none;
     transform: none;
