@@ -109,6 +109,14 @@ jobs:
         run: pnpm policy:check
       - name: Check Migration Drift
         run: pnpm --filter @repo/database check-migrations
+      - name: Lint Changed Migrations (Squawk + RLS)
+        run: pnpm --filter @repo/database lint:migrations
+        env:
+          MIGRATION_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - name: Replay Production Summary Migrations
+        run: pnpm --filter @repo/database test:migration-replay
+      - name: Check Circular Dependencies
+        run: pnpm cycles
 
   # HTML Meta Tags Check job - runs in parallel on coordinator
   html-meta-check:

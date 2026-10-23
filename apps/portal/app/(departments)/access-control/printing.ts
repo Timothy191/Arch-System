@@ -8,19 +8,11 @@ import { renderToFile } from '@react-pdf/renderer';
 import React from 'react';
 import { assertAccessControlRole } from './actions/shared';
 import { CardDocument } from './card-actions/card-pdf';
+import type { CardPrintSpec } from './card-types';
+
+export type { CardPrintSpec } from './card-types';
 
 const execAsync = promisify(exec);
-
-export interface CardPrintSpec {
-  employeeId: string;
-  firstName: string;
-  lastName: string;
-  nationalId: string;
-  jobTitle: string;
-  qrCodeData: string;
-  magStripeData?: string;
-  holokoteDesign?: string;
-}
 
 /**
  * Server action to generate a high-res card image and send it to the Magicard printer.

@@ -2,6 +2,7 @@
 -- Objective: Implement a high-performance materialized view for shift-level KPIs.
 -- Aggregates Tonnage, BCM, Fuel, and Hours to eliminate frontend overhead.
 
+-- squawk-ignore transaction-nesting
 BEGIN;
 
 -- 1. Material Density Reference Table
@@ -43,6 +44,7 @@ ON CONFLICT (material_type) DO UPDATE SET density_factor = EXCLUDED.density_fact
 
 -- 2. Materialized View for Production Summary
 -- Aggregates Tonnage (Actual) and BCM (Expected) per shift.
+-- squawk-ignore ban-drop-view
 DROP MATERIALIZED VIEW IF EXISTS view_production_summary;
 CREATE MATERIALIZED VIEW view_production_summary AS
 WITH production_data AS (
@@ -142,30 +144,34 @@ LEFT JOIN shift_status ss ON (ss.department_id = dl.department_id AND ss.shift_d
 CROSS JOIN densities dens;
 
 -- 3. Unique Index for CONCURRENT REFRESH
+-- squawk-ignore require-concurrent-index-creation
 CREATE UNIQUE INDEX uidx_production_summary_log ON view_production_summary(daily_log_id);
+-- squawk-ignore require-concurrent-index-creation
 CREATE INDEX idx_production_summary_date ON view_production_summary(log_date DESC);
+-- squawk-ignore require-concurrent-index-creation
 CREATE INDEX idx_production_summary_dept ON view_production_summary(department_id);
 
 -- 4. Refresh Function
+-- Schema-qualified: search_path = '' means unqualified lookups cannot resolve.
 CREATE OR REPLACE FUNCTION refresh_production_summary()
 RETURNS void SET search_path = '' AS $$
 BEGIN
   -- Plain refresh is executed here (manual / function-driven path).
   -- pg_cron schedules this view's CONCURRENTLY refresh directly below,
   -- since CONCURRENTLY cannot run inside a transaction block.
-  REFRESH MATERIALIZED VIEW view_production_summary;
+  REFRESH MATERIALIZED VIEW public.view_production_summary;
 END;
 $$ LANGUAGE plpgsql;
 
 -- 5. Security Wrapper
 CREATE OR REPLACE FUNCTION public.get_production_summary(p_start_date DATE, p_end_date DATE)
-RETURNS SETOF view_production_summary
+RETURNS SETOF public.view_production_summary
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = '' AS $$
   SELECT s.*
-  FROM view_production_summary s
+  FROM public.view_production_summary s
   WHERE (public.has_department_access(s.department_id) OR public.is_admin())
     AND s.log_date >= p_start_date
     AND s.log_date <= p_end_date;
@@ -180,4 +186,5 @@ SELECT cron.schedule(
   'REFRESH MATERIALIZED VIEW CONCURRENTLY view_production_summary'
 );
 
+-- squawk-ignore transaction-nesting
 COMMIT;

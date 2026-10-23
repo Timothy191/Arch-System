@@ -9,15 +9,21 @@
   },
   "scripts": {
     "db:types": "pnpm --filter @repo/supabase supabase:gen-types",
-    "test": "node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
+    "test": "node --test tests/migration-rls-lint.test.mjs tests/production-summary-functions.test.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
+    "test:migration-rollback": "node tests/migration-rollback-safety.mjs",
+    "test:migration-replay": "node tests/migration-replay.mjs",
     "check-migrations": "node tests/check-migration-drift.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
-    "migrate:lint": "node tests/check-migration-drift.mjs",
+    "lint:migrations": "node scripts/lint-migrations.mjs --changed",
+    "lint:migrations:staged": "node scripts/lint-migrations.mjs --staged",
+    "lint:migrations:all": "node scripts/lint-migrations.mjs --all",
+    "migrate:lint": "node tests/check-migration-drift.mjs && node scripts/lint-migrations.mjs --changed",
     "sync-migrations": "node tests/check-migration-drift.mjs",
     "supabase:start": "supabase start",
     "supabase:reset": "supabase db reset",
     "supabase:push": "supabase db push"
   },
   "devDependencies": {
+    "squawk-cli": "2.70.0",
     "supabase": "catalog:"
   }
 }

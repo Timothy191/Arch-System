@@ -81,7 +81,7 @@ export default {
     // Agent governance check — single JS/TS owner so each staged file matches exactly one task set.
     // NOTE: pre-tool-guard.sh is a PreToolUse stdin hook and must NOT run here (it would block on
     // `cat -`); only the shared package type-check is a valid lint-staged governance task.
-    const commands = ['pnpm --filter @repo/shared/hooks type-check'];
+    const commands = ['pnpm --filter @repo/shared/hooks type-check', 'pnpm cycles'];
     // Process in chunks of 20 to keep memory low
     for (const batch of chunk(filtered, 20)) {
       commands.push(`pnpm biome check --write ${batch.join(' ')}`);
@@ -126,10 +126,15 @@ export default {
     return ['pnpm --filter @repo/theme lint:tokens'];
   },
 
-  // Database migrations → rollback safety & contract drift
+  // Database migrations → Squawk + RLS gate, rollback safety & contract drift
   'packages/database/migrations/*.sql': (files) => {
     if (files.length === 0) return [];
-    return ['pnpm --filter @repo/database test:migration-rollback', 'pnpm audit:drift'];
+    const quoted = files.map((file) => JSON.stringify(file)).join(' ');
+    return [
+      `node packages/database/scripts/lint-migrations.mjs ${quoted}`,
+      'pnpm --filter @repo/database test:migration-rollback',
+      'pnpm audit:drift',
+    ];
   },
 
   // Contract schemas → contract drift

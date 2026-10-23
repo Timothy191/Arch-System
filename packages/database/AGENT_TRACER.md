@@ -1,5 +1,15 @@
 # Database Package Agent Tracer
 
+## 2026-10-23T09:05:51+02:00: Repair get_production_summary search_path Replay Failure (194)
+
+- **Purpose**: `get_production_summary` and `refresh_production_summary` declare `SET search_path = ''` but referenced `view_production_summary` unqualified. Creation fails on a fresh replay under the default `check_function_bodies = on`, and calls fail where creation was forced off (the executive Hub silently rendered zero KPIs).
+- **Changes**:
+  - `migrations/073_production_summary_view.sql`: Schema-qualified the materialized view in both function bodies; added reviewed Squawk inline ignores for the historical `BEGIN`/`COMMIT`, drop-view, and non-concurrent-index patterns that re-linting would otherwise flag.
+  - `migrations/194_fix_production_summary_rpc.sql`: Idempotent `CREATE OR REPLACE` repair plus grant for databases that already applied 073.
+  - `tests/production-summary-functions.test.mjs`: Static guard that both migrations keep the view schema-qualified; wired into `pnpm test`.
+  - `tests/migration-replay.mjs`: Docker replay of the real 073/194 DDL against `postgres:17-alpine` with a negative control, functional call, `proconfig`, and `SECURITY DEFINER` assertions; exposed as `test:migration-replay` and run in the CI policy-check job.
+- **Verification**: `pnpm --filter @repo/database test` ✅, `test:migration-replay` (14/14) ✅, Squawk/RLS lint on both migrations ✅, `check-migrations` ✅, `policy:check` ✅, codebase-map parity ✅.
+
 ## 2026-10-23T02:51:00+02:00: Active Operational Sites Consolidation Migration (193)
 
 - **Purpose**: Deactivate legacy placeholder sites (`PIT-01`, `PIT-02`, `STOCK-A`, `BRD-01`, `NP-01`, `UMALAZI`, `WIT-01`) and ensure the three operational sites (`Brakfontein Pit` `BRAK-PIT`, `Brakfontein Plant` `BRAK-PLANT`, `Extension Pit` `EXT-PIT`) are active in `sites`.

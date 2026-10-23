@@ -1,6 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import * as React from 'react';
-import type { PdfSiteGroup } from './ShiftPdfReportTab';
+import type { PdfSiteGroup } from './reports-types';
 
 const styles = StyleSheet.create({
   page: {

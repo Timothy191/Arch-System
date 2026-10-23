@@ -45,8 +45,10 @@ pnpm --filter @repo/ui storybook                               # port 6006, need
 
 ## 3. Verification
 
-`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the completion gate; it fails fast on 12 steps:
-type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint.
+`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the completion gate; it fails fast on 13 steps:
+type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint → cycles.
+
+Gates: `pnpm lint:migrations` (Squawk + RLS on changed files; `--all` audits all) and `pnpm cycles` (dependency-cruiser `no-circular`, type-only imports) run in `lint-staged`, CI, and `agent:verify`. RLS exemptions need `-- rls-exempt-table <t>: <why>`.
 
 Failures with non-obvious fixes:
 

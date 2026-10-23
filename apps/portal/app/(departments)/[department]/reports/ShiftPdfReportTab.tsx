@@ -5,23 +5,9 @@ import { Calendar, Download, FileText, Layers, Loader2, Printer } from 'lucide-r
 import { Fragment, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
-import type { MachineOperationLogItem } from './ReportsDashboardClient';
+import type { MachineOperationLogItem, PdfSiteGroup } from './reports-types';
 
-export interface PdfSiteGroup {
-  site: string;
-  excavators: MachineOperationLogItem[];
-  rollovers: MachineOperationLogItem[];
-  siteMachines: MachineOperationLogItem[];
-  orderedMachines: MachineOperationLogItem[];
-  totalHours: number;
-  totalBcm: number;
-  excavatorBcm: number;
-  rolloverBcm: number;
-  productionDelayMin: number;
-  engineeringDelayMin: number;
-  naturalDelayMin: number;
-  nonSiteDelayMin: number;
-}
+export type { PdfSiteGroup } from './reports-types';
 
 export function buildPdfSiteGroups(filteredMachineOps: MachineOperationLogItem[]): PdfSiteGroup[] {
   const classifyRole = (m: MachineOperationLogItem): 'excavator' | 'rollover' | 'site_machine' => {

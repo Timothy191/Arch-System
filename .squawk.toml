@@ -1,0 +1,22 @@
+# Squawk migration linter
+# https://squawkhq.com/docs/rules
+#
+# Supabase applies each migration inside a transaction, so Squawk should reason
+# about every file as transactional. Creating an index on an existing table in
+# a transaction still requires a separate concurrent migration; that rule stays
+# enabled.
+pg_version = "17.0"
+assume_in_transaction = true
+
+excluded_rules = [
+  # Supabase manages statement timeouts. Requiring SET lock_timeout /
+  # SET statement_timeout in every migration is noise for this project.
+  "require-lock-timeout",
+  "require-statement-timeout",
+
+  # RLS statements have no IF NOT EXISTS form:
+  #   ALTER TABLE ... ENABLE ROW LEVEL SECURITY
+  #   CREATE POLICY ...
+  # This rule can therefore never be satisfied for the required RLS pattern.
+  "prefer-robust-stmts",
+]

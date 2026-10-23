@@ -1,12 +1,12 @@
 'use client';
 
 import type { Department } from '@repo/departments/data-access';
+import { DepartmentCard } from '@repo/hub/ui';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
 import { ArrowUpRight, BarChart3, Search, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { DepartmentCard } from '@/features/hub';
 import { useClearanceNotification } from '@/hooks/useClearanceNotification';
 import { useDepartmentFilter } from '@/hooks/useDepartmentFilter';
 import { usePinnedDepartments } from '@/hooks/usePinnedDepartments';

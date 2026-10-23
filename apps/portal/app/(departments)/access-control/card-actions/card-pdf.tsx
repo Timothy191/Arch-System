@@ -1,5 +1,5 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import type { CardPrintSpec } from '../printing';
+import type { CardPrintSpec } from '../card-types';
 
 const styles = StyleSheet.create({
   page: {

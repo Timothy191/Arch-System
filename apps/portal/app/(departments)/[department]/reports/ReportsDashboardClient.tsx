@@ -25,7 +25,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { CopyReportButton } from './CopyReportButton';
+import type { MachineOperationLogItem } from './reports-types';
 import { buildPdfSiteGroups, ShiftPdfReportTab } from './ShiftPdfReportTab';
+
+export type { MachineOperationLogItem } from './reports-types';
+
 export interface ShiftReportRow {
   id: string;
   site: string;
@@ -42,31 +46,6 @@ export interface ShiftReportRow {
   coalTonnes: number;
   wasteTonnes: number;
   notes: string;
-}
-
-export interface MachineOperationLogItem {
-  id: string;
-  date: string;
-  shift: 'day' | 'night';
-  machineName: string;
-  machineType: string;
-  operatorName: string;
-  siteName: string;
-  startSmu: number | null;
-  endSmu: number | null;
-  hoursWorked: number;
-  bcmMoved: number;
-  isDozer: boolean;
-  delayMinutes: number;
-  productionDelayMinutes?: number;
-  engineeringDelayMinutes?: number;
-  naturalDelayMinutes?: number;
-  nonSiteDelayMinutes?: number;
-  excavatorActivity?: string;
-  siteGroupRole?: 'excavator' | 'rollover' | 'site_machine';
-  loadsCount?: number;
-  bladePasses?: number;
-  status: 'completed' | 'active';
 }
 
 export interface EngineeringLogItem {

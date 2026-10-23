@@ -4,7 +4,7 @@ import { Activity, AlertTriangle, Power, TrendingUp, Wrench } from 'lucide-react
 import Link from 'next/link';
 import type * as React from 'react';
 import { cn } from '../lib/utils';
-import type { Panel } from './HeroRotator';
+import type { Panel } from './hero-types';
 import { Logo } from './Logo';
 
 interface HeroTelemetrySeries {

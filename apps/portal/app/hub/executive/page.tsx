@@ -20,6 +20,7 @@ import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { ProductionTrendChart } from '@/features/analytics/components/ProductionTrendChartWrapper';
 import { withCache } from '@/lib/cache-utils';
+import { logError } from '@/lib/errors/error-logger';
 import { classifyReconciliationDrift, RECONCILIATION_UI } from '@/lib/production-reconciliation';
 import { cachedRSC } from '@/lib/server-cache';
 
@@ -88,7 +89,7 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
 
           // Parallel fetch of Unified Production Summary (RPC) and all KPI counters
           const [
-            { data: summaryData },
+            { data: summaryData, error: summaryError },
             { count: activeMachines },
             { count: totalMachines },
             { count: activeEmployees },
@@ -114,6 +115,12 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
               .gte('date_in', monthStart)
               .is('deleted_at', null),
           ]);
+
+          if (summaryError) {
+            await logError(summaryError, {
+              context: 'hub.executive.get_production_summary',
+            });
+          }
 
           const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
           const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
@@ -152,6 +159,7 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
 
           return {
             today,
+            summaryAvailable: !summaryError,
             totalCoalMtd,
             totalWasteMtd,
             totalTonnageMtd,
@@ -210,6 +218,7 @@ export default async function ExecutiveDashboardPage() {
 
   const {
     today,
+    summaryAvailable,
     totalCoalMtd,
     totalWasteMtd,
     totalTonnageMtd,
@@ -230,6 +239,7 @@ export default async function ExecutiveDashboardPage() {
 
   const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES.red!;
   const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? 'red';
+  const summaryText = (value: string) => (summaryAvailable ? value : '—');
 
   // CSV export payload
   const exportRows = chartData.map((r) => ({
@@ -274,11 +284,29 @@ export default async function ExecutiveDashboardPage() {
             Cross-department KPIs — month-to-date as of {today}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <PDFDownloadButton reportData={pdfReportData} />
-          <ExportButton filename={`executive-report-${today}`} rows={exportRows} />
-        </div>
+        {summaryAvailable && (
+          <div className="flex items-center gap-2">
+            <PDFDownloadButton reportData={pdfReportData} />
+            <ExportButton filename={`executive-report-${today}`} rows={exportRows} />
+          </div>
+        )}
       </div>
+
+      {!summaryAvailable && (
+        <div
+          role="alert"
+          className="p-3 rounded-lg border flex items-start gap-3 bg-accent-red/10 border-accent-red/30 text-sm"
+        >
+          <AlertCircle className="w-5 h-5 text-accent-red mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium">Production summary unavailable</p>
+            <p className="text-[var(--text-muted)]">
+              The production summary query failed. Tonnage, drift, fuel, and trend figures are
+              hidden instead of being shown as zero. Try again shortly.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* KPI Row 1 — Production &amp; Reconciliation */}
       <section className="space-y-3">
@@ -286,25 +314,33 @@ export default async function ExecutiveDashboardPage() {
           <TrendingUp className="w-3.5 h-3.5" /> Production &amp; Reconciliation (MTD)
         </h2>
         <KPIGrid cols={4}>
-          <KPICard label="Total Tonnage" value={`${totalTonnageMtd.toFixed(0)} t`} color="green" />
-          <KPICard label="Coal Removed" value={`${totalCoalMtd.toFixed(0)} t`} color="green" />
+          <KPICard
+            label="Total Tonnage"
+            value={summaryText(`${totalTonnageMtd.toFixed(0)} t`)}
+            color="green"
+          />
+          <KPICard
+            label="Coal Removed"
+            value={summaryText(`${totalCoalMtd.toFixed(0)} t`)}
+            color="green"
+          />
           <KPICard
             label="Reconciliation Drift"
-            value={`${avgDriftPct.toFixed(1)}%`}
+            value={summaryText(`${avgDriftPct.toFixed(1)}%`)}
             color={driftKpiColor}
-            sub={driftUi.label}
+            sub={summaryAvailable ? driftUi.label : 'Unavailable'}
             icon={<Scale className="w-4 h-4" />}
           />
           <KPICard
             label="Fuel Efficiency"
-            value={`${fuelPerTonne} L/t`}
+            value={summaryText(`${fuelPerTonne} L/t`)}
             color="blue"
             icon={<Activity className="w-4 h-4" />}
           />
         </KPIGrid>
 
         {/* Drift Alert (only if not stable) */}
-        {driftLevel !== 'stable' && (
+        {summaryAvailable && driftLevel !== 'stable' && (
           <div
             className={`p-3 rounded-lg border flex items-start gap-3 ${driftAlertStyle.container} text-sm`}
           >
@@ -331,7 +367,7 @@ export default async function ExecutiveDashboardPage() {
           />
           <KPICard
             label="Machine Hours (MTD)"
-            value={`${totalHoursMtd.toFixed(0)} h`}
+            value={summaryText(`${totalHoursMtd.toFixed(0)} h`)}
             color="blue"
           />
           <KPICard
@@ -356,10 +392,14 @@ export default async function ExecutiveDashboardPage() {
           />
           <KPICard
             label="Diesel Consumed (MTD)"
-            value={`${totalFuelMtd.toFixed(0)} L`}
+            value={summaryText(`${totalFuelMtd.toFixed(0)} L`)}
             color="blue"
           />
-          <KPICard label="Waste Removed" value={`${totalWasteMtd.toFixed(0)} t`} color="default" />
+          <KPICard
+            label="Waste Removed"
+            value={summaryText(`${totalWasteMtd.toFixed(0)} t`)}
+            color="default"
+          />
           <KPICard label="Reporting Date" value={today} color="default" />
         </KPIGrid>
       </section>
@@ -370,11 +410,17 @@ export default async function ExecutiveDashboardPage() {
           <Activity className="w-3.5 h-3.5" /> 30-Day Production Trend
         </h2>
         <GlassCard>
-          <Suspense
-            fallback={<div className="h-72 rounded-xl bg-[var(--bg-tertiary)] animate-pulse" />}
-          >
-            <ProductionTrendChart data={chartData} />
-          </Suspense>
+          {summaryAvailable ? (
+            <Suspense
+              fallback={<div className="h-72 rounded-xl bg-[var(--bg-tertiary)] animate-pulse" />}
+            >
+              <ProductionTrendChart data={chartData} />
+            </Suspense>
+          ) : (
+            <p className="text-sm text-[var(--text-muted)]">
+              Production trend is unavailable while the summary query is failing.
+            </p>
+          )}
         </GlassCard>
       </section>
     </div>

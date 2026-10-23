@@ -43,6 +43,9 @@ if pnpm audit:hooks > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"
 echo -n "📦 12. Dependency License Check... "
 if pnpm deps:lint > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Fix dependency license issues."; exit 1; fi
 
+echo -n "🔄 13. Circular Dependencies... "
+if pnpm cycles > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm cycles' and break the reported import cycle (dependency inversion or extract shared code)."; exit 1; fi
+
 echo "========================================================"
 echo "✅ [AGENT VERIFICATION] 100% PASS. Code is real-world ready."
 echo "========================================================"
