@@ -127,7 +127,7 @@ export function DataTable<T>({
       )}
 
       {/* Main Glass Table Container */}
-      <div className="rounded-xl border border-black/[0.08] bg-white/70 backdrop-blur-md overflow-hidden shadow-2xs">
+      <div className="rounded-xl border border-black/[0.08] bg-white/70 backdrop-blur-md overflow-hidden shadow-2xs gold-steel-border gold-steel-border-slim">
         <div className="overflow-x-auto">
           <Table className="w-full text-xs">
             <TableHeader className="bg-black/[0.02] border-b border-black/[0.06]">

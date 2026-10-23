@@ -109,7 +109,7 @@ export default async function DatabaseDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-white/75 backdrop-blur-md shadow-2xs gold-steel-border gold-steel-border-slim">
         <div>
           <h2 className="text-2xl font-semibold text-[var(--text-heading)] flex items-center gap-2.5">
             <Database className="w-6 h-6 text-accent-green" />
@@ -130,7 +130,7 @@ export default async function DatabaseDashboardPage() {
           </Badge>
           <Link
             href="/database/panels"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/15 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/15 transition-colors gold-steel-border gold-steel-border-slim"
           >
             Provisioning Panels
             <ArrowUpRight className="w-3.5 h-3.5" />

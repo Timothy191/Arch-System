@@ -68,22 +68,22 @@ export function HeadcountMusterBanner({
 
         {/* Center: Breakdown Pills */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
             <HardHat className="w-3.5 h-3.5 text-blue-600" />
             <span>Personnel:</span>
             <strong className="font-mono text-[var(--text-heading)]">{employeesCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
             <Shield className="w-3.5 h-3.5 text-amber-600" />
             <span>Contractors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{contractorsCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
             <Users className="w-3.5 h-3.5 text-teal-600" />
             <span>Visitors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{visitorsCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
             <Truck className="w-3.5 h-3.5 text-indigo-600" />
             <span>Fleet / Trucks:</span>
             <strong className="font-mono text-[var(--text-heading)]">{vehiclesCount}</strong>

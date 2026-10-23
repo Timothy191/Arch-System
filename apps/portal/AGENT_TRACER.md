@@ -1,3 +1,13 @@
+## 2026-10-23T02:32:00+02:00: Gold Steel Borders Across All 11 Department Pages, Headers, Sidebars & Panels
+
+- **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all 11 department pages (`/admin`, `/access-control`, `/production`, `/drilling`, `/plant-processing`, `/overview`, `/plant-inventory`, `/database`, `/control-room/reports`, `/engineering`, `/control-room`) and their panels, headers, sidebars, and quick-action pills.
+- **Changes**:
+  - `apps/portal/app/admin/layout.tsx`: Added `gold-steel-border gold-steel-border-slim` to the Admin navigation header, `Return to Hub` button, navigation links, and `SUPER-ADMIN` badge.
+  - `apps/portal/app/overview/page.tsx`: Added `gold-steel-border gold-steel-border-slim` to the System Overview sidebar, active section tabs, `Connection Secure` badge, and top header panel.
+  - `apps/portal/app/(departments)/access-control/components/{HeadcountMusterBanner,QuickActionHub,PerimeterGateHUD}.tsx`: Added `gold-steel-border gold-steel-border-slim` to headcount breakdown pills, quick-action buttons, and perimeter gate cards.
+  - `apps/portal/app/(departments)/{control-room,[department],database}/page.tsx` & `apps/portal/components/ui/GlassCard.test.tsx`: Added `gold-steel-border gold-steel-border-slim` to Control Room quick-action buttons, Database dashboard header & Provisioning Panels link, and verified `GlassCard` gold border class assertion.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="GlassCard|DepartmentLayout|BordersAndDividers"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:23:00+02:00: Admin Sites & Mine Blocks Adding Panels Redesign & Filter Strip Removal
 
 - **Purpose**: Implement `/admin` design feedback on `SitesTab.tsx`: redesign the `Sites & Locations` and `Mine Blocks & Areas` header sections into `GlassCard` adding panels with side-by-side horizontal form controls, and remove the `Filter by Site:` button strip.

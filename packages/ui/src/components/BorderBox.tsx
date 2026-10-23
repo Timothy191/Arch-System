@@ -77,7 +77,7 @@ export const BorderBox = forwardRef<HTMLDivElement, BorderBoxProps>(
       <div
         ref={ref}
         className={cn(
-          'relative transition-all duration-200',
+          'relative transition-all duration-200 gold-steel-border gold-steel-border-slim',
           variant !== 'handdrawn' && roundedStyles,
           paddingStyles,
           variantStyles[variant],

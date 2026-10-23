@@ -82,28 +82,28 @@ export default async function ControlRoomPage() {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/control-room/machine-operations"
-            className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+            className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2 gold-steel-border gold-steel-border-slim"
           >
             <Cpu className="w-4 h-4" />
             Machine Operations
           </Link>
           <Link
             href="/control-room/hourly-loads"
-            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2 gold-steel-border gold-steel-border-slim"
           >
             <Clock className="w-4 h-4" />
             Update Loads
           </Link>
           <Link
             href="/control-room/shift-compilation"
-            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2 gold-steel-border gold-steel-border-slim"
           >
             <ClipboardCheck className="w-4 h-4" />
             Shift Operations
           </Link>
           <Link
             href="/control-room/shift-compilation?tab=closeout"
-            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2 gold-steel-border gold-steel-border-slim"
           >
             <CheckSquare className="w-4 h-4" />
             Shift Closeout

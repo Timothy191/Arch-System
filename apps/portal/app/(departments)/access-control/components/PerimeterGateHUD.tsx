@@ -76,7 +76,7 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
           return (
             <div
               key={gate.id}
-              className="bg-white/60 rounded-xl border border-black/[0.07] p-3.5 flex flex-col justify-between hover:border-[var(--accent-blue)]/40 transition-all shadow-xs"
+              className="bg-white/60 rounded-xl border border-black/[0.07] p-3.5 flex flex-col justify-between hover:border-[var(--accent-blue)]/40 transition-all shadow-xs gold-steel-border gold-steel-border-slim"
             >
               <div>
                 {/* Top: Status & ID */}

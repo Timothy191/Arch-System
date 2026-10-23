@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T02:32:00+02:00 - Universal Gold Steel Borders Across All Department Page Panels & Primitives
+
+- **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all shared department layout, panel, card, header, table, toolbar, timeline, alert, tab, dialog, dropdown, and select primitives so all 11 department pages render gold borders on their panels and controls.
+- **Changes**:
+  - `packages/ui/src/components/{GlassCard,BorderBox,PageHeader,DepartmentLayout}.tsx`: Added `gold-steel-border gold-steel-border-slim` to `GlassCard`, `BorderBox`, `PageHeader`, and `DepartmentLayout` sidebar/active tabs/status strip.
+  - `packages/ui/src/components/ui/{card,tabs,data-table,filter-toolbar,activity-timeline,alert,dialog,dropdown-menu,select}.tsx`: Added `gold-steel-border gold-steel-border-slim` to `Card`, `TabsList`, `DataTable`, `FilterToolbar`, `ActivityTimeline` items, `Alert`, `DialogContent`, `DropdownMenuContent`, `SelectTrigger`, and `SelectContent`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:15:00+02:00 - MacMenuBar Pill Controls Gold Steel Borders
 
 - **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` to the 4 interactive taskbar pills inside `MacMenuBar.tsx` per `/hub` design feedback.

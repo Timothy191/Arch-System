@@ -79,7 +79,7 @@ export const ActivityTimeline = React.forwardRef<HTMLDivElement, ActivityTimelin
               </div>
 
               {/* Timeline Item Content */}
-              <div className="flex-1 min-w-0 bg-white/70 backdrop-blur-md p-3 rounded-xl border border-black/[0.06] shadow-2xs group-hover:border-black/15 transition-all">
+              <div className="flex-1 min-w-0 bg-white/70 backdrop-blur-md p-3 rounded-xl border border-black/[0.06] shadow-2xs group-hover:border-black/15 transition-all gold-steel-border gold-steel-border-slim">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <h5 className="font-semibold text-[13px] text-[var(--text-heading)] truncate">
                     {item.title}

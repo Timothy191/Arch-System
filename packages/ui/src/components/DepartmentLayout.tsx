@@ -205,7 +205,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'absolute left-0 top-0 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl',
+          'absolute left-0 top-0 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl gold-steel-border gold-steel-border-slim',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
@@ -329,7 +329,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     className={cn(
                       'flex-1 flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
                       isActive
-                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium gold-steel-border gold-steel-border-slim'
                         : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
                     )}
                   >
@@ -447,7 +447,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           )}
         >
-          <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-[var(--accent-green)]/8 border border-[var(--accent-green)]/15">
+          <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-[var(--accent-green)]/8 border border-[var(--accent-green)]/15 gold-steel-border gold-steel-border-slim">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
             <span className="text-[11px] text-[var(--text-muted)] font-medium tracking-wide">
               Connection Secure

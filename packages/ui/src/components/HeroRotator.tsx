@@ -369,17 +369,28 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-2 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-110 active:scale-95"
+              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse"
+              style={{
+                animationDuration: '3s',
+                filter:
+                  'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
+              }}
             >
-              <ArchEmblemIcon className="w-6 h-6 sm:w-7 sm:h-7 -rotate-90 transition-transform duration-300 drop-shadow-[0_2px_6px_rgba(212,175,55,0.35)]" />
+              <ArchEmblemIcon className="w-8 h-8 sm:w-10 sm:h-10 -rotate-90 transition-transform duration-300" />
             </button>
             <button
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-2 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-110 active:scale-95"
+              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse"
+              style={{
+                animationDuration: '3s',
+                animationDelay: '1.5s',
+                filter:
+                  'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
+              }}
             >
-              <ArchEmblemIcon className="w-6 h-6 sm:w-7 sm:h-7 rotate-90 transition-transform duration-300 drop-shadow-[0_2px_6px_rgba(212,175,55,0.35)]" />
+              <ArchEmblemIcon className="w-8 h-8 sm:w-10 sm:h-10 rotate-90 transition-transform duration-300" />
             </button>
           </div>
         )}

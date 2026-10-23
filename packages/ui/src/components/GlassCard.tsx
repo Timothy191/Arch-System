@@ -465,7 +465,7 @@ export function GlassCard({
         // Base classes
         'isolate relative overflow-hidden',
         'liquid-glass-light border border-white/20 shadow-window',
-        'group rounded-card animate-window-open',
+        'group rounded-card animate-window-open gold-steel-border gold-steel-border-slim',
         hover && 'liquid-glass-interactive',
 
         // CSS based animations to unblock main thread

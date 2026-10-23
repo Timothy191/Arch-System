@@ -163,7 +163,7 @@ export default function OverviewPage() {
         onMouseLeave={() => {
           if (!isPinned) setIsOpen(false);
         }}
-        className={`fixed md:sticky left-0 top-0 h-[calc(100vh-28px)] z-40 w-64 shrink-0 border-r border-black/[0.08] bg-white/85 backdrop-blur-xl flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xl ${
+        className={`fixed md:sticky left-0 top-0 h-[calc(100vh-28px)] z-40 w-64 shrink-0 border-r border-black/[0.08] bg-white/85 backdrop-blur-xl flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xl gold-steel-border gold-steel-border-slim ${
           isPinned || isOpen
             ? 'translate-x-0'
             : '-translate-x-[calc(100%-12px)] md:w-3 md:overflow-hidden'
@@ -241,7 +241,7 @@ export default function OverviewPage() {
                   value={item.value}
                   className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all relative group cursor-pointer data-[state=active]:bg-[var(--accent-blue)]/10 data-[state=active]:text-[var(--accent-blue)] data-[state=active]:font-semibold data-[state=active]:shadow-none ${
                     isActive
-                      ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold'
+                      ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
                   }`}
                 >
@@ -278,7 +278,7 @@ export default function OverviewPage() {
 
         {/* Bottom Status Strip matching DepartmentLayout */}
         <div className="p-3 border-t border-black/[0.06] flex flex-col gap-1.5">
-          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20">
+          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20 gold-steel-border gold-steel-border-slim">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
               <span className="text-[11px] text-[var(--text-heading)] font-medium tracking-wide">
@@ -293,7 +293,7 @@ export default function OverviewPage() {
       {/* Main Content Area beside Department Side Panel */}
       <div className="flex-1 min-w-0 px-4 sm:px-6 py-5 space-y-6 animate-fade-up max-w-[1600px] mx-auto pb-12">
         {/* Header with Official Arch Systems Branding, Full Stack SVG Icons & Visual Provenance Graphs */}
-        <header className="rounded-xl border border-[var(--border-subtle)] bg-white/80 backdrop-blur-xl p-5 shadow-card space-y-4">
+        <header className="rounded-xl border border-[var(--border-subtle)] bg-white/80 backdrop-blur-xl p-5 shadow-card space-y-4 gold-steel-border gold-steel-border-slim">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Logo className="w-9 h-9 text-[var(--accent-blue)] shrink-0" />

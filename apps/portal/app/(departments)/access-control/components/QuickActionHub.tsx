@@ -57,7 +57,7 @@ export function QuickActionHub() {
           {/* Action 1: Print Badge */}
           <Link
             href="/access-control/print-cards"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
           >
             <Printer className="w-3.5 h-3.5 text-blue-600" />
             <span>Print Badge (Neo300)</span>
@@ -66,7 +66,7 @@ export function QuickActionHub() {
           {/* Action 2: Enroll Visitor */}
           <Link
             href="/access-control/visitors"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
           >
             <UserPlus className="w-3.5 h-3.5 text-teal-600" />
             <span>Enroll Visitor</span>
@@ -75,7 +75,7 @@ export function QuickActionHub() {
           {/* Action 3: QR & RFID Studio */}
           <Link
             href="/access-control/qr-codes"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
           >
             <QrCode className="w-3.5 h-3.5 text-purple-600" />
             <span>RFID Inventory</span>
@@ -84,7 +84,7 @@ export function QuickActionHub() {
           {/* Action 4: Muster Station */}
           <Link
             href="/access-control/muster"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
           >
             <LifeBuoy className="w-3.5 h-3.5 text-red-600" />
             <span>Muster Roll</span>
@@ -93,7 +93,7 @@ export function QuickActionHub() {
           {/* Action 5: Regulatory Reports */}
           <Link
             href="/access-control/reports"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
             <span>Regulatory Pack</span>
@@ -104,7 +104,7 @@ export function QuickActionHub() {
             type="button"
             onClick={handleFastGatePulse}
             disabled={pulseLoading}
-            className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500 hover:text-white text-amber-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ml-auto sm:ml-0"
+            className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500 hover:text-white text-amber-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ml-auto sm:ml-0 gold-steel-border gold-steel-border-slim"
           >
             <Zap className="w-3.5 h-3.5" />
             <span>{pulseLoading ? 'Pulsing...' : 'Override Pulse'}</span>

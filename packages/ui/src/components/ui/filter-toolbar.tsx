@@ -36,7 +36,7 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
         role="toolbar"
         aria-label="Filter and Search Controls"
         className={cn(
-          'flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white/70 backdrop-blur-md rounded-xl border border-black/[0.08] shadow-2xs',
+          'flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white/70 backdrop-blur-md rounded-xl border border-black/[0.08] shadow-2xs gold-steel-border gold-steel-border-slim',
           className
         )}
         {...props}

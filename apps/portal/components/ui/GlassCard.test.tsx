@@ -3,8 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('GlassCard', () => {
   it('renders with default variant and children', () => {
-    render(<GlassCard>Default Content</GlassCard>);
+    const { container } = render(<GlassCard>Default Content</GlassCard>);
     expect(screen.getByText('Default Content')).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
   });
 
   it('renders with window variant and title', () => {
