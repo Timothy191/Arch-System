@@ -256,6 +256,27 @@
   opacity: 1;
 }
 
+input.gold-steel-border {
+  border: var(--gold-border-width, 1.5px) solid transparent;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+    linear-gradient(
+      135deg,
+      var(--arch15, #d4af37) 0%,
+      #f4d03f 22%,
+      #fff6cc 45%,
+      var(--arch15, #d4af37) 65%,
+      #c5a017 82%,
+      var(--arch15, #d4af37) 100%
+    );
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    300% 300%;
+  animation: gold-shimmer 3s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gold-steel-border::before {
     animation: none;

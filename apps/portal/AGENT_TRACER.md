@@ -1,3 +1,14 @@
+## 2026-10-23T02:15:00+02:00: Taskbar & Core Operational Modules Pill Controls Gold Steel Borders
+
+- **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all 10 portal taskbar & `CoreOperationalModules` header/toolbar pills requested in `/hub` design feedback.
+- **Changes**:
+  - `apps/portal/components/clock/SystemClock.tsx`: Added `gold-steel-border gold-steel-border-slim` to `button[aria-label="System Clock"]`.
+  - `apps/portal/components/nav/ServicesDropdown.tsx`: Added `gold-steel-border gold-steel-border-slim` to `button[aria-label="System Tray"]`.
+  - `apps/portal/components/FeedbackWidget.tsx`: Added `gold-steel-border gold-steel-border-slim` to `button[title="Feedback & Support"]`.
+  - `apps/portal/components/system/SystemTray.tsx`: Added `gold-steel-border gold-steel-border-slim` to `button[aria-label="System Tray Popover"]`, `a[aria-label="Return to Hub"]`, and `button[aria-label="Notifications"]`.
+  - `apps/portal/features/hub/components/CoreOperationalModules.tsx` & `CoreOperationalModules.test.tsx`: Added `gold-steel-border gold-steel-border-slim` to `h2` (`Core Operational Modules`), `Link` (`Executive Dashboard`), `input#hub-module-search` + its wrapper `div`, and `div[aria-label="Filter modules by category"]`, with unit test assertions.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="CoreOperationalModules"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T01:50:00+02:00: Hub Department MP4 Loops, CoreOperationalModules Gold Border & Global Arch Logo Dropdown Indicators
 
 - **Purpose**: Implement `/hub` Batch 1 & Batch 2 design feedback across `CoreOperationalModules.tsx`, `SystemTray.tsx`, `ControlRoomQuickNav.tsx`, `ExportButton.tsx`, and department `.mp4` video assets.

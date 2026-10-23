@@ -67,5 +67,18 @@ describe('CoreOperationalModules', () => {
     expect(screen.getByLabelText('Pin Administration')).toBeInTheDocument();
     expect(screen.getByLabelText('Pin Stock Control Department')).toBeInTheDocument();
     expect(screen.getAllByTestId('arch-bookmark-icon')).toHaveLength(2);
+    expect(heading).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+    expect(screen.getByRole('link', { name: /Executive Dashboard/i })).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+    expect(screen.getByLabelText('Search operational modules')).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+    expect(screen.getByRole('group', { name: 'Filter modules by category' })).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
   });
 });

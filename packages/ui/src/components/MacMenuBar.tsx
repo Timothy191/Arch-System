@@ -281,7 +281,7 @@ export function MacMenuBar({
                 aria-label="System Menu"
                 aria-haspopup="true"
                 title={`System Menu · Active: ${currentContextLabel}`}
-                className="relative w-9 h-9 rounded-full bg-white/80 hover:bg-white data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/60 shadow-xs flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-sm"
+                className="relative w-9 h-9 rounded-full gold-steel-border gold-steel-border-slim bg-white/80 hover:bg-white data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/60 shadow-xs flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-sm"
               >
                 <Logo className="w-5 h-5 text-[var(--accent-blue)] drop-shadow-xs" />
                 <span
@@ -308,7 +308,7 @@ export function MacMenuBar({
                   );
                 }
               }}
-              className="w-8 h-8 rounded-full bg-white/70 hover:bg-white/95 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer shrink-0 hover:shadow-md"
+              className="w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim bg-white/70 hover:bg-white/95 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer shrink-0 hover:shadow-md"
               title="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
               aria-label="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
             >
@@ -633,7 +633,7 @@ export function MacMenuBar({
         <button
           type="button"
           onClick={() => setSystemMenuOpen((open) => !open)}
-          className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none ml-1"
+          className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none ml-1"
           title="Open System Menu"
         >
           <span
@@ -889,15 +889,15 @@ export function MacMenuBar({
           centerSlot
         ) : (
           <form onSubmit={handleSearch} className="w-full flex justify-center">
-            <div className="relative w-full max-w-2xl">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none" />
+            <div className="relative w-full max-w-2xl rounded-full gold-steel-border gold-steel-border-slim">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none z-10" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
-                className="w-full h-6 pl-7 pr-3 rounded-full bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
+                className="w-full h-6 pl-7 pr-3 rounded-full gold-steel-border gold-steel-border-slim bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
               />
             </div>
           </form>

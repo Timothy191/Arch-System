@@ -84,7 +84,7 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="flex items-center gap-1.5 px-2.5 h-7 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 h-7 rounded-full gold-steel-border gold-steel-border-slim bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
         >
           <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none font-mono">
             {timeStr}

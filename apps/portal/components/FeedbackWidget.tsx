@@ -246,7 +246,7 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           className={cn(
-            'flex items-center gap-1.5 px-2.5 h-7 text-xs font-medium rounded-full',
+            'flex items-center gap-1.5 px-2.5 h-7 text-xs font-medium rounded-full gold-steel-border gold-steel-border-slim',
             'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md',
             'border border-white/20 text-[var(--text-heading)] shadow-diffusion-sm',
             'transition-all hover:scale-105 active:scale-95',

@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T02:15:00+02:00 - MacMenuBar Pill Controls Gold Steel Borders
+
+- **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` to the 4 interactive taskbar pills inside `MacMenuBar.tsx` per `/hub` design feedback.
+- **Changes**:
+  - `packages/ui/src/components/MacMenuBar.tsx`: Added `gold-steel-border gold-steel-border-slim` to `button[aria-label="System Menu"]`, `button[title="Open System Menu"]` (Control Room context pill), `input[aria-label="Search"]` + its `rounded-full` container, and `button[aria-label*="Open WhatsApp Web"]`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T01:50:00+02:00 - Hub Hero Card Video Loops, Department Icons, Slim KPI Banner, Arch Graph Nodes & Gold Steel Borders
 
 - **Purpose**: Implement `/hub` Hero Card and global navigation design feedback across `HeroCardContent`, `HeroRotator`, `MacMenuBar`, and `@repo/ui` dropdown/collapse primitives.

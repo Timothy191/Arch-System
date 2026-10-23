@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-23T02:15:00+02:00 - Input Element Support for Animated Gold Steel Border
+
+- **Purpose**: Allow void `<input>` elements (such as `input[aria-label="Search"]` and `input#hub-module-search`) to render the animated `.gold-steel-border` gradient border alongside their wrapper pill containers.
+- **Changes**:
+  - `packages/theme/src/css/cards.css`: Added `input.gold-steel-border` rule with `padding-box, border-box` dual background-clip and `gold-shimmer` animation.
+- **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T01:50:00+02:00 - Inherited Border Radius & Fixed-Position Support for Gold Steel Border
 
 - **Purpose**: Allow `.gold-steel-border` and `.gold-steel-border-slim` to apply shiny animated metallic gold borders on `rounded-2xl` Hero Cards, `rounded-card` sections, and `fixed rounded-full` navigation bars (`MacMenuBar`) without overriding `position: fixed` or `border-radius`.

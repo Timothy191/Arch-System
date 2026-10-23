@@ -86,7 +86,7 @@ export function CoreOperationalModules({
       {/* Section Header with Live Filtering & Executive Quick-Access */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-black/[0.08]">
         <div className="flex items-center justify-between sm:justify-start gap-3 flex-wrap">
-          <h2 className="inline-flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-full bg-white/85 backdrop-blur-md border border-arch-border-subtle ring-1 ring-inset ring-white/80 shadow-xs text-sm sm:text-base font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue group-hover/row:border-arch-accent-blue/40 transition-all duration-300">
+          <h2 className="inline-flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-full gold-steel-border gold-steel-border-slim bg-white/85 backdrop-blur-md border border-arch-border-subtle ring-1 ring-inset ring-white/80 shadow-xs text-sm sm:text-base font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue group-hover/row:border-arch-accent-blue/40 transition-all duration-300">
             <span className="p-1.5 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-2xs flex items-center justify-center">
               <Logo className="w-3.5 h-3.5 text-arch-accent-blue" />
             </span>
@@ -107,7 +107,7 @@ export function CoreOperationalModules({
           {canSeeExecutive && (
             <Link
               href="/hub/executive"
-              className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-white/85 hover:bg-white text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-xs hover:shadow-card transition-all group/exec"
+              className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full gold-steel-border gold-steel-border-slim bg-white/85 hover:bg-white text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-xs hover:shadow-card transition-all group/exec"
             >
               <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
                 <BarChart3 className="w-3 h-3" />
@@ -121,8 +121,8 @@ export function CoreOperationalModules({
         {/* Search & Category Filter Pills */}
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           {/* Quick Search Input */}
-          <div className="relative flex-1 sm:w-64 sm:min-w-[240px] min-w-[200px]">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none" />
+          <div className="relative flex-1 sm:w-64 sm:min-w-[240px] min-w-[200px] rounded-full gold-steel-border gold-steel-border-slim">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none z-10" />
             <input
               id="hub-module-search"
               type="text"
@@ -131,7 +131,7 @@ export function CoreOperationalModules({
               placeholder="Search modules... (/)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-9 pr-9 text-xs rounded-full bg-white/85 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/25 text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
+              className="w-full h-8 pl-9 pr-9 text-xs rounded-full gold-steel-border gold-steel-border-slim bg-white/85 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/25 text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search
@@ -154,7 +154,7 @@ export function CoreOperationalModules({
 
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-1 bg-arch-surface-secondary/85 p-1 rounded-full border border-arch-border-subtle text-xs font-medium shadow-xs"
+            className="flex items-center gap-1 bg-arch-surface-secondary/85 p-1 rounded-full gold-steel-border gold-steel-border-slim border border-arch-border-subtle text-xs font-medium shadow-xs"
             role="group"
             aria-label="Filter modules by category"
           >
