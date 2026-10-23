@@ -6,19 +6,19 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
-  Calendar,
   CheckCircle2,
-  Copy,
   Download,
   FileSpreadsheet,
   Flame,
   Gauge,
+  Minus,
   PieChart,
-  RotateCcw,
+  Plus,
   Save,
   Scale,
-  Sparkles,
+  Search,
   TrendingUp,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState, useTransition } from 'react';
@@ -51,76 +51,124 @@ type EditableColumnKey =
   | 'runMinutes'
   | 'notes';
 
-const COLUMN_META: ReadonlyArray<{
-  letter: string;
-  key: EditableColumnKey | 'hourSlot' | 'yieldPct';
-  label: string;
-  unit?: string;
-  formulaHint?: string;
-}> = [
-  { letter: 'A', key: 'hourSlot', label: 'Hour Window', formulaHint: 'Locked Shift Window' },
-  { letter: 'B', key: 'seamSource', label: 'Feed Seam / Blend', formulaHint: 'Source Stockpile' },
+type NumericStreamKey =
+  | 'romFeedTonnes'
+  | 'cleanCoalTonnes'
+  | 'discardTonnes'
+  | 'productAshPct'
+  | 'cycloneRd'
+  | 'moisturePct'
+  | 'runMinutes';
+
+interface PlantGridStreamMeta {
+  key: NumericStreamKey | 'yieldPct';
+  streamName: string;
+  code: string;
+  unit: string;
+  step: number;
+  min: number;
+  max: number;
+  ariaPrefix: string;
+  editable: boolean;
+  summaryType: 'sum' | 'avg' | 'yield';
+}
+
+const PLANT_GRID_STREAMS: ReadonlyArray<PlantGridStreamMeta> = [
   {
-    letter: 'C',
     key: 'romFeedTonnes',
-    label: 'ROM Scale',
+    streamName: 'ROM Scale Feed',
+    code: 'CV-101 Belt Scale',
     unit: 't/hr',
-    formulaHint: 'Input Value',
+    step: 5,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'ROM Feed',
+    editable: true,
+    summaryType: 'sum',
   },
   {
-    letter: 'D',
     key: 'cleanCoalTonnes',
-    label: 'Clean Product',
+    streamName: 'Clean Coal Product',
+    code: 'CV-204 Product Scale',
     unit: 't/hr',
-    formulaHint: 'Input Value (Auto-updates Discard & Recovery %)',
+    step: 5,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'Clean Coal',
+    editable: true,
+    summaryType: 'sum',
   },
   {
-    letter: 'E',
     key: 'discardTonnes',
-    label: 'Discard / Rejects',
+    streamName: 'Discard / Rejects',
+    code: 'CV-301 Rejects Belt',
     unit: 't/hr',
-    formulaHint: '=MAX(0, C{row} - D{row})',
+    step: 1,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'Discard',
+    editable: true,
+    summaryType: 'sum',
   },
   {
-    letter: 'F',
     key: 'yieldPct',
-    label: 'Product Yield',
+    streamName: 'Product Yield',
+    code: 'Mass Balance Rec %',
     unit: '% Rec',
-    formulaHint: '=ROUND((D{row} / C{row}) * 100, 1)',
+    step: 0.1,
+    min: 0,
+    max: 100,
+    ariaPrefix: 'Product Yield',
+    editable: false,
+    summaryType: 'yield',
   },
   {
-    letter: 'G',
     key: 'productAshPct',
-    label: 'Product Ash',
+    streamName: 'Product Ash',
+    code: 'On-Line Ash Analyzer',
     unit: '% ADB',
-    formulaHint: 'Washed Product Ash % (Spec <= 15.0%)',
+    step: 0.1,
+    min: 5,
+    max: 45,
+    ariaPrefix: 'Product Ash',
+    editable: true,
+    summaryType: 'avg',
   },
   {
-    letter: 'H',
     key: 'cycloneRd',
-    label: 'Running Density',
+    streamName: 'Running Density',
+    code: 'DMS Cyclone Medium',
     unit: 'g/cm³',
-    formulaHint: 'DMS Cyclone Medium Relative Density',
+    step: 0.01,
+    min: 1.2,
+    max: 2.2,
+    ariaPrefix: 'DMS Cyclone RD',
+    editable: true,
+    summaryType: 'avg',
   },
   {
-    letter: 'I',
     key: 'moisturePct',
-    label: 'Moisture',
+    streamName: 'Product Moisture',
+    code: 'Centrifuge Dewatering',
     unit: '%',
-    formulaHint: 'Clean Product Total Moisture',
+    step: 0.1,
+    min: 0,
+    max: 30,
+    ariaPrefix: 'Moisture',
+    editable: true,
+    summaryType: 'avg',
   },
   {
-    letter: 'J',
     key: 'runMinutes',
-    label: 'Run Time',
+    streamName: 'Circuit Run Time',
+    code: 'PLC Run Timer',
     unit: 'min',
-    formulaHint: 'Operating Minutes in Hour (0-60)',
-  },
-  {
-    letter: 'K',
-    key: 'notes',
-    label: 'Circuit & Operator Notes',
-    formulaHint: 'Process observations, density trims, or screen checks',
+    step: 1,
+    min: 0,
+    max: 60,
+    ariaPrefix: 'Run Time',
+    editable: true,
+    summaryType: 'sum',
   },
 ];
 
@@ -139,16 +187,10 @@ export function PlantHourlySheetClient({
   const [rows, setRows] = useState<PlantHourlyRow[]>(() =>
     initialSheets[0]?.rows ? initialSheets[0].rows : buildDefaultHourlyRows('day')
   );
-  const [activeCell, setActiveCell] = useState<{
-    rowIndex: number;
-    colLetter: string;
-    key: EditableColumnKey | 'hourSlot' | 'yieldPct';
-  }>({
-    rowIndex: 0,
-    colLetter: 'C',
-    key: 'romFeedTonnes',
-  });
-  const [autoCalcDiscard, setAutoCalcDiscard] = useState<boolean>(true);
+  const [streamSearch, setStreamSearch] = useState<string>('');
+  const [selectedSeamBlend, setSelectedSeamBlend] = useState<string>(
+    initialSheets[0]?.rows?.[0]?.seamSource || PLANT_SEAM_OPTIONS[0] || 'Seam 2 ROM'
+  );
   const [statusBanner, setStatusBanner] = useState<{
     type: 'success' | 'info';
     text: string;
@@ -201,9 +243,7 @@ export function PlantHourlySheetClient({
             key === 'cleanCoalTonnes' ? Math.min(rom, num) : Math.min(rom, row.cleanCoalTonnes);
           updated.romFeedTonnes = rom;
           updated.cleanCoalTonnes = clean;
-          if (autoCalcDiscard) {
-            updated.discardTonnes = Number(Math.max(0, rom - clean).toFixed(1));
-          }
+          updated.discardTonnes = Number(Math.max(0, rom - clean).toFixed(1));
           updated.yieldPct = calculateRowYield(rom, clean);
         } else if (key === 'discardTonnes') {
           updated.discardTonnes = num;
@@ -382,50 +422,34 @@ export function PlantHourlySheetClient({
     };
   }, [totals.weightedYield]);
 
-  const activeRow = rows[activeCell.rowIndex] ?? rows[0];
-  const activeColMeta =
-    COLUMN_META.find((c) => c.letter === activeCell.colLetter) ?? COLUMN_META[2]!;
-  const activeCellAddress = `${activeColMeta.letter}${activeCell.rowIndex + 1}`;
-  const activeFormulaDisplay = (activeColMeta.formulaHint ?? '').replaceAll(
-    '{row}',
-    String(activeCell.rowIndex + 1)
-  );
-
-  const handleFillDown = () => {
-    const sourceRow = rows[activeCell.rowIndex];
-    if (!sourceRow) return;
-    const key = activeCell.key;
-    if (key === 'hourSlot' || key === 'yieldPct') return;
-
-    setRows((prev) =>
-      prev.map((row, idx) => {
-        if (idx <= activeCell.rowIndex) return row;
-        const val = sourceRow[key];
-        const nextRow = { ...row, [key]: val };
-        if (key === 'romFeedTonnes' || key === 'cleanCoalTonnes') {
-          const rom = nextRow.romFeedTonnes;
-          const clean = Math.min(rom, nextRow.cleanCoalTonnes);
-          nextRow.cleanCoalTonnes = clean;
-          if (autoCalcDiscard) {
-            nextRow.discardTonnes = Number(Math.max(0, rom - clean).toFixed(1));
-          }
-          nextRow.yieldPct = calculateRowYield(rom, clean);
-        }
-        return nextRow;
-      })
+  const filteredStreams = useMemo(() => {
+    const q = streamSearch.trim().toLowerCase();
+    if (!q) return PLANT_GRID_STREAMS;
+    return PLANT_GRID_STREAMS.filter(
+      (s) =>
+        s.streamName.toLowerCase().includes(q) ||
+        s.code.toLowerCase().includes(q) ||
+        s.unit.toLowerCase().includes(q)
     );
-    setStatusBanner({
-      type: 'info',
-      text: `Filled column ${activeColMeta.letter} (${activeColMeta.label}) down from row ${activeCell.rowIndex + 1} to row ${rows.length}.`,
-    });
+  }, [streamSearch]);
+
+  const handleSeamBlendChange = (nextSeam: string) => {
+    setSelectedSeamBlend(nextSeam);
+    setRows((prev) => prev.map((r) => ({ ...r, seamSource: nextSeam })));
   };
 
-  const handleResetDefaults = () => {
-    setRows(buildDefaultHourlyRows(selectedShift));
-    setStatusBanner({
-      type: 'info',
-      text: `Reset ${selectedShift.toUpperCase()} shift hourly grid to baseline wash plant template.`,
-    });
+  const stepCellValue = (rowIndex: number, stream: PlantGridStreamMeta, direction: 1 | -1) => {
+    if (!stream.editable || stream.key === 'yieldPct') return;
+    const row = rows[rowIndex];
+    if (!row) return;
+    const current = Number(row[stream.key]) || 0;
+    const decimals = stream.step < 0.1 ? 2 : stream.step < 1 ? 1 : 0;
+    const nextVal = Number(
+      Math.max(stream.min, Math.min(stream.max, current + direction * stream.step)).toFixed(
+        decimals
+      )
+    );
+    updateCell(rowIndex, stream.key, nextVal);
   };
 
   const handleExportCsv = () => {
@@ -1230,36 +1254,23 @@ export function PlantHourlySheetClient({
         </>
       )}
 
-      {/* ── Excel-Style Hourly Input Sheet Workbook (Dedicated /plant-processing/hourly-sheet Tab) ── */}
+      {/* ── Control Room Style 12-Hour Matrix Grid (Dedicated /plant-processing/hourly-sheet Tab) ── */}
       {showSheet && (
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl overflow-hidden shadow-sm">
-          {/* Sheet Parameters Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border-default)] bg-black/[0.015]">
+        <div className="space-y-4">
+          {/* Shift & Circuit Module Selector Row (Matching Control Room Hourly Loads Layout) */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-xs font-medium text-[var(--text-secondary)]">
-                <Calendar className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span>Date:</span>
-                <input
-                  type="date"
-                  aria-label="Operational Date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-2.5 py-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs font-mono"
-                />
-              </label>
-
-              <div
-                className="inline-flex rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-0.5"
-                role="group"
-                aria-label="Shift selector"
-              >
+              <span className="text-[var(--text-secondary)] text-xs font-semibold uppercase tracking-wider">
+                Shift:
+              </span>
+              <div className="flex gap-2" role="group" aria-label="Shift selector">
                 <button
                   type="button"
                   onClick={() => setSelectedShift('day')}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer gold-steel-border gold-steel-border-slim ${
                     selectedShift === 'day'
                       ? 'bg-[var(--accent-blue)] text-white'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
                   }`}
                 >
                   Day Shift (06:00–18:00)
@@ -1267,381 +1278,270 @@ export function PlantHourlySheetClient({
                 <button
                   type="button"
                   onClick={() => setSelectedShift('night')}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer gold-steel-border gold-steel-border-slim ${
                     selectedShift === 'night'
                       ? 'bg-[var(--accent-blue)] text-white'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
                   }`}
                 >
                   Night Shift (18:00–06:00)
                 </button>
               </div>
+            </div>
 
-              <label className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
-                <span>Circuit Module:</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-heading)]">
+                <span>Circuit:</span>
                 <select
                   aria-label="Plant Circuit Module"
                   value={selectedModule}
                   onChange={(e) => setSelectedModule(e.target.value as PlantModuleId)}
-                  className="px-2.5 py-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] text-xs font-medium"
                 >
                   <option value="DMS-MOD-1">DMS Module 1 — Primary Wash Plant</option>
                   <option value="DMS-MOD-2">DMS Module 2 — Secondary &amp; Fines</option>
                 </select>
               </label>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={autoCalcDiscard}
-                  onChange={(e) => setAutoCalcDiscard(e.target.checked)}
-                  className="rounded border-[var(--border-default)]"
-                />
-                <span>Auto-calc Discard (=C-D)</span>
+              <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-heading)]">
+                <span>Feed Blend:</span>
+                <select
+                  aria-label="Feed Seam Blend"
+                  value={selectedSeamBlend}
+                  onChange={(e) => handleSeamBlendChange(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] text-xs font-medium"
+                >
+                  {PLANT_SEAM_OPTIONS.map((seam) => (
+                    <option key={seam} value={seam}>
+                      {seam}
+                    </option>
+                  ))}
+                </select>
               </label>
-
-              <button
-                type="button"
-                onClick={handleFillDown}
-                title="Copy active cell value down to remaining rows in this column"
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] text-[11px] font-medium text-[var(--text-heading)] hover:bg-black/[0.04] transition-colors cursor-pointer"
-              >
-                <Copy className="w-3 h-3" />
-                Fill Down ({activeColMeta.letter})
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResetDefaults}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04] transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Reset Sheet
-              </button>
             </div>
           </div>
 
-          {/* Excel Formula Bar */}
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border-default)] bg-[var(--bg-primary)] text-xs font-mono">
-            <span
-              className="inline-flex items-center justify-center min-w-[44px] px-2 py-0.5 rounded border border-[var(--border-default)] bg-black/[0.03] font-bold text-[var(--text-heading)]"
-              aria-label="Active Cell Reference"
-            >
-              {activeCellAddress}
-            </span>
-            <span className="inline-flex items-center gap-1 text-[var(--text-muted)] italic font-serif px-1.5">
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              fx
-            </span>
-            <div className="flex-1 truncate text-[var(--text-secondary)]">
-              <span className="font-semibold text-[var(--text-heading)]">
-                {activeColMeta.label}:
-              </span>{' '}
-              <span>{activeFormulaDisplay}</span>
-              {activeRow && (
-                <span className="ml-3 text-[var(--text-muted)]">
-                  [Row {activeRow.rowNumber} · {activeRow.hourSlot} · Value:{' '}
-                  {String(activeRow[activeCell.key])}]
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Spreadsheet Grid Table */}
-          <div className="overflow-x-auto">
-            <table
-              className="w-full border-collapse text-left text-xs"
-              aria-label="Plant and Processing Hourly Input Sheet"
-            >
-              <thead>
-                {/* Excel Column Letters Row */}
-                <tr className="bg-black/[0.04] border-b border-[var(--border-default)] text-[11px] font-mono text-[var(--text-muted)] select-none">
-                  <th className="w-10 py-1.5 px-2 text-center border-r border-[var(--border-default)]">
-                    #
-                  </th>
-                  {COLUMN_META.map((col) => (
-                    <th
-                      key={col.letter}
-                      className={`py-1.5 px-2.5 text-center border-r border-[var(--border-default)] font-semibold ${
-                        activeCell.colLetter === col.letter
-                          ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
-                          : ''
-                      }`}
-                    >
-                      {col.letter}
-                    </th>
-                  ))}
-                </tr>
-                {/* Column Titles Row */}
-                <tr className="bg-black/[0.02] border-b border-[var(--border-default)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  <th className="py-2.5 px-2 text-center border-r border-[var(--border-default)]">
-                    Row
-                  </th>
-                  {COLUMN_META.map((col) => (
-                    <th
-                      key={col.key}
-                      className="py-2.5 px-2.5 border-r border-[var(--border-default)] whitespace-nowrap"
-                    >
-                      <div className="flex items-center justify-between gap-1.5">
-                        <span>{col.label}</span>
-                        {col.unit && (
-                          <span className="text-[10px] font-mono lowercase px-1.5 py-0.5 rounded bg-black/[0.04] text-[var(--text-muted)]">
-                            {col.unit}
+          {/* Main 12-Hour Matrix Grid Card (Matching Control Room HourlyLoadsGrid) */}
+          <div className="revo-grid-visible">
+            <GlassCard className="p-0 overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] shadow-sm">
+              <div className="overflow-x-auto w-full">
+                <table
+                  className="w-full text-left border-collapse"
+                  aria-label="Plant and Processing Hourly Input Sheet"
+                >
+                  <thead>
+                    <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-xs font-semibold text-[var(--text-muted)]">
+                      <th
+                        scope="col"
+                        className="py-2.5 px-3 text-left min-w-[190px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] align-top"
+                      >
+                        <div className="space-y-1.5">
+                          <span className="block text-xs font-bold text-[var(--text-heading)]">
+                            Plant Stream / Metric
                           </span>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+                          <div className="relative">
+                            <Search className="w-3 h-3 text-[var(--text-muted)] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <input
+                              type="text"
+                              value={streamSearch}
+                              onChange={(e) => setStreamSearch(e.target.value)}
+                              placeholder="Filter plant stream..."
+                              aria-label="Filter plant stream"
+                              className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md pl-6 pr-6 py-1 text-[11px] font-normal text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                            />
+                            {streamSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setStreamSearch('')}
+                                aria-label="Clear stream filter"
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </th>
+                      <th scope="col" className="py-2.5 px-3 text-left min-w-[155px] align-top">
+                        <div className="space-y-1">
+                          <span className="block text-xs font-bold text-[var(--text-heading)]">
+                            Circuit &amp; Unit
+                          </span>
+                          <span className="block text-[11px] font-mono text-[var(--text-secondary)]">
+                            {selectedModule}
+                          </span>
+                        </div>
+                      </th>
+                      {rows.map((row) => {
+                        const shortStart = row.hourSlot.split(' - ')[0] ?? row.hourSlot;
+                        return (
+                          <th
+                            key={row.hourSlot}
+                            scope="col"
+                            className="py-2.5 px-1.5 text-center min-w-[92px]"
+                          >
+                            <span className="block font-mono font-bold text-xs text-[var(--text-heading)]">
+                              {shortStart}
+                            </span>
+                            <span className="block font-mono text-[9px] text-[var(--text-muted)] font-normal">
+                              {row.hourSlot}
+                            </span>
+                          </th>
+                        );
+                      })}
+                      <th scope="col" className="py-2.5 px-3 text-right min-w-[95px] align-middle">
+                        <span className="block text-xs font-bold text-[var(--text-heading)]">
+                          Total / Avg
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
 
-              <tbody className="divide-y divide-[var(--border-default)] font-mono">
-                {rows.map((row, rowIndex) => {
-                  const isActiveRow = activeCell.rowIndex === rowIndex;
-                  const yieldBadgeClass =
-                    row.yieldPct >= 88
-                      ? 'bg-emerald-500/15 text-emerald-800 border-emerald-500/30'
-                      : row.yieldPct >= 80
-                        ? 'bg-amber-500/15 text-amber-800 border-amber-500/30'
-                        : 'bg-red-500/15 text-red-800 border-red-500/30';
+                  <tbody className="divide-y divide-[var(--border-default)]/60 text-xs text-[var(--text-heading)]">
+                    {filteredStreams.map((stream) => {
+                      let summaryDisplay = '';
+                      if (stream.key === 'romFeedTonnes') {
+                        summaryDisplay = `${totals.totalRom.toLocaleString()} t`;
+                      } else if (stream.key === 'cleanCoalTonnes') {
+                        summaryDisplay = `${totals.totalClean.toLocaleString()} t`;
+                      } else if (stream.key === 'discardTonnes') {
+                        summaryDisplay = `${totals.totalDiscard.toLocaleString()} t`;
+                      } else if (stream.key === 'yieldPct') {
+                        summaryDisplay = `${totals.weightedYield.toFixed(1)}%`;
+                      } else if (stream.key === 'productAshPct') {
+                        summaryDisplay = `${totals.avgAsh.toFixed(1)}%`;
+                      } else if (stream.key === 'cycloneRd') {
+                        summaryDisplay = `${totals.avgRd.toFixed(2)}`;
+                      } else if (stream.key === 'moisturePct') {
+                        summaryDisplay = `${totals.avgMoisture.toFixed(1)}%`;
+                      } else if (stream.key === 'runMinutes') {
+                        summaryDisplay = `${totals.totalRunMins}m`;
+                      }
 
-                  return (
-                    <tr
-                      key={row.hourSlot}
-                      className={`transition-colors ${
-                        isActiveRow ? 'bg-[var(--accent-blue)]/[0.04]' : 'hover:bg-black/[0.015]'
-                      }`}
-                    >
-                      {/* Row Index */}
-                      <td
-                        className={`py-1.5 px-2 text-center border-r border-[var(--border-default)] text-[11px] select-none ${
-                          isActiveRow
-                            ? 'bg-[var(--accent-blue)]/15 font-bold text-[var(--accent-blue)]'
-                            : 'bg-black/[0.02] text-[var(--text-muted)]'
-                        }`}
-                      >
-                        {row.rowNumber}
-                      </td>
-
-                      {/* Col A: Hour Slot */}
-                      <td
-                        onClick={() => setActiveCell({ rowIndex, colLetter: 'A', key: 'hourSlot' })}
-                        className="py-1.5 px-2.5 border-r border-[var(--border-default)] whitespace-nowrap font-medium text-[var(--text-heading)] bg-black/[0.01]"
-                      >
-                        {row.hourSlot}
-                      </td>
-
-                      {/* Col B: Seam Source */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[145px]">
-                        <select
-                          aria-label={`Row ${row.rowNumber} Feed Seam`}
-                          value={row.seamSource}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'B', key: 'seamSource' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'seamSource', e.target.value)}
-                          className="w-full h-full py-2 px-2.5 bg-transparent font-sans text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
+                      return (
+                        <tr
+                          key={stream.key}
+                          className="transition-colors hover:bg-[var(--bg-secondary)]/40"
                         >
-                          {PLANT_SEAM_OPTIONS.map((seam) => (
-                            <option key={seam} value={seam}>
-                              {seam}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                          {/* Stream Name Column (Sticky Left) */}
+                          <td className="py-2.5 px-3 font-medium sticky left-0 z-10 bg-[var(--bg-primary)] shadow-[1px_0_0_0_var(--border-default)]">
+                            <div className="min-w-[160px]">
+                              <span className="block font-bold text-xs text-[var(--text-heading)]">
+                                {stream.streamName}
+                              </span>
+                              <span className="block text-[10px] text-[var(--text-secondary)]">
+                                {stream.code}
+                              </span>
+                            </div>
+                          </td>
 
-                      {/* Col C: ROM Feed */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
-                        <input
-                          type="number"
-                          min={0}
-                          max={2000}
-                          step={5}
-                          aria-label={`Row ${row.rowNumber} ROM Feed`}
-                          value={row.romFeedTonnes}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'C', key: 'romFeedTonnes' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'romFeedTonnes', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
+                          {/* Circuit / Unit Column */}
+                          <td className="py-2.5 px-3 min-w-[140px]">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className="text-[11px] font-medium text-[var(--text-secondary)] truncate">
+                                {selectedSeamBlend}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-mono font-semibold text-[10px] shrink-0">
+                                {stream.unit}
+                              </span>
+                            </div>
+                          </td>
 
-                      {/* Col D: Clean Coal */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
-                        <input
-                          type="number"
-                          min={0}
-                          max={2000}
-                          step={5}
-                          aria-label={`Row ${row.rowNumber} Clean Coal`}
-                          value={row.cleanCoalTonnes}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'D', key: 'cleanCoalTonnes' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'cleanCoalTonnes', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs font-semibold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
+                          {/* 12 Hourly Cells (Control Room Stepper + Direct Input Format) */}
+                          {rows.map((row, hourIdx) => {
+                            const streamKey = stream.key;
+                            if (!stream.editable || streamKey === 'yieldPct') {
+                              const yieldBadgeClass =
+                                row.yieldPct >= 88
+                                  ? 'bg-emerald-500/15 text-emerald-800 border-emerald-500/30'
+                                  : row.yieldPct >= 80
+                                    ? 'bg-amber-500/15 text-amber-800 border-amber-500/30'
+                                    : 'bg-red-500/15 text-red-800 border-red-500/30';
+                              return (
+                                <td
+                                  key={`${streamKey}-${row.hourSlot}`}
+                                  className="py-2 px-1 text-center bg-black/[0.015]"
+                                >
+                                  <span
+                                    className={`inline-block px-2 py-0.5 rounded border font-mono text-[11px] font-semibold ${yieldBadgeClass}`}
+                                  >
+                                    {row.yieldPct.toFixed(1)}%
+                                  </span>
+                                </td>
+                              );
+                            }
 
-                      {/* Col E: Discard Tonnes */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
-                        <input
-                          type="number"
-                          min={0}
-                          max={2000}
-                          step={1}
-                          aria-label={`Row ${row.rowNumber} Discard`}
-                          value={row.discardTonnes}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'E', key: 'discardTonnes' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'discardTonnes', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-amber-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
+                            const cellValue = row[streamKey];
+                            return (
+                              <td
+                                key={`${streamKey}-${row.hourSlot}`}
+                                className="py-1.5 px-1 text-center"
+                              >
+                                <div className="inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]">
+                                  <button
+                                    type="button"
+                                    onClick={() => stepCellValue(hourIdx, stream, -1)}
+                                    aria-label={`Decrease Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                    className="h-6 w-4 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] cursor-pointer transition-colors"
+                                  >
+                                    <Minus className="w-2.5 h-2.5" />
+                                  </button>
+                                  <input
+                                    type="number"
+                                    min={stream.min}
+                                    max={stream.max}
+                                    step={stream.step}
+                                    aria-label={`Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                    value={cellValue}
+                                    onChange={(e) => updateCell(hourIdx, streamKey, e.target.value)}
+                                    className="w-12 text-center font-mono text-xs font-semibold py-0.5 bg-transparent text-[var(--text-heading)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => stepCellValue(hourIdx, stream, 1)}
+                                    aria-label={`Increase Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                    className="h-6 w-4 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] cursor-pointer transition-colors"
+                                  >
+                                    <Plus className="w-2.5 h-2.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            );
+                          })}
 
-                      {/* Col F: Computed Plant Yield (% Recovery) */}
-                      <td
-                        onClick={() => setActiveCell({ rowIndex, colLetter: 'F', key: 'yieldPct' })}
-                        className="py-1.5 px-2.5 border-r border-[var(--border-default)] text-right bg-black/[0.015] min-w-[100px]"
-                      >
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded border text-[11px] font-semibold ${yieldBadgeClass}`}
+                          {/* Shift Total / Avg Column */}
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-xs text-[var(--text-heading)] tabular-nums min-w-[95px] bg-[var(--bg-secondary)]/30">
+                            {summaryDisplay}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+
+                  <tfoot>
+                    <tr className="bg-[var(--bg-secondary)]/80 border-t-2 border-[var(--border-default)] font-mono text-xs font-bold text-[var(--text-heading)]">
+                      <td className="py-2.5 px-3 sticky left-0 z-10 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)]">
+                        Net Mass Balance
+                      </td>
+                      <td className="py-2.5 px-3 text-[11px] font-sans font-medium text-[var(--text-secondary)]">
+                        Recovery Yield %
+                      </td>
+                      {rows.map((row) => (
+                        <td
+                          key={`footer-${row.hourSlot}`}
+                          className="py-2.5 px-1 text-center text-[var(--accent-blue)]"
                         >
                           {row.yieldPct.toFixed(1)}%
-                        </span>
-                      </td>
-
-                      {/* Col G: Product Ash (% ADB) */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[105px]">
-                        <input
-                          type="number"
-                          min={5}
-                          max={40}
-                          step={0.1}
-                          aria-label={`Row ${row.rowNumber} Product Ash`}
-                          value={row.productAshPct}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'G', key: 'productAshPct' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'productAshPct', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-indigo-700 font-semibold focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
-
-                      {/* Col H: Running Density (DMS Cyclone RD) */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[110px]">
-                        <input
-                          type="number"
-                          min={1.2}
-                          max={2.2}
-                          step={0.01}
-                          aria-label={`Row ${row.rowNumber} DMS Cyclone RD`}
-                          value={row.cycloneRd}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'H', key: 'cycloneRd' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'cycloneRd', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
-
-                      {/* Col I: Product Moisture % */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[95px]">
-                        <input
-                          type="number"
-                          min={0}
-                          max={30}
-                          step={0.1}
-                          aria-label={`Row ${row.rowNumber} Moisture`}
-                          value={row.moisturePct}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'I', key: 'moisturePct' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'moisturePct', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
-
-                      {/* Col J: Run Time (mins) */}
-                      <td className="p-0 border-r border-[var(--border-default)] min-w-[90px]">
-                        <input
-                          type="number"
-                          min={0}
-                          max={60}
-                          step={1}
-                          aria-label={`Row ${row.rowNumber} Run Time`}
-                          value={row.runMinutes}
-                          onFocus={() =>
-                            setActiveCell({ rowIndex, colLetter: 'J', key: 'runMinutes' })
-                          }
-                          onChange={(e) => updateCell(rowIndex, 'runMinutes', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent text-right font-mono text-xs text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
-                      </td>
-
-                      {/* Col K: Notes */}
-                      <td className="p-0 min-w-[240px]">
-                        <input
-                          type="text"
-                          aria-label={`Row ${row.rowNumber} Notes`}
-                          value={row.notes}
-                          placeholder="Add hourly circuit note..."
-                          onFocus={() => setActiveCell({ rowIndex, colLetter: 'K', key: 'notes' })}
-                          onChange={(e) => updateCell(rowIndex, 'notes', e.target.value)}
-                          className="w-full py-2 px-2.5 bg-transparent font-sans text-xs text-[var(--text-secondary)] focus:text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-blue)]"
-                        />
+                        </td>
+                      ))}
+                      <td className="py-2.5 px-3 text-right text-emerald-700">
+                        {totals.weightedYield.toFixed(1)}% ({totals.runHours}h)
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-
-              {/* Spreadsheet Summary Footer Row (Row 13) */}
-              <tfoot>
-                <tr className="bg-black/[0.04] border-t-2 border-[var(--border-default)] font-mono text-xs font-bold text-[var(--text-heading)]">
-                  <td className="py-2.5 px-2 text-center border-r border-[var(--border-default)] text-[var(--accent-blue)]">
-                    Σ
-                  </td>
-                  <td className="py-2.5 px-2.5 border-r border-[var(--border-default)] uppercase tracking-wider text-[11px]">
-                    Shift Total / Avg
-                  </td>
-                  <td className="py-2.5 px-2.5 border-r border-[var(--border-default)] font-sans text-[11px] font-medium text-[var(--text-secondary)]">
-                    12 Hourly Slots ({selectedModule})
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)]">
-                    {totals.totalRom.toLocaleString()} t
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-emerald-700">
-                    {totals.totalClean.toLocaleString()} t
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-amber-800">
-                    {totals.totalDiscard.toLocaleString()} t
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-[var(--accent-blue)]">
-                    {totals.weightedYield.toFixed(1)}%
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)] text-indigo-700">
-                    {totals.avgAsh.toFixed(1)}%
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)]">
-                    {totals.avgRd.toFixed(2)} g/cm³
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)]">
-                    {totals.avgMoisture.toFixed(1)}%
-                  </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-[var(--border-default)]">
-                    {totals.totalRunMins} min ({totals.runHours}h)
-                  </td>
-                  <td className="py-2.5 px-2.5 font-sans text-[11px] font-normal text-[var(--text-secondary)]">
-                    Auto-reconciled with Plant History Database
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                  </tfoot>
+                </table>
+              </div>
+            </GlassCard>
           </div>
         </div>
       )}

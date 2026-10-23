@@ -1,3 +1,11 @@
+## 2026-10-23T08:08:00+02:00: Plant & Processing Hourly Sheet Redesign into Control Room 12-Hour Matrix Grid
+
+- **Purpose**: Implement `/plant-processing/hourly-sheet` design feedback: remove the Excel formula bar (`C1 fx ...`) and legacy sheet toolbar (`Auto-calc Discard`, `Fill Down`, `Reset Sheet`), and redesign the hourly sheet into a 12-hour matrix grid matching Control Room's Hourly Loads layout (`HourlyLoadsGrid.tsx`).
+- **Changes**:
+  - `apps/portal/features/departments/components/plant-processing/PlantHourlySheetClient.tsx`: Removed the Excel formula bar and legacy toolbar; redesigned the hourly sheet into a sticky-left stream/metric matrix grid with 12 horizontal shift hour columns (`06:00`–`17:00` Day / `18:00`–`05:00` Night), `- / input / +` stepper controls per hour cell, stream search filter, and Shift Total/Avg column.
+  - `apps/portal/features/departments/components/plant-processing/plant-processing.test.tsx`: Added assertions verifying removal of the formula bar/toolbar and testing the 12-hour matrix grid stepper controls.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="plant-processing"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T07:53:00+02:00: Control Room SCADA Dashboard Sub-tab, Summary Golden Graphs, Excavator/Loaded Machines Panel & Admin Operational Targets
 
 - **Purpose**: Implement 5 `/control-room` design feedback items: expose `SCADA Dashboard` sub-tab, add HeroCard-style Golden Graphs to the 5 summary KPI cards, redesign `ScadaPanel` for Excavator Activity & Registered Machines with Loaded Loads, and add Shift/Daily/Monthly Operational Targets in Administration (`/admin?tab=targets`) with visual target trajectory graphs in `AlertPanel`.

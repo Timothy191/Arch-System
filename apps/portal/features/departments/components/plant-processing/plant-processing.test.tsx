@@ -89,10 +89,13 @@ describe('Plant & Processing Workspace Components', () => {
       );
       expect(screen.getByRole('img', { name: /Production Mix Pie Chart/i })).toBeInTheDocument();
 
-      // Verify Excel-style Hourly Input Sheet renders and updates calculations
+      // Verify Control Room style 12-Hour Matrix Grid renders without Excel formula bar or old toolbar
       expect(
         screen.getByRole('table', { name: /Plant and Processing Hourly Input Sheet/i })
       ).toBeInTheDocument();
+      expect(screen.queryByLabelText('Active Cell Reference')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Auto-calc Discard/i)).not.toBeInTheDocument();
+      expect(screen.getByText('Plant Stream / Metric')).toBeInTheDocument();
       expect(screen.getByText('06:00 - 07:00')).toBeInTheDocument();
       expect(screen.getByText('17:00 - 18:00')).toBeInTheDocument();
 
@@ -107,6 +110,10 @@ describe('Plant & Processing Workspace Components', () => {
 
       expect(row1DiscardInput.value).toBe('50');
       expect(row1AshInput.value).toBe('13.5');
+
+      // Test stepper button (+5 t/hr on ROM Feed)
+      fireEvent.click(screen.getByRole('button', { name: 'Increase Row 1 ROM Feed' }));
+      expect(row1RomInput.value).toBe('505');
 
       const saveBtn = screen.getByTestId('save-plant-hourly-sheet');
       fireEvent.click(saveBtn);
