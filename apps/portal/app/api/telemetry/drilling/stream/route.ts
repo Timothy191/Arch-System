@@ -3,7 +3,7 @@
  * /api/telemetry/drilling/stream:
  *   get:
  *     summary: Real-Time Drill Rig Telemetry SSE Stream
- *     description: Server-Sent Events (SSE) endpoint reading the capped Redis stream `drilling:telemetry:stream`. Reconnects replay missed entries via the standard Last-Event-ID header; pub/sub is used only on adapters without XREAD support.
+ *     description: Server-Sent Events (SSE) endpoint reading the capped Redis stream `drilling:telemetry:stream`. Reconnects replay missed entries via the standard Last-Event-ID header. Blocking XREAD on TCP, short polls on serverless REST.
  *     tags:
  *       - Telemetry
  *     responses:
@@ -15,7 +15,7 @@
  *               type: string
  */
 
-import { createRedisSubscriber } from '@repo/redis';
+import { createRedisSubscriber, readNew, supportsBlockingReads } from '@repo/redis';
 import { NextResponse } from 'next/server';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { authorizeTelemetryStream } from '@/lib/api/telemetry-auth';
@@ -26,11 +26,17 @@ export const maxDuration = 60;
 const DRILL_TELEMETRY_STREAM_KEY = 'drilling:telemetry:stream';
 const STREAM_READ_BLOCK_MS = 15000;
 const STREAM_READ_COUNT = 100;
+/** Floor between two reads: an empty non-blocking read must not spin the loop. */
+const STREAM_POLL_MS = 1000;
 const HEARTBEAT_MS = 15000;
 const VALID_STREAM_ID = /^\d+-\d+$/;
 const STREAM_CONNECTION_LIMIT = { windowMs: 60_000, maxRequests: 60 };
 
 type TelemetryClient = Awaited<ReturnType<typeof createRedisSubscriber>>;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // Reject malformed Last-Event-ID values before they reach XREAD.
 function resolveStartId(req: Request): string {
@@ -38,6 +44,15 @@ function resolveStartId(req: Request): string {
   return lastEventId && VALID_STREAM_ID.test(lastEventId) ? lastEventId : '$';
 }
 
+/**
+ * Replay-and-follow loop for one SSE client.
+ *
+ * Reads the same Redis Stream on both transports: `BLOCK` on TCP, short polls
+ * on serverless REST (where blocking is impossible and Pub/Sub is unavailable,
+ * so the previous implementation delivered nothing at all). A failed read
+ * returns empty rather than throwing, so a transient Redis blip leaves the
+ * connection idle and self-healing instead of closing it.
+ */
 async function pumpStream(
   client: TelemetryClient,
   controller: ReadableStreamDefaultController<Uint8Array>,
@@ -45,26 +60,30 @@ async function pumpStream(
   startId: string,
   isClosed: () => boolean
 ): Promise<void> {
+  const blockMs = supportsBlockingReads() ? STREAM_READ_BLOCK_MS : undefined;
   let nextId = startId;
 
   while (!isClosed()) {
-    const response = await client.xRead([{ key: DRILL_TELEMETRY_STREAM_KEY, id: nextId }], {
-      BLOCK: STREAM_READ_BLOCK_MS,
-      COUNT: STREAM_READ_COUNT,
+    const startedAt = Date.now();
+    const payloads = await readNew(DRILL_TELEMETRY_STREAM_KEY, {
+      from: nextId,
+      count: STREAM_READ_COUNT,
+      client,
+      ...(blockMs ? { blockMs } : {}),
     });
 
-    if (!response) continue;
-
-    for (const stream of response) {
-      for (const entry of stream.messages) {
+    for (const payload of payloads) {
+      for (const entry of payload.entries) {
         nextId = entry.id;
         // The ingest route writes the telemetry JSON as the `data` field.
-        const payload = entry.message.data ?? JSON.stringify(entry.message);
-        if (!isClosed()) {
-          controller.enqueue(encoder.encode(`id: ${entry.id}\ndata: ${payload}\n\n`));
-        }
+        const data = entry.fields.data ?? JSON.stringify(entry.fields);
+        if (isClosed()) return;
+        controller.enqueue(encoder.encode(`id: ${entry.id}\ndata: ${data}\n\n`));
       }
     }
+
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < STREAM_POLL_MS) await sleep(STREAM_POLL_MS - elapsed);
   }
 }
 
@@ -78,20 +97,14 @@ async function openTelemetryStream(req: Request): Promise<NextResponse> {
   let client: TelemetryClient | null = null;
   let heartbeat: ReturnType<typeof setInterval> | null = null;
   let closed = false;
-  let streamMode = false;
 
   const cleanup = () => {
     if (closed) return;
     closed = true;
     if (heartbeat) clearInterval(heartbeat);
     if (!client?.isOpen) return;
-    if (streamMode) {
-      // Breaks a pending blocking XREAD immediately.
-      client.disconnect().catch(() => {});
-    } else {
-      client.unsubscribe(DRILL_TELEMETRY_STREAM_KEY).catch(() => {});
-      client.quit().catch(() => {});
-    }
+    // Breaks a pending blocking XREAD immediately. REST has no socket to drop.
+    client.disconnect().catch(() => {});
   };
 
   const stream = new ReadableStream({
@@ -113,30 +126,16 @@ async function openTelemetryStream(req: Request): Promise<NextResponse> {
           }
         }, HEARTBEAT_MS);
 
-        if (typeof client.xRead === 'function') {
-          streamMode = true;
-          void pumpStream(client, controller, encoder, startId, () => closed).catch((err) => {
-            if (closed) return;
-            logError(err instanceof Error ? err : new Error(String(err)));
-            try {
-              controller.close();
-            } catch {
-              // Already closed
-            }
-            cleanup();
-          });
-        } else {
-          // Serverless REST adapters cannot block on XREAD; retain the
-          // existing lossy pub/sub behavior there.
-          await client.subscribe(DRILL_TELEMETRY_STREAM_KEY, (message) => {
-            if (closed) return;
-            try {
-              controller.enqueue(encoder.encode(`data: ${message}\n\n`));
-            } catch {
-              // Controller closed
-            }
-          });
-        }
+        void pumpStream(client, controller, encoder, startId, () => closed).catch((err) => {
+          if (closed) return;
+          logError(err instanceof Error ? err : new Error(String(err)));
+          try {
+            controller.close();
+          } catch {
+            // Already closed
+          }
+          cleanup();
+        });
       } catch (err: unknown) {
         const errorMsg =
           err instanceof Error ? err.message : 'Failed to initialize telemetry stream';

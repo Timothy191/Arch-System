@@ -52,7 +52,13 @@ import {
   drillTelemetryIngestSchema,
 } from '@repo/contract/schemas/drill.schema';
 import { withValidation } from '@repo/contract/validation';
-import { getRedisClient } from '@repo/redis';
+import {
+  addUnique,
+  appendToStream,
+  getRedisClient,
+  incrementCounter,
+  recordSample,
+} from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 import { withBodyLimit } from '@/lib/api/body-limit';
@@ -62,12 +68,50 @@ import { authorizeIngest } from '@/lib/api/telemetry-auth';
 
 const DRILL_TELEMETRY_STREAM_KEY = 'drilling:telemetry:stream';
 const DRILL_TELEMETRY_STREAM_MAXLEN = 1000;
+const TELEMETRY_STATE_TTL_SECONDS = 86_400;
 
 // Ingest sizing: a machine may publish up to 10 samples/sec; the per-IP entry
 // cap covers several rigs aggregated behind one gateway address.
 const INGEST_RATE_LIMIT = { windowMs: 60_000, maxRequests: 2400 };
 const MACHINE_RATE_LIMIT = { windowMs: 60_000, maxRequests: 600 };
 const INGEST_PATH = '/api/telemetry/drilling';
+
+interface LiveMetrics {
+  machineId: string;
+  bitDepth?: number | null;
+  penetrationRate?: number | null;
+}
+
+/**
+ * Live operational numbers, accumulated in Redis so the dashboard reads one
+ * counter instead of aggregating `machine_telemetry` per poll. Every call is
+ * a single Redis command and none of them can fail the ingest.
+ */
+async function recordLiveTelemetry(metrics: LiveMetrics): Promise<void> {
+  const { machineId, bitDepth, penetrationRate } = metrics;
+  await Promise.all([
+    incrementCounter('telemetry.drilling.ingest', { dimension: machineId }),
+    addUnique({ name: 'telemetry.drilling.machines', identifier: machineId, granularity: 'hour' }),
+    ...(typeof bitDepth === 'number'
+      ? [
+          recordSample({
+            name: 'telemetry.drilling.bit_depth',
+            value: bitDepth,
+            dimension: machineId,
+          }),
+        ]
+      : []),
+    ...(typeof penetrationRate === 'number'
+      ? [
+          recordSample({
+            name: 'telemetry.drilling.penetration_rate',
+            value: penetrationRate,
+            dimension: machineId,
+          }),
+        ]
+      : []),
+  ]);
+}
 
 // AGENT-TRACE: Ingestion route for Drill Rig IoT telemetry
 // Updates machine_telemetry table, updates Redis cache, and syncs with SCADA tag system
@@ -168,27 +212,22 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       const redis = await getRedisClient();
       const serializedState = JSON.stringify(telemetryState);
       await redis.set(`drilling:telemetry:last:${machine_id}`, serializedState, {
-        EX: 86400, // 24 hours TTL
+        EX: TELEMETRY_STATE_TTL_SECONDS,
       });
       // Streams keep a bounded replay window so SSE clients can resume with
-      // Last-Event-ID after a disconnect; pub/sub remains for serverless REST
-      // adapters, which do not implement XADD/XREAD.
-      if (typeof redis.xAdd === 'function') {
-        await redis.xAdd(
-          DRILL_TELEMETRY_STREAM_KEY,
-          '*',
-          { data: serializedState },
-          {
-            TRIM: {
-              strategy: 'MAXLEN',
-              strategyModifier: '~',
-              threshold: DRILL_TELEMETRY_STREAM_MAXLEN,
-            },
-          }
-        );
-      } else {
-        await redis.publish(DRILL_TELEMETRY_STREAM_KEY, serializedState);
-      }
+      // Last-Event-ID after a disconnect. `appendToStream` issues XADD on both
+      // transports — the typed `xAdd` exists only on the TCP client, so REST
+      // deployments used to fall through to publish() and lose the replay log.
+      await appendToStream({
+        key: DRILL_TELEMETRY_STREAM_KEY,
+        fields: { data: serializedState },
+        maxLen: DRILL_TELEMETRY_STREAM_MAXLEN,
+      });
+      await recordLiveTelemetry({
+        machineId: machine_id,
+        bitDepth: bit_depth,
+        penetrationRate: penetration_rate,
+      });
     } catch (redisErr) {
       // eslint-disable-next-line no-console
       console.warn('[DrillTelemetry] Redis caching warning:', redisErr);
@@ -214,7 +253,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       for (const [metric, val] of Object.entries(drillMetrics)) {
         if (val !== null && val !== undefined && !Number.isNaN(Number(val))) {
           await redis.set(`telemetry:last:drill_${machine_id}_${metric}`, String(val), {
-            EX: 86400, // 24 hours TTL
+            EX: TELEMETRY_STATE_TTL_SECONDS,
           });
         }
       }

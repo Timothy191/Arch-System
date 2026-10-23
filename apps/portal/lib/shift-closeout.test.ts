@@ -10,7 +10,11 @@ jest.mock('@repo/supabase/server', () => ({
 }));
 
 jest.mock('@/lib/observability/tracing', () => ({
-  withAsyncSpan: jest.fn((_name: string, _attrs: unknown, fn: () => unknown) => fn()),
+  // Spans are transparent in tests: run the wrapped function, drop the trace.
+  withAsyncSpan: jest.fn((...call: unknown[]) => {
+    const run = call[call.length - 1] as () => unknown;
+    return run();
+  }),
   addEvent: jest.fn(),
   setAttributes: jest.fn(),
 }));
@@ -36,6 +40,14 @@ jest.mock('./shift-completeness', () => {
 const mockRedisGet = jest.fn();
 const mockRedisSet = jest.fn();
 const mockRedisDel = jest.fn();
+const mockIncrWithExpire = jest.fn();
+const mockReadKeyCounter = jest.fn();
+// The mocked lock executes the body, so tests exercise the closeout itself;
+// individual tests override it to simulate contention.
+const mockTryWithLock = jest.fn(async (...args: unknown[]): Promise<unknown> => {
+  const body = args[1] as (lock: unknown) => Promise<unknown>;
+  return body({});
+});
 jest.mock('@repo/redis', () => ({
   getRedisClient: jest.fn(() =>
     Promise.resolve(
@@ -44,6 +56,9 @@ jest.mock('@repo/redis', () => ({
         : null
     )
   ),
+  incrWithExpire: (...args: unknown[]) => mockIncrWithExpire(...args),
+  readKeyCounter: (...args: unknown[]) => mockReadKeyCounter(...args),
+  tryWithLock: (...args: unknown[]) => mockTryWithLock(...args),
 }));
 const redisEnabled: { value: boolean } = { value: false };
 
@@ -150,6 +165,7 @@ describe('verifyPin', () => {
   it('rejects a wrong PIN and records the failed attempt', async () => {
     redisEnabled.value = true;
     mockRedisGet.mockResolvedValue(null);
+    mockIncrWithExpire.mockResolvedValue({ value: 1, resetMs: 60_000 });
     const hash = await bcrypt.hash('1111', 4);
     singleQueues.employees = [
       { data: { id: 'e1', full_name: 'Jane', pin_hash: hash }, error: null },
@@ -157,11 +173,42 @@ describe('verifyPin', () => {
 
     const result = await verifyPin('EMP-1', '9999');
     expect(result.valid).toBe(false);
+    // Counting goes through the atomic primitive, never GET -> parse -> SET.
+    expect(mockIncrWithExpire).toHaveBeenCalledWith(
+      'pin_attempts:EMP-1',
+      expect.objectContaining({ ttlMs: expect.any(Number) })
+    );
+    expect(mockRedisSet).not.toHaveBeenCalled();
+  });
+
+  it('locks the employee out once the attempt window is full', async () => {
+    redisEnabled.value = true;
+    mockRedisGet.mockResolvedValue(null);
+    mockIncrWithExpire.mockResolvedValue({ value: 3, resetMs: 60_000 });
+    const hash = await bcrypt.hash('1111', 4);
+    singleQueues.employees = [
+      { data: { id: 'e1', full_name: 'Jane', pin_hash: hash }, error: null },
+    ];
+
+    await verifyPin('EMP-1', '9999');
     expect(mockRedisSet).toHaveBeenCalledWith(
-      expect.stringContaining('pin_attempts:'),
-      expect.any(String),
+      'pin_lockout:EMP-1',
+      '1',
       expect.objectContaining({ EX: expect.any(Number) })
     );
+  });
+
+  it('clears attempt state when the PIN is correct', async () => {
+    redisEnabled.value = true;
+    mockRedisGet.mockResolvedValue(null);
+    const hash = await bcrypt.hash('1111', 4);
+    singleQueues.employees = [
+      { data: { id: 'e1', full_name: 'Jane', pin_hash: hash }, error: null },
+    ];
+
+    const result = await verifyPin('EMP-1', '1111');
+    expect(result.valid).toBe(true);
+    expect(mockRedisDel).toHaveBeenCalledWith(['pin_attempts:EMP-1', 'pin_lockout:EMP-1']);
   });
 
   it('accepts a correct PIN and returns the employee', async () => {
@@ -232,10 +279,27 @@ describe('closeShift', () => {
       { data: { id: 'e1' }, error: null }, // closedBy
       { data: { id: 'appr-1', pin_hash: hash }, error: null }, // approver
     ];
+    singleQueues.shift_status = [{ data: { id: 'ss-existing' }, error: null }];
 
     const result = await closeShift('d1', '2026-08-17', 'day', 'appr-1', '9999');
     expect(result.success).toBe(false);
     expect(result.errors).toContain('Invalid supervisor PIN');
+  });
+
+  it('refuses to insert when another instance holds the closeout lock', async () => {
+    const hash = await bcrypt.hash('1111', 4);
+    singleQueues.employees = [
+      { data: { id: 'e1' }, error: null }, // closedBy
+      { data: { id: 'appr-1', pin_hash: hash }, error: null }, // approver
+    ];
+    singleQueues.shift_status = [{ data: null, error: null }]; // no existing closeout
+    mockTryWithLock.mockResolvedValueOnce(null); // lock held elsewhere
+
+    const result = await closeShift('d1', '2026-08-17', 'day', 'appr-1', '1111');
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('This shift is already being closed. Wait for that to finish.');
+    expect(insertCalls).toHaveLength(0);
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 
   it('closes the shift, audits, and returns the shift status id', async () => {
@@ -260,6 +324,13 @@ describe('closeShift', () => {
     );
     expect(result).toEqual({ success: true, shiftStatusId: 'ss-1' });
 
+    expect(mockTryWithLock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'shift_closeout:d1:2026-08-17:day',
+        ttlMs: expect.any(Number),
+      }),
+      expect.any(Function)
+    );
     expect(insertCalls).toHaveLength(1);
     expect(insertCalls[0]!.args).toEqual(
       expect.objectContaining({

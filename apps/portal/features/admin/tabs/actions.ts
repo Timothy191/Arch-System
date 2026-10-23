@@ -1,9 +1,31 @@
 'use server';
 
 import { AuthError, DatabaseError } from '@repo/errors';
-import { cacheInvalidateTags } from '@repo/redis';
+import { cacheInvalidateTags, revokeSession } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+
+type AdminSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+/**
+ * A role or department change must not wait out the session TTL. Bumping the
+ * privilege version fences every cached copy of that employee's session —
+ * on every instance — so the next request re-reads the database.
+ */
+async function revokePrivilegeCache(
+  supabase: AdminSupabaseClient,
+  employeeId: string | null
+): Promise<void> {
+  if (!employeeId) return;
+  const { data } = await supabase
+    .from('employees')
+    .select('auth_id')
+    .eq('id', employeeId)
+    .maybeSingle();
+  const authId = (data as { auth_id?: string | null } | null)?.auth_id;
+  if (!authId) return;
+  await revokeSession(authId, { reason: 'role-change' }).catch(() => undefined);
+}
 
 export interface AdminDepartmentOption {
   id: string;
@@ -610,6 +632,8 @@ export async function upsertEmployeeAdmin(
       // Database trigger trg_sync_employee_to_operators serves as automated synchronization fallback
     }
   }
+
+  await revokePrivilegeCache(supabase, targetEmployeeId);
 
   await cacheInvalidateTags([
     'table:employees',

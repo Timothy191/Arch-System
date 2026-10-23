@@ -1,7 +1,7 @@
 'use server';
 
 import { FixedWindowStrategy, RateLimiter, RedisStore } from '@repo/rate-limiter';
-import { getRedisClient } from '@repo/redis';
+import { getRedisClient, incrWithExpire, readKeyCounter, tryWithLock } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
@@ -47,36 +47,31 @@ async function getShiftCloseoutRateLimiter(): Promise<RateLimiter | null> {
 }
 
 // AGENT-TRACE: Track failed PIN attempts and enforce lockout
+//
+// The attempt counter and the lockout are separate keys, both expired by Redis
+// itself. The previous implementation stored `{count, firstAttempt, lockedUntil}`
+// as JSON and did GET -> parse -> SET, so two operators guessing the same PIN
+// concurrently each read count=2 and neither reached the threshold.
+const PIN_ATTEMPTS_KEY = (employeeCode: string): string => `pin_attempts:${employeeCode}`;
+const PIN_LOCKOUT_KEY = (employeeCode: string): string => `pin_lockout:${employeeCode}`;
+/** Five wrong guesses, then the PIN is frozen for a quarter of an hour. */
+const PIN_ATTEMPT_WINDOW_MS = 300_000;
+const PIN_MAX_ATTEMPTS = 3;
+const PIN_LOCKOUT_SECONDS = 900;
+/** TTL for the per-shift closeout lock; auto-renews are unnecessary at this size. */
+const LOCK_TTL_MS = 30_000;
+
 async function checkPinAttemptLockout(employeeCode: string): Promise<boolean> {
   try {
     const redis = await getRedisClient();
     if (!redis?.isOpen) return false;
 
-    const key = `pin_attempts:${employeeCode}`;
-    const attempts = await redis.get(key);
+    if (await redis.get(PIN_LOCKOUT_KEY(employeeCode))) return true;
 
-    if (attempts) {
-      const data = JSON.parse(attempts);
-      const now = Date.now();
-
-      // Check if we're in lockout period
-      if (data.lockedUntil && data.lockedUntil > now) {
-        return true; // Locked out
-      }
-
-      // Reset if window expired (5 minutes)
-      if (now - data.firstAttempt > 5 * 60 * 1000) {
-        await redis.del(key);
-        return false;
-      }
-
-      // Check if we've hit the threshold (3 attempts)
-      if (data.count >= 3) {
-        // Set lockout for 15 minutes
-        data.lockedUntil = now + 15 * 60 * 1000;
-        await redis.set(key, JSON.stringify(data), { EX: 15 * 60 });
-        return true;
-      }
+    if ((await readKeyCounter(PIN_ATTEMPTS_KEY(employeeCode))) >= PIN_MAX_ATTEMPTS) {
+      // Repair the pre-existing state where the window has already filled.
+      await redis.set(PIN_LOCKOUT_KEY(employeeCode), '1', { EX: PIN_LOCKOUT_SECONDS });
+      return true;
     }
 
     return false;
@@ -92,35 +87,27 @@ async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
     const redis = await getRedisClient();
     if (!redis?.isOpen) return;
 
-    const key = `pin_attempts:${employeeCode}`;
-    const attempts = await redis.get(key);
-    const now = Date.now();
-
-    if (attempts) {
-      const data = JSON.parse(attempts);
-
-      // Reset if window expired (5 minutes)
-      if (now - data.firstAttempt > 5 * 60 * 1000) {
-        data.count = 1;
-        data.firstAttempt = now;
-      } else {
-        data.count += 1;
-      }
-
-      await redis.set(key, JSON.stringify(data), { EX: 15 * 60 });
-    } else {
-      await redis.set(
-        key,
-        JSON.stringify({
-          count: 1,
-          firstAttempt: now,
-        }),
-        { EX: 15 * 60 }
-      );
+    const { value } = await incrWithExpire(PIN_ATTEMPTS_KEY(employeeCode), {
+      ttlMs: PIN_ATTEMPT_WINDOW_MS,
+    });
+    if (value >= PIN_MAX_ATTEMPTS) {
+      await redis.set(PIN_LOCKOUT_KEY(employeeCode), '1', { EX: PIN_LOCKOUT_SECONDS });
     }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Failed to record failed PIN attempt:', error);
+  }
+}
+
+/** A good PIN clears the strike history; a stale lockout must not outlive success. */
+async function clearPinAttemptState(employeeCode: string): Promise<void> {
+  try {
+    const redis = await getRedisClient();
+    if (!redis?.isOpen) return;
+    await redis.del([PIN_ATTEMPTS_KEY(employeeCode), PIN_LOCKOUT_KEY(employeeCode)]);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to clear PIN attempt state:', error);
   }
 }
 
@@ -331,7 +318,9 @@ export async function verifyPin(employeeCode: string, pin: string) {
 
     const valid = await bcrypt.compare(pin, employee.pin_hash);
 
-    if (!valid) {
+    if (valid) {
+      await clearPinAttemptState(employeeCode);
+    } else {
       // AGENT-TRACE: Record failed PIN attempt
       await recordFailedPinAttempt(employeeCode);
     }
@@ -444,48 +433,65 @@ export async function closeShift(
 
       setAttributes({ pin_valid: true });
 
-      const { data: inserted, error: insertError } = await supabase
-        .from('shift_status')
-        .insert({
-          department_id: departmentId,
-          shift_date: date,
-          shift_type: shiftType,
-          status: 'closed',
-          closed_at: new Date().toISOString(),
-          closed_by: closedBy.id,
-          approved_by: approvedById,
-        })
-        .select('id')
-        .single();
+      // One closeout per (department, date, shift) across every instance: two
+      // operators submitting at once used to create two `shift_status` rows.
+      const closeOutcome = await tryWithLock(
+        {
+          name: `shift_closeout:${departmentId}:${date}:${shiftType}`,
+          ttlMs: LOCK_TTL_MS,
+        },
+        async () => {
+          const { data: inserted, error: insertError } = await supabase
+            .from('shift_status')
+            .insert({
+              department_id: departmentId,
+              shift_date: date,
+              shift_type: shiftType,
+              status: 'closed',
+              closed_at: new Date().toISOString(),
+              closed_by: closedBy.id,
+              approved_by: approvedById,
+            })
+            .select('id')
+            .single();
 
-      if (insertError || !inserted) {
-        setAttributes({ insert_success: false });
-        return { success: false, errors: ['Failed to close shift'] };
+          if (insertError || !inserted) {
+            setAttributes({ insert_success: false });
+            return { success: false as const, errors: ['Failed to close shift'] };
+          }
+
+          setAttributes({ insert_success: true, shift_status_id: inserted.id });
+          addEvent('shift_closed', {
+            shift_status_id: inserted.id,
+            closed_by: closedBy.id,
+            approved_by: approvedById,
+          });
+
+          await logAuditEvent({
+            action: 'insert',
+            tableName: 'shift_status',
+            recordId: inserted.id,
+            departmentId,
+          });
+
+          return { success: true as const, shiftStatusId: inserted.id };
+        }
+      );
+
+      if (!closeOutcome) {
+        setAttributes({ lock_contended: true });
+        return {
+          success: false,
+          errors: ['This shift is already being closed. Wait for that to finish.'],
+        };
       }
-
-      setAttributes({
-        insert_success: true,
-        shift_status_id: inserted.id,
-      });
-      addEvent('shift_closed', {
-        shift_status_id: inserted.id,
-        closed_by: closedBy.id,
-        approved_by: approvedById,
-      });
-
-      await logAuditEvent({
-        action: 'insert',
-        tableName: 'shift_status',
-        recordId: inserted.id,
-        departmentId,
-      });
 
       if (departmentSlug) {
         revalidatePath(`/${departmentSlug}`);
         revalidatePath(`/${departmentSlug}/shift-coverage`);
       }
 
-      return { success: true, shiftStatusId: inserted.id };
+      return closeOutcome;
     }
   );
 }

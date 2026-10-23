@@ -1,5 +1,12 @@
 // @ts-nocheck
 import { cacheEvictL1ByPrefix, cacheGet, cacheSet } from '@repo/redis/cache';
+import {
+  type EmployeeRecord,
+  readSession,
+  revokeSession,
+  touchSession,
+  writeSession,
+} from '@repo/redis/session';
 import { createMiddlewareClient } from '@repo/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
@@ -32,6 +39,12 @@ function safeRecordJob(name: string, success: boolean): void {
     // Metrics emission is best-effort; never let it break the request.
   }
 }
+
+/**
+ * Read budget for the session lookup on every routed request. Past this the
+ * proxy serves the request from the database rather than waiting on Redis.
+ */
+const SESSION_READ_BUDGET_MS = 150;
 
 /**
  * Server-side redirect validation with canonicalization and allowlist
@@ -293,7 +306,11 @@ export async function proxy(request: NextRequest) {
   if (shouldSignOut) {
     await client.supabase.auth.signOut();
     if (user?.id) {
-      cacheEvictL1ByPrefix(`arch:auth:employee:${user.id}`);
+      const signedOut = user.id;
+      // Fences every cached copy of this session, not just this instance's L1.
+      await revokeSession(signedOut, { reason: 'logout' }).catch(() => {
+        cacheEvictL1ByPrefix(`arch:auth:employee:${signedOut}`);
+      });
     }
     user = null;
   }
@@ -310,41 +327,31 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  // Fetch authoritative role/department from employees table (cached with resilient fallback)
-  const employeeCacheKey = `arch:auth:employee:${user.id}`;
-  let employee: {
-    role: string;
-    department_id: string;
-    accessible_departments: string[];
-  } | null = null;
-
+  // Authoritative role/department from the fenced session record — the same
+  // store @repo/supabase/auth reads, so the two writers cannot diverge.
+  let employee: EmployeeRecord | null = null;
   try {
-    const cachePromise = cacheGet<{
-      role: string;
-      department_id: string;
-      accessible_departments: string[];
-    }>(employeeCacheKey);
-
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error('Redis cache timeout')), 150)
-    );
-
-    employee = await Promise.race([cachePromise, timeoutPromise]);
+    employee = await Promise.race([
+      readSession(user.id),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), SESSION_READ_BUDGET_MS)),
+    ]);
   } catch (_err) {
-    // Redis offline or timeout — fall through to direct DB fetch
+    // Redis offline or too slow — fall through to direct DB fetch
     employee = null;
   }
 
-  if (!employee) {
+  if (!employee?.id) {
     const { data } = await client.supabase
       .from('employees')
-      .select('role, department_id, accessible_departments')
+      .select('id, role, department_id, accessible_departments')
       .eq('auth_id', user.id)
       .single();
     employee = data ?? null;
     if (employee) {
-      await cacheSet(employeeCacheKey, employee, 3600);
+      await writeSession({ userId: user.id, employee }).catch(() => undefined);
     }
+  } else {
+    await touchSession(user.id).catch(() => undefined);
   }
 
   const userRole = normalizeRole(employee?.role);

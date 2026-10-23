@@ -21,6 +21,13 @@ jest.mock('@repo/redis/cache', () => ({
   cacheEvictL1ByPrefix: jest.fn(),
 }));
 
+jest.mock('@repo/redis/session', () => ({
+  readSession: jest.fn().mockResolvedValue(null),
+  writeSession: jest.fn().mockResolvedValue(undefined),
+  touchSession: jest.fn().mockResolvedValue(false),
+  revokeSession: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { createMiddlewareClient } = jest.requireMock('@repo/supabase/middleware');
 const { cacheGet } = jest.requireMock('@repo/redis/cache');
 

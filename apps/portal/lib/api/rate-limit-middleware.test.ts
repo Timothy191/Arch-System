@@ -7,34 +7,22 @@ import { skipForInternal, withRateLimit } from './rate-limit-middleware';
 
 const mockCache = new Map<string, string>();
 
-const mockRedisClient = {
-  get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
-  set: jest.fn(async (key: string, value: string) => {
-    mockCache.set(key, value);
-  }),
-  del: jest.fn(async (key: string) => {
-    mockCache.delete(key);
-  }),
-  incr: jest.fn(async (key: string) => {
-    const val = parseInt(mockCache.get(key) || '0', 10) + 1;
-    mockCache.set(key, val.toString());
-    return val;
-  }),
-  expire: jest.fn(async (_key: string, _seconds: number) => {
-    return true;
-  }),
-  // Emulates INCR + PEXPIRE + PTTL from RATE_LIMIT_LUA_SCRIPT.
-  eval: jest.fn(async (_script: string, options: { keys: string[]; arguments: string[] }) => {
-    const key = options.keys[0]!;
-    const val = parseInt(mockCache.get(key) || '0', 10) + 1;
-    mockCache.set(key, val.toString());
-    return [val, Number(options.arguments[0])];
-  }),
-};
+const redisState = { available: true };
 
 jest.mock('@repo/redis', () => ({
-  getRedisClient: jest.fn(async () => mockRedisClient),
+  getRedisClient: jest.fn(async () => {
+    if (!redisState.available) throw new Error('ECONNREFUSED');
+    return { get: jest.fn(async () => null) };
+  }),
+  // Emulates `incrWithExpire`: INCR + PEXPIRE applied as one atomic step.
+  incrWithExpire: jest.fn(async (key: string, options: { ttlMs: number }) => {
+    const count = parseInt(mockCache.get(key) || '0', 10) + 1;
+    mockCache.set(key, String(count));
+    return { value: count, resetMs: options.ttlMs };
+  }),
 }));
+
+const { incrWithExpire } = jest.requireMock('@repo/redis') as { incrWithExpire: jest.Mock };
 
 function makeRequest(url: string, headers?: Record<string, string>): NextRequest {
   return new NextRequest(url, { headers });
@@ -170,7 +158,7 @@ describe('withRateLimit', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it('increments atomically through eval when the client supports it', async () => {
+  it('counts through the atomic Redis primitive when Redis is reachable', async () => {
     const req = makeRequest('http://localhost/api/export/machines', {
       'x-forwarded-for': '10.0.0.50',
     });
@@ -178,12 +166,13 @@ describe('withRateLimit', () => {
     const res = await withRateLimit(req, handler);
 
     expect(res.status).toBe(200);
-    expect(mockRedisClient.eval).toHaveBeenCalled();
-    expect(mockRedisClient.incr).not.toHaveBeenCalled();
+    expect(incrWithExpire).toHaveBeenCalledWith(expect.stringContaining('ratelimit:'), {
+      ttlMs: expect.any(Number),
+    });
   });
 
-  it('falls back to INCR when eval is unavailable', async () => {
-    mockRedisClient.eval.mockRejectedValueOnce(new Error('ERR unknown command'));
+  it('falls back to the in-process counter when Redis is unreachable', async () => {
+    redisState.available = false;
     const req = makeRequest('http://localhost/api/export/machines', {
       'x-forwarded-for': '10.0.0.51',
     });
@@ -192,8 +181,10 @@ describe('withRateLimit', () => {
       customLimit: { windowMs: 60_000, maxRequests: 2 },
     });
 
+    redisState.available = true;
+
     expect(res.status).toBe(200);
-    expect(mockRedisClient.incr).toHaveBeenCalled();
+    expect(res.headers.get('RateLimit')).toContain('remaining=1');
   });
 
   it('halves request limits when system is under high load', async () => {

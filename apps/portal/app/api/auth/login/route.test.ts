@@ -20,6 +20,10 @@ jest.mock('@repo/supabase/server', () => ({
   })),
 }));
 
+jest.mock('@/lib/api/rate-limit-middleware', () => ({
+  withRateLimit: jest.fn(async (_req: Request, handler: () => Promise<Response>) => handler()),
+}));
+
 jest.mock('@repo/redis', () => ({
   getRedisClient: jest.fn(async () => ({
     get: jest.fn().mockResolvedValue(null),

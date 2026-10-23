@@ -3,46 +3,40 @@
  */
 import { GET } from './route';
 
+const mockReadNew = jest.fn();
+/** Reads to drain before giving up: one chunk per SSE event plus slack. */
+const MAX_SSE_READS = 5;
+
 jest.mock('@repo/redis', () => ({
   createRedisSubscriber: jest.fn(),
+  supportsBlockingReads: jest.fn(() => true),
+  readNew: (...args: unknown[]) => mockReadNew(...args),
 }));
 
 jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
-const { createRedisSubscriber } = jest.requireMock('@repo/redis');
+jest.mock('@/lib/api/rate-limit-middleware', () => ({
+  withRateLimit: jest.fn(async (_req: Request, handler: () => Promise<Response>) => handler()),
+}));
 
-function makeStreamClient(firstReply: unknown) {
-  let rejectPending: ((err: Error) => void) | null = null;
+const { createRedisSubscriber, supportsBlockingReads } = jest.requireMock('@repo/redis');
 
+function makeSubscriberClient() {
   return {
     isOpen: true,
-    xRead: jest
-      .fn()
-      .mockResolvedValueOnce(firstReply)
-      .mockImplementationOnce(
-        () =>
-          new Promise((_resolve, reject) => {
-            rejectPending = reject;
-          })
-      ),
-    disconnect: jest.fn(async () => {
-      rejectPending?.(new Error('disconnected'));
-    }),
-    unsubscribe: jest.fn(async () => {}),
+    disconnect: jest.fn(async () => {}),
     quit: jest.fn(async () => 'OK'),
-    subscribe: jest.fn(),
   };
 }
 
 async function readUntil(
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  needle: string,
-  maxReads = 5
+  needle: string
 ): Promise<string> {
   let buffer = '';
-  for (let i = 0; i < maxReads; i++) {
+  for (let i = 0; i < MAX_SSE_READS; i++) {
     const { value, done } = await reader.read();
     if (done) break;
     buffer += new TextDecoder().decode(value);
@@ -54,16 +48,20 @@ async function readUntil(
 describe('GET /api/telemetry/drilling/stream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    supportsBlockingReads.mockReturnValue(true);
+    mockReadNew.mockResolvedValue([]);
   });
 
   it('streams entries with SSE ids and resumes from Last-Event-ID', async () => {
-    const client = makeStreamClient([
+    const client = makeSubscriberClient();
+    createRedisSubscriber.mockResolvedValue(client);
+
+    mockReadNew.mockResolvedValueOnce([
       {
-        name: 'drilling:telemetry:stream',
-        messages: [{ id: '1700000000000-0', message: { data: '{"machine_id":"m1"}' } }],
+        key: 'drilling:telemetry:stream',
+        entries: [{ id: '1700000000000-0', fields: { data: '{"machine_id":"m1"}' } }],
       },
     ]);
-    createRedisSubscriber.mockResolvedValue(client);
 
     const res = await GET(
       new Request('http://localhost/api/telemetry/drilling/stream', {
@@ -78,18 +76,19 @@ describe('GET /api/telemetry/drilling/stream', () => {
 
     expect(payload).toContain('id: 1700000000000-0');
     expect(payload).toContain('data: {"machine_id":"m1"}');
-    expect(client.xRead).toHaveBeenNthCalledWith(
-      1,
-      [{ key: 'drilling:telemetry:stream', id: '1699999999999-0' }],
-      { BLOCK: 15000, COUNT: 100 }
-    );
+    expect(mockReadNew).toHaveBeenCalledWith('drilling:telemetry:stream', {
+      from: '1699999999999-0',
+      count: 100,
+      client,
+      blockMs: 15000,
+    });
 
     await reader.cancel();
     expect(client.disconnect).toHaveBeenCalled();
   });
 
-  it('ignores malformed Last-Event-ID values', async () => {
-    const client = makeStreamClient(null);
+  it('ignores malformed Last-Event-ID values and defaults to $', async () => {
+    const client = makeSubscriberClient();
     createRedisSubscriber.mockResolvedValue(client);
 
     const res = await GET(
@@ -101,40 +100,35 @@ describe('GET /api/telemetry/drilling/stream', () => {
     const reader = res.body!.getReader();
     await readUntil(reader, 'connected');
 
-    expect(client.xRead).toHaveBeenNthCalledWith(
-      1,
-      [{ key: 'drilling:telemetry:stream', id: '$' }],
-      { BLOCK: 15000, COUNT: 100 }
+    expect(mockReadNew).toHaveBeenCalledWith(
+      'drilling:telemetry:stream',
+      expect.objectContaining({
+        from: '$',
+        count: 100,
+        client,
+      })
     );
 
     await reader.cancel();
   });
 
-  it('falls back to pub/sub when XREAD is unavailable', async () => {
-    const client = {
-      isOpen: true,
-      subscribe: jest.fn(async (_channel: string, callback: (message: string) => void) => {
-        callback('{"machine_id":"m2"}');
-      }),
-      unsubscribe: jest.fn(async () => {}),
-      quit: jest.fn(async () => 'OK'),
-      disconnect: jest.fn(async () => {}),
-    };
+  it('omits blockMs when supportsBlockingReads returns false (serverless REST)', async () => {
+    supportsBlockingReads.mockReturnValue(false);
+    const client = makeSubscriberClient();
     createRedisSubscriber.mockResolvedValue(client);
 
     const res = await GET(new Request('http://localhost/api/telemetry/drilling/stream'));
 
     const reader = res.body!.getReader();
-    const payload = await readUntil(reader, 'machine_id');
+    await readUntil(reader, 'connected');
 
-    expect(payload).toContain('data: {"machine_id":"m2"}');
-    expect(client.subscribe).toHaveBeenCalledWith(
-      'drilling:telemetry:stream',
-      expect.any(Function)
-    );
+    expect(mockReadNew).toHaveBeenCalledWith('drilling:telemetry:stream', {
+      from: '$',
+      count: 100,
+      client,
+    });
 
     await reader.cancel();
-    expect(client.unsubscribe).toHaveBeenCalledWith('drilling:telemetry:stream');
   });
 
   it('rejects connections without the stream secret when one is configured', async () => {
@@ -159,7 +153,7 @@ describe('GET /api/telemetry/drilling/stream', () => {
     const originalSecret = process.env.TELEMETRY_STREAM_SECRET;
     process.env.TELEMETRY_STREAM_SECRET = 'stream-secret';
 
-    const client = makeStreamClient(null);
+    const client = makeSubscriberClient();
     createRedisSubscriber.mockResolvedValue(client);
 
     try {

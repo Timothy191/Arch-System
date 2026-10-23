@@ -28,3 +28,22 @@ Extract and formalize 16 zero-dependency React 19 application hooks within `@rep
 4. Implemented `useOnlineStatus`, `usePolling`, `useClickOutside`, `useCopyToClipboard`, `useMediaQuery`.
 5. Implemented `useLatest`, `usePrevious`, `useMount`, `useUnmount`, `useUpdateEffect`.
 6. Barrel-exported all hooks in `src/index.ts`.
+
+## 2026-10-23: Offline queue replays carry an idempotency key
+
+### Purpose
+
+A queued mutation replayed after reconnect had no identity, so `/api/sync/fallback`
+re-executed it and a double-tapped closeout could write two rows.
+
+### Changes Made
+
+1. `src/useOfflineQueue.ts` now stamps each replay with `x-idempotency-key: req.id`
+   (the queue id is already unique per queued mutation) alongside the stored
+   headers.
+
+### What the Next Agent Should Know
+
+- The header is the contract with the server: `@repo/redis` `claimIdempotency`
+  answers a repeat with the stored result (`'duplicate'`) instead of running the
+  work again. Changing the queue id format changes replay semantics.

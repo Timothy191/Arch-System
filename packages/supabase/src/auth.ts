@@ -1,4 +1,4 @@
-import { cacheGet, cacheSet } from '@repo/redis/cache';
+import { employeeCacheKey, readSession, touchSession, writeSession } from '@repo/redis/session';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from './server';
 
@@ -23,16 +23,17 @@ export interface AuthenticatedPrincipal {
   employee: EmployeeSummary | null;
 }
 
-export const EMPLOYEE_CACHE_KEY = (userId: string): string => `arch:auth:employee:${userId}`;
-const EMPLOYEE_CACHE_TTL_SEC = 3600;
+export const EMPLOYEE_CACHE_KEY = employeeCacheKey;
 const CACHE_TIMEOUT_MS = 500;
 
 /**
  * Resolve the current authenticated user together with their authoritative
  * employee row (id, role, primary department, accessible departments).
  *
- * Cache: reads `arch:auth:employee:{userId}` in Redis with a 150 ms timeout.
- *   On miss, falls back to a direct DB query and repopulates the cache.
+ * Session: reads the fenced session record from Redis with a 500 ms budget and
+ * repopulates it from the database on a miss. A record written under an older
+ * privilege version reads as a miss, so a demotion or logout takes effect on
+ * the next request instead of after the TTL.
  *
  * Returns:
  * - `null` if the request is unauthenticated (caller should respond 401).
@@ -57,11 +58,10 @@ export async function getAuthenticatedEmployee(
 
   let employee: EmployeeSummary | null = null;
   try {
-    const cachePromise = cacheGet<EmployeeSummary>(EMPLOYEE_CACHE_KEY(user.id));
-    const timeoutPromise = new Promise<null>((resolve) =>
-      setTimeout(() => resolve(null), CACHE_TIMEOUT_MS)
-    );
-    employee = await Promise.race([cachePromise, timeoutPromise]);
+    employee = await Promise.race([
+      readSession(user.id),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), CACHE_TIMEOUT_MS)),
+    ]);
   } catch {
     // Redis offline or slow — fall through to direct DB fetch.
     employee = null;
@@ -77,8 +77,11 @@ export async function getAuthenticatedEmployee(
       .single();
     employee = (data as EmployeeSummary | null) ?? null;
     if (employee) {
-      await cacheSet(EMPLOYEE_CACHE_KEY(user.id), employee, EMPLOYEE_CACHE_TTL_SEC);
+      await writeSession({ userId: user.id, employee }).catch(() => undefined);
     }
+  } else {
+    // Actively used sessions slide forward instead of expiring mid-shift.
+    await touchSession(user.id).catch(() => undefined);
   }
 
   return { user, employee };

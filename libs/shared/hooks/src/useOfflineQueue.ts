@@ -114,7 +114,9 @@ export const useOfflineQueue = create<OfflineQueueState>()(
           try {
             const res = await fetch(req.url, {
               method: req.method,
-              headers: req.headers,
+              // The queue id is the replay identity: the server answers a repeat
+              // with the stored result instead of writing the row twice.
+              headers: { ...req.headers, 'x-idempotency-key': req.id },
               body: req.body,
             });
 

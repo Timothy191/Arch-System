@@ -7,10 +7,15 @@ jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
+const mockAppendToStream = jest.fn().mockResolvedValue('1700000000000-0');
+
 jest.mock('@repo/redis', () => ({
+  appendToStream: (...args: unknown[]) => mockAppendToStream(...args),
+  incrementCounter: jest.fn().mockResolvedValue(1),
+  addUnique: jest.fn().mockResolvedValue(1),
+  recordSample: jest.fn().mockResolvedValue(undefined),
   getRedisClient: jest.fn().mockResolvedValue({
     set: jest.fn().mockResolvedValue('OK'),
-    xAdd: jest.fn().mockResolvedValue('1700000000000-0'),
     publish: jest.fn().mockResolvedValue(1),
   }),
 }));
@@ -124,23 +129,14 @@ describe('POST /api/telemetry/drilling', () => {
     // Reverse-flow ingest (D2-a): FUXA pulls /api/scada/tags — no FUXA REST write.
     expect(global.fetch).not.toHaveBeenCalled();
 
-    const redis = await getRedisClient();
-    expect(redis.xAdd).toHaveBeenCalledWith(
-      'drilling:telemetry:stream',
-      '*',
-      { data: expect.any(String) },
-      {
-        TRIM: {
-          strategy: 'MAXLEN',
-          strategyModifier: '~',
-          threshold: 1000,
-        },
-      }
-    );
-    expect(redis.publish).not.toHaveBeenCalled();
+    expect(mockAppendToStream).toHaveBeenCalledWith({
+      key: 'drilling:telemetry:stream',
+      fields: { data: expect.any(String) },
+      maxLen: 1000,
+    });
   });
 
-  it('falls back to pub/sub when the Redis client has no stream support', async () => {
+  it('continues gracefully when stream append fails', async () => {
     createServerSupabaseClient.mockResolvedValue({
       from: jest.fn((table) => {
         if (table === 'machines') {
@@ -167,11 +163,7 @@ describe('POST /api/telemetry/drilling', () => {
       }),
     });
 
-    const fallbackClient = {
-      set: jest.fn().mockResolvedValue('OK'),
-      publish: jest.fn().mockResolvedValue(1),
-    };
-    getRedisClient.mockResolvedValueOnce(fallbackClient);
+    mockAppendToStream.mockRejectedValueOnce(new Error('Redis connection lost'));
 
     const req = new Request('http://localhost:3000/api/telemetry/drilling', {
       method: 'POST',
@@ -184,10 +176,6 @@ describe('POST /api/telemetry/drilling', () => {
 
     const res = await POST(req);
     expect(res.status).toBe(200);
-    expect(fallbackClient.publish).toHaveBeenCalledWith(
-      'drilling:telemetry:stream',
-      expect.any(String)
-    );
   });
 
   it('returns 429 when the per-machine rate limit is exceeded', async () => {

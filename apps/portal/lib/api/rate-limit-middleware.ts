@@ -7,7 +7,7 @@
 
 import { timingSafeEqual } from 'node:crypto';
 import os from 'node:os';
-import { getRedisClient } from '@repo/redis';
+import { getRedisClient, incrWithExpire } from '@repo/redis';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getRateLimitConfig } from './rate-limit-config';
 
@@ -40,59 +40,18 @@ class MemoryStore {
 
 // INCR and PEXPIRE must be atomic: a crash between the two leaves a key with
 // no TTL, which permanently blocks the identifier once the count is exceeded.
-const RATE_LIMIT_LUA_SCRIPT = `
-local count = redis.call('INCR', KEYS[1])
-local ttl = redis.call('PTTL', KEYS[1])
--- Repair keys left without a TTL by the old INCR/EXPIRE race.
-if ttl < 0 then
-  redis.call('PEXPIRE', KEYS[1], ARGV[1])
-  ttl = tonumber(ARGV[1])
-end
-return {count, ttl}
-`;
-
-// Simple Redis store for rate limiting
-class RedisStore {
-  constructor(private _redis: Awaited<ReturnType<typeof getRedisClient>>) {}
-
-  async increment(key: string, windowMs: number): Promise<{ count: number; resetTime: number }> {
-    const now = Date.now();
-
-    if (typeof this._redis.eval === 'function') {
-      try {
-        const raw = await this._redis.eval(RATE_LIMIT_LUA_SCRIPT, {
-          keys: [key],
-          arguments: [String(windowMs)],
-        });
-        if (Array.isArray(raw) && raw.length >= 2) {
-          const count = Number(raw[0]);
-          const ttl = Number(raw[1]);
-          if (Number.isFinite(count)) {
-            return {
-              count,
-              resetTime: now + (Number.isFinite(ttl) && ttl > 0 ? ttl : windowMs),
-            };
-          }
-        }
-      } catch {
-        // Fall back to non-atomic INCR/EXPIRE when scripts are unavailable
-      }
-    }
-
-    const result = await this._redis.incr(key);
-    if (result === 1) {
-      await this._redis.expire(key, Math.ceil(windowMs / 1000));
-    }
-
-    return { count: result, resetTime: now + windowMs };
-  }
-
-  async get(key: string): Promise<{ count: number; resetTime: number } | undefined> {
-    const count = await this._redis.get(key);
-    if (!count) return undefined;
-    return { count: parseInt(count, 10), resetTime: Date.now() + 60000 };
-  }
+// `incrWithExpire` is the shared primitive that guarantees this on both the TCP
+// and the serverless REST transport (Lua when the server allows it).
+interface CounterStore {
+  increment(key: string, windowMs: number): Promise<{ count: number; resetTime: number }>;
 }
+
+const redisCounterStore: CounterStore = {
+  async increment(key: string, windowMs: number) {
+    const { value, resetMs } = await incrWithExpire(key, { ttlMs: windowMs });
+    return { count: value, resetTime: Date.now() + resetMs };
+  },
+};
 
 // Shared window-based counter strategy. Both "token bucket" and
 // "sliding window" currently share the same fixed-window increment;
@@ -105,7 +64,7 @@ class WindowStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: MemoryStore | RedisStore
+    store: CounterStore
   ): Promise<RateLimitResult> {
     const result = await store.increment(key, windowMs);
     const allowed = result.count <= limit;
@@ -127,6 +86,25 @@ interface RateLimitResult {
   remaining: number;
   resetTime: number;
   retryAfter?: number;
+}
+
+/**
+ * RFC 9210 headers (`RateLimit`, `RateLimit-Policy`) are the standard clients
+ * will converge on; the legacy `X-RateLimit-*` triplet is kept because existing
+ * dashboards and the mobile app still read it. `reset` is seconds until the
+ * window rolls over.
+ */
+const MS_PER_SECOND = 1000;
+
+function rateLimitHeaders(result: RateLimitResult, windowMs: number): Record<string, string> {
+  const resetSeconds = Math.max(0, Math.ceil((result.resetTime - Date.now()) / MS_PER_SECOND));
+  return {
+    RateLimit: `limit=${result.limit}, remaining=${result.remaining}, reset=${resetSeconds}`,
+    'RateLimit-Policy': `${result.limit};w=${Math.ceil(windowMs / MS_PER_SECOND)}`,
+    'X-RateLimit-Limit': result.limit.toString(),
+    'X-RateLimit-Remaining': result.remaining.toString(),
+    'X-RateLimit-Reset': result.resetTime.toString(),
+  };
 }
 
 const WHITELISTED_IPS = new Set(
@@ -160,7 +138,6 @@ function isSystemUnderHighLoad(): boolean {
 
 // Singleton stores and strategies for performance and connection pooling
 const globalMemoryStore = new MemoryStore();
-let globalRedisStore: RedisStore | null = null;
 
 const slidingWindowStrategy = new WindowStrategy('sliding-window');
 const tokenBucketStrategy = new WindowStrategy('token-bucket');
@@ -177,13 +154,10 @@ export async function checkRateLimit(
   config: { windowMs: number; maxRequests: number },
   path: string
 ): Promise<RateLimitResult> {
-  let store;
+  let store: CounterStore;
   try {
-    const redisClient = await getRedisClient();
-    if (!globalRedisStore && redisClient) {
-      globalRedisStore = new RedisStore(redisClient);
-    }
-    store = globalRedisStore || globalMemoryStore;
+    await getRedisClient();
+    store = redisCounterStore;
   } catch {
     store = globalMemoryStore;
   }
@@ -192,7 +166,12 @@ export async function checkRateLimit(
   const strategy = path.startsWith('/api/ai/') ? tokenBucketStrategy : slidingWindowStrategy;
 
   const key = `ratelimit:${normalizePath(path)}:${identifier}`;
-  return strategy.check(key, config.maxRequests, config.windowMs, store);
+  try {
+    return await strategy.check(key, config.maxRequests, config.windowMs, store);
+  } catch {
+    // Redis dropped mid-request: this instance still limits traffic locally.
+    return strategy.check(key, config.maxRequests, config.windowMs, globalMemoryStore);
+  }
 }
 
 function normalizePath(path: string): string {
@@ -262,20 +241,18 @@ export async function withRateLimit(
         status: 429,
         headers: {
           'Content-Type': 'application/json',
-          'X-RateLimit-Limit': result.limit.toString(),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': result.resetTime.toString(),
           'Retry-After': (result.retryAfter || 60).toString(),
+          ...rateLimitHeaders({ ...result, remaining: 0 }, config.windowMs),
         },
       }
     );
   }
 
   const response = await handler();
-
-  response.headers.set('X-RateLimit-Limit', result.limit.toString());
-  response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
-  response.headers.set('X-RateLimit-Reset', result.resetTime.toString());
+  const headers = rateLimitHeaders(result, config.windowMs);
+  for (const [name, value] of Object.entries(headers)) {
+    response.headers.set(name, value);
+  }
 
   return response;
 }
