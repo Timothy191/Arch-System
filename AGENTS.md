@@ -54,7 +54,7 @@ Non-obvious fixes: rule-drift ⇒ sync `../.agents/rules/`; maps parity ⇒ `pnp
 
 - **Light mode only.** Canvas `#f3f4f6`; use semantic OKLCH tokens from `@repo/theme`. No `dark:` variants (`pnpm audit:tokens`).
 - Glass surfaces use `@repo/ui/GlassCard` (`default` | `window` | `spotlight` | `glowborder` | `liquid`).
-- Tailwind utility chains: ≤16 utilities per element (`pnpm audit:tailwind`); **canonical class order** enforced via Biome `nursery/useSortedClasses` (`"level": "error"`, `"fix": "safe"`) across `className`, `classList`, `cn()`, `clsx()`, `cva()`, and `twMerge()`.
+- Tailwind utility chains: ≤16 utilities per element (`pnpm audit:tailwind`); **canonical class order** enforced via Biome `nursery/useSortedClasses` (`"level": "error"`, `"fix": "safe"`) across `className`, `classList`, `cn()`, `clsx()`, `cva()`, and `twMerge()`; **minimal CSS build purge** enforced in `packages/theme/src/tailwind/preset.ts` (`.tsx`-only UI source globs, explicit negative exclusions, `future.hoverOnlyWhenSupported: true`, verified by `pnpm audit:tailwind`).
 - Boundaries: `apps/*` → no `packages/database` (use `@repo/supabase`); `packages/ui` → no db/supabase; `packages/theme` → no `packages/ui`; `packages/*` & `tools/*` → no `apps/*`. Import via canonical exports (`@repo/ui/GlassCard`).
 - Server Components by default; `'use client'` at leaves; no client fetching; `@tanstack/react-query` only (no SWR). Strict TS (no `any`/`@ts-ignore`). Conventional commits; never print/commit `.env*`.
 

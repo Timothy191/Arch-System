@@ -17,7 +17,7 @@ export default function PrivacyPage(): React.JSX.Element {
         <h1 className="font-semibold text-3xl text-[var(--text-heading)]">Privacy Policy</h1>
       </div>
 
-      <div className="prose prose-neutral max-w-none space-y-6 text-[var(--text-muted)]">
+      <div className="max-w-none space-y-6 text-[var(--text-muted)]">
         <p className="text-lg">Last updated: September 2026</p>
 
         <section className="rounded-2xl border border-black/[0.08] bg-white/70 p-8 shadow-card backdrop-blur-xl">

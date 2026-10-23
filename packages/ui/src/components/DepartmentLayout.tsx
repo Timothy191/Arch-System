@@ -206,7 +206,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'group/sidebar gold-steel-border gold-steel-border-slim absolute top-0 bottom-0 left-0 z-50 flex w-60 shrink-0 flex-col border-black/[0.08] border-r bg-[var(--vibrancy-surface)] shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'group/sidebar gold-steel-border gold-steel-border-slim absolute top-0 bottom-0 left-0 z-50 flex w-60 shrink-0 flex-col border-black/[0.08] border-r bg-[var(--vibrancy-surface)] shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-mac-decelerate',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}

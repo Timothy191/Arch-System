@@ -163,7 +163,7 @@ export default function OverviewPage() {
         onMouseLeave={() => {
           if (!isPinned) setIsOpen(false);
         }}
-        className={`gold-steel-border gold-steel-border-slim fixed top-0 left-0 z-40 flex h-[calc(100vh-28px)] w-64 shrink-0 flex-col border-black/[0.08] border-r bg-white/85 shadow-xl backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:sticky ${
+        className={`gold-steel-border gold-steel-border-slim fixed top-0 left-0 z-40 flex h-[calc(100vh-28px)] w-64 shrink-0 flex-col border-black/[0.08] border-r bg-white/85 shadow-xl backdrop-blur-xl transition-all duration-300 ease-mac-decelerate md:sticky ${
           isPinned || isOpen
             ? 'translate-x-0'
             : '-translate-x-[calc(100%-12px)] md:w-3 md:overflow-hidden'

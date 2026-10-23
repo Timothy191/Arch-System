@@ -47,6 +47,21 @@ const IGNORE_GLOBS = [
 
 const APPLY_GLOBS = ['apps/**/*.{css,scss}', 'libs/**/*.{css,scss}'];
 const APPLY_PATTERN = /@apply\b|@layer\s+components/;
+const PRESET_PATH = path.join(ROOT, 'packages/theme/src/tailwind/preset.ts');
+const REQUIRED_PURGE_EXCLUSIONS = [
+  '**/node_modules/**/*',
+  '**/.next/**/*',
+  '**/.turbo/**/*',
+  '**/dist/**/*',
+  '**/coverage/**/*',
+  '**/storybook-static/**/*',
+  '**/*.d.ts',
+  '**/*.test.{ts,tsx}',
+  '**/*.spec.{ts,tsx}',
+  '**/*.stories.{ts,tsx}',
+  '**/__tests__/**/*',
+  '**/__mocks__/**/*',
+];
 
 const CLASS_CALLS = new Set(['cn', 'clsx', 'twMerge', 'classNames', 'cx']);
 const MAX_EXPRESSION_DEPTH = 8;
@@ -201,6 +216,8 @@ function scanSources() {
     }
   }
 
+  const purgeViolations = checkTailwindPurgeConfig();
+
   return {
     filesScanned: files.length,
     classAttributes,
@@ -208,7 +225,76 @@ function scanSources() {
     repeatedChains,
     examples,
     cssViolations,
+    purgeViolations,
   };
+}
+
+function checkTailwindPurgeConfig() {
+  const issues = [];
+  if (!fs.existsSync(PRESET_PATH)) {
+    issues.push('Missing canonical Tailwind preset at packages/theme/src/tailwind/preset.ts');
+    return issues;
+  }
+
+  const preset = fs.readFileSync(PRESET_PATH, 'utf8');
+  const contentBlockMatch = preset.match(/const\s+content\s*=\s*\[([\s\S]*?)\];/);
+  if (!contentBlockMatch) {
+    issues.push(
+      'packages/theme/src/tailwind/preset.ts must declare an explicit `const content = [...]` purge glob array.'
+    );
+    return issues;
+  }
+
+  const contentBlock = contentBlockMatch[1];
+  const positiveGlobs = [...contentBlock.matchAll(/^\s*at\(['"]([^'"]+)['"]\)/gm)].map((m) => m[1]);
+
+  if (positiveGlobs.length === 0) {
+    issues.push(
+      'packages/theme/src/tailwind/preset.ts `content` array has no positive `at(...)` source globs.'
+    );
+  }
+
+  for (const globPattern of positiveGlobs) {
+    if (globPattern.includes('node_modules')) {
+      issues.push(
+        `Tailwind purge bloat: positive content glob '${globPattern}' scans node_modules and disables dead-class purging.`
+      );
+    }
+    if (!globPattern.endsWith('.tsx')) {
+      issues.push(
+        `Tailwind purge bloat: positive content glob '${globPattern}' must target '.tsx' UI files only (never '.ts' server/token/schema files).`
+      );
+    }
+    if (
+      globPattern === 'packages/theme/src/**/*.{ts,tsx}' ||
+      globPattern === 'packages/theme/src/**/*.tsx'
+    ) {
+      issues.push(
+        `Tailwind purge bloat: '${globPattern}' is too broad — scope to 'packages/theme/src/react/**/*.tsx' so preset.ts/tokens are not self-scanned.`
+      );
+    }
+    if (globPattern.startsWith('libs/') && !globPattern.includes('/ui/src/')) {
+      issues.push(
+        `Tailwind purge bloat: '${globPattern}' scans non-UI library code — scope to 'libs/features/*/ui/src/**/*.tsx'.`
+      );
+    }
+  }
+
+  for (const requiredExclusion of REQUIRED_PURGE_EXCLUSIONS) {
+    if (!contentBlock.includes(requiredExclusion)) {
+      issues.push(
+        `Tailwind purge config missing required exclusion '!at("${requiredExclusion}")' in packages/theme/src/tailwind/preset.ts.`
+      );
+    }
+  }
+
+  if (!/hoverOnlyWhenSupported\s*:\s*true/.test(preset)) {
+    issues.push(
+      'packages/theme/src/tailwind/preset.ts must set `future: { hoverOnlyWhenSupported: true }` to minimize hover media-query bloat.'
+    );
+  }
+
+  return issues;
 }
 
 function readBaseline() {
@@ -290,6 +376,10 @@ function check(scan, baseline) {
     violations.push(
       `@apply/@layer components outside the design system: ${file}\n   Move the rule into packages/theme (or packages/ui globals) and use a component class.`
     );
+  }
+
+  for (const issue of scan.purgeViolations ?? []) {
+    violations.push(issue);
   }
 
   const improvedFiles = Object.entries(baseline.overBudgetByFile ?? {}).filter(

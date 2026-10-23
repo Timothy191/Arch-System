@@ -147,7 +147,7 @@
       "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.{ts,tsx,css}"],
       "ignore": ["src/tokens/colors.ts", "src/tokens/motion.ts"],
-      "ignoreDependencies": ["@types/react-dom"]
+      "ignoreDependencies": ["@types/react-dom", "@tailwindcss/typography"]
     },
     "packages/database": {
       "entry": [".eslintrc.{js,cjs}"],

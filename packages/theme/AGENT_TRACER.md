@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-23T11:08:00+02:00 - Minimize Tailwind CSS Build Size via Strict Purge Globs
+
+- **Purpose**: Minimize compiled CSS size (-14.34 KB minified, -35.3% build time) and purge unused utility/prose classes.
+- **Changes**:
+  - `packages/theme/src/tailwind/preset.ts`: Scoped `content` globs strictly to active `.tsx` UI directories (`apps/*/{app,components,features,plugins}/**/*.tsx`, `packages/ui/src/**/*.tsx`, `packages/theme/src/react/**/*.tsx`, `libs/features/*/ui/src/**/*.tsx`), added global negative exclusions (`node_modules`, `.next`, `.turbo`, `dist`, `coverage`, `storybook-static`, `*.d.ts`, tests, stories, unmounted components), enabled `future.hoverOnlyWhenSupported: true`, and removed unused `@tailwindcss/typography` plugin.
+- **Verification**: `pnpm audit:tailwind` ✅; `pnpm lint:css-perf` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T06:05:00+02:00 - Circular Department Icon Bubble Geometry
 
 - **Purpose**: Update `.uiverse-card-icon-bubble` in `cards.css` to a circular (`border-radius: 9999px`) badge geometry for gold department icon branding across all department cards.

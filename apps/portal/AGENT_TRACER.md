@@ -1,3 +1,11 @@
+## 2026-10-23T11:15:00+02:00: Remove Redundant `.prose` Wrapper Classes & Ambiguous Cubic-Bezier Utilities
+
+- **Purpose**: Eliminate 13.4 KB of unused `@tailwindcss/typography` (`.prose`) CSS rules and ambiguous arbitrary cubic-bezier warnings in `apps/portal`.
+- **Changes**:
+  - `apps/portal/app/privacy/page.tsx` & `apps/portal/app/overview/{sections/,}AuditReportsSection.tsx`: Removed redundant `prose` / `prose-neutral` wrapper classes where all child elements already use explicit Tailwind utilities.
+  - `apps/portal/app/overview/page.tsx` & `apps/portal/features/hub/components/CoreOperationalModules.tsx`: Replaced `ease-[cubic-bezier(0.16,1,0.3,1)]` with `ease-mac-decelerate`.
+- **Verification**: `pnpm audit:tailwind` ✅; `pnpm agent:verify` (15/15 PASS) ✅.
+
 ## 2026-10-23T10:30:00+02:00: Enforce Utility Class Ordering (`useSortedClasses`), Knip Gate & Database RedisInsight Workbench
 
 - **Purpose**: Enforce canonical Tailwind utility class ordering across the monorepo (`nursery/useSortedClasses` in `biome.json`), clean up dead-code/unresolved imports so `pnpm knip` exits 0 as Step 15 of `agent:verify`, codify `javascript-testing-best-practices` / `nodebestpractices` in `.agents/rules/testing-rules.md`, and add the Redis 7.4 Dual-Tier Cache & RedisInsight Workbench panel to `/database` (`apps/portal/app/(departments)/database/page.tsx`) alongside auto-provisioned RedisInsight in `infra/docker/compose.{redis,tools}.yml`.

@@ -472,7 +472,7 @@ export function GlassCard({
         hover &&
           !prefersReduced &&
           !isLiquid &&
-          'transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:scale-[1.01] active:scale-[0.995]',
+          'transition-transform duration-300 ease-glass hover:scale-[1.01] active:scale-[0.995]',
 
         // Accent colors for hover
         hover && ACCENT_COLORS[accent],

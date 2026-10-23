@@ -184,7 +184,7 @@ function HeroSlide({
         className={cn(
           'relative h-full w-full select-none overflow-hidden rounded-2xl',
           'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
-          'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'transition-[box-shadow,transform] duration-500 ease-mac-decelerate',
           isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
         )}
       >

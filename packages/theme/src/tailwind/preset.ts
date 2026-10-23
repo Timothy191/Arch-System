@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import typography from '@tailwindcss/typography';
 import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
@@ -18,23 +17,34 @@ const repoRoot = path.resolve(here, '../../../..');
 const at = (p: string) => path.join(repoRoot, p);
 
 const content = [
-  at('apps/*/app/**/*.{ts,tsx}'),
-  at('apps/*/components/**/*.{ts,tsx}'),
-  at('apps/*/features/**/*.{ts,tsx}'),
-  at('apps/*/hooks/**/*.{ts,tsx}'),
-  at('apps/*/src/**/*.{ts,tsx}'),
-  at('packages/ui/src/**/*.{ts,tsx}'),
-  at('packages/theme/src/**/*.{ts,tsx}'),
-  at('libs/**/*.{ts,tsx}'),
-  `!${at('libs/**/node_modules/**/*')}`,
-  `!${at('libs/**/.next/**/*')}`,
-  `!${at('libs/**/.turbo/**/*')}`,
+  at('apps/*/app/**/*.tsx'),
+  at('apps/*/components/**/*.tsx'),
+  at('apps/*/features/**/*.tsx'),
+  at('apps/*/plugins/**/*.tsx'),
+  at('packages/ui/src/**/*.tsx'),
+  at('packages/theme/src/react/**/*.tsx'),
+  at('libs/features/*/ui/src/**/*.tsx'),
+  `!${at('**/node_modules/**/*')}`,
+  `!${at('**/.next/**/*')}`,
+  `!${at('**/.turbo/**/*')}`,
+  `!${at('**/dist/**/*')}`,
+  `!${at('**/coverage/**/*')}`,
+  `!${at('**/storybook-static/**/*')}`,
+  `!${at('**/*.d.ts')}`,
   `!${at('**/*.test.{ts,tsx}')}`,
   `!${at('**/*.spec.{ts,tsx}')}`,
   `!${at('**/*.stories.{ts,tsx}')}`,
-  `!${at('**/__tests__/**/*.{ts,tsx}')}`,
-  `!${at('**/__mocks__/**/*.{ts,tsx}')}`,
-  at('node_modules/@tremor/**/*.{js,ts,jsx,tsx}'),
+  `!${at('**/__tests__/**/*')}`,
+  `!${at('**/__mocks__/**/*')}`,
+  `!${at('apps/portal/app/overview/AuditReportsSection.tsx')}`,
+  `!${at('apps/portal/features/analytics/components/ReportTemplate.tsx')}`,
+  `!${at('apps/portal/components/LCPObserver.tsx')}`,
+  `!${at('apps/portal/components/PitConnectivityBanner.tsx')}`,
+  `!${at('apps/portal/components/WebVitalsReporter.tsx')}`,
+  `!${at('apps/portal/app/(departments)/access-control/card-actions/card-pdf.tsx')}`,
+  `!${at('apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx')}`,
+  `!${at('apps/portal/components/control-room/C66MachineOperatorScanner.tsx')}`,
+  `!${at('apps/portal/features/auth/components/RefractionGlow.tsx')}`,
 ];
 
 /**
@@ -50,6 +60,9 @@ const withAlpha = (token: string): string =>
 
 const archTheme: Config = {
   content,
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   prefix: '',
   theme: {
     container: {
@@ -537,7 +550,7 @@ const archTheme: Config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate, typography],
+  plugins: [tailwindcssAnimate],
 };
 
 export default archTheme;

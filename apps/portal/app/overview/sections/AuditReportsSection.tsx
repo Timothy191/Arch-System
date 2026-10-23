@@ -379,7 +379,7 @@ export default function AuditReportsSection() {
             </span>
           </div>
         ) : (
-          <div className="prose max-w-none">
+          <div className="max-w-none">
             {activeTab === 'results' && <SimpleMarkdownRenderer content={data?.results || ''} />}
             {activeTab === 'actions' && (
               <SimpleMarkdownRenderer content={data?.requiredActions || ''} />

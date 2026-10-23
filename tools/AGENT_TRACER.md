@@ -1,5 +1,13 @@
 # AGENT_TRACER — tools
 
+## 2026-10-23T11:08:00+02:00 - Tailwind Purge & CSS Build Budget Guardrail
+
+- **Purpose**: Enforce strict Tailwind `content` purge rules and tighten the CSS bundle budget so unused classes cannot regress into the build.
+- **Changes**:
+  - `tools/audits/audit-tailwind-usage.cjs`: Added `checkTailwindPurgeConfig()` verifying `packages/theme/src/tailwind/preset.ts` scans only `.tsx` UI directories, excludes `node_modules`/build/test/story artifacts, and enables `hoverOnlyWhenSupported: true`.
+  - `tools/audits/check-css-performance.cjs`: Tightened `BUDGET_KB` from `130` KB to `115` KB.
+- **Verification**: `pnpm audit:tailwind` ✅; `pnpm lint:css-perf` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-06-24T12:00:00Z
 
 **Purpose:** Enhanced `apply-project-tags.cjs` script with improved error handling, documentation, and integration.
@@ -101,3 +109,10 @@
 - `apps/portal` rate limiting calls `redis.eval(...)` to run an INCR/PTTL Lua script; the `no-eval` security check matched the method name and failed `pnpm policy:check` during telemetry hardening.
 - Refined the rule in `tools/repo/policy-compiler.cjs` to ignore method calls while still banning bare `eval(`, `window/globalThis/self/global.eval(`, and `new Function(`; regenerated the policy artifacts with `pnpm policy:gen`.
 - Verified: regex expectations cover bare/global eval (flagged), `redis.eval` (ignored); `pnpm policy:check` passes in CI mode with no violations.
+
+## 2026-10-23: Tailwind Utility Composition Guardrail
+
+- Added `tools/audits/audit-tailwind-usage.cjs`: enforces a 16-utility budget per className chain, flags repeated chains (10+ utilities, 3+ uses), and blocks `@apply`/`@layer components` outside `packages/theme` and `packages/ui` globals. Existing debt is ratcheted in `tools/audits/tailwind-baseline.json` (38 files, 37 chains); new files start at zero allowance.
+- Added the canonical rule `.agents/rules/tailwind-utility-composition.md` (mirrored as a root symlink) with the extraction ladder: existing `@repo/ui` component -> CVA variant -> local `cn()` constant -> theme class. Cross-referenced from `react-components.md`.
+- Wired `pnpm audit:tailwind` into `audit:compliance`, lint-staged (JS/TS commits), the CI policy-check job, and `agent:verify` step 14; updated both AGENTS.md gate descriptions and `docs/agents/commands.md`.
+- Verified: probe files fail for over-budget chains, a new repeated chain, and app-level `@apply`; baseline run passes; audit:agents, rule drift, maps parity, token budget, Biome, Prettier, and markdownlint pass.

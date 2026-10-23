@@ -87,7 +87,7 @@ export function CoreOperationalModules({
 
   return (
     <section
-      className="group/row liquid-glass-light gold-steel-border relative -translate-y-1.5 animate-fade-up space-y-5 rounded-card border border-white/45 p-4 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.28),0_16px_32px_-8px_rgba(15,23,42,0.16),0_4px_12px_-2px_rgba(15,23,42,0.08),inset_0_1.5px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(15,23,42,0.06)] ring-1 ring-white/75 ring-inset transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.34),0_20px_40px_-8px_rgba(15,23,42,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.95)] sm:p-6"
+      className="group/row liquid-glass-light gold-steel-border relative -translate-y-1.5 animate-fade-up space-y-5 rounded-card border border-white/45 p-4 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.28),0_16px_32px_-8px_rgba(15,23,42,0.16),0_4px_12px_-2px_rgba(15,23,42,0.08),inset_0_1.5px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(15,23,42,0.06)] ring-1 ring-white/75 ring-inset transition-[transform,box-shadow] duration-500 ease-mac-decelerate hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.34),0_20px_40px_-8px_rgba(15,23,42,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.95)] sm:p-6"
       style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering & Executive Quick-Access */}

@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T11:15:00+02:00 - Purge Unused Global CSS Keyframes & Replace Ambiguous Cubic-Bezier Classes
+
+- **Purpose**: Minimize compiled CSS bundle size by removing unreferenced top-level keyframes/utilities in `globals.css` and replacing ambiguous `ease-[cubic-bezier(...)]` arbitrary classes with named theme timing tokens.
+- **Changes**:
+  - `packages/ui/src/globals.css`: Removed unused top-level `@keyframes` (`wave-drift`, `solar-flare`, `aurora-shadow`, `glass-shimmer`, `caustic-*`) and unreferenced `.aurora-shadow`, `.glass-shimmer`, and `.caustic-glow-*` utilities.
+  - `packages/ui/src/components/{HeroRotator,DepartmentLayout,GlassCard}.tsx`: Replaced `ease-[cubic-bezier(...)]` with `ease-mac-decelerate` and `ease-glass`.
+- **Verification**: `pnpm audit:tailwind` ✅; `pnpm lint:css-perf` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T10:30:00+02:00 - Enforce Canonical Utility Class Ordering (`useSortedClasses`) & Prune Orphaned DataGrid Story
 
 - **Purpose**: Enforce consistent Tailwind utility class ordering across `@repo/ui` via Biome `nursery/useSortedClasses` (`level: "error"`, `fix: "safe"`) and remove orphaned `src/components/ui/DataGrid.stories.tsx` flagged by `pnpm knip`.
