@@ -351,3 +351,4 @@
 - 2026-10-22T05:59:38Z | Council-Orchestrator | Rotated Gold Arch icon mouse cursor -45deg (45deg left) with top-left apex hotspot (2 2) in variables.css.
 - 2026-10-22T06:17:58Z | Council-Orchestrator | Enlarged Gold Arch icon cursor (24x24 default, 26x26 pointer, hotspot 3 3) and added --cursor-arch-wait token in variables.css, reset.css, and preset.ts.
 - 2026-10-22T12:14:00+02:00 — style(theme): slim down uiverse-card vertical height and banner geometry for sleeker rectangular proportions
+- 2026-10-23T00:00:00Z | SearchInputGoldBorder | Updated `input.gold-steel-border` in `src/css/cards.css` with explicit metallic gold border (`rgba(212, 175, 55, 0.65)`) and gold rim `box-shadow` so `getComputedStyle(input).border` never resolves to transparent.

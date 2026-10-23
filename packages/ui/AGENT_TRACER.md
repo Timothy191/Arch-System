@@ -554,3 +554,4 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - 2026-10-22T11:36:00+02:00 — feat(ui): remove grey circle on HeroRotator prev/next highlight arrows and enlarge/animate indicator emblems
 - 2026-10-22T11:54:00+02:00 — feat(ui): add HeroOperationalKpiStrip to HeroCardContent and fix SelectItem text rendering
 - 2026-10-23T00:59:00+02:00 — feat(ui): add `variant="gold"` metallic gold gradient option to `Logo.tsx` for top-bar dropdown and excavator emblems
+- 2026-10-23T01:15:00+02:00 — feat(ui): add gold steel border to HeroTelemetryGraph containers, replace hero dept icons with gold Arch System Logo, and promote telemetry titles to semantic h3 headings

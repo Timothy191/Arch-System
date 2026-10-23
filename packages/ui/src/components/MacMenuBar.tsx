@@ -890,14 +890,18 @@ export function MacMenuBar({
         ) : (
           <form onSubmit={handleSearch} className="w-full flex justify-center">
             <div className="relative w-full max-w-2xl rounded-full gold-steel-border gold-steel-border-slim">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none z-10" />
+              <Logo
+                variant="gold"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-accent-amber pointer-events-none z-10"
+              />
+              <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none z-10" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
-                className="w-full h-6 pl-7 pr-3 rounded-full gold-steel-border gold-steel-border-slim bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
+                className="w-full h-6 pl-7 pr-7 rounded-full gold-steel-border gold-steel-border-slim bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-accent-amber/60 focus:border-accent-amber focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
               />
             </div>
           </form>

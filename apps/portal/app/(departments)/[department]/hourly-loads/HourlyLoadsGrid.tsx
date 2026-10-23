@@ -11,25 +11,17 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
-import {
-  saveHourlyLoad,
-  splitMachineHourlyLoad,
-  updateExcavatorAssignmentConfig,
-  updateHourlyLoadExcavator,
-} from './actions';
+import { saveHourlyLoad, splitMachineHourlyLoad, updateHourlyLoadExcavator } from './actions';
 
 import {
   buildHourlyLoadsGroupedMap,
-  getMaterialSubCategories,
   HOUR_PROP,
   HOURS_12,
   type HourlyLoad,
   type HourlyMaterial,
   type HourlyShift,
   isHourEditable,
-  isValidSubCategoryForMaterial,
   loadKey,
-  type MaterialSubCategory,
   parseExcavatorMaterial,
   sumHourlyTotal,
 } from './loads-utils';
@@ -234,19 +226,6 @@ function HourlyLoadsGrid({
       })
     )
   );
-  const [excavatorBlocks, setExcavatorBlocks] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      excavators.map((e) => {
-        const act = excavatorActivities.find((a) => a.machine_id === e.id);
-        if (act?.block_mined_id) {
-          return [e.id, act.block_mined_id];
-        }
-        const siteId = e.site_id ?? act?.site_id ?? '';
-        const siteSpecificBlocks = siteId ? mineBlocks.filter((mb) => mb.site_id === siteId) : [];
-        return [e.id, siteSpecificBlocks.length === 1 ? (siteSpecificBlocks[0]?.id ?? '') : ''];
-      })
-    )
-  );
   const [excavatorMaterials, setExcavatorMaterials] = useState<Record<string, HourlyMaterial>>(() =>
     Object.fromEntries(
       excavators.map((e) => {
@@ -254,16 +233,6 @@ function HourlyLoadsGrid({
         const load = hourlyLoads.find((l) => l.excavator_id === e.id && !l.is_locked);
         const mat = act?.material_type || load?.material_type;
         return [e.id, parseExcavatorMaterial(mat, mineralRegistry).category];
-      })
-    )
-  );
-  const [excavatorMaterialSubCategories, setExcavatorMaterialSubCategories] = useState<
-    Record<string, string>
-  >(() =>
-    Object.fromEntries(
-      excavators.map((e) => {
-        const act = excavatorActivities.find((a) => a.machine_id === e.id);
-        return [e.id, parseExcavatorMaterial(act?.material_type, mineralRegistry).subCategory];
       })
     )
   );
@@ -294,6 +263,31 @@ function HourlyLoadsGrid({
         });
       } else if (payload.eventType === 'DELETE' && payload.old.id) {
         setLoadsState((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    },
+  });
+
+  useSupabaseRealtime<ExcavatorActivitySummary>({
+    supabaseClient: supabase,
+    table: 'excavator_activity',
+    filter: `department_id=eq.${departmentId}`,
+    onChange: (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        const machineId = payload.new.machine_id;
+        if (!machineId) return;
+        if (payload.new.site_id !== undefined) {
+          setExcavatorSites((prev) => ({
+            ...prev,
+            [machineId]: payload.new.site_id ?? '',
+          }));
+        }
+        if (payload.new.material_type !== undefined) {
+          setExcavatorMaterials((prev) => ({
+            ...prev,
+            [machineId]: parseExcavatorMaterial(payload.new.material_type, mineralRegistry)
+              .category,
+          }));
+        }
       }
     },
   });
@@ -729,190 +723,6 @@ function HourlyLoadsGrid({
       );
     },
     [source, selectedShift, excavatorMaterials, commitLoadChange]
-  );
-
-  // Handle excavator site assignment change
-  const handleExcavatorSiteChange = useCallback(
-    async (excavatorId: string, newSiteId: string | null) => {
-      const prevSiteId = excavatorSites[excavatorId] ?? '';
-      if ((newSiteId || '') === prevSiteId) return;
-
-      const prevBlockId = excavatorBlocks[excavatorId] ?? '';
-      const validBlockForNewSite = prevBlockId
-        ? mineBlocks.some(
-            (mb) => mb.id === prevBlockId && (!newSiteId || mb.site_id === newSiteId || !mb.site_id)
-          )
-        : false;
-      const siteSpecificBlocks = newSiteId
-        ? mineBlocks.filter((mb) => mb.site_id === newSiteId)
-        : [];
-      const nextBlockId = validBlockForNewSite
-        ? prevBlockId
-        : siteSpecificBlocks.length === 1
-          ? (siteSpecificBlocks[0]?.id ?? '')
-          : '';
-
-      setExcavatorSites((prev) => ({ ...prev, [excavatorId]: newSiteId || '' }));
-      setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: nextBlockId }));
-      try {
-        await updateExcavatorAssignmentConfig({
-          departmentId,
-          excavatorId,
-          loadDate: today,
-          shiftType: selectedShift,
-          siteId: newSiteId || null,
-          blockMinedId: nextBlockId || null,
-        });
-      } catch (err) {
-        logError(err, { context: 'update_excavator_site' });
-        setExcavatorSites((prev) => ({ ...prev, [excavatorId]: prevSiteId }));
-        setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: prevBlockId }));
-        toast.error('Failed to update excavator site.');
-      }
-    },
-    [excavatorSites, excavatorBlocks, mineBlocks, departmentId, today, selectedShift]
-  );
-
-  // Handle excavator block mined / area change
-  const handleExcavatorBlockChange = useCallback(
-    async (excavatorId: string, newBlockId: string | null) => {
-      const prevBlockId = excavatorBlocks[excavatorId] ?? '';
-      if ((newBlockId || '') === prevBlockId) return;
-
-      const currentSiteId = excavatorSites[excavatorId] || null;
-      setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: newBlockId || '' }));
-      try {
-        await updateExcavatorAssignmentConfig({
-          departmentId,
-          excavatorId,
-          loadDate: today,
-          shiftType: selectedShift,
-          siteId: currentSiteId,
-          blockMinedId: newBlockId || null,
-        });
-      } catch (err) {
-        logError(err, { context: 'update_excavator_block' });
-        setExcavatorBlocks((prev) => ({ ...prev, [excavatorId]: prevBlockId }));
-        toast.error('Failed to update excavator block mined.');
-      }
-    },
-    [excavatorSites, excavatorBlocks, departmentId, today, selectedShift]
-  );
-
-  // Handle excavator material change (Waste / Coal)
-  const handleExcavatorMaterialChange = useCallback(
-    async (excavatorId: string, newMaterial: HourlyMaterial) => {
-      const prevMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
-      if (newMaterial === prevMaterial) return;
-
-      const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
-      const nextSubCategory = isValidSubCategoryForMaterial(
-        newMaterial,
-        prevSubCategory,
-        mineralRegistry
-      )
-        ? prevSubCategory
-        : '';
-
-      const currentSiteId = excavatorSites[excavatorId] || null;
-      const currentBlockId = excavatorBlocks[excavatorId] || null;
-
-      setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: newMaterial }));
-      setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: nextSubCategory }));
-      setLoadsState((prev) =>
-        prev.map((load) =>
-          load.excavator_id === excavatorId && load.shift_type === selectedShift && !load.is_locked
-            ? { ...load, material_type: newMaterial }
-            : load
-        )
-      );
-
-      try {
-        await updateExcavatorAssignmentConfig({
-          departmentId,
-          excavatorId,
-          loadDate: today,
-          shiftType: selectedShift,
-          siteId: currentSiteId,
-          blockMinedId: currentBlockId,
-          materialType: newMaterial,
-          materialSubCategory: nextSubCategory || null,
-        });
-      } catch (err) {
-        logError(err, { context: 'update_excavator_material' });
-        setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: prevMaterial }));
-        setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: prevSubCategory }));
-        setLoadsState((prev) =>
-          prev.map((load) =>
-            load.excavator_id === excavatorId &&
-            load.shift_type === selectedShift &&
-            !load.is_locked
-              ? { ...load, material_type: prevMaterial }
-              : load
-          )
-        );
-        toast.error('Failed to update excavator material.');
-      }
-    },
-    [
-      excavatorSites,
-      excavatorBlocks,
-      excavatorMaterials,
-      excavatorMaterialSubCategories,
-      departmentId,
-      today,
-      selectedShift,
-      mineralRegistry,
-    ]
-  );
-
-  // Handle excavator material sub-category change
-  const handleExcavatorMaterialSubCategoryChange = useCallback(
-    async (excavatorId: string, newSubCategory: string | null) => {
-      const currentMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
-      const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
-      const validNext = isValidSubCategoryForMaterial(
-        currentMaterial,
-        newSubCategory,
-        mineralRegistry
-      )
-        ? (newSubCategory ?? '')
-        : '';
-
-      if (validNext === prevSubCategory) return;
-
-      const currentSiteId = excavatorSites[excavatorId] || null;
-      const currentBlockId = excavatorBlocks[excavatorId] || null;
-
-      setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: validNext }));
-
-      try {
-        await updateExcavatorAssignmentConfig({
-          departmentId,
-          excavatorId,
-          loadDate: today,
-          shiftType: selectedShift,
-          siteId: currentSiteId,
-          blockMinedId: currentBlockId,
-          materialType: currentMaterial,
-          materialSubCategory: validNext || null,
-        });
-      } catch (err) {
-        logError(err, { context: 'update_excavator_material_subcategory' });
-        setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: prevSubCategory }));
-        toast.error('Failed to update excavator material sub-category.');
-      }
-    },
-    [
-      excavatorSites,
-      excavatorBlocks,
-      excavatorMaterials,
-      excavatorMaterialSubCategories,
-      departmentId,
-      today,
-      selectedShift,
-      mineralRegistry,
-    ]
   );
 
   // Handle split creation
@@ -1443,173 +1253,6 @@ function HourlyLoadsGrid({
           </div>
         </div>
       </div>
-
-      {/* Excavator Site, Block Mined & Material Assignment Panel */}
-      <GlassCard className="p-4 bg-[var(--vibrancy-surface)] border border-black/[0.06]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-          <div>
-            <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-              Excavator Location, Block Mined & Material Mapping
-            </h3>
-            <p className="text-xs text-[var(--text-muted)]">
-              Assign each Excavator to a Site, Block Mined / Area, and Material. Hauling trucks
-              assigned to the Excavator automatically inherit this location, block, and material.
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
-          {excavators.map((excavator) => {
-            const currentSiteId = excavatorSites[excavator.id] || '';
-            const currentBlockId = excavatorBlocks[excavator.id] || '';
-            const currentMaterial = excavatorMaterials[excavator.id] || 'Waste';
-            const currentSubCategory = excavatorMaterialSubCategories[excavator.id] || '';
-            const materialSubCategories = getMaterialSubCategories(
-              currentMaterial,
-              mineralRegistry
-            );
-            const availableBlocks = currentSiteId
-              ? mineBlocks.filter((mb) => mb.site_id === currentSiteId || mb.site_id === null)
-              : mineBlocks;
-
-            // Active machines assigned to this excavator in the current shift
-            const assignedMachineNames = Array.from(
-              new Set(
-                source
-                  .filter((r) => r.excavatorId === excavator.id && !r.isLocked)
-                  .map((r) => String(r.baseMachineName || r.machineName || ''))
-                  .filter(Boolean)
-              )
-            );
-
-            return (
-              <div
-                key={excavator.id}
-                className="flex flex-col gap-3 p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs"
-              >
-                {/* Header: Excavator Name (with Gold Arch Logo) + Active Machines Subtitle + Material Toggle */}
-                <div className="flex items-center justify-between gap-2 border-b border-[var(--border-default)]/60 pb-2.5">
-                  <div className="flex flex-col min-w-0">
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-heading)]">
-                      <Logo variant="gold" className="w-3.5 h-3.5 shrink-0" />
-                      <span>{excavator.name}</span>
-                    </span>
-                    <span
-                      className="text-[11px] text-[var(--text-muted)] truncate"
-                      title={
-                        assignedMachineNames.length > 0
-                          ? `Active machines: ${assignedMachineNames.join(', ')}`
-                          : 'No active machine assigned'
-                      }
-                    >
-                      {assignedMachineNames.length > 0
-                        ? `Active: ${assignedMachineNames.join(', ')}`
-                        : 'No active machine assigned'}
-                    </span>
-                  </div>
-
-                  {/* Material Selector (Waste / Coal) */}
-                  <div className="flex items-center gap-1 rounded-full bg-[var(--bg-primary)] p-0.5 border border-[var(--border-default)] shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleExcavatorMaterialChange(excavator.id, 'Waste')}
-                      className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                        currentMaterial === 'Waste'
-                          ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                      }`}
-                    >
-                      Waste
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleExcavatorMaterialChange(excavator.id, 'Coal')}
-                      className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                        currentMaterial === 'Coal'
-                          ? 'bg-neutral-800 text-white shadow-xs'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                      }`}
-                    >
-                      Coal
-                    </button>
-                  </div>
-                </div>
-
-                {/* Site, Block Mined / Area & Material Sub-Category Selectors */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
-                      Site / Location
-                    </label>
-                    <select
-                      value={currentSiteId}
-                      onChange={(e) =>
-                        handleExcavatorSiteChange(excavator.id, e.target.value || null)
-                      }
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
-                    >
-                      <option value="">No Site</option>
-                      {sites.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
-                      Block Mined / Area
-                    </label>
-                    <select
-                      value={currentBlockId}
-                      onChange={(e) =>
-                        handleExcavatorBlockChange(excavator.id, e.target.value || null)
-                      }
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
-                    >
-                      <option value="">Select block / area...</option>
-                      {availableBlocks.map((mb) => (
-                        <option key={mb.id} value={mb.id}>
-                          {mb.name} ({mb.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-[var(--text-muted)] block">
-                      Material ({currentMaterial})
-                    </label>
-                    <select
-                      value={currentSubCategory}
-                      onChange={(e) =>
-                        handleExcavatorMaterialSubCategoryChange(
-                          excavator.id,
-                          e.target.value || null
-                        )
-                      }
-                      aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
-                    >
-                      <option value="">Select {currentMaterial.toLowerCase()} material...</option>
-                      {materialSubCategories.map((subCat) => (
-                        <option key={subCat} value={subCat}>
-                          {subCat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {excavators.length === 0 && (
-            <p className="text-xs text-[var(--text-muted)] col-span-full">
-              No active excavators found. Please add excavators in Machine DB.
-            </p>
-          )}
-        </div>
-      </GlassCard>
 
       {/* Main Loads Data Grid */}
       <div

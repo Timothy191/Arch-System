@@ -1,7 +1,9 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
+import { getCurrentShift } from '@repo/utils';
 import { ArrowUpRight, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { getMineralRegistry } from '~/features/admin/actions/minerals';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HAUL_TRUCK_MACHINE_TYPES } from '../hourly-loads/loads-utils';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
@@ -19,7 +21,7 @@ export default async function ExcavatorActivityPage({
     department: deptSlug,
   });
 
-  // Parallel fetch of independent reference data and today's activity
+  // Parallel fetch of independent reference data, today's activity, and mineral registry
   const [
     { data: excavators },
     { data: dumpers },
@@ -27,6 +29,7 @@ export default async function ExcavatorActivityPage({
     { data: sites },
     { data: mineBlocks },
     { data: todayActivity },
+    mineralRegistry,
   ] = await Promise.all([
     supabase
       .from('machines')
@@ -59,6 +62,7 @@ export default async function ExcavatorActivityPage({
       .eq('department_id', deptId)
       .eq('activity_date', today)
       .order('created_at', { ascending: false }),
+    getMineralRegistry(),
   ]);
 
   // Fetch today's dumper assignments via excavator_activity IDs
@@ -131,7 +135,9 @@ export default async function ExcavatorActivityPage({
         todayDumperLoads={todayLoads || []}
         todayActivities={todayActivity || []}
         todayAssignments={todayAssignments || []}
+        mineralRegistry={mineralRegistry}
         today={today}
+        initialShift={getCurrentShift()}
       />
 
       {todayActivity && todayActivity.length > 0 && (

@@ -189,17 +189,29 @@ describe('HeroRotator', () => {
   it('renders department icons on each hero card, slim KPI banner under the hero card, and Arch logo nodes on telemetry graphs', () => {
     const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
-    // Department icons on hero cards with circular gold branding
+    // Department icons on hero cards with circular gold branding and Arch System gold Logo SVG
     const centralIcon = screen.getByTestId('hero-dept-icon-central-command');
+    const drillingIcon = screen.getByTestId('hero-dept-icon-drilling');
+    const productionIcon = screen.getByTestId('hero-dept-icon-production');
     expect(centralIcon).toBeInTheDocument();
     expect(centralIcon).toHaveClass('rounded-full', 'gold-steel-border', 'gold-steel-border-slim');
-    expect(screen.getByTestId('hero-dept-icon-drilling')).toHaveClass(
+    expect(drillingIcon).toHaveClass('rounded-full', 'gold-steel-border', 'gold-steel-border-slim');
+    expect(productionIcon).toHaveClass(
       'rounded-full',
-      'gold-steel-border'
+      'gold-steel-border',
+      'gold-steel-border-slim'
     );
-    expect(screen.getByTestId('hero-dept-icon-production')).toHaveClass(
-      'rounded-full',
-      'gold-steel-border'
+    expect(centralIcon.querySelector('svg')).toHaveAttribute(
+      'viewBox',
+      '22.75 16.625 166.16 166.19'
+    );
+    expect(drillingIcon.querySelector('svg')).toHaveAttribute(
+      'viewBox',
+      '22.75 16.625 166.16 166.19'
+    );
+    expect(productionIcon.querySelector('svg')).toHaveAttribute(
+      'viewBox',
+      '22.75 16.625 166.16 166.19'
     );
 
     // Slim KPI banner under the hero card with gold | separators
@@ -303,13 +315,45 @@ describe('HeroRotator', () => {
     expect(screen.getByText('30 FPS')).toBeInTheDocument();
     expect(screen.getByText('1080p')).toBeInTheDocument();
 
-    // Assert live telemetry graphs are rendered across all hero cards
+    // Assert live telemetry graphs and gold-bordered boxes are rendered across all hero cards
     expect(screen.getByTestId('hero-telemetry-graph-central-command')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-drilling')).toBeInTheDocument();
     expect(screen.getByTestId('hero-telemetry-graph-production')).toBeInTheDocument();
-    expect(screen.getByText('Central Operations Telemetry')).toBeInTheDocument();
-    expect(screen.getByText('Rig Penetration & Bit Depth')).toBeInTheDocument();
-    expect(screen.getByText('Coal & ROM Extraction Yield')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-telemetry-box-central-command')).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+    expect(screen.getByTestId('hero-telemetry-box-drilling')).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+    expect(screen.getByTestId('hero-telemetry-box-production')).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim'
+    );
+
+    // Assert telemetry titles are rendered as semantic h3 headings
+    expect(
+      screen.getByRole('heading', {
+        level: 3,
+        name: 'Central Operations Telemetry',
+        hidden: true,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        level: 3,
+        name: 'Rig Penetration & Bit Depth',
+        hidden: true,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        level: 3,
+        name: 'Coal & ROM Extraction Yield',
+        hidden: true,
+      })
+    ).toBeInTheDocument();
   });
 
   it('renders Plant & Processing slide and Wash Plant Throughput & Recovery telemetry', () => {

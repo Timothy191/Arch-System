@@ -3,9 +3,9 @@
 import { Activity, AlertTriangle, Power, TrendingUp, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import type * as React from 'react';
-import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import type { Panel } from './HeroRotator';
+import { Logo } from './Logo';
 
 interface HeroTelemetrySeries {
   title: string;
@@ -214,9 +214,15 @@ function HeroTelemetryGraph({
             className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse shrink-0"
             aria-hidden="true"
           />
-          <span className="text-[10px] uppercase tracking-wider text-slate-700 font-mono font-semibold truncate">
+          <h3
+            className="font-anurati text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--text-heading)] truncate leading-snug"
+            style={{
+              fontFamily:
+                "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
+            }}
+          >
             {series.title}
-          </span>
+          </h3>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-semibold text-emerald-700">
@@ -229,7 +235,10 @@ function HeroTelemetryGraph({
         </div>
       </div>
 
-      <div className="relative rounded-xl bg-white/85 backdrop-blur-md border border-slate-200/80 px-3 py-2 shadow-2xs overflow-hidden">
+      <div
+        className="relative rounded-xl gold-steel-border gold-steel-border-slim bg-white/85 backdrop-blur-md border border-accent-amber/40 px-3 py-2 shadow-2xs overflow-hidden"
+        data-testid={`hero-telemetry-box-${panelName}`}
+      >
         {/* Animated scanline effect */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30 animate-scanline"
@@ -529,7 +538,6 @@ export function HeroCardContent({
   breakdownCount,
   offlineMachineCount,
 }: HeroCardContentProps) {
-  const FallbackDeptIcon = getDepartmentIcon(panel.name);
   const assetSubtitle =
     panel.assetSubtitle ||
     (panel.name === 'drilling'
@@ -596,14 +604,11 @@ export function HeroCardContent({
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               <span
-                className={cn(
-                  'inline-flex items-center justify-center w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/40 shadow-2xs shrink-0',
-                  panel.iconBgColor || 'bg-accent-amber/10 text-accent-amber'
-                )}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/40 shadow-2xs shrink-0 bg-accent-amber/10 text-accent-amber"
                 aria-hidden="true"
                 data-testid={`hero-dept-icon-${panel.name}`}
               >
-                {panel.icon ?? <FallbackDeptIcon className="w-4 h-4 text-accent-amber" />}
+                <Logo variant="gold" className="w-4 h-4 text-accent-amber" />
               </span>
               <h2
                 className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"

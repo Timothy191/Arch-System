@@ -257,7 +257,10 @@
 }
 
 input.gold-steel-border {
-  border: var(--gold-border-width, 1.5px) solid transparent;
+  border: var(--gold-border-width, 1.5px) solid rgba(212, 175, 55, 0.65);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.35),
+    inset 0 1px 0 rgba(255, 246, 204, 0.65);
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
     linear-gradient(

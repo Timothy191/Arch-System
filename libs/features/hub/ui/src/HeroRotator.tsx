@@ -3,21 +3,8 @@
 import type { Department } from '@repo/departments/data-access';
 import type { Panel } from '@repo/ui/HeroRotator';
 import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
-import { getDepartmentIcon } from '@repo/ui/icons/department-icons';
 import { Logo } from '@repo/ui/Logo';
-import { cn } from '@repo/ui/lib/utils';
-import {
-  Activity,
-  ArrowUpRight,
-  Database,
-  Factory,
-  Layers,
-  Package,
-  Pickaxe,
-  ShieldCheck,
-  TowerControl,
-  Wrench,
-} from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useMemo } from 'react';
 
 export interface HeroRotatorProps {
@@ -32,63 +19,6 @@ export interface HeroRotatorProps {
   breakdownCount?: number;
   offlineMachineCount?: number;
 }
-
-const DEPT_STYLE_MAP: Record<
-  string,
-  { icon: React.ComponentType<{ className?: string }>; iconColor: string; bgColor: string }
-> = {
-  admin: {
-    icon: ShieldCheck,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  drilling: { icon: Pickaxe, iconColor: 'text-accent-amber', bgColor: 'bg-accent-amber/10' },
-  production: {
-    icon: Factory,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  'plant-processing': {
-    icon: Factory,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  'plant-inventory': {
-    icon: Package,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  'access-control': {
-    icon: ShieldCheck,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  engineering: {
-    icon: Wrench,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  'control-room': {
-    icon: TowerControl,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  overview: {
-    icon: Activity,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  database: {
-    icon: Database,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-  reports: {
-    icon: Activity,
-    iconColor: 'text-accent-amber',
-    bgColor: 'bg-accent-amber/10',
-  },
-};
 
 export function HeroRotator({
   defaultTitle,
@@ -115,8 +45,8 @@ export function HeroRotator({
       video: '/images/departments/overview.mp4',
       stats: { label: 'System Health', value: '100% Optimal' },
       status: 'active',
-      icon: <Logo variant="gold" className="w-4 h-4 text-[var(--accent-blue)]" />,
-      iconBgColor: 'bg-[var(--accent-blue)]/10',
+      icon: <Logo variant="gold" className="w-4 h-4 text-accent-amber" />,
+      iconBgColor: 'bg-accent-amber/10',
       primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
       secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
       assetOverline: 'CENTRAL COMMAND // SYS-MAIN',
@@ -124,13 +54,6 @@ export function HeroRotator({
     };
 
     const deptPanels = departments.map((dept): Panel => {
-      const style = DEPT_STYLE_MAP[dept.name] || {
-        icon: getDepartmentIcon(dept.name) || Layers,
-        iconColor: 'text-[var(--accent-blue)]',
-        bgColor: 'bg-[var(--accent-blue)]/10',
-      };
-      const DeptIcon = style.icon;
-
       const assetOverline =
         dept.name === 'admin'
           ? 'ENTERPRISE GOVERNANCE // ADM-CORE'
@@ -177,8 +100,8 @@ export function HeroRotator({
             : `/images/departments/${dept.name}.mp4`,
         stats: dept.stats || { label: 'Telemetry', value: 'Online' },
         status: dept.status || 'active',
-        icon: <DeptIcon className={cn('w-4 h-4', style.iconColor)} />,
-        iconBgColor: style.bgColor,
+        icon: <Logo variant="gold" className="w-4 h-4 text-accent-amber" />,
+        iconBgColor: 'bg-accent-amber/10',
         primary: dept.actions?.[0]
           ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
           : {
