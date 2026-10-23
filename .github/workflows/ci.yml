@@ -327,6 +327,9 @@ jobs:
       - name: Run Redis integration tests
         run: pnpm --filter portal test:integration
 
+      - name: Run Redis primitives integration tests
+        run: pnpm --filter @repo/redis test:integration
+
   # E2E job - depends on quality
   e2e:
     name: E2E Tests
