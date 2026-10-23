@@ -6,12 +6,27 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Gem, Layers, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  adminSaveMineralRegistry,
-  DEFAULT_COAL_MINERALS,
-  DEFAULT_WASTE_MINERALS,
-  getMineralRegistry,
-} from '../actions/minerals';
+import { adminSaveMineralRegistry, getMineralRegistry } from '../actions/minerals';
+
+const DEFAULT_WASTE_MINERALS: readonly string[] = [
+  'Dyke',
+  'Overburden',
+  'Interburden',
+  'Topsoil',
+  'Waste',
+  'Other',
+];
+
+const DEFAULT_COAL_MINERALS: readonly string[] = [
+  '2#Lower',
+  '2#Upper',
+  '4#Lower',
+  '4#Upper',
+  'Seam 1',
+  'Seam 2',
+  'Raw Coal',
+  'Other',
+];
 
 export function MineralsTab() {
   const [wasteMinerals, setWasteMinerals] = useState<string[]>([...DEFAULT_WASTE_MINERALS]);

@@ -8,7 +8,7 @@ import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-export const DEFAULT_WASTE_MINERALS: readonly string[] = [
+const DEFAULT_WASTE_MINERALS: readonly string[] = [
   'Dyke',
   'Overburden',
   'Interburden',
@@ -17,7 +17,7 @@ export const DEFAULT_WASTE_MINERALS: readonly string[] = [
   'Other',
 ];
 
-export const DEFAULT_COAL_MINERALS: readonly string[] = [
+const DEFAULT_COAL_MINERALS: readonly string[] = [
   '2#Lower',
   '2#Upper',
   '4#Lower',
