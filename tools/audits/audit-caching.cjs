@@ -5,12 +5,14 @@
  *
  * Enforces Next.js 16 Caching standards across apps/portal:
  *   1. Cache Components Configuration: apps/portal/next.config.mjs must declare cacheComponents: true
- *      and valid custom cacheLife profiles (stale <= revalidate <= expire).
- *   2. Cache Directive Safety: Functions or components using 'use cache' must NOT directly
- *      invoke dynamic runtime request APIs (cookies(), headers()) inside the cached scope.
- *   3. Cache Tag Convention: cacheTag() calls must use structured namespaced tags (e.g. dept_*, shift_*).
+ *      and valid custom cacheLife profiles (telemetry, departments, reports).
+ *   2. Server Cache SSoT: apps/portal/lib/server-cache.ts must export canonical cacheProfiles
+ *      (telemetry, departments, reports, max, hours, minutes), scoped tag builders, and dual-tier
+ *      Next.js + Redis L1/L2 invalidation helpers (updateTag, updateTags, updateTagInAction, refreshTag).
+ *   3. Cache Directive Safety: Modules or functions with a 'use cache' directive must NOT invoke
+ *      dynamic runtime request APIs (cookies(), headers(), searchParams) inside the cached scope.
  *   4. Mutation Invalidation Parity: Server actions or route handlers performing DB writes
- *      must declare tag or path revalidation (cacheInvalidateTags or revalidateTag).
+ *      must trigger tag or path revalidation.
  *
  * Run: node tools/audits/audit-caching.cjs
  * Exit code: 0 (pass) or 1 (fail)
@@ -24,6 +26,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const PORTAL_APP = path.join(ROOT, 'apps', 'portal');
 const PORTAL_APP_ROUTES = path.join(PORTAL_APP, 'app');
 const NEXT_CONFIG = path.join(PORTAL_APP, 'next.config.mjs');
+const SERVER_CACHE_SSOT = path.join(PORTAL_APP, 'lib', 'server-cache.ts');
 
 console.log('\n⚡ Initiating Next.js 16 Caching & Cache Components Audit...\n');
 
@@ -32,7 +35,7 @@ const warnings = [];
 let filesScanned = 0;
 
 // ── 1. Next.js Config Cache Components & cacheLife Audit ────────────────────
-console.log('1️⃣  Auditing apps/portal/next.config.mjs for Cache Components & cacheLife profiles...');
+console.log('1️⃣  Auditing apps/portal/next.config.mjs & lib/server-cache.ts SSoT...');
 
 if (!fs.existsSync(NEXT_CONFIG)) {
   violations.push('apps/portal/next.config.mjs does not exist.');
@@ -52,12 +55,44 @@ if (!fs.existsSync(NEXT_CONFIG)) {
       'apps/portal/next.config.mjs must define custom cacheLife profiles for industrial telemetry and departments.'
     );
   } else {
-    // Validate profile definitions
     const expectedProfiles = ['telemetry', 'departments', 'reports'];
     for (const profile of expectedProfiles) {
       if (!configContent.includes(`${profile}:`)) {
         warnings.push(`Missing recommended cacheLife profile "${profile}" in next.config.mjs.`);
       }
+    }
+  }
+}
+
+if (!fs.existsSync(SERVER_CACHE_SSOT)) {
+  violations.push('Missing canonical server cache SSoT at apps/portal/lib/server-cache.ts.');
+} else {
+  const serverCacheContent = fs.readFileSync(SERVER_CACHE_SSOT, 'utf8');
+  const requiredExports = [
+    'cacheProfiles',
+    'scopedTag',
+    'tagTenant',
+    'tagDepartment',
+    'updateTag',
+    'updateTags',
+    'updateTagInAction',
+    'refreshTag',
+    'cachedRSC',
+  ];
+  for (const symbol of requiredExports) {
+    if (!serverCacheContent.includes(symbol)) {
+      violations.push(
+        `apps/portal/lib/server-cache.ts is missing required export "${symbol}" for dual-tier Next.js + Redis L1/L2 caching.`
+      );
+    }
+  }
+
+  const requiredProfileKeys = ['telemetry', 'departments', 'reports', 'max', 'hours', 'minutes'];
+  for (const key of requiredProfileKeys) {
+    if (!new RegExp(`\\b${key}\\s*:`).test(serverCacheContent)) {
+      violations.push(
+        `apps/portal/lib/server-cache.ts cacheProfiles is missing required profile "${key}".`
+      );
     }
   }
 }
@@ -73,28 +108,34 @@ const tsxFiles = glob.sync('**/*.{ts,tsx}', {
 
 filesScanned += tsxFiles.length;
 
+// Match an actual JS/TS 'use cache' directive statement on its own line (file or function scope),
+// ignoring documentation strings that merely mention "use cache" in prose.
+const USE_CACHE_DIRECTIVE_RE = /^\s*['"]use cache(?::\s*[\w-]+)?['"]\s*;?\s*$/m;
+
 for (const file of tsxFiles) {
   const relPath = path.relative(ROOT, file);
   const content = fs.readFileSync(file, 'utf8');
 
-  const hasUseCacheDirective = /['"]use cache['"]/.test(content);
+  const hasUseCacheDirective = USE_CACHE_DIRECTIVE_RE.test(content);
 
   if (hasUseCacheDirective) {
-    // A function with 'use cache' cannot call dynamic functions (cookies(), headers()) directly
-    if (content.includes('cookies()') || content.includes('headers()')) {
+    // A function or module with 'use cache' cannot call dynamic request APIs directly
+    if (/\b(?:cookies|headers)\s*\(\s*\)/.test(content)) {
       violations.push(
-        `${relPath} - Contains 'use cache' but directly calls cookies() or headers(). Dynamic runtime data must be passed as serializable parameters or isolated outside the cached boundary.`
+        `${relPath} - Contains 'use cache' directive but directly calls cookies() or headers(). Dynamic runtime data must be passed as serializable parameters or isolated outside the cached boundary.`
+      );
+    }
+
+    if (!content.includes('cacheLife(')) {
+      warnings.push(
+        `${relPath} - Uses 'use cache' without an explicit cacheLife() profile. Always specify a named profile (e.g. 'telemetry', 'departments', 'reports').`
       );
     }
   }
 
   // Check top-level page components calling cookies() or headers() directly without Suspense or private cache
   if (path.basename(file) === 'page.tsx') {
-    if (
-      (content.includes('cookies()') || content.includes('headers()')) &&
-      !content.includes('<Suspense')
-    ) {
-      // Advisory warning for potential route de-optimization
+    if (/\b(?:cookies|headers)\s*\(\s*\)/.test(content) && !content.includes('<Suspense')) {
       warnings.push(
         `${relPath} - Page calls dynamic headers/cookies directly. Wrap dynamic consumers in <Suspense> to allow the static page shell to be cached and prerendered.`
       );
@@ -118,6 +159,10 @@ for (const file of mutationHandlers) {
   const hasPostOrPatch = /export async function (POST|PATCH|PUT|DELETE)/.test(content);
   if (hasPostOrPatch) {
     const hasInvalidation =
+      content.includes('updateTag') ||
+      content.includes('updateTags') ||
+      content.includes('updateTagInAction') ||
+      content.includes('refreshTag') ||
       content.includes('cacheInvalidateTags') ||
       content.includes('revalidateTag') ||
       content.includes('revalidatePath');
@@ -131,7 +176,7 @@ for (const file of mutationHandlers) {
       !hasInvalidation
     ) {
       warnings.push(
-        `${relPath} - Mutation handler performs database write/RPC but does not call cacheInvalidateTags() or revalidateTag(). Ensure tag invalidation is triggered.`
+        `${relPath} - Mutation handler performs database write/RPC but does not call updateTag() / cacheInvalidateTags() / revalidateTag(). Ensure tag invalidation is triggered.`
       );
     }
   }

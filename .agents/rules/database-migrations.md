@@ -1,43 +1,50 @@
 ---
 name: database-migrations
-description: Migration sequencing, Row Level Security (RLS) enforcement, and transaction safety rules for PostgreSQL.
+description: Immutable migration sequencing, zero-downtime DDL, Squawk linting, Row Level Security (RLS) isolation, and Zod contract parity rules for PostgreSQL.
 paths:
-  - "packages/database/migrations/**/*.{sql,ts}"
-  - "packages/database/tests/**/*.{sql,ts}"
-  - "tools/audits/audit-rls.cjs"
+  - 'packages/database/**/*.{sql,ts,mjs}'
+  - 'packages/supabase/src/**/*.ts'
+  - 'packages/contract/src/schemas/**/*.ts'
+  - 'tools/audits/audit-rls*.cjs'
+  - 'tools/audits/audit-contract-drift.cjs'
 ---
 
-# Database Migration & RLS Safety Rules
+# Database Migration, RLS & Schema Parity Rules
 
-## 1. Migration File Naming & Zero-Padding
+## 1. Immutable Migrations & Canonical Single-Tree SSoT
 
-- Migration files must be strictly zero-padded 3-digit identifiers followed by a descriptive snake_case slug:
-  `packages/database/migrations/NNN_description.sql` (e.g., `154_add_fleet_anomaly_indices.sql`).
-- Never edit or mutate previously executed historical migrations. Always create new incremental migrations.
+- **Canonical directory**: `packages/database/migrations/NNN_description.sql` (zero-padded 3-digit prefix + `snake_case` slug, e.g., `195_add_fleet_anomaly_indices.sql`).
+- **Symlink guard**: `packages/supabase/migrations` and `packages/database/supabase/migrations` are symlinks to `packages/database/migrations` — **never** write, copy, or create files directly in symlinked paths (`check-migration-drift.mjs`).
+- **Strict immutability**: Never rename, renumber, delete, or mutate an applied migration (`supabase_migrations.schema_migrations` keys on the version prefix). Always create a new forward incremental migration.
 
-## 2. Mandatory Row Level Security (RLS)
+## 2. Mandatory Row Level Security (RLS) & Tenant/Department Isolation
 
-- Every single newly created table MUST enable RLS on line 1 following table creation:
+- Every newly created table MUST enable RLS in the same migration:
   ```sql
   ALTER TABLE public.<table_name> ENABLE ROW LEVEL SECURITY;
   ```
-- Write explicit RLS policies for `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
-- Policies must check employee role and department hierarchy:
+  System-only tables that intentionally omit user policies must declare an audited exemption reason (≥8 chars): `-- rls-exempt-table public.<table_name>: <reason>` (or `-- rls-exempt: <reason>`). Never issue `DISABLE ROW LEVEL SECURITY`.
+- Define explicit RLS policies for `SELECT`, `INSERT`, `UPDATE`, and `DELETE` enforcing tenant/department isolation via `public.employees` (`department_id`, `accessible_departments`, and `role IN ('ADMIN', 'EXECUTIVE')`). Wrap `(SELECT auth.uid())` in a scalar subquery for PostgreSQL InitPlan caching:
   ```sql
   CREATE POLICY "<table_name>_dept_read" ON public.<table_name>
-    FOR SELECT
-    USING (
+    FOR SELECT USING (
       department_id IN (
-        SELECT e.department_id FROM public.employees e WHERE e.auth_id = auth.uid()
-      ) OR
-      EXISTS (
-        SELECT 1 FROM public.employees e WHERE e.auth_id = auth.uid() AND e.role IN ('ADMIN', 'EXECUTIVE')
+        SELECT e.department_id FROM public.employees e WHERE e.auth_id = (SELECT auth.uid())
+      ) OR EXISTS (
+        SELECT 1 FROM public.employees e
+        WHERE e.auth_id = (SELECT auth.uid()) AND e.role IN ('ADMIN', 'EXECUTIVE')
       )
     );
   ```
+- **`SECURITY DEFINER` RPC hardening**: Always pin `SET search_path = ''` (or `public, pg_temp`), schema-qualify every relation (`public.<table>`), verify `auth.uid()` and department access inside the body, and restrict execution (`REVOKE ALL ON FUNCTION ... FROM PUBLIC, anon; GRANT EXECUTE ... TO authenticated;`).
 
-## 3. Transaction Safety & Non-Destructive Migrations
+## 3. Zero-Downtime DDL & Squawk Linting (`pnpm lint:migrations`)
 
-- Wrap all DDL statements in atomic transactions (`BEGIN; ... COMMIT;`).
-- When adding columns, always add as nullable or with a default value first. Never add `NOT NULL` without a default on existing production tables.
-- Never drop a column in the same migration where active application code references are removed. Follow expand-and-contract deployment phases.
+- **Expand-and-contract DDL**: Add columns as nullable or with a non-volatile default; never add `NOT NULL` without a default on existing tables, and never drop active columns in the same release as application code removal.
+- **Idempotency & lock safety**: Use `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, and `DROP ... IF EXISTS`. Never run `REFRESH MATERIALIZED VIEW CONCURRENTLY` inside a `DO $$` / `plpgsql` block or transactional migration (schedule via `cron.schedule(...)`).
+- **Verification**: Run `pnpm lint:migrations` (Squawk + RLS policy gate), `node tools/audits/audit-rls-matrix.cjs`, and `pnpm --filter @repo/database test`.
+
+## 4. Canonical Zod Contract Parity (`@repo/contract`)
+
+- Every table or column added/modified in `packages/database/migrations/` MUST have a matching Zod schema in `packages/contract/src/schemas/*.schema.ts` (and `_registry.ts`).
+- Run `pnpm audit:drift` (`node tools/audits/audit-contract-drift.cjs`) and `pnpm --filter @repo/database db:types` to maintain a 100% Drift Health Index (DHI).

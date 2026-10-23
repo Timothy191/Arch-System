@@ -2,7 +2,7 @@
 
 ## Summary Metrics
 
-- **Agent Rules**: 26 verified in `.agents/rules/`
+- **Agent Rules**: 27 verified in `.agents/rules/`
 - **Agent Skills**: 7 verified in `.agents/skills/`
 - **Workspace Tracers**: 15 `AGENT_TRACER.md` files active
 - **Root Directives**: AGENTS.md, GEMINI.md, CLAUDE.md validated

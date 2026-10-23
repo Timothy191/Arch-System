@@ -10,122 +10,45 @@ paths:
   - 'apps/portal/app/api/**/*.ts'
 ---
 
-# Redis Capability Map
+# Redis 7.4 & Rate-Limiting Capability Contract
 
-`@repo/redis` is the only place that talks to Redis. Application code calls a named
-capability; it never issues a raw command, and it never assumes a persistent
-socket — production may run on the Upstash-style REST transport, which cannot
-block, subscribe, or run modules.
+`@repo/redis` and `@repo/rate-limiter` are the only packages that talk to Redis. Application code (`apps/portal`, `libs/*`, `packages/supabase`) calls a named capability; it never issues raw commands (`GET`, `SET`, `EVAL`, `XADD`, `FT.SEARCH`, `INCR`, `SET NX`) and never assumes a persistent TCP socket — production may run on the Upstash HTTP REST transport (Vercel serverless), which cannot block, subscribe, or load native modules.
 
-## 1. Pick the capability, do not hand-roll the command
+## 1. Capability-Only Façade
 
-| Need                                        | Use                                                                                                                       | Never                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Read-through cache, tag/prefix invalidation | `cacheGet` / `cacheSet` / `cacheWrap` / `cacheInvalidateTags` / `cacheInvalidatePrefixes` (`cache.ts`, `invalidation.ts`) | `getRedisClient().get(...)` in a route or action |
-| Authorization session state                 | `writeSession` / `readSession` / `touchSession` / `revokeSession` (`session.ts`)                                          | writing `arch:auth:employee:*` by hand           |
-| Work queue / live events                    | `appendToStream` / `consumeStream` / `readNew` (`streams.ts`)                                                             | bare `XADD` + `XREAD` pairs                      |
-| Rate limiting                               | `@repo/rate-limiter` with `RedisStore`, plus `rate-limit-middleware.ts` for HTTP                                          | per-route counters built with `INCR`             |
-| Live counters / uniques / leaderboards      | `incrementCounter` / `recordSample` / `addUnique` / `addToLeaderboard` (`analytics.ts`)                                   | `GET` → parse → `SET` read-modify-write          |
-| Coordinated writes across instances         | `withLock` / `tryWithLock` / `claimIdempotency` (`locks.ts`)                                                              | `SET NX` written inline                          |
-| Similarity search                           | `searchVectors` (`search.ts`) with a pgvector fallback                                                                    | calling `FT.SEARCH` without probing availability |
+| Need                       | Use                                                                                                                       | Never                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| L1/L2 cache + X-Fetch      | `cacheWrap` (`cacheGetOrSet`) / `swrCacheWrap` / `cacheGet` / `cacheSet` / `cacheSetWithTags` (`cache.ts`, `adaptive.ts`) | `getRedisClient().get(...)` in apps |
+| Dual-tier tag invalidation | `updateTag` / `updateTagInAction` / `updateTags` (`server-cache.ts`) → `cacheInvalidateTags` / `cacheInvalidatePrefixes`  | `SMEMBERS` + `DEL` or `KEYS *`      |
+| Session state & revocation | `writeSession` / `readSession` / `touchSession` / `revokeSession` / `bumpPrivilegeVersion` (`session.ts`)                 | writing `arch:auth:employee:*` raw  |
+| Streams & consumer groups  | `appendToStream` / `consumeStream` / `ensureConsumerGroup` / `claimIdle` / `moveToDeadLetter` / `readNew` (`streams.ts`)  | bare `XADD` + `XREAD` work queues   |
+| Rate limiting              | `@repo/rate-limiter` (`FixedWindowStrategy`, `SlidingWindowStrategy`, `TokenBucketStrategy`, `RedisStore`, `MemoryStore`) | per-route counters with bare `INCR` |
+| Counters / samples / ranks | `incrementCounter` / `incrWithExpire` / `recordSample` / `addUnique` / `addToLeaderboard` (`analytics.ts`)                | `GET` → parse → `SET`               |
+| Locks & idempotency        | `withLock` / `tryWithLock` / `acquireLock` / `claimIdempotency` / `completeIdempotency` (`locks.ts`)                      | inline `SET NX` or in-memory `Map`  |
+| Vector similarity search   | `ensureVectorIndex` / `upsertVector` / `searchVectors` (`search.ts`) with PostgreSQL `pgvector` fallback                  | `FT.SEARCH` without probing first   |
 
-## 2. Transport rules
+## 2. Dual-Transport Parity (TCP Redis 7.4 vs. Upstash HTTP REST)
 
-- Every new command goes through `send` / `sendSafe` in `raw.ts`
-  (`send` throws `RedisCommandError`, `sendSafe` degrades to a nullish reply).
-  Both tolerate RESP2 and RESP3 reply shapes.
-- Feature-detect, never guess: `detectCapabilities()` for
-  `eval` / `streams` / `hyperLogLog` / `sortedSets` / `search` / `blocking`,
-  and `supportsBlockingReads()` before any `BLOCK` argument. `searchAvailability()`
-  gates the whole vector path.
-- Anything that must work on serverless Redis needs a non-scripted fallback.
-  Locks, counters and samples use Lua when `EVAL` exists and a guarded single
-  command when it does not. Pub/Sub is best-effort only: L1 is purged locally
-  **before** any broadcast, so correctness never depends on delivery.
+- Every command rides `send` (throws `RedisCommandError`) or `sendSafe` (returns `null` on failure) in `raw.ts`, normalizing RESP2 and RESP3 replies (`asNumber`, `asStringOrNull`, `asFieldMap`, `parseStreamReply`, `asScoredMembers`, `asInfoMap`).
+- `getRedisClient()` (`client.ts`) auto-detects HTTP(S) `REDIS_URL` or `UPSTASH_REDIS_REST_URL` / `SERVERLESS_REDIS_URL` / `KV_REST_API_URL` and wraps `ServerlessRedisClient` (`serverless-client.ts`: raw-string returns, 5 s `AbortSignal` deadline, 429/5xx-only retries, micro-batched `/pipeline` auto-pipelining, cursor-backed `scanIterator`/`sScanIterator`). Only `cache.ts` calls `JSON.parse`; `readMemory<T>` checks explicit presence so falsy values (`0`, `false`, `""`, `null`) are valid cache hits.
+- Feature-detect, never guess: `detectCapabilities()` (cached 5 min) for `eval` / `streams` / `hyperLogLog` / `sortedSets` / `search` / `blocking`, `supportsBlockingReads()` before any `BLOCK` token, and `searchAvailability()` before vector queries.
+- Locks, counters, samples, and rate limiters use atomic Lua when `EVAL` exists and guarded command fallbacks when it does not. Pub/Sub is best-effort only: local L1 is purged synchronously **before** any `cache:invalidate:broadcast` publish.
 
-## 3. Locks and idempotency invariants
+## 3. L1/L2 Caching, X-Fetch Stampede Protection & Dual-Tier Invalidation
 
-- Every lock carries a TTL; `withLock` releases in `finally` and renews at
-  `ttlMs / 3` (floored at one second) when `autoRenew` is set.
-- Release and renew are compare-and-delete / compare-and-pexpire: a holder that
-  lost ownership cannot touch another holder's key, and `releaseLock` returns
-  `false` rather than lying.
-- Contention is a return value, not an exception: `tryWithLock` yields `null`,
-  `withLock` throws `LockUnavailableError`. Writers that must not queue pair it
-  with `claimIdempotency` (`'new'` / `'in-flight'` / `'duplicate'`) and store the
-  result with `completeIdempotency` so a replay returns the original outcome.
-- Pass `fencing: true` when a stale holder can still reach a datastore; the
-  token is monotonic per key and must be forwarded downstream.
-- A `RedisCommandError` from `acquireLock` means "Redis is unreachable" — it
-  must never be swallowed into a proceed-anyways path.
+- **L1 LRU + L2 Redis (`l1.ts`, `cache.ts`, `registry.ts`)**: `cacheGet` / `cacheGetWithStats` checks in-process L1 (`L1_MAX_ENTRIES = 1000`, O(1) `Map` recency bump) before L2 Redis. L1 TTL is computed by `l1TtlForKey(key, l2Seconds)` from `CACHE_TTL_REGISTRY` (`AUTH`, `METRICS`, `SHIFT`, `AI_MEMORY`, `DEPARTMENT`, `EQUIPMENT`), capped at `MAX_L1_TTL_SECONDS = 60`.
+- **X-Fetch stampede protection (`cacheWrap` / `cacheGetOrSet`, `xfetch.ts`, `adaptive.ts`)**: Hot reads use `cacheWrap` (`cacheGetOrSet`), storing `XFetchWrapper<T>` (`{ value, ttl, delta, computedAt, __isXFetchWrapper: true }`) and evaluating `shouldEarlyExpire`: `-beta * delta * Math.log(u) > ttlRemaining` (`u = Math.max(Math.random(), Number.MIN_VALUE)`). Early-expiry refreshes and misses coalesce in-process via `activeFetches` and cross-instance via `acquireRefreshLease(key)` (`arch:lease:refresh:<key>`, released early via `releaseRefreshLease` on error). `swrCacheWrap` adds TinyLFU frequency decay, adaptive TTL (0.5x–3x ±10% jitter), `redisCircuitBreaker`, and 15 s negative caching.
+- **Durability & invalidation (`invalidation.ts`, `apps/portal/lib/server-cache.ts`)**: `write-through-durable` categories use `cacheWriteThroughSupabase` + `registerSupabaseFallback`. Mutations call `updateTag()` / `updateTagInAction()` / `updateTags()` **before** `redirect()`, clearing Next.js Data Cache and Redis L1/L2 via `cacheInvalidateTags` (`sScanIterator` + `UNLINK` on `arch:__tags__:<tag>`, synchronous local L1 `memoryDeleteKeys` before broadcast capped at `BROADCAST_KEY_LIMIT = 1000`). Telemetry in `stats.ts` buffers in a `Float64Array` ring buffer and flushes in batches (`flushStats`, `persistCacheStatsSnapshot`).
 
-## 4. Sessions
+## 4. Atomic Lua Rate Limiting & Distributed Locks
 
-- One record shape (`EmployeeRecord`) under `sessionKey(userId, options)`;
-  multi-device sessions pass `sessionId`.
-- Revocation is `bumpPrivilegeVersion` (a single `INCR`), which invalidates every
-  stored copy on every instance without SCAN or Pub/Sub. Call it on logout and
-  whenever role, department, or access list changes.
-- Sliding expiry uses `GETEX` (`touchSession`), throttled per process — do not
-  re-issue `SET` on every navigation.
-- `readSession` serves L1 first: tests that assert "the session is gone" must
-  delete through `cacheDelete`/`revokeSession`, not `client.del` on the L2 key.
+- **Rate limiting (`@repo/rate-limiter` & `rate-limit-middleware.ts`)**: `RateLimiter` pairs `RedisStore` (with automatic `MemoryStore` fallback on error) with `FixedWindowStrategy` (`FIXED_WINDOW_LUA_SCRIPT`: atomic `INCR` + `PTTL`/`PEXPIRE` repair on `<key>:fixed:<windowStart>`), `SlidingWindowStrategy` (`SLIDING_WINDOW_LUA_SCRIPT`: `cjson` timestamp pruning + `SET EX` on `<key>:sliding`), or `TokenBucketStrategy` (`LUA_TOKEN_BUCKET`: continuous refill + weighted deduction on `<key>:tokenbucket`), each falling back to `get`/`set` when `eval` is unavailable. HTTP routes use `withRateLimit` / `checkRateLimit` (backed by `incrWithExpire`, scoped to `ratelimit:<path>:ip:<ip>`, CPU-load adaptive >85%, emitting RFC 9210 `RateLimit`/`RateLimit-Policy` and `X-RateLimit-*` headers).
+- **Distributed locks & idempotency (`locks.ts`)**: Every lock carries a TTL (`SET arch:lock:<name> <token> NX PX <ttlMs>`); `withLock` releases in `finally` and renews at `ttlMs / 3` (min 1 s) when `autoRenew: true`. Release (`RELEASE_SCRIPT`) and renewal (`RENEW_SCRIPT`) use token-verified Lua (`OWNED_BY_TOKEN_LUA`) with guarded `GET` + `DEL`/`PEXPIRE` fallback; `releaseLock` returns `false` if ownership was lost. Pass `fencing: true` (`ACQUIRE_FENCE_SCRIPT`) for monotonic `fencingToken`s. Contention returns `null` (`tryWithLock`) or throws `LockUnavailableError` (`withLock`); a `RedisCommandError` from `acquireLock` fails closed. Replay-safe writes pair with `claimIdempotency` (`'new' | 'in-flight' | 'duplicate'`), `completeIdempotency`, `readIdempotencyResult`, and `abandonIdempotency`.
 
-## 5. Streams
+## 5. Sessions, Streams, Analytics, Vector Search, Keys & Testing
 
-- A work queue is a consumer group: `ensureConsumerGroup` → `readFromGroup` →
-  `acknowledge`, with `claimIdle` to rescue entries from a dead consumer and
-  `moveToDeadLetter` after `maxDeliveries`. `consumeStream` drives that loop;
-  call it instead of assembling the pieces.
-- Append with `maxLen` (and `approx: false` when the cap must hold exactly);
-  an unbounded stream in a memory-limited instance is a future eviction.
-- Unacknowledged entries stay pending and are never lost; a handler signals
-  failure by throwing, and the loop counts it (`{ processed, failed, dead }`)
-  instead of dropping it.
-- SSE/broadcast readers use `readNew` with `Last-Event-ID` replay; queue
-  consumers never read the same stream with `XREAD`.
-
-## 6. Analytics are atomic and self-limiting
-
-- Increments are `INCR` + `TTL` in one script, samples are one hash update,
-  uniques are HyperLogLog, rankings are ZSET — no read-modify-write anywhere.
-- Keys are bucketed by time and carry a TTL, because the instance is
-  `allkeys-lru`: an unpinned counter is the first thing evicted, and a counter
-  without a window is a memory leak.
-- Analytics must never fail a request: `sendSafe` paths return `0`/`null` when
-  Redis is unreachable, and callers render "no data" instead of erroring.
-
-## 7. Vector search
-
-- `ensureVectorIndex` → `upsertVector` → `searchVectors`, all short-circuiting on
-  `searchAvailability()`. An unavailable or rejected query returns `[]`, which
-  means "fall back to pgvector", not "there is nothing similar".
-- Vectors are packed as little-endian float32 via `encodeVector`; a JSON array
-  is silently a different encoding and produces garbage scores, not an error.
-- Index names and key prefixes come from one `VectorIndexSpec` so the index
-  prefix and the document prefix cannot drift apart.
-
-## 8. Key hygiene
-
-- Namespacing is fixed: `arch:lock:` · `arch:idem:` · `arch:lease:refresh:` ·
-  `arch:auth:employee:` / `arch:auth:privilege:` · `arch:metrics:{ctr,hll,rank}:` ·
-  `arch:__tags__:` · `arch:vector:`. Streams are the one exception and carry
-  their domain name (`drilling:telemetry:stream`).
-- Every key is either TTL'd or trimmed. Keys with no bound fail review.
-- Build keys with the module's own helpers (`lockKey`, `sessionKey`,
-  `refreshLeaseKey`, `vectorKey`); never interpolate a prefix by hand.
-
-## 9. Testing
-
-- Unit suites mock at the **transport** boundary (`../src/client`, `../src/raw`)
-  and assert the exact command tokens, including the no-`EVAL` fallback path.
-- Real-server behaviour is covered by
-  `packages/redis/tests/integration/redis-capabilities.integration.test.ts`
-  (`REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration`, CI job
-  `redis-integration`): lock ownership and expiry, fencing monotonicity, claim
-  states, session revocation, concurrent counter exactness, consumer-group
-  split/claim/dead-letter, tag invalidation, and k-NN when a search module is
-  present. New primitives get both halves — a mocked suite proves the command,
-  an integration test proves the server honours it.
-- Integration keys carry a per-run token and are `SCAN`+`UNLINK`ed afterwards;
-  never `FLUSHDB` on a shared instance.
+- **Sessions (`session.ts`)**: One `EmployeeRecord` shape under `sessionKey(userId, options)`. Revocation is `bumpPrivilegeVersion` (single `INCR` on `arch:auth:privilege:<userId>` + `DEL` + L1 delete); call `revokeSession` on logout or role/department change. Sliding expiry uses `GETEX` (`touchSession`, throttled to 60 s). `readSession` checks L1 first — tests must delete via `cacheDelete`/`revokeSession`.
+- **Streams (`streams.ts`)**: Work queues use `consumeStream` (`ensureConsumerGroup` → `claimIdle` via `XAUTOCLAIM` → `readFromGroup` → `acknowledge` or `moveToDeadLetter` to `<stream>:dead` after `maxDeliveries`). Always pass `maxLen` to `appendToStream`. SSE readers use `readNew` with `Last-Event-ID`.
+- **Analytics (`analytics.ts`)**: `incrementCounter` / `incrWithExpire` (`INCR_WITH_TTL_SCRIPT`), `recordSample` (`RECORD_SAMPLE_SCRIPT`), `addUnique` (`PFADD`), and `addToLeaderboard` (`ZINCRBY`) are atomic, time-bucketed with retention TTLs for `allkeys-lru`, and degrade to `0`/`null`/`[]` via `sendSafe`.
+- **Vector search (`search.ts`)**: `ensureVectorIndex` → `upsertVector` → `searchVectors` (`DIALECT 2`), gated by `searchAvailability()`. Pack vectors with `encodeVector(Float32Array)` and share one `VectorIndexSpec`. Unavailable or rejected queries return `[]` to trigger the PostgreSQL `pgvector` fallback.
+- **Key hygiene & testing**: Fixed prefixes (`arch:lock:`, `arch:idem:`, `arch:lease:refresh:`, `arch:auth:employee:`, `arch:auth:privilege:`, `arch:metrics:{ctr,sample,hll,rank}:`, `arch:__tags__:`, `arch:vector:`, `ratelimit:`, `drilling:telemetry:stream`) built via module helpers (`buildCacheKey`, `lockKey`, `sessionKey`, `refreshLeaseKey`, `vectorKey`), always TTL'd or trimmed. Unit tests mock `client`/`raw` (asserting both Lua and fallback paths); real-server parity runs via `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` using per-run token `SCAN`+`UNLINK` cleanup (never `FLUSHDB`).
