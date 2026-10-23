@@ -150,7 +150,10 @@ const SECURITY_CHECKS = [
   {
     id: 'no-eval',
     rule: 'No eval() or Function() constructor',
-    pattern: '\\beval\\s*\\(|\\bnew\\s+Function\\s*\\(',
+    // Excludes method calls such as redis.eval() (server-side Lua); bare eval()
+    // and global-object eval remain banned.
+    pattern:
+      '(?<![.\\w$])eval\\s*\\(|\\b(?:window|globalThis|self|global)\\.eval\\s*\\(|\\bnew\\s+Function\\s*\\(',
     paths: ['apps/**/*.{ts,tsx,js,jsx}'],
     severity: 'error',
     enforceAt: ['ci', 'local'],

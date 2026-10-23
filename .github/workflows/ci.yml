@@ -283,6 +283,48 @@ jobs:
           path: apps/portal/coverage/
           retention-days: 14
 
+  redis-integration:
+    name: Redis Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    permissions:
+      contents: read
+    env:
+      REDIS_URL: redis://localhost:6379
+      REDIS_INTEGRATION: '1'
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Redis integration tests
+        run: pnpm --filter portal test:integration
+
   # E2E job - depends on quality
   e2e:
     name: E2E Tests

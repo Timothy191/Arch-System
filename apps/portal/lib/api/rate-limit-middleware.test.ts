@@ -23,6 +23,13 @@ const mockRedisClient = {
   expire: jest.fn(async (_key: string, _seconds: number) => {
     return true;
   }),
+  // Emulates INCR + PEXPIRE + PTTL from RATE_LIMIT_LUA_SCRIPT.
+  eval: jest.fn(async (_script: string, options: { keys: string[]; arguments: string[] }) => {
+    const key = options.keys[0]!;
+    const val = parseInt(mockCache.get(key) || '0', 10) + 1;
+    mockCache.set(key, val.toString());
+    return [val, Number(options.arguments[0])];
+  }),
 };
 
 jest.mock('@repo/redis', () => ({
@@ -112,21 +119,42 @@ describe('withRateLimit', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it('uses user ID as identifier when x-user-id header is set', async () => {
-    const req1 = makeRequest('http://localhost/api/ai/chat', {
-      'x-user-id': 'user-abc',
-    });
-    const req2 = makeRequest('http://localhost/api/ai/chat', {
-      'x-user-id': 'user-xyz',
-    });
-
+  it('does not trust the client-supplied x-user-id header', async () => {
     const customLimit = { windowMs: 60_000, maxRequests: 1 };
 
-    await withRateLimit(req1, handler, { customLimit });
+    await withRateLimit(
+      makeRequest('http://localhost/api/ai/chat', { 'x-user-id': 'user-abc' }),
+      handler,
+      { customLimit }
+    );
     handler.mockClear();
 
-    // Different user should not be blocked
-    const res = await withRateLimit(req2, handler, { customLimit });
+    // Same network identity, different claimed user — the bucket is shared.
+    const res = await withRateLimit(
+      makeRequest('http://localhost/api/ai/chat', { 'x-user-id': 'user-xyz' }),
+      handler,
+      { customLimit }
+    );
+
+    expect(res.status).toBe(429);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('uses a separate counter per endpoint path', async () => {
+    const customLimit = { windowMs: 60_000, maxRequests: 1 };
+    const headers = { 'x-forwarded-for': '10.0.0.60' };
+
+    await withRateLimit(makeRequest('http://localhost/api/export/machines', headers), handler, {
+      customLimit,
+    });
+    handler.mockClear();
+
+    const res = await withRateLimit(
+      makeRequest('http://localhost/api/export/reports', headers),
+      handler,
+      { customLimit }
+    );
+
     expect(res.status).toBe(200);
     expect(handler).toHaveBeenCalledTimes(1);
   });
@@ -140,6 +168,32 @@ describe('withRateLimit', () => {
     expect(res.status).toBe(200);
     expect(res.headers.get('X-RateLimit-Limit')).toBeNull();
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('increments atomically through eval when the client supports it', async () => {
+    const req = makeRequest('http://localhost/api/export/machines', {
+      'x-forwarded-for': '10.0.0.50',
+    });
+
+    const res = await withRateLimit(req, handler);
+
+    expect(res.status).toBe(200);
+    expect(mockRedisClient.eval).toHaveBeenCalled();
+    expect(mockRedisClient.incr).not.toHaveBeenCalled();
+  });
+
+  it('falls back to INCR when eval is unavailable', async () => {
+    mockRedisClient.eval.mockRejectedValueOnce(new Error('ERR unknown command'));
+    const req = makeRequest('http://localhost/api/export/machines', {
+      'x-forwarded-for': '10.0.0.51',
+    });
+
+    const res = await withRateLimit(req, handler, {
+      customLimit: { windowMs: 60_000, maxRequests: 2 },
+    });
+
+    expect(res.status).toBe(200);
+    expect(mockRedisClient.incr).toHaveBeenCalled();
   });
 
   it('halves request limits when system is under high load', async () => {

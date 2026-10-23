@@ -38,20 +38,53 @@ class MemoryStore {
   }
 }
 
+// INCR and PEXPIRE must be atomic: a crash between the two leaves a key with
+// no TTL, which permanently blocks the identifier once the count is exceeded.
+const RATE_LIMIT_LUA_SCRIPT = `
+local count = redis.call('INCR', KEYS[1])
+local ttl = redis.call('PTTL', KEYS[1])
+-- Repair keys left without a TTL by the old INCR/EXPIRE race.
+if ttl < 0 then
+  redis.call('PEXPIRE', KEYS[1], ARGV[1])
+  ttl = tonumber(ARGV[1])
+end
+return {count, ttl}
+`;
+
 // Simple Redis store for rate limiting
 class RedisStore {
   constructor(private _redis: Awaited<ReturnType<typeof getRedisClient>>) {}
 
   async increment(key: string, windowMs: number): Promise<{ count: number; resetTime: number }> {
     const now = Date.now();
-    const resetTime = now + windowMs;
+
+    if (typeof this._redis.eval === 'function') {
+      try {
+        const raw = await this._redis.eval(RATE_LIMIT_LUA_SCRIPT, {
+          keys: [key],
+          arguments: [String(windowMs)],
+        });
+        if (Array.isArray(raw) && raw.length >= 2) {
+          const count = Number(raw[0]);
+          const ttl = Number(raw[1]);
+          if (Number.isFinite(count)) {
+            return {
+              count,
+              resetTime: now + (Number.isFinite(ttl) && ttl > 0 ? ttl : windowMs),
+            };
+          }
+        }
+      } catch {
+        // Fall back to non-atomic INCR/EXPIRE when scripts are unavailable
+      }
+    }
 
     const result = await this._redis.incr(key);
     if (result === 1) {
       await this._redis.expire(key, Math.ceil(windowMs / 1000));
     }
 
-    return { count: result, resetTime };
+    return { count: result, resetTime: now + windowMs };
   }
 
   async get(key: string): Promise<{ count: number; resetTime: number } | undefined> {
@@ -133,9 +166,13 @@ const slidingWindowStrategy = new WindowStrategy('sliding-window');
 const tokenBucketStrategy = new WindowStrategy('token-bucket');
 
 /**
- * Check rate limit for a given identifier and configuration
+ * Check rate limit for a given identifier and configuration.
+ *
+ * The counter is scoped to the endpoint path so unrelated routes (and the SSE
+ * stream vs. its ingest route) never share a budget even when callers share an
+ * IP address.
  */
-async function checkRateLimit(
+export async function checkRateLimit(
   identifier: string,
   config: { windowMs: number; maxRequests: number },
   path: string
@@ -154,25 +191,23 @@ async function checkRateLimit(
   // Token Bucket Strategy for bursty AI calls, Sliding Window for all others
   const strategy = path.startsWith('/api/ai/') ? tokenBucketStrategy : slidingWindowStrategy;
 
-  const key = `ratelimit:${identifier}`;
+  const key = `ratelimit:${normalizePath(path)}:${identifier}`;
   return strategy.check(key, config.maxRequests, config.windowMs, store);
 }
 
+function normalizePath(path: string): string {
+  return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 /**
- * Extract client identifier from request
+ * Extract client identifier from request.
+ *
+ * Only the network identity is trusted. `x-user-id` is client-supplied on API
+ * routes (the auth proxy does not run for `/api/*`), so using it here let any
+ * caller reset their bucket by changing a header.
  */
 function getClientIdentifier(request: Request | NextRequest): string {
-  // Try to get real IP, fallback to user ID if authenticated
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIp = forwarded?.split(',')[0]?.trim() || ('ip' in request ? request.ip : undefined);
-
-  // For authenticated requests, use user ID for more precise limiting
-  const userId = request.headers.get('x-user-id');
-  if (userId) {
-    return `user:${userId}`;
-  }
-
-  return `ip:${realIp || 'unknown'}`;
+  return `ip:${getClientIp(request)}`;
 }
 
 /**

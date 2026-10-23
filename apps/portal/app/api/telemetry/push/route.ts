@@ -90,7 +90,6 @@
  *         description: Internal server error
  */
 
-import { timingSafeEqual } from 'node:crypto';
 import { telemetryPushSchema } from '@repo/contract/schemas/telemetry.schema';
 import { withValidation } from '@repo/contract/validation';
 import { getRedisClient } from '@repo/redis';
@@ -98,6 +97,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
+import { authorizeIngest } from '@/lib/api/telemetry-auth';
 
 // L1 cache (in-memory)
 const localLastValues = new Map<string, number>();
@@ -115,46 +115,6 @@ const webhookPayloadSchema = z
       .passthrough(),
   })
   .passthrough();
-
-function getIngestSecret(): string | null {
-  const secret = process.env.TELEMETRY_INGEST_SECRET || process.env.TELEMETRY_WEBHOOK_SECRET;
-  return secret && secret.trim().length > 0 ? secret : null;
-}
-
-function secretsMatch(provided: string, expected: string): boolean {
-  const providedBuffer = Buffer.from(provided);
-  const expectedBuffer = Buffer.from(expected);
-  if (providedBuffer.length !== expectedBuffer.length) return false;
-  return timingSafeEqual(providedBuffer, expectedBuffer);
-}
-
-/**
- * Telemetry writes are a safety-relevant ingest path: unsigned callers could
- * poison the values SCADA views read. Require a shared secret.
- *
- * In non-production environments an unconfigured secret is tolerated so local
- * development and tests keep working; production fails closed.
- */
-function authorizeIngest(req: Request): NextResponse | null {
-  const secret = getIngestSecret();
-  if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json({ error: 'Telemetry ingest is not configured.' }, { status: 503 });
-    }
-    return null;
-  }
-
-  const authHeader = req.headers.get('authorization');
-  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const provided =
-    req.headers.get('x-telemetry-secret') || req.headers.get('x-webhook-secret') || bearer;
-
-  if (!provided || !secretsMatch(provided, secret)) {
-    return NextResponse.json({ error: 'Unauthorized telemetry ingest.' }, { status: 401 });
-  }
-
-  return null;
-}
 
 export function clearTelemetryCache() {
   localLastValues.clear();

@@ -1,9 +1,21 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-10-21T04:06:23.505Z",
+  "generatedAt": "2026-10-23T08:06:21.722Z",
   "checks": [
-    { "projectType": "app", "targets": ["build", "lint", "typecheck", "test"], "blocking": true },
-    { "projectType": "package", "targets": ["build", "lint", "typecheck"], "blocking": true },
-    { "projectType": "tool", "targets": ["lint", "typecheck"], "blocking": false }
+    {
+      "projectType": "app",
+      "targets": ["build", "lint", "typecheck", "test"],
+      "blocking": true
+    },
+    {
+      "projectType": "package",
+      "targets": ["build", "lint", "typecheck"],
+      "blocking": true
+    },
+    {
+      "projectType": "tool",
+      "targets": ["lint", "typecheck"],
+      "blocking": false
+    }
   ]
 }

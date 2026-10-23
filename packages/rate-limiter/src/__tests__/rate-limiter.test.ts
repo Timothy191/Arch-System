@@ -1,4 +1,5 @@
 import { RateLimiter } from '../index';
+import type { IStore } from '../interfaces';
 import { MemoryStore } from '../stores/memory.store';
 import { RedisStore } from '../stores/redis.store';
 import { FixedWindowStrategy } from '../strategies/fixed-window';
@@ -215,6 +216,53 @@ describe('FixedWindowStrategy', () => {
     const result = await strategy.check('user:123', 5, 60000, store);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(4);
+  });
+
+  test('uses atomic Lua eval when the store supports it', async () => {
+    const evalStore = {
+      get: jest.fn(),
+      set: jest.fn(),
+      eval: jest.fn().mockResolvedValue([1, 59000]),
+    } as unknown as IStore;
+
+    const result = await strategy.check('user:123', 5, 60000, evalStore);
+
+    expect(evalStore.eval).toHaveBeenCalledWith(
+      expect.stringContaining("redis.call('INCR'"),
+      [expect.stringContaining(':fixed:')],
+      [expect.any(String)]
+    );
+    expect(evalStore.get).not.toHaveBeenCalled();
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(4);
+  });
+
+  test('blocks atomically when Lua count exceeds the limit', async () => {
+    const evalStore = {
+      get: jest.fn(),
+      set: jest.fn(),
+      eval: jest.fn().mockResolvedValue([6, 1000]),
+    } as unknown as IStore;
+
+    const result = await strategy.check('user:123', 5, 60000, evalStore);
+
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
+    expect(result.retryAfter).toBeGreaterThan(0);
+  });
+
+  test('falls back to read-modify-write when eval fails', async () => {
+    const evalStore = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      eval: jest.fn().mockRejectedValue(new Error('ERR unknown command')),
+    } as unknown as IStore;
+
+    const result = await strategy.check('user:123', 5, 60000, evalStore);
+
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(4);
+    expect(evalStore.set).toHaveBeenCalled();
   });
 });
 

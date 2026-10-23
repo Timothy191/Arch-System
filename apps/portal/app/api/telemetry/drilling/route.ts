@@ -57,6 +57,17 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
+import { checkRateLimit, withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { authorizeIngest } from '@/lib/api/telemetry-auth';
+
+const DRILL_TELEMETRY_STREAM_KEY = 'drilling:telemetry:stream';
+const DRILL_TELEMETRY_STREAM_MAXLEN = 1000;
+
+// Ingest sizing: a machine may publish up to 10 samples/sec; the per-IP entry
+// cap covers several rigs aggregated behind one gateway address.
+const INGEST_RATE_LIMIT = { windowMs: 60_000, maxRequests: 2400 };
+const MACHINE_RATE_LIMIT = { windowMs: 60_000, maxRequests: 600 };
+const INGEST_PATH = '/api/telemetry/drilling';
 
 // AGENT-TRACE: Ingestion route for Drill Rig IoT telemetry
 // Updates machine_telemetry table, updates Redis cache, and syncs with SCADA tag system
@@ -76,6 +87,33 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       rotary_speed,
       timestamp = new Date().toISOString(),
     } = payload;
+
+    const machineLimit = await checkRateLimit(
+      `machine:${machine_id}`,
+      MACHINE_RATE_LIMIT,
+      INGEST_PATH
+    );
+
+    if (!machineLimit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: `Telemetry rate limit exceeded for machine ${machine_id}.`,
+            code: 'RATE_LIMIT_EXCEEDED',
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': machineLimit.limit.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': machineLimit.resetTime.toString(),
+            'Retry-After': (machineLimit.retryAfter || 60).toString(),
+          },
+        }
+      );
+    }
 
     const supabase = await createServerSupabaseClient();
 
@@ -128,12 +166,29 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
 
     try {
       const redis = await getRedisClient();
-      await redis.set(
-        `drilling:telemetry:last:${machine_id}`,
-        JSON.stringify(telemetryState),
-        { EX: 86400 } // 24 hours TTL
-      );
-      await redis.publish('drilling:telemetry:stream', JSON.stringify(telemetryState));
+      const serializedState = JSON.stringify(telemetryState);
+      await redis.set(`drilling:telemetry:last:${machine_id}`, serializedState, {
+        EX: 86400, // 24 hours TTL
+      });
+      // Streams keep a bounded replay window so SSE clients can resume with
+      // Last-Event-ID after a disconnect; pub/sub remains for serverless REST
+      // adapters, which do not implement XADD/XREAD.
+      if (typeof redis.xAdd === 'function') {
+        await redis.xAdd(
+          DRILL_TELEMETRY_STREAM_KEY,
+          '*',
+          { data: serializedState },
+          {
+            TRIM: {
+              strategy: 'MAXLEN',
+              strategyModifier: '~',
+              threshold: DRILL_TELEMETRY_STREAM_MAXLEN,
+            },
+          }
+        );
+      } else {
+        await redis.publish(DRILL_TELEMETRY_STREAM_KEY, serializedState);
+      }
     } catch (redisErr) {
       // eslint-disable-next-line no-console
       console.warn('[DrillTelemetry] Redis caching warning:', redisErr);
@@ -184,12 +239,23 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
 });
 
 export async function POST(req: Request) {
-  return withBodyLimit(
+  return withRateLimit(
     req,
     async () => {
-      const response = await handleIngest(req, { params: Promise.resolve({}) });
-      return applyCors(req, response as NextResponse);
+      const unauthorized = authorizeIngest(req);
+      if (unauthorized) {
+        return applyCors(req, unauthorized);
+      }
+
+      return withBodyLimit(
+        req,
+        async () => {
+          const response = await handleIngest(req, { params: Promise.resolve({}) });
+          return applyCors(req, response as NextResponse);
+        },
+        { maxSize: 1048576 } // 1MB payload limit
+      );
     },
-    { maxSize: 1048576 } // 1MB payload limit
+    { customLimit: INGEST_RATE_LIMIT }
   );
 }

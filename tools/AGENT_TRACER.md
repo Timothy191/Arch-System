@@ -95,3 +95,9 @@
 - Extracted active skill directory filtering into `active-skill-directories.cjs`; dot-prefixed archive containers are excluded, while normal active directories without `SKILL.md` continue to be audited and fail.
 - Added three Node regression tests and included them in `audit:compliance`.
 - Verified: targeted audit tests pass; agentic audit checks 52 active skills with zero critical findings; `pnpm quality` exits 0 with WARN for remaining dependency advisories; `pnpm agent:verify` passes; portal production build passes after removing the route runtime option incompatible with Cache Components.
+
+## 2026-10-23: no-eval False Positive on Redis EVAL
+
+- `apps/portal` rate limiting calls `redis.eval(...)` to run an INCR/PTTL Lua script; the `no-eval` security check matched the method name and failed `pnpm policy:check` during telemetry hardening.
+- Refined the rule in `tools/repo/policy-compiler.cjs` to ignore method calls while still banning bare `eval(`, `window/globalThis/self/global.eval(`, and `new Function(`; regenerated the policy artifacts with `pnpm policy:gen`.
+- Verified: regex expectations cover bare/global eval (flagged), `redis.eval` (ignored); `pnpm policy:check` passes in CI mode with no violations.

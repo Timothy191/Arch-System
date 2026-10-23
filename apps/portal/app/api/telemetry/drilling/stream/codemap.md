@@ -2,29 +2,34 @@
 
 ## Responsibility
 
-Provides a real-time SSE endpoint that streams live drill rig telemetry to clients by forwarding Redis pub/sub messages from `drilling:telemetry:stream`.
+Provides a real-time SSE endpoint that streams drill rig telemetry from the capped Redis stream `drilling:telemetry:stream`, replaying missed entries when a client reconnects.
 
 ## Design
 
-- `GET` only; returns `text/event-stream`.
-- Uses a `ReadableStream` with a Redis subscriber created via `@repo/redis`.
-- Sends an initial `connected` event, then forwards every pub/sub message as `data: ...`.
-- Sends SSE comment heartbeats (`: ping`) every 15 seconds to keep proxies and clients alive.
-- Cleans up subscriber, unsubscribe, and heartbeat timer on stream cancel or request abort.
+- `GET` only; returns `text/event-stream` as a `NextResponse`.
+- Connection budget: 60 connections/min per IP, path-scoped through `withRateLimit`.
+- Shared-secret auth via `authorizeTelemetryStream` (`@/lib/api/telemetry-auth`): `TELEMETRY_STREAM_SECRET`, falling back to `TELEMETRY_INGEST_SECRET` / `TELEMETRY_WEBHOOK_SECRET`. Production fails closed (503) when unconfigured.
+- Uses a duplicated Redis client via `@repo/redis` (`createRedisSubscriber`).
+- Reads with `XREAD BLOCK 15000 COUNT 100`, starting at `$` for live-only or at the client's `Last-Event-ID` for replay.
+- Emits each entry as `id: <stream-id>` plus `data: <telemetry-json>`, so browsers resume automatically after a disconnect.
+- Sends an initial `connected` event (no id) and SSE comment heartbeats (`: ping`) every 15 seconds.
+- Falls back to pub/sub subscribe on adapters without `XREAD` (serverless REST).
+- Cleans up the heartbeat and disconnects the client on cancel/abort; `disconnect()` also breaks a pending blocking read.
 
 ## Flow
 
-1. Client opens `GET /api/telemetry/drilling/stream`.
-2. Create Redis subscriber and subscribe to `drilling:telemetry:stream`.
-3. Enqueue a welcome event with `event: "connected"`.
-4. Start a 15s keep-alive interval.
-5. On each Redis message, enqueue `data: <json>\n\n`.
-6. On client abort or stream cancel:
-   - clear heartbeat interval
-   - unsubscribe and quit subscriber if open
+1. Client opens `GET /api/telemetry/drilling/stream` (optionally with `Last-Event-ID`).
+2. `withRateLimit` applies the per-IP connection cap.
+3. `authorizeTelemetryStream` rejects unsigned requests (401, or 503 in production when unconfigured).
+4. Validate the id (`<ms>-<seq>`); otherwise start at `$`.
+5. Create the Redis client, enqueue `connected`, start the 15s heartbeat.
+6. Loop on `XREAD`; enqueue `id: <id>\ndata: <json>\n\n` for each entry.
+7. On client abort or stream cancel: clear the heartbeat and disconnect the client.
 
 ## Integration
 
-- Depends on `@repo/redis` subscriber/client behavior.
-- Consumes events published by `apps/portal/app/api/telemetry/drilling`.
-- Intended for dashboard or operator clients needing live drill telemetry without polling.
+- Depends on `@repo/redis` client behavior.
+- Uses `@/lib/api/telemetry-auth` and `@/lib/api/rate-limit-middleware`.
+- Consumes entries appended by `apps/portal/app/api/telemetry/drilling`.
+- The ingest route trims the stream to ~1000 entries, bounding replay memory.
+- Live-Redis coverage lives in `apps/portal/test/integration/redis-primitives.integration.test.ts` (`REDIS_INTEGRATION=1`).
