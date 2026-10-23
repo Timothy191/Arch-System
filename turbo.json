@@ -1,6 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["tsconfig.json", "pnpm-workspace.yaml", ".npmrc"],
+  "globalDependencies": [
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml",
+    ".npmrc",
+    "biome.json"
+  ],
   "globalEnv": ["NODE_ENV", "VERCEL_ENV", "CI"],
   "globalPassThroughEnv": [
     "OTEL_EXPORTER_OTLP_ENDPOINT",

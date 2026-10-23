@@ -94,6 +94,7 @@
     "audit:data-fetching": "node tools/audits/audit-data-fetching.cjs",
     "audit:caching": "node tools/audits/audit-caching.cjs",
     "audit:turbopack": "node tools/audits/audit-turbopack.cjs",
+    "doctor": "node tools/repo/repository-doctor.cjs",
     "audit:routing": "node tools/audits/audit-routing-and-actions.cjs",
     "audit:rsc": "node tools/audits/audit-server-components.cjs",
     "audit:images": "node tools/audits/audit-image-optimization.cjs",
