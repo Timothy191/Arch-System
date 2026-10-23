@@ -466,26 +466,37 @@ export function HeroOperationalKpiStrip({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 rounded-xl liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-slate-200/80 px-3.5 py-2 shadow-2xs sm:divide-x divide-slate-200/70',
+        'grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 rounded-xl liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-slate-200/80 px-3.5 py-2 shadow-2xs',
         className
       )}
       data-testid={`hero-kpi-strip-${panelName}`}
       aria-label="Operational subsystem indicators"
     >
       {tiles.map((tile, index) => (
-        <div
-          key={tile.label}
-          className={cn(
-            'flex items-center justify-between gap-2 min-w-0 py-0.5',
-            index > 0 && 'sm:pl-3'
-          )}
-        >
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
-            {tile.label}
-          </span>
-          <div className="flex items-baseline gap-2 shrink-0">
+        <div key={tile.label} className="flex items-center justify-between gap-2 min-w-0 py-0.5">
+          <div className="flex items-center gap-2 min-w-0">
+            {index > 0 && (
+              <span
+                aria-hidden="true"
+                data-testid="hero-kpi-gold-separator"
+                className="hidden sm:inline-flex items-center justify-center font-mono text-xs font-bold text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none shrink-0"
+              >
+                |
+              </span>
+            )}
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
+              {tile.label}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-1.5 shrink-0">
             <span className="text-xs sm:text-[13px] font-mono font-bold text-[var(--text-heading)] tabular-nums">
               {tile.value}
+            </span>
+            <span
+              aria-hidden="true"
+              className="font-mono text-[10px] font-bold text-accent-amber select-none"
+            >
+              |
             </span>
             <span className="text-[10px] font-mono text-[var(--accent-blue)] font-semibold">
               {tile.subtext}
@@ -586,13 +597,13 @@ export function HeroCardContent({
             <div className="flex items-center gap-2.5">
               <span
                 className={cn(
-                  'inline-flex items-center justify-center w-8 h-8 rounded-xl border border-black/[0.08] shadow-2xs shrink-0',
-                  panel.iconBgColor || 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
+                  'inline-flex items-center justify-center w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/40 shadow-2xs shrink-0',
+                  panel.iconBgColor || 'bg-accent-amber/10 text-accent-amber'
                 )}
                 aria-hidden="true"
                 data-testid={`hero-dept-icon-${panel.name}`}
               >
-                {panel.icon ?? <FallbackDeptIcon className="w-4 h-4 text-[var(--accent-blue)]" />}
+                {panel.icon ?? <FallbackDeptIcon className="w-4 h-4 text-accent-amber" />}
               </span>
               <h2
                 className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
@@ -620,7 +631,7 @@ export function HeroCardContent({
               href={panel.primary.href}
               data-cta="primary-hero"
               className={cn(
-                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs border border-black/[0.08] transition-all duration-300 active:scale-95',
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs border border-black/[0.08] gold-steel-border gold-steel-border-slim transition-all duration-300 active:scale-95',
                 primaryBtnClass
               )}
               tabIndex={isActive ? 0 : -1}
@@ -632,7 +643,7 @@ export function HeroCardContent({
               <Link
                 href={panel.secondary.href}
                 data-cta="secondary-hero"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.08] text-[var(--text-heading)] font-medium text-xs border border-transparent transition-all duration-300 active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg gold-steel-border gold-steel-border-slim bg-black/[0.04] hover:bg-black/[0.08] text-[var(--text-heading)] font-medium text-xs border border-transparent transition-all duration-300 active:scale-95"
                 tabIndex={isActive ? 0 : -1}
               >
                 {panel.secondary.icon}

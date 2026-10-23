@@ -189,15 +189,31 @@ describe('HeroRotator', () => {
   it('renders department icons on each hero card, slim KPI banner under the hero card, and Arch logo nodes on telemetry graphs', () => {
     const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
-    // Department icons on hero cards
-    expect(screen.getByTestId('hero-dept-icon-central-command')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-dept-icon-drilling')).toBeInTheDocument();
-    expect(screen.getByTestId('hero-dept-icon-production')).toBeInTheDocument();
+    // Department icons on hero cards with circular gold branding
+    const centralIcon = screen.getByTestId('hero-dept-icon-central-command');
+    expect(centralIcon).toBeInTheDocument();
+    expect(centralIcon).toHaveClass('rounded-full', 'gold-steel-border', 'gold-steel-border-slim');
+    expect(screen.getByTestId('hero-dept-icon-drilling')).toHaveClass(
+      'rounded-full',
+      'gold-steel-border'
+    );
+    expect(screen.getByTestId('hero-dept-icon-production')).toHaveClass(
+      'rounded-full',
+      'gold-steel-border'
+    );
 
-    // Slim KPI banner under the hero card
+    // Slim KPI banner under the hero card with gold | separators
     const slimBanner = screen.getByTestId('hero-kpi-slim-banner');
     expect(slimBanner).toBeInTheDocument();
     expect(slimBanner).toContainElement(screen.getByTestId('hero-kpi-strip-central-command'));
+    expect(screen.getAllByTestId('hero-kpi-gold-separator').length).toBeGreaterThanOrEqual(2);
+
+    // Primary and secondary hero CTAs have gold bordering
+    const secondaryCtas = container.querySelectorAll('[data-cta="secondary-hero"]');
+    expect(secondaryCtas.length).toBeGreaterThan(0);
+    for (const cta of Array.from(secondaryCtas)) {
+      expect(cta).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+    }
 
     // Small Arch-System logo icons on telemetry graphs instead of circle dots
     const archNodes = screen.getAllByTestId('hero-graph-arch-node');
@@ -371,12 +387,12 @@ describe('HeroRotator', () => {
 
     const activeIndicator = screen.getByLabelText('Jump to System Overview');
     const inactiveIndicator = screen.getByLabelText('Jump to Drilling Operations');
-    expect(activeIndicator).toHaveClass('scale-125');
+    expect(activeIndicator).toHaveClass('scale-125', 'text-amber-400', 'brightness-125');
     expect(activeIndicator.querySelector('svg')).toHaveClass(
-      'w-4',
-      'h-4',
+      'w-6',
+      'h-6',
       'motion-safe:animate-pulse'
     );
-    expect(inactiveIndicator.querySelector('svg')).toHaveClass('w-3.5', 'h-3.5');
+    expect(inactiveIndicator.querySelector('svg')).toHaveClass('w-5', 'h-5');
   });
 });

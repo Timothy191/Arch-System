@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-23T06:05:00+02:00 - Circular Department Icon Bubble Geometry
+
+- **Purpose**: Update `.uiverse-card-icon-bubble` in `cards.css` to a circular (`border-radius: 9999px`) badge geometry for gold department icon branding across all department cards.
+- **Changes**:
+  - `packages/theme/src/css/cards.css`: Updated `.uiverse-card-icon-bubble` `border-radius` to `9999px`.
+- **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:51:00+02:00 - Hero Telemetry Graph Keyframes & Reduced Motion Rules
 
 - **Purpose**: Add compositor-friendly keyframe animations (`scanline`, `draw-line`, `telemetry-fade-in`) and `prefers-reduced-motion` overrides for the Hub Hero Telemetry Graph in `animations.css`.

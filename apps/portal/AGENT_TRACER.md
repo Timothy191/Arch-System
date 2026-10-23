@@ -1,3 +1,11 @@
+## 2026-10-23T06:05:00+02:00: Site Footer Gold Borders & System Tray Popover Gold `|` Separators
+
+- **Purpose**: Implement `/hub` design feedback on the global Site Footer (`apps/portal/app/layout.tsx`) and `SystemTrayPill` (`apps/portal/components/system/SystemTray.tsx`).
+- **Changes**:
+  - `apps/portal/app/layout.tsx`: Added `gold-steel-border gold-steel-border-slim` to `<footer role="contentinfo" aria-label="Site footer">` and its `Arch OS` and `eve` capsules.
+  - `apps/portal/components/system/SystemTray.tsx`: Replaced vertical divider spans inside `button[aria-label="System Tray Popover"]` with gold `|` separators (`data-testid="system-tray-gold-separator"`).
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="SystemTray"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:51:00+02:00: Hub Module Search Typewriter Placeholder Integration
 
 - **Purpose**: Add an animated typewriter placeholder hook (`useTypewriterPlaceholder`) to `input#hub-module-search` in `CoreOperationalModules.tsx` while preserving static `Search modules... (/)` fallback under `prefers-reduced-motion` and during user input.

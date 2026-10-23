@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-23T06:05:00+02:00 - Circular Gold Branding on Department Icons & Footer Telemetry Ticker Gold Borders
+
+- **Purpose**: Apply circular gold branding (`rounded-full gold-steel-border gold-steel-border-slim` + `<Logo variant="gold" />` / `text-accent-amber`) to all department icon badges across `DepartmentCard.tsx` and `HeroRotator.tsx`, and add gold borders (`gold-steel-border gold-steel-border-slim`) and gold `|` separators to all footer telemetry marquee items in `DepartmentReviews.tsx`.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx` & `DepartmentCard.test.tsx`: Unified `COLOR_MAP` on `GOLD_BADGE_CONFIG`, applied `rounded-full gold-steel-border gold-steel-border-slim` and `<Logo variant="gold" />` to `.uiverse-card-icon-bubble` and the inline title icon badge.
+  - `libs/features/hub/ui/src/HeroRotator.tsx` & `HeroRotator.test.tsx`: Unified `DEPT_STYLE_MAP` on gold (`text-accent-amber`, `bg-accent-amber/10`) and added test assertions for circular gold icons, CTA gold borders, KPI gold `|` separators, and enlarged/brightened indicator emblems.
+  - `libs/features/hub/ui/src/DepartmentReviews.tsx`: Added `gold-steel-border gold-steel-border-slim` and gold `|` separators to `SystemStatTickerItem` capsules, icon circles, metric badges, detail spans, and `System Stats & Updates` pill.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T05:51:00+02:00 - DepartmentCard Arch Logo Badge & Pin Gold Border
 
 - **Purpose**: Standardize `DepartmentCard.tsx` banner and title icon badges on the Arch-System `<Logo />` component and add `.gold-steel-border .gold-steel-border-slim` to the pin button (`uiverse-card-pin`).

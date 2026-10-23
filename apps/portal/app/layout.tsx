@@ -195,10 +195,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                 <footer
                   role="contentinfo"
                   aria-label="Site footer"
-                  className="relative z-10 mt-3 px-3 sm:px-5 py-1.5 border-t border-white/45 liquid-glass-light bg-white/45 backdrop-blur-xl text-[10px] text-[var(--text-muted)] select-none"
+                  className="relative z-10 mt-3 px-3 sm:px-5 py-1.5 border-t border-white/45 liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/45 backdrop-blur-xl text-[10px] text-[var(--text-muted)] select-none"
                 >
                   <div className="flex items-center justify-between gap-2.5 w-full">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
                       <span
                         className="w-1.5 h-1.5 rounded-full bg-accent-green shrink-0"
                         aria-hidden="true"
@@ -218,7 +218,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       <DepartmentReviews />
                     </div>
 
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
                       <span className="hidden md:inline-flex items-center gap-1 pr-1.5 border-r border-black/10 font-mono text-[9px] text-accent-green font-semibold">
                         ● Sync Active
                       </span>

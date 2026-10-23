@@ -38,58 +38,25 @@ function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; classNam
   );
 }
 
+const GOLD_BADGE_CONFIG = {
+  bg: 'border-accent-amber/45 bg-white/95 text-accent-amber shadow-sm',
+  text: 'text-accent-amber',
+  iconColor: 'text-accent-amber',
+  ringColor: 'ring-accent-amber/35',
+} as const;
+
 const COLOR_MAP: Record<
   string,
   { bg: string; text: string; iconColor: string; ringColor: string }
 > = {
-  amber: {
-    bg: 'border-accent-amber/35 bg-white/95 text-accent-amber shadow-sm',
-    text: 'text-accent-amber',
-    iconColor: 'text-accent-amber',
-    ringColor: 'ring-accent-amber/30',
-  },
-  emerald: {
-    bg: 'border-accent-green/35 bg-white/95 text-accent-green shadow-sm',
-    text: 'text-accent-green',
-    iconColor: 'text-accent-green',
-    ringColor: 'ring-accent-green/30',
-  },
-  blue: {
-    bg: 'border-accent-blue/35 bg-white/95 text-accent-blue shadow-sm',
-    text: 'text-accent-blue',
-    iconColor: 'text-accent-blue',
-    ringColor: 'ring-accent-blue/30',
-  },
-  violet: {
-    bg: 'border-purple-400/35 bg-white/95 text-purple-600 shadow-sm',
-    text: 'text-purple-600',
-    iconColor: 'text-purple-600',
-    ringColor: 'ring-purple-400/30',
-  },
-  red: {
-    bg: 'border-accent-red/35 bg-white/95 text-accent-red shadow-sm',
-    text: 'text-accent-red',
-    iconColor: 'text-accent-red',
-    ringColor: 'ring-accent-red/30',
-  },
-  orange: {
-    bg: 'border-amber-500/35 bg-white/95 text-amber-600 shadow-sm',
-    text: 'text-amber-600',
-    iconColor: 'text-amber-600',
-    ringColor: 'ring-amber-500/30',
-  },
-  cyan: {
-    bg: 'border-cyan-400/35 bg-white/95 text-cyan-700 shadow-sm',
-    text: 'text-cyan-700',
-    iconColor: 'text-cyan-700',
-    ringColor: 'ring-cyan-400/30',
-  },
-  indigo: {
-    bg: 'border-indigo-400/35 bg-white/95 text-indigo-600 shadow-sm',
-    text: 'text-indigo-600',
-    iconColor: 'text-indigo-600',
-    ringColor: 'ring-indigo-400/30',
-  },
+  amber: GOLD_BADGE_CONFIG,
+  emerald: GOLD_BADGE_CONFIG,
+  blue: GOLD_BADGE_CONFIG,
+  violet: GOLD_BADGE_CONFIG,
+  red: GOLD_BADGE_CONFIG,
+  orange: GOLD_BADGE_CONFIG,
+  cyan: GOLD_BADGE_CONFIG,
+  indigo: GOLD_BADGE_CONFIG,
 };
 
 interface DepartmentCardProps {
@@ -136,12 +103,7 @@ function DepartmentCard({
     }
   };
 
-  const config = COLOR_MAP[department.color] || {
-    bg: 'border-arch-border-emphasis/30 bg-white/95 text-arch-accent-blue shadow-sm',
-    text: 'text-arch-text-primary',
-    iconColor: 'text-arch-accent-blue',
-    ringColor: 'ring-arch-accent-blue/30',
-  };
+  const config = COLOR_MAP[department.color] || GOLD_BADGE_CONFIG;
 
   const route = department.route || `/${department.name}`;
 
@@ -238,16 +200,22 @@ function DepartmentCard({
             <ArchBookmarkIcon isPinned={isPinned} />
           </button>
 
-          {/* Department Icon Bubble with high-contrast badge */}
+          {/* Department Icon Bubble with high-contrast gold badge */}
           <div
             className={cn(
-              'uiverse-card-icon-bubble absolute left-4 -bottom-4 z-20 flex items-center justify-center rounded-xl shadow-md ring-2 backdrop-blur-md',
+              'uiverse-card-icon-bubble gold-steel-border gold-steel-border-slim absolute left-4 -bottom-4 z-20 flex items-center justify-center rounded-full shadow-md ring-2 backdrop-blur-md',
               config.bg,
               config.ringColor
             )}
             aria-hidden="true"
           >
-            <Logo className={cn('w-5 h-5 shrink-0 drop-shadow-xs', config.iconColor)} />
+            <Logo
+              variant="gold"
+              className={cn(
+                'w-5 h-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
+                config.iconColor
+              )}
+            />
           </div>
         </div>
 
@@ -258,12 +226,12 @@ function DepartmentCard({
               <div className="flex items-center gap-2 min-w-0">
                 <span
                   className={cn(
-                    'inline-flex items-center justify-center w-5 h-5 rounded-md text-xs font-semibold shrink-0 border shadow-2xs',
+                    'inline-flex items-center justify-center w-6 h-6 rounded-full gold-steel-border gold-steel-border-slim text-xs font-semibold shrink-0 border shadow-2xs',
                     config.bg
                   )}
                   aria-hidden="true"
                 >
-                  <Logo className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
+                  <Logo variant="gold" className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
                 </span>
                 <h3
                   className="uiverse-card-title font-anurati uppercase tracking-[0.055em] font-bold truncate"

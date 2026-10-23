@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T06:05:00+02:00 - Hero Card CTA Gold Borders, Gold KPI `|` Separators, Circular Gold Dept Icons & Enlarged Bright Gold Carousel Indicators
+
+- **Purpose**: Implement `/hub` design feedback across `HeroCardContent.tsx` and `HeroRotator.tsx`: circular gold department icon badges (`rounded-full gold-steel-border gold-steel-border-slim`), gold borders on all primary/secondary Hero CTAs (`Log Delays`, `Machine Operations`, `Shift Closeout`, etc.), gold `|` separators in `HeroOperationalKpiStrip`, and enlarged (`w-6 h-6 sm:w-7 sm:h-7` active, `w-5 h-5 sm:w-[22px] sm:h-[22px]` inactive) brightened (`text-amber-400 brightness-125`) carousel indicator emblems.
+- **Changes**:
+  - `packages/ui/src/components/HeroCardContent.tsx`: Added `rounded-full gold-steel-border gold-steel-border-slim` to `hero-dept-icon-*`, added `gold-steel-border gold-steel-border-slim` to `data-cta="primary-hero"` and `data-cta="secondary-hero"`, and added gold `|` separators (`data-testid="hero-kpi-gold-separator"`) to `HeroOperationalKpiStrip`.
+  - `packages/ui/src/components/HeroRotator.tsx`: Enlarged and brightened the `ArchEmblemIcon` slide jump indicators.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:32:00+02:00 - Universal Gold Steel Borders Across All Department Page Panels & Primitives
 
 - **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all shared department layout, panel, card, header, table, toolbar, timeline, alert, tab, dialog, dropdown, and select primitives so all 11 department pages render gold borders on their panels and controls.

@@ -129,22 +129,24 @@ function SystemStatTickerItem({
   icon: Icon,
 }: SystemStatItem) {
   return (
-    <div className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-2.5 py-0.5 rounded-full bg-white/80 backdrop-blur-md border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs hover:border-arch-accent-blue/35 transition-colors select-none">
-      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-black/[0.04] text-arch-text-primary shrink-0">
-        <Icon className="w-2.5 h-2.5 text-arch-accent-blue" aria-hidden="true" />
+    <div className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs hover:border-arch-accent-blue/35 transition-colors select-none">
+      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full gold-steel-border gold-steel-border-slim bg-accent-amber/10 text-accent-amber shrink-0">
+        <Icon className="w-2.5 h-2.5 text-accent-amber" aria-hidden="true" />
       </span>
       <span className="text-[10.5px] font-semibold text-arch-text-primary tracking-tight">
         {subsystem}
       </span>
       <span
-        className={`inline-flex items-center px-1.5 py-px rounded-full border text-[9.5px] font-mono font-semibold tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
+        className={`inline-flex items-center px-1.5 py-px rounded-full gold-steel-border gold-steel-border-slim border text-[9.5px] font-mono font-semibold tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
       >
         {metricBadge}
       </span>
-      <span className="text-arch-text-tertiary/40" aria-hidden="true">
-        ·
+      <span className="text-accent-amber font-mono font-bold" aria-hidden="true">
+        |
       </span>
-      <span className="text-[10.5px] font-mono text-arch-text-secondary">{detail}</span>
+      <span className="inline-flex items-center px-2 py-px rounded-full gold-steel-border gold-steel-border-slim bg-white/70 text-[10.5px] font-mono text-arch-text-secondary">
+        {detail}
+      </span>
     </div>
   );
 }
@@ -161,7 +163,7 @@ export function DepartmentReviews() {
       className="flex items-center gap-2 w-full min-w-0 overflow-hidden"
       aria-label="Codebase & Architecture Performance Telemetry"
     >
-      <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-green/10 border border-accent-green/25 text-accent-green text-[9.5px] font-mono font-semibold uppercase tracking-wider shrink-0">
+      <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-accent-green/10 border border-accent-green/25 text-accent-green text-[9.5px] font-mono font-semibold uppercase tracking-wider shrink-0">
         <span
           className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
           aria-hidden="true"

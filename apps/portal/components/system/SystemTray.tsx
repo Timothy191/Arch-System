@@ -949,12 +949,30 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
               )}
               <span className={cn('relative inline-flex rounded-full h-2 w-2', healthDotColor)} />
             </span>
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <span
+              aria-hidden="true"
+              data-testid="system-tray-gold-separator"
+              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+            >
+              |
+            </span>
 
             <VolumeIcon className={cn('w-3.5 h-3.5', volumeColor)} />
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <span
+              aria-hidden="true"
+              data-testid="system-tray-gold-separator"
+              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+            >
+              |
+            </span>
             <ConnIcon className={cn('w-3.5 h-3.5', connColor)} />
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <span
+              aria-hidden="true"
+              data-testid="system-tray-gold-separator"
+              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+            >
+              |
+            </span>
             <div className="flex items-center gap-0.5">
               <BatteryIcon className={cn('w-3.5 h-3.5', batteryColor)} />
               {battery.supported && battery.level !== null && (
@@ -967,7 +985,13 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             {/* Offline queue pending badge */}
             {offlineQueue.pendingCount > 0 && (
               <>
-                <span className="w-[1px] h-3 bg-black/[0.08]" />
+                <span
+                  aria-hidden="true"
+                  data-testid="system-tray-gold-separator"
+                  className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+                >
+                  |
+                </span>
                 <div
                   className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-amber/10 border border-accent-amber/20 text-accent-amber animate-pulse"
                   title={`${offlineQueue.pendingCount} offline actions pending sync`}

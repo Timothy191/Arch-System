@@ -414,7 +414,7 @@ export function HeroRotator({
 
       {total > 1 && (
         <div className="mt-4 flex items-center justify-center px-1">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-3 sm:gap-3.5">
             {panels.map((p, idx) => (
               <button
                 key={p.id}
@@ -424,16 +424,16 @@ export function HeroRotator({
                 className={cn(
                   'group/ind transition-all duration-300 ease-out flex items-center justify-center p-1 rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'text-[var(--accent-blue)] scale-125 -translate-y-0.5 drop-shadow-[0_2px_6px_rgba(212,175,55,0.45)]'
-                    : 'text-black/25 hover:text-[var(--accent-blue)]/80 hover:scale-115 hover:-translate-y-0.5'
+                    ? 'text-amber-400 brightness-125 scale-125 -translate-y-0.5 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
+                    : 'text-accent-amber/80 hover:text-amber-400 hover:brightness-125 hover:scale-115 hover:-translate-y-0.5 drop-shadow-[0_0_4px_rgba(212,175,55,0.35)]'
                 )}
               >
                 <ArchEmblemIcon
                   className={cn(
                     'transition-all duration-300 ease-out',
                     idx === activeIndex
-                      ? 'w-4 h-4 sm:w-[18px] sm:h-[18px] motion-safe:animate-pulse'
-                      : 'w-3.5 h-3.5 group-hover/ind:rotate-12'
+                      ? 'w-6 h-6 sm:w-7 sm:h-7 motion-safe:animate-pulse'
+                      : 'w-5 h-5 sm:w-[22px] sm:h-[22px] group-hover/ind:rotate-12'
                   )}
                 />
               </button>
