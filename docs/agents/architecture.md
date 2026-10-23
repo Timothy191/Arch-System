@@ -83,27 +83,27 @@ Enforced by `tools/repo/policy-compiler.cjs` via `tools/repo/policy/dependency.r
 
 ## Key Directories
 
-| Directory Path           | Purpose & Responsibilities                                                                                                          |
-| :----------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal/`           | Main Next.js 16 (React 19) App Router portal application (`app/`, `features/`, `hooks/`, `lib/`, `proxy.ts`).                       |
-| `packages/contract/`     | Canonical Single Source of Truth for Zod schemas, TypeScript types, and OpenAPI specifications.                                     |
-| `packages/errors/`       | Standardized `AppError` class hierarchy, error codes, and TypeScript type guards.                                                   |
-| `packages/supabase/`     | SSR/browser Supabase client factories (`/server`, `/client`, `/middleware`), Kysely client (`/kysely`), and query instrumentation.  |
-| `packages/database/`     | 164+ sequential PostgreSQL migrations (`migrations/NNN_*.sql`), rollback scripts, and safety tests.                                 |
-| `packages/redis/`        | Two-tier (L1 Memory LRU / L2 Redis) caching layer with XFetch early expiration, TTL registry, and tag invalidation.                 |
-| `packages/rate-limiter/` | Distributed multi-strategy rate limiters (sliding window, token bucket, fixed window) with DI stores.                               |
-| `packages/logger/`       | Structured JSON logger powered by Pino (`serverLogger`, `browserLogger`) with OpenTelemetry correlation.                            |
-| `packages/theme/`        | Style Dictionary token compiler, OKLCH design tokens, glass physics, and Tailwind preset.                                           |
-| `packages/ui/`           | Pure React 19 UI component library (GlassCard, DataGrid, KPI cards, Radix primitives) and Storybook catalog.                        |
-| `packages/agents/`       | Multi-agent execution engine, LangGraph workflows, Langfuse LLM telemetry, and reflection engine.                                   |
-| `packages/eval/`         | DeepEval and Pytest LLM evaluation suites and golden test datasets (Python `>=3.10`).                                               |
-| `packages/utils/`        | Shared utilities: resilient fetch client with circuit breaker, Inngest triggers, n8n integration, offline storage.                  |
-| `libs/features/`         | Modular domain feature packages (`departments`, `auth`, `hub`) with separate UI and data-access layers.                             |
-| `libs/shared/`           | Cross-domain shared React hooks (`useSupabaseRealtime`, `usePitConnectivity`), data access clients, and telemetry circuit breakers. |
-| `tools/repo/`            | Architecture and dependency boundary compilers (`policy-compiler.cjs`, `dependency.rules.json`).                                    |
-| `tools/scripts/`         | Quality gates (`enforce-quality-gates.sh`), AST compound-bash safety checker (`check-compound-bash.cjs`), and hooks bridge.         |
-| `tools/audits/`          | Drift verification tools: token compliance, contract drift, RLS matrix, and bundle sizes.                                           |
-| `infra/docker/`          | Docker Compose definitions for companion stacks (`compose.tools.yml`, `compose.ai-tools.yml`, `compose.portal.yml`).                |
-| `e2e/`                   | Playwright end-to-end and visual regression test suites with cached auth state (`e2e/.auth/user.json`).                             |
+| Directory Path           | Purpose & Responsibilities                                                                                                                                       |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/portal/`           | Main Next.js 16 (React 19) App Router portal application (`app/`, `features/`, `hooks/`, `lib/`, `proxy.ts`).                                                    |
+| `packages/contract/`     | Canonical Single Source of Truth for Zod schemas, TypeScript types, and OpenAPI specifications.                                                                  |
+| `packages/errors/`       | Standardized `AppError` class hierarchy, error codes, and TypeScript type guards.                                                                                |
+| `packages/supabase/`     | SSR/browser Supabase client factories (`/server`, `/client`, `/middleware`), Kysely client (`/kysely`), and query instrumentation.                               |
+| `packages/database/`     | 164+ sequential PostgreSQL migrations (`migrations/NNN_*.sql`), rollback scripts, and safety tests.                                                              |
+| `packages/redis/`        | Two-tier (L1 Memory LRU / L2 Redis) caching, privilege-fenced sessions, distributed locks, streams, and analytics ([ADR-012](adr-async-processing-topology.md)). |
+| `packages/rate-limiter/` | Distributed multi-strategy rate limiters (sliding window, token bucket, fixed window) with DI stores.                                                            |
+| `packages/logger/`       | Structured JSON logger powered by Pino (`serverLogger`, `browserLogger`) with OpenTelemetry correlation.                                                         |
+| `packages/theme/`        | Style Dictionary token compiler, OKLCH design tokens, glass physics, and Tailwind preset.                                                                        |
+| `packages/ui/`           | Pure React 19 UI component library (GlassCard, DataGrid, KPI cards, Radix primitives) and Storybook catalog.                                                     |
+| `packages/agents/`       | Multi-agent execution engine, LangGraph workflows, Langfuse LLM telemetry, and reflection engine.                                                                |
+| `packages/eval/`         | DeepEval and Pytest LLM evaluation suites and golden test datasets (Python `>=3.10`).                                                                            |
+| `packages/utils/`        | Shared utilities: resilient fetch client with circuit breaker, Inngest triggers, n8n integration, offline storage.                                               |
+| `libs/features/`         | Modular domain feature packages (`departments`, `auth`, `hub`) with separate UI and data-access layers.                                                          |
+| `libs/shared/`           | Cross-domain shared React hooks (`useSupabaseRealtime`, `usePitConnectivity`), data access clients, and telemetry circuit breakers.                              |
+| `tools/repo/`            | Architecture and dependency boundary compilers (`policy-compiler.cjs`, `dependency.rules.json`).                                                                 |
+| `tools/scripts/`         | Quality gates (`enforce-quality-gates.sh`), AST compound-bash safety checker (`check-compound-bash.cjs`), and hooks bridge.                                      |
+| `tools/audits/`          | Drift verification tools: token compliance, contract drift, RLS matrix, and bundle sizes.                                                                        |
+| `infra/docker/`          | Docker Compose definitions for companion stacks (`compose.tools.yml`, `compose.ai-tools.yml`, `compose.portal.yml`).                                             |
+| `e2e/`                   | Playwright end-to-end and visual regression test suites with cached auth state (`e2e/.auth/user.json`).                                                          |
 
 ---

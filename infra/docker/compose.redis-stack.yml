@@ -1,0 +1,84 @@
+# Redis Stack (Redis 8 + Query Engine) for local development.
+#
+# `@repo/redis` detects the `search` module through `MODULE LIST`
+# (packages/redis/src/raw.ts -> detectCapabilities) and only then uses
+# FT.CREATE / FT.SEARCH for vector similarity (`packages/redis/src/search.ts`).
+# Without this stack the probe reports `search: false` and semantic search keeps
+# serving from Postgres + pgvector, which stays the system of record.
+#
+# Starts on host port 6380 so it can run beside the plain cache instance from
+# compose.redis.yml (6379). Point the portal at it with:
+#   REDIS_URL=redis://127.0.0.1:6380 pnpm dev:quick
+#
+# Usage:
+#   docker compose -f infra/docker/compose.redis-stack.yml up -d
+#   docker compose -f infra/docker/compose.redis-stack.yml down
+
+version: '3.8'
+
+services:
+  redis-stack:
+    image: redis/redis-stack-server:7.4.0-v3
+    container_name: arch-redis-stack
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:6380:6379'
+    volumes:
+      - redis_stack_data:/data
+    command:
+      [
+        'redis-stack-server',
+        '--save',
+        '900',
+        '1',
+        '--appendonly',
+        'yes',
+        '--maxmemory',
+        '512mb',
+        '--maxmemory-policy',
+        'noeviction',
+      ]
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - arch-redis-net
+
+  redis-stack-ui:
+    image: redis/redisinsight:latest
+    container_name: arch-redis-stack-ui
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5541:5540'
+    volumes:
+      - redis_stack_insight_data:/data
+    environment:
+      - RITRUSTEDORIGINS=http://localhost:5541,http://127.0.0.1:5541,http://localhost:3000
+      - RI_ACCEPT_TERMS_AND_CONDITIONS=true
+      - RI_REDIS_HOST1=redis-stack
+      - RI_REDIS_PORT1=6379
+      - RI_REDIS_ALIAS1=Arch-OS Vector Search (Redis Stack)
+    depends_on:
+      redis-stack:
+        condition: service_healthy
+    networks:
+      - arch-redis-net
+
+volumes:
+  redis_stack_data:
+  redis_stack_insight_data:
+
+networks:
+  arch-redis-net:
+    driver: bridge
