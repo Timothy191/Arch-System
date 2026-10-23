@@ -10,6 +10,24 @@ export {
   swrCacheWrap,
 } from './adaptive';
 export {
+  addToLeaderboard,
+  addUnique,
+  type CounterGranularity,
+  estimateUnique,
+  incrementCounter,
+  incrWithExpire,
+  type LeaderboardScoreInput,
+  leaderboardTop,
+  type MetricOptions,
+  readCounter,
+  readKeyCounter,
+  readSample,
+  recordSample,
+  type SampleInput,
+  type SampleSummary,
+  type UniqueInput,
+} from './analytics';
+export {
   cacheDelete,
   cacheDeletePattern,
   cacheEvictL1ByPrefix,
@@ -35,6 +53,37 @@ export {
   isServerlessRedis,
 } from './client';
 export {
+  abandonIdempotency,
+  acquireLock,
+  acquireRefreshLease,
+  claimIdempotency,
+  completeIdempotency,
+  type IdempotencyClaim,
+  type IdempotencyCompletion,
+  type LockHandle,
+  type LockOptions,
+  type LockRunInput,
+  LockUnavailableError,
+  readIdempotencyResult,
+  releaseLock,
+  releaseRefreshLease,
+  renewLock,
+  tryWithLock,
+  withLock,
+} from './locks';
+export {
+  asNumber,
+  asStringOrNull,
+  currentTransport,
+  detectCapabilities,
+  type RedisCapabilities,
+  RedisCommandError,
+  resetCapabilityCache,
+  send,
+  sendSafe,
+  supportsBlockingReads,
+} from './raw';
+export {
   assertDurabilityBoundary,
   buildCacheKey,
   CACHE_TTL_REGISTRY,
@@ -53,10 +102,40 @@ export {
   unregisterSupabaseFallback,
 } from './registry';
 export {
+  type DistanceMetric,
+  dropVectorIndex,
+  encodeVector,
+  ensureVectorIndex,
+  type SearchAvailability,
+  searchAvailability,
+  searchVectors,
+  type VectorAlgorithm,
+  type VectorIndexSpec,
+  type VectorIndexStats,
+  type VectorMatch,
+  type VectorSearchQuery,
+  type VectorUpsert,
+  vectorIndexStats,
+  vectorKey,
+} from './search';
+export {
   ServerlessRedisClient,
   type ServerlessRedisConfig,
   serverlessRedis,
 } from './serverless-client';
+export {
+  bumpPrivilegeVersion,
+  type EmployeeRecord,
+  employeeCacheKey,
+  getPrivilegeVersion,
+  privilegeVersionKey,
+  readSession,
+  revokeSession,
+  sessionTtl,
+  touchSession,
+  type WriteSessionInput,
+  writeSession,
+} from './session';
 export {
   type CacheStatsSnapshot,
   flushStats,
@@ -69,4 +148,29 @@ export {
   registerStatsPersistenceSink,
   resetCacheStats,
 } from './stats';
+export {
+  type AckInput,
+  type AppendInput,
+  type AutoClaimResult,
+  acknowledge,
+  appendToStream,
+  type ClaimInput,
+  type ConsumeInput,
+  type ConsumerRef,
+  claimIdle,
+  consumeStream,
+  type DeadLetterInput,
+  ensureConsumerGroup,
+  type GroupRef,
+  moveToDeadLetter,
+  type RangeOptions,
+  type ReadGroupInput,
+  type ReadNewOptions,
+  type ReadPendingInput,
+  readFromGroup,
+  readNew,
+  readPending,
+  readStream,
+  streamLength,
+} from './streams';
 export { shouldEarlyExpire, type XFetchWrapper } from './xfetch';

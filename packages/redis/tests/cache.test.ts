@@ -96,11 +96,11 @@ describe('X-Fetch Cache Wrapper', () => {
     expect(result).toBe('stale-data');
     expect(latency).toBeLessThan(10); // less than 10ms
 
+    // Wait for the background execution to complete
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
     // Background execution should happen
     expect(mockFn).toHaveBeenCalledTimes(1);
-
-    // Wait for the background execution to complete
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockRedisSetEx).toHaveBeenCalledTimes(1);
     expect(mockRedisSetEx).toHaveBeenCalledWith(
@@ -136,11 +136,11 @@ describe('X-Fetch Cache Wrapper', () => {
     // All should return the stale data immediately
     results.forEach((res) => expect(res).toBe('stale-data'));
 
+    // Wait for the background function to finish
+    await new Promise((resolve) => setTimeout(resolve, 30));
+
     // The background function should only be called ONCE
     expect(mockFn).toHaveBeenCalledTimes(1);
-
-    // Wait for the background function to finish
-    await new Promise((resolve) => setTimeout(resolve, 20));
   });
 
   test('Early Expiration Not Triggered', async () => {

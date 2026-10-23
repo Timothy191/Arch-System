@@ -1,9 +1,30 @@
+import { incrementCounter } from './analytics';
 import { getRedisClient } from './client';
 import { memoryDeleteByPrefix, memoryDeleteKeys } from './l1';
 
 const TAG_PREFIX = 'arch:__tags__';
 const BROADCAST_CHANNEL = 'cache:invalidate:broadcast';
 const SCAN_COUNT = 100;
+/**
+ * A broadcast is one Pub/Sub message: past this many keys the payload is
+ * dropped rather than shipping a megabyte of JSON to every subscriber.
+ * Peers still converge because the L2 keys themselves were already unlinked.
+ */
+const BROADCAST_KEY_LIMIT = 1_000;
+
+/** Envelope understood by the L1 subscriber in `cache.ts`. */
+type InvalidationBroadcast =
+  | { type: 'keys'; keys: string[] }
+  | { type: 'prefixes'; prefixes: string[] };
+
+async function broadcast(payload: InvalidationBroadcast): Promise<void> {
+  try {
+    const redis = await getRedisClient();
+    await redis.publish(BROADCAST_CHANNEL, JSON.stringify(payload));
+  } catch {
+    await incrementCounter('cache.invalidate.broadcast_failed');
+  }
+}
 
 async function getRedisClientSafe() {
   try {
@@ -30,7 +51,8 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
     }
     await pipeline.exec();
   } catch {
-    // Silent fail — tag index inconsistency is acceptable
+    // Tag index inconsistency is acceptable; a miss costs one recompute.
+    await incrementCounter('cache.invalidate.tag_index_failed');
   }
 }
 
@@ -48,6 +70,7 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
   if (!redis) return 0;
 
   let deleted = 0;
+  const touched: string[] = [];
 
   try {
     for (const tag of tags) {
@@ -60,6 +83,7 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
           await redis.unlink(keysToDelete);
           // Purge L1 first so this instance is never serving a deleted key.
           memoryDeleteKeys(keysToDelete);
+          if (touched.length <= BROADCAST_KEY_LIMIT) touched.push(...keysToDelete);
           deleted += keysToDelete.length;
           keysToDelete.length = 0;
         }
@@ -68,18 +92,24 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
       if (keysToDelete.length > 0) {
         await redis.unlink(keysToDelete);
         memoryDeleteKeys(keysToDelete);
+        if (touched.length <= BROADCAST_KEY_LIMIT) touched.push(...keysToDelete);
         deleted += keysToDelete.length;
       }
 
       await redis.unlink(tagKey);
     }
 
-    // Best-effort cross-instance L1 invalidation.
+    // Best-effort cross-instance L1 invalidation. Peers only know how to purge
+    // explicit keys or prefixes, so the resolved key set is what ships.
     if (deleted > 0) {
-      await redis.publish(BROADCAST_CHANNEL, JSON.stringify({ action: 'tags', tags }));
+      if (deleted <= BROADCAST_KEY_LIMIT) {
+        await broadcast({ type: 'keys', keys: touched });
+      } else {
+        await incrementCounter('cache.invalidate.broadcast_skipped', { dimension: tags.join(',') });
+      }
     }
   } catch {
-    // Silent fail
+    await incrementCounter('cache.invalidate.failed', { dimension: 'tags' });
   }
 
   return deleted;
@@ -126,10 +156,10 @@ export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<numbe
 
     // Best-effort cross-instance L1 invalidation.
     if (deleted > 0) {
-      await redis.publish(BROADCAST_CHANNEL, JSON.stringify({ action: 'prefixes', prefixes }));
+      await broadcast({ type: 'prefixes', prefixes });
     }
   } catch {
-    // Silent fail
+    await incrementCounter('cache.invalidate.failed', { dimension: 'prefixes' });
   }
 
   return deleted;

@@ -12,6 +12,7 @@ import {
   memorySweep,
   readMemory,
 } from './l1';
+import { acquireRefreshLease, releaseRefreshLease } from './locks';
 import { l1TtlForKey, resolveSupabaseFallback } from './registry';
 import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from './stats';
 import { shouldEarlyExpire, type XFetchWrapper } from './xfetch';
@@ -295,10 +296,16 @@ export async function cacheWrap<T>(
     if (isXFetchWrapper<T>(cached)) {
       if (shouldEarlyExpire(cached)) {
         recordXFetchTrigger(performance.now() - start);
+        // `activeFetches` coalesces this process only, and it must be registered
+        // synchronously: awaiting the lease before the guard would let every
+        // concurrent request through. The lease extends the guard fleet-wide.
         if (!activeFetches.has(key)) {
-          const fetchStart = performance.now();
-          const fetchPromise = fn()
-            .then(async (freshVal) => {
+          const fetchPromise = (async () => {
+            const hasLease = await acquireRefreshLease(key).catch(() => true);
+            if (!hasLease) return;
+            const fetchStart = performance.now();
+            try {
+              const freshVal = await fn();
               const delta = performance.now() - fetchStart;
               const newWrapper: XFetchWrapper<T> = {
                 value: freshVal,
@@ -308,14 +315,14 @@ export async function cacheWrap<T>(
                 __isXFetchWrapper: true,
               };
               await cacheSet(key, newWrapper, ttlSeconds);
-              return freshVal;
-            })
-            .catch(() => {
-              // Ignore background refresh errors, serve stale
-            })
-            .finally(() => {
-              activeFetches.delete(key);
-            });
+            } catch {
+              // Serve stale, and drop the lease so the next request can retry
+              // immediately instead of waiting it out.
+              await releaseRefreshLease(key).catch(() => undefined);
+            }
+          })().finally(() => {
+            activeFetches.delete(key);
+          });
 
           activeFetches.set(key, fetchPromise);
         }

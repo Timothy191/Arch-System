@@ -1,6 +1,6 @@
 {
   "name": "@repo/redis",
-  "description": "Redis client, caching helpers, cache statistics, and TTL registry for department slug resolution and general caching",
+  "description": "Redis client, caching helpers, cache statistics, TTL registry, sessions with privilege revocation, streams, distributed locks, analytics counters, RediSearch vector search and capability probing",
   "version": "1.0.0",
   "dependencies": {
     "redis": "^4.7.0"
@@ -14,7 +14,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
-    "./cache": "./src/cache.ts"
+    "./cache": "./src/cache.ts",
+    "./session": "./src/session.ts",
+    "./search": "./src/search.ts",
+    "./analytics": "./src/analytics.ts",
+    "./raw": "./src/raw.ts"
   },
   "main": "./src/index.ts",
   "private": true,
@@ -24,7 +28,8 @@
     "dev": "tsc --watch",
     "lint": "biome check .",
     "type-check": "tsc --noEmit",
-    "test": "jest tests --passWithNoTests --runInBand"
+    "test": "jest tests --passWithNoTests --runInBand",
+    "test:integration": "jest --config jest.integration.config.cjs --runInBand"
   },
   "types": "./src/index.ts"
 }

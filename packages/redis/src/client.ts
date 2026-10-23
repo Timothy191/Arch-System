@@ -84,6 +84,20 @@ function createServerlessAdapter(restClient: ServerlessRedisClient): RedisClient
     sRem: (key: string, members: string | string[]) => restClient.sRem(key, ...toKeyArray(members)),
     sMembers: (key: string) => restClient.sMembers(key),
 
+    // Raw command surface: lets `raw.ts` drive commands (EVAL, streams, HLL,
+    // ZSET, GETEX, MODULE/INFO probes) that this adapter does not mirror.
+    // Without it every capability module silently failed on serverless.
+    sendCommand: (args: string[]) => restClient.command(args[0] as string, args.slice(1)),
+    eval: (
+      script: string,
+      options?: { numberOfKeys?: number; keys?: string[]; arguments?: (string | number)[] }
+    ) => {
+      const keys = options?.keys ?? [];
+      const argv = options?.arguments ?? [];
+      const numKeys = options?.numberOfKeys ?? keys.length;
+      return restClient.command('eval', [script, String(numKeys), ...keys, ...argv]);
+    },
+
     // Real cursor-based SCAN — non-blocking, unlike KEYS.
     scan: (cursor: number | string, options?: { MATCH?: string; COUNT?: number; TYPE?: string }) =>
       restClient.scan(cursor, options),

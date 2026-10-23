@@ -300,3 +300,9 @@ temp/lighthouse-report.report.*
 
 # Local auth helper with hardcoded dev credentials — never commit
 get-token.js
+
+# `lock*` is in the developer-global core.excludesFile (~/.config/git/ignore),
+# which would silently exclude the distributed-lock module from every clone.
+# Negate it here so the source and its tests stay tracked.
+!packages/redis/src/locks.ts
+!packages/redis/tests/locks.test.ts
