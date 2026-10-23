@@ -42,9 +42,6 @@ export function SitesTab() {
   const [newSiteName, setNewSiteName] = useState('');
   const [newSiteCode, setNewSiteCode] = useState('');
 
-  // Selected site for blocks view/filter
-  const [selectedSiteId, setSelectedSiteId] = useState<string>('all');
-
   // New mine block form state
   const [newBlockSiteId, setNewBlockSiteId] = useState<string>('');
   const [newBlockName, setNewBlockName] = useState('');
@@ -204,47 +201,58 @@ export function SitesTab() {
     }
   };
 
-  const filteredBlocks =
-    selectedSiteId === 'all' ? dbBlocks : dbBlocks.filter((b) => b.site_id === selectedSiteId);
-
   return (
     <div className="space-y-8">
       {/* SECTION 1: SITES MANAGEMENT */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-medium text-[var(--text-heading)]">Sites & Locations</h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              Operational complex sites connected directly to excavator and hauling logs.
-            </p>
-          </div>
+        <GlassCard
+          data-testid="sites-adding-panel"
+          className="p-4 sm:px-5 sm:py-3.5 gold-steel-border gold-steel-border-slim"
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-emerald)]/15 border border-[var(--accent-emerald)]/30 text-[var(--accent-emerald)]">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-base font-semibold text-[var(--text-heading)] leading-tight">
+                  Sites & Locations
+                </h2>
+                <p className="text-xs text-[var(--text-muted)] truncate">
+                  Operational complex sites connected directly to excavator and hauling logs.
+                </p>
+              </div>
+            </div>
 
-          <form
-            onSubmit={handleAddSite}
-            className="flex flex-wrap items-center gap-2 w-full sm:w-auto"
-          >
-            <Input
-              placeholder="Site Name (e.g. North Pit)"
-              value={newSiteName}
-              onChange={(e) => setNewSiteName(e.target.value)}
-              className="w-48 bg-[var(--bg-secondary)] border-[var(--border-default)]"
-            />
-            <Input
-              placeholder="Code (e.g. PIT-NP)"
-              value={newSiteCode}
-              onChange={(e) => setNewSiteCode(e.target.value)}
-              className="w-32 bg-[var(--bg-secondary)] border-[var(--border-default)]"
-            />
-            <Button
-              type="submit"
-              disabled={saving || !newSiteName.trim()}
-              className="shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+            <form
+              onSubmit={handleAddSite}
+              className="grid grid-cols-1 sm:grid-cols-[minmax(180px,220px)_minmax(120px,140px)_auto] items-center gap-2.5 w-full lg:w-auto shrink-0"
             >
-              <Plus className="w-4 h-4 mr-1.5" />
-              Add Site
-            </Button>
-          </form>
-        </div>
+              <Input
+                placeholder="Site Name (e.g. North Pit)"
+                value={newSiteName}
+                onChange={(e) => setNewSiteName(e.target.value)}
+                wrapperClassName="w-full"
+                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs"
+              />
+              <Input
+                placeholder="Code (e.g. PIT-NP)"
+                value={newSiteCode}
+                onChange={(e) => setNewSiteCode(e.target.value)}
+                wrapperClassName="w-full"
+                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs font-mono"
+              />
+              <Button
+                type="submit"
+                disabled={saving || !newSiteName.trim()}
+                className="h-9 px-4 shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)] text-xs font-semibold"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Add Site
+              </Button>
+            </form>
+          </div>
+        </GlassCard>
 
         <GlassCard className="overflow-hidden p-0">
           {loading ? (
@@ -312,94 +320,76 @@ export function SitesTab() {
 
       {/* SECTION 2: MINE BLOCKS MANAGEMENT */}
       <div className="space-y-4 pt-4 border-t border-[var(--border-default)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-medium text-[var(--text-heading)]">Mine Blocks & Areas</h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              Mining benches and extraction areas linked to sites, populated into Hourly Loads and
-              Excavator tracking.
-            </p>
-          </div>
+        <GlassCard
+          data-testid="blocks-adding-panel"
+          className="p-4 sm:px-5 sm:py-3.5 gold-steel-border gold-steel-border-slim"
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/30 text-[var(--accent-blue)]">
+                <Layers className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-base font-semibold text-[var(--text-heading)] leading-tight">
+                  Mine Blocks & Areas
+                </h2>
+                <p className="text-xs text-[var(--text-muted)] truncate">
+                  Mining benches and extraction areas linked to sites, populated into Hourly Loads
+                  and Excavator tracking.
+                </p>
+              </div>
+            </div>
 
-          <form
-            onSubmit={handleAddBlock}
-            className="flex flex-wrap items-center gap-2 w-full sm:w-auto"
-          >
-            <select
-              value={newBlockSiteId}
-              onChange={(e) => setNewBlockSiteId(e.target.value)}
-              className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2.5 py-1.5 text-xs text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+            <form
+              onSubmit={handleAddBlock}
+              className="grid grid-cols-1 sm:grid-cols-[minmax(150px,180px)_minmax(190px,220px)_minmax(120px,140px)_auto] items-center gap-2.5 w-full lg:w-auto shrink-0"
             >
-              {dbSites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <Input
-              placeholder="Block Name (e.g. North Pit Bench B)"
-              value={newBlockName}
-              onChange={(e) => setNewBlockName(e.target.value)}
-              className="w-52 bg-[var(--bg-secondary)] border-[var(--border-default)]"
-            />
-            <Input
-              placeholder="Code (e.g. BLK-NP-B)"
-              value={newBlockCode}
-              onChange={(e) => setNewBlockCode(e.target.value)}
-              className="w-32 bg-[var(--bg-secondary)] border-[var(--border-default)]"
-            />
-            <Button
-              type="submit"
-              disabled={saving || !newBlockName.trim()}
-              className="shrink-0 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white"
-            >
-              <Plus className="w-4 h-4 mr-1.5" />
-              Add Block
-            </Button>
-          </form>
-        </div>
-
-        {/* Filter blocks by site */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-[var(--text-muted)]">Filter by Site:</span>
-          <button
-            type="button"
-            onClick={() => setSelectedSiteId('all')}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
-              selectedSiteId === 'all'
-                ? 'bg-[var(--accent-blue)] text-white font-medium'
-                : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-            }`}
-          >
-            All Sites ({dbBlocks.length})
-          </button>
-          {dbSites.map((s) => {
-            const count = dbBlocks.filter((b) => b.site_id === s.id).length;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setSelectedSiteId(s.id)}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  selectedSiteId === s.id
-                    ? 'bg-[var(--accent-blue)] text-white font-medium'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                }`}
+              <select
+                aria-label="Select site for block"
+                value={newBlockSiteId}
+                onChange={(e) => setNewBlockSiteId(e.target.value)}
+                className="h-9 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2.5 text-xs text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
               >
-                {s.name} ({count})
-              </button>
-            );
-          })}
-        </div>
+                {dbSites.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              <Input
+                placeholder="Block Name (e.g. North Pit Bench B)"
+                value={newBlockName}
+                onChange={(e) => setNewBlockName(e.target.value)}
+                wrapperClassName="w-full"
+                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs"
+              />
+              <Input
+                placeholder="Code (e.g. BLK-NP-B)"
+                value={newBlockCode}
+                onChange={(e) => setNewBlockCode(e.target.value)}
+                wrapperClassName="w-full"
+                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs font-mono"
+              />
+              <Button
+                type="submit"
+                disabled={saving || !newBlockName.trim()}
+                className="h-9 px-4 shrink-0 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-xs font-semibold"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Add Block
+              </Button>
+            </form>
+          </div>
+        </GlassCard>
 
         <GlassCard className="overflow-hidden p-0">
-          {filteredBlocks.length === 0 ? (
+          {dbBlocks.length === 0 ? (
             <div className="px-6 py-12 text-center text-[var(--text-muted)]">
-              No mine blocks found for this site.
+              No mine blocks found in database.
             </div>
           ) : (
             <ul className="divide-y divide-[var(--border-default)]" aria-label="Mine blocks list">
-              {filteredBlocks.map((block) => {
+              {dbBlocks.map((block) => {
                 const site = dbSites.find((s) => s.id === block.site_id);
                 return (
                   <li

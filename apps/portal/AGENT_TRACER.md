@@ -1,3 +1,11 @@
+## 2026-10-23T02:23:00+02:00: Admin Sites & Mine Blocks Adding Panels Redesign & Filter Strip Removal
+
+- **Purpose**: Implement `/admin` design feedback on `SitesTab.tsx`: redesign the `Sites & Locations` and `Mine Blocks & Areas` header sections into `GlassCard` adding panels with side-by-side horizontal form controls, and remove the `Filter by Site:` button strip.
+- **Changes**:
+  - `apps/portal/features/admin/tabs/SitesTab.tsx`: Wrapped the `Sites & Locations` and `Mine Blocks & Areas` headers and forms in `GlassCard` adding panels (`data-testid="sites-adding-panel"`, `data-testid="blocks-adding-panel"`, `gold-steel-border gold-steel-border-slim`), placed the adding inputs and submit buttons side-by-side on a single horizontal row (`sm:grid-cols-[...]`), and removed the `Filter by Site:` button bar.
+  - `apps/portal/features/admin/tabs/SitesTab.test.tsx`: Added unit test verifying the redesigned adding panels, side-by-side form controls, and removal of `Filter by Site:`.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="SitesTab"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T02:15:00+02:00: Taskbar & Core Operational Modules Pill Controls Gold Steel Borders
 
 - **Purpose**: Apply `.gold-steel-border .gold-steel-border-slim` across all 10 portal taskbar & `CoreOperationalModules` header/toolbar pills requested in `/hub` design feedback.
