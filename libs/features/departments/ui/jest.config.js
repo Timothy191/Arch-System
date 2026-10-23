@@ -23,6 +23,8 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
+    '^@repo/contract$': '<rootDir>/../../../../packages/contract/src/index.ts',
+    '^@repo/contract/(.*)$': '<rootDir>/../../../../packages/contract/src/$1',
     '^react$': '<rootDir>/../../../../apps/portal/node_modules/react',
     '^react/(.*)$': '<rootDir>/../../../../apps/portal/node_modules/react/$1',
     '^react-dom$': '<rootDir>/../../../../apps/portal/node_modules/react-dom',

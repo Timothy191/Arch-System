@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
+    "jest": "^30.0.0",
     "typescript": "catalog:"
   }
 }
