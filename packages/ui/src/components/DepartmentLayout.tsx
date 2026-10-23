@@ -96,6 +96,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   const basePath = `/${department.name}`;
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isDashboardExpanded, setIsDashboardExpanded] = useState(true);
   const [isReportsExpanded, setIsReportsExpanded] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
   const collapseTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -301,6 +302,13 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         >
           {tabs.map((tab) => {
             const href = tab.name === 'dashboard' ? basePath : `${basePath}/${tab.name}`;
+            const hasDashboardSubtabs =
+              tab.name === 'dashboard' && department.name === 'control-room';
+            const isShiftOperationsSubtabActive =
+              hasDashboardSubtabs &&
+              (pathname === `${basePath}/shift-compilation` ||
+                pathname === `${basePath}/shift-coverage` ||
+                pathname === `${basePath}/shift-closeout`);
             const isShiftOperationsActive =
               tab.name === 'shift-compilation' &&
               (pathname === `${basePath}/shift-compilation` ||
@@ -308,13 +316,14 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 pathname === `${basePath}/shift-closeout`);
             const isRouteMatch =
               pathname === href ||
-              (tab.name === 'dashboard' && pathname === basePath) ||
+              (tab.name === 'dashboard' &&
+                (pathname === basePath || isShiftOperationsSubtabActive)) ||
               isShiftOperationsActive;
             const isPdfReportActive =
               tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
             const isReportsDashboardActive =
               tab.name === 'reports' && isRouteMatch && !isPdfReportActive;
-            const isActive = isRouteMatch && !isPdfReportActive;
+            const isActive = isRouteMatch && !isPdfReportActive && !isShiftOperationsSubtabActive;
             const Icon = ICON_MAP[tab.icon];
             return (
               <div key={tab.name} className="space-y-0.5">
@@ -322,6 +331,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                   <Link
                     href={href}
                     onClick={() => {
+                      if (hasDashboardSubtabs) {
+                        setIsDashboardExpanded(true);
+                      }
                       if (tab.name === 'reports') {
                         setIsReportsExpanded(true);
                       }
@@ -351,6 +363,32 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     )}
                     <span className="flex-1 truncate">{tab.label}</span>
                   </Link>
+                  {hasDashboardSubtabs && (
+                    <button
+                      type="button"
+                      data-testid="dashboard-subtabs-toggle"
+                      aria-label={
+                        isDashboardExpanded
+                          ? 'Collapse Dashboard sub-tabs'
+                          : 'Expand Dashboard sub-tabs'
+                      }
+                      aria-expanded={isDashboardExpanded}
+                      onClick={() => setIsDashboardExpanded((prev) => !prev)}
+                      className={cn(
+                        'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
+                        isRouteMatch
+                          ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                      )}
+                    >
+                      <ChevronRight
+                        className={cn(
+                          'w-3.5 h-3.5 transition-transform duration-200',
+                          isDashboardExpanded && 'rotate-90'
+                        )}
+                      />
+                    </button>
+                  )}
                   {tab.name === 'reports' && (
                     <button
                       type="button"
@@ -376,6 +414,39 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     </button>
                   )}
                 </div>
+                {hasDashboardSubtabs && isDashboardExpanded && (
+                  <div
+                    data-testid="dashboard-subtabs"
+                    className="pl-6 space-y-0.5 border-l border-black/[0.06] ml-4 mt-0.5"
+                  >
+                    <Link
+                      href={`${basePath}/shift-compilation`}
+                      data-testid="dashboard-subtab-shift-operations"
+                      className={cn(
+                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        isShiftOperationsSubtabActive
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium gold-steel-border gold-steel-border-slim'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                      )}
+                    >
+                      {isShiftOperationsSubtabActive && (
+                        <m.div
+                          layoutId="active-sidebar-subtab"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                        />
+                      )}
+                      <ClipboardCheck
+                        className={cn(
+                          'w-3 h-3 shrink-0 transition-colors',
+                          isShiftOperationsSubtabActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                        )}
+                      />
+                      <span>Shift Operations</span>
+                    </Link>
+                  </div>
+                )}
                 {tab.name === 'reports' && isReportsExpanded && (
                   <div
                     data-testid="reports-subtabs"

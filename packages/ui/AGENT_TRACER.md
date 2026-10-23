@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T07:12:00+02:00 - Move Control Room Shift Operations Into Sub-tab Under Dashboard in DepartmentLayout
+
+- **Purpose**: Make `Shift Operations` (`/control-room/shift-compilation`) a sub-tab under `Dashboard` (`/control-room`) in the Control Room sidebar (`DepartmentLayout.tsx`) with an expandable/collapsible chevron toggle (`dashboard-subtabs-toggle`) so operators landing on Dashboard can immediately navigate to `Shift Operations` to inspect previous/current shift operations.
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Added `isDashboardExpanded` state, `dashboard-subtabs-toggle` chevron button, and `dashboard-subtab-shift-operations` sub-tab under `Dashboard` for the Control Room department.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter portal test -- --testPathPatterns="DepartmentLayout"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T06:05:00+02:00 - Hero Card CTA Gold Borders, Gold KPI `|` Separators, Circular Gold Dept Icons & Enlarged Bright Gold Carousel Indicators
 
 - **Purpose**: Implement `/hub` design feedback across `HeroCardContent.tsx` and `HeroRotator.tsx`: circular gold department icon badges (`rounded-full gold-steel-border gold-steel-border-slim`), gold borders on all primary/secondary Hero CTAs (`Log Delays`, `Machine Operations`, `Shift Closeout`, etc.), gold `|` separators in `HeroOperationalKpiStrip`, and enlarged (`w-6 h-6 sm:w-7 sm:h-7` active, `w-5 h-5 sm:w-[22px] sm:h-[22px]` inactive) brightened (`text-amber-400 brightness-125`) carousel indicator emblems.

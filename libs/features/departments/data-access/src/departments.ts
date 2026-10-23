@@ -258,7 +258,6 @@ export const DEPARTMENT_TABS = [
  * in favor of delay_entries, which are managed within the Machine Ops interface.
  */
 export const CONTROL_ROOM_TABS = [
-  { name: 'shift-compilation', label: 'Shift Operations', icon: 'ClipboardCheck' },
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
   { name: 'machine-operations', label: 'Machine Operations', icon: 'Cpu' },

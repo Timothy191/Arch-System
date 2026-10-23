@@ -13,7 +13,8 @@ import {
 } from '@repo/departments/ui';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { cn } from '@repo/ui/lib/utils';
-import { CheckSquare, ClipboardCheck, Users } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck, Users } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ShiftCloseoutForm } from '../../control-room/components/ShiftCloseoutForm';
@@ -77,6 +78,28 @@ export function ShiftCompilationClient({
 
   return (
     <div className="space-y-6">
+      {/* Dashboard / Shift Operations Sub-tab Navigation */}
+      <div
+        aria-label="Control Room Dashboard Sub-tabs"
+        className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)]/60 pb-2.5"
+      >
+        <Link
+          href={`/${departmentSlug}`}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
+        >
+          <BarChart3 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <span>Dashboard</span>
+        </Link>
+        <Link
+          href={`/${departmentSlug}/shift-compilation`}
+          aria-current="page"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] gold-steel-border gold-steel-border-slim transition-all"
+        >
+          <ClipboardCheck className="w-3.5 h-3.5" />
+          <span>Shift Operations</span>
+        </Link>
+      </div>
+
       {/* Unified Shift Operations Section Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
         <div>

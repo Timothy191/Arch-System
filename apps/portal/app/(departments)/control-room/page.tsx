@@ -1,6 +1,6 @@
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck, Clock, Cpu } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -68,6 +68,28 @@ export default async function ControlRoomPage() {
                 })}
               </p>
             </div>
+          </div>
+
+          {/* Dashboard Sub-tabs: Dashboard Overview & Shift Operations (Previous / Current Shift) */}
+          <div
+            aria-label="Control Room Dashboard Sub-tabs"
+            className="mt-4 pt-3 border-t border-[var(--border-subtle)]/60 flex flex-wrap items-center gap-2"
+          >
+            <Link
+              href="/control-room"
+              aria-current="page"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] gold-steel-border gold-steel-border-slim transition-all"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              href="/control-room/shift-compilation"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
+            >
+              <ClipboardCheck className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <span>Shift Operations</span>
+            </Link>
           </div>
         </GlassCard>
 

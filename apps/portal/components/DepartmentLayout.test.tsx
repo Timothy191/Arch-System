@@ -50,11 +50,13 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     const pdfReportSubtab = screen.getByTestId('reports-subtab-pdf-report');
     expect(pdfReportSubtab).toBeInTheDocument();
     expect(pdfReportSubtab).toHaveAttribute('href', '/control-room/reports?tab=pdf-report');
-    expect(screen.getByRole('link', { name: /Shift Operations/i })).toBeInTheDocument();
+    expect(screen.getByTestId('dashboard-subtabs-toggle')).toHaveAttribute('aria-expanded', 'true');
+    const shiftOperationsSubtab = screen.getByTestId('dashboard-subtab-shift-operations');
+    expect(shiftOperationsSubtab).toBeInTheDocument();
+    expect(shiftOperationsSubtab).toHaveAttribute('href', '/control-room/shift-compilation');
 
-    // Verify exact ordering (Shift Operations at the top above Dashboard)
+    // Verify exact ordering (Dashboard at the top with Shift Operations as its sub-tab)
     expect(controlRoomTabs.map((t) => t.label)).toEqual([
-      'Shift Operations',
       'Dashboard',
       'Hourly Loads',
       'Machine Operations',
@@ -230,5 +232,34 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     fireEvent.click(arrowToggle);
     expect(arrowToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('reports-subtabs')).toBeInTheDocument();
+  });
+
+  it('highlights Shift Operations sub-tab under Dashboard and toggles Dashboard sub-tabs via the arrow button', () => {
+    mockUsePathname.mockReturnValue('/control-room/shift-compilation');
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+
+    render(
+      <DepartmentLayout department={controlRoomDept} tabs={controlRoomTabs}>
+        <div>Shift Operations Content</div>
+      </DepartmentLayout>
+    );
+
+    const dashboardLinks = screen.getAllByRole('link', { name: /^Dashboard$/i });
+    const mainDashboardLink = dashboardLinks[0]!;
+    const shiftOperationsSubtab = screen.getByTestId('dashboard-subtab-shift-operations');
+    const dashboardArrowToggle = screen.getByTestId('dashboard-subtabs-toggle');
+
+    expect(shiftOperationsSubtab.className).toContain('bg-[var(--accent-blue)]/10');
+    expect(mainDashboardLink.className).not.toContain('bg-[var(--accent-blue)]/10');
+
+    // Click the small arrow button to collapse Dashboard sub-tabs
+    fireEvent.click(dashboardArrowToggle);
+    expect(dashboardArrowToggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('dashboard-subtabs')).not.toBeInTheDocument();
+
+    // Click the small arrow button again to expand Dashboard sub-tabs
+    fireEvent.click(dashboardArrowToggle);
+    expect(dashboardArrowToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('dashboard-subtabs')).toBeInTheDocument();
   });
 });
