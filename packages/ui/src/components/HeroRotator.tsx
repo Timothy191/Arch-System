@@ -369,7 +369,7 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse"
+              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/50 shadow-xs transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse text-amber-500 hover:text-amber-400"
               style={{
                 animationDuration: '3s',
                 filter:
@@ -382,7 +382,7 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-md text-[var(--accent-blue)] hover:text-[var(--accent-electric-blue-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse"
+              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/50 shadow-xs transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse text-amber-500 hover:text-amber-400"
               style={{
                 animationDuration: '3s',
                 animationDelay: '1.5s',

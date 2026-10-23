@@ -424,10 +424,24 @@ describe('HeroRotator', () => {
 
     const prevBtn = screen.getByLabelText('Previous highlight');
     const nextBtn = screen.getByLabelText('Next highlight');
-    expect(prevBtn).toHaveClass('text-[var(--accent-blue)]', 'bg-transparent', 'border-0');
-    expect(nextBtn).toHaveClass('text-[var(--accent-blue)]', 'bg-transparent', 'border-0');
-    expect(prevBtn).not.toHaveClass('liquid-glass-light', 'rounded-full', 'shadow-window');
-    expect(nextBtn).not.toHaveClass('liquid-glass-light', 'rounded-full', 'shadow-window');
+    expect(prevBtn).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim',
+      'border-accent-amber/50',
+      'text-amber-500',
+      'hover:text-amber-400',
+      'rounded-full',
+      'shadow-xs'
+    );
+    expect(nextBtn).toHaveClass(
+      'gold-steel-border',
+      'gold-steel-border-slim',
+      'border-accent-amber/50',
+      'text-amber-500',
+      'hover:text-amber-400',
+      'rounded-full',
+      'shadow-xs'
+    );
 
     const activeIndicator = screen.getByLabelText('Jump to System Overview');
     const inactiveIndicator = screen.getByLabelText('Jump to Drilling Operations');

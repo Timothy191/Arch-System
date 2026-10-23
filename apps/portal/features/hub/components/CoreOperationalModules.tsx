@@ -140,7 +140,7 @@ export function CoreOperationalModules({
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className="w-full h-8 pl-9 pr-9 text-xs rounded-full gold-steel-border gold-steel-border-slim bg-white/85 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/25 text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
+              className="w-full h-8 pl-9 pr-9 text-xs rounded-full gold-steel-border gold-steel-border-slim bg-white/85 border border-arch-border-subtle focus:border-arch-accent-amber/50 focus:outline-none focus:border-accent-amber text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search
