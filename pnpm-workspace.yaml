@@ -22,7 +22,7 @@ catalog:
   zustand: ^5.0.14
   xstate: ^5.19.2
   "@tremor/react": ^3.18.7
-  "@sentry/nextjs": ^10.57.0
+  "@sentry/nextjs": ^10.75.2
   react-hook-form: ^7.79.0
   three: ^0.185.1
   "@types/three": ^0.185.4
