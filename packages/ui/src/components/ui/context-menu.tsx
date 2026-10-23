@@ -117,7 +117,7 @@ export function ContextMenuTrigger({ children, className, ...props }: ContextMen
       onKeyDown={handleKeyDown}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={cn('outline-none select-none', className)}
+      className={cn('select-none outline-none', className)}
       {...props}
     >
       {children}
@@ -166,7 +166,7 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
         top: adjustedPos.y,
       }}
       className={cn(
-        'z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100',
+        'fade-in-0 zoom-in-95 z-50 min-w-[180px] animate-in overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 text-neutral-900 shadow-xl backdrop-blur-md duration-100',
         className
       )}
       {...props}
@@ -213,7 +213,7 @@ export function ContextMenuItem({
       {prefix && <span className="mr-2 flex shrink-0 items-center text-neutral-500">{prefix}</span>}
       <span className="flex-1 truncate">{children}</span>
       {suffix && (
-        <span className="ml-2 flex shrink-0 items-center text-xs text-neutral-400">{suffix}</span>
+        <span className="ml-2 flex shrink-0 items-center text-neutral-400 text-xs">{suffix}</span>
       )}
     </>
   );
@@ -223,7 +223,7 @@ export function ContextMenuItem({
     destructive
       ? 'text-red-600 hover:bg-red-50'
       : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900',
-    disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+    disabled && 'pointer-events-none cursor-not-allowed opacity-40',
     className
   );
 

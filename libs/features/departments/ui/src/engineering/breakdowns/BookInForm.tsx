@@ -144,29 +144,29 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Form */}
       <div className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6">
-        <div className="flex items-center justify-between mb-5">
+        <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ClipboardPlus className="w-5 h-5 text-violet-400" />
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">Book In Machine</h3>
+            <ClipboardPlus className="h-5 w-5 text-violet-400" />
+            <h3 className="font-medium text-[var(--text-heading)] text-lg">Book In Machine</h3>
           </div>
 
           {/* Draft status indicator */}
           {hasDraft && (
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/30">
-                <Save className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/15 px-2 py-0.5 text-[11px] text-violet-400">
+                <Save className="h-3 w-3" />
                 Draft Cached
               </span>
               <button
                 type="button"
                 onClick={clearDraft}
                 title="Clear Draft"
-                className="p-1 rounded text-[var(--text-muted)] hover:text-accent-red hover:bg-accent-red/10 transition-colors"
+                className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-accent-red/10 hover:text-accent-red"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
@@ -174,10 +174,10 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
         {message && (
           <div
-            className={`mb-4 px-4 py-3 rounded-lg border text-sm ${
+            className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
               message.type === 'success'
-                ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
-                : 'bg-accent-red/10 border-accent-red/20 text-accent-red'
+                ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
+                : 'border-accent-red/20 bg-accent-red/10 text-accent-red'
             }`}
           >
             {message.text}
@@ -189,7 +189,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           <div>
             <label
               htmlFor="machine-select"
-              className="block text-sm text-[var(--text-secondary)] mb-1.5"
+              className="mb-1.5 block text-[var(--text-secondary)] text-sm"
             >
               Select Machine
             </label>
@@ -198,7 +198,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               required
               value={selectedMachineId}
               onChange={(e) => setSelectedMachineId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+              className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             >
               <option value="">— Choose a machine —</option>
               {machines.map((m) => (
@@ -211,20 +211,20 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
           {/* Auto-filled Machine Details */}
           {selectedMachine && (
-            <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-violet-500/5 border border-violet-500/10">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border border-violet-500/10 bg-violet-500/5 p-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                   Fleet / Serial
                 </p>
-                <p className="text-sm text-[var(--text-heading)] font-medium">
+                <p className="font-medium text-[var(--text-heading)] text-sm">
                   {selectedMachine.serial_number || selectedMachine.id.slice(0, 8)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                   Machine Type
                 </p>
-                <p className="text-sm text-[var(--text-heading)] font-medium">
+                <p className="font-medium text-[var(--text-heading)] text-sm">
                   {selectedMachine.machine_type}
                 </p>
               </div>
@@ -234,8 +234,8 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                <CalendarDays className="w-3.5 h-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                <CalendarDays className="h-3.5 w-3.5" />
                 Date In
               </label>
               <input
@@ -244,12 +244,12 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 aria-label="Date In"
                 value={dateIn}
                 onChange={(e) => setDateIn(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                <Clock className="w-3.5 h-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                <Clock className="h-3.5 w-3.5" />
                 Time In
               </label>
               <input
@@ -258,28 +258,28 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 aria-label="Time In"
                 value={timeIn}
                 onChange={(e) => setTimeIn(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
           </div>
 
           {/* Quick Preset Fault Reasons */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm text-[var(--text-secondary)]">Breakdown Reason</label>
-              <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-violet-400" />
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-[var(--text-secondary)] text-sm">Breakdown Reason</label>
+              <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                <Sparkles className="h-3 w-3 text-violet-400" />
                 Quick presets
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 mb-2">
+            <div className="mb-2 flex flex-wrap gap-1.5">
               {COMMON_REASONS.map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setReason(r)}
-                  className="px-2 py-1 text-[11px] rounded-md bg-[var(--bg-primary)] hover:bg-violet-500/10 hover:border-violet-500/30 border border-[var(--border-emphasis)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all"
+                  className="rounded-md border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-2 py-1 text-[11px] text-[var(--text-secondary)] transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-[var(--text-heading)]"
                 >
                   {r}
                 </button>
@@ -292,14 +292,14 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Describe the issue or select a preset..."
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             />
           </div>
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
+            className="w-full rounded-lg bg-violet-600 py-2.5 font-medium text-sm text-white shadow-card transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? 'Booking In...' : 'Book In Machine'}
           </button>
@@ -310,15 +310,15 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-violet-400" />
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">Active Breakdowns</h3>
+            <ClipboardList className="h-5 w-5 text-violet-400" />
+            <h3 className="font-medium text-[var(--text-heading)] text-lg">Active Breakdowns</h3>
           </div>
           <span className="text-[var(--text-secondary)] text-sm">
             {activeBreakdowns.length} machines
           </span>
         </div>
 
-        <div className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)]">
           {activeBreakdowns.length === 0 ? (
             <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
               No active breakdowns. All machines operational.
@@ -327,28 +327,28 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--border-emphasis)]">
+                  <tr className="border-[var(--border-emphasis)] border-b">
                     <th
                       scope="col"
-                      className="text-left px-4 py-3 text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium"
+                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
                     >
                       Fleet ID
                     </th>
                     <th
                       scope="col"
-                      className="text-left px-4 py-3 text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium"
+                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
                     >
                       Machine
                     </th>
                     <th
                       scope="col"
-                      className="text-left px-4 py-3 text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium"
+                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
                     >
                       Type
                     </th>
                     <th
                       scope="col"
-                      className="text-left px-4 py-3 text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium"
+                      className="px-4 py-3 text-left font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide"
                     >
                       Date In
                     </th>
@@ -358,16 +358,16 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                   {activeBreakdowns.map((b) => (
                     <tr
                       key={b.id}
-                      className="border-b border-[var(--border-emphasis)] last:border-0 hover:bg-[var(--bg-tertiary)] transition-colors"
+                      className="border-[var(--border-emphasis)] border-b transition-colors last:border-0 hover:bg-[var(--bg-tertiary)]"
                     >
-                      <td className="px-4 py-3 text-[var(--text-heading)] font-medium">
+                      <td className="px-4 py-3 font-medium text-[var(--text-heading)]">
                         {b.fleet_id}
                       </td>
                       <td className="px-4 py-3 text-[var(--text-heading)]">
                         {b.machine_name || b.fleet_id}
                       </td>
                       <td className="px-4 py-3 text-[var(--text-muted)]">{b.machine_type}</td>
-                      <td className="px-4 py-3 text-[var(--text-muted)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-3 text-[var(--text-muted)]">
                         {b.date_in}
                       </td>
                     </tr>

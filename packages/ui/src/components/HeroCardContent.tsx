@@ -205,17 +205,17 @@ function HeroTelemetryGraph({
 
   return (
     <div
-      className="mt-auto pt-2.5 border-t border-slate-200/70"
+      className="mt-auto border-slate-200/70 border-t pt-2.5"
       data-testid={`hero-telemetry-graph-${panelName}`}
     >
-      <div className="flex items-center justify-between gap-2 mb-1.5">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span
-            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse shrink-0"
+            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
             aria-hidden="true"
           />
           <h3
-            className="font-anurati text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--text-heading)] truncate leading-snug"
+            className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm"
             style={{
               fontFamily:
                 "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
@@ -224,24 +224,24 @@ function HeroTelemetryGraph({
             {series.title}
           </h3>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-semibold text-emerald-700">
-            <TrendingUp className="w-2.5 h-2.5" aria-hidden="true" />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-emerald-700">
+            <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
             {series.deltaBadge}
           </span>
-          <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full bg-slate-900/5 border border-slate-300/60 text-[9px] font-mono font-bold text-slate-800 tabular-nums">
+          <span className="hidden items-center rounded-full border border-slate-300/60 bg-slate-900/5 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-800 tabular-nums sm:inline-flex">
             {series.currentValue}
           </span>
         </div>
       </div>
 
       <div
-        className="relative rounded-xl gold-steel-border gold-steel-border-slim bg-white/85 backdrop-blur-md border border-accent-amber/40 px-3 py-2 shadow-2xs overflow-hidden"
+        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 shadow-2xs backdrop-blur-md"
         data-testid={`hero-telemetry-box-${panelName}`}
       >
         {/* Animated scanline effect */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30 animate-scanline"
+          className="pointer-events-none absolute inset-0 animate-scanline opacity-30"
           style={{
             background:
               'linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.1) 50%, transparent 100%)',
@@ -250,7 +250,7 @@ function HeroTelemetryGraph({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-14 overflow-visible relative z-10"
+          className="relative z-10 h-14 w-full overflow-visible"
           role="img"
           aria-label={`${series.title} telemetry trend graph`}
         >
@@ -366,11 +366,11 @@ function HeroTelemetryGraph({
           })}
         </svg>
 
-        <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 pt-1 border-t border-slate-100 tabular-nums relative z-10">
+        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[9px] text-slate-500 tabular-nums">
           <span>00:00 SHIFT START</span>
           <span>AVG {series.avgValue}</span>
           <span>PEAK {series.peakValue}</span>
-          <span className="text-emerald-700 font-semibold motion-safe:animate-pulse">
+          <span className="font-semibold text-emerald-700 motion-safe:animate-pulse">
             LIVE · NOW
           </span>
         </div>
@@ -475,39 +475,39 @@ export function HeroOperationalKpiStrip({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 rounded-xl liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-slate-200/80 px-3.5 py-2 shadow-2xs',
+        'liquid-glass-light gold-steel-border gold-steel-border-slim grid grid-cols-1 gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3.5 py-2 shadow-2xs backdrop-blur-md sm:grid-cols-3 sm:gap-3',
         className
       )}
       data-testid={`hero-kpi-strip-${panelName}`}
       aria-label="Operational subsystem indicators"
     >
       {tiles.map((tile, index) => (
-        <div key={tile.label} className="flex items-center justify-between gap-2 min-w-0 py-0.5">
-          <div className="flex items-center gap-2 min-w-0">
+        <div key={tile.label} className="flex min-w-0 items-center justify-between gap-2 py-0.5">
+          <div className="flex min-w-0 items-center gap-2">
             {index > 0 && (
               <span
                 aria-hidden="true"
                 data-testid="hero-kpi-gold-separator"
-                className="hidden sm:inline-flex items-center justify-center font-mono text-xs font-bold text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none shrink-0"
+                className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-accent-amber text-xs drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] sm:inline-flex"
               >
                 |
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
+            <span className="truncate font-mono font-semibold text-[10px] text-slate-500 uppercase tracking-wider">
               {tile.label}
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 shrink-0">
-            <span className="text-xs sm:text-[13px] font-mono font-bold text-[var(--text-heading)] tabular-nums">
+          <div className="flex shrink-0 items-baseline gap-1.5">
+            <span className="font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums sm:text-[13px]">
               {tile.value}
             </span>
             <span
               aria-hidden="true"
-              className="font-mono text-[10px] font-bold text-accent-amber select-none"
+              className="select-none font-bold font-mono text-[10px] text-accent-amber"
             >
               |
             </span>
-            <span className="text-[10px] font-mono text-[var(--accent-blue)] font-semibold">
+            <span className="font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
               {tile.subtext}
             </span>
           </div>
@@ -572,28 +572,28 @@ export function HeroCardContent({
   const hasUrgentTelemetry = incidentCount > 0 || breakdownCount > 0 || offlineMachineCount > 0;
 
   return (
-    <div className="relative h-full w-full flex flex-row z-10">
+    <div className="relative z-10 flex h-full w-full flex-row">
       {/* Left Column: Text, Controls & Live Telemetry Graph */}
-      <div className="relative z-20 flex flex-col justify-between w-[52%] sm:w-[50%] h-full p-5 sm:p-7 liquid-glass-light border border-white/20 shadow-window rounded-l-2xl rounded-r-none">
+      <div className="liquid-glass-light relative z-20 flex h-full w-[52%] flex-col justify-between rounded-r-none rounded-l-2xl border border-white/20 p-5 shadow-window sm:w-[50%] sm:p-7">
         <div>
           {/* Urgent Telemetry Readouts (only shown when active incidents/breakdowns/offline exist) */}
           {hasUrgentTelemetry && (
-            <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono tabular-nums mb-3">
+            <div className="mb-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px] tabular-nums">
               {incidentCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red font-medium">
-                  <AlertTriangle className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 rounded-md bg-accent-red/10 px-2 py-0.5 font-medium text-accent-red">
+                  <AlertTriangle className="h-3 w-3" />
                   {incidentCount} Open
                 </span>
               )}
               {breakdownCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber font-medium">
-                  <Wrench className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 rounded-md bg-accent-amber/10 px-2 py-0.5 font-medium text-accent-amber">
+                  <Wrench className="h-3 w-3" />
                   {breakdownCount} Breakdown
                 </span>
               )}
               {offlineMachineCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] font-medium">
-                  <Power className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 rounded-md bg-black/[0.04] px-2 py-0.5 font-medium text-[var(--text-secondary)]">
+                  <Power className="h-3 w-3" />
                   {offlineMachineCount} Offline
                 </span>
               )}
@@ -604,14 +604,14 @@ export function HeroCardContent({
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               <span
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/40 shadow-2xs shrink-0 bg-accent-amber/10 text-accent-amber"
+                className="gold-steel-border gold-steel-border-slim inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent-amber/40 bg-accent-amber/10 text-accent-amber shadow-2xs"
                 aria-hidden="true"
                 data-testid={`hero-dept-icon-${panel.name}`}
               >
-                <Logo variant="gold" className="w-4 h-4 text-accent-amber" />
+                <Logo variant="gold" className="h-4 w-4 text-accent-amber" />
               </span>
               <h2
-                className="font-anurati uppercase tracking-[0.04em] text-xl sm:text-2xl font-bold text-[var(--text-heading)] leading-snug pr-4"
+                className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl uppercase leading-snug tracking-[0.04em] sm:text-2xl"
                 style={{
                   fontFamily:
                     "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
@@ -620,7 +620,7 @@ export function HeroCardContent({
                 {panel.title}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-[95%]">
+            <p className="max-w-[95%] text-[var(--text-secondary)] text-xs leading-relaxed sm:text-sm">
               {assetSubtitle}
             </p>
           </div>
@@ -629,14 +629,14 @@ export function HeroCardContent({
           <div
             className={cn(
               'mt-4 flex flex-wrap items-center gap-2',
-              !isActive && 'opacity-60 pointer-events-none'
+              !isActive && 'pointer-events-none opacity-60'
             )}
           >
             <Link
               href={panel.primary.href}
               data-cta="primary-hero"
               className={cn(
-                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs border border-black/[0.08] gold-steel-border gold-steel-border-slim transition-all duration-300 active:scale-95',
+                'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-black/[0.08] px-3.5 py-1.5 text-xs transition-all duration-300 active:scale-95',
                 primaryBtnClass
               )}
               tabIndex={isActive ? 0 : -1}
@@ -648,7 +648,7 @@ export function HeroCardContent({
               <Link
                 href={panel.secondary.href}
                 data-cta="secondary-hero"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg gold-steel-border gold-steel-border-slim bg-black/[0.04] hover:bg-black/[0.08] text-[var(--text-heading)] font-medium text-xs border border-transparent transition-all duration-300 active:scale-95"
+                className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-black/[0.04] px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all duration-300 hover:bg-black/[0.08] active:scale-95"
                 tabIndex={isActive ? 0 : -1}
               >
                 {panel.secondary.icon}
@@ -663,8 +663,8 @@ export function HeroCardContent({
       </div>
 
       {/* Right Column: Full Bleed Looping MP4 Video with Live Camera Feed HUD */}
-      <div className="absolute top-0 right-0 w-[48%] sm:w-[50%] h-full group/img overflow-hidden rounded-r-2xl z-10">
-        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white/20 to-transparent z-10 pointer-events-none" />
+      <div className="group/img absolute top-0 right-0 z-10 h-full w-[48%] overflow-hidden rounded-r-2xl sm:w-[50%]">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white/20 to-transparent" />
         {(() => {
           const posterSrc = failedImages.has(panel.image)
             ? '/images/departments/overview.jpg'
@@ -699,41 +699,41 @@ export function HeroCardContent({
             />
           );
         })()}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
         {/* Live Video HUD Pill (Top Left of Feed) */}
         {isActive && (
-          <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono text-white shadow-sm z-20 pointer-events-none">
+          <div className="pointer-events-none absolute top-4 left-4 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-2.5 py-1 font-mono text-[10px] text-white shadow-sm backdrop-blur-md">
             <span
-              className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+              className="h-1.5 w-1.5 animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite] rounded-full bg-emerald-400"
               aria-hidden="true"
             />
             <span className="font-bold text-emerald-300 tracking-wider">LIVE</span>
             <span className="text-white/30">·</span>
-            <span className="tabular-nums font-medium text-white/90">30 FPS</span>
+            <span className="font-medium text-white/90 tabular-nums">30 FPS</span>
             <span className="text-white/30">·</span>
             <span className="font-medium text-white/90">1080p</span>
           </div>
         )}
 
         {/* Telemetry HUD & Target Progress Delta Bar (Top Right) */}
-        <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 pointer-events-none z-20">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 border border-white/15 shadow-sm text-xs backdrop-blur-md">
-            <Activity className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="text-white/70 uppercase text-[10px] font-mono font-medium tracking-wider">
+        <div className="pointer-events-none absolute top-4 right-4 z-20 flex flex-col items-end gap-1.5">
+          <div className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1 text-xs shadow-sm backdrop-blur-md">
+            <Activity className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+            <span className="font-medium font-mono text-[10px] text-white/70 uppercase tracking-wider">
               {panel.stats?.label || 'DEPTH'}:
             </span>
-            <span className="font-mono tabular-nums font-bold text-white">
+            <span className="font-bold font-mono text-white tabular-nums">
               {panel.stats?.value || '1,240m'}
             </span>
           </div>
 
           {isActive && (
-            <div className="flex flex-col items-end gap-0.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-mono text-white/80">
-              <span className="tabular-nums font-semibold text-white/90">{targetMeta.label}</span>
-              <div className="w-24 h-1 bg-white/20 rounded-full overflow-hidden mt-0.5">
+            <div className="flex flex-col items-end gap-0.5 rounded-md border border-white/10 bg-black/50 px-2 py-1 font-mono text-[9px] text-white/80 backdrop-blur-md">
+              <span className="font-semibold text-white/90 tabular-nums">{targetMeta.label}</span>
+              <div className="mt-0.5 h-1 w-24 overflow-hidden rounded-full bg-white/20">
                 <div
-                  className="h-full bg-emerald-400 rounded-full"
+                  className="h-full rounded-full bg-emerald-400"
                   style={{ width: targetMeta.width }}
                 />
               </div>
@@ -742,18 +742,18 @@ export function HeroCardContent({
         </div>
 
         {/* Machine Status & CAM Overlay (Bottom Right) */}
-        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1 pointer-events-none z-20">
+        <div className="pointer-events-none absolute right-4 bottom-4 z-20 flex flex-col items-end gap-1">
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[10px] font-mono font-semibold border border-white/15 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true" />●{' '}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-2.5 py-1 font-mono font-semibold text-[10px] text-white/95 shadow-sm backdrop-blur-md">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />●{' '}
               {panel.name === 'drilling' ? 'DRILLING' : panel.name.toUpperCase()}
             </span>
-            <span className="text-[10px] font-mono tabular-nums text-white/90 bg-black/60 px-2 py-1 rounded-md backdrop-blur-md border border-white/15 shadow-sm">
+            <span className="rounded-md border border-white/15 bg-black/60 px-2 py-1 font-mono text-[10px] text-white/90 tabular-nums shadow-sm backdrop-blur-md">
               CAM-{String(idx + 1).padStart(2, '0')}
             </span>
           </div>
           {isActive && (
-            <span className="text-[9px] font-mono tabular-nums text-white/70 bg-black/50 px-1.5 py-0.5 rounded backdrop-blur-sm border border-white/10">
+            <span className="rounded border border-white/10 bg-black/50 px-1.5 py-0.5 font-mono text-[9px] text-white/70 tabular-nums backdrop-blur-sm">
               UTC 08:30:12
             </span>
           )}

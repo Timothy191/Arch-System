@@ -24,11 +24,11 @@ export const Default: Story = {
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Core Temperature</span>
-            <span className="text-sm text-accent-green">42°C</span>
+            <span className="font-medium text-sm">Core Temperature</span>
+            <span className="text-accent-green text-sm">42°C</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Uptime</span>
+            <span className="font-medium text-sm">Uptime</span>
             <span className="text-sm">14d 6h 22m</span>
           </div>
         </div>
@@ -44,8 +44,8 @@ export const Default: Story = {
 export const Minimal: Story = {
   render: () => (
     <Card className="w-[200px] p-4 text-center">
-      <p className="text-sm font-medium">Network Signal</p>
-      <p className="text-2xl font-bold text-accent-blue">98%</p>
+      <p className="font-medium text-sm">Network Signal</p>
+      <p className="font-bold text-2xl text-accent-blue">98%</p>
     </Card>
   ),
 };

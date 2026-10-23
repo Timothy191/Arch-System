@@ -46,7 +46,7 @@ export function CollapseGroup({
   return (
     <CollapseGroupContext.Provider value={{ multiple, activeKeys, toggleKey }}>
       <div
-        className={cn('divide-y divide-neutral-200 border-y border-neutral-200 ', className)}
+        className={cn('divide-y divide-neutral-200 border-neutral-200 border-y', className)}
         {...props}
       >
         {children}
@@ -125,22 +125,22 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
           aria-controls={contentId}
           onClick={handleToggle}
           className={cn(
-            'w-full flex items-center justify-between text-left transition-colors select-none',
-            size === 'small' ? 'py-2.5 text-xs font-medium' : 'py-4 text-sm font-semibold',
-            'text-neutral-900 hover:text-neutral-600 ',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 '
+            'flex w-full select-none items-center justify-between text-left transition-colors',
+            size === 'small' ? 'py-2.5 font-medium text-xs' : 'py-4 font-semibold text-sm',
+            'text-neutral-900 hover:text-neutral-600',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
           )}
         >
           <div className="flex flex-col pr-4">
             <span className="leading-snug">{title}</span>
             {subtitle && (
-              <span className="text-xs font-normal text-neutral-500 mt-0.5">{subtitle}</span>
+              <span className="mt-0.5 font-normal text-neutral-500 text-xs">{subtitle}</span>
             )}
           </div>
           <Logo
             variant="gold"
             className={cn(
-              'w-3.5 h-3.5 shrink-0 transition-transform duration-200 ease-out',
+              'h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out',
               isExpanded ? 'rotate-0' : 'rotate-180'
             )}
             aria-hidden="true"

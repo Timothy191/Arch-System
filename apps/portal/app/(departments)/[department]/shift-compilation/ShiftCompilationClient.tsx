@@ -81,32 +81,32 @@ export function ShiftCompilationClient({
       {/* SCADA Dashboard / Shift Operations Sub-tab Navigation */}
       <div
         aria-label="Control Room Dashboard Sub-tabs"
-        className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)]/60 pb-2.5"
+        className="flex flex-wrap items-center gap-2 border-[var(--border-subtle)]/60 border-b pb-2.5"
       >
         <Link
           href={`/${departmentSlug}`}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
+          className="inline-flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--border-subtle)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]"
         >
-          <BarChart3 className="w-3.5 h-3.5 text-[var(--text-heading)]" />
+          <BarChart3 className="h-3.5 w-3.5 text-[var(--text-heading)]" />
           <span>SCADA Dashboard</span>
         </Link>
         <Link
           href={`/${departmentSlug}/shift-compilation`}
           aria-current="page"
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] gold-steel-border gold-steel-border-slim transition-all"
+          className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-semibold text-[var(--accent-blue)] text-xs transition-all"
         >
-          <ClipboardCheck className="w-3.5 h-3.5" />
+          <ClipboardCheck className="h-3.5 w-3.5" />
           <span>Shift Operations</span>
         </Link>
       </div>
 
       {/* Unified Shift Operations Section Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+      <div className="flex flex-col justify-between gap-3 border-[var(--border-subtle)] border-b pb-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[var(--text-heading)]">
+          <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight">
             Shift Operations
           </h1>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+          <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
             Unified shift handover compilation, roster &amp; machine coverage, and atomic shift
             closeout.
           </p>
@@ -114,7 +114,7 @@ export function ShiftCompilationClient({
         <div
           role="tablist"
           aria-label="Shift Operations Views"
-          className="inline-flex items-center gap-1 bg-[var(--bg-secondary)]/80 p-1 rounded-xl border border-[var(--border-subtle)]"
+          className="inline-flex items-center gap-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/80 p-1"
         >
           <button
             type="button"
@@ -122,13 +122,13 @@ export function ShiftCompilationClient({
             aria-selected={activeSection === 'handover'}
             onClick={() => setActiveSection('handover')}
             className={cn(
-              'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+              'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'handover'
                 ? 'bg-white text-[var(--text-heading)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             )}
           >
-            <ClipboardCheck className="w-3.5 h-3.5" />
+            <ClipboardCheck className="h-3.5 w-3.5" />
             Shift Handover
           </button>
           <button
@@ -137,13 +137,13 @@ export function ShiftCompilationClient({
             aria-selected={activeSection === 'coverage'}
             onClick={() => setActiveSection('coverage')}
             className={cn(
-              'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+              'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'coverage'
                 ? 'bg-white text-[var(--text-heading)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             )}
           >
-            <Users className="w-3.5 h-3.5" />
+            <Users className="h-3.5 w-3.5" />
             Roster &amp; Coverage
           </button>
           <button
@@ -152,13 +152,13 @@ export function ShiftCompilationClient({
             aria-selected={activeSection === 'closeout'}
             onClick={() => setActiveSection('closeout')}
             className={cn(
-              'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+              'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'closeout'
                 ? 'bg-white text-[var(--text-heading)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             )}
           >
-            <CheckSquare className="w-3.5 h-3.5" />
+            <CheckSquare className="h-3.5 w-3.5" />
             Shift Closeout
           </button>
         </div>
@@ -200,13 +200,13 @@ export function ShiftCompilationClient({
           />
 
           {/* View Switcher: Department Shift vs Multi-Site Operations */}
-          <div className="flex items-center justify-between border-b border-arch-border-subtle pb-2">
-            <div className="flex items-center gap-2 bg-arch-surface-secondary/70 p-1 rounded-lg border border-arch-border-subtle">
+          <div className="flex items-center justify-between border-arch-border-subtle border-b pb-2">
+            <div className="flex items-center gap-2 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/70 p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab('department')}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+                  'rounded-md px-3 py-1.5 font-semibold text-xs transition-all',
                   activeTab === 'department'
                     ? 'bg-white text-arch-text-primary shadow-card'
                     : 'text-arch-text-tertiary hover:text-arch-text-secondary'
@@ -218,7 +218,7 @@ export function ShiftCompilationClient({
                 type="button"
                 onClick={() => setActiveTab('multisite')}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+                  'rounded-md px-3 py-1.5 font-semibold text-xs transition-all',
                   activeTab === 'multisite'
                     ? 'bg-white text-arch-text-primary shadow-card'
                     : 'text-arch-text-tertiary hover:text-arch-text-secondary'

@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T10:30:00+02:00 - Enforce Canonical Utility Class Ordering (`useSortedClasses`) & Prune Orphaned DataGrid Story
+
+- **Purpose**: Enforce consistent Tailwind utility class ordering across `@repo/ui` via Biome `nursery/useSortedClasses` (`level: "error"`, `fix: "safe"`) and remove orphaned `src/components/ui/DataGrid.stories.tsx` flagged by `pnpm knip`.
+- **Changes**:
+  - `packages/ui/src/**/*.tsx`: Auto-sorted utility classes across all UI primitives and components.
+  - `packages/ui/src/components/ui/DataGrid.stories.tsx`: Deleted orphaned story referencing removed `./data-grid`.
+- **Verification**: `pnpm --filter @repo/ui lint` ✅; `pnpm knip` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T08:42:00+02:00 - Hide Inactive Hero Carousel Indicator Icons Until Card Is Presented
 
 - **Purpose**: Keep only the active slide's `ArchEmblemIcon` indicator visible (`opacity-100 visible`) on `/hub` while hiding all inactive indicator icons (`opacity-0 invisible`) until their respective Hero card is presented.

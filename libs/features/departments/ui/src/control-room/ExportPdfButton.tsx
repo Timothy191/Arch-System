@@ -88,23 +88,23 @@ export function ExportPdfButton({
         type="button"
         onClick={handleDownload}
         disabled={loading}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary text-arch-text-primary text-xs font-semibold shadow-card hover:bg-arch-surface-tertiary transition-all active:scale-95 disabled:opacity-50 min-h-[32px]"
+        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary px-3 py-1.5 font-semibold text-arch-text-primary text-xs shadow-card transition-all hover:bg-arch-surface-tertiary active:scale-95 disabled:opacity-50"
         title={isShiftClosed ? 'Export Signed PDF with Digital Seal' : 'Download Draft PDF'}
       >
         {loading ? (
           <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-arch-brand-blue" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-arch-brand-blue" />
             <span>Generating Signed Report...</span>
           </>
         ) : (
           <>
-            <Download className="w-3.5 h-3.5 text-arch-brand-blue" />
+            <Download className="h-3.5 w-3.5 text-arch-brand-blue" />
             <span>{isShiftClosed ? 'Export Signed PDF' : 'Download Draft PDF'}</span>
           </>
         )}
       </button>
       {errorMessage && (
-        <span className="text-[10px] text-accent-red mt-1 font-medium">{errorMessage}</span>
+        <span className="mt-1 font-medium text-[10px] text-accent-red">{errorMessage}</span>
       )}
     </div>
   );

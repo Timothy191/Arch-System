@@ -111,11 +111,11 @@ export default async function ExcavatorActivityPage({
         <PageHeader title="Excavator Activity" />
         <Link
           href="/hub/executive"
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+          className="inline-flex items-center gap-1.5 rounded-button border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-all hover:border-[var(--accent-blue)]/30 hover:bg-[var(--accent-blue)]/20"
         >
-          <BarChart3 className="w-3.5 h-3.5" />
+          <BarChart3 className="h-3.5 w-3.5" />
           Executive Dashboard
-          <ArrowUpRight className="w-3 h-3" />
+          <ArrowUpRight className="h-3 w-3" />
         </Link>
       </div>
 

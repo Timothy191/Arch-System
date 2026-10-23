@@ -28,13 +28,13 @@ export function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[100] flex max-h-[45vh] flex-col gap-4 overflow-y-auto border-t border-border bg-background/95 p-4 shadow-lg backdrop-blur-xl sm:max-h-none sm:flex-row sm:items-center sm:justify-between sm:p-6">
-      <div className="flex-1 text-sm text-muted-foreground">
+    <div className="fixed inset-x-0 bottom-0 z-[100] flex max-h-[45vh] flex-col gap-4 overflow-y-auto border-border border-t bg-background/95 p-4 shadow-lg backdrop-blur-xl sm:max-h-none sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="flex-1 text-muted-foreground text-sm">
         <p>
           We use cookies to improve your experience, analyze site traffic, and support operational
           security. By continuing to use the Arch Portal, you consent to our use of cookies as
           described in our{' '}
-          <Link href="/privacy" className="text-[var(--accent-blue)] hover:underline font-medium">
+          <Link href="/privacy" className="font-medium text-[var(--accent-blue)] hover:underline">
             Privacy Policy
           </Link>
           .

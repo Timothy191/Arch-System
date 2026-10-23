@@ -11,5 +11,5 @@ import { Clock } from '@repo/ui/Clock';
  * e2e/visual/login.visual.spec.ts mask contract.
  */
 export function LoginClock() {
-  return <Clock testId="login-clock" format="time" className="text-[12px] font-medium" />;
+  return <Clock testId="login-clock" format="time" className="font-medium text-[12px]" />;
 }

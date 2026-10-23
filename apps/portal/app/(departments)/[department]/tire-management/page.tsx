@@ -80,28 +80,28 @@ export default async function TireManagementPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <CircleDot className="w-6 h-6 text-dept-engineering" aria-hidden="true" />
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Tire Management</h2>
+            <CircleDot className="h-6 w-6 text-dept-engineering" aria-hidden="true" />
+            <h2 className="font-bold text-2xl text-[var(--text-heading)]">Tire Management</h2>
           </div>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Fleet tire pressure, tread wear telemetry, and replacement tracking
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/engineering/breakdowns"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:border-[var(--border-emphasis)] transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 text-[var(--text-secondary)] text-sm transition-colors hover:border-[var(--border-emphasis)] hover:text-[var(--text-heading)]"
           >
-            <Wrench className="w-4 h-4 text-dept-engineering" aria-hidden="true" />
+            <Wrench className="h-4 w-4 text-dept-engineering" aria-hidden="true" />
             Breakdowns
-            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Link>
           <Link
             href="/admin"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white text-sm font-medium hover:bg-[var(--accent-blue)]/90 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-sm text-white shadow-sm transition-colors hover:bg-[var(--accent-blue)]/90"
           >
             Manage Fleet
           </Link>
@@ -109,57 +109,57 @@ export default async function TireManagementPage({
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <GlassCard>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Total Tires
             </span>
-            <Layers className="w-4 h-4 text-[var(--text-muted)]" aria-hidden="true" />
+            <Layers className="h-4 w-4 text-[var(--text-muted)]" aria-hidden="true" />
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{totalTires}</p>
-          <span className="text-xs text-[var(--text-secondary)] mt-1 block">In fleet tracking</span>
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">{totalTires}</p>
+          <span className="mt-1 block text-[var(--text-secondary)] text-xs">In fleet tracking</span>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Installed Active
             </span>
-            <CheckCircle className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+            <CheckCircle className="h-4 w-4 text-emerald-600" aria-hidden="true" />
           </div>
-          <p className="text-2xl font-bold text-emerald-600 mt-2">{installedTires}</p>
-          <span className="text-xs text-[var(--text-secondary)] mt-1 block">
+          <p className="mt-2 font-bold text-2xl text-emerald-600">{installedTires}</p>
+          <span className="mt-1 block text-[var(--text-secondary)] text-xs">
             Mounted on machines
           </span>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Inventory / Spares
             </span>
-            <Clock className="w-4 h-4 text-blue-600" aria-hidden="true" />
+            <Clock className="h-4 w-4 text-blue-600" aria-hidden="true" />
           </div>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{inventoryTires}</p>
-          <span className="text-xs text-[var(--text-secondary)] mt-1 block">
+          <p className="mt-2 font-bold text-2xl text-blue-600">{inventoryTires}</p>
+          <span className="mt-1 block text-[var(--text-secondary)] text-xs">
             Ready for deployment
           </span>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Critical Alerts
             </span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            <AlertTriangle className="h-4 w-4 text-amber-600" aria-hidden="true" />
           </div>
           <p
-            className={`text-2xl font-bold mt-2 ${criticalTires > 0 ? 'text-amber-600' : 'text-[var(--text-heading)]'}`}
+            className={`mt-2 font-bold text-2xl ${criticalTires > 0 ? 'text-amber-600' : 'text-[var(--text-heading)]'}`}
           >
             {criticalTires}
           </p>
-          <span className="text-xs text-[var(--text-secondary)] mt-1 block">
+          <span className="mt-1 block text-[var(--text-secondary)] text-xs">
             Low tread or high PSI drift
           </span>
         </GlassCard>
@@ -167,13 +167,13 @@ export default async function TireManagementPage({
 
       {/* Tires Table */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[var(--text-heading)]">Tire Fleet Status</h3>
+        <h3 className="font-semibold text-[var(--text-heading)] text-lg">Tire Fleet Status</h3>
         {tires.length === 0 ? (
           <GlassCard>
-            <div className="text-center py-10 space-y-3">
-              <CircleDot className="w-10 h-10 mx-auto text-[var(--text-muted)] opacity-50" />
-              <p className="text-sm font-medium text-[var(--text-heading)]">No Tires Registered</p>
-              <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+            <div className="space-y-3 py-10 text-center">
+              <CircleDot className="mx-auto h-10 w-10 text-[var(--text-muted)] opacity-50" />
+              <p className="font-medium text-[var(--text-heading)] text-sm">No Tires Registered</p>
+              <p className="mx-auto max-w-sm text-[var(--text-muted)] text-xs">
                 Tire telemetry and maintenance records are managed through Admin fleet provisioning
                 and the engineering workshop.
               </p>
@@ -187,46 +187,46 @@ export default async function TireManagementPage({
                 aria-label="Tire fleet inventory and telemetry table"
               >
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-black/[0.02]">
+                  <tr className="border-[var(--border-default)] border-b bg-black/[0.02]">
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Serial Number
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Brand / Size
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Machine / Position
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Status
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Tread Depth
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Pressure
                     </th>
                     <th
                       scope="col"
-                      className="px-5 py-3 font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Hours Operated
                     </th>
@@ -245,11 +245,11 @@ export default async function TireManagementPage({
                       tire.latestInspection?.condition_status === 'critical' || isLowTread;
 
                     return (
-                      <tr key={tire.id} className="hover:bg-black/[0.01] transition-colors">
-                        <td className="px-5 py-3.5 font-mono text-xs font-semibold text-[var(--text-heading)]">
+                      <tr key={tire.id} className="transition-colors hover:bg-black/[0.01]">
+                        <td className="px-5 py-3.5 font-mono font-semibold text-[var(--text-heading)] text-xs">
                           {tire.serial_number}
                         </td>
-                        <td className="px-5 py-3.5 text-xs text-[var(--text-secondary)]">
+                        <td className="px-5 py-3.5 text-[var(--text-secondary)] text-xs">
                           <span className="font-medium text-[var(--text-heading)]">
                             {tire.brand}
                           </span>
@@ -267,7 +267,7 @@ export default async function TireManagementPage({
                         </td>
                         <td className="px-5 py-3.5 text-xs">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium text-[11px] ${
                               tire.status === 'installed'
                                 ? 'bg-emerald-500/10 text-emerald-700'
                                 : tire.status === 'inventory'
@@ -283,36 +283,36 @@ export default async function TireManagementPage({
                             <span
                               className={`inline-flex items-center gap-1 font-medium ${
                                 isCritical
-                                  ? 'text-amber-600 font-semibold'
+                                  ? 'font-semibold text-amber-600'
                                   : 'text-[var(--text-heading)]'
                               }`}
                             >
                               {tread} mm
                               {isCritical && (
                                 <AlertTriangle
-                                  className="w-3.5 h-3.5 text-amber-600 shrink-0"
+                                  className="h-3.5 w-3.5 shrink-0 text-amber-600"
                                   aria-hidden="true"
                                 />
                               )}
                             </span>
                           ) : (
-                            <span className="text-[var(--text-muted)] text-[11px]">—</span>
+                            <span className="text-[11px] text-[var(--text-muted)]">—</span>
                           )}
                         </td>
                         <td className="px-5 py-3.5 text-xs">
                           {psi !== null ? (
                             <span className="inline-flex items-center gap-1 text-[var(--text-heading)]">
                               <Gauge
-                                className="w-3 h-3 text-[var(--text-muted)]"
+                                className="h-3 w-3 text-[var(--text-muted)]"
                                 aria-hidden="true"
                               />
                               {psi} PSI
                             </span>
                           ) : (
-                            <span className="text-[var(--text-muted)] text-[11px]">—</span>
+                            <span className="text-[11px] text-[var(--text-muted)]">—</span>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 text-xs text-right font-mono text-[var(--text-secondary)]">
+                        <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-xs">
                           {tire.installed_hours?.toLocaleString() || 0} hrs
                         </td>
                       </tr>

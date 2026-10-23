@@ -29,29 +29,29 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
   ];
 
   return (
-    <GlassCard variant="spotlight" className="p-0 overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b border-arch-border-subtle bg-arch-surface-secondary/50 flex justify-between items-center">
+    <GlassCard variant="spotlight" className="flex h-full flex-col overflow-hidden p-0">
+      <div className="flex items-center justify-between border-arch-border-subtle border-b bg-arch-surface-secondary/50 p-4">
         <div className="flex items-center gap-2">
-          <History className="w-5 h-5 text-arch-brand-blue" />
-          <h3 className="text-sm font-bold text-arch-text-primary">Shift Activity Feed</h3>
+          <History className="h-5 w-5 text-arch-brand-blue" />
+          <h3 className="font-bold text-arch-text-primary text-sm">Shift Activity Feed</h3>
         </div>
       </div>
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {feed.map((item) => (
           <div key={item.id} className="flex gap-4">
             <div className="relative flex-none">
-              <div className="w-8 h-8 rounded-full bg-arch-surface-tertiary border border-arch-border-subtle flex items-center justify-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-arch-border-subtle bg-arch-surface-tertiary">
                 {item.type === 'note' && (
-                  <MessageSquare className="w-3.5 h-3.5 text-arch-text-secondary" />
+                  <MessageSquare className="h-3.5 w-3.5 text-arch-text-secondary" />
                 )}
-                {item.type === 'system' && <History className="w-3.5 h-3.5 text-arch-brand-blue" />}
-                {item.type === 'action' && <Wrench className="w-3.5 h-3.5 text-accent-red" />}
+                {item.type === 'system' && <History className="h-3.5 w-3.5 text-arch-brand-blue" />}
+                {item.type === 'action' && <Wrench className="h-3.5 w-3.5 text-accent-red" />}
               </div>
               <div className="absolute top-8 bottom-[-16px] left-1/2 -ml-px w-px bg-arch-border-subtle" />
             </div>
             <div className="flex-1 pb-4">
-              <p className="text-sm text-arch-text-primary">{item.text}</p>
-              <div className="flex items-center gap-2 text-xs text-arch-text-muted mt-1.5">
+              <p className="text-arch-text-primary text-sm">{item.text}</p>
+              <div className="mt-1.5 flex items-center gap-2 text-arch-text-muted text-xs">
                 <span className="font-medium">{item.author}</span>
                 <span>•</span>
                 <span>{item.time}</span>

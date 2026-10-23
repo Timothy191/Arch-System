@@ -54,7 +54,7 @@ export default async function HourlyLoadsPage({
 
   return (
     <div className="space-y-6">
-      <GlassCard className="relative overflow-hidden group">
+      <GlassCard className="group relative overflow-hidden">
         <PageHeader title="Hourly Loads Sheet" showDate={false} />
       </GlassCard>
 
@@ -71,13 +71,13 @@ export default async function HourlyLoadsPage({
         initialShift={getCurrentShift()}
       />
 
-      <div className="flex items-center gap-6 text-xs text-[var(--text-muted)]">
+      <div className="flex items-center gap-6 text-[var(--text-muted)] text-xs">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-[var(--accent-blue)]/20 border border-[var(--accent-blue)]"></span>
+          <span className="h-3 w-3 rounded border border-[var(--accent-blue)] bg-[var(--accent-blue)]/20"></span>
           <span>Active hour with loads</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"></span>
+          <span className="h-3 w-3 rounded border border-[var(--border-default)] bg-[var(--bg-secondary)]"></span>
           <span>No loads recorded</span>
         </div>
         <p className="ml-auto">Tip: Click any cell to edit load count. Auto-saves on change.</p>

@@ -60,7 +60,7 @@ export function CyberButton({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        'relative overflow-hidden rounded-md font-mono font-medium uppercase tracking-widest',
+        'relative overflow-hidden rounded-md font-medium font-mono uppercase tracking-widest',
         'border backdrop-blur-sm transition-all duration-300',
         'disabled:pointer-events-none disabled:opacity-50',
         colors.border,
@@ -78,7 +78,7 @@ export function CyberButton({
     >
       {/* Scanline overlay */}
       <span
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="pointer-events-none absolute inset-0 opacity-20"
         style={{
           backgroundImage:
             'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',

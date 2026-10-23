@@ -91,24 +91,24 @@ export default async function AccessLogsPage({
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Access Logs</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <h2 className="font-bold text-2xl text-[var(--text-heading)]">Access Logs</h2>
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Recent scan events across all entry points for this department.
           </p>
         </div>
       </div>
 
-      <GlassCard className="p-0 overflow-hidden">
-        <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50 flex justify-between items-center">
-          <h3 className="font-semibold text-[var(--text-heading)] flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-[var(--text-muted)]" />
+      <GlassCard className="overflow-hidden p-0">
+        <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+          <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
+            <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
             Recent Events
           </h3>
-          <span className="text-xs text-[var(--text-muted)]">{totalCount} total events</span>
+          <span className="text-[var(--text-muted)] text-xs">{totalCount} total events</span>
         </div>
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
+            <TableRow className="border-[var(--border-default)] border-b hover:bg-transparent">
               <TableHead className="text-[var(--text-muted)]">Time</TableHead>
               <TableHead className="text-[var(--text-muted)]">Entity</TableHead>
               <TableHead className="text-[var(--text-muted)]">Type</TableHead>
@@ -121,7 +121,7 @@ export default async function AccessLogsPage({
           <TableBody>
             {resolvedLogs.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-[var(--text-muted)]">
+                <TableCell colSpan={7} className="py-8 text-center text-[var(--text-muted)]">
                   No access logs found for this department.
                 </TableCell>
               </TableRow>
@@ -129,9 +129,9 @@ export default async function AccessLogsPage({
             {resolvedLogs.map((log) => (
               <TableRow
                 key={log.id}
-                className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
+                className="border-[var(--border-default)]/50 border-b transition-colors hover:bg-[var(--bg-tertiary)]"
               >
-                <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
+                <TableCell className="font-mono text-[var(--text-secondary)] text-sm">
                   {new Date(log.timestamp).toLocaleTimeString('en-US', {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -150,9 +150,9 @@ export default async function AccessLogsPage({
                       title={log.entityName}
                       icon={
                         log.status === 'Granted' ? (
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         ) : (
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
                         )
                       }
                       iconBackground
@@ -163,7 +163,7 @@ export default async function AccessLogsPage({
                 <TableCell className="text-[var(--text-secondary)] capitalize">
                   {log.entityType}
                 </TableCell>
-                <TableCell className="font-mono text-sm text-[var(--accent-blue)]">
+                <TableCell className="font-mono text-[var(--accent-blue)] text-sm">
                   {log.qrCodeId}
                 </TableCell>
                 <TableCell className="text-[var(--text-secondary)]">{log.zone}</TableCell>
@@ -194,7 +194,7 @@ export default async function AccessLogsPage({
 
         {/* Pagination */}
         {totalCount > 0 && (
-          <div className="p-4 border-t border-[var(--border-default)]">
+          <div className="border-[var(--border-default)] border-t p-4">
             <Pagination
               currentPage={page}
               totalPages={totalPages}

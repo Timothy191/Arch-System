@@ -16,9 +16,9 @@ import Link from 'next/link';
 export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-transparent text-[var(--text-primary)]">
-      <div className="border-b border-[var(--border-subtle)] glass-card rounded-none backdrop-blur-xl p-4">
-        <h1 className="text-2xl font-semibold text-[var(--text-heading)]">API Documentation</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+      <div className="glass-card rounded-none border-[var(--border-subtle)] border-b p-4 backdrop-blur-xl">
+        <h1 className="font-semibold text-2xl text-[var(--text-heading)]">API Documentation</h1>
+        <p className="mt-1 text-[var(--text-muted)] text-sm">
           Interactive API reference for Arch-Systems Portal
         </p>
       </div>

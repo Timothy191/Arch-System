@@ -34,16 +34,16 @@ export function KPICard({
   icon,
 }: KPICardProps) {
   return (
-    <GlassCard className="relative overflow-hidden group">
+    <GlassCard className="group relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div>
           <p className="system-label">{label}</p>
-          <p className={cn('text-fluid-2xl font-medium mt-1', colorMap[color])}>{value}</p>
+          <p className={cn('mt-1 font-medium text-fluid-2xl', colorMap[color])}>{value}</p>
         </div>
         {icon && (
           <div
             className={cn(
-              'opacity-20 group-hover:opacity-40 transition-opacity duration-300',
+              'opacity-20 transition-opacity duration-300 group-hover:opacity-40',
               colorMap[color]
             )}
           >
@@ -51,7 +51,7 @@ export function KPICard({
           </div>
         )}
       </div>
-      {sub && <p className={cn('text-fluid-xs mt-1', colorMap[subColor])}>{sub}</p>}
+      {sub && <p className={cn('mt-1 text-fluid-xs', colorMap[subColor])}>{sub}</p>}
     </GlassCard>
   );
 }

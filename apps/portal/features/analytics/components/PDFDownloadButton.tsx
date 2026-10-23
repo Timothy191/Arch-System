@@ -40,12 +40,12 @@ export function PDFDownloadButton({ reportData, departmentId }: PDFDownloadButto
     <button
       onClick={handleDownload}
       disabled={loading}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/70 backdrop-blur-xl border border-black/[0.08] text-[var(--text-body)] text-sm font-medium hover:bg-white/90 shadow-card transition-colors disabled:opacity-50 min-h-[44px]"
+      className="flex min-h-[44px] items-center gap-2 rounded-lg border border-black/[0.08] bg-white/70 px-4 py-2 font-medium text-[var(--text-body)] text-sm shadow-card backdrop-blur-xl transition-colors hover:bg-white/90 disabled:opacity-50"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin text-[var(--accent-blue)]" />
+        <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-blue)]" />
       ) : (
-        <FileText className="w-4 h-4 text-accent-red" />
+        <FileText className="h-4 w-4 text-accent-red" />
       )}
       <span>{loading ? 'Generating PDF...' : 'Export PDF'}</span>
     </button>

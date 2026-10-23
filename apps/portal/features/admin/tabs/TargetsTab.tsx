@@ -200,12 +200,12 @@ export function TargetsTab() {
 
   return (
     <div className="space-y-6" data-testid="admin-targets-tab">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-bold text-[var(--text-heading)]">
+          <h2 className="font-bold text-[var(--text-heading)] text-lg">
             Operational Targets (Shift · Daily · Monthly)
           </h2>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-[var(--text-secondary)] text-xs">
             Define official Shift, Daily, and Monthly targets for Control Room SCADA graphs,
             excavator dispatch, and production dashboards.
           </p>
@@ -218,9 +218,9 @@ export function TargetsTab() {
             size="sm"
             onClick={handleAutoScaleFromShift}
             disabled={loading || saving}
-            className="text-xs border-[var(--border-default)] text-[var(--text-heading)]"
+            className="border-[var(--border-default)] text-[var(--text-heading)] text-xs"
           >
-            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
             Auto-Scale from Shift
           </Button>
           <Button
@@ -228,41 +228,41 @@ export function TargetsTab() {
             size="sm"
             onClick={handleSave}
             disabled={loading || saving}
-            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-semibold text-xs gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)] font-semibold text-white text-xs hover:bg-[var(--accent-blue)]/90"
           >
-            <Save className="w-3.5 h-3.5 mr-1.5" />
+            <Save className="mr-1.5 h-3.5 w-3.5" />
             {saving ? 'Saving Targets...' : 'Save All Targets'}
           </Button>
         </div>
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-xs text-[var(--text-muted)]">
+        <div className="py-12 text-center text-[var(--text-muted)] text-xs">
           Loading operational targets...
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {horizons.map((horizon) => {
             const Icon = horizon.icon;
             const windowValues = targets[horizon.key];
             return (
               <GlassCard
                 key={horizon.key}
-                className="p-5 flex flex-col gap-4 gold-steel-border gold-steel-border-slim"
+                className="gold-steel-border gold-steel-border-slim flex flex-col gap-4 p-5"
               >
-                <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-lg bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30">
-                      <Icon className="w-4 h-4" />
+                    <div className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 p-2 text-[var(--accent-blue)]">
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-[var(--text-heading)]">
+                      <h3 className="font-bold text-[var(--text-heading)] text-sm">
                         {horizon.title}
                       </h3>
                       <p className="text-[11px] text-[var(--text-secondary)]">{horizon.subtitle}</p>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30">
+                  <span className="rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-2 py-0.5 font-bold font-mono text-[10px] text-[var(--accent-blue)]">
                     {horizon.badge}
                   </span>
                 </div>
@@ -277,7 +277,7 @@ export function TargetsTab() {
                         >
                           {field.label}
                         </label>
-                        <span className="text-[10px] font-mono text-[var(--text-secondary)] uppercase">
+                        <span className="font-mono text-[10px] text-[var(--text-secondary)] uppercase">
                           {field.unit}
                         </span>
                       </div>
@@ -287,19 +287,19 @@ export function TargetsTab() {
                         min={1}
                         value={windowValues[field.key]}
                         onChange={(e) => handleFieldChange(horizon.key, field.key, e.target.value)}
-                        className="bg-[var(--bg-primary)] border-[var(--border-default)] font-mono text-xs font-bold text-[var(--text-heading)]"
+                        className="border-[var(--border-default)] bg-[var(--bg-primary)] font-bold font-mono text-[var(--text-heading)] text-xs"
                       />
                       <p className="text-[10px] text-[var(--text-muted)]">{field.helper}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-auto pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px]">
-                  <span className="text-[var(--text-secondary)] flex items-center gap-1">
-                    <TrendingUp className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+                <div className="mt-auto flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
+                  <span className="flex items-center gap-1 text-[var(--text-secondary)]">
+                    <TrendingUp className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
                     Strip Ratio Target
                   </span>
-                  <span className="font-mono font-bold text-[var(--text-heading)]">
+                  <span className="font-bold font-mono text-[var(--text-heading)]">
                     {(
                       windowValues.wasteTonnesTarget / Math.max(windowValues.coalTonnesTarget, 1)
                     ).toFixed(2)}{' '}

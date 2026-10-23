@@ -29,7 +29,7 @@ export const ActivityTimeline = React.forwardRef<HTMLDivElement, ActivityTimelin
       return (
         <div
           ref={ref}
-          className={cn('p-6 text-center text-xs text-[var(--text-secondary)] italic', className)}
+          className={cn('p-6 text-center text-[var(--text-secondary)] text-xs italic', className)}
           {...props}
         >
           {emptyMessage}
@@ -42,11 +42,11 @@ export const ActivityTimeline = React.forwardRef<HTMLDivElement, ActivityTimelin
         ref={ref}
         role="feed"
         aria-label="Audit Activity Timeline"
-        className={cn('relative pl-6 space-y-6', className)}
+        className={cn('relative space-y-6 pl-6', className)}
         {...props}
       >
         {/* Continuous vertical timeline connector line */}
-        <div className="absolute left-2.5 top-2 bottom-2 w-px bg-black/[0.08]" aria-hidden="true" />
+        <div className="absolute top-2 bottom-2 left-2.5 w-px bg-black/[0.08]" aria-hidden="true" />
 
         {items.map((item, index) => {
           const statusIcon =
@@ -61,48 +61,48 @@ export const ActivityTimeline = React.forwardRef<HTMLDivElement, ActivityTimelin
           return (
             <article
               key={item.id ?? index}
-              className="relative flex items-start gap-3 group text-xs"
+              className="group relative flex items-start gap-3 text-xs"
             >
               {/* Timeline bullet / icon node */}
               <div
                 className={cn(
-                  'absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center border shadow-2xs z-10 transition-transform group-hover:scale-110',
+                  'absolute top-0.5 -left-6 z-10 flex h-5 w-5 items-center justify-center rounded-full border shadow-2xs transition-transform group-hover:scale-110',
                   item.status === 'critical'
-                    ? 'bg-[var(--accent-red)]/15 border-[var(--accent-red)]/40 text-[var(--accent-red)]'
+                    ? 'border-[var(--accent-red)]/40 bg-[var(--accent-red)]/15 text-[var(--accent-red)]'
                     : item.status === 'warning'
-                      ? 'bg-[var(--accent-amber)]/15 border-[var(--accent-amber)]/40 text-[var(--accent-amber)]'
-                      : 'bg-white border-black/10 text-[var(--accent-blue)]'
+                      ? 'border-[var(--accent-amber)]/40 bg-[var(--accent-amber)]/15 text-[var(--accent-amber)]'
+                      : 'border-black/10 bg-white text-[var(--accent-blue)]'
                 )}
                 aria-hidden="true"
               >
-                {item.icon ?? <StatusIconComponent className="w-2.5 h-2.5" />}
+                {item.icon ?? <StatusIconComponent className="h-2.5 w-2.5" />}
               </div>
 
               {/* Timeline Item Content */}
-              <div className="flex-1 min-w-0 bg-white/70 backdrop-blur-md p-3 rounded-xl border border-black/[0.06] shadow-2xs group-hover:border-black/15 transition-all gold-steel-border gold-steel-border-slim">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <h5 className="font-semibold text-[13px] text-[var(--text-heading)] truncate">
+              <div className="gold-steel-border gold-steel-border-slim min-w-0 flex-1 rounded-xl border border-black/[0.06] bg-white/70 p-3 shadow-2xs backdrop-blur-md transition-all group-hover:border-black/15">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <h5 className="truncate font-semibold text-[13px] text-[var(--text-heading)]">
                     {item.title}
                   </h5>
                   <time
                     dateTime={item.timestamp}
-                    className="text-[10px] font-mono text-[var(--text-secondary)] shrink-0"
+                    className="shrink-0 font-mono text-[10px] text-[var(--text-secondary)]"
                   >
                     {item.timestamp}
                   </time>
                 </div>
 
                 {item.description && (
-                  <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed mt-0.5">
+                  <p className="mt-0.5 text-[12px] text-[var(--text-secondary)] leading-relaxed">
                     {item.description}
                   </p>
                 )}
 
                 {item.user && (
-                  <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/[0.04] text-[11px] text-[var(--text-secondary)]">
+                  <div className="mt-2 flex items-center gap-1.5 border-black/[0.04] border-t pt-2 text-[11px] text-[var(--text-secondary)]">
                     <span className="font-medium text-[var(--text-heading)]">{item.user.name}</span>
                     {item.user.role && (
-                      <span className="px-1.5 py-0.2 rounded bg-black/[0.04] font-mono text-[9.5px]">
+                      <span className="rounded bg-black/[0.04] px-1.5 py-0.2 font-mono text-[9.5px]">
                         {item.user.role}
                       </span>
                     )}

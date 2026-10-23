@@ -19,10 +19,10 @@ export function FreezeToggle({ isFrozen, onToggle, className }: FreezeToggleProp
       type="button"
       onClick={() => onToggle(!isFrozen)}
       className={cn(
-        'flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200 text-xs font-medium select-none',
+        'flex select-none items-center gap-2 rounded-lg border px-3 py-1.5 font-medium text-xs transition-all duration-200',
         isFrozen
-          ? 'bg-accent-blue/10 border-accent-blue text-accent-blue'
-          : 'bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:border-[var(--border-emphasis)]',
+          ? 'border-accent-blue bg-accent-blue/10 text-accent-blue'
+          : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:border-[var(--border-emphasis)] hover:text-[var(--text-heading)]',
         className
       )}
       aria-pressed={isFrozen}
@@ -30,12 +30,12 @@ export function FreezeToggle({ isFrozen, onToggle, className }: FreezeToggleProp
     >
       {isFrozen ? (
         <>
-          <Play className="w-3.5 h-3.5 fill-current" />
+          <Play className="h-3.5 w-3.5 fill-current" />
           <span>FROZEN</span>
         </>
       ) : (
         <>
-          <Pause className="w-3.5 h-3.5" />
+          <Pause className="h-3.5 w-3.5" />
           <span>LIVE</span>
         </>
       )}

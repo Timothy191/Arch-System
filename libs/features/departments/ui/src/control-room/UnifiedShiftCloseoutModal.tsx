@@ -92,9 +92,9 @@ export function UnifiedShiftCloseoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-arch-bg-base/40 backdrop-blur-md animate-in fade-in duration-200">
-      <GlassCard className="w-full max-w-md overflow-hidden border border-arch-border-subtle shadow-window bg-arch-surface-base/95 backdrop-blur-2xl">
-        <div className="flex items-center justify-between border-b border-arch-border-subtle px-6 py-4 bg-arch-surface-secondary/70">
+    <div className="fade-in fixed inset-0 z-50 flex animate-in items-center justify-center bg-arch-bg-base/40 p-4 backdrop-blur-md duration-200">
+      <GlassCard className="w-full max-w-md overflow-hidden border border-arch-border-subtle bg-arch-surface-base/95 shadow-window backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-arch-border-subtle border-b bg-arch-surface-secondary/70 px-6 py-4">
           <div className="flex items-center gap-2 font-semibold text-arch-text-primary text-sm">
             <Lock className="h-4 w-4 text-arch-text-secondary" />
             <span>Lock & Sign Unified Shift</span>
@@ -103,30 +103,30 @@ export function UnifiedShiftCloseoutModal({
             type="button"
             onClick={onClose}
             disabled={loading || isPendingWorkflow}
-            className="rounded-full p-1 text-arch-text-tertiary hover:text-arch-text-primary hover:bg-arch-surface-tertiary transition-colors"
+            className="rounded-full p-1 text-arch-text-tertiary transition-colors hover:bg-arch-surface-tertiary hover:text-arch-text-primary"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
-          <div className="p-3.5 rounded-lg bg-arch-surface-secondary border border-arch-border-subtle space-y-1">
-            <div className="text-arch-text-secondary font-medium">Shift Scope:</div>
-            <div className="font-semibold text-arch-text-primary flex items-center justify-between">
+        <form onSubmit={handleSubmit} className="space-y-4 p-6 text-xs">
+          <div className="space-y-1 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary p-3.5">
+            <div className="font-medium text-arch-text-secondary">Shift Scope:</div>
+            <div className="flex items-center justify-between font-semibold text-arch-text-primary">
               <span>{shiftDate}</span>
-              <span className="uppercase text-[11px] px-2 py-0.5 rounded-full bg-arch-surface-tertiary text-arch-text-primary font-bold">
+              <span className="rounded-full bg-arch-surface-tertiary px-2 py-0.5 font-bold text-[11px] text-arch-text-primary uppercase">
                 {shiftType} Shift
               </span>
             </div>
-            <p className="text-[11px] text-arch-text-muted pt-1 leading-relaxed">
+            <p className="pt-1 text-[11px] text-arch-text-muted leading-relaxed">
               Signing locks this operational period. Loads, SMU hours, breakdowns, and tire records
               will be permanently archived.
             </p>
           </div>
 
           {errorMessage && (
-            <div className="p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 text-accent-red flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 text-accent-red shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg border border-accent-red/20 bg-accent-red/10 p-3 text-accent-red">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent-red" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -136,14 +136,14 @@ export function UnifiedShiftCloseoutModal({
               Supervisor Security PIN <span className="text-accent-red">*</span>
             </label>
             <div className="relative">
-              <KeyRound className="h-4 w-4 absolute left-3 top-2.5 text-arch-text-muted" />
+              <KeyRound className="absolute top-2.5 left-3 h-4 w-4 text-arch-text-muted" />
               <input
                 type="password"
                 maxLength={20}
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="Enter 4-digit or supervisor PIN"
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-arch-border-subtle bg-arch-surface-base text-arch-text-primary font-mono tracking-widest outline-hidden focus:border-arch-brand-blue focus:ring-1 focus:ring-arch-brand-blue transition-colors"
+                className="w-full rounded-lg border border-arch-border-subtle bg-arch-surface-base py-2 pr-3 pl-9 font-mono text-arch-text-primary tracking-widest outline-hidden transition-colors focus:border-arch-brand-blue focus:ring-1 focus:ring-arch-brand-blue"
                 disabled={loading || isPendingWorkflow}
               />
             </div>
@@ -158,7 +158,7 @@ export function UnifiedShiftCloseoutModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Operational remarks, weather anomalies, or shift turnover notes..."
-              className="w-full p-2.5 rounded-lg border border-arch-border-subtle bg-arch-surface-base text-arch-text-primary outline-hidden focus:border-arch-brand-blue focus:ring-1 focus:ring-arch-brand-blue resize-none transition-colors"
+              className="w-full resize-none rounded-lg border border-arch-border-subtle bg-arch-surface-base p-2.5 text-arch-text-primary outline-hidden transition-colors focus:border-arch-brand-blue focus:ring-1 focus:ring-arch-brand-blue"
               disabled={loading || isPendingWorkflow}
             />
           </div>
@@ -169,30 +169,30 @@ export function UnifiedShiftCloseoutModal({
               id="autoCompile"
               checked={autoCompile}
               onChange={(e) => setAutoCompile(e.target.checked)}
-              className="rounded border-arch-border-subtle text-arch-brand-blue focus:ring-arch-brand-blue w-4 h-4"
+              className="h-4 w-4 rounded border-arch-border-subtle text-arch-brand-blue focus:ring-arch-brand-blue"
               disabled={loading || isPendingWorkflow}
             />
             <label
               htmlFor="autoCompile"
-              className="text-[11px] font-medium text-arch-text-secondary cursor-pointer"
+              className="cursor-pointer font-medium text-[11px] text-arch-text-secondary"
             >
               Auto-compile and distribute background PDF report upon lock
             </label>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-arch-border-subtle">
+          <div className="flex items-center justify-end gap-2.5 border-arch-border-subtle border-t pt-3">
             <button
               type="button"
               onClick={onClose}
               disabled={loading || isPendingWorkflow}
-              className="px-4 py-2 rounded-full border border-arch-border-subtle text-arch-text-secondary hover:bg-arch-surface-secondary font-semibold transition-colors cursor-pointer"
+              className="cursor-pointer rounded-full border border-arch-border-subtle px-4 py-2 font-semibold text-arch-text-secondary transition-colors hover:bg-arch-surface-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || isPendingWorkflow}
-              className="px-5 py-2 rounded-full bg-arch-surface-inverse hover:bg-arch-surface-inverse/90 text-arch-text-inverse font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-2 rounded-full bg-arch-surface-inverse px-5 py-2 font-bold text-arch-text-inverse transition-all hover:bg-arch-surface-inverse/90 disabled:opacity-50"
             >
               {loading || isPendingWorkflow ? (
                 <>

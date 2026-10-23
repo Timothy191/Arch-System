@@ -34,7 +34,7 @@ export function Folder({ name, defaultOpen = false, className, children, ...prop
   return (
     <div className={cn('flex flex-col', className)} {...props}>
       <div
-        className="flex items-center gap-1.5 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+        className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -48,9 +48,9 @@ export function Folder({ name, defaultOpen = false, className, children, ...prop
       </div>
       {isOpen && (
         <TreeContext.Provider value={{ level: level + 1 }}>
-          <div className="flex flex-col relative">
+          <div className="relative flex flex-col">
             <div
-              className="absolute left-0 top-0 bottom-0 border-l border-border"
+              className="absolute top-0 bottom-0 left-0 border-border border-l"
               style={{ left: `${level * 16 + 13}px` }}
             />
             {children}
@@ -73,9 +73,9 @@ export function File({ name, active, icon, className, ...props }: FileProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer transition-colors',
+        'flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-muted/50',
         active
-          ? 'bg-muted/50 text-foreground font-medium'
+          ? 'bg-muted/50 font-medium text-foreground'
           : 'text-muted-foreground hover:text-foreground',
         className
       )}
@@ -83,7 +83,7 @@ export function File({ name, active, icon, className, ...props }: FileProps) {
       {...props}
     >
       {icon ? (
-        <div className="h-4 w-4 shrink-0 flex items-center justify-center">{icon}</div>
+        <div className="flex h-4 w-4 shrink-0 items-center justify-center">{icon}</div>
       ) : (
         <FileIcon className="h-4 w-4 shrink-0" />
       )}

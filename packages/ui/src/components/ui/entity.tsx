@@ -19,21 +19,21 @@ export function Entity({
   return (
     <div
       className={cn(
-        'flex items-center justify-between gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm',
+        'flex items-center justify-between gap-4 rounded-xl border bg-card p-4 text-card-foreground shadow-sm',
         className
       )}
       {...props}
     >
-      <div className="flex items-center gap-4 min-w-0">
+      <div className="flex min-w-0 items-center gap-4">
         {thumbnail && <div className="flex-shrink-0">{thumbnail}</div>}
-        <div className="flex flex-col min-w-0">
-          <div className="font-medium text-base truncate">{title}</div>
+        <div className="flex min-w-0 flex-col">
+          <div className="truncate font-medium text-base">{title}</div>
           {description && (
-            <div className="text-sm text-muted-foreground truncate">{description}</div>
+            <div className="truncate text-muted-foreground text-sm">{description}</div>
           )}
         </div>
       </div>
-      {actions && <div className="flex-shrink-0 flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>}
     </div>
   );
 }

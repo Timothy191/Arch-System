@@ -215,50 +215,50 @@ export function FleetTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">Fleet</h2>
+        <h2 className="font-medium text-[var(--text-heading)] text-lg">Fleet</h2>
         <Button
           onClick={handleAdd}
-          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Machine
         </Button>
       </div>
 
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-4">
-        <GlassCard className="py-3 px-4">
+        <GlassCard className="px-4 py-3">
           <p className="text-[var(--text-muted)] text-xs">Total</p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-0.5">
+          <p className="mt-0.5 font-medium text-2xl text-[var(--text-heading)]">
             {machines.length}
           </p>
         </GlassCard>
-        <GlassCard className="py-3 px-4">
+        <GlassCard className="px-4 py-3">
           <p className="text-[var(--text-muted)] text-xs">Active</p>
-          <p className="text-2xl font-medium text-accent-green mt-0.5">{totalActive}</p>
+          <p className="mt-0.5 font-medium text-2xl text-accent-green">{totalActive}</p>
         </GlassCard>
-        <GlassCard className="py-3 px-4">
+        <GlassCard className="px-4 py-3">
           <p className="text-[var(--text-muted)] text-xs">Inactive</p>
-          <p className="text-2xl font-medium text-[var(--text-muted)] mt-0.5">{totalInactive}</p>
+          <p className="mt-0.5 font-medium text-2xl text-[var(--text-muted)]">{totalInactive}</p>
         </GlassCard>
       </div>
 
       {/* Search + filters */}
       <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
+        <div className="relative min-w-48 flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search machine ID, manufacturer, type…"
-            className="w-full pl-9 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-9"
           />
         </div>
         <select
           value={filterDept}
           onChange={(e) => setFilterDept(e.target.value)}
           aria-label="Filter by department"
-          className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+          className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
         >
           <option value="">All Departments</option>
           {departments.map((d) => (
@@ -271,7 +271,7 @@ export function FleetTab() {
           value={filterSite}
           onChange={(e) => setFilterSite(e.target.value)}
           aria-label="Filter by site"
-          className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+          className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
         >
           <option value="">All Sites</option>
           <option value="__none__">No site assigned</option>
@@ -288,7 +288,7 @@ export function FleetTab() {
               setFilterDept('');
               setFilterSite('');
             }}
-            className="px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+            className="px-3 py-2 text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
           >
             Clear
           </button>
@@ -300,7 +300,7 @@ export function FleetTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[var(--border-default)]">
+              <tr className="border-[var(--border-default)] border-b">
                 {[
                   'Machine Id / Name',
                   'Type / Bin Factor (Waste & Coal)',
@@ -314,7 +314,7 @@ export function FleetTab() {
                   <th
                     key={h}
                     scope="col"
-                    className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider${h === 'Actions' ? ' text-right' : ''}`}
+                    className={`px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider${h === 'Actions' ? 'text-right' : ''}`}
                   >
                     {h}
                   </th>
@@ -342,26 +342,26 @@ export function FleetTab() {
                   const wasteFactor = m.bin_factor_waste ?? m.bin_factor;
                   const coalFactor = m.bin_factor_coal;
                   return (
-                    <tr key={m.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                      <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
+                    <tr key={m.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
+                      <td className="px-6 py-4 font-medium text-[var(--text-heading)] text-sm">
                         <div>{m.serial_number || m.name}</div>
                         {m.serial_number && m.name !== m.serial_number && (
-                          <div className="text-xs text-[var(--text-muted)] font-normal">
+                          <div className="font-normal text-[var(--text-muted)] text-xs">
                             {m.name}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="text-[var(--text-muted)] font-mono">{m.machine_type}</span>
+                        <span className="font-mono text-[var(--text-muted)]">{m.machine_type}</span>
                         {isDumper && (wasteFactor != null || coalFactor != null) && (
-                          <div className="flex flex-wrap gap-1.5 mt-1">
+                          <div className="mt-1 flex flex-wrap gap-1.5">
                             {wasteFactor != null && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 font-mono">
+                              <span className="rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono text-[10px] text-[var(--accent-blue)]">
                                 Waste: {wasteFactor}
                               </span>
                             )}
                             {coalFactor != null && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-green/10 text-accent-green border border-accent-green/20 font-mono">
+                              <span className="rounded border border-accent-green/20 bg-accent-green/10 px-1.5 py-0.5 font-mono text-[10px] text-accent-green">
                                 Coal: {coalFactor}
                               </span>
                             )}
@@ -376,7 +376,7 @@ export function FleetTab() {
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                         {m.manufacturer || '—'}
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-muted)] text-sm font-mono">
+                      <td className="px-6 py-4 font-mono text-[var(--text-muted)] text-sm">
                         {m.starting_smr != null ? `${m.starting_smr} hrs` : '—'}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
@@ -384,7 +384,7 @@ export function FleetTab() {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {m.site ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                             {m.site.site_code}
                             <span className="text-[var(--text-muted)]">{m.site.name}</span>
                           </span>
@@ -393,28 +393,28 @@ export function FleetTab() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1 items-start">
+                        <div className="flex flex-col items-start gap-1">
                           <Badge
                             variant="outline"
                             className={
                               m.active
-                                ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
-                                : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
+                                ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
+                                : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]'
                             }
                           >
                             {m.active ? 'Active' : 'Inactive'}
                           </Badge>
                           {m.report_exempt && (
-                            <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-accent-amber/20 bg-accent-amber/10 px-1.5 py-0.5 text-[10px] text-accent-amber">
                               Exempt
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex justify-end gap-2">
                           <Button variant="outline" size="sm" onClick={() => handleEdit(m)}>
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -428,7 +428,7 @@ export function FleetTab() {
                             onClick={() => setPendingToggle(m)}
                             title={m.active ? 'Deactivate' : 'Activate'}
                           >
-                            <Power className="w-4 h-4" />
+                            <Power className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
@@ -440,7 +440,7 @@ export function FleetTab() {
           </table>
         </div>
         {!loading && filtered.length > 0 && filtered.length < machines.length && (
-          <p className="px-6 py-2 text-xs text-[var(--text-muted)] border-t border-[var(--border-default)]">
+          <p className="border-[var(--border-default)] border-t px-6 py-2 text-[var(--text-muted)] text-xs">
             Showing {filtered.length} of {machines.length} machines
           </p>
         )}
@@ -448,7 +448,7 @@ export function FleetTab() {
 
       {/* Add / Edit dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]">
           <DialogHeader>
             <DialogTitle>{editingMachine ? 'Edit Machine' : 'Add Machine'}</DialogTitle>
           </DialogHeader>
@@ -466,7 +466,7 @@ export function FleetTab() {
 
       {/* Confirm deactivate / activate dialog */}
       <Dialog open={!!pendingToggle} onOpenChange={(open) => !open && setPendingToggle(null)}>
-        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-sm">
+        <DialogContent className="max-w-sm border-[var(--border-default)] bg-[var(--bg-primary)]">
           <DialogHeader>
             <DialogTitle>
               {pendingToggle?.active ? 'Deactivate Machine?' : 'Activate Machine?'}
@@ -477,7 +477,7 @@ export function FleetTab() {
               ? `"${pendingToggle?.name}" will be removed from all active dropdowns and marked inactive. This affects shift entry forms immediately.`
               : `"${pendingToggle?.name}" will become available again in all shift entry forms.`}
           </p>
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setPendingToggle(null)} disabled={saving}>
               Cancel
             </Button>
@@ -485,8 +485,8 @@ export function FleetTab() {
               disabled={saving}
               className={
                 pendingToggle?.active
-                  ? 'bg-accent-red hover:bg-accent-red/90 text-white'
-                  : 'bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]'
+                  ? 'bg-accent-red text-white hover:bg-accent-red/90'
+                  : 'bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]'
               }
               onClick={handleConfirmToggle}
             >
@@ -569,11 +569,11 @@ function MachineForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="machineType"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Machine Type <span className="text-accent-red">*</span>
           </label>
@@ -581,7 +581,7 @@ function MachineForm({
             id="machineType"
             value={machineType}
             onChange={(e) => setMachineType(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+            className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
             required
           >
             <option value="">Select machine type…</option>
@@ -600,7 +600,7 @@ function MachineForm({
         <div>
           <label
             htmlFor="manufacturer"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Machine Manufacture <span className="text-accent-red">*</span>
           </label>
@@ -609,17 +609,17 @@ function MachineForm({
             value={manufacturer}
             onChange={(e) => setManufacturer(e.target.value)}
             placeholder="e.g. Caterpillar, Bell, Komatsu, Volvo"
-            className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
             required
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="machineId"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Machine Id <span className="text-accent-red">*</span>
           </label>
@@ -631,7 +631,7 @@ function MachineForm({
               if (!machine) setName(e.target.value);
             }}
             placeholder="e.g. ADT-001, RDT-104, EX-02"
-            className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+            className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
             required
           />
         </div>
@@ -639,7 +639,7 @@ function MachineForm({
         <div>
           <label
             htmlFor="startingSmr"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Starting SMR on Site <span className="text-accent-red">*</span>
           </label>
@@ -651,7 +651,7 @@ function MachineForm({
             value={startingSmr}
             onChange={(e) => setStartingSmr(e.target.value)}
             placeholder="e.g. 1250.0"
-            className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+            className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
             required
           />
         </div>
@@ -659,23 +659,23 @@ function MachineForm({
 
       {isDumperType && (
         <div
-          className="p-4 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/5 space-y-3"
+          className="space-y-3 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/5 p-4"
           data-testid="dumper-bin-factor-block"
         >
           <div>
-            <h4 className="text-sm font-semibold text-[var(--text-heading)]">
+            <h4 className="font-semibold text-[var(--text-heading)] text-sm">
               Bin Factor Configuration (Dumper Payload)
             </h4>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[var(--text-muted)] text-xs">
               Separate payload factors for Waste and Coal material loads.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="binFactorWaste"
-                className="block text-xs font-medium text-[var(--text-body)] mb-1.5"
+                className="mb-1.5 block font-medium text-[var(--text-body)] text-xs"
               >
                 Waste Bin Factor <span className="text-accent-red">*</span>
               </label>
@@ -687,7 +687,7 @@ function MachineForm({
                 value={binFactorWaste}
                 onChange={(e) => setBinFactorWaste(e.target.value)}
                 placeholder="e.g. 28.5"
-                className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+                className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
                 required
               />
             </div>
@@ -695,7 +695,7 @@ function MachineForm({
             <div>
               <label
                 htmlFor="binFactorCoal"
-                className="block text-xs font-medium text-[var(--text-body)] mb-1.5"
+                className="mb-1.5 block font-medium text-[var(--text-body)] text-xs"
               >
                 Coal Bin Factor <span className="text-accent-red">*</span>
               </label>
@@ -707,7 +707,7 @@ function MachineForm({
                 value={binFactorCoal}
                 onChange={(e) => setBinFactorCoal(e.target.value)}
                 placeholder="e.g. 22.0"
-                className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
+                className="border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono"
                 required
               />
             </div>
@@ -715,16 +715,16 @@ function MachineForm({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+          <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">
             Department <span className="text-accent-red">*</span>
           </label>
           <select
             value={departmentId}
             onChange={(e) => setDepartmentId(e.target.value)}
             aria-label="Department"
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+            className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
             required
           >
             <option value="">Select department…</option>
@@ -737,12 +737,12 @@ function MachineForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[var(--text-body)] mb-2">Site</label>
+          <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">Site</label>
           <select
             value={siteId}
             onChange={(e) => setSiteId(e.target.value)}
             aria-label="Site"
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+            className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
           >
             <option value="">No site assigned</option>
             {activeSites.map((s) => (
@@ -760,29 +760,29 @@ function MachineForm({
           id="active"
           checked={active}
           onChange={(e) => setActive(e.target.checked)}
-          className="w-4 h-4 accent-[var(--accent-emerald)]"
+          className="h-4 w-4 accent-[var(--accent-emerald)]"
         />
-        <label htmlFor="active" className="text-sm font-medium text-[var(--text-body)]">
+        <label htmlFor="active" className="font-medium text-[var(--text-body)] text-sm">
           Active
         </label>
       </div>
 
-      <div className="flex items-center gap-3 p-3 rounded-lg border border-accent-amber/20 bg-accent-amber/5">
+      <div className="flex items-center gap-3 rounded-lg border border-accent-amber/20 bg-accent-amber/5 p-3">
         <input
           type="checkbox"
           id="report_exempt"
           checked={reportExempt}
           onChange={(e) => setReportExempt(e.target.checked)}
-          className="w-4 h-4 accent-amber-400"
+          className="h-4 w-4 accent-amber-400"
         />
         <div>
           <label
             htmlFor="report_exempt"
-            className="text-sm font-medium text-accent-amber cursor-pointer"
+            className="cursor-pointer font-medium text-accent-amber text-sm"
           >
             Exempt from shift reporting
           </label>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="mt-0.5 text-[var(--text-muted)] text-xs">
             When checked, control room users will not be required to log this machine before
             generating reports.
           </p>
@@ -790,19 +790,19 @@ function MachineForm({
       </div>
 
       {error && (
-        <p className="text-sm text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-lg px-3 py-2">
+        <p className="rounded-lg border border-accent-red/20 bg-accent-red/10 px-3 py-2 text-accent-red text-sm">
           {error}
         </p>
       )}
 
-      <div className="flex gap-2 justify-end pt-2">
+      <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={saving}
-          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
           {saving ? 'Saving…' : machine ? 'Update' : 'Add Machine'}
         </Button>

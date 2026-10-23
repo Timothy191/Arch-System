@@ -1,6 +1,6 @@
 ---
 name: clean-code-and-refactoring
-description: 'Concrete code-level rules to keep files clean, predictable, and easy to refactor: constants, guard clauses, immutability, explicit unions, and typed lookups.'
+description: 'Concrete code-level rules to keep files clean, predictable, and easy to refactor: constants, guard clauses, immutability, explicit unions, typed lookups, and consistent utility class ordering.'
 paths:
   - 'apps/**/*'
   - 'packages/**/*'
@@ -10,7 +10,7 @@ alwaysApply: true
 
 # Clean Code & Concrete Refactoring Rules
 
-These 10 concrete, code-level rules keep codebases clean, predictable, and maintainable across all packages and apps.
+These 11 concrete, code-level rules keep codebases clean, predictable, and maintainable across all packages and apps.
 
 ---
 
@@ -226,4 +226,25 @@ try {
 } catch (error) {
   throw new Error(`Failed to save record [id=${id}]`, { cause: error });
 }
+```
+
+---
+
+## 11. Keep Utility Class Ordering Consistent (`useSortedClasses`)
+
+Maintain a consistent, canonical order for all CSS/Tailwind utility classes across JSX attributes (`className`, `class`, `classList`, `wrapperClassName`, `iconClassName`, `contentClassName`) and class-composition helpers (`cn`, `clsx`, `cva`, `twMerge`). Consistent class ordering makes UI markup predictable to read, diff, and modify:
+
+1. **Canonical Flow**: Layout/Positioning (`flex`, `grid`, `relative`, `inset-0`, `z-10`) → Box Model/Sizing (`h-*`, `w-*`, `p-*`, `m-*`) → Borders/Radius (`rounded-*`, `border`, `border-*`) → Backgrounds/Effects (`bg-*`, `shadow-*`, `backdrop-blur-*`) → Typography (`font-*`, `text-*`, `tracking-*`) → Transitions/Animations (`transition-*`, `duration-*`) → State/Responsive Variants (`hover:*`, `focus-visible:*`, `sm:*`, `lg:*`).
+2. **Machine-Enforced Guardrail**: `Arch-System/biome.json` enforces `nursery/useSortedClasses` at `"level": "error"` with `"fix": "safe"`, so `biome check --write` auto-sorts utility classes on every edit/commit and `pnpm lint` fails fast if any utility class string is out of order.
+
+### Anti-Pattern (Bad)
+
+```tsx
+<div className="px-4 text-sm flex hover:bg-amber-500/10 items-center rounded-lg border py-2 gap-2" />
+```
+
+### Pattern (Good)
+
+```tsx
+<div className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-amber-500/10" />
 ```

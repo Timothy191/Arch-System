@@ -1,64 +1,64 @@
 export default function LoginLoading() {
   return (
     <main
-      className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent"
+      className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden bg-transparent px-4"
       aria-busy="true"
       aria-label="Loading sign in page"
     >
-      <div className="relative w-full max-w-md z-10">
+      <div className="relative z-10 w-full max-w-md">
         <div
           data-testid="login-card-skeleton"
-          className="w-full bg-arch-surface-secondary/80 backdrop-blur-xl border border-arch-border-subtle rounded-card p-8 md:p-10 shadow-window"
+          className="w-full rounded-card border border-arch-border-subtle bg-arch-surface-secondary/80 p-8 shadow-window backdrop-blur-xl md:p-10"
         >
           {/* Branding Skeleton */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-diffusion-sm animate-pulse">
-              <div className="w-6 h-6 rounded-md bg-arch-accent-blue/30" />
+          <div className="mb-6 flex flex-col items-center">
+            <div className="mb-3 flex h-12 w-12 animate-pulse items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 shadow-diffusion-sm">
+              <div className="h-6 w-6 rounded-md bg-arch-accent-blue/30" />
             </div>
-            <div className="flex flex-col items-center gap-1.5 w-full">
-              <div className="h-6 w-32 bg-neutral-200/80 rounded animate-pulse" />
-              <div className="h-3 w-24 bg-neutral-200/60 rounded animate-pulse" />
+            <div className="flex w-full flex-col items-center gap-1.5">
+              <div className="h-6 w-32 animate-pulse rounded bg-neutral-200/80" />
+              <div className="h-3 w-24 animate-pulse rounded bg-neutral-200/60" />
             </div>
           </div>
 
           {/* Header Skeleton */}
           <div className="mb-6 space-y-2">
-            <div className="h-3 w-20 bg-[var(--accent-blue)]/20 rounded animate-pulse" />
-            <div className="h-5 w-48 bg-neutral-200/80 rounded animate-pulse" />
-            <div className="h-3.5 w-64 bg-neutral-200/60 rounded animate-pulse" />
+            <div className="h-3 w-20 animate-pulse rounded bg-[var(--accent-blue)]/20" />
+            <div className="h-5 w-48 animate-pulse rounded bg-neutral-200/80" />
+            <div className="h-3.5 w-64 animate-pulse rounded bg-neutral-200/60" />
           </div>
 
           {/* Form Skeleton */}
           <div className="space-y-5" aria-hidden="true">
             {/* Email field */}
             <div className="space-y-1.5">
-              <div className="h-3 w-24 bg-neutral-200/70 rounded animate-pulse" />
-              <div className="h-11 w-full bg-white/70 border border-neutral-200/90 rounded-lg animate-pulse" />
+              <div className="h-3 w-24 animate-pulse rounded bg-neutral-200/70" />
+              <div className="h-11 w-full animate-pulse rounded-lg border border-neutral-200/90 bg-white/70" />
             </div>
 
             {/* Password field */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <div className="h-3 w-20 bg-neutral-200/70 rounded animate-pulse" />
-                <div className="h-3 w-24 bg-[var(--accent-blue)]/20 rounded animate-pulse" />
+              <div className="flex items-center justify-between">
+                <div className="h-3 w-20 animate-pulse rounded bg-neutral-200/70" />
+                <div className="h-3 w-24 animate-pulse rounded bg-[var(--accent-blue)]/20" />
               </div>
-              <div className="h-11 w-full bg-white/70 border border-neutral-200/90 rounded-lg animate-pulse" />
+              <div className="h-11 w-full animate-pulse rounded-lg border border-neutral-200/90 bg-white/70" />
             </div>
 
             {/* Submit button */}
-            <div className="h-11 w-full bg-[var(--accent-blue)]/40 rounded-button animate-pulse shadow-card" />
+            <div className="h-11 w-full animate-pulse rounded-button bg-[var(--accent-blue)]/40 shadow-card" />
           </div>
         </div>
 
         {/* Footer Skeleton */}
-        <footer className="mt-8 text-center space-y-2 select-none" aria-hidden="true">
+        <footer className="mt-8 select-none space-y-2 text-center" aria-hidden="true">
           <div className="flex items-center justify-center gap-1.5">
-            <div className="w-3.5 h-3.5 bg-accent-green/30 rounded-full animate-pulse" />
-            <div className="h-3 w-56 bg-neutral-200/60 rounded animate-pulse" />
+            <div className="h-3.5 w-3.5 animate-pulse rounded-full bg-accent-green/30" />
+            <div className="h-3 w-56 animate-pulse rounded bg-neutral-200/60" />
           </div>
           <div className="flex justify-center gap-6">
-            <div className="h-4 w-24 bg-neutral-200/50 rounded animate-pulse" />
-            <div className="h-4 w-16 bg-neutral-200/50 rounded animate-pulse" />
+            <div className="h-4 w-24 animate-pulse rounded bg-neutral-200/50" />
+            <div className="h-4 w-16 animate-pulse rounded bg-neutral-200/50" />
           </div>
         </footer>
       </div>

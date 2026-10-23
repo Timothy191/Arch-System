@@ -74,7 +74,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
 
     return (
       <div className="w-full space-y-1">
-        {label && <label className="block text-xs font-medium text-neutral-700">{label}</label>}
+        {label && <label className="block font-medium text-neutral-700 text-xs">{label}</label>}
         <div className="relative flex items-center">
           <input
             ref={inputRef}
@@ -87,8 +87,8 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
             className={cn(
               'w-full rounded-md border border-neutral-300',
               'bg-white text-neutral-900 placeholder:text-neutral-400',
-              'transition-colors focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100',
+              'transition-colors focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900',
+              'disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-50',
               size === 'small'
                 ? 'h-8 px-2.5 text-xs'
                 : size === 'large'
@@ -108,15 +108,15 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
                 tabIndex={-1}
                 onClick={handleClear}
                 aria-label="Clear input"
-                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                className="rounded-full p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
 
             {/* CMD-K or Esc Badge */}
             {cmdk && (
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-neutral-200 bg-neutral-100 text-[10px] font-mono text-neutral-500 select-none">
+              <kbd className="hidden select-none items-center rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 sm:inline-flex">
                 {hasValue ? 'Esc' : '⌘K'}
               </kbd>
             )}

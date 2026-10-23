@@ -71,39 +71,39 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
     <div className="space-y-6">
       {/* Top Header Card */}
       <GlassCard variant="window" className="p-6">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20">
-              <FileCheck2 className="w-6 h-6" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600">
+              <FileCheck2 className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded">
+                <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-bold font-mono text-emerald-700 text-xs uppercase tracking-wider">
                   REGULATORY COMPLIANCE SUITE
                 </span>
-                <span className="text-xs text-[var(--text-muted)] font-mono">
+                <span className="font-mono text-[var(--text-muted)] text-xs">
                   MHSA / DMRE Section 21 & 22 Audit
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-[var(--text-heading)] mt-1 tracking-tight">
+              <h2 className="mt-1 font-black text-2xl text-[var(--text-heading)] tracking-tight">
                 Security Access & Gate Telemetry Reports
               </h2>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Official access clearance logs, contractor hours reconciliation, and safety
                 induction exception tracking
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
+          <div className="flex w-full flex-wrap items-center justify-end gap-2.5 lg:w-auto">
             {/* Date filter pills */}
-            <div className="flex items-center bg-black/[0.04] p-1 rounded-lg text-xs font-medium">
+            <div className="flex items-center rounded-lg bg-black/[0.04] p-1 font-medium text-xs">
               <button
                 type="button"
                 onClick={() => setDateRange('today')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   dateRange === 'today'
-                    ? 'bg-white text-[var(--text-heading)] font-bold shadow-2xs'
+                    ? 'bg-white font-bold text-[var(--text-heading)] shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -112,9 +112,9 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
               <button
                 type="button"
                 onClick={() => setDateRange('7days')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   dateRange === '7days'
-                    ? 'bg-white text-[var(--text-heading)] font-bold shadow-2xs'
+                    ? 'bg-white font-bold text-[var(--text-heading)] shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -123,9 +123,9 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
               <button
                 type="button"
                 onClick={() => setDateRange('30days')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   dateRange === '30days'
-                    ? 'bg-white text-[var(--text-heading)] font-bold shadow-2xs'
+                    ? 'bg-white font-bold text-[var(--text-heading)] shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -136,79 +136,79 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3.5 py-2 font-bold text-white text-xs shadow-xs transition-all hover:bg-[var(--accent-blue)]/90 active:scale-95"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="h-3.5 w-3.5" />
               <span>Export Audit CSV</span>
             </button>
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 bg-black/[0.04] hover:bg-black/[0.08] text-[var(--text-heading)] px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg bg-black/[0.04] px-3 py-2 font-bold text-[var(--text-heading)] text-xs transition-all hover:bg-black/[0.08] active:scale-95"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="h-3.5 w-3.5" />
               <span>Print Pack</span>
             </button>
           </div>
         </div>
 
         {/* High-Density Compliance KPI Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 pt-5 border-t border-black/[0.06]">
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-[var(--text-muted)]">
+        <div className="mt-6 grid grid-cols-2 gap-3 border-black/[0.06] border-t pt-5 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-[var(--text-muted)] uppercase">
               Total Access Events
             </span>
-            <div className="text-xl font-black font-mono text-[var(--text-heading)] mt-1">
+            <div className="mt-1 font-black font-mono text-[var(--text-heading)] text-xl">
               {data.summary.totalEvents.toLocaleString()}
             </div>
             <span className="text-[10px] text-[var(--text-muted)]">Gate & turnstile scans</span>
           </div>
 
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-emerald-700">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-emerald-700 uppercase">
               Granted Clearances
             </span>
-            <div className="text-xl font-black font-mono text-emerald-600 mt-1">
+            <div className="mt-1 font-black font-mono text-emerald-600 text-xl">
               {data.summary.grantedCount.toLocaleString()}
             </div>
             <span className="text-[10px] text-emerald-700/80">Authorized entries</span>
           </div>
 
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-amber-700">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-amber-700 uppercase">
               Security Interlocks
             </span>
-            <div className="text-xl font-black font-mono text-amber-600 mt-1">
+            <div className="mt-1 font-black font-mono text-amber-600 text-xl">
               {data.summary.deniedCount.toLocaleString()}
             </div>
             <span className="text-[10px] text-amber-700/80">Blocked attempts</span>
           </div>
 
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-blue-700">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-blue-700 uppercase">
               Compliance Rate
             </span>
-            <div className="text-xl font-black font-mono text-[var(--accent-blue)] mt-1">
+            <div className="mt-1 font-black font-mono text-[var(--accent-blue)] text-xl">
               {data.summary.complianceRate}%
             </div>
             <span className="text-[10px] text-blue-700/80">Audit benchmark: 95%+</span>
           </div>
 
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-purple-700">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-purple-700 uppercase">
               Active Credentials
             </span>
-            <div className="text-xl font-black font-mono text-purple-600 mt-1">
+            <div className="mt-1 font-black font-mono text-purple-600 text-xl">
               {data.summary.activeCredentials}
             </div>
             <span className="text-[10px] text-purple-700/80">Valid RFID & QR cards</span>
           </div>
 
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[10px] font-mono font-semibold uppercase text-teal-700">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[10px] text-teal-700 uppercase">
               Contractor Hours
             </span>
-            <div className="text-xl font-black font-mono text-teal-600 mt-1">
+            <div className="mt-1 font-black font-mono text-teal-600 text-xl">
               {data.summary.contractorHoursLogged}h
             </div>
             <span className="text-[10px] text-teal-700/80">On-site billing verification</span>
@@ -217,20 +217,20 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
       </GlassCard>
 
       {/* Middle Row: Denial Reason Taxonomy & Gate Traffic */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Denial Reason Taxonomy */}
         <GlassCard variant="window" className="p-5">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-black/[0.06]">
+          <div className="mb-4 flex items-center justify-between border-black/[0.06] border-b pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-600" />
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-sm">
+                <ShieldAlert className="h-4 w-4 text-amber-600" />
                 <span>Security Interlock & Denial Reason Taxonomy</span>
               </h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Breakdown of access rejections by safety regulation type
               </p>
             </div>
-            <span className="text-xs font-mono font-bold bg-amber-500/10 text-amber-700 px-2 py-0.5 rounded">
+            <span className="rounded bg-amber-500/10 px-2 py-0.5 font-bold font-mono text-amber-700 text-xs">
               {data.summary.deniedCount} Events
             </span>
           </div>
@@ -245,9 +245,9 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
                     <span className="text-[var(--text-muted)]">({d.percentage}%)</span>
                   </div>
                 </div>
-                <div className="w-full bg-black/[0.05] h-2 rounded-full overflow-hidden">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-black/[0.05]">
                   <div
-                    className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                    className="h-full rounded-full bg-amber-500 transition-all duration-500"
                     style={{ width: `${d.percentage}%` }}
                   />
                 </div>
@@ -258,17 +258,17 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
 
         {/* Gate Traffic Throughput */}
         <GlassCard variant="window" className="p-5">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-black/[0.06]">
+          <div className="mb-4 flex items-center justify-between border-black/[0.06] border-b pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[var(--accent-blue)]" />
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-sm">
+                <Sliders className="h-4 w-4 text-[var(--accent-blue)]" />
                 <span>Perimeter Barrier Traffic & Peak Load</span>
               </h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Inbound vs. Outbound distribution and peak congestion windows
               </p>
             </div>
-            <span className="text-xs font-mono font-bold bg-blue-500/10 text-[var(--accent-blue)] px-2 py-0.5 rounded">
+            <span className="rounded bg-blue-500/10 px-2 py-0.5 font-bold font-mono text-[var(--accent-blue)] text-xs">
               5 Physical Barriers
             </span>
           </div>
@@ -277,21 +277,21 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
             {data.gateTraffic.map((g) => (
               <div
                 key={g.gateName}
-                className="bg-white/60 p-3 rounded-xl border border-black/[0.06] flex items-center justify-between gap-3 text-xs"
+                className="flex items-center justify-between gap-3 rounded-xl border border-black/[0.06] bg-white/60 p-3 text-xs"
               >
                 <div>
                   <h4 className="font-bold text-[var(--text-heading)]">{g.gateName}</h4>
-                  <span className="text-[11px] text-[var(--text-muted)] font-mono">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
                     Peak: {g.peakHour}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 font-mono">
-                  <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold">
-                    <ArrowDownRight className="w-3 h-3" />
+                  <span className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                    <ArrowDownRight className="h-3 w-3" />
                     IN: {g.inbound}
                   </span>
-                  <span className="flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-semibold">
-                    <ArrowUpRight className="w-3 h-3" />
+                  <span className="flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 font-semibold text-blue-700">
+                    <ArrowUpRight className="h-3 w-3" />
                     OUT: {g.outbound}
                   </span>
                 </div>
@@ -303,55 +303,55 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
 
       {/* Recent Security Audits Table */}
       <GlassCard variant="window" className="p-5">
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-black/[0.06]">
+        <div className="mb-4 flex items-center justify-between border-black/[0.06] border-b pb-3">
           <div>
-            <h3 className="text-sm font-bold text-[var(--text-heading)]">
+            <h3 className="font-bold text-[var(--text-heading)] text-sm">
               Audit Event Trail & Security Exceptions
             </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Immutable ledger timestamps and scan verification outcomes
             </p>
           </div>
-          <span className="text-xs font-mono text-[var(--text-muted)]">
+          <span className="font-mono text-[var(--text-muted)] text-xs">
             Showing last {data.recentAudits.length} events
           </span>
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-black/[0.08]">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-black/[0.03] border-b border-black/[0.08] text-[var(--text-muted)] font-mono text-[11px] uppercase tracking-wider">
+          <table className="w-full border-collapse text-left text-xs">
+            <thead className="border-black/[0.08] border-b bg-black/[0.03] font-mono text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Audit ID</th>
-                <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4">Gate Location</th>
-                <th className="py-3 px-4">Entity</th>
-                <th className="py-3 px-4">Action</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Audit Note / Denial Reason</th>
+                <th className="px-4 py-3">Audit ID</th>
+                <th className="px-4 py-3">Timestamp</th>
+                <th className="px-4 py-3">Gate Location</th>
+                <th className="px-4 py-3">Entity</th>
+                <th className="px-4 py-3">Action</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Audit Note / Denial Reason</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.06] bg-white/50">
               {data.recentAudits.map((a) => (
-                <tr key={a.id} className="hover:bg-black/[0.02] transition-colors">
-                  <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-muted)]">
+                <tr key={a.id} className="transition-colors hover:bg-black/[0.02]">
+                  <td className="px-4 py-3 font-mono text-[11px] text-[var(--text-muted)]">
                     {a.id.substring(0, 8)}...
                   </td>
-                  <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-secondary)]">
+                  <td className="px-4 py-3 font-mono text-[11px] text-[var(--text-secondary)]">
                     {a.timestamp}
                   </td>
-                  <td className="py-3 px-4 font-medium text-[var(--text-heading)]">{a.gate}</td>
-                  <td className="py-3 px-4">
-                    <span className="font-semibold text-[var(--text-heading)] block">
+                  <td className="px-4 py-3 font-medium text-[var(--text-heading)]">{a.gate}</td>
+                  <td className="px-4 py-3">
+                    <span className="block font-semibold text-[var(--text-heading)]">
                       {a.entityName}
                     </span>
                     <span className="text-[10px] text-[var(--text-muted)]">{a.entityType}</span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-secondary)]">
+                  <td className="px-4 py-3 font-mono text-[11px] text-[var(--text-secondary)]">
                     {a.action}
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-bold text-[10px] ${
                         a.granted
                           ? 'bg-emerald-500/10 text-emerald-700'
                           : 'bg-red-500/10 text-red-700'
@@ -360,7 +360,7 @@ export function AccessReportsStudio({ initialData }: AccessReportsStudioProps) {
                       {a.granted ? 'GRANTED' : 'DENIED'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-[11px] text-[var(--text-muted)]">
+                  <td className="px-4 py-3 text-[11px] text-[var(--text-muted)]">
                     {a.reason || 'Standard Badge Verification'}
                   </td>
                 </tr>

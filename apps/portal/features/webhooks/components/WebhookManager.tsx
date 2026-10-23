@@ -151,7 +151,7 @@ export function WebhookManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <RefreshCw className="w-8 h-8 animate-spin text-arch-accent-blue/50" />
+        <RefreshCw className="h-8 w-8 animate-spin text-arch-accent-blue/50" />
       </div>
     );
   }
@@ -164,7 +164,7 @@ export function WebhookManager() {
         transition={{ duration: 0.4 }}
         className="flex items-center justify-between"
       >
-        <h2 className="text-2xl font-bold tracking-tight text-arch-text-primary">
+        <h2 className="font-bold text-2xl text-arch-text-primary tracking-tight">
           Webhook Endpoints
         </h2>
         <Button
@@ -178,9 +178,9 @@ export function WebhookManager() {
             });
             setShowForm(!showForm);
           }}
-          className="bg-arch-accent-blue text-white hover:bg-arch-accent-blue/90 shadow-sm transition-transform active:scale-95"
+          className="bg-arch-accent-blue text-white shadow-sm transition-transform hover:bg-arch-accent-blue/90 active:scale-95"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Webhook
         </Button>
       </m.div>
@@ -196,20 +196,20 @@ export function WebhookManager() {
             <GlassCard
               variant="liquid"
               hover={false}
-              className="p-1 mb-8"
+              className="mb-8 p-1"
               glassIntensity="intense"
               padding={false}
             >
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-arch-text-primary mb-6 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-arch-accent-blue animate-pulse"></span>
+                <h3 className="mb-6 flex items-center gap-2 font-semibold text-arch-text-primary text-lg">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-arch-accent-blue"></span>
                   {editingWebhook ? 'Edit Webhook Configuration' : 'New Webhook Configuration'}
                 </h3>
                 <form onSubmit={editingWebhook ? handleUpdate : handleSubmit} className="space-y-6">
                   <div>
                     <label
                       htmlFor="url"
-                      className="block text-sm font-medium text-arch-text-secondary mb-2"
+                      className="mb-2 block font-medium text-arch-text-secondary text-sm"
                     >
                       Endpoint URL
                     </label>
@@ -219,7 +219,7 @@ export function WebhookManager() {
                       placeholder="https://api.example.com/webhooks"
                       value={formData.url}
                       onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                      className="bg-white/50 border-white/20 focus-visible:ring-arch-accent-blue transition-colors"
+                      className="border-white/20 bg-white/50 transition-colors focus-visible:ring-arch-accent-blue"
                       required
                     />
                   </div>
@@ -227,7 +227,7 @@ export function WebhookManager() {
                   <div>
                     <label
                       htmlFor="description"
-                      className="block text-sm font-medium text-arch-text-secondary mb-2"
+                      className="mb-2 block font-medium text-arch-text-secondary text-sm"
                     >
                       Description (Optional)
                     </label>
@@ -237,15 +237,15 @@ export function WebhookManager() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       rows={2}
-                      className="w-full px-3 py-2 border border-white/20 rounded-lg bg-white/50 text-arch-text-primary focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/50 transition-colors text-sm"
+                      className="w-full rounded-lg border border-white/20 bg-white/50 px-3 py-2 text-arch-text-primary text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-arch-accent-blue/50"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-arch-text-secondary mb-3">
+                    <label className="mb-3 block font-medium text-arch-text-secondary text-sm">
                       Event Subscriptions
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                       {EVENT_TYPES.map((eventType) => {
                         const isSelected = formData.event_types.includes(eventType);
                         return (
@@ -253,16 +253,16 @@ export function WebhookManager() {
                             key={eventType}
                             type="button"
                             onClick={() => toggleEventType(eventType)}
-                            className={`text-left px-4 py-3 rounded-xl border transition-all text-xs font-medium relative overflow-hidden ${
+                            className={`relative overflow-hidden rounded-xl border px-4 py-3 text-left font-medium text-xs transition-all ${
                               isSelected
-                                ? 'bg-arch-accent-green/10 border-arch-accent-green text-arch-accent-green'
-                                : 'bg-white/40 border-white/20 text-arch-text-secondary hover:bg-white/60 hover:border-white/40'
+                                ? 'border-arch-accent-green bg-arch-accent-green/10 text-arch-accent-green'
+                                : 'border-white/20 bg-white/40 text-arch-text-secondary hover:border-white/40 hover:bg-white/60'
                             }`}
                           >
                             {isSelected && (
                               <m.div
                                 layoutId="active-indicator"
-                                className="absolute left-0 top-0 bottom-0 w-1 bg-arch-accent-green"
+                                className="absolute top-0 bottom-0 left-0 w-1 bg-arch-accent-green"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               />
@@ -280,15 +280,15 @@ export function WebhookManager() {
                       checked={formData.active}
                       onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
                       label="Webhook Active Status"
-                      className="text-sm font-medium text-arch-text-secondary"
+                      className="font-medium text-arch-text-secondary text-sm"
                     />
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-6 border-t border-black/5 mt-6">
+                  <div className="mt-6 flex justify-end gap-3 border-black/5 border-t pt-6">
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-white/40 bg-white/30 text-arch-text-secondary hover:bg-white/60 hover:text-arch-text-primary transition-all"
+                      className="border-white/40 bg-white/30 text-arch-text-secondary transition-all hover:bg-white/60 hover:text-arch-text-primary"
                       onClick={() => {
                         setShowForm(false);
                         setEditingWebhook(null);
@@ -304,7 +304,7 @@ export function WebhookManager() {
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-arch-accent-blue text-white hover:bg-arch-accent-blue/90 shadow-sm transition-transform active:scale-95"
+                      className="bg-arch-accent-blue text-white shadow-sm transition-transform hover:bg-arch-accent-blue/90 active:scale-95"
                     >
                       {editingWebhook ? 'Update Webhook' : 'Create Webhook'}
                     </Button>
@@ -321,7 +321,7 @@ export function WebhookManager() {
           <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="p-12 text-center rounded-2xl border border-dashed border-arch-border-subtle bg-arch-surface-primary/30"
+            className="rounded-2xl border border-arch-border-subtle border-dashed bg-arch-surface-primary/30 p-12 text-center"
           >
             <p className="text-arch-text-tertiary">No webhooks are currently configured</p>
           </m.div>
@@ -333,34 +333,34 @@ export function WebhookManager() {
                 variant="glowborder"
                 hover={true}
                 colorPreset="ocean"
-                className="mb-4 bg-white/70 backdrop-blur-xl border border-white/30"
+                className="mb-4 border border-white/30 bg-white/70 backdrop-blur-xl"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="mb-2 flex items-center gap-3">
                       <h3 className="font-bold text-[15px] text-arch-text-primary tracking-tight">
                         {webhook.url}
                       </h3>
                       {webhook.active ? (
                         <Badge
                           variant="default"
-                          className="bg-arch-accent-green/10 text-arch-accent-green border border-arch-accent-green/20 px-2 py-0.5"
+                          className="border border-arch-accent-green/20 bg-arch-accent-green/10 px-2 py-0.5 text-arch-accent-green"
                         >
-                          <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                          <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
                           Active
                         </Badge>
                       ) : (
                         <Badge
                           variant="outline"
-                          className="bg-black/5 border-black/10 text-arch-text-tertiary px-2 py-0.5"
+                          className="border-black/10 bg-black/5 px-2 py-0.5 text-arch-text-tertiary"
                         >
-                          <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                          <XCircle className="mr-1.5 h-3.5 w-3.5" />
                           Inactive
                         </Badge>
                       )}
                     </div>
                     {webhook.description && (
-                      <p className="text-[13px] text-arch-text-secondary mb-4 font-medium leading-relaxed max-w-2xl">
+                      <p className="mb-4 max-w-2xl font-medium text-[13px] text-arch-text-secondary leading-relaxed">
                         {webhook.description}
                       </p>
                     )}
@@ -369,18 +369,18 @@ export function WebhookManager() {
                         <Badge
                           key={eventType}
                           variant="secondary"
-                          className="text-[10px] bg-white text-arch-text-secondary border border-black/5 hover:bg-black/5 transition-colors font-semibold"
+                          className="border border-black/5 bg-white font-semibold text-[10px] text-arch-text-secondary transition-colors hover:bg-black/5"
                         >
                           {eventType}
                         </Badge>
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="ml-6 flex items-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-white border-black/5 text-arch-text-secondary hover:text-arch-accent-blue hover:bg-arch-accent-blue/10 transition-colors shadow-sm"
+                      className="border-black/5 bg-white text-arch-text-secondary shadow-sm transition-colors hover:bg-arch-accent-blue/10 hover:text-arch-accent-blue"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEdit(webhook);
@@ -391,13 +391,13 @@ export function WebhookManager() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-white border-black/5 text-arch-text-tertiary hover:text-arch-accent-red hover:bg-arch-accent-red/10 transition-colors shadow-sm"
+                      className="border-black/5 bg-white text-arch-text-tertiary shadow-sm transition-colors hover:bg-arch-accent-red/10 hover:text-arch-accent-red"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(webhook.id);
                       }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

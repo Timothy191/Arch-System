@@ -146,8 +146,8 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
   if (!today || !/^\d{4}-\d{2}-\d{2}$/.test(today)) {
     return (
-      <GlassCard className="border-accent-red/30 bg-accent-red/5 text-accent-red p-6">
-        <p className="text-sm font-medium">
+      <GlassCard className="border-accent-red/30 bg-accent-red/5 p-6 text-accent-red">
+        <p className="font-medium text-sm">
           Operational date is missing or invalid. Please reload the page.
         </p>
       </GlassCard>
@@ -255,9 +255,9 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-[var(--bg-secondary)] font-medium py-2.5 px-5 rounded-lg transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-5 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)]/90"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
             Add Roll
           </button>
         </div>
@@ -268,34 +268,34 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-[var(--accent-blue)]" />
-                <h3 className="text-lg font-medium text-[var(--text-heading)]">
+                <Calculator className="h-5 w-5 text-[var(--accent-blue)]" />
+                <h3 className="font-medium text-[var(--text-heading)] text-lg">
                   Record Dozer Roll
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={reset}
-                className="text-[var(--text-muted)] hover:text-[var(--text-heading)] text-sm transition-colors"
+                className="text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
               >
                 Cancel
               </button>
             </div>
 
             {/* Display operational date (read‑only) */}
-            <div className="bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2 flex items-center justify-between text-sm">
-              <span className="text-[var(--text-secondary)] font-medium">Operational Date:</span>
+            <div className="flex items-center justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm">
+              <span className="font-medium text-[var(--text-secondary)]">Operational Date:</span>
               <span className="font-mono font-semibold text-[var(--accent-blue)]">
                 {today} (Africa/Johannesburg)
               </span>
             </div>
 
             {/* Dozer & Site */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label
                   htmlFor="dozer-select"
-                  className="block text-sm text-[var(--text-secondary)]"
+                  className="block text-[var(--text-secondary)] text-sm"
                 >
                   Dozer <span className="text-accent-red">*</span>
                 </label>
@@ -303,7 +303,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   id="dozer-select"
                   value={machineId}
                   onChange={(e) => setMachineId(e.target.value)}
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                 >
                   <option value="">Select dozer...</option>
                   {dozers.map((d) => (
@@ -316,8 +316,8 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">Site</label>
-                <div className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm">
+                <label className="block text-[var(--text-secondary)] text-sm">Site</label>
+                <div className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2.5 text-[var(--text-heading)] text-sm">
                   {siteName}
                 </div>
               </div>
@@ -325,13 +325,13 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
             {/* Shift */}
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">Shift</label>
+              <label className="block text-[var(--text-secondary)] text-sm">Shift</label>
               <ShiftToggle value={shiftType} onChange={setShiftType} />
             </div>
 
             {/* Calculation: Length x Width = Area */}
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">Area Calculation</label>
+              <label className="block text-[var(--text-secondary)] text-sm">Area Calculation</label>
               <div className="flex items-center gap-3">
                 <div className="flex-1 space-y-1">
                   <input
@@ -341,10 +341,10 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                     value={lengthM}
                     onChange={(e) => setLengthM(e.target.value)}
                     placeholder="Length (m)"
-                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                   />
                 </div>
-                <X className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
+                <X className="h-5 w-5 shrink-0 text-[var(--text-muted)]" />
                 <div className="flex-1 space-y-1">
                   <input
                     type="number"
@@ -353,12 +353,12 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                     value={widthM}
                     onChange={(e) => setWidthM(e.target.value)}
                     placeholder="Width (m)"
-                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                   />
                 </div>
-                <Equal className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
+                <Equal className="h-5 w-5 shrink-0 text-[var(--text-muted)]" />
                 <div className="flex-1">
-                  <div className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--accent-blue)] text-sm font-medium text-center">
+                  <div className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2.5 text-center font-medium text-[var(--accent-blue)] text-sm">
                     {area > 0 ? `${area.toFixed(2)} m²` : '—'}
                   </div>
                 </div>
@@ -366,9 +366,9 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
             </div>
 
             {/* Roll Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">Blade Passes</label>
+                <label className="block text-[var(--text-secondary)] text-sm">Blade Passes</label>
                 <input
                   type="number"
                   min={0}
@@ -376,11 +376,11 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={bladePasses}
                   onChange={(e) => setBladePasses(e.target.value)}
                   placeholder="e.g. 12"
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">Push Count</label>
+                <label className="block text-[var(--text-secondary)] text-sm">Push Count</label>
                 <input
                   type="number"
                   min={0}
@@ -388,11 +388,11 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={pushCount}
                   onChange={(e) => setPushCount(e.target.value)}
                   placeholder="e.g. 8"
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">Hours Operated</label>
+                <label className="block text-[var(--text-secondary)] text-sm">Hours Operated</label>
                 <input
                   type="number"
                   min={0}
@@ -401,7 +401,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   value={hoursOperated}
                   onChange={(e) => setHoursOperated(e.target.value)}
                   placeholder="e.g. 8.5"
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
                 />
               </div>
             </div>
@@ -409,13 +409,13 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
             {machineId && (
               <div
                 data-testid="dozer-rollover-summary"
-                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)] p-3.5"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                  <span className="font-medium text-[var(--text-heading)] text-sm">
                     Roll-over Amount:
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                  <span className="font-mono text-[var(--text-muted)] text-xs">
                     (
                     {(Number.isNaN(parseFloat(hoursOperated))
                       ? 0
@@ -424,9 +424,9 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                     h &times; 250 = Total Roll-over)
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
-                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
-                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                <div className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3.5 py-1.5">
+                  <span className="text-[var(--text-muted)] text-xs">Total Roll-over:</span>
+                  <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
                     {Number(
                       (
                         (Number.isNaN(parseFloat(hoursOperated)) ? 0 : parseFloat(hoursOperated)) *
@@ -450,7 +450,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
+                className="rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
               >
                 {isSubmitting ? 'Saving...' : 'Save Roll'}
               </button>

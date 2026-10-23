@@ -124,7 +124,7 @@ export function Clock({
       aria-label={ariaText || undefined}
       className={cn(
         // AGENT-TRACE: reads theme tokens only — no hardcoded colors, preserves light-mode invariant
-        'tabular-nums select-none text-[var(--text-secondary)]',
+        'select-none text-[var(--text-secondary)] tabular-nums',
         className
       )}
       suppressHydrationWarning

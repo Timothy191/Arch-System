@@ -30,8 +30,8 @@ type Story = StoryObj<typeof GlassCard>;
 export const Default: Story = {
   args: {
     children: (
-      <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">Standard Glass Card</p>
+      <div className="flex h-32 w-64 items-center justify-center">
+        <p className="font-medium text-[var(--text-heading)]">Standard Glass Card</p>
       </div>
     ),
     variant: 'default',
@@ -43,7 +43,7 @@ export const Window: Story = {
   args: {
     title: 'Terminal',
     children: (
-      <div className="w-80 h-48 bg-black/90 p-4 font-mono text-green-400 text-sm">
+      <div className="h-48 w-80 bg-black/90 p-4 font-mono text-green-400 text-sm">
         <p>arch-system login: admin</p>
         <p>password: ********</p>
         <p className="mt-2">Welcome to Arch-System CLI v1.5.1</p>
@@ -58,8 +58,8 @@ export const Window: Story = {
 export const Spotlight: Story = {
   args: {
     children: (
-      <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium text-center">
+      <div className="flex h-32 w-64 items-center justify-center">
+        <p className="text-center font-medium text-[var(--text-heading)]">
           Hover me to see the <br /> spotlight effect
         </p>
       </div>
@@ -72,8 +72,8 @@ export const Spotlight: Story = {
 export const GlowBorder: Story = {
   args: {
     children: (
-      <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">Glow Border variant</p>
+      <div className="flex h-32 w-64 items-center justify-center">
+        <p className="font-medium text-[var(--text-heading)]">Glow Border variant</p>
       </div>
     ),
     variant: 'glowborder',
@@ -84,8 +84,8 @@ export const GlowBorder: Story = {
 export const Liquid: Story = {
   args: {
     children: (
-      <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">Liquid Glass Refraction</p>
+      <div className="flex h-32 w-64 items-center justify-center">
+        <p className="font-medium text-[var(--text-heading)]">Liquid Glass Refraction</p>
       </div>
     ),
     variant: 'liquid',

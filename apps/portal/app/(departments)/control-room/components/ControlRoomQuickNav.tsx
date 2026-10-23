@@ -101,30 +101,30 @@ export function ControlRoomQuickNav() {
         <button
           type="button"
           data-testid="control-room-quick-nav-trigger"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/90 hover:bg-[var(--bg-tertiary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:border-[var(--accent-blue)]/50 shadow-sm hover:shadow transition-all duration-200 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:scale-[0.98]"
+          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-sm transition-all duration-200 hover:border-[var(--accent-blue)]/50 hover:bg-[var(--bg-tertiary)] hover:shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:scale-[0.98] sm:text-sm"
           aria-label="Quick navigation to other Control Room tabs"
         >
-          <Compass className="w-4 h-4 text-[var(--accent-blue)] shrink-0" />
+          <Compass className="h-4 w-4 shrink-0 text-[var(--accent-blue)]" />
           <span>Quick Navigation</span>
           <Logo
             variant="gold"
-            className="w-3.5 h-3.5 shrink-0 rotate-180 transition-transform duration-200 ease-out [[data-state=open]_&]:rotate-0"
+            className="h-3.5 w-3.5 shrink-0 rotate-180 transition-transform duration-200 ease-out [[data-state=open]_&]:rotate-0"
           />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         sideOffset={6}
-        className="w-72 sm:w-80 p-1.5 bg-[var(--vibrancy-surface)] backdrop-blur-xl border border-[var(--border-subtle)] shadow-2xl rounded-xl z-50 animate-in fade-in-0 zoom-in-95"
+        className="fade-in-0 zoom-in-95 z-50 w-72 animate-in rounded-xl border border-[var(--border-subtle)] bg-[var(--vibrancy-surface)] p-1.5 shadow-2xl backdrop-blur-xl sm:w-80"
       >
-        <DropdownMenuLabel className="px-2.5 py-2 text-xs font-semibold text-[var(--text-heading)]">
+        <DropdownMenuLabel className="px-2.5 py-2 font-semibold text-[var(--text-heading)] text-xs">
           <div className="flex items-center justify-between">
             <span>Control Room Tabs</span>
-            <span className="text-[10px] font-normal text-[var(--text-muted)] uppercase tracking-wider">
+            <span className="font-normal text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
               Navigation
             </span>
           </div>
-          <p className="text-[11px] font-normal text-[var(--text-secondary)] mt-0.5">
+          <p className="mt-0.5 font-normal text-[11px] text-[var(--text-secondary)]">
             Quick jump to operational modules
           </p>
         </DropdownMenuLabel>
@@ -144,35 +144,35 @@ export function ControlRoomQuickNav() {
                 key={tab.name}
                 asChild
                 className={cn(
-                  'cursor-pointer rounded-lg px-2.5 py-2 transition-colors duration-150 outline-none select-none',
+                  'cursor-pointer select-none rounded-lg px-2.5 py-2 outline-none transition-colors duration-150',
                   isActive
-                    ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
-                    : 'hover:bg-black/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                    ? 'bg-[var(--accent-blue)]/10 font-medium text-[var(--accent-blue)]'
+                    : 'text-[var(--text-secondary)] hover:bg-black/[0.04] hover:text-[var(--text-heading)]'
                 )}
               >
-                <Link href={tab.href} className="flex items-start gap-3 w-full">
+                <Link href={tab.href} className="flex w-full items-start gap-3">
                   <div
                     className={cn(
-                      'p-1.5 rounded-md shrink-0 mt-0.5',
+                      'mt-0.5 shrink-0 rounded-md p-1.5',
                       isActive
                         ? 'bg-[var(--accent-blue)]/20 text-[var(--accent-blue)]'
                         : 'bg-black/[0.04] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-medium truncate text-[var(--text-heading)]">
+                      <span className="truncate font-medium text-[var(--text-heading)] text-xs">
                         {tab.label}
                       </span>
                       {isActive && (
-                        <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]">
+                        <span className="rounded bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-semibold text-[9px] text-[var(--accent-blue)] uppercase tracking-wider">
                           Active
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-[var(--text-muted)] line-clamp-1 mt-0.5">
+                    <p className="mt-0.5 line-clamp-1 text-[11px] text-[var(--text-muted)]">
                       {tab.description}
                     </p>
                   </div>

@@ -51,7 +51,7 @@ export default function UniverSheet({ id, data, onReady }: UniverSheetProps) {
     <div
       ref={containerRef}
       id={id}
-      className="w-full h-[600px] rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] overflow-hidden"
+      className="h-[600px] w-full overflow-hidden rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)]"
     />
   );
 }

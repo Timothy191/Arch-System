@@ -38,9 +38,9 @@ export function PredictiveAlertsWidget() {
 
   if (loading) {
     return (
-      <div className="p-4 bg-[var(--bg-secondary)] rounded-lg animate-pulse flex items-center gap-3">
-        <BrainCircuit className="w-5 h-5 text-[var(--text-muted)]" />
-        <span className="text-sm text-[var(--text-muted)]">
+      <div className="flex animate-pulse items-center gap-3 rounded-lg bg-[var(--bg-secondary)] p-4">
+        <BrainCircuit className="h-5 w-5 text-[var(--text-muted)]" />
+        <span className="text-[var(--text-muted)] text-sm">
           Running predictive maintenance models...
         </span>
       </div>
@@ -52,25 +52,25 @@ export function PredictiveAlertsWidget() {
   }
 
   return (
-    <div className="space-y-4 mb-6">
-      <h3 className="text-lg font-medium text-[var(--text-heading)] flex items-center gap-2">
-        <BrainCircuit className="w-5 h-5 text-[var(--accent-blue)]" />
+    <div className="mb-6 space-y-4">
+      <h3 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-lg">
+        <BrainCircuit className="h-5 w-5 text-[var(--accent-blue)]" />
         AI Predictive Maintenance Alerts
       </h3>
       <GlassCard className="border-[var(--accent-red)]/30 bg-[var(--accent-red)]/5">
         <AnimatedList className="divide-y divide-[var(--border-subtle)]">
           {predictions.map((p) => (
-            <div key={p.machine_id} className="py-3 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-[var(--accent-red)] shrink-0 mt-0.5" />
+            <div key={p.machine_id} className="flex items-start gap-3 py-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent-red)]" />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-[var(--text-heading)]">{p.machine_name}</span>
-                  <span className="px-2 py-0.5 rounded text-xs bg-[var(--accent-red)]/20 text-[var(--accent-red)] font-medium">
+                  <span className="rounded bg-[var(--accent-red)]/20 px-2 py-0.5 font-medium text-[var(--accent-red)] text-xs">
                     {p.risk_level} RISK ({(p.confidence * 100).toFixed(0)}% CONFIDENCE)
                   </span>
                 </div>
-                <p className="text-sm text-[var(--text-muted)] mt-1">{p.reason}</p>
-                <div className="mt-2 text-sm bg-[var(--bg-primary)] p-2 rounded border border-[var(--border-subtle)] inline-block">
+                <p className="mt-1 text-[var(--text-muted)] text-sm">{p.reason}</p>
+                <div className="mt-2 inline-block rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-2 text-sm">
                   <span className="font-medium text-[var(--text-heading)]">Action:</span>{' '}
                   {p.recommended_action}
                 </div>

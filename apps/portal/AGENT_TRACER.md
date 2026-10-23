@@ -1,3 +1,12 @@
+## 2026-10-23T10:30:00+02:00: Enforce Utility Class Ordering (`useSortedClasses`), Knip Gate & Database RedisInsight Workbench
+
+- **Purpose**: Enforce canonical Tailwind utility class ordering across the monorepo (`nursery/useSortedClasses` in `biome.json`), clean up dead-code/unresolved imports so `pnpm knip` exits 0 as Step 15 of `agent:verify`, codify `javascript-testing-best-practices` / `nodebestpractices` in `.agents/rules/testing-rules.md`, and add the Redis 7.4 Dual-Tier Cache & RedisInsight Workbench panel to `/database` (`apps/portal/app/(departments)/database/page.tsx`) alongside auto-provisioned RedisInsight in `infra/docker/compose.{redis,tools}.yml`.
+- **Changes**:
+  - `biome.json` & 314 TSX/TS files: Enabled `nursery/useSortedClasses` (`"level": "error"`, `"fix": "safe"`) and auto-sorted utility classes across `apps/`, `packages/`, and `libs/`.
+  - `apps/portal/app/(departments)/database/{page.tsx,page.test.tsx}` & `infra/docker/compose.{redis,tools}.yml`: Added Redis 7.4 L1/L2 Cache & RedisInsight (`:5540`) Workbench panel and pre-configured `RI_REDIS_HOST1` / `RI_ACCEPT_TERMS_AND_CONDITIONS` Docker environment variables.
+  - `config/tools/knip.json` & `tools/scripts/agent-verify.sh`: Pruned orphaned `MetabasePanel.tsx`, `hooks/index.ts`, and `DataGrid.stories.tsx`, fixed `jest*.config.*` pattern, and wired `pnpm knip` as Step 15 of `agent:verify`.
+- **Verification**: `pnpm knip` ✅; `pnpm --filter portal test -- --testPathPatterns="database/page.test"` ✅; `pnpm agent:verify` (15/15 PASS) ✅.
+
 ## 2026-10-23T08:08:00+02:00: Plant & Processing Hourly Sheet Redesign into Control Room 12-Hour Matrix Grid
 
 - **Purpose**: Implement `/plant-processing/hourly-sheet` design feedback: remove the Excel formula bar (`C1 fx ...`) and legacy sheet toolbar (`Auto-calc Discard`, `Fill Down`, `Reset Sheet`), and redesign the hourly sheet into a 12-hour matrix grid matching Control Room's Hourly Loads layout (`HourlyLoadsGrid.tsx`).

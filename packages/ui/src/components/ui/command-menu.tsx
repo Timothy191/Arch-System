@@ -126,7 +126,7 @@ export function CommandMenu({
       }}
     >
       <div
-        className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] bg-black/50 backdrop-blur-sm animate-in fade-in-0 duration-150"
+        className="fade-in-0 fixed inset-0 z-50 flex animate-in items-start justify-center bg-black/50 p-4 pt-[12vh] backdrop-blur-sm duration-150"
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
         }}
@@ -136,7 +136,7 @@ export function CommandMenu({
       >
         <div
           className={cn(
-            'w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl transition-all text-neutral-900',
+            'w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white text-neutral-900 shadow-2xl transition-all',
             className
           )}
         >
@@ -194,7 +194,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
     };
 
     return (
-      <div className="flex items-center border-b border-neutral-200 px-3">
+      <div className="flex items-center border-neutral-200 border-b px-3">
         <Search className="mr-2 h-4 w-4 shrink-0 text-neutral-400" />
         <input
           ref={inputRef}
@@ -209,7 +209,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           )}
           {...props}
         />
-        <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-mono font-medium text-neutral-500 select-none">
+        <kbd className="hidden select-none items-center gap-1 rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 font-medium font-mono text-[10px] text-neutral-500 sm:inline-flex">
           ESC
         </kbd>
       </div>
@@ -243,13 +243,13 @@ export function CommandMenuList({
 
   return (
     <div
-      className={cn('max-h-80 overflow-y-auto overflow-x-hidden p-2 space-y-1', className)}
+      className={cn('max-h-80 space-y-1 overflow-y-auto overflow-x-hidden p-2', className)}
       role="listbox"
       aria-live="polite"
       {...props}
     >
       {children}
-      {showEmpty && <div className="py-6 text-center text-sm text-neutral-500">{emptyMessage}</div>}
+      {showEmpty && <div className="py-6 text-center text-neutral-500 text-sm">{emptyMessage}</div>}
     </div>
   );
 }
@@ -292,7 +292,7 @@ export function CommandMenuGroup({
       {...props}
     >
       {heading && hasVisibleChildren && (
-        <div className="px-2 pb-1.5 text-xs font-semibold text-neutral-500 select-none">
+        <div className="select-none px-2 pb-1.5 font-semibold text-neutral-500 text-xs">
           {heading}
         </div>
       )}

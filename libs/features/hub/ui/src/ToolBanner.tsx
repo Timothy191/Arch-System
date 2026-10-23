@@ -62,7 +62,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
 
   return (
     <div className="relative w-full overflow-hidden" style={maskStyle}>
-      <Marquee pauseOnHover className="[--duration:25s] [--gap:1rem] sm:[--gap:1.5rem] py-2">
+      <Marquee pauseOnHover className="py-2 [--duration:25s] [--gap:1rem] sm:[--gap:1.5rem]">
         {tools.map((tool) => {
           const Icon = ICON_MAP[tool.icon] || Factory;
           const config = COLOR_MAP[tool.color] || {
@@ -71,25 +71,25 @@ export function ToolBanner({ tools }: ToolBannerProps) {
           };
 
           return (
-            <div key={tool.id} className="w-[280px] sm:w-[300px] shrink-0">
+            <div key={tool.id} className="w-[280px] shrink-0 sm:w-[300px]">
               <GlassCard
                 variant="spotlight"
                 spotlightColor={config.glow}
-                className="h-full rounded-card bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300 will-change-[backdrop-filter]"
+                className="h-full rounded-card border border-black/[0.08] bg-white/75 shadow-card backdrop-blur-xl transition-all duration-300 will-change-[backdrop-filter] hover:border-arch-accent-blue/30 hover:shadow-card-hover"
               >
-                <div className="p-5 sm:p-6 flex flex-col items-center text-center select-none">
+                <div className="flex select-none flex-col items-center p-5 text-center sm:p-6">
                   <div
                     className={cn(
-                      'p-3.5 rounded-lg mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle',
+                      'mb-3.5 rounded-lg border border-arch-border-subtle p-3.5 shadow-sm transition-transform duration-300 hover:scale-105',
                       config.iconBg
                     )}
                   >
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <h3 className="text-sm sm:text-base font-semibold text-arch-text-primary mb-1.5 hover:text-arch-accent-blue transition-colors duration-200">
+                  <h3 className="mb-1.5 font-semibold text-arch-text-primary text-sm transition-colors duration-200 hover:text-arch-accent-blue sm:text-base">
                     {tool.displayName}
                   </h3>
-                  <p className="text-xs text-arch-text-secondary leading-relaxed line-clamp-2">
+                  <p className="line-clamp-2 text-arch-text-secondary text-xs leading-relaxed">
                     {tool.description}
                   </p>
                 </div>

@@ -33,10 +33,10 @@ export default function HubError({ error, reset }: HubErrorProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">{title}</h2>
+      <h2 className="font-medium text-2xl text-[var(--text-heading)]">{title}</h2>
       <p className="text-[var(--text-muted)] text-sm">{message}</p>
       {appErrorCode && (
-        <div className="text-xs text-[var(--text-muted)] font-mono">{appErrorCode}</div>
+        <div className="font-mono text-[var(--text-muted)] text-xs">{appErrorCode}</div>
       )}
       <SecondaryButton size="sm" onClick={reset}>
         Try again

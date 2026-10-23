@@ -129,22 +129,22 @@ function SystemStatTickerItem({
   icon: Icon,
 }: SystemStatItem) {
   return (
-    <div className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/80 backdrop-blur-md border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs hover:border-arch-accent-blue/35 transition-colors select-none">
-      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full gold-steel-border gold-steel-border-slim bg-accent-amber/10 text-accent-amber shrink-0">
-        <Icon className="w-2.5 h-2.5 text-accent-amber" aria-hidden="true" />
+    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 select-none items-center gap-2 whitespace-nowrap rounded-full border border-black/[0.08] bg-white/80 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-colors hover:border-arch-accent-blue/35">
+      <span className="gold-steel-border gold-steel-border-slim inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent-amber/10 text-accent-amber">
+        <Icon className="h-2.5 w-2.5 text-accent-amber" aria-hidden="true" />
       </span>
-      <span className="text-[10.5px] font-semibold text-arch-text-primary tracking-tight">
+      <span className="font-semibold text-[10.5px] text-arch-text-primary tracking-tight">
         {subsystem}
       </span>
       <span
-        className={`inline-flex items-center px-1.5 py-px rounded-full gold-steel-border gold-steel-border-slim border text-[9.5px] font-mono font-semibold tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
+        className={`gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full border px-1.5 py-px font-mono font-semibold text-[9.5px] tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
       >
         {metricBadge}
       </span>
-      <span className="text-accent-amber font-mono font-bold" aria-hidden="true">
+      <span className="font-bold font-mono text-accent-amber" aria-hidden="true">
         |
       </span>
-      <span className="inline-flex items-center px-2 py-px rounded-full gold-steel-border gold-steel-border-slim bg-white/70 text-[10.5px] font-mono text-arch-text-secondary">
+      <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full bg-white/70 px-2 py-px font-mono text-[10.5px] text-arch-text-secondary">
         {detail}
       </span>
     </div>
@@ -160,19 +160,19 @@ export function DepartmentReviews() {
 
   return (
     <div
-      className="flex items-center gap-2 w-full min-w-0 overflow-hidden"
+      className="flex w-full min-w-0 items-center gap-2 overflow-hidden"
       aria-label="Codebase & Architecture Performance Telemetry"
     >
-      <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-accent-green/10 border border-accent-green/25 text-accent-green text-[9.5px] font-mono font-semibold uppercase tracking-wider shrink-0">
+      <span className="gold-steel-border gold-steel-border-slim hidden shrink-0 items-center gap-1.5 rounded-full border border-accent-green/25 bg-accent-green/10 px-2 py-0.5 font-mono font-semibold text-[9.5px] text-accent-green uppercase tracking-wider lg:inline-flex">
         <span
-          className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
+          className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-green"
           aria-hidden="true"
         />
         System Stats &amp; Updates
       </span>
 
-      <div className="relative flex-1 min-w-0 overflow-hidden" style={maskStyle}>
-        <Marquee pauseOnHover className="[--duration:42s] [--gap:0.65rem] py-0.5">
+      <div className="relative min-w-0 flex-1 overflow-hidden" style={maskStyle}>
+        <Marquee pauseOnHover className="py-0.5 [--duration:42s] [--gap:0.65rem]">
           {CODEBASE_STATS.map((item) => (
             <SystemStatTickerItem key={item.id} {...item} />
           ))}

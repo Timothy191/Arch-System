@@ -91,7 +91,7 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
   if (notes.length === 0) {
     return (
       <GlassCard>
-        <p className="text-[var(--text-muted)] text-sm text-center py-8">
+        <p className="py-8 text-center text-[var(--text-muted)] text-sm">
           No engineering issues, breakdowns, or activities logged today.
         </p>
       </GlassCard>
@@ -106,8 +106,8 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
     <div className="space-y-4">
       {dayNotes.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-accent-blue flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent-blue"></span>
+          <h4 className="flex items-center gap-2 font-medium text-accent-blue text-sm">
+            <span className="h-2 w-2 rounded-full bg-accent-blue"></span>
             Day Shift
           </h4>
           <AutoAnimateList className="space-y-2">
@@ -120,8 +120,8 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
 
       {nightNotes.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-accent-blue flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent-blue"></span>
+          <h4 className="flex items-center gap-2 font-medium text-accent-blue text-sm">
+            <span className="h-2 w-2 rounded-full bg-accent-blue"></span>
             Night Shift
           </h4>
           <AutoAnimateList className="space-y-2">
@@ -145,11 +145,11 @@ function NoteCard({ note }: { note: EngineeringNote }) {
     <GlassCard className={`py-3 ${note.severity === 'critical' ? 'border-accent-red/30' : ''}`}>
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Source Badge */}
           {sourceBadge && (
             <span
-              className={`px-2 py-1 rounded text-xs font-medium border ${sourceBadge.className}`}
+              className={`rounded border px-2 py-1 font-medium text-xs ${sourceBadge.className}`}
             >
               {sourceBadge.label}
             </span>
@@ -157,7 +157,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 
           {/* Issue Type */}
           <span
-            className="px-2 py-1 rounded text-xs font-medium text-[var(--bg-secondary)]"
+            className="rounded px-2 py-1 font-medium text-[var(--bg-secondary)] text-xs"
             style={{ backgroundColor: issueColor }}
           >
             {formatIssueTypeLabel(note.issue_type)}
@@ -165,7 +165,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 
           {/* Severity */}
           <span
-            className="px-2 py-1 rounded text-xs font-medium"
+            className="rounded px-2 py-1 font-medium text-xs"
             style={{
               backgroundColor: `${severityColor}20`,
               color: severityColor,
@@ -177,7 +177,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 
           {/* Status */}
           <span
-            className="px-2 py-1 rounded text-xs font-medium"
+            className="rounded px-2 py-1 font-medium text-xs"
             style={{
               backgroundColor: `${statusColor}20`,
               color: statusColor,
@@ -194,7 +194,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
                 ? note.machine!.sites[0]?.name
                 : (note.machine!.sites as { name: string } | null | undefined)?.name;
               return (
-                <span className="text-[var(--text-muted)] text-xs flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-[var(--text-muted)] text-xs">
                   {note.machine!.name}
                   {siteName && (
                     <>
@@ -207,7 +207,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
             })()}
 
           {/* Time */}
-          <span className="text-[var(--text-muted)] text-xs ml-auto">
+          <span className="ml-auto text-[var(--text-muted)] text-xs">
             {formatTime(note.created_at)}
           </span>
         </div>
@@ -226,7 +226,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
         {/* Follow-up Flag */}
         {note.requires_follow_up && (
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-blue"></span>
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-blue"></span>
             <span className="text-accent-blue text-xs">Follow-up required</span>
           </div>
         )}

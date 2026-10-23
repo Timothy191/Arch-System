@@ -86,7 +86,7 @@ export default async function AccessControlDashboardPage() {
       <DashboardChartsRow hourlyStats={hourlyStats} distribution={distribution} />
 
       {/* 6. Live Audit Stream & Entity Coverage Breakdown */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <DashboardActivityFeed activity={activity} />
         </div>

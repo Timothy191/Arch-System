@@ -43,21 +43,21 @@ export function ErrorFallback({ error, reset, title, showDetails = false }: Erro
 
   return (
     <div className="space-y-6 p-6" role="alert" aria-live="assertive">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">{displayTitle}</h2>
+      <h2 className="font-medium text-2xl text-[var(--text-heading)]">{displayTitle}</h2>
       <p className="text-[var(--text-muted)] text-sm">{message}</p>
 
       {appError && 'code' in appError && (
-        <div className="text-xs text-[var(--text-muted)] font-mono">
+        <div className="font-mono text-[var(--text-muted)] text-xs">
           Error code: {(appError as { code: string }).code}
         </div>
       )}
 
       {showDetails && process.env.NODE_ENV === 'development' && (
         <details className="text-left">
-          <summary className="text-xs text-[var(--text-muted)] cursor-pointer">
+          <summary className="cursor-pointer text-[var(--text-muted)] text-xs">
             Error details (dev only)
           </summary>
-          <pre className="mt-2 p-3 bg-[var(--bg-secondary)] rounded text-xs text-[var(--text-muted)] overflow-auto max-h-40">
+          <pre className="mt-2 max-h-40 overflow-auto rounded bg-[var(--bg-secondary)] p-3 text-[var(--text-muted)] text-xs">
             {error.message}
             {error.stack && `\n\n${error.stack}`}
           </pre>
@@ -70,7 +70,7 @@ export function ErrorFallback({ error, reset, title, showDetails = false }: Erro
         </SecondaryButton>
         <Link
           href={action.href}
-          className="px-4 py-2 rounded-full text-[var(--text-muted)] text-sm hover:text-[var(--text-heading)] transition-colors"
+          className="rounded-full px-4 py-2 text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
         >
           {action.label}
         </Link>

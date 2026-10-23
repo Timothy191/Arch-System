@@ -24,7 +24,7 @@ type WindowWithIdleCallback = Window & {
 function RouteBackgroundPoster() {
   return (
     <div
-      className="fixed inset-0 z-background overflow-hidden route-bg-image-container pointer-events-none"
+      className="route-bg-image-container pointer-events-none fixed inset-0 z-background overflow-hidden"
       aria-hidden="true"
     >
       <picture>
@@ -39,7 +39,7 @@ function RouteBackgroundPoster() {
           alt=""
           fetchPriority="high"
           decoding="async"
-          className="route-bg-image object-cover object-center w-full h-full"
+          className="route-bg-image h-full w-full object-cover object-center"
         />
       </picture>
     </div>
@@ -136,7 +136,7 @@ function RouteBackgroundInner() {
       {/* ── Ambient PS3 Wave Video Background (Desktop & Mobile) ── */}
       {shouldLoadVideo && (
         <div
-          className="route-bg-video-container fixed inset-0 z-route-bg pointer-events-none"
+          className="route-bg-video-container pointer-events-none fixed inset-0 z-route-bg"
           aria-hidden="true"
         >
           <video
@@ -144,7 +144,7 @@ function RouteBackgroundInner() {
             id="route-bg-light-video"
             ref={videoRef}
             poster={posterSrc}
-            className="route-bg-video object-cover object-center w-full h-full"
+            className="route-bg-video h-full w-full object-cover object-center"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1)',

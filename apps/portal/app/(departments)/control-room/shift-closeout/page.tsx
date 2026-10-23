@@ -116,15 +116,15 @@ async function ShiftCloseoutSection() {
 
 function ShiftCloseoutSkeleton() {
   return (
-    <GlassCard variant="spotlight" className="p-6 max-w-5xl animate-pulse">
-      <div className="flex items-center justify-between mb-6">
+    <GlassCard variant="spotlight" className="max-w-5xl animate-pulse p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-6 w-64 bg-[var(--bg-secondary)] rounded-md" />
-          <div className="h-4 w-96 bg-[var(--bg-secondary)]/60 rounded-md" />
+          <div className="h-6 w-64 rounded-md bg-[var(--bg-secondary)]" />
+          <div className="h-4 w-96 rounded-md bg-[var(--bg-secondary)]/60" />
         </div>
       </div>
-      <div className="h-10 w-48 bg-[var(--bg-secondary)] rounded-lg mb-4" />
-      <div className="h-64 w-full bg-[var(--bg-secondary)]/40 rounded-xl" />
+      <div className="mb-4 h-10 w-48 rounded-lg bg-[var(--bg-secondary)]" />
+      <div className="h-64 w-full rounded-xl bg-[var(--bg-secondary)]/40" />
     </GlassCard>
   );
 }
@@ -135,19 +135,19 @@ export default function ShiftCloseoutPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Link
                 href="/control-room"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors"
+                className="inline-flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-xs transition-colors hover:text-[var(--text-heading)]"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="h-3.5 w-3.5" />
                 Back to Control Room
               </Link>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+            <h1 className="font-bold text-2xl text-[var(--text-heading)] tracking-tight">
               Shift Closeout Procedures
             </h1>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Dynamic opening SMR resolution, machine hours allocation, and atomic shift handover.
             </p>
           </div>

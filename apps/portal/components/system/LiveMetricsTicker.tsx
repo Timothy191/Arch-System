@@ -20,7 +20,7 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
     <div
       data-testid="live-metrics-ticker"
       className={cn(
-        'flex items-center gap-2 font-mono text-[10px] tracking-wider text-black/45 select-none',
+        'flex select-none items-center gap-2 font-mono text-[10px] text-black/45 tracking-wider',
         className
       )}
     >
@@ -28,7 +28,7 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
         <span
           data-testid="pulsing-indicator"
           className={cn(
-            'w-1.5 h-1.5 rounded-full animate-pulse',
+            'h-1.5 w-1.5 animate-pulse rounded-full',
             online ? 'bg-emerald-500' : 'bg-rose-500'
           )}
         />

@@ -84,12 +84,12 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="flex items-center gap-1.5 px-2.5 h-7 rounded-full gold-steel-border gold-steel-border-slim bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
+          className="gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95"
         >
-          <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none font-mono">
+          <span className="font-mono font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
             {timeStr}
           </span>
-          <span className="text-[9.5px] text-[var(--text-secondary)] opacity-70 font-semibold tracking-wider leading-none uppercase">
+          <span className="font-semibold text-[9.5px] text-[var(--text-secondary)] uppercase leading-none tracking-wider opacity-70">
             SAST
           </span>
         </button>
@@ -100,20 +100,20 @@ export function SystemClock() {
           align="end"
           sideOffset={6}
           className={cn(
-            'bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-popover',
-            'flex gap-5 select-none focus:outline-none'
+            'z-popover rounded-xl border border-black/[0.08] bg-white/95 p-4 shadow-window backdrop-blur-2xl',
+            'flex select-none gap-5 focus:outline-none'
           )}
         >
           {/* Left panel: Calendar */}
           <div className="w-[185px]">
             {/* Header / Month Controls */}
-            <div className="flex items-center justify-between mb-3.5">
+            <div className="mb-3.5 flex items-center justify-between">
               <div className="flex gap-0.5">
                 <button
                   type="button"
                   onClick={prevYear}
                   title="Previous Year"
-                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.05] text-[12px] font-bold text-[var(--text-secondary)]"
+                  className="flex h-5 w-5 items-center justify-center rounded font-bold text-[12px] text-[var(--text-secondary)] hover:bg-black/[0.05]"
                 >
                   &laquo;
                 </button>
@@ -121,12 +121,12 @@ export function SystemClock() {
                   type="button"
                   onClick={prevMonth}
                   title="Previous Month"
-                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.05] text-[12px] font-bold text-[var(--text-secondary)]"
+                  className="flex h-5 w-5 items-center justify-center rounded font-bold text-[12px] text-[var(--text-secondary)] hover:bg-black/[0.05]"
                 >
                   &lsaquo;
                 </button>
               </div>
-              <span className="text-[12px] font-bold text-[var(--text-heading)]">
+              <span className="font-bold text-[12px] text-[var(--text-heading)]">
                 {monthLabel.substring(0, 3)} {viewYear}
               </span>
               <div className="flex gap-0.5">
@@ -134,7 +134,7 @@ export function SystemClock() {
                   type="button"
                   onClick={nextMonth}
                   title="Next Month"
-                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.05] text-[12px] font-bold text-[var(--text-secondary)]"
+                  className="flex h-5 w-5 items-center justify-center rounded font-bold text-[12px] text-[var(--text-secondary)] hover:bg-black/[0.05]"
                 >
                   &rsaquo;
                 </button>
@@ -142,7 +142,7 @@ export function SystemClock() {
                   type="button"
                   onClick={nextYear}
                   title="Next Year"
-                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.05] text-[12px] font-bold text-[var(--text-secondary)]"
+                  className="flex h-5 w-5 items-center justify-center rounded font-bold text-[12px] text-[var(--text-secondary)] hover:bg-black/[0.05]"
                 >
                   &raquo;
                 </button>
@@ -150,7 +150,7 @@ export function SystemClock() {
             </div>
 
             {/* Weekdays header */}
-            <div className="grid grid-cols-7 gap-0.5 text-center text-[9px] font-bold text-[var(--text-muted)] mb-1.5">
+            <div className="mb-1.5 grid grid-cols-7 gap-0.5 text-center font-bold text-[9px] text-[var(--text-muted)]">
               <span>SU</span>
               <span>MO</span>
               <span>TU</span>
@@ -164,7 +164,7 @@ export function SystemClock() {
             <div className="grid grid-cols-7 gap-0.5">
               {daysArray.map((day, idx) => {
                 if (day === null) {
-                  return <div key={`empty-${idx}`} className="w-[24px] h-[24px]" />;
+                  return <div key={`empty-${idx}`} className="h-[24px] w-[24px]" />;
                 }
                 const today = new Date();
                 const isToday =
@@ -176,9 +176,9 @@ export function SystemClock() {
                   <div
                     key={`day-${day}`}
                     className={cn(
-                      'w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors',
+                      'flex h-[24px] w-[24px] items-center justify-center rounded-full font-medium text-[10.5px] transition-colors',
                       isToday
-                        ? 'bg-[var(--accent-blue)] text-white font-bold shadow-card'
+                        ? 'bg-[var(--accent-blue)] font-bold text-white shadow-card'
                         : 'text-[var(--text-heading)] hover:bg-black/[0.04]'
                     )}
                   >
@@ -190,21 +190,21 @@ export function SystemClock() {
           </div>
 
           {/* Right panel: Analog Clock */}
-          <div className="flex flex-col items-center justify-center border-l border-black/[0.06] pl-5 min-w-[120px]">
+          <div className="flex min-w-[120px] flex-col items-center justify-center border-black/[0.06] border-l pl-5">
             {/* Clock Face */}
-            <div className="relative w-24 h-24 rounded-full border border-black/[0.08] shadow-inner flex items-center justify-center bg-black/[0.01]">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-black/[0.08] bg-black/[0.01] shadow-inner">
               {/* Top hour indicator dot */}
-              <div className="absolute top-1 w-1 h-1 rounded-full bg-black/20" />
+              <div className="absolute top-1 h-1 w-1 rounded-full bg-black/20" />
               {/* Bottom hour indicator dot */}
-              <div className="absolute bottom-1 w-1 h-1 rounded-full bg-black/20" />
+              <div className="absolute bottom-1 h-1 w-1 rounded-full bg-black/20" />
               {/* Left hour indicator dot */}
-              <div className="absolute left-1 w-1 h-1 rounded-full bg-black/20" />
+              <div className="absolute left-1 h-1 w-1 rounded-full bg-black/20" />
               {/* Right hour indicator dot */}
-              <div className="absolute right-1 w-1 h-1 rounded-full bg-black/20" />
+              <div className="absolute right-1 h-1 w-1 rounded-full bg-black/20" />
 
               {/* Hour hand */}
               <div
-                className="absolute bottom-1/2 left-1/2 w-[3px] h-6 rounded-full bg-black/85 origin-bottom"
+                className="absolute bottom-1/2 left-1/2 h-6 w-[3px] origin-bottom rounded-full bg-black/85"
                 style={{
                   transform: `translate(-50%, 0) rotate(${hourDeg}deg)`,
                   transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
@@ -212,7 +212,7 @@ export function SystemClock() {
               />
               {/* Minute hand */}
               <div
-                className="absolute bottom-1/2 left-1/2 w-[2px] h-9 rounded-full bg-black/60 origin-bottom"
+                className="absolute bottom-1/2 left-1/2 h-9 w-[2px] origin-bottom rounded-full bg-black/60"
                 style={{
                   transform: `translate(-50%, 0) rotate(${minuteDeg}deg)`,
                   transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
@@ -220,7 +220,7 @@ export function SystemClock() {
               />
               {/* Second hand */}
               <div
-                className="absolute bottom-1/2 left-1/2 w-[1px] h-10 rounded-full bg-[var(--accent-red)] origin-bottom"
+                className="absolute bottom-1/2 left-1/2 h-10 w-[1px] origin-bottom rounded-full bg-[var(--accent-red)]"
                 style={{
                   transform: `translate(-50%, 0) rotate(${secondDeg}deg)`,
                   transition: secondDeg === 0 ? 'none' : 'transform 0.1s ease-out',
@@ -228,7 +228,7 @@ export function SystemClock() {
               />
               {/* Center Pin */}
               <div
-                className="absolute w-1.5 h-1.5 rounded-full bg-black border border-white"
+                className="absolute h-1.5 w-1.5 rounded-full border border-white bg-black"
                 style={{
                   top: '50%',
                   left: '50%',
@@ -238,7 +238,7 @@ export function SystemClock() {
             </div>
 
             {/* Digital Time text */}
-            <span className="text-[11px] font-semibold text-[var(--text-secondary)] mt-3 tabular-nums select-all">
+            <span className="mt-3 select-all font-semibold text-[11px] text-[var(--text-secondary)] tabular-nums">
               {time.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',

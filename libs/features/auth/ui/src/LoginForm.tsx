@@ -59,12 +59,12 @@ export function LoginForm() {
       <div className="space-y-1.5">
         <label
           htmlFor="email"
-          className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 select-none cursor-pointer"
+          className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
         >
           Email Address
         </label>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-diffusion-sm">
-          <Mail className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
+        <div className="relative flex items-center overflow-hidden rounded-lg border border-neutral-200/90 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20">
+          <Mail className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500" />
           <input
             id="email"
             type="email"
@@ -84,7 +84,7 @@ export function LoginForm() {
               }
             }}
             placeholder="username@arch-systems.io"
-            className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-500  focus:outline-none focus:ring-0"
+            className="w-full border-none bg-transparent py-3 pr-4 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
             autoComplete="username"
           />
         </div>
@@ -92,22 +92,22 @@ export function LoginForm() {
 
       {/* Password Field */}
       <div className="space-y-1.5">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 select-none cursor-pointer"
+            className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
           >
             Password
           </label>
           <Link
             href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-            className="text-xs font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/80 hover:underline transition-colors select-none py-1 inline-flex items-center min-h-[32px]"
+            className="inline-flex min-h-[32px] select-none items-center py-1 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:text-[var(--accent-blue)]/80 hover:underline"
           >
             Forgot password?
           </Link>
         </div>
-        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20 shadow-diffusion-sm">
-          <Lock className="w-4 h-4 absolute left-3.5 text-neutral-500 pointer-events-none" />
+        <div className="relative flex items-center overflow-hidden rounded-lg border border-neutral-200/90 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20">
+          <Lock className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500" />
           <input
             id="password"
             type={showPassword ? 'text' : 'password'}
@@ -124,21 +124,21 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             placeholder="••••••••"
-            className="w-full pl-10 pr-11 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-500  focus:outline-none focus:ring-0"
+            className="w-full border-none bg-transparent py-3 pr-11 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800   transition-colors p-2 rounded focus:outline-none min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer"
+            className="absolute top-1/2 right-1 flex min-h-[36px] min-w-[36px] -translate-y-1/2 cursor-pointer items-center justify-center rounded p-2 text-neutral-500 transition-colors hover:text-neutral-800 focus:outline-none"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {passwordError && (
           <div
-            className="flex items-center gap-1.5 text-xs text-red-600 animate-fade-up mt-1"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-red-600 text-xs"
             role="alert"
             aria-live="assertive"
           >
@@ -147,17 +147,17 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="flex items-center gap-1.5 text-xs text-accent-amber animate-fade-up mt-1"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-accent-amber text-xs"
             role="alert"
             aria-live="polite"
           >
-            <Lock className="w-3 h-3" strokeWidth={1.5} />
+            <Lock className="h-3 w-3" strokeWidth={1.5} />
             <span>Caps Lock is on</span>
           </div>
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="flex items-center gap-1.5 text-xs text-accent-amber animate-fade-up mt-1"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-accent-amber text-xs"
             role="alert"
             aria-live="polite"
           >
@@ -170,17 +170,17 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading || isRateLimited}
-        className="w-full py-3.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-xs font-semibold tracking-wider uppercase rounded-button shadow-card active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-button bg-[var(--accent-blue)] py-3.5 font-semibold text-white text-xs uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-[var(--accent-blue)]/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <span className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
             <span>Signing In...</span>
           </span>
         ) : (
           <>
             <span>Sign In</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </>
         )}
       </button>

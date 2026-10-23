@@ -69,8 +69,8 @@ export default async function BadgesPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Credential Management</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <h2 className="font-bold text-2xl text-[var(--text-heading)]">Credential Management</h2>
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Issue, print, and revoke physical QR access credentials.
           </p>
         </div>
@@ -80,19 +80,19 @@ export default async function BadgesPage({
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Side: Active Badges Table (Takes up 2 cols) */}
-        <div className="lg:col-span-2 space-y-4">
-          <GlassCard className="p-0 overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50">
-              <h3 className="font-semibold text-[var(--text-heading)] flex items-center">
-                <UserCheck className="w-4 h-4 mr-2 text-accent-green" />
+        <div className="space-y-4 lg:col-span-2">
+          <GlassCard className="overflow-hidden p-0">
+            <div className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+              <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
+                <UserCheck className="mr-2 h-4 w-4 text-accent-green" />
                 Active Provisioned Badges
               </h3>
             </div>
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
+                <TableRow className="border-[var(--border-default)] border-b hover:bg-transparent">
                   <TableHead className="text-[var(--text-muted)]">QR Code Data</TableHead>
                   <TableHead className="text-[var(--text-muted)]">Assigned To</TableHead>
                   <TableHead className="text-[var(--text-muted)]">Entity Type</TableHead>
@@ -102,7 +102,7 @@ export default async function BadgesPage({
               <TableBody>
                 {resolvedBadges.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-[var(--text-muted)]">
+                    <TableCell colSpan={4} className="py-8 text-center text-[var(--text-muted)]">
                       No badges found for this department.
                     </TableCell>
                   </TableRow>
@@ -110,9 +110,9 @@ export default async function BadgesPage({
                 {resolvedBadges.map((badge) => (
                   <TableRow
                     key={badge.id}
-                    className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer group"
+                    className="group cursor-pointer border-[var(--border-default)]/50 border-b transition-colors hover:bg-[var(--bg-tertiary)]"
                   >
-                    <TableCell className="font-mono text-sm text-[var(--accent-blue)] group-hover:text-accent-blue transition-colors">
+                    <TableCell className="font-mono text-[var(--accent-blue)] text-sm transition-colors group-hover:text-accent-blue">
                       {badge.qr_code}
                     </TableCell>
                     <TableCell className="font-medium text-[var(--text-heading)]">
@@ -141,7 +141,7 @@ export default async function BadgesPage({
 
             {/* Pagination */}
             {totalCount > 0 && (
-              <div className="p-4 border-t border-[var(--border-default)]">
+              <div className="border-[var(--border-default)] border-t p-4">
                 <Pagination
                   currentPage={page}
                   totalPages={totalPages}
@@ -167,43 +167,43 @@ export default async function BadgesPage({
 
         {/* Right Side: QR Generation/Preview Widget */}
         <div className="lg:col-span-1">
-          <GlassCard className="relative overflow-hidden group">
+          <GlassCard className="group relative overflow-hidden">
             {/* Background Glow */}
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-[var(--accent-blue)]/10 blur-3xl" />
+            <div className="absolute top-0 right-0 -mt-8 -mr-8 h-32 w-32 rounded-full bg-[var(--accent-blue)]/10 blur-3xl" />
 
-            <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-[var(--accent-blue)]/10 flex items-center justify-center border border-[var(--accent-blue)]/20 mb-2">
-                <QrCode className="w-6 h-6 text-[var(--accent-blue)]" />
+            <div className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
+              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10">
+                <QrCode className="h-6 w-6 text-[var(--accent-blue)]" />
               </div>
 
-              <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+              <h3 className="font-semibold text-[var(--text-heading)] text-lg">
                 QR Preview Engine
               </h3>
 
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-[var(--text-muted)] text-sm">
                 Select a badge from the registry to securely display its scannable matrix code for
                 physical printing or mobile sync.
               </p>
 
               {/* Placeholder for actual QR code rendering */}
-              <div className="w-48 h-48 bg-[var(--bg-secondary)] rounded-xl p-2 flex items-center justify-center mt-4 shadow-card group-hover:shadow-[var(--accent-blue)]/10 transition-[box-shadow] duration-500">
-                <div className="w-full h-full border-2 border-dashed border-[var(--border-subtle)] rounded-lg flex items-center justify-center bg-[var(--bg-tertiary)]">
-                  <span className="text-xs text-[var(--text-muted)] font-medium">Select Badge</span>
+              <div className="mt-4 flex h-48 w-48 items-center justify-center rounded-xl bg-[var(--bg-secondary)] p-2 shadow-card transition-[box-shadow] duration-500 group-hover:shadow-[var(--accent-blue)]/10">
+                <div className="flex h-full w-full items-center justify-center rounded-lg border-2 border-[var(--border-subtle)] border-dashed bg-[var(--bg-tertiary)]">
+                  <span className="font-medium text-[var(--text-muted)] text-xs">Select Badge</span>
                 </div>
               </div>
 
-              <div className="w-full grid grid-cols-2 gap-3 mt-6">
+              <div className="mt-6 grid w-full grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  className="w-full text-xs font-medium border border-[var(--border-default)]"
+                  className="w-full border border-[var(--border-default)] font-medium text-xs"
                 >
                   Print Batch
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full text-xs font-medium border-accent-red/20 text-accent-red hover:bg-accent-red/10 hover:text-accent-red"
+                  className="w-full border-accent-red/20 font-medium text-accent-red text-xs hover:bg-accent-red/10 hover:text-accent-red"
                 >
-                  <ShieldOff className="w-3 h-3 mr-2" />
+                  <ShieldOff className="mr-2 h-3 w-3" />
                   Revoke All
                 </Button>
               </div>

@@ -42,7 +42,7 @@
     "chokidar"
   ],
   "ignore": [
-    "**/jest.config.*",
+    "**/jest*.config.*",
     "**/postcss.config.*",
     "packages/contract/scripts/generate-spec-local.js",
     "packages/ui/storybook-static/**",
@@ -134,18 +134,14 @@
         "app/actions.ts",
         "lib/actions/shift-closeout.ts",
         "app/(departments)/access-control/card-actions/card-pdf.tsx",
+        "app/(departments)/access-control/card-types.ts",
         "app/(departments)/access-control/printing.ts",
+        "app/(departments)/[department]/excavator-activity/actions.ts",
+        "app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx",
+        "components/control-room/C66MachineOperatorScanner.tsx",
         "features/auth/components/RefractionGlow.tsx",
         "lib/control-room-shift-report.ts"
       ]
-    },
-    "apps/cms": {
-      "entry": [".eslintrc.{js,cjs}"],
-      "project": ["app/**/*.{ts,tsx}"]
-    },
-    "apps/overview": {
-      "entry": [".eslintrc.{js,cjs}"],
-      "project": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"]
     },
     "packages/theme": {
       "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],
@@ -234,6 +230,7 @@
     "types": "warn",
     "nsTypes": "warn",
     "duplicates": "warn",
-    "unresolved": "warn"
+    "unresolved": "warn",
+    "catalog": "warn"
   }
 }

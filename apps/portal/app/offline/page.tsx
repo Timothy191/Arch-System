@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 
 export default function OfflinePage(): React.JSX.Element {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-      <div className="p-4 bg-[var(--bg-tertiary)]/60 rounded-full mb-6">
-        <CloudOff className="w-12 h-12 text-[var(--text-muted)]" />
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      <div className="mb-6 rounded-full bg-[var(--bg-tertiary)]/60 p-4">
+        <CloudOff className="h-12 w-12 text-[var(--text-muted)]" />
       </div>
-      <h1 className="text-2xl font-semibold text-[var(--text-heading)] mb-2">You're Offline</h1>
-      <p className="text-[var(--text-muted)] max-w-md mb-8">
+      <h1 className="mb-2 font-semibold text-2xl text-[var(--text-heading)]">You're Offline</h1>
+      <p className="mb-8 max-w-md text-[var(--text-muted)]">
         It looks like you've lost your network connection. Some features of the Arch Portal are
         unavailable until your connection is restored.
       </p>

@@ -375,7 +375,7 @@ export function IntegrationManager() {
       },
     };
     const item = map[kind] ?? map.mcp;
-    return <Badge className={`text-[11px] font-medium ${item.className}`}>{item.label}</Badge>;
+    return <Badge className={`font-medium text-[11px] ${item.className}`}>{item.label}</Badge>;
   };
 
   const authBadge = (auth: AuthType) => {
@@ -387,8 +387,8 @@ export function IntegrationManager() {
       oauth2: 'OAuth 2.0',
     };
     return (
-      <Badge variant="outline" className="text-[11px] gap-1 text-[var(--text-secondary)]">
-        <KeyRound className="w-3 h-3" />
+      <Badge variant="outline" className="gap-1 text-[11px] text-[var(--text-secondary)]">
+        <KeyRound className="h-3 w-3" />
         {labels[auth] ?? auth}
       </Badge>
     );
@@ -400,30 +400,30 @@ export function IntegrationManager() {
     <div className="space-y-6">
       {/* Header & Installation Drawer */}
       <GlassCard className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <Plug className="w-5 h-5 text-[var(--accent-blue)]" />
-              <h2 className="text-lg font-semibold text-[var(--text-heading)]">
+              <Plug className="h-5 w-5 text-[var(--accent-blue)]" />
+              <h2 className="font-semibold text-[var(--text-heading)] text-lg">
                 Integration Platform & MCP Registry
               </h2>
-              <Badge variant="outline" className="text-xs font-mono">
+              <Badge variant="outline" className="font-mono text-xs">
                 {catalog.length} Connectors
               </Badge>
               <Badge
                 variant="outline"
-                className="text-xs font-mono bg-emerald-500/10 text-emerald-700 border-emerald-500/25"
+                className="border-emerald-500/25 bg-emerald-500/10 font-mono text-emerald-700 text-xs"
               >
                 {installations.length} Installed
               </Badge>
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="mt-1 text-[var(--text-muted)] text-xs">
               Connect official Streamable-HTTP MCP servers, federated SCADA/workflow action bridges,
               and native ArchPlugins with AES-256-GCM credential encryption.
             </p>
           </div>
           <Button onClick={() => setShowForm((v) => !v)} size="sm" className="shrink-0">
-            <Plus className="w-4 h-4 mr-1" />
+            <Plus className="mr-1 h-4 w-4" />
             {showForm ? 'Close Installer' : 'Custom / Install'}
           </Button>
         </div>
@@ -435,9 +435,9 @@ export function IntegrationManager() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               onSubmit={handleInstall}
-              className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t border-[var(--border-subtle)] overflow-hidden"
+              className="grid grid-cols-1 gap-3 overflow-hidden border-[var(--border-subtle)] border-t pt-4 md:grid-cols-2"
             >
-              <label className="text-sm text-[var(--text-secondary)] md:col-span-2 flex items-center gap-2">
+              <label className="flex items-center gap-2 text-[var(--text-secondary)] text-sm md:col-span-2">
                 <input
                   type="checkbox"
                   checked={form.new_entry}
@@ -461,7 +461,7 @@ export function IntegrationManager() {
                   />
                   <select
                     aria-label="Authentication type"
-                    className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-heading)]"
+                    className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                     value={form.auth_type}
                     onChange={(e) => setForm({ ...form, auth_type: e.target.value as AuthType })}
                   >
@@ -473,7 +473,7 @@ export function IntegrationManager() {
               ) : (
                 <select
                   aria-label="Select catalog entry"
-                  className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-heading)]"
+                  className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                   value={form.catalog_id}
                   onChange={(e) => {
                     const nextEntry = catalog.find((c) => c.id === e.target.value);
@@ -496,7 +496,7 @@ export function IntegrationManager() {
 
               <select
                 aria-label="Installation scope"
-                className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-heading)]"
+                className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 value={form.scope}
                 onChange={(e) =>
                   setForm({ ...form, scope: e.target.value as 'global' | 'department' })
@@ -509,7 +509,7 @@ export function IntegrationManager() {
               {form.scope === 'department' && (
                 <select
                   aria-label="Target department"
-                  className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-heading)]"
+                  className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                   value={form.department_id}
                   onChange={(e) => setForm({ ...form, department_id: e.target.value })}
                   required
@@ -525,7 +525,7 @@ export function IntegrationManager() {
 
               <select
                 aria-label="Tool execution risk class"
-                className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-heading)]"
+                className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 value={form.risk_class}
                 onChange={(e) => setForm({ ...form, risk_class: e.target.value as RiskClass })}
               >
@@ -551,7 +551,7 @@ export function IntegrationManager() {
                 onChange={(e) => setForm({ ...form, tool_allowlist: e.target.value })}
               />
 
-              <div className="md:col-span-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 md:col-span-2">
                 <Button type="submit" size="sm">
                   Install Integration
                 </Button>
@@ -575,17 +575,17 @@ export function IntegrationManager() {
       {/* Active Installations Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+          <h3 className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
             Installed Connectors ({installations.length})
           </h3>
         </div>
 
         {loading ? (
-          <GlassCard className="p-6 text-sm text-[var(--text-muted)]">
+          <GlassCard className="p-6 text-[var(--text-muted)] text-sm">
             Loading integrations…
           </GlassCard>
         ) : installations.length === 0 ? (
-          <GlassCard className="p-5 text-sm text-[var(--text-secondary)] flex items-center justify-between flex-wrap gap-3">
+          <GlassCard className="flex flex-wrap items-center justify-between gap-3 p-5 text-[var(--text-secondary)] text-sm">
             <span>
               No integrations installed yet. Select any connector from the{' '}
               <strong className="text-[var(--text-heading)]">Available Connector Catalog</strong>{' '}
@@ -600,9 +600,9 @@ export function IntegrationManager() {
               const isExpanded = expandedId === installation.id;
               return (
                 <GlassCard key={installation.id} className="p-4">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-[var(--text-heading)]">
                           {catalogEntry?.name ?? installation.catalog_id}
                         </span>
@@ -620,7 +620,7 @@ export function IntegrationManager() {
                             : 'read-class'}
                         </Badge>
                       </div>
-                      <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
+                      <p className="mt-1 truncate text-[var(--text-muted)] text-xs">
                         {catalogEntry?.server_url ?? 'In-process native module'} · {tools.length}{' '}
                         tool(s) synced
                         {installation.tools_synced_at
@@ -628,12 +628,12 @@ export function IntegrationManager() {
                           : ''}
                       </p>
                       {installation.last_error && (
-                        <p className="text-xs text-red-700 mt-1 truncate">
+                        <p className="mt-1 truncate text-red-700 text-xs">
                           {installation.last_error}
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex shrink-0 items-center gap-1">
                       <Button
                         size="sm"
                         variant="ghost"
@@ -642,7 +642,7 @@ export function IntegrationManager() {
                         aria-label="Toggle tools and audit log"
                       >
                         <ChevronDown
-                          className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         />
                       </Button>
                       <Button
@@ -653,7 +653,7 @@ export function IntegrationManager() {
                         title="Refresh tool discovery"
                         aria-label="Refresh tool discovery"
                       >
-                        <RefreshCw className="w-4 h-4" />
+                        <RefreshCw className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
@@ -664,9 +664,9 @@ export function IntegrationManager() {
                         aria-label={installation.status === 'disabled' ? 'Enable' : 'Disable'}
                       >
                         {installation.status === 'disabled' ? (
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="h-4 w-4" />
                         ) : (
-                          <XCircle className="w-4 h-4" />
+                          <XCircle className="h-4 w-4" />
                         )}
                       </Button>
                       <Button
@@ -677,7 +677,7 @@ export function IntegrationManager() {
                         title="Uninstall"
                         aria-label="Uninstall integration"
                       >
-                        <Trash2 className="w-4 h-4 text-red-600" />
+                        <Trash2 className="h-4 w-4 text-red-600" />
                       </Button>
                     </div>
                   </div>
@@ -690,13 +690,13 @@ export function IntegrationManager() {
                         exit={{ opacity: 0, y: -6 }}
                         className="overflow-hidden"
                       >
-                        <div className="pt-3 mt-3 border-t border-[var(--border-default)] grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="mt-3 grid grid-cols-1 gap-4 border-[var(--border-default)] border-t pt-3 lg:grid-cols-2">
                           <div>
-                            <p className="text-xs font-medium text-[var(--text-muted)] uppercase mb-2">
+                            <p className="mb-2 font-medium text-[var(--text-muted)] text-xs uppercase">
                               Discovered tools
                             </p>
                             {tools.length === 0 ? (
-                              <p className="text-xs text-[var(--text-muted)]">
+                              <p className="text-[var(--text-muted)] text-xs">
                                 None — run “Refresh tool discovery”.
                               </p>
                             ) : (
@@ -705,7 +705,7 @@ export function IntegrationManager() {
                                   <li key={tool.name} className="text-xs">
                                     <button
                                       type="button"
-                                      className="text-[var(--text-heading)] hover:underline font-mono"
+                                      className="font-mono text-[var(--text-heading)] hover:underline"
                                       onClick={() => setTestTool(tool.name)}
                                     >
                                       {tool.name}
@@ -721,7 +721,7 @@ export function IntegrationManager() {
                               </ul>
                             )}
 
-                            <p className="text-xs font-medium text-[var(--text-muted)] uppercase mt-4 mb-2">
+                            <p className="mt-4 mb-2 font-medium text-[var(--text-muted)] text-xs uppercase">
                               Test a tool
                             </p>
                             <div className="space-y-2">
@@ -733,7 +733,7 @@ export function IntegrationManager() {
                               />
                               <textarea
                                 aria-label="Tool test JSON arguments"
-                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-3 py-2 text-xs font-mono text-[var(--text-heading)]"
+                                className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-xs"
                                 rows={3}
                                 value={testArgs}
                                 onChange={(e) => setTestArgs(e.target.value)}
@@ -747,7 +747,7 @@ export function IntegrationManager() {
                                 Invoke
                               </Button>
                               {testResult && (
-                                <pre className="text-xs bg-[var(--bg-secondary)] rounded-md p-2 overflow-auto max-h-48 text-[var(--text-heading)]">
+                                <pre className="max-h-48 overflow-auto rounded-md bg-[var(--bg-secondary)] p-2 text-[var(--text-heading)] text-xs">
                                   {testResult}
                                 </pre>
                               )}
@@ -755,15 +755,15 @@ export function IntegrationManager() {
                           </div>
 
                           <div>
-                            <p className="text-xs font-medium text-[var(--text-muted)] uppercase mb-2 flex items-center gap-1">
-                              <History className="w-3 h-3" /> Audit log (latest 20)
+                            <p className="mb-2 flex items-center gap-1 font-medium text-[var(--text-muted)] text-xs uppercase">
+                              <History className="h-3 w-3" /> Audit log (latest 20)
                             </p>
                             {auditLogs.length === 0 ? (
-                              <p className="text-xs text-[var(--text-muted)]">No calls recorded.</p>
+                              <p className="text-[var(--text-muted)] text-xs">No calls recorded.</p>
                             ) : (
-                              <ul className="space-y-1 max-h-72 overflow-auto">
+                              <ul className="max-h-72 space-y-1 overflow-auto">
                                 {auditLogs.map((log) => (
-                                  <li key={log.id} className="text-xs flex items-center gap-2">
+                                  <li key={log.id} className="flex items-center gap-2 text-xs">
                                     <span
                                       className={
                                         log.status === 'success'
@@ -781,7 +781,7 @@ export function IntegrationManager() {
                                       {new Date(log.created_at).toLocaleTimeString()}
                                     </span>
                                     {log.error_message && (
-                                      <span className="text-red-700 truncate">
+                                      <span className="truncate text-red-700">
                                         {log.error_message}
                                       </span>
                                     )}
@@ -803,8 +803,8 @@ export function IntegrationManager() {
 
       {/* Available Connector Marketplace Grid */}
       <div className="space-y-4 pt-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center gap-1.5">
             {(
               [
                 { id: 'all', label: `All Connectors (${kindCounts.all})`, icon: Sparkles },
@@ -820,13 +820,13 @@ export function IntegrationManager() {
                   key={tab.id}
                   type="button"
                   onClick={() => setCatalogFilter(tab.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-medium text-xs transition-all ${
                     active
-                      ? 'bg-[var(--accent-blue)] text-white border-[var(--accent-blue)] shadow-2xs'
-                      : 'bg-white/60 hover:bg-white/85 text-[var(--text-secondary)] border-[var(--border-subtle)]'
+                      ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white shadow-2xs'
+                      : 'border-[var(--border-subtle)] bg-white/60 text-[var(--text-secondary)] hover:bg-white/85'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="h-3.5 w-3.5" />
                   {tab.label}
                 </button>
               );
@@ -834,17 +834,17 @@ export function IntegrationManager() {
           </div>
 
           <div className="relative w-full md:w-72">
-            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <Input
               placeholder="Filter by name, domain, or author…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 text-xs h-8"
+              className="h-8 pl-8 text-xs"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredCatalog.map((entry) => {
             const isInstalled = installedCatalogIds.has(entry.id);
             const domains = entry.capabilities?.domains ?? [];
@@ -853,13 +853,13 @@ export function IntegrationManager() {
             return (
               <GlassCard
                 key={entry.id}
-                className="p-5 flex flex-col justify-between gap-4 border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all"
+                className="flex flex-col justify-between gap-4 border border-[var(--border-subtle)] p-5 transition-all hover:border-[var(--border-default)]"
               >
                 <div className="space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-sm font-semibold text-[var(--text-heading)] truncate">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <h4 className="truncate font-semibold text-[var(--text-heading)] text-sm">
                           {entry.name}
                         </h4>
                         {entry.verified && (
@@ -867,7 +867,7 @@ export function IntegrationManager() {
                             title="Verified Official / First-Party Connector"
                             className="inline-flex items-center text-[var(--accent-blue)]"
                           >
-                            <ShieldCheck className="w-4 h-4" />
+                            <ShieldCheck className="h-4 w-4" />
                           </span>
                         )}
                       </div>
@@ -879,16 +879,16 @@ export function IntegrationManager() {
                     {kindBadge(entry.kind)}
                   </div>
 
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">
+                  <p className="line-clamp-3 text-[var(--text-secondary)] text-xs leading-relaxed">
                     {entry.description}
                   </p>
 
                   {domains.length > 0 && (
-                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
                       {domains.map((domain) => (
                         <span
                           key={domain}
-                          className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
+                          className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[10px] text-[var(--text-secondary)]"
                         >
                           {domain}
                         </span>
@@ -897,7 +897,7 @@ export function IntegrationManager() {
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2.5">
+                <div className="space-y-2.5 border-[var(--border-subtle)] border-t pt-3">
                   <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
                     {authBadge(entry.auth_type)}
                     {entry.docs_url && (
@@ -905,28 +905,28 @@ export function IntegrationManager() {
                         href={entry.docs_url}
                         target={entry.docs_url.startsWith('http') ? '_blank' : undefined}
                         rel={entry.docs_url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="inline-flex items-center gap-1 text-[var(--accent-blue)] hover:underline font-medium"
+                        className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] hover:underline"
                       >
-                        Docs <ExternalLink className="w-3 h-3" />
+                        Docs <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono text-[var(--text-muted)] truncate max-w-[180px]">
+                    <span className="max-w-[180px] truncate font-mono text-[10px] text-[var(--text-muted)]">
                       {entry.server_url ?? 'native://arch-plugin'}
                     </span>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex shrink-0 items-center gap-1.5">
                       {isInstalled ? (
                         <>
-                          <Badge className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-[11px]">
+                          <Badge className="border border-emerald-500/30 bg-emerald-500/15 text-[11px] text-emerald-700">
                             Installed
                           </Badge>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-xs px-2.5"
+                            className="h-7 px-2.5 text-xs"
                             onClick={() => startInstallFromCatalog(entry)}
                           >
                             Add Scope
@@ -935,7 +935,7 @@ export function IntegrationManager() {
                       ) : entry.auth_type === 'none' ? (
                         <Button
                           size="sm"
-                          className="h-7 text-xs px-3"
+                          className="h-7 px-3 text-xs"
                           disabled={isQuickInstalling}
                           onClick={() => handleQuickInstall(entry)}
                         >
@@ -945,7 +945,7 @@ export function IntegrationManager() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 text-xs px-3"
+                          className="h-7 px-3 text-xs"
                           onClick={() => startInstallFromCatalog(entry)}
                         >
                           Configure & Install

@@ -9,19 +9,19 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage(): React.JSX.Element {
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 bg-[var(--bg-tertiary)] rounded-xl">
-          <Shield className="w-8 h-8 text-[var(--text-heading)]" />
+    <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mb-8 flex items-center gap-4">
+        <div className="rounded-xl bg-[var(--bg-tertiary)] p-3">
+          <Shield className="h-8 w-8 text-[var(--text-heading)]" />
         </div>
-        <h1 className="text-3xl font-semibold text-[var(--text-heading)]">Privacy Policy</h1>
+        <h1 className="font-semibold text-3xl text-[var(--text-heading)]">Privacy Policy</h1>
       </div>
 
-      <div className="prose prose-neutral max-w-none text-[var(--text-muted)] space-y-6">
+      <div className="prose prose-neutral max-w-none space-y-6 text-[var(--text-muted)]">
         <p className="text-lg">Last updated: September 2026</p>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
-          <h2 className="text-xl font-medium text-[var(--text-heading)] mb-4">
+        <section className="rounded-2xl border border-black/[0.08] bg-white/70 p-8 shadow-card backdrop-blur-xl">
+          <h2 className="mb-4 font-medium text-[var(--text-heading)] text-xl">
             1. Data Collection and Usage
           </h2>
           <p className="mb-4">
@@ -29,7 +29,7 @@ export default function PrivacyPage(): React.JSX.Element {
             performance metrics necessary to ensure the continuous and safe operation of mining
             facilities.
           </p>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc space-y-2 pl-6">
             <li>
               <strong>Authentication Data:</strong> Employee IDs, roles, and department affiliations
               to enforce access control (via Supabase RLS).
@@ -45,8 +45,8 @@ export default function PrivacyPage(): React.JSX.Element {
           </ul>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
-          <h2 className="text-xl font-medium text-[var(--text-heading)] mb-4">
+        <section className="rounded-2xl border border-black/[0.08] bg-white/70 p-8 shadow-card backdrop-blur-xl">
+          <h2 className="mb-4 font-medium text-[var(--text-heading)] text-xl">
             2. Cookies and Tracking
           </h2>
           <p>
@@ -56,8 +56,8 @@ export default function PrivacyPage(): React.JSX.Element {
           </p>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
-          <h2 className="text-xl font-medium text-[var(--text-heading)] mb-4">
+        <section className="rounded-2xl border border-black/[0.08] bg-white/70 p-8 shadow-card backdrop-blur-xl">
+          <h2 className="mb-4 font-medium text-[var(--text-heading)] text-xl">
             3. Data Security and Isolation
           </h2>
           <p>
@@ -67,8 +67,8 @@ export default function PrivacyPage(): React.JSX.Element {
           </p>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
-          <h2 className="text-xl font-medium text-[var(--text-heading)] mb-4">
+        <section className="rounded-2xl border border-black/[0.08] bg-white/70 p-8 shadow-card backdrop-blur-xl">
+          <h2 className="mb-4 font-medium text-[var(--text-heading)] text-xl">
             4. Compliance and Contact
           </h2>
           <p>

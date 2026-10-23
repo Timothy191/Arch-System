@@ -452,55 +452,55 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'dashboard') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <BarChart2 className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Stock Dashboard</h2>
+              <BarChart2 className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Stock Dashboard</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Plant equipment stock overview for consumables, reagents, and wear spares tracked per
               piece of plant equipment (crushers, screens, pumps, cyclones, thickeners — not mobile
               mining machines).
             </p>
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <div className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Operational Date:{' '}
             <span className="font-semibold text-[var(--text-heading)]">{today}</span>
           </div>
         </div>
 
         {/* Summary KPI Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Total Stock Lines
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--text-heading)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {stockItems.length}
             </p>
           </GlassCard>
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Nominal Stock Levels
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--accent-green)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--accent-green)]">
               {nominalCount}
             </p>
           </GlassCard>
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Stock Required Alerts
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--accent-alert)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--accent-alert)]">
               {totalRequiredCount}
             </p>
           </GlassCard>
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Equipment Tracked
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--text-heading)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {equipmentList.length}
             </p>
           </GlassCard>
@@ -508,37 +508,37 @@ export function PlantInventoryWorkspaceClient({
 
         {/* Stock Required Quick List */}
         <GlassCard className="overflow-hidden p-0">
-          <div className="p-4 border-b border-[var(--border-default)]">
-            <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-[var(--accent-alert)]" aria-hidden="true" />
+          <div className="border-[var(--border-default)] border-b p-4">
+            <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+              <AlertTriangle className="h-4 w-4 text-[var(--accent-alert)]" aria-hidden="true" />
               Items Requiring Replenishment
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left" aria-label="Stock Required Quick List">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                   <th
                     scope="col"
-                    className="px-6 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Stock
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Plant Equipment
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Required
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Present
                   </th>
@@ -553,23 +553,23 @@ export function PlantInventoryWorkspaceClient({
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                      className="transition-colors hover:bg-[var(--bg-secondary)]/60"
                     >
                       <td className="px-6 py-4 align-top">
-                        <div className="font-semibold text-sm text-[var(--text-heading)]">
+                        <div className="font-semibold text-[var(--text-heading)] text-sm">
                           {item.stock}
                         </div>
-                        <div className="text-xs font-mono text-[var(--text-muted)]">
+                        <div className="font-mono text-[var(--text-muted)] text-xs">
                           {item.code}
                         </div>
                       </td>
-                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)]">
+                      <td className="px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                         {item.plantEquipment}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono text-[var(--text-heading)] text-sm">
                         {formatQty(item.amountRequired)} {item.unit}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-bold font-mono text-[var(--accent-alert)] text-sm">
                         {formatQty(item.amountPresent)} {item.unit} ({-formatQty(shortfall)})
                       </td>
                     </tr>
@@ -579,10 +579,10 @@ export function PlantInventoryWorkspaceClient({
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-8 text-center text-sm text-[var(--text-muted)]"
+                      className="px-6 py-8 text-center text-[var(--text-muted)] text-sm"
                     >
                       <div className="inline-flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                         All plant inventory items meet or exceed their required par quantities.
                       </div>
                     </td>
@@ -592,7 +592,7 @@ export function PlantInventoryWorkspaceClient({
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-4 text-center text-sm text-[var(--text-muted)]"
+                      className="px-6 py-4 text-center text-[var(--text-muted)] text-sm"
                     >
                       Showing 5 of {stockRequiredItems.length} items requiring replenishment.{' '}
                       <a
@@ -611,13 +611,13 @@ export function PlantInventoryWorkspaceClient({
 
         {/* Equipment Trend Summary */}
         <GlassCard className="overflow-hidden p-0">
-          <div className="p-4 border-b border-[var(--border-default)]">
-            <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[var(--accent-blue)]" aria-hidden="true" />
+          <div className="border-[var(--border-default)] border-b p-4">
+            <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+              <TrendingUp className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
               Stock Drawdown by Equipment
             </h3>
           </div>
-          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
             {equipmentList.map((equipment) => {
               const eqUsage = usageHistory.filter((e) => e.plantEquipment === equipment);
               const eqDrawdown = eqUsage.reduce((sum, e) => sum + e.amountUsed, 0);
@@ -628,15 +628,15 @@ export function PlantInventoryWorkspaceClient({
               return (
                 <GlassCard
                   key={equipment}
-                  className="p-4 hover:border-[var(--border-default)] transition-colors"
+                  className="p-4 transition-colors hover:border-[var(--border-default)]"
                 >
-                  <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                  <div className="mb-1 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     {equipment}
                   </div>
-                  <div className="text-lg font-mono font-bold text-[var(--text-heading)]">
+                  <div className="font-bold font-mono text-[var(--text-heading)] text-lg">
                     {formatQty(eqDrawdown)}
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">
+                  <div className="mt-1 text-[var(--text-secondary)] text-xs">
                     {eqStockLines} stock lines{' '}
                     {eqShortfall > 0 ? ` · ${eqShortfall} below par` : ' · all nominal'}
                   </div>
@@ -653,46 +653,46 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'inventory-list') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <ClipboardList className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Inventory List</h2>
+              <ClipboardList className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Inventory List</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Live CHPP reagents, dense medium magnetite, crusher spares, and consumables balance
               ledger tracked per plant equipment.
             </p>
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <div className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Operational Date:{' '}
             <span className="font-semibold text-[var(--text-heading)]">{today}</span>
           </div>
         </div>
 
         {/* Summary KPI Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Total Stock Lines
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--text-heading)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {stockItems.length}
             </p>
           </GlassCard>
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Nominal Stock Levels
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--accent-green)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--accent-green)]">
               {nominalCount}
             </p>
           </GlassCard>
           <GlassCard>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            <p className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Stock Required Alerts
             </p>
-            <p className="text-2xl font-bold font-mono text-[var(--accent-alert)] mt-1">
+            <p className="mt-1 font-bold font-mono text-2xl text-[var(--accent-alert)]">
               {totalRequiredCount}
             </p>
           </GlassCard>
@@ -700,10 +700,10 @@ export function PlantInventoryWorkspaceClient({
 
         {/* Filter Bar */}
         <GlassCard className="p-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search
-                className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]"
                 aria-hidden="true"
               />
               <Input
@@ -712,7 +712,7 @@ export function PlantInventoryWorkspaceClient({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search stock, code, equipment, or description..."
                 aria-label="Search inventory list"
-                className="pl-9 w-full"
+                className="w-full pl-9"
               />
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -723,10 +723,10 @@ export function PlantInventoryWorkspaceClient({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-colors ${
                     selectedCategory === cat
-                      ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30'
-                      : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:text-[var(--text-heading)]'
+                      ? 'border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
+                      : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {cat === 'ALL' ? 'All Categories' : cat}
@@ -741,28 +741,28 @@ export function PlantInventoryWorkspaceClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left" aria-label="Plant Inventory List">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Stock
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Description
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Required
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Present
                   </th>
@@ -774,34 +774,34 @@ export function PlantInventoryWorkspaceClient({
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                      className="transition-colors hover:bg-[var(--bg-secondary)]/60"
                     >
                       <td className="px-6 py-4 align-top">
-                        <div className="font-semibold text-sm text-[var(--text-heading)]">
+                        <div className="font-semibold text-[var(--text-heading)] text-sm">
                           {item.stock}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="font-mono text-[var(--text-muted)] text-xs">
                             {item.code}
                           </span>
-                          <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                          <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                             {item.category}
                           </span>
-                          <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                          <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                             {item.plantEquipment}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] max-w-md">
+                      <td className="max-w-md px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                         {item.description}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-medium text-[var(--text-heading)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-medium font-mono text-[var(--text-heading)] text-sm">
                         {formatQty(item.amountRequired)} {item.unit}
                       </td>
-                      <td className="px-6 py-4 align-top text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-2 justify-end">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top">
+                        <div className="inline-flex items-center justify-end gap-2">
                           <span
-                            className={`font-mono text-sm font-bold ${
+                            className={`font-bold font-mono text-sm ${
                               isShortfall
                                 ? 'text-[var(--accent-alert)]'
                                 : 'text-[var(--accent-green)]'
@@ -810,10 +810,10 @@ export function PlantInventoryWorkspaceClient({
                             {formatQty(item.amountPresent)} {item.unit}
                           </span>
                           <span
-                            className={`px-2 py-0.5 text-[11px] font-medium rounded-full border ${
+                            className={`rounded-full border px-2 py-0.5 font-medium text-[11px] ${
                               isShortfall
-                                ? 'bg-[var(--accent-alert)]/10 border-[var(--accent-alert)]/30 text-[var(--accent-alert)]'
-                                : 'bg-[var(--accent-green)]/10 border-[var(--accent-green)]/30 text-[var(--accent-green)]'
+                                ? 'border-[var(--accent-alert)]/30 bg-[var(--accent-alert)]/10 text-[var(--accent-alert)]'
+                                : 'border-[var(--accent-green)]/30 bg-[var(--accent-green)]/10 text-[var(--accent-green)]'
                             }`}
                           >
                             {isShortfall ? 'Replenish' : 'Nominal'}
@@ -827,7 +827,7 @@ export function PlantInventoryWorkspaceClient({
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-8 text-center text-sm text-[var(--text-muted)]"
+                      className="px-6 py-8 text-center text-[var(--text-muted)] text-sm"
                     >
                       No stock items match the current filter criteria.
                     </td>
@@ -845,18 +845,18 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'item-list') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <PackagePlus className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Item List</h2>
+              <PackagePlus className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Item List</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Register new stock items, spare parts, or reagents into the Plant Inventory master
               stock list, assigned to specific plant equipment.
             </p>
           </div>
-          <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <span className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Catalog Items:{' '}
             <strong className="text-[var(--text-heading)]">{stockItems.length}</strong>
           </span>
@@ -865,22 +865,22 @@ export function PlantInventoryWorkspaceClient({
         {/* Add New Item to Stock List Form */}
         <GlassCard>
           <div className="mb-4">
-            <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-              <Plus className="w-4 h-4 text-[var(--accent-blue)]" aria-hidden="true" />
+            <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+              <Plus className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
               Add New Item to Stock List
             </h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
               New items added here are immediately synchronized with Inventory List and Stock
               Required views.
             </p>
           </div>
 
           <form onSubmit={handleAddItem} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label
                   htmlFor="plant-item-stock"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Stock Name
                 </label>
@@ -896,7 +896,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="plant-item-code"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Part / Stock Code
                 </label>
@@ -911,7 +911,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="plant-item-category"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Category
                 </label>
@@ -921,7 +921,7 @@ export function PlantInventoryWorkspaceClient({
                   onChange={(e) =>
                     setNewCategory(e.target.value as PlantInventoryStockItem['category'])
                   }
-                  className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 >
                   <option value="Wear Spares">Wear Spares</option>
                   <option value="Dense Medium">Dense Medium</option>
@@ -932,11 +932,11 @@ export function PlantInventoryWorkspaceClient({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div className="md:col-span-2">
                 <label
                   htmlFor="plant-item-description"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Description
                 </label>
@@ -952,7 +952,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="plant-item-required"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Amount Required
                 </label>
@@ -971,7 +971,7 @@ export function PlantInventoryWorkspaceClient({
                 <div>
                   <label
                     htmlFor="plant-item-present"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                    className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Present
                   </label>
@@ -989,7 +989,7 @@ export function PlantInventoryWorkspaceClient({
                 <div>
                   <label
                     htmlFor="plant-item-unit"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                    className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Unit
                   </label>
@@ -1007,7 +1007,7 @@ export function PlantInventoryWorkspaceClient({
             <div>
               <label
                 htmlFor="plant-item-equipment"
-                className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
               >
                 Plant Equipment (e.g. CR-101, SC-201, DM-301, TH-501)
               </label>
@@ -1021,21 +1021,21 @@ export function PlantInventoryWorkspaceClient({
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <div className="flex flex-col justify-between gap-3 pt-2 sm:flex-row sm:items-center">
               {formFeedback ? (
-                <p className="text-xs font-medium text-[var(--accent-blue)]" role="status">
+                <p className="font-medium text-[var(--accent-blue)] text-xs" role="status">
                   {formFeedback}
                 </p>
               ) : (
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-[var(--text-muted)] text-xs">
                   All fields marked required must be completed before adding to stock list.
                 </span>
               )}
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-blue)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-sm text-white transition-opacity hover:opacity-90"
               >
-                <Plus className="w-4 h-4" aria-hidden="true" />
+                <Plus className="h-4 w-4" aria-hidden="true" />
                 Add Item to Stock List
               </button>
             </div>
@@ -1047,34 +1047,34 @@ export function PlantInventoryWorkspaceClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left" aria-label="Registered Stock Item List">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Stock
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Description
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Required
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Present
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Plant Equipment
                   </th>
@@ -1082,30 +1082,30 @@ export function PlantInventoryWorkspaceClient({
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
                 {stockItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-[var(--bg-secondary)]/60 transition-colors">
+                  <tr key={item.id} className="transition-colors hover:bg-[var(--bg-secondary)]/60">
                     <td className="px-6 py-4 align-top">
-                      <div className="font-semibold text-sm text-[var(--text-heading)]">
+                      <div className="font-semibold text-[var(--text-heading)] text-sm">
                         {item.stock}
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-mono text-[var(--text-muted)]">
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="font-mono text-[var(--text-muted)] text-xs">
                           {item.code}
                         </span>
-                        <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                        <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                           {item.category}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)]">
+                    <td className="px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                       {item.description}
                     </td>
-                    <td className="px-6 py-4 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono text-[var(--text-heading)] text-sm">
                       {formatQty(item.amountRequired)} {item.unit}
                     </td>
-                    <td className="px-6 py-4 align-top text-right font-mono text-sm font-semibold text-[var(--text-heading)] whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono font-semibold text-[var(--text-heading)] text-sm">
                       {formatQty(item.amountPresent)} {item.unit}
                     </td>
-                    <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                       {item.plantEquipment}
                     </td>
                   </tr>
@@ -1122,18 +1122,18 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'stock-required') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <AlertTriangle className="w-6 h-6 text-[var(--accent-alert)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Stock Required</h2>
+              <AlertTriangle className="h-6 w-6 text-[var(--accent-alert)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Stock Required</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Replenishment queue for plant consumables, reagents, and wear spares below required
               par levels.
             </p>
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <div className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Items Requiring Replenishment:{' '}
             <strong className="text-[var(--accent-alert)]">{stockRequiredItems.length}</strong>
           </div>
@@ -1143,46 +1143,46 @@ export function PlantInventoryWorkspaceClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left" aria-label="Stock Required Table">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Stock
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Description
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Required
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Present
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Shortfall
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Plant Equipment
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Action
                   </th>
@@ -1197,44 +1197,44 @@ export function PlantInventoryWorkspaceClient({
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                      className="transition-colors hover:bg-[var(--bg-secondary)]/60"
                     >
                       <td className="px-6 py-4 align-top">
-                        <div className="font-semibold text-sm text-[var(--text-heading)]">
+                        <div className="font-semibold text-[var(--text-heading)] text-sm">
                           {item.stock}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="font-mono text-[var(--text-muted)] text-xs">
                             {item.code}
                           </span>
-                          <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                          <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                             {item.category}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] max-w-md">
+                      <td className="max-w-md px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                         {item.description}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono text-[var(--text-heading)] text-sm">
                         {formatQty(item.amountRequired)} {item.unit}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-bold font-mono text-[var(--accent-alert)] text-sm">
                         {formatQty(item.amountPresent)} {item.unit}
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-bold font-mono text-[var(--accent-alert)] text-sm">
                         -{formatQty(shortfall)} {item.unit}
                       </td>
-                      <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                         {item.plantEquipment}
                       </td>
-                      <td className="px-6 py-4 align-top text-right whitespace-nowrap">
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top">
                         <button
                           type="button"
                           onClick={() => handleRestockItem(item.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-default)] text-xs font-semibold text-[var(--text-heading)] hover:border-[var(--accent-blue)] transition-colors"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs transition-colors hover:border-[var(--accent-blue)]"
                         >
                           <RefreshCw
-                            className="w-3.5 h-3.5 text-[var(--accent-blue)]"
+                            className="h-3.5 w-3.5 text-[var(--accent-blue)]"
                             aria-hidden="true"
                           />
                           Mark Restocked
@@ -1247,10 +1247,10 @@ export function PlantInventoryWorkspaceClient({
                   <tr>
                     <td
                       colSpan={7}
-                      className="px-6 py-8 text-center text-sm text-[var(--text-muted)]"
+                      className="px-6 py-8 text-center text-[var(--text-muted)] text-sm"
                     >
-                      <div className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent-green)]">
-                        <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                      <div className="inline-flex items-center gap-2 font-medium text-[var(--accent-green)] text-sm">
+                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                         All plant inventory items meet or exceed their required par quantities.
                       </div>
                     </td>
@@ -1268,18 +1268,18 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'history-of-used') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <History className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">History of Used</h2>
+              <History className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">History of Used</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Chronological consumption log of reagents, magnetite medium, and critical wear spares
               drawn across shifts, tracked per plant equipment.
             </p>
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <div className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Recorded Drawdowns:{' '}
             <strong className="text-[var(--text-heading)]">{usageHistory.length}</strong>
           </div>
@@ -1288,19 +1288,19 @@ export function PlantInventoryWorkspaceClient({
         {/* Log Stock Used Form */}
         <GlassCard>
           <div className="mb-4">
-            <h3 className="text-base font-bold text-[var(--text-heading)]">Record Stock Used</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            <h3 className="font-bold text-[var(--text-heading)] text-base">Record Stock Used</h3>
+            <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
               Logging stock usage automatically deducts the quantity from Amount Present in the
               Inventory List.
             </p>
           </div>
 
           <form onSubmit={handleRecordUsage} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div className="md:col-span-2">
                 <label
                   htmlFor="usage-stock-select"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Stock Item
                 </label>
@@ -1308,7 +1308,7 @@ export function PlantInventoryWorkspaceClient({
                   id="usage-stock-select"
                   value={usageStockId}
                   onChange={(e) => setUsageStockId(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 >
                   {stockItems.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -1320,7 +1320,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="usage-amount-input"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Amount Used
                 </label>
@@ -1338,7 +1338,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="usage-shift-select"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Shift
                 </label>
@@ -1346,7 +1346,7 @@ export function PlantInventoryWorkspaceClient({
                   id="usage-shift-select"
                   value={usageShift}
                   onChange={(e) => setUsageShift(e.target.value as 'Day' | 'Night')}
-                  className="w-full rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-2 text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 >
                   <option value="Day">Day Shift</option>
                   <option value="Night">Night Shift</option>
@@ -1354,11 +1354,11 @@ export function PlantInventoryWorkspaceClient({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label
                   htmlFor="usage-circuit-input"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Circuit / Work Area
                 </label>
@@ -1373,7 +1373,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="usage-equipment-input"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Plant Equipment
                 </label>
@@ -1388,7 +1388,7 @@ export function PlantInventoryWorkspaceClient({
               <div>
                 <label
                   htmlFor="usage-notes-input"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Usage Description / Work Order
                 </label>
@@ -1402,11 +1402,11 @@ export function PlantInventoryWorkspaceClient({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label
                   htmlFor="usage-operator-input"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1"
+                  className="mb-1 block font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Logged By
                 </label>
@@ -1420,19 +1420,19 @@ export function PlantInventoryWorkspaceClient({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <div className="flex flex-col justify-between gap-3 pt-2 sm:flex-row sm:items-center">
               {usageFeedback ? (
-                <p className="text-xs font-medium text-[var(--accent-blue)]" role="status">
+                <p className="font-medium text-[var(--accent-blue)] text-xs" role="status">
                   {usageFeedback}
                 </p>
               ) : (
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-[var(--text-muted)] text-xs">
                   Each entry is recorded with shift timestamp and operator attribution.
                 </span>
               )}
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-blue)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-sm text-white transition-opacity hover:opacity-90"
               >
                 Record Used Stock
               </button>
@@ -1445,34 +1445,34 @@ export function PlantInventoryWorkspaceClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left" aria-label="History of Used Stock">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Date &amp; Shift
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Stock
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Plant Equipment
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                    className="px-6 py-3.5 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Amount Used
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3.5 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                    className="px-6 py-3.5 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                   >
                     Logged By
                   </th>
@@ -1482,34 +1482,34 @@ export function PlantInventoryWorkspaceClient({
                 {usageHistory.map((entry) => (
                   <tr
                     key={entry.id}
-                    className="hover:bg-[var(--bg-secondary)]/60 transition-colors"
+                    className="transition-colors hover:bg-[var(--bg-secondary)]/60"
                   >
-                    <td className="px-6 py-4 align-top whitespace-nowrap">
-                      <div className="text-sm font-mono font-semibold text-[var(--text-heading)]">
+                    <td className="whitespace-nowrap px-6 py-4 align-top">
+                      <div className="font-mono font-semibold text-[var(--text-heading)] text-sm">
                         {entry.date}
                       </div>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
+                      <span className="mt-1 inline-block rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                         {entry.shift} Shift
                       </span>
                     </td>
                     <td className="px-6 py-4 align-top">
-                      <div className="font-semibold text-sm text-[var(--text-heading)]">
+                      <div className="font-semibold text-[var(--text-heading)] text-sm">
                         {entry.stock}
                       </div>
-                      <div className="text-xs text-[var(--accent-blue)] mt-0.5">
+                      <div className="mt-0.5 text-[var(--accent-blue)] text-xs">
                         {entry.circuitArea}
                       </div>
-                      <div className="text-xs text-[var(--text-secondary)] mt-0.5">
+                      <div className="mt-0.5 text-[var(--text-secondary)] text-xs">
                         {entry.description}
                       </div>
                     </td>
-                    <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)]">
+                    <td className="px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                       {entry.plantEquipment}
                     </td>
-                    <td className="px-6 py-4 align-top text-right font-mono text-sm font-bold text-[var(--text-heading)] whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-4 text-right align-top font-bold font-mono text-[var(--text-heading)] text-sm">
                       {formatQty(entry.amountUsed)} {entry.unit}
                     </td>
-                    <td className="px-6 py-4 align-top text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
                       {entry.loggedBy}
                     </td>
                   </tr>
@@ -1526,64 +1526,64 @@ export function PlantInventoryWorkspaceClient({
   if (mode === 'reports') {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2.5">
-              <BarChart2 className="w-6 h-6 text-[var(--accent-blue)]" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
+              <BarChart2 className="h-6 w-6 text-[var(--accent-blue)]" aria-hidden="true" />
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Reports</h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Plant equipment stock control reports: drawdown trends, replenishment demand, and
               consumption by equipment across shifts.
             </p>
           </div>
-          <div className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-secondary)] border border-[var(--border-default)] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+          <div className="self-start rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-mono text-[var(--text-muted)] text-xs sm:self-auto">
             Operational Date:{' '}
             <span className="font-semibold text-[var(--text-heading)]">{today}</span>
           </div>
         </div>
 
         {/* Reports Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Stock Required Report */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="p-4 border-b border-[var(--border-default)]">
-              <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-[var(--accent-alert)]" aria-hidden="true" />
+            <div className="border-[var(--border-default)] border-b p-4">
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+                <AlertTriangle className="h-4 w-4 text-[var(--accent-alert)]" aria-hidden="true" />
                 Replenishment Demand Report
               </h3>
             </div>
             <div className="p-4">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Stock
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Plant Equipment
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Required
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Present
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Shortfall
                     </th>
@@ -1598,23 +1598,23 @@ export function PlantInventoryWorkspaceClient({
                     return (
                       <tr key={item.id} className="hover:bg-[var(--bg-secondary)]/60">
                         <td className="px-4 py-3 align-top">
-                          <div className="font-semibold text-sm text-[var(--text-heading)]">
+                          <div className="font-semibold text-[var(--text-heading)] text-sm">
                             {item.stock}
                           </div>
-                          <div className="text-xs font-mono text-[var(--text-muted)]">
+                          <div className="font-mono text-[var(--text-muted)] text-xs">
                             {item.code}
                           </div>
                         </td>
-                        <td className="px-4 py-3 align-top text-sm text-[var(--text-secondary)]">
+                        <td className="px-4 py-3 align-top text-[var(--text-secondary)] text-sm">
                           {item.plantEquipment}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-heading)] text-sm">
                           {formatQty(item.amountRequired)} {item.unit}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-bold font-mono text-[var(--accent-alert)] text-sm">
                           {formatQty(item.amountPresent)} {item.unit}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm font-bold text-[var(--accent-alert)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-bold font-mono text-[var(--accent-alert)] text-sm">
                           -{formatQty(shortfall)} {item.unit}
                         </td>
                       </tr>
@@ -1624,10 +1624,10 @@ export function PlantInventoryWorkspaceClient({
                     <tr>
                       <td
                         colSpan={5}
-                        className="px-4 py-6 text-center text-sm text-[var(--text-muted)]"
+                        className="px-4 py-6 text-center text-[var(--text-muted)] text-sm"
                       >
-                        <div className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent-green)]">
-                          <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                        <div className="inline-flex items-center gap-2 font-medium text-[var(--accent-green)] text-sm">
+                          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                           All plant inventory items meet par quantities.
                         </div>
                       </td>
@@ -1640,43 +1640,43 @@ export function PlantInventoryWorkspaceClient({
 
           {/* Consumption by Equipment Report */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="p-4 border-b border-[var(--border-default)]">
-              <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <TrendingDown className="w-4 h-4 text-[var(--accent-blue)]" aria-hidden="true" />
+            <div className="border-[var(--border-default)] border-b p-4">
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+                <TrendingDown className="h-4 w-4 text-[var(--accent-blue)]" aria-hidden="true" />
                 Consumption by Plant Equipment
               </h3>
             </div>
             <div className="p-4">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider"
+                      className="px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Plant Equipment
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Total Drawdown
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Entries
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Stock Lines
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right"
+                      className="px-4 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
                     >
                       Below Par
                     </th>
@@ -1694,19 +1694,19 @@ export function PlantInventoryWorkspaceClient({
                     ).length;
                     return (
                       <tr key={equipment} className="hover:bg-[var(--bg-secondary)]/60">
-                        <td className="px-4 py-3 align-top text-sm text-[var(--text-heading)]">
+                        <td className="px-4 py-3 align-top text-[var(--text-heading)] text-sm">
                           {equipment}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm text-[var(--text-heading)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-heading)] text-sm">
                           {formatQty(eqDrawdown)}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
                           {eqUsage.length}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
                           {eqStockLines}
                         </td>
-                        <td className="px-4 py-3 align-top text-right font-mono text-sm text-[var(--text-secondary)] whitespace-nowrap">
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
                           {eqShortfall}
                         </td>
                       </tr>
@@ -1716,7 +1716,7 @@ export function PlantInventoryWorkspaceClient({
                     <tr>
                       <td
                         colSpan={5}
-                        className="px-4 py-6 text-center text-sm text-[var(--text-muted)]"
+                        className="px-4 py-6 text-center text-[var(--text-muted)] text-sm"
                       >
                         No plant equipment stock lines tracked yet.
                       </td>

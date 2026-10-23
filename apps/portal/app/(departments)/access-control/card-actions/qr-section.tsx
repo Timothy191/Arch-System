@@ -57,7 +57,7 @@ export function QRCodeSection({ data, size = 160 }: QRCodeSectionProps) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div ref={ref} className="rounded-xl border border-[var(--border-default)] bg-white p-2" />
-      <p className="text-xs text-[var(--text-muted)] font-mono select-all">{data}</p>
+      <p className="select-all font-mono text-[var(--text-muted)] text-xs">{data}</p>
     </div>
   );
 }

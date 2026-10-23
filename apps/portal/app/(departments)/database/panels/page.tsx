@@ -50,13 +50,13 @@ export default async function DatabasePanelsPage() {
   return (
     <div className="space-y-8">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)] flex items-center gap-2">
-            <Database className="w-6 h-6 text-accent-green" />
+          <h2 className="flex items-center gap-2 font-bold text-2xl text-[var(--text-heading)]">
+            <Database className="h-6 w-6 text-accent-green" />
             Database Control & Personnel Provisioning Panels
           </h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Direct database console for personnel records, safety compliance, and physical QR badge
             credentials.
           </p>
@@ -72,55 +72,55 @@ export default async function DatabasePanelsPage() {
       </div>
 
       {/* ── Key Metrics Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <GlassCard className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Total Personnel
             </span>
-            <Users className="w-4 h-4 text-[var(--accent-blue)]" />
+            <Users className="h-4 w-4 text-[var(--accent-blue)]" />
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{totalEmployees}</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1">
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">{totalEmployees}</p>
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">
             Active personnel table records
           </p>
         </GlassCard>
 
         <GlassCard className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Active QR Badges
             </span>
-            <QrCode className="w-4 h-4 text-accent-green" />
+            <QrCode className="h-4 w-4 text-accent-green" />
           </div>
-          <p className="text-2xl font-bold text-accent-green mt-2">{activeBadgesCount}</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1">Bound to C66 scan gate matrix</p>
+          <p className="mt-2 font-bold text-2xl text-accent-green">{activeBadgesCount}</p>
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">Bound to C66 scan gate matrix</p>
         </GlassCard>
 
         <GlassCard className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Medical Compliance
             </span>
-            <ShieldCheck className="w-4 h-4 text-[var(--accent-blue)]" />
+            <ShieldCheck className="h-4 w-4 text-[var(--accent-blue)]" />
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">
             {medicalCompliancePct}%
           </p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">
             {medicalValidCount} of {totalEmployees} current
           </p>
         </GlassCard>
 
         <GlassCard className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            <span className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Induction Safety
             </span>
-            <UserCheck className="w-4 h-4 text-violet-500" />
+            <UserCheck className="h-4 w-4 text-violet-500" />
           </div>
-          <p className="text-2xl font-bold text-violet-500 mt-2">{inductionCompliancePct}%</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1">
+          <p className="mt-2 font-bold text-2xl text-violet-500">{inductionCompliancePct}%</p>
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">
             {inductionValidCount} of {totalEmployees} certified
           </p>
         </GlassCard>
@@ -134,32 +134,32 @@ export default async function DatabasePanelsPage() {
       <Divider variant="fading" label="LIVE DATABASE PERSONNEL & CREDENTIAL REGISTRY" />
 
       {/* ── Table of Existing Personnel with All 9 Fields ── */}
-      <GlassCard className="p-0 overflow-hidden">
-        <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50 flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-[var(--text-heading)] flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-accent-green" />
-            PostgreSQL Registry Table: <code className="text-xs font-mono">public.personnel</code> &{' '}
-            <code className="text-xs font-mono">public.badges</code>
+      <GlassCard className="overflow-hidden p-0">
+        <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+          <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+            <HardDrive className="h-4 w-4 text-accent-green" />
+            PostgreSQL Registry Table: <code className="font-mono text-xs">public.personnel</code> &{' '}
+            <code className="font-mono text-xs">public.badges</code>
           </h3>
-          <span className="text-xs text-[var(--text-muted)] font-mono">
+          <span className="font-mono text-[var(--text-muted)] text-xs">
             {recentPersonnel.length} Records
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/30 text-[var(--text-muted)] font-medium">
-                <th className="py-3 px-4">Photo</th>
-                <th className="py-3 px-4">Name & Surname</th>
-                <th className="py-3 px-4">ID Number</th>
-                <th className="py-3 px-4">Job Title</th>
-                <th className="py-3 px-4">Area / Dept</th>
-                <th className="py-3 px-4">Medical Expiry</th>
-                <th className="py-3 px-4">Induction Expiry</th>
-                <th className="py-3 px-4">QR Code Data</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+              <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/30 font-medium text-[var(--text-muted)]">
+                <th className="px-4 py-3">Photo</th>
+                <th className="px-4 py-3">Name & Surname</th>
+                <th className="px-4 py-3">ID Number</th>
+                <th className="px-4 py-3">Job Title</th>
+                <th className="px-4 py-3">Area / Dept</th>
+                <th className="px-4 py-3">Medical Expiry</th>
+                <th className="px-4 py-3">Induction Expiry</th>
+                <th className="px-4 py-3">QR Code Data</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -182,11 +182,11 @@ export default async function DatabasePanelsPage() {
                   return (
                     <tr
                       key={p.id}
-                      className="hover:bg-[var(--bg-tertiary)]/50 transition-colors text-[var(--text-heading)]"
+                      className="text-[var(--text-heading)] transition-colors hover:bg-[var(--bg-tertiary)]/50"
                     >
                       {/* 1. Photo */}
-                      <td className="py-2 px-4">
-                        <div className="w-9 h-9 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] overflow-hidden flex items-center justify-center relative shrink-0">
+                      <td className="px-4 py-2">
+                        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)]">
                           {p.photo_url ? (
                             <Image
                               src={p.photo_url}
@@ -197,40 +197,40 @@ export default async function DatabasePanelsPage() {
                               unoptimized
                             />
                           ) : (
-                            <Camera className="w-4 h-4 text-[var(--text-muted)] opacity-60" />
+                            <Camera className="h-4 w-4 text-[var(--text-muted)] opacity-60" />
                           )}
                         </div>
                       </td>
 
                       {/* 2. Name & Surname */}
-                      <td className="py-2 px-4 font-semibold whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2 font-semibold">
                         {p.first_name} {p.surname}
-                        <span className="block text-[10px] font-mono text-[var(--text-muted)] font-normal">
+                        <span className="block font-mono font-normal text-[10px] text-[var(--text-muted)]">
                           {p.emp_code}
                         </span>
                       </td>
 
                       {/* 3. ID No */}
-                      <td className="py-2 px-4 font-mono text-[var(--text-secondary)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2 font-mono text-[var(--text-secondary)]">
                         {p.id_number}
                       </td>
 
                       {/* 4. Job Title */}
-                      <td className="py-2 px-4 whitespace-nowrap">{p.job_title || 'Operator'}</td>
+                      <td className="whitespace-nowrap px-4 py-2">{p.job_title || 'Operator'}</td>
 
                       {/* 5. Area */}
-                      <td className="py-2 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2">
                         <Badge variant="blue" size="sm">
                           {p.area_name || 'General Mining'}
                         </Badge>
                       </td>
 
                       {/* 6. Medical Expiry */}
-                      <td className="py-2 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2">
                         {p.medical_expiry ? (
                           <span
                             className={`inline-flex items-center gap-1 font-mono text-[11px] ${
-                              isMedicalValid ? 'text-accent-green' : 'text-accent-red font-bold'
+                              isMedicalValid ? 'text-accent-green' : 'font-bold text-accent-red'
                             }`}
                           >
                             {new Date(p.medical_expiry).toLocaleDateString('en-ZA', {
@@ -245,11 +245,11 @@ export default async function DatabasePanelsPage() {
                       </td>
 
                       {/* 7. Induction Expiry */}
-                      <td className="py-2 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2">
                         {p.induction_expiry ? (
                           <span
                             className={`inline-flex items-center gap-1 font-mono text-[11px] ${
-                              isInductionValid ? 'text-accent-green' : 'text-accent-red font-bold'
+                              isInductionValid ? 'text-accent-green' : 'font-bold text-accent-red'
                             }`}
                           >
                             {new Date(p.induction_expiry).toLocaleDateString('en-ZA', {
@@ -264,19 +264,19 @@ export default async function DatabasePanelsPage() {
                       </td>
 
                       {/* 8. QR Code */}
-                      <td className="py-2 px-4 font-mono text-[11px] text-[var(--accent-blue)] whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2 font-mono text-[11px] text-[var(--accent-blue)]">
                         {p.badge?.qr_code || 'Unassigned'}
                       </td>
 
                       {/* 9. Status */}
-                      <td className="py-2 px-4 text-center whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2 text-center">
                         <Badge variant={p.status === 'Active' ? 'green' : 'red'} size="sm">
                           {p.status || 'Active'}
                         </Badge>
                       </td>
 
                       {/* 10. Actions */}
-                      <td className="py-2 px-4 text-right whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-2 text-right">
                         <EditEmployeeModal employee={p} departments={departments} />
                       </td>
                     </tr>

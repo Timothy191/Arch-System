@@ -545,25 +545,25 @@ export function PlantHourlySheetClient({
     <div className="space-y-6">
       {/* Top Header GlassCard — Redesigned Command Banner without redundant badge */}
       <GlassCard className="p-5">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0 mt-0.5">
-              <Activity className="w-5 h-5 text-emerald-700" />
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10">
+              <Activity className="h-5 w-5 text-emerald-700" />
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight sm:text-2xl">
                   {mode === 'sheet'
                     ? 'Plant & Processing — Hourly Input Sheet'
                     : 'Plant & Processing — Wash Plant Telemetry'}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-800 border border-emerald-500/25">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 font-medium font-mono text-[11px] text-emerald-800">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600" />
                   {selectedModule} · {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'} ·{' '}
                   {totals.runHours}h Run
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-secondary)]">
+              <p className="text-[var(--text-secondary)] text-xs">
                 {mode === 'sheet'
                   ? 'Interactive hourly wash plant workbook for ROM belt-scale feed, clean coal recovery, product ash, and running density.'
                   : 'Real-time ROM belt-scale throughput, product recovery yield, washed ash quality, running medium density, and production mix.'}
@@ -571,37 +571,37 @@ export function PlantHourlySheetClient({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[var(--bg-secondary)]/90 border border-[var(--border-default)] self-start xl:self-auto">
+          <div className="flex flex-wrap items-center gap-1.5 self-start rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 p-1.5 xl:self-auto">
             {mode === 'sheet' ? (
               <Link
                 href="/plant-processing"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-2xs transition-colors hover:bg-black/[0.03]"
               >
-                <BarChart3 className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+                <BarChart3 className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
                 Telemetry Dashboard
               </Link>
             ) : (
               <Link
                 href="/plant-processing/hourly-sheet"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs shadow-xs transition-all hover:opacity-95"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <FileSpreadsheet className="h-3.5 w-3.5" />
                 Hourly Sheet
               </Link>
             )}
             <Link
               href="/plant-processing/delays"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-medium text-amber-800 text-xs transition-colors hover:bg-amber-500/20"
             >
-              <AlertTriangle className="w-3.5 h-3.5" />
+              <AlertTriangle className="h-3.5 w-3.5" />
               Log Delay
             </Link>
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-primary)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:bg-black/[0.03] transition-colors cursor-pointer"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="h-3.5 w-3.5" />
               Export CSV
             </button>
             {showSheet && (
@@ -610,9 +610,9 @@ export function PlantHourlySheetClient({
                 onClick={handleSaveSheet}
                 disabled={isPending}
                 data-testid="save-plant-hourly-sheet"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 disabled:opacity-60 transition-all shadow-xs cursor-pointer"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3.5 py-1.5 font-semibold text-white text-xs shadow-xs transition-all hover:opacity-95 disabled:opacity-60"
               >
-                <Save className="w-3.5 h-3.5" />
+                <Save className="h-3.5 w-3.5" />
                 {isPending ? 'Saving Sheet...' : 'Save Hourly Sheet'}
               </button>
             )}
@@ -624,16 +624,16 @@ export function PlantHourlySheetClient({
       {statusBanner && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-900 text-xs font-medium"
+          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 font-medium text-emerald-900 text-xs"
         >
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
             <span>{statusBanner.text}</span>
           </div>
           <button
             type="button"
             onClick={() => setStatusBanner(null)}
-            className="text-[11px] underline opacity-75 hover:opacity-100 cursor-pointer"
+            className="cursor-pointer text-[11px] underline opacity-75 hover:opacity-100"
           >
             Dismiss
           </button>
@@ -643,25 +643,25 @@ export function PlantHourlySheetClient({
       {showDashboard && (
         <>
           {/* ── 4 Primary Plant Telemetry GlassCards (ROM Scale, Product Yield, Product Ash, Running Density) ── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {/* Card 1: ROM Scale (t/latest hour + graphs and visuals) */}
-            <GlassCard className="p-5 space-y-3" data-testid="card-rom-scale">
+            <GlassCard className="space-y-3 p-5" data-testid="card-rom-scale">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                  <Scale className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <Scale className="h-3.5 w-3.5 text-emerald-600" />
                   ROM Scale (t / Latest Hour)
                 </span>
-                <Badge className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-xs font-mono">
+                <Badge className="border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-700 text-xs">
                   {totals.romCapacityPct}% of {totals.nominalRomTph} t/h
                 </Badge>
               </div>
 
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                  <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
                     {totals.latestHourRom.toLocaleString()} t/hr
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Shift Σ:{' '}
                     <strong className="text-[var(--text-heading)]">
                       {totals.totalRom.toLocaleString()} t
@@ -673,7 +673,7 @@ export function PlantHourlySheetClient({
                 {/* Mini 12-Hour ROM Scale Bar Graph Visual */}
                 <svg
                   viewBox="0 0 120 34"
-                  className="w-28 h-9 shrink-0 overflow-visible"
+                  className="h-9 w-28 shrink-0 overflow-visible"
                   aria-label="ROM Scale 12-hour mini bar graph"
                 >
                   {rows.map((r, idx) => {
@@ -699,37 +699,37 @@ export function PlantHourlySheetClient({
                 </svg>
               </div>
 
-              <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                 <div
-                  className="h-full bg-emerald-600 rounded-full transition-all"
+                  className="h-full rounded-full bg-emerald-600 transition-all"
                   style={{ width: `${Math.min(100, totals.romCapacityPct)}%` }}
                 />
               </div>
 
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+              <p className="font-mono text-[11px] text-[var(--text-secondary)]">
                 Avg Run-Rate: {totals.avgTph.toLocaleString()} t/hr · Peak: {totals.peakHourRom}{' '}
                 t/hr
               </p>
             </GlassCard>
 
             {/* Card 2: Product Yield (% Recovery) */}
-            <GlassCard className="p-5 space-y-3" data-testid="card-product-yield">
+            <GlassCard className="space-y-3 p-5" data-testid="card-product-yield">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                   Product Yield (% Recovery)
                 </span>
-                <Badge className="bg-blue-500/15 text-blue-700 border border-blue-500/30 text-xs font-mono">
+                <Badge className="border border-blue-500/30 bg-blue-500/15 font-mono text-blue-700 text-xs">
                   {recoveryDelta >= 0 ? `+${recoveryDelta}%` : `${recoveryDelta}%`} vs Target
                 </Badge>
               </div>
 
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                  <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
                     {totals.weightedYield.toFixed(1)}% Recovery
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Target: <strong className="text-[var(--text-heading)]">90.0%</strong> · Clean:{' '}
                     {totals.totalClean.toLocaleString()} t
                   </p>
@@ -738,7 +738,7 @@ export function PlantHourlySheetClient({
                 {/* Mini Recovery Sparkline */}
                 <svg
                   viewBox="0 0 110 32"
-                  className="w-24 h-8 shrink-0"
+                  className="h-8 w-24 shrink-0"
                   aria-label="Product Yield recovery trend sparkline"
                 >
                   <polyline
@@ -758,32 +758,32 @@ export function PlantHourlySheetClient({
                 </svg>
               </div>
 
-              <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                 <div
-                  className="h-full bg-blue-600 rounded-full transition-all"
+                  className="h-full rounded-full bg-blue-600 transition-all"
                   style={{ width: `${Math.min(100, totals.weightedYield)}%` }}
                 />
               </div>
 
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+              <p className="font-mono text-[11px] text-[var(--text-secondary)]">
                 Clean Product: {totals.totalClean.toLocaleString()} t · Discard:{' '}
                 {totals.totalDiscard.toLocaleString()} t
               </p>
             </GlassCard>
 
             {/* Card 3: Product Ash (% ADB) */}
-            <GlassCard className="p-5 space-y-3" data-testid="card-product-ash">
+            <GlassCard className="space-y-3 p-5" data-testid="card-product-ash">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-indigo-600" />
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <Flame className="h-3.5 w-3.5 text-indigo-600" />
                   Product Ash (% ADB)
                 </span>
                 <Badge
                   variant="outline"
-                  className={`text-xs font-mono ${
+                  className={`font-mono text-xs ${
                     totals.avgAsh <= 15.0
-                      ? 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30'
-                      : 'bg-red-500/15 text-red-700 border-red-500/30'
+                      ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-700'
+                      : 'border-red-500/30 bg-red-500/15 text-red-700'
                   }`}
                 >
                   Spec ≤ 15.0% Ash
@@ -792,10 +792,10 @@ export function PlantHourlySheetClient({
 
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                  <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
                     {totals.avgAsh.toFixed(1)}% Ash
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Raw Feed Ash: <strong className="text-[var(--text-heading)]">28.4%</strong> ·
                     Moisture: {totals.avgMoisture.toFixed(1)}%
                   </p>
@@ -804,7 +804,7 @@ export function PlantHourlySheetClient({
                 {/* Mini Ash Profile Bars */}
                 <svg
                   viewBox="0 0 110 32"
-                  className="w-24 h-8 shrink-0"
+                  className="h-8 w-24 shrink-0"
                   aria-label="Product Ash hourly quality profile"
                 >
                   {rows.map((r, i) => {
@@ -825,28 +825,28 @@ export function PlantHourlySheetClient({
                 </svg>
               </div>
 
-              <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                 <div
-                  className="h-full bg-indigo-600 rounded-full transition-all"
+                  className="h-full rounded-full bg-indigo-600 transition-all"
                   style={{ width: `${Math.min(100, Math.round((totals.avgAsh / 20) * 100))}%` }}
                 />
               </div>
 
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+              <p className="font-mono text-[11px] text-[var(--text-secondary)]">
                 Ash Reduction: -{(28.4 - totals.avgAsh).toFixed(1)}% pts via DMS Cyclones
               </p>
             </GlassCard>
 
             {/* Card 4: Running Density (DMS RD g/cm³) */}
-            <GlassCard className="p-5 space-y-3" data-testid="card-running-density">
+            <GlassCard className="space-y-3 p-5" data-testid="card-running-density">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                  <Gauge className="w-3.5 h-3.5 text-amber-600" />
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <Gauge className="h-3.5 w-3.5 text-amber-600" />
                   Running Density
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-xs font-mono bg-amber-500/15 text-amber-800 border-amber-500/30"
+                  className="border-amber-500/30 bg-amber-500/15 font-mono text-amber-800 text-xs"
                 >
                   Setpoint: 1.48 g/cm³
                 </Badge>
@@ -854,10 +854,10 @@ export function PlantHourlySheetClient({
 
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+                  <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
                     {totals.avgRd.toFixed(2)} g/cm³
                   </p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Latest Hour:{' '}
                     <strong className="text-[var(--text-heading)]">
                       {totals.latestHourRd.toFixed(2)} g/cm³
@@ -869,7 +869,7 @@ export function PlantHourlySheetClient({
                 {/* Mini Running Density Trace */}
                 <svg
                   viewBox="0 0 110 32"
-                  className="w-24 h-8 shrink-0"
+                  className="h-8 w-24 shrink-0"
                   aria-label="Running Density hourly trace"
                 >
                   <line
@@ -898,7 +898,7 @@ export function PlantHourlySheetClient({
                 </svg>
               </div>
 
-              <div className="pt-1 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-1 text-xs">
                 <span className="text-[var(--text-muted)]">Plant Operating Hours:</span>
                 <span className="font-mono font-semibold text-[var(--text-heading)]">
                   {totals.runHours} / 12.0 hrs ({totals.totalRunMins} min)
@@ -908,19 +908,19 @@ export function PlantHourlySheetClient({
           </div>
 
           {/* ── Row 2: Live Production Pulse Graph (lg:col-span-7) & Production Mix Pie Chart (lg:col-span-5) ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Card 5: Live Production Pulse Graph (Current throughput t/h + % vs prior shift) */}
             <GlassCard
-              className="lg:col-span-7 p-5 flex flex-col gap-3"
+              className="flex flex-col gap-3 p-5 lg:col-span-7"
               data-testid="card-live-production-pulse"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+                  <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                    <Activity className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
                     Live Production Pulse Graph — Current Throughput (t/h)
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Hourly ROM belt scale feed vs. washed clean coal output across active shift
                     windows
                   </p>
@@ -928,10 +928,10 @@ export function PlantHourlySheetClient({
 
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
+                    className={`rounded-full border px-2.5 py-1 font-bold font-mono text-xs ${
                       totals.throughputDeltaPct >= 0
-                        ? 'text-emerald-700 bg-emerald-500/10 border-emerald-500/25'
-                        : 'text-amber-800 bg-amber-500/15 border-amber-500/30'
+                        ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
+                        : 'border-amber-500/30 bg-amber-500/15 text-amber-800'
                     }`}
                   >
                     {totals.throughputDeltaPct >= 0
@@ -942,24 +942,24 @@ export function PlantHourlySheetClient({
               </div>
 
               {/* Alternative Design: Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
-              <div className="relative rounded-2xl bg-[var(--bg-secondary)]/70 border border-[var(--border-default)] p-3.5 space-y-2.5 shadow-xs">
+              <div className="relative space-y-2.5 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
                 {/* Top Legend & Benchmark Strip */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)] text-[10px] font-mono">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-2 font-mono text-[10px]">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-800 font-semibold">
-                      <span className="w-2.5 h-2.5 rounded-xs bg-emerald-600 inline-block" />
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
+                      <span className="inline-block h-2.5 w-2.5 rounded-xs bg-emerald-600" />
                       ROM Throughput (t/h)
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-blue-800 font-semibold">
-                      <span className="w-2.5 h-2.5 rounded-xs bg-blue-600 inline-block" />
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-blue-800">
+                      <span className="inline-block h-2.5 w-2.5 rounded-xs bg-blue-600" />
                       Clean Coal (t/h)
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-amber-800 font-medium">
-                      <span className="w-3 h-0 border-t-2 border-dashed border-amber-600 inline-block" />
+                    <span className="inline-flex items-center gap-1.5 font-medium text-amber-800">
+                      <span className="inline-block h-0 w-3 border-amber-600 border-t-2 border-dashed" />
                       Prior Shift Avg: {totals.priorShiftTph} t/h
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-semibold">
+                  <span className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2 py-0.5 font-semibold text-[var(--text-secondary)]">
                     Peak: {totals.peakHourRom} t/h
                   </span>
                 </div>
@@ -967,7 +967,7 @@ export function PlantHourlySheetClient({
                 {/* Paired Hourly Columns + Cubic Bezier Pulse Spline SVG */}
                 <svg
                   viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
-                  className="w-full h-40 overflow-visible"
+                  className="h-40 w-full overflow-visible"
                   role="img"
                   aria-label="Live Production Pulse Graph showing hourly throughput in tonnes per hour"
                 >
@@ -998,7 +998,7 @@ export function PlantHourlySheetClient({
                         x={pulseChartGeometry.padLeft - 6}
                         y={lvl.y + 3}
                         textAnchor="end"
-                        className="fill-[var(--text-muted)] text-[9px] font-mono"
+                        className="fill-[var(--text-muted)] font-mono text-[9px]"
                       >
                         {lvl.val}
                       </text>
@@ -1045,7 +1045,7 @@ export function PlantHourlySheetClient({
                           x={b.centerX}
                           y={pulseChartGeometry.baselineY + 15}
                           textAnchor="middle"
-                          className={`text-[9px] font-mono ${
+                          className={`font-mono text-[9px] ${
                             isLatest ? 'fill-emerald-700 font-bold' : 'fill-[var(--text-muted)]'
                           }`}
                         >
@@ -1083,7 +1083,7 @@ export function PlantHourlySheetClient({
                         cy={b.romY}
                         r={isLatest ? 3.8 : 2.2}
                         className={
-                          isLatest ? 'fill-emerald-600 stroke-white stroke-2' : 'fill-emerald-700'
+                          isLatest ? 'fill-emerald-600 stroke-2 stroke-white' : 'fill-emerald-700'
                         }
                       />
                     );
@@ -1091,37 +1091,37 @@ export function PlantHourlySheetClient({
                 </svg>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs pt-0.5">
-                <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+              <div className="grid grid-cols-2 gap-2.5 pt-0.5 text-xs sm:grid-cols-4">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                     Current Throughput
                   </p>
-                  <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+                  <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                     {totals.avgTph.toLocaleString()} t/h
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                     Latest Hour Scale
                   </p>
-                  <p className="font-bold text-emerald-700 mt-0.5 font-mono">
+                  <p className="mt-0.5 font-bold font-mono text-emerald-700">
                     {totals.latestHourRom.toLocaleString()} t/h
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                     Prior Shift Avg
                   </p>
-                  <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+                  <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                     {totals.priorShiftTph.toLocaleString()} t/h
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                     vs Prior Shift
                   </p>
                   <p
-                    className={`font-bold mt-0.5 font-mono ${
+                    className={`mt-0.5 font-bold font-mono ${
                       totals.throughputDeltaPct >= 0 ? 'text-emerald-700' : 'text-amber-700'
                     }`}
                   >
@@ -1135,32 +1135,32 @@ export function PlantHourlySheetClient({
 
             {/* Card 6: Production Mix (Pie Chart with Product, Discard, Recovery) */}
             <GlassCard
-              className="lg:col-span-5 p-5 flex flex-col justify-between gap-4"
+              className="flex flex-col justify-between gap-4 p-5 lg:col-span-5"
               data-testid="card-production-mix"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                    <PieChart className="w-3.5 h-3.5 text-emerald-600" />
+                  <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                    <PieChart className="h-3.5 w-3.5 text-emerald-600" />
                     Production Mix — Product, Discard &amp; Recovery
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Wash plant mass-balance split across Clean Product, Rejects Discard, and %
                     Recovery
                   </p>
                 </div>
-                <Badge className="bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 font-mono text-xs">
+                <Badge className="border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
                   {totals.weightedYield.toFixed(1)}% Recovery
                 </Badge>
               </div>
 
               {/* Pie Chart + Mass Balance Breakdown */}
-              <div className="flex flex-col sm:flex-row items-center gap-5 my-auto py-1">
+              <div className="my-auto flex flex-col items-center gap-5 py-1 sm:flex-row">
                 {/* SVG Donut / Pie Chart */}
-                <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+                <div className="relative flex h-32 w-32 shrink-0 items-center justify-center">
                   <svg
                     viewBox="0 0 110 110"
-                    className="w-32 h-32 -rotate-90"
+                    className="h-32 w-32 -rotate-90"
                     role="img"
                     aria-label={`Production Mix Pie Chart: Product ${totals.weightedYield.toFixed(1)}%, Discard ${totals.discardPct.toFixed(1)}%`}
                   >
@@ -1186,64 +1186,64 @@ export function PlantHourlySheetClient({
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] font-mono uppercase text-[var(--text-muted)]">
+                    <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                       Recovery
                     </span>
-                    <span className="text-base font-bold font-mono text-[var(--text-heading)]">
+                    <span className="font-bold font-mono text-[var(--text-heading)] text-base">
                       {totals.weightedYield.toFixed(1)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Product / Discard / Recovery Breakdown Pills */}
-                <div className="flex-1 w-full space-y-2 text-xs">
-                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                <div className="w-full flex-1 space-y-2 text-xs">
+                  <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
                       <span className="font-semibold text-[var(--text-heading)]">
                         Product (Clean Coal)
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-emerald-700">
+                    <span className="font-bold font-mono text-emerald-700">
                       {totals.totalClean.toLocaleString()} t ({totals.weightedYield.toFixed(1)}%)
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                  <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
                       <span className="font-semibold text-[var(--text-heading)]">
                         Discard (Rejects)
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-amber-800">
+                    <span className="font-bold font-mono text-amber-800">
                       {totals.totalDiscard.toLocaleString()} t ({totals.discardPct.toFixed(1)}%)
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                  <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" />
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
                       <span className="font-semibold text-[var(--text-heading)]">
                         Recovery Yield
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-blue-700">
+                    <span className="font-bold font-mono text-blue-700">
                       {totals.weightedYield.toFixed(1)}% (Ash {totals.avgAsh.toFixed(1)}%)
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-1 border-t border-[var(--border-subtle)]">
+              <div className="flex flex-wrap gap-2 border-[var(--border-subtle)] border-t pt-1">
                 <Link
-                  className="px-3 py-1.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg text-xs transition-all"
+                  className="rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90"
                   href="/plant-processing/hourly-sheet"
                 >
                   + Open Hourly Sheet
                 </Link>
                 <Link
-                  className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
+                  className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
                   href="/plant-processing/delays"
                 >
                   Log Plant Delays
@@ -1260,17 +1260,17 @@ export function PlantHourlySheetClient({
           {/* Shift & Circuit Module Selector Row (Matching Control Room Hourly Loads Layout) */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[var(--text-secondary)] text-xs font-semibold uppercase tracking-wider">
+              <span className="font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                 Shift:
               </span>
               <div className="flex gap-2" role="group" aria-label="Shift selector">
                 <button
                   type="button"
                   onClick={() => setSelectedShift('day')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer gold-steel-border gold-steel-border-slim ${
+                  className={`gold-steel-border gold-steel-border-slim cursor-pointer rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-colors ${
                     selectedShift === 'day'
                       ? 'bg-[var(--accent-blue)] text-white'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
+                      : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
                   }`}
                 >
                   Day Shift (06:00–18:00)
@@ -1278,10 +1278,10 @@ export function PlantHourlySheetClient({
                 <button
                   type="button"
                   onClick={() => setSelectedShift('night')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer gold-steel-border gold-steel-border-slim ${
+                  className={`gold-steel-border gold-steel-border-slim cursor-pointer rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-colors ${
                     selectedShift === 'night'
                       ? 'bg-[var(--accent-blue)] text-white'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
+                      : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
                   }`}
                 >
                   Night Shift (18:00–06:00)
@@ -1290,26 +1290,26 @@ export function PlantHourlySheetClient({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-heading)]">
+              <label className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs">
                 <span>Circuit:</span>
                 <select
                   aria-label="Plant Circuit Module"
                   value={selectedModule}
                   onChange={(e) => setSelectedModule(e.target.value as PlantModuleId)}
-                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] text-xs font-medium"
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs"
                 >
                   <option value="DMS-MOD-1">DMS Module 1 — Primary Wash Plant</option>
                   <option value="DMS-MOD-2">DMS Module 2 — Secondary &amp; Fines</option>
                 </select>
               </label>
 
-              <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-heading)]">
+              <label className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs">
                 <span>Feed Blend:</span>
                 <select
                   aria-label="Feed Seam Blend"
                   value={selectedSeamBlend}
                   onChange={(e) => handleSeamBlendChange(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] text-xs font-medium"
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs"
                 >
                   {PLANT_SEAM_OPTIONS.map((seam) => (
                     <option key={seam} value={seam}>
@@ -1323,51 +1323,51 @@ export function PlantHourlySheetClient({
 
           {/* Main 12-Hour Matrix Grid Card (Matching Control Room HourlyLoadsGrid) */}
           <div className="revo-grid-visible">
-            <GlassCard className="p-0 overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] shadow-sm">
-              <div className="overflow-x-auto w-full">
+            <GlassCard className="overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] p-0 shadow-sm">
+              <div className="w-full overflow-x-auto">
                 <table
-                  className="w-full text-left border-collapse"
+                  className="w-full border-collapse text-left"
                   aria-label="Plant and Processing Hourly Input Sheet"
                 >
                   <thead>
-                    <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-xs font-semibold text-[var(--text-muted)]">
+                    <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60 font-semibold text-[var(--text-muted)] text-xs">
                       <th
                         scope="col"
-                        className="py-2.5 px-3 text-left min-w-[190px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] align-top"
+                        className="sticky left-0 z-20 min-w-[190px] bg-[var(--bg-secondary)] px-3 py-2.5 text-left align-top shadow-[1px_0_0_0_var(--border-default)]"
                       >
                         <div className="space-y-1.5">
-                          <span className="block text-xs font-bold text-[var(--text-heading)]">
+                          <span className="block font-bold text-[var(--text-heading)] text-xs">
                             Plant Stream / Metric
                           </span>
                           <div className="relative">
-                            <Search className="w-3 h-3 text-[var(--text-muted)] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <Search className="pointer-events-none absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
                             <input
                               type="text"
                               value={streamSearch}
                               onChange={(e) => setStreamSearch(e.target.value)}
                               placeholder="Filter plant stream..."
                               aria-label="Filter plant stream"
-                              className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md pl-6 pr-6 py-1 text-[11px] font-normal text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                              className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] py-1 pr-6 pl-6 font-normal text-[11px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                             />
                             {streamSearch && (
                               <button
                                 type="button"
                                 onClick={() => setStreamSearch('')}
                                 aria-label="Clear stream filter"
-                                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                                className="absolute top-1/2 right-1.5 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                               >
-                                <X className="w-3 h-3" />
+                                <X className="h-3 w-3" />
                               </button>
                             )}
                           </div>
                         </div>
                       </th>
-                      <th scope="col" className="py-2.5 px-3 text-left min-w-[155px] align-top">
+                      <th scope="col" className="min-w-[155px] px-3 py-2.5 text-left align-top">
                         <div className="space-y-1">
-                          <span className="block text-xs font-bold text-[var(--text-heading)]">
+                          <span className="block font-bold text-[var(--text-heading)] text-xs">
                             Circuit &amp; Unit
                           </span>
-                          <span className="block text-[11px] font-mono text-[var(--text-secondary)]">
+                          <span className="block font-mono text-[11px] text-[var(--text-secondary)]">
                             {selectedModule}
                           </span>
                         </div>
@@ -1378,26 +1378,26 @@ export function PlantHourlySheetClient({
                           <th
                             key={row.hourSlot}
                             scope="col"
-                            className="py-2.5 px-1.5 text-center min-w-[92px]"
+                            className="min-w-[92px] px-1.5 py-2.5 text-center"
                           >
-                            <span className="block font-mono font-bold text-xs text-[var(--text-heading)]">
+                            <span className="block font-bold font-mono text-[var(--text-heading)] text-xs">
                               {shortStart}
                             </span>
-                            <span className="block font-mono text-[9px] text-[var(--text-muted)] font-normal">
+                            <span className="block font-mono font-normal text-[9px] text-[var(--text-muted)]">
                               {row.hourSlot}
                             </span>
                           </th>
                         );
                       })}
-                      <th scope="col" className="py-2.5 px-3 text-right min-w-[95px] align-middle">
-                        <span className="block text-xs font-bold text-[var(--text-heading)]">
+                      <th scope="col" className="min-w-[95px] px-3 py-2.5 text-right align-middle">
+                        <span className="block font-bold text-[var(--text-heading)] text-xs">
                           Total / Avg
                         </span>
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-[var(--border-default)]/60 text-xs text-[var(--text-heading)]">
+                  <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
                     {filteredStreams.map((stream) => {
                       let summaryDisplay = '';
                       if (stream.key === 'romFeedTonnes') {
@@ -1424,9 +1424,9 @@ export function PlantHourlySheetClient({
                           className="transition-colors hover:bg-[var(--bg-secondary)]/40"
                         >
                           {/* Stream Name Column (Sticky Left) */}
-                          <td className="py-2.5 px-3 font-medium sticky left-0 z-10 bg-[var(--bg-primary)] shadow-[1px_0_0_0_var(--border-default)]">
+                          <td className="sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]">
                             <div className="min-w-[160px]">
-                              <span className="block font-bold text-xs text-[var(--text-heading)]">
+                              <span className="block font-bold text-[var(--text-heading)] text-xs">
                                 {stream.streamName}
                               </span>
                               <span className="block text-[10px] text-[var(--text-secondary)]">
@@ -1436,12 +1436,12 @@ export function PlantHourlySheetClient({
                           </td>
 
                           {/* Circuit / Unit Column */}
-                          <td className="py-2.5 px-3 min-w-[140px]">
+                          <td className="min-w-[140px] px-3 py-2.5">
                             <div className="flex items-center justify-between gap-1.5">
-                              <span className="text-[11px] font-medium text-[var(--text-secondary)] truncate">
+                              <span className="truncate font-medium text-[11px] text-[var(--text-secondary)]">
                                 {selectedSeamBlend}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-mono font-semibold text-[10px] shrink-0">
+                              <span className="shrink-0 rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
                                 {stream.unit}
                               </span>
                             </div>
@@ -1460,10 +1460,10 @@ export function PlantHourlySheetClient({
                               return (
                                 <td
                                   key={`${streamKey}-${row.hourSlot}`}
-                                  className="py-2 px-1 text-center bg-black/[0.015]"
+                                  className="bg-black/[0.015] px-1 py-2 text-center"
                                 >
                                   <span
-                                    className={`inline-block px-2 py-0.5 rounded border font-mono text-[11px] font-semibold ${yieldBadgeClass}`}
+                                    className={`inline-block rounded border px-2 py-0.5 font-mono font-semibold text-[11px] ${yieldBadgeClass}`}
                                   >
                                     {row.yieldPct.toFixed(1)}%
                                   </span>
@@ -1475,16 +1475,16 @@ export function PlantHourlySheetClient({
                             return (
                               <td
                                 key={`${streamKey}-${row.hourSlot}`}
-                                className="py-1.5 px-1 text-center"
+                                className="px-1 py-1.5 text-center"
                               >
                                 <div className="inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]">
                                   <button
                                     type="button"
                                     onClick={() => stepCellValue(hourIdx, stream, -1)}
                                     aria-label={`Decrease Row ${row.rowNumber} ${stream.ariaPrefix}`}
-                                    className="h-6 w-4 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] cursor-pointer transition-colors"
+                                    className="inline-flex h-6 w-4 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
                                   >
-                                    <Minus className="w-2.5 h-2.5" />
+                                    <Minus className="h-2.5 w-2.5" />
                                   </button>
                                   <input
                                     type="number"
@@ -1494,15 +1494,15 @@ export function PlantHourlySheetClient({
                                     aria-label={`Row ${row.rowNumber} ${stream.ariaPrefix}`}
                                     value={cellValue}
                                     onChange={(e) => updateCell(hourIdx, streamKey, e.target.value)}
-                                    className="w-12 text-center font-mono text-xs font-semibold py-0.5 bg-transparent text-[var(--text-heading)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-12 bg-transparent py-0.5 text-center font-mono font-semibold text-[var(--text-heading)] text-xs [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => stepCellValue(hourIdx, stream, 1)}
                                     aria-label={`Increase Row ${row.rowNumber} ${stream.ariaPrefix}`}
-                                    className="h-6 w-4 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] cursor-pointer transition-colors"
+                                    className="inline-flex h-6 w-4 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
                                   >
-                                    <Plus className="w-2.5 h-2.5" />
+                                    <Plus className="h-2.5 w-2.5" />
                                   </button>
                                 </div>
                               </td>
@@ -1510,7 +1510,7 @@ export function PlantHourlySheetClient({
                           })}
 
                           {/* Shift Total / Avg Column */}
-                          <td className="py-2.5 px-3 text-right font-mono font-bold text-xs text-[var(--text-heading)] tabular-nums min-w-[95px] bg-[var(--bg-secondary)]/30">
+                          <td className="min-w-[95px] bg-[var(--bg-secondary)]/30 px-3 py-2.5 text-right font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums">
                             {summaryDisplay}
                           </td>
                         </tr>
@@ -1519,22 +1519,22 @@ export function PlantHourlySheetClient({
                   </tbody>
 
                   <tfoot>
-                    <tr className="bg-[var(--bg-secondary)]/80 border-t-2 border-[var(--border-default)] font-mono text-xs font-bold text-[var(--text-heading)]">
-                      <td className="py-2.5 px-3 sticky left-0 z-10 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)]">
+                    <tr className="border-[var(--border-default)] border-t-2 bg-[var(--bg-secondary)]/80 font-bold font-mono text-[var(--text-heading)] text-xs">
+                      <td className="sticky left-0 z-10 bg-[var(--bg-secondary)] px-3 py-2.5 shadow-[1px_0_0_0_var(--border-default)]">
                         Net Mass Balance
                       </td>
-                      <td className="py-2.5 px-3 text-[11px] font-sans font-medium text-[var(--text-secondary)]">
+                      <td className="px-3 py-2.5 font-medium font-sans text-[11px] text-[var(--text-secondary)]">
                         Recovery Yield %
                       </td>
                       {rows.map((row) => (
                         <td
                           key={`footer-${row.hourSlot}`}
-                          className="py-2.5 px-1 text-center text-[var(--accent-blue)]"
+                          className="px-1 py-2.5 text-center text-[var(--accent-blue)]"
                         >
                           {row.yieldPct.toFixed(1)}%
                         </td>
                       ))}
-                      <td className="py-2.5 px-3 text-right text-emerald-700">
+                      <td className="px-3 py-2.5 text-right text-emerald-700">
                         {totals.weightedYield.toFixed(1)}% ({totals.runHours}h)
                       </td>
                     </tr>

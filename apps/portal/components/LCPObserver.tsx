@@ -130,10 +130,10 @@ export function LCPObserver() {
 
   if (isMinimized) {
     return (
-      <div ref={panelRef} className="fixed bottom-4 right-4 z-dev-overlay">
+      <div ref={panelRef} className="fixed right-4 bottom-4 z-dev-overlay">
         <button
           onClick={() => setIsMinimized(false)}
-          className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-window flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)] bg-[var(--arch0)] px-3 py-1.5 font-mono text-white text-xs shadow-window transition-colors hover:bg-[var(--arch1)]"
           title="Expand LCP Observer"
         >
           📊 LCP:{' '}
@@ -154,19 +154,19 @@ export function LCPObserver() {
   return (
     <div
       ref={panelRef}
-      className="fixed bottom-4 right-4 z-dev-overlay bg-[var(--arch0)] text-white p-4 rounded-lg shadow-window border-2 border-[var(--accent-blue)] max-w-md"
+      className="fixed right-4 bottom-4 z-dev-overlay max-w-md rounded-lg border-2 border-[var(--accent-blue)] bg-[var(--arch0)] p-4 text-white shadow-window"
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="font-bold text-lg">📊 LCP Element Detected</h3>
         <button
           onClick={() => setIsMinimized(true)}
-          className="text-xs text-[var(--text-secondary)] hover:text-white px-2 py-0.5 rounded border border-white/10"
+          className="rounded border border-white/10 px-2 py-0.5 text-[var(--text-secondary)] text-xs hover:text-white"
           title="Minimize overlay"
         >
           Minimize
         </button>
       </div>
-      <div className="space-y-1 text-sm font-mono">
+      <div className="space-y-1 font-mono text-sm">
         <div>
           <span className="text-[var(--text-secondary)]">Tag:</span>{' '}
           <span className="text-[var(--accent-blue)]">{lcpElement.tagName}</span>
@@ -202,13 +202,13 @@ export function LCPObserver() {
         {lcpElement.imageUrl && (
           <div className="truncate">
             <span className="text-[var(--text-secondary)]">Image:</span>{' '}
-            <span className="text-[var(--accent-purple)] truncate block">
+            <span className="block truncate text-[var(--accent-purple)]">
               {lcpElement.imageUrl}
             </span>
           </div>
         )}
       </div>
-      <p className="text-xs text-[var(--text-secondary)] mt-3">
+      <p className="mt-3 text-[var(--text-secondary)] text-xs">
         💡 Tip: Make this element load faster by preloading resources or optimizing rendering
       </p>
     </div>

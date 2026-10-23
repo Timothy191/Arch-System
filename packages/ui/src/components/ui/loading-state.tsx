@@ -47,7 +47,7 @@ export const LoadingState = React.forwardRef<HTMLDivElement, LoadingStateProps>(
           role="status"
           aria-label={message}
           className={cn(
-            'p-6 bg-white/70 backdrop-blur-md rounded-2xl border border-black/[0.08] shadow-2xs space-y-4',
+            'space-y-4 rounded-2xl border border-black/[0.08] bg-white/70 p-6 shadow-2xs backdrop-blur-md',
             className
           )}
           {...props}
@@ -72,13 +72,13 @@ export const LoadingState = React.forwardRef<HTMLDivElement, LoadingStateProps>(
         role="status"
         aria-label={message}
         className={cn(
-          'flex flex-col items-center justify-center p-8 space-y-3 text-center',
+          'flex flex-col items-center justify-center space-y-3 p-8 text-center',
           className
         )}
         {...props}
       >
         <Loader size="md" />
-        <p className="text-xs font-medium text-[var(--text-secondary)]">{message}</p>
+        <p className="font-medium text-[var(--text-secondary)] text-xs">{message}</p>
       </div>
     );
   }

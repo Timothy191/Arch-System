@@ -55,7 +55,7 @@ export function AcknowledgeButton({
       type="button"
       onClick={handleClick}
       className={cn(
-        'px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]',
+        'rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-1 text-[var(--text-muted)] text-xs transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]',
         className
       )}
     >

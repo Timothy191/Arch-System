@@ -8,6 +8,6 @@ export const ProductionTrendChart: ComponentType<ProductionTrendChartProps> = dy
   () => import('./ProductionTrendChart').then((m) => m.ProductionTrendChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-[var(--bg-tertiary)]" />,
   }
 );

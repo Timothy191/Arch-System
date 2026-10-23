@@ -33,17 +33,17 @@ export const PitConnectivityBanner = memo(function PitConnectivityBanner({
     <div
       role="alert"
       aria-live="polite"
-      className={`w-full px-4 py-2.5 flex items-center justify-between text-xs font-medium transition-all duration-200 border-b ${
+      className={`flex w-full items-center justify-between border-b px-4 py-2.5 font-medium text-xs transition-all duration-200 ${
         isDegraded
-          ? 'bg-amber-500/10 text-amber-900 border-amber-500/20'
-          : 'bg-red-500/10 text-red-900 border-red-500/20'
+          ? 'border-amber-500/20 bg-amber-500/10 text-amber-900'
+          : 'border-red-500/20 bg-red-500/10 text-red-900'
       } ${className}`}
     >
       <div className="flex items-center gap-2">
         {isDegraded ? (
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+          <AlertTriangle className="h-4 w-4 shrink-0 animate-pulse text-amber-600" />
         ) : (
-          <WifiOff className="w-4 h-4 text-red-600 shrink-0" />
+          <WifiOff className="h-4 w-4 shrink-0 text-red-600" />
         )}
         <span>
           {isDegraded
@@ -55,9 +55,9 @@ export const PitConnectivityBanner = memo(function PitConnectivityBanner({
       <button
         type="button"
         onClick={() => checkConnectivity()}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-current bg-background/50 hover:bg-background/80 transition-colors shrink-0 text-xs"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded border border-current bg-background/50 px-2.5 py-1 text-xs transition-colors hover:bg-background/80"
       >
-        <RefreshCw className="w-3 h-3" />
+        <RefreshCw className="h-3 w-3" />
         <span>Check Link</span>
       </button>
     </div>

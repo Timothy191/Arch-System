@@ -181,27 +181,27 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
   return (
     <div className="max-w-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Book Out Machine</h3>
-          <p className="text-[var(--text-secondary)] text-sm mt-0.5">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Book Out Machine</h3>
+          <p className="mt-0.5 text-[var(--text-secondary)] text-sm">
             Complete repair and return machine to service.
           </p>
         </div>
 
         {hasDraft && !directMode && (
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/30">
-              <Save className="w-3 h-3" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/15 px-2 py-0.5 text-[11px] text-violet-400">
+              <Save className="h-3 w-3" />
               Draft Cached
             </span>
             <button
               type="button"
               onClick={clearDraft}
               title="Clear Draft"
-              className="p-1 rounded text-[var(--text-muted)] hover:text-accent-red hover:bg-accent-red/10 transition-colors"
+              className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-accent-red/10 hover:text-accent-red"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
@@ -209,10 +209,10 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
 
       {message && (
         <div
-          className={`mb-4 px-4 py-3 rounded-lg border text-sm ${
+          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
             message.type === 'success'
-              ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
-              : 'bg-accent-red/10 border-accent-red/20 text-accent-red'
+              ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
+              : 'border-accent-red/20 bg-accent-red/10 text-accent-red'
           }`}
         >
           {message.text}
@@ -221,7 +221,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
 
       {/* Toggle */}
       <div className="mb-5 rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] px-4 py-3">
-        <label className="flex items-center gap-3 cursor-pointer">
+        <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
             checked={directMode}
@@ -232,10 +232,10 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
             className="accent-violet-500"
           />
           <div>
-            <span className="text-sm font-medium text-[var(--text-heading)]">
+            <span className="font-medium text-[var(--text-heading)] text-sm">
               Direct checkout (no prior book-in)
             </span>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
               Use when a machine was repaired and returned to service without being booked in first.
               Will be flagged in audit reports.
             </p>
@@ -247,11 +247,11 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       {!directMode && (
         <form
           onSubmit={handleNormalSubmit}
-          className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6 space-y-4 shadow-card"
+          className="space-y-4 rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6 shadow-card"
         >
           {activeBreakdowns.length === 0 ? (
             <div className="p-6 text-center text-[var(--text-secondary)] text-sm">
-              <Info className="w-5 h-5 mx-auto mb-2 text-violet-400" />
+              <Info className="mx-auto mb-2 h-5 w-5 text-violet-400" />
               No active breakdowns to book out. Use &ldquo;Direct checkout&rdquo; above if needed.
             </div>
           ) : (
@@ -259,7 +259,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
               <div>
                 <label
                   htmlFor="breakdown-select"
-                  className="block text-sm text-[var(--text-secondary)] mb-1.5"
+                  className="mb-1.5 block text-[var(--text-secondary)] text-sm"
                 >
                   Select Machine in Workshop
                 </label>
@@ -268,7 +268,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                   required
                   value={selectedId}
                   onChange={(e) => setSelectedId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
                 >
                   <option value="">— Choose a broken-down machine —</option>
                   {activeBreakdowns.map((b) => (
@@ -281,52 +281,52 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
               </div>
 
               {selectedBreakdown && (
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-violet-500/5 border border-violet-500/10">
+                <div className="grid grid-cols-2 gap-3 rounded-lg border border-violet-500/10 bg-violet-500/5 p-3">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                    <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                       Fleet ID
                     </p>
-                    <p className="text-sm text-[var(--text-heading)] font-medium">
+                    <p className="font-medium text-[var(--text-heading)] text-sm">
                       {selectedBreakdown.fleet_id}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                    <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                       Machine Name
                     </p>
-                    <p className="text-sm text-[var(--text-heading)] font-medium">
+                    <p className="font-medium text-[var(--text-heading)] text-sm">
                       {selectedBreakdown.machine_name || selectedBreakdown.fleet_id}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                    <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                       Machine Type
                     </p>
-                    <p className="text-sm text-[var(--text-heading)] font-medium">
+                    <p className="font-medium text-[var(--text-heading)] text-sm">
                       {selectedBreakdown.machine_type}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                    <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                       Date In
                     </p>
-                    <p className="text-sm text-[var(--text-heading)] font-medium">
+                    <p className="font-medium text-[var(--text-heading)] text-sm">
                       {selectedBreakdown.date_in} {selectedBreakdown.time_in}
                     </p>
                   </div>
                   <div className="col-span-2">
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                    <p className="font-medium text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                       Reason
                     </p>
-                    <p className="text-sm text-[var(--text-heading)]">{selectedBreakdown.reason}</p>
+                    <p className="text-[var(--text-heading)] text-sm">{selectedBreakdown.reason}</p>
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                    <CalendarDays className="w-3.5 h-3.5" />
+                  <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                    <CalendarDays className="h-3.5 w-3.5" />
                     Date Out
                   </label>
                   <input
@@ -335,12 +335,12 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                     aria-label="Date Out"
                     value={dateOut}
                     onChange={(e) => setDateOut(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                    className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
                   />
                 </div>
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                    <Clock className="w-3.5 h-3.5" />
+                  <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                    <Clock className="h-3.5 w-3.5" />
                     Time Out
                   </label>
                   <input
@@ -349,29 +349,29 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                     aria-label="Time Out"
                     value={timeOut}
                     onChange={(e) => setTimeOut(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                    className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm text-[var(--text-secondary)]">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="block text-[var(--text-secondary)] text-sm">
                     Repair / Service Notes
                   </label>
-                  <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-violet-400" />
+                  <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                    <Sparkles className="h-3 w-3 text-violet-400" />
                     Quick presets
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="mb-2 flex flex-wrap gap-1.5">
                   {COMMON_REPAIRS.map((r) => (
                     <button
                       key={r}
                       type="button"
                       onClick={() => setRepairNotes((prev) => (prev ? `${prev}; ${r}` : r))}
-                      className="px-2 py-1 text-[11px] rounded-md bg-[var(--bg-primary)] hover:bg-violet-500/10 hover:border-violet-500/30 border border-[var(--border-emphasis)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all"
+                      className="rounded-md border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-2 py-1 text-[11px] text-[var(--text-secondary)] transition-all hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-[var(--text-heading)]"
                     >
                       + {r}
                     </button>
@@ -383,16 +383,16 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                   placeholder="Describe repair actions performed..."
                   value={repairNotes}
                   onChange={(e) => setRepairNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors resize-none"
+                  className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 py-2.5 font-medium text-sm text-white shadow-card transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Wrench className="w-4 h-4" />
+                <Wrench className="h-4 w-4" />
                 {isPending ? 'Booking Out...' : 'Complete Repair & Book Out'}
               </button>
             </>
@@ -404,10 +404,10 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       {directMode && (
         <form
           onSubmit={handleDirectSubmit}
-          className="rounded-xl border border-amber-500/20 bg-[var(--bg-tertiary)] p-6 space-y-4 shadow-card"
+          className="space-y-4 rounded-xl border border-amber-500/20 bg-[var(--bg-tertiary)] p-6 shadow-card"
         >
-          <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-amber-400 text-xs">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>
               This will create a closed breakdown marked as &ldquo;missing book-in&rdquo; for audit
               integrity.
@@ -418,7 +418,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
             <div>
               <label
                 htmlFor="direct-fleet-id"
-                className="block text-sm text-[var(--text-secondary)] mb-1.5"
+                className="mb-1.5 block text-[var(--text-secondary)] text-sm"
               >
                 Fleet ID
               </label>
@@ -429,13 +429,13 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                 placeholder="e.g. EX01, DT05"
                 value={direct.fleet_id}
                 onChange={(e) => setDirect({ ...direct, fleet_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
             <div>
               <label
                 htmlFor="direct-machine-type"
-                className="block text-sm text-[var(--text-secondary)] mb-1.5"
+                className="mb-1.5 block text-[var(--text-secondary)] text-sm"
               >
                 Machine Type
               </label>
@@ -444,7 +444,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                 required
                 value={direct.machine_type}
                 onChange={(e) => setDirect({ ...direct, machine_type: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               >
                 <option value="">— Select Type —</option>
                 {MACHINE_TYPES.map((t) => (
@@ -459,7 +459,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
           <div>
             <label
               htmlFor="direct-reason"
-              className="block text-sm text-[var(--text-secondary)] mb-1.5"
+              className="mb-1.5 block text-[var(--text-secondary)] text-sm"
             >
               Breakdown Reason
             </label>
@@ -470,14 +470,14 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
               placeholder="What was broken?"
               value={direct.reason}
               onChange={(e) => setDirect({ ...direct, reason: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+              className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                <CalendarDays className="w-3.5 h-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                <CalendarDays className="h-3.5 w-3.5" />
                 Date Out
               </label>
               <input
@@ -486,12 +486,12 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                 aria-label="Direct Date Out"
                 value={direct.date_out}
                 onChange={(e) => setDirect({ ...direct, date_out: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-1.5">
-                <Clock className="w-3.5 h-3.5" />
+              <label className="mb-1.5 flex items-center gap-1.5 text-[var(--text-secondary)] text-sm">
+                <Clock className="h-3.5 w-3.5" />
                 Time Out
               </label>
               <input
@@ -500,7 +500,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                 aria-label="Direct Time Out"
                 value={direct.time_out}
                 onChange={(e) => setDirect({ ...direct, time_out: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
               />
             </div>
           </div>
@@ -508,7 +508,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
           <div>
             <label
               htmlFor="direct-notes"
-              className="block text-sm text-[var(--text-secondary)] mb-1.5"
+              className="mb-1.5 block text-[var(--text-secondary)] text-sm"
             >
               Repair Notes
             </label>
@@ -518,16 +518,16 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
               placeholder="What repair was completed?"
               value={direct.repair_notes}
               onChange={(e) => setDirect({ ...direct, repair_notes: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[#555] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
             />
           </div>
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 py-2.5 font-medium text-sm text-white shadow-card transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Wrench className="w-4 h-4" />
+            <Wrench className="h-4 w-4" />
             {isPending ? 'Recording Checkout...' : 'Record Direct Checkout'}
           </button>
         </form>

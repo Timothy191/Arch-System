@@ -401,24 +401,24 @@ export function NetworkStatusRow({
           : Wifi;
 
   return (
-    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
+    <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
       <ConnQualityIcon
         className={cn(
-          'w-4 h-4 shrink-0',
+          'h-4 w-4 shrink-0',
           online ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'
         )}
       />
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between">
-          <span className="text-[12px] font-medium text-[var(--text-heading)]">
+          <span className="font-medium text-[12px] text-[var(--text-heading)]">
             {online ? 'Connected' : 'Offline'}
           </span>
           {effectiveType && (
-            <span className="text-[10px] uppercase text-[var(--text-muted)]">{effectiveType}</span>
+            <span className="text-[10px] text-[var(--text-muted)] uppercase">{effectiveType}</span>
           )}
         </div>
         {supported && online && (
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="mt-0.5 flex items-center gap-2">
             {connType && (
               <span className="text-[10px] text-[var(--text-muted)] capitalize">{connType}</span>
             )}
@@ -433,7 +433,7 @@ export function NetworkStatusRow({
           </div>
         )}
         {!supported && (
-          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Network API unavailable</p>
+          <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">Network API unavailable</p>
         )}
       </div>
     </div>
@@ -449,8 +449,8 @@ export function BatteryStatusRow({
 }: ReturnType<typeof useBatteryStatus>) {
   if (!supported || level === null) {
     return (
-      <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
-        <BatteryMedium className="w-4 h-4 text-[var(--text-secondary)]" />
+      <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
+        <BatteryMedium className="h-4 w-4 text-[var(--text-secondary)]" />
         <span className="text-[12px] text-[var(--text-muted)]">Battery status unavailable</span>
       </div>
     );
@@ -483,11 +483,11 @@ export function BatteryStatusRow({
         : 'bg-[var(--accent-green)]';
 
   return (
-    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
+    <div className="space-y-1.5 rounded-lg px-2 py-1.5">
       <div className="flex items-center gap-2.5">
-        <BatteryIcon className={cn('w-4 h-4 shrink-0', batteryColor)} />
-        <div className="flex-1 flex items-center justify-between">
-          <span className="text-[12px] font-medium text-[var(--text-heading)]">
+        <BatteryIcon className={cn('h-4 w-4 shrink-0', batteryColor)} />
+        <div className="flex flex-1 items-center justify-between">
+          <span className="font-medium text-[12px] text-[var(--text-heading)]">
             {Math.round(level * 100)}%
           </span>
           <span className="text-[10px] text-[var(--text-muted)]">
@@ -495,7 +495,7 @@ export function BatteryStatusRow({
           </span>
         </div>
       </div>
-      <div className="w-full h-1.5 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
         <div
           className={cn('h-full rounded-full transition-all duration-500', barColor)}
           style={{ width: `${Math.round(level * 100)}%` }}
@@ -526,17 +526,17 @@ export function VolumeControlRow({
     muted || volume === 0 ? 'text-[var(--text-muted)]' : 'text-[var(--accent-blue)]';
 
   return (
-    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
+    <div className="space-y-1.5 rounded-lg px-2 py-1.5">
       <div className="flex items-center gap-2.5">
         <button
           type="button"
           onClick={toggleMute}
           aria-label={muted ? 'Unmute' : 'Mute'}
-          className="p-0.5 rounded-md hover:bg-black/[0.06] transition-colors"
+          className="rounded-md p-0.5 transition-colors hover:bg-black/[0.06]"
         >
-          <VolumeIcon className={cn('w-4 h-4', volumeColor)} />
+          <VolumeIcon className={cn('h-4 w-4', volumeColor)} />
         </button>
-        <span className="text-[12px] font-medium text-[var(--text-heading)] min-w-[2rem]">
+        <span className="min-w-[2rem] font-medium text-[12px] text-[var(--text-heading)]">
           {muted ? 'Muted' : `${volume}%`}
         </span>
       </div>
@@ -547,7 +547,7 @@ export function VolumeControlRow({
         value={muted ? 0 : volume}
         onChange={(e) => adjust(Number(e.target.value))}
         aria-label="Volume"
-        className="w-full accent-[var(--accent-blue)] h-1"
+        className="h-1 w-full accent-[var(--accent-blue)]"
       />
     </div>
   );
@@ -555,20 +555,20 @@ export function VolumeControlRow({
 
 export function NotificationRow({ count, clear }: ReturnType<typeof useNotificationCount>) {
   return (
-    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
+    <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
       <div className="relative">
         {count > 0 ? (
-          <BellDot className="w-4 h-4 text-[var(--text-secondary)]" />
+          <BellDot className="h-4 w-4 text-[var(--text-secondary)]" />
         ) : (
-          <Bell className="w-4 h-4 text-[var(--text-secondary)]" />
+          <Bell className="h-4 w-4 text-[var(--text-secondary)]" />
         )}
         {count > 0 && (
-          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-[3px] rounded-full bg-[var(--accent-red)] text-white text-[9px] font-bold leading-none">
+          <span className="absolute -top-1 -right-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[var(--accent-red)] px-[3px] font-bold text-[9px] text-white leading-none">
             {count}
           </span>
         )}
       </div>
-      <span className="text-[12px] text-[var(--text-heading)] flex-1">
+      <span className="flex-1 text-[12px] text-[var(--text-heading)]">
         {count > 0 ? `${count} notification${count === 1 ? '' : 's'}` : 'No notifications'}
       </span>
       {count > 0 && (
@@ -576,7 +576,7 @@ export function NotificationRow({ count, clear }: ReturnType<typeof useNotificat
           type="button"
           onClick={clear}
           aria-label="Clear notifications"
-          className="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          className="text-[10px] text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
         >
           Clear
         </button>
@@ -607,9 +607,9 @@ function HealthSubRow({
 
   return (
     <div className="flex items-center gap-2">
-      <Icon className={cn('w-3 h-3 shrink-0', c.color)} />
-      <span className="text-[11px] text-[var(--text-secondary)] flex-1">{label}</span>
-      <span className={cn('text-[10px] font-medium', c.color)}>{c.label}</span>
+      <Icon className={cn('h-3 w-3 shrink-0', c.color)} />
+      <span className="flex-1 text-[11px] text-[var(--text-secondary)]">{label}</span>
+      <span className={cn('font-medium text-[10px]', c.color)}>{c.label}</span>
     </div>
   );
 }
@@ -643,13 +643,13 @@ export function ServerHealthRow({
   const current = statusConfig[status] ?? statusConfig.healthy;
 
   return (
-    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
+    <div className="space-y-1.5 rounded-lg px-2 py-1.5">
       <div className="flex items-center gap-2.5">
-        <current.icon className={cn('w-4 h-4 shrink-0', current.color)} />
-        <span className="text-[12px] font-medium text-[var(--text-heading)] flex-1">
+        <current.icon className={cn('h-4 w-4 shrink-0', current.color)} />
+        <span className="flex-1 font-medium text-[12px] text-[var(--text-heading)]">
           Server Health
         </span>
-        <span className={cn('text-[10px] font-medium', current.color)}>{current.label}</span>
+        <span className={cn('font-medium text-[10px]', current.color)}>{current.label}</span>
       </div>
 
       <div className="space-y-1">
@@ -659,7 +659,7 @@ export function ServerHealthRow({
       </div>
 
       <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-        <Clock className="w-3 h-3" />
+        <Clock className="h-3 w-3" />
         <span className="text-[10px]">
           {loading ? 'Checking…' : responseTime > 0 ? `${responseTime}ms` : 'Unavailable'}
         </span>
@@ -674,11 +674,11 @@ function OfflineQueueRow() {
   if (pendingCount === 0 && isOnline) return null;
 
   return (
-    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-accent-amber/10 border border-accent-amber/20">
-      <div className="flex items-center gap-2 min-w-0">
-        <CloudOff className="w-4 h-4 text-accent-amber shrink-0" />
-        <div className="flex flex-col min-w-0">
-          <span className="text-[12px] font-medium text-[var(--text-heading)]">
+    <div className="flex items-center justify-between gap-2 rounded-lg border border-accent-amber/20 bg-accent-amber/10 px-2.5 py-1.5">
+      <div className="flex min-w-0 items-center gap-2">
+        <CloudOff className="h-4 w-4 shrink-0 text-accent-amber" />
+        <div className="flex min-w-0 flex-col">
+          <span className="font-medium text-[12px] text-[var(--text-heading)]">
             {pendingCount > 0
               ? `${pendingCount} Offline Action${pendingCount > 1 ? 's' : ''}`
               : 'Offline Mode'}
@@ -693,9 +693,9 @@ function OfflineQueueRow() {
           type="button"
           onClick={() => flushQueue()}
           disabled={isSyncing}
-          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-button bg-accent-amber text-white hover:bg-accent-amber-hover transition-colors disabled:opacity-50"
+          className="flex items-center gap-1 rounded-button bg-accent-amber px-2 py-1 font-medium text-[10px] text-white transition-colors hover:bg-accent-amber-hover disabled:opacity-50"
         >
-          <RefreshCw className={cn('w-3 h-3', isSyncing && 'animate-spin')} />
+          <RefreshCw className={cn('h-3 w-3', isSyncing && 'animate-spin')} />
           {isSyncing ? 'Syncing...' : 'Sync Now'}
         </button>
       )}
@@ -784,17 +784,17 @@ function TaskbarNotificationBell() {
           title="Notifications"
           data-testid="taskbar-notifications-bell"
           className={cn(
-            'relative flex items-center justify-center w-7 h-7 rounded-full gold-steel-border gold-steel-border-slim',
-            'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
-            'transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50'
+            'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full',
+            'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
+            'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
           )}
         >
-          <Bell className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          <Bell className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
           {unreadCount > 0 && (
             <span
               data-testid="notification-unread-dot"
               aria-label={`${unreadCount} unread notifications`}
-              className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--accent-red)] ring-1 ring-white"
+              className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[var(--accent-red)] ring-1 ring-white"
             />
           )}
         </button>
@@ -804,44 +804,44 @@ function TaskbarNotificationBell() {
           align="end"
           sideOffset={6}
           className={cn(
-            'w-72 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card p-3 z-popover',
-            'flex flex-col gap-2 select-none focus:outline-none'
+            'z-popover w-72 rounded-card border border-black/[0.08] bg-white/95 p-3 shadow-window backdrop-blur-2xl',
+            'flex select-none flex-col gap-2 focus:outline-none'
           )}
         >
-          <div className="flex items-center justify-between px-1 pb-1.5 border-b border-black/[0.06]">
-            <span className="text-xs font-semibold text-[var(--text-heading)]">Notifications</span>
+          <div className="flex items-center justify-between border-black/[0.06] border-b px-1 pb-1.5">
+            <span className="font-semibold text-[var(--text-heading)] text-xs">Notifications</span>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllRead}
-                className="text-[10px] font-medium text-[var(--accent-blue)] hover:underline"
+                className="font-medium text-[10px] text-[var(--accent-blue)] hover:underline"
               >
                 Mark all read
               </button>
             )}
           </div>
           {items.length === 0 ? (
-            <p className="text-[11px] text-[var(--text-muted)] py-3 text-center">
+            <p className="py-3 text-center text-[11px] text-[var(--text-muted)]">
               No notifications
             </p>
           ) : (
-            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+            <div className="max-h-60 space-y-1.5 overflow-y-auto">
               {items.map((item) => (
                 <div
                   key={item.id}
                   className={cn(
-                    'p-2.5 rounded-lg border text-left transition-colors',
+                    'rounded-lg border p-2.5 text-left transition-colors',
                     item.unread
-                      ? 'bg-accent-amber/5 border-accent-amber/25'
-                      : 'bg-black/[0.02] border-black/[0.05]'
+                      ? 'border-accent-amber/25 bg-accent-amber/5'
+                      : 'border-black/[0.05] bg-black/[0.02]'
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-[var(--text-heading)]">
+                    <span className="font-semibold text-[11px] text-[var(--text-heading)]">
                       {item.title}
                     </span>
                     {item.unread && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-red)] shrink-0" />
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent-red)]" />
                     )}
                   </div>
                   <p className="mt-1 text-[11px] text-[var(--text-secondary)] leading-relaxed">
@@ -918,13 +918,13 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             aria-label="Return to Hub"
             data-testid="taskbar-home-button"
             className={cn(
-              'flex items-center justify-center w-7 h-7 rounded-full gold-steel-border gold-steel-border-slim',
-              'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
+              'gold-steel-border gold-steel-border-slim flex h-7 w-7 items-center justify-center rounded-full',
+              'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
               'transition-colors active:scale-[0.97]'
             )}
             title="Home — Return to Hub"
           >
-            <Home className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+            <Home className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
           </Link>
         </>
       )}
@@ -937,46 +937,46 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             aria-haspopup="dialog"
             title="System status & options"
             className={cn(
-              'flex items-center gap-2 h-7 px-2.5 rounded-full select-none cursor-default outline-none gold-steel-border gold-steel-border-slim',
-              'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
-              'transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50'
+              'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-2 rounded-full px-2.5 outline-none',
+              'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
+              'transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
             )}
           >
             {/* Server health dot */}
             <span className="relative flex h-2 w-2">
               {health.status === 'healthy' && !health.loading && (
-                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--accent-green)] opacity-75" />
+                <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-[var(--accent-green)] opacity-75" />
               )}
-              <span className={cn('relative inline-flex rounded-full h-2 w-2', healthDotColor)} />
+              <span className={cn('relative inline-flex h-2 w-2 rounded-full', healthDotColor)} />
             </span>
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
 
-            <VolumeIcon className={cn('w-3.5 h-3.5', volumeColor)} />
+            <VolumeIcon className={cn('h-3.5 w-3.5', volumeColor)} />
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
-            <ConnIcon className={cn('w-3.5 h-3.5', connColor)} />
+            <ConnIcon className={cn('h-3.5 w-3.5', connColor)} />
             <span
               aria-hidden="true"
               data-testid="system-tray-gold-separator"
-              className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
             >
               |
             </span>
             <div className="flex items-center gap-0.5">
-              <BatteryIcon className={cn('w-3.5 h-3.5', batteryColor)} />
+              <BatteryIcon className={cn('h-3.5 w-3.5', batteryColor)} />
               {battery.supported && battery.level !== null && (
-                <span className="text-[11px] font-medium text-[var(--text-heading)] leading-none">
+                <span className="font-medium text-[11px] text-[var(--text-heading)] leading-none">
                   {Math.round(battery.level * 100)}%
                 </span>
               )}
@@ -988,16 +988,16 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
                 <span
                   aria-hidden="true"
                   data-testid="system-tray-gold-separator"
-                  className="font-mono text-[11px] font-bold leading-none text-accent-amber drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] select-none"
+                  className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
                 >
                   |
                 </span>
                 <div
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-amber/10 border border-accent-amber/20 text-accent-amber animate-pulse"
+                  className="flex animate-pulse items-center gap-1 rounded-full border border-accent-amber/20 bg-accent-amber/10 px-1.5 py-0.5 text-accent-amber"
                   title={`${offlineQueue.pendingCount} offline actions pending sync`}
                 >
-                  <CloudOff className="w-3 h-3" />
-                  <span className="text-[10px] font-semibold">{offlineQueue.pendingCount}</span>
+                  <CloudOff className="h-3 w-3" />
+                  <span className="font-semibold text-[10px]">{offlineQueue.pendingCount}</span>
                 </div>
               </>
             )}
@@ -1005,7 +1005,7 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             <Logo
               variant="gold"
               className={cn(
-                'w-3 h-3 shrink-0 transition-transform duration-200 ease-out',
+                'h-3 w-3 shrink-0 transition-transform duration-200 ease-out',
                 trayOpen ? 'rotate-0' : 'rotate-180'
               )}
             />
@@ -1016,8 +1016,8 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             align="end"
             sideOffset={6}
             className={cn(
-              'w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card p-3 z-popover',
-              'flex flex-col gap-2 select-none focus:outline-none'
+              'z-popover w-64 rounded-card border border-black/[0.08] bg-white/95 p-3 shadow-window backdrop-blur-2xl',
+              'flex select-none flex-col gap-2 focus:outline-none'
             )}
           >
             <div className="space-y-3">

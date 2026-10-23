@@ -48,7 +48,7 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48">
+      <div className="flex h-48 items-center justify-center">
         <Text className="text-[var(--text-muted)]">No production data in the last 30 days</Text>
       </div>
     );
@@ -56,18 +56,18 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
+      <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-accent-green inline-block" />
+          <span className="inline-block h-2 w-2 rounded-full bg-accent-green" />
           Coal Removed
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-accent-blue inline-block" />
+          <span className="inline-block h-2 w-2 rounded-full bg-accent-blue" />
           Waste Removed
         </span>
         {forecast.length > 0 && (
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
+            <span className="inline-block h-2 w-2 rounded-full bg-indigo-500" />
             7-day Forecast
           </span>
         )}

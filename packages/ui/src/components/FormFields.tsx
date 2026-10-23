@@ -31,7 +31,7 @@ export function FormInput({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
+      <label htmlFor={inputId} className="block text-[var(--text-secondary)] text-sm">
         {label}
         {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
         {!optional && props.required && <span className="text-[var(--accent-red)]"> *</span>}
@@ -75,7 +75,7 @@ export function FormSelect({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
+      <label htmlFor={inputId} className="block text-[var(--text-secondary)] text-sm">
         {label}
         {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
       </label>
@@ -121,7 +121,7 @@ export function FormTextarea({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
+      <label htmlFor={inputId} className="block text-[var(--text-secondary)] text-sm">
         {label}
         {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
       </label>
@@ -161,7 +161,7 @@ export function SubmitButton({ loading, children, className, ...props }: SubmitB
       aria-busy={loading}
       className={cn(
         'bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]',
-        'text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors',
+        'rounded-lg px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors',
         className
       )}
       {...props}

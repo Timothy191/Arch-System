@@ -32,7 +32,7 @@ const DOCUMENTATION_VOLUMES = [
     variant: 'stripe' as const,
     color: '#006fee',
     textColor: '#ffffff',
-    icon: <Network className="w-4 h-4" />,
+    icon: <Network className="h-4 w-4" />,
     href: '/overview?tab=architecture',
     badge: 'Core Architecture',
   },
@@ -46,7 +46,7 @@ const DOCUMENTATION_VOLUMES = [
     color: '#9D2127',
     textColor: '#ffffff',
     textured: true,
-    icon: <ShieldCheck className="w-4 h-4" />,
+    icon: <ShieldCheck className="h-4 w-4" />,
     href: '/overview?tab=audit',
     badge: 'Security & Compliance',
   },
@@ -59,7 +59,7 @@ const DOCUMENTATION_VOLUMES = [
     variant: 'stripe' as const,
     color: '#7DC1C1',
     textColor: '#ffffff',
-    icon: <Bot className="w-4 h-4" />,
+    icon: <Bot className="h-4 w-4" />,
     href: '/overview?tab=agentic',
     badge: 'Agent Mesh',
   },
@@ -73,7 +73,7 @@ const DOCUMENTATION_VOLUMES = [
     color: '#FED954',
     textColor: '#9d3b05',
     textured: true,
-    icon: <Layers className="w-4 h-4" />,
+    icon: <Layers className="h-4 w-4" />,
     href: '/overview?tab=departments',
     badge: 'Industrial Ops',
   },
@@ -86,7 +86,7 @@ const DOCUMENTATION_VOLUMES = [
     variant: 'stripe' as const,
     color: '#059669',
     textColor: '#ffffff',
-    icon: <FileCode className="w-4 h-4" />,
+    icon: <FileCode className="h-4 w-4" />,
     href: '/docs/api',
     badge: 'API Reference',
   },
@@ -110,7 +110,7 @@ await client.recordMetric({
 
 export default function DocsLandingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl py-10 space-y-12">
+    <div className="mx-auto max-w-7xl space-y-12 px-md py-10 sm:px-lg lg:px-xl">
       {/* Navigation Breadcrumbs (Geist Menu Type) */}
       <Breadcrumb type="menu">
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
@@ -119,28 +119,28 @@ export default function DocsLandingPage() {
       </Breadcrumb>
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-[var(--border-default)]">
+      <div className="flex flex-col justify-between gap-6 border-[var(--border-default)] border-b pb-6 md:flex-row md:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-semibold uppercase tracking-wider mb-3">
-            <BookOpen className="w-3.5 h-3.5" />
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent-blue/20 bg-accent-blue/10 px-3 py-1 font-semibold text-accent-blue text-xs uppercase tracking-wider">
+            <BookOpen className="h-3.5 w-3.5" />
             Official Arch Library
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-heading)] sm:text-4xl">
+          <h1 className="font-extrabold text-3xl text-[var(--text-heading)] tracking-tight sm:text-4xl">
             Documentation & System Manuals
           </h1>
-          <p className="mt-2 text-base text-[var(--text-muted)] max-w-3xl">
+          <p className="mt-2 max-w-3xl text-[var(--text-muted)] text-base">
             Explore authoritative operational manuals, architectural blueprints, compliance
             runbooks, and machine-to-machine API specifications.
           </p>
         </div>
 
         {/* Geist ButtonLink Actions */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex shrink-0 items-center gap-3">
           <ButtonLink
             href="/docs/api"
             variant="default"
             size="small"
-            prefix={<FileCode className="w-4 h-4" />}
+            prefix={<FileCode className="h-4 w-4" />}
           >
             Swagger API
           </ButtonLink>
@@ -148,7 +148,7 @@ export default function DocsLandingPage() {
             href="/overview?tab=docs"
             variant="secondary"
             size="small"
-            suffix={<ArrowRight className="w-4 h-4" />}
+            suffix={<ArrowRight className="h-4 w-4" />}
           >
             Codebase Maps
           </ButtonLink>
@@ -156,11 +156,11 @@ export default function DocsLandingPage() {
       </div>
 
       {/* Bookshelf Volumes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {DOCUMENTATION_VOLUMES.map((vol) => (
           <GlassCard
             key={vol.id}
-            className="p-6 flex flex-col justify-between hover:border-[var(--accent-blue)]/40 transition-all duration-300 group"
+            className="group flex flex-col justify-between p-6 transition-all duration-300 hover:border-[var(--accent-blue)]/40"
           >
             <div className="flex items-start gap-6">
               {/* Responsive Book Cover */}
@@ -178,27 +178,27 @@ export default function DocsLandingPage() {
               </div>
 
               {/* Volume Details */}
-              <div className="space-y-2.5 flex-1 min-w-0">
-                <span className="inline-block text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              <div className="min-w-0 flex-1 space-y-2.5">
+                <span className="inline-block font-mono text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                   {vol.badge}
                 </span>
-                <h3 className="text-base font-bold text-[var(--text-heading)] group-hover:text-[var(--accent-blue)] transition-colors line-clamp-2">
+                <h3 className="line-clamp-2 font-bold text-[var(--text-heading)] text-base transition-colors group-hover:text-[var(--accent-blue)]">
                   {vol.title}
                 </h3>
-                <p className="text-xs text-[var(--text-muted)] line-clamp-3 leading-relaxed">
+                <p className="line-clamp-3 text-[var(--text-muted)] text-xs leading-relaxed">
                   {vol.description}
                 </p>
               </div>
             </div>
 
-            <div className="pt-5 mt-4 border-t border-[var(--border-default)]/60 flex items-center justify-between">
-              <span className="text-xs text-[var(--text-muted)] font-mono">{vol.subtitle}</span>
+            <div className="mt-4 flex items-center justify-between border-[var(--border-default)]/60 border-t pt-5">
+              <span className="font-mono text-[var(--text-muted)] text-xs">{vol.subtitle}</span>
               <Link
                 href={vol.href}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-blue)] hover:underline"
+                className="inline-flex items-center gap-1.5 font-semibold text-[var(--accent-blue)] text-xs hover:underline"
               >
                 Open Volume
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </Link>
             </div>
           </GlassCard>
@@ -208,10 +208,10 @@ export default function DocsLandingPage() {
       {/* Code Snippet Example with Geist CodeBlock */}
       <div className="space-y-4 pt-4">
         <div>
-          <h2 className="text-lg font-bold text-[var(--text-heading)]">
+          <h2 className="font-bold text-[var(--text-heading)] text-lg">
             Telemetry Client Ingestion API
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-[var(--text-muted)] text-xs">
             Publish SCADA sensor measurements directly to the Arch edge telemetry gateway.
           </p>
         </div>
@@ -228,10 +228,10 @@ export default function DocsLandingPage() {
       {/* Operational Runbooks Disclosure with Geist Collapse */}
       <div className="space-y-4 pt-4">
         <div>
-          <h2 className="text-lg font-bold text-[var(--text-heading)]">
+          <h2 className="font-bold text-[var(--text-heading)] text-lg">
             Frequently Referenced Operational Runbooks
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-[var(--text-muted)] text-xs">
             Standard emergency response procedures, cryptographic credential rotation, and shift
             protocols.
           </p>
@@ -240,21 +240,21 @@ export default function DocsLandingPage() {
         <GlassCard className="p-6">
           <CollapseGroup multiple>
             <Collapse defaultExpanded title="Emergency SCADA Failover Procedure">
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
                 In the event of an edge telemetry connection interruption exceeding 90 seconds, the
                 local gateway buffers all PLC tag events in memory. Standby Redis clusters
                 automatically initiate replica promotion within 450ms.
               </p>
             </Collapse>
             <Collapse title="Cryptographic Access Card Key Rotation">
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
                 RFID credentials and QR badges are signed with rotating SHA-256 HMAC tokens. Access
                 keys expire every 24 hours and can be manually refreshed from the Access Control
                 Credential Manager.
               </p>
             </Collapse>
             <Collapse title="Multi-Agent Mesh Coordinator Handover">
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
                 When transferring supervisory control between agents (e.g., Antigravity to Claude),
                 ensure all active background workers have concluded transactions before
                 synchronizing state trees.
@@ -268,50 +268,50 @@ export default function DocsLandingPage() {
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[var(--text-heading)]">
+            <h2 className="font-bold text-[var(--text-heading)] text-lg">
               Live Operations Interface
             </h2>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[var(--text-muted)] text-xs">
               Real-time telemetry and supervisory control visualizer running across the pit.
             </p>
           </div>
-          <span className="text-xs font-mono text-[var(--accent-green)] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[var(--accent-green)] text-xs">
             ● SCADA Engine Active
           </span>
         </div>
 
         <Browser address="https://arch.coal/operations/live" className="max-w-5xl shadow-2xl">
-          <div className="p-8 bg-neutral-900 text-white min-h-[220px] flex flex-col justify-between">
+          <div className="flex min-h-[220px] flex-col justify-between bg-neutral-900 p-8 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="font-mono text-xs uppercase tracking-widest text-neutral-400">
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+                <span className="font-mono text-neutral-400 text-xs uppercase tracking-widest">
                   Telemetry Stream · Opencast Mine Sector 7
                 </span>
               </div>
-              <span className="font-mono text-xs text-neutral-500">12 Active Vehicles</span>
+              <span className="font-mono text-neutral-500 text-xs">12 Active Vehicles</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
-              <div className="p-4 rounded-lg bg-neutral-800/80 border border-neutral-700/60">
-                <span className="text-xs text-neutral-400 block font-mono">Haul Fleet Output</span>
-                <span className="text-2xl font-bold text-white mt-1 block">4,280 t/h</span>
+            <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
+                <span className="block font-mono text-neutral-400 text-xs">Haul Fleet Output</span>
+                <span className="mt-1 block font-bold text-2xl text-white">4,280 t/h</span>
               </div>
-              <div className="p-4 rounded-lg bg-neutral-800/80 border border-neutral-700/60">
-                <span className="text-xs text-neutral-400 block font-mono">Blast Hole Drills</span>
-                <span className="text-2xl font-bold text-emerald-400 mt-1 block">
+              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
+                <span className="block font-mono text-neutral-400 text-xs">Blast Hole Drills</span>
+                <span className="mt-1 block font-bold text-2xl text-emerald-400">
                   98.4% Nominal
                 </span>
               </div>
-              <div className="p-4 rounded-lg bg-neutral-800/80 border border-neutral-700/60">
-                <span className="text-xs text-neutral-400 block font-mono">
+              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
+                <span className="block font-mono text-neutral-400 text-xs">
                   RFID Gate Verifications
                 </span>
-                <span className="text-2xl font-bold text-blue-400 mt-1 block">342 Today</span>
+                <span className="mt-1 block font-bold text-2xl text-blue-400">342 Today</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-neutral-500 border-t border-neutral-800 pt-3">
+            <div className="flex items-center justify-between border-neutral-800 border-t pt-3 text-neutral-500 text-xs">
               <span>Arch Industrial OS v2.4</span>
               <Link href="/overview" className="text-blue-400 hover:underline">
                 Explore Full Topology &rarr;

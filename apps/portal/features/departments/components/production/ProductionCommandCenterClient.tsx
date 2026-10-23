@@ -140,20 +140,20 @@ export function ProductionCommandCenterClient({
     <div className="space-y-6">
       {/* ── Top Header: Month Switcher, Passed Month Quick-View, & Target Editor Trigger ── */}
       <GlassCard className="p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-bold text-2xl text-[var(--text-heading)] tracking-tight">
                 Production Command &amp; Monthly Reconciliation
               </h2>
               <Badge
                 variant="outline"
-                className="text-xs font-mono bg-emerald-500/10 text-emerald-700 border-emerald-500/25"
+                className="border-emerald-500/25 bg-emerald-500/10 font-mono text-emerald-700 text-xs"
               >
                 Auto-Pulled Multi-Source SSoT
               </Badge>
             </div>
-            <p className="text-xs text-[var(--text-secondary)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-xs">
               Automatically aggregates ROM Coal, Overburden Waste, Haul Truck Loads, Excavator BCM,
               and Dozer Push across Control Room &amp; Production logs.
             </p>
@@ -168,9 +168,9 @@ export function ProductionCommandCenterClient({
                 variant={selectedMonth === passedMonthOption.value ? 'default' : 'outline'}
                 onClick={() => handleMonthChange(passedMonthOption.value)}
                 disabled={isPending}
-                className="text-xs gap-1.5"
+                className="gap-1.5 text-xs"
               >
-                <Calendar className="w-3.5 h-3.5" />
+                <Calendar className="h-3.5 w-3.5" />
                 Passed Month Report ({passedMonthOption.value})
               </Button>
             )}
@@ -180,7 +180,7 @@ export function ProductionCommandCenterClient({
               value={selectedMonth}
               onChange={(e) => handleMonthChange(e.target.value)}
               disabled={isPending}
-              className="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-medium text-[var(--text-heading)]"
+              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs"
             >
               {report.availableMonths.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -194,9 +194,9 @@ export function ProductionCommandCenterClient({
               size="sm"
               variant="outline"
               onClick={() => setShowTargetEditor((v) => !v)}
-              className="text-xs gap-1.5"
+              className="gap-1.5 text-xs"
             >
-              <Target className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              <Target className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
               Set Monthly Target
             </Button>
 
@@ -205,9 +205,9 @@ export function ProductionCommandCenterClient({
               size="sm"
               variant="outline"
               onClick={handleExportCsv}
-              className="text-xs gap-1.5"
+              className="gap-1.5 text-xs"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="h-3.5 w-3.5" />
               CSV
             </Button>
 
@@ -216,9 +216,9 @@ export function ProductionCommandCenterClient({
               size="sm"
               variant="outline"
               onClick={() => typeof window !== 'undefined' && window.print()}
-              className="text-xs gap-1.5"
+              className="gap-1.5 text-xs"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="h-3.5 w-3.5" />
               Print
             </Button>
           </div>
@@ -227,14 +227,14 @@ export function ProductionCommandCenterClient({
 
       {/* ── Monthly Target Configuration Drawer (Coal & Waste) ── */}
       {showTargetEditor && (
-        <GlassCard className="p-6 border-2 border-[var(--accent-blue)]/40 space-y-4">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <GlassCard className="space-y-4 border-2 border-[var(--accent-blue)]/40 p-6">
+          <div className="flex items-center justify-between border-[var(--border-subtle)] border-b pb-3">
             <div>
-              <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <Target className="w-4 h-4 text-[var(--accent-blue)]" />
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+                <Target className="h-4 w-4 text-[var(--accent-blue)]" />
                 Set Monthly Production Targets — {report.monthLabel} ({selectedMonth})
               </h3>
-              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
                 Targets set here are stored in{' '}
                 <code className="font-mono">production_monthly_targets</code> and automatically
                 pulled by Control Room, Drilling, and Executive Reports.
@@ -242,9 +242,9 @@ export function ProductionCommandCenterClient({
             </div>
           </div>
 
-          <form onSubmit={handleSaveTarget} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <form onSubmit={handleSaveTarget} className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div>
-              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+              <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                 Monthly Coal Target (Tonnes) *
               </label>
               <input
@@ -259,12 +259,12 @@ export function ProductionCommandCenterClient({
                     coal_target_tonnes: Number(e.target.value),
                   }))
                 }
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+              <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                 Monthly Waste Target (Tonnes) *
               </label>
               <input
@@ -279,12 +279,12 @@ export function ProductionCommandCenterClient({
                     waste_target_tonnes: Number(e.target.value),
                   }))
                 }
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+              <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                 Monthly Bank Volume Target (BCM) *
               </label>
               <input
@@ -299,12 +299,12 @@ export function ProductionCommandCenterClient({
                     bcm_target: Number(e.target.value),
                   }))
                 }
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+              <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                 Target Notes / Seam Reference
               </label>
               <input
@@ -312,11 +312,11 @@ export function ProductionCommandCenterClient({
                 value={targetForm.notes}
                 onChange={(e) => setTargetForm((prev) => ({ ...prev, notes: e.target.value }))}
                 placeholder="e.g. Seam 2 & 4 ROM Plan"
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
               />
             </div>
 
-            <div className="md:col-span-4 flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-end gap-2 border-[var(--border-subtle)] border-t pt-2 md:col-span-4">
               <Button
                 type="button"
                 size="sm"
@@ -329,9 +329,9 @@ export function ProductionCommandCenterClient({
                 type="submit"
                 size="sm"
                 disabled={isPending}
-                className="bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 gap-1.5"
+                className="gap-1.5 bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="h-4 w-4" />
                 {isPending ? 'Saving Target…' : 'Save & Broadcast Monthly Target'}
               </Button>
             </div>
@@ -340,22 +340,22 @@ export function ProductionCommandCenterClient({
       )}
 
       {/* ── Monthly Target vs Actual Progress Cards (Coal, Waste, BCM, Strip Ratio) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* Card 1: Monthly Coal vs Target */}
-        <GlassCard className="p-5 space-y-3">
+        <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
               Coal Production ({report.selectedMonth})
             </span>
-            <Badge className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-xs font-mono">
+            <Badge className="border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-700 text-xs">
               {totals.coalTargetProgressPct}% of Target
             </Badge>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+            <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
               {totals.coalTonnes.toLocaleString()} t
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
                 {target.coal_target_tonnes.toLocaleString()} t
@@ -363,32 +363,32 @@ export function ProductionCommandCenterClient({
               · Rem: {totals.remainingCoalTonnes.toLocaleString()} t
             </p>
           </div>
-          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
-              className="h-full bg-emerald-600 rounded-full transition-all"
+              className="h-full rounded-full bg-emerald-600 transition-all"
               style={{ width: `${Math.min(100, totals.coalTargetProgressPct)}%` }}
             />
           </div>
-          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+          <p className="font-mono text-[11px] text-[var(--text-secondary)]">
             Req. Run-Rate: {totals.requiredDailyCoalRate.toLocaleString()} t/day
           </p>
         </GlassCard>
 
         {/* Card 2: Monthly Waste vs Target */}
-        <GlassCard className="p-5 space-y-3">
+        <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
               Waste Stripping ({report.selectedMonth})
             </span>
-            <Badge className="bg-blue-500/15 text-blue-700 border border-blue-500/30 text-xs font-mono">
+            <Badge className="border border-blue-500/30 bg-blue-500/15 font-mono text-blue-700 text-xs">
               {totals.wasteTargetProgressPct}% of Target
             </Badge>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+            <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
               {totals.wasteTonnes.toLocaleString()} t
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
                 {target.waste_target_tonnes.toLocaleString()} t
@@ -396,32 +396,32 @@ export function ProductionCommandCenterClient({
               · Rem: {totals.remainingWasteTonnes.toLocaleString()} t
             </p>
           </div>
-          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all"
+              className="h-full rounded-full bg-blue-600 transition-all"
               style={{ width: `${Math.min(100, totals.wasteTargetProgressPct)}%` }}
             />
           </div>
-          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+          <p className="font-mono text-[11px] text-[var(--text-secondary)]">
             Req. Run-Rate: {totals.requiredDailyWasteRate.toLocaleString()} t/day
           </p>
         </GlassCard>
 
         {/* Card 3: Total Extraction BCM */}
-        <GlassCard className="p-5 space-y-3">
+        <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
               Total Bank Volume (BCM)
             </span>
-            <Badge variant="outline" className="text-xs font-mono">
+            <Badge variant="outline" className="font-mono text-xs">
               {totals.bcmTargetProgressPct}% of Plan
             </Badge>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+            <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
               {totals.totalBcm.toLocaleString()} BCM
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target:{' '}
               <strong className="text-[var(--text-heading)]">
                 {target.bcm_target.toLocaleString()} BCM
@@ -429,33 +429,33 @@ export function ProductionCommandCenterClient({
               · {totals.haulTruckLoads.toLocaleString()} Haul Loads
             </p>
           </div>
-          <div className="w-full h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
-              className="h-full bg-indigo-600 rounded-full transition-all"
+              className="h-full rounded-full bg-indigo-600 transition-all"
               style={{ width: `${Math.min(100, totals.bcmTargetProgressPct)}%` }}
             />
           </div>
-          <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+          <p className="font-mono text-[11px] text-[var(--text-secondary)]">
             Haul: {totals.haulTruckBcm.toLocaleString()} · Dozer:{' '}
             {totals.dozerPushBcm.toLocaleString()} BCM
           </p>
         </GlassCard>
 
         {/* Card 4: Strip Ratio & Fleet SMR Hours */}
-        <GlassCard className="p-5 space-y-3">
+        <GlassCard className="space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            <span className="font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
               Strip Ratio &amp; Fleet SMR
             </span>
-            <Badge variant="outline" className="text-xs font-mono">
+            <Badge variant="outline" className="font-mono text-xs">
               {totals.daysLogged} / {totals.totalDaysInMonth} Days
             </Badge>
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+            <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
               {totals.stripRatio.toFixed(2)} : 1
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            <p className="mt-0.5 text-[var(--text-muted)] text-xs">
               Target Ratio:{' '}
               <strong className="text-[var(--text-heading)]">
                 {target.coal_target_tonnes > 0
@@ -466,7 +466,7 @@ export function ProductionCommandCenterClient({
               (W:C)
             </p>
           </div>
-          <div className="pt-1 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-1 text-xs">
             <span className="text-[var(--text-muted)]">Fleet Operating Hours:</span>
             <span className="font-mono font-semibold text-[var(--text-heading)]">
               {totals.fleetOperatingHours.toLocaleString()} SMR hrs
@@ -476,47 +476,47 @@ export function ProductionCommandCenterClient({
       </div>
 
       {/* ── Auto-Pulled Source Breakdown & Reconciliation Drift Banner ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <GlassCard className="lg:col-span-7 p-4 flex flex-col justify-between gap-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <GlassCard className="flex flex-col justify-between gap-3 p-4 lg:col-span-7">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+            <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+              <Layers className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
               Auto-Synchronized Upstream Data Sources
             </h3>
-            <span className="text-[11px] font-mono text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-700">
               Live Pipeline Active
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+          <div className="grid grid-cols-2 gap-2.5 text-xs sm:grid-cols-4">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                 1. Hourly Loads
               </p>
-              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                 {totals.haulTruckLoads.toLocaleString()} loads
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                 2. Excavator BCM
               </p>
-              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                 {totals.excavatorBcm.toLocaleString()} BCM
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                 3. Dozer Rollover
               </p>
-              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                 {totals.dozerPushBcm.toLocaleString()} BCM
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
                 4. Fleet SMR Ops
               </p>
-              <p className="font-bold text-[var(--text-heading)] mt-0.5 font-mono">
+              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
                 {totals.fleetOperatingHours.toLocaleString()} hrs
               </p>
             </div>
@@ -524,7 +524,7 @@ export function ProductionCommandCenterClient({
         </GlassCard>
 
         <GlassCard
-          className={`lg:col-span-5 p-4 border-l-4 flex flex-col justify-between ${
+          className={`flex flex-col justify-between border-l-4 p-4 lg:col-span-5 ${
             driftLevel === 'critical'
               ? 'border-accent-red'
               : driftLevel === 'moderate'
@@ -536,14 +536,14 @@ export function ProductionCommandCenterClient({
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
                 Weighbridge vs. Survey BCM Reconciliation
               </h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{driftUI.description}</p>
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">{driftUI.description}</p>
             </div>
             <div className="text-right">
               <span
-                className={`text-lg font-bold font-mono ${
+                className={`font-bold font-mono text-lg ${
                   driftLevel === 'critical'
                     ? 'text-accent-red'
                     : driftLevel === 'moderate'
@@ -564,19 +564,19 @@ export function ProductionCommandCenterClient({
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
               href="/production/daily-log"
-              className="px-3 py-1.5 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg text-xs transition-all"
+              className="rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90"
             >
               + Log Weighbridge Override
             </Link>
             <Link
               href="/production/hourly-loads"
-              className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
+              className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
             >
               Hourly Loads Matrix
             </Link>
             <Link
               href="/production/reports"
-              className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] font-medium rounded-lg text-xs transition-all"
+              className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
             >
               Detailed Shift Logs
             </Link>
@@ -585,14 +585,14 @@ export function ProductionCommandCenterClient({
       </div>
 
       {/* ── Daily & Passed Month Production Report Table ── */}
-      <GlassCard className="p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <GlassCard className="space-y-4 p-5">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
-            <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-[var(--accent-blue)]" />
+            <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+              <BarChart3 className="h-4 w-4 text-[var(--accent-blue)]" />
               {report.monthLabel} — Automated Daily Production &amp; Stripping Ledger
             </h3>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[var(--text-muted)] text-xs">
               Showing {report.dailyRows.length} active production day(s) for {report.monthLabel}.
               Switch month above at any time to inspect passed-month reports.
             </p>
@@ -603,58 +603,58 @@ export function ProductionCommandCenterClient({
             variant="ghost"
             disabled={isPending}
             onClick={() => handleMonthChange(selectedMonth)}
-            className="text-xs gap-1.5"
+            className="gap-1.5 text-xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${isPending ? 'animate-spin' : ''}`} />
             Refresh Auto-Pull
           </Button>
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] uppercase font-mono text-[11px] border-b border-[var(--border-subtle)]">
+            <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)] font-mono text-[11px] text-[var(--text-secondary)] uppercase">
               <tr>
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3 text-right">Day Coal (t)</th>
-                <th className="py-2.5 px-3 text-right">Night Coal (t)</th>
-                <th className="py-2.5 px-3 text-right font-bold text-emerald-700">
+                <th className="px-3 py-2.5">Date</th>
+                <th className="px-3 py-2.5 text-right">Day Coal (t)</th>
+                <th className="px-3 py-2.5 text-right">Night Coal (t)</th>
+                <th className="px-3 py-2.5 text-right font-bold text-emerald-700">
                   Total Coal (t)
                 </th>
-                <th className="py-2.5 px-3 text-right font-bold text-blue-700">Total Waste (t)</th>
-                <th className="py-2.5 px-3 text-right">Strip Ratio</th>
-                <th className="py-2.5 px-3 text-right">Haul Loads</th>
-                <th className="py-2.5 px-3 text-right">Total BCM</th>
-                <th className="py-2.5 px-3 text-right">Fleet SMR (h)</th>
+                <th className="px-3 py-2.5 text-right font-bold text-blue-700">Total Waste (t)</th>
+                <th className="px-3 py-2.5 text-right">Strip Ratio</th>
+                <th className="px-3 py-2.5 text-right">Haul Loads</th>
+                <th className="px-3 py-2.5 text-right">Total BCM</th>
+                <th className="px-3 py-2.5 text-right">Fleet SMR (h)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {report.dailyRows.map((row) => (
                 <tr key={row.date} className="hover:bg-[var(--bg-secondary)]/50">
-                  <td className="py-2.5 px-3 font-mono font-medium text-[var(--text-heading)]">
+                  <td className="px-3 py-2.5 font-medium font-mono text-[var(--text-heading)]">
                     {row.date}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-[var(--text-secondary)]">
+                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
                     {row.dayShiftCoalTonnes.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-[var(--text-secondary)]">
+                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
                     {row.nightShiftCoalTonnes.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-emerald-700">
+                  <td className="px-3 py-2.5 text-right font-mono font-semibold text-emerald-700">
                     {row.totalCoalTonnes.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-blue-700">
+                  <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-700">
                     {row.totalWasteTonnes.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-[var(--text-heading)]">
+                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-heading)]">
                     {row.stripRatio.toFixed(2)}:1
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-[var(--text-secondary)]">
+                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
                     {row.haulTruckLoads.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-medium text-[var(--text-heading)]">
+                  <td className="px-3 py-2.5 text-right font-medium font-mono text-[var(--text-heading)]">
                     {row.totalBcm.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-[var(--text-secondary)]">
+                  <td className="px-3 py-2.5 text-right font-mono text-[var(--text-secondary)]">
                     {row.fleetOperatingHours.toFixed(1)}h
                   </td>
                 </tr>
@@ -668,31 +668,31 @@ export function ProductionCommandCenterClient({
               )}
             </tbody>
             {report.dailyRows.length > 0 && (
-              <tfoot className="bg-[var(--bg-secondary)] font-mono font-bold text-[var(--text-heading)] border-t-2 border-[var(--border-default)]">
+              <tfoot className="border-[var(--border-default)] border-t-2 bg-[var(--bg-secondary)] font-bold font-mono text-[var(--text-heading)]">
                 <tr>
-                  <td className="py-2.5 px-3">MONTHLY TOTAL</td>
-                  <td className="py-2.5 px-3 text-right">
+                  <td className="px-3 py-2.5">MONTHLY TOTAL</td>
+                  <td className="px-3 py-2.5 text-right">
                     {report.dailyRows
                       .reduce((s, r) => s + r.dayShiftCoalTonnes, 0)
                       .toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right">
+                  <td className="px-3 py-2.5 text-right">
                     {report.dailyRows
                       .reduce((s, r) => s + r.nightShiftCoalTonnes, 0)
                       .toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right text-emerald-700">
+                  <td className="px-3 py-2.5 text-right text-emerald-700">
                     {totals.coalTonnes.toLocaleString()} t
                   </td>
-                  <td className="py-2.5 px-3 text-right text-blue-700">
+                  <td className="px-3 py-2.5 text-right text-blue-700">
                     {totals.wasteTonnes.toLocaleString()} t
                   </td>
-                  <td className="py-2.5 px-3 text-right">{totals.stripRatio.toFixed(2)}:1</td>
-                  <td className="py-2.5 px-3 text-right">
+                  <td className="px-3 py-2.5 text-right">{totals.stripRatio.toFixed(2)}:1</td>
+                  <td className="px-3 py-2.5 text-right">
                     {totals.haulTruckLoads.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right">{totals.totalBcm.toLocaleString()} BCM</td>
-                  <td className="py-2.5 px-3 text-right">{totals.fleetOperatingHours}h</td>
+                  <td className="px-3 py-2.5 text-right">{totals.totalBcm.toLocaleString()} BCM</td>
+                  <td className="px-3 py-2.5 text-right">{totals.fleetOperatingHours}h</td>
                 </tr>
               </tfoot>
             )}

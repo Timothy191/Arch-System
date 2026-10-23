@@ -14,13 +14,13 @@ export default function TechStack() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-text-heading">Technology Stack</h2>
-        <p className="text-text-secondary mt-1">
+        <h2 className="font-semibold text-2xl text-text-heading">Technology Stack</h2>
+        <p className="mt-1 text-text-secondary">
           Complete overview of technologies used in Arch Systems Enterprise OS
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {TECH_STACK.map((category) => (
           <Card key={category.category} className="overflow-hidden">
             {/* Category header with color */}
@@ -29,7 +29,7 @@ export default function TechStack() {
             <CardHeader className="pb-4">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
                   style={{ backgroundColor: `${category.color}20` }}
                 >
                   {categoryIcons[category.category] || '📦'}
@@ -38,7 +38,7 @@ export default function TechStack() {
                   <CardTitle className="text-lg" style={{ color: category.color }}>
                     {category.category}
                   </CardTitle>
-                  <div className="text-xs text-text-muted mt-0.5">
+                  <div className="mt-0.5 text-text-muted text-xs">
                     {category.items.length} technologies
                   </div>
                 </div>
@@ -50,7 +50,7 @@ export default function TechStack() {
                 {category.items.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary hover:bg-border-subtle transition-colors"
+                    className="flex items-start justify-between rounded-lg bg-bg-tertiary p-3 transition-colors hover:bg-border-subtle"
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -58,13 +58,13 @@ export default function TechStack() {
                         {item.version && (
                           <Badge
                             variant="outline"
-                            className="text-[10px] border-default text-text-muted"
+                            className="border-default text-[10px] text-text-muted"
                           >
                             {item.version}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-text-muted mt-1">{item.description}</p>
+                      <p className="mt-1 text-text-muted text-xs">{item.description}</p>
                     </div>
                   </div>
                 ))}
@@ -76,77 +76,77 @@ export default function TechStack() {
 
       {/* Core Architecture Diagram */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-text-heading mb-4">Architecture Overview</h3>
-        <div className="glass-card p-6 rounded-xl">
+        <h3 className="mb-4 font-medium text-lg text-text-heading">Architecture Overview</h3>
+        <div className="glass-card rounded-xl p-6">
           <div className="flex flex-wrap items-center justify-center gap-4">
             {/* Frontend Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">Frontend</div>
+              <div className="mb-2 text-text-muted text-xs uppercase tracking-wider">Frontend</div>
               <div className="flex flex-wrap gap-2">
-                <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
+                <div className="rounded-lg border border-accent-green/30 bg-accent-green/10 px-4 py-3 font-medium text-accent-green text-sm">
                   Next.js 16.3.8
                 </div>
-                <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
+                <div className="rounded-lg border border-accent-green/30 bg-accent-green/10 px-4 py-3 font-medium text-accent-green text-sm">
                   React 19.2
                 </div>
-                <div className="px-4 py-3 bg-accent-green/10 border border-accent-green/30 rounded-lg text-accent-green text-sm font-medium">
+                <div className="rounded-lg border border-accent-green/30 bg-accent-green/10 px-4 py-3 font-medium text-accent-green text-sm">
                   Tailwind OKLCH
                 </div>
               </div>
             </div>
 
-            <div className="text-border-default text-2xl">→</div>
+            <div className="text-2xl text-border-default">→</div>
 
             {/* API Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
+              <div className="mb-2 text-text-muted text-xs uppercase tracking-wider">
                 RPC & Boundary
               </div>
               <div className="flex flex-wrap gap-2">
-                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   Server Actions + @repo/contract
                 </div>
-                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   @repo/supabase SSR
                 </div>
               </div>
             </div>
 
-            <div className="text-border-default text-2xl">→</div>
+            <div className="text-2xl text-border-default">→</div>
 
             {/* Backend Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
+              <div className="mb-2 text-text-muted text-xs uppercase tracking-wider">
                 Data & Cache
               </div>
               <div className="flex flex-wrap gap-2">
-                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   PostgreSQL 17 (186 Migrations)
                 </div>
-                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   100% RLS InitPlan
                 </div>
-                <div className="px-4 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-accent-blue text-sm font-medium">
+                <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   Hybrid L1/L2 Redis 7.4
                 </div>
               </div>
             </div>
 
-            <div className="text-border-default text-2xl">+</div>
+            <div className="text-2xl text-border-default">+</div>
 
             {/* Integration Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-text-muted mb-2 uppercase tracking-wider">
+              <div className="mb-2 text-text-muted text-xs uppercase tracking-wider">
                 Industrial Mesh
               </div>
               <div className="flex flex-wrap gap-2">
-                <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
+                <div className="rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-4 py-3 font-medium text-accent-amber text-sm">
                   FUXA SCADA
                 </div>
-                <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
+                <div className="rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-4 py-3 font-medium text-accent-amber text-sm">
                   Inngest
                 </div>
-                <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
+                <div className="rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-4 py-3 font-medium text-accent-amber text-sm">
                   Flowise & Langfuse
                 </div>
               </div>
@@ -154,8 +154,8 @@ export default function TechStack() {
           </div>
 
           {/* Data Flow */}
-          <div className="mt-6 pt-6 border-t border-default">
-            <div className="text-xs text-text-muted text-center">
+          <div className="mt-6 border-default border-t pt-6">
+            <div className="text-center text-text-muted text-xs">
               Data Flow: Operator → Next.js 16 Proxy → RSC / Server Action (@repo/contract) →
               @repo/supabase (Primary / Read Replica) → PostgreSQL 17 (100% RLS InitPlan) → Hybrid
               L1/L2 Cache
@@ -166,8 +166,8 @@ export default function TechStack() {
 
       {/* Monorepo Structure */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-text-heading mb-4">Monorepo Structure</h3>
-        <div className="glass-card p-6 rounded-xl font-mono text-sm">
+        <h3 className="mb-4 font-medium text-lg text-text-heading">Monorepo Structure</h3>
+        <div className="glass-card rounded-xl p-6 font-mono text-sm">
           <div className="text-text-secondary">
             <span className="text-accent-green">Arch-System/</span>
             <br />

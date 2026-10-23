@@ -16,14 +16,14 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
       : ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
 
   return (
-    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
-      <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
+    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] bg-[var(--vibrancy-surface)] shadow-card backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/50 px-5 py-4">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--text-heading)] tracking-tight flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm tracking-tight">
             <Truck className="h-4 w-4 text-[var(--text-secondary)]" />
             Excavator & Hauling Output
           </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="mt-0.5 text-[var(--text-muted)] text-xs">
             Total loads hauled and hourly loader production rates
           </p>
         </div>
@@ -32,7 +32,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
       <div className="p-5">
         {production.machines.length === 0 ? (
           <div className="py-8 text-center text-[var(--text-muted)] text-xs">
-            <BarChart2 className="h-8 w-8 mx-auto mb-2 text-[var(--text-muted)]" />
+            <BarChart2 className="mx-auto mb-2 h-8 w-8 text-[var(--text-muted)]" />
             No hourly load tallies recorded for this shift date.
           </div>
         ) : (
@@ -46,18 +46,18 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
               return (
                 <div
                   key={machine.machine_id}
-                  className="p-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 space-y-2.5"
+                  className="space-y-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 p-3.5"
                 >
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 font-semibold text-[var(--text-heading)]">
                       <span>{machine.machine_name}</span>
-                      <span className="text-[10px] font-normal text-[var(--text-muted)] px-2 py-0.5 rounded bg-[var(--bg-secondary)] uppercase">
+                      <span className="rounded bg-[var(--bg-secondary)] px-2 py-0.5 font-normal text-[10px] text-[var(--text-muted)] uppercase">
                         {machine.machine_type}
                       </span>
                     </div>
-                    <div className="font-mono font-medium text-[var(--text-secondary)]">
+                    <div className="font-medium font-mono text-[var(--text-secondary)]">
                       Loads:{' '}
-                      <strong className="text-[var(--text-heading)] font-bold">
+                      <strong className="font-bold text-[var(--text-heading)]">
                         {machine.total_loads}
                       </strong>
                     </div>
@@ -74,7 +74,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
 
                       return (
                         <div key={h} className="flex flex-col items-center gap-1">
-                          <div className="w-full h-10 bg-neutral-100 rounded-sm flex items-end overflow-hidden p-0.5">
+                          <div className="flex h-10 w-full items-end overflow-hidden rounded-sm bg-neutral-100 p-0.5">
                             <div
                               className={`w-full rounded-xs transition-all duration-300 ${
                                 loadCount > 0
@@ -85,7 +85,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
                               title={`${h}:00 - ${loadCount} loads`}
                             />
                           </div>
-                          <span className="text-[9px] font-mono text-neutral-400">{h}h</span>
+                          <span className="font-mono text-[9px] text-neutral-400">{h}h</span>
                         </div>
                       );
                     })}

@@ -89,9 +89,9 @@ export default function UpdatePasswordPage() {
   if (checkingSession) {
     return (
       <div className="w-full max-w-md space-y-3">
-        <div className="glass-card rounded-xl overflow-hidden p-6 text-center space-y-4">
-          <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin mx-auto" />
-          <p className="text-sm text-[var(--text-muted)]">Verifying session...</p>
+        <div className="glass-card space-y-4 overflow-hidden rounded-xl p-6 text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--accent-blue)]" />
+          <p className="text-[var(--text-muted)] text-sm">Verifying session...</p>
         </div>
       </div>
     );
@@ -100,15 +100,15 @@ export default function UpdatePasswordPage() {
   if (!hasSession) {
     return (
       <div className="w-full max-w-md space-y-3">
-        <div className="glass-card rounded-xl overflow-hidden p-6 text-center space-y-4">
-          <AlertTriangle className="w-8 h-8 text-[var(--accent-red)] mx-auto" strokeWidth={1.5} />
-          <h1 className="text-lg font-medium text-[var(--text-heading)]">Link Expired</h1>
-          <p className="text-sm text-[var(--text-muted)]">
+        <div className="glass-card space-y-4 overflow-hidden rounded-xl p-6 text-center">
+          <AlertTriangle className="mx-auto h-8 w-8 text-[var(--accent-red)]" strokeWidth={1.5} />
+          <h1 className="font-medium text-[var(--text-heading)] text-lg">Link Expired</h1>
+          <p className="text-[var(--text-muted)] text-sm">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
           <a
             href="/reset-password"
-            className="inline-block w-full text-center px-4 py-2.5 rounded-full bg-[var(--accent-blue)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="inline-block w-full rounded-full bg-[var(--accent-blue)] px-4 py-2.5 text-center font-medium text-sm text-white transition-opacity hover:opacity-90"
           >
             Request New Link
           </a>
@@ -119,40 +119,40 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="w-full max-w-md space-y-3">
-      <div className="glass-card rounded-xl overflow-hidden animate-window-open glass-top-border">
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--glass-surface-hover)]">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-close)] border border-[var(--border-subtle)]" />
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-minimize)] border border-[var(--border-subtle)]" />
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-zoom)] border border-[var(--border-subtle)]" />
+      <div className="glass-card glass-top-border animate-window-open overflow-hidden rounded-xl">
+        <div className="flex items-center gap-3 border-[var(--border-subtle)] border-b bg-[var(--glass-surface-hover)] px-4 py-2.5">
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border border-[var(--border-subtle)] bg-[var(--mac-close)]" />
+            <span className="h-3 w-3 rounded-full border border-[var(--border-subtle)] bg-[var(--mac-minimize)]" />
+            <span className="h-3 w-3 rounded-full border border-[var(--border-subtle)] bg-[var(--mac-zoom)]" />
           </div>
-          <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">
+          <span className="flex-1 select-none pr-14 text-center font-medium text-[13px] text-[var(--text-secondary)]">
             Arch — New Password
           </span>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="space-y-4 p-6">
           {updated ? (
             <div className="space-y-4 text-center">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-green)]/10 mx-auto">
-                <Check className="w-6 h-6 text-[var(--accent-green)]" strokeWidth={1.5} />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-green)]/10">
+                <Check className="h-6 w-6 text-[var(--accent-green)]" strokeWidth={1.5} />
               </div>
               <div className="space-y-1">
-                <h1 className="text-lg font-medium text-[var(--text-heading)]">Password Updated</h1>
-                <p className="text-sm text-[var(--text-muted)]">
+                <h1 className="font-medium text-[var(--text-heading)] text-lg">Password Updated</h1>
+                <p className="text-[var(--text-muted)] text-sm">
                   Your password has been updated. Redirecting to sign in...
                 </p>
               </div>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-blue)]/10 mx-auto">
-                <Lock className="w-6 h-6 text-[var(--accent-blue)]" strokeWidth={1.5} />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-blue)]/10">
+                <Lock className="h-6 w-6 text-[var(--accent-blue)]" strokeWidth={1.5} />
               </div>
 
-              <div className="text-center space-y-1">
-                <h1 className="text-xl font-medium text-[var(--text-heading)]">Set New Password</h1>
-                <p className="text-sm text-[var(--text-muted)]">
+              <div className="space-y-1 text-center">
+                <h1 className="font-medium text-[var(--text-heading)] text-xl">Set New Password</h1>
+                <p className="text-[var(--text-muted)] text-sm">
                   Choose a strong password you have not used before.
                 </p>
               </div>
@@ -161,7 +161,7 @@ export default function UpdatePasswordPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="new-password"
-                    className="block text-sm text-[var(--text-secondary)]"
+                    className="block text-[var(--text-secondary)] text-sm"
                   >
                     New Password
                   </label>
@@ -185,7 +185,7 @@ export default function UpdatePasswordPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="confirm-password"
-                    className="block text-sm text-[var(--text-secondary)]"
+                    className="block text-[var(--text-secondary)] text-sm"
                   >
                     Confirm Password
                   </label>
@@ -209,10 +209,10 @@ export default function UpdatePasswordPage() {
                 {error && (
                   <p
                     id="update-error"
-                    className="text-sm text-red-700 bg-red-50/80 px-3 py-2 rounded-md flex items-center gap-2"
+                    className="flex items-center gap-2 rounded-md bg-red-50/80 px-3 py-2 text-red-700 text-sm"
                     role="alert"
                   >
-                    <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+                    <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                     {error}
                   </p>
                 )}
@@ -220,7 +220,7 @@ export default function UpdatePasswordPage() {
                 <AnimatedButton
                   type="submit"
                   disabled={loading}
-                  className="w-full liquid-glass-button"
+                  className="liquid-glass-button w-full"
                   hoverScale={1}
                   tapScale={0.97}
                 >

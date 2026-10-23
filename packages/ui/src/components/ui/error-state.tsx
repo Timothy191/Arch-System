@@ -34,20 +34,20 @@ export const ErrorState = React.forwardRef<HTMLDivElement, ErrorStateProps>(
         ref={ref}
         role="alert"
         className={cn(
-          'flex flex-col items-center justify-center p-8 text-center bg-white/70 backdrop-blur-md rounded-2xl border border-[var(--accent-red)]/20 shadow-2xs space-y-3.5',
+          'flex flex-col items-center justify-center space-y-3.5 rounded-2xl border border-[var(--accent-red)]/20 bg-white/70 p-8 text-center shadow-2xs backdrop-blur-md',
           className
         )}
         {...props}
       >
-        <div className="w-10 h-10 rounded-full bg-[var(--accent-red)]/10 text-[var(--accent-red)] flex items-center justify-center border border-[var(--accent-red)]/25">
-          {icon ?? <AlertCircle className="w-5 h-5" aria-hidden="true" />}
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--accent-red)]/25 bg-[var(--accent-red)]/10 text-[var(--accent-red)]">
+          {icon ?? <AlertCircle className="h-5 w-5" aria-hidden="true" />}
         </div>
 
-        <div className="space-y-1 max-w-sm">
-          <h4 className="font-semibold text-sm text-[var(--text-heading)]">{title}</h4>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{description}</p>
+        <div className="max-w-sm space-y-1">
+          <h4 className="font-semibold text-[var(--text-heading)] text-sm">{title}</h4>
+          <p className="text-[var(--text-secondary)] text-xs leading-relaxed">{description}</p>
           {errorMessage && (
-            <p className="mt-2 text-[11px] font-mono p-2 rounded bg-black/[0.03] text-[var(--accent-red)] border border-black/[0.04] break-all">
+            <p className="mt-2 break-all rounded border border-black/[0.04] bg-black/[0.03] p-2 font-mono text-[11px] text-[var(--accent-red)]">
               {errorMessage}
             </p>
           )}
@@ -59,9 +59,9 @@ export const ErrorState = React.forwardRef<HTMLDivElement, ErrorStateProps>(
             variant="outline"
             size="sm"
             onClick={onRetry}
-            className="gap-1.5 text-xs h-8 px-3 border-black/15 hover:bg-black/5"
+            className="h-8 gap-1.5 border-black/15 px-3 text-xs hover:bg-black/5"
           >
-            <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{retryLabel}</span>
           </Button>
         )}

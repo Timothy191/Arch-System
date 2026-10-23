@@ -22,9 +22,9 @@ export const LazyDataGrid = dynamic(
   () => import('@repo/ui').then((mod) => ({ default: mod.DataGrid })),
   {
     loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <span className="ml-2 text-sm text-gray-600">Loading grid...</span>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2"></div>
+        <span className="ml-2 text-gray-600 text-sm">Loading grid...</span>
       </div>
     ),
     ssr: false, // Don't SSR this heavy component
@@ -41,9 +41,9 @@ export const LazyWorkflowBuilder = dynamic(
   () => import('@repo/ui').then((mod) => ({ default: mod.WorkflowBuilder })),
   {
     loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <span className="ml-2 text-sm text-gray-600">Loading workflow builder...</span>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2"></div>
+        <span className="ml-2 text-gray-600 text-sm">Loading workflow builder...</span>
       </div>
     ),
     ssr: false,
@@ -60,9 +60,9 @@ export const LazyTelemetryChart = dynamic(
   () => import('@repo/ui').then((mod) => ({ default: mod.TelemetryChart })),
   {
     loading: () => (
-      <div className="flex items-center justify-center h-48">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-        <span className="ml-2 text-sm text-gray-600">Loading chart...</span>
+      <div className="flex h-48 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-gray-900 border-b-2"></div>
+        <span className="ml-2 text-gray-600 text-sm">Loading chart...</span>
       </div>
     ),
     ssr: false,
@@ -112,7 +112,7 @@ export const WorkflowPage = () => {
       <button
         onClick={() => setShowBuilder(true)}
         onMouseEnter={handleMouseEnter}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
+        className="rounded bg-blue-500 px-4 py-2 text-white"
       >
         Create Workflow
       </button>

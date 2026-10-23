@@ -497,38 +497,38 @@ export function ControlRoomChecklistWidget({
   ];
 
   return (
-    <GlassCard className="p-6 flex flex-col gap-6">
+    <GlassCard className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--glass-border)] pb-4">
+      <div className="flex flex-col justify-between gap-4 border-[var(--glass-border)] border-b pb-4 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-              <Radio className="w-5 h-5 animate-pulse" />
+            <span className="rounded-lg bg-[var(--accent-blue)]/10 p-1.5 text-[var(--accent-blue)]">
+              <Radio className="h-5 w-5 animate-pulse" />
             </span>
-            <h2 className="text-lg font-semibold text-[var(--text-heading)]">
+            <h2 className="font-semibold text-[var(--text-heading)] text-lg">
               Control Room Operations & Shift Checklist
             </h2>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-xs">
             24/7 Situational awareness, live KPI monitoring, and verified shift checklist execution.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--glass-border)] text-[var(--text-body)]">
-            Shift: <strong className="capitalize text-[var(--text-heading)]">{shift}</strong>
+          <span className="rounded-full border border-[var(--glass-border)] bg-[var(--bg-secondary)] px-2.5 py-1 font-medium text-[var(--text-body)] text-xs">
+            Shift: <strong className="text-[var(--text-heading)] capitalize">{shift}</strong>
           </span>
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--accent-green)]/10 text-[var(--accent-green)] border border-[var(--accent-green)]/20 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-green)] animate-ping" />
+          <span className="flex items-center gap-1.5 rounded-full border border-[var(--accent-green)]/20 bg-[var(--accent-green)]/10 px-2.5 py-1 font-medium text-[var(--accent-green)] text-xs">
+            <span className="h-2 w-2 animate-ping rounded-full bg-[var(--accent-green)]" />
             Live SLA Active
           </span>
         </div>
       </div>
 
       {hasRestoredDraft && (
-        <div className="p-3 rounded-xl bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-xs text-[var(--accent-blue)] flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 p-3 text-[var(--accent-blue)] text-xs">
           <span className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--accent-blue)]" />
+            <CheckCircle2 className="h-4 w-4 text-[var(--accent-blue)]" />
             Auto-restored unsaved shift entries from previous tab session
           </span>
           <button
@@ -544,7 +544,7 @@ export function ControlRoomChecklistWidget({
               setSummaryNotes(initialReport?.summaryNotes ?? '');
               setSupervisorSignature(initialReport?.supervisorSignature ?? '');
             }}
-            className="text-[11px] underline hover:opacity-80 transition-opacity cursor-pointer"
+            className="cursor-pointer text-[11px] underline transition-opacity hover:opacity-80"
           >
             Discard Draft
           </button>
@@ -552,72 +552,72 @@ export function ControlRoomChecklistWidget({
       )}
 
       {validationError && (
-        <div className="p-3 rounded-xl bg-accent-red/10 border border-accent-red/20 text-xs text-accent-red flex items-center gap-2">
-          <AlertOctagon className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2 rounded-xl border border-accent-red/20 bg-accent-red/10 p-3 text-accent-red text-xs">
+          <AlertOctagon className="h-4 w-4 shrink-0" />
           <span>{validationError}</span>
         </div>
       )}
 
       {/* KPI SLA Badges */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)] flex flex-col gap-1">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="flex flex-col gap-1 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-3">
+          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
             <span>Alarm Response</span>
-            <Clock className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+            <Clock className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-[var(--text-heading)]">
+            <span className="font-bold text-[var(--text-heading)] text-lg">
               {alarmResponseSec}s
             </span>
-            <span className="text-[10px] text-[var(--accent-green)] font-medium">
+            <span className="font-medium text-[10px] text-[var(--accent-green)]">
               (&lt; 60s Target)
             </span>
           </div>
-          <span className="text-[10px] text-[var(--accent-green)] font-medium">
+          <span className="font-medium text-[10px] text-[var(--accent-green)]">
             ✓ In SLA Compliance
           </span>
         </div>
 
-        <div className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)] flex flex-col gap-1">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="flex flex-col gap-1 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-3">
+          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
             <span>Incident Ack</span>
-            <Zap className="w-3.5 h-3.5 text-[var(--accent-amber)]" />
+            <Zap className="h-3.5 w-3.5 text-[var(--accent-amber)]" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-[var(--text-heading)]">{incidentAckSec}s</span>
-            <span className="text-[10px] text-[var(--accent-green)] font-medium">
+            <span className="font-bold text-[var(--text-heading)] text-lg">{incidentAckSec}s</span>
+            <span className="font-medium text-[10px] text-[var(--accent-green)]">
               (&lt; 30s Target)
             </span>
           </div>
-          <span className="text-[10px] text-[var(--accent-green)] font-medium">
+          <span className="font-medium text-[10px] text-[var(--accent-green)]">
             ✓ Rapid Ack Active
           </span>
         </div>
 
-        <div className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)] flex flex-col gap-1">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="flex flex-col gap-1 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-3">
+          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
             <span>System Uptime</span>
-            <Activity className="w-3.5 h-3.5 text-[var(--accent-green)]" />
+            <Activity className="h-3.5 w-3.5 text-[var(--accent-green)]" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-[var(--text-heading)]">{systemUptime}%</span>
-            <span className="text-[10px] text-[var(--text-muted)] font-medium">(&ge; 99.9%)</span>
+            <span className="font-bold text-[var(--text-heading)] text-lg">{systemUptime}%</span>
+            <span className="font-medium text-[10px] text-[var(--text-muted)]">(&ge; 99.9%)</span>
           </div>
-          <span className="text-[10px] text-[var(--accent-green)] font-medium">
+          <span className="font-medium text-[10px] text-[var(--accent-green)]">
             ✓ High Availability
           </span>
         </div>
 
-        <div className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)] flex flex-col gap-1">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="flex flex-col gap-1 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-3">
+          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
             <span>Missed Incidents</span>
-            <AlertTriangle className="w-3.5 h-3.5 text-[var(--accent-green)]" />
+            <AlertTriangle className="h-3.5 w-3.5 text-[var(--accent-green)]" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-bold text-[var(--text-heading)]">{missedIncidents}</span>
-            <span className="text-[10px] text-[var(--accent-green)] font-medium">(0 Target)</span>
+            <span className="font-bold text-[var(--text-heading)] text-lg">{missedIncidents}</span>
+            <span className="font-medium text-[10px] text-[var(--accent-green)]">(0 Target)</span>
           </div>
-          <span className="text-[10px] text-[var(--accent-green)] font-medium">
+          <span className="font-medium text-[10px] text-[var(--accent-green)]">
             ✓ Zero Missed SLA
           </span>
         </div>
@@ -626,7 +626,7 @@ export function ControlRoomChecklistWidget({
       {/* Category Tabs & Progress */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)]">
+          <div className="flex flex-wrap gap-1.5 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-1">
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = activeCategory === cat.key;
@@ -640,16 +640,16 @@ export function ControlRoomChecklistWidget({
                   key={cat.key}
                   type="button"
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
                     isActive
                       ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-primary)]'
+                      : 'text-[var(--text-muted)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-heading)]'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="h-3.5 w-3.5" />
                   <span>{cat.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    className={`rounded-full px-1.5 py-0.2 text-[10px] ${
                       isActive
                         ? 'bg-white/20 text-white'
                         : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
@@ -662,7 +662,7 @@ export function ControlRoomChecklistWidget({
             })}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
             <span>
               Overall:{' '}
               <strong>
@@ -670,9 +670,9 @@ export function ControlRoomChecklistWidget({
               </strong>{' '}
               ({overallStats.pct}%)
             </span>
-            <div className="w-24 h-2 rounded-full bg-[var(--bg-secondary)] overflow-hidden border border-[var(--glass-border)]">
+            <div className="h-2 w-24 overflow-hidden rounded-full border border-[var(--glass-border)] bg-[var(--bg-secondary)]">
               <div
-                className="h-full bg-[var(--accent-blue)] transition-all duration-300 rounded-full"
+                className="h-full rounded-full bg-[var(--accent-blue)] transition-all duration-300"
                 style={{ width: `${overallStats.pct}%` }}
               />
             </div>
@@ -680,7 +680,7 @@ export function ControlRoomChecklistWidget({
         </div>
 
         {/* Section Progress Bar */}
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
+        <div className="flex items-center justify-between px-1 text-[var(--text-muted)] text-xs">
           <span className="capitalize">{activeCategory} Checklist Progress</span>
           <span className="font-semibold text-[var(--text-heading)]">
             {currentCategoryStats.completed} of {currentCategoryStats.total} Completed (
@@ -696,10 +696,10 @@ export function ControlRoomChecklistWidget({
             <div
               key={item.id}
               onClick={() => toggleItem(item.id)}
-              className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+              className={`flex cursor-pointer select-none items-start gap-3 rounded-xl border p-3 transition-all ${
                 item.completed
-                  ? 'bg-[var(--accent-green)]/5 border-[var(--accent-green)]/30 hover:border-[var(--accent-green)]/50'
-                  : 'bg-[var(--bg-secondary)] border-[var(--glass-border)] hover:border-[var(--glass-border-hover)]'
+                  ? 'border-[var(--accent-green)]/30 bg-[var(--accent-green)]/5 hover:border-[var(--accent-green)]/50'
+                  : 'border-[var(--glass-border)] bg-[var(--bg-secondary)] hover:border-[var(--glass-border-hover)]'
               }`}
             >
               <button
@@ -708,15 +708,15 @@ export function ControlRoomChecklistWidget({
                 aria-label={item.completed ? 'Mark incomplete' : 'Mark complete'}
               >
                 {item.completed ? (
-                  <CheckCircle2 className="w-5 h-5 text-[var(--accent-green)] transition-transform scale-110" />
+                  <CheckCircle2 className="h-5 w-5 scale-110 text-[var(--accent-green)] transition-transform" />
                 ) : (
-                  <Circle className="w-5 h-5 text-[var(--text-muted)] hover:text-[var(--text-heading)]" />
+                  <Circle className="h-5 w-5 text-[var(--text-muted)] hover:text-[var(--text-heading)]" />
                 )}
               </button>
 
-              <div className="flex-1 flex flex-col gap-1">
+              <div className="flex flex-1 flex-col gap-1">
                 <span
-                  className={`text-xs font-medium leading-relaxed ${
+                  className={`font-medium text-xs leading-relaxed ${
                     item.completed
                       ? 'text-[var(--text-muted)] line-through'
                       : 'text-[var(--text-heading)]'
@@ -726,7 +726,7 @@ export function ControlRoomChecklistWidget({
                 </span>
 
                 {item.completed && item.completedAt && (
-                  <div className="flex items-center gap-2 text-[10px] text-[var(--accent-green)] font-medium">
+                  <div className="flex items-center gap-2 font-medium text-[10px] text-[var(--accent-green)]">
                     <span>Verified at {new Date(item.completedAt).toLocaleTimeString()}</span>
                     {item.completedBy && <span>• Signed: {item.completedBy}</span>}
                   </div>
@@ -740,22 +740,22 @@ export function ControlRoomChecklistWidget({
       {/* Operator Shift Verification Form */}
       <form
         onSubmit={handleSubmit}
-        className="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--glass-border)] flex flex-col gap-3"
+        className="flex flex-col gap-3 rounded-xl border border-[var(--glass-border)] bg-[var(--bg-secondary)] p-4"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-[var(--text-heading)] uppercase tracking-wider">
+          <h3 className="font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
             Operator Shift Log & Handover Sign-Off
           </h3>
           {submitted && (
-            <span className="text-xs text-[var(--accent-green)] font-medium flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Log Submitted Successfully
+            <span className="flex items-center gap-1 font-medium text-[var(--accent-green)] text-xs">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Log Submitted Successfully
             </span>
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+            <label className="mb-1 block font-medium text-[11px] text-[var(--text-muted)]">
               Operator In-Charge Name *
             </label>
             <input
@@ -764,12 +764,12 @@ export function ControlRoomChecklistWidget({
               value={operatorName}
               onChange={(e) => setOperatorName(e.target.value)}
               placeholder="e.g. John Doe (Shift Supervisor)"
-              className="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--bg-primary)] border border-[var(--glass-border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+            <label className="mb-1 block font-medium text-[11px] text-[var(--text-muted)]">
               Shift Handover Summary Notes
             </label>
             <input
@@ -777,7 +777,7 @@ export function ControlRoomChecklistWidget({
               value={summaryNotes}
               onChange={(e) => setSummaryNotes(e.target.value)}
               placeholder="All alarms cleared, SCADA telemetry green..."
-              className="w-full px-3 py-1.5 rounded-lg text-xs bg-[var(--bg-primary)] border border-[var(--glass-border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
         </div>
@@ -793,9 +793,9 @@ export function ControlRoomChecklistWidget({
           <button
             type="submit"
             disabled={isSubmitting || !operatorName.trim()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+            className="flex items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-medium text-white text-xs shadow-sm transition-all hover:bg-[var(--accent-blue)]/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="h-3.5 w-3.5" />
             <span>{isSubmitting ? 'Submitting Log...' : 'Submit Shift Verification'}</span>
           </button>
         </div>

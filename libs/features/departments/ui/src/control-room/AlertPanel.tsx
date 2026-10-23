@@ -117,9 +117,9 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-[var(--text-heading)]">Alerts</h2>
+        <h2 className="font-medium text-[var(--text-heading)] text-xl">Alerts</h2>
         {unacknowledged.length > 0 && (
-          <span className="px-2.5 py-1 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20 text-xs font-medium">
+          <span className="rounded-full border border-accent-red/20 bg-accent-red/10 px-2.5 py-1 font-medium text-accent-red text-xs">
             {unacknowledged.length} unacknowledged
           </span>
         )}
@@ -140,7 +140,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
-                  className={`w-2 h-2 rounded-full ${
+                  className={`h-2 w-2 rounded-full ${
                     alert.severity === 'critical' ? 'bg-accent-red' : 'bg-accent-blue'
                   }`}
                 />
@@ -161,7 +161,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
                 )}
                 <button
                   onClick={() => dismiss(alert.id)}
-                  className="px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-secondary)] text-xs hover:bg-[var(--bg-tertiary)] transition-colors"
+                  className="rounded-lg bg-[var(--bg-primary)] px-3 py-1 text-[var(--text-secondary)] text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
                 >
                   Dismiss
                 </button>

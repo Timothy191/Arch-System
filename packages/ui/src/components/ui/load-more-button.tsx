@@ -9,11 +9,11 @@ export interface LoadMoreButtonProps extends ButtonProps {
 const LoadMoreButton = React.forwardRef<HTMLButtonElement, LoadMoreButtonProps>(
   ({ className, loading, children, ...props }, ref) => {
     return (
-      <div className="flex justify-center w-full py-4">
+      <div className="flex w-full justify-center py-4">
         <Button
           ref={ref}
           variant="secondary"
-          className={cn('w-full sm:w-auto min-w-[120px]', className)}
+          className={cn('w-full min-w-[120px] sm:w-auto', className)}
           disabled={loading || props.disabled}
           {...props}
         >

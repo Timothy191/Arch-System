@@ -20,7 +20,7 @@ import type {
 
 const BreakdownCharts = dynamic(() => import('./BreakdownCharts').then((m) => m.BreakdownCharts), {
   ssr: false,
-  loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
+  loading: () => <div className="h-64 animate-pulse rounded-xl bg-[var(--bg-tertiary)]" />,
 });
 
 type Tab = 'overview' | 'diagnostics' | 'bookin' | 'bookout' | 'query';
@@ -148,17 +148,17 @@ export function BreakdownsDashboard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
+          <h2 className="font-semibold text-2xl text-[var(--text-heading)]">
             Breakdown Management
           </h2>
-          <p className="text-[var(--text-secondary)] text-sm mt-0.5">
+          <p className="mt-0.5 text-[var(--text-secondary)] text-sm">
             Track machine breakdowns, book-in/out and monitor fleet health.
           </p>
         </div>
         {activeBreakdowns.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent-red/10 border border-accent-red/20">
-            <Zap className="w-4 h-4 text-accent-red" />
-            <span className="text-accent-red text-sm font-medium">
+          <div className="flex items-center gap-2 rounded-lg border border-accent-red/20 bg-accent-red/10 px-3 py-1.5">
+            <Zap className="h-4 w-4 text-accent-red" />
+            <span className="font-medium text-accent-red text-sm">
               {activeBreakdowns.length} Active
             </span>
           </div>
@@ -166,7 +166,7 @@ export function BreakdownsDashboard({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
+      <div className="flex gap-1 rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-primary)] p-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -174,16 +174,16 @@ export function BreakdownsDashboard({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
                 isActive
                   ? 'bg-[var(--bg-tertiary)] text-[var(--text-heading)] shadow-card'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]/50'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]/50 hover:text-[var(--text-heading)]'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="h-4 w-4" />
               {tab.label}
               {tab.id === 'bookout' && activeBreakdowns.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent-red/20 text-accent-red border border-accent-red/30">
+                <span className="ml-1 rounded-full border border-accent-red/30 bg-accent-red/20 px-1.5 py-0.5 text-accent-red text-xs">
                   {activeBreakdowns.length}
                 </span>
               )}
@@ -218,7 +218,7 @@ export function BreakdownsDashboard({
               />
 
               <div>
-                <h3 className="text-lg font-medium text-[var(--text-heading)] mb-3">
+                <h3 className="mb-3 font-medium text-[var(--text-heading)] text-lg">
                   Active Breakdowns
                 </h3>
                 <BreakdownsTable breakdowns={activeBreakdowns} showStatus={false} />

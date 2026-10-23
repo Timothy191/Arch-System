@@ -50,8 +50,8 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <label
         className={cn(
-          'inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium',
-          disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
+          'inline-flex cursor-pointer select-none items-center gap-2 font-medium text-sm',
+          disabled && 'pointer-events-none cursor-not-allowed opacity-50',
           className
         )}
       >
@@ -62,24 +62,24 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           disabled={disabled}
           aria-checked={indeterminate ? 'mixed' : checked}
           onChange={handleChange}
-          className="sr-only peer"
+          className="peer sr-only"
           {...props}
         />
         <span
           className={cn(
-            'flex items-center justify-center shrink-0 rounded border transition-colors duration-150',
-            size === 'small' ? 'w-3.5 h-3.5 text-[10px]' : 'w-4 h-4 text-xs',
-            'peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900',
+            'flex shrink-0 items-center justify-center rounded border transition-colors duration-150',
+            size === 'small' ? 'h-3.5 w-3.5 text-[10px]' : 'h-4 w-4 text-xs',
+            'peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-900 peer-focus-visible:ring-offset-2',
             isChecked
-              ? 'bg-neutral-900 border-neutral-900 text-white'
-              : 'bg-white/5 border-white/10 hover:border-white/20'
+              ? 'border-neutral-900 bg-neutral-900 text-white'
+              : 'border-white/10 bg-white/5 hover:border-white/20'
           )}
           aria-hidden="true"
         >
           {indeterminate ? (
-            <Minus className="w-3 h-3 stroke-[3]" />
+            <Minus className="h-3 w-3 stroke-[3]" />
           ) : checked ? (
-            <Check className="w-3 h-3 stroke-[3]" />
+            <Check className="h-3 w-3 stroke-[3]" />
           ) : null}
         </span>
         {(children || label) && (

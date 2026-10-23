@@ -19,5 +19,6 @@ These guidelines are inspired by tools like `pbakaus/impeccable`, `Leonxlnx/tast
 - **Click Targets:** Inactive 3D or flanking cards must either be non-interactive (`pointer-events-none`) or cleanly capture click-to-activate events without intercepting internal clicks.
 - **Focus Rings:** Always provide high-contrast, accessible focus states (`focus-visible:ring-2`, never `outline-none` alone).
 - **Sensory Feedback:** Provide scale or opacity feedback on active interactions (e.g., `active:scale-95`).
+- **Keep Class Ordering (`useSortedClasses`):** Maintain a consistent canonical order for all utility classes in `className`, `cn()`, `clsx()`, `cva()`, and `twMerge()` (enforced as a hard error + auto-fix via `nursery/useSortedClasses` in `biome.json`).
 
 When modifying UI components, run self-audits to ensure these constraints are met before finalizing the implementation.

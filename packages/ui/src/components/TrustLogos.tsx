@@ -31,19 +31,19 @@ export interface TrustLogosProps {
 const PROTOCOL_BADGES = [
   {
     label: 'Modbus TCP Active',
-    icon: <Cpu className="w-2.5 h-2.5 mr-1 shrink-0 text-cyan-600" />,
+    icon: <Cpu className="mr-1 h-2.5 w-2.5 shrink-0 text-cyan-600" />,
   },
   {
     label: 'CAN-Bus 250kbps',
-    icon: <Radio className="w-2.5 h-2.5 mr-1 shrink-0 text-emerald-600" />,
+    icon: <Radio className="mr-1 h-2.5 w-2.5 shrink-0 text-emerald-600" />,
   },
   {
     label: 'Latency: 14ms',
-    icon: <Activity className="w-2.5 h-2.5 mr-1 shrink-0 text-amber-600" />,
+    icon: <Activity className="mr-1 h-2.5 w-2.5 shrink-0 text-amber-600" />,
   },
   {
     label: 'ISO 27001',
-    icon: <ShieldCheck className="w-2.5 h-2.5 mr-1 shrink-0 text-emerald-600" />,
+    icon: <ShieldCheck className="mr-1 h-2.5 w-2.5 shrink-0 text-emerald-600" />,
   },
 ];
 
@@ -51,17 +51,17 @@ export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-2 border-t border-slate-200/60">
-      <p className="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-medium mb-1.5 flex items-center gap-1.5">
+    <div className="border-slate-200/60 border-t pt-2">
+      <p className="mb-1.5 flex items-center gap-1.5 font-medium font-mono text-[9px] text-slate-500 uppercase tracking-wider">
         <span
-          className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+          className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
           aria-hidden="true"
         />
         SYSTEM DIAGNOSTICS & TELEMETRY BUS
       </p>
 
       {hasLogos ? (
-        <div className="flex flex-wrap items-center gap-2.5 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+        <div className="flex flex-wrap items-center gap-2.5 opacity-70 grayscale transition-all duration-500 hover:grayscale-0">
           {logos.map((logo) => (
             <NextImage
               key={logo.src}
@@ -80,7 +80,7 @@ export function TrustLogos({ logos }: TrustLogosProps) {
           {PROTOCOL_BADGES.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-5 px-2.5 text-[10px] font-medium font-mono tabular-nums text-slate-700 bg-white/80 backdrop-blur-md rounded-full border border-slate-200/80 shadow-sm transition-colors hover:bg-white"
+              className="inline-flex h-5 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 px-2.5 font-medium font-mono text-[10px] text-slate-700 tabular-nums shadow-sm backdrop-blur-md transition-colors hover:bg-white"
             >
               {p.icon}
               {p.label}

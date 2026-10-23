@@ -66,6 +66,9 @@ describe('Database Admin Department Route Module', () => {
       expect(screen.getByText('SUPABASE CLUSTER METRICS')).toBeInTheDocument();
       expect(screen.getByText('122')).toBeInTheDocument();
       expect(screen.getByText('Migration #186')).toBeInTheDocument();
+      expect(screen.getByTestId('redis-insight-workbench-card')).toBeInTheDocument();
+      expect(screen.getByText('Open RedisInsight (:5540)')).toBeInTheDocument();
+      expect(screen.getByText('drilling:telemetry:stream')).toBeInTheDocument();
     });
 
     it('degrades gracefully to Supabase Standby when read replica connection throws or fails', async () => {

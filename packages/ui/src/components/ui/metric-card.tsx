@@ -45,32 +45,32 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
         variant="default"
         onClick={onClick}
         className={cn(
-          'p-4 transition-all duration-150 hover:shadow-md select-none',
+          'select-none p-4 transition-all duration-150 hover:shadow-md',
           status === 'warning' && 'border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/[0.02]',
           status === 'critical' && 'border-[var(--accent-red)]/30 bg-[var(--accent-red)]/[0.02]',
           className
         )}
       >
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider truncate">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="truncate font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wider">
             {title}
           </span>
           {icon && (
-            <div className="p-1.5 rounded-lg bg-black/[0.04] text-[var(--text-secondary)] shrink-0">
+            <div className="shrink-0 rounded-lg bg-black/[0.04] p-1.5 text-[var(--text-secondary)]">
               {icon}
             </div>
           )}
         </div>
 
-        <div className="flex items-baseline gap-1.5 my-1">
-          <span className="text-2xl font-bold tracking-tight text-[var(--text-heading)] font-mono tabular-nums">
+        <div className="my-1 flex items-baseline gap-1.5">
+          <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums tracking-tight">
             {value}
           </span>
-          {unit && <span className="text-xs font-medium text-[var(--text-secondary)]">{unit}</span>}
+          {unit && <span className="font-medium text-[var(--text-secondary)] text-xs">{unit}</span>}
         </div>
 
         {(change !== undefined || subtitle) && (
-          <div className="flex items-center gap-1.5 mt-2 text-xs">
+          <div className="mt-2 flex items-center gap-1.5 text-xs">
             {change !== undefined && (
               <span
                 className={cn(
@@ -80,14 +80,14 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
                   isNeutral && 'text-[var(--text-secondary)]'
                 )}
               >
-                {isPositive && <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />}
-                {isNegative && <ArrowDownRight className="w-3.5 h-3.5" aria-hidden="true" />}
-                {isNeutral && <Minus className="w-3.5 h-3.5" aria-hidden="true" />}
+                {isPositive && <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />}
+                {isNegative && <ArrowDownRight className="h-3.5 w-3.5" aria-hidden="true" />}
+                {isNeutral && <Minus className="h-3.5 w-3.5" aria-hidden="true" />}
                 {Math.abs(change)}%
               </span>
             )}
             {(changeLabel || subtitle) && (
-              <span className="text-[var(--text-secondary)] truncate">
+              <span className="truncate text-[var(--text-secondary)]">
                 {changeLabel ?? subtitle}
               </span>
             )}

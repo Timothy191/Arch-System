@@ -68,14 +68,14 @@ export const WeatherWidget = function WeatherWidget({
           <button
             aria-label="Weather details"
             title="Weather details"
-            className="relative flex items-center justify-center w-7 h-7 bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05] rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 cursor-default outline-none active:scale-[0.97]"
+            className="relative flex h-7 w-7 cursor-default items-center justify-center rounded-full border border-black/[0.05] bg-black/[0.03] outline-none transition-colors hover:bg-black/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]"
           >
             <span className="text-lg leading-none">{weather.icon}</span>
             {alert.level !== 'none' && (
               <span
-                className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${
+                className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full ${
                   alert.level === 'critical'
-                    ? 'bg-accent-red animate-pulse'
+                    ? 'animate-pulse bg-accent-red'
                     : alert.level === 'warning'
                       ? 'bg-accent-blue'
                       : 'bg-accent-blue'
@@ -88,18 +88,18 @@ export const WeatherWidget = function WeatherWidget({
           <Popover.Content
             align="end"
             sideOffset={6}
-            className="w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-popover focus:outline-none select-none"
+            className="z-popover w-64 select-none rounded-xl border border-black/[0.08] bg-white/95 p-4 shadow-window backdrop-blur-2xl focus:outline-none"
           >
             <div className="space-y-3">
               {/* Header */}
-              <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.05]">
+              <div className="flex items-center justify-between border-black/[0.05] border-b pb-1.5">
                 <span
-                  className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider uppercase truncate max-w-[130px]"
+                  className="max-w-[130px] truncate font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider"
                   title={weather.location.name || locationName}
                 >
                   {weather.location.name || locationName}
                 </span>
-                <span className="text-[9px] text-[var(--text-muted)] shrink-0">
+                <span className="shrink-0 text-[9px] text-[var(--text-muted)]">
                   Updated{' '}
                   {new Date(weather.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
@@ -112,30 +112,30 @@ export const WeatherWidget = function WeatherWidget({
               <div className="flex items-center gap-3">
                 <span className="text-4xl">{weather.icon}</span>
                 <div>
-                  <p className="text-2xl font-semibold text-[var(--text-heading)]">
+                  <p className="font-semibold text-2xl text-[var(--text-heading)]">
                     {weather.temperature}°C
                   </p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-[var(--text-secondary)] text-xs">
                     {weather.description} (Feels: {weather.feelsLike}°C)
                   </p>
                 </div>
               </div>
 
               {/* Details (Wind/Humidity) */}
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs text-[var(--text-secondary)]">
-                <div className="bg-black/[0.02] p-2 rounded-lg border border-black/[0.04] min-w-0">
+              <div className="grid grid-cols-2 gap-2 pt-1 text-[var(--text-secondary)] text-xs">
+                <div className="min-w-0 rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
                   <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
                     Wind
                   </p>
-                  <p className="font-semibold text-[var(--text-heading)] truncate">
+                  <p className="truncate font-semibold text-[var(--text-heading)]">
                     💨 {weather.windSpeed} km/h {getWindDirection(weather.windDirection)}
                   </p>
                 </div>
-                <div className="bg-black/[0.02] p-2 rounded-lg border border-black/[0.04] min-w-0">
+                <div className="min-w-0 rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
                   <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">
                     Humidity
                   </p>
-                  <p className="font-semibold text-[var(--text-heading)] truncate">
+                  <p className="truncate font-semibold text-[var(--text-heading)]">
                     💧 {weather.humidity}%
                   </p>
                 </div>
@@ -145,10 +145,10 @@ export const WeatherWidget = function WeatherWidget({
               {alert.level !== 'none' && (
                 <div
                   className={cn(
-                    'p-2.5 rounded-lg text-xs font-medium border',
+                    'rounded-lg border p-2.5 font-medium text-xs',
                     alert.level === 'critical'
-                      ? 'bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse'
-                      : 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                      ? 'animate-pulse border-accent-red/20 bg-accent-red/10 text-accent-red'
+                      : 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
                   )}
                 >
                   {alert.message}
@@ -169,25 +169,25 @@ export const WeatherWidget = function WeatherWidget({
           <div className="flex items-center gap-3">
             <span className="text-3xl">{weather.icon}</span>
             <div>
-              <p className="text-2xl font-semibold text-arch-text-primary">
+              <p className="font-semibold text-2xl text-arch-text-primary">
                 {weather.temperature}°C
               </p>
-              <p className="text-sm text-arch-text-tertiary">{weather.description}</p>
+              <p className="text-arch-text-tertiary text-sm">{weather.description}</p>
             </div>
           </div>
-          <div className="text-right text-sm text-arch-text-tertiary">
+          <div className="text-right text-arch-text-tertiary text-sm">
             <p>💧 {weather.humidity}%</p>
             <p>💨 {weather.windSpeed} km/h</p>
           </div>
         </div>
         {alert.level !== 'none' && (
           <div
-            className={`mt-3 p-2 rounded-lg text-xs ${
+            className={`mt-3 rounded-lg p-2 text-xs ${
               alert.level === 'critical'
-                ? 'bg-accent-red/10 text-accent-red border border-accent-red/20'
+                ? 'border border-accent-red/20 bg-accent-red/10 text-accent-red'
                 : alert.level === 'warning'
-                  ? 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
-                  : 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
+                  ? 'border border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
+                  : 'border border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
             }`}
           >
             {alert.message}
@@ -200,12 +200,12 @@ export const WeatherWidget = function WeatherWidget({
   // Full variant with forecast
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-arch-text-primary">Weather Conditions</h3>
-          <p className="text-sm text-arch-text-tertiary">{weather.location.name}</p>
+          <h3 className="font-medium text-arch-text-primary text-lg">Weather Conditions</h3>
+          <p className="text-arch-text-tertiary text-sm">{weather.location.name}</p>
         </div>
-        <span className="text-xs text-arch-text-tertiary">
+        <span className="text-arch-text-tertiary text-xs">
           Updated{' '}
           {new Date(weather.timestamp).toLocaleTimeString([], {
             hour: '2-digit',
@@ -216,14 +216,14 @@ export const WeatherWidget = function WeatherWidget({
       </div>
 
       {/* Current conditions */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="mb-6 flex items-center gap-4">
         <span className="text-5xl">{weather.icon}</span>
         <div>
-          <p className="text-3xl font-semibold text-arch-text-primary">{weather.temperature}°C</p>
+          <p className="font-semibold text-3xl text-arch-text-primary">{weather.temperature}°C</p>
           <p className="text-arch-text-tertiary">Feels like {weather.feelsLike}°C</p>
-          <p className="text-sm text-arch-text-secondary">{weather.description}</p>
+          <p className="text-arch-text-secondary text-sm">{weather.description}</p>
         </div>
-        <div className="ml-auto text-right text-sm space-y-1">
+        <div className="ml-auto space-y-1 text-right text-sm">
           <p className="text-arch-text-tertiary">💧 Humidity: {weather.humidity}%</p>
           <p className="text-arch-text-tertiary">💨 Wind: {weather.windSpeed} km/h</p>
           <p className="text-arch-text-tertiary">🧭 Direction: {weather.windDirection}°</p>
@@ -233,16 +233,16 @@ export const WeatherWidget = function WeatherWidget({
       {/* Operations alert */}
       {alert.level !== 'none' && (
         <div
-          className={`mb-6 p-3 rounded-lg ${
+          className={`mb-6 rounded-lg p-3 ${
             alert.level === 'critical'
-              ? 'bg-accent-red/10 border border-accent-red/30'
+              ? 'border border-accent-red/30 bg-accent-red/10'
               : alert.level === 'warning'
-                ? 'bg-accent-blue/10 border border-accent-blue/30'
-                : 'bg-accent-blue/10 border border-accent-blue/30'
+                ? 'border border-accent-blue/30 bg-accent-blue/10'
+                : 'border border-accent-blue/30 bg-accent-blue/10'
           }`}
         >
           <p
-            className={`text-sm font-medium ${
+            className={`font-medium text-sm ${
               alert.level === 'critical'
                 ? 'text-accent-red'
                 : alert.level === 'warning'
@@ -257,18 +257,18 @@ export const WeatherWidget = function WeatherWidget({
 
       {/* 5-day forecast */}
       <div>
-        <p className="text-sm font-medium text-arch-text-secondary mb-3">5-Day Forecast</p>
+        <p className="mb-3 font-medium text-arch-text-secondary text-sm">5-Day Forecast</p>
         <div className="grid grid-cols-5 gap-2">
           {weather.daily?.map((day, i) => (
-            <div key={i} className="text-center p-2 rounded-lg bg-arch-surface-primary/50">
-              <p className="text-xs text-arch-text-tertiary mb-1">
+            <div key={i} className="rounded-lg bg-arch-surface-primary/50 p-2 text-center">
+              <p className="mb-1 text-arch-text-tertiary text-xs">
                 {new Date(day.date).toLocaleDateString([], {
                   weekday: 'short',
                 })}
               </p>
-              <p className="text-lg mb-1">{day.icon}</p>
-              <p className="text-xs text-arch-text-primary">{day.maxTemp}°</p>
-              <p className="text-xs text-arch-text-tertiary">{day.minTemp}°</p>
+              <p className="mb-1 text-lg">{day.icon}</p>
+              <p className="text-arch-text-primary text-xs">{day.maxTemp}°</p>
+              <p className="text-arch-text-tertiary text-xs">{day.minTemp}°</p>
             </div>
           ))}
         </div>

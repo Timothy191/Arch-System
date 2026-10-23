@@ -38,7 +38,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-dock flex md:hidden border-t border-[var(--border-default)] bg-white/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
+      className="fixed right-0 bottom-0 left-0 z-dock flex border-[var(--border-default)] border-t bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       {visibleItems.map(({ href, label, icon: Icon }) => {
         const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
@@ -47,7 +47,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
             key={href}
             href={href}
             className={cn(
-              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium transition-colors touch-manipulation',
+              'flex min-h-[56px] flex-1 touch-manipulation flex-col items-center justify-center gap-0.5 py-2 font-medium text-[10px] transition-colors',
               isActive
                 ? 'text-[var(--accent-emerald)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'

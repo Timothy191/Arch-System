@@ -50,7 +50,7 @@ export function AvatarGroup({
     <div
       role="group"
       aria-label={groupLabel}
-      className={cn('flex items-center isolate', className)}
+      className={cn('isolate flex items-center', className)}
       {...props}
     >
       {visibleMembers.map((member, index) => {
@@ -92,8 +92,8 @@ export function AvatarGroup({
             minWidth: `${size}px`,
           }}
           className={cn(
-            'relative rounded-full shrink-0 select-none flex items-center justify-center font-medium',
-            'ring-2 ring-white border border-black/[0.08]',
+            'relative flex shrink-0 select-none items-center justify-center rounded-full font-medium',
+            'border border-black/[0.08] ring-2 ring-white',
             'bg-neutral-100 text-neutral-600',
             size <= 24 ? 'text-[10px]' : 'text-xs'
           )}

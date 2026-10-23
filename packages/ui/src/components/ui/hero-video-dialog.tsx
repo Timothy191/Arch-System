@@ -128,7 +128,7 @@ export function HeroVideoDialog({
             >
               <m.button
                 type="button"
-                className="absolute -top-16 right-0 rounded-full bg-black/60 p-2 text-xl text-white ring-1 ring-[var(--border-default)] backdrop-blur-md"
+                className="absolute -top-16 right-0 rounded-full bg-black/60 p-2 text-white text-xl ring-1 ring-[var(--border-default)] backdrop-blur-md"
               >
                 <X className="size-5" />
               </m.button>

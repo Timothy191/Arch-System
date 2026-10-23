@@ -23,11 +23,11 @@ interface CustomTooltipProps {
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2 text-xs">
-      <p className="font-semibold text-foreground mb-1.5">{label}</p>
+    <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-card">
+      <p className="mb-1.5 font-semibold text-foreground">{label}</p>
       {payload.map((p) => (
-        <div key={`tooltip-${p.name}`} className="flex items-center gap-2 mb-0.5">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+        <div key={`tooltip-${p.name}`} className="mb-0.5 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.color }} />
           <span className="text-muted-foreground capitalize">{p.name}:</span>
           <span className="font-semibold text-foreground tabular-nums">{p.value}</span>
         </div>

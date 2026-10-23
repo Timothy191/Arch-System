@@ -128,38 +128,38 @@ export function CloseShiftModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <GlassCard className="w-full max-w-md mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Close Shift</h3>
+      <GlassCard className="mx-4 w-full max-w-md">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Close Shift</h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+            className="text-[var(--text-muted)] transition-colors hover:text-[var(--text-heading)]"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {state.type === 'validating' && (
-          <div className="flex flex-col items-center py-8 gap-3">
-            <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
+          <div className="flex flex-col items-center gap-3 py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-blue)]" />
             <p className="text-[var(--text-muted)] text-sm">Validating shift data...</p>
           </div>
         )}
 
         {state.type === 'has_errors' && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 rounded-lg border border-accent-red/20 bg-accent-red/10 p-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent-red" />
               <div>
-                <p className="text-accent-red text-sm font-medium mb-2">
+                <p className="mb-2 font-medium text-accent-red text-sm">
                   Cannot close shift until the following are resolved:
                 </p>
                 <ul className="space-y-1">
                   {state.errors.map((err, i) => (
-                    <li key={i} className="text-accent-red/80 text-xs flex items-start gap-2">
-                      <span className="mt-1.5 w-1 h-1 rounded-full bg-accent-red shrink-0" />
+                    <li key={i} className="flex items-start gap-2 text-accent-red/80 text-xs">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent-red" />
                       {err}
                     </li>
                   ))}
@@ -169,7 +169,7 @@ export function CloseShiftModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-2.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] font-medium rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors text-sm"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-2.5 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]"
             >
               Close
             </button>
@@ -178,32 +178,32 @@ export function CloseShiftModal({
 
         {(state.type === 'pin_entry' || state.type === 'verifying') && (
           <div className="space-y-5">
-            <div className="flex items-center gap-3 p-3 bg-accent-green/10 border border-accent-green/20 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-accent-green shrink-0" />
+            <div className="flex items-center gap-3 rounded-lg border border-accent-green/20 bg-accent-green/10 p-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-accent-green" />
               <p className="text-accent-green text-sm">
                 All machines accounted for. Supervisor PIN required to close.
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">Employee Code</label>
+              <label className="block text-[var(--text-secondary)] text-sm">Employee Code</label>
               <input
                 type="text"
                 value={employeeCode}
                 onChange={(e) => setEmployeeCode(e.target.value)}
                 placeholder="e.g. EMP001"
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">PIN</label>
+              <label className="block text-[var(--text-secondary)] text-sm">PIN</label>
               <input
                 type="password"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="Enter supervisor PIN"
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20"
               />
             </div>
 
@@ -211,16 +211,16 @@ export function CloseShiftModal({
               type="button"
               onClick={handleVerify}
               disabled={state.type === 'verifying' || !employeeCode || !pin}
-              className="w-full flex items-center justify-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
             >
               {state.type === 'verifying' ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Verifying...
                 </>
               ) : (
                 <>
-                  <Lock className="w-4 h-4" />
+                  <Lock className="h-4 w-4" />
                   Verify PIN
                 </>
               )}
@@ -230,10 +230,10 @@ export function CloseShiftModal({
 
         {state.type === 'verified' && (
           <div className="space-y-5">
-            <div className="flex items-center gap-3 p-3 bg-accent-green/10 border border-accent-green/20 rounded-lg">
-              <UserCheck className="w-5 h-5 text-accent-green shrink-0" />
+            <div className="flex items-center gap-3 rounded-lg border border-accent-green/20 bg-accent-green/10 p-3">
+              <UserCheck className="h-5 w-5 shrink-0 text-accent-green" />
               <div>
-                <p className="text-accent-green text-sm font-medium">Approved by</p>
+                <p className="font-medium text-accent-green text-sm">Approved by</p>
                 <p className="text-accent-green text-sm">{state.employeeName}</p>
               </div>
             </div>
@@ -241,16 +241,16 @@ export function CloseShiftModal({
             <button
               type="button"
               onClick={handleCloseShift}
-              className="w-full flex items-center justify-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)]/90"
             >
-              <Lock className="w-4 h-4" />
+              <Lock className="h-4 w-4" />
               Close Shift & Lock
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] font-medium rounded-lg hover:text-[var(--text-heading)] transition-colors text-sm"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-2 font-medium text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
             >
               Cancel
             </button>
@@ -258,29 +258,29 @@ export function CloseShiftModal({
         )}
 
         {state.type === 'submitting' && (
-          <div className="flex flex-col items-center py-8 gap-3">
-            <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
+          <div className="flex flex-col items-center gap-3 py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-blue)]" />
             <p className="text-[var(--text-muted)] text-sm">Closing shift...</p>
           </div>
         )}
 
         {state.type === 'success' && (
-          <div className="flex flex-col items-center py-8 gap-3">
-            <CheckCircle className="w-12 h-12 text-accent-green" />
-            <p className="text-accent-green font-medium text-lg">Shift closed successfully</p>
+          <div className="flex flex-col items-center gap-3 py-8">
+            <CheckCircle className="h-12 w-12 text-accent-green" />
+            <p className="font-medium text-accent-green text-lg">Shift closed successfully</p>
           </div>
         )}
 
         {state.type === 'api_error' && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 rounded-lg border border-accent-red/20 bg-accent-red/10 p-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent-red" />
               <p className="text-accent-red/80 text-sm">{state.message}</p>
             </div>
             <button
               type="button"
               onClick={validate}
-              className="w-full py-2.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] font-medium rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors text-sm"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-2.5 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]"
             >
               Try Again
             </button>

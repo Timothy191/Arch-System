@@ -111,12 +111,12 @@ export function AuditLogsTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             placeholder="Search logs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-10"
           />
         </div>
         <div className="flex gap-2">
@@ -127,7 +127,7 @@ export function AuditLogsTab() {
               setActionFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="rounded border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
             aria-label="Filter by action"
           >
             <option value="all">All Actions</option>
@@ -144,7 +144,7 @@ export function AuditLogsTab() {
               setTableFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="rounded border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
             aria-label="Filter by table"
           >
             <option value="all">All Tables</option>
@@ -155,7 +155,7 @@ export function AuditLogsTab() {
             ))}
           </select>
           <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>
@@ -165,34 +165,34 @@ export function AuditLogsTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[var(--border-default)]">
+              <tr className="border-[var(--border-default)] border-b">
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Timestamp
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   User
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Action
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Table
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Changes
                 </th>
@@ -213,7 +213,7 @@ export function AuditLogsTab() {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                  <tr key={log.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                       {new Date(log.created_at).toLocaleString()}
                     </td>
@@ -225,21 +225,21 @@ export function AuditLogsTab() {
                         variant="outline"
                         className={
                           log.action === 'INSERT'
-                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                            ? 'border-green-500/20 bg-green-500/10 text-green-400'
                             : log.action === 'UPDATE'
-                              ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                              ? 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
                               : log.action === 'DELETE'
-                                ? 'bg-accent-red/10 text-accent-red border-accent-red/20'
+                                ? 'border-accent-red/20 bg-accent-red/10 text-accent-red'
                                 : ''
                         }
                       >
                         {log.action}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm font-mono">
+                    <td className="px-6 py-4 font-mono text-[var(--text-muted)] text-sm">
                       {log.table_name}
                     </td>
-                    <td className="px-6 py-4 text-[var(--text-muted)] text-sm max-w-xs truncate">
+                    <td className="max-w-xs truncate px-6 py-4 text-[var(--text-muted)] text-sm">
                       {JSON.stringify(log.new_values || log.old_values)}
                     </td>
                   </tr>

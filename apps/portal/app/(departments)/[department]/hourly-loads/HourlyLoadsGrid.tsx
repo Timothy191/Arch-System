@@ -113,14 +113,14 @@ const HourCell = memo(function HourCell({
   if (!editable) {
     return (
       <td
-        className="py-2 px-1 text-center bg-black/[0.02]"
+        className="bg-black/[0.02] px-1 py-2 text-center"
         title={
           isLocked ? 'Segment locked' : `Active hours: ${startHour ?? 1}:00 - ${endHour ?? 12}:59`
         }
       >
         <div className="flex items-center justify-center gap-1 text-[var(--text-muted)] opacity-60">
           <span className="font-mono text-xs">{value > 0 ? value : '-'}</span>
-          <Lock className="w-2.5 h-2.5 opacity-50" />
+          <Lock className="h-2.5 w-2.5 opacity-50" />
         </div>
       </td>
     );
@@ -136,7 +136,7 @@ const HourCell = memo(function HourCell({
   };
 
   return (
-    <td className="py-1.5 px-1 text-center">
+    <td className="px-1 py-1.5 text-center">
       <div
         className="inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]"
         data-row={String(rowIndex)}
@@ -154,9 +154,9 @@ const HourCell = memo(function HourCell({
           disabled={value <= 0}
           aria-label={`Decrease ${hourLabel}:00 loads`}
           title={`Decrease ${hourLabel}:00 loads`}
-          className="h-6 w-5 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-20"
         >
-          <Minus className="w-3 h-3" />
+          <Minus className="h-3 w-3" />
         </button>
         <input
           type="text"
@@ -177,7 +177,7 @@ const HourCell = memo(function HourCell({
               onStep(rowIndex, hourProp, -1);
             }
           }}
-          className="w-7 text-center font-mono text-xs font-semibold py-0.5 bg-transparent text-[var(--text-heading)] focus:outline-none"
+          className="w-7 bg-transparent py-0.5 text-center font-mono font-semibold text-[var(--text-heading)] text-xs focus:outline-none"
         />
         <button
           type="button"
@@ -191,9 +191,9 @@ const HourCell = memo(function HourCell({
           disabled={value >= 100}
           aria-label={`Increase ${hourLabel}:00 loads`}
           title={`Increase ${hourLabel}:00 loads`}
-          className="h-6 w-5 inline-flex items-center justify-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-heading)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+          className="inline-flex h-6 w-5 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)] disabled:cursor-not-allowed disabled:opacity-20"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="h-3 w-3" />
         </button>
       </div>
     </td>
@@ -1000,7 +1000,7 @@ function HourlyLoadsGrid({
   if (machines.length === 0) {
     return (
       <GlassCard>
-        <p className="text-[var(--text-muted)] text-sm text-center py-8">
+        <p className="py-8 text-center text-[var(--text-muted)] text-sm">
           No machines available. Add machines in the Machine DB tab first.
         </p>
       </GlassCard>
@@ -1010,94 +1010,94 @@ function HourlyLoadsGrid({
   return (
     <div className="space-y-4">
       {/* Live KPI Telemetry & Dynamic Shift Timeline Graph */}
-      <GlassCard className="p-4 sm:p-5 bg-[var(--vibrancy-surface)] border border-black/[0.06] space-y-4">
+      <GlassCard className="space-y-4 border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4 sm:p-5">
         {/* Redesigned Live KPI Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {/* KPI 1: Total Loads Captured */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
             <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Total Shift Loads
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
                   {grandTotalLoads}
                 </span>
-                <span className="text-[11px] font-medium text-[var(--accent-blue)]">
+                <span className="font-medium text-[11px] text-[var(--accent-blue)]">
                   {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'}
                 </span>
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] block">
+              <span className="block text-[11px] text-[var(--text-muted)]">
                 {grandTotalMaterial > 0
                   ? `${grandTotalMaterial.toLocaleString()} t total material`
                   : 'Real-time shift tally'}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 flex items-center justify-center text-[var(--accent-blue)] shrink-0">
-              <TrendingUp className="w-5 h-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <TrendingUp className="h-5 w-5" />
             </div>
           </div>
 
           {/* KPI 2: Machines Active */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
             <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Machines Active
               </span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
                   {activeMachinesCount}
                 </span>
-                <span className="text-xs font-medium text-[var(--text-muted)]">
+                <span className="font-medium text-[var(--text-muted)] text-xs">
                   / {machines.length} fleet
                 </span>
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] block">
+              <span className="block text-[11px] text-[var(--text-muted)]">
                 {machines.length > 0
                   ? `${Math.round((activeMachinesCount / machines.length) * 100)}% fleet utilization`
                   : 'No fleet configured'}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20 flex items-center justify-center text-[var(--accent-green)] shrink-0">
-              <Truck className="w-5 h-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-green)]/20 bg-[var(--accent-green)]/10 text-[var(--accent-green)]">
+              <Truck className="h-5 w-5" />
             </div>
           </div>
 
           {/* KPI 3: Avg Loads / Machine */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
             <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Avg Loads / Machine
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-mono tabular-nums text-[var(--text-heading)]">
+                <span className="font-bold font-mono text-2xl text-[var(--text-heading)] tabular-nums">
                   {avgLoadsPerMachine}
                 </span>
-                <span className="text-[11px] font-medium text-[var(--text-muted)]">loads/unit</span>
+                <span className="font-medium text-[11px] text-[var(--text-muted)]">loads/unit</span>
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] block">
+              <span className="block text-[11px] text-[var(--text-muted)]">
                 Peak:{' '}
                 {peakHour.totalLoads > 0
                   ? `${peakHour.hourLabel} (${peakHour.totalLoads})`
                   : 'No loads yet'}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-amber)]/15 border border-[var(--accent-amber)]/30 flex items-center justify-center text-[var(--accent-amber)] shrink-0">
-              <Activity className="w-5 h-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/15 text-[var(--accent-amber)]">
+              <Activity className="h-5 w-5" />
             </div>
           </div>
 
           {/* KPI 4: Waste vs Coal Split */}
-          <div className="flex flex-col justify-between p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs">
+          <div className="flex flex-col justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              <span className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Material Split
               </span>
-              <span className="text-[11px] font-mono font-semibold text-[var(--text-heading)]">
+              <span className="font-mono font-semibold text-[11px] text-[var(--text-heading)]">
                 W: {wasteTotalLoads} · C: {coalTotalLoads}
               </span>
             </div>
-            <div className="my-2 h-2 w-full rounded-full bg-black/[0.06] overflow-hidden flex">
+            <div className="my-2 flex h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
               <div
                 className="h-full bg-[var(--accent-blue)] transition-all duration-300"
                 style={{
@@ -1121,12 +1121,12 @@ function HourlyLoadsGrid({
             </div>
             <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
               <span className="inline-flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent-blue)]" />
+                <span className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
                 Waste (
                 {grandTotalLoads > 0 ? Math.round((wasteTotalLoads / grandTotalLoads) * 100) : 0}%)
               </span>
               <span className="inline-flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-neutral-800" />
+                <span className="h-2 w-2 rounded-full bg-neutral-800" />
                 Coal (
                 {grandTotalLoads > 0 ? Math.round((coalTotalLoads / grandTotalLoads) * 100) : 0}%)
               </span>
@@ -1135,12 +1135,12 @@ function HourlyLoadsGrid({
         </div>
 
         {/* Live Hourly Timeline Graph */}
-        <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)]/80 border border-[var(--border-default)] space-y-3">
+        <div className="space-y-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/80 p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Logo variant="gold" className="w-4 h-4 shrink-0" />
+              <Logo variant="gold" className="h-4 w-4 shrink-0" />
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)]">
+                <h3 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
                   Live Hourly Production Timeline (
                   {selectedShift === 'day' ? '06:00 – 17:00' : '18:00 – 05:00'})
                 </h3>
@@ -1149,13 +1149,13 @@ function HourlyLoadsGrid({
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-[11px] font-medium text-[var(--text-muted)]">
+            <div className="flex items-center gap-4 font-medium text-[11px] text-[var(--text-muted)]">
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-[var(--accent-blue)]" />
+                <span className="h-2.5 w-2.5 rounded-xs bg-[var(--accent-blue)]" />
                 Waste Loads
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-neutral-800" />
+                <span className="h-2.5 w-2.5 rounded-xs bg-neutral-800" />
                 Coal Loads
               </span>
               <span className="inline-flex items-center gap-1.5 font-mono text-[var(--text-heading)]">
@@ -1165,7 +1165,7 @@ function HourlyLoadsGrid({
           </div>
 
           {/* 12-Hour Interactive Bar + Cumulative Progress Timeline */}
-          <div className="grid grid-cols-12 gap-1.5 sm:gap-2 pt-2 items-end h-28">
+          <div className="grid h-28 grid-cols-12 items-end gap-1.5 pt-2 sm:gap-2">
             {hourlySeries.map((slot) => {
               const heightPct =
                 slot.totalLoads > 0
@@ -1178,11 +1178,11 @@ function HourlyLoadsGrid({
               return (
                 <div
                   key={slot.hourLabel}
-                  className="flex flex-col items-center h-full justify-end group"
+                  className="group flex h-full flex-col items-center justify-end"
                   title={`${slot.hourLabel} — Total: ${slot.totalLoads} (Waste: ${slot.wasteLoads}, Coal: ${slot.coalLoads}) · Cumulative: ${slot.cumulativeLoads}`}
                 >
                   <span
-                    className={`text-[10px] font-mono font-bold tabular-nums mb-1 transition-colors ${
+                    className={`mb-1 font-bold font-mono text-[10px] tabular-nums transition-colors ${
                       slot.totalLoads > 0
                         ? 'text-[var(--text-heading)]'
                         : 'text-[var(--text-muted)] opacity-50'
@@ -1190,10 +1190,10 @@ function HourlyLoadsGrid({
                   >
                     {slot.totalLoads}
                   </span>
-                  <div className="w-full max-w-[38px] bg-black/[0.04] rounded-t-md h-16 flex flex-col justify-end overflow-hidden border border-black/[0.05]">
+                  <div className="flex h-16 w-full max-w-[38px] flex-col justify-end overflow-hidden rounded-t-md border border-black/[0.05] bg-black/[0.04]">
                     {slot.totalLoads > 0 ? (
                       <div
-                        className="w-full flex flex-col justify-end transition-all duration-300 rounded-t-sm overflow-hidden"
+                        className="flex w-full flex-col justify-end overflow-hidden rounded-t-sm transition-all duration-300"
                         style={{ height: `${heightPct}%` }}
                       >
                         {slot.coalLoads > 0 && (
@@ -1210,10 +1210,10 @@ function HourlyLoadsGrid({
                         )}
                       </div>
                     ) : (
-                      <div className="w-full h-1 bg-black/[0.08]" />
+                      <div className="h-1 w-full bg-black/[0.08]" />
                     )}
                   </div>
-                  <span className="mt-1.5 text-[10px] font-mono font-medium text-[var(--text-muted)] group-hover:text-[var(--text-heading)]">
+                  <span className="mt-1.5 font-medium font-mono text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-heading)]">
                     {slot.shortLabel}:00
                   </span>
                 </div>
@@ -1231,10 +1231,10 @@ function HourlyLoadsGrid({
             <button
               type="button"
               onClick={() => setSelectedShift('day')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
                 selectedShift === 'day'
                   ? 'bg-arch-accent-blue text-arch-surface-secondary'
-                  : 'bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary'
+                  : 'border border-arch-border-primary bg-arch-surface-secondary text-arch-text-tertiary hover:text-arch-text-primary'
               }`}
             >
               Day (06:00 - 17:59)
@@ -1242,10 +1242,10 @@ function HourlyLoadsGrid({
             <button
               type="button"
               onClick={() => setSelectedShift('night')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
                 selectedShift === 'night'
                   ? 'bg-arch-accent-blue text-arch-surface-secondary'
-                  : 'bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary'
+                  : 'border border-arch-border-primary bg-arch-surface-secondary text-arch-text-tertiary hover:text-arch-text-primary'
               }`}
             >
               Night (18:00 - 05:59)
@@ -1262,52 +1262,52 @@ function HourlyLoadsGrid({
         onKeyDown={handleGridKeyDown}
         className="revo-grid-visible"
       >
-        <GlassCard className="p-0 overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] shadow-sm">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse">
+        <GlassCard className="overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] p-0 shadow-sm">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-xs font-semibold text-[var(--text-muted)]">
+                <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60 font-semibold text-[var(--text-muted)] text-xs">
                   <th
                     scope="col"
-                    className="py-2.5 px-3 text-left min-w-[180px] sticky left-0 z-20 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] align-top"
+                    className="sticky left-0 z-20 min-w-[180px] bg-[var(--bg-secondary)] px-3 py-2.5 text-left align-top shadow-[1px_0_0_0_var(--border-default)]"
                   >
                     <div className="space-y-1.5">
-                      <span className="block text-xs font-bold text-[var(--text-heading)]">
+                      <span className="block font-bold text-[var(--text-heading)] text-xs">
                         Machine
                       </span>
                       <div className="relative">
-                        <Search className="w-3 h-3 text-[var(--text-muted)] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <Search className="pointer-events-none absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
                         <input
                           type="text"
                           value={machineSearch}
                           onChange={(e) => setMachineSearch(e.target.value)}
                           placeholder="Search machine..."
                           aria-label="Search machine"
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md pl-6 pr-6 py-1 text-[11px] font-normal text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                          className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] py-1 pr-6 pl-6 font-normal text-[11px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                         />
                         {machineSearch && (
                           <button
                             type="button"
                             onClick={() => setMachineSearch('')}
                             aria-label="Clear machine search"
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                            className="absolute top-1/2 right-1.5 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="h-3 w-3" />
                           </button>
                         )}
                       </div>
                     </div>
                   </th>
-                  <th scope="col" className="py-2.5 px-3 text-left min-w-[165px] align-top">
+                  <th scope="col" className="min-w-[165px] px-3 py-2.5 text-left align-top">
                     <div className="space-y-1.5">
-                      <span className="block text-xs font-bold text-[var(--text-heading)]">
+                      <span className="block font-bold text-[var(--text-heading)] text-xs">
                         Excavator Assigned
                       </span>
                       <select
                         value={excavatorFilter}
                         onChange={(e) => setExcavatorFilter(e.target.value)}
                         aria-label="Filter by assigned excavator"
-                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-2 py-1 text-[11px] font-normal text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                        className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 font-normal text-[11px] text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                       >
                         <option value="">All Excavators</option>
                         <option value="__unassigned__">Unassigned</option>
@@ -1323,32 +1323,32 @@ function HourlyLoadsGrid({
                     <th
                       key={HOUR_PROP(index)}
                       scope="col"
-                      className="py-3 px-1 text-center min-w-[80px]"
+                      className="min-w-[80px] px-1 py-3 text-center"
                     >
                       {hourLabels[index]}:00
                     </th>
                   ))}
-                  <th scope="col" className="py-3 px-3 text-right min-w-[70px]">
+                  <th scope="col" className="min-w-[70px] px-3 py-3 text-right">
                     Total
                   </th>
                   {hasBinFactors && (
                     <>
-                      <th scope="col" className="py-3 px-2 text-right min-w-[70px]">
+                      <th scope="col" className="min-w-[70px] px-2 py-3 text-right">
                         Bin Factor
                       </th>
-                      <th scope="col" className="py-3 px-3 text-right min-w-[100px]">
+                      <th scope="col" className="min-w-[100px] px-3 py-3 text-right">
                         Total Material (t)
                       </th>
                     </>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-default)]/60 text-xs text-[var(--text-heading)]">
+              <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td
                       colSpan={2 + 12 + 1 + (hasBinFactors ? 2 : 0)}
-                      className="py-10 text-center text-sm text-[var(--text-muted)]"
+                      className="py-10 text-center text-[var(--text-muted)] text-sm"
                     >
                       {source.length === 0
                         ? 'No machine load records found for this shift.'
@@ -1368,8 +1368,8 @@ function HourlyLoadsGrid({
                         }`}
                       >
                         {/* Machine Column (sticky left) */}
-                        <td className="py-2.5 px-3 font-medium sticky left-0 z-10 bg-[var(--bg-primary)] shadow-[1px_0_0_0_var(--border-default)]">
-                          <div className="flex items-center gap-1.5 min-w-[140px] max-w-[180px]">
+                        <td className="sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]">
+                          <div className="flex min-w-[140px] max-w-[180px] items-center gap-1.5">
                             <span
                               className={`truncate font-semibold text-xs ${
                                 isLocked
@@ -1382,14 +1382,14 @@ function HourlyLoadsGrid({
                             </span>
                             {isLocked ? (
                               <span
-                                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-semibold bg-black/[0.06] text-[var(--text-muted)] shrink-0"
+                                className="inline-flex shrink-0 items-center gap-0.5 rounded bg-black/[0.06] px-1 py-0.5 font-semibold text-[10px] text-[var(--text-muted)]"
                                 title="Previous segment locked"
                               >
-                                <Lock className="w-2.5 h-2.5" />
+                                <Lock className="h-2.5 w-2.5" />
                                 Locked
                               </span>
                             ) : isSplit ? (
-                              <span className="px-1 py-0.5 rounded text-[10px] font-semibold bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] shrink-0">
+                              <span className="shrink-0 rounded bg-[var(--accent-blue)]/15 px-1 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
                                 Split
                               </span>
                             ) : null}
@@ -1397,7 +1397,7 @@ function HourlyLoadsGrid({
                         </td>
 
                         {/* Excavator Assigned Column */}
-                        <td className="py-2.5 px-3 min-w-[150px]">
+                        <td className="min-w-[150px] px-3 py-2.5">
                           <select
                             data-row={String(originalRowIndex)}
                             data-action="select-excavator"
@@ -1407,10 +1407,10 @@ function HourlyLoadsGrid({
                               handleExcavatorAssignment(originalRowIndex, e.target.value || null);
                             }}
                             disabled={isLocked}
-                            className={`w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2 py-1 text-xs font-medium ${
+                            className={`w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 font-medium text-xs ${
                               isLocked
-                                ? 'text-[var(--text-muted)] cursor-not-allowed opacity-60'
-                                : 'text-[var(--text-heading)] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
+                                ? 'cursor-not-allowed text-[var(--text-muted)] opacity-60'
+                                : 'cursor-pointer text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]'
                             } transition-colors`}
                           >
                             <option value="">Select Excavator</option>
@@ -1447,17 +1447,17 @@ function HourlyLoadsGrid({
                         })}
 
                         {/* Total Column */}
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-xs text-[var(--text-heading)] tabular-nums min-w-[70px]">
+                        <td className="min-w-[70px] px-3 py-2.5 text-right font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums">
                           {row.total ?? 0}
                         </td>
 
                         {/* Bin Factor & Total Material Columns */}
                         {hasBinFactors && (
                           <>
-                            <td className="py-2.5 px-2 text-right font-mono text-xs text-[var(--text-muted)] tabular-nums min-w-[70px]">
+                            <td className="min-w-[70px] px-2 py-2.5 text-right font-mono text-[var(--text-muted)] text-xs tabular-nums">
                               {row.binFactor ?? '-'}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-semibold text-xs text-[var(--text-heading)] tabular-nums min-w-[100px]">
+                            <td className="min-w-[100px] px-3 py-2.5 text-right font-mono font-semibold text-[var(--text-heading)] text-xs tabular-nums">
                               {row.totalMaterial ?? '-'}
                             </td>
                           </>
@@ -1467,29 +1467,29 @@ function HourlyLoadsGrid({
                   })
                 )}
               </tbody>
-              <tfoot className="border-t-2 border-[var(--border-default)] bg-[var(--bg-secondary)]/80 text-xs font-semibold text-[var(--text-heading)]">
+              <tfoot className="border-[var(--border-default)] border-t-2 bg-[var(--bg-secondary)]/80 font-semibold text-[var(--text-heading)] text-xs">
                 <tr>
-                  <td className="py-3 px-3 text-left sticky left-0 z-10 bg-[var(--bg-secondary)] shadow-[1px_0_0_0_var(--border-default)] font-bold">
+                  <td className="sticky left-0 z-10 bg-[var(--bg-secondary)] px-3 py-3 text-left font-bold shadow-[1px_0_0_0_var(--border-default)]">
                     Total Loads
                   </td>
-                  <td className="py-3 px-3 text-left text-[var(--text-muted)]">—</td>
+                  <td className="px-3 py-3 text-left text-[var(--text-muted)]">—</td>
                   {HOURS_12.map((_, index) => (
                     <td
                       key={`footer-hour-${HOUR_PROP(index)}`}
-                      className="py-3 px-1 text-center font-mono font-bold text-xs tabular-nums text-[var(--text-heading)]"
+                      className="px-1 py-3 text-center font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums"
                     >
                       {hourTotals[index] ?? 0}
                     </td>
                   ))}
-                  <td className="py-3 px-3 text-right font-mono font-bold text-xs text-[var(--accent-blue)] tabular-nums">
+                  <td className="px-3 py-3 text-right font-bold font-mono text-[var(--accent-blue)] text-xs tabular-nums">
                     {grandTotalLoads}
                   </td>
                   {hasBinFactors && (
                     <>
-                      <td className="py-3 px-2 text-right text-[var(--text-muted)] font-mono text-xs">
+                      <td className="px-2 py-3 text-right font-mono text-[var(--text-muted)] text-xs">
                         —
                       </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-xs text-[var(--accent-blue)] tabular-nums">
+                      <td className="px-3 py-3 text-right font-bold font-mono text-[var(--accent-blue)] text-xs tabular-nums">
                         {grandTotalMaterial > 0 ? `${grandTotalMaterial} t` : '-'}
                       </td>
                     </>
@@ -1502,14 +1502,14 @@ function HourlyLoadsGrid({
       </div>
 
       {/* Bottom Action Area: Split Shift / Machine Lineup Change */}
-      <GlassCard className="p-4 bg-[var(--vibrancy-surface)] border border-black/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <GlassCard className="flex flex-col items-start justify-between gap-4 border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-[var(--text-heading)]">
+            <span className="font-semibold text-[var(--text-heading)] text-sm">
               Mid-Shift Machine Lineup & Excavator Reassignment
             </span>
           </div>
-          <p className="text-xs text-[var(--text-muted)] max-w-2xl">
+          <p className="max-w-2xl text-[var(--text-muted)] text-xs">
             Need to swap an excavator, change materials, or reassign a haul truck mid-day? Click
             below to add a split segment. The previous hours will automatically lock to ensure no
             duplicate work or double-counting occurs.
@@ -1519,9 +1519,9 @@ function HourlyLoadsGrid({
         <button
           type="button"
           onClick={() => setIsSplitModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 shrink-0 cursor-pointer"
+          className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2.5 font-semibold text-white text-xs shadow-sm transition-all hover:bg-[var(--accent-blue)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           <span>Add Machine Split / Excavator Swap</span>
         </button>
       </GlassCard>
@@ -1534,17 +1534,17 @@ function HourlyLoadsGrid({
         description="Reassign a haul truck mid-shift to a different excavator or material. Previous hours will be locked against editing."
         className="max-w-md"
       >
-        <div className="space-y-4 mt-2">
+        <div className="mt-2 space-y-4">
           {/* Machine Selection */}
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-heading)] mb-1">
+            <label className="mb-1 block font-semibold text-[var(--text-heading)] text-xs">
               Select Haul Truck
             </label>
             <select
               value={splitMachineId}
               onChange={(e) => setSplitMachineId(e.target.value)}
               disabled={isSubmittingSplit}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
             >
               {machines.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -1556,14 +1556,14 @@ function HourlyLoadsGrid({
 
           {/* Excavator Selection */}
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-heading)] mb-1">
+            <label className="mb-1 block font-semibold text-[var(--text-heading)] text-xs">
               Assigned Excavator
             </label>
             <select
               value={splitExcavatorId}
               onChange={(e) => setSplitExcavatorId(e.target.value)}
               disabled={isSubmittingSplit}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
             >
               <option value="">No Excavator Assigned</option>
               {excavators.map((e) => {
@@ -1579,17 +1579,17 @@ function HourlyLoadsGrid({
 
           {/* Material Selection */}
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-heading)] mb-1">
+            <label className="mb-1 block font-semibold text-[var(--text-heading)] text-xs">
               Material Type
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setSplitMaterial('Waste')}
-                className={`py-2 px-3 rounded-lg text-xs font-medium border text-center transition-all ${
+                className={`rounded-lg border px-3 py-2 text-center font-medium text-xs transition-all ${
                   splitMaterial === 'Waste'
-                    ? 'bg-arch-surface-primary text-arch-text-primary border-arch-border-primary font-semibold shadow-xs'
-                    : 'bg-transparent text-[var(--text-muted)] border-[var(--border-default)]'
+                    ? 'border-arch-border-primary bg-arch-surface-primary font-semibold text-arch-text-primary shadow-xs'
+                    : 'border-[var(--border-default)] bg-transparent text-[var(--text-muted)]'
                 }`}
               >
                 Waste
@@ -1597,10 +1597,10 @@ function HourlyLoadsGrid({
               <button
                 type="button"
                 onClick={() => setSplitMaterial('Coal')}
-                className={`py-2 px-3 rounded-lg text-xs font-medium border text-center transition-all ${
+                className={`rounded-lg border px-3 py-2 text-center font-medium text-xs transition-all ${
                   splitMaterial === 'Coal'
-                    ? 'bg-arch-text-primary text-white border-arch-text-primary font-semibold shadow-xs'
-                    : 'bg-transparent text-[var(--text-muted)] border-[var(--border-default)]'
+                    ? 'border-arch-text-primary bg-arch-text-primary font-semibold text-white shadow-xs'
+                    : 'border-[var(--border-default)] bg-transparent text-[var(--text-muted)]'
                 }`}
               >
                 Coal
@@ -1610,14 +1610,14 @@ function HourlyLoadsGrid({
 
           {/* Switch-over Start Hour */}
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-heading)] mb-1">
+            <label className="mb-1 block font-semibold text-[var(--text-heading)] text-xs">
               Effective Starting Hour
             </label>
             <select
               value={splitStartHour}
               onChange={(e) => setSplitStartHour(parseInt(e.target.value, 10))}
               disabled={isSubmittingSplit}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
             >
               {HOURS_12.slice(1).map((hourNum) => (
                 <option key={hourNum} value={hourNum}>
@@ -1628,9 +1628,9 @@ function HourlyLoadsGrid({
           </div>
 
           {/* Information & Locking Preview */}
-          <div className="p-3 rounded-lg bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-xs text-[var(--text-heading)] space-y-1">
+          <div className="space-y-1 rounded-lg border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 p-3 text-[var(--text-heading)] text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--accent-blue)]">
-              <Lock className="w-3.5 h-3.5" />
+              <Lock className="h-3.5 w-3.5" />
               <span>Locking & Double-Counting Safeguard</span>
             </div>
             <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
@@ -1655,9 +1655,9 @@ function HourlyLoadsGrid({
               type="button"
               onClick={handleCreateSplit}
               disabled={isSubmittingSplit}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 disabled:opacity-50 transition-all cursor-pointer"
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90 disabled:opacity-50"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="h-3.5 w-3.5" />
               {isSubmittingSplit ? 'Adding Split...' : 'Confirm & Add Split'}
             </button>
           </div>

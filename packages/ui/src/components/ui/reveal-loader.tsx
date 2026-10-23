@@ -24,7 +24,7 @@ export function RevealLoader({ className, rows = 3, columns = 1, gap = 12 }: Rev
           key={i}
           className={cn(
             'relative overflow-hidden rounded-xl',
-            'bg-[var(--bg-tertiary)]/50 border border-[var(--border-default)]/30',
+            'border border-[var(--border-default)]/30 bg-[var(--bg-tertiary)]/50',
             'h-24'
           )}
         >
@@ -38,7 +38,7 @@ export function RevealLoader({ className, rows = 3, columns = 1, gap = 12 }: Rev
           />
 
           {/* Content placeholder lines */}
-          <div className="p-4 space-y-3">
+          <div className="space-y-3 p-4">
             <div className="h-4 w-1/3 rounded bg-[var(--bg-tertiary)]">
               <div
                 className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite]"

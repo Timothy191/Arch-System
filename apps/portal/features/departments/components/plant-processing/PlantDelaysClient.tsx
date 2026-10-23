@@ -312,18 +312,18 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6">
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-5 shadow-sm">
+      <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-800 border border-amber-500/30">
-            <AlertTriangle className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/15 px-2.5 py-1 font-semibold text-[11px] text-amber-800 uppercase tracking-wider">
+            <AlertTriangle className="h-3.5 w-3.5" />
             Plant &amp; Processing Downtime &amp; Delay Log
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)] tracking-tight">
+          <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight sm:text-2xl">
             Plant &amp; Processing Delays
           </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+          <p className="text-[var(--text-secondary)] text-xs sm:text-sm">
             Log and categorize wash plant stoppages, crusher chute blockages, dense media
             excursions, and circuit maintenance delays.
           </p>
@@ -332,17 +332,17 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/plant-processing/hourly-sheet"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600" />
+            <FileSpreadsheet className="h-3.5 w-3.5 text-amber-600" />
             Hourly Input Sheet
           </Link>
           <button
             type="button"
             onClick={handleExportDelaysCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="h-3.5 w-3.5" />
             Export Delays CSV
           </button>
         </div>
@@ -351,16 +351,16 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
       {feedbackBanner && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-900 text-xs font-medium"
+          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 font-medium text-emerald-900 text-xs"
         >
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
             <span>{feedbackBanner}</span>
           </div>
           <button
             type="button"
             onClick={() => setFeedbackBanner(null)}
-            className="text-[11px] underline cursor-pointer"
+            className="cursor-pointer text-[11px] underline"
           >
             Dismiss
           </button>
@@ -368,72 +368,72 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+          <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
             Logged Delay Events
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-[var(--text-heading)]">
+          <div className="mt-1 font-bold font-mono text-2xl text-[var(--text-heading)]">
             {metrics.totalEvents}
           </div>
-          <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
+          <div className="mt-0.5 text-[var(--text-secondary)] text-xs">
             Across Day &amp; Night wash plant shifts
           </div>
         </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+          <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
             Cumulative Downtime
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-amber-700">
-            {metrics.totalMinutes} <span className="text-sm font-normal">mins</span>
+          <div className="mt-1 font-bold font-mono text-2xl text-amber-700">
+            {metrics.totalMinutes} <span className="font-normal text-sm">mins</span>
           </div>
-          <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
+          <div className="mt-0.5 text-[var(--text-secondary)] text-xs">
             {metrics.totalHours} hours total lost run time
           </div>
         </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+          <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
             Plant Circuit Availability
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-emerald-700">
+          <div className="mt-1 font-bold font-mono text-2xl text-emerald-700">
             {metrics.availabilityPct}%
           </div>
-          <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
+          <div className="mt-0.5 text-[var(--text-secondary)] text-xs">
             Target availability ≥ 92.0%
           </div>
         </div>
 
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+          <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
             Primary Bottleneck Circuit
           </div>
-          <div className="mt-1 text-base font-bold text-[var(--text-heading)] truncate">
+          <div className="mt-1 truncate font-bold text-[var(--text-heading)] text-base">
             {metrics.topCircuit}
           </div>
-          <div className="mt-0.5 text-xs text-[var(--text-secondary)]">
+          <div className="mt-0.5 text-[var(--text-secondary)] text-xs">
             {metrics.topMins} mins total delay impact
           </div>
         </div>
       </div>
 
       {/* Main Split: Log Form (Left) + Delays Register Table (Right) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
         {/* Log New Plant Delay Form */}
         <form
           onSubmit={handleSubmit}
           aria-label="Log Plant and Processing Delay"
-          className="xl:col-span-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-5 space-y-4 shadow-sm"
+          className="space-y-4 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-5 shadow-sm xl:col-span-4"
         >
-          <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+          <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-3">
             <div className="flex items-center gap-2">
               {selectedDelayId ? (
-                <Edit3 className="w-4 h-4 text-amber-600" />
+                <Edit3 className="h-4 w-4 text-amber-600" />
               ) : (
-                <PlusCircle className="w-4 h-4 text-[var(--accent-blue)]" />
+                <PlusCircle className="h-4 w-4 text-[var(--accent-blue)]" />
               )}
-              <h2 className="text-sm font-bold text-[var(--text-heading)] uppercase tracking-wider">
+              <h2 className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider">
                 {selectedDelayId ? 'Update Delay / Log End Time' : 'Log New Plant Delay'}
               </h2>
             </div>
@@ -443,14 +443,14 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   type="button"
                   onClick={handleClearSelection}
                   data-testid="cancel-edit-delay-btn"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[var(--border-default)] bg-[var(--bg-primary)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] cursor-pointer"
+                  className="inline-flex cursor-pointer items-center gap-1 rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
                 >
-                  <RotateCcw className="w-3 h-3" />
+                  <RotateCcw className="h-3 w-3" />
                   New Log
                 </button>
               )}
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 font-mono text-xs font-semibold">
-                <Clock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-2 py-0.5 font-mono font-semibold text-amber-800 text-xs">
+                <Clock className="h-3 w-3" />
                 {endTime.trim() ? `${calculatedDurationMins} min` : 'Booked In (Open)'}
               </span>
             </div>
@@ -464,7 +464,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] font-mono text-xs"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-xs"
               />
             </label>
 
@@ -473,7 +473,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
               <select
                 value={shift}
                 onChange={(e) => setShift(e.target.value as PlantShiftType)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
               >
                 <option value="day">Day Shift (06:00–18:00)</option>
                 <option value="night">Night Shift (18:00–06:00)</option>
@@ -495,7 +495,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 aria-label="Plant Circuit / Equipment Section"
                 value={circuit}
                 onChange={(e) => setCircuit(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
               >
                 {circuitOptions.map((opt) => (
                   <option key={opt} value={opt}>
@@ -509,9 +509,9 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 aria-label="Quick add Equipment"
                 data-testid="quick-add-equipment-btn"
                 title="Quick add Equipment (Adds to database)"
-                className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.04] font-bold text-sm transition-colors cursor-pointer"
+                className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] font-bold text-[var(--text-heading)] text-sm transition-colors hover:bg-black/[0.04]"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
             {showAddEquipment && (
@@ -522,13 +522,13 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   value={newEquipmentName}
                   onChange={(e) => setNewEquipmentName(e.target.value)}
                   placeholder="Quick add equipment (e.g. Tertiary Crusher CR-103)..."
-                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                  className="flex-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
                 />
                 <button
                   type="button"
                   onClick={handleQuickAddEquipment}
                   data-testid="confirm-add-equipment-btn"
-                  className="px-3 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white text-xs font-semibold hover:opacity-95 cursor-pointer"
+                  className="cursor-pointer rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs hover:opacity-95"
                 >
                   Add to DB
                 </button>
@@ -551,7 +551,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   aria-label="Delay Category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as PlantDelayCategory)}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
                 >
                   {categoryOptions.map((cat) => (
                     <option key={cat} value={cat}>
@@ -565,9 +565,9 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   aria-label="Quick add Delays"
                   data-testid="quick-add-category-btn"
                   title="Quick add Delay Category"
-                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.04] font-bold text-sm transition-colors cursor-pointer"
+                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] font-bold text-[var(--text-heading)] text-sm transition-colors hover:bg-black/[0.04]"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
               {showAddCategory && (
@@ -581,13 +581,13 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     placeholder="Add delay category..."
-                    className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                    className="min-w-0 flex-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-xs"
                   />
                   <button
                     type="button"
                     onClick={handleQuickAddCategory}
                     data-testid="confirm-add-category-btn"
-                    className="px-2.5 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white text-xs font-semibold hover:opacity-95 cursor-pointer"
+                    className="cursor-pointer rounded-lg bg-[var(--accent-blue)] px-2.5 py-1.5 font-semibold text-white text-xs hover:opacity-95"
                   >
                     Add
                   </button>
@@ -608,7 +608,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   aria-label="Operational Impact"
                   value={impactType}
                   onChange={(e) => setImpactType(e.target.value as PlantImpactType)}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
                 >
                   {impactOptions.map((impact) => (
                     <option key={impact} value={impact}>
@@ -622,9 +622,9 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                   aria-label="Quick add Operational Impact"
                   data-testid="quick-add-impact-btn"
                   title="Quick add Operational Impact"
-                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.04] font-bold text-sm transition-colors cursor-pointer"
+                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] font-bold text-[var(--text-heading)] text-sm transition-colors hover:bg-black/[0.04]"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
               {showAddImpact && (
@@ -638,13 +638,13 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                     value={newImpactName}
                     onChange={(e) => setNewImpactName(e.target.value)}
                     placeholder="Add operational impact..."
-                    className="flex-1 min-w-0 px-2 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+                    className="min-w-0 flex-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-xs"
                   />
                   <button
                     type="button"
                     onClick={handleQuickAddImpact}
                     data-testid="confirm-add-impact-btn"
-                    className="px-2.5 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white text-xs font-semibold hover:opacity-95 cursor-pointer"
+                    className="cursor-pointer rounded-lg bg-[var(--accent-blue)] px-2.5 py-1.5 font-semibold text-white text-xs hover:opacity-95"
                   >
                     Add
                   </button>
@@ -665,14 +665,14 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 aria-label="Booked In Time (Time Occurred)"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] font-mono text-xs"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-xs"
               />
             </label>
 
             <label className="block space-y-1 text-xs">
               <span className="font-medium text-[var(--text-secondary)]">
                 End Time{' '}
-                <span className="text-[10px] font-normal text-[var(--text-muted)]">
+                <span className="font-normal text-[10px] text-[var(--text-muted)]">
                   (Optional at Book-In)
                 </span>
               </span>
@@ -681,11 +681,11 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 aria-label="End Time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] font-mono text-xs"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-xs"
               />
             </label>
           </div>
-          <p className="text-[11px] text-[var(--text-muted)] -mt-2">
+          <p className="-mt-2 text-[11px] text-[var(--text-muted)]">
             Delays can be booked in at Time Occurred without an End Time. Select any log from the
             database list on the right to pull its details here and log the End Time once resolved.
           </p>
@@ -700,7 +700,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g., Oversize ROM rock bridged primary jaw crusher feed chute..."
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
             />
           </label>
 
@@ -713,7 +713,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
               value={correctiveAction}
               onChange={(e) => setCorrectiveAction(e.target.value)}
               placeholder="e.g., Isolated feeder AF-100, cleared bridge with rock breaker, resumed at 450 t/hr..."
-              className="w-full px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] text-xs"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
             />
           </label>
 
@@ -721,7 +721,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
             type="submit"
             disabled={isPending}
             data-testid="submit-plant-delay-btn"
-            className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-blue)] text-white text-xs font-semibold hover:opacity-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
+            className="w-full cursor-pointer rounded-xl bg-[var(--accent-blue)] px-4 py-2.5 font-semibold text-white text-xs shadow-sm transition-all hover:opacity-95 disabled:opacity-60"
           >
             {isPending
               ? 'Saving Plant Delay...'
@@ -735,13 +735,13 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
           </button>
         </form>
         {/* Logged Delays Register Table */}
-        <div className="xl:col-span-8 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[var(--border-default)]">
+        <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm xl:col-span-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-b px-5 py-4">
             <div>
-              <h2 className="text-sm font-bold text-[var(--text-heading)] uppercase tracking-wider">
+              <h2 className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider">
                 Plant &amp; Processing Delay Database ({filteredDelays.length})
               </h2>
-              <p className="text-xs text-[var(--text-secondary)]">
+              <p className="text-[var(--text-secondary)] text-xs">
                 Select any delay log below to pull its information into the form and update or log
                 its End Time
               </p>
@@ -752,7 +752,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 aria-label="Filter by delay status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'OPEN' | 'RESOLVED')}
-                className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-xs text-[var(--text-heading)]"
+                className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="OPEN">Booked In (Awaiting End Time)</option>
@@ -760,12 +760,12 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
               </select>
 
               <div className="flex items-center gap-1.5 text-xs">
-                <Filter className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 <select
                   aria-label="Filter by delay category"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-xs text-[var(--text-heading)]"
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
                 >
                   <option value="ALL">All Categories</option>
                   {categoryOptions.map((cat) => (
@@ -782,22 +782,22 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search circuit or cause..."
-                className="px-3 py-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-xs text-[var(--text-heading)]"
+                className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs"
               />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="bg-black/[0.025] border-b border-[var(--border-default)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  <th className="py-3 px-4">Date / Shift</th>
-                  <th className="py-3 px-4">Circuit &amp; Category</th>
-                  <th className="py-3 px-4">Booked In / End Time</th>
-                  <th className="py-3 px-4 text-right">Duration</th>
-                  <th className="py-3 px-4">Root Cause &amp; Corrective Action</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.025] font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
+                  <th className="px-4 py-3">Date / Shift</th>
+                  <th className="px-4 py-3">Circuit &amp; Category</th>
+                  <th className="px-4 py-3">Booked In / End Time</th>
+                  <th className="px-4 py-3 text-right">Duration</th>
+                  <th className="px-4 py-3">Root Cause &amp; Corrective Action</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
@@ -808,20 +808,20 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                     <tr
                       key={d.id}
                       onClick={() => handleSelectDelayForUpdate(d)}
-                      className={`transition-colors cursor-pointer ${
+                      className={`cursor-pointer transition-colors ${
                         isSelected ? 'bg-[var(--accent-blue)]/10' : 'hover:bg-black/[0.02]'
                       }`}
                     >
-                      <td className="py-3 px-4 whitespace-nowrap font-mono">
+                      <td className="whitespace-nowrap px-4 py-3 font-mono">
                         <div className="font-semibold text-[var(--text-heading)]">{d.date}</div>
-                        <div className="text-[11px] uppercase text-[var(--text-muted)]">
+                        <div className="text-[11px] text-[var(--text-muted)] uppercase">
                           {d.shift} shift
                         </div>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">
                         <div className="font-semibold text-[var(--text-heading)]">{d.circuit}</div>
-                        <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-800 border border-amber-500/30">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                          <span className="inline-block rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-semibold text-[10px] text-amber-800">
                             {d.category}
                           </span>
                           <span className="text-[11px] text-[var(--text-muted)]">
@@ -829,37 +829,37 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-[var(--text-secondary)]">
                         <div>In: {d.startTime}</div>
                         <div className="text-[11px]">
                           {d.endTime ? (
                             <span>Out: {d.endTime}</span>
                           ) : (
-                            <span className="text-amber-700 font-semibold">Out: Pending</span>
+                            <span className="font-semibold text-amber-700">Out: Pending</span>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right whitespace-nowrap font-mono font-bold text-amber-700">
+                      <td className="whitespace-nowrap px-4 py-3 text-right font-bold font-mono text-amber-700">
                         {d.endTime ? `${d.durationMinutes} min` : 'Open'}
                       </td>
-                      <td className="py-3 px-4 max-w-md">
+                      <td className="max-w-md px-4 py-3">
                         <div className="font-medium text-[var(--text-heading)]">{d.reason}</div>
                         <div className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
                           <span className="font-semibold">Action:</span> {d.correctiveAction}
                         </div>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-3">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 font-semibold text-[10px] uppercase ${
                             d.status === 'Resolved' && d.endTime
-                              ? 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30'
-                              : 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
+                              ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-800'
+                              : 'border border-amber-500/30 bg-amber-500/15 text-amber-800'
                           }`}
                         >
                           {isOpenDelay ? 'Booked In (Open)' : d.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-3 text-right">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -867,13 +867,13 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
                             handleSelectDelayForUpdate(d);
                           }}
                           data-testid={`select-delay-${d.id}`}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                          className={`inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2.5 py-1 font-semibold text-[11px] transition-colors ${
                             isOpenDelay
                               ? 'border-amber-500/40 bg-amber-500/15 text-amber-900 hover:bg-amber-500/25'
                               : 'border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.04]'
                           }`}
                         >
-                          <Edit3 className="w-3 h-3" />
+                          <Edit3 className="h-3 w-3" />
                           {isOpenDelay ? 'Log End Time' : 'Select / Update'}
                         </button>
                       </td>

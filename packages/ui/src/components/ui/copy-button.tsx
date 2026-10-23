@@ -71,7 +71,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
         {...props}
       >
         {copied ? (
-          <Check className={cn(iconSize, 'stroke-[2.5] animate-in zoom-in-50 duration-150')} />
+          <Check className={cn(iconSize, 'zoom-in-50 animate-in stroke-[2.5] duration-150')} />
         ) : (
           <Copy className={iconSize} />
         )}

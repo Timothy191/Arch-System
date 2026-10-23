@@ -63,45 +63,45 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
   };
 
   return (
-    <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
-      <div className="border-b border-black/[0.08] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50">
+    <GlassCard className="overflow-hidden border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-black/[0.08] border-b bg-neutral-50/50 px-5 py-4">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold text-neutral-900 text-sm tracking-tight">
             <Compass className="h-4 w-4 text-neutral-700" />
             Cross-Shift Operational Intelligence
           </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
+          <p className="mt-0.5 text-neutral-500 text-xs">
             Semantic retrieval across historical shift closeouts, delay notes, and handover
             observations
           </p>
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
+      <div className="space-y-4 p-5">
         {/* Search input */}
         <form onSubmit={onSubmit} className="space-y-2.5">
           <div className="relative flex items-center">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Ask about past shifts (e.g. water ponding on haul road, delayed loader)..."
-              className="w-full pl-10 pr-24 py-2 rounded-lg bg-white border border-neutral-200 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-300 transition-colors"
+              className="w-full rounded-lg border border-neutral-200 bg-white py-2 pr-24 pl-10 text-neutral-900 text-xs transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300"
             />
             <button
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 rounded-md bg-neutral-900 text-white text-xs font-medium hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+              className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-1 rounded-md bg-neutral-900 px-3 py-1 font-medium text-white text-xs transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                   <span>Searching</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <Sparkles className="h-3 w-3 text-amber-400" />
                   <span>Query</span>
                 </>
               )}
@@ -119,7 +119,7 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
                   setQuery(q);
                   void handleSearch(q);
                 }}
-                className="text-[11px] px-2 py-0.5 rounded-full bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border border-neutral-200 transition-colors"
+                className="rounded-full border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-700 transition-colors hover:bg-neutral-200/80"
               >
                 {q}
               </button>
@@ -128,7 +128,7 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
         </form>
 
         {errorMsg && (
-          <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-rose-700 text-xs">
             {errorMsg}
           </div>
         )}
@@ -140,9 +140,9 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="py-6 text-center text-xs text-neutral-500 space-y-1"
+              className="space-y-1 py-6 text-center text-neutral-500 text-xs"
             >
-              <Loader2 className="w-4 h-4 animate-spin mx-auto text-neutral-700" />
+              <Loader2 className="mx-auto h-4 w-4 animate-spin text-neutral-700" />
               <p>Scanning shift vector space...</p>
             </motion.div>
           )}
@@ -151,7 +151,7 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="py-6 text-center text-xs text-neutral-500"
+              className="py-6 text-center text-neutral-500 text-xs"
             >
               No relevant shift notes found for this query.
             </motion.div>
@@ -163,37 +163,37 @@ export function ShiftIntelligenceWidget({ onSearchIntelligence }: ShiftIntellige
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 pt-1"
             >
-              <div className="flex items-center justify-between text-[11px] text-neutral-500 font-medium">
+              <div className="flex items-center justify-between font-medium text-[11px] text-neutral-500">
                 <span>Matching Historical Shift Records ({results.length})</span>
                 <span>Hybrid Match Confidence</span>
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                 {results.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 rounded-lg border border-neutral-200/80 bg-white/60 space-y-1.5 text-xs hover:border-neutral-300 transition-colors"
+                    className="space-y-1.5 rounded-lg border border-neutral-200/80 bg-white/60 p-3 text-xs transition-colors hover:border-neutral-300"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-neutral-100 font-medium text-neutral-800 uppercase text-[10px] tracking-wider flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-neutral-500" />
+                        <span className="flex items-center gap-1 rounded bg-neutral-100 px-2 py-0.5 font-medium text-[10px] text-neutral-800 uppercase tracking-wider">
+                          <Clock className="h-3 w-3 text-neutral-500" />
                           {item.shiftType} Shift
                         </span>
                         {item.noteDate && (
-                          <span className="text-neutral-500 text-[11px] flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
+                          <span className="flex items-center gap-1 text-[11px] text-neutral-500">
+                            <Calendar className="h-3 w-3" />
                             {item.noteDate}
                           </span>
                         )}
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-semibold">
+                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-[10px] text-emerald-800">
                         {item.score}% Match
                       </span>
                     </div>
 
-                    <div className="text-neutral-800 text-xs leading-relaxed flex items-start gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-neutral-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-1.5 text-neutral-800 text-xs leading-relaxed">
+                      <FileText className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-neutral-400" />
                       <span>{item.content}</span>
                     </div>
                   </div>

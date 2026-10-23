@@ -191,7 +191,7 @@ export function C66MachineOperatorScanner({
     <GlassCard className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <h3 className="flex items-center gap-2 text-lg font-medium text-[var(--text-heading)]">
+          <h3 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-lg">
             Machine &amp; Operator Assignment
           </h3>
           <ContextCardTrigger
@@ -199,13 +199,13 @@ export function C66MachineOperatorScanner({
             align="center"
             delay={100}
             content={
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              <p className="mt-1 text-[var(--text-secondary)] text-sm">
                 Select a machine to filter and assign qualified operators. When an ADT machine is
                 selected, operators are automatically filtered to show certified ADT operators with
                 current medical and induction clearances.
               </p>
             }
-            render={<Info className="h-4 w-4 ml-2 text-[var(--accent-blue)]" />}
+            render={<Info className="ml-2 h-4 w-4 text-[var(--accent-blue)]" />}
           />
         </div>
         {(machine || assignment) && (
@@ -213,7 +213,7 @@ export function C66MachineOperatorScanner({
             type="button"
             onClick={resetSelection}
             disabled={isSubmitting}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--border-default)] px-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-heading)] disabled:opacity-50"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--border-default)] px-3 text-[var(--text-secondary)] text-sm hover:text-[var(--text-heading)] disabled:opacity-50"
           >
             <RefreshCw size={15} />
             Reset
@@ -223,7 +223,7 @@ export function C66MachineOperatorScanner({
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className="space-y-2">
-          <h4 className="text-sm font-medium text-[var(--text-secondary)]">1. Select a machine</h4>
+          <h4 className="font-medium text-[var(--text-secondary)] text-sm">1. Select a machine</h4>
           <select
             aria-label="Machine"
             value={selectedMachineId}
@@ -241,7 +241,7 @@ export function C66MachineOperatorScanner({
         </section>
 
         <section className="space-y-2">
-          <h4 className="text-sm font-medium text-[var(--text-secondary)]">
+          <h4 className="font-medium text-[var(--text-secondary)] text-sm">
             2. Select {isAdtMachine ? 'an ADT' : machine ? `a ${machine.machineType}` : 'a machine'}{' '}
             operator
           </h4>
@@ -278,7 +278,7 @@ export function C66MachineOperatorScanner({
               type="button"
               onClick={() => void assignOperator()}
               disabled={!machine || isSubmitting || !selectedOperatorId}
-              className="min-h-12 shrink-0 rounded-lg bg-[var(--accent-blue)] px-4 text-sm font-medium text-white disabled:opacity-50"
+              className="min-h-12 shrink-0 rounded-lg bg-[var(--accent-blue)] px-4 font-medium text-sm text-white disabled:opacity-50"
             >
               {isSubmitting ? 'Assigning…' : 'Assign'}
             </button>
@@ -287,7 +287,7 @@ export function C66MachineOperatorScanner({
       </div>
 
       {error && (
-        <p role="alert" className="flex items-start gap-2 text-sm text-[var(--accent-red)]">
+        <p role="alert" className="flex items-start gap-2 text-[var(--accent-red)] text-sm">
           <AlertTriangle size={17} className="mt-0.5 shrink-0" />
           {error}
         </p>
@@ -296,7 +296,7 @@ export function C66MachineOperatorScanner({
       {assignment && (
         <div
           role="status"
-          className="flex items-start gap-2 rounded-lg border border-[var(--accent-green)]/30 bg-[var(--accent-green)]/10 p-3 text-sm text-[var(--text-heading)]"
+          className="flex items-start gap-2 rounded-lg border border-[var(--accent-green)]/30 bg-[var(--accent-green)]/10 p-3 text-[var(--text-heading)] text-sm"
         >
           <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[var(--accent-green)]" />
           <span>

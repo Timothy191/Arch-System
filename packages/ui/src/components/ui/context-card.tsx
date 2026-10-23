@@ -110,7 +110,7 @@ export function ContextCardTrigger({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'absolute z-50 min-w-[200px] max-w-sm rounded-xl border border-neutral-200 bg-white p-3 text-sm text-neutral-900 shadow-xl animate-in fade-in-0 zoom-in-95 duration-150',
+        'fade-in-0 zoom-in-95 absolute z-50 min-w-[200px] max-w-sm animate-in rounded-xl border border-neutral-200 bg-white p-3 text-neutral-900 text-sm shadow-xl duration-150',
         positionClasses,
         cardClassName
       )}

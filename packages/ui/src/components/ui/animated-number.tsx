@@ -24,7 +24,7 @@ export function AnimatedNumber({
   return (
     <div className={cn('flex items-center tabular-nums', className)}>
       {prefix && <span>{prefix}</span>}
-      <div className="flex relative items-center">
+      <div className="relative flex items-center">
         {digits.map((digit, index) => (
           <SingleDigit
             key={`${index}-${digits.length}`}
@@ -118,10 +118,10 @@ function DigitStrip({
         animate={{ y: 0 }}
         exit={{ y: 0, transition: { duration: 0.1 } }}
         transition={{ duration, ease: 'easeOut' }}
-        className="flex relative flex-col items-center"
+        className="relative flex flex-col items-center"
       >
         {/* Numbers smaller than current */}
-        <span className="flex flex-col items-center absolute bottom-full left-0">
+        <span className="absolute bottom-full left-0 flex flex-col items-center">
           {zeroToNine
             .filter((val) => val < currentVal)
             .map((val, idx) => (
@@ -133,7 +133,7 @@ function DigitStrip({
         <span>{value}</span>
 
         {/* Numbers larger than current */}
-        <span className="flex flex-col items-center absolute top-full left-0">
+        <span className="absolute top-full left-0 flex flex-col items-center">
           {zeroToNine
             .filter((val) => val > currentVal)
             .map((val, idx) => (

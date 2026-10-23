@@ -127,10 +127,10 @@ export function DataTable<T>({
       )}
 
       {/* Main Glass Table Container */}
-      <div className="rounded-xl border border-black/[0.08] bg-white/70 backdrop-blur-md overflow-hidden shadow-2xs gold-steel-border gold-steel-border-slim">
+      <div className="gold-steel-border gold-steel-border-slim overflow-hidden rounded-xl border border-black/[0.08] bg-white/70 shadow-2xs backdrop-blur-md">
         <div className="overflow-x-auto">
           <Table className="w-full text-xs">
-            <TableHeader className="bg-black/[0.02] border-b border-black/[0.06]">
+            <TableHeader className="border-black/[0.06] border-b bg-black/[0.02]">
               <TableRow className="hover:bg-transparent">
                 {columns.map((col) => {
                   const keyStr = String(col.key);
@@ -141,7 +141,7 @@ export function DataTable<T>({
                       key={keyStr}
                       style={{ width: col.width }}
                       className={cn(
-                        'h-9 px-4 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[11px]',
+                        'h-9 px-4 font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider',
                         col.align === 'center' && 'text-center',
                         col.align === 'right' && 'text-right',
                         col.className
@@ -152,19 +152,19 @@ export function DataTable<T>({
                           type="button"
                           onClick={() => handleSort(keyStr)}
                           className={cn(
-                            'inline-flex items-center gap-1.5 hover:text-[var(--text-heading)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-arch-accent-blue rounded',
+                            'inline-flex items-center gap-1.5 rounded transition-colors hover:text-[var(--text-heading)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-arch-accent-blue',
                             col.align === 'right' && 'ml-auto'
                           )}
                         >
                           <span>{col.header}</span>
                           {isSorted ? (
                             sortDirection === 'asc' ? (
-                              <ArrowUp className="w-3 h-3 text-[var(--accent-blue)]" />
+                              <ArrowUp className="h-3 w-3 text-[var(--accent-blue)]" />
                             ) : (
-                              <ArrowDown className="w-3 h-3 text-[var(--accent-blue)]" />
+                              <ArrowDown className="h-3 w-3 text-[var(--accent-blue)]" />
                             )
                           ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-40 group-hover:opacity-100" />
+                            <ArrowUpDown className="h-3 w-3 opacity-40 group-hover:opacity-100" />
                           )}
                         </button>
                       ) : (
@@ -179,7 +179,7 @@ export function DataTable<T>({
             <TableBody>
               {loading ? (
                 Array.from({ length: pageSize }).map((_, rIdx) => (
-                  <TableRow key={`skeleton-row-${rIdx}`} className="border-b border-black/[0.04]">
+                  <TableRow key={`skeleton-row-${rIdx}`} className="border-black/[0.04] border-b">
                     {columns.map((col, cIdx) => (
                       <TableCell key={`skeleton-col-${cIdx}`} className="p-3 px-4">
                         <Skeleton className="h-4 w-full max-w-[120px] rounded" />
@@ -191,7 +191,7 @@ export function DataTable<T>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-32 text-center text-xs text-[var(--text-secondary)]"
+                    className="h-32 text-center text-[var(--text-secondary)] text-xs"
                   >
                     {emptyState ?? 'No matching records found.'}
                   </TableCell>
@@ -202,7 +202,7 @@ export function DataTable<T>({
                     key={String(keyExtractor(item, index))}
                     onClick={() => onRowClick?.(item)}
                     className={cn(
-                      'border-b border-black/[0.04] transition-colors hover:bg-black/[0.015]',
+                      'border-black/[0.04] border-b transition-colors hover:bg-black/[0.015]',
                       onRowClick && 'cursor-pointer'
                     )}
                   >
@@ -234,18 +234,18 @@ export function DataTable<T>({
 
         {/* Pagination & Count footer */}
         {!loading && sortedData.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-black/[0.06] bg-black/[0.01] text-xs text-[var(--text-secondary)]">
+          <div className="flex flex-col items-center justify-between gap-3 border-black/[0.06] border-t bg-black/[0.01] px-4 py-3 text-[var(--text-secondary)] text-xs sm:flex-row">
             <span>
               Showing{' '}
-              <strong className="text-[var(--text-heading)] font-mono font-semibold">
+              <strong className="font-mono font-semibold text-[var(--text-heading)]">
                 {(currentPage - 1) * pageSize + 1}
               </strong>{' '}
               to{' '}
-              <strong className="text-[var(--text-heading)] font-mono font-semibold">
+              <strong className="font-mono font-semibold text-[var(--text-heading)]">
                 {Math.min(currentPage * pageSize, sortedData.length)}
               </strong>{' '}
               of{' '}
-              <strong className="text-[var(--text-heading)] font-mono font-semibold">
+              <strong className="font-mono font-semibold text-[var(--text-heading)]">
                 {sortedData.length}
               </strong>{' '}
               records

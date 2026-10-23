@@ -216,17 +216,17 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
   return (
     <GlassCard
       variant="spotlight"
-      className="p-0 overflow-hidden flex flex-col h-full"
+      className="flex h-full flex-col overflow-hidden p-0"
       data-testid="control-room-targets-visual-panel"
     >
       {/* Header */}
-      <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/60 flex flex-wrap justify-between items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/60 p-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30">
-            <BarChart3 className="w-4 h-4" />
+          <div className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 p-1.5 text-[var(--accent-blue)]">
+            <BarChart3 className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[var(--text-heading)]">
+            <h3 className="font-bold text-[var(--text-heading)] text-sm">
               Operational Target Graphs &amp; KPI Attainment
             </h3>
             <p className="text-[11px] text-[var(--text-secondary)]">
@@ -239,20 +239,20 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           <div
             role="tablist"
             aria-label="Target Horizon Selector"
-            className="inline-flex items-center gap-1 bg-white/80 p-0.5 rounded-lg border border-[var(--border-subtle)] text-[11px]"
+            className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-white/80 p-0.5 text-[11px]"
           >
             <button
               type="button"
               role="tab"
               aria-selected={horizon === 'shift'}
               onClick={() => setHorizon('shift')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-semibold transition-colors ${
                 horizon === 'shift'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
               }`}
             >
-              <Clock className="w-3 h-3" />
+              <Clock className="h-3 w-3" />
               Shift
             </button>
             <button
@@ -260,13 +260,13 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
               role="tab"
               aria-selected={horizon === 'daily'}
               onClick={() => setHorizon('daily')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-semibold transition-colors ${
                 horizon === 'daily'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
               }`}
             >
-              <Target className="w-3 h-3" />
+              <Target className="h-3 w-3" />
               Daily
             </button>
             <button
@@ -274,35 +274,35 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
               role="tab"
               aria-selected={horizon === 'monthly'}
               onClick={() => setHorizon('monthly')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 font-semibold transition-colors ${
                 horizon === 'monthly'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
               }`}
             >
-              <Calendar className="w-3 h-3" />
+              <Calendar className="h-3 w-3" />
               Monthly
             </button>
           </div>
 
           <Link
             href="/admin?tab=targets"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--accent-blue)]/10 hover:bg-[var(--accent-blue)]/20 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 text-[11px] font-semibold transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-1 font-semibold text-[11px] text-[var(--accent-blue)] transition-colors hover:bg-[var(--accent-blue)]/20"
           >
             Admin Targets
-            <ArrowUpRight className="w-3 h-3" />
+            <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
       </div>
 
       {/* Main Visual Content */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {/* Top Row: Radial Gauge + Golden Hero Trajectory Graph */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {/* Radial Attainment Visual */}
-          <div className="rounded-xl gold-steel-border gold-steel-border-slim bg-white/85 border border-accent-amber/40 p-3 flex items-center gap-3">
-            <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64" aria-hidden="true">
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-3 rounded-xl border border-accent-amber/40 bg-white/85 p-3">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+              <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64" aria-hidden="true">
                 <circle
                   cx="32"
                   cy="32"
@@ -323,38 +323,38 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                   strokeDashoffset={dashOffset}
                 />
               </svg>
-              <span className="absolute text-xs font-mono font-bold text-[var(--text-heading)]">
+              <span className="absolute font-bold font-mono text-[var(--text-heading)] text-xs">
                 {overallAttainment}%
               </span>
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block">
+              <span className="block font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
                 {horizon.toUpperCase()} PLAN INDEX
               </span>
-              <span className="text-sm font-bold text-[var(--text-heading)] block truncate">
+              <span className="block truncate font-bold text-[var(--text-heading)] text-sm">
                 {overallAttainment >= 85 ? 'On Target Pace' : 'Ramp-Up Active'}
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-accent-green mt-0.5">
-                <TrendingUp className="w-3 h-3" />
+              <span className="mt-0.5 inline-flex items-center gap-1 font-mono font-semibold text-[10px] text-accent-green">
+                <TrendingUp className="h-3 w-3" />
                 Admin Benchmark
               </span>
             </div>
           </div>
 
           {/* Golden Trajectory Curve vs Target Benchmark */}
-          <div className="sm:col-span-2 rounded-xl gold-steel-border gold-steel-border-slim bg-white/85 border border-accent-amber/40 px-3 py-2 flex flex-col justify-between relative overflow-hidden">
-            <div className="flex items-center justify-between text-[10px] mb-1">
-              <span className="font-bold uppercase tracking-wider text-[var(--text-heading)]">
+          <div className="gold-steel-border gold-steel-border-slim relative flex flex-col justify-between overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 sm:col-span-2">
+            <div className="mb-1 flex items-center justify-between text-[10px]">
+              <span className="font-bold text-[var(--text-heading)] uppercase tracking-wider">
                 {horizon} Cumulative Trajectory vs Admin Target (100%)
               </span>
-              <span className="font-mono font-bold text-[var(--accent-blue)]">
+              <span className="font-bold font-mono text-[var(--accent-blue)]">
                 Target: {activeTarget.loadsTarget.toLocaleString()} loads
               </span>
             </div>
 
             <svg
               viewBox={`0 0 ${width} ${height}`}
-              className="w-full h-16 overflow-visible"
+              className="h-16 w-full overflow-visible"
               role="img"
               aria-label={`${horizon} operational target trajectory graph`}
             >
@@ -428,10 +428,10 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
               })}
             </svg>
 
-            <div className="flex items-center justify-between text-[9px] font-mono text-[var(--text-secondary)] pt-1 border-t border-slate-100">
+            <div className="flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[9px] text-[var(--text-secondary)]">
               <span>START OF {horizon.toUpperCase()}</span>
-              <span className="text-accent-green font-semibold">--- 100% ADMIN TARGET</span>
-              <span className="text-[var(--text-heading)] font-bold">
+              <span className="font-semibold text-accent-green">--- 100% ADMIN TARGET</span>
+              <span className="font-bold text-[var(--text-heading)]">
                 ACTUAL {overallAttainment}%
               </span>
             </div>
@@ -448,7 +448,7 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
             return (
               <div
                 key={metric.id}
-                className="p-2.5 rounded-xl bg-white/80 border border-[var(--border-subtle)] space-y-1.5"
+                className="space-y-1.5 rounded-xl border border-[var(--border-subtle)] bg-white/80 p-2.5"
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-[var(--text-heading)]">{metric.label}</span>
@@ -459,14 +459,14 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                     <span className="text-[var(--text-secondary)]">
                       / {metric.target.toLocaleString()} {metric.unit}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] font-bold text-[10px]">
+                    <span className="rounded bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-bold text-[10px] text-[var(--accent-blue)]">
                       {pct}%
                     </span>
                   </div>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]">
                   <div
-                    className="h-full rounded-full transition-transform duration-300 origin-left"
+                    className="h-full origin-left rounded-full transition-transform duration-300"
                     style={{
                       width: `${pct}%`,
                       background: 'linear-gradient(90deg, #d4af37 0%, #10b981 100%)',

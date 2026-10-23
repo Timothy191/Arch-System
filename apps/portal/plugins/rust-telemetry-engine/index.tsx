@@ -92,13 +92,13 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Wear Index</p>
-                <p className="mt-1 text-lg font-bold">{data?.wearIndex}</p>
+                <p className="mt-1 font-bold text-lg">{data?.wearIndex}</p>
               </div>
               <div>
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">
                   Est. Lifetime (RUL)
                 </p>
-                <p className="mt-1 text-lg font-bold">{data?.rulHours} hrs</p>
+                <p className="mt-1 font-bold text-lg">{data?.rulHours} hrs</p>
               </div>
             </div>
 
@@ -110,7 +110,7 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
                 <span className="font-semibold">{probability}%</span>
               </div>
               <div
-                className="bg-muted h-2 overflow-hidden rounded-full"
+                className="h-2 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
                 aria-label="Failure probability"
                 aria-valuemin={0}
@@ -118,13 +118,13 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
                 aria-valuenow={probability}
               >
                 <div
-                  className="bg-primary h-full rounded-full transition-[width] duration-500"
+                  className="h-full rounded-full bg-primary transition-[width] duration-500"
                   style={{ width: `${probability}%` }}
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t pt-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between border-t pt-2 text-muted-foreground text-xs">
               <span>Engine: {data?.isNative ? 'Rust binary' : 'JS fallback'}</span>
               {data?.error && <span className="text-destructive">Sensor read timeout</span>}
             </div>

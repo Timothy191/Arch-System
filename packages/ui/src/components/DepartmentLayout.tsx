@@ -169,11 +169,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   );
 
   return (
-    <div className="flex h-[calc(100vh-28px)] relative" onMouseMove={handleContainerMouseMove}>
+    <div className="relative flex h-[calc(100vh-28px)]" onMouseMove={handleContainerMouseMove}>
       {/* Hover / proximity trigger zone at the far left (disabled when pinned) */}
       <div
         className={cn(
-          'absolute left-0 top-0 bottom-0 w-12 z-40',
+          'absolute top-0 bottom-0 left-0 z-40 w-12',
           isPinned ? 'pointer-events-none' : 'cursor-pointer'
         )}
         onMouseEnter={openSidebar}
@@ -188,15 +188,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Toggle department navigation"
-        className="fixed bottom-4 left-4 z-50 md:hidden p-2.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border-default)] shadow-lg text-[var(--text-heading)] hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+        className="fixed bottom-4 left-4 z-50 rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] p-2.5 text-[var(--text-heading)] shadow-lg hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] md:hidden"
       >
-        <Menu className="w-5 h-5" />
+        <Menu className="h-5 w-5" />
       </button>
 
       {/* Mobile backdrop overlay */}
       {isOpen && !isPinned && (
         <div
-          className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px] md:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
@@ -206,7 +206,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'absolute left-0 top-0 bottom-0 z-50 w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group/sidebar shadow-2xl gold-steel-border gold-steel-border-slim',
+          'group/sidebar gold-steel-border gold-steel-border-slim absolute top-0 bottom-0 left-0 z-50 flex w-60 shrink-0 flex-col border-black/[0.08] border-r bg-[var(--vibrancy-surface)] shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
@@ -222,11 +222,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Subtle hint when collapsed */}
         <div
           className={cn(
-            'absolute top-1/2 right-0 -translate-y-1/2 translate-x-full w-4 h-12 flex items-center justify-center transition-opacity pointer-events-none',
+            'pointer-events-none absolute top-1/2 right-0 flex h-12 w-4 translate-x-full -translate-y-1/2 items-center justify-center transition-opacity',
             isPinned || isOpen ? 'opacity-0' : 'opacity-50'
           )}
         >
-          <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+          <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
         </div>
 
         {/* MacTitleBar with department name */}
@@ -235,15 +235,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Back to Hub link & Pin toggle */}
         <div
           className={cn(
-            'px-3 pt-3.5 pb-1.5 flex items-center justify-between transition-opacity duration-200',
-            isPinned || isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            'flex items-center justify-between px-3 pt-3.5 pb-1.5 transition-opacity duration-200',
+            isPinned || isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text-heading)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
+            className="group flex items-center gap-1.5 rounded px-2 py-1 font-semibold text-[12px] text-[var(--text-heading)] transition-colors hover:text-[var(--accent-blue)]"
           >
-            <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
+            <span className="text-sm transition-transform group-hover:-translate-x-0.5">‹</span>
             <span>Back to Hub</span>
           </Link>
           <div className="flex items-center gap-1">
@@ -251,30 +251,30 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               type="button"
               onClick={togglePin}
               aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-              className="p-1.5 rounded hover:bg-black/5 text-[var(--text-heading)] hover:text-[var(--accent-blue)] transition-colors cursor-pointer"
+              className="cursor-pointer rounded p-1.5 text-[var(--text-heading)] transition-colors hover:bg-black/5 hover:text-[var(--accent-blue)]"
               title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
             >
               <Pin
                 className={cn(
-                  'w-3.5 h-3.5 transition-transform',
+                  'h-3.5 w-3.5 transition-transform',
                   isPinned ? 'rotate-45 text-[var(--accent-blue)]' : ''
                 )}
               />
             </button>
-            <Logo className="w-4 h-4 opacity-60 mr-1" />
+            <Logo className="mr-1 h-4 w-4 opacity-60" />
           </div>
         </div>
 
         {/* Department icon + label */}
         <div
           className={cn(
-            'px-4 py-2 flex items-center gap-2.5 transition-opacity duration-200',
-            isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            'flex items-center gap-2.5 px-4 py-2 transition-opacity duration-200',
+            isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
           <div
             className={cn(
-              'p-1.5 rounded-lg',
+              'rounded-lg p-1.5',
               department.color === 'blue' && 'bg-dept-drilling/10 text-dept-drilling',
               department.color === 'emerald' && 'bg-dept-production/10 text-dept-production',
               department.color === 'violet' && 'bg-dept-engineering/10 text-dept-engineering',
@@ -285,10 +285,10 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             {(() => {
               const DeptIcon =
                 ICON_MAP[department.icon] || getDepartmentIcon(department.name) || BarChart3;
-              return <DeptIcon className="w-3.5 h-3.5" />;
+              return <DeptIcon className="h-3.5 w-3.5" />;
             })()}
           </div>
-          <span className="text-[12px] font-semibold text-[var(--text-heading)] uppercase tracking-wider">
+          <span className="font-semibold text-[12px] text-[var(--text-heading)] uppercase tracking-wider">
             {department.displayName}
           </span>
         </div>
@@ -296,8 +296,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Navigation items */}
         <nav
           className={cn(
-            'flex-1 px-2 pb-2 space-y-0.5 overflow-y-auto transition-opacity duration-200',
-            isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            'flex-1 space-y-0.5 overflow-y-auto px-2 pb-2 transition-opacity duration-200',
+            isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
           {tabs.map((tab) => {
@@ -341,22 +341,22 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       }
                     }}
                     className={cn(
-                      'flex-1 flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
+                      'group relative flex flex-1 items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] transition-all',
                       isActive
-                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                        : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                        ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                        : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                     )}
                   >
                     {isActive && (
                       <m.div
                         layoutId="active-sidebar-tab"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[var(--accent-blue)]"
+                        className="absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                       />
                     )}
                     {Icon && (
                       <Icon
                         className={cn(
-                          'w-3.5 h-3.5 shrink-0 transition-colors',
+                          'h-3.5 w-3.5 shrink-0 transition-colors',
                           isActive
                             ? 'text-[var(--accent-blue)]'
                             : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
@@ -377,15 +377,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       aria-expanded={isDashboardExpanded}
                       onClick={() => setIsDashboardExpanded((prev) => !prev)}
                       className={cn(
-                        'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
+                        'shrink-0 cursor-pointer rounded-md p-1.5 transition-colors',
                         isRouteMatch
                           ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
-                          : 'text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          : 'text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       <ChevronRight
                         className={cn(
-                          'w-3.5 h-3.5 transition-transform duration-200',
+                          'h-3.5 w-3.5 transition-transform duration-200',
                           isDashboardExpanded && 'rotate-90'
                         )}
                       />
@@ -401,15 +401,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       aria-expanded={isReportsExpanded}
                       onClick={() => setIsReportsExpanded((prev) => !prev)}
                       className={cn(
-                        'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
+                        'shrink-0 cursor-pointer rounded-md p-1.5 transition-colors',
                         isRouteMatch
                           ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
-                          : 'text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          : 'text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       <ChevronRight
                         className={cn(
-                          'w-3.5 h-3.5 transition-transform duration-200',
+                          'h-3.5 w-3.5 transition-transform duration-200',
                           isReportsExpanded && 'rotate-90'
                         )}
                       />
@@ -419,27 +419,27 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 {hasDashboardSubtabs && isDashboardExpanded && (
                   <div
                     data-testid="dashboard-subtabs"
-                    className="pl-6 space-y-0.5 border-l border-black/[0.06] ml-4 mt-0.5"
+                    className="mt-0.5 ml-4 space-y-0.5 border-black/[0.06] border-l pl-6"
                   >
                     <Link
                       href={basePath}
                       data-testid="dashboard-subtab-scada"
                       className={cn(
-                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
                         isScadaDashboardSubtabActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                          : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       {isScadaDashboardSubtabActive && (
                         <m.div
                           layoutId="active-dashboard-subtab"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
                       <Activity
                         className={cn(
-                          'w-3 h-3 shrink-0 transition-colors',
+                          'h-3 w-3 shrink-0 transition-colors',
                           isScadaDashboardSubtabActive
                             ? 'text-[var(--accent-blue)]'
                             : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
@@ -451,21 +451,21 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={`${basePath}/shift-compilation`}
                       data-testid="dashboard-subtab-shift-operations"
                       className={cn(
-                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
                         isShiftOperationsSubtabActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                          : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       {isShiftOperationsSubtabActive && (
                         <m.div
                           layoutId="active-dashboard-subtab"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
                       <ClipboardCheck
                         className={cn(
-                          'w-3 h-3 shrink-0 transition-colors',
+                          'h-3 w-3 shrink-0 transition-colors',
                           isShiftOperationsSubtabActive
                             ? 'text-[var(--accent-blue)]'
                             : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
@@ -478,27 +478,27 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 {tab.name === 'reports' && isReportsExpanded && (
                   <div
                     data-testid="reports-subtabs"
-                    className="pl-6 space-y-0.5 border-l border-black/[0.06] ml-4 mt-0.5"
+                    className="mt-0.5 ml-4 space-y-0.5 border-black/[0.06] border-l pl-6"
                   >
                     <Link
                       href={`${basePath}/reports`}
                       data-testid="reports-subtab-dashboard"
                       className={cn(
-                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
                         isReportsDashboardActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                          : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       {isReportsDashboardActive && (
                         <m.div
                           layoutId="active-sidebar-subtab"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
                       <BarChart3
                         className={cn(
-                          'w-3 h-3 shrink-0 transition-colors',
+                          'h-3 w-3 shrink-0 transition-colors',
                           isReportsDashboardActive
                             ? 'text-[var(--accent-blue)]'
                             : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
@@ -510,21 +510,21 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={`${basePath}/reports?tab=pdf-report`}
                       data-testid="reports-subtab-pdf-report"
                       className={cn(
-                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
                         isPdfReportActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                          : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
                       {isPdfReportActive && (
                         <m.div
                           layoutId="active-sidebar-subtab"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
                       <FileText
                         className={cn(
-                          'w-3 h-3 shrink-0 transition-colors',
+                          'h-3 w-3 shrink-0 transition-colors',
                           isPdfReportActive
                             ? 'text-[var(--accent-blue)]'
                             : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
@@ -542,13 +542,13 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Bottom status strip */}
         <div
           className={cn(
-            'p-3 border-t border-black/[0.06] flex items-center justify-between gap-2 transition-opacity duration-200',
-            isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            'flex items-center justify-between gap-2 border-black/[0.06] border-t p-3 transition-opacity duration-200',
+            isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
-          <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-[var(--accent-green)]/8 border border-[var(--accent-green)]/15 gold-steel-border gold-steel-border-slim">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
-            <span className="text-[11px] text-[var(--text-heading)] font-medium tracking-wide">
+          <div className="gold-steel-border gold-steel-border-slim flex flex-1 items-center gap-2 rounded-md border border-[var(--accent-green)]/15 bg-[var(--accent-green)]/8 px-2 py-1.5">
+            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent-green)]" />
+            <span className="font-medium text-[11px] text-[var(--text-heading)] tracking-wide">
               Connection Secure
             </span>
           </div>
@@ -559,7 +559,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <main
         aria-label={`${department.displayName} content`}
         className={cn(
-          'flex-1 h-full overflow-auto p-lg transition-all duration-300',
+          'h-full flex-1 overflow-auto p-lg transition-all duration-300',
           isPinned ? 'pl-64' : 'pl-12',
           'max-md:pl-4'
         )}

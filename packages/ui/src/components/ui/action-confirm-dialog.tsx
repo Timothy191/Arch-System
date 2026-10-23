@@ -34,7 +34,7 @@ export function ActionConfirmDialog({
 
   return (
     <AnimatedDialog open={open} onClose={onClose} title={title} description={description}>
-      <div className="flex justify-end gap-3 mt-6">
+      <div className="mt-6 flex justify-end gap-3">
         <Button
           variant="ghost"
           onClick={onClose}
@@ -47,7 +47,7 @@ export function ActionConfirmDialog({
           onClick={handleConfirm}
           className={
             variant === 'default'
-              ? 'bg-accent-blue hover:bg-accent-blue/90 text-white border-none'
+              ? 'border-none bg-accent-blue text-white hover:bg-accent-blue/90'
               : ''
           }
         >

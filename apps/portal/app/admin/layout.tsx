@@ -29,20 +29,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-transparent text-[var(--text-heading)] flex flex-col">
+    <div className="flex min-h-screen flex-col bg-transparent text-[var(--text-heading)]">
       {/* Universal Admin Navigation Bar */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-white/80 backdrop-blur-md gold-steel-border gold-steel-border-slim">
-        <div className="flex flex-wrap items-center justify-between px-6 py-3 gap-4">
+      <header className="gold-steel-border gold-steel-border-slim sticky top-0 z-50 border-[var(--border-default)] border-b bg-white/80 backdrop-blur-md">
+        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-4">
             <Link
               href="/hub"
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors bg-zinc-100 px-2.5 py-1.5 rounded-md gold-steel-border gold-steel-border-slim"
+              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md bg-zinc-100 px-2.5 py-1.5 font-semibold text-xs text-zinc-500 transition-colors hover:text-zinc-900"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Return to Hub
             </Link>
             <div className="h-4 w-px bg-zinc-200" />
-            <span className="text-base font-semibold text-zinc-900 flex items-center gap-2">
+            <span className="flex items-center gap-2 font-semibold text-base text-zinc-900">
               <ShieldCheck className="h-5 w-5 text-indigo-600" />
               Arch Operations Console
             </span>
@@ -52,28 +52,28 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <nav className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href="/admin"
-              className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5 gold-steel-border gold-steel-border-slim"
+              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <Cpu className="h-3.5 w-3.5 text-zinc-500" />
               General
             </Link>
             <Link
               href="/admin/workflows"
-              className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5 gold-steel-border gold-steel-border-slim"
+              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <N8nIcon className="h-3.5 w-3.5" color="#ea4b71" />
               n8n Workflows
             </Link>
             <Link
               href="/admin/redis"
-              className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5 gold-steel-border gold-steel-border-slim"
+              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <RedisIcon className="h-3.5 w-3.5" color="#dc382d" />
               RedisInsight
             </Link>
             <Link
               href="/admin/ai-metrics"
-              className="px-3 py-1.5 text-xs font-medium rounded-md hover:bg-zinc-100 text-zinc-700 transition-colors flex items-center gap-1.5 gold-steel-border gold-steel-border-slim"
+              className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-xs text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <Activity className="h-3.5 w-3.5 text-emerald-600" />
               AI Metrics
@@ -82,16 +82,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           {/* Operator Identity Badge */}
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 gold-steel-border gold-steel-border-slim">
+            <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 font-mono font-semibold text-[11px] text-indigo-700">
               SUPER-ADMIN
             </span>
-            <span className="text-xs text-zinc-500 font-mono hidden md:inline">{user.email}</span>
+            <span className="hidden font-mono text-xs text-zinc-500 md:inline">{user.email}</span>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }

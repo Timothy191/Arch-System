@@ -86,7 +86,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           aria-label="Loading avatar"
           style={{ ...customSizeStyle, ...style }}
           className={cn(
-            'relative rounded-full shrink-0 bg-black/[0.08] animate-pulse',
+            'relative shrink-0 animate-pulse rounded-full bg-black/[0.08]',
             sizeConfig.container,
             className
           )}
@@ -106,7 +106,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         title={title}
         style={{ ...customSizeStyle, ...style }}
         className={cn(
-          'relative rounded-full shrink-0 select-none flex items-center justify-center overflow-hidden',
+          'relative flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full',
           'border border-black/[0.08] shadow-sm',
           'bg-white text-neutral-800',
           sizeConfig.container,
@@ -119,13 +119,13 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             src={src!}
             alt={title ?? ariaLabel}
             onError={() => setImageFailed(true)}
-            className="w-full h-full object-cover rounded-full"
+            className="h-full w-full rounded-full object-cover"
             loading="lazy"
           />
         ) : computedLetter ? (
           <span
             className={cn(
-              'font-medium tracking-wide uppercase leading-none select-none',
+              'select-none font-medium uppercase leading-none tracking-wide',
               sizeConfig.font
             )}
           >
@@ -133,7 +133,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           </span>
         ) : (
           <svg
-            className="w-1/2 h-1/2 text-neutral-400"
+            className="h-1/2 w-1/2 text-neutral-400"
             fill="currentColor"
             viewBox="0 0 24 24"
             aria-hidden="true"

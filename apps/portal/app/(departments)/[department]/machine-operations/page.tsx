@@ -6,7 +6,7 @@ import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 const MachineOperationsForm = dynamic(
   () => import('./MachineOperationsForm').then((m) => m.MachineOperationsForm),
   {
-    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+    loading: () => <div className="h-64 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
   }
 );
 
@@ -16,7 +16,7 @@ const MachineOperationsList = dynamic(
     loading: () => (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+          <div key={i} className="h-24 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
         ))}
       </div>
     ),
@@ -27,7 +27,7 @@ const MachineOperationsComplianceWidget = dynamic(
   () =>
     import('./MachineOperationsComplianceWidget').then((m) => m.MachineOperationsComplianceWidget),
   {
-    loading: () => <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+    loading: () => <div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
   }
 );
 
@@ -237,7 +237,7 @@ export default async function MachineOperationsPage({
     <div className="space-y-6">
       <GlassCard>
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-medium text-[var(--text-heading)]">Machine Operations</h2>
+          <h2 className="font-medium text-2xl text-[var(--text-heading)]">Machine Operations</h2>
           <p className="text-[var(--text-muted)] text-sm">
             {new Date().toLocaleDateString('en-ZA', {
               weekday: 'long',
@@ -250,32 +250,32 @@ export default async function MachineOperationsPage({
       </GlassCard>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Today&apos;s Hours</p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
+          <p className="mt-1 font-medium text-2xl text-[var(--text-heading)]">
             {totalHours.toFixed(1)}h
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Active Machines</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">{activeMachines}</p>
+          <p className="mt-1 font-medium text-2xl text-accent-green">{activeMachines}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Material Moved</p>
-          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
+          <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
             {totalMaterialBCM.toFixed(1)} BCM
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">BCM/Hour</p>
-          <p className="text-2xl font-medium text-accent-blue mt-1">{avgBcmPerHour.toFixed(1)}</p>
+          <p className="mt-1 font-medium text-2xl text-accent-blue">{avgBcmPerHour.toFixed(1)}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Total Delays</p>
-          <p className="text-2xl font-medium text-accent-red mt-1">{totalDelayHours.toFixed(1)}h</p>
+          <p className="mt-1 font-medium text-2xl text-accent-red">{totalDelayHours.toFixed(1)}h</p>
           {totalEngineeringDelayHours > 0 && (
-            <p className="text-[11px] text-[var(--text-muted)] font-mono mt-0.5">
+            <p className="mt-0.5 font-mono text-[11px] text-[var(--text-muted)]">
               CR: {controlRoomDelayHours.toFixed(1)}h + Eng: {totalEngineeringDelayHours.toFixed(1)}
               h
             </p>
@@ -285,7 +285,7 @@ export default async function MachineOperationsPage({
 
       {/* Shift Coverage Compliance Widget */}
       <Suspense
-        fallback={<div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+        fallback={<div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
       >
         <MachineOperationsComplianceWidget departmentId={deptId} departmentSlug={deptSlug} />
       </Suspense>
@@ -293,7 +293,7 @@ export default async function MachineOperationsPage({
       {/* Add Operation Form */}
       <div id="machine-operations-form" className="scroll-mt-6">
         <Suspense
-          fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+          fallback={<div className="h-64 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
         >
           <MachineOperationsForm
             departmentId={deptId}
@@ -310,10 +310,10 @@ export default async function MachineOperationsPage({
       {/* Today's Operations List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">
             Today&apos;s Operations
           </h3>
-          <span className="text-xs text-[var(--text-muted)] font-mono">
+          <span className="font-mono text-[var(--text-muted)] text-xs">
             {machinesWithSmu.length} fleet machine{machinesWithSmu.length === 1 ? '' : 's'}
           </span>
         </div>
@@ -321,7 +321,7 @@ export default async function MachineOperationsPage({
           fallback={
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+                <div key={i} className="h-24 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
               ))}
             </div>
           }

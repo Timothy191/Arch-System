@@ -87,7 +87,7 @@ export function ExcavatorActivityList({
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
+      <h3 className="font-medium text-[var(--text-heading)] text-lg">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
         const siteAssignments = activities.flatMap((a) => assignmentsByActivityId.get(a.id) || []);
@@ -100,17 +100,17 @@ export function ExcavatorActivityList({
         return (
           <div key={siteKey} className="space-y-3">
             {/* Site header */}
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
-              <h4 className="text-base font-medium text-[var(--text-heading)] flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-blue)]" />
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-2">
+              <h4 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-base">
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-blue)]" />
                 {siteName}
               </h4>
-              <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
+              <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs">
                 {siteBcm > 0 && (
-                  <span className="text-accent-green font-medium">{siteBcm.toFixed(1)} BCM</span>
+                  <span className="font-medium text-accent-green">{siteBcm.toFixed(1)} BCM</span>
                 )}
                 {siteLoads > 0 && (
-                  <span className="text-[var(--accent-blue)] font-medium">
+                  <span className="font-medium text-[var(--accent-blue)]">
                     {siteLoads.toLocaleString()} loads
                   </span>
                 )}
@@ -120,8 +120,8 @@ export function ExcavatorActivityList({
             {/* Day shift */}
             {dayOps.length > 0 && (
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-accent-blue flex items-center gap-1.5 ml-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
+                <h5 className="ml-4 flex items-center gap-1.5 font-medium text-accent-blue text-xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent-blue" />
                   Day Shift
                 </h5>
                 <div className="space-y-2">
@@ -139,8 +139,8 @@ export function ExcavatorActivityList({
             {/* Night shift */}
             {nightOps.length > 0 && (
               <div className="space-y-2">
-                <h5 className="text-xs font-medium text-indigo-400 flex items-center gap-1.5 ml-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                <h5 className="ml-4 flex items-center gap-1.5 font-medium text-indigo-400 text-xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
                   Night Shift
                 </h5>
                 <div className="space-y-2">
@@ -180,10 +180,10 @@ function ActivityCard({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[var(--text-heading)] font-medium">
+            <p className="font-medium text-[var(--text-heading)]">
               {activity.machine?.name || 'Unknown Excavator'}
             </p>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-[var(--text-muted)]">
+            <div className="mt-0.5 flex items-center gap-3 text-[var(--text-muted)] text-xs">
               <span>{activity.operator?.full_name || 'No Operator'}</span>
               <span className="text-[var(--border-emphasis)]">|</span>
               <span>{activity.site?.name || 'No Site'}</span>
@@ -197,7 +197,7 @@ function ActivityCard({
           </div>
           <div className="text-right">
             <span
-              className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+              className={`inline-block rounded px-2 py-0.5 font-medium text-xs ${
                 activity.shift_type === 'day'
                   ? 'bg-accent-blue/20 text-accent-blue'
                   : 'bg-accent-blue/20 text-accent-blue'
@@ -213,28 +213,28 @@ function ActivityCard({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border-default)]">
+                <tr className="border-[var(--border-default)] border-b">
                   <th
                     scope="col"
-                    className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
+                    className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
                   >
                     Dumper
                   </th>
                   <th
                     scope="col"
-                    className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
+                    className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
                   >
                     Material
                   </th>
                   <th
                     scope="col"
-                    className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
+                    className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
                   >
                     Loads
                   </th>
                   <th
                     scope="col"
-                    className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
+                    className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
                   >
                     BCM
                   </th>
@@ -242,37 +242,37 @@ function ActivityCard({
               </thead>
               <tbody>
                 {assignments.map((assignment) => (
-                  <tr key={assignment.id} className="border-b border-[var(--border-default)]/30">
-                    <td className="py-1.5 px-2 text-[var(--text-heading)]">
+                  <tr key={assignment.id} className="border-[var(--border-default)]/30 border-b">
+                    <td className="px-2 py-1.5 text-[var(--text-heading)]">
                       {assignment.dumper?.name || 'Unknown'}
-                      <span className="text-[var(--text-muted)] text-xs ml-1">
+                      <span className="ml-1 text-[var(--text-muted)] text-xs">
                         ({assignment.dumper?.machine_type || ''})
                       </span>
                     </td>
-                    <td className="py-1.5 px-2 text-[var(--text-muted)]">
+                    <td className="px-2 py-1.5 text-[var(--text-muted)]">
                       {assignment.material_type}
                     </td>
-                    <td className="py-1.5 px-2 text-right text-[var(--text-heading)]">
+                    <td className="px-2 py-1.5 text-right text-[var(--text-heading)]">
                       {assignment.total_loads}
                     </td>
-                    <td className="py-1.5 px-2 text-right text-[var(--accent-blue)] font-medium">
+                    <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)]">
                       {(assignment.total_bcm || 0).toFixed(1)}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-[var(--border-default)]">
+                <tr className="border-[var(--border-default)] border-t">
                   <td
                     colSpan={2}
-                    className="py-1.5 px-2 text-[var(--text-heading)] font-medium text-xs"
+                    className="px-2 py-1.5 font-medium text-[var(--text-heading)] text-xs"
                   >
                     Total
                   </td>
-                  <td className="py-1.5 px-2 text-right text-[var(--text-heading)] font-medium text-xs">
+                  <td className="px-2 py-1.5 text-right font-medium text-[var(--text-heading)] text-xs">
                     {totalLoads}
                   </td>
-                  <td className="py-1.5 px-2 text-right text-[var(--accent-blue)] font-medium text-xs">
+                  <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)] text-xs">
                     {totalBcm.toFixed(1)}
                   </td>
                 </tr>
@@ -280,23 +280,23 @@ function ActivityCard({
             </table>
           </div>
         ) : (
-          <p className="text-[var(--text-muted)] text-sm text-center py-2">No dumper assignments</p>
+          <p className="py-2 text-center text-[var(--text-muted)] text-sm">No dumper assignments</p>
         )}
 
         {/* Metrics Row */}
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <span className="text-[var(--text-muted)]">BCM/h:</span>
-            <span className="text-accent-blue font-medium">{bcmPerHour.toFixed(1)}</span>
+            <span className="font-medium text-accent-blue">{bcmPerHour.toFixed(1)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-[var(--text-muted)]">Loads/h:</span>
-            <span className="text-accent-green font-medium">{loadsPerHour.toFixed(1)}</span>
+            <span className="font-medium text-accent-green">{loadsPerHour.toFixed(1)}</span>
           </div>
           {estimatedScoopMinutes > 0 && (
             <div className="flex items-center gap-1.5">
               <span className="text-[var(--text-muted)]">Scoop time:</span>
-              <span className="text-[var(--text-heading)] font-medium">
+              <span className="font-medium text-[var(--text-heading)]">
                 {estimatedScoopMinutes.toFixed(1)} min/load
               </span>
             </div>
@@ -305,7 +305,7 @@ function ActivityCard({
 
         {/* Notes */}
         {activity.notes && (
-          <p className="text-[var(--text-muted)] text-xs italic border-t border-[var(--border-default)]/50 pt-2">
+          <p className="border-[var(--border-default)]/50 border-t pt-2 text-[var(--text-muted)] text-xs italic">
             {activity.notes}
           </p>
         )}

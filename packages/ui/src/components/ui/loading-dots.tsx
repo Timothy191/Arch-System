@@ -6,9 +6,9 @@ export interface LoadingDotsProps extends React.HTMLAttributes<HTMLSpanElement> 
 export function LoadingDots({ className, ...props }: LoadingDotsProps) {
   return (
     <span className={cn('inline-flex items-center space-x-1', className)} {...props}>
-      <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
     </span>
   );
 }

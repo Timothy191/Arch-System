@@ -57,31 +57,31 @@ function HeroSummaryGoldenGraph({
 
   return (
     <div
-      className="mt-auto pt-2.5 border-t border-slate-200/70"
+      className="mt-auto border-slate-200/70 border-t pt-2.5"
       data-testid={`summary-golden-graph-${id}`}
     >
-      <div className="flex items-center justify-between gap-1.5 mb-1.5">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="mb-1.5 flex items-center justify-between gap-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span
-            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse shrink-0"
+            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
             aria-hidden="true"
           />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-heading)] truncate">
+          <span className="truncate font-bold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
             {title}
           </span>
         </div>
-        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/30 text-[9px] font-mono font-semibold text-[var(--text-heading)] shrink-0">
-          <TrendingUp className="w-2.5 h-2.5 text-[var(--accent-blue)]" aria-hidden="true" />
+        <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--text-heading)]">
+          <TrendingUp className="h-2.5 w-2.5 text-[var(--accent-blue)]" aria-hidden="true" />
           {deltaBadge}
         </span>
       </div>
 
       <div
-        className="relative rounded-xl gold-steel-border gold-steel-border-slim bg-white/85 backdrop-blur-md border border-accent-amber/40 px-2.5 py-1.5 shadow-2xs overflow-hidden"
+        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-2.5 py-1.5 shadow-2xs backdrop-blur-md"
         data-testid={`summary-golden-box-${id}`}
       >
         <div
-          className="absolute inset-0 pointer-events-none opacity-30 animate-scanline"
+          className="pointer-events-none absolute inset-0 animate-scanline opacity-30"
           style={{
             background:
               'linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.12) 50%, transparent 100%)',
@@ -90,7 +90,7 @@ function HeroSummaryGoldenGraph({
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-12 overflow-visible relative z-10"
+          className="relative z-10 h-12 w-full overflow-visible"
           role="img"
           aria-label={`${title} golden telemetry trend graph`}
         >
@@ -187,10 +187,10 @@ function HeroSummaryGoldenGraph({
           })}
         </svg>
 
-        <div className="flex items-center justify-between text-[8.5px] font-mono text-[var(--text-secondary)] pt-1 border-t border-slate-100 tabular-nums relative z-10">
+        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[8.5px] text-[var(--text-secondary)] tabular-nums">
           <span>AVG {avgValue}</span>
           <span>PEAK {peakValue}</span>
-          <span className="text-[var(--accent-blue)] font-bold">{currentValue}</span>
+          <span className="font-bold text-[var(--accent-blue)]">{currentValue}</span>
         </div>
       </div>
     </div>
@@ -211,18 +211,18 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
   const delayEntriesVal = Math.max(data.delayEntriesCount, 0);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
       <GlassCard hover accent="charcoal" className="flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Hours Today</p>
             {data.activeOperations > 0 && (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <span className="rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
                 {data.activeOperations} active
               </span>
             )}
           </div>
-          <p className="text-2xl font-bold text-accent-charcoal mt-1">
+          <p className="mt-1 font-bold text-2xl text-accent-charcoal">
             {data.totalHours.toFixed(1)}h
           </p>
         </div>
@@ -249,7 +249,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
       <GlassCard hover accent="none" className="flex flex-col justify-between">
         <div>
           <p className="system-label">Total Loads</p>
-          <p className="text-2xl font-bold text-text-heading mt-1">
+          <p className="mt-1 font-bold text-2xl text-text-heading">
             {data.totalLoads.toLocaleString()}
           </p>
         </div>
@@ -269,12 +269,12 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Delay Hours</p>
             {data.draftDelayHours > 0 && (
-              <span className="text-[10px] font-medium text-accent-charcoal">
+              <span className="font-medium text-[10px] text-accent-charcoal">
                 {data.draftDelayHours.toFixed(1)}h draft
               </span>
             )}
           </div>
-          <p className="text-2xl font-bold text-accent-red mt-1">
+          <p className="mt-1 font-bold text-2xl text-accent-red">
             {data.totalDelayHours.toFixed(1)}h
           </p>
         </div>
@@ -293,11 +293,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <div>
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Machines</p>
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent-green/10 text-accent-green">
+            <span className="rounded bg-accent-green/10 px-1.5 py-0.5 font-semibold text-[10px] text-accent-green">
               Active Fleet
             </span>
           </div>
-          <p className="text-2xl font-bold text-accent-green mt-1">{data.machineCount}</p>
+          <p className="mt-1 font-bold text-2xl text-accent-green">{data.machineCount}</p>
         </div>
         <HeroSummaryGoldenGraph
           id="machines"
@@ -315,12 +315,12 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Delay Entries</p>
             {data.committedDelayHours > 0 && (
-              <span className="text-[10px] font-medium text-accent-green">
+              <span className="font-medium text-[10px] text-accent-green">
                 {data.committedDelayHours.toFixed(1)}h committed
               </span>
             )}
           </div>
-          <p className="text-2xl font-bold text-accent-charcoal mt-1">{data.delayEntriesCount}</p>
+          <p className="mt-1 font-bold text-2xl text-accent-charcoal">{data.delayEntriesCount}</p>
         </div>
         <HeroSummaryGoldenGraph
           id="delay-entries"

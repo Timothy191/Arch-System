@@ -213,52 +213,52 @@ export function EngineeringNotesForm({
     <div className="space-y-4">
       {/* Engineering Breakdowns Draft Panel */}
       {breakdownDrafts.length > 0 && (
-        <GlassCard className="p-0 overflow-hidden">
+        <GlassCard className="overflow-hidden p-0">
           <button
             type="button"
             onClick={() => setDraftsExpanded((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--bg-tertiary)] transition-colors text-left"
+            className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[var(--bg-tertiary)]"
           >
             <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-accent-amber shrink-0" />
-              <span className="text-sm font-medium text-[var(--text-heading)]">
+              <Wrench className="h-4 w-4 shrink-0 text-accent-amber" />
+              <span className="font-medium text-[var(--text-heading)] text-sm">
                 Engineering Breakdowns
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
+              <span className="rounded-full border border-accent-amber/20 bg-accent-amber/10 px-2 py-0.5 text-accent-amber text-xs">
                 {breakdownDrafts.length} active/today
               </span>
             </div>
             {draftsExpanded ? (
-              <ChevronUp className="w-4 h-4 text-[var(--text-muted)]" />
+              <ChevronUp className="h-4 w-4 text-[var(--text-muted)]" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-[var(--text-muted)]" />
+              <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
             )}
           </button>
 
           {draftsExpanded && (
-            <div className="divide-y divide-[var(--border-default)] border-t border-[var(--border-default)]">
+            <div className="divide-y divide-[var(--border-default)] border-[var(--border-default)] border-t">
               {breakdownDrafts.map((bd) => (
                 <div key={bd.id} className="flex items-start justify-between gap-4 px-4 py-3">
                   <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-[var(--text-heading)]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-[var(--text-heading)] text-sm">
                         {bd.machine_name || bd.fleet_id}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)]">[{bd.fleet_id}]</span>
+                      <span className="text-[var(--text-muted)] text-xs">[{bd.fleet_id}]</span>
                       {bd.status === 'active' ? (
-                        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20">
-                          <AlertTriangle className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 rounded-full border border-accent-red/20 bg-accent-red/10 px-2 py-0.5 text-accent-red text-xs">
+                          <AlertTriangle className="h-3 w-3" />
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-50/70 px-2 py-0.5 font-semibold text-emerald-700 text-xs">
                           <span className="badge-pulse-dot bg-emerald-500" />
                           Completed today
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{bd.reason}</p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="line-clamp-2 text-[var(--text-secondary)] text-xs">{bd.reason}</p>
+                    <p className="text-[var(--text-muted)] text-xs">
                       {bd.machine_type} &middot; In: {bd.date_in} {bd.time_in}
                       {bd.date_out && ` → Out: ${bd.date_out}`}
                     </p>
@@ -266,7 +266,7 @@ export function EngineeringNotesForm({
                   <button
                     type="button"
                     onClick={() => prefillFromBreakdown(bd)}
-                    className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 transition-colors"
+                    className="shrink-0 rounded-lg border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-3 py-1.5 text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
                   >
                     Log Note →
                   </button>
@@ -280,12 +280,12 @@ export function EngineeringNotesForm({
       <GlassCard>
         <form id="eng-notes-form" onSubmit={handleSubmit} className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">
+            <h3 className="font-medium text-[var(--text-heading)] text-lg">
               Log Engineering Issue
             </h3>
             {isTemplatePreFilled && (
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-1 rounded-full bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
+                <span className="rounded-full border border-accent-amber/20 bg-accent-amber/10 px-2 py-1 text-accent-amber text-xs">
                   Template from Engineering
                 </span>
                 <button
@@ -302,7 +302,7 @@ export function EngineeringNotesForm({
                     });
                     setIsTemplatePreFilled(false);
                   }}
-                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+                  className="text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)]"
                 >
                   Clear
                 </button>
@@ -310,10 +310,10 @@ export function EngineeringNotesForm({
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Issue Type */}
             <div className="space-y-2">
-              <label className="text-[var(--text-secondary)] text-sm block">
+              <label className="block text-[var(--text-secondary)] text-sm">
                 Issue Type <span className="text-accent-red">*</span>
               </label>
               <select
@@ -324,7 +324,7 @@ export function EngineeringNotesForm({
                     issueType: e.target.value,
                   }))
                 }
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
               >
                 <option value="">Select type...</option>
                 {ISSUE_TYPES.map((type) => (
@@ -338,13 +338,13 @@ export function EngineeringNotesForm({
 
             {/* Severity */}
             <div className="space-y-2">
-              <label className="text-[var(--text-secondary)] text-sm block">
+              <label className="block text-[var(--text-secondary)] text-sm">
                 Severity <span className="text-accent-red">*</span>
               </label>
               <select
                 value={formData.severity}
                 onChange={(e) => setFormData((prev) => ({ ...prev, severity: e.target.value }))}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
               >
                 <option value="">Select severity...</option>
                 {SEVERITY_LEVELS.map((sev) => (
@@ -358,7 +358,7 @@ export function EngineeringNotesForm({
 
             {/* Machine (Optional) */}
             <div className="space-y-2">
-              <label className="text-[var(--text-secondary)] text-sm block">
+              <label className="block text-[var(--text-secondary)] text-sm">
                 Affected Machine <span className="text-[var(--text-muted)]">(Optional)</span>
               </label>
               <select
@@ -369,7 +369,7 @@ export function EngineeringNotesForm({
                     machineId: e.target.value,
                   }))
                 }
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
               >
                 <option value="">No specific machine</option>
                 {machines.map((m) => (
@@ -383,8 +383,8 @@ export function EngineeringNotesForm({
 
           {/* Shift Type */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">Shift</label>
-            <div className="flex gap-2 max-w-xs">
+            <label className="block text-[var(--text-secondary)] text-sm">Shift</label>
+            <div className="flex max-w-xs gap-2">
               {['day', 'night'].map((shift) => (
                 <button
                   key={shift}
@@ -395,10 +395,10 @@ export function EngineeringNotesForm({
                       shiftType: shift as 'day' | 'night',
                     }))
                   }
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-lg px-3 py-2 font-medium text-sm transition-colors ${
                     formData.shiftType === shift
                       ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                      : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {shift.charAt(0).toUpperCase() + shift.slice(1)}
@@ -409,7 +409,7 @@ export function EngineeringNotesForm({
 
           {/* Description */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Description <span className="text-accent-red">*</span>
             </label>
             <textarea
@@ -423,13 +423,13 @@ export function EngineeringNotesForm({
               placeholder="Describe the engineering issue..."
               rows={3}
               maxLength={500}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
             <div className="flex justify-between">
               {errors.description && (
                 <p className="text-accent-red text-xs">{errors.description}</p>
               )}
-              <p className="text-[var(--text-muted)] text-xs ml-auto">
+              <p className="ml-auto text-[var(--text-muted)] text-xs">
                 {formData.description.length}/500
               </p>
             </div>
@@ -437,7 +437,7 @@ export function EngineeringNotesForm({
 
           {/* Action Taken */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Action Taken <span className="text-[var(--text-muted)]">(Optional)</span>
             </label>
             <textarea
@@ -452,7 +452,7 @@ export function EngineeringNotesForm({
               placeholder="What was done to address this issue?"
               rows={2}
               maxLength={300}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
 
@@ -473,7 +473,7 @@ export function EngineeringNotesForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
+              className="rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
             >
               {isSubmitting ? 'Saving...' : 'Log Issue'}
             </button>

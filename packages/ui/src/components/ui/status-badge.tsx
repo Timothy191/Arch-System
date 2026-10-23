@@ -14,28 +14,28 @@ export type MachineOperationalStatus =
   | 'critical';
 
 const statusBadgeVariants = cva(
-  'inline-flex items-center gap-1.5 font-medium rounded-full px-2.5 py-0.5 text-xs transition-all duration-150 border',
+  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium text-xs transition-all duration-150',
   {
     variants: {
       status: {
         active:
-          'bg-[var(--accent-green)]/10 text-[var(--accent-green)] border-[var(--accent-green)]/25',
+          'border-[var(--accent-green)]/25 bg-[var(--accent-green)]/10 text-[var(--accent-green)]',
         online:
-          'bg-[var(--accent-green)]/10 text-[var(--accent-green)] border-[var(--accent-green)]/25',
+          'border-[var(--accent-green)]/25 bg-[var(--accent-green)]/10 text-[var(--accent-green)]',
         standby:
-          'bg-[var(--accent-amber)]/10 text-[var(--accent-amber)] border-[var(--accent-amber)]/25',
+          'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-[var(--accent-amber)]',
         maintenance:
-          'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border-[var(--accent-blue)]/25',
-        offline: 'bg-black/5 text-[var(--text-secondary)] border-black/10',
+          'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]',
+        offline: 'border-black/10 bg-black/5 text-[var(--text-secondary)]',
         alert:
-          'bg-[var(--accent-amber)]/15 text-[var(--accent-amber)] border-[var(--accent-amber)]/30 font-semibold',
+          'border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/15 font-semibold text-[var(--accent-amber)]',
         critical:
-          'bg-[var(--accent-red)]/10 text-[var(--accent-red)] border-[var(--accent-red)]/25 font-semibold animate-pulse',
+          'animate-pulse border-[var(--accent-red)]/25 bg-[var(--accent-red)]/10 font-semibold text-[var(--accent-red)]',
       },
       size: {
-        sm: 'text-[10px] px-2 py-0.5 gap-1',
-        md: 'text-xs px-2.5 py-0.5 gap-1.5',
-        lg: 'text-sm px-3 py-1 gap-2',
+        sm: 'gap-1 px-2 py-0.5 text-[10px]',
+        md: 'gap-1.5 px-2.5 py-0.5 text-xs',
+        lg: 'gap-2 px-3 py-1 text-sm',
       },
     },
     defaultVariants: {
@@ -95,7 +95,7 @@ export const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
           <Icon
             className={cn(
               'shrink-0',
-              size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-4 h-4' : 'w-3.5 h-3.5'
+              size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-4 w-4' : 'h-3.5 w-3.5'
             )}
             aria-hidden="true"
           />

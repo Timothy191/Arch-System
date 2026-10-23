@@ -277,7 +277,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Shift selector */}
       <div className="space-y-2">
-        <label htmlFor="shift-day" className="block text-sm text-[var(--text-muted)]">
+        <label htmlFor="shift-day" className="block text-[var(--text-muted)] text-sm">
           Shift
         </label>
         <ShiftToggle
@@ -291,12 +291,12 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
 
       {/* Production-Specific Operational Metrics */}
       {isProduction && (
-        <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] space-y-4">
+        <div className="space-y-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+            <h3 className="font-semibold text-[var(--text-heading)] text-sm">
               Production Shift Metrics
             </h3>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium">
+            <span className="rounded-full bg-[var(--accent-blue)]/10 px-2.5 py-1 font-medium text-[var(--accent-blue)] text-xs">
               Strip Ratio:{' '}
               {watch('actualCoalTonnes')
                 ? (
@@ -306,9 +306,9 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-3">
-              <label className="block text-xs text-[var(--text-muted)] font-medium">
+              <label className="block font-medium text-[var(--text-muted)] text-xs">
                 Actual Coal (Tonnes)
               </label>
               <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                       { shouldDirty: true }
                     )
                   }
-                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                  className="flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] font-medium text-lg transition-all hover:bg-[var(--bg-tertiary)] active:scale-95"
                 >
                   -
                 </button>
@@ -330,7 +330,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   {...register('actualCoalTonnes', { valueAsNumber: true })}
                   onFocus={(e) => e.target.select()}
                   className={cn(
-                    'flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                    'flex-1 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-3 text-center text-[var(--text-heading)] text-lg transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                     errors.actualCoalTonnes && 'border-accent-red'
                   )}
                   placeholder="0"
@@ -342,18 +342,18 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                       shouldDirty: true,
                     })
                   }
-                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                  className="flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] font-medium text-lg transition-all hover:bg-[var(--bg-tertiary)] active:scale-95"
                 >
                   +
                 </button>
               </div>
               {errors.actualCoalTonnes && (
-                <p className="text-accent-red text-xs mt-1">{errors.actualCoalTonnes.message}</p>
+                <p className="mt-1 text-accent-red text-xs">{errors.actualCoalTonnes.message}</p>
               )}
             </div>
 
             <div className="space-y-3">
-              <label className="block text-xs text-[var(--text-muted)] font-medium">
+              <label className="block font-medium text-[var(--text-muted)] text-xs">
                 Actual Waste (Tonnes)
               </label>
               <div className="flex items-center gap-3">
@@ -366,7 +366,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                       { shouldDirty: true }
                     )
                   }
-                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                  className="flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] font-medium text-lg transition-all hover:bg-[var(--bg-tertiary)] active:scale-95"
                 >
                   -
                 </button>
@@ -375,7 +375,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   {...register('actualWasteTonnes', { valueAsNumber: true })}
                   onFocus={(e) => e.target.select()}
                   className={cn(
-                    'flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                    'flex-1 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-3 text-center text-[var(--text-heading)] text-lg transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                     errors.actualWasteTonnes && 'border-accent-red'
                   )}
                   placeholder="0"
@@ -387,13 +387,13 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                       shouldDirty: true,
                     })
                   }
-                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                  className="flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] font-medium text-lg transition-all hover:bg-[var(--bg-tertiary)] active:scale-95"
                 >
                   +
                 </button>
               </div>
               {errors.actualWasteTonnes && (
-                <p className="text-accent-red text-xs mt-1">{errors.actualWasteTonnes.message}</p>
+                <p className="mt-1 text-accent-red text-xs">{errors.actualWasteTonnes.message}</p>
               )}
             </div>
           </div>
@@ -402,23 +402,23 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
 
       {/* Drilling-Specific Operational Metrics */}
       {isDrilling && (
-        <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] space-y-4">
+        <div className="space-y-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+            <h3 className="font-semibold text-[var(--text-heading)] text-sm">
               Drilling Shift Performance Metrics
             </h3>
             {averageDepth > 0 && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium">
+              <span className="rounded-full bg-[var(--accent-blue)]/10 px-2.5 py-1 font-medium text-[var(--accent-blue)] text-xs">
                 Avg: {averageDepth} m / hole
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-holes"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Holes Drilled
               </label>
@@ -428,20 +428,20 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 {...register('holesDrilled', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                   errors.holesDrilled && 'border-accent-red'
                 )}
                 placeholder="0"
               />
               {errors.holesDrilled && (
-                <p className="text-accent-red text-xs mt-0.5">{errors.holesDrilled.message}</p>
+                <p className="mt-0.5 text-accent-red text-xs">{errors.holesDrilled.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-depth"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Total Depth (meters)
               </label>
@@ -452,20 +452,20 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 {...register('totalDepthMeters', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                   errors.totalDepthMeters && 'border-accent-red'
                 )}
                 placeholder="0.0"
               />
               {errors.totalDepthMeters && (
-                <p className="text-accent-red text-xs mt-0.5">{errors.totalDepthMeters.message}</p>
+                <p className="mt-0.5 text-accent-red text-xs">{errors.totalDepthMeters.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-rate"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Penetration Rate (m/h)
               </label>
@@ -476,7 +476,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 {...register('penetrationRate', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                   errors.penetrationRate && 'border-accent-red'
                 )}
                 placeholder="0.0"
@@ -486,7 +486,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-wear"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Bit Wear (%)
               </label>
@@ -499,22 +499,22 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 {...register('bitWearPercentage', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                   errors.bitWearPercentage && 'border-accent-red'
                 )}
                 placeholder="0"
               />
               {errors.bitWearPercentage && (
-                <p className="text-accent-red text-xs mt-0.5">{errors.bitWearPercentage.message}</p>
+                <p className="mt-0.5 text-accent-red text-xs">{errors.bitWearPercentage.message}</p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[var(--border-default)]">
+          <div className="grid grid-cols-1 gap-4 border-[var(--border-default)] border-t pt-2 sm:grid-cols-3">
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-pattern"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Drill Pattern ID
               </label>
@@ -522,7 +522,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 id="drilling-pattern"
                 type="text"
                 {...register('drillPatternId')}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30"
                 placeholder="e.g. PAT-2026-B4"
               />
             </div>
@@ -530,14 +530,14 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-delay-cat"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Delay Category
               </label>
               <select
                 id="drilling-delay-cat"
                 {...register('delayCategory')}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30"
               >
                 <option value="none">None (Zero Delay)</option>
                 <option value="bit_replacement">Bit Replacement</option>
@@ -551,7 +551,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
             <div className="space-y-1.5">
               <label
                 htmlFor="drilling-delay-min"
-                className="block text-xs text-[var(--text-muted)] font-medium"
+                className="block font-medium text-[var(--text-muted)] text-xs"
               >
                 Delay Duration (min)
               </label>
@@ -560,13 +560,13 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 type="number"
                 {...register('delayMinutes', { valueAsNumber: true })}
                 className={cn(
-                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  'w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
                   errors.delayMinutes && 'border-accent-red'
                 )}
                 placeholder="0"
               />
               {errors.delayMinutes && (
-                <p className="text-accent-red text-xs mt-0.5">{errors.delayMinutes.message}</p>
+                <p className="mt-0.5 text-accent-red text-xs">{errors.delayMinutes.message}</p>
               )}
             </div>
           </div>
@@ -576,14 +576,14 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       {/* Machines list (read-only reference) */}
       {machines.length > 0 && (
         <div className="space-y-2">
-          <label className="block text-sm text-[var(--text-muted)]">
+          <label className="block text-[var(--text-muted)] text-sm">
             Active Rigs &amp; Equipment
           </label>
           <div className="flex flex-wrap gap-2">
             {machines.map((m) => (
               <span
                 key={m.id}
-                className="px-3 py-1 rounded-full text-xs bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-default)]"
+                className="rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1 text-[var(--text-secondary)] text-xs"
               >
                 {m.name} ({m.machine_type})
               </span>
@@ -594,7 +594,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
 
       {/* Notes */}
       <div className="space-y-2">
-        <label htmlFor="daily-log-notes" className="block text-sm text-[var(--text-muted)]">
+        <label htmlFor="daily-log-notes" className="block text-[var(--text-muted)] text-sm">
           Observations &amp; Shift Handover Notes
         </label>
         <textarea
@@ -602,7 +602,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
           {...register('notes')}
           rows={4}
           className={cn(
-            'w-full px-4 py-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none',
+            'w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-heading)] transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30',
             errors.notes && 'border-accent-red'
           )}
           placeholder="Enter any stratum notes, bit wear observations, or safety handovers..."
@@ -611,7 +611,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
           aria-describedby={errors.notes ? 'daily-log-notes-error' : undefined}
         />
         {errors.notes && (
-          <p id="daily-log-notes-error" className="text-accent-red text-xs mt-1">
+          <p id="daily-log-notes-error" className="mt-1 text-accent-red text-xs">
             {errors.notes.message}
           </p>
         )}
@@ -628,12 +628,12 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
         </SecondaryButton>
 
         {status === 'success' && (
-          <span className="text-sm text-accent-green" role="status" aria-live="polite">
+          <span className="text-accent-green text-sm" role="status" aria-live="polite">
             Log saved successfully.
           </span>
         )}
         {status === 'error' && (
-          <span className="text-sm text-accent-red" role="alert" aria-live="assertive">
+          <span className="text-accent-red text-sm" role="alert" aria-live="assertive">
             Failed to save log. Please try again.
           </span>
         )}

@@ -16,16 +16,16 @@ function SubmitButton() {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full bg-accent-cyan text-bg-secondary hover:bg-accent-cyan/90 shadow-diffusion-cyan transition-all"
+      className="w-full bg-accent-cyan text-bg-secondary shadow-diffusion-cyan transition-all hover:bg-accent-cyan/90"
     >
       {pending ? (
         <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Registering...
         </>
       ) : (
         <>
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Register &amp; Issue Badge
         </>
       )}
@@ -61,9 +61,9 @@ export function VisitorForm() {
 
   return (
     <GlassCard>
-      <div className="flex items-center space-x-2 mb-6">
-        <div className="p-2 bg-[var(--accent-blue)]/10 rounded-lg">
-          <Users className="w-5 h-5 text-[var(--accent-blue)]" />
+      <div className="mb-6 flex items-center space-x-2">
+        <div className="rounded-lg bg-[var(--accent-blue)]/10 p-2">
+          <Users className="h-5 w-5 text-[var(--accent-blue)]" />
         </div>
         <h3 className="font-semibold text-[var(--text-heading)]">New Registration</h3>
       </div>
@@ -72,7 +72,7 @@ export function VisitorForm() {
         <div className="space-y-2">
           <label
             htmlFor="first_name"
-            className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider block"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
           >
             First Name
           </label>
@@ -81,14 +81,14 @@ export function VisitorForm() {
             name="first_name"
             placeholder="John"
             required
-            className="bg-[var(--bg-tertiary)] border-[var(--border-default)]"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
           />
         </div>
 
         <div className="space-y-2">
           <label
             htmlFor="surname"
-            className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider block"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
           >
             Surname
           </label>
@@ -97,14 +97,14 @@ export function VisitorForm() {
             name="surname"
             placeholder="Doe"
             required
-            className="bg-[var(--bg-tertiary)] border-[var(--border-default)]"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
           />
         </div>
 
         <div className="space-y-2">
           <label
             htmlFor="company"
-            className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider block"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
           >
             Company / Agency
           </label>
@@ -112,14 +112,14 @@ export function VisitorForm() {
             id="company"
             name="company"
             placeholder="Acme Corp"
-            className="bg-[var(--bg-tertiary)] border-[var(--border-default)]"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
           />
         </div>
 
         <div className="space-y-2">
           <label
             htmlFor="reason"
-            className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider block"
+            className="block font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
           >
             Reason for Visit
           </label>
@@ -127,11 +127,11 @@ export function VisitorForm() {
             id="reason"
             name="reason"
             placeholder="Maintenance, Audit, etc."
-            className="bg-[var(--bg-tertiary)] border-[var(--border-default)]"
+            className="border-[var(--border-default)] bg-[var(--bg-tertiary)]"
           />
         </div>
 
-        {error && <p className="text-xs font-medium text-red-500 mt-2">{error}</p>}
+        {error && <p className="mt-2 font-medium text-red-500 text-xs">{error}</p>}
 
         <div className="pt-4">
           <SubmitButton />

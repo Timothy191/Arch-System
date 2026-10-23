@@ -66,8 +66,8 @@ export default async function EngineeringDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Engineering Hub</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <h2 className="font-semibold text-2xl text-[var(--text-heading)]">Engineering Hub</h2>
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Breakdowns, tire management &amp; maintenance overview
           </p>
         </div>
@@ -84,55 +84,55 @@ export default async function EngineeringDashboardPage() {
       <Divider variant="dotted" label="FLEET HEALTH & TELEMETRY" />
 
       {/* Secondary Hub Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Breakdowns Card */}
         <Link href="/engineering/breakdowns" className="group h-full">
-          <BorderBox variant="thick-transparent" className="h-full p-0 border-0">
-            <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
+          <BorderBox variant="thick-transparent" className="h-full border-0 p-0">
+            <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-accent-red/10 text-accent-red">
-                    <AlertTriangle className="w-5 h-5" />
+                  <div className="rounded-xl bg-accent-red/10 p-2.5 text-accent-red">
+                    <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--text-heading)]">Breakdowns</h3>
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <h3 className="font-semibold text-[var(--text-heading)] text-lg">Breakdowns</h3>
+                    <p className="text-[var(--text-muted)] text-sm">
                       Active faults &amp; maintenance issues
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--accent-blue)] group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="h-5 w-5 text-[var(--text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--accent-blue)]" />
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-accent-red/5 border border-accent-red/10">
-                  <p className="text-2xl font-bold text-accent-red">{activeBreakdowns}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Active Breakdowns</p>
+                <div className="rounded-lg border border-accent-red/10 bg-accent-red/5 p-3">
+                  <p className="font-bold text-2xl text-accent-red">{activeBreakdowns}</p>
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">Active Breakdowns</p>
                 </div>
-                <div className="p-3 rounded-lg bg-accent-green/5 border border-accent-green/10">
-                  <p className="text-2xl font-bold text-accent-green">{resolvedToday}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Resolved Today</p>
+                <div className="rounded-lg border border-accent-green/10 bg-accent-green/5 p-3">
+                  <p className="font-bold text-2xl text-accent-green">{resolvedToday}</p>
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">Resolved Today</p>
                 </div>
               </div>
 
               {recentBreakdowns.length > 0 && (
                 <div className="mt-4 space-y-2">
-                  <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     Recent Active
                   </p>
                   {recentBreakdowns.slice(0, 3).map((b) => (
                     <div
                       key={b.id}
-                      className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)] last:border-0"
+                      className="flex items-center justify-between border-[var(--border-subtle)] border-b py-2 last:border-0"
                     >
                       <div className="flex items-center gap-2">
-                        <Wrench className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                        <span className="text-sm text-[var(--text-body)]">
+                        <Wrench className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                        <span className="text-[var(--text-body)] text-sm">
                           {b.machine_name || 'Unknown Machine'}
                         </span>
                       </div>
                       <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        className={`rounded-full px-2 py-0.5 font-medium text-xs ${
                           b.priority === 'critical'
                             ? 'bg-accent-red/10 text-accent-red'
                             : b.priority === 'high'

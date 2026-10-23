@@ -255,7 +255,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           : 'h-9 text-sm px-3';
 
     return (
-      <div className="relative flex items-center w-full">
+      <div className="relative flex w-full items-center">
         <input
           ref={inputRef}
           type="text"
@@ -272,12 +272,12 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            'w-full rounded-md border bg-white pr-8 text-neutral-900 placeholder:text-neutral-400 transition-colors outline-none',
+            'w-full rounded-md border bg-white pr-8 text-neutral-900 outline-none transition-colors placeholder:text-neutral-400',
             heightClass,
             errored
               ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
               : 'border-neutral-200 hover:border-neutral-300 focus:border-neutral-900',
-            disabled && 'cursor-not-allowed opacity-50 bg-neutral-100',
+            disabled && 'cursor-not-allowed bg-neutral-100 opacity-50',
             className
           )}
           {...props}
@@ -289,7 +289,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
               tabIndex={-1}
               aria-label="Clear selection"
               onClick={handleClear}
-              className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700"
+              className="rounded p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -297,7 +297,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           <Logo
             variant="gold"
             className={cn(
-              'h-3.5 w-3.5 transition-transform duration-200 ease-out pointer-events-none',
+              'pointer-events-none h-3.5 w-3.5 transition-transform duration-200 ease-out',
               isOpen ? 'rotate-0' : 'rotate-180'
             )}
           />
@@ -343,13 +343,13 @@ export function ComboboxList({
       role="listbox"
       style={customStyle}
       className={cn(
-        'absolute left-0 top-[calc(100%+4px)] z-50 min-w-full max-h-60 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 duration-100',
+        'fade-in-0 absolute top-[calc(100%+4px)] left-0 z-50 max-h-60 min-w-full animate-in overflow-y-auto overflow-x-hidden rounded-md border border-neutral-200 bg-white p-1 text-neutral-900 shadow-lg duration-100',
         className
       )}
       {...props}
     >
       {options.length > 0 && filtered.length === 0 ? (
-        <div className="py-4 text-center text-xs text-neutral-500">{emptyMessage}</div>
+        <div className="py-4 text-center text-neutral-500 text-xs">{emptyMessage}</div>
       ) : (
         children
       )}
@@ -423,22 +423,22 @@ export function ComboboxOption({
         'relative flex cursor-pointer select-none items-center justify-between rounded px-2 text-sm transition-colors',
         !ignoreDefaultHeight && 'h-8',
         isHighlighted || isSelected
-          ? 'bg-neutral-100 text-neutral-900 font-medium'
+          ? 'bg-neutral-100 font-medium text-neutral-900'
           : 'text-neutral-700 hover:bg-neutral-50',
-        disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+        disabled && 'pointer-events-none cursor-not-allowed opacity-40',
         className
       )}
       {...props}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        {prefix && <span className="shrink-0 flex items-center text-neutral-500">{prefix}</span>}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {prefix && <span className="flex shrink-0 items-center text-neutral-500">{prefix}</span>}
         <span className={cn('truncate', ignoreDefaultHeight && 'whitespace-normal')}>
           {children}
         </span>
       </div>
-      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+      <div className="ml-2 flex shrink-0 items-center gap-1.5">
         {suffix && <span className="text-neutral-500 text-xs">{suffix}</span>}
-        {isSelected && <Check className="h-3.5 w-3.5 text-neutral-900 stroke-[2.5]" />}
+        {isSelected && <Check className="h-3.5 w-3.5 stroke-[2.5] text-neutral-900" />}
       </div>
     </div>
   );

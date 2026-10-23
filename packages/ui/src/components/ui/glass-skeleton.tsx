@@ -25,14 +25,14 @@ export function GlassSkeleton({
       className={cn(
         'relative overflow-hidden rounded-card',
         'border border-[var(--glass-border)] border-t-white/95',
-        'bg-white/40 backdrop-blur-xl saturate-[160%]',
+        'bg-white/40 saturate-[160%] backdrop-blur-xl',
         className
       )}
       style={{ boxShadow: 'var(--refraction-edge-light)' }}
     >
       {/* Ambient shimmer sweep — silver core, 12s diagonal */}
       <div
-        className="absolute inset-0 overflow-hidden pointer-events-none z-[1] motion-reduce:hidden"
+        className="pointer-events-none absolute inset-0 z-[1] overflow-hidden motion-reduce:hidden"
         aria-hidden="true"
       >
         <div
@@ -52,11 +52,11 @@ export function GlassSkeleton({
         />
       </div>
 
-      <div className="relative z-10 p-5 space-y-3">
+      <div className="relative z-10 space-y-3 p-5">
         {showHeader && (
           <>
-            <div className="rounded bg-[var(--bg-tertiary)]/60 h-8 w-48" />
-            <div className="rounded bg-[var(--bg-tertiary)]/60 h-4 w-96" />
+            <div className="h-8 w-48 rounded bg-[var(--bg-tertiary)]/60" />
+            <div className="h-4 w-96 rounded bg-[var(--bg-tertiary)]/60" />
           </>
         )}
         {Array.from({ length: totalPills }).map((_, i) => (

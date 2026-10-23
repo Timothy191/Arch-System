@@ -21,15 +21,15 @@ export const Default: Story = {
         <TabsTrigger value="password">Password</TabsTrigger>
       </TabsList>
       <TabsContent value="account">
-        <div className="p-4 border rounded-md bg-white/50">
-          <p className="text-sm font-medium">Account Details</p>
-          <p className="text-xs text-muted-foreground mt-1">Manage your system credentials.</p>
+        <div className="rounded-md border bg-white/50 p-4">
+          <p className="font-medium text-sm">Account Details</p>
+          <p className="mt-1 text-muted-foreground text-xs">Manage your system credentials.</p>
         </div>
       </TabsContent>
       <TabsContent value="password">
-        <div className="p-4 border rounded-md bg-white/50">
-          <p className="text-sm font-medium">Security Policy</p>
-          <p className="text-xs text-muted-foreground mt-1">Update your access codes.</p>
+        <div className="rounded-md border bg-white/50 p-4">
+          <p className="font-medium text-sm">Security Policy</p>
+          <p className="mt-1 text-muted-foreground text-xs">Update your access codes.</p>
         </div>
       </TabsContent>
     </Tabs>

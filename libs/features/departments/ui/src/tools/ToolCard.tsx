@@ -46,21 +46,21 @@ export default function ToolCard({ tool }: ToolCardProps) {
 
   return (
     <GlassCard className="flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg" style={{ backgroundColor: `${tool.color}20` }}>
-            <Icon className="w-5 h-5" style={{ color: tool.color }} />
+          <div className="rounded-lg p-2" style={{ backgroundColor: `${tool.color}20` }}>
+            <Icon className="h-5 w-5" style={{ color: tool.color }} />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">{tool.displayName}</h3>
+            <h3 className="font-medium text-[var(--text-heading)] text-lg">{tool.displayName}</h3>
             <p className="text-[var(--text-secondary)] text-sm">{tool.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${statusBg} ${statusColor}`}
+            className={`flex items-center gap-1.5 rounded-full px-2 py-1 font-medium text-xs ${statusBg} ${statusColor}`}
           >
-            <StatusIcon className="w-3.5 h-3.5" />
+            <StatusIcon className="h-3.5 w-3.5" />
             <span className="capitalize">{tool.status}</span>
             {tool.responseTime && tool.status === 'online' && <span>({tool.responseTime}ms)</span>}
           </div>
@@ -68,19 +68,19 @@ export default function ToolCard({ tool }: ToolCardProps) {
             href={tool.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-sm font-medium hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] transition-colors border border-[var(--border-emphasis)]"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] px-3 py-1.5 font-medium text-[var(--text-muted)] text-sm transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="h-3.5 w-3.5" />
             Open
           </a>
           <button
             onClick={() => setIsOpen(!isOpen)}
             disabled={tool.status === 'offline'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium text-sm transition-colors ${
               isOpen
-                ? 'bg-[#3ecf8e]/20 text-[#3ecf8e] border-[#3ecf8e]/30'
-                : 'bg-[var(--bg-primary)] text-[var(--text-muted)] border-[var(--border-emphasis)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                ? 'border-[#3ecf8e]/30 bg-[#3ecf8e]/20 text-[#3ecf8e]'
+                : 'border-[var(--border-emphasis)] bg-[var(--bg-primary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]'
+            } disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {isOpen ? 'Close' : 'Embed'}
           </button>
@@ -88,11 +88,11 @@ export default function ToolCard({ tool }: ToolCardProps) {
       </div>
 
       {isOpen && tool.status === 'online' && (
-        <div className="flex-1 min-h-[500px] rounded-lg border border-[var(--border-emphasis)] overflow-hidden bg-[var(--bg-primary)] animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fade-in slide-in-from-top-2 min-h-[500px] flex-1 animate-in overflow-hidden rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] duration-200">
           <iframe
             src={tool.url}
             title={tool.displayName}
-            className="w-full h-full min-h-[500px]"
+            className="h-full min-h-[500px] w-full"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
             loading="lazy"
           />
@@ -100,11 +100,11 @@ export default function ToolCard({ tool }: ToolCardProps) {
       )}
 
       {isOpen && tool.status === 'offline' && (
-        <div className="flex-1 min-h-[200px] rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] flex items-center justify-center">
+        <div className="flex min-h-[200px] flex-1 items-center justify-center rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)]">
           <div className="text-center">
-            <WifiOff className="w-8 h-8 text-[#ef4444] mx-auto mb-2" />
+            <WifiOff className="mx-auto mb-2 h-8 w-8 text-[#ef4444]" />
             <p className="text-[var(--text-muted)]">{tool.displayName} is not running</p>
-            <p className="text-[var(--text-secondary)] text-sm mt-1">
+            <p className="mt-1 text-[var(--text-secondary)] text-sm">
               Start it locally or configure the URL
             </p>
           </div>

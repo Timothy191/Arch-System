@@ -42,16 +42,16 @@ export default async function HistoryPage({
     <GlassCard>
       <form method="GET" className="flex items-end gap-4">
         <div>
-          <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
+          <label className="mb-1 block text-[var(--text-muted)] text-sm">From</label>
           <Input type="date" name="from" defaultValue={from} className="px-4 py-2" />
         </div>
         <div>
-          <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
+          <label className="mb-1 block text-[var(--text-muted)] text-sm">To</label>
           <Input type="date" name="to" defaultValue={to} className="px-4 py-2" />
         </div>
         <button
           type="submit"
-          className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-heading)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
+          className="rounded-lg bg-[var(--bg-tertiary)] px-4 py-2 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]"
         >
           Filter
         </button>
@@ -119,10 +119,10 @@ export default async function HistoryPage({
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Shift History</h2>
+          <h2 className="font-bold text-2xl text-[var(--text-heading)]">Shift History</h2>
           <Link
             href={`/${deptSlug}/reports?from=${from}&to=${to}`}
-            className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="rounded-lg bg-[var(--bg-tertiary)] px-4 py-2 font-medium text-[var(--accent-blue)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]"
           >
             Export CSV
           </Link>
@@ -134,7 +134,7 @@ export default async function HistoryPage({
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-[var(--border-default)]">
+                <tr className="border-[var(--border-default)] border-b">
                   {[
                     { label: 'Date', align: '' },
                     { label: 'Shift', align: '' },
@@ -147,7 +147,7 @@ export default async function HistoryPage({
                     <th
                       key={label}
                       scope="col"
-                      className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider ${align}`}
+                      className={`px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider ${align}`}
                     >
                       {label}
                     </th>
@@ -159,13 +159,13 @@ export default async function HistoryPage({
                   const k = keyOf(ss.shift_date, ss.shift_type);
                   const closer = Array.isArray(ss.closer) ? ss.closer[0] : ss.closer;
                   return (
-                    <tr key={k} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                    <tr key={k} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                       <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
                         {ss.shift_date}
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${
                             ss.shift_type === 'day'
                               ? 'bg-accent-blue/10 text-accent-blue'
                               : 'bg-indigo-500/10 text-indigo-400'
@@ -176,10 +176,10 @@ export default async function HistoryPage({
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
                             ss.status === 'closed'
-                              ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
-                              : 'bg-amber-50/70 border-amber-200/50 text-amber-700'
+                              ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
+                              : 'border-amber-200/50 bg-amber-50/70 text-amber-700'
                           }`}
                         >
                           {ss.status === 'closed' && (
@@ -188,13 +188,13 @@ export default async function HistoryPage({
                           {ss.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
+                      <td className="px-6 py-4 text-right text-[var(--text-muted)] text-sm">
                         {(hoursMap.get(k) || 0).toFixed(1)}
                       </td>
-                      <td className="px-6 py-4 text-[var(--accent-blue)] text-sm text-right">
+                      <td className="px-6 py-4 text-right text-[var(--accent-blue)] text-sm">
                         {(loadsMap.get(k) || 0).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-accent-blue text-sm text-right">
+                      <td className="px-6 py-4 text-right text-accent-blue text-sm">
                         {delayMap.get(k) || 0}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-xs">
@@ -247,10 +247,10 @@ export default async function HistoryPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[var(--text-heading)]">History</h2>
+        <h2 className="font-bold text-2xl text-[var(--text-heading)]">History</h2>
         <Link
           href={`/${deptSlug}/reports?from=${from}&to=${to}`}
-          className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
+          className="rounded-lg bg-[var(--bg-tertiary)] px-4 py-2 font-medium text-[var(--accent-blue)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]"
         >
           Export CSV
         </Link>
@@ -263,28 +263,28 @@ export default async function HistoryPage({
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[var(--border-default)]">
+              <tr className="border-[var(--border-default)] border-b">
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Shift
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Notes
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-6 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Created
                 </th>
@@ -292,11 +292,11 @@ export default async function HistoryPage({
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
               {logs?.map((log) => (
-                <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                <tr key={log.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                   <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{log.log_date}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${
                         log.shift === 'day'
                           ? 'bg-accent-blue/10 text-accent-blue'
                           : 'bg-indigo-500/10 text-indigo-400'
@@ -305,7 +305,7 @@ export default async function HistoryPage({
                       {log.shift}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-[var(--text-muted)] text-sm truncate max-w-xs">
+                  <td className="max-w-xs truncate px-6 py-4 text-[var(--text-muted)] text-sm">
                     {log.notes || '—'}
                   </td>
                   <td className="px-6 py-4 text-[var(--text-muted)] text-sm">

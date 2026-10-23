@@ -97,34 +97,34 @@ export function SupervisorApprovalPanel({
 
   return (
     <div className="space-y-6">
-      <GlassCard variant="spotlight" className="p-6 max-w-5xl">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border-subtle,#e5e7eb)]">
+      <GlassCard variant="spotlight" className="max-w-5xl p-6">
+        <div className="mb-4 flex items-center justify-between border-[var(--border-subtle,#e5e7eb)] border-b pb-3">
           <div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-xl font-semibold text-[var(--text-heading,#111827)]">
+              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <h2 className="font-semibold text-[var(--text-heading,#111827)] text-xl">
                 Supervisor Shift Closeout Governance
               </h2>
             </div>
-            <p className="text-sm text-[var(--text-secondary,#4b5563)] mt-1">
+            <p className="mt-1 text-[var(--text-secondary,#4b5563)] text-sm">
               MHSA statutory compliance & shift sign-off. Separation of duties strictly enforced:
               report submitter cannot self-approve.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 text-xs">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
             Separation of Duties Active
           </span>
         </div>
 
         {pendingReports.length === 0 ? (
-          <div className="py-8 text-center text-sm text-[var(--text-secondary,#6b7280)] bg-[var(--bg-subtle,#f9fafb)] rounded-lg border border-dashed border-[var(--border-subtle,#e5e7eb)]">
-            <Clock className="w-8 h-8 text-[var(--text-muted,#9ca3af)] mx-auto mb-2 opacity-60" />
+          <div className="rounded-lg border border-[var(--border-subtle,#e5e7eb)] border-dashed bg-[var(--bg-subtle,#f9fafb)] py-8 text-center text-[var(--text-secondary,#6b7280)] text-sm">
+            <Clock className="mx-auto mb-2 h-8 w-8 text-[var(--text-muted,#9ca3af)] opacity-60" />
             No shift closeout reports currently awaiting supervisor approval.
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-xs font-semibold tracking-wider text-[var(--text-secondary,#4b5563)] uppercase">
+            <h3 className="font-semibold text-[var(--text-secondary,#4b5563)] text-xs uppercase tracking-wider">
               Pending Approvals ({pendingReports.length})
             </h3>
             {pendingReports.map((report) => {
@@ -137,26 +137,26 @@ export function SupervisorApprovalPanel({
               return (
                 <div
                   key={report.id}
-                  className="p-4 rounded-lg border border-[var(--border-subtle,#e5e7eb)] bg-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="flex flex-col justify-between gap-4 rounded-lg border border-[var(--border-subtle,#e5e7eb)] bg-white p-4 shadow-sm md:flex-row md:items-center"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-[var(--text-heading,#111827)]">
+                      <span className="font-semibold text-[var(--text-heading,#111827)] text-sm">
                         {report.reportDate} — {report.shiftType.toUpperCase()} Shift
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
-                        <Clock className="w-3 h-3 text-amber-600" />
+                      <span className="inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 font-medium text-amber-800 text-xs">
+                        <Clock className="h-3 w-3 text-amber-600" />
                         Pending Approval
                       </span>
                     </div>
-                    <div className="text-xs text-[var(--text-secondary,#4b5563)]">
+                    <div className="text-[var(--text-secondary,#4b5563)] text-xs">
                       Submitted by:{' '}
                       <span className="font-medium text-gray-900">{report.operatorName}</span>
                     </div>
 
                     {isSelfSubmitter && (
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">
-                        <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
+                      <div className="mt-2 flex items-center gap-1.5 rounded border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700 text-xs">
+                        <ShieldAlert className="h-3.5 w-3.5 flex-shrink-0 text-amber-600" />
                         <span>
                           Submitter lock: You submitted this report. An independent supervisor must
                           review and approve.
@@ -165,7 +165,7 @@ export function SupervisorApprovalPanel({
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                     {!isSelfSubmitter && isSupervisorOrAdmin && (
                       <input
                         type="text"
@@ -174,7 +174,7 @@ export function SupervisorApprovalPanel({
                         onChange={(e) =>
                           setNotes((prev) => ({ ...prev, [report.id]: e.target.value }))
                         }
-                        className="text-xs px-3 py-1.5 rounded border border-[var(--border-subtle,#d1d5db)] bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-48"
+                        className="w-full rounded border border-[var(--border-subtle,#d1d5db)] bg-white px-3 py-1.5 text-gray-900 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:w-48"
                       />
                     )}
 
@@ -182,13 +182,13 @@ export function SupervisorApprovalPanel({
                       type="button"
                       disabled={isSelfSubmitter || !isSupervisorOrAdmin || isSubmitting}
                       onClick={() => handleApprove(report.id, report.submitterId)}
-                      className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded text-xs font-semibold transition-colors ${
+                      className={`inline-flex items-center justify-center gap-1.5 rounded px-3.5 py-1.5 font-semibold text-xs transition-colors ${
                         isSelfSubmitter || !isSupervisorOrAdmin
-                          ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                          ? 'cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400'
+                          : 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700'
                       }`}
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                       {isSubmitting ? 'Approving...' : 'Approve Closeout'}
                     </button>
                   </div>
@@ -199,15 +199,15 @@ export function SupervisorApprovalPanel({
         )}
 
         {pastReports.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-[var(--border-subtle,#e5e7eb)] space-y-3">
-            <h3 className="text-xs font-semibold tracking-wider text-[var(--text-secondary,#4b5563)] uppercase">
+          <div className="mt-6 space-y-3 border-[var(--border-subtle,#e5e7eb)] border-t pt-4">
+            <h3 className="font-semibold text-[var(--text-secondary,#4b5563)] text-xs uppercase tracking-wider">
               Recent Completed Sign-Offs
             </h3>
             <div className="space-y-2">
               {pastReports.slice(0, 5).map((report) => (
                 <div
                   key={report.id}
-                  className="p-3 rounded-md bg-[var(--bg-subtle,#f9fafb)] border border-[var(--border-subtle,#e5e7eb)] flex items-center justify-between text-xs"
+                  className="flex items-center justify-between rounded-md border border-[var(--border-subtle,#e5e7eb)] bg-[var(--bg-subtle,#f9fafb)] p-3 text-xs"
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-900">
@@ -217,14 +217,14 @@ export function SupervisorApprovalPanel({
                   </div>
                   <div className="flex items-center gap-2">
                     {report.status === 'approved' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800 text-xs">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
                         Approved
                       </span>
                     )}
                     {report.status === 'rejected' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200">
-                        <AlertCircle className="w-3 h-3 text-rose-600" />
+                      <span className="inline-flex items-center gap-1 rounded border border-rose-200 bg-rose-50 px-2 py-0.5 font-medium text-rose-800 text-xs">
+                        <AlertCircle className="h-3 w-3 text-rose-600" />
                         Rejected
                       </span>
                     )}

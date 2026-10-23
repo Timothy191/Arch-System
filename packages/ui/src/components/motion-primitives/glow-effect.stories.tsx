@@ -25,9 +25,9 @@ type Story = StoryObj<typeof GlowEffect>;
 
 export const Default: Story = {
   render: (args) => (
-    <div className="relative w-64 h-64 flex items-center justify-center bg-black rounded-3xl overflow-hidden shadow-window">
+    <div className="relative flex h-64 w-64 items-center justify-center overflow-hidden rounded-3xl bg-black shadow-window">
       <GlowEffect {...args} />
-      <div className="relative z-10 text-white font-bold text-xl">ARCH CORE</div>
+      <div className="relative z-10 font-bold text-white text-xl">ARCH CORE</div>
     </div>
   ),
   args: {
@@ -40,9 +40,9 @@ export const Default: Story = {
 
 export const Pulse: Story = {
   render: (args) => (
-    <div className="relative w-64 h-32 flex items-center justify-center bg-slate-900 rounded-xl overflow-hidden">
+    <div className="relative flex h-32 w-64 items-center justify-center overflow-hidden rounded-xl bg-slate-900">
       <GlowEffect {...args} />
-      <div className="relative z-10 text-emerald-400 font-mono text-sm tracking-widest">
+      <div className="relative z-10 font-mono text-emerald-400 text-sm tracking-widest">
         SYSTEM BREATHING
       </div>
     </div>
@@ -57,9 +57,9 @@ export const Pulse: Story = {
 
 export const Flow: Story = {
   render: (args) => (
-    <div className="relative w-80 h-12 flex items-center justify-center bg-black rounded-full overflow-hidden">
+    <div className="relative flex h-12 w-80 items-center justify-center overflow-hidden rounded-full bg-black">
       <GlowEffect {...args} />
-      <div className="relative z-10 text-white/50 text-xs tracking-[0.5em] font-medium">
+      <div className="relative z-10 font-medium text-white/50 text-xs tracking-[0.5em]">
         PROCESSING...
       </div>
     </div>

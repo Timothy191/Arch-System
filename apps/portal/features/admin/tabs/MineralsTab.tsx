@@ -121,31 +121,31 @@ export function MineralsTab() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">
+        <h2 className="font-medium text-[var(--text-heading)] text-lg">
           Minerals & Materials Register
         </h2>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="text-[var(--text-muted)] text-xs">
           Register operational mineral sub-categories for Waste and Coal. These options
           automatically populate the excavator material mapping dropdowns across the portal.
         </p>
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-xs text-[var(--text-muted)]">
+        <div className="py-12 text-center text-[var(--text-muted)] text-xs">
           Loading mineral register...
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* WASTE MINERALS SECTION */}
-          <GlassCard className="p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+          <GlassCard className="flex flex-col gap-4 p-5">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-3">
               <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[var(--accent-blue)]" />
-                <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+                <Layers className="h-4 w-4 text-[var(--accent-blue)]" />
+                <h3 className="font-semibold text-[var(--text-heading)] text-sm">
                   Waste Minerals ({wasteMinerals.length})
                 </h3>
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] font-mono">
+              <span className="font-mono text-[11px] text-[var(--text-muted)]">
                 Category: Waste
               </span>
             </div>
@@ -155,34 +155,34 @@ export function MineralsTab() {
                 placeholder="e.g. Dyke, Overburden, Topsoil..."
                 value={newWasteMineral}
                 onChange={(e) => setNewWasteMineral(e.target.value)}
-                className="bg-[var(--bg-primary)] border-[var(--border-default)] text-xs"
+                className="border-[var(--border-default)] bg-[var(--bg-primary)] text-xs"
               />
               <Button
                 type="submit"
                 size="sm"
                 disabled={saving || !newWasteMineral.trim()}
-                className="shrink-0 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white"
+                className="shrink-0 bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
               >
-                <Plus className="w-3.5 h-3.5 mr-1" />
+                <Plus className="mr-1 h-3.5 w-3.5" />
                 Add
               </Button>
             </form>
 
-            <ul className="divide-y divide-[var(--border-default)]/60 rounded-lg border border-[var(--border-default)] overflow-hidden">
+            <ul className="divide-y divide-[var(--border-default)]/60 overflow-hidden rounded-lg border border-[var(--border-default)]">
               {wasteMinerals.map((mineral) => (
                 <li
                   key={mineral}
-                  className="flex items-center justify-between px-3.5 py-2.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors text-xs"
+                  className="flex items-center justify-between bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
                 >
                   <span className="font-medium text-[var(--text-heading)]">{mineral}</span>
                   <button
                     type="button"
                     disabled={saving}
                     onClick={() => handleRemoveWaste(mineral)}
-                    className="text-[var(--text-muted)] hover:text-accent-red transition-colors p-1"
+                    className="p-1 text-[var(--text-muted)] transition-colors hover:text-accent-red"
                     title={`Remove ${mineral}`}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </li>
               ))}
@@ -190,15 +190,15 @@ export function MineralsTab() {
           </GlassCard>
 
           {/* COAL MINERALS SECTION */}
-          <GlassCard className="p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+          <GlassCard className="flex flex-col gap-4 p-5">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-3">
               <div className="flex items-center gap-2">
-                <Gem className="w-4 h-4 text-neutral-800" />
-                <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+                <Gem className="h-4 w-4 text-neutral-800" />
+                <h3 className="font-semibold text-[var(--text-heading)] text-sm">
                   Coal Minerals ({coalMinerals.length})
                 </h3>
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] font-mono">Category: Coal</span>
+              <span className="font-mono text-[11px] text-[var(--text-muted)]">Category: Coal</span>
             </div>
 
             <form onSubmit={handleAddCoal} className="flex items-center gap-2">
@@ -206,34 +206,34 @@ export function MineralsTab() {
                 placeholder="e.g. 2#Lower, 4#Upper, Seam 1..."
                 value={newCoalMineral}
                 onChange={(e) => setNewCoalMineral(e.target.value)}
-                className="bg-[var(--bg-primary)] border-[var(--border-default)] text-xs"
+                className="border-[var(--border-default)] bg-[var(--bg-primary)] text-xs"
               />
               <Button
                 type="submit"
                 size="sm"
                 disabled={saving || !newCoalMineral.trim()}
-                className="shrink-0 bg-neutral-800 hover:bg-neutral-900 text-white"
+                className="shrink-0 bg-neutral-800 text-white hover:bg-neutral-900"
               >
-                <Plus className="w-3.5 h-3.5 mr-1" />
+                <Plus className="mr-1 h-3.5 w-3.5" />
                 Add
               </Button>
             </form>
 
-            <ul className="divide-y divide-[var(--border-default)]/60 rounded-lg border border-[var(--border-default)] overflow-hidden">
+            <ul className="divide-y divide-[var(--border-default)]/60 overflow-hidden rounded-lg border border-[var(--border-default)]">
               {coalMinerals.map((mineral) => (
                 <li
                   key={mineral}
-                  className="flex items-center justify-between px-3.5 py-2.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors text-xs"
+                  className="flex items-center justify-between bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
                 >
                   <span className="font-medium text-[var(--text-heading)]">{mineral}</span>
                   <button
                     type="button"
                     disabled={saving}
                     onClick={() => handleRemoveCoal(mineral)}
-                    className="text-[var(--text-muted)] hover:text-accent-red transition-colors p-1"
+                    className="p-1 text-[var(--text-muted)] transition-colors hover:text-accent-red"
                     title={`Remove ${mineral}`}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </li>
               ))}

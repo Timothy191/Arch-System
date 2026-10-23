@@ -123,18 +123,18 @@ export default async function DrillingDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="font-semibold text-2xl text-[var(--text-heading)]">
               Drilling Dashboard
             </h2>
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
-              <Radio className="w-3 h-3" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-accent-green text-xs">
+              <Radio className="h-3 w-3" />
               Auto-Built from Control Room
             </span>
           </div>
-          <p className="text-[var(--text-muted)] text-sm mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             {new Date().toLocaleDateString('en-ZA', {
               weekday: 'long',
               year: 'numeric',
@@ -147,16 +147,16 @@ export default async function DrillingDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/drilling/drilling-operations"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-medium text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
           >
-            <Drill className="w-3.5 h-3.5 text-accent-green" />
+            <Drill className="h-3.5 w-3.5 text-accent-green" />
             Today&apos;s Shift Report ({loggedShifts})
           </Link>
           <Link
             href="/drilling/reports"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-xs font-medium text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="h-3.5 w-3.5" />
             Production Reports
           </Link>
         </div>
@@ -164,41 +164,41 @@ export default async function DrillingDashboardPage() {
 
       <Divider variant="fading" label="CONTROL ROOM AUTO-SYNCED PRODUCTION" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Drill className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <Drill className="h-4 w-4 text-accent-green" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Meters Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-accent-green mt-2">{totalMeters.toFixed(1)}m</p>
-          <p className="text-[var(--text-muted)] text-xs mt-1">Captured via Control Room</p>
+          <p className="mt-2 font-bold text-2xl text-accent-green">{totalMeters.toFixed(1)}m</p>
+          <p className="mt-1 text-[var(--text-muted)] text-xs">Captured via Control Room</p>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Holes Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-2">{totalHoles}</p>
-          <p className="text-[var(--text-muted)] text-xs mt-1">
+          <p className="mt-2 font-bold text-2xl text-[var(--accent-blue)]">{totalHoles}</p>
+          <p className="mt-1 text-[var(--text-muted)] text-xs">
             {loggedShifts} shift{loggedShifts === 1 ? '' : 's'} compiled
           </p>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Drill className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <Drill className="h-4 w-4 text-accent-green" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Active Drills
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{machineCount}</p>
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">{machineCount}</p>
           {activeOps > 0 && (
-            <p className="text-accent-green text-xs mt-1">
+            <p className="mt-1 text-accent-green text-xs">
               {activeOps} operation{activeOps > 1 ? 's' : ''} active
             </p>
           )}
@@ -206,12 +206,12 @@ export default async function DrillingDashboardPage() {
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[var(--accent-blue)]" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <Clock className="h-4 w-4 text-[var(--accent-blue)]" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Hours Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-2">
+          <p className="mt-2 font-bold text-2xl text-[var(--accent-blue)]">
             {totalHours.toFixed(1)}h
           </p>
         </GlassCard>
@@ -219,14 +219,14 @@ export default async function DrillingDashboardPage() {
         <BorderBox variant="patterned-caution" padding="none" className="overflow-hidden">
           <div className="p-4 sm:p-5">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-accent-blue" />
-              <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+              <AlertTriangle className="h-4 w-4 text-accent-blue" />
+              <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                 Delays
               </p>
             </div>
-            <p className="text-2xl font-bold text-accent-blue mt-2">{delayCount}</p>
+            <p className="mt-2 font-bold text-2xl text-accent-blue">{delayCount}</p>
             {delayMinutes > 0 && (
-              <p className="text-[var(--text-muted)] text-xs mt-1">{delayMinutes} min lost</p>
+              <p className="mt-1 text-[var(--text-muted)] text-xs">{delayMinutes} min lost</p>
             )}
           </div>
         </BorderBox>

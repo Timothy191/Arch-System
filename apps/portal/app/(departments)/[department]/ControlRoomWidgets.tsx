@@ -5,17 +5,17 @@ import { Suspense } from 'react';
 // Co-locating them prevents bundle fragmentation on non-control room department routes.
 
 const ScadaPanel = dynamic(() => import('@/features/departments').then((m) => m.ScadaPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
+  loading: () => <div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />,
 });
 
 const AlertPanel = dynamic(() => import('@/features/departments').then((m) => m.AlertPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
+  loading: () => <div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />,
 });
 
 const ControlRoomActivityFeed = dynamic(
   () => import('@/features/departments').then((m) => m.ControlRoomActivityFeed),
   {
-    loading: () => <div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />,
+    loading: () => <div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />,
   }
 );
 
@@ -29,21 +29,21 @@ export function ControlRoomWidgets({ deptId }: ControlRoomWidgetsProps) {
   return (
     <div className="space-y-6">
       {/* SCADA and Alert Telemetry Panels (Elevated to top for 24/7 Situational Awareness) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
+          fallback={<div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />}
         >
           <ScadaPanel departmentId={deptId} />
         </Suspense>
         <Suspense
-          fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}
+          fallback={<div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />}
         >
           <AlertPanel departmentId={deptId} />
         </Suspense>
       </div>
 
       {/* Activity Feed */}
-      <Suspense fallback={<div className="h-[400px] animate-pulse bg-bg-tertiary rounded-card" />}>
+      <Suspense fallback={<div className="h-[400px] animate-pulse rounded-card bg-bg-tertiary" />}>
         <ControlRoomActivityFeed departmentId={deptId} />
       </Suspense>
     </div>

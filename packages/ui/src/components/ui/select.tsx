@@ -13,15 +13,15 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       <SelectPrimitive.Root {...props}>
         <SelectPrimitive.Trigger
           className={cn(
-            'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 gold-steel-border gold-steel-border-slim'
+            'gold-steel-border gold-steel-border-slim flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
           )}
         >
           <SelectPrimitive.Value placeholder="Select..." className="w-full" />
         </SelectPrimitive.Trigger>
         <SelectPrimitive.Content
           className={cn(
-            'select-content z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-sm shadow-lg gold-steel-border gold-steel-border-slim',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2'
+            'select-content gold-steel-border gold-steel-border-slim z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-sm shadow-lg',
+            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=open]:animate-in'
           )}
         >
           <SelectPrimitive.Group>{children}</SelectPrimitive.Group>
@@ -39,7 +39,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2.5 text-xs font-medium text-[var(--text-heading)] outline-none hover:bg-black/[0.04] focus:bg-black/[0.04] data-[state=checked]:text-[var(--accent-blue)] data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex w-full cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs outline-none hover:bg-black/[0.04] focus:bg-black/[0.04] data-[disabled]:pointer-events-none data-[state=checked]:font-semibold data-[state=checked]:text-[var(--accent-blue)] data-[disabled]:opacity-50',
       className
     )}
     {...props}

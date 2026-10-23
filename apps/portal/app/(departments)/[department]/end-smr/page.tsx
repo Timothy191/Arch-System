@@ -67,7 +67,7 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">End SMR</h2>
+        <h2 className="font-medium text-2xl text-[var(--text-heading)]">End SMR</h2>
         <p className="text-[var(--text-muted)] text-sm">
           {new Date().toLocaleDateString('en-ZA', {
             weekday: 'long',

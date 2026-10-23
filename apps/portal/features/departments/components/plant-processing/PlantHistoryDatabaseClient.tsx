@@ -375,18 +375,18 @@ export function PlantHistoryDatabaseClient({
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6">
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
       {/* Database Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-5 shadow-sm">
+      <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/25">
-            <Database className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-2.5 py-1 font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
+            <Database className="h-3.5 w-3.5" />
             Plant &amp; Processing Logged Telemetry Archive
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)] tracking-tight">
+          <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight sm:text-2xl">
             Plant &amp; Processing — Logged Info &amp; Reports Database
           </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+          <p className="text-[var(--text-secondary)] text-xs sm:text-sm">
             Unified historical database of logged wash plant performance across Monthly, Daily, and
             Hourly report granularities.
           </p>
@@ -395,33 +395,33 @@ export function PlantHistoryDatabaseClient({
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/plant-processing/hourly-sheet"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600" />
+            <FileSpreadsheet className="h-3.5 w-3.5 text-amber-600" />
             Hourly Input Sheet
           </Link>
           <Link
             href="/plant-processing/delays"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.03] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
             Delays Register
           </Link>
           <button
             type="button"
             onClick={handleExportReportCsv}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[var(--accent-blue)] text-white hover:opacity-95 transition-all shadow-sm cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3.5 py-2 font-semibold text-white text-xs shadow-sm transition-all hover:opacity-95"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="h-3.5 w-3.5" />
             Export {granularity.charAt(0).toUpperCase() + granularity.slice(1)} Report CSV
           </button>
         </div>
       </div>
 
       {/* Granularity Switcher (Monthly / Daily / Hourly Reports) & Filter Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-4 shadow-sm">
+      <div className="flex flex-col justify-between gap-4 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4 shadow-sm md:flex-row md:items-center">
         <div
-          className="inline-flex rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-1 gap-1"
+          className="inline-flex gap-1 rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-1"
           role="tablist"
           aria-label="Report Granularity Database View"
         >
@@ -430,13 +430,13 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'monthly'}
             onClick={() => setGranularity('monthly')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
               granularity === 'monthly'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.03]'
+                : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="h-3.5 w-3.5" />
             Monthly Reports ({filteredMonthly.length})
           </button>
 
@@ -445,13 +445,13 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'daily'}
             onClick={() => setGranularity('daily')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
               granularity === 'daily'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.03]'
+                : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="h-3.5 w-3.5" />
             Daily Reports ({filteredDaily.length})
           </button>
 
@@ -460,13 +460,13 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'hourly'}
             onClick={() => setGranularity('hourly')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
               granularity === 'hourly'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.03]'
+                : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="h-3.5 w-3.5" />
             Hourly Reports ({filteredHourly.length})
           </button>
         </div>
@@ -477,7 +477,7 @@ export function PlantHistoryDatabaseClient({
               aria-label="Filter database by shift"
               value={shiftFilter}
               onChange={(e) => setShiftFilter(e.target.value as 'ALL' | 'day' | 'night')}
-              className="px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-xs text-[var(--text-heading)]"
+              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
             >
               <option value="ALL">All Shifts (Day &amp; Night)</option>
               <option value="day">Day Shift Only</option>
@@ -486,72 +486,72 @@ export function PlantHistoryDatabaseClient({
           )}
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="search"
               aria-label="Search logged database records"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by date, seam, module, or note..."
-              className="pl-8 pr-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] text-xs text-[var(--text-heading)] min-w-[240px]"
+              className="min-w-[240px] rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] py-2 pr-3 pl-8 text-[var(--text-heading)] text-xs"
             />
           </div>
         </div>
       </div>
 
       {/* Report Database Table Container */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl overflow-hidden shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm">
         {granularity === 'monthly' && (
           <div className="overflow-x-auto">
             <table
-              className="w-full text-left border-collapse text-xs"
+              className="w-full border-collapse text-left text-xs"
               aria-label="Monthly Plant Reports Database"
             >
               <thead>
-                <tr className="bg-black/[0.03] border-b border-[var(--border-default)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  <th className="py-3.5 px-4">Month Period</th>
-                  <th className="py-3.5 px-4 text-right">Shifts Logged</th>
-                  <th className="py-3.5 px-4 text-right">ROM Feed (t)</th>
-                  <th className="py-3.5 px-4 text-right">Clean Coal (t)</th>
-                  <th className="py-3.5 px-4 text-right">Discard (t)</th>
-                  <th className="py-3.5 px-4 text-right">Plant Yield (%)</th>
-                  <th className="py-3.5 px-4 text-right">Mean RD (g/cm³)</th>
-                  <th className="py-3.5 px-4 text-right">Moisture (%)</th>
-                  <th className="py-3.5 px-4 text-right">Run / Delay Hrs</th>
-                  <th className="py-3.5 px-4 text-right">Availability</th>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.03] font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
+                  <th className="px-4 py-3.5">Month Period</th>
+                  <th className="px-4 py-3.5 text-right">Shifts Logged</th>
+                  <th className="px-4 py-3.5 text-right">ROM Feed (t)</th>
+                  <th className="px-4 py-3.5 text-right">Clean Coal (t)</th>
+                  <th className="px-4 py-3.5 text-right">Discard (t)</th>
+                  <th className="px-4 py-3.5 text-right">Plant Yield (%)</th>
+                  <th className="px-4 py-3.5 text-right">Mean RD (g/cm³)</th>
+                  <th className="px-4 py-3.5 text-right">Moisture (%)</th>
+                  <th className="px-4 py-3.5 text-right">Run / Delay Hrs</th>
+                  <th className="px-4 py-3.5 text-right">Availability</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)] font-mono">
                 {filteredMonthly.map((m) => (
-                  <tr key={m.month} className="hover:bg-black/[0.015] transition-colors">
-                    <td className="py-3.5 px-4 font-sans">
+                  <tr key={m.month} className="transition-colors hover:bg-black/[0.015]">
+                    <td className="px-4 py-3.5 font-sans">
                       <div className="font-bold text-[var(--text-heading)]">{m.monthLabel}</div>
-                      <div className="text-[11px] font-mono text-[var(--text-muted)]">
+                      <div className="font-mono text-[11px] text-[var(--text-muted)]">
                         {m.month}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right">{m.shiftsLogged}</td>
-                    <td className="py-3.5 px-4 text-right font-semibold text-[var(--text-heading)]">
+                    <td className="px-4 py-3.5 text-right">{m.shiftsLogged}</td>
+                    <td className="px-4 py-3.5 text-right font-semibold text-[var(--text-heading)]">
                       {m.romFeedTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-emerald-700">
+                    <td className="px-4 py-3.5 text-right font-bold text-emerald-700">
                       {m.cleanCoalTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3.5 px-4 text-right text-amber-800">
+                    <td className="px-4 py-3.5 text-right text-amber-800">
                       {m.discardTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 font-bold">
+                    <td className="px-4 py-3.5 text-right">
+                      <span className="inline-block rounded border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-800">
                         {m.yieldPct.toFixed(1)}%
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-right">{m.avgCycloneRd.toFixed(2)}</td>
-                    <td className="py-3.5 px-4 text-right">{m.avgMoisturePct.toFixed(1)}%</td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="px-4 py-3.5 text-right">{m.avgCycloneRd.toFixed(2)}</td>
+                    <td className="px-4 py-3.5 text-right">{m.avgMoisturePct.toFixed(1)}%</td>
+                    <td className="px-4 py-3.5 text-right">
                       {m.totalRunHours}h /{' '}
                       <span className="text-amber-700">{m.totalDelayHours}h</span>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-[var(--accent-blue)]">
+                    <td className="px-4 py-3.5 text-right font-bold text-[var(--accent-blue)]">
                       {m.availabilityPct.toFixed(1)}%
                     </td>
                   </tr>
@@ -564,60 +564,60 @@ export function PlantHistoryDatabaseClient({
         {granularity === 'daily' && (
           <div className="overflow-x-auto">
             <table
-              className="w-full text-left border-collapse text-xs"
+              className="w-full border-collapse text-left text-xs"
               aria-label="Daily Plant Reports Database"
             >
               <thead>
-                <tr className="bg-black/[0.03] border-b border-[var(--border-default)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  <th className="py-3.5 px-4">Date</th>
-                  <th className="py-3.5 px-4">Shift</th>
-                  <th className="py-3.5 px-4">Plant Module</th>
-                  <th className="py-3.5 px-4 text-right">ROM Feed (t)</th>
-                  <th className="py-3.5 px-4 text-right">Clean Coal (t)</th>
-                  <th className="py-3.5 px-4 text-right">Discard (t)</th>
-                  <th className="py-3.5 px-4 text-right">Yield (%)</th>
-                  <th className="py-3.5 px-4 text-right">Avg RD</th>
-                  <th className="py-3.5 px-4 text-right">Moisture</th>
-                  <th className="py-3.5 px-4 text-right">Run Hrs / Delay</th>
-                  <th className="py-3.5 px-4">Logged By</th>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.03] font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
+                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-4 py-3.5">Shift</th>
+                  <th className="px-4 py-3.5">Plant Module</th>
+                  <th className="px-4 py-3.5 text-right">ROM Feed (t)</th>
+                  <th className="px-4 py-3.5 text-right">Clean Coal (t)</th>
+                  <th className="px-4 py-3.5 text-right">Discard (t)</th>
+                  <th className="px-4 py-3.5 text-right">Yield (%)</th>
+                  <th className="px-4 py-3.5 text-right">Avg RD</th>
+                  <th className="px-4 py-3.5 text-right">Moisture</th>
+                  <th className="px-4 py-3.5 text-right">Run Hrs / Delay</th>
+                  <th className="px-4 py-3.5">Logged By</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)] font-mono">
                 {filteredDaily.map((d) => (
-                  <tr key={d.id} className="hover:bg-black/[0.015] transition-colors">
-                    <td className="py-3 px-4 font-bold text-[var(--text-heading)]">{d.date}</td>
-                    <td className="py-3 px-4 uppercase">
+                  <tr key={d.id} className="transition-colors hover:bg-black/[0.015]">
+                    <td className="px-4 py-3 font-bold text-[var(--text-heading)]">{d.date}</td>
+                    <td className="px-4 py-3 uppercase">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
+                        className={`inline-block rounded px-2 py-0.5 font-semibold text-[10px] ${
                           d.shift === 'day'
-                            ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
-                            : 'bg-indigo-500/15 text-indigo-800 border border-indigo-500/30'
+                            ? 'border border-amber-500/30 bg-amber-500/15 text-amber-800'
+                            : 'border border-indigo-500/30 bg-indigo-500/15 text-indigo-800'
                         }`}
                       >
                         {d.shift}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-[var(--text-secondary)]">{d.moduleId}</td>
-                    <td className="py-3 px-4 text-right font-semibold text-[var(--text-heading)]">
+                    <td className="px-4 py-3 text-[var(--text-secondary)]">{d.moduleId}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-[var(--text-heading)]">
                       {d.romFeedTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-emerald-700">
+                    <td className="px-4 py-3 text-right font-bold text-emerald-700">
                       {d.cleanCoalTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 text-right text-amber-800">
+                    <td className="px-4 py-3 text-right text-amber-800">
                       {d.discardTonnes.toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 font-bold">
+                    <td className="px-4 py-3 text-right">
+                      <span className="inline-block rounded border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-800">
                         {d.yieldPct.toFixed(1)}%
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">{d.avgCycloneRd.toFixed(2)}</td>
-                    <td className="py-3 px-4 text-right">{d.avgMoisturePct.toFixed(1)}%</td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="px-4 py-3 text-right">{d.avgCycloneRd.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right">{d.avgMoisturePct.toFixed(1)}%</td>
+                    <td className="px-4 py-3 text-right">
                       {d.runHours}h / <span className="text-amber-700">{d.delayMinutes}m</span>
                     </td>
-                    <td className="py-3 px-4 font-sans text-[var(--text-secondary)]">
+                    <td className="px-4 py-3 font-sans text-[var(--text-secondary)]">
                       {d.operatorName}
                     </td>
                   </tr>
@@ -630,53 +630,53 @@ export function PlantHistoryDatabaseClient({
         {granularity === 'hourly' && (
           <div className="overflow-x-auto">
             <table
-              className="w-full text-left border-collapse text-xs"
+              className="w-full border-collapse text-left text-xs"
               aria-label="Hourly Plant Reports Database"
             >
               <thead>
-                <tr className="bg-black/[0.03] border-b border-[var(--border-default)] text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  <th className="py-3 px-3.5">Date / Shift</th>
-                  <th className="py-3 px-3.5">Hour Slot</th>
-                  <th className="py-3 px-3.5">Feed Seam</th>
-                  <th className="py-3 px-3.5 text-right">ROM Feed (t/hr)</th>
-                  <th className="py-3 px-3.5 text-right">Clean Coal (t/hr)</th>
-                  <th className="py-3 px-3.5 text-right">Discard (t/hr)</th>
-                  <th className="py-3 px-3.5 text-right">Yield (%)</th>
-                  <th className="py-3 px-3.5 text-right">DMS RD</th>
-                  <th className="py-3 px-3.5 text-right">Moisture</th>
-                  <th className="py-3 px-3.5 text-right">Run Mins</th>
-                  <th className="py-3 px-3.5">Circuit Notes</th>
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.03] font-semibold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider">
+                  <th className="px-3.5 py-3">Date / Shift</th>
+                  <th className="px-3.5 py-3">Hour Slot</th>
+                  <th className="px-3.5 py-3">Feed Seam</th>
+                  <th className="px-3.5 py-3 text-right">ROM Feed (t/hr)</th>
+                  <th className="px-3.5 py-3 text-right">Clean Coal (t/hr)</th>
+                  <th className="px-3.5 py-3 text-right">Discard (t/hr)</th>
+                  <th className="px-3.5 py-3 text-right">Yield (%)</th>
+                  <th className="px-3.5 py-3 text-right">DMS RD</th>
+                  <th className="px-3.5 py-3 text-right">Moisture</th>
+                  <th className="px-3.5 py-3 text-right">Run Mins</th>
+                  <th className="px-3.5 py-3">Circuit Notes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)] font-mono">
                 {filteredHourly.map((h) => (
-                  <tr key={h.id} className="hover:bg-black/[0.015] transition-colors">
-                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                  <tr key={h.id} className="transition-colors hover:bg-black/[0.015]">
+                    <td className="whitespace-nowrap px-3.5 py-2.5">
                       <span className="font-semibold text-[var(--text-heading)]">{h.date}</span>{' '}
-                      <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-black/[0.04] text-[var(--text-secondary)]">
+                      <span className="rounded bg-black/[0.04] px-1.5 py-0.5 text-[10px] text-[var(--text-secondary)] uppercase">
                         {h.shift}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3.5 whitespace-nowrap font-semibold text-[var(--text-heading)]">
+                    <td className="whitespace-nowrap px-3.5 py-2.5 font-semibold text-[var(--text-heading)]">
                       {h.hourSlot}
                     </td>
-                    <td className="py-2.5 px-3.5 font-sans text-[var(--text-secondary)]">
+                    <td className="px-3.5 py-2.5 font-sans text-[var(--text-secondary)]">
                       {h.seamSource}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right font-semibold text-[var(--text-heading)]">
+                    <td className="px-3.5 py-2.5 text-right font-semibold text-[var(--text-heading)]">
                       {h.romFeedTonnes}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right font-bold text-emerald-700">
+                    <td className="px-3.5 py-2.5 text-right font-bold text-emerald-700">
                       {h.cleanCoalTonnes}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right text-amber-800">{h.discardTonnes}</td>
-                    <td className="py-2.5 px-3.5 text-right font-bold text-[var(--accent-blue)]">
+                    <td className="px-3.5 py-2.5 text-right text-amber-800">{h.discardTonnes}</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-[var(--accent-blue)]">
                       {h.yieldPct.toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3.5 text-right">{h.cycloneRd.toFixed(2)}</td>
-                    <td className="py-2.5 px-3.5 text-right">{h.moisturePct.toFixed(1)}%</td>
-                    <td className="py-2.5 px-3.5 text-right">{h.runMinutes}m</td>
-                    <td className="py-2.5 px-3.5 font-sans text-[var(--text-secondary)] max-w-xs truncate">
+                    <td className="px-3.5 py-2.5 text-right">{h.cycloneRd.toFixed(2)}</td>
+                    <td className="px-3.5 py-2.5 text-right">{h.moisturePct.toFixed(1)}%</td>
+                    <td className="px-3.5 py-2.5 text-right">{h.runMinutes}m</td>
+                    <td className="max-w-xs truncate px-3.5 py-2.5 font-sans text-[var(--text-secondary)]">
                       {h.notes}
                     </td>
                   </tr>

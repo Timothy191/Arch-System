@@ -36,7 +36,7 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
         role="toolbar"
         aria-label="Filter and Search Controls"
         className={cn(
-          'flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white/70 backdrop-blur-md rounded-xl border border-black/[0.08] shadow-2xs gold-steel-border gold-steel-border-slim',
+          'gold-steel-border gold-steel-border-slim flex flex-col items-stretch justify-between gap-3 rounded-xl border border-black/[0.08] bg-white/70 p-3 shadow-2xs backdrop-blur-md sm:flex-row sm:items-center',
           className
         )}
         {...props}
@@ -44,9 +44,9 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
         <div className="flex flex-1 items-center gap-2.5">
           {/* Integrated Search Input */}
           {onSearchChange && (
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative max-w-sm flex-1">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none"
+                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]"
                 aria-hidden="true"
               />
               <Input
@@ -54,16 +54,16 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="pl-9 pr-8 h-9 text-xs bg-white/90 border-black/10 focus-visible:ring-1"
+                className="h-9 border-black/10 bg-white/90 pr-8 pl-9 text-xs focus-visible:ring-1"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange('')}
                   aria-label="Clear search query"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-heading)] p-0.5 rounded"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded p-0.5 text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
@@ -79,9 +79,9 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
               variant="ghost"
               size="sm"
               onClick={onClearFilters}
-              className="text-xs h-9 text-[var(--text-secondary)] hover:text-[var(--accent-red)] gap-1 px-2.5"
+              className="h-9 gap-1 px-2.5 text-[var(--text-secondary)] text-xs hover:text-[var(--accent-red)]"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="h-3.5 w-3.5" />
               <span>Reset</span>
             </Button>
           )}
@@ -91,7 +91,7 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
 
         {/* Action buttons (e.g. Export, Add Record) */}
         {actions && (
-          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">{actions}</div>
+          <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">{actions}</div>
         )}
       </div>
     );

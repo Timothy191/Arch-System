@@ -22,15 +22,15 @@ export function WorkflowStatusBadge({ status, progress, jobName }: WorkflowStatu
   };
 
   return (
-    <div className="p-3 flex items-center space-x-4 w-64 bg-[#ffffff] border-2 border-color-border-subtle rounded-md shadow-sm">
+    <div className="flex w-64 items-center space-x-4 rounded-md border-2 border-color-border-subtle bg-[#ffffff] p-3 shadow-sm">
       <div className="flex-1">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-bold text-color-text-primary truncate">{jobName}</span>
-          <span className="text-xs font-semibold text-color-text-secondary capitalize">
+        <div className="mb-1 flex items-center justify-between">
+          <span className="truncate font-bold text-color-text-primary text-sm">{jobName}</span>
+          <span className="font-semibold text-color-text-secondary text-xs capitalize">
             {status}
           </span>
         </div>
-        <div className="w-full bg-color-bg-sunken h-2 rounded-full overflow-hidden border border-color-border-subtle">
+        <div className="h-2 w-full overflow-hidden rounded-full border border-color-border-subtle bg-color-bg-sunken">
           <div
             className={`h-full rounded-full transition-all duration-500 ease-out ${getStatusColor()} ${status === 'running' ? 'animate-pulse' : ''}`}
             style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}

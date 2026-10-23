@@ -235,38 +235,38 @@ export function Neo300PrintStudio({
   return (
     <div className="space-y-6">
       {/* ── Top Header & Neo 300 Printer Status Widget ── */}
-      <GlassCard className="p-5 border border-[var(--border-default)] bg-[var(--bg-secondary)]/40 backdrop-blur-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <GlassCard className="border border-[var(--border-default)] bg-[var(--bg-secondary)]/40 p-5 backdrop-blur-md">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Printer className="w-6 h-6 animate-pulse" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-500/20 shadow-md">
+              <Printer className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-bold tracking-tight text-[var(--text-heading)]">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-bold text-[var(--text-heading)] text-xl tracking-tight">
                   Magicard Neo 300 Card & Employee Provisioning Studio
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 border-emerald-500/25 text-emerald-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping inline-block" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 font-medium text-emerald-700 text-xs">
+                  <span className="inline-block h-2 w-2 animate-ping rounded-full bg-emerald-600" />
                   {printer.status.toUpperCase()}
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Model:{' '}
                 <span className="font-semibold text-[var(--text-primary)]">{printer.model}</span> |
                 CUPS Queue: <span className="font-mono text-blue-600">{printer.cups_name}</span> |
                 Connection:{' '}
-                <span className="uppercase text-[var(--text-primary)]">
+                <span className="text-[var(--text-primary)] uppercase">
                   {printer.connection_type}
                 </span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 self-end md:self-center flex-wrap">
-            <div className="text-right hidden sm:block mr-2">
-              <p className="text-xs text-[var(--text-muted)]">Active Print Queue</p>
-              <p className="text-sm font-mono font-bold text-[var(--text-heading)]">
+          <div className="flex flex-wrap items-center gap-2.5 self-end md:self-center">
+            <div className="mr-2 hidden text-right sm:block">
+              <p className="text-[var(--text-muted)] text-xs">Active Print Queue</p>
+              <p className="font-bold font-mono text-[var(--text-heading)] text-sm">
                 {jobs.filter((j) => j.status === 'queued' || j.status === 'printing').length} Jobs
                 Pending
               </p>
@@ -274,9 +274,9 @@ export function Neo300PrintStudio({
             <Button
               size="sm"
               onClick={openCreateEmployeeModal}
-              className="gap-1.5 text-xs bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
+              className="gap-1.5 bg-[var(--accent-blue)] text-white text-xs hover:bg-[var(--accent-blue)]/90"
             >
-              <UserPlus className="w-3.5 h-3.5" />+ Add Employee to DB
+              <UserPlus className="h-3.5 w-3.5" />+ Add Employee to DB
             </Button>
             <Button
               variant="outline"
@@ -284,7 +284,7 @@ export function Neo300PrintStudio({
               onClick={() => toast.info('Printer status synchronized')}
               className="gap-1.5 text-xs"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="h-3.5 w-3.5" />
               Check Status
             </Button>
           </div>
@@ -293,16 +293,16 @@ export function Neo300PrintStudio({
 
       {/* ── Employee Database Registration & Photo Setup Drawer ── */}
       {showEditor && (
-        <GlassCard className="p-6 border-2 border-[var(--accent-blue)]/40 shadow-lg space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <GlassCard className="space-y-5 border-2 border-[var(--accent-blue)]/40 p-6 shadow-lg">
+          <div className="flex items-center justify-between border-[var(--border-subtle)] border-b pb-3">
             <div>
-              <h3 className="text-base font-bold text-[var(--text-heading)] flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-[var(--accent-blue)]" />
+              <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+                <UserPlus className="h-4 w-4 text-[var(--accent-blue)]" />
                 {editorMode === 'create'
                   ? 'Register New Employee & Provision Access Card'
                   : `Edit Employee Card Profile & Photo (${formState.emp_code})`}
               </h3>
-              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
                 Saves directly to <code className="font-mono">personnel</code>, issues active{' '}
                 <code className="font-mono">badges</code> (QR + RFID), and auto-syncs to{' '}
                 <code className="font-mono">operators</code> across Control Room, Drilling &amp;
@@ -312,28 +312,28 @@ export function Neo300PrintStudio({
             <button
               type="button"
               onClick={() => setShowEditor(false)}
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-secondary)]"
+              className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-heading)]"
               aria-label="Close employee editor"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 
-          <form onSubmit={handleSaveEmployee} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <form onSubmit={handleSaveEmployee} className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             {/* Photo Upload & Live Portrait Preview (4 cols) */}
-            <div className="lg:col-span-4 flex flex-col items-center justify-center p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] gap-3">
-              <div className="w-28 h-36 rounded-xl bg-slate-900 border-2 border-[var(--border-default)] overflow-hidden flex flex-col items-center justify-center relative shadow-inner">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4 lg:col-span-4">
+              <div className="relative flex h-36 w-28 flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-[var(--border-default)] bg-slate-900 shadow-inner">
                 {formState.photo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={formState.photo_url}
                     alt="Employee ID preview"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <>
-                    <Camera className="w-7 h-7 text-slate-400" />
-                    <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
+                    <Camera className="h-7 w-7 text-slate-400" />
+                    <span className="mt-1 text-[10px] text-slate-400 uppercase tracking-wider">
                       ID Portrait
                     </span>
                   </>
@@ -349,15 +349,15 @@ export function Neo300PrintStudio({
                 className="hidden"
               />
 
-              <div className="flex flex-wrap items-center justify-center gap-2 w-full">
+              <div className="flex w-full flex-wrap items-center justify-center gap-2">
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs gap-1.5"
+                  className="gap-1.5 text-xs"
                 >
-                  <Upload className="w-3.5 h-3.5" />
+                  <Upload className="h-3.5 w-3.5" />
                   Upload / Capture Photo
                 </Button>
                 {formState.photo_url && (
@@ -366,7 +366,7 @@ export function Neo300PrintStudio({
                     size="sm"
                     variant="ghost"
                     onClick={() => setFormState((prev) => ({ ...prev, photo_url: '' }))}
-                    className="text-xs text-red-600"
+                    className="text-red-600 text-xs"
                   >
                     Clear
                   </Button>
@@ -378,14 +378,14 @@ export function Neo300PrintStudio({
                 placeholder="Or paste photo URL / data URI…"
                 value={formState.photo_url || ''}
                 onChange={(e) => setFormState((prev) => ({ ...prev, photo_url: e.target.value }))}
-                className="w-full px-2.5 py-1.5 rounded-md bg-[var(--bg-primary)] border border-[var(--border-default)] text-xs text-[var(--text-primary)]"
+                className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-primary)] text-xs"
               />
             </div>
 
             {/* Employee Database Fields (8 cols) */}
-            <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:col-span-8">
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   First Name *
                 </label>
                 <input
@@ -396,12 +396,12 @@ export function Neo300PrintStudio({
                     setFormState((prev) => ({ ...prev, first_name: e.target.value }))
                   }
                   placeholder="e.g. Sipho"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Surname *
                 </label>
                 <input
@@ -410,12 +410,12 @@ export function Neo300PrintStudio({
                   value={formState.surname}
                   onChange={(e) => setFormState((prev) => ({ ...prev, surname: e.target.value }))}
                   placeholder="e.g. Ndlovu"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Employee Code *
                 </label>
                 <input
@@ -431,12 +431,12 @@ export function Neo300PrintStudio({
                     }));
                   }}
                   placeholder="e.g. EMP-0105"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   National ID / Passport Number *
                 </label>
                 <input
@@ -445,12 +445,12 @@ export function Neo300PrintStudio({
                   value={formState.id_number}
                   onChange={(e) => setFormState((prev) => ({ ...prev, id_number: e.target.value }))}
                   placeholder="e.g. 8804125104081"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Job Title / Designation *
                 </label>
                 <input
@@ -459,12 +459,12 @@ export function Neo300PrintStudio({
                   value={formState.job_title}
                   onChange={(e) => setFormState((prev) => ({ ...prev, job_title: e.target.value }))}
                   placeholder="e.g. Pit Viper Drill Operator"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Department
                 </label>
                 <select
@@ -473,7 +473,7 @@ export function Neo300PrintStudio({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, department_id: e.target.value || null }))
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 >
                   <option value="">General Operations</option>
                   {departments.map((d) => (
@@ -485,7 +485,7 @@ export function Neo300PrintStudio({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Medical Fitness Expiry Date
                 </label>
                 <input
@@ -495,12 +495,12 @@ export function Neo300PrintStudio({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, medical_expiry: e.target.value }))
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Safety Induction Expiry Date
                 </label>
                 <input
@@ -510,19 +510,19 @@ export function Neo300PrintStudio({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, induction_expiry: e.target.value }))
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   Site Clearance Zone
                 </label>
                 <select
                   aria-label="Site Clearance Zone"
                   value={formState.area || 'Main Complex'}
                   onChange={(e) => setFormState((prev) => ({ ...prev, area: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm"
                 >
                   <option value="Main Complex">Main Complex &amp; Control Room</option>
                   <option value="North Pit">North Pit &amp; Haul Roads</option>
@@ -533,7 +533,7 @@ export function Neo300PrintStudio({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label className="mb-1 block font-medium text-[var(--text-secondary)] text-xs">
                   RFID Chip UID / QR Payload
                 </label>
                 <input
@@ -541,11 +541,11 @@ export function Neo300PrintStudio({
                   value={formState.rfid_code || ''}
                   onChange={(e) => setFormState((prev) => ({ ...prev, rfid_code: e.target.value }))}
                   placeholder="e.g. RFID-9A84F2"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm font-mono text-[var(--text-heading)]"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
                 />
               </div>
 
-              <div className="sm:col-span-2 flex items-center justify-end gap-2.5 pt-2 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center justify-end gap-2.5 border-[var(--border-subtle)] border-t pt-2 sm:col-span-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -558,9 +558,9 @@ export function Neo300PrintStudio({
                   type="submit"
                   size="sm"
                   disabled={isPending}
-                  className="bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 gap-1.5"
+                  className="gap-1.5 bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="h-4 w-4" />
                   {isPending
                     ? 'Saving to Database…'
                     : editorMode === 'create'
@@ -574,61 +574,61 @@ export function Neo300PrintStudio({
       )}
 
       {/* ── Main Layout: Directory & Live Preview ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* ── Column 1: Employee Directory (5 cols) ── */}
-        <div className="lg:col-span-5 space-y-4">
-          <GlassCard className="p-4 space-y-4 border border-[var(--border-default)]">
+        <div className="space-y-4 lg:col-span-5">
+          <GlassCard className="space-y-4 border border-[var(--border-default)] p-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm text-[var(--text-heading)] flex items-center gap-2">
-                <Layers className="w-4 h-4 text-blue-600" />
+              <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                <Layers className="h-4 w-4 text-blue-600" />
                 Employee Badging Directory
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-[var(--text-muted)] text-xs">
                   {employees.length} available
                 </span>
                 <button
                   type="button"
                   onClick={openCreateEmployeeModal}
-                  className="text-xs font-medium text-[var(--accent-blue)] hover:underline inline-flex items-center gap-1"
+                  className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] text-xs hover:underline"
                 >
-                  <UserPlus className="w-3.5 h-3.5" /> New
+                  <UserPlus className="h-3.5 w-3.5" /> New
                 </button>
               </div>
             </div>
 
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 placeholder="Search by name, ID number, or code..."
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] py-2 pr-4 pl-9 text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
             </div>
 
-            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+            <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
               {employees.map((emp) => {
                 const isSelected = selectedEmp?.id === emp.id;
                 return (
                   <div
                     key={emp.id}
                     onClick={() => setSelectedEmp(emp)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 transition-all ${
                       isSelected
-                        ? 'bg-blue-600/12 border-blue-500/50 shadow-sm'
-                        : 'bg-[var(--bg-secondary)]/30 border-[var(--border-default)] hover:bg-[var(--bg-secondary)]/60'
+                        ? 'border-blue-500/50 bg-blue-600/12 shadow-sm'
+                        : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)]/60'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 overflow-hidden flex items-center justify-center font-bold text-white text-sm shrink-0 border border-white/10">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-slate-800 to-slate-700 font-bold text-sm text-white">
                         {emp.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={emp.photo_url}
                             alt={`${emp.first_name} ${emp.surname}`}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         ) : (
                           <>
@@ -638,27 +638,27 @@ export function Neo300PrintStudio({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm text-[var(--text-heading)] truncate">
+                        <p className="truncate font-medium text-[var(--text-heading)] text-sm">
                           {emp.first_name} {emp.surname}
                         </p>
-                        <p className="text-xs text-[var(--text-muted)] truncate">
+                        <p className="truncate text-[var(--text-muted)] text-xs">
                           {emp.emp_code} • {emp.job_title || 'Personnel'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1 shrink-0">
+                    <div className="flex shrink-0 flex-col items-end gap-1">
                       {emp.qr_code ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/25">
-                          <QrCode className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-700">
+                          <QrCode className="h-3 w-3" />
                           Ready
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/25">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] text-amber-700">
                           New Card
                         </span>
                       )}
-                      <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[90px]">
+                      <span className="max-w-[90px] truncate text-[10px] text-[var(--text-muted)]">
                         {emp.department_name}
                       </span>
                     </div>
@@ -667,10 +667,10 @@ export function Neo300PrintStudio({
               })}
 
               {employees.length === 0 && (
-                <div className="p-8 text-center text-sm text-[var(--text-muted)] space-y-2">
+                <div className="space-y-2 p-8 text-center text-[var(--text-muted)] text-sm">
                   <p>No personnel records found matching your search.</p>
                   <Button size="sm" variant="outline" onClick={openCreateEmployeeModal}>
-                    <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+                    <UserPlus className="mr-1.5 h-3.5 w-3.5" />
                     Register New Employee
                   </Button>
                 </div>
@@ -680,15 +680,15 @@ export function Neo300PrintStudio({
         </div>
 
         {/* ── Column 2: CR80 PVC Interactive Preview & Print Trigger (7 cols) ── */}
-        <div className="lg:col-span-7 space-y-4">
-          <GlassCard className="p-6 border border-[var(--border-default)] flex flex-col items-center">
-            <div className="w-full flex items-center justify-between pb-4 mb-4 border-b border-[var(--border-default)] flex-wrap gap-2">
+        <div className="space-y-4 lg:col-span-7">
+          <GlassCard className="flex flex-col items-center border border-[var(--border-default)] p-6">
+            <div className="mb-4 flex w-full flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-b pb-4">
               <div>
-                <h3 className="font-semibold text-sm text-[var(--text-heading)] flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-emerald-600" />
+                <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                  <Cpu className="h-4 w-4 text-emerald-600" />
                   CR80 PVC Card Preview (ISO/IEC 7810 ID-1 Standard)
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Standard format 85.60 mm × 53.98 mm • Optimized for Neo 300 Dye-Sublimation
                 </p>
               </div>
@@ -700,17 +700,17 @@ export function Neo300PrintStudio({
                     size="sm"
                     variant="outline"
                     onClick={() => openEditEmployeeModal(selectedEmp)}
-                    className="h-7 text-xs gap-1.5"
+                    className="h-7 gap-1.5 text-xs"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
+                    <Edit3 className="h-3.5 w-3.5" />
                     Edit Photo &amp; Details
                   </Button>
                 )}
-                <div className="flex items-center gap-1 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border-default)]">
+                <div className="flex items-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-1">
                   <button
                     type="button"
                     onClick={() => setCardSide('front')}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                    className={`rounded px-3 py-1 font-medium text-xs transition-colors ${
                       cardSide === 'front'
                         ? 'bg-blue-600 text-white'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -721,7 +721,7 @@ export function Neo300PrintStudio({
                   <button
                     type="button"
                     onClick={() => setCardSide('back')}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                    className={`rounded px-3 py-1 font-medium text-xs transition-colors ${
                       cardSide === 'back'
                         ? 'bg-blue-600 text-white'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -734,101 +734,101 @@ export function Neo300PrintStudio({
             </div>
 
             {selectedEmp ? (
-              <div className="flex flex-col items-center gap-6 w-full">
+              <div className="flex w-full flex-col items-center gap-6">
                 {/* ── Card Canvas (Realistic CR80 Styling) ── */}
-                <div className="relative w-[380px] h-[240px] rounded-2xl p-5 shadow-2xl transition-all duration-300 overflow-hidden border border-white/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white select-none">
+                <div className="relative h-[240px] w-[380px] select-none overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-5 text-white shadow-2xl transition-all duration-300">
                   {/* Holographic Security Overlay Pattern */}
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
-                  <div className="absolute -top-16 -right-16 w-36 h-36 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] opacity-10 [background-size:12px_12px]" />
+                  <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-blue-500/20 blur-2xl" />
 
                   {cardSide === 'front' ? (
-                    <div className="relative h-full flex flex-col justify-between">
+                    <div className="relative flex h-full flex-col justify-between">
                       {/* Card Header */}
-                      <div className="flex items-center justify-between border-b border-white/15 pb-2">
+                      <div className="flex items-center justify-between border-white/15 border-b pb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center font-bold text-white text-xs shadow-sm">
-                            <ShieldCheck className="w-4 h-4" />
+                          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500 font-bold text-white text-xs shadow-sm">
+                            <ShieldCheck className="h-4 w-4" />
                           </div>
                           <div>
-                            <span className="font-extrabold text-xs tracking-wider uppercase bg-gradient-to-r from-blue-200 to-indigo-100 bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-blue-200 to-indigo-100 bg-clip-text font-extrabold text-transparent text-xs uppercase tracking-wider">
                               PLANTCOR MINING
                             </span>
-                            <span className="block text-[8px] text-blue-300 font-mono tracking-widest">
+                            <span className="block font-mono text-[8px] text-blue-300 tracking-widest">
                               SITE ACCESS CLEARANCE
                             </span>
                           </div>
                         </div>
 
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                        <span className="rounded border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 font-mono text-[10px] text-blue-300">
                           {selectedEmp.emp_code}
                         </span>
                       </div>
 
                       {/* Card Body: Photo & Identity */}
-                      <div className="flex items-center gap-4 my-auto">
+                      <div className="my-auto flex items-center gap-4">
                         <button
                           type="button"
                           onClick={() => openEditEmployeeModal(selectedEmp)}
                           title="Click to upload or update employee photo"
-                          className="w-20 h-24 rounded-lg bg-slate-800 border-2 border-white/30 hover:border-blue-400 overflow-hidden flex flex-col items-center justify-center relative shadow-inner shrink-0 group cursor-pointer"
+                          className="group relative flex h-24 w-20 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-white/30 bg-slate-800 shadow-inner hover:border-blue-400"
                         >
                           {selectedEmp.photo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={selectedEmp.photo_url}
                               alt={`${selectedEmp.first_name} ${selectedEmp.surname}`}
-                              className="w-full h-full object-cover"
+                              className="h-full w-full object-cover"
                             />
                           ) : (
                             <>
-                              <span className="text-2xl font-bold text-slate-300">
+                              <span className="font-bold text-2xl text-slate-300">
                                 {selectedEmp.first_name[0]}
                                 {selectedEmp.surname[0]}
                               </span>
-                              <span className="text-[7px] text-blue-300 tracking-wider mt-1 uppercase">
+                              <span className="mt-1 text-[7px] text-blue-300 uppercase tracking-wider">
                                 + ADD PHOTO
                               </span>
                             </>
                           )}
                         </button>
 
-                        <div className="space-y-1 min-w-0 flex-1">
-                          <h4 className="text-base font-bold leading-tight truncate text-white">
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <h4 className="truncate font-bold text-base text-white leading-tight">
                             {selectedEmp.first_name} {selectedEmp.surname}
                           </h4>
-                          <p className="text-xs text-blue-200 font-medium truncate">
+                          <p className="truncate font-medium text-blue-200 text-xs">
                             {selectedEmp.job_title || 'Site Operator'}
                           </p>
-                          <p className="text-[10px] text-slate-300 font-mono">
+                          <p className="font-mono text-[10px] text-slate-300">
                             NAT ID: {selectedEmp.id_number || 'Verified'}
                           </p>
 
-                          <div className="pt-2 flex items-center gap-2">
+                          <div className="flex items-center gap-2 pt-2">
                             <span
-                              className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border ${
+                              className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
                                 isMedicalValid
-                                  ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300'
-                                  : 'bg-red-500/20 border-red-400/30 text-red-300'
+                                  ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
+                                  : 'border-red-400/30 bg-red-500/20 text-red-300'
                               }`}
                             >
-                              <Stethoscope className="w-2.5 h-2.5" />
+                              <Stethoscope className="h-2.5 w-2.5" />
                               Med: {isMedicalValid ? 'PASS' : 'EXP'}
                             </span>
                             <span
-                              className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border ${
+                              className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-medium text-[9px] ${
                                 isInductionValid
-                                  ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300'
-                                  : 'bg-amber-500/20 border-amber-400/30 text-amber-300'
+                                  ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-300'
+                                  : 'border-amber-400/30 bg-amber-500/20 text-amber-300'
                               }`}
                             >
-                              <FileCheck2 className="w-2.5 h-2.5" />
+                              <FileCheck2 className="h-2.5 w-2.5" />
                               Induct: {isInductionValid ? 'OK' : 'DUE'}
                             </span>
                           </div>
                         </div>
 
                         {/* QR Code section */}
-                        <div className="w-16 h-16 bg-white p-1 rounded-md shadow-md shrink-0 flex items-center justify-center">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-white p-1 shadow-md">
                           <QRCodeSection
                             data={selectedEmp.qr_code || `EMP-${selectedEmp.emp_code}`}
                             size={56}
@@ -837,30 +837,30 @@ export function Neo300PrintStudio({
                       </div>
 
                       {/* Card Footer */}
-                      <div className="flex items-center justify-between text-[8px] text-slate-300 border-t border-white/10 pt-1 font-mono">
+                      <div className="flex items-center justify-between border-white/10 border-t pt-1 font-mono text-[8px] text-slate-300">
                         <span>DEPT: {selectedEmp.department_name?.toUpperCase()}</span>
                         <span>{selectedEmp.area?.toUpperCase() || 'MAIN COMPLEX'} • RFID</span>
                       </div>
                     </div>
                   ) : (
                     /* Back of Card Preview */
-                    <div className="relative h-full flex flex-col justify-between py-1">
+                    <div className="relative flex h-full flex-col justify-between py-1">
                       {/* Magnetic Stripe representation */}
-                      <div className="w-full h-8 bg-black/90 -mx-5 px-5 my-1" />
+                      <div className="-mx-5 my-1 h-8 w-full bg-black/90 px-5" />
 
-                      <div className="space-y-2 text-[8px] text-slate-300 px-1 font-mono">
+                      <div className="space-y-2 px-1 font-mono text-[8px] text-slate-300">
                         <p className="leading-tight">
                           This credential is property of Plantcor Mining. Unauthorized possession,
                           duplication, or transfer is strictly prohibited. If found, please return
                           to the Security Access Gate.
                         </p>
-                        <div className="border border-white/10 p-2 rounded bg-black/30 flex justify-between items-center text-[9px]">
+                        <div className="flex items-center justify-between rounded border border-white/10 bg-black/30 p-2 text-[9px]">
                           <span>Emergency Security Hotline:</span>
                           <span className="font-bold text-white">+27 (0) 11 902 4400</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[8px] font-mono text-slate-300">
+                      <div className="flex items-center justify-between border-white/10 border-t pt-2 font-mono text-[8px] text-slate-300">
                         <span>MAGICARD SECURE HOLOPRINT</span>
                         <span>SER: {selectedEmp.id.substring(0, 12).toUpperCase()}</span>
                       </div>
@@ -869,13 +869,13 @@ export function Neo300PrintStudio({
                 </div>
 
                 {/* Print Dispatch Action Button */}
-                <div className="flex flex-wrap items-center gap-3 w-full max-w-[380px]">
+                <div className="flex w-full max-w-[380px] flex-wrap items-center gap-3">
                   <Button
-                    className="flex-1 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-2.5 shadow-lg shadow-blue-600/30"
+                    className="flex-1 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 font-semibold text-white shadow-blue-600/30 shadow-lg hover:from-blue-500 hover:to-indigo-500"
                     onClick={() => handlePrint(selectedEmp.id)}
                     disabled={isPending}
                   >
-                    <Printer className="w-4 h-4" />
+                    <Printer className="h-4 w-4" />
                     {isPending ? 'Sending to Neo 300...' : 'Print Card via Neo 300'}
                   </Button>
 
@@ -884,7 +884,7 @@ export function Neo300PrintStudio({
                     className="gap-2"
                     onClick={() => openEditEmployeeModal(selectedEmp)}
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <Edit3 className="h-4 w-4" />
                     Setup
                   </Button>
 
@@ -893,13 +893,13 @@ export function Neo300PrintStudio({
                     className="gap-2"
                     onClick={() => toast.info('PDF card preview ready for download')}
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="h-4 w-4" />
                     PDF
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center text-sm text-[var(--text-muted)]">
+              <div className="p-12 text-center text-[var(--text-muted)] text-sm">
                 Select an employee from the directory or click &ldquo;+ Add Employee to DB&rdquo; to
                 preview and print their PVC ID badge.
               </div>
@@ -907,25 +907,25 @@ export function Neo300PrintStudio({
           </GlassCard>
 
           {/* ── Print Queue / Recent Jobs Table ── */}
-          <GlassCard className="p-4 border border-[var(--border-default)] space-y-3">
+          <GlassCard className="space-y-3 border border-[var(--border-default)] p-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm text-[var(--text-heading)] flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-600" />
+              <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                <Clock className="h-4 w-4 text-blue-600" />
                 Neo 300 Print Queue &amp; Recent Dispatches
               </h3>
-              <span className="text-xs text-[var(--text-muted)]">{jobs.length} jobs</span>
+              <span className="text-[var(--text-muted)] text-xs">{jobs.length} jobs</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] text-[var(--text-muted)]">
+                  <tr className="border-[var(--border-default)] border-b text-[var(--text-muted)]">
                     <th className="pb-2 font-medium">Job ID</th>
                     <th className="pb-2 font-medium">Employee Name</th>
                     <th className="pb-2 font-medium">Target Printer</th>
                     <th className="pb-2 font-medium">Status</th>
                     <th className="pb-2 font-medium">Timestamp</th>
-                    <th className="pb-2 font-medium text-right">Actions</th>
+                    <th className="pb-2 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]/50">
@@ -940,12 +940,12 @@ export function Neo300PrintStudio({
                       <td className="py-2.5 text-[var(--text-secondary)]">{printer.model}</td>
                       <td className="py-2.5">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-[10px] ${
                             j.status === 'completed'
-                              ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/25'
+                              ? 'border border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
                               : j.status === 'queued' || j.status === 'printing'
-                                ? 'bg-blue-500/10 text-blue-700 border border-blue-500/25 animate-pulse'
-                                : 'bg-slate-500/10 text-slate-700 border border-slate-500/25'
+                                ? 'animate-pulse border border-blue-500/25 bg-blue-500/10 text-blue-700'
+                                : 'border border-slate-500/25 bg-slate-500/10 text-slate-700'
                           }`}
                         >
                           {j.status.toUpperCase()}
@@ -962,7 +962,7 @@ export function Neo300PrintStudio({
                           <button
                             type="button"
                             onClick={() => handleCancelJob(j.id)}
-                            className="text-red-600 hover:text-red-500 font-medium text-xs"
+                            className="font-medium text-red-600 text-xs hover:text-red-500"
                           >
                             Cancel
                           </button>
@@ -971,7 +971,7 @@ export function Neo300PrintStudio({
                           <button
                             type="button"
                             onClick={() => handlePrint(j.personnel_id || '')}
-                            className="text-blue-600 hover:text-blue-500 font-medium text-xs"
+                            className="font-medium text-blue-600 text-xs hover:text-blue-500"
                           >
                             Reprint
                           </button>

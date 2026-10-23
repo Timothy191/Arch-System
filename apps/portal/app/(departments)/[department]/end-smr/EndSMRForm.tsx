@@ -161,14 +161,14 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
   };
 
   return (
-    <GlassCard variant="spotlight" className="p-6 max-w-4xl">
-      <h3 className="text-lg font-medium text-[var(--text-heading)] mb-4">Record End SMR</h3>
+    <GlassCard variant="spotlight" className="max-w-4xl p-6">
+      <h3 className="mb-4 font-medium text-[var(--text-heading)] text-lg">Record End SMR</h3>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Machine <span className="text-accent-red">*</span>
             </label>
             <select
@@ -184,7 +184,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                     machineObj?.latest_smu != null ? String(machineObj.latest_smu) : prev.startSmu,
                 }));
               }}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select machine...</option>
               {machines.map((m) => (
@@ -198,13 +198,13 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
 
           {/* Operator Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Operator <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.operatorId}
               onChange={(e) => setFormData((prev) => ({ ...prev, operatorId: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select operator...</option>
               {operators.map((op) => (
@@ -217,13 +217,13 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
 
           {/* Site Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Site/Location <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.siteId}
               onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select site...</option>
               {sites.map((s) => (
@@ -236,7 +236,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
 
           {/* Shift Type */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Shift <span className="text-accent-red">*</span>
             </label>
             <div className="flex gap-2">
@@ -250,10 +250,10 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                       shiftType: shift as 'day' | 'night',
                     }))
                   }
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-lg px-3 py-2 font-medium text-sm transition-colors ${
                     formData.shiftType === shift
                       ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+                      : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {shift.charAt(0).toUpperCase() + shift.slice(1)}
@@ -264,7 +264,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
 
           {/* Start SMR */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Start SMR <span className="text-accent-red">*</span>
             </label>
             <input
@@ -272,13 +272,13 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
               step="0.1"
               value={formData.startSmu}
               onChange={(e) => setFormData((prev) => ({ ...prev, startSmu: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
 
           {/* End SMR */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               End SMR <span className="text-accent-red">*</span>
             </label>
             <input
@@ -286,20 +286,20 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
               step="0.1"
               value={formData.endSmu}
               onChange={(e) => setFormData((prev) => ({ ...prev, endSmu: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
         </div>
 
         {/* DRILLING PRODUCTION SECTION */}
         {isDrillRig && (
-          <div className="mt-6 p-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-            <h4 className="text-sm font-semibold text-[var(--text-heading)] mb-4">
+          <div className="mt-6 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+            <h4 className="mb-4 font-semibold text-[var(--text-heading)] text-sm">
               DRILLING PRODUCTION
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Block Drilled <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -309,12 +309,12 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, blockDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Meters Drilled <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -325,12 +325,12 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Holes Drilled <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -341,7 +341,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, holesDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
               </div>
             </div>
@@ -351,9 +351,9 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
         {(hoursWorked !== null || isDozer) && (
           <div className="space-y-3">
             {hoursWorked !== null && (
-              <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
+              <div className="flex items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
                 <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
-                <span className="text-2xl font-medium text-[var(--accent-blue)]">
+                <span className="font-medium text-2xl text-[var(--accent-blue)]">
                   {hoursWorked.toFixed(2)}h
                 </span>
                 <span className="text-[var(--text-muted)] text-xs">
@@ -365,19 +365,19 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
             {isDozer && (
               <div
                 data-testid="dozer-rollover-summary"
-                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)] p-3.5"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                  <span className="font-medium text-[var(--text-heading)] text-sm">
                     Roll-over Amount:
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                  <span className="font-mono text-[var(--text-muted)] text-xs">
                     ({(hoursWorked ?? 0).toFixed(2)}h &times; 250 = Total Roll-over)
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
-                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
-                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                <div className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3.5 py-1.5">
+                  <span className="text-[var(--text-muted)] text-xs">Total Roll-over:</span>
+                  <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
                     {Number(((hoursWorked ?? 0) * 250).toFixed(1)).toLocaleString()} BCM
                   </span>
                 </div>
@@ -390,7 +390,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:opacity-50 text-white font-medium py-2.5 px-6 rounded-lg transition-colors"
+            className="rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-white transition-colors hover:bg-[var(--accent-blue)]/90 disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit End SMR'}
           </button>

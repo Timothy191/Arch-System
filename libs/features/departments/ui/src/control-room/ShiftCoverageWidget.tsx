@@ -113,13 +113,13 @@ function ShiftCoverageWidgetBase({
   if (loading) {
     return (
       <GlassCard>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
-          <Clock className="w-5 h-5 text-[var(--text-muted)]" />
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Shift Coverage</h3>
+          <Clock className="h-5 w-5 text-[var(--text-muted)]" />
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
+            <div key={i} className="h-10 animate-pulse rounded-lg bg-[var(--bg-tertiary)]" />
           ))}
         </div>
       </GlassCard>
@@ -130,12 +130,12 @@ function ShiftCoverageWidgetBase({
   if (error) {
     return (
       <GlassCard>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
-          <Clock className="w-5 h-5 text-[var(--text-muted)]" />
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Shift Coverage</h3>
+          <Clock className="h-5 w-5 text-[var(--text-muted)]" />
         </div>
         <div className="space-y-2">
-          <p className="text-accent-red text-sm font-medium">Unable to load shift coverage data</p>
+          <p className="font-medium text-accent-red text-sm">Unable to load shift coverage data</p>
           <p className="text-[var(--text-muted)] text-xs">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -151,8 +151,8 @@ function ShiftCoverageWidgetBase({
   return (
     <>
       <GlassCard>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Shift Coverage</h3>
           <div className="flex items-center gap-3">
             {isClosed && (
               <Badge variant="green" contrast="low" size="sm">
@@ -170,7 +170,7 @@ function ShiftCoverageWidgetBase({
                 { letter: 'ME', title: 'Maintenance Engineer' },
               ]}
             />
-            <Clock className="w-5 h-5 text-[var(--text-muted)]" />
+            <Clock className="h-5 w-5 text-[var(--text-muted)]" />
           </div>
         </div>
 
@@ -183,7 +183,7 @@ function ShiftCoverageWidgetBase({
           />
         ) : (
           <>
-            <p className="text-[var(--text-muted)] text-xs mb-3">
+            <p className="mb-3 text-[var(--text-muted)] text-xs">
               {reportedCount} of {machines.length} machines reported
             </p>
 
@@ -193,19 +193,19 @@ function ShiftCoverageWidgetBase({
                   <tr className="bg-[var(--bg-tertiary)]">
                     <th
                       scope="col"
-                      className="text-left px-3 py-2 text-[var(--text-muted)] text-xs font-medium"
+                      className="px-3 py-2 text-left font-medium text-[var(--text-muted)] text-xs"
                     >
                       Machine
                     </th>
                     <th
                       scope="col"
-                      className="text-right px-3 py-2 text-[var(--text-muted)] text-xs font-medium"
+                      className="px-3 py-2 text-right font-medium text-[var(--text-muted)] text-xs"
                     >
                       Hours
                     </th>
                     <th
                       scope="col"
-                      className="text-center px-3 py-2 text-[var(--text-muted)] text-xs font-medium"
+                      className="px-3 py-2 text-center font-medium text-[var(--text-muted)] text-xs"
                     >
                       Status
                     </th>
@@ -213,9 +213,9 @@ function ShiftCoverageWidgetBase({
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {machines.map((m) => (
-                    <tr key={m.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
+                    <tr key={m.id} className="transition-colors hover:bg-[var(--bg-tertiary)]/50">
                       <td className="px-3 py-2 text-[var(--text-heading)]">
-                        <span className="text-[var(--text-muted)] text-xs mr-1.5">
+                        <span className="mr-1.5 text-[var(--text-muted)] text-xs">
                           {m.machine_type}
                         </span>
                         {m.name}
@@ -225,11 +225,11 @@ function ShiftCoverageWidgetBase({
                       </td>
                       <td className="px-3 py-2 text-center">
                         {m.has_entry && m.hours_worked !== null && m.hours_worked > 0 ? (
-                          <CheckCircle className="w-4 h-4 text-accent-green mx-auto" />
+                          <CheckCircle className="mx-auto h-4 w-4 text-accent-green" />
                         ) : m.has_entry && m.hours_worked === 0 ? (
-                          <AlertTriangle className="w-4 h-4 text-accent-blue mx-auto" />
+                          <AlertTriangle className="mx-auto h-4 w-4 text-accent-blue" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-accent-red mx-auto" />
+                          <XCircle className="mx-auto h-4 w-4 text-accent-red" />
                         )}
                       </td>
                     </tr>
@@ -242,9 +242,9 @@ function ShiftCoverageWidgetBase({
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
-                className="mt-4 w-full flex items-center justify-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors text-sm"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent-blue)] py-2.5 font-medium text-[var(--bg-secondary)] text-sm transition-colors hover:bg-[var(--accent-blue)]/90"
               >
-                <Clock className="w-4 h-4" />
+                <Clock className="h-4 w-4" />
                 Close Shift
               </button>
             )}

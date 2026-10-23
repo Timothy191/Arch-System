@@ -274,17 +274,17 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   return (
     <GlassCard
       variant="spotlight"
-      className="p-0 overflow-hidden flex flex-col h-full"
+      className="flex h-full flex-col overflow-hidden p-0"
       data-testid="scada-excavator-machines-panel"
     >
       {/* Panel Header */}
-      <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/60 flex flex-wrap justify-between items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/60 p-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30">
-            <Pickaxe className="w-4 h-4" />
+          <div className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 p-1.5 text-[var(--accent-blue)]">
+            <Pickaxe className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[var(--text-heading)]">
+            <h3 className="font-bold text-[var(--text-heading)] text-sm">
               Excavator Activity &amp; Registered Fleet Loads
             </h3>
             <p className="text-[11px] text-[var(--text-secondary)]">
@@ -297,14 +297,14 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
           <div
             role="tablist"
             aria-label="Excavator and Registered Machine views"
-            className="inline-flex items-center gap-1 bg-white/80 p-0.5 rounded-lg border border-[var(--border-subtle)] text-[11px]"
+            className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-white/80 p-0.5 text-[11px]"
           >
             <button
               type="button"
               role="tab"
               aria-selected={activeView === 'both'}
               onClick={() => setActiveView('both')}
-              className={`px-2 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`cursor-pointer rounded-md px-2 py-1 font-semibold transition-colors ${
                 activeView === 'both'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
@@ -317,7 +317,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
               role="tab"
               aria-selected={activeView === 'excavators'}
               onClick={() => setActiveView('excavators')}
-              className={`px-2 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`cursor-pointer rounded-md px-2 py-1 font-semibold transition-colors ${
                 activeView === 'excavators'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
@@ -330,7 +330,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
               role="tab"
               aria-selected={activeView === 'machines'}
               onClick={() => setActiveView('machines')}
-              className={`px-2 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              className={`cursor-pointer rounded-md px-2 py-1 font-semibold transition-colors ${
                 activeView === 'machines'
                   ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   : 'text-[var(--text-heading)] hover:bg-black/5'
@@ -344,74 +344,74 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             type="button"
             onClick={handleRefresh}
             aria-label="Refresh SCADA Telemetry"
-            className={`p-1.5 rounded-md hover:bg-black/5 transition-colors cursor-pointer ${
+            className={`cursor-pointer rounded-md p-1.5 transition-colors hover:bg-black/5 ${
               isRefreshing ? 'animate-spin' : ''
             }`}
           >
-            <RefreshCw className="w-4 h-4 text-[var(--text-heading)]" />
+            <RefreshCw className="h-4 w-4 text-[var(--text-heading)]" />
           </button>
         </div>
       </div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-4 gap-2 px-4 py-2.5 bg-white/60 border-b border-[var(--border-subtle)]">
-        <div className="px-2.5 py-1.5 rounded-lg bg-[var(--bg-secondary)]/70 border border-[var(--border-subtle)]">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">
+      <div className="grid grid-cols-4 gap-2 border-[var(--border-subtle)] border-b bg-white/60 px-4 py-2.5">
+        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
+          <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
             Active Excavators
           </span>
-          <span className="text-sm font-bold font-mono text-[var(--text-heading)]">
+          <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
             {excavators.length} Digging
           </span>
         </div>
-        <div className="px-2.5 py-1.5 rounded-lg bg-[var(--bg-secondary)]/70 border border-[var(--border-subtle)]">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">
+        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
+          <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
             Registered Fleet
           </span>
-          <span className="text-sm font-bold font-mono text-[var(--text-heading)]">
+          <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
             {registeredMachines.length} Units
           </span>
         </div>
-        <div className="px-2.5 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/30">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-heading)] block">
+        <div className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-1.5">
+          <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
             Loaded Loads
           </span>
-          <span className="text-sm font-bold font-mono text-[var(--accent-blue)]">
+          <span className="font-bold font-mono text-[var(--accent-blue)] text-sm">
             {Math.max(totalMachineLoads, totalExcavatorLoads).toLocaleString()} Loads
           </span>
         </div>
-        <div className="px-2.5 py-1.5 rounded-lg bg-accent-green/10 border border-accent-green/25">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-heading)] block">
+        <div className="rounded-lg border border-accent-green/25 bg-accent-green/10 px-2.5 py-1.5">
+          <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
             Loaded Volume
           </span>
-          <span className="text-sm font-bold font-mono text-accent-green">
+          <span className="font-bold font-mono text-accent-green text-sm">
             {totalVolumeBcm.toLocaleString()} BCM
           </span>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {(activeView === 'both' || activeView === 'excavators') && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Pickaxe className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)]">
+                <Pickaxe className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                <h4 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
                   Excavator Activity (Active Dig Faces)
                 </h4>
               </div>
               <Link
                 href="/control-room/excavator-activity"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--accent-blue)] hover:underline"
+                className="inline-flex items-center gap-1 font-semibold text-[11px] text-[var(--accent-blue)] hover:underline"
               >
                 Open Excavator Log
-                <ArrowUpRight className="w-3 h-3" />
+                <ArrowUpRight className="h-3 w-3" />
               </Link>
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-white/80">
-              <table className="w-full text-xs text-left">
-                <thead className="text-[10px] text-[var(--text-heading)] font-bold uppercase bg-[var(--bg-secondary)]/80 border-b border-[var(--border-subtle)]">
+              <table className="w-full text-left text-xs">
+                <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80 font-bold text-[10px] text-[var(--text-heading)] uppercase">
                   <tr>
                     <th className="px-3 py-2">Excavator / Operator</th>
                     <th className="px-3 py-2">Pit &amp; Block</th>
@@ -425,7 +425,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                   {excavators.map((ex) => (
                     <tr
                       key={ex.id}
-                      className="border-b last:border-b-0 border-[var(--border-subtle)]/70 hover:bg-[var(--bg-secondary)]/40"
+                      className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
                     >
                       <td className="px-3 py-2">
                         <div className="font-bold text-[var(--text-heading)]">
@@ -435,18 +435,18 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                           {ex.operatorName} · {ex.shift}
                         </div>
                       </td>
-                      <td className="px-3 py-2 text-[var(--text-heading)] font-medium">
+                      <td className="px-3 py-2 font-medium text-[var(--text-heading)]">
                         {ex.siteBlock}
                       </td>
                       <td className="px-3 py-2">
-                        <span className="px-2 py-0.5 rounded-md bg-[var(--accent-blue)]/10 text-[var(--text-heading)] border border-[var(--accent-blue)]/30 font-medium text-[11px]">
+                        <span className="rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--text-heading)]">
                           {ex.material}
                         </span>
                       </td>
                       <td className="px-3 py-2 text-center font-mono font-semibold text-[var(--text-heading)]">
                         {ex.assignedMachines}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono font-bold text-[var(--accent-blue)]">
+                      <td className="px-3 py-2 text-right font-bold font-mono text-[var(--accent-blue)]">
                         {ex.loadedLoads} loads
                       </td>
                       <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
@@ -464,23 +464,23 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)]">
+                <Truck className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                <h4 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
                   Registered Machines with Loaded Loads
                 </h4>
               </div>
               <Link
                 href="/control-room/hourly-loads"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--accent-blue)] hover:underline"
+                className="inline-flex items-center gap-1 font-semibold text-[11px] text-[var(--accent-blue)] hover:underline"
               >
                 Update Hourly Loads
-                <ArrowUpRight className="w-3 h-3" />
+                <ArrowUpRight className="h-3 w-3" />
               </Link>
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-white/80">
-              <table className="w-full text-xs text-left">
-                <thead className="text-[10px] text-[var(--text-heading)] font-bold uppercase bg-[var(--bg-secondary)]/80 border-b border-[var(--border-subtle)]">
+              <table className="w-full text-left text-xs">
+                <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80 font-bold text-[10px] text-[var(--text-heading)] uppercase">
                   <tr>
                     <th className="px-3 py-2">Registered Machine</th>
                     <th className="px-3 py-2">Excavator</th>
@@ -494,7 +494,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                   {registeredMachines.map((m) => (
                     <tr
                       key={m.id}
-                      className="border-b last:border-b-0 border-[var(--border-subtle)]/70 hover:bg-[var(--bg-secondary)]/40"
+                      className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
                     >
                       <td className="px-3 py-2">
                         <div className="font-bold text-[var(--text-heading)]">{m.machineName}</div>
@@ -507,7 +507,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                       </td>
                       <td className="px-3 py-2 text-[var(--text-heading)]">{m.material}</td>
                       <td className="px-3 py-2 text-right">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/30 font-mono font-bold text-[var(--text-heading)]">
+                        <span className="inline-flex items-center rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-2 py-0.5 font-bold font-mono text-[var(--text-heading)]">
                           {m.loadedLoads} loads
                         </span>
                       </td>
@@ -515,7 +515,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                         {m.totalBcm.toLocaleString()}
                       </td>
                       <td className="px-3 py-2 text-center">
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-md border bg-accent-green/10 text-accent-green border-accent-green/20">
+                        <span className="rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-bold text-[10px] text-accent-green uppercase tracking-wider">
                           {m.status}
                         </span>
                       </td>

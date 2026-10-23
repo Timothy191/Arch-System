@@ -2,11 +2,11 @@
 name: react-components
 description: React 19 UI component conventions, strict light mode invariant, OKLCH design tokens, and a11y accessibility standards.
 paths:
-  - "packages/ui/**/*.{ts,tsx}"
-  - "packages/theme/**/*.{ts,tsx,json,css}"
-  - "apps/portal/components/**/*.{ts,tsx}"
-  - "apps/portal/app/**/*.{ts,tsx}"
-  - "libs/features/**/ui/**/*.{ts,tsx}"
+  - 'packages/ui/**/*.{ts,tsx}'
+  - 'packages/theme/**/*.{ts,tsx,json,css}'
+  - 'apps/portal/components/**/*.{ts,tsx}'
+  - 'apps/portal/app/**/*.{ts,tsx}'
+  - 'libs/features/**/ui/**/*.{ts,tsx}'
 ---
 
 # React 19 & UI Component Standards
@@ -21,6 +21,7 @@ paths:
 - Rely strictly on design tokens from `@repo/theme` (OKLCH color system).
 - Use approved semantic color tokens (`--color-surface-base`, `--color-accent-primary`, `--color-border-subtle`).
 - Avoid arbitrary hardcoded hex codes (`#123456`) in component stylesheets or inline styles.
+- Keep className chains within budget and combine repeated utilities per `tailwind-utility-composition`; `pnpm audit:tailwind` enforces it.
 
 ## 3. Server vs. Client Boundary Isolation
 

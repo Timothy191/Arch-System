@@ -28,7 +28,7 @@ export const Cyan: Story = {
   args: {
     children: (
       <>
-        <Terminal className="w-4 h-4" />
+        <Terminal className="h-4 w-4" />
         <span>Initialize Core</span>
       </>
     ),

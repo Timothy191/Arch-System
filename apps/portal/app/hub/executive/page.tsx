@@ -276,11 +276,11 @@ export default async function ExecutiveDashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium text-[var(--text-heading)] flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-[var(--accent-blue)]" />
+          <h1 className="flex items-center gap-2 font-medium text-2xl text-[var(--text-heading)]">
+            <BarChart3 className="h-6 w-6 text-[var(--accent-blue)]" />
             Executive Dashboard
           </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Cross-department KPIs — month-to-date as of {today}
           </p>
         </div>
@@ -295,9 +295,9 @@ export default async function ExecutiveDashboardPage() {
       {!summaryAvailable && (
         <div
           role="alert"
-          className="p-3 rounded-lg border flex items-start gap-3 bg-accent-red/10 border-accent-red/30 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-accent-red/30 bg-accent-red/10 p-3 text-sm"
         >
-          <AlertCircle className="w-5 h-5 text-accent-red mt-0.5 shrink-0" />
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent-red" />
           <div>
             <p className="font-medium">Production summary unavailable</p>
             <p className="text-[var(--text-muted)]">
@@ -310,8 +310,8 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 1 — Production &amp; Reconciliation */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <TrendingUp className="w-3.5 h-3.5" /> Production &amp; Reconciliation (MTD)
+        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+          <TrendingUp className="h-3.5 w-3.5" /> Production &amp; Reconciliation (MTD)
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -329,22 +329,22 @@ export default async function ExecutiveDashboardPage() {
             value={summaryText(`${avgDriftPct.toFixed(1)}%`)}
             color={driftKpiColor}
             sub={summaryAvailable ? driftUi.label : 'Unavailable'}
-            icon={<Scale className="w-4 h-4" />}
+            icon={<Scale className="h-4 w-4" />}
           />
           <KPICard
             label="Fuel Efficiency"
             value={summaryText(`${fuelPerTonne} L/t`)}
             color="blue"
-            icon={<Activity className="w-4 h-4" />}
+            icon={<Activity className="h-4 w-4" />}
           />
         </KPIGrid>
 
         {/* Drift Alert (only if not stable) */}
         {summaryAvailable && driftLevel !== 'stable' && (
           <div
-            className={`p-3 rounded-lg border flex items-start gap-3 ${driftAlertStyle.container} text-sm`}
+            className={`flex items-start gap-3 rounded-lg border p-3 ${driftAlertStyle.container} text-sm`}
           >
-            <AlertCircle className={`w-5 h-5 ${driftAlertStyle.icon} mt-0.5 shrink-0`} />
+            <AlertCircle className={`h-5 w-5 ${driftAlertStyle.icon} mt-0.5 shrink-0`} />
             <div>
               <p className="font-medium">Operational Drift Warning</p>
               <p className="text-[var(--text-muted)]">{driftUi.description}</p>
@@ -355,8 +355,8 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 2 — Fleet &amp; Personnel */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <Truck className="w-3.5 h-3.5" /> Fleet &amp; Personnel
+        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+          <Truck className="h-3.5 w-3.5" /> Fleet &amp; Personnel
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -381,8 +381,8 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 3 — Safety &amp; Environment */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <ShieldAlert className="w-3.5 h-3.5" /> Safety &amp; Resource Usage
+        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+          <ShieldAlert className="h-3.5 w-3.5" /> Safety &amp; Resource Usage
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -406,18 +406,18 @@ export default async function ExecutiveDashboardPage() {
 
       {/* 30-Day Production Trend Chart */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5" /> 30-Day Production Trend
+        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+          <Activity className="h-3.5 w-3.5" /> 30-Day Production Trend
         </h2>
         <GlassCard>
           {summaryAvailable ? (
             <Suspense
-              fallback={<div className="h-72 rounded-xl bg-[var(--bg-tertiary)] animate-pulse" />}
+              fallback={<div className="h-72 animate-pulse rounded-xl bg-[var(--bg-tertiary)]" />}
             >
               <ProductionTrendChart data={chartData} />
             </Suspense>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-[var(--text-muted)] text-sm">
               Production trend is unavailable while the summary query is failing.
             </p>
           )}

@@ -38,13 +38,13 @@ export function QuickActionHub() {
 
   return (
     <GlassCard variant="window" className="p-4">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+      <div className="flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-4 h-4" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+            <ShieldCheck className="h-4 w-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)]">
+            <h4 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
               Security Operations Command
             </h4>
             <p className="text-[11px] text-[var(--text-muted)]">
@@ -53,49 +53,49 @@ export function QuickActionHub() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
           {/* Action 1: Print Badge */}
           <Link
             href="/access-control/print-cards"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
-            <Printer className="w-3.5 h-3.5 text-blue-600" />
+            <Printer className="h-3.5 w-3.5 text-blue-600" />
             <span>Print Badge (Neo300)</span>
           </Link>
 
           {/* Action 2: Enroll Visitor */}
           <Link
             href="/access-control/visitors"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
-            <UserPlus className="w-3.5 h-3.5 text-teal-600" />
+            <UserPlus className="h-3.5 w-3.5 text-teal-600" />
             <span>Enroll Visitor</span>
           </Link>
 
           {/* Action 3: QR & RFID Studio */}
           <Link
             href="/access-control/qr-codes"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
-            <QrCode className="w-3.5 h-3.5 text-purple-600" />
+            <QrCode className="h-3.5 w-3.5 text-purple-600" />
             <span>RFID Inventory</span>
           </Link>
 
           {/* Action 4: Muster Station */}
           <Link
             href="/access-control/muster"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
-            <LifeBuoy className="w-3.5 h-3.5 text-red-600" />
+            <LifeBuoy className="h-3.5 w-3.5 text-red-600" />
             <span>Muster Roll</span>
           </Link>
 
           {/* Action 5: Regulatory Reports */}
           <Link
             href="/access-control/reports"
-            className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] text-[var(--text-heading)] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] active:scale-95"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
             <span>Regulatory Pack</span>
           </Link>
 
@@ -104,9 +104,9 @@ export function QuickActionHub() {
             type="button"
             onClick={handleFastGatePulse}
             disabled={pulseLoading}
-            className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500 hover:text-white text-amber-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ml-auto sm:ml-0 gold-steel-border gold-steel-border-slim"
+            className="gold-steel-border gold-steel-border-slim ml-auto flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-bold text-amber-800 text-xs transition-all hover:bg-amber-500 hover:text-white active:scale-95 sm:ml-0"
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="h-3.5 w-3.5" />
             <span>{pulseLoading ? 'Pulsing...' : 'Override Pulse'}</span>
           </button>
         </div>

@@ -265,13 +265,13 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'fixed top-2 left-3 right-3 z-navigation h-11 flex items-center justify-between px-3.5',
-        'liquid-glass-light gold-steel-border border border-white/20 shadow-window rounded-full',
+        'fixed top-2 right-3 left-3 z-navigation flex h-11 items-center justify-between px-3.5',
+        'liquid-glass-light gold-steel-border rounded-full border border-white/20 shadow-window',
         className
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
-      <nav className="flex items-center gap-1 shrink-0" aria-label="Main Navigation">
+      <nav className="flex shrink-0 items-center gap-1" aria-label="Main Navigation">
         {/* ── System Logo Dropdown ── */}
         <DropdownMenu open={systemMenuOpen} onOpenChange={setSystemMenuOpen}>
           <div className="flex items-center gap-1.5">
@@ -281,12 +281,12 @@ export function MacMenuBar({
                 aria-label="System Menu"
                 aria-haspopup="true"
                 title={`System Menu · Active: ${currentContextLabel}`}
-                className="relative w-9 h-9 rounded-full gold-steel-border gold-steel-border-slim bg-white/80 hover:bg-white data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25 backdrop-blur-md border border-white/60 shadow-xs flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-pointer hover:shadow-sm"
+                className="gold-steel-border gold-steel-border-slim relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/60 bg-white/80 shadow-xs backdrop-blur-md transition-all duration-150 ease-in-out hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] active:scale-95 data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25"
               >
-                <Logo className="w-5 h-5 text-[var(--accent-blue)] drop-shadow-xs" />
+                <Logo className="h-5 w-5 text-[var(--accent-blue)] drop-shadow-xs" />
                 <span
                   className={cn(
-                    'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white shadow-2xs transition-colors',
+                    'absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-white shadow-2xs transition-colors',
                     systemMenuOpen ? 'bg-[var(--accent-blue)]' : 'bg-accent-green'
                   )}
                   aria-hidden="true"
@@ -308,7 +308,7 @@ export function MacMenuBar({
                   );
                 }
               }}
-              className="w-8 h-8 rounded-full gold-steel-border gold-steel-border-slim bg-white/70 hover:bg-white/95 backdrop-blur-md border border-white/50 shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer shrink-0 hover:shadow-md"
+              className="gold-steel-border gold-steel-border-slim flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-white/70 shadow-sm backdrop-blur-md transition-all duration-150 hover:scale-110 hover:bg-white/95 hover:shadow-md active:scale-95"
               title="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
               aria-label="Open WhatsApp Web (Direct web.whatsapp.com shortcut & Split Screen)"
             >
@@ -317,7 +317,7 @@ export function MacMenuBar({
                 alt="WhatsApp Logo"
                 width={20}
                 height={20}
-                className="rounded-full object-cover shrink-0 drop-shadow-xs"
+                className="shrink-0 rounded-full object-cover drop-shadow-xs"
               />
             </button>
           </div>
@@ -325,19 +325,19 @@ export function MacMenuBar({
             align="start"
             sideOffset={5}
             className={cn(
-              'w-[560px] p-0 flex flex-col md:flex-row overflow-hidden z-popover',
-              'bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-card'
+              'z-popover flex w-[560px] flex-col overflow-hidden p-0 md:flex-row',
+              'rounded-card border border-black/[0.08] bg-white/95 shadow-window backdrop-blur-2xl'
             )}
           >
             {/* ── Left Column: Departments ── */}
-            <div className="flex-1 p-3.5 space-y-2">
+            <div className="flex-1 space-y-2 p-3.5">
               <div className="flex items-center justify-between px-2">
-                <p className="text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
+                <p className="font-medium text-[10.5px] text-[var(--text-muted)] uppercase tracking-widest">
                   System Departments
                 </p>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-[9.5px] font-mono font-semibold text-[var(--accent-blue)] truncate max-w-[165px]">
+                <span className="inline-flex max-w-[165px] items-center gap-1 truncate rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono font-semibold text-[9.5px] text-[var(--accent-blue)]">
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse"
+                    className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent-blue)]"
                     aria-hidden="true"
                   />
                   {currentContextLabel}
@@ -353,29 +353,29 @@ export function MacMenuBar({
                   setSystemMenuOpen(false);
                 }}
                 className={cn(
-                  'flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all group border',
+                  'group flex items-center gap-3 rounded-lg border px-2 py-1.5 transition-all',
                   isHubRoute && (!focusedModule || focusedModule.name === 'overview')
-                    ? 'bg-[var(--accent-blue)]/10 border-[var(--accent-blue)]/25'
+                    ? 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10'
                     : 'border-transparent hover:bg-black/[0.04] active:bg-black/[0.08]'
                 )}
               >
-                <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] transition-transform group-hover:scale-105">
-                  <LayoutGrid className="w-3.5 h-3.5" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] transition-transform group-hover:scale-105">
+                  <LayoutGrid className="h-3.5 w-3.5" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[13px] font-medium text-[var(--text-heading)] truncate leading-tight">
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-medium text-[13px] text-[var(--text-heading)] leading-tight">
                     Central Operations Hub
                   </span>
-                  <span className="text-[10.5px] text-[var(--text-muted)] truncate leading-tight">
+                  <span className="truncate text-[10.5px] text-[var(--text-muted)] leading-tight">
                     Executive overview &amp; shift telemetry
                   </span>
                 </div>
                 {isHubRoute && (!focusedModule || focusedModule.name === 'overview') ? (
-                  <span className="ml-auto px-1.5 py-0.5 rounded-md bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                  <span className="ml-auto shrink-0 rounded-md bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--accent-blue)] uppercase tracking-wider">
                     Active
                   </span>
                 ) : (
-                  <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                  <ChevronRight className="ml-auto h-3 w-3 shrink-0 text-[var(--text-muted)] opacity-0 transition-opacity group-hover:opacity-60" />
                 )}
               </Link>
 
@@ -394,40 +394,40 @@ export function MacMenuBar({
                         setSystemMenuOpen(false);
                       }}
                       className={cn(
-                        'flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all group border',
+                        'group flex items-center gap-3 rounded-lg border px-2 py-1.5 transition-all',
                         isRouteActive
-                          ? 'bg-[var(--accent-blue)]/10 border-[var(--accent-blue)]/25'
+                          ? 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10'
                           : isFocused
-                            ? 'bg-black/[0.035] border-black/[0.08]'
+                            ? 'border-black/[0.08] bg-black/[0.035]'
                             : 'border-transparent hover:bg-black/[0.04] active:bg-black/[0.08]'
                       )}
                     >
                       <div
                         className={cn(
-                          'w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105',
+                          'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105',
                           dept.bgColor
                         )}
                       >
-                        <Icon className={cn('w-3.5 h-3.5', dept.iconColor)} />
+                        <Icon className={cn('h-3.5 w-3.5', dept.iconColor)} />
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[13px] font-medium text-[var(--text-body)] group-hover:text-[var(--text-heading)] truncate leading-tight">
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium text-[13px] text-[var(--text-body)] leading-tight group-hover:text-[var(--text-heading)]">
                           {dept.displayName}
                         </span>
-                        <span className="text-[10.5px] text-[var(--text-muted)] truncate leading-tight">
+                        <span className="truncate text-[10.5px] text-[var(--text-muted)] leading-tight">
                           {dept.description}
                         </span>
                       </div>
                       {isRouteActive ? (
-                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                        <span className="ml-auto shrink-0 rounded-md bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--accent-blue)] uppercase tracking-wider">
                           Active
                         </span>
                       ) : isFocused ? (
-                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-black/[0.06] text-[var(--text-secondary)] text-[9px] font-mono font-semibold uppercase tracking-wider shrink-0">
+                        <span className="ml-auto shrink-0 rounded-md bg-black/[0.06] px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--text-secondary)] uppercase tracking-wider">
                           Focused
                         </span>
                       ) : (
-                        <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                        <ChevronRight className="ml-auto h-3 w-3 shrink-0 text-[var(--text-muted)] opacity-0 transition-opacity group-hover:opacity-60" />
                       )}
                     </Link>
                   );
@@ -436,32 +436,32 @@ export function MacMenuBar({
             </div>
 
             {/* ── Right Column: User + Tools + Admin ── */}
-            <div className="w-[205px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
+            <div className="flex w-[205px] shrink-0 flex-col border-black/[0.05] border-l bg-black/[0.015]">
               {/* User Identity */}
-              <div className="px-3.5 py-3 flex items-center gap-2.5 border-b border-black/[0.06]">
+              <div className="flex items-center gap-2.5 border-black/[0.06] border-b px-3.5 py-3">
                 <Avatar
                   size={32}
                   letter="AO"
                   title="Arch Operator"
-                  className="border border-black/10 shadow-card shrink-0"
+                  className="shrink-0 border border-black/10 shadow-card"
                 />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[12.5px] font-medium text-[var(--text-heading)] truncate leading-tight">
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-medium text-[12.5px] text-[var(--text-heading)] leading-tight">
                     Arch Operator
                   </span>
-                  <span className="text-[10px] text-[var(--text-muted)] truncate leading-tight">
+                  <span className="truncate text-[10px] text-[var(--text-muted)] leading-tight">
                     admin@arch-systems.com
                   </span>
                 </div>
               </div>
 
               {/* Tools */}
-              <div className="px-2.5 pt-2.5 pb-1 space-y-0.5">
-                <div className="flex items-center justify-between px-2 mb-1">
-                  <p className="text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
+              <div className="space-y-0.5 px-2.5 pt-2.5 pb-1">
+                <div className="mb-1 flex items-center justify-between px-2">
+                  <p className="font-medium text-[10.5px] text-[var(--text-muted)] uppercase tracking-widest">
                     Tools
                   </p>
-                  <span className="text-[9.5px] font-mono text-[var(--text-muted)] truncate max-w-[95px]">
+                  <span className="max-w-[95px] truncate font-mono text-[9.5px] text-[var(--text-muted)]">
                     /{activeDeptSlug}
                   </span>
                 </div>
@@ -475,12 +475,12 @@ export function MacMenuBar({
                         setPathname(`/${activeDeptSlug}/tools`);
                         setSystemMenuOpen(false);
                       }}
-                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                      className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all hover:bg-black/[0.04] active:bg-black/[0.08]"
                     >
                       <Icon
-                        className={cn('w-3.5 h-3.5 shrink-0 transition-colors', tool.colorClass)}
+                        className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)}
                       />
-                      <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                      <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
                         {tool.displayName}
                       </span>
                     </Link>
@@ -488,11 +488,11 @@ export function MacMenuBar({
                 })}
               </div>
 
-              <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
+              <DropdownMenuSeparator className="mx-2.5 bg-black/[0.06]" />
 
               {/* Split View & Quick Actions */}
-              <div className="px-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
+              <div className="space-y-0.5 px-2.5 pb-1">
+                <p className="mb-1 px-2 pt-1 font-medium text-[10.5px] text-[var(--text-muted)] uppercase tracking-widest">
                   Workspace
                 </p>
                 <DropdownMenuItem asChild>
@@ -506,10 +506,10 @@ export function MacMenuBar({
                       );
                       setSystemMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-pointer"
+                    className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all hover:bg-black/[0.04] focus:outline-none active:bg-black/[0.08]"
                   >
                     <svg
-                      className="w-3.5 h-3.5 shrink-0 text-dept-engineering"
+                      className="h-3.5 w-3.5 shrink-0 text-dept-engineering"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -520,7 +520,7 @@ export function MacMenuBar({
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <line x1="12" y1="3" x2="12" y2="21" />
                     </svg>
-                    <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                    <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
                       New Split Tab
                     </span>
                   </button>
@@ -539,24 +539,24 @@ export function MacMenuBar({
                       );
                       setSystemMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-pointer"
+                    className="group flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-1.5 text-left transition-all hover:bg-black/[0.04] focus:outline-none active:bg-black/[0.08]"
                   >
                     <span className="flex items-center gap-2.5">
-                      <Command className="w-3.5 h-3.5 shrink-0 text-[var(--accent-blue)]" />
-                      <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                      <Command className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
+                      <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
                         Command Palette
                       </span>
                     </span>
-                    <span className="text-[10px] font-mono text-[var(--text-muted)]">⌘K</span>
+                    <span className="font-mono text-[10px] text-[var(--text-muted)]">⌘K</span>
                   </button>
                 </DropdownMenuItem>
               </div>
 
-              <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
+              <DropdownMenuSeparator className="mx-2.5 bg-black/[0.06]" />
 
               {/* Automation */}
-              <div className="px-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
+              <div className="space-y-0.5 px-2.5 pb-1">
+                <p className="mb-1 px-2 pt-1 font-medium text-[10.5px] text-[var(--text-muted)] uppercase tracking-widest">
                   Automation
                 </p>
                 {EXTERNAL_LIST.map((tool) => {
@@ -568,15 +568,15 @@ export function MacMenuBar({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setSystemMenuOpen(false)}
-                      className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                      className="group flex items-center justify-between rounded-lg px-2 py-1.5 transition-all hover:bg-black/[0.04] active:bg-black/[0.08]"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className={cn('w-3.5 h-3.5 shrink-0', tool.colorClass)} />
-                        <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                        <Icon className={cn('h-3.5 w-3.5 shrink-0', tool.colorClass)} />
+                        <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
                           {tool.displayName}
                         </span>
                       </div>
-                      <ExternalLink className="w-2.5 h-2.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ExternalLink className="h-2.5 w-2.5 text-[var(--text-muted)] opacity-0 transition-opacity group-hover:opacity-100" />
                     </a>
                   );
                 })}
@@ -587,17 +587,17 @@ export function MacMenuBar({
                     setFocusedModule({ name: 'admin', title: 'AI & Build Metrics' });
                     setSystemMenuOpen(false);
                   }}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                  className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all hover:bg-black/[0.04] active:bg-black/[0.08]"
                 >
-                  <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)] shrink-0" />
-                  <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                  <Activity className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
+                  <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
                     AI &amp; Build Metrics
                   </span>
                 </Link>
               </div>
 
               {/* Admin Panel */}
-              <div className="mt-auto px-2.5 py-2.5 border-t border-black/[0.06]">
+              <div className="mt-auto border-black/[0.06] border-t px-2.5 py-2.5">
                 <Link
                   href="/admin"
                   onClick={() => {
@@ -606,20 +606,20 @@ export function MacMenuBar({
                     setSystemMenuOpen(false);
                   }}
                   className={cn(
-                    'flex items-center justify-between gap-2.5 px-2 py-1.5 rounded-lg transition-all group',
+                    'group flex items-center justify-between gap-2.5 rounded-lg px-2 py-1.5 transition-all',
                     isAdminRoute || focusedModule?.name === 'admin'
                       ? 'bg-dept-admin/15 text-dept-admin'
                       : 'hover:bg-dept-admin/10 active:bg-dept-admin/15'
                   )}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
-                    <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
+                    <Shield className="h-3.5 w-3.5 shrink-0 text-dept-admin" />
+                    <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-dept-admin">
                       Admin Panel
                     </span>
                   </span>
                   {(isAdminRoute || focusedModule?.name === 'admin') && (
-                    <span className="px-1.5 py-0.5 rounded-md bg-dept-admin/15 text-dept-admin text-[9px] font-mono font-semibold uppercase tracking-wider">
+                    <span className="rounded-md bg-dept-admin/15 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-dept-admin uppercase tracking-wider">
                       Active
                     </span>
                   )}
@@ -633,18 +633,18 @@ export function MacMenuBar({
         <button
           type="button"
           onClick={() => setSystemMenuOpen((open) => !open)}
-          className="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/60 hover:bg-white/85 backdrop-blur-md border border-black/[0.08] text-[11px] font-medium text-[var(--text-heading)] shadow-2xs transition-all cursor-pointer select-none ml-1"
+          className="gold-steel-border gold-steel-border-slim ml-1 hidden h-7 cursor-pointer select-none items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/60 px-2.5 font-medium text-[11px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:bg-white/85 md:inline-flex"
           title="Open System Menu"
         >
           <span
-            className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse shrink-0"
+            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[var(--accent-blue)]"
             aria-hidden="true"
           />
-          <span className="truncate max-w-[140px]">{currentContextLabel}</span>
+          <span className="max-w-[140px] truncate">{currentContextLabel}</span>
           <Logo
             variant="gold"
             className={cn(
-              'w-3 h-3 shrink-0 transition-transform duration-200 ease-out',
+              'h-3 w-3 shrink-0 transition-transform duration-200 ease-out',
               systemMenuOpen ? 'rotate-0' : 'rotate-180'
             )}
           />
@@ -665,21 +665,21 @@ export function MacMenuBar({
                       <DropdownMenuItem
                         key={dept.name}
                         asChild
-                        className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                        className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                       >
                         <Link
                           href={`/${dept.name}`}
-                          className="w-full flex items-center px-2 py-1.5"
+                          className="flex w-full items-center px-2 py-1.5"
                         >
                           <div
                             className={cn(
-                              'w-6 h-6 rounded-sm flex items-center justify-center mr-2.5 shrink-0',
+                              'mr-2.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm',
                               dept.bgColor
                             )}
                           >
-                            <Icon className={cn('w-3.5 h-3.5', dept.iconColor)} />
+                            <Icon className={cn('h-3.5 w-3.5', dept.iconColor)} />
                           </div>
-                          <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                          <span className="font-medium text-[13px] text-[var(--text-heading)]">
                             {dept.displayName}
                           </span>
                         </Link>
@@ -704,14 +704,14 @@ export function MacMenuBar({
                       <DropdownMenuItem
                         key={tool.name}
                         asChild
-                        className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                        className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                       >
                         <Link
                           href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
-                          className="w-full flex items-center px-2 py-1.5 gap-2.5"
+                          className="flex w-full items-center gap-2.5 px-2 py-1.5"
                         >
-                          <Icon className={cn('w-4 h-4 shrink-0', tool.colorClass)} />
-                          <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                          <Icon className={cn('h-4 w-4 shrink-0', tool.colorClass)} />
+                          <span className="font-medium text-[13px] text-[var(--text-heading)]">
                             {tool.displayName}
                           </span>
                         </Link>
@@ -719,7 +719,7 @@ export function MacMenuBar({
                     );
                   })}
                   <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                    className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                     onClick={() => {
                       window.dispatchEvent(
                         new CustomEvent('open-split-view', {
@@ -728,36 +728,36 @@ export function MacMenuBar({
                       );
                     }}
                   >
-                    <div className="w-full flex items-center px-2 py-1.5 gap-2.5">
+                    <div className="flex w-full items-center gap-2.5 px-2 py-1.5">
                       <svg
-                        className="w-4 h-4 shrink-0 text-dept-drilling fill-current"
+                        className="h-4 w-4 shrink-0 fill-current text-dept-drilling"
                         viewBox="0 0 24 24"
                       >
                         <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                       </svg>
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                      <span className="font-medium text-[13px] text-[var(--text-heading)]">
                         GitHub Workspace
                       </span>
                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
+                  <DropdownMenuSeparator className="mx-1 my-1 bg-black/[0.06]" />
                   {EXTERNAL_LIST.map((tool) => {
                     const Icon = tool.icon;
                     return (
                       <DropdownMenuItem
                         key={tool.name}
                         asChild
-                        className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                        className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                       >
                         <a
                           href={tool.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full flex items-center justify-between px-2 py-1.5"
+                          className="flex w-full items-center justify-between px-2 py-1.5"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon className={cn('w-4 h-4 shrink-0', tool.colorClass)} />
-                            <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                            <Icon className={cn('h-4 w-4 shrink-0', tool.colorClass)} />
+                            <span className="font-medium text-[13px] text-[var(--text-heading)]">
                               {tool.displayName}
                             </span>
                           </div>
@@ -779,17 +779,17 @@ export function MacMenuBar({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className={cn('w-48', DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+                    className="mx-1 my-0.5 flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-black/[0.04] focus:bg-black/[0.04]"
                     onClick={() => window.location.reload()}
                   >
                     <RotateCcw className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                    <span className="font-medium text-[13px] text-[var(--text-heading)]">
                       Reload
                     </span>
                     <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘R</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+                    className="mx-1 my-0.5 flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-black/[0.04] focus:bg-black/[0.04]"
                     onClick={() => {
                       if (!document.fullscreenElement) {
                         document.documentElement.requestFullscreen().catch(() => {});
@@ -799,7 +799,7 @@ export function MacMenuBar({
                     }}
                   >
                     <Maximize2 className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                    <span className="font-medium text-[13px] text-[var(--text-heading)]">
                       Toggle Fullscreen
                     </span>
                     <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘F</span>
@@ -818,55 +818,55 @@ export function MacMenuBar({
                 <DropdownMenuContent align="start" className={cn('w-52', DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
                     asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                    className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                   >
                     <a
                       href="https://docs.arch.os"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
+                      className="flex w-full items-center gap-2.5 px-2 py-1.5"
                     >
                       <BookOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                      <span className="font-medium text-[13px] text-[var(--text-heading)]">
                         Documentation
                       </span>
                     </a>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                    className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                   >
                     <a
                       href="https://wiki.arch.os"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
+                      className="flex w-full items-center gap-2.5 px-2 py-1.5"
                     >
                       <ScrollText className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                      <span className="font-medium text-[13px] text-[var(--text-heading)]">
                         Wiki
                       </span>
                     </a>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
+                  <DropdownMenuSeparator className="mx-1 my-1 bg-black/[0.06]" />
                   <DropdownMenuItem
                     asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
+                    className="mx-1 my-0.5 cursor-pointer rounded-lg hover:bg-black/[0.04] focus:bg-black/[0.04]"
                   >
                     <a
                       href="mailto:support@arch.os"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
+                      className="flex w-full items-center gap-2.5 px-2 py-1.5"
                     >
                       <MailOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                      <span className="font-medium text-[13px] text-[var(--text-heading)]">
                         Contact Support
                       </span>
                     </a>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
-                  <DropdownMenuItem className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5">
+                  <DropdownMenuSeparator className="mx-1 my-1 bg-black/[0.06]" />
+                  <DropdownMenuItem className="mx-1 my-0.5 flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-black/[0.04] focus:bg-black/[0.04]">
                     <Info className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                    <span className="font-medium text-[13px] text-[var(--text-heading)]">
                       About Arch Systems
                     </span>
                   </DropdownMenuItem>
@@ -884,24 +884,24 @@ export function MacMenuBar({
       </nav>
 
       {/* Center: Pill-shaped search or custom slot */}
-      <div className="hidden sm:flex flex-1 items-center justify-center mx-4">
+      <div className="mx-4 hidden flex-1 items-center justify-center sm:flex">
         {centerSlot !== undefined ? (
           centerSlot
         ) : (
-          <form onSubmit={handleSearch} className="w-full flex justify-center">
-            <div className="relative w-full max-w-2xl rounded-full gold-steel-border gold-steel-border-slim">
+          <form onSubmit={handleSearch} className="flex w-full justify-center">
+            <div className="gold-steel-border gold-steel-border-slim relative w-full max-w-2xl rounded-full">
               <Logo
                 variant="gold"
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-accent-amber pointer-events-none z-10"
+                className="pointer-events-none absolute top-1/2 left-2.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-accent-amber"
               />
-              <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none z-10" />
+              <Search className="pointer-events-none absolute top-1/2 right-2.5 z-10 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
-                className="w-full h-6 pl-7 pr-7 rounded-full gold-steel-border gold-steel-border-slim bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-accent-amber/60 focus:border-accent-amber focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
+                className="gold-steel-border gold-steel-border-slim h-6 w-full rounded-full border border-accent-amber/60 bg-white/35 pr-7 pl-7 text-[12px] text-[var(--text-heading)] shadow-diffusion-sm backdrop-blur-md transition-all placeholder:text-[var(--text-muted)] hover:bg-white/50 focus:border-accent-amber focus:bg-white/70 focus:outline-none"
               />
             </div>
           </form>
@@ -909,7 +909,7 @@ export function MacMenuBar({
       </div>
 
       {/* Right: system tray slot */}
-      <div className="flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
+      <div className="flex shrink-0 items-center gap-1.5 text-[12px] text-[var(--text-secondary)]">
         {rightSlot}
       </div>
     </m.div>

@@ -23,9 +23,9 @@ const HeaderWidgets = dynamic(
   {
     loading: () => (
       <div className="flex items-center gap-3" aria-hidden="true">
-        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
-        <div className="w-20 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
-        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
+        <div className="liquid-glass-light h-7 w-7 animate-pulse rounded-full border border-white/20" />
+        <div className="liquid-glass-light h-7 w-20 animate-pulse rounded-full border border-white/20" />
+        <div className="liquid-glass-light h-7 w-7 animate-pulse rounded-full border border-white/20" />
       </div>
     ),
   }
@@ -157,7 +157,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent`}
+        className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} relative min-h-screen overflow-x-hidden bg-transparent font-sans text-[var(--text-heading)] antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)]`}
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />
@@ -186,7 +186,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               </header>
 
               {/* Content wrapper with main landmark (WCAG 1.3.1) */}
-              <div className="relative max-w-[1920px] mx-auto shadow-window">
+              <div className="relative mx-auto max-w-[1920px] shadow-window">
                 <main id="main-content" aria-label="Main content" className="relative pt-16">
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>
@@ -195,35 +195,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                 <footer
                   role="contentinfo"
                   aria-label="Site footer"
-                  className="relative z-10 mt-3 px-3 sm:px-5 py-1.5 border-t border-white/45 liquid-glass-light gold-steel-border gold-steel-border-slim bg-white/45 backdrop-blur-xl text-[10px] text-[var(--text-muted)] select-none"
+                  className="liquid-glass-light gold-steel-border gold-steel-border-slim relative z-10 mt-3 select-none border-white/45 border-t bg-white/45 px-3 py-1.5 text-[10px] text-[var(--text-muted)] backdrop-blur-xl sm:px-5"
                 >
-                  <div className="flex items-center justify-between gap-2.5 w-full">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
+                  <div className="flex w-full items-center justify-between gap-2.5">
+                    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/75 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset">
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-accent-green shrink-0"
+                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green"
                         aria-hidden="true"
                       />
-                      <span className="uppercase tracking-wider font-semibold text-[9.5px] text-[var(--text-heading)]">
+                      <span className="font-semibold text-[9.5px] text-[var(--text-heading)] uppercase tracking-wider">
                         Arch OS
                       </span>
-                      <span className="px-1.5 py-px rounded-full bg-arch-accent-blue/10 border border-arch-accent-blue/25 font-mono text-[9px] font-semibold text-arch-accent-blue tabular-nums">
+                      <span className="rounded-full border border-arch-accent-blue/25 bg-arch-accent-blue/10 px-1.5 py-px font-mono font-semibold text-[9px] text-arch-accent-blue tabular-nums">
                         v{APP_VERSION}
                       </span>
-                      <span className="hidden sm:inline-flex items-center gap-1 pl-1 border-l border-black/10 font-mono text-[9px] text-[var(--text-secondary)] tabular-nums">
+                      <span className="hidden items-center gap-1 border-black/10 border-l pl-1 font-mono text-[9px] text-[var(--text-secondary)] tabular-nums sm:inline-flex">
                         99.95% SLA · 9 Modules
                       </span>
                     </div>
 
-                    <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="min-w-0 flex-1 overflow-hidden">
                       <DepartmentReviews />
                     </div>
 
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full gold-steel-border gold-steel-border-slim bg-white/75 border border-black/[0.08] ring-1 ring-inset ring-white/80 shadow-2xs shrink-0">
-                      <span className="hidden md:inline-flex items-center gap-1 pr-1.5 border-r border-black/10 font-mono text-[9px] text-accent-green font-semibold">
+                    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/75 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset">
+                      <span className="hidden items-center gap-1 border-black/10 border-r pr-1.5 font-mono font-semibold text-[9px] text-accent-green md:inline-flex">
                         ● Sync Active
                       </span>
                       <EveLogo className="h-2.5 w-auto text-[var(--text-secondary)]" />
-                      <span className="font-mono font-medium text-[9.5px] text-[var(--text-secondary)]">
+                      <span className="font-medium font-mono text-[9.5px] text-[var(--text-secondary)]">
                         eve
                       </span>
                     </div>

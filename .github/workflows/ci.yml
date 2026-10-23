@@ -117,6 +117,8 @@ jobs:
         run: pnpm --filter @repo/database test:migration-replay
       - name: Check Circular Dependencies
         run: pnpm cycles
+      - name: Tailwind Utility Composition
+        run: pnpm audit:tailwind
 
   # HTML Meta Tags Check job - runs in parallel on coordinator
   html-meta-check:

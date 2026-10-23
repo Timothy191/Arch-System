@@ -221,10 +221,10 @@ const colorPresets: Record<string, string[]> = {
 
 function MacTrafficLights() {
   return (
-    <div className="flex items-center gap-1.5 shrink-0">
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-close)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-minimize)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-zoom)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
+    <div className="flex shrink-0 items-center gap-1.5">
+      <span className="h-3 w-3 rounded-full border border-black/[0.06] bg-[var(--mac-close)] opacity-70 transition-opacity group-hover/window:opacity-100" />
+      <span className="h-3 w-3 rounded-full border border-black/[0.06] bg-[var(--mac-minimize)] opacity-70 transition-opacity group-hover/window:opacity-100" />
+      <span className="h-3 w-3 rounded-full border border-black/[0.06] bg-[var(--mac-zoom)] opacity-70 transition-opacity group-hover/window:opacity-100" />
     </div>
   );
 }
@@ -463,9 +463,9 @@ export function GlassCard({
       }}
       className={cn(
         // Base classes
-        'isolate relative overflow-hidden',
+        'relative isolate overflow-hidden',
         'liquid-glass-light border border-white/20 shadow-window',
-        'group rounded-card animate-window-open gold-steel-border gold-steel-border-slim',
+        'group gold-steel-border gold-steel-border-slim animate-window-open rounded-card',
         hover && 'liquid-glass-interactive',
 
         // CSS based animations to unblock main thread
@@ -480,7 +480,7 @@ export function GlassCard({
         // Hover focus rings
         hover &&
           onClick &&
-          'cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none',
+          'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]',
         padding && 'p-6',
         className
       )}
@@ -525,10 +525,10 @@ export function GlassCard({
 
       {/* macOS window title bar */}
       {isWindow && (
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10 backdrop-blur-md">
+        <div className="flex items-center gap-3 border-white/20 border-b bg-white/10 px-4 py-2.5 backdrop-blur-md">
           <MacTrafficLights />
           {title && (
-            <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">
+            <span className="flex-1 select-none pr-14 text-center font-medium text-[13px] text-[var(--text-secondary)]">
               {title}
             </span>
           )}
@@ -547,7 +547,7 @@ export function GlassCard({
 
       {/* Dynamic border highlight facing light source on hover */}
       {hover && (variant === 'default' || variant === 'window') && (
-        <div className="absolute inset-0 rounded-[inherit] pointer-events-none opacity-0 group-hover/window:opacity-100 transition-opacity duration-500">
+        <div className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover/window:opacity-100">
           <div
             className="absolute inset-0 rounded-[inherit]"
             style={{
@@ -562,7 +562,7 @@ export function GlassCard({
       {isLiquid && (
         <>
           <div
-            className="absolute inset-0 -z-10 rounded-[inherit] liquid-glass-pane-rounded pointer-events-none"
+            className="liquid-glass-pane-rounded pointer-events-none absolute inset-0 -z-10 rounded-[inherit]"
             style={{
               ...backdropStyle,
               backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, ${globalBackgroundOpacity * 1.5}) 0%, rgba(255, 255, 255, ${globalBackgroundOpacity}) 100%), linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(240, 240, 240, 0.1) 50%, rgba(255, 255, 255, 0.2) 100%)`,
@@ -571,7 +571,7 @@ export function GlassCard({
           <svg
             width="0"
             height="0"
-            className="absolute pointer-events-none overflow-hidden"
+            className="pointer-events-none absolute overflow-hidden"
             aria-hidden="true"
           >
             <defs>
@@ -621,19 +621,19 @@ export function GlassCard({
               </filter>
             </defs>
           </svg>
-          <canvas ref={canvasRef} className="hidden pointer-events-none" />
+          <canvas ref={canvasRef} className="pointer-events-none hidden" />
         </>
       )}
 
       {/* Liquid Glass Specular Sheen Sweep Layer */}
       {isLiquid && (
         <div
-          className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit] z-[5]"
+          className="pointer-events-none absolute inset-0 z-[5] overflow-hidden rounded-[inherit]"
           aria-hidden="true"
         >
           <div
             key={hoverCount}
-            className="absolute inset-0 will-change-transform liquid-sheen-sweep"
+            className="liquid-sheen-sweep absolute inset-0 will-change-transform"
             style={{
               background:
                 'linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.4) 55%, transparent 65%)',
@@ -651,7 +651,7 @@ export function GlassCard({
 
       {/* Content wrapper */}
       <div
-        className={cn('relative z-10 w-full h-full', (isWindow || isLiquid) && padding && 'p-6')}
+        className={cn('relative z-10 h-full w-full', (isWindow || isLiquid) && padding && 'p-6')}
       >
         {children}
       </div>

@@ -79,8 +79,8 @@ export function DotsMenu({
           aria-expanded={isOpen}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            'inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
-            disabled && 'cursor-not-allowed opacity-50 pointer-events-none'
+            'inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
+            disabled && 'pointer-events-none cursor-not-allowed opacity-50'
           )}
         >
           <MoreHorizontal style={{ width: iconSize, height: iconSize }} />
@@ -90,7 +90,7 @@ export function DotsMenu({
           <div
             role="menu"
             className={cn(
-              'absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100',
+              'fade-in-0 zoom-in-95 absolute top-[calc(100%+4px)] z-50 min-w-[160px] animate-in overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 text-neutral-900 shadow-lg duration-100',
               alignClasses
             )}
           >
@@ -137,7 +137,7 @@ export function DotsMenuItem({
     destructive
       ? 'text-red-600 hover:bg-red-50'
       : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900',
-    disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+    disabled && 'pointer-events-none cursor-not-allowed opacity-40',
     className
   );
 
@@ -146,7 +146,7 @@ export function DotsMenuItem({
       {prefix && <span className="mr-2 flex shrink-0 items-center text-neutral-400">{prefix}</span>}
       <span className="flex-1 truncate">{children}</span>
       {suffix && (
-        <span className="ml-2 flex shrink-0 items-center text-xs text-neutral-400">{suffix}</span>
+        <span className="ml-2 flex shrink-0 items-center text-neutral-400 text-xs">{suffix}</span>
       )}
     </>
   );

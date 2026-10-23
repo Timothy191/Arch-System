@@ -42,24 +42,24 @@ export function BreakdownStats({ metrics }: BreakdownStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
           <div
             key={stat.label}
-            className="rounded-xl border bg-[var(--bg-tertiary)] border-[var(--border-emphasis)] p-4 hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-4 transition-colors hover:bg-[var(--bg-tertiary)]"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium">
+                <p className="font-medium text-[var(--text-secondary)] text-xs uppercase tracking-wide">
                   {stat.label}
                 </p>
-                <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">{stat.value}</p>
-                <p className="text-[var(--text-secondary)] text-xs mt-1">{stat.sub}</p>
+                <p className="mt-1 font-bold text-2xl text-[var(--text-heading)]">{stat.value}</p>
+                <p className="mt-1 text-[var(--text-secondary)] text-xs">{stat.sub}</p>
               </div>
-              <div className={`p-2 rounded-lg border ${stat.bg}`}>
-                <Icon className={`w-4 h-4 ${stat.color}`} />
+              <div className={`rounded-lg border p-2 ${stat.bg}`}>
+                <Icon className={`h-4 w-4 ${stat.color}`} />
               </div>
             </div>
           </div>

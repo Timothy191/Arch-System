@@ -504,24 +504,24 @@ export function ExcavatorActivityForm({
   );
 
   return (
-    <GlassCard className="p-4 bg-[var(--vibrancy-surface)] border border-black/[0.06]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+    <GlassCard className="border border-black/[0.06] bg-[var(--vibrancy-surface)] p-4">
+      <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+          <h3 className="font-semibold text-[var(--text-heading)] text-sm">
             Excavator Location, Block Mined & Material Mapping
           </h3>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-[var(--text-muted)] text-xs">
             Assign each Excavator to a Site, Block Mined / Area, and Material. Hauling trucks
             assigned to the Excavator automatically inherit this location, block, and material.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           <span className="text-[var(--text-muted)] text-xs">Shift:</span>
-          <div className="flex items-center gap-1 rounded-full bg-[var(--bg-secondary)] p-0.5 border border-[var(--border-default)]">
+          <div className="flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] p-0.5">
             <button
               type="button"
               onClick={() => setSelectedShift('day')}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+              className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
                 selectedShift === 'day'
                   ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -532,7 +532,7 @@ export function ExcavatorActivityForm({
             <button
               type="button"
               onClick={() => setSelectedShift('night')}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+              className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
                 selectedShift === 'night'
                   ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -543,7 +543,7 @@ export function ExcavatorActivityForm({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
         {excavators.map((excavator) => {
           const currentSiteId = excavatorSites[excavator.id] || '';
           const currentBlockId = excavatorBlocks[excavator.id] || '';
@@ -579,17 +579,17 @@ export function ExcavatorActivityForm({
           return (
             <div
               key={excavator.id}
-              className="flex flex-col gap-3 p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] shadow-xs"
+              className="flex flex-col gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs"
             >
               {/* Header: Excavator Name (with Gold Arch Logo) + Active Machines Subtitle + Material Toggle */}
-              <div className="flex items-center justify-between gap-2 border-b border-[var(--border-default)]/60 pb-2.5">
-                <div className="flex flex-col min-w-0">
-                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-heading)]">
-                    <Logo variant="gold" className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex items-center justify-between gap-2 border-[var(--border-default)]/60 border-b pb-2.5">
+                <div className="flex min-w-0 flex-col">
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-sm">
+                    <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
                     <span>{excavator.name}</span>
                   </span>
                   <span
-                    className="text-[11px] text-[var(--text-muted)] truncate"
+                    className="truncate text-[11px] text-[var(--text-muted)]"
                     title={
                       assignedMachineNames.length > 0
                         ? `Active machines: ${assignedMachineNames.join(', ')}`
@@ -603,11 +603,11 @@ export function ExcavatorActivityForm({
                 </div>
 
                 {/* Material Selector (Waste / Coal) */}
-                <div className="flex items-center gap-1 rounded-full bg-[var(--bg-primary)] p-0.5 border border-[var(--border-default)] shrink-0">
+                <div className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] p-0.5">
                   <button
                     type="button"
                     onClick={() => handleExcavatorMaterialChange(excavator.id, 'Waste')}
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
                       currentMaterial === 'Waste'
                         ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-xs'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -618,7 +618,7 @@ export function ExcavatorActivityForm({
                   <button
                     type="button"
                     onClick={() => handleExcavatorMaterialChange(excavator.id, 'Coal')}
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    className={`rounded-full px-2.5 py-1 font-semibold text-xs transition-all ${
                       currentMaterial === 'Coal'
                         ? 'bg-neutral-800 text-white shadow-xs'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -630,9 +630,9 @@ export function ExcavatorActivityForm({
               </div>
 
               {/* Site, Block Mined / Area & Material Sub-Category Selectors */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                  <label className="block font-medium text-[11px] text-[var(--text-muted)]">
                     Site / Location
                   </label>
                   <select
@@ -641,7 +641,7 @@ export function ExcavatorActivityForm({
                       handleExcavatorSiteChange(excavator.id, e.target.value || null)
                     }
                     aria-label={`Select Site / Location for ${excavator.name}`}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                   >
                     <option value="">No Site</option>
                     {sites.map((s) => (
@@ -653,7 +653,7 @@ export function ExcavatorActivityForm({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                  <label className="block font-medium text-[11px] text-[var(--text-muted)]">
                     Block Mined / Area
                   </label>
                   <select
@@ -662,7 +662,7 @@ export function ExcavatorActivityForm({
                       handleExcavatorBlockChange(excavator.id, e.target.value || null)
                     }
                     aria-label={`Select Block Mined / Area for ${excavator.name}`}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                   >
                     <option value="">Select block / area...</option>
                     {availableBlocks.map((mb) => (
@@ -674,7 +674,7 @@ export function ExcavatorActivityForm({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-[var(--text-muted)] block">
+                  <label className="block font-medium text-[11px] text-[var(--text-muted)]">
                     Material ({currentMaterial})
                   </label>
                   <select
@@ -683,7 +683,7 @@ export function ExcavatorActivityForm({
                       handleExcavatorMaterialSubCategoryChange(excavator.id, e.target.value || null)
                     }
                     aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
                   >
                     <option value="">Select {currentMaterial.toLowerCase()} material...</option>
                     {materialSubCategories.map((subCat) => (
@@ -698,7 +698,7 @@ export function ExcavatorActivityForm({
           );
         })}
         {excavators.length === 0 && (
-          <p className="text-xs text-[var(--text-muted)] col-span-full">
+          <p className="col-span-full text-[var(--text-muted)] text-xs">
             No active excavators found. Please add excavators in Machine DB.
           </p>
         )}

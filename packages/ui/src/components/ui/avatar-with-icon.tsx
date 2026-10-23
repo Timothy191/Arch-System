@@ -35,10 +35,10 @@ export function AvatarWithIcon({
       <Avatar size={size} {...avatarProps} />
       <div
         className={cn(
-          'absolute flex items-center justify-center rounded-full z-10 select-none',
+          'absolute z-10 flex select-none items-center justify-center rounded-full',
           positionClass,
           iconSizeClass,
-          iconBackground && 'bg-white ring-2 ring-white border border-black/10 shadow-sm'
+          iconBackground && 'border border-black/10 bg-white shadow-sm ring-2 ring-white'
         )}
         aria-hidden="true"
       >

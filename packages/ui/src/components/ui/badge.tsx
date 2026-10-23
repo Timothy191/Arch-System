@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center justify-center font-medium rounded-full border select-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shrink-0 leading-none',
+  'inline-flex shrink-0 select-none items-center justify-center rounded-full border font-medium leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
@@ -25,28 +25,28 @@ const badgeVariants = cva(
         inverted: 'border-transparent bg-neutral-900 text-white shadow-sm',
 
         // Geist subtle variants
-        'gray-subtle': 'bg-neutral-100 text-neutral-600 border-neutral-200/80',
-        'blue-subtle': 'bg-blue-50 text-blue-700 border-blue-200/70',
-        'purple-subtle': 'bg-purple-50 text-purple-700 border-purple-200/70',
-        'amber-subtle': 'bg-amber-50 text-amber-700 border-amber-200/70',
-        'red-subtle': 'bg-red-50 text-red-700 border-red-200/70',
-        'pink-subtle': 'bg-pink-50 text-pink-700 border-pink-200/70',
-        'green-subtle': 'bg-emerald-50 text-emerald-700 border-emerald-200/70',
-        'teal-subtle': 'bg-teal-50 text-teal-700 border-teal-200/70',
+        'gray-subtle': 'border-neutral-200/80 bg-neutral-100 text-neutral-600',
+        'blue-subtle': 'border-blue-200/70 bg-blue-50 text-blue-700',
+        'purple-subtle': 'border-purple-200/70 bg-purple-50 text-purple-700',
+        'amber-subtle': 'border-amber-200/70 bg-amber-50 text-amber-700',
+        'red-subtle': 'border-red-200/70 bg-red-50 text-red-700',
+        'pink-subtle': 'border-pink-200/70 bg-pink-50 text-pink-700',
+        'green-subtle': 'border-emerald-200/70 bg-emerald-50 text-emerald-700',
+        'teal-subtle': 'border-teal-200/70 bg-teal-50 text-teal-700',
 
         // Special branded variants
         trial:
-          'border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-sm',
+          'border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold text-white shadow-sm',
         turbo:
-          'border-transparent bg-gradient-to-r from-red-500 via-pink-500 to-blue-500 text-white font-semibold shadow-sm',
+          'border-transparent bg-gradient-to-r from-red-500 via-pink-500 to-blue-500 font-semibold text-white shadow-sm',
 
         // Interactive link / filter pill
-        pill: 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 cursor-pointer shadow-sm active:scale-[0.98]',
+        pill: 'cursor-pointer border-neutral-200 bg-white text-neutral-700 shadow-sm hover:border-neutral-400 hover:bg-neutral-50 active:scale-[0.98]',
       },
       size: {
-        sm: 'h-5 px-1.5 text-[11px] gap-1 [&>svg]:w-3 [&>svg]:h-3',
-        md: 'h-6 px-2 text-xs gap-1.5 [&>svg]:w-3.5 [&>svg]:h-3.5',
-        lg: 'h-7 px-2.5 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4',
+        sm: 'h-5 gap-1 px-1.5 text-[11px] [&>svg]:h-3 [&>svg]:w-3',
+        md: 'h-6 gap-1.5 px-2 text-xs [&>svg]:h-3.5 [&>svg]:w-3.5',
+        lg: 'h-7 gap-2 px-2.5 text-sm [&>svg]:h-4 [&>svg]:w-4',
       },
     },
     defaultVariants: {
@@ -84,7 +84,7 @@ export const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         {...props}
       >
         {icon && (
-          <span className="shrink-0 flex items-center justify-center" aria-hidden="true">
+          <span className="flex shrink-0 items-center justify-center" aria-hidden="true">
             {icon}
           </span>
         )}

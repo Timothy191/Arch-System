@@ -22,8 +22,7 @@ Turborepo + pnpm workspaces (`apps/*`, `packages/*`, `libs/features/*/*`, `libs/
 - `libs/features/{auth,departments,hub}/{ui,data-access,utils}` and `libs/shared/{data-access,hooks,utils}` — published as `@repo/<feature>/<layer>`.
 - `packages/{ui,theme,contract,supabase,database,redis,errors,logger,rate-limiter,agents,eval,utils,typescript-config}`; `tools/{repo,audits,scripts}` are build-time only; `e2e/` Playwright.
 - `apps/portal/proxy.ts` → `server/proxy.ts` gates routes (`DEPARTMENT_ROUTES`, `RESTRICTED_ROUTES`) and refreshes Supabase JWT + Redis-cached RBAC.
-- Migrations: `packages/database/migrations/NNN_description.sql`; `packages/supabase/migrations` is a **symlink** to it — never write there.
-- **Never rename or renumber an applied migration.** The filename prefix is the version key in `supabase_migrations.schema_migrations`, and the README states every migration is pushed to Cloud Supabase — renaming makes `supabase db push` re-apply it. `0145_`/`0146_` are deliberate 4-digit outliers; `check-migration-drift` warns about the ordering gap but reports 0 errors, and it cannot see applied state.
+- Migrations: `packages/database/migrations/NNN_description.sql` (`packages/supabase/migrations` is a symlink — never write there). **Never rename or renumber an applied migration** (`supabase_migrations.schema_migrations` keys on prefix; `0145_`/`0146_` are deliberate 4-digit outliers).
 - DB/contract parity is a gate: new tables/columns need a Zod schema in `packages/contract/src/schemas/` or `pnpm audit:drift` fails.
 
 ## 2. Commands that are easy to get wrong
@@ -38,36 +37,26 @@ pnpm --filter @repo/theme codegen                              # after editing t
 pnpm --filter @repo/ui storybook                               # port 6006, needed by test:a11y
 ```
 
-- `pnpm test` is `turbo run test`; packages with no `test`/`lint` script are silently skipped (e.g. `packages/supabase`), so "green" can mean "nothing ran". `@repo/database`'s `test` is Node scripts (migration drift, rollback safety, RLS), not Jest.
-- `pnpm test:e2e` auto-starts `pnpm --filter portal dev` on :3000 unless `BASE_URL` is set; it needs a seeded local Supabase plus the dev-seed admin (`TEST_EMAIL`/`TEST_PASSWORD` override it in `e2e/helpers/credentials.ts`) and writes `e2e/.auth/user.json` (reused for 30 min). Visual diffs allow `maxDiffPixelRatio: 0.02`.
-- `pnpm dev` → `scripts/dev-system-reimagined.sh` (asset sync + Supabase checks + `run/portal.log`). `pnpm dev:quick` is headless; `pnpm dev:turbo` is portal-only.
-- `make` here has `dev`, `build`, `test`, `quality`, `policy-check`, `audit-*`, docker helpers — but **no `make verify`/`make pipeline`**; those targets live in `../Makefile`.
+- `pnpm test` is `turbo run test`; packages with no `test`/`lint` script are silently skipped, and `@repo/database`'s `test` runs Node scripts (migration drift, rollback safety, RLS), not Jest.
+- `pnpm test:e2e` auto-starts `pnpm --filter portal dev` on :3000 unless `BASE_URL` is set (`TEST_EMAIL`/`TEST_PASSWORD` override `e2e/helpers/credentials.ts`) and caches `e2e/.auth/user.json` for 30 min.
+- `pnpm dev` → `scripts/dev-system-reimagined.sh`; `pnpm dev:quick` is headless; `pnpm dev:turbo` is portal-only. `make verify`/`make pipeline` live in `../Makefile`.
 
 ## 3. Verification
 
-`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the completion gate; it fails fast on 13 steps:
-type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint → cycles.
+`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the 15-step completion gate:
+type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint → cycles → audit:tailwind → knip.
 
-Gates: `pnpm lint:migrations` (Squawk + RLS on changed files; `--all` audits all) and `pnpm cycles` (dependency-cruiser `no-circular`, type-only imports) run in `lint-staged`, CI, and `agent:verify`. RLS exemptions need `-- rls-exempt-table <t>: <why>`.
+Gates: `pnpm lint:migrations` (Squawk + RLS on changed files; `--all` audits all) and `pnpm cycles` (dependency-cruiser `no-circular`) run in `lint-staged`, CI, and `agent:verify`. RLS exemptions need `-- rls-exempt-table <t>: <why>`.
 
-Failures with non-obvious fixes:
-
-- rule-drift: `.agents/rules/` here is canonical, `../.agents/rules/` is a mirror that must match (symlinks are accepted).
-- maps parity: added/removed directories ⇒ `pnpm maps:sync`.
-- token:budget-check ⇒ `pnpm context:debloat`.
-- policy:check ⇒ `tools/repo/policy/{dependency,architecture,security}.*.json`. `config/tools/eslint.boundaries.cjs` is **generated** by `pnpm policy:gen` — edit the compiler/rules, not the output.
-
-Cheapest gate that can catch your change: `pnpm type-check`, `pnpm lint` (Biome per package), `pnpm policy:check`, `pnpm audit:drift`. `pnpm quality` is the release-grade suite.
+Non-obvious fixes: rule-drift ⇒ sync `../.agents/rules/`; maps parity ⇒ `pnpm maps:sync`; token:budget-check ⇒ `pnpm context:debloat`; policy:check ⇒ `pnpm policy:gen` (`config/tools/eslint.boundaries.cjs` is generated); audit:tailwind ⇒ extract repeated/over-budget chain into a component/CVA/`cn()` constant.
 
 ## 4. Hard invariants
 
-- **Light mode only.** Canvas `#f3f4f6`; use semantic OKLCH tokens from `@repo/theme` (`color-bg-base`, `color-text-primary`, …). No `dark:` variants, ever (`pnpm audit:tokens` reports them).
+- **Light mode only.** Canvas `#f3f4f6`; use semantic OKLCH tokens from `@repo/theme`. No `dark:` variants (`pnpm audit:tokens`).
 - Glass surfaces use `@repo/ui/GlassCard` (`default` | `window` | `spotlight` | `glowborder` | `liquid`).
-- Boundaries (enforced): `apps/*` must not import `packages/database` (use `@repo/supabase`); `packages/ui` must not touch db/supabase (presentational only); `packages/theme` must not import `packages/ui`; `packages/*` and `tools/*` must not import `apps/*`.
-- Import via canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/...`.
-- Server Components by default; push `'use client'` to leaves; no data fetching in client components; `@tanstack/react-query` is the client cache (SWR is prohibited).
-- Strict TypeScript; no `any`/`@ts-ignore`. Biome has `noExplicitAny` and several a11y rules turned off — absence of a lint error is not permission.
-- Conventional commits (commitlint); never print or commit `.env*` values (`apps/portal/.env`, `apps/portal/env/.env.example`).
+- Tailwind utility chains: ≤16 utilities per element (`pnpm audit:tailwind`); **canonical class order** enforced via Biome `nursery/useSortedClasses` (`"level": "error"`, `"fix": "safe"`) across `className`, `classList`, `cn()`, `clsx()`, `cva()`, and `twMerge()`.
+- Boundaries: `apps/*` → no `packages/database` (use `@repo/supabase`); `packages/ui` → no db/supabase; `packages/theme` → no `packages/ui`; `packages/*` & `tools/*` → no `apps/*`. Import via canonical exports (`@repo/ui/GlassCard`).
+- Server Components by default; `'use client'` at leaves; no client fetching; `@tanstack/react-query` only (no SWR). Strict TS (no `any`/`@ts-ignore`). Conventional commits; never print/commit `.env*`.
 
 ## 5. Next.js 16 specifics
 

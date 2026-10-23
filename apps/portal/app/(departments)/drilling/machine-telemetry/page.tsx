@@ -190,10 +190,10 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Machine Telemetry</h2>
-          <div className="flex items-center gap-2 mt-1">
-            <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
-            <p className="text-sm text-[var(--text-muted)]">
+          <h2 className="font-semibold text-2xl text-[var(--text-heading)]">Machine Telemetry</h2>
+          <div className="mt-1 flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-[var(--text-muted)]" />
+            <p className="text-[var(--text-muted)] text-sm">
               Current Period:{' '}
               <span className="font-medium text-[var(--accent-blue)]">
                 {formatMonth(currentMonth)}
@@ -204,60 +204,60 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
         <div className="flex gap-2">
           <Link href="/drilling/drilling-operations">
             <Button variant="outline" className="border-[var(--border-subtle)]">
-              <Activity className="w-4 h-4 mr-2" />
+              <Activity className="mr-2 h-4 w-4" />
               Live Operations
             </Button>
           </Link>
           <Button className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90">
-            <Gauge className="w-4 h-4 mr-2" />
+            <Gauge className="mr-2 h-4 w-4" />
             Export Data
           </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+          <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
             Active Drills
           </p>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">{drills.length}</p>
+          <p className="mt-1 font-bold text-2xl text-[var(--text-heading)]">{drills.length}</p>
         </GlassCard>
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+          <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
             Data Points
           </p>
-          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-1">
+          <p className="mt-1 font-bold text-2xl text-[var(--accent-blue)]">
             {totalRecords.toLocaleString()}
           </p>
         </GlassCard>
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+          <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
             Avg Penetration
           </p>
-          <p className="text-2xl font-bold text-accent-green mt-1">
+          <p className="mt-1 font-bold text-2xl text-accent-green">
             {formatNumber(avgPenetration, 2)} m/h
           </p>
         </GlassCard>
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider text-accent-red">
+          <p className="font-medium text-[var(--text-muted)] text-accent-red text-xs uppercase tracking-wider">
             Alerts
           </p>
-          <p className="text-2xl font-bold text-accent-red mt-1">{totalAlerts}</p>
+          <p className="mt-1 font-bold text-2xl text-accent-red">{totalAlerts}</p>
         </GlassCard>
       </div>
 
       {/* Monthly Availability & Utilization Summary (auto-built from drill_operations) */}
       <GlassCard className="overflow-hidden p-0">
-        <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+        <div className="flex items-center justify-between border-[var(--border-subtle)] border-b p-4">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[var(--accent-blue)]" />
-              <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+              <BarChart3 className="h-5 w-5 text-[var(--accent-blue)]" />
+              <h3 className="font-semibold text-[var(--text-heading)] text-lg">
                 Monthly Availability &amp; Utilization
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
+            <p className="mt-1 text-[var(--text-muted)] text-sm">
               Auto-built from {formatMonth(currentMonth)} drill operations. Downtime = Standard +
               External + Production + Engineering delays.
             </p>
@@ -267,27 +267,27 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider">
-                  <Activity className="w-3 h-3 inline mr-1" />
+              <TableRow className="border-[var(--border-subtle)] border-b hover:bg-transparent">
+                <TableHead className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Activity className="mr-1 inline h-3 w-3" />
                   Drill Rig
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Clock className="w-3 h-3 inline mr-1" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Clock className="mr-1 inline h-3 w-3" />
                   Scheduled (h)
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <TrendingUp className="w-3 h-3 inline mr-1" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <TrendingUp className="mr-1 inline h-3 w-3" />
                   Productive (h)
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <AlertTriangle className="w-3 h-3 inline mr-1" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <AlertTriangle className="mr-1 inline h-3 w-3" />
                   Downtime (h)
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Availability %
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Utilization %
                 </TableHead>
               </TableRow>
@@ -295,10 +295,10 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
             <TableBody>
               {monthlySummary.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-[var(--text-muted)]">
-                    <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <TableCell colSpan={6} className="py-10 text-center text-[var(--text-muted)]">
+                    <BarChart3 className="mx-auto mb-2 h-10 w-10 opacity-30" />
                     <p>No drill operations logged for {formatMonth(currentMonth)} yet.</p>
-                    <p className="text-sm mt-1">
+                    <p className="mt-1 text-sm">
                       Log shifts in Drilling Operations to populate the summary.
                     </p>
                   </TableCell>
@@ -332,27 +332,27 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                   return (
                     <TableRow
                       key={s.machine_id}
-                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/30"
+                      className="border-[var(--border-subtle)] border-b hover:bg-[var(--bg-tertiary)]/30"
                     >
                       <TableCell className="font-medium text-[var(--text-heading)]">
                         {s.machine_name}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-[var(--text-body)]">
+                      <TableCell className="text-right text-[var(--text-body)] tabular-nums">
                         {scheduled > 0 ? scheduled.toFixed(2) : '—'}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-[var(--text-body)]">
+                      <TableCell className="text-right text-[var(--text-body)] tabular-nums">
                         {productive > 0 ? productive.toFixed(2) : '—'}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-[var(--text-body)]">
+                      <TableCell className="text-right text-[var(--text-body)] tabular-nums">
                         {downtime > 0 ? downtime.toFixed(2) : '—'}
                       </TableCell>
                       <TableCell
-                        className={`text-right tabular-nums font-semibold ${availabilityClass}`}
+                        className={`text-right font-semibold tabular-nums ${availabilityClass}`}
                       >
                         {availabilityPct === null ? '—' : `${availabilityPct.toFixed(1)}%`}
                       </TableCell>
                       <TableCell
-                        className={`text-right tabular-nums font-semibold ${utilizationClass}`}
+                        className={`text-right font-semibold tabular-nums ${utilizationClass}`}
                       >
                         {utilizationPct === null ? '—' : `${utilizationPct.toFixed(1)}%`}
                       </TableCell>
@@ -367,12 +367,12 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
 
       {/* Current Month Telemetry Table */}
       <GlassCard className="overflow-hidden p-0">
-        <div className="p-4 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 border-[var(--border-subtle)] border-b p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+            <h3 className="font-semibold text-[var(--text-heading)] text-lg">
               {formatMonth(currentMonth)} Telemetry
             </h3>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
+            <p className="mt-1 text-[var(--text-muted)] text-sm">
               Daily aggregated telemetry data for active month
             </p>
           </div>
@@ -382,7 +382,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
             <form method="GET" className="flex items-center gap-2">
               <label
                 htmlFor="machineId"
-                className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-semibold"
+                className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider"
               >
                 Filter Rig:
               </label>
@@ -390,7 +390,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                 id="machineId"
                 name="machineId"
                 defaultValue={machineId || 'all'}
-                className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-heading)] text-sm rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--accent-blue)]"
+                className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
               >
                 <option value="all">All Drill Rigs</option>
                 {drills.map((drill) => (
@@ -401,15 +401,15 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
               </select>
               <button
                 type="submit"
-                className="px-2.5 py-1.5 bg-[var(--bg-tertiary)] hover:bg-[var(--border-subtle)] text-xs text-[var(--text-heading)] font-semibold rounded-lg border border-[var(--border-subtle)] transition-colors"
+                className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2.5 py-1.5 font-semibold text-[var(--text-heading)] text-xs transition-colors hover:bg-[var(--border-subtle)]"
               >
                 Apply
               </button>
             </form>
 
-            <div className="flex items-center gap-2 border-l border-[var(--border-subtle)] pl-4">
-              <TrendingUp className="w-5 h-5 text-accent-green" />
-              <span className="text-sm text-[var(--text-body)]">
+            <div className="flex items-center gap-2 border-[var(--border-subtle)] border-l pl-4">
+              <TrendingUp className="h-5 w-5 text-accent-green" />
+              <span className="text-[var(--text-body)] text-sm">
                 Max Depth:{' '}
                 <span className="font-semibold text-accent-green">
                   {formatNumber(maxBitDepth, 1)}m
@@ -422,45 +422,45 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider">
-                  <Calendar className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+              <TableRow className="border-[var(--border-subtle)] border-b hover:bg-transparent">
+                <TableHead className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Calendar className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Date
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider">
-                  <Activity className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Activity className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Drill Rig
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Gauge className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Gauge className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Engine RPM
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Thermometer className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Thermometer className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Temp (°C)
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Droplets className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Droplets className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Pressure
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <ArrowDown className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <ArrowDown className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Bit Depth
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Layers className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Layers className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Hole Depth
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <TrendingUp className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <TrendingUp className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Pen. Rate
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-center">
-                  <AlertTriangle className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-center font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <AlertTriangle className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Alerts
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Database className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Database className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Records
                 </TableHead>
               </TableRow>
@@ -468,10 +468,10 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
             <TableBody>
               {telemetry.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-12 text-[var(--text-muted)]">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <TableCell colSpan={10} className="py-12 text-center text-[var(--text-muted)]">
+                    <Activity className="mx-auto mb-3 h-12 w-12 opacity-30" />
                     <p>No telemetry data for {formatMonth(currentMonth)}</p>
-                    <p className="text-sm mt-1">
+                    <p className="mt-1 text-sm">
                       Data will appear once machines start reporting telemetry
                     </p>
                   </TableCell>
@@ -488,7 +488,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                   return (
                     <TableRow
                       key={`${record.machine_id}-${record.period}`}
-                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/50"
+                      className="border-[var(--border-subtle)] border-b hover:bg-[var(--bg-tertiary)]/50"
                     >
                       <TableCell className="font-semibold text-[var(--text-heading)]">
                         {formatDate(record.period)}
@@ -506,7 +506,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                       >
                         {formatNumber(record.avg_engine_temp, 1)}°C
                       </TableCell>
-                      <TableCell className="text-right text-[var(--text-body)] font-medium">
+                      <TableCell className="text-right font-medium text-[var(--text-body)]">
                         {formatNumber(record.avg_hydraulic_pressure, 0)} bar
                       </TableCell>
                       <TableCell className="text-right font-semibold text-accent-green">
@@ -515,16 +515,16 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                       <TableCell className="text-right font-semibold text-cyan-400">
                         {formatNumber(record.max_hole_depth, 1)}m
                       </TableCell>
-                      <TableCell className="text-right text-[var(--text-body)] font-medium">
+                      <TableCell className="text-right font-medium text-[var(--text-body)]">
                         {formatNumber(record.avg_penetration_rate, 2)} m/h
                       </TableCell>
                       <TableCell className="text-center">
                         {record.total_alerts > 0 ? (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-accent-red/10 text-accent-red">
+                          <span className="inline-flex rounded-full bg-accent-red/10 px-2 py-0.5 font-semibold text-accent-red text-xs">
                             {record.total_alerts}
                           </span>
                         ) : (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-accent-green/10 text-accent-green">
+                          <span className="inline-flex rounded-full bg-accent-green/10 px-2 py-0.5 font-semibold text-accent-green text-xs">
                             0
                           </span>
                         )}
@@ -543,12 +543,12 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
 
       {/* Archived Months */}
       <GlassCard className="overflow-hidden p-0">
-        <div className="p-4 border-b border-[var(--border-subtle)]">
+        <div className="border-[var(--border-subtle)] border-b p-4">
           <div className="flex items-center gap-2">
-            <Archive className="w-5 h-5 text-[var(--text-muted)]" />
-            <h3 className="text-lg font-semibold text-[var(--text-heading)]">Archived Months</h3>
+            <Archive className="h-5 w-5 text-[var(--text-muted)]" />
+            <h3 className="font-semibold text-[var(--text-heading)] text-lg">Archived Months</h3>
           </div>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Previous months telemetry data is automatically archived and preserved for safe keeping
           </p>
         </div>
@@ -556,24 +556,24 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider">
-                  <Calendar className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+              <TableRow className="border-[var(--border-subtle)] border-b hover:bg-transparent">
+                <TableHead className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Calendar className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Month
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider">
-                  <Activity className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Activity className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Drill Rig
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Database className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Database className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Records
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-right">
-                  <Archive className="w-3 h-3 inline mr-1 text-[var(--text-muted)]" />
+                <TableHead className="text-right font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                  <Archive className="mr-1 inline h-3 w-3 text-[var(--text-muted)]" />
                   Archived On
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-semibold text-xs uppercase tracking-wider text-center">
+                <TableHead className="text-center font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Actions
                 </TableHead>
               </TableRow>
@@ -581,10 +581,10 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
             <TableBody>
               {archives.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-[var(--text-muted)]">
-                    <Archive className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <TableCell colSpan={5} className="py-8 text-center text-[var(--text-muted)]">
+                    <Archive className="mx-auto mb-2 h-8 w-8 opacity-30" />
                     <p>No archived telemetry data yet</p>
-                    <p className="text-sm mt-1">
+                    <p className="mt-1 text-sm">
                       Data is archived automatically when each month ends
                     </p>
                   </TableCell>
@@ -593,7 +593,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                 archives.map((archive) => (
                   <TableRow
                     key={archive.id}
-                    className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/50"
+                    className="border-[var(--border-subtle)] border-b hover:bg-[var(--bg-tertiary)]/50"
                   >
                     <TableCell className="font-semibold text-[var(--text-heading)]">
                       {formatMonth(archive.year_month)}
@@ -601,7 +601,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
                     <TableCell className="text-[var(--text-body)]">
                       {archive.machine_name}
                     </TableCell>
-                    <TableCell className="text-right text-[var(--text-body)] font-medium">
+                    <TableCell className="text-right font-medium text-[var(--text-body)]">
                       {archive.record_count.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right text-[var(--text-muted)] text-sm">

@@ -68,7 +68,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-[var(--text-heading)]">Activity Feed</h2>
+        <h2 className="font-medium text-[var(--text-heading)] text-xl">Activity Feed</h2>
         {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for filter toggle buttons */}
         <div className="flex items-center gap-2" role="group" aria-label="Activity filter">
           {(['all', 'insert', 'update', 'delete'] as const).map((f) => (
@@ -76,10 +76,10 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
               key={f}
               onClick={() => setFilter(f)}
               aria-pressed={filter === f}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1 font-medium text-xs transition-colors ${
                 filter === f
-                  ? 'bg-[var(--bg-tertiary)] text-[var(--text-heading)] border border-arch-accent-green'
-                  : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border border-[var(--border-emphasis)] hover:text-[var(--text-heading)]'
+                  ? 'border border-arch-accent-green bg-[var(--bg-tertiary)] text-[var(--text-heading)]'
+                  : 'border border-[var(--border-emphasis)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
               }`}
             >
               {f === 'all' ? 'All' : f}
@@ -91,11 +91,11 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
       <div className="max-h-96 overflow-y-auto pr-1">
         <AnimatedFeed className="gap-2">
           {filtered.map((activity) => (
-            <GlassCard key={activity.id} className="py-3 px-4">
+            <GlassCard key={activity.id} className="px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span
-                    className={`w-2 h-2 rounded-full ${
+                    className={`h-2 w-2 rounded-full ${
                       activity.type === 'insert'
                         ? 'bg-accent-green'
                         : activity.type === 'update'
@@ -114,7 +114,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
 
           {activities.length === 0 && (
             <GlassCard>
-              <p className="text-[var(--text-secondary)] text-sm text-center py-8">
+              <p className="py-8 text-center text-[var(--text-secondary)] text-sm">
                 Waiting for activity...
               </p>
             </GlassCard>

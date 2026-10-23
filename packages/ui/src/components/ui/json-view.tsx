@@ -13,7 +13,7 @@ export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>
 export function JsonView({ value, defaultExpanded = true, className, ...props }: JsonViewProps) {
   return (
     <div
-      className={cn('font-mono text-sm bg-muted/30 p-4 rounded-md border', className)}
+      className={cn('rounded-md border bg-muted/30 p-4 font-mono text-sm', className)}
       {...props}
     >
       <JsonNode value={value} name="root" defaultExpanded={defaultExpanded} isRoot />
@@ -88,13 +88,13 @@ function JsonNode({
     return (
       <div className={cn(!isRoot && 'ml-4')}>
         <div
-          className="flex items-center gap-1 cursor-pointer hover:bg-muted/50 w-fit px-1 rounded-sm"
+          className="flex w-fit cursor-pointer items-center gap-1 rounded-sm px-1 hover:bg-muted/50"
           onClick={() => setExpanded(!expanded)}
         >
           {!isEmpty &&
             (expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />)}
           {isEmpty && <span className="w-3" />}
-          <span className="text-muted-foreground font-medium">
+          <span className="font-medium text-muted-foreground">
             {!isRoot && `"${name}": `}
             {isArray ? '[' : '{'}
             {isEmpty && (isArray ? ']' : '}')}
@@ -107,7 +107,7 @@ function JsonNode({
           {isRoot && (
             <button
               onClick={handleCopy}
-              className="ml-2 text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+              className="ml-2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
               title="Copy JSON"
             >
               {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
@@ -116,7 +116,7 @@ function JsonNode({
         </div>
 
         {expanded && !isEmpty && (
-          <div className="border-l border-border/50 ml-1.5 pl-1.5 mt-1">
+          <div className="mt-1 ml-1.5 border-border/50 border-l pl-1.5">
             {keys.map((k) => (
               <JsonNode
                 key={k}
@@ -129,7 +129,7 @@ function JsonNode({
         )}
 
         {expanded && !isEmpty && (
-          <div className="ml-1 text-muted-foreground font-medium">{isArray ? ']' : '}'}</div>
+          <div className="ml-1 font-medium text-muted-foreground">{isArray ? ']' : '}'}</div>
         )}
       </div>
     );

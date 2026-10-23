@@ -35,13 +35,13 @@ export const Default: Story = {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="name" className="text-right text-sm font-medium">
+            <label htmlFor="name" className="text-right font-medium text-sm">
               Name
             </label>
             <Input id="name" defaultValue="Arch Operator" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="username" className="text-right text-sm font-medium">
+            <label htmlFor="username" className="text-right font-medium text-sm">
               Username
             </label>
             <Input id="username" defaultValue="@arch_admin" className="col-span-3" />

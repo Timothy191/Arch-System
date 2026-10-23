@@ -6,7 +6,7 @@ import { type HTMLMotionProps, m } from 'framer-motion';
 import * as React from 'react';
 
 const animatedButtonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -26,7 +26,7 @@ const animatedButtonVariants = cva(
       },
       size: {
         default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-md gap-1.5 px-3 text-xs',
+        sm: 'h-8 gap-1.5 rounded-md px-3 text-xs',
         lg: 'h-11 rounded-md px-6',
         icon: 'h-10 w-10',
       },

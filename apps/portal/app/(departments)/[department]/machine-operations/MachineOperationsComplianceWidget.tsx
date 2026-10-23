@@ -52,7 +52,7 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
   if (loading && !data) {
     return (
       <GlassCard className="py-3">
-        <p className="text-[var(--text-muted)] text-sm text-center">Checking shift coverage…</p>
+        <p className="text-center text-[var(--text-muted)] text-sm">Checking shift coverage…</p>
       </GlassCard>
     );
   }
@@ -72,7 +72,7 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
   const dotColor = complete ? 'bg-accent-green' : 'bg-accent-red';
 
   return (
-    <GlassCard className="space-y-0 p-0 overflow-hidden">
+    <GlassCard className="space-y-0 overflow-hidden p-0">
       {/* Header row */}
       <div
         role="button"
@@ -84,11 +84,11 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
             setExpanded((v) => !v);
           }
         }}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--bg-tertiary)] transition-colors text-left cursor-pointer select-none"
+        className="flex w-full cursor-pointer select-none items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[var(--bg-tertiary)]"
       >
         <div className="flex items-center gap-3">
-          <span className={`w-2.5 h-2.5 rounded-full ${dotColor} shrink-0`} />
-          <span className={`text-sm font-medium ${headerColor}`}>
+          <span className={`h-2.5 w-2.5 rounded-full ${dotColor} shrink-0`} />
+          <span className={`font-medium text-sm ${headerColor}`}>
             {complete
               ? 'All machines reported'
               : `${missing.length} machine${missing.length !== 1 ? 's' : ''} missing`}
@@ -100,7 +100,7 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
         </div>
         <div className="flex items-center gap-2 text-[var(--text-muted)]">
           {lastRefresh && (
-            <span className="text-xs hidden sm:block">
+            <span className="hidden text-xs sm:block">
               {lastRefresh.toLocaleTimeString('en-ZA', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -115,22 +115,22 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
               router.refresh();
             }}
             title="Refresh"
-            className="p-1 rounded hover:text-[var(--text-heading)] transition-colors"
+            className="rounded p-1 transition-colors hover:text-[var(--text-heading)]"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="h-3.5 w-3.5" />
           </button>
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </div>
 
       {/* Expanded checklist */}
       {expanded && (
-        <div className="border-t border-[var(--border-default)] divide-y divide-[var(--border-default)]">
+        <div className="divide-y divide-[var(--border-default)] border-[var(--border-default)] border-t">
           {statuses.map((s: MachineCoverageStatus) => (
             <MachineRow key={s.machineId} status={s} departmentSlug={departmentSlug} />
           ))}
           {statuses.length === 0 && (
-            <p className="px-4 py-3 text-[var(--text-muted)] text-sm text-center">
+            <p className="px-4 py-3 text-center text-[var(--text-muted)] text-sm">
               No active machines in this department.
             </p>
           )}
@@ -152,10 +152,10 @@ function MachineRow({
   if (status.exempt) {
     return (
       <div className="flex items-center gap-3 px-4 py-2.5 opacity-50">
-        <ShieldOff className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-        <span className="text-[var(--text-muted)] text-sm flex-1">
+        <ShieldOff className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+        <span className="flex-1 text-[var(--text-muted)] text-sm">
           {status.machineName}
-          <span className="text-xs ml-2 text-[var(--text-muted)]">({status.machineType})</span>
+          <span className="ml-2 text-[var(--text-muted)] text-xs">({status.machineType})</span>
         </span>
         <span className="text-[var(--text-muted)] text-xs">Exempt</span>
       </div>
@@ -165,10 +165,10 @@ function MachineRow({
   if (status.hasEntry) {
     return (
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <CheckCircle2 className="w-4 h-4 text-accent-green shrink-0" />
-        <span className="text-[var(--text-secondary)] text-sm flex-1">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-accent-green" />
+        <span className="flex-1 text-[var(--text-secondary)] text-sm">
           {status.machineName}
-          <span className="text-xs ml-2 text-[var(--text-muted)]">({status.machineType})</span>
+          <span className="ml-2 text-[var(--text-muted)] text-xs">({status.machineType})</span>
         </span>
         <span className="text-accent-green text-xs">{status.formLabel}</span>
       </div>
@@ -179,12 +179,12 @@ function MachineRow({
     <button
       type="button"
       onClick={() => router.push(`/${departmentSlug}/${status.formPath.split('/').pop()}`)}
-      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent-red/5 transition-colors text-left group"
+      className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-accent-red/5"
     >
-      <XCircle className="w-4 h-4 text-accent-red shrink-0" />
-      <span className="text-[var(--text-heading)] text-sm flex-1 font-medium">
+      <XCircle className="h-4 w-4 shrink-0 text-accent-red" />
+      <span className="flex-1 font-medium text-[var(--text-heading)] text-sm">
         {status.machineName}
-        <span className="text-xs ml-2 text-[var(--text-muted)] font-normal">
+        <span className="ml-2 font-normal text-[var(--text-muted)] text-xs">
           ({status.machineType})
         </span>
       </span>

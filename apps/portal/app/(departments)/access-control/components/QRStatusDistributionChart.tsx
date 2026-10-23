@@ -17,13 +17,13 @@ function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
   const d = payload[0].payload;
   const pct = totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(1) : '0.0';
   return (
-    <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2 text-xs">
-      <div className="flex items-center gap-2 mb-0.5">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.fill }} />
+    <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-card">
+      <div className="mb-0.5 flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: d.fill }} />
         <span className="font-semibold text-foreground">{d.name}</span>
       </div>
       <p className="text-muted-foreground">
-        <span className="tabular-nums font-semibold text-foreground">
+        <span className="font-semibold text-foreground tabular-nums">
           {d.value.toLocaleString()}
         </span>{' '}
         codes ({pct}%)
@@ -56,16 +56,16 @@ export default function QRStatusDistributionChart({ data }: QRStatusDistribution
         </RadialBarChart>
       </ResponsiveContainer>
       {/* Legend */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-2 w-full mt-1">
+      <div className="mt-1 grid w-full grid-cols-2 gap-x-6 gap-y-2">
         {data.map((d) => (
           <div key={`legend-${d.name}`} className="flex items-center gap-2">
             <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: d.fill }}
             />
             <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground truncate">{d.name}</p>
-              <p className="text-xs font-bold text-foreground tabular-nums">
+              <p className="truncate text-[10px] text-muted-foreground">{d.name}</p>
+              <p className="font-bold text-foreground text-xs tabular-nums">
                 {d.value.toLocaleString()}
               </p>
             </div>

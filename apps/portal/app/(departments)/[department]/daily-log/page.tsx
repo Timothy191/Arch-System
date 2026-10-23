@@ -33,14 +33,14 @@ export default async function DailyLogPage({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">Daily Log</h2>
+      <h2 className="font-medium text-2xl text-[var(--text-heading)]">Daily Log</h2>
 
       {allShiftsLogged ? (
         <GlassCard className="border-accent-green/20">
-          <p className="text-accent-green text-sm font-medium">
+          <p className="font-medium text-accent-green text-sm">
             &#10003; All shifts logged for today
           </p>
-          <p className="text-[var(--text-secondary)] text-sm mt-1">
+          <p className="mt-1 text-[var(--text-secondary)] text-sm">
             <a
               href={`/${department}/history`}
               className="text-[var(--accent-cyan)] hover:underline"
@@ -53,7 +53,7 @@ export default async function DailyLogPage({
         <>
           {existingShifts.length > 0 && (
             <GlassCard className="border-accent-blue/20">
-              <p className="text-accent-blue text-sm font-medium">
+              <p className="font-medium text-accent-blue text-sm">
                 {existingShifts.length} shift
                 {existingShifts.length > 1 ? 's' : ''} already logged: {existingShifts.join(', ')}
               </p>

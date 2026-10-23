@@ -17,20 +17,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       .join(' ');
     return (
       <div
-        className={cn('relative flex items-center w-full group', gridSpanClass, wrapperClassName)}
+        className={cn('group relative flex w-full items-center', gridSpanClass, wrapperClassName)}
       >
         {prefix && (
-          <span className="absolute left-3 z-10 flex items-center justify-center text-muted-foreground pointer-events-none">
+          <span className="pointer-events-none absolute left-3 z-10 flex items-center justify-center text-muted-foreground">
             {prefix}
           </span>
         )}
         <input
           type={type}
           className={cn(
-            'flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+            'flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
             errored
-              ? 'border-red-500 focus-visible:ring-red-500/20 text-red-900 placeholder:text-red-300'
-              : 'border-input focus-visible:ring-ring focus-visible:border-ring',
+              ? 'border-red-500 text-red-900 placeholder:text-red-300 focus-visible:ring-red-500/20'
+              : 'border-input focus-visible:border-ring focus-visible:ring-ring',
             prefix && 'pl-9',
             suffix && 'pr-9',
             className
@@ -39,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {suffix && (
-          <span className="absolute right-3 z-10 flex items-center justify-center text-muted-foreground pointer-events-none">
+          <span className="pointer-events-none absolute right-3 z-10 flex items-center justify-center text-muted-foreground">
             {suffix}
           </span>
         )}

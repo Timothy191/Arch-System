@@ -170,12 +170,12 @@ export default async function DrillingOperationsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between flex-wrap gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
+          <h2 className="font-semibold text-2xl text-[var(--text-heading)]">
             Drilling Shift Operations Report
           </h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-sm">
             Automatically compiled from Control Room machine operations (Meters, Site, Block, Holes
             &amp; SMR).
           </p>

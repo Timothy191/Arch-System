@@ -98,15 +98,15 @@ export default function RedisManagerPage() {
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 p-4 lg:p-6 bg-zinc-50">
-      <div className="flex flex-wrap justify-between items-center gap-4">
+    <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 bg-zinc-50 p-4 lg:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#dc382d]/10 rounded-lg border border-[#dc382d]/20 flex items-center justify-center">
+          <div className="flex items-center justify-center rounded-lg border border-[#dc382d]/20 bg-[#dc382d]/10 p-2">
             <RedisIcon size={24} color="#dc382d" />
           </div>
           <div>
             <PageHeader title="RedisInsight Manager" />
-            <p className="text-xs text-zinc-500 font-mono mt-0.5">
+            <p className="mt-0.5 font-mono text-xs text-zinc-500">
               Cluster: {stats.host} • Port: {stats.port}
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function RedisManagerPage() {
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-md text-sm font-medium hover:bg-zinc-100 transition-colors shadow-sm"
+          className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 font-medium text-sm shadow-sm transition-colors hover:bg-zinc-100"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           {isLoading ? 'Syncing...' : 'Refresh Cluster'}
@@ -153,11 +153,11 @@ export default function RedisManagerPage() {
         />
       </KPIGrid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+      <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Keys Browser Sidebar */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-          <GlassCard variant="spotlight" className="flex-1 flex flex-col p-4">
-            <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col gap-4 lg:col-span-1">
+          <GlassCard variant="spotlight" className="flex flex-1 flex-col p-4">
+            <div className="mb-4 flex items-center gap-2">
               <RedisIcon size={18} color="#dc382d" />
               <h3 className="font-semibold text-zinc-800">Key Browser</h3>
             </div>
@@ -166,18 +166,18 @@ export default function RedisManagerPage() {
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Search keys (*:pattern)"
-              className="w-full rounded-md border border-zinc-200 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+              className="mb-4 w-full rounded-md border border-zinc-200 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <div className="flex-1 overflow-auto border rounded-md border-zinc-200 bg-white/30">
+            <div className="flex-1 overflow-auto rounded-md border border-zinc-200 bg-white/30">
               <ul className="divide-y divide-zinc-100">
                 {keys.map((key) => (
                   <li
                     key={key}
                     onClick={() => setSelectedKey(key)}
-                    className={`px-3 py-2 cursor-pointer text-sm font-mono transition-colors ${
+                    className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
                       selectedKey === key
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                        : 'hover:bg-zinc-100/50 text-zinc-700'
+                        ? 'bg-indigo-50 font-semibold text-indigo-700'
+                        : 'text-zinc-700 hover:bg-zinc-100/50'
                     }`}
                   >
                     {key}
@@ -189,23 +189,23 @@ export default function RedisManagerPage() {
         </div>
 
         {/* Data Inspector */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <GlassCard variant="window" className="flex-1 flex flex-col">
-            <div className="border-b border-zinc-100 bg-zinc-50/50 px-4 py-3 flex justify-between items-center">
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <GlassCard variant="window" className="flex flex-1 flex-col">
+            <div className="flex items-center justify-between border-zinc-100 border-b bg-zinc-50/50 px-4 py-3">
               <div>
-                <h3 className="font-mono text-sm font-semibold text-zinc-800">{selectedKey}</h3>
+                <h3 className="font-mono font-semibold text-sm text-zinc-800">{selectedKey}</h3>
                 <p className="text-xs text-zinc-500 uppercase">Type: Hash • TTL: 3600s</p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => alert(`Key ${selectedKey} reloaded`)}
-                  className="px-3 py-1 bg-white border border-zinc-200 rounded text-xs hover:bg-zinc-50"
+                  className="rounded border border-zinc-200 bg-white px-3 py-1 text-xs hover:bg-zinc-50"
                 >
                   Inspect
                 </button>
               </div>
             </div>
-            <div className="p-4 flex-1 bg-white/40 overflow-auto font-mono text-sm text-zinc-800">
+            <div className="flex-1 overflow-auto bg-white/40 p-4 font-mono text-sm text-zinc-800">
               <pre>
                 {JSON.stringify(
                   {

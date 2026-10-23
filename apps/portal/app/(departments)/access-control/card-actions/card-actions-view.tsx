@@ -51,7 +51,7 @@ function formatDate(dateStr: string | null): string {
 function ExpiryPill({ date }: { date: string | null }) {
   if (!date) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)]">
+      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
         Not set
       </span>
     );
@@ -61,23 +61,23 @@ function ExpiryPill({ date }: { date: string | null }) {
 
   if (days < 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-red-50/70 border-red-200/50 text-red-700">
-        <AlertCircle className="w-3 h-3" />
+      <span className="inline-flex items-center gap-1 rounded-full border border-red-200/50 bg-red-50/70 px-2 py-0.5 font-medium text-red-700 text-xs">
+        <AlertCircle className="h-3 w-3" />
         Expired
       </span>
     );
   }
   if (days <= 30) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-amber-50/70 border-amber-200/50 text-amber-700">
-        <Clock className="w-3 h-3" />
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200/50 bg-amber-50/70 px-2 py-0.5 font-medium text-amber-700 text-xs">
+        <Clock className="h-3 w-3" />
         {days}d remaining
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-accent-green/10 border-accent-green/20 text-accent-green">
-      <CheckCircle2 className="w-3 h-3" />
+    <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-medium text-accent-green text-xs">
+      <CheckCircle2 className="h-3 w-3" />
       {days}d remaining
     </span>
   );
@@ -88,10 +88,10 @@ function StatusPill({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border',
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium text-xs',
         isActive
-          ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
-          : 'bg-amber-50/70 border-amber-200/50 text-amber-700'
+          ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
+          : 'border-amber-200/50 bg-amber-50/70 text-amber-700'
       )}
     >
       {status}
@@ -111,15 +111,15 @@ function DetailRow({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-[var(--border-default)]/50 last:border-0">
-      <div className="w-8 h-8 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-muted)] shrink-0">
+    <div className="flex items-center gap-3 border-[var(--border-default)]/50 border-b py-2.5 last:border-0">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider">
+      <div className="min-w-0 flex-1">
+        <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
           {label}
         </p>
-        {children ?? <p className="text-sm text-[var(--text-heading)] truncate">{value ?? '—'}</p>}
+        {children ?? <p className="truncate text-[var(--text-heading)] text-sm">{value ?? '—'}</p>}
       </div>
     </div>
   );
@@ -288,19 +288,19 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
   /* ── Render ── */
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
       {/* ── Left Panel: Search + Results ── */}
-      <div className="lg:col-span-2 space-y-4">
-        <GlassCard className="p-0 overflow-hidden">
-          <div className="p-3 border-b border-[var(--border-default)]">
+      <div className="space-y-4 lg:col-span-2">
+        <GlassCard className="overflow-hidden p-0">
+          <div className="border-[var(--border-default)] border-b p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => handleQueryChange(e.target.value)}
                 placeholder="Search by name or ID number..."
-                className="w-full h-10 pl-9 pr-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-blue)] transition-colors"
+                className="h-10 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] pr-3 pl-9 text-[var(--text-heading)] text-sm outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)]"
                 aria-label="Search personnel"
               />
               {query && (
@@ -313,24 +313,24 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                     params.delete('selected');
                     router.replace(`?${params.toString()}`, { scroll: false });
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                   aria-label="Clear search"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
           </div>
 
           {selectedForBulk.size > 0 && (
-            <div className="p-3 border-b border-[var(--border-default)] bg-[var(--accent-blue)]/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="text-xs font-medium text-[var(--text-heading)]">
+            <div className="flex flex-col items-center justify-between gap-3 border-[var(--border-default)] border-b bg-[var(--accent-blue)]/5 p-3 sm:flex-row">
+              <span className="font-medium text-[var(--text-heading)] text-xs">
                 {selectedForBulk.size} selected for bulk print
               </span>
               <div className="flex items-center gap-3">
                 {templates.length > 0 && (
                   <select
-                    className="h-8 rounded-md bg-[var(--bg-primary)] border border-[var(--border-default)] text-xs text-[var(--text-heading)] outline-none px-2 focus:border-[var(--accent-blue)]"
+                    className="h-8 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 text-[var(--text-heading)] text-xs outline-none focus:border-[var(--accent-blue)]"
                     value={selectedTemplateId}
                     onChange={(e) => setSelectedTemplateId(e.target.value)}
                   >
@@ -348,9 +348,9 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                   className="h-8 gap-1.5"
                 >
                   {bulkPrinting ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <Printer className="w-3.5 h-3.5" />
+                    <Printer className="h-3.5 w-3.5" />
                   )}
                   Bulk Print
                 </Button>
@@ -361,14 +361,14 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
           <div className="divide-y divide-[var(--border-default)]/50" data-testid="search-results">
             {searching && (
               <div className="flex items-center justify-center py-8 text-[var(--text-muted)]">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Searching...
               </div>
             )}
 
             {!searching && query.trim().length >= 2 && results.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-[var(--text-muted)]">
-                <Search className="w-8 h-8 mb-2 opacity-50" />
+                <Search className="mb-2 h-8 w-8 opacity-50" />
                 <p className="text-sm">No personnel found</p>
                 <p className="text-xs">Try a different search term</p>
               </div>
@@ -379,7 +379,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                 <div
                   key={person.id}
                   className={cn(
-                    'flex items-center w-full px-4 transition-colors hover:bg-[var(--bg-tertiary)] group',
+                    'group flex w-full items-center px-4 transition-colors hover:bg-[var(--bg-tertiary)]',
                     selectedId === person.id && 'bg-[var(--accent-blue)]/5'
                   )}
                 >
@@ -392,23 +392,23 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                   </div>
                   <button
                     onClick={() => selectPersonnel(person.id)}
-                    className="flex-1 text-left py-3 flex items-center gap-3 min-w-0"
+                    className="flex min-w-0 flex-1 items-center gap-3 py-3 text-left"
                   >
-                    <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center text-xs font-semibold text-[var(--text-muted)] shrink-0">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--bg-tertiary)] font-semibold text-[var(--text-muted)] text-xs">
                       {getInitials(person.first_name, person.surname)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--text-heading)] truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-[var(--text-heading)] text-sm">
                         {person.first_name} {person.surname}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] truncate">
+                      <p className="truncate text-[var(--text-muted)] text-xs">
                         {person.job_title ?? '—'}
                         {person.area && ` · ${person.area}`}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex shrink-0 items-center gap-2">
                       <StatusPill status={person.status} />
-                      <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-0.5 transition-transform" />
+                      <ChevronRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
                     </div>
                   </button>
                 </div>
@@ -418,17 +418,17 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       </div>
 
       {/* ── Right Panel: Detail ── */}
-      <div className="lg:col-span-3 space-y-4">
+      <div className="space-y-4 lg:col-span-3">
         {loadingDetail && (
           <GlassCard className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--text-muted)]" />
           </GlassCard>
         )}
 
         {!loadingDetail && !detail && (
           <GlassCard className="flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
-            <User className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-sm font-medium">Select an employee</p>
+            <User className="mb-3 h-12 w-12 opacity-30" />
+            <p className="font-medium text-sm">Select an employee</p>
             <p className="text-xs">Search and select a person to view their details</p>
           </GlassCard>
         )}
@@ -438,35 +438,35 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
             {/* Photo + Name Header */}
             <GlassCard>
               <div className="flex items-start gap-5">
-                <div className="w-20 h-20 rounded-xl bg-[var(--bg-tertiary)] overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--bg-tertiary)]">
                   {detail.photo_signed_url ? (
                     <Image
                       src={detail.photo_signed_url}
                       alt={`${detail.first_name} ${detail.surname}`}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                       width={80}
                       height={80}
                       unoptimized
                     />
                   ) : (
-                    <span className="text-2xl font-bold text-[var(--text-muted)]">
+                    <span className="font-bold text-2xl text-[var(--text-muted)]">
                       {getInitials(detail.first_name, detail.surname)}
                     </span>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="text-xl font-semibold text-[var(--text-heading)]">
+                      <h2 className="font-semibold text-[var(--text-heading)] text-xl">
                         {detail.first_name} {detail.surname}
                       </h2>
-                      <p className="text-sm text-[var(--text-secondary)]">
+                      <p className="text-[var(--text-secondary)] text-sm">
                         {detail.job_title ?? 'No title'}
                       </p>
                     </div>
                     <StatusPill status={detail.status} />
                   </div>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-[var(--text-muted)]">
+                  <div className="mt-2 flex items-center gap-3 text-[var(--text-muted)] text-xs">
                     <span className="font-mono">#{detail.emp_code}</span>
                     {detail.area && (
                       <>
@@ -479,35 +479,35 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
               </div>
             </GlassCard>
             {/* Info Fields */}
-            <GlassCard className="p-0 overflow-hidden">
-              <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50">
+            <GlassCard className="overflow-hidden p-0">
+              <div className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
                 <h3 className="font-medium text-[var(--text-heading)]">Personal Details</h3>
               </div>
               <div className="px-4">
                 <DetailRow
-                  icon={<IdCard className="w-4 h-4" />}
+                  icon={<IdCard className="h-4 w-4" />}
                   label="ID Number"
                   value={detail.id_number}
                 />
                 <DetailRow
-                  icon={<Briefcase className="w-4 h-4" />}
+                  icon={<Briefcase className="h-4 w-4" />}
                   label="Job Title"
                   value={detail.job_title}
                 />
                 <DetailRow
-                  icon={<MapPin className="w-4 h-4" />}
+                  icon={<MapPin className="h-4 w-4" />}
                   label="Area / Zone"
                   value={detail.area}
                 />
-                <DetailRow icon={<Stethoscope className="w-4 h-4" />} label="Medical Expiry">
+                <DetailRow icon={<Stethoscope className="h-4 w-4" />} label="Medical Expiry">
                   <ExpiryPill date={detail.medical_expiry} />
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     {formatDate(detail.medical_expiry)}
                   </p>
                 </DetailRow>
-                <DetailRow icon={<CalendarClock className="w-4 h-4" />} label="Induction Expiry">
+                <DetailRow icon={<CalendarClock className="h-4 w-4" />} label="Induction Expiry">
                   <ExpiryPill date={detail.induction_expiry} />
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     {formatDate(detail.induction_expiry)}
                   </p>
                 </DetailRow>
@@ -515,47 +515,47 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
             </GlassCard>
 
             {/* QR Code */}
-            <GlassCard className="p-0 overflow-hidden">
-              <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50 flex items-center justify-between">
-                <h3 className="font-medium text-[var(--text-heading)] flex items-center gap-2">
-                  <QrCode className="w-4 h-4 text-[var(--text-muted)]" />
+            <GlassCard className="overflow-hidden p-0">
+              <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
+                <h3 className="flex items-center gap-2 font-medium text-[var(--text-heading)]">
+                  <QrCode className="h-4 w-4 text-[var(--text-muted)]" />
                   Access Badge
                 </h3>
                 {detail.badge && (
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border',
+                      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium text-xs',
                       detail.badge.is_active
-                        ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
-                        : 'bg-red-50/70 border-red-200/50 text-red-700'
+                        ? 'border-accent-green/20 bg-accent-green/10 text-accent-green'
+                        : 'border-red-200/50 bg-red-50/70 text-red-700'
                     )}
                   >
                     {detail.badge.is_active ? 'Active' : 'Revoked'}
                   </span>
                 )}
               </div>
-              <div className="p-6 flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-3 p-6">
                 <div data-testid="qr-section">
                   {detail.badge?.qr_code ? (
                     <QRCodeSection data={detail.badge.qr_code} />
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-[var(--text-muted)]">
-                      <QrCode className="w-12 h-12 opacity-30" />
+                      <QrCode className="h-12 w-12 opacity-30" />
                       <p className="text-sm">No badge assigned</p>
                     </div>
                   )}
                   {detail.issued_card && (
-                    <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
+                    <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs">
                       <span>
                         Issued card:
-                        <span className="text-[var(--text-heading)] ml-1">
+                        <span className="ml-1 text-[var(--text-heading)]">
                           {detail.issued_card.status}
                         </span>
                       </span>
                       {detail.issued_card.expires_at && (
                         <span>
                           Expires:
-                          <span className="text-[var(--text-heading)] ml-1">
+                          <span className="ml-1 text-[var(--text-heading)]">
                             {formatDate(detail.issued_card.expires_at)}
                           </span>
                         </span>
@@ -570,9 +570,9 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
             <div className="flex items-center justify-end gap-3">
               {templates.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-[var(--text-muted)]">Template:</label>
+                  <label className="font-medium text-[var(--text-muted)] text-xs">Template:</label>
                   <select
-                    className="h-9 rounded-md bg-[var(--bg-primary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] outline-none px-3 focus:border-[var(--accent-blue)]"
+                    className="h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[var(--text-heading)] text-sm outline-none focus:border-[var(--accent-blue)]"
                     value={selectedTemplateId}
                     onChange={(e) => setSelectedTemplateId(e.target.value)}
                   >
@@ -584,11 +584,11 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                   </select>
                 </div>
               )}
-              <Button onClick={handlePrint} disabled={printing} className="gap-2 h-9">
+              <Button onClick={handlePrint} disabled={printing} className="h-9 gap-2">
                 {printing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Printer className="w-4 h-4" />
+                  <Printer className="h-4 w-4" />
                 )}
                 {printing ? 'Queuing...' : 'Print Card'}
               </Button>

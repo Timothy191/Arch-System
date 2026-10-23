@@ -133,9 +133,9 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         role="group"
         aria-label={typeof title === 'string' ? `Book: ${title}` : 'Book'}
         className={cn(
-          'relative select-none overflow-hidden shrink-0 rounded-r-md rounded-l-sm transition-transform duration-200',
+          'relative shrink-0 select-none overflow-hidden rounded-r-md rounded-l-sm transition-transform duration-200',
           'shadow-[0_4px_16px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.12),-2px_0_4px_rgba(0,0,0,0.08),2px_0_6px_rgba(0,0,0,0.06)]',
-          'border-r-2 border-r-white/20 border-y border-y-black/10',
+          'border-y border-y-black/10 border-r-2 border-r-white/20',
           widthClasses,
           className
         )}
@@ -150,7 +150,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         {/* Book Spine Crease & Shadow (Left edge binding simulation) */}
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-4 z-20 pointer-events-none"
+          className="pointer-events-none absolute inset-y-0 left-0 z-20 w-4"
           style={{
             background:
               'linear-gradient(to right, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.12) 35%, rgba(255,255,255,0.2) 70%, rgba(0,0,0,0.12) 100%)',
@@ -161,7 +161,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         {textured && (
           <div
             aria-hidden="true"
-            className="absolute inset-0 z-10 pointer-events-none opacity-40 mix-blend-overlay"
+            className="pointer-events-none absolute inset-0 z-10 opacity-40 mix-blend-overlay"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 60%, rgba(0,0,0,0.25) 100%)`,
             }}
@@ -171,7 +171,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         {/* Ambient Top Sheen */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-1/2 z-10 pointer-events-none opacity-30"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1/2 opacity-30"
           style={{
             background:
               'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
@@ -179,20 +179,20 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         />
 
         {/* Inner Cover Content */}
-        <div className="relative z-10 h-full flex flex-col justify-between pl-6 pr-3.5 py-3.5">
+        <div className="relative z-10 flex h-full flex-col justify-between py-3.5 pr-3.5 pl-6">
           {/* Top / Stripe Header Area */}
           {variant === 'stripe' ? (
             <div className="space-y-2">
               <div
-                className="inline-flex items-center gap-2 px-2 py-1 rounded bg-black/20 backdrop-blur-xs text-xs"
+                className="inline-flex items-center gap-2 rounded bg-black/20 px-2 py-1 text-xs backdrop-blur-xs"
                 style={{ color: textColor }}
               >
                 {icon && (
-                  <span aria-hidden="true" className="shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">
+                  <span aria-hidden="true" className="shrink-0 [&>svg]:h-3.5 [&>svg]:w-3.5">
                     {icon}
                   </span>
                 )}
-                <span className="text-[10px] font-mono uppercase tracking-wider opacity-85">
+                <span className="font-mono text-[10px] uppercase tracking-wider opacity-85">
                   Volume
                 </span>
               </div>
@@ -202,7 +202,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
               {icon && (
                 <div
                   aria-hidden="true"
-                  className="mb-2 shrink-0 [&>svg]:w-4 [&>svg]:h-4 opacity-90"
+                  className="mb-2 shrink-0 opacity-90 [&>svg]:h-4 [&>svg]:w-4"
                 >
                   {icon}
                 </div>
@@ -214,18 +214,18 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
           {illustration && (
             <div
               aria-hidden="true"
-              className="my-auto flex items-center justify-center overflow-hidden max-h-[45%] opacity-90"
+              className="my-auto flex max-h-[45%] items-center justify-center overflow-hidden opacity-90"
             >
               {illustration}
             </div>
           )}
 
           {/* Bottom Title & Subtitle Area */}
-          <div className="mt-auto pt-2 space-y-1">
+          <div className="mt-auto space-y-1 pt-2">
             {renderHeading(title)}
             {subtitle && (
               <p
-                className="text-[10px] font-mono uppercase tracking-wider opacity-75 line-clamp-1"
+                className="line-clamp-1 font-mono text-[10px] uppercase tracking-wider opacity-75"
                 style={{ color: textColor }}
               >
                 {subtitle}

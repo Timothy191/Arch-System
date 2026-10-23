@@ -22,7 +22,7 @@ export type StackTechName =
 
 export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
   'Next.js 16': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <circle cx="12" cy="12" r="10" fill="#111827" />
       <path
         d="M8.5 16V8l7.8 9.8A10 10 0 0 0 18 16.5L10.1 6.8H8.5V16h1.6v-6.1l6.4 8a10 10 0 0 0 1.2-.8"
@@ -32,7 +32,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'React 19': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <circle cx="12" cy="12" r="2.1" fill="#0284c7" />
       <ellipse cx="12" cy="12" rx="9.5" ry="3.8" fill="none" stroke="#0284c7" strokeWidth="1.5" />
       <ellipse
@@ -58,7 +58,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'TypeScript 5.8': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" rx="4" fill="#2563eb" />
       <path
         d="M7 11h6M10 11v7M17.5 12.2c-.5-.4-1.2-.6-2-.6-1.1 0-1.8.5-1.8 1.3 0 .8.6 1.1 1.9 1.5 1.5.4 2.2 1 2.2 2.1 0 1.3-1.1 2.1-2.7 2.1-1 0-1.9-.3-2.5-.8"
@@ -70,7 +70,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Supabase RLS': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <path
         d="M13.5 2.5L4.8 13.4c-.5.6-.1 1.6.7 1.6h6.5l-1.5 6.5c-.2.8.8 1.3 1.3.7l8.7-10.9c.5-.6.1-1.6-.7-1.6h-6.5l1.5-6.5c.2-.8-.8-1.3-1.3-.7z"
         fill="#10b981"
@@ -78,7 +78,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'PostgreSQL 17': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <ellipse cx="12" cy="6" rx="7.5" ry="3.2" fill="#0369a1" />
       <path
         d="M4.5 6v6c0 1.8 3.4 3.2 7.5 3.2s7.5-1.4 7.5-3.2V6"
@@ -95,7 +95,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Redis Cluster': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <polygon points="12,3 21,7.5 12,12 3,7.5" fill="#dc2626" />
       <polyline
         points="3,12 12,16.5 21,12"
@@ -114,7 +114,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Tailwind + OKLCH': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <path
         d="M12 6c-2.7 0-4.3 1.3-5 4 1-1.3 2.2-1.8 3.5-1.5.8.2 1.3.7 1.9 1.3 1 1 2.1 2.2 4.6 2.2 2.7 0 4.3-1.3 5-4-1 1.3-2.2 1.8-3.5 1.5-.8-.2-1.3-.7-1.9-1.3C15.6 7.2 14.5 6 12 6zM7 12c-2.7 0-4.3 1.3-5 4 1-1.3 2.2-1.8 3.5-1.5.8.2 1.3.7 1.9 1.3 1 1 2.1 2.2 4.6 2.2 2.7 0 4.3-1.3 5-4-1 1.3-2.2 1.8-3.5 1.5-.8-.2-1.3-.7-1.9-1.3C10.6 13.2 9.5 12 7 12z"
         fill="#06b6d4"
@@ -122,7 +122,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Zod Contracts': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <polygon points="12,2.5 21,9 17.5,20.5 6.5,20.5 3,9" fill="#1d4ed8" />
       <path
         d="M8.5 9.5h7l-7 5h7"
@@ -135,7 +135,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'TanStack Query v5': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <circle
         cx="12"
         cy="12"
@@ -149,7 +149,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Turborepo + pnpm': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <circle
         cx="12"
         cy="12"
@@ -163,7 +163,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'Playwright + Jest 30': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <rect x="3" y="4" width="18" height="16" rx="3" fill="#16a34a" />
       <path
         d="M8 12.5l2.6 2.6L16.5 9"
@@ -176,7 +176,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'OTel + Sentry + Langfuse': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <path
         d="M3 13h4l2.5-6 4.5 11 2.5-5H21"
         fill="none"
@@ -188,7 +188,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   'n8n + Inngest': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <circle cx="5" cy="12" r="2.6" fill="#ea4b71" />
       <circle cx="12" cy="7" r="2.6" fill="#ea4b71" />
       <circle cx="12" cy="17" r="2.6" fill="#ea4b71" />
@@ -202,7 +202,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
     </svg>
   ),
   '20 Connectors': (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <rect
         x="6"
         y="6"
@@ -225,7 +225,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
 };
 
 export function StackIcon({ name }: { name: StackTechName }) {
-  return <>{STACK_ICON_MAP[name] ?? <Cpu className="w-4 h-4 shrink-0" />}</>;
+  return <>{STACK_ICON_MAP[name] ?? <Cpu className="h-4 w-4 shrink-0" />}</>;
 }
 
 interface StackBadgeItem {
@@ -341,31 +341,31 @@ export function OverviewStackIconsStrip() {
   return (
     <div
       data-testid="overview-tech-stack-icons"
-      className="pt-3 border-t border-[var(--border-subtle)] space-y-2"
+      className="space-y-2 border-[var(--border-subtle)] border-t pt-3"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold flex items-center gap-1.5">
-          <Layers className="w-3 h-3 text-[var(--accent-blue)]" />
+        <span className="flex items-center gap-1.5 font-mono font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+          <Layers className="h-3 w-3 text-[var(--accent-blue)]" />
           Full-Stack Codebase Architecture & Runtime Illustrators ({CODEBASE_STACK_ITEMS.length}{' '}
           Core Technologies)
         </span>
-        <span className="text-[10px] font-mono text-[var(--text-muted)] hidden sm:inline">
+        <span className="hidden font-mono text-[10px] text-[var(--text-muted)] sm:inline">
           Strict TypeScript · Zero-Proxy RLS · Hybrid L1/L2 Cache
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
         {CODEBASE_STACK_ITEMS.map((item) => (
           <div
             key={item.id}
-            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all hover:shadow-xs hover:bg-white ${item.bgClass}`}
+            className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-all hover:bg-white hover:shadow-xs ${item.bgClass}`}
           >
             <StackIcon name={item.techKey} />
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-semibold text-[var(--text-heading)] truncate leading-tight">
+              <div className="truncate font-semibold text-[11px] text-[var(--text-heading)] leading-tight">
                 {item.name}
               </div>
-              <div className="text-[9px] font-mono text-[var(--text-muted)] truncate leading-tight mt-0.5">
+              <div className="mt-0.5 truncate font-mono text-[9px] text-[var(--text-muted)] leading-tight">
                 {item.detail}
               </div>
             </div>
@@ -395,24 +395,24 @@ export function GitHubProvenanceVisualGraphs() {
   return (
     <div
       data-testid="github-provenance-strip"
-      className="pt-3 border-t border-[var(--border-subtle)] space-y-2.5"
+      className="space-y-2.5 border-[var(--border-subtle)] border-t pt-3"
     >
       <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
         <div className="flex items-center gap-2 font-mono font-semibold text-[var(--text-heading)]">
-          <Clock className="w-3.5 h-3.5 text-emerald-600" />
+          <Clock className="h-3.5 w-3.5 text-emerald-600" />
           <span>
             Time Worked Since First GitHub Commit: {timeWorked.formattedActiveWork} ·{' '}
             {timeWorked.formattedSpan}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-[var(--text-secondary)]">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-            <GitCommit className="w-3 h-3 text-[var(--accent-blue)]" />
+          <span className="inline-flex items-center gap-1 rounded border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5">
+            <GitCommit className="h-3 w-3 text-[var(--accent-blue)]" />
             First Commit: #{GIT_PROVENANCE_METRICS.firstCommitShortHash} (
             {GIT_PROVENANCE_METRICS.firstCommitDateFormatted})
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
-            <ShieldCheck className="w-3 h-3 text-emerald-600" />
+          <span className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-800">
+            <ShieldCheck className="h-3 w-3 text-emerald-600" />
             {GIT_PROVENANCE_METRICS.totalCommits}+ Commits on main ·{' '}
             {GIT_PROVENANCE_METRICS.totalMigrations} SQL Migrations
           </span>
@@ -420,11 +420,11 @@ export function GitHubProvenanceVisualGraphs() {
       </div>
 
       {/* 4 Visual Engineering Telemetry Graphs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* Graph Card 1: Radial Engineering Utilization Gauge */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/40 border border-emerald-200/80 flex items-center gap-3.5 shadow-2xs">
-          <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-            <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90" aria-hidden="true">
+        <div className="flex items-center gap-3.5 rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/40 p-3.5 shadow-2xs">
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+            <svg viewBox="0 0 56 56" className="h-14 w-14 -rotate-90" aria-hidden="true">
               <circle cx="28" cy="28" r="22" fill="none" stroke="#d1fae5" strokeWidth="5" />
               <circle
                 cx="28"
@@ -438,18 +438,18 @@ export function GitHubProvenanceVisualGraphs() {
                 strokeDashoffset={strokeDashoffset}
               />
             </svg>
-            <span className="absolute text-[11px] font-mono font-bold text-emerald-900">
+            <span className="absolute font-bold font-mono text-[11px] text-emerald-900">
               {utilizationRatio}%
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 font-semibold">
+            <div className="font-mono font-semibold text-[10px] text-emerald-700 uppercase tracking-wider">
               Active Engineering Cadence
             </div>
-            <div className="text-base font-bold text-emerald-950 leading-tight mt-0.5">
+            <div className="mt-0.5 font-bold text-base text-emerald-950 leading-tight">
               {timeWorked.activeEngineeringHours}h Active Work
             </div>
-            <div className="text-[10px] font-mono text-emerald-800/80 mt-0.5 truncate">
+            <div className="mt-0.5 truncate font-mono text-[10px] text-emerald-800/80">
               {timeWorked.calendarDays}d {timeWorked.remainderHours}h span (
               {timeWorked.totalCalendarHours}h elapsed)
             </div>
@@ -470,28 +470,28 @@ export function GitHubProvenanceVisualGraphs() {
         </div>
 
         {/* Graph Card 2: Commit Velocity Area & Bar Chart */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/30 border border-blue-200/70 flex flex-col justify-between shadow-2xs">
+        <div className="flex flex-col justify-between rounded-xl border border-blue-200/70 bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/30 p-3.5 shadow-2xs">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-wider text-blue-700 font-semibold">
+              <div className="font-mono font-semibold text-[10px] text-blue-700 uppercase tracking-wider">
                 Git Commit Velocity
               </div>
-              <div className="text-base font-bold text-slate-900 leading-tight mt-0.5">
+              <div className="mt-0.5 font-bold text-base text-slate-900 leading-tight">
                 {GIT_PROVENANCE_METRICS.totalCommits}+ Commits on main
               </div>
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            <span className="rounded border border-blue-200 bg-blue-100 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-blue-800">
               #{GIT_PROVENANCE_METRICS.firstCommitShortHash} → HEAD
             </span>
           </div>
 
-          <div className="mt-2 flex items-end gap-1 h-9 pt-1">
+          <div className="mt-2 flex h-9 items-end gap-1 pt-1">
             {COMMIT_VELOCITY_SERIES.map((val, i) => {
               const heightPct = Math.round((val / 40) * 100);
               return (
                 <div
                   key={i}
-                  className="flex-1 flex flex-col items-center justify-end h-full group"
+                  className="group flex h-full flex-1 flex-col items-center justify-end"
                   title={`Sprint Window ${i + 1}: ${val} commits`}
                 >
                   <div
@@ -503,30 +503,30 @@ export function GitHubProvenanceVisualGraphs() {
             })}
           </div>
 
-          <div className="mt-1 flex items-center justify-between text-[9px] font-mono text-slate-500">
+          <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-slate-500">
             <span>26 Sep 2026 (10:00 SAST)</span>
-            <span className="text-blue-700 font-semibold">~10.1 commits/day</span>
+            <span className="font-semibold text-blue-700">~10.1 commits/day</span>
           </div>
         </div>
 
         {/* Graph Card 3: Cumulative SQL Migrations & RLS Curve */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-br from-teal-50/80 via-white to-emerald-50/30 border border-teal-200/70 flex flex-col justify-between shadow-2xs">
+        <div className="flex flex-col justify-between rounded-xl border border-teal-200/70 bg-gradient-to-br from-teal-50/80 via-white to-emerald-50/30 p-3.5 shadow-2xs">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-semibold">
+              <div className="font-mono font-semibold text-[10px] text-teal-700 uppercase tracking-wider">
                 Schema Evolution Curve
               </div>
-              <div className="text-base font-bold text-slate-900 leading-tight mt-0.5">
+              <div className="mt-0.5 font-bold text-base text-slate-900 leading-tight">
                 {GIT_PROVENANCE_METRICS.totalMigrations} SQL Migrations
               </div>
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-teal-100 text-teal-800 border border-teal-200">
+            <span className="rounded border border-teal-200 bg-teal-100 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-teal-800">
               100% RLS
             </span>
           </div>
 
           <div className="mt-1.5 h-9 w-full">
-            <svg viewBox="0 0 200 38" className="w-full h-full overflow-visible" aria-hidden="true">
+            <svg viewBox="0 0 200 38" className="h-full w-full overflow-visible" aria-hidden="true">
               <defs>
                 <linearGradient id="migrationAreaGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#0d9488" stopOpacity="0.32" />
@@ -552,31 +552,31 @@ export function GitHubProvenanceVisualGraphs() {
             </svg>
           </div>
 
-          <div className="mt-1 flex items-center justify-between text-[9px] font-mono text-slate-500">
+          <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-slate-500">
             <span>001_initial_schema.sql</span>
-            <span className="text-teal-700 font-semibold">189_rls_initplan.sql</span>
+            <span className="font-semibold text-teal-700">189_rls_initplan.sql</span>
           </div>
         </div>
 
         {/* Graph Card 4: Operational Topology & Connector Distribution */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-br from-violet-50/80 via-white to-fuchsia-50/30 border border-violet-200/70 flex flex-col justify-between shadow-2xs">
+        <div className="flex flex-col justify-between rounded-xl border border-violet-200/70 bg-gradient-to-br from-violet-50/80 via-white to-fuchsia-50/30 p-3.5 shadow-2xs">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-wider text-violet-700 font-semibold">
+              <div className="font-mono font-semibold text-[10px] text-violet-700 uppercase tracking-wider">
                 Subsystem Saturation
               </div>
-              <div className="text-base font-bold text-slate-900 leading-tight mt-0.5">
+              <div className="mt-0.5 font-bold text-base text-slate-900 leading-tight">
                 {DEPARTMENTS.length} Modules · {totalRoutes} Routes
               </div>
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-violet-100 text-violet-800 border border-violet-200">
+            <span className="rounded border border-violet-200 bg-violet-100 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-violet-800">
               {GIT_PROVENANCE_METRICS.activeConnectorCount} Connectors
             </span>
           </div>
 
           {/* Multi-segment stacked bar chart */}
           <div className="mt-2 space-y-1.5">
-            <div className="h-3 w-full rounded-full bg-slate-100 overflow-hidden flex p-0.5 gap-0.5 border border-slate-200">
+            <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full border border-slate-200 bg-slate-100 p-0.5">
               <div
                 className="h-full rounded-l-full bg-blue-600"
                 style={{ width: '32%' }}
@@ -599,29 +599,29 @@ export function GitHubProvenanceVisualGraphs() {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-1 text-[9px] font-mono text-slate-600">
+            <div className="grid grid-cols-4 gap-1 font-mono text-[9px] text-slate-600">
               <span className="flex items-center gap-1 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
                 UI 56
               </span>
               <span className="flex items-center gap-1 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                 DB 189
               </span>
               <span className="flex items-center gap-1 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                 Cache L2
               </span>
               <span className="flex items-center gap-1 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-600 shrink-0" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600" />
                 IoT 20
               </span>
             </div>
           </div>
 
-          <div className="mt-1 flex items-center justify-between text-[9px] font-mono text-slate-500">
+          <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-slate-500">
             <span>Zero Boundary Drift</span>
-            <span className="text-violet-700 font-semibold">8/8 Gates Verified</span>
+            <span className="font-semibold text-violet-700">8/8 Gates Verified</span>
           </div>
         </div>
       </div>

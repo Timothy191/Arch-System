@@ -233,26 +233,26 @@ export function DrillingReportsDashboardClient({
     <div className="space-y-6">
       {/* Header */}
       <GlassCard className="p-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">
                 Drilling Production Report &amp; Live Stats
               </h2>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
-                <Radio className="w-3.5 h-3.5 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-accent-green text-xs">
+                <Radio className="h-3.5 w-3.5 animate-pulse" />
                 Live Telemetry &amp; Control Room Sync
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                 {currentShift === 'day' ? (
-                  <Sun className="w-3.5 h-3.5" />
+                  <Sun className="h-3.5 w-3.5" />
                 ) : (
-                  <Moon className="w-3.5 h-3.5" />
+                  <Moon className="h-3.5 w-3.5" />
                 )}
                 Active Shift: {currentShift.toUpperCase()} ({todayStr})
               </span>
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="mt-1 text-[var(--text-muted)] text-xs">
               Compiled from Drilling &amp; Control Room machine operations ({fromDateStr} to{' '}
               {toDateStr}) across Shift, Day, and Archived views.
             </p>
@@ -269,29 +269,29 @@ export function DrillingReportsDashboardClient({
       </GlassCard>
 
       {/* Live Stats KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <GlassCard className="p-4 flex flex-col justify-between">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
                 Total Meters Drilled
               </span>
-              <Drill className="w-4 h-4 text-accent-green" />
+              <Drill className="h-4 w-4 text-accent-green" />
             </div>
-            <p className="text-2xl font-bold text-accent-green mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-accent-green">
               {kpi.totalMeters.toFixed(1)}m
             </p>
           </div>
           <div className="mt-3 space-y-1">
-            <div className="w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
+            <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
               <div
-                className="bg-amber-500 h-full"
+                className="h-full bg-amber-500"
                 style={{
                   width: `${kpi.totalMeters > 0 ? Math.round((kpi.dayMeters / kpi.totalMeters) * 100) : 50}%`,
                 }}
               />
               <div
-                className="bg-indigo-500 h-full"
+                className="h-full bg-indigo-500"
                 style={{
                   width: `${kpi.totalMeters > 0 ? Math.round((kpi.nightMeters / kpi.totalMeters) * 100) : 50}%`,
                 }}
@@ -304,15 +304,15 @@ export function DrillingReportsDashboardClient({
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
                 Total Holes Drilled
               </span>
-              <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
+              <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--accent-blue)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--accent-blue)]">
               {kpi.totalHoles.toLocaleString()}
             </p>
           </div>
@@ -324,13 +324,13 @@ export function DrillingReportsDashboardClient({
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Operating Hours</span>
-              <Clock className="w-4 h-4 text-[var(--accent-blue)]" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Operating Hours</span>
+              <Clock className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {kpi.totalHours.toFixed(1)}h
             </p>
           </div>
@@ -342,31 +342,31 @@ export function DrillingReportsDashboardClient({
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Penetration Rate</span>
-              <Gauge className="w-4 h-4 text-accent-green" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Penetration Rate</span>
+              <Gauge className="h-4 w-4 text-accent-green" />
             </div>
-            <p className="text-2xl font-bold text-accent-green mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-accent-green">
               {kpi.penetrationRate.toFixed(1)} m/h
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
             <span>Status</span>
-            <span className="px-2 py-0.5 rounded-full font-semibold bg-accent-green/10 text-accent-green">
+            <span className="rounded-full bg-accent-green/10 px-2 py-0.5 font-semibold text-accent-green">
               {kpi.penetrationRate >= 15 ? 'Optimal' : kpi.penetrationRate > 0 ? 'Active' : 'Idle'}
             </span>
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Total Delays</span>
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Total Delays</span>
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {formatDelay(kpi.totalDelaysMin)}
             </p>
           </div>
@@ -376,13 +376,13 @@ export function DrillingReportsDashboardClient({
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Drill Fleet</span>
-              <Activity className="w-4 h-4 text-[var(--accent-blue)]" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Drill Fleet</span>
+              <Activity className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {drillRigNames.length} Rigs
             </p>
           </div>
@@ -397,26 +397,26 @@ export function DrillingReportsDashboardClient({
 
       {/* Subtabs & Filter Bar */}
       <GlassCard className="p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div
             role="tablist"
             aria-label="Drilling Report Subtabs"
-            className="inline-flex items-center p-1 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-default)] self-start"
+            className="inline-flex items-center self-start rounded-xl border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-1"
           >
             <button
               type="button"
               role="tab"
               aria-selected={activeSubTab === 'shift'}
               onClick={() => setActiveSubTab('shift')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
                 activeSubTab === 'shift'
-                  ? 'bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm border border-[var(--border-default)]'
+                  ? 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
               }`}
             >
-              <Sun className="w-4 h-4" />
+              <Sun className="h-4 w-4" />
               <span>Shift</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+              <span className="rounded-full bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono text-[10px] text-[var(--accent-blue)]">
                 {filteredOps.length}
               </span>
             </button>
@@ -426,15 +426,15 @@ export function DrillingReportsDashboardClient({
               role="tab"
               aria-selected={activeSubTab === 'day'}
               onClick={() => setActiveSubTab('day')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
                 activeSubTab === 'day'
-                  ? 'bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm border border-[var(--border-default)]'
+                  ? 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
               }`}
             >
-              <Calendar className="w-4 h-4" />
+              <Calendar className="h-4 w-4" />
               <span>Day</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-accent-green/10 text-accent-green">
+              <span className="rounded-full bg-accent-green/10 px-1.5 py-0.5 font-mono text-[10px] text-accent-green">
                 {dailyRows.length}
               </span>
             </button>
@@ -444,28 +444,28 @@ export function DrillingReportsDashboardClient({
               role="tab"
               aria-selected={activeSubTab === 'archived'}
               onClick={() => setActiveSubTab('archived')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
                 activeSubTab === 'archived'
-                  ? 'bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm border border-[var(--border-default)]'
+                  ? 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
               }`}
             >
-              <Archive className="w-4 h-4" />
+              <Archive className="h-4 w-4" />
               <span>Archived</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+              <span className="rounded-full bg-[var(--bg-tertiary)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-muted)]">
                 {monthlyRollups.length}m
               </span>
             </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="inline-flex items-center rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-default)] p-0.5 text-xs">
+            <div className="inline-flex items-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-0.5 text-xs">
               {(['all', 'day', 'night'] as const).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setShiftFilter(s)}
-                  className={`px-2.5 py-1.5 rounded-md font-medium capitalize transition-colors ${
+                  className={`rounded-md px-2.5 py-1.5 font-medium capitalize transition-colors ${
                     shiftFilter === s
                       ? 'bg-[var(--bg-secondary)] text-[var(--text-heading)] shadow-xs'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -478,12 +478,12 @@ export function DrillingReportsDashboardClient({
 
             {drillRigNames.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <Filter className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 <select
                   aria-label="Filter by drill rig"
                   value={rigFilter}
                   onChange={(e) => setRigFilter(e.target.value)}
-                  className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-heading)] focus:outline-none focus:border-[var(--accent-blue)]"
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none"
                 >
                   <option value="all">All Drill Rigs ({drillRigNames.length})</option>
                   {drillRigNames.map((name) => (
@@ -496,13 +496,13 @@ export function DrillingReportsDashboardClient({
             )}
 
             <div className="relative min-w-[210px]">
-              <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search rig, block, operator..."
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)]"
+                className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
               />
             </div>
           </div>
@@ -512,45 +512,45 @@ export function DrillingReportsDashboardClient({
       {/* SUBTAB 1: SHIFT */}
       {activeSubTab === 'shift' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <GlassCard className="p-5">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-heading)] flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-[var(--accent-blue)]" />
+                  <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                    <BarChart3 className="h-4 w-4 text-[var(--accent-blue)]" />
                     Day vs. Night Shift Drilling Split
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                     Meters drilled and shift count across Day and Night shifts
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-1.5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5">
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600">
-                      <Sun className="w-3.5 h-3.5" />
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600 text-xs">
+                      <Sun className="h-3.5 w-3.5" />
                       Day Shift
                     </span>
-                    <span className="text-xs font-mono text-[var(--text-muted)]">
+                    <span className="font-mono text-[var(--text-muted)] text-xs">
                       {kpi.dayCount} shifts
                     </span>
                   </div>
-                  <p className="text-xl font-bold font-mono text-[var(--text-heading)]">
+                  <p className="font-bold font-mono text-[var(--text-heading)] text-xl">
                     {kpi.dayMeters.toFixed(1)}m
                   </p>
                 </div>
-                <div className="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5">
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600">
-                      <Moon className="w-3.5 h-3.5" />
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-indigo-600 text-xs">
+                      <Moon className="h-3.5 w-3.5" />
                       Night Shift
                     </span>
-                    <span className="text-xs font-mono text-[var(--text-muted)]">
+                    <span className="font-mono text-[var(--text-muted)] text-xs">
                       {kpi.nightCount} shifts
                     </span>
                   </div>
-                  <p className="text-xl font-bold font-mono text-[var(--text-heading)]">
+                  <p className="font-bold font-mono text-[var(--text-heading)] text-xl">
                     {kpi.nightMeters.toFixed(1)}m
                   </p>
                 </div>
@@ -558,8 +558,8 @@ export function DrillingReportsDashboardClient({
             </GlassCard>
 
             <GlassCard className="p-5">
-              <h3 className="text-sm font-semibold text-[var(--text-heading)] mb-3 flex items-center gap-2">
-                <Drill className="w-4 h-4 text-accent-green" />
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                <Drill className="h-4 w-4 text-accent-green" />
                 Drill Rig Performance Breakdown
               </h3>
               <div className="space-y-3">
@@ -574,9 +574,9 @@ export function DrillingReportsDashboardClient({
                           {rig.meters.toFixed(1)}m • {rig.holes} holes • {rig.hours.toFixed(1)}h
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                         <div
-                          className="h-full bg-accent-green rounded-full"
+                          className="h-full rounded-full bg-accent-green"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -584,7 +584,7 @@ export function DrillingReportsDashboardClient({
                   );
                 })}
                 {rigBreakdown.length === 0 && (
-                  <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+                  <p className="py-4 text-center text-[var(--text-muted)] text-xs">
                     No drill rig logs found for the selected filter.
                   </p>
                 )}
@@ -593,49 +593,49 @@ export function DrillingReportsDashboardClient({
           </div>
 
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
-              <h3 className="text-base font-semibold text-[var(--text-heading)]">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
+              <h3 className="font-semibold text-[var(--text-heading)] text-base">
                 Shift Drilling Operations Log
               </h3>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {filteredOps.length} shift records
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/50">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Shift
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Drill Rig
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Operator
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Site
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Block
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Hours
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Holes
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Meters
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Delays
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-center">
+                    <th className="px-5 py-3 text-center font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Status
                     </th>
                   </tr>
@@ -645,22 +645,22 @@ export function DrillingReportsDashboardClient({
                     const totalOpDelays =
                       op.production_delays + op.non_productional_delays + op.engineering_delays;
                     return (
-                      <tr key={op.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                        <td className="px-5 py-3.5 text-[var(--text-heading)] text-sm font-mono">
+                      <tr key={op.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
+                        <td className="px-5 py-3.5 font-mono text-[var(--text-heading)] text-sm">
                           {op.operation_date}
                         </td>
                         <td className="px-5 py-3.5 text-sm">
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs capitalize ${
                               op.shift_type === 'day'
-                                ? 'bg-amber-500/10 text-amber-700 border border-amber-500/20'
-                                : 'bg-indigo-500/10 text-indigo-700 border border-indigo-500/20'
+                                ? 'border border-amber-500/20 bg-amber-500/10 text-amber-700'
+                                : 'border border-indigo-500/20 bg-indigo-500/10 text-indigo-700'
                             }`}
                           >
                             {op.shift_type}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 text-[var(--text-heading)] text-sm font-semibold">
+                        <td className="px-5 py-3.5 font-semibold text-[var(--text-heading)] text-sm">
                           {op.machine_name}
                         </td>
                         <td className="px-5 py-3.5 text-[var(--text-body)] text-sm">
@@ -669,27 +669,27 @@ export function DrillingReportsDashboardClient({
                         <td className="px-5 py-3.5 text-[var(--text-body)] text-sm">
                           {op.site || '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-[var(--text-heading)] text-sm font-medium">
+                        <td className="px-5 py-3.5 font-medium text-[var(--text-heading)] text-sm">
                           {op.block_drilled || '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-[var(--text-muted)] text-sm text-right font-mono">
+                        <td className="px-5 py-3.5 text-right font-mono text-[var(--text-muted)] text-sm">
                           {op.total_hours ? op.total_hours.toFixed(1) : '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-[var(--accent-blue)] text-sm text-right font-mono font-medium">
+                        <td className="px-5 py-3.5 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
                           {op.holes || 0}
                         </td>
-                        <td className="px-5 py-3.5 text-accent-green text-sm text-right font-mono font-bold">
+                        <td className="px-5 py-3.5 text-right font-bold font-mono text-accent-green text-sm">
                           {op.meters_drilled ? Number(op.meters_drilled).toFixed(1) : '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-[var(--accent-blue)] text-sm text-right font-mono">
+                        <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                           {formatDelay(totalOpDelays)}
                         </td>
                         <td className="px-5 py-3.5 text-center">
                           <span
-                            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-xs ${
                               op.status === 'active' || op.status === 'completed'
-                                ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
-                                : 'bg-amber-50/70 border-amber-200/50 text-amber-700'
+                                ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
+                                : 'border-amber-200/50 bg-amber-50/70 text-amber-700'
                             }`}
                           >
                             {op.status}
@@ -719,80 +719,80 @@ export function DrillingReportsDashboardClient({
       {activeSubTab === 'day' && (
         <div className="space-y-6">
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Daily Consolidated Drilling Log (Day + Night Combined)
                 </h3>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                   24-hour daily rollup of meters drilled, holes, operating hours, and delays
                 </p>
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {dailyRows.length} days
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/50">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Active Rigs
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Blocks
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Day Meters
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Night Meters
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total Meters
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total Holes
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Hours
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Delays
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {dailyRows.map((day) => (
-                    <tr key={day.date} className="hover:bg-[var(--bg-tertiary)] transition-colors">
-                      <td className="px-5 py-3.5 text-sm font-mono font-semibold text-[var(--text-heading)]">
+                    <tr key={day.date} className="transition-colors hover:bg-[var(--bg-tertiary)]">
+                      <td className="px-5 py-3.5 font-mono font-semibold text-[var(--text-heading)] text-sm">
                         {day.date}
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-[var(--text-body)]">
+                      <td className="px-5 py-3.5 text-[var(--text-body)] text-xs">
                         {Array.from(day.rigsSet).join(', ') || '—'}
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-[var(--text-muted)]">
+                      <td className="px-5 py-3.5 text-[var(--text-muted)] text-xs">
                         {Array.from(day.blocksSet).join(', ') || '—'}
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono text-amber-700">
+                      <td className="px-5 py-3.5 text-right font-mono text-amber-700 text-sm">
                         {day.dayMeters.toFixed(1)}m
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono text-indigo-700">
+                      <td className="px-5 py-3.5 text-right font-mono text-indigo-700 text-sm">
                         {day.nightMeters.toFixed(1)}m
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono font-bold text-accent-green">
+                      <td className="px-5 py-3.5 text-right font-bold font-mono text-accent-green text-sm">
                         {day.totalMeters.toFixed(1)}m
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono text-[var(--accent-blue)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {day.holes}
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono text-[var(--text-heading)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-heading)] text-sm">
                         {day.hours.toFixed(1)}h
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-right font-mono text-[var(--text-muted)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-muted)] text-sm">
                         {formatDelay(day.delaysMin)}
                       </td>
                     </tr>
@@ -820,26 +820,26 @@ export function DrillingReportsDashboardClient({
           <GlassCard className="p-5">
             <form method="GET" className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-heading)] flex items-center gap-2">
-                  <Archive className="w-4 h-4 text-[var(--accent-blue)]" />
+                <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm">
+                  <Archive className="h-4 w-4 text-[var(--accent-blue)]" />
                   Historical &amp; Archived Date Range Query
                 </h3>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                   Query historical drilling logs and monthly rollups across any date window
                 </p>
               </div>
               <div className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">From Date</label>
+                  <label className="mb-1 block text-[var(--text-muted)] text-xs">From Date</label>
                   <Input type="date" name="from" defaultValue={fromDateStr} className="h-9" />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">To Date</label>
+                  <label className="mb-1 block text-[var(--text-muted)] text-xs">To Date</label>
                   <Input type="date" name="to" defaultValue={toDateStr} className="h-9" />
                 </div>
                 <button
                   type="submit"
-                  className="h-9 px-4 rounded-lg bg-[var(--accent-blue)] text-white text-xs font-semibold hover:bg-[var(--accent-blue)]/90 transition-colors"
+                  className="h-9 rounded-lg bg-[var(--accent-blue)] px-4 font-semibold text-white text-xs transition-colors hover:bg-[var(--accent-blue)]/90"
                 >
                   Load Archive Window
                 </button>
@@ -848,21 +848,21 @@ export function DrillingReportsDashboardClient({
           </GlassCard>
 
           {monthlyRollups.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {monthlyRollups.map((m) => (
-                <GlassCard key={m.month} className="p-4 space-y-2">
+                <GlassCard key={m.month} className="space-y-2 p-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold font-mono text-[var(--text-heading)]">
+                    <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
                       {m.month}
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+                    <span className="rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 font-semibold text-[10px] text-[var(--text-muted)]">
                       {m.shiftsCount} shifts
                     </span>
                   </div>
-                  <p className="text-2xl font-bold font-mono text-accent-green">
+                  <p className="font-bold font-mono text-2xl text-accent-green">
                     {m.meters.toFixed(1)}m
                   </p>
-                  <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-default)]">
+                  <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-2 text-[var(--text-muted)] text-xs">
                     <span>Holes: {m.holes}</span>
                     <span>Hours: {m.hours.toFixed(1)}h</span>
                   </div>

@@ -29,7 +29,7 @@ const ServicesDropdown = dynamic(
 function WidgetFallback({ width = 'w-7' }: { width?: string }) {
   return (
     <div
-      className={`${width} h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse`}
+      className={`${width} liquid-glass-light h-7 animate-pulse rounded-full border border-white/20`}
       aria-hidden="true"
     />
   );

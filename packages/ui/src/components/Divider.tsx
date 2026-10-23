@@ -42,8 +42,8 @@ export function Divider({
             variant === 'dotted' && 'divider-arch-dotted-v',
             variant === 'fading' && 'divider-arch-fading-v',
             variant === 'double' &&
-              'w-[3px] border-l-[3px] border-double border-arch-border-emphasis',
-            variant === 'dashed' && 'w-0 border-l border-dashed border-arch-border-emphasis',
+              'w-[3px] border-arch-border-emphasis border-l-[3px] border-double',
+            variant === 'dashed' && 'w-0 border-arch-border-emphasis border-l border-dashed',
             className
           )}
           {...props}
@@ -55,13 +55,13 @@ export function Divider({
       <hr
         aria-orientation="horizontal"
         className={cn(
-          'w-full border-none my-4',
+          'my-4 w-full border-none',
           variant === 'default' && 'h-px bg-arch-border-subtle',
           variant === 'dotted' && 'divider-arch-dotted',
           variant === 'fading' && 'divider-arch-fading',
           variant === 'double' &&
-            'h-[3px] border-t-[3px] border-double border-arch-border-emphasis',
-          variant === 'dashed' && 'border-t border-dashed border-arch-border-emphasis',
+            'h-[3px] border-arch-border-emphasis border-t-[3px] border-double',
+          variant === 'dashed' && 'border-arch-border-emphasis border-t border-dashed',
           className
         )}
         {...props}
@@ -74,34 +74,34 @@ export function Divider({
     <div
       role="separator"
       aria-orientation="horizontal"
-      className={cn('relative flex items-center w-full my-4', className)}
+      className={cn('relative my-4 flex w-full items-center', className)}
       {...props}
     >
       <div
         className={cn(
           'flex-grow',
           variant === 'default' && 'h-px bg-arch-border-subtle',
-          variant === 'dotted' && 'border-t-[1.5px] border-dotted border-arch-border-emphasis',
+          variant === 'dotted' && 'border-arch-border-emphasis border-t-[1.5px] border-dotted',
           variant === 'fading' &&
             'h-px bg-gradient-to-r from-transparent via-arch-border-emphasis to-arch-border-emphasis',
           variant === 'double' &&
-            'h-[3px] border-t-[3px] border-double border-arch-border-emphasis',
-          variant === 'dashed' && 'border-t border-dashed border-arch-border-emphasis'
+            'h-[3px] border-arch-border-emphasis border-t-[3px] border-double',
+          variant === 'dashed' && 'border-arch-border-emphasis border-t border-dashed'
         )}
       />
-      <span className="px-3 text-xs font-medium uppercase tracking-wider text-arch-text-tertiary select-none">
+      <span className="select-none px-3 font-medium text-arch-text-tertiary text-xs uppercase tracking-wider">
         {content}
       </span>
       <div
         className={cn(
           'flex-grow',
           variant === 'default' && 'h-px bg-arch-border-subtle',
-          variant === 'dotted' && 'border-t-[1.5px] border-dotted border-arch-border-emphasis',
+          variant === 'dotted' && 'border-arch-border-emphasis border-t-[1.5px] border-dotted',
           variant === 'fading' &&
             'h-px bg-gradient-to-l from-transparent via-arch-border-emphasis to-arch-border-emphasis',
           variant === 'double' &&
-            'h-[3px] border-t-[3px] border-double border-arch-border-emphasis',
-          variant === 'dashed' && 'border-t border-dashed border-arch-border-emphasis'
+            'h-[3px] border-arch-border-emphasis border-t-[3px] border-double',
+          variant === 'dashed' && 'border-arch-border-emphasis border-t border-dashed'
         )}
       />
     </div>

@@ -27,7 +27,7 @@ export function Description({
   return (
     <dl
       className={cn(
-        'flex text-sm font-sans',
+        'flex font-sans text-sm',
         right ? 'flex-row items-baseline justify-between gap-4' : 'flex-col gap-1',
         className
       )}
@@ -35,7 +35,7 @@ export function Description({
     >
       <dt
         className={cn(
-          'flex items-center gap-1.5 font-medium text-xs text-neutral-500 select-none',
+          'flex select-none items-center gap-1.5 font-medium text-neutral-500 text-xs',
           right && 'shrink-0'
         )}
       >
@@ -51,11 +51,11 @@ export function Description({
             role="button"
             aria-label={`More information about ${typeof title === 'string' ? title : 'this field'}`}
           >
-            <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 transition-colors cursor-help" />
+            <Info className="h-3.5 w-3.5 cursor-help text-neutral-400 transition-colors hover:text-neutral-600" />
             {showTooltip && (
               <span
                 role="tooltip"
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-50 w-max max-w-xs rounded-md bg-neutral-900 px-2 py-1 text-xs text-neutral-100 shadow-md pointer-events-none animate-in fade-in-0 duration-150"
+                className="fade-in-0 pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max max-w-xs -translate-x-1/2 animate-in rounded-md bg-neutral-900 px-2 py-1 text-neutral-100 text-xs shadow-md duration-150"
               >
                 {tooltip}
               </span>
@@ -65,9 +65,9 @@ export function Description({
       </dt>
       <dd
         className={cn(
-          'text-sm text-neutral-900 m-0',
+          'm-0 text-neutral-900 text-sm',
           right && 'text-right',
-          ellipsis && 'truncate max-w-full'
+          ellipsis && 'max-w-full truncate'
         )}
       >
         {content}

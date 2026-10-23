@@ -23,19 +23,19 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
       <GlassCard
         variant="default"
         padding
-        className="flex flex-wrap items-center justify-between gap-4 bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card"
+        className="flex flex-wrap items-center justify-between gap-4 border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl"
       >
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold uppercase tracking-tight text-arch-text-primary">
+            <h1 className="font-bold text-arch-text-primary text-xl uppercase tracking-tight">
               Multi-Site Production & Engineering Report
             </h1>
-            <span className="rounded-md bg-arch-brand-blue/10 px-2.5 py-0.5 text-xs font-semibold text-arch-brand-blue">
+            <span className="rounded-md bg-arch-brand-blue/10 px-2.5 py-0.5 font-semibold text-arch-brand-blue text-xs">
               {meta.shift_date} — {meta.shift_type.toUpperCase()} SHIFT
             </span>
           </div>
-          <p className="text-xs text-arch-text-secondary mt-1 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-arch-accent-blue" />
+          <p className="mt-1 flex items-center gap-1.5 text-arch-text-secondary text-xs">
+            <MapPin className="h-3.5 w-3.5 text-arch-accent-blue" />
             Brakfontein Pit (BKF) • Extension Pit (EXT) • Coal Processing Plant (PLANT)
           </p>
         </div>
@@ -47,9 +47,9 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
               key={site}
               onClick={() => setActiveSite(site)}
               className={cn(
-                'rounded-md px-3 py-1 text-xs font-medium transition-all',
+                'rounded-md px-3 py-1 font-medium text-xs transition-all',
                 activeSite === site
-                  ? 'bg-white text-arch-text-primary shadow-card font-semibold'
+                  ? 'bg-white font-semibold text-arch-text-primary shadow-card'
                   : 'text-arch-text-tertiary hover:text-arch-text-secondary'
               )}
             >
@@ -62,9 +62,9 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
       {/* 1. Excavator Production Blocks */}
       {(activeSite === 'ALL' || activeSite === 'BKF' || activeSite === 'EXT') && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-arch-border-subtle pb-2">
-            <Pickaxe className="w-4 h-4 text-arch-accent-blue" />
-            <h2 className="text-sm font-semibold tracking-wider text-arch-text-primary uppercase">
+          <div className="flex items-center gap-2 border-arch-border-subtle border-b pb-2">
+            <Pickaxe className="h-4 w-4 text-arch-accent-blue" />
+            <h2 className="font-semibold text-arch-text-primary text-sm uppercase tracking-wider">
               Excavator Production & Hauling
             </h2>
           </div>
@@ -77,27 +77,27 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     key={`${site}-${exc.excavator_name}-${exc.block_id}`}
                     variant="default"
                     padding
-                    className="bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card"
+                    className="border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl"
                   >
-                    <div className="flex items-start justify-between border-b border-arch-border-subtle/80 pb-3">
+                    <div className="flex items-start justify-between border-arch-border-subtle/80 border-b pb-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-arch-text-primary">
                             {exc.excavator_name}
                           </span>
-                          <span className="rounded bg-arch-surface-tertiary px-1.5 py-0.5 text-[10px] font-semibold uppercase text-arch-text-secondary">
+                          <span className="rounded bg-arch-surface-tertiary px-1.5 py-0.5 font-semibold text-[10px] text-arch-text-secondary uppercase">
                             {site}
                           </span>
-                          <span className="text-xs text-arch-text-tertiary">
+                          <span className="text-arch-text-tertiary text-xs">
                             ({exc.operator_name})
                           </span>
                         </div>
-                        <p className="text-xs text-arch-accent-blue font-medium mt-0.5">
+                        <p className="mt-0.5 font-medium text-arch-accent-blue text-xs">
                           {exc.material_type} • Block {exc.block_id}
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-lg font-mono font-bold text-arch-text-primary">
+                        <span className="font-bold font-mono text-arch-text-primary text-lg">
                           {exc.material_type === 'TOPSOIL'
                             ? `${exc.total_bcm.toLocaleString()} m³`
                             : `${exc.total_tonnes.toLocaleString()} t`}
@@ -113,9 +113,9 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       {exc.trucks.map((trk) => (
                         <div
                           key={trk.truck_name}
-                          className="flex items-center gap-1.5 rounded-md border border-arch-border-subtle bg-arch-surface-secondary/50 px-2 py-1 text-xs font-mono"
+                          className="flex items-center gap-1.5 rounded-md border border-arch-border-subtle bg-arch-surface-secondary/50 px-2 py-1 font-mono text-xs"
                         >
-                          <Truck className="w-3 h-3 text-arch-text-tertiary" />
+                          <Truck className="h-3 w-3 text-arch-text-tertiary" />
                           <span className="text-arch-text-secondary">{trk.truck_name}:</span>
                           <span className="font-semibold text-arch-text-primary">{trk.loads}</span>
                         </div>
@@ -123,7 +123,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     </div>
 
                     {/* Performance Metric Footer */}
-                    <div className="mt-3 flex items-center justify-between border-t border-arch-border-subtle/60 pt-2 text-xs">
+                    <div className="mt-3 flex items-center justify-between border-arch-border-subtle/60 border-t pt-2 text-xs">
                       <span className="text-arch-text-secondary">
                         Operating:{' '}
                         <strong className="text-arch-text-primary">{exc.operating_hours}h</strong>
@@ -136,13 +136,13 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       </span>
                       {exc.delays ? (
                         <span
-                          className="text-accent-amber truncate max-w-[200px]"
+                          className="max-w-[200px] truncate text-accent-amber"
                           title={exc.delays}
                         >
                           ⚠️ {exc.delays}
                         </span>
                       ) : (
-                        <span className="text-accent-green font-medium">Optimal Flow</span>
+                        <span className="font-medium text-accent-green">Optimal Flow</span>
                       )}
                     </div>
                   </GlassCard>
@@ -160,28 +160,28 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
           <GlassCard
             variant="default"
             padding
-            className="bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card"
+            className="border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between border-b border-arch-border-subtle pb-2">
-              <h3 className="text-sm font-semibold uppercase text-arch-text-primary flex items-center gap-2">
-                <Shield className="w-4 h-4 text-arch-accent-blue" />
+            <div className="flex items-center justify-between border-arch-border-subtle border-b pb-2">
+              <h3 className="flex items-center gap-2 font-semibold text-arch-text-primary text-sm uppercase">
+                <Shield className="h-4 w-4 text-arch-accent-blue" />
                 Bulldozer Rollover Operations (Push Factor: 250 m³/h)
               </h3>
-              <span className="font-mono text-sm font-bold text-accent-green">
+              <span className="font-bold font-mono text-accent-green text-sm">
                 Total: {rollover.total_bcm.toLocaleString()} BCM
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {rollover.entries.map((item) => (
                 <div
                   key={item.machine_name}
                   className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/40 p-2.5 text-xs"
                 >
                   <span className="font-bold text-arch-text-primary">{item.machine_name}</span>
-                  <p className="font-mono text-[11px] text-arch-text-secondary mt-0.5">
+                  <p className="mt-0.5 font-mono text-[11px] text-arch-text-secondary">
                     {item.start_smu} - {item.end_smu} ({item.hours}h × {item.push_factor})
                   </p>
-                  <p className="font-mono font-semibold text-arch-brand-blue mt-1">
+                  <p className="mt-1 font-mono font-semibold text-arch-brand-blue">
                     {item.total_bcm.toLocaleString()} BCM
                   </p>
                 </div>
@@ -195,33 +195,33 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
         <GlassCard
           variant="default"
           padding
-          className="lg:col-span-2 bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card"
+          className="border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl lg:col-span-2"
         >
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-arch-text-primary mb-3 flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-accent-amber" />
+          <h3 className="mb-3 flex items-center gap-2 font-semibold text-arch-text-primary text-sm uppercase tracking-wider">
+            <Wrench className="h-4 w-4 text-accent-amber" />
             Engineering Downtime & Faults
           </h3>
           <div className="divide-y divide-arch-border-subtle/60">
             {breakdowns && breakdowns.length > 0 ? (
               breakdowns.map((b) => (
-                <div key={b.id} className="py-2.5 flex items-start justify-between gap-2 text-xs">
+                <div key={b.id} className="flex items-start justify-between gap-2 py-2.5 text-xs">
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold font-mono text-arch-text-primary">
                         {b.machine_name}
                       </span>
-                      <span className="rounded bg-arch-surface-tertiary px-1.5 py-0.2 text-[10px] text-arch-text-secondary font-semibold">
+                      <span className="rounded bg-arch-surface-tertiary px-1.5 py-0.2 font-semibold text-[10px] text-arch-text-secondary">
                         {b.site_code}
                       </span>
                       {b.is_operational_defect && (
-                        <span className="rounded bg-accent-amber/10 text-accent-amber text-[10px] px-1 font-medium">
+                        <span className="rounded bg-accent-amber/10 px-1 font-medium text-[10px] text-accent-amber">
                           Working with defect
                         </span>
                       )}
                     </div>
-                    <p className="text-arch-text-secondary mt-0.5">{b.reason}</p>
+                    <p className="mt-0.5 text-arch-text-secondary">{b.reason}</p>
                     {b.repair_notes && (
-                      <p className="text-arch-text-tertiary text-[11px] italic mt-0.5">
+                      <p className="mt-0.5 text-[11px] text-arch-text-tertiary italic">
                         Note: {b.repair_notes}
                       </p>
                     )}
@@ -230,8 +230,8 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     <span
                       className={
                         b.duration_hours >= 10
-                          ? 'text-accent-red font-bold'
-                          : 'text-arch-text-primary font-medium'
+                          ? 'font-bold text-accent-red'
+                          : 'font-medium text-arch-text-primary'
                       }
                     >
                       {b.duration_hours.toFixed(1)}h
@@ -240,7 +240,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                 </div>
               ))
             ) : (
-              <p className="text-xs text-arch-text-tertiary py-3">
+              <p className="py-3 text-arch-text-tertiary text-xs">
                 No active breakdowns recorded for this shift.
               </p>
             )}
@@ -251,14 +251,14 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
         <GlassCard
           variant="default"
           padding
-          className="bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card"
+          className="border border-black/[0.08] bg-white/70 shadow-card backdrop-blur-xl"
         >
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-arch-text-primary mb-3 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-arch-accent-blue" />
+          <h3 className="mb-3 flex items-center gap-2 font-semibold text-arch-text-primary text-sm uppercase tracking-wider">
+            <AlertCircle className="h-4 w-4 text-arch-accent-blue" />
             Machines at Bredell Workshop
           </h3>
           {bredell_workshop && bredell_workshop.length === 0 ? (
-            <p className="text-xs text-arch-text-tertiary">0 machines off-site</p>
+            <p className="text-arch-text-tertiary text-xs">0 machines off-site</p>
           ) : (
             <div className="space-y-2">
               {bredell_workshop?.map((m) => (
@@ -266,11 +266,11 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                   key={m.machine_name}
                   className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/40 p-2.5 text-xs"
                 >
-                  <span className="font-bold text-arch-text-primary font-mono">
+                  <span className="font-bold font-mono text-arch-text-primary">
                     {m.machine_name}
                   </span>
-                  <p className="text-arch-text-secondary mt-0.5">{m.reason}</p>
-                  <p className="text-[10px] text-arch-text-tertiary mt-0.5">Since: {m.date_in}</p>
+                  <p className="mt-0.5 text-arch-text-secondary">{m.reason}</p>
+                  <p className="mt-0.5 text-[10px] text-arch-text-tertiary">Since: {m.date_in}</p>
                 </div>
               ))}
             </div>

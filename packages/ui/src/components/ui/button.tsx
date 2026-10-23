@@ -5,39 +5,39 @@ import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shrink-0',
+  'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap rounded-md font-medium text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs border border-transparent',
+          'border border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs border border-transparent',
+          'border border-transparent bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
         outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-2xs',
+          'border border-input bg-background shadow-2xs hover:bg-accent hover:text-accent-foreground',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-transparent',
-        ghost: 'hover:bg-accent hover:text-accent-foreground border border-transparent',
-        link: 'text-primary underline-offset-4 hover:underline border border-transparent bg-transparent',
+          'border border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'border border-transparent hover:bg-accent hover:text-accent-foreground',
+        link: 'border border-transparent bg-transparent text-primary underline-offset-4 hover:underline',
         glass:
-          'bg-white/70 backdrop-blur-md text-neutral-900 border border-white/40 hover:bg-white/85 shadow-xs active:scale-[0.98]',
+          'border border-white/40 bg-white/70 text-neutral-900 shadow-xs backdrop-blur-md hover:bg-white/85 active:scale-[0.98]',
       },
       size: {
         // Geist sizes
-        tiny: 'h-6 px-2 text-[11px] gap-1 [&>svg]:w-3 [&>svg]:h-3',
-        small: 'h-8 px-3 text-xs gap-1.5 [&>svg]:w-3.5 [&>svg]:h-3.5',
-        medium: 'h-9 px-4 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4',
-        large: 'h-10 px-5 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4',
+        tiny: 'h-6 gap-1 px-2 text-[11px] [&>svg]:h-3 [&>svg]:w-3',
+        small: 'h-8 gap-1.5 px-3 text-xs [&>svg]:h-3.5 [&>svg]:w-3.5',
+        medium: 'h-9 gap-2 px-4 text-sm [&>svg]:h-4 [&>svg]:w-4',
+        large: 'h-10 gap-2 px-5 text-sm [&>svg]:h-4 [&>svg]:w-4',
 
         // Backward-compatible sizes
-        default: 'h-9 px-4 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4',
-        sm: 'h-8 px-3 text-xs gap-1.5 [&>svg]:w-3.5 [&>svg]:h-3.5',
-        lg: 'h-10 px-5 text-sm gap-2 [&>svg]:w-4 [&>svg]:h-4',
-        icon: 'h-9 w-9 p-0 [&>svg]:w-4 [&>svg]:h-4',
+        default: 'h-9 gap-2 px-4 text-sm [&>svg]:h-4 [&>svg]:w-4',
+        sm: 'h-8 gap-1.5 px-3 text-xs [&>svg]:h-3.5 [&>svg]:w-3.5',
+        lg: 'h-10 gap-2 px-5 text-sm [&>svg]:h-4 [&>svg]:w-4',
+        icon: 'h-9 w-9 p-0 [&>svg]:h-4 [&>svg]:w-4',
       },
       shape: {
-        square: 'rounded-md aspect-square p-0',
-        circle: 'rounded-full aspect-square p-0',
+        square: 'aspect-square rounded-md p-0',
+        circle: 'aspect-square rounded-full p-0',
         rounded: 'rounded-full px-5',
         pill: 'rounded-full px-5',
       },
@@ -134,15 +134,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {loading && <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" aria-hidden="true" />}
+        {loading && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden="true" />}
         {!loading && prefix && (
-          <span className="shrink-0 inline-flex items-center" aria-hidden="true">
+          <span className="inline-flex shrink-0 items-center" aria-hidden="true">
             {prefix}
           </span>
         )}
         {children}
         {!loading && suffix && (
-          <span className="shrink-0 inline-flex items-center" aria-hidden="true">
+          <span className="inline-flex shrink-0 items-center" aria-hidden="true">
             {suffix}
           </span>
         )}
@@ -196,13 +196,13 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
         {...props}
       >
         {prefix && (
-          <span className="shrink-0 inline-flex items-center" aria-hidden="true">
+          <span className="inline-flex shrink-0 items-center" aria-hidden="true">
             {prefix}
           </span>
         )}
         {children}
         {suffix && (
-          <span className="shrink-0 inline-flex items-center" aria-hidden="true">
+          <span className="inline-flex shrink-0 items-center" aria-hidden="true">
             {suffix}
           </span>
         )}

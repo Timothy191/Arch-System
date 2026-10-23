@@ -448,10 +448,10 @@ export function DelayEntriesForm({
       <GlassCard>
         <div className="p-6">
           <div className="animate-pulse">
-            <div className="h-4 bg-[var(--bg-tertiary)] rounded mb-4" />
-            <div className="h-8 bg-[var(--bg-tertiary)] rounded mb-2" />
-            <div className="h-8 bg-[var(--bg-tertiary)] rounded mb-2" />
-            <div className="h-8 bg-[var(--bg-tertiary)] rounded" />
+            <div className="mb-4 h-4 rounded bg-[var(--bg-tertiary)]" />
+            <div className="mb-2 h-8 rounded bg-[var(--bg-tertiary)]" />
+            <div className="mb-2 h-8 rounded bg-[var(--bg-tertiary)]" />
+            <div className="h-8 rounded bg-[var(--bg-tertiary)]" />
           </div>
         </div>
       </GlassCard>
@@ -463,7 +463,7 @@ export function DelayEntriesForm({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">Delay Entries</h3>
+            <h3 className="font-medium text-[var(--text-heading)] text-lg">Delay Entries</h3>
             <p className="text-[var(--text-muted)] text-sm">
               Log delays with start/end times for accurate tracking
             </p>
@@ -471,12 +471,12 @@ export function DelayEntriesForm({
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-[var(--text-muted)] text-xs">Total Delay Hours (12h Shift)</p>
-              <p className="text-2xl font-medium text-accent-red">
+              <p className="font-medium text-2xl text-accent-red">
                 {(totalDelayHours + engineeringDelayHours).toFixed(2)}h
-                <span className="text-xs text-[var(--text-muted)] ml-1">/ 12h max</span>
+                <span className="ml-1 text-[var(--text-muted)] text-xs">/ 12h max</span>
               </p>
               {engineeringDelayHours > 0 && (
-                <p className="text-[11px] text-amber-700 font-mono">
+                <p className="font-mono text-[11px] text-amber-700">
                   Eng: {engineeringDelayHours.toFixed(1)}h + CR: {totalDelayHours.toFixed(1)}h (Max
                   CR: {Math.max(0, 12 - engineeringDelayHours).toFixed(1)}h)
                 </p>
@@ -485,7 +485,7 @@ export function DelayEntriesForm({
             <button
               type="button"
               onClick={() => setShowHelp(!showHelp)}
-              className="text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+              className="text-[var(--text-muted)] transition-colors hover:text-[var(--text-heading)]"
               title="Show help"
             >
               <HelpCircle size={20} />
@@ -494,7 +494,7 @@ export function DelayEntriesForm({
               <button
                 type="button"
                 onClick={addDelayEntry}
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-sm font-medium rounded-lg transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-3 py-2 font-medium text-sm text-white transition-colors hover:bg-[var(--accent-blue)]/90"
               >
                 <Plus size={16} />
                 Add Delay
@@ -504,7 +504,7 @@ export function DelayEntriesForm({
         </div>
 
         {engineeringDelayHours > 0 && (
-          <div className="p-3 rounded-lg bg-amber-50/90 border border-amber-300/70 text-xs text-amber-900 space-y-1">
+          <div className="space-y-1 rounded-lg border border-amber-300/70 bg-amber-50/90 p-3 text-amber-900 text-xs">
             <div className="flex items-center justify-between font-semibold">
               <span>
                 Engineering Breakdown Delay Synced ({engineeringDelayHours.toFixed(1)}h logged)
@@ -522,12 +522,12 @@ export function DelayEntriesForm({
 
         {/* Help Section */}
         {showHelp && (
-          <div className="p-4 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg space-y-3">
+          <div className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-4">
             <div className="flex items-start gap-2">
-              <Info size={16} className="text-[var(--accent-blue)] mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-[var(--text-secondary)]">
-                <p className="font-medium text-[var(--text-heading)] mb-1">Delay Entry Guide</p>
-                <ul className="space-y-1.5 list-disc list-inside">
+              <Info size={16} className="mt-0.5 flex-shrink-0 text-[var(--accent-blue)]" />
+              <div className="text-[var(--text-secondary)] text-sm">
+                <p className="mb-1 font-medium text-[var(--text-heading)]">Delay Entry Guide</p>
+                <ul className="list-inside list-disc space-y-1.5">
                   <li>
                     <strong>Category:</strong> Select the type of delay (External, Production,
                     Engineering)
@@ -558,10 +558,10 @@ export function DelayEntriesForm({
         )}
 
         {delayEntries.length === 0 ? (
-          <div className="text-center py-8 text-[var(--text-muted)]">
+          <div className="py-8 text-center text-[var(--text-muted)]">
             <Clock size={32} className="mx-auto mb-2 opacity-50" />
             <p>No delay entries yet</p>
-            {!readOnly && <p className="text-sm mt-1">Click "Add Delay" to log a delay</p>}
+            {!readOnly && <p className="mt-1 text-sm">Click "Add Delay" to log a delay</p>}
           </div>
         ) : (
           <div className="space-y-3">
@@ -573,13 +573,13 @@ export function DelayEntriesForm({
               return (
                 <div
                   key={entry.id || index}
-                  className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg space-y-3"
+                  className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
+                    <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                       {/* Category */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
+                        <label className="flex items-center gap-1 text-[var(--text-secondary)] text-xs">
                           Category <span className="text-accent-red">*</span>
                           <span title="Select the type of delay: External, Production, or Engineering">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />
@@ -593,7 +593,7 @@ export function DelayEntriesForm({
                             updateDelayEntry(index, 'delay_category_id', e.target.value)
                           }
                           disabled={readOnly || entry.status === 'committed'}
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <option value="">Select category...</option>
                           {categories.map((cat) => (
@@ -606,7 +606,7 @@ export function DelayEntriesForm({
 
                       {/* Start Time */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
+                        <label className="flex items-center gap-1 text-[var(--text-secondary)] text-xs">
                           Start Time <span className="text-accent-red">*</span>
                           <span title="When the delay began. Displayed in local time, stored in UTC.">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />
@@ -628,13 +628,13 @@ export function DelayEntriesForm({
                           disabled={
                             readOnly || entry.status === 'committed' || entry.is_manual_override
                           }
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </div>
 
                       {/* End Time */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
+                        <label className="flex items-center gap-1 text-[var(--text-secondary)] text-xs">
                           End Time <span className="text-accent-red">*</span>
                           <span title="When the delay ended. Duration is auto-calculated from start time.">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />
@@ -656,22 +656,22 @@ export function DelayEntriesForm({
                           disabled={
                             readOnly || entry.status === 'committed' || entry.is_manual_override
                           }
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </div>
 
                       {/* Duration Display */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs block">
+                        <label className="block text-[var(--text-secondary)] text-xs">
                           Duration
                         </label>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-medium text-[var(--text-heading)]">
+                          <span className="font-medium text-[var(--text-heading)] text-lg">
                             {duration.toFixed(2)}h
                           </span>
                           {!readOnly && entry.status === 'draft' && (
                             <label
-                              className="flex items-center gap-1 cursor-pointer"
+                              className="flex cursor-pointer items-center gap-1"
                               title="Enable to manually specify duration when exact times aren't available"
                             >
                               <input
@@ -680,9 +680,9 @@ export function DelayEntriesForm({
                                 onChange={(e) =>
                                   updateDelayEntry(index, 'is_manual_override', e.target.checked)
                                 }
-                                className="w-4 h-4 rounded border-[var(--border-default)]"
+                                className="h-4 w-4 rounded border-[var(--border-default)]"
                               />
-                              <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+                              <span className="flex items-center gap-1 text-[var(--text-muted)] text-xs">
                                 Override
                                 <HelpCircle size={10} className="text-[var(--text-muted)]" />
                               </span>
@@ -697,7 +697,7 @@ export function DelayEntriesForm({
                       <button
                         type="button"
                         onClick={() => handleRemoveClick(index)}
-                        className="text-[var(--text-muted)] hover:text-accent-red transition-colors"
+                        className="text-[var(--text-muted)] transition-colors hover:text-accent-red"
                         title="Remove delay entry"
                       >
                         <Trash2 size={18} />
@@ -708,7 +708,7 @@ export function DelayEntriesForm({
                   {/* Manual Override Duration */}
                   {entry.is_manual_override && !readOnly && entry.status === 'draft' && (
                     <div className="space-y-1">
-                      <label className="text-[var(--text-secondary)] text-xs block">
+                      <label className="block text-[var(--text-secondary)] text-xs">
                         Manual Duration (hours) <span className="text-accent-red">*</span>
                       </label>
                       <input
@@ -726,7 +726,7 @@ export function DelayEntriesForm({
                             parseFloat(e.target.value) || null
                           )
                         }
-                        className="w-full md:w-48 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none md:w-48"
                       />
                       <p className="text-[var(--text-muted)] text-xs">
                         Manual entry flagged for audit trail
@@ -736,7 +736,7 @@ export function DelayEntriesForm({
 
                   {/* Description */}
                   <div className="space-y-1">
-                    <label className="text-[var(--text-secondary)] text-xs block">
+                    <label className="block text-[var(--text-secondary)] text-xs">
                       Description (optional)
                     </label>
                     <textarea
@@ -744,14 +744,14 @@ export function DelayEntriesForm({
                       onChange={(e) => updateDelayEntry(index, 'description', e.target.value)}
                       disabled={readOnly || entry.status === 'committed'}
                       rows={2}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1.5 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="Describe the delay cause and impact..."
                     />
                   </div>
 
                   {/* Status Badge */}
                   {entry.status === 'committed' && (
-                    <div className="flex items-center gap-2 text-xs text-[var(--accent-green)]">
+                    <div className="flex items-center gap-2 text-[var(--accent-green)] text-xs">
                       <Clock size={14} />
                       Committed - locked for editing
                     </div>
@@ -759,7 +759,7 @@ export function DelayEntriesForm({
 
                   {/* Validation Error */}
                   {errors[index] && (
-                    <div className="flex items-center gap-2 text-xs text-accent-red bg-red-50/80 px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2 rounded-lg bg-red-50/80 px-3 py-2 text-accent-red text-xs">
                       <AlertCircle size={14} />
                       {errors[index]}
                     </div>
@@ -772,12 +772,12 @@ export function DelayEntriesForm({
 
         {/* Save Button */}
         {!readOnly && delayEntries.length > 0 && delayEntries.some((d) => d.status === 'draft') && (
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+          <div className="flex justify-end gap-3 border-[var(--border-default)] border-t pt-4">
             <button
               type="button"
               onClick={saveDelayEntries}
               disabled={isSubmitting}
-              className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
+              className="min-w-[120px] rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
             >
               {isSubmitting ? 'Saving...' : 'Save Delays'}
             </button>
@@ -785,7 +785,7 @@ export function DelayEntriesForm({
               type="button"
               onClick={handleCommitClick}
               disabled={isCommitting}
-              className="bg-[var(--accent-green)] hover:bg-[var(--accent-green)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 min-w-[140px]"
+              className="flex min-w-[140px] items-center gap-2 rounded-lg bg-[var(--accent-green)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--accent-green)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
             >
               {isCommitting ? (
                 'Committing...'
@@ -801,19 +801,19 @@ export function DelayEntriesForm({
 
         {/* Confirmation Dialog */}
         {showConfirmDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-window">
-              <div className="flex items-start gap-3 mb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-6 shadow-window">
+              <div className="mb-4 flex items-start gap-3">
                 {confirmAction === 'commit' ? (
                   <CheckCircle className="text-[var(--accent-green)]" size={24} />
                 ) : (
                   <Trash2 className="text-accent-red" size={24} />
                 )}
                 <div>
-                  <h3 className="text-lg font-medium text-[var(--text-heading)]">
+                  <h3 className="font-medium text-[var(--text-heading)] text-lg">
                     {confirmAction === 'commit' ? 'Commit Delay Entries' : 'Remove Delay Entry'}
                   </h3>
-                  <p className="text-[var(--text-secondary)] text-sm mt-1">
+                  <p className="mt-1 text-[var(--text-secondary)] text-sm">
                     {confirmAction === 'commit'
                       ? 'This will transition all draft delay entries to committed status. Committed entries cannot be edited. Are you sure?'
                       : 'This will remove the delay entry. This action cannot be undone. Are you sure?'}
@@ -828,7 +828,7 @@ export function DelayEntriesForm({
                     setConfirmAction(null);
                     setConfirmIndex(null);
                   }}
-                  className="px-4 py-2 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-heading)] rounded-lg transition-colors font-medium"
+                  className="rounded-lg bg-[var(--bg-secondary)] px-4 py-2 font-medium text-[var(--text-heading)] transition-colors hover:bg-[var(--bg-tertiary)]"
                 >
                   Cancel
                 </button>
@@ -844,10 +844,10 @@ export function DelayEntriesForm({
                     setConfirmAction(null);
                     setConfirmIndex(null);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-colors font-medium ${
+                  className={`rounded-lg px-4 py-2 font-medium transition-colors ${
                     confirmAction === 'commit'
-                      ? 'bg-[var(--accent-green)] hover:bg-[var(--accent-green)]/90 text-white'
-                      : 'bg-accent-red hover:bg-red-600 text-white'
+                      ? 'bg-[var(--accent-green)] text-white hover:bg-[var(--accent-green)]/90'
+                      : 'bg-accent-red text-white hover:bg-red-600'
                   }`}
                 >
                   {confirmAction === 'commit' ? 'Confirm Commit' : 'Remove'}

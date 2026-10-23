@@ -46,6 +46,12 @@ if pnpm deps:lint > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; 
 echo -n "🔄 13. Circular Dependencies... "
 if pnpm cycles > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm cycles' and break the reported import cycle (dependency inversion or extract shared code)."; exit 1; fi
 
+echo -n "🎨 14. Tailwind Utility Composition... "
+if pnpm audit:tailwind > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm audit:tailwind' and combine repeated utility chains into a component, CVA variant, or cn() constant. Never regenerate the baseline to hide a violation."; exit 1; fi
+
+echo -n "✂️  15. Dead Code & Unresolved Imports (Knip)... "
+if pnpm knip > /dev/null 2>&1; then echo "✅ PASS"; else echo "❌ FAIL"; echo "AGENT DIRECTIVE: Run 'pnpm knip' and remove dead files/unresolved imports."; exit 1; fi
+
 echo "========================================================"
 echo "✅ [AGENT VERIFICATION] 100% PASS. Code is real-world ready."
 echo "========================================================"

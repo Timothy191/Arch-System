@@ -24,8 +24,8 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
     return (
       <GlassCard className="p-6 text-center">
         <div className="flex flex-col items-center justify-center py-6 text-neutral-500">
-          <Activity className="h-8 w-8 mb-2 stroke-1 text-neutral-400" />
-          <p className="text-sm font-medium">
+          <Activity className="mb-2 h-8 w-8 stroke-1 text-neutral-400" />
+          <p className="font-medium text-sm">
             No machine telemetry or operations recorded for this shift.
           </p>
         </div>
@@ -34,21 +34,21 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
   }
 
   return (
-    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] shadow-card bg-[var(--vibrancy-surface)] backdrop-blur-xl">
-      <div className="border-b border-[var(--border-subtle)] px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-secondary)]/50">
+    <GlassCard className="overflow-hidden border border-[var(--border-subtle)] bg-[var(--vibrancy-surface)] shadow-card backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/50 px-5 py-4">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--text-heading)] tracking-tight flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-sm tracking-tight">
             <Activity className="h-4 w-4 text-[var(--text-secondary)]" />
             Fleet Availability & SMU Performance
           </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="mt-0.5 text-[var(--text-muted)] text-xs">
             Machine operating hours, recorded operational delays, and mechanical availability
           </p>
         </div>
       </div>
 
       {/* Table Header Wrapper to keep headers fixed if we scroll */}
-      <div className="w-full text-left text-xs bg-[var(--bg-secondary)]/80 text-[var(--text-secondary)] font-medium grid grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] border-b border-[var(--border-subtle)]">
+      <div className="grid w-full grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80 text-left font-medium text-[var(--text-secondary)] text-xs">
         <div className="px-5 py-3">Machine</div>
         <div className="px-4 py-3">Type</div>
         <div className="px-4 py-3">Operating Window</div>
@@ -80,46 +80,46 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
             return (
               <div
                 key={item.machine_id}
-                className="absolute top-0 left-0 w-full text-xs hover:bg-neutral-50/70 transition-colors border-b border-black/[0.06] grid grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center"
+                className="absolute top-0 left-0 grid w-full grid-cols-[2fr_1fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center border-black/[0.06] border-b text-xs transition-colors hover:bg-neutral-50/70"
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
-                <div className="px-5 font-semibold text-[var(--text-heading)] flex items-center gap-2">
+                <div className="flex items-center gap-2 px-5 font-semibold text-[var(--text-heading)]">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   {item.machine_name}
                 </div>
-                <div className="px-4 text-[var(--text-secondary)] capitalize truncate">
+                <div className="truncate px-4 text-[var(--text-secondary)] capitalize">
                   {item.machine_type}
                 </div>
-                <div className="px-4 text-[var(--text-muted)] font-mono text-[11px] truncate">
+                <div className="truncate px-4 font-mono text-[11px] text-[var(--text-muted)]">
                   {item.start_smu != null
                     ? `SMR ${item.start_smu.toFixed(1)} – ${item.end_smu != null ? item.end_smu.toFixed(1) : 'Active'}`
                     : item.start_time
                       ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`
                       : 'Not logged'}
                 </div>
-                <div className="px-4 text-right font-mono font-medium text-[var(--text-heading)]">
+                <div className="px-4 text-right font-medium font-mono text-[var(--text-heading)]">
                   {item.hours_worked.toFixed(1)}h
                 </div>
-                <div className="px-4 text-right font-mono font-medium text-amber-700">
+                <div className="px-4 text-right font-medium font-mono text-amber-700">
                   {item.delay_hours > 0 ? `${item.delay_hours.toFixed(1)}h` : '—'}
                 </div>
-                <div className="px-4 text-right font-mono font-medium text-rose-700">
+                <div className="px-4 text-right font-medium font-mono text-rose-700">
                   {item.breakdown_hours > 0 ? `${item.breakdown_hours.toFixed(1)}h` : '—'}
                 </div>
                 <div className="px-5 text-right font-mono font-semibold">
                   <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
+                    className={`inline-flex items-center rounded px-2 py-0.5 font-medium text-[11px] ${
                       isHigh
-                        ? 'bg-emerald-100/70 text-emerald-800 border border-emerald-200'
+                        ? 'border border-emerald-200 bg-emerald-100/70 text-emerald-800'
                         : isMedium
-                          ? 'bg-amber-100/70 text-amber-800 border border-amber-200'
-                          : 'bg-rose-100/70 text-rose-800 border border-rose-200'
+                          ? 'border border-amber-200 bg-amber-100/70 text-amber-800'
+                          : 'border border-rose-200 bg-rose-100/70 text-rose-800'
                     }`}
                   >
-                    {!isHigh && <AlertTriangle className="h-3 w-3 mr-1" />}
+                    {!isHigh && <AlertTriangle className="mr-1 h-3 w-3" />}
                     {item.mechanical_availability_pct.toFixed(1)}%
                   </span>
                 </div>

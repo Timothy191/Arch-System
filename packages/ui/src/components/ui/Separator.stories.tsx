@@ -17,8 +17,8 @@ export const Horizontal: Story = {
   render: () => (
     <div className="w-64">
       <div className="space-y-1">
-        <h4 className="text-sm font-medium leading-none">Arch OS Core</h4>
-        <p className="text-sm text-muted-foreground">
+        <h4 className="font-medium text-sm leading-none">Arch OS Core</h4>
+        <p className="text-muted-foreground text-sm">
           Advanced operating system for industrial mining.
         </p>
       </div>

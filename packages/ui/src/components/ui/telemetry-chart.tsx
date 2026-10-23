@@ -67,10 +67,10 @@ export function TelemetryChart({
     <GlassCard className={cn('flex flex-col gap-4', className)}>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-[var(--text-heading)] uppercase tracking-wider">
+          <h3 className="font-medium text-[var(--text-heading)] text-sm uppercase tracking-wider">
             {title}
           </h3>
-          <p className="text-[10px] text-[var(--text-muted)] font-mono">
+          <p className="font-mono text-[10px] text-[var(--text-muted)]">
             {unit && `Unit: ${unit}`}
           </p>
         </div>

@@ -47,55 +47,55 @@ export const MachineStatusPanel = React.forwardRef<HTMLDivElement, MachineStatus
         ref={ref}
         variant="window"
         onClick={onClick}
-        className={cn('p-5 flex flex-col gap-4', className)}
+        className={cn('flex flex-col gap-4 p-5', className)}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-semibold text-[var(--accent-blue)] px-2 py-0.5 rounded bg-[var(--accent-blue)]/10">
+              <span className="rounded bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono font-semibold text-[var(--accent-blue)] text-xs">
                 {machineId}
               </span>
-              <h4 className="font-semibold text-sm text-[var(--text-heading)] truncate">{name}</h4>
+              <h4 className="truncate font-semibold text-[var(--text-heading)] text-sm">{name}</h4>
             </div>
-            {model && <p className="text-xs text-[var(--text-secondary)] mt-0.5">{model}</p>}
+            {model && <p className="mt-0.5 text-[var(--text-secondary)] text-xs">{model}</p>}
           </div>
           <StatusBadge status={status} size="sm" />
         </div>
 
         {/* Primary Metrics Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 border-t border-black/[0.06]">
+        <div className="grid grid-cols-2 gap-2.5 border-black/[0.06] border-t pt-2 sm:grid-cols-3">
           {uptimePct !== undefined && (
-            <div className="p-2 rounded-lg bg-black/[0.02] border border-black/[0.04]">
-              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
-                <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
+            <div className="rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
+              <div className="mb-1 flex items-center gap-1.5 text-[var(--text-secondary)] text-xs">
+                <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Uptime</span>
               </div>
-              <span className="font-mono font-bold text-sm text-[var(--text-heading)]">
+              <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
                 {uptimePct}%
               </span>
             </div>
           )}
 
           {hoursRun !== undefined && (
-            <div className="p-2 rounded-lg bg-black/[0.02] border border-black/[0.04]">
-              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
-                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+            <div className="rounded-lg border border-black/[0.04] bg-black/[0.02] p-2">
+              <div className="mb-1 flex items-center gap-1.5 text-[var(--text-secondary)] text-xs">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Hours</span>
               </div>
-              <span className="font-mono font-bold text-sm text-[var(--text-heading)]">
+              <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
                 {hoursRun.toLocaleString()}h
               </span>
             </div>
           )}
 
           {operator && (
-            <div className="p-2 rounded-lg bg-black/[0.02] border border-black/[0.04] col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
-                <Cpu className="w-3.5 h-3.5" aria-hidden="true" />
+            <div className="col-span-2 rounded-lg border border-black/[0.04] bg-black/[0.02] p-2 sm:col-span-1">
+              <div className="mb-1 flex items-center gap-1.5 text-[var(--text-secondary)] text-xs">
+                <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Operator</span>
               </div>
-              <span className="font-medium text-xs text-[var(--text-heading)] truncate block">
+              <span className="block truncate font-medium text-[var(--text-heading)] text-xs">
                 {operator}
               </span>
             </div>
@@ -108,10 +108,10 @@ export const MachineStatusPanel = React.forwardRef<HTMLDivElement, MachineStatus
             {telemetry.map((t, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-2 rounded-lg bg-black/[0.015] border border-black/[0.04]"
+                className="flex items-center justify-between rounded-lg border border-black/[0.04] bg-black/[0.015] p-2"
               >
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-                  {t.icon ?? <Activity className="w-3.5 h-3.5" aria-hidden="true" />}
+                  {t.icon ?? <Activity className="h-3.5 w-3.5" aria-hidden="true" />}
                   <span>{t.label}</span>
                 </div>
                 <span className="font-mono font-semibold text-[var(--text-heading)]">
@@ -124,7 +124,7 @@ export const MachineStatusPanel = React.forwardRef<HTMLDivElement, MachineStatus
 
         {/* Footer timestamp */}
         {lastPing && (
-          <div className="text-[10px] text-[var(--text-secondary)] flex items-center justify-between pt-2 border-t border-black/[0.04]">
+          <div className="flex items-center justify-between border-black/[0.04] border-t pt-2 text-[10px] text-[var(--text-secondary)]">
             <span>Last Telemetry Ping:</span>
             <span className="font-mono">{lastPing}</span>
           </div>

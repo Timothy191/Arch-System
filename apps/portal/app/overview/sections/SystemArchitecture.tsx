@@ -88,21 +88,21 @@ export default function SystemArchitecture() {
       {/* Design-System Panel for End-to-End System Architecture Topology Header, KPIs & View Toggle */}
       <Card
         data-testid="system-architecture-header-panel"
-        className="p-6 border border-white/60 bg-white/80 backdrop-blur-2xl shadow-glass-depth space-y-5 relative overflow-hidden"
+        className="relative space-y-5 overflow-hidden border border-white/60 bg-white/80 p-6 shadow-glass-depth backdrop-blur-2xl"
       >
-        <div className="h-1 w-full absolute top-0 left-0 bg-gradient-to-r from-accent-blue via-emerald-500 to-indigo-600" />
+        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent-blue via-emerald-500 to-indigo-600" />
 
-        <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-start">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-accent-blue/10 border border-accent-blue/20 text-[10px] font-mono uppercase tracking-wider text-accent-blue font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-0.5 font-mono font-semibold text-[10px] text-accent-blue uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-blue" />
               Multi-Tier Industrial Architecture · Zero-Proxy RLS
             </div>
-            <h2 className="text-2xl font-semibold text-text-heading flex items-center gap-2.5">
-              <Network className="w-6 h-6 text-accent-blue shrink-0" />
+            <h2 className="flex items-center gap-2.5 font-semibold text-2xl text-text-heading">
+              <Network className="h-6 w-6 shrink-0 text-accent-blue" />
               End-to-End System Architecture Topology
             </h2>
-            <p className="text-text-secondary text-sm max-w-3xl">
+            <p className="max-w-3xl text-sm text-text-secondary">
               Multi-tier industrial architecture connecting 8 Core Operational Modules to Supabase
               PostgreSQL 17, Hybrid Redis 7.4, and real-time SCADA telemetry
             </p>
@@ -113,20 +113,20 @@ export default function SystemArchitecture() {
             data-testid="architecture-view-toggle"
             role="group"
             aria-label="Architecture visualization mode"
-            className="inline-flex items-center gap-1 p-1 rounded-xl bg-bg-secondary border border-border-subtle self-start shrink-0 shadow-inner"
+            className="inline-flex shrink-0 items-center gap-1 self-start rounded-xl border border-border-subtle bg-bg-secondary p-1 shadow-inner"
           >
             <button
               type="button"
               data-testid="view-toggle-cards"
               aria-pressed={viewMode === 'cards'}
               onClick={() => setViewMode('cards')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
                 viewMode === 'cards'
                   ? 'bg-accent-blue text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-heading hover:bg-white/60'
+                  : 'text-text-secondary hover:bg-white/60 hover:text-text-heading'
               }`}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <LayoutGrid className="h-3.5 w-3.5" />
               <span>Cards & Flow View</span>
             </button>
             <button
@@ -134,16 +134,16 @@ export default function SystemArchitecture() {
               data-testid="view-toggle-n8n"
               aria-pressed={viewMode === 'node-canvas'}
               onClick={() => setViewMode('node-canvas')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
                 viewMode === 'node-canvas'
                   ? 'bg-accent-blue text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-heading hover:bg-white/60'
+                  : 'text-text-secondary hover:bg-white/60 hover:text-text-heading'
               }`}
             >
-              <Workflow className="w-3.5 h-3.5" />
+              <Workflow className="h-3.5 w-3.5" />
               <span>n8n Node Canvas</span>
               <span
-                className={`px-1.5 py-0.2 rounded text-[9px] font-mono ${
+                className={`rounded px-1.5 py-0.2 font-mono text-[9px] ${
                   viewMode === 'node-canvas'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-500/15 text-emerald-700'
@@ -157,56 +157,56 @@ export default function SystemArchitecture() {
               data-testid="view-toggle-both"
               aria-pressed={viewMode === 'both'}
               onClick={() => setViewMode('both')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
                 viewMode === 'both'
                   ? 'bg-accent-blue text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-heading hover:bg-white/60'
+                  : 'text-text-secondary hover:bg-white/60 hover:text-text-heading'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className="h-3.5 w-3.5" />
               <span>Combined View</span>
             </button>
           </div>
         </div>
 
         {/* 5 Design-System KPI Tiles inside Panel */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 border-t border-border-subtle">
-          <div className="px-4 py-2.5 rounded-xl bg-bg-secondary/80 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
+        <div className="grid grid-cols-2 gap-3 border-border-subtle border-t pt-3 sm:grid-cols-5">
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/80 px-4 py-2.5">
+            <div className="font-mono text-[10px] text-text-muted uppercase tracking-wider">
               Core Modules
             </div>
-            <div className="text-lg font-bold text-text-heading mt-0.5">
+            <div className="mt-0.5 font-bold text-lg text-text-heading">
               {DEPARTMENTS.length} / 8
             </div>
           </div>
-          <div className="px-4 py-2.5 rounded-xl bg-bg-secondary/80 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/80 px-4 py-2.5">
+            <div className="font-mono text-[10px] text-text-muted uppercase tracking-wider">
               Active Routes
             </div>
-            <div className="text-lg font-bold text-accent-blue mt-0.5">{totalRoutes}</div>
+            <div className="mt-0.5 font-bold text-accent-blue text-lg">{totalRoutes}</div>
           </div>
-          <div className="px-4 py-2.5 rounded-xl bg-bg-secondary/80 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/80 px-4 py-2.5">
+            <div className="font-mono text-[10px] text-text-muted uppercase tracking-wider">
               DB Migrations
             </div>
-            <div className="text-lg font-bold text-accent-green mt-0.5">
+            <div className="mt-0.5 font-bold text-accent-green text-lg">
               {GIT_PROVENANCE_METRICS.totalMigrations}
             </div>
           </div>
-          <div className="px-4 py-2.5 rounded-xl bg-bg-secondary/80 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted">
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/80 px-4 py-2.5">
+            <div className="font-mono text-[10px] text-text-muted uppercase tracking-wider">
               Backend Nodes
             </div>
-            <div className="text-lg font-bold text-text-heading mt-0.5">
+            <div className="mt-0.5 font-bold text-lg text-text-heading">
               {BACKEND_SERVICES.length}
             </div>
           </div>
-          <div className="px-4 py-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 col-span-2 sm:col-span-1">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+          <div className="col-span-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-2.5 sm:col-span-1">
+            <div className="flex items-center gap-1 font-mono text-[10px] text-emerald-700 uppercase tracking-wider">
+              <Clock className="h-3 w-3" />
               Time Worked
             </div>
-            <div className="text-lg font-bold text-emerald-900 mt-0.5">
+            <div className="mt-0.5 font-bold text-emerald-900 text-lg">
               {timeWorked.activeEngineeringHours}h ({timeWorked.calendarDays}d)
             </div>
           </div>
@@ -220,29 +220,29 @@ export default function SystemArchitecture() {
       {(viewMode === 'cards' || viewMode === 'both') && (
         <div className="space-y-8" data-testid="architecture-cards-flow-view">
           {/* 4 Architectural Pillars */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {ARCHITECTURAL_PILLARS.map((pillar) => {
               const Icon = pillar.icon;
               return (
                 <Card key={pillar.title} className="overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between gap-2">
-                      <div className={`p-2 rounded-lg border ${pillar.bg}`}>
-                        <Icon className={`w-4 h-4 ${pillar.color}`} />
+                      <div className={`rounded-lg border p-2 ${pillar.bg}`}>
+                        <Icon className={`h-4 w-4 ${pillar.color}`} />
                       </div>
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge variant="outline" className="font-mono text-[10px]">
                         {pillar.badge}
                       </Badge>
                     </div>
-                    <CardTitle className="text-sm font-semibold text-text-heading mt-2">
+                    <CardTitle className="mt-2 font-semibold text-sm text-text-heading">
                       {pillar.title}
                     </CardTitle>
-                    <CardDescription className="text-xs font-mono">
+                    <CardDescription className="font-mono text-xs">
                       {pillar.subtitle}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-xs text-text-secondary leading-relaxed">
+                    <p className="text-text-secondary text-xs leading-relaxed">
                       {pillar.description}
                     </p>
                   </CardContent>
@@ -253,123 +253,123 @@ export default function SystemArchitecture() {
 
           {/* Layered Request & Data Flow Topology */}
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-semibold text-text-heading flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-accent-blue" />
+                <h3 className="flex items-center gap-2 font-semibold text-base text-text-heading">
+                  <Layers className="h-4 w-4 text-accent-blue" />
                   Layered Execution & Security Pipeline
                 </h3>
-                <p className="text-xs text-text-secondary mt-0.5">
+                <p className="mt-0.5 text-text-secondary text-xs">
                   Zero-proxy request flow from Edge authentication through Server Actions to
                   Supabase PostgreSQL 17 RLS
                 </p>
               </div>
               <Badge
                 variant="outline"
-                className="text-[10px] font-mono text-accent-green border-accent-green/30 bg-accent-green/10"
+                className="border-accent-green/30 bg-accent-green/10 font-mono text-[10px] text-accent-green"
               >
                 Zero Boundary Violations
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
+            <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-5">
               {/* Tier 1 */}
-              <div className="p-4 rounded-xl bg-bg-tertiary border border-border-subtle flex flex-col justify-between">
+              <div className="flex flex-col justify-between rounded-xl border border-border-subtle bg-bg-tertiary p-4">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-accent-blue font-semibold">
+                  <div className="font-mono font-semibold text-[10px] text-accent-blue uppercase tracking-wider">
                     Tier 01 · Edge & Auth
                   </div>
-                  <div className="text-sm font-semibold text-text-heading mt-1">
+                  <div className="mt-1 font-semibold text-sm text-text-heading">
                     Next.js 16 Proxy & SSR Session
                   </div>
-                  <p className="text-xs text-text-secondary mt-2">
+                  <p className="mt-2 text-text-secondary text-xs">
                     Validates HttpOnly PKCE cookies, enforces CSP nonces, and resolves employee role
                     + department claims.
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <div className="mt-3 flex items-center justify-between border-border-subtle border-t pt-2 font-mono text-[11px] text-text-muted">
                   <span>proxy.ts</span>
-                  <Lock className="w-3.5 h-3.5 text-accent-green" />
+                  <Lock className="h-3.5 w-3.5 text-accent-green" />
                 </div>
               </div>
 
               {/* Tier 2 */}
-              <div className="p-4 rounded-xl bg-bg-tertiary border border-border-subtle flex flex-col justify-between">
+              <div className="flex flex-col justify-between rounded-xl border border-border-subtle bg-bg-tertiary p-4">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-accent-blue font-semibold">
+                  <div className="font-mono font-semibold text-[10px] text-accent-blue uppercase tracking-wider">
                     Tier 02 · Presentation
                   </div>
-                  <div className="text-sm font-semibold text-text-heading mt-1">
+                  <div className="mt-1 font-semibold text-sm text-text-heading">
                     8 Core Operational Modules
                   </div>
-                  <p className="text-xs text-text-secondary mt-2">
+                  <p className="mt-2 text-text-secondary text-xs">
                     Pure light-mode OKLCH UI (@repo/ui + @repo/theme) with React 19 transitions and
                     TanStack Query state sync.
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <div className="mt-3 flex items-center justify-between border-border-subtle border-t pt-2 font-mono text-[11px] text-text-muted">
                   <span>apps/portal</span>
-                  <Building2 className="w-3.5 h-3.5 text-accent-blue" />
+                  <Building2 className="h-3.5 w-3.5 text-accent-blue" />
                 </div>
               </div>
 
               {/* Tier 3 */}
-              <div className="p-4 rounded-xl bg-bg-tertiary border border-border-subtle flex flex-col justify-between">
+              <div className="flex flex-col justify-between rounded-xl border border-border-subtle bg-bg-tertiary p-4">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-accent-blue font-semibold">
+                  <div className="font-mono font-semibold text-[10px] text-accent-blue uppercase tracking-wider">
                     Tier 03 · Contract & RPC
                   </div>
-                  <div className="text-sm font-semibold text-text-heading mt-1">
+                  <div className="mt-1 font-semibold text-sm text-text-heading">
                     Server Actions + @repo/contract
                   </div>
-                  <p className="text-xs text-text-secondary mt-2">
+                  <p className="mt-2 text-text-secondary text-xs">
                     Authenticate → Authorize → Validate via Zod (@repo/contract) → Rate-limit via
                     Redis → Invalidate cache tags.
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <div className="mt-3 flex items-center justify-between border-border-subtle border-t pt-2 font-mono text-[11px] text-text-muted">
                   <span>@repo/contract</span>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-accent-green" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-accent-green" />
                 </div>
               </div>
 
               {/* Tier 4 */}
-              <div className="p-4 rounded-xl bg-bg-tertiary border border-border-subtle flex flex-col justify-between">
+              <div className="flex flex-col justify-between rounded-xl border border-border-subtle bg-bg-tertiary p-4">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-accent-green font-semibold">
+                  <div className="font-mono font-semibold text-[10px] text-accent-green uppercase tracking-wider">
                     Tier 04 · Data Gateway
                   </div>
-                  <div className="text-sm font-semibold text-text-heading mt-1">
+                  <div className="mt-1 font-semibold text-sm text-text-heading">
                     @repo/supabase Primary & Replica
                   </div>
-                  <p className="text-xs text-text-secondary mt-2">
+                  <p className="mt-2 text-text-secondary text-xs">
                     Routes analytical dashboard reads to createReadReplicaClient() and transactional
                     writes to primary PostgreSQL 17.
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <div className="mt-3 flex items-center justify-between border-border-subtle border-t pt-2 font-mono text-[11px] text-text-muted">
                   <span>@repo/supabase</span>
-                  <Server className="w-3.5 h-3.5 text-accent-green" />
+                  <Server className="h-3.5 w-3.5 text-accent-green" />
                 </div>
               </div>
 
               {/* Tier 5 */}
-              <div className="p-4 rounded-xl bg-bg-tertiary border border-border-subtle flex flex-col justify-between">
+              <div className="flex flex-col justify-between rounded-xl border border-border-subtle bg-bg-tertiary p-4">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-accent-amber font-semibold">
+                  <div className="font-mono font-semibold text-[10px] text-accent-amber uppercase tracking-wider">
                     Tier 05 · Storage & Telemetry
                   </div>
-                  <div className="text-sm font-semibold text-text-heading mt-1">
+                  <div className="mt-1 font-semibold text-sm text-text-heading">
                     PostgreSQL 17 + Redis + SCADA
                   </div>
-                  <p className="text-xs text-text-secondary mt-2">
+                  <p className="mt-2 text-text-secondary text-xs">
                     {GIT_PROVENANCE_METRICS.totalMigrations} migrations, {DATABASE_SCHEMA.length}{' '}
                     core tables, Hybrid L1/L2 Redis 7.4, FUXA Modbus/OPC-UA, and C66 gate hardware.
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-text-muted">
+                <div className="mt-3 flex items-center justify-between border-border-subtle border-t pt-2 font-mono text-[11px] text-text-muted">
                   <span>@repo/database</span>
-                  <Cpu className="w-3.5 h-3.5 text-accent-amber" />
+                  <Cpu className="h-3.5 w-3.5 text-accent-amber" />
                 </div>
               </div>
             </div>
@@ -377,20 +377,20 @@ export default function SystemArchitecture() {
 
           {/* Visual Block-and-Line Example Backend Flow Diagrams */}
           <Card className="p-6" data-testid="visual-block-line-diagrams">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h3 className="text-base font-semibold text-text-heading flex items-center gap-2">
-                  <GitCommit className="w-4 h-4 text-accent-blue" />
+                <h3 className="flex items-center gap-2 font-semibold text-base text-text-heading">
+                  <GitCommit className="h-4 w-4 text-accent-blue" />
                   Visual Block-and-Line Architecture & Cross-Department Data Flows
                 </h3>
-                <p className="text-xs text-text-secondary mt-0.5">
+                <p className="mt-0.5 text-text-secondary text-xs">
                   End-to-end block-and-line illustrations showing how field telemetry, shift
                   budgets, and badge credentials flow across backend services
                 </p>
               </div>
               <Badge
                 variant="outline"
-                className="text-[10px] font-mono text-accent-blue border-accent-blue/30 bg-accent-blue/10"
+                className="border-accent-blue/30 bg-accent-blue/10 font-mono text-[10px] text-accent-blue"
               >
                 3 Live Inter-Department Pipelines
               </Badge>
@@ -400,31 +400,31 @@ export default function SystemArchitecture() {
               {EXAMPLE_BACKEND_FLOW_PIPELINES.map((pipeline) => (
                 <div
                   key={pipeline.id}
-                  className="p-4 rounded-xl bg-bg-secondary/60 border border-border-subtle space-y-4"
+                  className="space-y-4 rounded-xl border border-border-subtle bg-bg-secondary/60 p-4"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                     <div>
-                      <h4 className="text-sm font-semibold text-text-heading">{pipeline.title}</h4>
-                      <p className="text-xs text-text-secondary">{pipeline.subtitle}</p>
+                      <h4 className="font-semibold text-sm text-text-heading">{pipeline.title}</h4>
+                      <p className="text-text-secondary text-xs">{pipeline.subtitle}</p>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-mono w-fit">
+                    <Badge variant="outline" className="w-fit font-mono text-[10px]">
                       {pipeline.badge}
                     </Badge>
                   </div>
 
                   {/* Connected Blocks & Directional Lines */}
-                  <div className="grid grid-cols-1 lg:grid-cols-9 gap-2 items-center">
+                  <div className="grid grid-cols-1 items-center gap-2 lg:grid-cols-9">
                     {pipeline.nodes.map((node, idx) => (
                       <div key={node.id} className="contents">
                         {/* Block Node */}
                         <div
-                          className="lg:col-span-1 p-3 rounded-xl bg-white border-2 shadow-sm flex flex-col justify-between min-h-[148px] relative"
+                          className="relative flex min-h-[148px] flex-col justify-between rounded-xl border-2 bg-white p-3 shadow-sm lg:col-span-1"
                           style={{ borderColor: `${node.color}55` }}
                         >
                           <div>
                             <div className="flex items-center justify-between gap-1">
                               <span
-                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
+                                className="rounded px-1.5 py-0.5 font-bold font-mono text-[9px]"
                                 style={{
                                   backgroundColor: `${node.color}18`,
                                   color: node.color,
@@ -433,29 +433,29 @@ export default function SystemArchitecture() {
                                 {node.step}
                               </span>
                               <span
-                                className="w-2 h-2 rounded-full"
+                                className="h-2 w-2 rounded-full"
                                 style={{ backgroundColor: node.color }}
                               />
                             </div>
-                            <div className="text-xs font-semibold text-text-heading mt-1.5 leading-snug">
+                            <div className="mt-1.5 font-semibold text-text-heading text-xs leading-snug">
                               {node.title}
                             </div>
-                            <div className="text-[10px] font-mono text-text-muted mt-0.5">
+                            <div className="mt-0.5 font-mono text-[10px] text-text-muted">
                               {node.role}
                             </div>
-                            <p className="text-[11px] text-text-secondary mt-1.5 leading-relaxed">
+                            <p className="mt-1.5 text-[11px] text-text-secondary leading-relaxed">
                               {node.detail}
                             </p>
                           </div>
-                          <div className="mt-2 pt-1.5 border-t border-border-subtle text-[9px] font-mono text-accent-blue truncate">
+                          <div className="mt-2 truncate border-border-subtle border-t pt-1.5 font-mono text-[9px] text-accent-blue">
                             {node.protocol}
                           </div>
                         </div>
 
                         {/* Connecting Line + Arrow between blocks */}
                         {idx < pipeline.nodes.length - 1 && (
-                          <div className="lg:col-span-1 flex lg:flex-col items-center justify-center py-1 lg:py-0">
-                            <div className="hidden lg:flex items-center w-full">
+                          <div className="flex items-center justify-center py-1 lg:col-span-1 lg:flex-col lg:py-0">
+                            <div className="hidden w-full items-center lg:flex">
                               <div
                                 className="h-0.5 flex-1"
                                 style={{
@@ -465,11 +465,11 @@ export default function SystemArchitecture() {
                                 }}
                               />
                               <ArrowRight
-                                className="w-4 h-4 -ml-1 shrink-0"
+                                className="-ml-1 h-4 w-4 shrink-0"
                                 style={{ color: pipeline.nodes[idx + 1]?.color ?? node.color }}
                               />
                             </div>
-                            <span className="text-[9px] font-mono text-text-muted px-1.5 py-0.5 rounded bg-bg-tertiary border border-border-subtle mt-1">
+                            <span className="mt-1 rounded border border-border-subtle bg-bg-tertiary px-1.5 py-0.5 font-mono text-[9px] text-text-muted">
                               {node.protocol}
                             </span>
                           </div>
@@ -484,60 +484,60 @@ export default function SystemArchitecture() {
 
           {/* Hub -> 8 Core Operational Modules Topology Grid */}
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-semibold text-text-heading flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-accent-green" />
+                <h3 className="flex items-center gap-2 font-semibold text-base text-text-heading">
+                  <Activity className="h-4 w-4 text-accent-green" />
                   Central Hub Routing Topology (8 / 8 Active Modules)
                 </h3>
-                <p className="text-xs text-text-secondary mt-0.5">
+                <p className="mt-0.5 text-text-secondary text-xs">
                   Direct navigation and RBAC boundary mapping from Central Command (/hub) to all 8
                   operational modules
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               {DEPARTMENTS.map((dept) => (
-                <Card key={dept.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <Card key={dept.id} className="overflow-hidden transition-shadow hover:shadow-md">
                   <div className="h-1" style={{ backgroundColor: dept.color }} />
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-semibold text-text-heading">
+                      <CardTitle className="font-semibold text-sm text-text-heading">
                         {dept.name}
                       </CardTitle>
-                      <span className="text-[11px] font-mono text-text-muted">/{dept.slug}</span>
+                      <span className="font-mono text-[11px] text-text-muted">/{dept.slug}</span>
                     </div>
-                    <CardDescription className="text-xs line-clamp-2">
+                    <CardDescription className="line-clamp-2 text-xs">
                       {dept.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0 space-y-3">
+                  <CardContent className="space-y-3 pt-0">
                     <div className="flex flex-wrap gap-1">
                       {dept.routes.slice(0, 4).map((r) => (
                         <span
                           key={r.path}
-                          className="px-2 py-0.5 rounded bg-bg-tertiary text-[10px] font-mono text-text-secondary"
+                          className="rounded bg-bg-tertiary px-2 py-0.5 font-mono text-[10px] text-text-secondary"
                         >
                           {r.name}
                         </span>
                       ))}
                       {dept.routes.length > 4 && (
-                        <span className="px-2 py-0.5 rounded bg-bg-tertiary text-[10px] font-mono text-text-muted">
+                        <span className="rounded bg-bg-tertiary px-2 py-0.5 font-mono text-[10px] text-text-muted">
                           +{dept.routes.length - 4} more
                         </span>
                       )}
                     </div>
-                    <div className="pt-2 border-t border-border-subtle flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-text-muted">
+                    <div className="flex items-center justify-between border-border-subtle border-t pt-2">
+                      <span className="font-mono text-[10px] text-text-muted">
                         {dept.roles.length} RBAC roles
                       </span>
                       <Link
                         href={`/${dept.slug}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue hover:underline"
+                        className="inline-flex items-center gap-1 font-medium text-accent-blue text-xs hover:underline"
                       >
                         Open Module
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
                   </CardContent>

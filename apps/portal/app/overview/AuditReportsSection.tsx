@@ -53,7 +53,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           className="my-4 overflow-x-auto rounded-lg border border-arch-border-subtle shadow-card"
         >
           <table className="w-full text-left text-sm">
-            <thead className="bg-arch-surface-tertiary/70 text-arch-text-primary text-xs font-semibold uppercase tracking-wider border-b border-arch-border-subtle">
+            <thead className="border-arch-border-subtle border-b bg-arch-surface-tertiary/70 font-semibold text-arch-text-primary text-xs uppercase tracking-wider">
               <tr>
                 {tableHeader.map((h, i) => (
                   <th key={i} className="px-4 py-3">
@@ -64,11 +64,11 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
             </thead>
             <tbody className="divide-y divide-arch-border-subtle bg-white/60">
               {tableRows.map((row, rIdx) => (
-                <tr key={rIdx} className="hover:bg-arch-surface-secondary/40 transition-colors">
+                <tr key={rIdx} className="transition-colors hover:bg-arch-surface-secondary/40">
                   {row.map((cell, cIdx) => (
                     <td
                       key={cIdx}
-                      className="px-4 py-2.5 text-arch-text-secondary font-mono text-xs"
+                      className="px-4 py-2.5 font-mono text-arch-text-secondary text-xs"
                     >
                       {cell.trim()}
                     </td>
@@ -109,7 +109,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       elements.push(
         <h1
           key={idx}
-          className="text-2xl font-bold text-arch-text-primary mt-6 mb-3 flex items-center gap-2 border-b border-arch-border-subtle pb-2"
+          className="mt-6 mb-3 flex items-center gap-2 border-arch-border-subtle border-b pb-2 font-bold text-2xl text-arch-text-primary"
         >
           {trimmed.slice(2)}
         </h1>
@@ -118,14 +118,14 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       elements.push(
         <h2
           key={idx}
-          className="text-lg font-semibold text-arch-text-primary mt-5 mb-2 flex items-center gap-2"
+          className="mt-5 mb-2 flex items-center gap-2 font-semibold text-arch-text-primary text-lg"
         >
           {trimmed.slice(3)}
         </h2>
       );
     } else if (trimmed.startsWith('### ')) {
       elements.push(
-        <h3 key={idx} className="text-md font-medium text-arch-text-secondary mt-4 mb-1">
+        <h3 key={idx} className="mt-4 mb-1 font-medium text-arch-text-secondary text-md">
           {trimmed.slice(4)}
         </h3>
       );
@@ -135,7 +135,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       elements.push(
         <div
           key={idx}
-          className="flex items-start gap-2.5 my-1.5 p-2 rounded-md bg-arch-surface-secondary/60 border border-arch-border-subtle text-sm"
+          className="my-1.5 flex items-start gap-2.5 rounded-md border border-arch-border-subtle bg-arch-surface-secondary/60 p-2 text-sm"
         >
           <input
             type="checkbox"
@@ -146,8 +146,8 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           <span
             className={
               isChecked
-                ? 'line-through text-arch-text-tertiary'
-                : 'text-arch-text-primary font-medium'
+                ? 'text-arch-text-tertiary line-through'
+                : 'font-medium text-arch-text-primary'
             }
           >
             {text}
@@ -156,7 +156,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       );
     } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       elements.push(
-        <li key={idx} className="ml-5 list-disc text-sm text-arch-text-secondary my-1">
+        <li key={idx} className="my-1 ml-5 list-disc text-arch-text-secondary text-sm">
           {trimmed.slice(2)}
         </li>
       );
@@ -164,7 +164,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       // Code block boundary handled simply
     } else if (trimmed.length > 0) {
       elements.push(
-        <p key={idx} className="text-sm text-arch-text-secondary leading-relaxed my-2">
+        <p key={idx} className="my-2 text-arch-text-secondary text-sm leading-relaxed">
           {trimmed}
         </p>
       );
@@ -210,23 +210,23 @@ export function AuditReportsSection() {
       {/* Top Header & Log Selector Bar */}
       <GlassCard
         variant="default"
-        className="p-6 bg-white/70 border-arch-border-subtle shadow-card"
+        className="border-arch-border-subtle bg-white/70 p-6 shadow-card"
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-accent-blue/10 text-accent-blue border border-accent-blue/20">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="rounded-xl border border-accent-blue/20 bg-accent-blue/10 p-3 text-accent-blue">
+              <ShieldCheck className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-arch-text-primary flex items-center gap-2">
+              <h2 className="flex items-center gap-2 font-bold text-arch-text-primary text-xl">
                 Automated Audit & Compliance System
                 {activeMeta && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-arch-surface-tertiary border border-arch-border-subtle text-arch-text-secondary">
+                  <span className="rounded-full border border-arch-border-subtle bg-arch-surface-tertiary px-2.5 py-0.5 font-mono font-semibold text-arch-text-secondary text-xs">
                     {activeMeta.folderName}
                   </span>
                 )}
               </h2>
-              <p className="text-xs text-arch-text-secondary mt-0.5">
+              <p className="mt-0.5 text-arch-text-secondary text-xs">
                 Versioned security, PostgreSQL RLS policies, and OKLCH design system validation
                 reports
               </p>
@@ -234,14 +234,14 @@ export function AuditReportsSection() {
           </div>
 
           {/* Log selector dropdown */}
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-arch-surface-secondary border border-arch-border-subtle text-xs text-arch-text-secondary">
-              <History className="w-4 h-4 text-arch-text-tertiary" />
+          <div className="flex w-full items-center gap-3 md:w-auto">
+            <div className="flex items-center gap-2 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary px-3 py-1.5 text-arch-text-secondary text-xs">
+              <History className="h-4 w-4 text-arch-text-tertiary" />
               <span>Audit History:</span>
               <select
                 value={selectedLogId}
                 onChange={(e) => setSelectedLogId(e.target.value)}
-                className="bg-transparent text-arch-text-primary font-mono text-xs font-medium focus:outline-none cursor-pointer"
+                className="cursor-pointer bg-transparent font-medium font-mono text-arch-text-primary text-xs focus:outline-none"
               >
                 <option value="latest">Latest Audit (.audit/latest)</option>
                 {data?.manifest
@@ -261,27 +261,27 @@ export function AuditReportsSection() {
 
             <button
               onClick={() => fetchAuditData(selectedLogId)}
-              className="p-2 rounded-lg bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary transition-colors"
+              className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary p-2 text-arch-text-secondary transition-colors hover:bg-arch-surface-tertiary hover:text-arch-text-primary"
               title="Refresh Audit Data"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-accent-blue' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-accent-blue' : ''}`} />
             </button>
           </div>
         </div>
 
         {/* Score metrics strip */}
         {activeMeta && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-5 border-t border-arch-border-subtle">
-            <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
-              <span className="text-xs text-arch-text-tertiary block">Overall Score</span>
-              <span className="text-lg font-bold text-arch-text-primary font-mono">
+          <div className="mt-6 grid grid-cols-2 gap-4 border-arch-border-subtle border-t pt-5 sm:grid-cols-4">
+            <div className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/50 p-3">
+              <span className="block text-arch-text-tertiary text-xs">Overall Score</span>
+              <span className="font-bold font-mono text-arch-text-primary text-lg">
                 {activeMeta.score.toFixed(1)}%
               </span>
             </div>
-            <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
-              <span className="text-xs text-arch-text-tertiary block">Gate Status</span>
+            <div className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/50 p-3">
+              <span className="block text-arch-text-tertiary text-xs">Gate Status</span>
               <span
-                className={`text-sm font-semibold inline-flex items-center gap-1.5 ${
+                className={`inline-flex items-center gap-1.5 font-semibold text-sm ${
                   activeMeta.overallStatus === 'PASS'
                     ? 'text-accent-green'
                     : activeMeta.overallStatus === 'WARN'
@@ -290,24 +290,24 @@ export function AuditReportsSection() {
                 }`}
               >
                 {activeMeta.overallStatus === 'PASS' ? (
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="h-4 w-4" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4" />
+                  <AlertTriangle className="h-4 w-4" />
                 )}
                 {activeMeta.overallStatus}
               </span>
             </div>
-            <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
-              <span className="text-xs text-arch-text-tertiary block">Critical Violations</span>
+            <div className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/50 p-3">
+              <span className="block text-arch-text-tertiary text-xs">Critical Violations</span>
               <span
-                className={`text-lg font-bold font-mono ${activeMeta.criticalCount > 0 ? 'text-accent-red' : 'text-arch-text-primary'}`}
+                className={`font-bold font-mono text-lg ${activeMeta.criticalCount > 0 ? 'text-accent-red' : 'text-arch-text-primary'}`}
               >
                 {activeMeta.criticalCount}
               </span>
             </div>
-            <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
-              <span className="text-xs text-arch-text-tertiary block">Audit Timestamp</span>
-              <span className="text-xs font-mono text-arch-text-secondary block truncate mt-1">
+            <div className="rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/50 p-3">
+              <span className="block text-arch-text-tertiary text-xs">Audit Timestamp</span>
+              <span className="mt-1 block truncate font-mono text-arch-text-secondary text-xs">
                 {activeMeta.displayDate}
               </span>
             </div>
@@ -316,73 +316,73 @@ export function AuditReportsSection() {
       </GlassCard>
 
       {/* Tab Navigation for 4 Markdown Reports */}
-      <div className="flex flex-wrap gap-2 border-b border-arch-border-subtle pb-2">
+      <div className="flex flex-wrap gap-2 border-arch-border-subtle border-b pb-2">
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
             activeTab === 'results'
               ? 'bg-accent-blue text-white shadow-sm'
-              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:bg-arch-surface-tertiary hover:text-arch-text-primary'
           }`}
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="h-4 w-4" />
           <span>Results Summary</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">results.md</span>
+          <span className="rounded bg-white/20 px-1.5 py-0.5 font-mono text-xs">results.md</span>
         </button>
 
         <button
           onClick={() => setActiveTab('actions')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
             activeTab === 'actions'
               ? 'bg-accent-blue text-white shadow-sm'
-              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:bg-arch-surface-tertiary hover:text-arch-text-primary'
           }`}
         >
-          <ClipboardList className="w-4 h-4" />
+          <ClipboardList className="h-4 w-4" />
           <span>Required Actions</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">
+          <span className="rounded bg-white/20 px-1.5 py-0.5 font-mono text-xs">
             required-actions.md
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('design')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
             activeTab === 'design'
               ? 'bg-accent-blue text-white shadow-sm'
-              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:bg-arch-surface-tertiary hover:text-arch-text-primary'
           }`}
         >
-          <Palette className="w-4 h-4" />
+          <Palette className="h-4 w-4" />
           <span>Design Audit</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">
+          <span className="rounded bg-white/20 px-1.5 py-0.5 font-mono text-xs">
             design-report.md
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('rls')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all ${
             activeTab === 'rls'
               ? 'bg-accent-blue text-white shadow-sm'
-              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:bg-arch-surface-tertiary hover:text-arch-text-primary'
           }`}
         >
-          <Lock className="w-4 h-4" />
+          <Lock className="h-4 w-4" />
           <span>RLS Security Audit</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">rls-report.md</span>
+          <span className="rounded bg-white/20 px-1.5 py-0.5 font-mono text-xs">rls-report.md</span>
         </button>
       </div>
 
       {/* Report Content Panel */}
       <GlassCard
         variant="default"
-        className="p-6 bg-white/70 border-arch-border-subtle shadow-card min-h-[400px]"
+        className="min-h-[400px] border-arch-border-subtle bg-white/70 p-6 shadow-card"
       >
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <RefreshCw className="w-6 h-6 animate-spin text-accent-blue" />
-            <span className="text-xs text-arch-text-tertiary font-mono">
+          <div className="flex h-64 flex-col items-center justify-center gap-3">
+            <RefreshCw className="h-6 w-6 animate-spin text-accent-blue" />
+            <span className="font-mono text-arch-text-tertiary text-xs">
               Loading audit report contents...
             </span>
           </div>

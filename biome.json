@@ -83,6 +83,16 @@
       },
       "security": {
         "noGlobalEval": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "error",
+          "fix": "safe",
+          "options": {
+            "attributes": ["classList", "wrapperClassName", "iconClassName", "contentClassName"],
+            "functions": ["cn", "clsx", "cva", "twMerge"]
+          }
+        }
       }
     }
   },

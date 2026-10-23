@@ -65,12 +65,12 @@ export function Pagination({
   return (
     <div
       className={cn(
-        'flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white/40 backdrop-blur-md border border-black/[0.08] rounded-xl',
+        'flex flex-col items-center justify-between gap-4 rounded-xl border border-black/[0.08] bg-white/40 px-4 py-3 backdrop-blur-md sm:flex-row',
         className
       )}
     >
       {/* Total count status */}
-      <div className="text-sm text-[var(--text-muted)] font-medium">
+      <div className="font-medium text-[var(--text-muted)] text-sm">
         {totalCount !== undefined ? (
           <>
             Showing <span className="font-semibold text-[var(--text-heading)]">{startRange}</span>{' '}
@@ -92,7 +92,7 @@ export function Pagination({
           <div className="flex items-center gap-2">
             <label
               htmlFor="pageSizeSelect"
-              className="text-xs text-[var(--text-muted)] font-medium whitespace-nowrap"
+              className="whitespace-nowrap font-medium text-[var(--text-muted)] text-xs"
             >
               Show
             </label>
@@ -100,7 +100,7 @@ export function Pagination({
               id="pageSizeSelect"
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="bg-white/50 border border-black/[0.08] text-[var(--text-heading)] rounded-lg text-xs font-semibold py-1 px-2.5 outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20 focus:border-[var(--accent-blue)] transition-all"
+              className="rounded-lg border border-black/[0.08] bg-white/50 px-2.5 py-1 font-semibold text-[var(--text-heading)] text-xs outline-none transition-all focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20"
             >
               {pageSizeOptions.map((option) => (
                 <option key={option} value={option}>
@@ -116,22 +116,22 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon"
-            className="w-8 h-8 rounded-lg bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]"
+            className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
             aria-label="First page"
           >
-            <ChevronsLeft className="w-4 h-4" />
+            <ChevronsLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="w-8 h-8 rounded-lg bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]"
+            className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             aria-label="Previous page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
 
           {getPageNumbers().map((page, index) => {
@@ -139,7 +139,7 @@ export function Pagination({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="w-8 text-center text-sm text-[var(--text-muted)] font-medium select-none"
+                  className="w-8 select-none text-center font-medium text-[var(--text-muted)] text-sm"
                 >
                   ...
                 </span>
@@ -153,10 +153,10 @@ export function Pagination({
                 variant={isCurrent ? 'default' : 'outline'}
                 onClick={() => onPageChange(page as number)}
                 className={cn(
-                  'w-8 h-8 rounded-lg font-semibold text-sm',
+                  'h-8 w-8 rounded-lg font-semibold text-sm',
                   isCurrent
                     ? 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90'
-                    : 'bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]'
+                    : 'border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]'
                 )}
               >
                 {page}
@@ -167,22 +167,22 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon"
-            className="w-8 h-8 rounded-lg bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]"
+            className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages || totalPages === 0}
             aria-label="Next page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="w-8 h-8 rounded-lg bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]"
+            className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages || totalPages === 0}
             aria-label="Last page"
           >
-            <ChevronsRight className="w-4 h-4" />
+            <ChevronsRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

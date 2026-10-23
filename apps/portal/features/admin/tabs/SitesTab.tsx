@@ -207,18 +207,18 @@ export function SitesTab() {
       <div className="space-y-4">
         <GlassCard
           data-testid="sites-adding-panel"
-          className="p-4 sm:px-5 sm:py-3.5 gold-steel-border gold-steel-border-slim"
+          className="gold-steel-border gold-steel-border-slim p-4 sm:px-5 sm:py-3.5"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-emerald)]/15 border border-[var(--accent-emerald)]/30 text-[var(--accent-emerald)]">
-                <MapPin className="w-4 h-4" />
+          <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/15 text-[var(--accent-emerald)]">
+                <MapPin className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-base font-semibold text-[var(--text-heading)] leading-tight">
+                <h2 className="font-semibold text-[var(--text-heading)] text-base leading-tight">
                   Sites & Locations
                 </h2>
-                <p className="text-xs text-[var(--text-muted)] truncate">
+                <p className="truncate text-[var(--text-muted)] text-xs">
                   Operational complex sites connected directly to excavator and hauling logs.
                 </p>
               </div>
@@ -226,28 +226,28 @@ export function SitesTab() {
 
             <form
               onSubmit={handleAddSite}
-              className="grid grid-cols-1 sm:grid-cols-[minmax(180px,220px)_minmax(120px,140px)_auto] items-center gap-2.5 w-full lg:w-auto shrink-0"
+              className="grid w-full shrink-0 grid-cols-1 items-center gap-2.5 sm:grid-cols-[minmax(180px,220px)_minmax(120px,140px)_auto] lg:w-auto"
             >
               <Input
                 placeholder="Site Name (e.g. North Pit)"
                 value={newSiteName}
                 onChange={(e) => setNewSiteName(e.target.value)}
                 wrapperClassName="w-full"
-                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs"
+                className="h-9 w-full border-[var(--border-default)] bg-[var(--bg-secondary)] text-xs"
               />
               <Input
                 placeholder="Code (e.g. PIT-NP)"
                 value={newSiteCode}
                 onChange={(e) => setNewSiteCode(e.target.value)}
                 wrapperClassName="w-full"
-                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs font-mono"
+                className="h-9 w-full border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono text-xs"
               />
               <Button
                 type="submit"
                 disabled={saving || !newSiteName.trim()}
-                className="h-9 px-4 shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)] text-xs font-semibold"
+                className="h-9 shrink-0 bg-[var(--accent-emerald)] px-4 font-semibold text-[var(--bg-void)] text-xs hover:bg-[var(--accent-green)]"
               >
-                <Plus className="w-4 h-4 mr-1.5" />
+                <Plus className="mr-1.5 h-4 w-4" />
                 Add Site
               </Button>
             </form>
@@ -256,7 +256,7 @@ export function SitesTab() {
 
         <GlassCard className="overflow-hidden p-0">
           {loading ? (
-            <div className="px-6 py-8 text-center text-xs text-[var(--text-muted)]">
+            <div className="px-6 py-8 text-center text-[var(--text-muted)] text-xs">
               Loading sites...
             </div>
           ) : dbSites.length === 0 ? (
@@ -268,23 +268,23 @@ export function SitesTab() {
               {dbSites.map((site) => (
                 <li
                   key={site.id}
-                  className="flex items-center justify-between px-6 py-3.5 hover:bg-[var(--bg-tertiary)] transition-colors"
+                  className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-[var(--bg-tertiary)]"
                 >
                   <div className="flex items-center gap-3">
-                    <MapPin className="w-4 h-4 text-[var(--accent-emerald)] shrink-0" />
-                    <span className="text-sm font-semibold text-[var(--text-heading)]">
+                    <MapPin className="h-4 w-4 shrink-0 text-[var(--accent-emerald)]" />
+                    <span className="font-semibold text-[var(--text-heading)] text-sm">
                       {site.name}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-muted)]">
+                    <span className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
                       {site.site_code}
                     </span>
                     {site.active ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Active
+                      <span className="inline-flex items-center gap-1 font-medium text-[11px] text-emerald-600">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)]">
-                        <XCircle className="w-3.5 h-3.5" /> Inactive
+                      <span className="inline-flex items-center gap-1 font-medium text-[11px] text-[var(--text-muted)]">
+                        <XCircle className="h-3.5 w-3.5" /> Inactive
                       </span>
                     )}
                   </div>
@@ -308,7 +308,7 @@ export function SitesTab() {
                       className="text-accent-red hover:text-accent-red/80"
                       onClick={() => handleDeleteSite(site)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </li>
@@ -319,21 +319,21 @@ export function SitesTab() {
       </div>
 
       {/* SECTION 2: MINE BLOCKS MANAGEMENT */}
-      <div className="space-y-4 pt-4 border-t border-[var(--border-default)]">
+      <div className="space-y-4 border-[var(--border-default)] border-t pt-4">
         <GlassCard
           data-testid="blocks-adding-panel"
-          className="p-4 sm:px-5 sm:py-3.5 gold-steel-border gold-steel-border-slim"
+          className="gold-steel-border gold-steel-border-slim p-4 sm:px-5 sm:py-3.5"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-blue)]/15 border border-[var(--accent-blue)]/30 text-[var(--accent-blue)]">
-                <Layers className="w-4 h-4" />
+          <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]">
+                <Layers className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-base font-semibold text-[var(--text-heading)] leading-tight">
+                <h2 className="font-semibold text-[var(--text-heading)] text-base leading-tight">
                   Mine Blocks & Areas
                 </h2>
-                <p className="text-xs text-[var(--text-muted)] truncate">
+                <p className="truncate text-[var(--text-muted)] text-xs">
                   Mining benches and extraction areas linked to sites, populated into Hourly Loads
                   and Excavator tracking.
                 </p>
@@ -342,13 +342,13 @@ export function SitesTab() {
 
             <form
               onSubmit={handleAddBlock}
-              className="grid grid-cols-1 sm:grid-cols-[minmax(150px,180px)_minmax(190px,220px)_minmax(120px,140px)_auto] items-center gap-2.5 w-full lg:w-auto shrink-0"
+              className="grid w-full shrink-0 grid-cols-1 items-center gap-2.5 sm:grid-cols-[minmax(150px,180px)_minmax(190px,220px)_minmax(120px,140px)_auto] lg:w-auto"
             >
               <select
                 aria-label="Select site for block"
                 value={newBlockSiteId}
                 onChange={(e) => setNewBlockSiteId(e.target.value)}
-                className="h-9 w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md px-2.5 text-xs text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                className="h-9 w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 text-[var(--text-heading)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
               >
                 {dbSites.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -361,21 +361,21 @@ export function SitesTab() {
                 value={newBlockName}
                 onChange={(e) => setNewBlockName(e.target.value)}
                 wrapperClassName="w-full"
-                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs"
+                className="h-9 w-full border-[var(--border-default)] bg-[var(--bg-secondary)] text-xs"
               />
               <Input
                 placeholder="Code (e.g. BLK-NP-B)"
                 value={newBlockCode}
                 onChange={(e) => setNewBlockCode(e.target.value)}
                 wrapperClassName="w-full"
-                className="h-9 w-full bg-[var(--bg-secondary)] border-[var(--border-default)] text-xs font-mono"
+                className="h-9 w-full border-[var(--border-default)] bg-[var(--bg-secondary)] font-mono text-xs"
               />
               <Button
                 type="submit"
                 disabled={saving || !newBlockName.trim()}
-                className="h-9 px-4 shrink-0 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-xs font-semibold"
+                className="h-9 shrink-0 bg-[var(--accent-blue)] px-4 font-semibold text-white text-xs hover:bg-[var(--accent-blue)]/90"
               >
-                <Plus className="w-4 h-4 mr-1.5" />
+                <Plus className="mr-1.5 h-4 w-4" />
                 Add Block
               </Button>
             </form>
@@ -394,26 +394,26 @@ export function SitesTab() {
                 return (
                   <li
                     key={block.id}
-                    className="flex items-center justify-between px-6 py-3.5 hover:bg-[var(--bg-tertiary)] transition-colors"
+                    className="flex items-center justify-between px-6 py-3.5 transition-colors hover:bg-[var(--bg-tertiary)]"
                   >
                     <div className="flex items-center gap-3">
-                      <Layers className="w-4 h-4 text-[var(--accent-blue)] shrink-0" />
-                      <span className="text-sm font-semibold text-[var(--text-heading)]">
+                      <Layers className="h-4 w-4 shrink-0 text-[var(--accent-blue)]" />
+                      <span className="font-semibold text-[var(--text-heading)] text-sm">
                         {block.name}
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-muted)]">
+                      <span className="rounded border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
                         {block.code}
                       </span>
                       {site && (
-                        <span className="text-xs text-[var(--text-muted)]">· {site.name}</span>
+                        <span className="text-[var(--text-muted)] text-xs">· {site.name}</span>
                       )}
                       {block.active ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Active
+                        <span className="inline-flex items-center gap-1 font-medium text-[11px] text-emerald-600">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)]">
-                          <XCircle className="w-3.5 h-3.5" /> Inactive
+                        <span className="inline-flex items-center gap-1 font-medium text-[11px] text-[var(--text-muted)]">
+                          <XCircle className="h-3.5 w-3.5" /> Inactive
                         </span>
                       )}
                     </div>
@@ -437,7 +437,7 @@ export function SitesTab() {
                         className="text-accent-red hover:text-accent-red/80"
                         onClick={() => handleDeleteBlock(block)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </li>

@@ -78,7 +78,7 @@ export default async function RollOverPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Roll Over (Dozers)</h2>
+        <h2 className="font-medium text-2xl text-[var(--text-heading)]">Roll Over (Dozers)</h2>
         <p className="text-[var(--text-muted)] text-sm">
           {new Date().toLocaleDateString('en-ZA', {
             weekday: 'long',
@@ -90,35 +90,35 @@ export default async function RollOverPage({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Total Roll-over (BCM)</p>
-          <p className="text-2xl font-semibold font-mono text-[var(--accent-blue)] mt-1">
+          <p className="mt-1 font-mono font-semibold text-2xl text-[var(--accent-blue)]">
             {Number(totalRolloverBcm.toFixed(1)).toLocaleString()} BCM
           </p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-1 font-mono">
+          <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
             {totalHours.toFixed(1)}h &times; 250 BCM/h
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Hours Operated</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">{totalHours.toFixed(1)}h</p>
+          <p className="mt-1 font-medium text-2xl text-accent-green">{totalHours.toFixed(1)}h</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Blade Passes</p>
-          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
+          <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
             {totalPasses.toLocaleString()}
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Push Count</p>
-          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
+          <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
             {totalPushes.toLocaleString()}
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Active Dozers</p>
-          <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
+          <p className="mt-1 font-medium text-2xl text-[var(--text-heading)]">
             {dozers?.length || 0}
           </p>
         </GlassCard>
@@ -157,7 +157,7 @@ export default async function RollOverPage({
 
           return (
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Rolls</h3>
+              <h3 className="font-medium text-[var(--text-heading)] text-lg">Today&apos;s Rolls</h3>
 
               {siteEntries.map(([siteKey, { siteName, rolls }]) => {
                 const sitePasses = rolls.reduce((sum, r) => sum + (r.blade_passes || 0), 0);
@@ -172,24 +172,24 @@ export default async function RollOverPage({
                 return (
                   <div key={siteKey} className="space-y-3">
                     {/* Site header */}
-                    <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
-                      <h4 className="text-base font-medium text-[var(--text-heading)] flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-blue)]" />
+                    <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-2">
+                      <h4 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-base">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-blue)]" />
                         {siteName}
                       </h4>
                       <div className="flex items-center gap-4 text-xs">
                         {siteRolloverBcm > 0 && (
-                          <span className="text-[var(--accent-blue)] font-semibold font-mono">
+                          <span className="font-mono font-semibold text-[var(--accent-blue)]">
                             Roll-over: {Number(siteRolloverBcm.toFixed(1)).toLocaleString()} BCM
                           </span>
                         )}
                         {sitePasses > 0 && (
-                          <span className="text-[var(--accent-blue)] font-medium">
+                          <span className="font-medium text-[var(--accent-blue)]">
                             {sitePasses.toLocaleString()} passes
                           </span>
                         )}
                         {siteHours > 0 && (
-                          <span className="text-accent-green font-medium">
+                          <span className="font-medium text-accent-green">
                             {siteHours.toFixed(1)}h
                           </span>
                         )}
@@ -198,8 +198,8 @@ export default async function RollOverPage({
 
                     {dayRolls.length > 0 && (
                       <div className="space-y-2">
-                        <h5 className="text-xs font-medium text-accent-blue flex items-center gap-1.5 ml-4">
-                          <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
+                        <h5 className="ml-4 flex items-center gap-1.5 font-medium text-accent-blue text-xs">
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent-blue" />
                           Day Shift
                         </h5>
                         {dayRolls.map((roll) => {
@@ -209,7 +209,7 @@ export default async function RollOverPage({
                             <GlassCard key={roll.id} className="py-3">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-[var(--text-heading)] font-medium">
+                                  <p className="font-medium text-[var(--text-heading)]">
                                     {Array.isArray(roll.machine)
                                       ? roll.machine[0]?.name
                                       : roll.machine?.name}
@@ -221,8 +221,8 @@ export default async function RollOverPage({
                                     • Day shift • {rollHours.toFixed(1)}h worked
                                   </p>
                                 </div>
-                                <div className="text-right space-y-0.5">
-                                  <p className="text-[var(--accent-blue)] font-semibold font-mono text-sm">
+                                <div className="space-y-0.5 text-right">
+                                  <p className="font-mono font-semibold text-[var(--accent-blue)] text-sm">
                                     Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString()} BCM
                                   </p>
                                   {roll.blade_passes > 0 && (
@@ -245,8 +245,8 @@ export default async function RollOverPage({
 
                     {nightRolls.length > 0 && (
                       <div className="space-y-2">
-                        <h5 className="text-xs font-medium text-indigo-400 flex items-center gap-1.5 ml-4">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        <h5 className="ml-4 flex items-center gap-1.5 font-medium text-indigo-400 text-xs">
+                          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
                           Night Shift
                         </h5>
                         {nightRolls.map((roll) => {
@@ -256,7 +256,7 @@ export default async function RollOverPage({
                             <GlassCard key={roll.id} className="py-3">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-[var(--text-heading)] font-medium">
+                                  <p className="font-medium text-[var(--text-heading)]">
                                     {Array.isArray(roll.machine)
                                       ? roll.machine[0]?.name
                                       : roll.machine?.name}
@@ -268,8 +268,8 @@ export default async function RollOverPage({
                                     • Night shift • {rollHours.toFixed(1)}h worked
                                   </p>
                                 </div>
-                                <div className="text-right space-y-0.5">
-                                  <p className="text-[var(--accent-blue)] font-semibold font-mono text-sm">
+                                <div className="space-y-0.5 text-right">
+                                  <p className="font-mono font-semibold text-[var(--accent-blue)] text-sm">
                                     Roll-over: {Number(rollBcm.toFixed(1)).toLocaleString()} BCM
                                   </p>
                                   {roll.blade_passes > 0 && (

@@ -40,49 +40,49 @@ const DEPARTMENT_COMMANDS: CommandItem[] = [
     label: 'System Overview',
     href: '/overview',
     category: 'Departments',
-    icon: <Activity className="w-4 h-4" />,
+    icon: <Activity className="h-4 w-4" />,
   },
   {
     id: 'dept-drilling',
     label: 'Drilling Operations',
     href: '/drilling',
     category: 'Departments',
-    icon: <Pickaxe className="w-4 h-4" />,
+    icon: <Pickaxe className="h-4 w-4" />,
   },
   {
     id: 'dept-production',
     label: 'Production',
     href: '/production',
     category: 'Departments',
-    icon: <Factory className="w-4 h-4" />,
+    icon: <Factory className="h-4 w-4" />,
   },
   {
     id: 'dept-control',
     label: 'Control Room',
     href: '/control-room',
     category: 'Departments',
-    icon: <Monitor className="w-4 h-4" />,
+    icon: <Monitor className="h-4 w-4" />,
   },
   {
     id: 'dept-engineering',
     label: 'Engineering',
     href: '/engineering',
     category: 'Departments',
-    icon: <Wrench className="w-4 h-4" />,
+    icon: <Wrench className="h-4 w-4" />,
   },
   {
     id: 'dept-access',
     label: 'Access Control',
     href: '/access-control',
     category: 'Departments',
-    icon: <ShieldCheck className="w-4 h-4" />,
+    icon: <ShieldCheck className="h-4 w-4" />,
   },
   {
     id: 'dept-admin',
     label: 'Admin Management',
     href: '/admin',
     category: 'Departments',
-    icon: <ShieldCheck className="w-4 h-4" />,
+    icon: <ShieldCheck className="h-4 w-4" />,
   },
 ];
 
@@ -92,21 +92,21 @@ const NAV_COMMANDS: CommandItem[] = [
     label: 'Hub Dashboard',
     href: '/',
     category: 'Navigation',
-    icon: <LayoutDashboard className="w-4 h-4" />,
+    icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
     id: 'nav-profile',
     label: 'Profile',
     href: '/admin',
     category: 'Navigation',
-    icon: <User className="w-4 h-4" />,
+    icon: <User className="h-4 w-4" />,
   },
   {
     id: 'nav-settings',
     label: 'Settings',
     href: '/admin',
     category: 'Navigation',
-    icon: <Settings className="w-4 h-4" />,
+    icon: <Settings className="h-4 w-4" />,
   },
   {
     id: 'nav-logout',
@@ -116,7 +116,7 @@ const NAV_COMMANDS: CommandItem[] = [
       logout().catch(console.error);
     },
     category: 'Navigation',
-    icon: <LogOut className="w-4 h-4" />,
+    icon: <LogOut className="h-4 w-4" />,
   },
 ];
 
@@ -126,7 +126,7 @@ const TOOLS_COMMANDS: CommandItem[] = [
     label: 'Flowise',
     href: `${urls.portal}`,
     category: 'Tools',
-    icon: <Bot className="w-4 h-4" />,
+    icon: <Bot className="h-4 w-4" />,
   },
 ];
 
@@ -253,36 +253,36 @@ export function CommandBar() {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 rounded-2xl liquid-glass-light border border-white/20 shadow-window overflow-hidden">
+      <div className="liquid-glass-light relative mx-4 w-full max-w-lg overflow-hidden rounded-2xl border border-white/20 shadow-window">
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-transparent">
-          <Search className="w-4 h-4 text-arch-text-tertiary shrink-0" />
+        <div className="flex items-center gap-3 border-white/10 border-b bg-transparent px-4 py-3">
+          <Search className="h-4 w-4 shrink-0 text-arch-text-tertiary" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={handleQueryChange}
             placeholder="Search departments, tools, or pages..."
-            className="flex-1 bg-transparent text-sm text-arch-text-primary placeholder:text-arch-text-tertiary outline-none"
+            className="flex-1 bg-transparent text-arch-text-primary text-sm outline-none placeholder:text-arch-text-tertiary"
           />
           <button
             onClick={() => setOpen(false)}
-            className="p-1 rounded-md hover:bg-arch-surface-tertiary text-arch-text-tertiary transition-colors"
+            className="rounded-md p-1 text-arch-text-tertiary transition-colors hover:bg-arch-surface-tertiary"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Results */}
         <div className="max-h-[50vh] overflow-y-auto py-2">
           {flatList.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-arch-text-tertiary">
+            <div className="px-4 py-8 text-center text-arch-text-tertiary text-sm">
               No results found for &quot;{query}&quot;
             </div>
           ) : (
             Object.entries(grouped).map(([category, items]) => (
               <div key={category}>
-                <div className="px-4 py-1.5 text-[10px] font-bold text-arch-text-tertiary uppercase tracking-wider">
+                <div className="px-4 py-1.5 font-bold text-[10px] text-arch-text-tertiary uppercase tracking-wider">
                   {category}
                 </div>
                 {items.map((item) => {
@@ -294,7 +294,7 @@ export function CommandBar() {
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setSelectedIndex(globalIndex)}
                       className={cn(
-                        'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
+                        'flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors',
                         isSelected
                           ? 'bg-arch-accent-blue/10 text-arch-accent-blue'
                           : 'text-arch-text-secondary hover:bg-arch-surface-tertiary'
@@ -308,9 +308,9 @@ export function CommandBar() {
                       >
                         {item.icon}
                       </span>
-                      <span className="flex-1 text-sm font-medium">{item.label}</span>
+                      <span className="flex-1 font-medium text-sm">{item.label}</span>
                       {item.shortcut && (
-                        <kbd className="px-1.5 py-0.5 rounded bg-arch-surface-tertiary text-[10px] font-mono text-arch-text-tertiary">
+                        <kbd className="rounded bg-arch-surface-tertiary px-1.5 py-0.5 font-mono text-[10px] text-arch-text-tertiary">
                           {item.shortcut}
                         </kbd>
                       )}
@@ -323,14 +323,14 @@ export function CommandBar() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-arch-border-subtle text-[10px] text-arch-text-tertiary">
+        <div className="flex items-center gap-4 border-arch-border-subtle border-t px-4 py-2 text-[10px] text-arch-text-tertiary">
           <span className="flex items-center gap-1">
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">↑</kbd>
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">↓</kbd>
+            <kbd className="rounded bg-arch-surface-tertiary px-1 font-mono">↑</kbd>
+            <kbd className="rounded bg-arch-surface-tertiary px-1 font-mono">↓</kbd>
             to navigate
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">Enter</kbd>
+            <kbd className="rounded bg-arch-surface-tertiary px-1 font-mono">Enter</kbd>
             to select
           </span>
         </div>

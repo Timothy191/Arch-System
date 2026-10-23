@@ -41,32 +41,32 @@ export function BreakdownCharts({
     <div className="space-y-6">
       {/* Automated Preventative Service Triggers */}
       {serviceTriggers.length > 0 && (
-        <div className="p-4 rounded-xl bg-accent-amber/10 border border-accent-amber/25 space-y-3">
+        <div className="space-y-3 rounded-xl border border-accent-amber/25 bg-accent-amber/10 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-accent-amber" />
-              <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+              <ShieldAlert className="h-5 w-5 text-accent-amber" />
+              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
                 Automated Preventative Service Triggers ({serviceTriggers.length} Active)
               </h3>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-accent-amber/20 text-accent-amber font-semibold uppercase tracking-wider">
+            <span className="rounded-full bg-accent-amber/20 px-2 py-0.5 font-semibold text-[11px] text-accent-amber uppercase tracking-wider">
               High Priority
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {serviceTriggers.map((trigger) => (
               <div
                 key={trigger.id}
-                className="p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] flex flex-col justify-between space-y-2 shadow-card"
+                className="flex flex-col justify-between space-y-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-3 shadow-card"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-[var(--text-heading)]">
+                    <span className="font-semibold text-[var(--text-heading)] text-xs">
                       {trigger.machine_name}
                     </span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                      className={`rounded px-1.5 py-0.5 font-medium text-[10px] ${
                         trigger.severity === 'high'
                           ? 'bg-accent-red/15 text-accent-red'
                           : 'bg-accent-amber/15 text-accent-amber'
@@ -75,14 +75,14 @@ export function BreakdownCharts({
                       {trigger.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                  <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
                     {trigger.machine_type} • {trigger.reason}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border-default)] flex items-center justify-between text-[11px]">
-                  <span className="text-[var(--text-muted)] font-mono">{trigger.metric_value}</span>
-                  <span className="text-[var(--accent-blue)] font-medium">
+                <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-2 text-[11px]">
+                  <span className="font-mono text-[var(--text-muted)]">{trigger.metric_value}</span>
+                  <span className="font-medium text-[var(--accent-blue)]">
                     {trigger.recommended_action}
                   </span>
                 </div>
@@ -92,32 +92,32 @@ export function BreakdownCharts({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Reliability Metrics: MTTR vs Predictive MTBF */}
-        <Card className="lg:col-span-2 bg-[var(--bg-primary)] border-[var(--border-default)] shadow-none p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+        <Card className="border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-none lg:col-span-2">
+          <div className="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
             <div>
-              <Title className="text-[var(--text-heading)] text-sm font-semibold">
+              <Title className="font-semibold text-[var(--text-heading)] text-sm">
                 Reliability Analytics: MTTR vs Predictive MTBF (Hours)
               </Title>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Mean Time to Repair vs Mean Time Between Failures by equipment category.
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded bg-accent-blue" />
+                <div className="h-2.5 w-2.5 rounded bg-accent-blue" />
                 <span className="text-[var(--text-muted)]">MTTR (Repair)</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded bg-accent-green" />
+                <div className="h-2.5 w-2.5 rounded bg-accent-green" />
                 <span className="text-[var(--text-muted)]">MTBF (Uptime)</span>
               </div>
             </div>
           </div>
 
           <BarChart
-            className="h-72 mt-4"
+            className="mt-4 h-72"
             data={reliabilityChartData}
             index="category"
             categories={['MTTR (hrs)', 'MTBF (hrs)']}
@@ -129,15 +129,15 @@ export function BreakdownCharts({
         </Card>
 
         {/* Fleet Health Distribution */}
-        <Card className="bg-[var(--bg-primary)] border-[var(--border-default)] shadow-none p-5">
-          <Title className="text-[var(--text-heading)] text-sm font-semibold mb-1">
+        <Card className="border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-none">
+          <Title className="mb-1 font-semibold text-[var(--text-heading)] text-sm">
             Fleet Health Distribution
           </Title>
-          <p className="text-xs text-[var(--text-muted)] mb-4">
+          <p className="mb-4 text-[var(--text-muted)] text-xs">
             Proportion of active operational fleet vs broken-down units.
           </p>
           <DonutChart
-            className="h-60 mt-2"
+            className="mt-2 h-60"
             data={statusData}
             category="value"
             index="name"
@@ -150,11 +150,11 @@ export function BreakdownCharts({
               <div key={idx} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
                   <div
-                    className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-accent-green' : 'bg-accent-red'}`}
+                    className={`h-2 w-2 rounded-full ${idx === 0 ? 'bg-accent-green' : 'bg-accent-red'}`}
                   />
                   <span className="text-[var(--text-secondary)]">{item.name}</span>
                 </div>
-                <span className="text-[var(--text-heading)] font-medium">{item.value} units</span>
+                <span className="font-medium text-[var(--text-heading)]">{item.value} units</span>
               </div>
             ))}
           </div>

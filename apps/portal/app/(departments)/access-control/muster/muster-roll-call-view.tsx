@@ -173,13 +173,13 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   return (
     <div className="space-y-6">
       {(!isOnline || queue.length > 0) && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-center justify-between text-amber-600">
+        <div className="flex items-center justify-between rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-amber-600">
           <div className="flex items-center gap-2">
             <Radio className="h-5 w-5 animate-pulse" />
             <span className="font-semibold text-sm">
               {!isOnline ? 'OFFLINE MODE (SAT/WIFI DOWN)' : 'SYNCING QUEUE'}
             </span>
-            <span className="text-sm opacity-80 border-l border-amber-500/20 pl-2 ml-2">
+            <span className="ml-2 border-amber-500/20 border-l pl-2 text-sm opacity-80">
               {queue.length} tap(s) buffered to local storage.
               {!isOnline
                 ? ' Do not close this tablet. Will auto-sync when network returns.'
@@ -197,28 +197,28 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       {/* Top Emergency Command HUD */}
       <GlassCard
         variant="window"
-        className={`p-6 border-l-4 ${
+        className={`border-l-4 p-6 ${
           unaccounted > 0 ? 'border-l-amber-500' : 'border-l-emerald-500'
         }`}
       >
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex items-start gap-4">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${
                 unaccounted > 0
-                  ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                  : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                  ? 'border-amber-500/20 bg-amber-500/10 text-amber-600'
+                  : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
               }`}
             >
-              <LifeBuoy className="w-6 h-6 animate-pulse" />
+              <LifeBuoy className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider bg-black/[0.04] text-[var(--text-heading)] px-2 py-0.5 rounded">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded bg-black/[0.04] px-2 py-0.5 font-bold font-mono text-[var(--text-heading)] text-xs uppercase tracking-wider">
                   DMRE SECTION 54/55 MUSTER PROTOCOL
                 </span>
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                  className={`rounded-full px-2 py-0.5 font-bold text-xs ${
                     unaccounted > 0
                       ? 'bg-amber-500/10 text-amber-700'
                       : 'bg-emerald-500/10 text-emerald-700'
@@ -229,101 +229,101 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                     : 'ALL SOULS ACCOUNTED • PIT SECURED'}
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-[var(--text-heading)] mt-1 tracking-tight">
+              <h2 className="mt-1 font-black text-2xl text-[var(--text-heading)] tracking-tight">
                 Emergency Evacuation & Blast Clearance Station
               </h2>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
                 Brakfontein Pit Alpha • Automated head-count sync via gate turnstiles and safety
                 marshals
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full lg:w-auto justify-end">
+          <div className="flex w-full items-center justify-end gap-2.5 lg:w-auto">
             <button
               type="button"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 bg-white border border-black/[0.1] hover:border-[var(--accent-blue)] text-[var(--text-heading)] px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg border border-black/[0.1] bg-white px-3.5 py-2 font-bold text-[var(--text-heading)] text-xs shadow-xs transition-all hover:border-[var(--accent-blue)] active:scale-95"
             >
-              <Download className="w-4 h-4 text-emerald-600" />
+              <Download className="h-4 w-4 text-emerald-600" />
               <span>Export Rescue Manifest (CSV)</span>
             </button>
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 bg-black/[0.04] hover:bg-black/[0.08] text-[var(--text-heading)] px-3.5 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg bg-black/[0.04] px-3.5 py-2 font-bold text-[var(--text-heading)] text-xs transition-all hover:bg-black/[0.08] active:scale-95"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="h-4 w-4" />
               <span>Print Roster</span>
             </button>
           </div>
         </div>
 
         {/* Live Counters Bento Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-black/[0.06]">
-          <div className="bg-white/60 p-3.5 rounded-xl border border-black/[0.06]">
-            <span className="text-[11px] font-mono font-semibold uppercase text-[var(--text-muted)]">
+        <div className="mt-6 grid grid-cols-2 gap-3 border-black/[0.06] border-t pt-5 sm:grid-cols-4">
+          <div className="rounded-xl border border-black/[0.06] bg-white/60 p-3.5">
+            <span className="font-mono font-semibold text-[11px] text-[var(--text-muted)] uppercase">
               Total Souls on Site
             </span>
-            <div className="text-2xl font-black font-mono text-[var(--text-heading)] mt-1">
+            <div className="mt-1 font-black font-mono text-2xl text-[var(--text-heading)]">
               {totalSouls}
             </div>
             <span className="text-[10px] text-[var(--text-muted)]">Active Swiped Badges</span>
           </div>
 
-          <div className="bg-emerald-500/5 p-3.5 rounded-xl border border-emerald-500/20">
-            <span className="text-[11px] font-mono font-semibold uppercase text-emerald-700">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5">
+            <span className="font-mono font-semibold text-[11px] text-emerald-700 uppercase">
               Accounted (Safe)
             </span>
-            <div className="text-2xl font-black font-mono text-emerald-600 mt-1">{accounted}</div>
+            <div className="mt-1 font-black font-mono text-2xl text-emerald-600">{accounted}</div>
             <span className="text-[10px] text-emerald-700/80">
               {Math.round((accounted / (totalSouls || 1)) * 100)}% Verified at Stations
             </span>
           </div>
 
-          <div className="bg-amber-500/5 p-3.5 rounded-xl border border-amber-500/20">
-            <span className="text-[11px] font-mono font-semibold uppercase text-amber-700">
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5">
+            <span className="font-mono font-semibold text-[11px] text-amber-700 uppercase">
               Unaccounted
             </span>
-            <div className="text-2xl font-black font-mono text-amber-600 mt-1">{unaccounted}</div>
+            <div className="mt-1 font-black font-mono text-2xl text-amber-600">{unaccounted}</div>
             <span className="text-[10px] text-amber-700/80">Search Team Focus</span>
           </div>
 
-          <div className="bg-blue-500/5 p-3.5 rounded-xl border border-blue-500/20">
-            <span className="text-[11px] font-mono font-semibold uppercase text-blue-700">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3.5">
+            <span className="font-mono font-semibold text-[11px] text-blue-700 uppercase">
               Evacuated Off-Site
             </span>
-            <div className="text-2xl font-black font-mono text-blue-600 mt-1">{evacuated}</div>
+            <div className="mt-1 font-black font-mono text-2xl text-blue-600">{evacuated}</div>
             <span className="text-[10px] text-blue-700/80">Main Gate Exit Scanned</span>
           </div>
         </div>
       </GlassCard>
 
       {/* Muster Point Stations Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {summary.musterStations.map((station) => {
           const stationCount = stationCounts.get(station.name) || 0;
           return (
             <div
               key={station.id}
               onClick={() => setSelectedStation(station.name)}
-              className={`cursor-pointer p-4 rounded-xl border transition-all ${
+              className={`cursor-pointer rounded-xl border p-4 transition-all ${
                 selectedStation === station.name
-                  ? 'bg-blue-50/50 border-[var(--accent-blue)] ring-2 ring-[var(--accent-blue)]/20'
-                  : 'bg-white/60 border-black/[0.08] hover:border-[var(--accent-blue)]/40'
+                  ? 'border-[var(--accent-blue)] bg-blue-50/50 ring-2 ring-[var(--accent-blue)]/20'
+                  : 'border-black/[0.08] bg-white/60 hover:border-[var(--accent-blue)]/40'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-[var(--accent-blue)]">
+                <span className="font-bold font-mono text-[var(--accent-blue)] text-xs">
                   {station.id}
                 </span>
-                <span className="text-xs font-mono font-bold bg-black/[0.04] px-2 py-0.5 rounded text-[var(--text-heading)]">
+                <span className="rounded bg-black/[0.04] px-2 py-0.5 font-bold font-mono text-[var(--text-heading)] text-xs">
                   {stationCount} Verified
                 </span>
               </div>
-              <h4 className="text-sm font-bold text-[var(--text-heading)] mt-2">{station.name}</h4>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{station.location}</p>
-              <p className="text-[11px] font-mono text-[var(--text-secondary)] mt-2">
+              <h4 className="mt-2 font-bold text-[var(--text-heading)] text-sm">{station.name}</h4>
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">{station.location}</p>
+              <p className="mt-2 font-mono text-[11px] text-[var(--text-secondary)]">
                 Target: {station.targetZone}
               </p>
             </div>
@@ -333,27 +333,27 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
 
       {/* Filter and Search Bar */}
       <GlassCard variant="window" className="p-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
           <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search name, contractor, zone..."
-              className="w-full pl-9 pr-4 py-2 bg-white/80 border border-black/[0.1] rounded-lg text-xs text-[var(--text-heading)] focus:outline-none focus:border-[var(--accent-blue)]"
+              className="w-full rounded-lg border border-black/[0.1] bg-white/80 py-2 pr-4 pl-9 text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
             {/* Status Filter */}
-            <div className="flex items-center bg-black/[0.04] p-1 rounded-lg text-xs font-medium">
+            <div className="flex items-center rounded-lg bg-black/[0.04] p-1 font-medium text-xs">
               <button
                 type="button"
                 onClick={() => setStatusFilter('all')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   statusFilter === 'all'
-                    ? 'bg-white text-[var(--text-heading)] font-bold shadow-2xs'
+                    ? 'bg-white font-bold text-[var(--text-heading)] shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -362,9 +362,9 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
               <button
                 type="button"
                 onClick={() => setStatusFilter('unaccounted')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   statusFilter === 'unaccounted'
-                    ? 'bg-amber-500 text-white font-bold shadow-2xs'
+                    ? 'bg-amber-500 font-bold text-white shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -373,9 +373,9 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
               <button
                 type="button"
                 onClick={() => setStatusFilter('accounted')}
-                className={`px-3 py-1 rounded-md transition-all ${
+                className={`rounded-md px-3 py-1 transition-all ${
                   statusFilter === 'accounted'
-                    ? 'bg-emerald-600 text-white font-bold shadow-2xs'
+                    ? 'bg-emerald-600 font-bold text-white shadow-2xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -387,7 +387,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
               <button
                 type="button"
                 onClick={() => setSelectedStation('all')}
-                className="text-xs text-[var(--accent-blue)] font-semibold underline ml-2"
+                className="ml-2 font-semibold text-[var(--accent-blue)] text-xs underline"
               >
                 Clear Station Filter
               </button>
@@ -397,28 +397,28 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
 
         {/* Live Roll Call Table */}
         <div className="mt-4 overflow-x-auto rounded-xl border border-black/[0.08]">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-black/[0.03] border-b border-black/[0.08] text-[var(--text-muted)] font-mono text-[11px] uppercase tracking-wider">
+          <table className="w-full border-collapse text-left text-xs">
+            <thead className="border-black/[0.08] border-b bg-black/[0.03] font-mono text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
               <tr>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Entity / Personnel
                 </th>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Organization & Role
                 </th>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Assigned Pit Zone
                 </th>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Last Gate Swipe
                 </th>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Compliance
                 </th>
-                <th scope="col" className="py-3 px-4">
+                <th scope="col" className="px-4 py-3">
                   Muster Station
                 </th>
-                <th scope="col" className="py-3 px-4 text-right">
+                <th scope="col" className="px-4 py-3 text-right">
                   Reconciliation Action
                 </th>
               </tr>
@@ -438,30 +438,30 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                   return (
                     <tr
                       key={r.id}
-                      className={`hover:bg-black/[0.02] transition-colors ${
+                      className={`transition-colors hover:bg-black/[0.02] ${
                         !isAccounted ? 'bg-amber-500/[0.03]' : ''
                       }`}
                     >
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {r.entityType === 'personnel' ? (
-                            <HardHat className="w-4 h-4 text-blue-600 shrink-0" />
+                            <HardHat className="h-4 w-4 shrink-0 text-blue-600" />
                           ) : (
-                            <Users className="w-4 h-4 text-teal-600 shrink-0" />
+                            <Users className="h-4 w-4 shrink-0 text-teal-600" />
                           )}
                           <div>
-                            <span className="font-bold text-[var(--text-heading)] block">
+                            <span className="block font-bold text-[var(--text-heading)]">
                               {r.name}
                             </span>
-                            <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                            <span className="font-mono text-[10px] text-[var(--text-muted)]">
                               ID: {r.id.substring(0, 8)}...
                             </span>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3 px-4">
-                        <span className="font-medium text-[var(--text-heading)] block">
+                      <td className="px-4 py-3">
+                        <span className="block font-medium text-[var(--text-heading)]">
                           {r.company}
                         </span>
                         <span className="text-[11px] text-[var(--text-muted)]">
@@ -469,23 +469,23 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-secondary)]">
+                      <td className="px-4 py-3 font-mono text-[11px] text-[var(--text-secondary)]">
                         {r.assignedZone}
                       </td>
 
-                      <td className="py-3 px-4">
-                        <span className="font-medium text-[var(--text-heading)] block">
+                      <td className="px-4 py-3">
+                        <span className="block font-medium text-[var(--text-heading)]">
                           {r.lastSeenGate}
                         </span>
-                        <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                        <span className="font-mono text-[10px] text-[var(--text-muted)]">
                           {r.lastSeenTime}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           <span
-                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded ${
+                            className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-bold text-[10px] ${
                               r.inductionValid
                                 ? 'bg-emerald-500/10 text-emerald-700'
                                 : 'bg-red-500/10 text-red-700'
@@ -496,40 +496,40 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
                         </div>
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">
                         {r.station ? (
                           <div className="font-medium text-[var(--text-heading)]">
                             <span className="text-xs">{r.station}</span>
                             {r.checkedOffAt && (
-                              <span className="block text-[10px] text-[var(--text-muted)] font-mono">
+                              <span className="block font-mono text-[10px] text-[var(--text-muted)]">
                                 Verified: {r.checkedOffAt}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[11px] text-amber-600 font-bold font-mono">
+                          <span className="font-bold font-mono text-[11px] text-amber-600">
                             Pending Check-off
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-right">
+                      <td className="px-4 py-3 text-right">
                         <button
                           type="button"
                           disabled={isProcessing}
                           onClick={() => handleToggleStatus(r)}
-                          className={`inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold transition-all active:scale-95 ${
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-bold text-xs transition-all active:scale-95 ${
                             isAccounted
                               ? 'bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20'
-                              : 'bg-amber-500 text-white hover:bg-amber-600 shadow-xs'
+                              : 'bg-amber-500 text-white shadow-xs hover:bg-amber-600'
                           }`}
                         >
                           {isProcessing ? (
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                           ) : isAccounted ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                           ) : (
-                            <AlertCircle className="w-3.5 h-3.5 text-white" />
+                            <AlertCircle className="h-3.5 w-3.5 text-white" />
                           )}
                           <span>{isAccounted ? 'Safe (Accounted)' : 'Mark as Safe'}</span>
                         </button>

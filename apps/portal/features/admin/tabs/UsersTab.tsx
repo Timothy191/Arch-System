@@ -114,22 +114,22 @@ export function UsersTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] z-10 pointer-events-none" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             placeholder="Search employees by name, Coy No, ID, job title, or QR..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] pl-10"
           />
         </div>
         <Button
-          className="shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          className="shrink-0 bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
           onClick={() => {
             setEditingEmployee(null);
             setShowEditDialog(true);
           }}
         >
-          <UserPlus className="w-4 h-4 mr-2" />
+          <UserPlus className="mr-2 h-4 w-4" />
           Add Employee
         </Button>
       </div>
@@ -138,46 +138,46 @@ export function UsersTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[var(--border-default)]">
+              <tr className="border-[var(--border-default)] border-b">
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Employee
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Coy / ID Number
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Job Title & Area
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Department & Access
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Medical / Induction
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider"
+                  className="px-4 py-3 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   QR Code & Role
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider text-right"
+                  className="px-4 py-3 text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider"
                 >
                   Actions
                 </th>
@@ -206,10 +206,10 @@ export function UsersTab() {
                     : (emp.departments?.display_name ?? 'Unassigned');
 
                   return (
-                    <tr key={emp.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                    <tr key={emp.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] overflow-hidden shrink-0 relative flex items-center justify-center text-xs font-semibold text-[var(--text-muted)]">
+                          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border-default)] bg-[var(--bg-secondary)] font-semibold text-[var(--text-muted)] text-xs">
                             {emp.photo_url ? (
                               <Image
                                 src={emp.photo_url}
@@ -227,40 +227,40 @@ export function UsersTab() {
                             )}
                           </div>
                           <div>
-                            <div className="text-[var(--text-heading)] text-sm font-medium">
+                            <div className="font-medium text-[var(--text-heading)] text-sm">
                               {emp.full_name}
                             </div>
-                            <div className="text-xs text-[var(--text-muted)]">
+                            <div className="text-[var(--text-muted)] text-xs">
                               {emp.first_name || '—'} {emp.last_name || ''}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="text-xs font-mono text-[var(--text-heading)]">
+                        <div className="font-mono text-[var(--text-heading)] text-xs">
                           {emp.employee_code || '—'}
                         </div>
-                        <div className="text-xs font-mono text-[var(--text-muted)]">
+                        <div className="font-mono text-[var(--text-muted)] text-xs">
                           ID: {emp.national_id || '—'}
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="text-sm text-[var(--text-heading)]">
+                        <div className="text-[var(--text-heading)] text-sm">
                           {emp.job_title || '—'}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)]">Area: {primaryArea}</div>
+                        <div className="text-[var(--text-muted)] text-xs">Area: {primaryArea}</div>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="text-sm text-[var(--text-heading)]">{primaryDept}</div>
-                        <div className="text-xs text-[var(--text-muted)]">
+                        <div className="text-[var(--text-heading)] text-sm">{primaryDept}</div>
+                        <div className="text-[var(--text-muted)] text-xs">
                           {emp.accessible_departments?.length || 0} accessible depts
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="text-xs text-[var(--text-heading)]">
+                        <div className="text-[var(--text-heading)] text-xs">
                           Med: {formatDateShort(emp.medical_expiry_date)}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)]">
+                        <div className="text-[var(--text-muted)] text-xs">
                           Ind: {formatDateShort(emp.induction_expiry_date)}
                         </div>
                       </td>
@@ -270,28 +270,28 @@ export function UsersTab() {
                             variant="outline"
                             className={
                               emp.role === 'admin'
-                                ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                                ? 'border-violet-500/20 bg-violet-500/10 text-violet-400'
                                 : emp.role === 'supervisor'
-                                  ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                                  ? 'border-accent-blue/20 bg-accent-blue/10 text-accent-blue'
                                   : ''
                             }
                           >
                             {emp.role}
                           </Badge>
-                          <span className="text-xs font-mono text-[var(--text-muted)]">
+                          <span className="font-mono text-[var(--text-muted)] text-xs">
                             {emp.qr_code_data || 'No QR'}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3.5 text-right">
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex justify-end gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(emp)}
                             aria-label={`Edit ${emp.full_name}`}
                           >
-                            <Edit2 className="w-4 h-4" aria-hidden="true" />
+                            <Edit2 className="h-4 w-4" aria-hidden="true" />
                           </Button>
                           <Button
                             variant="outline"
@@ -299,7 +299,7 @@ export function UsersTab() {
                             className="text-accent-red hover:text-accent-red/80"
                             aria-label={`Delete ${emp.full_name}`}
                           >
-                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </Button>
                         </div>
                       </td>
@@ -313,7 +313,7 @@ export function UsersTab() {
       </GlassCard>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-[var(--border-default)] bg-[var(--bg-primary)]">
           <DialogHeader>
             <DialogTitle>{editingEmployee ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
           </DialogHeader>
@@ -447,9 +447,9 @@ function EditEmployeeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="names" className="block text-sm font-medium text-[var(--text-body)] mb-2">
+          <label htmlFor="names" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
             Names
           </label>
           <input
@@ -457,7 +457,7 @@ function EditEmployeeForm({
             type="text"
             value={names}
             onChange={(e) => handleNamesChange(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
             placeholder="Enter first name(s)"
           />
         </div>
@@ -465,7 +465,7 @@ function EditEmployeeForm({
         <div>
           <label
             htmlFor="surname"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Surname
           </label>
@@ -474,7 +474,7 @@ function EditEmployeeForm({
             type="text"
             value={surname}
             onChange={(e) => handleSurnameChange(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
             placeholder="Enter surname"
           />
         </div>
@@ -483,7 +483,7 @@ function EditEmployeeForm({
       <div>
         <label
           htmlFor="fullName"
-          className="block text-sm font-medium text-[var(--text-body)] mb-2"
+          className="mb-2 block font-medium text-[var(--text-body)] text-sm"
         >
           Full Name
         </label>
@@ -492,16 +492,16 @@ function EditEmployeeForm({
           type="text"
           value={fullName}
           onChange={(e) => handleFullNameChange(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+          className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           placeholder="Enter full name"
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="idNumber"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Id Number
           </label>
@@ -510,7 +510,7 @@ function EditEmployeeForm({
             type="text"
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)] font-mono"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]"
             placeholder="Enter ID / passport number"
           />
         </div>
@@ -518,7 +518,7 @@ function EditEmployeeForm({
         <div>
           <label
             htmlFor="coyNumber"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Coy Number
           </label>
@@ -527,17 +527,17 @@ function EditEmployeeForm({
             type="text"
             value={coyNumber}
             onChange={(e) => setCoyNumber(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)] font-mono"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)]"
             placeholder="e.g. COY-1042 / EMP-1042"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="jobTitle"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Job Title
           </label>
@@ -546,20 +546,20 @@ function EditEmployeeForm({
             type="text"
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
             placeholder="e.g. Excavator Operator"
           />
         </div>
 
         <div>
-          <label htmlFor="area" className="block text-sm font-medium text-[var(--text-body)] mb-2">
+          <label htmlFor="area" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
             Area
           </label>
           <select
             id="area"
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           >
             <option value="">Select area</option>
             {availableAreas.map((areaName) => (
@@ -571,11 +571,11 @@ function EditEmployeeForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="medicalExpiry"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Medical Expiry
           </label>
@@ -584,14 +584,14 @@ function EditEmployeeForm({
             type="date"
             value={medicalExpiry}
             onChange={(e) => setMedicalExpiry(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           />
         </div>
 
         <div>
           <label
             htmlFor="inductionExpiry"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Induction Expiry
           </label>
@@ -600,40 +600,40 @@ function EditEmployeeForm({
             type="date"
             value={inductionExpiry}
             onChange={(e) => setInductionExpiry(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="qrCode" className="block text-sm font-medium text-[var(--text-body)] mb-2">
+        <label htmlFor="qrCode" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
           QR Code
         </label>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <QrCode className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            <QrCode className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               id="qrCode"
               type="text"
               value={qrCode}
               onChange={(e) => setQrCode(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)] font-mono"
+              className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] py-2 pr-3 pl-9 font-mono text-[var(--text-heading)]"
               placeholder="QR-EMP-..."
             />
           </div>
           <Button type="button" variant="outline" onClick={handleGenerateQR} className="shrink-0">
-            <RefreshCw className="w-4 h-4 mr-1.5" />
+            <RefreshCw className="mr-1.5 h-4 w-4" />
             Generate
           </Button>
         </div>
       </div>
 
       <div>
-        <label htmlFor="photo" className="block text-sm font-medium text-[var(--text-body)] mb-2">
+        <label htmlFor="photo" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
           Photo
         </label>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] overflow-hidden shrink-0 relative flex items-center justify-center">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)]">
             {photoUrl ? (
               <Image
                 src={photoUrl}
@@ -644,11 +644,11 @@ function EditEmployeeForm({
                 unoptimized
               />
             ) : (
-              <Camera className="w-5 h-5 text-[var(--text-muted)]" />
+              <Camera className="h-5 w-5 text-[var(--text-muted)]" />
             )}
           </div>
-          <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded text-[var(--text-heading)] transition-colors shrink-0">
-            <Upload className="w-4 h-4 text-[var(--accent-blue)]" />
+          <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 font-medium text-[var(--text-heading)] text-sm transition-colors hover:bg-[var(--bg-tertiary)]">
+            <Upload className="h-4 w-4 text-[var(--accent-blue)]" />
             <span>Upload Photo</span>
             <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
           </label>
@@ -657,22 +657,22 @@ function EditEmployeeForm({
             type="text"
             value={photoUrl}
             onChange={(e) => setPhotoUrl(e.target.value)}
-            className="flex-1 px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)] text-sm"
+            className="flex-1 rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm"
             placeholder="Or paste photo URL..."
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-[var(--text-body)] mb-2">
+          <label htmlFor="role" className="mb-2 block font-medium text-[var(--text-body)] text-sm">
             Role
           </label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           >
             <option value="operator">Operator</option>
             <option value="supervisor">Supervisor</option>
@@ -684,7 +684,7 @@ function EditEmployeeForm({
         <div>
           <label
             htmlFor="department"
-            className="block text-sm font-medium text-[var(--text-body)] mb-2"
+            className="mb-2 block font-medium text-[var(--text-body)] text-sm"
           >
             Primary Department
           </label>
@@ -692,7 +692,7 @@ function EditEmployeeForm({
             id="department"
             value={departmentId}
             onChange={(e) => setDepartmentId(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded text-[var(--text-heading)]"
+            className="w-full rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)]"
           >
             <option value="">Select department</option>
             {departments.map((dept) => (
@@ -705,7 +705,7 @@ function EditEmployeeForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+        <label className="mb-2 block font-medium text-[var(--text-body)] text-sm">
           Accessible Departments
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -714,10 +714,10 @@ function EditEmployeeForm({
               key={dept.id}
               type="button"
               onClick={() => toggleAccessibleDept(dept.id)}
-              className={`text-left px-3 py-2 rounded border text-sm ${
+              className={`rounded border px-3 py-2 text-left text-sm ${
                 accessibleDepts.includes(dept.id)
-                  ? 'bg-[var(--accent-emerald)] border-[var(--accent-emerald)] text-[var(--bg-void)]'
-                  : 'bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-body)]'
+                  ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)] text-[var(--bg-void)]'
+                  : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-body)]'
               }`}
             >
               {dept.display_name}
@@ -726,13 +726,13 @@ function EditEmployeeForm({
         </div>
       </div>
 
-      <div className="flex gap-2 justify-end pt-4">
+      <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button
           type="submit"
-          className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+          className="bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
         >
           {employee ? 'Save Changes' : 'Add Employee'}
         </Button>

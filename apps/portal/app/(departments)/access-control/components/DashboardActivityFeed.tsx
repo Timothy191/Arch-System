@@ -39,17 +39,17 @@ interface DashboardActivityFeedProps {
 
 export default function DashboardActivityFeed({ activity }: DashboardActivityFeedProps) {
   return (
-    <div className="bg-card rounded-xl border border-border shadow-card">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+    <div className="rounded-xl border border-border bg-card shadow-card">
+      <div className="flex items-center justify-between border-border border-b px-5 py-4">
         <div>
-          <h2 className="text-sm font-bold text-foreground">Recent Access Events</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h2 className="font-bold text-foreground text-sm">Recent Access Events</h2>
+          <p className="mt-0.5 text-muted-foreground text-xs">
             Last {activity.length} scan events across all zones
           </p>
         </div>
         <Link
           href="/access-control/access-logs"
-          className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+          className="flex items-center gap-1 font-semibold text-primary text-xs transition-colors hover:text-primary/80"
         >
           View all <ArrowRight size={12} />
         </Link>
@@ -60,7 +60,7 @@ export default function DashboardActivityFeed({ activity }: DashboardActivityFee
           return (
             <div
               key={entry.id}
-              className="flex items-center gap-3 px-5 py-3 hover:bg-secondary/40 transition-colors duration-100 group"
+              className="group flex items-center gap-3 px-5 py-3 transition-colors duration-100 hover:bg-secondary/40"
             >
               <div className="shrink-0">
                 <StatusIcon
@@ -74,26 +74,26 @@ export default function DashboardActivityFeed({ activity }: DashboardActivityFee
                   }
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-semibold text-foreground truncate">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="truncate font-semibold text-foreground text-sm">
                     {entry.entityName}
                   </span>
                   <span
-                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${entityTypePill[entry.entityType]}`}
+                    className={`rounded-full px-1.5 py-0.5 font-semibold text-[10px] ${entityTypePill[entry.entityType]}`}
                   >
                     {entry.entityType}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-muted-foreground">{entry.zone}</span>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <span className="text-muted-foreground text-xs">{entry.zone}</span>
                   <span className="text-muted-foreground">·</span>
-                  <span className="text-[10px] font-mono text-muted-foreground">{entry.qrId}</span>
+                  <span className="font-mono text-[10px] text-muted-foreground">{entry.qrId}</span>
                 </div>
               </div>
-              <div className="shrink-0 flex flex-col items-end gap-1">
+              <div className="flex shrink-0 flex-col items-end gap-1">
                 <StatusBadge status={entry.status as AccessStatus} size="sm" />
-                <span className="text-[10px] font-mono text-muted-foreground">{entry.time}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{entry.time}</span>
               </div>
             </div>
           );

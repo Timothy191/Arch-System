@@ -189,17 +189,17 @@ export function ShiftCloseoutForm({
   };
 
   return (
-    <GlassCard variant="spotlight" className="p-6 max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
+    <GlassCard variant="spotlight" className="max-w-5xl p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-[var(--text-heading)]">
+          <h2 className="font-semibold text-[var(--text-heading)] text-xl">
             Shift Production & SMR Ledger
           </h2>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
+          <p className="mt-1 text-[var(--text-secondary)] text-sm">
             Every machine must be accounted for. Operating SMR + Breakdowns + Delays cannot exceed
             12.5 hours (overrun reason required beyond 12.0h).
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="mt-1 text-[var(--text-muted)] text-xs">
             Logged Operator:{' '}
             <span className="font-semibold text-[var(--text-heading)]">
               {operatorName || 'Resolving session...'}
@@ -208,18 +208,18 @@ export function ShiftCloseoutForm({
         </div>
         <div className="flex items-center gap-2">
           {!isOnline ? (
-            <span className="text-sm text-red-600 animate-pulse font-medium px-3 py-1 bg-red-500/10 rounded-full border border-red-500/30 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-600" />
+            <span className="flex animate-pulse items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 font-medium text-red-600 text-sm">
+              <span className="h-2 w-2 rounded-full bg-red-600" />
               Disconnected (Offline)
             </span>
           ) : isDegraded ? (
-            <span className="text-sm text-amber-600 animate-pulse font-medium px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/30 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="flex animate-pulse items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-medium text-amber-600 text-sm">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
               ⚠️ High Latency (Degraded)
             </span>
           ) : (
-            <span className="text-xs text-emerald-600 font-medium px-2.5 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 font-medium text-emerald-600 text-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               Connected
             </span>
           )}
@@ -227,37 +227,37 @@ export function ShiftCloseoutForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex gap-4 mb-4">
+        <div className="mb-4 flex gap-4">
           <select
             value={shiftType}
             onChange={(e) => setShiftType(e.target.value as 'day' | 'night')}
-            className="rounded-lg border border-[var(--border-default)] px-3 py-2 min-h-[44px] text-sm bg-[var(--bg-secondary)] text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] transition-colors shadow-sm"
+            className="min-h-[44px] rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-heading)] text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
           >
             <option value="day">Day Shift (06:00 - 18:00)</option>
             <option value="night">Night Shift (18:00 - 06:00)</option>
           </select>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/40 backdrop-blur-sm shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/40 shadow-sm backdrop-blur-sm">
           <table className="min-w-full divide-y divide-[var(--border-subtle)]">
             <thead className="bg-[var(--bg-secondary)]/70">
               <tr>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Equipment
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Opening SMR
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Closing SMR
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Breakdown (h)
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-left font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Delays (h)
                 </th>
-                <th className="px-4 py-3.5 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-right font-semibold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                   Total Allocated
                 </th>
               </tr>
@@ -275,7 +275,7 @@ export function ShiftCloseoutForm({
                       isError ? 'bg-red-500/10' : 'hover:bg-[var(--bg-secondary)]/30'
                     }`}
                   >
-                    <td className="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-[var(--text-heading)]">
+                    <td className="whitespace-nowrap px-4 py-3.5 font-medium text-[var(--text-heading)] text-sm">
                       {m.machine_name}
                       {totalAllocated > 12.0 && totalAllocated <= 12.5 && (
                         <div className="mt-1.5 max-w-xs">
@@ -286,20 +286,20 @@ export function ShiftCloseoutForm({
                             onChange={(e) =>
                               updateMachine(m.machine_id, 'overrun_reason' as any, e.target.value)
                             }
-                            className="w-full text-xs rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[var(--text-heading)] placeholder:text-amber-600/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                            className="w-full rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[var(--text-heading)] text-xs placeholder:text-amber-600/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
                         </div>
                       )}
                       {isError && (
-                        <div className="text-xs text-red-600 font-normal mt-1 max-w-xs whitespace-normal">
+                        <div className="mt-1 max-w-xs whitespace-normal font-normal text-red-600 text-xs">
                           {validationErrors[m.machine_id]}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap text-sm font-mono text-[var(--text-secondary)]">
+                    <td className="whitespace-nowrap px-4 py-3.5 font-mono text-[var(--text-secondary)] text-sm">
                       {m.opening_smr.toFixed(1)}
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-3.5">
                       <input
                         type="number"
                         step="0.1"
@@ -311,14 +311,14 @@ export function ShiftCloseoutForm({
                             parseFloat(e.target.value) || m.opening_smr
                           )
                         }
-                        className={`w-24 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                        className={`min-h-[44px] w-24 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
                           isError
                             ? 'border-red-500 focus:ring-red-500'
                             : 'border-[var(--border-default)]'
                         }`}
                       />
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-3.5">
                       <input
                         type="number"
                         step="0.1"
@@ -331,14 +331,14 @@ export function ShiftCloseoutForm({
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className={`w-20 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                        className={`min-h-[44px] w-20 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
                           isError
                             ? 'border-red-500 focus:ring-red-500'
                             : 'border-[var(--border-default)]'
                         }`}
                       />
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-3.5">
                       <input
                         type="number"
                         step="0.1"
@@ -351,20 +351,20 @@ export function ShiftCloseoutForm({
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className={`w-20 rounded-lg border px-3 py-2 min-h-[44px] text-sm font-mono bg-[var(--bg-secondary)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:border-transparent transition-all shadow-sm ${
+                        className={`min-h-[44px] w-20 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
                           isError
                             ? 'border-red-500 focus:ring-red-500'
                             : 'border-[var(--border-default)]'
                         }`}
                       />
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-mono font-medium">
+                    <td className="whitespace-nowrap px-4 py-3.5 text-right font-medium font-mono text-sm">
                       <span
                         className={
                           totalAllocated > 12.5
-                            ? 'text-red-600 font-bold'
+                            ? 'font-bold text-red-600'
                             : totalAllocated > 12.0
-                              ? 'text-amber-500 font-bold'
+                              ? 'font-bold text-amber-500'
                               : totalAllocated < 12.0
                                 ? 'text-amber-600'
                                 : 'text-emerald-600'
@@ -380,8 +380,8 @@ export function ShiftCloseoutForm({
           </table>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
-          <p className="text-xs text-[var(--text-muted)] font-medium">
+        <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-4">
+          <p className="font-medium text-[var(--text-muted)] text-xs">
             {queue.length > 0
               ? `${queue.length} shift record(s) buffered offline.`
               : 'Real-time sync active.'}
@@ -389,7 +389,7 @@ export function ShiftCloseoutForm({
           <button
             type="submit"
             disabled={isSubmitting || isSyncing}
-            className="px-6 py-2.5 min-h-[44px] bg-[var(--arch-brand-blue)] hover:bg-[var(--arch-brand-blue-hover)] text-white font-medium rounded-lg shadow-sm disabled:opacity-50 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-1"
+            className="min-h-[44px] rounded-lg bg-[var(--arch-brand-blue)] px-6 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-[var(--arch-brand-blue-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-1 disabled:opacity-50"
           >
             {isOnline && !isDegraded ? 'Lock Shift & Compile Ledger' : 'Lock Shift (Local Queue)'}
           </button>

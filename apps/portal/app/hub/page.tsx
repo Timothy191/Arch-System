@@ -262,10 +262,10 @@ export default async function HubPage() {
   });
 
   return (
-    <div className="space-y-8 sm:space-y-10 w-full">
+    <div className="w-full space-y-8 sm:space-y-10">
       {/* Light-theme glass hero section */}
       <section
-        className="relative w-full pt-2 pb-2 px-4 sm:px-6 motion-reduce:animate-none animate-fade-up"
+        className="relative w-full animate-fade-up px-4 pt-2 pb-2 motion-reduce:animate-none sm:px-6"
         style={{
           animationDelay: '0s',
           animationFillMode: 'both',
@@ -298,19 +298,19 @@ export default async function HubPage() {
 
       {/* Core Operational Modules - Primary Workspace Above the Fold (Fitts's Law & Primacy Effect) */}
       {departments.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center rounded-card bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
-          <Shield className="w-8 h-8 mx-auto text-accent-amber" />
-          <p className="text-sm font-medium text-arch-text-secondary">
+        <div className="space-y-3 rounded-card border border-arch-border-subtle bg-arch-surface-secondary/40 p-8 text-center sm:p-12">
+          <Shield className="mx-auto h-8 w-8 text-accent-amber" />
+          <p className="font-medium text-arch-text-secondary text-sm">
             No departments assigned to your account.
           </p>
-          <p className="text-xs text-arch-text-tertiary">
+          <p className="text-arch-text-tertiary text-xs">
             Contact your administrator to request department access.
           </p>
         </div>
       ) : (
         <Suspense
           fallback={
-            <div className="h-64 rounded-card bg-arch-surface-secondary/40 animate-pulse" />
+            <div className="h-64 animate-pulse rounded-card bg-arch-surface-secondary/40" />
           }
         >
           <CoreOperationalModules
@@ -323,13 +323,13 @@ export default async function HubPage() {
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
       {pluginWidgets.length > 0 && (
-        <section className="space-y-4 animate-fade-up" style={{ animationDelay: '0.35s' }}>
-          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary">
+        <section className="animate-fade-up space-y-4" style={{ animationDelay: '0.35s' }}>
+          <div className="flex items-center justify-between border-arch-border-subtle border-b pb-3">
+            <h2 className="font-semibold text-arch-text-primary text-base tracking-tight sm:text-lg">
               Plugin Widgets
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {pluginWidgets.map((widget) => (
               <div key={widget.id} className={widget.gridSpan ?? 'col-span-1'}>
                 <widget.component departmentId={accessibleDeptIds[0] ?? ''} />

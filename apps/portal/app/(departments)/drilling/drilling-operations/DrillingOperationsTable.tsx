@@ -135,76 +135,76 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
   return (
     <div className="space-y-6">
       {/* Auto-Compiled KPI Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Drill className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <Drill className="h-4 w-4 text-accent-green" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Meters Drilled
             </p>
           </div>
-          <p className="text-2xl font-bold text-accent-green mt-2">{totalMeters.toFixed(1)}m</p>
+          <p className="mt-2 font-bold text-2xl text-accent-green">{totalMeters.toFixed(1)}m</p>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <ClipboardList className="h-4 w-4 text-[var(--accent-blue)]" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Holes Drilled
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--accent-blue)] mt-2">{totalHoles}</p>
+          <p className="mt-2 font-bold text-2xl text-[var(--accent-blue)]">{totalHoles}</p>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-cyan-500" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <Clock className="h-4 w-4 text-cyan-500" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Operating Hours
             </p>
           </div>
-          <p className="text-2xl font-bold text-cyan-500 mt-2">{totalHours.toFixed(1)}h</p>
+          <p className="mt-2 font-bold text-2xl text-cyan-500">{totalHours.toFixed(1)}h</p>
         </GlassCard>
 
         <GlassCard>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+            <CheckCircle2 className="h-4 w-4 text-accent-green" />
+            <p className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
               Rigs Logged Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
+          <p className="mt-2 font-bold text-2xl text-[var(--text-heading)]">
             {activeRigsCount} / {drills.length}
           </p>
         </GlassCard>
       </div>
 
       <GlassCard className="overflow-hidden p-0">
-        <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-subtle)] border-b p-4">
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h3 className="font-semibold text-[var(--text-heading)] text-lg">
                 {today} — Auto-Compiled Shift Report
               </h3>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
-                <Radio className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-accent-green text-xs">
+                <Radio className="h-3 w-3" />
                 Synced from Control Room
               </span>
             </div>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
+            <p className="mt-1 text-[var(--text-muted)] text-sm">
               Built automatically from Control Room Machine Operations (Meters, Site, Block, Holes,
               SMR &amp; Delays).
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Shift Filter */}
-            <div className="inline-flex rounded-lg border border-[var(--border-default)] overflow-hidden">
+            <div className="inline-flex overflow-hidden rounded-lg border border-[var(--border-default)]">
               <button
                 type="button"
                 onClick={() => setSelectedShift('all')}
                 className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors',
+                  'px-3 py-1.5 font-medium text-xs transition-colors',
                   selectedShift === 'all'
                     ? 'bg-[var(--accent-blue)] text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
@@ -216,35 +216,35 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
                 type="button"
                 onClick={() => setSelectedShift('day')}
                 className={cn(
-                  'px-3 py-1.5 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)] transition-colors',
+                  'flex items-center gap-1 border-[var(--border-default)] border-l px-3 py-1.5 font-medium text-xs transition-colors',
                   selectedShift === 'day'
                     ? 'bg-[var(--accent-blue)] text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
                 )}
               >
-                <Sun className="w-3 h-3" />
+                <Sun className="h-3 w-3" />
                 Day
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedShift('night')}
                 className={cn(
-                  'px-3 py-1.5 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)] transition-colors',
+                  'flex items-center gap-1 border-[var(--border-default)] border-l px-3 py-1.5 font-medium text-xs transition-colors',
                   selectedShift === 'night'
                     ? 'bg-[var(--accent-blue)] text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
                 )}
               >
-                <Moon className="w-3 h-3" />
+                <Moon className="h-3 w-3" />
                 Night
               </button>
             </div>
 
             <Link
               href="/drilling/reports"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-medium text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-[var(--bg-tertiary)]"
             >
-              <FileText className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
+              <FileText className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
               Production Reports &amp; CSV
             </Link>
           </div>
@@ -253,41 +253,41 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[var(--border-subtle)] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider sticky left-0 bg-[var(--bg-primary)] z-10">
+              <TableRow className="border-[var(--border-subtle)] border-b hover:bg-transparent">
+                <TableHead className="sticky left-0 z-10 bg-[var(--bg-primary)] font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Drill Rig
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Shift
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Site
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Block
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Meters
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Holes
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Open SMR
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Close SMR
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Hours
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Operator
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-right">
+                <TableHead className="text-right font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Delays (min)
                 </TableHead>
-                <TableHead className="text-[var(--text-muted)] font-medium text-xs uppercase tracking-wider text-center">
+                <TableHead className="text-center font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                   Status
                 </TableHead>
               </TableRow>
@@ -314,24 +314,24 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
                   return (
                     <TableRow
                       key={key}
-                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]/30"
+                      className="border-[var(--border-subtle)] border-b hover:bg-[var(--bg-tertiary)]/30"
                     >
-                      <TableCell className="font-medium text-[var(--text-heading)] sticky left-0 bg-[var(--bg-primary)] z-10">
+                      <TableCell className="sticky left-0 z-10 bg-[var(--bg-primary)] font-medium text-[var(--text-heading)]">
                         {drill.name}
                       </TableCell>
                       <TableCell>
                         <span
                           className={cn(
-                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs',
                             shift === 'day'
                               ? 'bg-amber-500/10 text-amber-600'
                               : 'bg-indigo-500/10 text-indigo-600'
                           )}
                         >
                           {shift === 'day' ? (
-                            <Sun className="w-3 h-3" />
+                            <Sun className="h-3 w-3" />
                           ) : (
-                            <Moon className="w-3 h-3" />
+                            <Moon className="h-3 w-3" />
                           )}
                           {shift === 'day' ? 'Day' : 'Night'}
                         </span>
@@ -339,7 +339,7 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
                       <TableCell className="text-[var(--text-body)] text-sm">
                         {row?.site || '—'}
                       </TableCell>
-                      <TableCell className="text-[var(--text-heading)] font-medium text-sm">
+                      <TableCell className="font-medium text-[var(--text-heading)] text-sm">
                         {row?.block_drilled || '—'}
                       </TableCell>
                       <TableCell className="text-right font-semibold text-accent-green tabular-nums">
@@ -348,10 +348,10 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
                       <TableCell className="text-right font-semibold text-[var(--accent-blue)] tabular-nums">
                         {row?.holes != null ? row.holes : '—'}
                       </TableCell>
-                      <TableCell className="text-right text-[var(--text-muted)] font-mono text-sm tabular-nums">
+                      <TableCell className="text-right font-mono text-[var(--text-muted)] text-sm tabular-nums">
                         {fmt(row?.open_hours, 1)}
                       </TableCell>
-                      <TableCell className="text-right text-[var(--text-muted)] font-mono text-sm tabular-nums">
+                      <TableCell className="text-right font-mono text-[var(--text-muted)] text-sm tabular-nums">
                         {fmt(row?.close_hours, 1)}
                       </TableCell>
                       <TableCell className="text-right font-medium text-cyan-600 tabular-nums">
@@ -360,23 +360,23 @@ export function DrillingOperationsTable({ drills, initialOps }: Props) {
                       <TableCell className="text-[var(--text-body)] text-sm">
                         {row?.operator_name || '—'}
                       </TableCell>
-                      <TableCell className="text-right text-[var(--text-muted)] tabular-nums text-sm">
+                      <TableCell className="text-right text-[var(--text-muted)] text-sm tabular-nums">
                         {delayMins > 0 ? `${delayMins}m` : '—'}
                       </TableCell>
                       <TableCell className="text-center">
                         {row ? (
                           <span
                             className={cn(
-                              'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full border',
+                              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-semibold text-xs',
                               row.status === 'completed'
-                                ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
-                                : 'bg-blue-50/70 border-blue-200/50 text-blue-700'
+                                ? 'border-emerald-200/50 bg-emerald-50/70 text-emerald-700'
+                                : 'border-blue-200/50 bg-blue-50/70 text-blue-700'
                             )}
                           >
                             {row.status ?? 'active'}
                           </span>
                         ) : (
-                          <span className="text-xs text-[var(--text-muted)]">
+                          <span className="text-[var(--text-muted)] text-xs">
                             Awaiting Control Room
                           </span>
                         )}

@@ -163,7 +163,7 @@ function HeroSlide({
       aria-hidden={!isCenter}
       onClick={handleClick}
       className={cn(
-        'absolute inset-x-0 mx-auto w-[92%] sm:w-[88%] lg:w-[82%] max-w-[1060px] h-full will-change-[transform,opacity] transform-gpu',
+        'absolute inset-x-0 mx-auto h-full w-[92%] max-w-[1060px] transform-gpu will-change-[transform,opacity] sm:w-[88%] lg:w-[82%]',
         cursorClass
       )}
       style={{
@@ -182,7 +182,7 @@ function HeroSlide({
     >
       <div
         className={cn(
-          'relative h-full w-full rounded-2xl overflow-hidden select-none',
+          'relative h-full w-full select-none overflow-hidden rounded-2xl',
           'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
           'transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
           isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
@@ -297,7 +297,7 @@ export function HeroRotator({
 
   return (
     <div
-      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl"
+      className="relative w-full select-none rounded-2xl py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
@@ -327,7 +327,7 @@ export function HeroRotator({
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative w-full cursor-grab active:cursor-grabbing overflow-visible touch-pan-y"
+          className="relative w-full cursor-grab touch-pan-y overflow-visible active:cursor-grabbing"
           style={{ height: 400, transformStyle: 'preserve-3d' }}
         >
           {panels.map((panel, idx) => (
@@ -349,25 +349,25 @@ export function HeroRotator({
         </m.div>
 
         {total > 1 && (
-          <div className="pointer-events-none absolute inset-y-0 inset-x-0 w-full z-40">
+          <div className="pointer-events-none absolute inset-x-0 inset-y-0 z-40 w-full">
             <button
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/50 shadow-xs transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse text-amber-500 hover:text-amber-400"
+              className="gold-steel-border gold-steel-border-slim pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 rounded-full border border-0 border-accent-amber/50 bg-transparent p-3 text-amber-500 shadow-none shadow-xs transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-left-4 sm:p-4 lg:-left-6"
               style={{
                 animationDuration: '3s',
                 filter:
                   'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
               }}
             >
-              <ArchEmblemIcon className="w-8 h-8 sm:w-10 sm:h-10 -rotate-90 transition-transform duration-300" />
+              <ArchEmblemIcon className="h-8 w-8 -rotate-90 transition-transform duration-300 sm:h-10 sm:w-10" />
             </button>
             <button
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 p-3 sm:p-4 bg-transparent border-0 shadow-none rounded-full gold-steel-border gold-steel-border-slim border border-accent-amber/50 shadow-xs transition-all duration-300 hover:scale-125 active:scale-95 motion-safe:animate-pulse text-amber-500 hover:text-amber-400"
+              className="gold-steel-border gold-steel-border-slim pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 rounded-full border border-0 border-accent-amber/50 bg-transparent p-3 text-amber-500 shadow-none shadow-xs transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-right-4 sm:p-4 lg:-right-6"
               style={{
                 animationDuration: '3s',
                 animationDelay: '1.5s',
@@ -375,7 +375,7 @@ export function HeroRotator({
                   'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
               }}
             >
-              <ArchEmblemIcon className="w-8 h-8 sm:w-10 sm:h-10 rotate-90 transition-transform duration-300" />
+              <ArchEmblemIcon className="h-8 w-8 rotate-90 transition-transform duration-300 sm:h-10 sm:w-10" />
             </button>
           </div>
         )}
@@ -384,7 +384,7 @@ export function HeroRotator({
       {/* Slim Operational Subsystem KPI Banner directly under the Hero Card */}
       {panels.length > 0 && (
         <div
-          className="w-[92%] sm:w-[88%] lg:w-[82%] max-w-[1060px] mx-auto mt-3.5"
+          className="mx-auto mt-3.5 w-[92%] max-w-[1060px] sm:w-[88%] lg:w-[82%]"
           data-testid="hero-kpi-slim-banner"
         >
           {panels.map((p, idx) => (
@@ -407,18 +407,18 @@ export function HeroRotator({
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  'group/ind transition-all duration-300 ease-out flex items-center justify-center p-1 rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
+                  'group/ind flex items-center justify-center rounded-md p-1 transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'opacity-100 visible text-amber-400 brightness-125 scale-125 -translate-y-0.5 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
-                    : 'opacity-0 invisible pointer-events-none text-accent-amber/80'
+                    ? 'visible -translate-y-0.5 scale-125 text-amber-400 opacity-100 brightness-125 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
+                    : 'pointer-events-none invisible text-accent-amber/80 opacity-0'
                 )}
               >
                 <ArchEmblemIcon
                   className={cn(
                     'transition-all duration-300 ease-out',
                     idx === activeIndex
-                      ? 'w-6 h-6 sm:w-7 sm:h-7 opacity-100 visible motion-safe:animate-pulse'
-                      : 'w-5 h-5 sm:w-[22px] sm:h-[22px] opacity-0 invisible'
+                      ? 'visible h-6 w-6 opacity-100 motion-safe:animate-pulse sm:h-7 sm:w-7'
+                      : 'invisible h-5 w-5 opacity-0 sm:h-[22px] sm:w-[22px]'
                   )}
                 />
               </button>

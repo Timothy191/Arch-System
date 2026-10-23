@@ -60,33 +60,33 @@ export function ExportButton({ filename, rows }: ExportButtonProps) {
         onClick={() => setIsOpen(!isOpen)}
         disabled={rows.length === 0}
         type="button"
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/70 backdrop-blur-xl border border-black/[0.08] text-[var(--text-body)] text-sm font-medium hover:bg-white/90 shadow-card transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
+        className="flex min-h-[44px] items-center gap-2 rounded-lg border border-black/[0.08] bg-white/70 px-4 py-2 font-medium text-[var(--text-body)] text-sm shadow-card backdrop-blur-xl transition-colors hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        <Download className="w-4 h-4" />
+        <Download className="h-4 w-4" />
         <span>Export Report</span>
         <Logo
           variant="gold"
           className={cn(
-            'w-3.5 h-3.5 shrink-0 transition-transform duration-200 ease-out',
+            'h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out',
             isOpen ? 'rotate-0' : 'rotate-180'
           )}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-lg bg-white/90 backdrop-blur-xl border border-black/[0.08] shadow-window z-50 py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="fade-in slide-in-from-top-1 absolute right-0 z-50 mt-2 w-48 animate-in overflow-hidden rounded-lg border border-black/[0.08] bg-white/90 py-1 shadow-window backdrop-blur-xl duration-150">
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-[var(--text-body)] hover:bg-[var(--bg-secondary)] transition-colors"
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[var(--text-body)] text-sm transition-colors hover:bg-[var(--bg-secondary)]"
           >
-            <FileText className="w-4 h-4 text-[var(--text-muted)]" />
+            <FileText className="h-4 w-4 text-[var(--text-muted)]" />
             Download CSV
           </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-[var(--text-body)] hover:bg-[var(--bg-secondary)] transition-colors"
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[var(--text-body)] text-sm transition-colors hover:bg-[var(--bg-secondary)]"
           >
-            <FileSpreadsheet className="w-4 h-4 text-accent-green" />
+            <FileSpreadsheet className="h-4 w-4 text-accent-green" />
             Download Excel (.xlsx)
           </button>
         </div>

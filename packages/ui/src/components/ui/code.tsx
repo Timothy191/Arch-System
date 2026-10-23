@@ -13,8 +13,8 @@ export const Code = React.forwardRef<HTMLElement, CodeProps>(
         ref={ref}
         data-syntax={syntax}
         className={cn(
-          'font-mono text-xs px-1.5 py-0.5 rounded',
-          'bg-neutral-100 text-neutral-900 border border-neutral-200',
+          'rounded px-1.5 py-0.5 font-mono text-xs',
+          'border border-neutral-200 bg-neutral-100 text-neutral-900',
           className
         )}
         {...props}

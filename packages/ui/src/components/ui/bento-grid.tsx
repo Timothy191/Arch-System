@@ -24,7 +24,7 @@ const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
   return (
     <div
       className={cn(
-        'grid w-full auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6',
+        'grid w-full auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3',
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ const BentoCard = ({
   <div
     className={cn(
       'group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl',
-      'bg-[var(--bg-tertiary)] border border-[var(--border-default)]',
+      'border border-[var(--border-default)] bg-[var(--bg-tertiary)]',
       'transform-gpu [box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]',
       className
     )}
@@ -57,7 +57,7 @@ const BentoCard = ({
     <div className="p-4">
       <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
         <Icon className="h-12 w-12 origin-left transform-gpu text-[var(--text-muted)] transition-all duration-300 ease-in-out group-hover:scale-75" />
-        <h3 className="text-xl font-medium text-[var(--text-heading)]">{name}</h3>
+        <h3 className="font-medium text-[var(--text-heading)] text-xl">{name}</h3>
         <p className="max-w-lg text-[var(--text-muted)]">{description}</p>
       </div>
 

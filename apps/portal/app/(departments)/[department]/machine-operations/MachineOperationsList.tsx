@@ -300,7 +300,7 @@ function MachineOperationsList({
     if (operations.length === 0) {
       return (
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm text-center py-8">
+          <p className="py-8 text-center text-[var(--text-muted)] text-sm">
             No operations logged today. Use the form above to add operations.
           </p>
         </GlassCard>
@@ -331,10 +331,10 @@ function MachineOperationsList({
               {/* Site Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)]" />
-                  <h4 className="text-[var(--text-heading)] font-semibold text-sm">{siteName}</h4>
+                  <div className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
+                  <h4 className="font-semibold text-[var(--text-heading)] text-sm">{siteName}</h4>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+                <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
                   <span>{siteHours.toFixed(1)}h total</span>
                   {siteBcm > 0 && (
                     <>
@@ -348,7 +348,7 @@ function MachineOperationsList({
               {/* Shift Subsections */}
               {dayOps.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider pl-4 border-l-2 border-[var(--accent-amber)]">
+                  <h5 className="border-[var(--accent-amber)] border-l-2 pl-4 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     Day Shift ({dayOps.length})
                   </h5>
                   <div className="space-y-2">
@@ -366,7 +366,7 @@ function MachineOperationsList({
 
               {nightOps.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider pl-4 border-l-2 border-[var(--accent-purple)]">
+                  <h5 className="border-[var(--accent-purple)] border-l-2 pl-4 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     Night Shift ({nightOps.length})
                   </h5>
                   <div className="space-y-2">
@@ -392,7 +392,7 @@ function MachineOperationsList({
   if (fleetMachines.length === 0) {
     return (
       <GlassCard>
-        <p className="text-[var(--text-muted)] text-sm text-center py-8">
+        <p className="py-8 text-center text-[var(--text-muted)] text-sm">
           No machines registered in the fleet. Contact an administrator to add machines.
         </p>
       </GlassCard>
@@ -402,15 +402,15 @@ function MachineOperationsList({
   return (
     <div className="space-y-5" data-testid="fleet-machines-list">
       {/* Search & Filter Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
             type="button"
             onClick={() => setFilterStatus('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
               filterStatus === 'all'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             All Machines ({counts.total})
@@ -418,22 +418,22 @@ function MachineOperationsList({
           <button
             type="button"
             onClick={() => setFilterStatus('operating')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
               filterStatus === 'operating'
                 ? 'bg-accent-green text-white shadow-sm'
-                : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-green inline-block" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
             Operating ({counts.operating})
           </button>
           <button
             type="button"
             onClick={() => setFilterStatus('standby')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
               filterStatus === 'standby'
                 ? 'bg-[var(--text-heading)] text-white shadow-sm'
-                : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
             Standby ({counts.standby})
@@ -442,10 +442,10 @@ function MachineOperationsList({
             <button
               type="button"
               onClick={() => setFilterStatus('breakdown')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
                 filterStatus === 'breakdown'
                   ? 'bg-accent-red text-white shadow-sm'
-                  : 'bg-accent-red/10 border border-accent-red/30 text-accent-red hover:bg-accent-red/20'
+                  : 'border border-accent-red/30 bg-accent-red/10 text-accent-red hover:bg-accent-red/20'
               }`}
             >
               <AlertCircle size={12} />
@@ -458,14 +458,14 @@ function MachineOperationsList({
         <div className="relative min-w-[240px]">
           <Search
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--text-muted)]"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search machine, type, or SN..."
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
           />
         </div>
       </div>
@@ -473,7 +473,7 @@ function MachineOperationsList({
       {/* Filtered Machine Results */}
       {filteredMachines.length === 0 ? (
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm text-center py-6">
+          <p className="py-6 text-center text-[var(--text-muted)] text-sm">
             No machines matching the selected filter or search query.
           </p>
         </GlassCard>
@@ -488,21 +488,21 @@ function MachineOperationsList({
             return (
               <div key={siteKey} className="space-y-3">
                 {/* Site Header */}
-                <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
+                <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)]" />
+                    <div className="h-2 w-2 rounded-full bg-[var(--accent-blue)]" />
                     {siteCode && (
-                      <span className="inline-flex px-1.5 py-0.5 rounded font-mono text-[11px] bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+                      <span className="inline-flex rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono text-[11px] text-[var(--accent-blue)]">
                         {siteCode}
                       </span>
                     )}
-                    <h4 className="text-[var(--text-heading)] font-semibold text-sm">{siteName}</h4>
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <h4 className="font-semibold text-[var(--text-heading)] text-sm">{siteName}</h4>
+                    <span className="text-[var(--text-muted)] text-xs">
                       ({items.length} machine{items.length !== 1 ? 's' : ''})
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-                    <span className="text-accent-green font-medium">
+                  <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs">
+                    <span className="font-medium text-accent-green">
                       {siteOperatingCount} operating
                     </span>
                     {siteTotalHours > 0 && (
@@ -575,19 +575,19 @@ function FleetMachineCard({
   };
 
   return (
-    <GlassCard className="py-3 px-4">
+    <GlassCard className="px-4 py-3">
       <div className="space-y-3">
         {/* Machine Header Row */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Left: Indicator, Machine Name, Type, SN */}
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex min-w-0 items-center gap-3">
             {/* Status Indicator */}
             <div
-              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                 status === 'breakdown'
-                  ? 'bg-accent-red animate-pulse'
+                  ? 'animate-pulse bg-accent-red'
                   : status === 'in-progress'
-                    ? 'bg-accent-blue animate-pulse'
+                    ? 'animate-pulse bg-accent-blue'
                     : status === 'operating'
                       ? 'bg-accent-green'
                       : 'bg-[var(--text-muted)]/50'
@@ -595,20 +595,20 @@ function FleetMachineCard({
             />
 
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[var(--text-heading)] font-semibold text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-[var(--text-heading)] text-sm">
                   {machine.name}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[11px] bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] font-medium">
+                <span className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
                   {machine.machine_type}
                 </span>
                 {machine.bin_factor != null && machine.bin_factor > 0 && (
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-[var(--accent-blue)] font-medium">
+                  <span className="rounded-md border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium font-mono text-[11px] text-[var(--accent-blue)]">
                     {machine.bin_factor} BCM/load
                   </span>
                 )}
                 {machine.serial_number && (
-                  <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
                     {machine.serial_number}
                   </span>
                 )}
@@ -617,35 +617,35 @@ function FleetMachineCard({
           </div>
 
           {/* Right: SMR, Status Badge & Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex shrink-0 items-center gap-3">
             {/* Latest SMR */}
             {machine.latest_smu != null && (
-              <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)]">
+              <span className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[var(--text-heading)] text-xs">
                 SMR {machine.latest_smu.toFixed(1)}
               </span>
             )}
 
             {/* Status Badge */}
             {status === 'breakdown' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-accent-red/10 text-accent-red border border-accent-red/20">
+              <span className="inline-flex items-center gap-1 rounded-md border border-accent-red/20 bg-accent-red/10 px-2 py-0.5 font-medium text-accent-red text-xs">
                 <AlertCircle size={12} />
                 Breakdown
               </span>
             )}
             {status === 'in-progress' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-accent-blue/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 animate-pulse">
+              <span className="inline-flex animate-pulse items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-accent-blue/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                 <Clock size={12} />
                 In Progress
               </span>
             )}
             {status === 'operating' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-accent-green/10 text-accent-green border border-accent-green/20">
+              <span className="inline-flex items-center gap-1 rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-medium text-accent-green text-xs">
                 <CheckCircle2 size={12} />
                 {totalHours.toFixed(1)}h logged
               </span>
             )}
             {status === 'standby' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border-default)]">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
                 Standby
               </span>
             )}
@@ -655,7 +655,7 @@ function FleetMachineCard({
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="text-xs text-[var(--accent-blue)] hover:underline font-medium ml-1"
+                className="ml-1 font-medium text-[var(--accent-blue)] text-xs hover:underline"
               >
                 {operations.length} shift{operations.length !== 1 ? 's' : ''} (
                 {isExpanded ? 'Hide' : 'Show'})
@@ -666,21 +666,21 @@ function FleetMachineCard({
 
         {/* Breakdown Alert Banner */}
         {breakdown && breakdown.status === 'active' && (
-          <div className="p-2.5 rounded-lg bg-accent-red/10 border border-accent-red/20 text-xs">
-            <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div className="rounded-lg border border-accent-red/20 bg-accent-red/10 p-2.5 text-xs">
+            <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="flex items-start gap-2">
-                <AlertCircle size={14} className="text-accent-red shrink-0 mt-0.5" />
+                <AlertCircle size={14} className="mt-0.5 shrink-0 text-accent-red" />
                 <div>
                   <p className="font-semibold text-accent-red">
                     Engineering Breakdown: {breakdown.reason}
                   </p>
                   {breakdown.repair_notes && (
-                    <p className="text-[var(--text-secondary)] mt-0.5">{breakdown.repair_notes}</p>
+                    <p className="mt-0.5 text-[var(--text-secondary)]">{breakdown.repair_notes}</p>
                   )}
                 </div>
               </div>
               {engineeringDelay && engineeringDelay.hours > 0 && (
-                <span className="px-2 py-0.5 rounded-full font-mono text-[11px] bg-amber-100 text-amber-900 border border-amber-300 font-semibold">
+                <span className="rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 font-mono font-semibold text-[11px] text-amber-900">
                   Eng Delay: {engineeringDelay.hours.toFixed(1)}h · Remaining Shift Cap:{' '}
                   {Math.max(0, 12 - engineeringDelay.hours).toFixed(1)}h
                 </span>
@@ -692,7 +692,7 @@ function FleetMachineCard({
         {/* Today's Shifts for this machine */}
         {operations.length > 0 ? (
           isExpanded && (
-            <div className="space-y-2 pt-2 border-t border-[var(--border-default)]">
+            <div className="space-y-2 border-[var(--border-default)] border-t pt-2">
               {operations.map((op) => (
                 <OperationCard
                   key={op.id}
@@ -705,12 +705,12 @@ function FleetMachineCard({
           )
         ) : (
           /* Standby notice when no operations logged */
-          <div className="pt-2 border-t border-[var(--border-default)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-2 text-[var(--text-muted)] text-xs">
             <span className="italic">Standby — No operations logged today</span>
             <button
               type="button"
               onClick={scrollToForm}
-              className="inline-flex items-center gap-1 text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/80 font-medium transition-colors"
+              className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80"
             >
               <Plus size={12} />
               Log Shift
@@ -783,19 +783,19 @@ function OperationCard({
   const [showDelays, setShowDelays] = useState(false);
 
   return (
-    <GlassCard className="py-2.5 px-3">
+    <GlassCard className="px-3 py-2.5">
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Status Indicator */}
             <div
-              className={`w-2 h-2 rounded-full ${
+              className={`h-2 w-2 rounded-full ${
                 machineBreakdown?.status === 'active'
-                  ? 'bg-accent-red animate-pulse'
+                  ? 'animate-pulse bg-accent-red'
                   : isComplete
                     ? 'bg-accent-green'
                     : isInProgress
-                      ? 'bg-accent-blue animate-pulse'
+                      ? 'animate-pulse bg-accent-blue'
                       : 'bg-[var(--text-secondary)]'
               }`}
             />
@@ -803,21 +803,21 @@ function OperationCard({
             {/* Machine & Details */}
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-[var(--text-heading)] font-medium text-xs sm:text-sm">
+                <p className="font-medium text-[var(--text-heading)] text-xs sm:text-sm">
                   {operation.machine?.name || 'Unknown Machine'}
                 </p>
                 <span
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${
+                  className={`rounded px-1.5 py-0.5 font-medium text-[10px] uppercase tracking-wider ${
                     operation.shift_type === 'day'
-                      ? 'bg-[var(--accent-amber)]/15 text-[var(--accent-amber)] border border-[var(--accent-amber)]/30'
-                      : 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] border border-[var(--accent-blue)]/30'
+                      ? 'border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/15 text-[var(--accent-amber)]'
+                      : 'border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
                   }`}
                 >
                   {operation.shift_type} shift
                 </span>
                 {machineBreakdown && (
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                    className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] ${
                       machineBreakdown.status === 'active'
                         ? 'bg-accent-red/10 text-accent-red'
                         : 'bg-accent-green/10 text-accent-green'
@@ -828,14 +828,14 @@ function OperationCard({
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-0.5 text-xs text-[var(--text-muted)] flex-wrap">
+              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs">
                 <span>{operation.operator?.full_name || 'No Operator'}</span>
                 <span className="text-[var(--border-emphasis)]">|</span>
                 <span>{operation.site?.name || 'No Site'}</span>
                 {operation.block_drilled && (
                   <>
                     <span className="text-[var(--border-emphasis)]">|</span>
-                    <span className="text-[var(--text-heading)] font-medium">
+                    <span className="font-medium text-[var(--text-heading)]">
                       Block: {operation.block_drilled}
                     </span>
                   </>
@@ -860,22 +860,22 @@ function OperationCard({
                 </>
               )}
             </p>
-            <div className="flex items-center gap-2 mt-0.5 justify-end flex-wrap text-xs">
+            <div className="mt-0.5 flex flex-wrap items-center justify-end gap-2 text-xs">
               {operation.start_smu != null ? (
-                <span className="text-[var(--text-muted)] font-mono text-[11px]">
+                <span className="font-mono text-[11px] text-[var(--text-muted)]">
                   {formatTime(operation.start_time)}
                   {operation.end_time ? ` - ${formatTime(operation.end_time)}` : ''}
                 </span>
               ) : null}
               {operation.hours_worked !== null && (
-                <span className="text-accent-green font-medium">
+                <span className="font-medium text-accent-green">
                   {operation.hours_worked.toFixed(2)}h
                 </span>
               )}
               {operation.meters_drilled != null && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-accent-green font-medium">
+                  <span className="font-medium text-accent-green">
                     {Number(operation.meters_drilled).toFixed(1)}m
                   </span>
                 </>
@@ -883,7 +883,7 @@ function OperationCard({
               {operation.holes_drilled != null && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-[var(--accent-blue)] font-medium">
+                  <span className="font-medium text-[var(--accent-blue)]">
                     {operation.holes_drilled} holes
                   </span>
                 </>
@@ -906,14 +906,14 @@ function OperationCard({
 
         {/* Breakdown Summary */}
         {machineBreakdown && (
-          <div className="pt-2 border-t border-[var(--border-default)]">
+          <div className="border-[var(--border-default)] border-t pt-2">
             <div className="flex items-start gap-2 text-xs">
               <AlertCircle
                 size={14}
                 className={
                   machineBreakdown.status === 'active'
-                    ? 'text-accent-red mt-0.5 shrink-0'
-                    : 'text-accent-green mt-0.5 shrink-0'
+                    ? 'mt-0.5 shrink-0 text-accent-red'
+                    : 'mt-0.5 shrink-0 text-accent-green'
                 }
               />
               <div>
@@ -923,7 +923,7 @@ function OperationCard({
                   Engineering Breakdown: {machineBreakdown.reason}
                 </p>
                 {machineBreakdown.repair_notes && (
-                  <p className="text-[var(--text-muted)] mt-0.5">{machineBreakdown.repair_notes}</p>
+                  <p className="mt-0.5 text-[var(--text-muted)]">{machineBreakdown.repair_notes}</p>
                 )}
               </div>
             </div>
@@ -932,11 +932,11 @@ function OperationCard({
 
         {/* Delay Summary */}
         {delayEntries.length > 0 && (
-          <div className="pt-2 border-t border-[var(--border-default)]">
+          <div className="border-[var(--border-default)] border-t pt-2">
             <button
               type="button"
               onClick={() => setShowDelays(!showDelays)}
-              className="flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+              className="flex items-center gap-2 text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)]"
             >
               <Clock size={14} />
               <span className="font-medium">
@@ -959,7 +959,7 @@ function OperationCard({
                   </div>
                 ))}
                 {delayEntries.some((d) => d.is_manual_override) && (
-                  <div className="flex items-center gap-1 text-xs text-[var(--accent-amber)]">
+                  <div className="flex items-center gap-1 text-[var(--accent-amber)] text-xs">
                     <AlertCircle size={12} />
                     <span>Includes manual override entries</span>
                   </div>

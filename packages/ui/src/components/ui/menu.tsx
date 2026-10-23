@@ -113,13 +113,13 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         asChild={!!href}
         onClick={onClick}
         className={cn(
-          'cursor-pointer flex items-center w-full',
+          'flex w-full cursor-pointer items-center',
           type === 'error' && 'text-red-600 focus:bg-red-100 focus:text-red-700',
           className
         )}
         {...props}
       >
-        <Component href={href} className="w-full flex items-center">
+        <Component href={href} className="flex w-full items-center">
           {prefix && <span className="mr-2 flex items-center justify-center">{prefix}</span>}
           <span className="flex-1 truncate">{children}</span>
           {suffix && <span className="ml-2 flex items-center justify-center">{suffix}</span>}

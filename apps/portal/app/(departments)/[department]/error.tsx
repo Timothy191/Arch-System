@@ -49,10 +49,10 @@ export default function DepartmentError({ error, reset }: DepartmentErrorProps) 
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">{title}</h2>
+      <h2 className="font-medium text-2xl text-[var(--text-heading)]">{title}</h2>
       <p className="text-[var(--text-muted)] text-sm">{message}</p>
       {appError && (
-        <div className="text-xs text-[var(--text-muted)] font-mono">
+        <div className="font-mono text-[var(--text-muted)] text-xs">
           {appError.code}
           {appError.statusCode && ` (${appError.statusCode})`}
         </div>
@@ -63,7 +63,7 @@ export default function DepartmentError({ error, reset }: DepartmentErrorProps) 
         </SecondaryButton>
         <Link
           href={action.href}
-          className="px-4 py-2 rounded-full text-[var(--text-muted)] text-sm hover:text-[var(--text-heading)] transition-colors"
+          className="rounded-full px-4 py-2 text-[var(--text-muted)] text-sm transition-colors hover:text-[var(--text-heading)]"
         >
           {action.label}
         </Link>

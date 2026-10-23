@@ -18,9 +18,9 @@ function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; classNam
       xmlns="http://www.w3.org/2000/svg"
       viewBox="22.75 16.625 166.16 166.19"
       className={cn(
-        'w-4 h-4 transition-all duration-200',
+        'h-4 w-4 transition-all duration-200',
         isPinned
-          ? 'fill-current text-arch-accent-blue scale-110 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]'
+          ? 'scale-110 fill-current text-arch-accent-blue drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]'
           : 'fill-none text-arch-text-secondary group-hover/pin:text-arch-accent-blue',
         className
       )}
@@ -118,18 +118,18 @@ function DepartmentCard({
       className={cn('h-full', department.gridSpan)}
     >
       <div
-        className="uiverse-card gold-steel-border group outline-none h-full interactive-element relative ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
+        className="uiverse-card gold-steel-border group interactive-element relative h-full outline-none ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
         data-testid={`dept-card-${department.name}`}
       >
         {/* Navigation Loading Overlay */}
         {isNavigating && (
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-arch-surface-primary/75 backdrop-blur-sm rounded-[20px] z-30 transition-all animate-fade-in"
+            className="absolute inset-0 z-30 flex animate-fade-in flex-col items-center justify-center gap-2 rounded-[20px] bg-arch-surface-primary/75 backdrop-blur-sm transition-all"
             data-testid={`dept-loading-${department.name}`}
             aria-live="polite"
           >
-            <Loader2 className="w-6 h-6 animate-spin text-arch-accent-blue" />
-            <span className="text-xs font-medium text-arch-text-secondary">Loading...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-arch-accent-blue" />
+            <span className="font-medium text-arch-text-secondary text-xs">Loading...</span>
           </div>
         )}
 
@@ -144,7 +144,7 @@ function DepartmentCard({
               router.push(route);
             });
           }}
-          className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[20px]"
+          className="absolute inset-0 z-0 rounded-[20px] focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue"
           aria-label={`Open ${department.displayName} department`}
           data-testid={`dept-link-${department.name}`}
         />
@@ -152,7 +152,7 @@ function DepartmentCard({
         {/* Banner area with photographic / terrain visual background */}
         <div
           className={cn(
-            'uiverse-card-banner relative z-10 pointer-events-none',
+            'uiverse-card-banner pointer-events-none relative z-10',
             `uiverse-card-banner-${department.name}`
           )}
         >
@@ -178,7 +178,7 @@ function DepartmentCard({
               }}
             />
             {/* Glass gradient overlay to ensure icon bubble contrast */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 z-10" />
+            <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-transparent to-black/35" />
           </div>
 
           {/* Save/Pin Button */}
@@ -187,10 +187,10 @@ function DepartmentCard({
             onClick={togglePin}
             aria-pressed={isPinned}
             className={cn(
-              'uiverse-card-pin gold-steel-border gold-steel-border-slim group/pin absolute top-2.5 right-2.5 z-20 pointer-events-auto border border-transparent hover:scale-110 active:scale-95',
+              'uiverse-card-pin gold-steel-border gold-steel-border-slim group/pin pointer-events-auto absolute top-2.5 right-2.5 z-20 border border-transparent hover:scale-110 active:scale-95',
               isPinned
                 ? 'bg-white text-arch-accent-blue shadow-sm'
-                : 'text-arch-text-secondary hover:text-arch-accent-blue hover:bg-white/95'
+                : 'text-arch-text-secondary hover:bg-white/95 hover:text-arch-accent-blue'
             )}
             title={isPinned ? 'Unpin department' : 'Pin department'}
             aria-label={
@@ -203,7 +203,7 @@ function DepartmentCard({
           {/* Department Icon Bubble with high-contrast gold badge */}
           <div
             className={cn(
-              'uiverse-card-icon-bubble gold-steel-border gold-steel-border-slim absolute left-4 -bottom-4 z-20 flex items-center justify-center rounded-full shadow-md ring-2 backdrop-blur-md',
+              'uiverse-card-icon-bubble gold-steel-border gold-steel-border-slim absolute -bottom-4 left-4 z-20 flex items-center justify-center rounded-full shadow-md ring-2 backdrop-blur-md',
               config.bg,
               config.ringColor
             )}
@@ -212,7 +212,7 @@ function DepartmentCard({
             <Logo
               variant="gold"
               className={cn(
-                'w-5 h-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
+                'h-5 w-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
                 config.iconColor
               )}
             />
@@ -220,21 +220,21 @@ function DepartmentCard({
         </div>
 
         {/* Card Body */}
-        <div className="uiverse-card-body relative z-10 pointer-events-none">
+        <div className="uiverse-card-body pointer-events-none relative z-10">
           <div className="space-y-1">
             <div className="uiverse-card-title-row">
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
                 <span
                   className={cn(
-                    'inline-flex items-center justify-center w-6 h-6 rounded-full gold-steel-border gold-steel-border-slim text-xs font-semibold shrink-0 border shadow-2xs',
+                    'gold-steel-border gold-steel-border-slim inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border font-semibold text-xs shadow-2xs',
                     config.bg
                   )}
                   aria-hidden="true"
                 >
-                  <Logo variant="gold" className={cn('w-3.5 h-3.5 shrink-0', config.iconColor)} />
+                  <Logo variant="gold" className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
                 </span>
                 <h3
-                  className="uiverse-card-title font-anurati uppercase tracking-[0.055em] font-bold truncate"
+                  className="uiverse-card-title truncate font-anurati font-bold uppercase tracking-[0.055em]"
                   style={{
                     fontFamily:
                       "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
@@ -246,18 +246,18 @@ function DepartmentCard({
               {department.status && (
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-[0.05em]',
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-[10px] uppercase tracking-[0.05em]',
                     department.status === 'active' &&
-                      'bg-accent-green/10 text-accent-green border-accent-green/25',
+                      'border-accent-green/25 bg-accent-green/10 text-accent-green',
                     department.status === 'maintenance' &&
-                      'bg-accent-amber/12 text-accent-amber border-accent-amber/30',
+                      'border-accent-amber/30 bg-accent-amber/12 text-accent-amber',
                     department.status === 'alert' &&
-                      'bg-accent-red/12 text-accent-red border-accent-red/30'
+                      'border-accent-red/30 bg-accent-red/12 text-accent-red'
                   )}
                 >
                   <span
                     className={cn(
-                      'w-1.5 h-1.5 rounded-full animate-pulse',
+                      'h-1.5 w-1.5 animate-pulse rounded-full',
                       department.status === 'active' && 'bg-accent-green',
                       department.status === 'maintenance' && 'bg-accent-amber',
                       department.status === 'alert' && 'bg-accent-red'
@@ -285,7 +285,7 @@ function DepartmentCard({
                 <span className="uiverse-card-tag-row-value">{department.stats.value}</span>
                 <ArrowUpRight
                   aria-hidden="true"
-                  className="w-3.5 h-3.5 text-arch-text-tertiary group-hover:text-arch-accent-blue group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+                  className="h-3.5 w-3.5 text-arch-text-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-arch-accent-blue"
                 />
               </div>
             </div>

@@ -19,7 +19,7 @@ export function Fieldset({
   return (
     <fieldset
       className={cn(
-        'rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden',
+        'overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm',
         className
       )}
       {...props}
@@ -28,15 +28,15 @@ export function Fieldset({
         {(title || subtitle) && (
           <div className="flex flex-col gap-1.5">
             {title && (
-              <legend className="text-xl font-semibold leading-none tracking-tight">{title}</legend>
+              <legend className="font-semibold text-xl leading-none tracking-tight">{title}</legend>
             )}
-            {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+            {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
           </div>
         )}
         <div className="flex flex-col gap-4">{children}</div>
       </div>
       {footer && (
-        <div className="flex items-center justify-between border-t border-border bg-muted/40 px-6 py-4">
+        <div className="flex items-center justify-between border-border border-t bg-muted/40 px-6 py-4">
           {footer}
         </div>
       )}

@@ -13,30 +13,30 @@ export default function DatabaseSchema() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-text-heading">Database Schema</h2>
-        <p className="text-text-secondary mt-1">
+        <h2 className="font-semibold text-2xl text-text-heading">Database Schema</h2>
+        <p className="mt-1 text-text-secondary">
           PostgreSQL tables with Row Level Security (RLS) policies
         </p>
       </div>
 
       {/* Tables Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {DATABASE_SCHEMA.map((table) => (
           <Card key={table.name} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Table2 className="w-5 h-5 text-accent-blue" />
-                  <CardTitle className="text-lg text-text-heading font-mono">
+                  <Table2 className="h-5 w-5 text-accent-blue" />
+                  <CardTitle className="font-mono text-lg text-text-heading">
                     {table.name}
                   </CardTitle>
                 </div>
                 {table.rls && (
                   <Badge
                     variant="outline"
-                    className="text-[10px] flex items-center gap-1 text-accent-green border-accent-green/30 bg-accent-green/10"
+                    className="flex items-center gap-1 border-accent-green/30 bg-accent-green/10 text-[10px] text-accent-green"
                   >
-                    <Lock className="w-3 h-3" />
+                    <Lock className="h-3 w-3" />
                     RLS
                   </Badge>
                 )}
@@ -49,10 +49,10 @@ export default function DatabaseSchema() {
                 {table.columns.map((column) => (
                   <div
                     key={column}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded bg-bg-tertiary text-xs"
+                    className="flex items-center gap-2 rounded bg-bg-tertiary px-2 py-1.5 text-xs"
                   >
-                    {column.includes('PK') && <Key className="w-3 h-3 text-accent-blue" />}
-                    {column.includes('FK') && <ArrowRight className="w-3 h-3 text-accent-blue" />}
+                    {column.includes('PK') && <Key className="h-3 w-3 text-accent-blue" />}
+                    {column.includes('FK') && <ArrowRight className="h-3 w-3 text-accent-blue" />}
                     {!column.includes('PK') && !column.includes('FK') && <div className="w-3" />}
                     <span className="font-mono text-text-secondary">{column}</span>
                   </div>
@@ -65,27 +65,27 @@ export default function DatabaseSchema() {
 
       {/* Relationships Diagram */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-text-heading mb-4">Table Relationships</h3>
-        <div className="glass-card p-6 rounded-xl">
+        <h3 className="mb-4 font-medium text-lg text-text-heading">Table Relationships</h3>
+        <div className="glass-card rounded-xl p-6">
           <div className="flex flex-wrap justify-center gap-8">
             {/* Central: departments */}
             <div className="flex flex-col items-center">
-              <div className="px-4 py-2 bg-accent-green/10 border border-accent-green rounded-lg text-accent-green font-mono text-sm font-medium">
+              <div className="rounded-lg border border-accent-green bg-accent-green/10 px-4 py-2 font-medium font-mono text-accent-green text-sm">
                 departments
               </div>
-              <div className="text-xs text-text-muted mt-1">Central</div>
+              <div className="mt-1 text-text-muted text-xs">Central</div>
             </div>
 
             <div className="flex flex-col items-center justify-center">
-              <ArrowRight className="w-5 h-5 text-border-default rotate-90 md:rotate-0" />
-              <span className="text-xs text-text-muted">1:N</span>
+              <ArrowRight className="h-5 w-5 rotate-90 text-border-default md:rotate-0" />
+              <span className="text-text-muted text-xs">1:N</span>
             </div>
 
             {/* Connected tables */}
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap justify-center gap-4">
               {['employees', 'personnel', 'machines', 'daily_logs', 'breakdowns'].map((table) => (
                 <div key={table} className="flex flex-col items-center">
-                  <div className="px-4 py-2 bg-accent-blue/10 border border-accent-blue rounded-lg text-accent-blue font-mono text-sm font-medium">
+                  <div className="rounded-lg border border-accent-blue bg-accent-blue/10 px-4 py-2 font-medium font-mono text-accent-blue text-sm">
                     {table}
                   </div>
                 </div>
@@ -94,8 +94,8 @@ export default function DatabaseSchema() {
           </div>
 
           {/* Child tables */}
-          <div className="mt-8 pt-6 border-t border-default">
-            <div className="text-xs text-text-muted mb-3 text-center uppercase tracking-wider">
+          <div className="mt-8 border-default border-t pt-6">
+            <div className="mb-3 text-center text-text-muted text-xs uppercase tracking-wider">
               Child & Telemetry Tables (reference daily_logs, machines & personnel)
             </div>
             <div className="flex flex-wrap justify-center gap-4">
@@ -109,11 +109,11 @@ export default function DatabaseSchema() {
                 'audit_logs',
               ].map((table) => (
                 <div key={table} className="flex flex-col items-center">
-                  <div className="px-4 py-2 bg-accent-amber/10 border border-accent-amber rounded-lg text-accent-amber font-mono text-sm font-medium">
+                  <div className="rounded-lg border border-accent-amber bg-accent-amber/10 px-4 py-2 font-medium font-mono text-accent-amber text-sm">
                     {table}
                   </div>
-                  <ArrowRight className="w-4 h-4 text-border-default -rotate-90 mt-2" />
-                  <span className="text-xs text-text-muted mt-1">N:1</span>
+                  <ArrowRight className="mt-2 h-4 w-4 -rotate-90 text-border-default" />
+                  <span className="mt-1 text-text-muted text-xs">N:1</span>
                 </div>
               ))}
             </div>
@@ -122,39 +122,39 @@ export default function DatabaseSchema() {
       </div>
 
       {/* RLS Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Lock className="w-5 h-5 text-accent-green" />
-            <span className="text-sm font-medium text-text-heading">
+          <div className="mb-2 flex items-center gap-2">
+            <Lock className="h-5 w-5 text-accent-green" />
+            <span className="font-medium text-sm text-text-heading">
               100% RLS InitPlan Security
             </span>
           </div>
-          <p className="text-xs text-text-secondary">
+          <p className="text-text-secondary text-xs">
             Every table enforces Row Level Security with cached (select auth.uid()) InitPlan
             department policies
           </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Key className="w-5 h-5 text-accent-blue" />
-            <span className="text-sm font-medium text-text-heading">186 Versioned Migrations</span>
+          <div className="mb-2 flex items-center gap-2">
+            <Key className="h-5 w-5 text-accent-blue" />
+            <span className="font-medium text-sm text-text-heading">186 Versioned Migrations</span>
           </div>
-          <p className="text-xs text-text-secondary">
+          <p className="text-text-secondary text-xs">
             Supabase PostgreSQL 17 schema managed via zero-padded declarative migrations & atomic
             RPCs
           </p>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Table2 className="w-5 h-5 text-accent-blue" />
-            <span className="text-sm font-medium text-text-heading">
+          <div className="mb-2 flex items-center gap-2">
+            <Table2 className="h-5 w-5 text-accent-blue" />
+            <span className="font-medium text-sm text-text-heading">
               {DATABASE_SCHEMA.length} Core Domain Tables
             </span>
           </div>
-          <p className="text-xs text-text-secondary">
+          <p className="text-text-secondary text-xs">
             Departments, employees, personnel, badges, machines, daily_logs, breakdowns, loads &
             audit trails
           </p>
@@ -163,9 +163,9 @@ export default function DatabaseSchema() {
 
       {/* Helper Functions */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-text-heading mb-4">RLS Helper Functions</h3>
-        <div className="glass-card p-6 rounded-xl font-mono text-sm">
-          <div className="text-text-secondary space-y-2">
+        <h3 className="mb-4 font-medium text-lg text-text-heading">RLS Helper Functions</h3>
+        <div className="glass-card rounded-xl p-6 font-mono text-sm">
+          <div className="space-y-2 text-text-secondary">
             <div className="text-text-muted">-- Department access check</div>
             <div>
               <span className="text-accent-green">auth.user_department_id</span>

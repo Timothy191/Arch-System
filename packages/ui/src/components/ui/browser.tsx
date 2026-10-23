@@ -40,7 +40,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         ref={ref}
         className={cn(
           'w-full overflow-hidden rounded-xl border border-neutral-200',
-          'bg-white shadow-xl select-none',
+          'select-none bg-white shadow-xl',
           className
         )}
         style={{
@@ -52,34 +52,34 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         {/* Decorative Browser Chrome Bar */}
         <div
           aria-hidden="true"
-          className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-neutral-200/80 bg-neutral-100/70 backdrop-blur-xs"
+          className="flex items-center justify-between gap-3 border-neutral-200/80 border-b bg-neutral-100/70 px-3.5 py-2.5 backdrop-blur-xs"
         >
           {/* Window Control Dots (Decorative, non-focusable) */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]/40" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]/40" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]/40" />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full border border-[#E0443E]/40 bg-[#FF5F56]" />
+            <span className="h-2.5 w-2.5 rounded-full border border-[#DEA123]/40 bg-[#FFBD2E]" />
+            <span className="h-2.5 w-2.5 rounded-full border border-[#1AAB29]/40 bg-[#27C93F]" />
           </div>
 
           {/* Navigation Controls */}
-          <div className="hidden sm:flex items-center gap-1 text-neutral-400 shrink-0">
-            <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
-            <ChevronRight className="w-3.5 h-3.5 opacity-40" />
-            <RotateCw className="w-3 h-3 opacity-60 ml-1" />
+          <div className="hidden shrink-0 items-center gap-1 text-neutral-400 sm:flex">
+            <ChevronLeft className="h-3.5 w-3.5 opacity-60" />
+            <ChevronRight className="h-3.5 w-3.5 opacity-40" />
+            <RotateCw className="ml-1 h-3 w-3 opacity-60" />
           </div>
 
           {/* Centered Address Bar */}
-          <div className="flex-1 max-w-md mx-auto flex items-center justify-center gap-1.5 px-3 py-1 rounded-md bg-white border border-neutral-200/70 shadow-2xs text-xs font-mono text-neutral-600">
-            <Lock className="w-3 h-3 text-neutral-400 shrink-0" />
+          <div className="mx-auto flex max-w-md flex-1 items-center justify-center gap-1.5 rounded-md border border-neutral-200/70 bg-white px-3 py-1 font-mono text-neutral-600 text-xs shadow-2xs">
+            <Lock className="h-3 w-3 shrink-0 text-neutral-400" />
             <span className="truncate tracking-tight">{truncatedAddress}</span>
           </div>
 
           {/* Spacer for symmetrical balance */}
-          <div className="w-12 shrink-0 hidden sm:block" />
+          <div className="hidden w-12 shrink-0 sm:block" />
         </div>
 
         {/* Inner Content / Screenshot / Demo surface */}
-        <div className="relative w-full h-full overflow-hidden bg-neutral-50">{children}</div>
+        <div className="relative h-full w-full overflow-hidden bg-neutral-50">{children}</div>
       </div>
     );
   }

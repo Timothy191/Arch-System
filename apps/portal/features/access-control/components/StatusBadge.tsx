@@ -81,7 +81,7 @@ export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${sizeClass} ${config.bg} ${config.text}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${config.dot}`} />
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${config.dot}`} />
       {config.label}
     </span>
   );

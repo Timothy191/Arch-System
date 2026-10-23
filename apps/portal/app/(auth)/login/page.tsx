@@ -61,25 +61,25 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   }
 
   return (
-    <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent">
-      <div className="relative w-full max-w-md z-10">
+    <main className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden bg-transparent px-4">
+      <div className="relative z-10 w-full max-w-md">
         {systemUnavailable ? (
           <div
             data-testid="login-card"
-            className="w-full bg-arch-surface-secondary/80 backdrop-blur-xl border border-arch-border-subtle rounded-card p-8 md:p-10 shadow-window text-center space-y-4 animate-fade-up"
+            className="w-full animate-fade-up space-y-4 rounded-card border border-arch-border-subtle bg-arch-surface-secondary/80 p-8 text-center shadow-window backdrop-blur-xl md:p-10"
           >
-            <AlertTriangle className="w-10 h-10 text-accent-amber mx-auto" strokeWidth={1.5} />
-            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 text-[var(--text-heading)]">
+            <AlertTriangle className="mx-auto h-10 w-10 text-accent-amber" strokeWidth={1.5} />
+            <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
               System Unavailable
             </h1>
-            <p className="text-sm text-neutral-600">
+            <p className="text-neutral-600 text-sm">
               Unable to reach authentication services. Please try again shortly or contact IT
               Support.
             </p>
             <a
               href="/login"
               autoFocus
-              className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 rounded-button shadow-diffusion-sm border border-[var(--accent-blue)]/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
+              className="mt-4 inline-block rounded-button border border-[var(--accent-blue)]/40 bg-[var(--accent-blue)] px-6 py-2.5 font-semibold text-white text-xs uppercase tracking-wider shadow-diffusion-sm transition-all hover:bg-[var(--accent-blue)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
             >
               Retry
             </a>
@@ -87,18 +87,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         ) : (
           <div
             data-testid="login-card"
-            className="w-full bg-arch-surface-secondary/80 backdrop-blur-xl border border-arch-border-subtle rounded-card p-8 md:p-10 shadow-window animate-fade-up"
+            className="w-full animate-fade-up rounded-card border border-arch-border-subtle bg-arch-surface-secondary/80 p-8 shadow-window backdrop-blur-xl md:p-10"
           >
             {/* Branding */}
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-arch-accent-blue/10 border border-arch-accent-blue/20 flex items-center justify-center mb-3 shadow-diffusion-sm text-arch-accent-blue">
-                <Logo className="w-6 h-6 text-[var(--accent-blue)]" />
+            <div className="mb-6 flex flex-col items-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 text-arch-accent-blue shadow-diffusion-sm">
+                <Logo className="h-6 w-6 text-[var(--accent-blue)]" />
               </div>
               <div className="text-center">
-                <h1 className="text-xl font-semibold tracking-tight text-neutral-900 text-[var(--text-heading)]">
+                <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
                   Arch Systems
                 </h1>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500 mt-0.5">
+                <p className="mt-0.5 font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
                   Arch OS v{APP_VERSION}
                 </p>
               </div>
@@ -106,13 +106,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
             {/* Header */}
             <div className="mb-6">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--accent-blue)] select-none">
+              <span className="select-none font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
                 Welcome Back
               </span>
-              <h2 className="text-lg font-semibold text-neutral-900 tracking-tight mt-0.5">
+              <h2 className="mt-0.5 font-semibold text-lg text-neutral-900 tracking-tight">
                 Sign in to your account
               </h2>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="mt-1 text-neutral-500 text-xs">
                 Access the mining & operations control panel.
               </p>
             </div>
@@ -120,8 +120,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             {/* Form */}
             <Suspense
               fallback={
-                <div className="h-48 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-blue)]" />
+                <div className="flex h-48 items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-blue)]" />
                 </div>
               }
             >
@@ -131,20 +131,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         )}
 
         {/* Footer */}
-        <footer className="mt-8 text-center space-y-2 select-none">
-          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-600 ">
-            <ShieldCheck className="w-3.5 h-3.5 text-accent-green shrink-0" />
+        <footer className="mt-8 select-none space-y-2 text-center">
+          <div className="flex items-center justify-center gap-1.5 font-semibold text-[11px] text-neutral-600 uppercase tracking-widest">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-accent-green" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
-          <div className="flex justify-center gap-6 text-xs text-neutral-600 ">
+          <div className="flex justify-center gap-6 text-neutral-600 text-xs">
             <a
-              className="hover:text-neutral-900 :text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              className="inline-flex min-h-[32px] items-center px-2 py-1 :text-white transition-colors hover:text-neutral-900"
               href="/docs"
             >
               Security Policy
             </a>
             <a
-              className="hover:text-neutral-900 :text-white transition-colors py-1 px-2 inline-flex items-center min-h-[32px]"
+              className="inline-flex min-h-[32px] items-center px-2 py-1 :text-white transition-colors hover:text-neutral-900"
               href="/docs#support"
             >
               Support

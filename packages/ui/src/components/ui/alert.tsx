@@ -4,19 +4,19 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 const alertVariants = cva(
-  'relative w-full rounded-xl border p-4 [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-current transition-all duration-150 gold-steel-border gold-steel-border-slim',
+  'gold-steel-border gold-steel-border-slim relative w-full rounded-xl border p-4 transition-all duration-150 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:top-4 [&>svg]:left-4 [&>svg]:text-current [&>svg~*]:pl-8',
   {
     variants: {
       variant: {
         default:
-          'bg-white/80 backdrop-blur-md text-[var(--text-heading)] border-black/[0.08] shadow-xs',
-        info: 'bg-[var(--accent-blue)]/5 border-[var(--accent-blue)]/20 text-[var(--accent-blue)] [&>svg]:text-[var(--accent-blue)]',
+          'border-black/[0.08] bg-white/80 text-[var(--text-heading)] shadow-xs backdrop-blur-md',
+        info: 'border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/5 text-[var(--accent-blue)] [&>svg]:text-[var(--accent-blue)]',
         success:
-          'bg-[var(--accent-green)]/5 border-[var(--accent-green)]/20 text-[var(--accent-green)] [&>svg]:text-[var(--accent-green)]',
+          'border-[var(--accent-green)]/20 bg-[var(--accent-green)]/5 text-[var(--accent-green)] [&>svg]:text-[var(--accent-green)]',
         warning:
-          'bg-[var(--accent-amber)]/5 border-[var(--accent-amber)]/20 text-[var(--accent-amber)] [&>svg]:text-[var(--accent-amber)]',
+          'border-[var(--accent-amber)]/20 bg-[var(--accent-amber)]/5 text-[var(--accent-amber)] [&>svg]:text-[var(--accent-amber)]',
         destructive:
-          'bg-[var(--accent-red)]/5 border-[var(--accent-red)]/20 text-[var(--accent-red)] [&>svg]:text-[var(--accent-red)]',
+          'border-[var(--accent-red)]/20 bg-[var(--accent-red)]/5 text-[var(--accent-red)] [&>svg]:text-[var(--accent-red)]',
       },
     },
     defaultVariants: {
@@ -62,7 +62,7 @@ const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<H
   ({ className, ...props }, ref) => (
     <h5
       ref={ref}
-      className={cn('mb-1 font-semibold leading-none tracking-tight text-[13px]', className)}
+      className={cn('mb-1 font-semibold text-[13px] leading-none tracking-tight', className)}
       {...props}
     />
   )
@@ -75,7 +75,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('text-xs text-[var(--text-secondary)] [&_p]:leading-relaxed', className)}
+    className={cn('text-[var(--text-secondary)] text-xs [&_p]:leading-relaxed', className)}
     {...props}
   />
 ));

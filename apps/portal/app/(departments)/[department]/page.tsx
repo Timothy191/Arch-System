@@ -25,13 +25,13 @@ const ControlRoomWidgets = dynamic(
   {
     loading: () => (
       <div className="space-y-6">
-        <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-        <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="h-64 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+        <div className="h-96 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="h-[400px] animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+          <div className="h-[400px] animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
         </div>
-        <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="h-[400px] animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
       </div>
     ),
   }
@@ -75,7 +75,7 @@ export default async function DepartmentDashboard({
       <Suspense
         fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-transparent">
-            <div className="w-8 h-8 border-2 border-blue-500/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500/20 border-t-[var(--accent-blue)]" />
           </div>
         }
       >
@@ -94,18 +94,18 @@ export default async function DepartmentDashboard({
         {isControlRoom ? (
           <>
             <GlassCard hover accent="charcoal">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                  <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)]">
+                  <h2 className="font-bold text-2xl text-[var(--text-heading)] tracking-tight">
                     Control Room Dashboard
                   </h2>
-                  <p className="text-sm text-[var(--text-secondary)] mt-1">
+                  <p className="mt-1 text-[var(--text-secondary)] text-sm">
                     Live SCADA monitoring, production metrics, and shift dispatch.
                   </p>
                 </div>
                 <div className="flex items-center gap-3 self-start sm:self-auto">
                   <ControlRoomQuickNav />
-                  <p className="text-[var(--text-muted)] text-sm whitespace-nowrap">
+                  <p className="whitespace-nowrap text-[var(--text-muted)] text-sm">
                     {new Date().toLocaleDateString('en-ZA', {
                       weekday: 'long',
                       year: 'numeric',
@@ -119,21 +119,21 @@ export default async function DepartmentDashboard({
               {/* Dashboard Sub-tabs: SCADA Dashboard & Shift Operations (Previous / Current Shift) */}
               <div
                 aria-label="Control Room Dashboard Sub-tabs"
-                className="mt-4 pt-3 border-t border-[var(--border-subtle)]/60 flex flex-wrap items-center gap-2"
+                className="mt-4 flex flex-wrap items-center gap-2 border-[var(--border-subtle)]/60 border-t pt-3"
               >
                 <Link
                   href={`/${deptSlug}`}
                   aria-current="page"
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] gold-steel-border gold-steel-border-slim transition-all"
+                  className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-semibold text-[var(--accent-blue)] text-xs transition-all"
                 >
-                  <BarChart3 className="w-3.5 h-3.5" />
+                  <BarChart3 className="h-3.5 w-3.5" />
                   <span>SCADA Dashboard</span>
                 </Link>
                 <Link
                   href={`/${deptSlug}/shift-compilation`}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
+                  className="inline-flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--border-subtle)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]"
                 >
-                  <ClipboardCheck className="w-3.5 h-3.5 text-[var(--text-heading)]" />
+                  <ClipboardCheck className="h-3.5 w-3.5 text-[var(--text-heading)]" />
                   <span>Shift Operations</span>
                 </Link>
               </div>
@@ -144,12 +144,12 @@ export default async function DepartmentDashboard({
             {/* Control Room Summary Grid - Client-side with React Query */}
             <Suspense
               fallback={
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
                 </div>
               }
             >
@@ -158,7 +158,7 @@ export default async function DepartmentDashboard({
 
             {/* Cross-Department Monthly Coal & Waste Target Pulled from Production */}
             <Suspense
-              fallback={<div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+              fallback={<div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
             >
               <MonthlyProductionTargetBanner />
             </Suspense>
@@ -172,13 +172,13 @@ export default async function DepartmentDashboard({
             <div className="flex flex-wrap gap-3">
               <Link
                 href={`/${deptSlug}/machine-operations`}
-                className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] gold-steel-border gold-steel-border-slim"
+                className="gold-steel-border gold-steel-border-slim rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--accent-blue)]/90 active:scale-[0.98]"
               >
                 Machine Operations
               </Link>
               <Link
                 href={`/${deptSlug}/hourly-loads`}
-                className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98] gold-steel-border gold-steel-border-slim"
+                className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-medium text-[var(--text-secondary)] text-sm transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:scale-[0.98]"
               >
                 Update Loads
               </Link>
@@ -190,7 +190,7 @@ export default async function DepartmentDashboard({
         ) : (
           <>
             <GlassCard hover accent="charcoal">
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">Dashboard</h2>
             </GlassCard>
 
             <Divider variant="fading" />
@@ -198,10 +198,10 @@ export default async function DepartmentDashboard({
             {/* Non-Control Room Summary Grid - Client-side with React Query */}
             <Suspense
               fallback={
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                  <div className="h-28 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+                  <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
                 </div>
               }
             >

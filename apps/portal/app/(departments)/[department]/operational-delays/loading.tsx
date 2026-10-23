@@ -4,7 +4,7 @@ export default function OperationalDelaysLoading() {
   return (
     <div className="space-y-6">
       <GlassSkeleton showHeader rows={2} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <GlassSkeleton rows={2} />
         <GlassSkeleton rows={2} />
         <GlassSkeleton rows={2} />

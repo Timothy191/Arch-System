@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-23T08:20:59.151Z",
+  "config": {
+    "maxUtilitiesPerElement": 16,
+    "duplicateMinTokens": 10,
+    "duplicateMinUses": 3
+  },
+  "overBudgetByFile": {
+    "apps/portal/app/(auth)/login/page.tsx": 1,
+    "apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx": 1,
+    "apps/portal/app/(departments)/[department]/page.tsx": 1,
+    "apps/portal/app/(departments)/access-control/components/PerimeterGateHUD.tsx": 1,
+    "apps/portal/app/(departments)/access-control/components/QuickActionHub.tsx": 6,
+    "apps/portal/app/(departments)/access-control/print-cards/neo300-print-studio.tsx": 2,
+    "apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx": 1,
+    "apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx": 3,
+    "apps/portal/app/(departments)/control-room/page.tsx": 4,
+    "apps/portal/app/overview/page.tsx": 2,
+    "apps/portal/app/overview/sections/SystemArchitectureNodeCanvas.tsx": 1,
+    "apps/portal/components/FeedbackWidget.tsx": 3,
+    "apps/portal/components/PWAInstallButton.tsx": 1,
+    "apps/portal/components/clock/SystemClock.tsx": 1,
+    "apps/portal/components/weather/WeatherWidget.tsx": 1,
+    "apps/portal/features/analytics/components/ExportButton.tsx": 2,
+    "apps/portal/features/analytics/components/PDFDownloadButton.tsx": 1,
+    "apps/portal/features/hub/components/CoreOperationalModules.tsx": 4,
+    "libs/features/auth/ui/src/LoginForm.tsx": 1,
+    "libs/features/departments/ui/src/control-room/ExportPdfButton.tsx": 1,
+    "libs/features/departments/ui/src/control-room/ShiftCompilationHeader.tsx": 3,
+    "libs/features/departments/ui/src/control-room/ShiftIntelligenceWidget.tsx": 1,
+    "libs/features/departments/ui/src/engineering/breakdowns/BreakdownDiagnosticAssistant.tsx": 1,
+    "libs/features/hub/ui/src/DepartmentReviews.tsx": 2,
+    "packages/ui/src/components/CookieConsent.tsx": 1,
+    "packages/ui/src/components/DepartmentLayout.tsx": 1,
+    "packages/ui/src/components/HeroCardContent.tsx": 2,
+    "packages/ui/src/components/HeroRotator.tsx": 2,
+    "packages/ui/src/components/MacMenuBar.tsx": 4,
+    "packages/ui/src/components/TrustLogos.tsx": 1,
+    "packages/ui/src/components/ui/browser.tsx": 1,
+    "packages/ui/src/components/ui/combobox.tsx": 1,
+    "packages/ui/src/components/ui/description.tsx": 1,
+    "packages/ui/src/components/ui/dialog.tsx": 1,
+    "packages/ui/src/components/ui/dropdown-menu.tsx": 3,
+    "packages/ui/src/components/ui/select.tsx": 2,
+    "packages/ui/src/components/ui/tabs.tsx": 1,
+    "packages/ui/src/components/ui/textarea.tsx": 1
+  },
+  "repeatedChains": {
+    "active:scale-95 bg-[var(--bg-secondary)] border border-[var(--border-default)] flex font-medium h-12 hover:bg-[var(--bg-tertiary)] items-center justify-center rounded-xl text-lg touch-manipulation transition-all w-12": {
+      "tokens": 15,
+      "uses": 4
+    },
+    "active:scale-95 bg-white border border-black/[0.08] flex font-semibold gap-1.5 gold-steel-border gold-steel-border-slim hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] items-center px-3 py-1.5 rounded-lg shadow-2xs text-[var(--text-heading)] text-xs transition-all": {
+      "tokens": 19,
+      "uses": 5
+    },
+    "active:scale-[0.98] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] duration-200 font-medium gap-2 gold-steel-border gold-steel-border-slim hover:bg-[var(--bg-tertiary)] hover:scale-[1.02] hover:text-[var(--text-heading)] inline-flex items-center px-4 py-2 rounded-lg text-[var(--text-secondary)] text-sm transition-all": {
+      "tokens": 20,
+      "uses": 3
+    },
+    "animate-in backdrop-blur-sm bg-black/40 duration-200 fade-in fixed flex inset-0 items-center justify-center p-4 z-50": {
+      "tokens": 12,
+      "uses": 4
+    },
+    "bg-[var(--accent-blue)]/10 font-semibold gap-2 gold-steel-border gold-steel-border-slim inline-flex items-center px-3.5 py-1.5 rounded-lg text-[var(--accent-blue)] text-xs transition-all": {
+      "tokens": 13,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] cursor-pointer font-bold h-9 hover:bg-black/[0.04] inline-flex items-center justify-center rounded-lg shrink-0 text-[var(--text-heading)] text-sm transition-colors w-9": {
+      "tokens": 16,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] disabled:cursor-not-allowed disabled:opacity-50 focus:border-[var(--accent-blue)] focus:outline-none px-2 py-1.5 rounded-lg text-[var(--text-heading)] text-sm w-full": {
+      "tokens": 13,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] font-medium px-2.5 py-1.5 rounded-lg text-[var(--text-heading)] text-xs w-full": {
+      "tokens": 13,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] font-medium gap-1.5 hover:bg-black/[0.03] inline-flex items-center px-3 py-2 rounded-lg text-[var(--text-heading)] text-xs transition-colors": {
+      "tokens": 14,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] font-mono px-3 py-2 rounded-lg text-[var(--text-heading)] text-sm w-full": {
+      "tokens": 10,
+      "uses": 6
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-default)] font-mono px-3 py-2 rounded-lg text-[var(--text-heading)] text-xs w-full": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-emphasis)] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20 placeholder:text-[#555] px-3 py-2 resize-none rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
+      "tokens": 16,
+      "uses": 4
+    },
+    "bg-[var(--bg-primary)] border border-[var(--border-emphasis)] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20 px-3 py-2 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
+      "tokens": 14,
+      "uses": 12
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--accent-blue)]/30 flex flex-wrap gap-4 items-center justify-between p-3.5 rounded-lg": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/20 placeholder:text-[var(--text-muted)] px-3 py-2.5 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
+      "tokens": 15,
+      "uses": 7
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 px-3 py-2 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
+      "tokens": 14,
+      "uses": 7
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none px-3 py-2 rounded-md text-[var(--text-heading)] text-sm w-full": {
+      "tokens": 11,
+      "uses": 3
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none px-3 py-2.5 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
+      "tokens": 12,
+      "uses": 14
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] font-medium px-3 py-2 rounded-lg text-[var(--text-heading)] text-xs w-full": {
+      "tokens": 13,
+      "uses": 3
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] px-3 py-2 rounded-lg text-[var(--text-heading)] text-sm w-full": {
+      "tokens": 12,
+      "uses": 7
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:outline-none focus:ring-2 focus:ring-accent-blue h-9 px-3 rounded-lg text-[var(--text-heading)] text-xs w-full": {
+      "tokens": 12,
+      "uses": 7
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono px-3 py-1.5 rounded-lg self-start sm:self-auto text-[var(--text-muted)] text-xs": {
+      "tokens": 11,
+      "uses": 6
+    },
+    "bg-[var(--bg-secondary)] border border-[var(--border-subtle)] font-medium px-3 py-1.5 rounded-lg text-[var(--text-heading)] text-xs transition-all": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "bg-accent-green/10 border border-accent-green/20 font-medium gap-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-accent-green text-xs": {
+      "tokens": 12,
+      "uses": 3
+    },
+    "bg-black/[0.03] border border-black/[0.08] flex font-medium gap-1.5 gold-steel-border gold-steel-border-slim items-center px-3 py-1.5 rounded-lg text-[var(--text-secondary)]": {
+      "tokens": 13,
+      "uses": 4
+    },
+    "bg-white border border-slate-200 font-medium hover:bg-emerald-50 hover:text-emerald-700 px-2 py-0.5 rounded-full shadow-diffusion-sm shrink-0 text-[10.5px] text-slate-700 transition-colors whitespace-nowrap": {
+      "tokens": 15,
+      "uses": 4
+    },
+    "border border-transparent font-medium gap-2 hover:bg-black/[0.04] hover:border-[var(--border-subtle)] hover:text-[var(--accent-blue)] inline-flex items-center px-3.5 py-1.5 rounded-lg text-[var(--text-heading)] text-xs transition-all": {
+      "tokens": 15,
+      "uses": 3
+    },
+    "border-border-subtle border-t flex font-mono items-center justify-between mt-3 pt-2 text-[11px] text-text-muted": {
+      "tokens": 10,
+      "uses": 5
+    },
+    "cursor-default flex focus:bg-black/[0.04] gap-2.5 hover:bg-black/[0.04] items-center mx-1 my-0.5 px-2 py-1.5 rounded-md": {
+      "tokens": 11,
+      "uses": 7
+    },
+    "cursor-pointer flex focus:bg-black/[0.04] gap-2.5 hover:bg-black/[0.04] items-center mx-1 my-0.5 px-2 py-1.5 rounded-lg": {
+      "tokens": 11,
+      "uses": 3
+    },
+    "cursor-pointer font-medium gap-1.5 inline-flex items-center px-2.5 py-1 rounded-lg text-xs transition-all": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "cursor-pointer font-medium gap-1.5 inline-flex items-center px-3 py-1.5 rounded-lg text-xs transition-all": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "cursor-pointer font-semibold gap-2 inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs transition-all": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "cursor-pointer font-semibold gap-2 inline-flex items-center px-4 py-2 rounded-lg text-xs transition-all": {
+      "tokens": 10,
+      "uses": 3
+    },
+    "flex font-bold h-5 hover:bg-black/[0.05] items-center justify-center rounded text-[12px] text-[var(--text-secondary)] w-5": {
+      "tokens": 10,
+      "uses": 4
+    },
+    "flex font-medium gap-1.5 gold-steel-border gold-steel-border-slim hover:bg-zinc-100 items-center px-3 py-1.5 rounded-md text-xs text-zinc-700 transition-colors": {
+      "tokens": 13,
+      "uses": 4
+    },
+    "flex gap-2 group items-center px-2.5 py-1 relative rounded-md text-[12px] transition-all": {
+      "tokens": 10,
+      "uses": 4
+    }
+  }
+}

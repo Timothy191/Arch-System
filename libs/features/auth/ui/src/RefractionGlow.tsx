@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 export function RefractionGlow() {
   return (
     <motion.div
-      className="absolute inset-[-60px] -z-10 blur-[60px] opacity-40 pointer-events-none"
+      className="pointer-events-none absolute inset-[-60px] -z-10 opacity-40 blur-[60px]"
       animate={{
         background: [
           'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), transparent 70%)',

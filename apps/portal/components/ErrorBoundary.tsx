@@ -107,41 +107,41 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       // Default fallback UI with rose theme
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-4">
-          <GlassCard className="max-w-md w-full border-rose-200 bg-rose-50/50">
+        <div className="flex min-h-[400px] items-center justify-center p-4">
+          <GlassCard className="w-full max-w-md border-rose-200 bg-rose-50/50">
             <div className="space-y-6">
               {/* Error Icon */}
               <div className="flex justify-center">
-                <div className="p-4 rounded-full bg-rose-100 border border-rose-300">
-                  <AlertTriangle className="w-8 h-8 text-rose-600" />
+                <div className="rounded-full border border-rose-300 bg-rose-100 p-4">
+                  <AlertTriangle className="h-8 w-8 text-rose-600" />
                 </div>
               </div>
 
               {/* Error Message */}
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium text-rose-900">{displayTitle}</h3>
+              <div className="space-y-2 text-center">
+                <h3 className="font-medium text-lg text-rose-900">{displayTitle}</h3>
                 <p className="text-rose-700 text-sm">{displayMessage}</p>
-                <p className="text-rose-500 text-xs font-mono">
+                <p className="font-mono text-rose-500 text-xs">
                   {this.state.error?.message || 'Unknown error'}
                 </p>
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   onClick={this.handleReset}
                   variant="outline"
                   className="flex-1 border-rose-300 text-rose-900 hover:bg-rose-100"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Try Again
                 </Button>
                 <Button
                   onClick={this.handleGoHome}
                   variant="default"
-                  className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
+                  className="flex-1 bg-rose-600 text-white hover:bg-rose-700"
                 >
-                  <Home className="w-4 h-4 mr-2" />
+                  <Home className="mr-2 h-4 w-4" />
                   Go Home
                 </Button>
               </div>
@@ -149,10 +149,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               {/* Development Info */}
               {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                 <details className="mt-4">
-                  <summary className="text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-secondary)]">
+                  <summary className="cursor-pointer text-[var(--text-muted)] text-xs hover:text-[var(--text-secondary)]">
                     Error Details (Development Only)
                   </summary>
-                  <pre className="mt-2 p-3 bg-[var(--bg-tertiary)] rounded-lg text-xs overflow-auto max-h-48">
+                  <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-[var(--bg-tertiary)] p-3 text-xs">
                     <code>
                       {this.state.error?.toString()}
                       {'\n\n'}

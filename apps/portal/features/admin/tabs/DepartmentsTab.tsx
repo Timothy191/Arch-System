@@ -60,21 +60,21 @@ export function DepartmentsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">Areas</h2>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <h2 className="font-medium text-[var(--text-heading)] text-lg">Areas</h2>
 
-        <form onSubmit={handleAddArea} className="flex items-center gap-2 w-full sm:w-auto">
+        <form onSubmit={handleAddArea} className="flex w-full items-center gap-2 sm:w-auto">
           <Input
             placeholder="Add new area..."
             value={newArea}
             onChange={(e) => setNewArea(e.target.value)}
-            className="w-full sm:w-64 bg-[var(--bg-secondary)] border-[var(--border-default)]"
+            className="w-full border-[var(--border-default)] bg-[var(--bg-secondary)] sm:w-64"
           />
           <Button
             type="submit"
-            className="shrink-0 bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+            className="shrink-0 bg-[var(--accent-emerald)] text-[var(--bg-void)] hover:bg-[var(--accent-green)]"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Area
           </Button>
         </form>
@@ -88,11 +88,11 @@ export function DepartmentsTab() {
             {areas.map((area) => (
               <li
                 key={area}
-                className="flex items-center justify-between px-6 py-4 hover:bg-[var(--bg-tertiary)] transition-colors"
+                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-[var(--bg-tertiary)]"
               >
                 <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-[var(--accent-emerald)] shrink-0" />
-                  <span className="text-sm font-medium text-[var(--text-heading)]">{area}</span>
+                  <MapPin className="h-4 w-4 shrink-0 text-[var(--accent-emerald)]" />
+                  <span className="font-medium text-[var(--text-heading)] text-sm">{area}</span>
                 </div>
                 <Button
                   type="button"
@@ -102,7 +102,7 @@ export function DepartmentsTab() {
                   className="text-accent-red hover:text-accent-red/80"
                   onClick={() => handleRemoveArea(area)}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </li>
             ))}

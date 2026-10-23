@@ -565,9 +565,9 @@ export function ReportsDashboardClient({
         <div
           role="alert"
           data-testid="reports-query-warning-banner"
-          className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 flex items-start gap-2.5 no-print"
+          className="no-print flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-800 text-xs"
         >
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
           <div>
             <p className="font-semibold">Partial Data Warning — Database Query Issue</p>
             <p className="mt-0.5 font-mono text-[11px]">{queryWarnings.join(' · ')}</p>
@@ -575,22 +575,22 @@ export function ReportsDashboardClient({
         </div>
       )}
       {/* Executive & Operator Live Header */}
-      <GlassCard className="p-5 no-print">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <GlassCard className="no-print p-5">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div className="space-y-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-2xl font-bold text-[var(--text-heading)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-bold text-2xl text-[var(--text-heading)]">
                 {departmentName} Reports &amp; Live Intelligence
               </h2>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20">
-                <Radio className="w-3.5 h-3.5 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-semibold text-accent-green text-xs">
+                <Radio className="h-3.5 w-3.5 animate-pulse" />
                 Live Telemetry &amp; Logs
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                 {currentShift === 'day' ? (
-                  <Sun className="w-3.5 h-3.5" />
+                  <Sun className="h-3.5 w-3.5" />
                 ) : (
-                  <Moon className="w-3.5 h-3.5" />
+                  <Moon className="h-3.5 w-3.5" />
                 )}
                 Active Shift: {currentShift.toUpperCase()} ({todayStr})
               </span>
@@ -600,30 +600,30 @@ export function ReportsDashboardClient({
       </GlassCard>
 
       {/* Live Stats KPI Grid with Visual Indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 no-print">
+      <div className="no-print grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/* 1. Total Volume Moved (BCM) */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
                 Total Volume (BCM)
               </span>
-              <Layers className="w-4 h-4 text-[var(--accent-blue)]" />
+              <Layers className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {Number(kpiStats.totalBcm.toFixed(1)).toLocaleString()}
             </p>
           </div>
           <div className="mt-3 space-y-1.5">
-            <div className="w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
+            <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
               <div
-                className="bg-[var(--accent-blue)] h-full transition-all"
+                className="h-full bg-[var(--accent-blue)] transition-all"
                 style={{
                   width: `${kpiStats.totalBcm > 0 ? Math.round((kpiStats.totalHaulBcm / kpiStats.totalBcm) * 100) : 50}%`,
                 }}
               />
               <div
-                className="bg-accent-green h-full transition-all"
+                className="h-full bg-accent-green transition-all"
                 style={{
                   width: `${kpiStats.totalBcm > 0 ? Math.round((kpiStats.totalDozerBcm / kpiStats.totalBcm) * 100) : 50}%`,
                 }}
@@ -637,105 +637,105 @@ export function ReportsDashboardClient({
         </GlassCard>
 
         {/* 2. Haul Loads */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Total Haul Loads</span>
-              <Truck className="w-4 h-4 text-[var(--accent-blue)]" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Total Haul Loads</span>
+              <Truck className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--accent-blue)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--accent-blue)]">
               {kpiStats.totalLoads.toLocaleString()}
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
             <span className="text-[var(--text-muted)]">Today&apos;s Loads:</span>
-            <span className="font-semibold text-[var(--text-heading)] font-mono">
+            <span className="font-mono font-semibold text-[var(--text-heading)]">
               {kpiStats.todayLoads.toLocaleString()} loads
             </span>
           </div>
         </GlassCard>
 
         {/* 3. Operating Hours & Efficiency */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Operating Hours</span>
-              <Clock className="w-4 h-4 text-accent-green" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Operating Hours</span>
+              <Clock className="h-4 w-4 text-accent-green" />
             </div>
-            <p className="text-2xl font-bold text-accent-green mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-accent-green">
               {kpiStats.totalHours.toFixed(1)}h
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
             <span className="text-[var(--text-muted)]">Efficiency Rate:</span>
-            <span className="font-semibold text-[var(--accent-blue)] font-mono">
+            <span className="font-mono font-semibold text-[var(--accent-blue)]">
               {kpiStats.bcmPerHour.toFixed(1)} BCM/h
             </span>
           </div>
         </GlassCard>
 
         {/* 4. Dozer Roll-over Fixed Calculation */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
                 Dozer Roll-over (250/h)
               </span>
-              <BarChart3 className="w-4 h-4 text-[var(--accent-blue)]" />
+              <BarChart3 className="h-4 w-4 text-[var(--accent-blue)]" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {Number(kpiStats.totalDozerBcm.toFixed(1)).toLocaleString()}{' '}
-              <span className="text-xs font-normal text-[var(--text-muted)]">BCM</span>
+              <span className="font-normal text-[var(--text-muted)] text-xs">BCM</span>
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
             <span className="text-[var(--text-muted)]">Blade Passes:</span>
-            <span className="font-semibold text-[var(--text-heading)] font-mono">
+            <span className="font-mono font-semibold text-[var(--text-heading)]">
               {kpiStats.totalPasses.toLocaleString()}
             </span>
           </div>
         </GlassCard>
 
         {/* 5. Delays & Engineering Health */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
                 Delays &amp; Breakdowns
               </span>
-              <Wrench className="w-4 h-4 text-accent-red" />
+              <Wrench className="h-4 w-4 text-accent-red" />
             </div>
-            <p className="text-2xl font-bold text-[var(--text-heading)] mt-1.5 font-mono">
+            <p className="mt-1.5 font-bold font-mono text-2xl text-[var(--text-heading)]">
               {kpiStats.totalDelayMin.toLocaleString()}{' '}
-              <span className="text-xs font-normal text-[var(--text-muted)]">min</span>
+              <span className="font-normal text-[var(--text-muted)] text-xs">min</span>
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px]">
-            <span className="text-accent-red font-medium">{kpiStats.openIssues} Open</span>
-            <span className="text-accent-green font-medium">
+            <span className="font-medium text-accent-red">{kpiStats.openIssues} Open</span>
+            <span className="font-medium text-accent-green">
               {kpiStats.resolvedIssues} Resolved
             </span>
           </div>
         </GlassCard>
 
         {/* 6. Shift Coverage Completeness */}
-        <GlassCard className="p-4 flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between p-4">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Shift Coverage</span>
-              <Activity className="w-4 h-4 text-accent-green" />
+              <span className="font-medium text-[var(--text-muted)] text-xs">Shift Coverage</span>
+              <Activity className="h-4 w-4 text-accent-green" />
             </div>
-            <div className="flex items-baseline justify-between mt-1.5">
-              <p className="text-2xl font-bold text-[var(--text-heading)] font-mono">
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
                 {kpiStats.coveragePct}%
               </p>
-              <span className="text-xs text-[var(--text-muted)]">
+              <span className="text-[var(--text-muted)] text-xs">
                 {coveredFleetCount}/{totalFleetCount} units
               </span>
             </div>
           </div>
           <div className="mt-3 space-y-1.5">
-            <div className="w-full h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
               <div
                 className={`h-full transition-all ${
                   kpiStats.coveragePct === 100 ? 'bg-accent-green' : 'bg-[var(--accent-blue)]'
@@ -747,15 +747,15 @@ export function ReportsDashboardClient({
               <button
                 type="button"
                 onClick={() => setShowMissingMachines((v) => !v)}
-                className="text-[11px] text-[var(--accent-blue)] hover:underline text-left w-full"
+                className="w-full text-left text-[11px] text-[var(--accent-blue)] hover:underline"
               >
                 {showMissingMachines
                   ? 'Hide pending machines'
                   : `${missingCoverage.length} pending shift entries →`}
               </button>
             ) : (
-              <span className="text-[11px] text-accent-green flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> All machines logged
+              <span className="flex items-center gap-1 text-[11px] text-accent-green">
+                <CheckCircle2 className="h-3 w-3" /> All machines logged
               </span>
             )}
           </div>
@@ -764,35 +764,35 @@ export function ReportsDashboardClient({
 
       {/* Optional Expandable Pending Shift Coverage Drawer (Non-blocking!) */}
       {showMissingMachines && missingCoverage.length > 0 && (
-        <GlassCard className="border-[var(--accent-blue)]/30 p-4 space-y-3 no-print">
+        <GlassCard className="no-print space-y-3 border-[var(--accent-blue)]/30 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-[var(--accent-blue)]" />
-              <p className="text-sm font-medium text-[var(--text-heading)]">
+              <AlertTriangle className="h-4 w-4 text-[var(--accent-blue)]" />
+              <p className="font-medium text-[var(--text-heading)] text-sm">
                 Pending Shift Entries ({missingCoverage.length} machines for {currentShift} shift)
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowMissingMachines(false)}
-              className="text-xs text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+              className="text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)]"
             >
               Close
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {missingCoverage.map((s) => (
               <div
                 key={s.machineId}
-                className="flex items-center justify-between px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                className="flex items-center justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2"
               >
                 <div>
-                  <p className="text-xs font-medium text-[var(--text-heading)]">{s.machineName}</p>
+                  <p className="font-medium text-[var(--text-heading)] text-xs">{s.machineName}</p>
                   <p className="text-[11px] text-[var(--text-muted)]">{s.machineType}</p>
                 </div>
                 <Link
                   href={s.formPath}
-                  className="text-xs font-medium text-[var(--accent-blue)] hover:underline"
+                  className="font-medium text-[var(--accent-blue)] text-xs hover:underline"
                 >
                   Log →
                 </Link>
@@ -803,27 +803,27 @@ export function ReportsDashboardClient({
       )}
 
       {/* Subtabs Navigation: Shift | Day | Archived + Filter Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-default)] pb-3 no-print">
+      <div className="no-print flex flex-col justify-between gap-4 border-[var(--border-default)] border-b pb-3 md:flex-row md:items-center">
         <div
           role="tablist"
           aria-label="Report Views"
-          className="inline-flex items-center gap-1.5 bg-[var(--bg-secondary)] p-1.5 rounded-xl border border-[var(--border-default)]"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1.5"
         >
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === 'shift'}
             onClick={() => handleSelectTab('shift')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
               activeTab === 'shift'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Clock className="w-4 h-4" />
+            <Clock className="h-4 w-4" />
             Shift
             <span
-              className={`text-xs px-1.5 py-0.2 rounded-full ${
+              className={`rounded-full px-1.5 py-0.2 text-xs ${
                 activeTab === 'shift'
                   ? 'bg-white/20 text-white'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
@@ -838,16 +838,16 @@ export function ReportsDashboardClient({
             role="tab"
             aria-selected={activeTab === 'day'}
             onClick={() => handleSelectTab('day')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
               activeTab === 'day'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="h-4 w-4" />
             Day
             <span
-              className={`text-xs px-1.5 py-0.2 rounded-full ${
+              className={`rounded-full px-1.5 py-0.2 text-xs ${
                 activeTab === 'day'
                   ? 'bg-white/20 text-white'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
@@ -862,16 +862,16 @@ export function ReportsDashboardClient({
             role="tab"
             aria-selected={activeTab === 'archived'}
             onClick={() => handleSelectTab('archived')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
               activeTab === 'archived'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
-            <Archive className="w-4 h-4" />
+            <Archive className="h-4 w-4" />
             Archived
             <span
-              className={`text-xs px-1.5 py-0.2 rounded-full ${
+              className={`rounded-full px-1.5 py-0.2 text-xs ${
                 activeTab === 'archived'
                   ? 'bg-white/20 text-white'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
@@ -886,16 +886,16 @@ export function ReportsDashboardClient({
             role="tab"
             aria-selected={activeTab === 'pdf-report'}
             onClick={() => handleSelectTab('pdf-report')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
               activeTab === 'pdf-report'
                 ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="h-4 w-4" />
             PDF Report
             <span
-              className={`text-xs px-1.5 py-0.2 rounded-full ${
+              className={`rounded-full px-1.5 py-0.2 text-xs ${
                 activeTab === 'pdf-report'
                   ? 'bg-white/20 text-white'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
@@ -909,13 +909,13 @@ export function ReportsDashboardClient({
         {/* Interactive Quick Filters (Shift, Site, Search) */}
         <div className="flex flex-wrap items-center gap-2.5">
           {activeTab !== 'day' && (
-            <div className="inline-flex items-center rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] p-1">
+            <div className="inline-flex items-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1">
               {(['all', 'day', 'night'] as const).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setShiftFilter(s)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  className={`rounded-md px-3 py-1 font-medium text-xs transition-colors ${
                     shiftFilter === s
                       ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
@@ -932,7 +932,7 @@ export function ReportsDashboardClient({
               aria-label="Filter by site"
               value={siteFilter}
               onChange={(e) => setSiteFilter(e.target.value)}
-              className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-heading)] focus:outline-none focus:border-[var(--accent-blue)]"
+              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 text-[var(--text-heading)] text-xs focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="all">All Sites ({allSites.length})</option>
               {allSites.map((site) => (
@@ -944,13 +944,13 @@ export function ReportsDashboardClient({
           )}
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search machine, site, date..."
-              className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)] w-48 sm:w-56"
+              className="w-48 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none sm:w-56"
             />
           </div>
         </div>
@@ -962,19 +962,19 @@ export function ReportsDashboardClient({
       {activeTab === 'shift' && (
         <div className="space-y-6">
           {/* Visual Indicators Row: Day vs Night Shift Split & Site Performance */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Day vs Night Shift Visual Indicator Card */}
-            <GlassCard className="p-5 space-y-4">
+            <GlassCard className="space-y-4 p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                  <h3 className="font-semibold text-[var(--text-heading)] text-base">
                     Shift Performance Split (Day vs Night)
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     Visual comparison of volume moved, haul loads, and operating hours by shift
                   </p>
                 </div>
-                <span className="text-xs font-mono text-[var(--accent-blue)] font-semibold">
+                <span className="font-mono font-semibold text-[var(--accent-blue)] text-xs">
                   {Number(
                     (shiftComparison.dayBcm + shiftComparison.nightBcm).toFixed(1)
                   ).toLocaleString()}{' '}
@@ -984,47 +984,47 @@ export function ReportsDashboardClient({
 
               {/* Visual Split Bar */}
               <div className="space-y-2">
-                <div className="w-full h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
+                <div className="flex h-3 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                   <div
-                    className="bg-[var(--accent-blue)] h-full transition-all"
+                    className="h-full bg-[var(--accent-blue)] transition-all"
                     style={{ width: `${shiftComparison.dayPct}%` }}
                     title={`Day Shift: ${shiftComparison.dayPct}%`}
                   />
                   <div
-                    className="bg-indigo-500 h-full transition-all"
+                    className="h-full bg-indigo-500 transition-all"
                     style={{ width: `${shiftComparison.nightPct}%` }}
                     title={`Night Shift: ${shiftComparison.nightPct}%`}
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1.5 text-[var(--accent-blue)] font-medium">
-                    <Sun className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-1.5 font-medium text-[var(--accent-blue)]">
+                    <Sun className="h-3.5 w-3.5" />
                     Day Shift ({shiftComparison.dayPct}%)
                   </span>
-                  <span className="flex items-center gap-1.5 text-indigo-500 font-medium">
-                    <Moon className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-1.5 font-medium text-indigo-500">
+                    <Moon className="h-3.5 w-3.5" />
                     Night Shift ({shiftComparison.nightPct}%)
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--border-default)]">
-                <div className="p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-1">
-                  <p className="text-xs font-medium text-[var(--accent-blue)]">Day Shift Totals</p>
-                  <p className="text-lg font-bold font-mono text-[var(--text-heading)]">
+              <div className="grid grid-cols-2 gap-3 border-[var(--border-default)] border-t pt-2">
+                <div className="space-y-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
+                  <p className="font-medium text-[var(--accent-blue)] text-xs">Day Shift Totals</p>
+                  <p className="font-bold font-mono text-[var(--text-heading)] text-lg">
                     {Number(shiftComparison.dayBcm.toFixed(1)).toLocaleString()} BCM
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     {shiftComparison.dayLoads.toLocaleString()} loads ·{' '}
                     {shiftComparison.dayHours.toFixed(1)}h · {shiftComparison.dayDelays}m delay
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-1">
-                  <p className="text-xs font-medium text-indigo-500">Night Shift Totals</p>
-                  <p className="text-lg font-bold font-mono text-[var(--text-heading)]">
+                <div className="space-y-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
+                  <p className="font-medium text-indigo-500 text-xs">Night Shift Totals</p>
+                  <p className="font-bold font-mono text-[var(--text-heading)] text-lg">
                     {Number(shiftComparison.nightBcm.toFixed(1)).toLocaleString()} BCM
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     {shiftComparison.nightLoads.toLocaleString()} loads ·{' '}
                     {shiftComparison.nightHours.toFixed(1)}h · {shiftComparison.nightDelays}m delay
                   </p>
@@ -1033,22 +1033,22 @@ export function ReportsDashboardClient({
             </GlassCard>
 
             {/* Site Production Visual Indicators Card */}
-            <GlassCard className="p-5 space-y-4">
+            <GlassCard className="space-y-4 p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                  <h3 className="font-semibold text-[var(--text-heading)] text-base">
                     Site Volume &amp; Productivity Indicators
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     Live production distribution across active pit &amp; stockpile sites
                   </p>
                 </div>
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-[var(--text-muted)] text-xs">
                   {siteBreakdown.length} active site{siteBreakdown.length === 1 ? '' : 's'}
                 </span>
               </div>
 
-              <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
+              <div className="max-h-52 space-y-3 overflow-y-auto pr-1">
                 {siteBreakdown.map((s) => (
                   <div key={s.site} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
@@ -1061,16 +1061,16 @@ export function ReportsDashboardClient({
                         {s.bcmPerHour.toFixed(1)} BCM/h)
                       </span>
                     </div>
-                    <div className="w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                       <div
-                        className="bg-[var(--accent-blue)] h-full rounded-full transition-all"
+                        className="h-full rounded-full bg-[var(--accent-blue)] transition-all"
                         style={{ width: `${Math.max(s.pct, 4)}%` }}
                       />
                     </div>
                   </div>
                 ))}
                 {siteBreakdown.length === 0 && (
-                  <p className="text-xs text-[var(--text-muted)] py-6 text-center">
+                  <p className="py-6 text-center text-[var(--text-muted)] text-xs">
                     No site shift data for the current filter.
                   </p>
                 )}
@@ -1080,115 +1080,115 @@ export function ReportsDashboardClient({
 
           {/* Shift Production Logs Table */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Shift Production &amp; Roll-over Logs
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Per-shift breakdown of operating hours, haul loads, excavator BCM, Dozer roll-over
                   (Hours &times; 250), and delays
                 </p>
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {filteredShiftRows.length} shift record{filteredShiftRows.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Shift
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Site
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Hours
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Loads
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Haul BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Roll-over BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Delay (min)
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Status
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {filteredShiftRows.map((row) => (
-                    <tr key={row.id} className="hover:bg-[var(--bg-tertiary)]/60 transition-colors">
-                      <td className="px-5 py-3.5 text-sm font-mono text-[var(--text-heading)]">
+                    <tr key={row.id} className="transition-colors hover:bg-[var(--bg-tertiary)]/60">
+                      <td className="px-5 py-3.5 font-mono text-[var(--text-heading)] text-sm">
                         {row.date}
                       </td>
                       <td className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium text-xs ${
                             row.shift === 'day'
                               ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
                               : 'bg-indigo-500/10 text-indigo-500'
                           }`}
                         >
                           {row.shift === 'day' ? (
-                            <Sun className="w-3 h-3" />
+                            <Sun className="h-3 w-3" />
                           ) : (
-                            <Moon className="w-3 h-3" />
+                            <Moon className="h-3 w-3" />
                           )}
                           {row.shift.toUpperCase()}
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-sm">
                         {row.site && row.site !== '—' ? (
-                          <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
+                          <span className="inline-flex rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                             {row.site}
                           </span>
                         ) : (
-                          <span className="text-xs text-[var(--text-muted)]">All Sites</span>
+                          <span className="text-[var(--text-muted)] text-xs">All Sites</span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-heading)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-heading)] text-sm">
                         {row.hours.toFixed(1)}h
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--accent-blue)] font-medium">
+                      <td className="px-5 py-3.5 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
                         {row.loads.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {Number(row.haulBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--accent-blue)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {Number(row.dozerRolloverBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-accent-green font-semibold">
+                      <td className="px-5 py-3.5 text-right font-mono font-semibold text-accent-green text-sm">
                         {Number(row.totalBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {row.delayMin}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
                             row.delayMin > 120
                               ? 'bg-accent-red/10 text-accent-red'
                               : 'bg-accent-green/10 text-accent-green'
                           }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
+                            className={`h-1.5 w-1.5 rounded-full ${
                               row.delayMin > 120 ? 'bg-accent-red' : 'bg-accent-green'
                             }`}
                           />
@@ -1201,7 +1201,7 @@ export function ReportsDashboardClient({
                     <tr>
                       <td
                         colSpan={10}
-                        className="px-6 py-10 text-center text-sm text-[var(--text-muted)]"
+                        className="px-6 py-10 text-center text-[var(--text-muted)] text-sm"
                       >
                         No shift production logs match the selected filters.
                       </td>
@@ -1214,84 +1214,84 @@ export function ReportsDashboardClient({
 
           {/* Machine Operations & SMR Log Table */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Machine Operations &amp; SMR Shift Log
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Individual machine SMR readings, operator assignments, and calculated output
                 </p>
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {filteredMachineOps.length} operation{filteredMachineOps.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date &amp; Shift
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Machine
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Operator
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Site
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Start SMR
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Stop SMR
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Hours Worked
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Volume / Roll-over
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Status
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {filteredMachineOps.slice(0, 50).map((op) => (
-                    <tr key={op.id} className="hover:bg-[var(--bg-tertiary)]/60 transition-colors">
-                      <td className="px-5 py-3 text-xs font-mono text-[var(--text-heading)]">
+                    <tr key={op.id} className="transition-colors hover:bg-[var(--bg-tertiary)]/60">
+                      <td className="px-5 py-3 font-mono text-[var(--text-heading)] text-xs">
                         {op.date} · <span className="uppercase">{op.shift}</span>
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-[var(--text-heading)]">
+                          <span className="font-medium text-[var(--text-heading)] text-sm">
                             {op.machineName}
                           </span>
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+                          <span className="rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)] text-xs">
                             {op.machineType}
                           </span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-sm text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-[var(--text-secondary)] text-sm">
                         {op.operatorName}
                       </td>
-                      <td className="px-5 py-3 text-sm text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-[var(--text-secondary)] text-sm">
                         {op.siteName}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {op.startSmu != null ? op.startSmu.toFixed(1) : '—'}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {op.endSmu != null ? op.endSmu.toFixed(1) : '—'}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-accent-green font-medium">
+                      <td className="px-5 py-3 text-right font-medium font-mono text-accent-green text-sm">
                         {op.hoursWorked.toFixed(2)}h
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--accent-blue)] font-medium">
+                      <td className="px-5 py-3 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
                         {op.isDozer
                           ? `${Number(op.bcmMoved.toFixed(1)).toLocaleString()} BCM (Roll-over)`
                           : op.bcmMoved > 0
@@ -1300,7 +1300,7 @@ export function ReportsDashboardClient({
                       </td>
                       <td className="px-5 py-3 text-right">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
                             op.status === 'completed'
                               ? 'bg-accent-green/10 text-accent-green'
                               : 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
@@ -1315,7 +1315,7 @@ export function ReportsDashboardClient({
                     <tr>
                       <td
                         colSpan={9}
-                        className="px-6 py-8 text-center text-sm text-[var(--text-muted)]"
+                        className="px-6 py-8 text-center text-[var(--text-muted)] text-sm"
                       >
                         No machine operation logs found for the selected filter.
                       </td>
@@ -1329,16 +1329,16 @@ export function ReportsDashboardClient({
           {/* Engineering Breakdowns & Activity Logs */}
           {filteredEngineeringLogs.length > 0 && (
             <GlassCard className="overflow-hidden p-0">
-              <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+              <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
                 <div>
-                  <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                  <h3 className="font-semibold text-[var(--text-heading)] text-base">
                     Engineering Breakdowns &amp; Department Activity Logs
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     Cross-department engineering faults, repairs, and shift logs
                   </p>
                 </div>
-                <span className="text-xs font-mono text-[var(--text-muted)]">
+                <span className="font-mono text-[var(--text-muted)] text-xs">
                   {filteredEngineeringLogs.length} item
                   {filteredEngineeringLogs.length === 1 ? '' : 's'}
                 </span>
@@ -1347,15 +1347,15 @@ export function ReportsDashboardClient({
                 {filteredEngineeringLogs.slice(0, 20).map((item) => (
                   <div
                     key={item.id}
-                    className="px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[var(--bg-tertiary)]/50 transition-colors"
+                    className="flex flex-col justify-between gap-2 px-6 py-3.5 transition-colors hover:bg-[var(--bg-tertiary)]/50 sm:flex-row sm:items-center"
                   >
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          className={`rounded px-2 py-0.5 font-medium text-xs ${
                             item.source === 'breakdown'
-                              ? 'bg-accent-red/10 text-accent-red border border-accent-red/20'
-                              : 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20'
+                              ? 'border border-accent-red/20 bg-accent-red/10 text-accent-red'
+                              : 'border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
                           }`}
                         >
                           {item.source === 'breakdown'
@@ -1364,23 +1364,23 @@ export function ReportsDashboardClient({
                               ? 'Engineering Log'
                               : 'Engineering Note'}
                         </span>
-                        <span className="text-sm font-semibold text-[var(--text-heading)]">
+                        <span className="font-semibold text-[var(--text-heading)] text-sm">
                           {item.machineName}
                         </span>
-                        <span className="text-xs font-mono text-[var(--text-muted)]">
+                        <span className="font-mono text-[var(--text-muted)] text-xs">
                           {item.date} · {item.shift.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-sm text-[var(--text-heading)]">{item.description}</p>
+                      <p className="text-[var(--text-heading)] text-sm">{item.description}</p>
                       {item.actionTaken && (
-                        <p className="text-xs text-[var(--text-secondary)]">
+                        <p className="text-[var(--text-secondary)] text-xs">
                           <strong className="text-[var(--accent-blue)]">Action:</strong>{' '}
                           {item.actionTaken}
                         </p>
                       )}
                     </div>
                     <span
-                      className={`self-start sm:self-center px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
+                      className={`shrink-0 self-start rounded-full px-2.5 py-0.5 font-medium text-xs sm:self-center ${
                         item.status === 'resolved'
                           ? 'bg-accent-green/10 text-accent-green'
                           : 'bg-accent-red/10 text-accent-red'
@@ -1402,30 +1402,30 @@ export function ReportsDashboardClient({
       {activeTab === 'day' && (
         <div className="space-y-6">
           {/* Visual Daily Volume Trend Bars */}
-          <GlassCard className="p-5 space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+          <GlassCard className="space-y-4 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Daily Consolidated Production Trend (Day + Night Combined)
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Visual daily volume comparison (Haul BCM + Dozer Roll-over BCM) for CEO &amp;
                   Operational review
                 </p>
               </div>
               <div className="flex items-center gap-4 text-xs">
                 <span className="flex items-center gap-1.5 text-[var(--accent-blue)]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[var(--accent-blue)]" />
+                  <span className="h-2.5 w-2.5 rounded-sm bg-[var(--accent-blue)]" />
                   Haul / Excavator BCM
                 </span>
                 <span className="flex items-center gap-1.5 text-accent-green">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-accent-green" />
+                  <span className="h-2.5 w-2.5 rounded-sm bg-accent-green" />
                   Dozer Roll-over BCM (Hours &times; 250)
                 </span>
               </div>
             </div>
 
-            <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+            <div className="max-h-72 space-y-2.5 overflow-y-auto pr-1">
               {dailyAggregatedRows.slice(0, 14).map((d) => {
                 const haulRatio = d.totalBcm > 0 ? (d.haulBcm / d.totalBcm) * d.bcmPct : 0;
                 const dozerRatio =
@@ -1433,10 +1433,10 @@ export function ReportsDashboardClient({
                 return (
                   <div key={d.date} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-medium text-[var(--text-heading)]">
+                      <span className="font-medium font-mono text-[var(--text-heading)]">
                         {d.date}
                         {d.date === todayStr && (
-                          <span className="ml-2 px-1.5 py-0.5 rounded bg-accent-green/10 text-accent-green text-[10px]">
+                          <span className="ml-2 rounded bg-accent-green/10 px-1.5 py-0.5 text-[10px] text-accent-green">
                             TODAY
                           </span>
                         )}
@@ -1449,13 +1449,13 @@ export function ReportsDashboardClient({
                         {d.bcmPerHour.toFixed(1)} BCM/h)
                       </span>
                     </div>
-                    <div className="w-full h-2.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
+                    <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                       <div
-                        className="bg-[var(--accent-blue)] h-full transition-all"
+                        className="h-full bg-[var(--accent-blue)] transition-all"
                         style={{ width: `${Math.max(haulRatio, d.haulBcm > 0 ? 2 : 0)}%` }}
                       />
                       <div
-                        className="bg-accent-green h-full transition-all"
+                        className="h-full bg-accent-green transition-all"
                         style={{
                           width: `${Math.max(dozerRatio, d.dozerRolloverBcm > 0 ? 2 : 0)}%`,
                         }}
@@ -1465,7 +1465,7 @@ export function ReportsDashboardClient({
                 );
               })}
               {dailyAggregatedRows.length === 0 && (
-                <p className="text-xs text-[var(--text-muted)] text-center py-8">
+                <p className="py-8 text-center text-[var(--text-muted)] text-xs">
                   No daily production records found.
                 </p>
               )}
@@ -1474,82 +1474,82 @@ export function ReportsDashboardClient({
 
           {/* Daily Consolidated Log Table */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Daily Consolidated Operational Log
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Full-day (24h) aggregated metrics combining Day &amp; Night shifts per calendar
                   date
                 </p>
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {dailyAggregatedRows.length} day{dailyAggregatedRows.length === 1 ? '' : 's'}
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Active Sites
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total Hours
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total Loads
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Haul BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Dozer Roll-over BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total Daily BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       BCM / Hour
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Delays (min)
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {dailyAggregatedRows.map((d) => (
-                    <tr key={d.date} className="hover:bg-[var(--bg-tertiary)]/60 transition-colors">
-                      <td className="px-5 py-3.5 text-sm font-mono font-medium text-[var(--text-heading)]">
+                    <tr key={d.date} className="transition-colors hover:bg-[var(--bg-tertiary)]/60">
+                      <td className="px-5 py-3.5 font-medium font-mono text-[var(--text-heading)] text-sm">
                         {d.date}
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-[var(--text-secondary)]">
+                      <td className="px-5 py-3.5 text-[var(--text-secondary)] text-xs">
                         {d.siteList.length > 0 ? d.siteList.join(', ') : 'All Sites'} (
                         {d.shiftCount} shift{d.shiftCount === 1 ? '' : 's'})
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-heading)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-heading)] text-sm">
                         {d.hours.toFixed(1)}h
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--accent-blue)] font-medium">
+                      <td className="px-5 py-3.5 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
                         {d.loads.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {Number(d.haulBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--accent-blue)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {Number(d.dozerRolloverBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-accent-green font-semibold">
+                      <td className="px-5 py-3.5 text-right font-mono font-semibold text-accent-green text-sm">
                         {Number(d.totalBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--accent-blue)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {d.bcmPerHour.toFixed(1)}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {d.delayMin}
                       </td>
                     </tr>
@@ -1558,7 +1558,7 @@ export function ReportsDashboardClient({
                     <tr>
                       <td
                         colSpan={9}
-                        className="px-6 py-10 text-center text-sm text-[var(--text-muted)]"
+                        className="px-6 py-10 text-center text-[var(--text-muted)] text-sm"
                       >
                         No daily consolidated data available.
                       </td>
@@ -1578,19 +1578,19 @@ export function ReportsDashboardClient({
         <div className="space-y-6">
           {/* Date Range Filter Card */}
           <GlassCard className="p-5">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Archived &amp; Historical Period Query
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Select a historical date range to inspect archived shift logs and monthly
                   production rollups
                 </p>
               </div>
               <form method="GET" className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">From Date</label>
+                  <label className="mb-1 block text-[var(--text-muted)] text-xs">From Date</label>
                   <Input
                     type="date"
                     name="from"
@@ -1599,12 +1599,12 @@ export function ReportsDashboardClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">To Date</label>
+                  <label className="mb-1 block text-[var(--text-muted)] text-xs">To Date</label>
                   <Input type="date" name="to" defaultValue={toDateStr} className="px-3 py-1.5" />
                 </div>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[var(--accent-blue)] text-[var(--bg-secondary)] text-xs font-semibold hover:bg-[var(--accent-blue)]/90 transition-colors"
+                  className="rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-semibold text-[var(--bg-secondary)] text-xs transition-colors hover:bg-[var(--accent-blue)]/90"
                 >
                   Load Archive Range
                 </button>
@@ -1613,15 +1613,15 @@ export function ReportsDashboardClient({
           </GlassCard>
 
           {/* Monthly Archive Rollup Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {archivedData.monthlyRollups.map((m) => (
-              <GlassCard key={m.month} className="p-4 space-y-3">
+              <GlassCard key={m.month} className="space-y-3 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold font-mono text-[var(--text-heading)]">
+                  <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
                     Period: {m.month}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                    className={`rounded-full px-2 py-0.5 font-medium text-[11px] ${
                       m.month === currentMonthPrefix
                         ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
                         : 'bg-accent-green/10 text-accent-green'
@@ -1631,27 +1631,27 @@ export function ReportsDashboardClient({
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)]">
+                  <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                     <p className="text-[var(--text-muted)]">Total Volume</p>
-                    <p className="text-base font-bold font-mono text-accent-green mt-0.5">
+                    <p className="mt-0.5 font-bold font-mono text-accent-green text-base">
                       {Number(m.totalBcm.toFixed(1)).toLocaleString()} BCM
                     </p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)]">
+                  <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                     <p className="text-[var(--text-muted)]">Haul Loads</p>
-                    <p className="text-base font-bold font-mono text-[var(--accent-blue)] mt-0.5">
+                    <p className="mt-0.5 font-bold font-mono text-[var(--accent-blue)] text-base">
                       {m.loads.toLocaleString()}
                     </p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)]">
+                  <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                     <p className="text-[var(--text-muted)]">Dozer Roll-over</p>
-                    <p className="text-sm font-semibold font-mono text-[var(--text-heading)] mt-0.5">
+                    <p className="mt-0.5 font-mono font-semibold text-[var(--text-heading)] text-sm">
                       {Number(m.dozerRolloverBcm.toFixed(1)).toLocaleString()} BCM
                     </p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)]">
+                  <div className="rounded-lg bg-[var(--bg-secondary)] p-2.5">
                     <p className="text-[var(--text-muted)]">Operating Hours</p>
-                    <p className="text-sm font-semibold font-mono text-[var(--text-heading)] mt-0.5">
+                    <p className="mt-0.5 font-mono font-semibold text-[var(--text-heading)] text-sm">
                       {m.hours.toFixed(1)}h ({m.shiftCount} shifts)
                     </p>
                   </div>
@@ -1662,16 +1662,16 @@ export function ReportsDashboardClient({
 
           {/* Full Historical / Archived Shift Register */}
           <GlassCard className="overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-heading)]">
+                <h3 className="font-semibold text-[var(--text-heading)] text-base">
                   Archived Shift &amp; Production Register ({fromDateStr} — {toDateStr})
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[var(--text-muted)] text-xs">
                   Complete immutable historical log for executive auditing and compliance export
                 </p>
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)]">
+              <span className="font-mono text-[var(--text-muted)] text-xs">
                 {archivedData.historicalRows.length} archived record
                 {archivedData.historicalRows.length === 1 ? '' : 's'}
               </span>
@@ -1679,32 +1679,32 @@ export function ReportsDashboardClient({
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/60">
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                  <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Date
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Shift
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase">
+                    <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Site
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Hours
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Loads
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Haul BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Dozer Roll-over BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Total BCM
                     </th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[var(--text-muted)] uppercase text-right">
+                    <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
                       Delay (min)
                     </th>
                   </tr>
@@ -1713,35 +1713,35 @@ export function ReportsDashboardClient({
                   {archivedData.historicalRows.map((row) => (
                     <tr
                       key={`arch-${row.id}`}
-                      className="hover:bg-[var(--bg-tertiary)]/60 transition-colors"
+                      className="transition-colors hover:bg-[var(--bg-tertiary)]/60"
                     >
-                      <td className="px-5 py-3 text-sm font-mono text-[var(--text-heading)]">
+                      <td className="px-5 py-3 font-mono text-[var(--text-heading)] text-sm">
                         {row.date}
                       </td>
                       <td className="px-5 py-3">
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-secondary)] uppercase">
+                        <span className="inline-flex rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[var(--text-secondary)] text-xs uppercase">
                           {row.shift}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-[var(--text-secondary)] text-sm">
                         {row.site || 'All Sites'}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--text-heading)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--text-heading)] text-sm">
                         {row.hours.toFixed(1)}h
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--accent-blue)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {row.loads.toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {Number(row.haulBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--accent-blue)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--accent-blue)] text-sm">
                         {Number(row.dozerRolloverBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-accent-green font-semibold">
+                      <td className="px-5 py-3 text-right font-mono font-semibold text-accent-green text-sm">
                         {Number(row.totalBcm.toFixed(1)).toLocaleString()}
                       </td>
-                      <td className="px-5 py-3 text-sm font-mono text-right text-[var(--text-secondary)]">
+                      <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
                         {row.delayMin}
                       </td>
                     </tr>
@@ -1750,7 +1750,7 @@ export function ReportsDashboardClient({
                     <tr>
                       <td
                         colSpan={9}
-                        className="px-6 py-10 text-center text-sm text-[var(--text-muted)]"
+                        className="px-6 py-10 text-center text-[var(--text-muted)] text-sm"
                       >
                         No archived records found for this date range.
                       </td>
@@ -1780,7 +1780,7 @@ export function ReportsDashboardClient({
           pdfShiftReportData={pdfShiftReportData}
         />
       )}
-      <div className="flex items-center gap-2 flex-wrap justify-end no-print pt-4">
+      <div className="no-print flex flex-wrap items-center justify-end gap-2 pt-4">
         <CopyReportButton csvContent={csvContent} />
         <PDFDownloadButton reportData={pdfShiftReportData} departmentId={departmentId} />
         <ExportButton

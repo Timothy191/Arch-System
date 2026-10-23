@@ -380,7 +380,7 @@ export function MachineOperationsForm({
     <GlassCard>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Log Machine Operation</h3>
+          <h3 className="font-medium text-[var(--text-heading)] text-lg">Log Machine Operation</h3>
           {lastSaved && (
             <span className="text-[var(--text-muted)] text-xs">
               Draft saved {lastSaved.toLocaleTimeString()}
@@ -388,10 +388,10 @@ export function MachineOperationsForm({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Machine <span className="text-accent-red">*</span>
             </label>
             <select
@@ -407,7 +407,7 @@ export function MachineOperationsForm({
                     machineObj?.latest_smu != null ? String(machineObj.latest_smu) : prev.startSmu,
                 }));
               }}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select machine...</option>
               {machines.map((m) => (
@@ -422,13 +422,13 @@ export function MachineOperationsForm({
 
           {/* Operator Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Operator <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.operatorId}
               onChange={(e) => setFormData((prev) => ({ ...prev, operatorId: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select operator...</option>
               {operators.map((op) => (
@@ -442,13 +442,13 @@ export function MachineOperationsForm({
 
           {/* Site Dropdown */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Site/Location <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.siteId}
               onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select site...</option>
               {sites.map((s) => (
@@ -462,7 +462,7 @@ export function MachineOperationsForm({
 
           {/* Start SMR */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
+            <label className="block text-[var(--text-secondary)] text-sm">
               Start SMR <span className="text-accent-red">*</span>
             </label>
             <input
@@ -472,14 +472,14 @@ export function MachineOperationsForm({
               placeholder="e.g. 1420.5"
               value={formData.startSmu}
               onChange={(e) => setFormData((prev) => ({ ...prev, startSmu: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
             {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
           </div>
 
           {/* Stop SMR */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">Stop SMR</label>
+            <label className="block text-[var(--text-secondary)] text-sm">Stop SMR</label>
             <input
               type="number"
               step="0.1"
@@ -487,7 +487,7 @@ export function MachineOperationsForm({
               placeholder="e.g. 1431.0"
               value={formData.endSmu}
               onChange={(e) => setFormData((prev) => ({ ...prev, endSmu: e.target.value }))}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
             {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}
           </div>
@@ -497,21 +497,21 @@ export function MachineOperationsForm({
         {selectedMachine && engDelayHours > 0 && (
           <div
             data-testid="engineering-shift-budget-banner"
-            className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-300/70 space-y-2"
+            className="space-y-2 rounded-xl border border-amber-300/70 bg-amber-50/90 p-3.5"
           >
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-700" />
-                <span className="text-xs font-semibold text-amber-900">
+                <Clock className="h-4 w-4 text-amber-700" />
+                <span className="font-semibold text-amber-900 text-xs">
                   Cross-Department 12-Hour Shift Budget ({selectedMachine.name})
                 </span>
               </div>
-              <span className="text-xs font-mono font-semibold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
+              <span className="rounded-full border border-amber-300 bg-amber-100 px-2.5 py-0.5 font-mono font-semibold text-amber-900 text-xs">
                 Engineering Logged: {engDelayHours.toFixed(1)}h / Remaining Budget:{' '}
                 {maxAllowedShiftHours.toFixed(1)}h
               </span>
             </div>
-            <div className="w-full h-2 rounded-full bg-amber-200/70 overflow-hidden flex">
+            <div className="flex h-2 w-full overflow-hidden rounded-full bg-amber-200/70">
               <div
                 className="h-full bg-red-500 transition-all"
                 style={{ width: `${Math.min(100, (engDelayHours / 12) * 100)}%` }}
@@ -535,30 +535,30 @@ export function MachineOperationsForm({
 
         {/* Drill Rig Specific Fields: Meters, Site, Block, Holes */}
         {isDrillRig && (
-          <div className="p-4 rounded-xl bg-[var(--bg-secondary)]/80 border border-[var(--accent-blue)]/30 space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="space-y-4 rounded-xl border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)]/80 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-                  <Drill className="w-4 h-4" />
+                <span className="rounded-lg bg-[var(--accent-blue)]/10 p-1.5 text-[var(--accent-blue)]">
+                  <Drill className="h-4 w-4" />
                 </span>
                 <div>
-                  <h4 className="text-sm font-semibold text-[var(--text-heading)]">
+                  <h4 className="font-semibold text-[var(--text-heading)] text-sm">
                     Drilling Production Metrics
                   </h4>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-[var(--text-muted)] text-xs">
                     Automatically populates Drilling Department shift logs and production reports
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
+              <span className="rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-[11px] text-accent-green">
                 Auto-Syncs to Drilling Dept
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {/* Meters */}
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Meters <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -570,7 +570,7 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
                 {errors.metersDrilled && (
                   <p className="text-accent-red text-xs">{errors.metersDrilled}</p>
@@ -579,13 +579,13 @@ export function MachineOperationsForm({
 
               {/* Site */}
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Site <span className="text-accent-red">*</span>
                 </label>
                 <select
                   value={formData.siteId}
                   onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 >
                   <option value="">Select site...</option>
                   {sites.map((s) => (
@@ -599,7 +599,7 @@ export function MachineOperationsForm({
 
               {/* Block */}
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Block <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -610,7 +610,7 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, blockDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
                 {availableBlocks.length > 0 && (
                   <datalist id="drill-mine-blocks">
@@ -626,7 +626,7 @@ export function MachineOperationsForm({
 
               {/* Holes */}
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
+                <label className="block text-[var(--text-secondary)] text-sm">
                   Holes <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -638,7 +638,7 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, holesDrilled: e.target.value }))
                   }
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
                 />
                 {errors.holesDrilled && (
                   <p className="text-accent-red text-xs">{errors.holesDrilled}</p>
@@ -652,9 +652,9 @@ export function MachineOperationsForm({
         {(hoursWorked !== null || isDozer) && (
           <div className="space-y-3">
             {hoursWorked !== null && (
-              <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
+              <div className="flex items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
                 <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
-                <span className="text-2xl font-medium text-[var(--accent-blue)]">
+                <span className="font-medium text-2xl text-[var(--accent-blue)]">
                   {hoursWorked.toFixed(2)}h
                 </span>
                 <span className="text-[var(--text-muted)] text-xs">
@@ -666,20 +666,20 @@ export function MachineOperationsForm({
             {isDozer && (
               <div
                 data-testid="dozer-rollover-summary"
-                className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-blue)]/30"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)] p-3.5"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--text-heading)]">
+                  <span className="font-medium text-[var(--text-heading)] text-sm">
                     Roll-over Amount:
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                  <span className="font-mono text-[var(--text-muted)] text-xs">
                     ({(hoursWorked ?? 0).toFixed(2)}h &times; {DOZER_PUSH_FACTOR_BCM_PER_HOUR} =
                     Total Roll-over)
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3.5 py-1.5">
-                  <span className="text-xs text-[var(--text-muted)]">Total Roll-over:</span>
-                  <span className="text-xl font-semibold font-mono text-[var(--accent-blue)]">
+                <div className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3.5 py-1.5">
+                  <span className="text-[var(--text-muted)] text-xs">Total Roll-over:</span>
+                  <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
                     {Number(
                       ((hoursWorked ?? 0) * DOZER_PUSH_FACTOR_BCM_PER_HOUR).toFixed(1)
                     ).toLocaleString()}{' '}
@@ -696,7 +696,7 @@ export function MachineOperationsForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
+            className="min-w-[120px] rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
           >
             {isSubmitting ? 'Saving...' : 'Save Operation'}
           </button>
@@ -711,11 +711,11 @@ export function MachineOperationsForm({
 
       {/* Expandable Delay Entries Section */}
       {lastOperationId && (
-        <div className="border-t border-[var(--border-default)] pt-4">
+        <div className="border-[var(--border-default)] border-t pt-4">
           <button
             type="button"
             onClick={() => setShowDelaySection(!showDelaySection)}
-            className="flex items-center gap-2 text-[var(--text-secondary)] text-sm hover:text-[var(--text-heading)] transition-colors"
+            className="flex items-center gap-2 text-[var(--text-secondary)] text-sm transition-colors hover:text-[var(--text-heading)]"
           >
             {showDelaySection ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             <Clock size={18} />

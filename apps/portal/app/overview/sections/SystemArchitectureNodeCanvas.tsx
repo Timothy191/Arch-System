@@ -786,24 +786,24 @@ export function SystemArchitectureNodeCanvas() {
   return (
     <Card
       data-testid="n8n-architecture-canvas"
-      className="overflow-hidden border border-white/60 bg-white/85 backdrop-blur-2xl shadow-glass-depth"
+      className="overflow-hidden border border-white/60 bg-white/85 shadow-glass-depth backdrop-blur-2xl"
     >
       {/* Top n8n Workflow Toolbar */}
-      <div className="px-5 py-4 border-b border-border-subtle bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 border-border-subtle border-b bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 py-4 text-white xl:flex-row xl:items-center">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shadow-inner">
-            <Workflow className="w-5 h-5 text-emerald-400" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/40 bg-emerald-500/20 shadow-inner">
+            <Workflow className="h-5 w-5 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold tracking-tight text-white">
+              <h3 className="font-bold text-sm text-white tracking-tight">
                 n8n-Style System Architecture Node & Wire Canvas
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2 py-0.5 font-mono font-semibold text-[10px] text-emerald-300">
                 LIVE TOPOLOGY · 6 TIERS
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="mt-0.5 text-slate-300 text-xs">
               Interactive box-and-wire graph of all 16 architecture subsystems & 21 data pipelines —
               click any node to inspect inputs, outputs, and file boundaries
             </p>
@@ -812,8 +812,8 @@ export function SystemArchitectureNodeCanvas() {
 
         {/* Pipeline Scenario Filter Pills & Canvas Zoom Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-lg p-1">
-            <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-1" />
+          <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/90 p-1">
+            <Filter className="mr-1 ml-1.5 h-3.5 w-3.5 text-slate-400" />
             {PIPELINE_FILTERS.map((pf) => {
               const active = activePipeline === pf.id;
               return (
@@ -821,10 +821,10 @@ export function SystemArchitectureNodeCanvas() {
                   key={pf.id}
                   type="button"
                   onClick={() => setActivePipeline(pf.id)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all cursor-pointer ${
+                  className={`cursor-pointer rounded-md px-2.5 py-1 font-mono text-[11px] transition-all ${
                     active
-                      ? 'bg-accent-blue text-white font-semibold shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+                      ? 'bg-accent-blue font-semibold text-white shadow-sm'
+                      : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                   }`}
                 >
                   {pf.label}
@@ -833,47 +833,47 @@ export function SystemArchitectureNodeCanvas() {
             })}
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-lg p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/90 p-1">
             <button
               type="button"
               onClick={() => setAnimatePulses((prev) => !prev)}
-              className={`px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 cursor-pointer ${
+              className={`flex cursor-pointer items-center gap-1 rounded px-2 py-1 font-mono text-[11px] ${
                 animatePulses
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  ? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-300'
                   : 'text-slate-400 hover:text-white'
               }`}
               title="Toggle live packet flow animation"
             >
-              <Play className="w-3 h-3" />
+              <Play className="h-3 w-3" />
               <span>{animatePulses ? 'Flow Live' : 'Paused'}</span>
             </button>
             <button
               type="button"
               onClick={() => setZoom((z) => Math.max(0.75, Number((z - 0.1).toFixed(2))))}
               aria-label="Zoom out canvas"
-              className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer"
+              className="cursor-pointer rounded p-1 text-slate-300 hover:bg-slate-700 hover:text-white"
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <ZoomOut className="h-3.5 w-3.5" />
             </button>
-            <span className="text-[11px] font-mono text-slate-300 px-1.5">
+            <span className="px-1.5 font-mono text-[11px] text-slate-300">
               {Math.round(zoom * 100)}%
             </span>
             <button
               type="button"
               onClick={() => setZoom((z) => Math.min(1.15, Number((z + 0.1).toFixed(2))))}
               aria-label="Zoom in canvas"
-              className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer"
+              className="cursor-pointer rounded p-1 text-slate-300 hover:bg-slate-700 hover:text-white"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               onClick={() => setZoom(1)}
               aria-label="Reset canvas zoom"
-              className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer"
+              className="cursor-pointer rounded p-1 text-slate-300 hover:bg-slate-700 hover:text-white"
               title="Reset zoom (100%)"
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              <Maximize2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -889,7 +889,7 @@ export function SystemArchitectureNodeCanvas() {
         }}
       >
         <div
-          className="relative transition-transform origin-top-left"
+          className="relative origin-top-left transition-transform"
           style={{
             width: `${canvasWidth}px`,
             height: `${canvasHeight}px`,
@@ -903,13 +903,13 @@ export function SystemArchitectureNodeCanvas() {
             return (
               <div
                 key={colHeader.col}
-                className="absolute top-3 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200/90 px-3 py-1.5 shadow-xs"
+                className="absolute top-3 rounded-lg border border-slate-200/90 bg-white/90 px-3 py-1.5 shadow-xs backdrop-blur-sm"
                 style={{ left: `${left}px`, width: `${NODE_WIDTH}px` }}
               >
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-700">
+                <div className="font-bold font-mono text-[10px] text-slate-700 uppercase tracking-wider">
                   {colHeader.title}
                 </div>
-                <div className="text-[10px] text-slate-500 truncate">{colHeader.subtitle}</div>
+                <div className="truncate text-[10px] text-slate-500">{colHeader.subtitle}</div>
               </div>
             );
           })}
@@ -919,7 +919,7 @@ export function SystemArchitectureNodeCanvas() {
             width={canvasWidth}
             height={canvasHeight}
             viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-            className="absolute inset-0 pointer-events-none"
+            className="pointer-events-none absolute inset-0"
             aria-label="System Architecture Node Connections"
           >
             <defs>
@@ -1028,7 +1028,7 @@ export function SystemArchitectureNodeCanvas() {
                         x={0}
                         y={3}
                         textAnchor="middle"
-                        className="text-[9px] font-mono font-semibold fill-slate-700"
+                        className="fill-slate-700 font-mono font-semibold text-[9px]"
                       >
                         {edge.label}
                       </text>
@@ -1073,10 +1073,10 @@ export function SystemArchitectureNodeCanvas() {
                       : 'rgba(148, 163, 184, 0.45)',
                   opacity: isVisible ? 1 : 0.25,
                 }}
-                className={`absolute rounded-xl bg-white border-2 shadow-md transition-all duration-200 cursor-pointer select-none flex flex-col justify-between overflow-hidden group ${
+                className={`group absolute flex cursor-pointer select-none flex-col justify-between overflow-hidden rounded-xl border-2 bg-white shadow-md transition-all duration-200 ${
                   isSelected
-                    ? 'ring-4 ring-accent-blue/20 -translate-y-0.5 shadow-xl z-20'
-                    : 'hover:-translate-y-0.5 hover:shadow-lg z-10'
+                    ? 'z-20 -translate-y-0.5 shadow-xl ring-4 ring-accent-blue/20'
+                    : 'z-10 hover:-translate-y-0.5 hover:shadow-lg'
                 }`}
               >
                 {/* Top Colored Node Bar */}
@@ -1085,7 +1085,7 @@ export function SystemArchitectureNodeCanvas() {
                 {/* Input Connection Port (Left) */}
                 {node.col > 0 && (
                   <span
-                    className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs"
+                    className="absolute top-1/2 -left-2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-white shadow-xs"
                     style={{ backgroundColor: node.color }}
                     title="Input Port"
                   />
@@ -1094,18 +1094,18 @@ export function SystemArchitectureNodeCanvas() {
                 {/* Output Connection Port (Right) */}
                 {node.col < 5 && (
                   <span
-                    className="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs"
+                    className="absolute top-1/2 -right-2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-white shadow-xs"
                     style={{ backgroundColor: node.color }}
                     title="Output Port"
                   />
                 )}
 
                 {/* Node Body */}
-                <div className="p-3 flex-1 flex flex-col justify-between">
+                <div className="flex flex-1 flex-col justify-between p-3">
                   <div>
                     <div className="flex items-center justify-between gap-1.5">
                       <span
-                        className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        className="rounded px-1.5 py-0.5 font-bold font-mono text-[9px] uppercase tracking-wider"
                         style={{
                           backgroundColor: `${node.color}15`,
                           color: node.color,
@@ -1113,35 +1113,35 @@ export function SystemArchitectureNodeCanvas() {
                       >
                         {node.typeLabel}
                       </span>
-                      <span className="text-[9px] font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                      <span className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-slate-600">
                         {node.metricBadge}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <div
-                        className="p-1.5 rounded-lg shrink-0"
+                        className="shrink-0 rounded-lg p-1.5"
                         style={{
                           backgroundColor: `${node.color}15`,
                           color: node.color,
                         }}
                       >
-                        <NodeIcon name={node.iconName} className="w-4 h-4" />
+                        <NodeIcon name={node.iconName} className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-slate-900 truncate">
+                        <div className="truncate font-bold text-slate-900 text-xs">
                           {node.title}
                         </div>
-                        <div className="text-[10px] text-slate-500 truncate">{node.subtitle}</div>
+                        <div className="truncate text-[10px] text-slate-500">{node.subtitle}</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Node Footer Protocol Bar */}
-                  <div className="pt-1.5 mt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-slate-500 truncate">{node.protocol}</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <div className="mt-1.5 flex items-center justify-between border-slate-100 border-t pt-1.5 font-mono text-[10px]">
+                    <span className="truncate text-slate-500">{node.protocol}</span>
+                    <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-emerald-700">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       {node.status}
                     </span>
                   </div>
@@ -1155,12 +1155,12 @@ export function SystemArchitectureNodeCanvas() {
       {/* Bottom n8n Node Inspector Drawer (Shows Selected Node Details & Connected Wires) */}
       <div
         data-testid="n8n-node-inspector"
-        className="p-5 bg-white border-t border-border-subtle grid grid-cols-1 lg:grid-cols-12 gap-5 items-start"
+        className="grid grid-cols-1 items-start gap-5 border-border-subtle border-t bg-white p-5 lg:grid-cols-12"
       >
-        <div className="lg:col-span-5 space-y-2">
+        <div className="space-y-2 lg:col-span-5">
           <div className="flex items-center gap-2">
             <span
-              className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase"
+              className="rounded px-2 py-0.5 font-bold font-mono text-[10px] uppercase"
               style={{
                 backgroundColor: `${selectedNode.color}18`,
                 color: selectedNode.color,
@@ -1168,65 +1168,65 @@ export function SystemArchitectureNodeCanvas() {
             >
               {selectedNode.typeLabel}
             </span>
-            <Badge variant="outline" className="text-[10px] font-mono">
+            <Badge variant="outline" className="font-mono text-[10px]">
               {selectedNode.protocol}
             </Badge>
             <Badge
               variant="outline"
-              className="text-[10px] font-mono text-emerald-700 border-emerald-200 bg-emerald-50"
+              className="border-emerald-200 bg-emerald-50 font-mono text-[10px] text-emerald-700"
             >
-              <CheckCircle2 className="w-3 h-3 mr-1" />
+              <CheckCircle2 className="mr-1 h-3 w-3" />
               {selectedNode.metricBadge}
             </Badge>
           </div>
 
-          <h4 className="text-base font-bold text-text-heading flex items-center gap-2">
+          <h4 className="flex items-center gap-2 font-bold text-base text-text-heading">
             {selectedNode.title}
-            <span className="text-xs font-normal text-text-secondary">
+            <span className="font-normal text-text-secondary text-xs">
               — {selectedNode.subtitle}
             </span>
           </h4>
 
-          <p className="text-xs text-text-secondary leading-relaxed">{selectedNode.description}</p>
+          <p className="text-text-secondary text-xs leading-relaxed">{selectedNode.description}</p>
 
-          <div className="pt-1 flex items-center gap-2 text-[11px] font-mono text-accent-blue">
-            <GitCommit className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex items-center gap-2 pt-1 font-mono text-[11px] text-accent-blue">
+            <GitCommit className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Source SSoT: {selectedNode.filePath}</span>
           </div>
         </div>
 
         {/* Inputs & Outputs Ports */}
-        <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-bg-secondary/70 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold mb-1.5 flex items-center gap-1.5">
-              <Layers className="w-3 h-3 text-accent-blue" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-4">
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/70 p-3">
+            <div className="mb-1.5 flex items-center gap-1.5 font-mono font-semibold text-[10px] text-text-muted uppercase tracking-wider">
+              <Layers className="h-3 w-3 text-accent-blue" />
               Input Signals ({selectedNode.inputs.length})
             </div>
             <ul className="space-y-1">
               {selectedNode.inputs.map((inp) => (
                 <li
                   key={inp}
-                  className="text-[11px] font-mono text-text-heading flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 font-mono text-[11px] text-text-heading"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue shrink-0" />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-blue" />
                   <span>{inp}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="p-3 rounded-xl bg-bg-secondary/70 border border-border-subtle">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold mb-1.5 flex items-center gap-1.5">
-              <Network className="w-3 h-3 text-accent-green" />
+          <div className="rounded-xl border border-border-subtle bg-bg-secondary/70 p-3">
+            <div className="mb-1.5 flex items-center gap-1.5 font-mono font-semibold text-[10px] text-text-muted uppercase tracking-wider">
+              <Network className="h-3 w-3 text-accent-green" />
               Output Emissions ({selectedNode.outputs.length})
             </div>
             <ul className="space-y-1">
               {selectedNode.outputs.map((out) => (
                 <li
                   key={out}
-                  className="text-[11px] font-mono text-text-heading flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 font-mono text-[11px] text-text-heading"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-green shrink-0" />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
                   <span>{out}</span>
                 </li>
               ))}
@@ -1235,11 +1235,11 @@ export function SystemArchitectureNodeCanvas() {
         </div>
 
         {/* Connected Wires List */}
-        <div className="lg:col-span-3 p-3 rounded-xl bg-bg-secondary/70 border border-border-subtle">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold mb-1.5">
+        <div className="rounded-xl border border-border-subtle bg-bg-secondary/70 p-3 lg:col-span-3">
+          <div className="mb-1.5 font-mono font-semibold text-[10px] text-text-muted uppercase tracking-wider">
             Active Wire Connections ({connectedEdges.length})
           </div>
-          <div className="space-y-1.5 max-h-[115px] overflow-y-auto pr-1">
+          <div className="max-h-[115px] space-y-1.5 overflow-y-auto pr-1">
             {connectedEdges.map((edge) => {
               const otherId = edge.source === selectedNode.id ? edge.target : edge.source;
               const otherNode = CANVAS_NODES.find((n) => n.id === otherId);
@@ -1249,13 +1249,13 @@ export function SystemArchitectureNodeCanvas() {
                   key={edge.id}
                   type="button"
                   onClick={() => setSelectedNodeId(otherId)}
-                  className="w-full text-left px-2 py-1 rounded bg-white border border-border-subtle hover:border-accent-blue/50 flex items-center justify-between gap-2 text-[10px] font-mono transition-colors cursor-pointer"
+                  className="flex w-full cursor-pointer items-center justify-between gap-2 rounded border border-border-subtle bg-white px-2 py-1 text-left font-mono text-[10px] transition-colors hover:border-accent-blue/50"
                 >
-                  <span className="truncate text-text-heading font-medium">
+                  <span className="truncate font-medium text-text-heading">
                     {direction} {otherNode?.title ?? otherId}
                   </span>
                   <span
-                    className="px-1.5 py-0.5 rounded text-[9px] shrink-0"
+                    className="shrink-0 rounded px-1.5 py-0.5 text-[9px]"
                     style={{ backgroundColor: `${edge.color}18`, color: edge.color }}
                   >
                     {edge.label}

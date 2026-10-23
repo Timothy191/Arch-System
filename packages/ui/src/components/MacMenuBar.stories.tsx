@@ -19,10 +19,10 @@ export const Default: Story = {
     menuItems: ['Operations', 'Tools', 'View', 'Help'],
     rightSlot: (
       <div className="flex items-center gap-3 pr-2">
-        <Wifi className="w-3.5 h-3.5" />
-        <Battery className="w-3.5 h-3.5" />
-        <div className="flex items-center gap-1.5 ml-1">
-          <Bell className="w-3.5 h-3.5" />
+        <Wifi className="h-3.5 w-3.5" />
+        <Battery className="h-3.5 w-3.5" />
+        <div className="ml-1 flex items-center gap-1.5">
+          <Bell className="h-3.5 w-3.5" />
           <span className="font-medium">10:45 AM</span>
         </div>
       </div>

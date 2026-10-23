@@ -14,11 +14,11 @@ export default meta;
 type Story = StoryObj<typeof Marquee>;
 
 const Logo = () => (
-  <div className="flex items-center gap-2 px-8 py-4 bg-white/5 border border-black/10 rounded-xl backdrop-blur-sm">
-    <div className="w-8 h-8 rounded bg-accent-blue/20 flex items-center justify-center">
-      <div className="w-4 h-4 bg-accent-blue rounded-sm animate-pulse" />
+  <div className="flex items-center gap-2 rounded-xl border border-black/10 bg-white/5 px-8 py-4 backdrop-blur-sm">
+    <div className="flex h-8 w-8 items-center justify-center rounded bg-accent-blue/20">
+      <div className="h-4 w-4 animate-pulse rounded-sm bg-accent-blue" />
     </div>
-    <span className="font-mono text-sm font-bold tracking-tighter">ARCH_OS</span>
+    <span className="font-bold font-mono text-sm tracking-tighter">ARCH_OS</span>
   </div>
 );
 
@@ -39,7 +39,7 @@ export const Horizontal: Story = {
 
 export const Vertical: Story = {
   render: (args) => (
-    <div className="h-[400px] flex items-center justify-center bg-slate-50">
+    <div className="flex h-[400px] items-center justify-center bg-slate-50">
       <Marquee {...args} className="h-full" />
     </div>
   ),
@@ -62,7 +62,7 @@ export const FastReverse: Story = {
     children: (
       <div className="flex gap-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <span key={i} className="text-4xl font-black text-black/10 uppercase italic">
+          <span key={i} className="font-black text-4xl text-black/10 uppercase italic">
             Telemetry Processing —
           </span>
         ))}

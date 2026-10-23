@@ -83,9 +83,9 @@ const OVERVIEW_NAV_ITEMS = [
 
 function SectionLoader() {
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-200px)] min-h-[400px]">
+    <div className="flex h-[calc(100vh-200px)] min-h-[400px] items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent-blue)] border-t-transparent" />
         <span className="text-[var(--text-secondary)] text-sm">Loading visualizer...</span>
       </div>
     </div>
@@ -130,12 +130,12 @@ export default function OverviewPage() {
       value={activeTab}
       onValueChange={setActiveTab}
       orientation="vertical"
-      className="flex min-h-[calc(100vh-28px)] relative w-full"
+      className="relative flex min-h-[calc(100vh-28px)] w-full"
       onMouseMove={handleContainerMouseMove}
     >
       {/* Left Edge Hover Trigger Zone when Sidebar is Unpinned */}
       <div
-        className={`fixed left-0 top-7 bottom-0 w-6 z-30 ${
+        className={`fixed top-7 bottom-0 left-0 z-30 w-6 ${
           isPinned ? 'pointer-events-none' : 'cursor-pointer'
         }`}
         onMouseEnter={openSidebar}
@@ -149,9 +149,9 @@ export default function OverviewPage() {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Toggle overview navigation"
-        className="fixed bottom-4 left-4 z-50 md:hidden p-2.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border-default)] shadow-lg text-[var(--text-heading)] hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]"
+        className="fixed bottom-4 left-4 z-50 rounded-full border border-[var(--border-default)] bg-[var(--bg-primary)] p-2.5 text-[var(--text-heading)] shadow-lg hover:bg-[var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] md:hidden"
       >
-        <Menu className="w-5 h-5" />
+        <Menu className="h-5 w-5" />
       </button>
 
       {/* Department-Style Left Side Panel Navigation */}
@@ -163,7 +163,7 @@ export default function OverviewPage() {
         onMouseLeave={() => {
           if (!isPinned) setIsOpen(false);
         }}
-        className={`fixed md:sticky left-0 top-0 h-[calc(100vh-28px)] z-40 w-64 shrink-0 border-r border-black/[0.08] bg-white/85 backdrop-blur-xl flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xl gold-steel-border gold-steel-border-slim ${
+        className={`gold-steel-border gold-steel-border-slim fixed top-0 left-0 z-40 flex h-[calc(100vh-28px)] w-64 shrink-0 flex-col border-black/[0.08] border-r bg-white/85 shadow-xl backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:sticky ${
           isPinned || isOpen
             ? 'translate-x-0'
             : '-translate-x-[calc(100%-12px)] md:w-3 md:overflow-hidden'
@@ -171,23 +171,23 @@ export default function OverviewPage() {
       >
         {/* Collapsed Hint */}
         <div
-          className={`absolute top-1/2 right-0 -translate-y-1/2 translate-x-full w-4 h-12 flex items-center justify-center transition-opacity pointer-events-none ${
+          className={`pointer-events-none absolute top-1/2 right-0 flex h-12 w-4 translate-x-full -translate-y-1/2 items-center justify-center transition-opacity ${
             isPinned || isOpen ? 'opacity-0' : 'opacity-60'
           }`}
         >
-          <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+          <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
         </div>
 
         {/* macOS Title Bar matching DepartmentLayout */}
         <MacTitleBar title="System Overview" className="bg-white/40" />
 
         {/* Back to Hub & Pin Sidebar Controls */}
-        <div className="px-3 pt-3.5 pb-1.5 flex items-center justify-between">
+        <div className="flex items-center justify-between px-3 pt-3.5 pb-1.5">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
+            className="group flex items-center gap-1.5 rounded px-2 py-1 font-medium text-[12px] text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-blue)]"
           >
-            <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
+            <span className="text-sm transition-transform group-hover:-translate-x-0.5">‹</span>
             <span>Back to Hub</span>
           </Link>
           <div className="flex items-center gap-1">
@@ -196,41 +196,41 @@ export default function OverviewPage() {
               onClick={togglePin}
               aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
               title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
-              className="p-1.5 rounded hover:bg-black/5 text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
+              className="cursor-pointer rounded p-1.5 text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
             >
               <Pin
-                className={`w-3.5 h-3.5 transition-transform ${
+                className={`h-3.5 w-3.5 transition-transform ${
                   isPinned ? 'rotate-45 text-[var(--accent-blue)]' : ''
                 }`}
               />
             </button>
-            <Logo className="w-4 h-4 opacity-60 mr-1" />
+            <Logo className="mr-1 h-4 w-4 opacity-60" />
           </div>
         </div>
 
         {/* Department Header Badge */}
-        <div className="px-4 py-2 flex items-center gap-2.5 border-b border-black/[0.05]">
-          <div className="p-1.5 rounded-lg bg-accent-blue/10 text-[var(--accent-blue)]">
-            <Network className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2.5 border-black/[0.05] border-b px-4 py-2">
+          <div className="rounded-lg bg-accent-blue/10 p-1.5 text-[var(--accent-blue)]">
+            <Network className="h-3.5 w-3.5" />
           </div>
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold text-[var(--text-heading)] uppercase tracking-wider truncate">
+            <div className="truncate font-semibold text-[11px] text-[var(--text-heading)] uppercase tracking-wider">
               Architecture & Ops
             </div>
-            <div className="text-[10px] font-mono text-[var(--text-muted)] truncate">
+            <div className="truncate font-mono text-[10px] text-[var(--text-muted)]">
               8 Modules · 189 Migrations
             </div>
           </div>
         </div>
 
         {/* Vertical Side Panel Navigation TabsList */}
-        <div className="flex-1 px-2.5 py-3 overflow-y-auto">
-          <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+        <div className="flex-1 overflow-y-auto px-2.5 py-3">
+          <div className="px-2 pb-1.5 font-mono font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
             Topology & Audit Views
           </div>
           <TabsList
             aria-label="System Overview Sections"
-            className="flex flex-col items-stretch justify-start bg-transparent border-0 p-0 h-auto gap-1 w-full"
+            className="flex h-auto w-full flex-col items-stretch justify-start gap-1 border-0 bg-transparent p-0"
           >
             {OVERVIEW_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -239,21 +239,21 @@ export default function OverviewPage() {
                 <TabsTrigger
                   key={item.value}
                   value={item.value}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all relative group cursor-pointer data-[state=active]:bg-[var(--accent-blue)]/10 data-[state=active]:text-[var(--accent-blue)] data-[state=active]:font-semibold data-[state=active]:shadow-none ${
+                  className={`group relative flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all data-[state=active]:bg-[var(--accent-blue)]/10 data-[state=active]:font-semibold data-[state=active]:text-[var(--accent-blue)] data-[state=active]:shadow-none ${
                     isActive
-                      ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                      ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                      : 'text-[var(--text-secondary)] hover:bg-black/[0.04] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-[var(--accent-blue)]"
+                      className="absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
                     />
                   )}
-                  <span className="flex items-center gap-2.5 min-w-0">
+                  <span className="flex min-w-0 items-center gap-2.5">
                     <Icon
-                      className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                      className={`h-3.5 w-3.5 shrink-0 transition-colors ${
                         isActive
                           ? 'text-[var(--accent-blue)]'
                           : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
@@ -262,9 +262,9 @@ export default function OverviewPage() {
                     <span className="truncate">{item.label}</span>
                   </span>
                   <span
-                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
+                    className={`shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] ${
                       isActive
-                        ? 'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] font-semibold'
+                        ? 'bg-[var(--accent-blue)]/15 font-semibold text-[var(--accent-blue)]'
                         : 'bg-black/[0.04] text-[var(--text-muted)]'
                     }`}
                   >
@@ -277,37 +277,37 @@ export default function OverviewPage() {
         </div>
 
         {/* Bottom Status Strip matching DepartmentLayout */}
-        <div className="p-3 border-t border-black/[0.06] flex flex-col gap-1.5">
-          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20 gold-steel-border gold-steel-border-slim">
+        <div className="flex flex-col gap-1.5 border-black/[0.06] border-t p-3">
+          <div className="gold-steel-border gold-steel-border-slim flex items-center justify-between rounded-md border border-[var(--accent-green)]/20 bg-[var(--accent-green)]/10 px-2.5 py-1.5">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
-              <span className="text-[11px] text-[var(--text-heading)] font-medium tracking-wide">
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent-green)]" />
+              <span className="font-medium text-[11px] text-[var(--text-heading)] tracking-wide">
                 Connection Secure
               </span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-700 font-semibold">RLS 100%</span>
+            <span className="font-mono font-semibold text-[10px] text-emerald-700">RLS 100%</span>
           </div>
         </div>
       </aside>
 
       {/* Main Content Area beside Department Side Panel */}
-      <div className="flex-1 min-w-0 px-4 sm:px-6 py-5 space-y-6 animate-fade-up max-w-[1600px] mx-auto pb-12">
+      <div className="mx-auto min-w-0 max-w-[1600px] flex-1 animate-fade-up space-y-6 px-4 py-5 pb-12 sm:px-6">
         {/* Header with Official Arch Systems Branding, Full Stack SVG Icons & Visual Provenance Graphs */}
-        <header className="rounded-xl border border-[var(--border-subtle)] bg-white/80 backdrop-blur-xl p-5 shadow-card space-y-4 gold-steel-border gold-steel-border-slim">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <header className="gold-steel-border gold-steel-border-slim space-y-4 rounded-xl border border-[var(--border-subtle)] bg-white/80 p-5 shadow-card backdrop-blur-xl">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <Logo className="w-9 h-9 text-[var(--accent-blue)] shrink-0" />
+              <Logo className="h-9 w-9 shrink-0 text-[var(--accent-blue)]" />
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-[var(--text-heading)] flex flex-wrap items-center gap-2">
+                <h1 className="flex flex-wrap items-center gap-2 font-bold text-[var(--text-heading)] text-xl tracking-tight">
                   <span>Arch Systems</span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-accent-blue/10 text-[var(--accent-blue)] border border-accent-blue/20">
+                  <span className="rounded-full border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
                     System Architecture & Operations Topology
                   </span>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                  <span className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-secondary)]">
                     Active View: {activeNavMeta.label}
                   </span>
                 </h1>
-                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
                   Opencast Coal Mine Operations Portal — Interactive Block-and-Line Flow Diagrams,
                   n8n Node Canvas & Audit Intelligence
                 </p>

@@ -87,18 +87,18 @@ export function CoreOperationalModules({
 
   return (
     <section
-      className="space-y-5 animate-fade-up group/row relative rounded-card liquid-glass-light gold-steel-border border border-white/45 ring-1 ring-inset ring-white/75 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.28),0_16px_32px_-8px_rgba(15,23,42,0.16),0_4px_12px_-2px_rgba(15,23,42,0.08),inset_0_1.5px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(15,23,42,0.06)] -translate-y-1.5 hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.34),0_20px_40px_-8px_rgba(15,23,42,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.95)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] p-4 sm:p-6"
+      className="group/row liquid-glass-light gold-steel-border relative -translate-y-1.5 animate-fade-up space-y-5 rounded-card border border-white/45 p-4 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.28),0_16px_32px_-8px_rgba(15,23,42,0.16),0_4px_12px_-2px_rgba(15,23,42,0.08),inset_0_1.5px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(15,23,42,0.06)] ring-1 ring-white/75 ring-inset transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.34),0_20px_40px_-8px_rgba(15,23,42,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.95)] sm:p-6"
       style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering & Executive Quick-Access */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-black/[0.08]">
-        <div className="flex items-center justify-between sm:justify-start gap-3 flex-wrap">
-          <h2 className="inline-flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-full gold-steel-border gold-steel-border-slim bg-white/85 backdrop-blur-md border border-arch-border-subtle ring-1 ring-inset ring-white/80 shadow-xs text-sm sm:text-base font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue group-hover/row:border-arch-accent-blue/40 transition-all duration-300">
-            <span className="p-1.5 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue border border-arch-accent-blue/20 shadow-2xs flex items-center justify-center">
-              <Logo className="w-3.5 h-3.5 text-arch-accent-blue" />
+      <div className="flex flex-col justify-between gap-4 border-black/[0.08] border-b pb-4 lg:flex-row lg:items-center">
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
+          <h2 className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2.5 rounded-full border border-arch-border-subtle bg-white/85 py-1 pr-3 pl-2 font-semibold text-arch-text-primary text-sm tracking-tight shadow-xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-all duration-300 group-hover/row:border-arch-accent-blue/40 group-hover/row:text-arch-accent-blue sm:text-base">
+            <span className="flex items-center justify-center rounded-full border border-arch-accent-blue/20 bg-arch-accent-blue/10 p-1.5 text-arch-accent-blue shadow-2xs">
+              <Logo className="h-3.5 w-3.5 text-arch-accent-blue" />
             </span>
             <span
-              className="font-anurati uppercase tracking-[0.06em] font-bold"
+              className="font-anurati font-bold uppercase tracking-[0.06em]"
               style={{
                 fontFamily:
                   "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
@@ -106,7 +106,7 @@ export function CoreOperationalModules({
             >
               Core Operational Modules
             </span>
-            <span className="ml-0.5 px-2.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary text-[11px] font-mono tabular-nums">
+            <span className="ml-0.5 rounded-full border border-arch-border-subtle bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[11px] text-arch-text-secondary tabular-nums">
               {filteredDepartments.length} / {departments.length}
             </span>
           </h2>
@@ -114,22 +114,22 @@ export function CoreOperationalModules({
           {canSeeExecutive && (
             <Link
               href="/hub/executive"
-              className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full gold-steel-border gold-steel-border-slim bg-white/85 hover:bg-white text-arch-text-primary hover:text-arch-accent-blue text-xs font-semibold border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-xs hover:shadow-card transition-all group/exec"
+              className="gold-steel-border gold-steel-border-slim group/exec inline-flex items-center gap-1.5 rounded-full border border-arch-border-subtle bg-white/85 py-1 pr-3 pl-2 font-semibold text-arch-text-primary text-xs shadow-xs transition-all hover:border-arch-accent-blue/40 hover:bg-white hover:text-arch-accent-blue hover:shadow-card"
             >
-              <span className="p-1 rounded-full bg-arch-accent-blue/10 text-arch-accent-blue flex items-center justify-center">
-                <BarChart3 className="w-3 h-3" />
+              <span className="flex items-center justify-center rounded-full bg-arch-accent-blue/10 p-1 text-arch-accent-blue">
+                <BarChart3 className="h-3 w-3" />
               </span>
               <span>Executive Dashboard</span>
-              <ArrowUpRight className="w-3 h-3 text-arch-accent-blue transition-transform duration-200 group-hover/exec:translate-x-0.5 group-hover/exec:-translate-y-0.5" />
+              <ArrowUpRight className="h-3 w-3 text-arch-accent-blue transition-transform duration-200 group-hover/exec:translate-x-0.5 group-hover/exec:-translate-y-0.5" />
             </Link>
           )}
         </div>
 
         {/* Search & Category Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
           {/* Quick Search Input */}
-          <div className="relative flex-1 sm:w-64 sm:min-w-[240px] min-w-[200px] rounded-full gold-steel-border gold-steel-border-slim">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none z-10" />
+          <div className="gold-steel-border gold-steel-border-slim relative min-w-[200px] flex-1 rounded-full sm:w-64 sm:min-w-[240px]">
+            <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-3.5 w-3.5 -translate-y-1/2 text-arch-text-tertiary" />
             <input
               id="hub-module-search"
               type="text"
@@ -140,7 +140,7 @@ export function CoreOperationalModules({
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className="w-full h-8 pl-9 pr-9 text-xs rounded-full gold-steel-border gold-steel-border-slim bg-white/85 border border-arch-border-subtle focus:border-arch-accent-amber/50 focus:outline-none focus:border-accent-amber text-arch-text-primary placeholder:text-arch-text-tertiary shadow-xs transition-all"
+              className="gold-steel-border gold-steel-border-slim h-8 w-full rounded-full border border-arch-border-subtle bg-white/85 pr-9 pl-9 text-arch-text-primary text-xs shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-amber focus:border-arch-accent-amber/50 focus:outline-none"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search
@@ -150,12 +150,12 @@ export function CoreOperationalModules({
                 type="button"
                 aria-label="Clear search"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-arch-text-tertiary hover:text-arch-text-primary"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 text-arch-text-tertiary text-xs hover:text-arch-text-primary"
               >
                 ✕
               </button>
             ) : (
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-arch-text-tertiary font-mono bg-arch-surface-tertiary px-1.5 py-0.5 rounded-full border border-arch-border-subtle pointer-events-none">
+              <kbd className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full border border-arch-border-subtle bg-arch-surface-tertiary px-1.5 py-0.5 font-mono text-[10px] text-arch-text-tertiary">
                 /
               </kbd>
             )}
@@ -163,7 +163,7 @@ export function CoreOperationalModules({
 
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-1 bg-arch-surface-secondary/85 p-1 rounded-full gold-steel-border gold-steel-border-slim border border-arch-border-subtle text-xs font-medium shadow-xs"
+            className="gold-steel-border gold-steel-border-slim flex items-center gap-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/85 p-1 font-medium text-xs shadow-xs"
             role="group"
             aria-label="Filter modules by category"
           >
@@ -172,10 +172,10 @@ export function CoreOperationalModules({
               aria-pressed={activeFilter === 'all'}
               onClick={() => handleFilterSelect('all')}
               className={cn(
-                'px-2.5 py-1 rounded-full transition-all text-xs tabular-nums',
+                'rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'all'
-                  ? 'bg-white text-arch-text-primary shadow-card font-semibold'
-                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
+                  ? 'bg-white font-semibold text-arch-text-primary shadow-card'
+                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
               )}
             >
               All
@@ -186,13 +186,13 @@ export function CoreOperationalModules({
                 aria-pressed={activeFilter === 'pinned'}
                 onClick={() => handleFilterSelect('pinned')}
                 className={cn(
-                  'px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1 tabular-nums',
+                  'flex items-center gap-1 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                   activeFilter === 'pinned'
-                    ? 'bg-white text-arch-accent-blue shadow-card font-semibold'
-                    : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
+                    ? 'bg-white font-semibold text-arch-accent-blue shadow-card'
+                    : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
                 )}
               >
-                <Star className="w-3 h-3 fill-arch-accent-blue/20" />
+                <Star className="h-3 w-3 fill-arch-accent-blue/20" />
                 Pinned ({pinnedCount})
               </button>
             )}
@@ -201,35 +201,35 @@ export function CoreOperationalModules({
               aria-pressed={activeFilter === 'active'}
               onClick={() => handleFilterSelect('active')}
               className={cn(
-                'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
+                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'active'
-                  ? 'bg-white text-accent-green shadow-card font-semibold'
-                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
+                  ? 'bg-white font-semibold text-accent-green shadow-card'
+                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
               )}
             >
               <span>Active</span>
-              <span className="text-[10px] font-mono opacity-95">{activeCount}</span>
+              <span className="font-mono text-[10px] opacity-95">{activeCount}</span>
             </button>
             <button
               type="button"
               aria-pressed={activeFilter === 'critical'}
               onClick={() => handleFilterSelect('critical')}
               className={cn(
-                'px-2.5 py-1 rounded-full transition-all text-xs inline-flex items-center gap-1.5 tabular-nums',
+                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'critical'
-                  ? 'bg-white text-accent-amber shadow-card font-semibold'
-                  : 'text-arch-text-secondary hover:text-arch-text-primary font-medium'
+                  ? 'bg-white font-semibold text-accent-amber shadow-card'
+                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
               )}
             >
               {criticalCount > 0 && (
                 <span
-                  className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse"
+                  className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-amber"
                   aria-hidden="true"
                 />
               )}
               <span>Alerts</span>
               {criticalCount > 0 && (
-                <span className="text-[10px] font-mono text-accent-amber font-semibold">
+                <span className="font-mono font-semibold text-[10px] text-accent-amber">
                   {criticalCount}
                 </span>
               )}
@@ -240,8 +240,8 @@ export function CoreOperationalModules({
 
       {/* Grid Display */}
       {filteredDepartments.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center rounded-card bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
-          <p className="text-sm font-medium text-arch-text-secondary">
+        <div className="space-y-3 rounded-card border border-arch-border-subtle bg-arch-surface-secondary/40 p-8 text-center sm:p-12">
+          <p className="font-medium text-arch-text-secondary text-sm">
             No operational modules matched your search filter.
           </p>
           <button
@@ -249,14 +249,14 @@ export function CoreOperationalModules({
               setSearchQuery('');
               setActiveFilter('all');
             }}
-            className="text-xs text-arch-accent-blue hover:underline font-medium"
+            className="font-medium text-arch-accent-blue text-xs hover:underline"
           >
             Clear search and category filters
           </button>
         </div>
       ) : (
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 auto-rows-fr"
+          className="grid auto-rows-fr grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
           aria-label="Department modules"
           role="list"
         >

@@ -25,17 +25,17 @@ export function MachineControl() {
 
   return (
     <GlassCard className="mt-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-arch-accent-green" />
-          <h3 className="text-[var(--text-heading)] font-medium">Operational Parameters</h3>
+          <Activity className="h-5 w-5 text-arch-accent-green" />
+          <h3 className="font-medium text-[var(--text-heading)]">Operational Parameters</h3>
         </div>
         {lastApplied && (
           <span className="text-[10px] text-[var(--text-muted)]">Applied at {lastApplied}</span>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="space-y-4">
           <PrecisionInput
             label="Target Rotation Speed"
@@ -73,18 +73,18 @@ export function MachineControl() {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-[var(--border-emphasis)]">
+      <div className="mt-8 flex items-center justify-end gap-3 border-[var(--border-emphasis)] border-t pt-6">
         <Button
           variant="outline"
           onClick={handleReset}
           className="border-[var(--border-emphasis)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
         >
-          <RotateCcw className="w-4 h-4 mr-2" />
+          <RotateCcw className="mr-2 h-4 w-4" />
           Reset Defaults
         </Button>
         <Button
           onClick={handleApply}
-          className="bg-arch-accent-green text-white hover:bg-arch-accent-green/90 font-medium"
+          className="bg-arch-accent-green font-medium text-white hover:bg-arch-accent-green/90"
         >
           Apply Configuration
         </Button>

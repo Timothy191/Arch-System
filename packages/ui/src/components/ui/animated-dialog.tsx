@@ -147,7 +147,7 @@ export function AnimatedDialog({
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             className={cn(
-              'relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 backdrop-blur-xl p-6 outline-none',
+              'relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 p-6 outline-none backdrop-blur-xl',
               className
             )}
           >
@@ -156,7 +156,7 @@ export function AnimatedDialog({
               type="button"
               onClick={onClose}
               aria-label="Close dialog"
-              className="absolute right-4 top-4 rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              className="absolute top-4 right-4 rounded-md p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]"
             >
               <X className="h-4 w-4" />
             </button>
@@ -165,12 +165,12 @@ export function AnimatedDialog({
             {(title || description) && (
               <div className="mb-4 pr-8">
                 {title && (
-                  <h2 id={titleId} className="text-lg font-medium text-[var(--text-heading)]">
+                  <h2 id={titleId} className="font-medium text-[var(--text-heading)] text-lg">
                     {title}
                   </h2>
                 )}
                 {description && (
-                  <p id={descriptionId} className="text-sm text-[var(--text-muted)] mt-1">
+                  <p id={descriptionId} className="mt-1 text-[var(--text-muted)] text-sm">
                     {description}
                   </p>
                 )}

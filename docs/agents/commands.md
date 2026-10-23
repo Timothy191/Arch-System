@@ -131,6 +131,9 @@ pnpm audit:rls-matrix
 # Audit design token compliance (detects raw colors and forbidden dark: classes)
 pnpm audit:tokens
 
+# Audit Tailwind utility composition (class chain budget + repeated chain extraction)
+pnpm audit:tailwind
+
 # Audit & synchronize MCP server registrations across all 7 agent runtimes
 pnpm mcp:verify
 pnpm mcp:onboard

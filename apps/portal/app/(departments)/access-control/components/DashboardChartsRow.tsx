@@ -23,25 +23,25 @@ export default function DashboardChartsRow({ hourlyStats, distribution }: Dashbo
   const total = distribution.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-card p-5">
-        <div className="flex items-center justify-between mb-4">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div className="rounded-xl border border-border bg-card p-5 shadow-card lg:col-span-2">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-foreground">Access Events — Today</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <h2 className="font-bold text-foreground text-sm">Access Events — Today</h2>
+            <p className="mt-0.5 text-muted-foreground text-xs">
               Hourly scan volume across all entry points
             </p>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground bg-secondary px-2 py-1 rounded-md">
+          <span className="rounded-md bg-secondary px-2 py-1 font-semibold text-[10px] text-muted-foreground uppercase tracking-widest">
             Live
           </span>
         </div>
         <HourlyAccessChart data={hourlyStats} />
       </div>
-      <div className="lg:col-span-1 bg-card rounded-xl border border-border shadow-card p-5">
+      <div className="rounded-xl border border-border bg-card p-5 shadow-card lg:col-span-1">
         <div className="mb-4">
-          <h2 className="text-sm font-bold text-foreground">QR Code Status Distribution</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h2 className="font-bold text-foreground text-sm">QR Code Status Distribution</h2>
+          <p className="mt-0.5 text-muted-foreground text-xs">
             {total.toLocaleString()} registered QR codes
           </p>
         </div>

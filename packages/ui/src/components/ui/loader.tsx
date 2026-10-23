@@ -23,7 +23,7 @@ export function Loader({ className, size = 'md', ...props }: LoaderProps) {
       aria-label="Loading..."
       viewBox="0 0 240 240"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('loader-pl select-none pointer-events-none', sizeClasses[size], className)}
+      className={cn('loader-pl pointer-events-none select-none', sizeClasses[size], className)}
       {...props}
     >
       <circle

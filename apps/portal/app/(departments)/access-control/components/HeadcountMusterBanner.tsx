@@ -37,28 +37,28 @@ export function HeadcountMusterBanner({
   return (
     <GlassCard
       variant="window"
-      className="p-4 sm:p-5 border-l-4 border-l-[var(--accent-blue)] relative overflow-hidden"
+      className="relative overflow-hidden border-l-4 border-l-[var(--accent-blue)] p-4 sm:p-5"
     >
-      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 xl:flex-row xl:items-center">
         {/* Left: Real-Time Headcount & Status */}
-        <div className="flex items-start sm:items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] flex items-center justify-center shrink-0 border border-[var(--accent-blue)]/20">
-            <Radio className="w-6 h-6 animate-pulse" />
+        <div className="flex items-start gap-4 sm:items-center">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+            <Radio className="h-6 w-6 animate-pulse" />
           </div>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xs font-mono uppercase tracking-wider font-semibold text-[var(--accent-blue)] bg-[var(--accent-blue)]/10 px-2 py-0.5 rounded">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="rounded bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono font-semibold text-[var(--accent-blue)] text-xs uppercase tracking-wider">
                 LIVE SOC TELEMETRY
               </span>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <div className="flex items-center gap-1.5 font-medium text-[var(--text-secondary)] text-xs">
+                <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
                 <span>Brakfontein Pit & Surface Facilities</span>
               </div>
             </div>
-            <div className="flex items-baseline gap-3 mt-1">
-              <h2 className="text-3xl font-extrabold text-[var(--text-heading)] font-mono tracking-tight">
+            <div className="mt-1 flex items-baseline gap-3">
+              <h2 className="font-extrabold font-mono text-3xl text-[var(--text-heading)] tracking-tight">
                 {totalSouls}{' '}
-                <span className="text-sm font-sans font-medium text-[var(--text-muted)]">
+                <span className="font-medium font-sans text-[var(--text-muted)] text-sm">
                   Souls On-Site
                 </span>
               </h2>
@@ -67,42 +67,42 @@ export function HeadcountMusterBanner({
         </div>
 
         {/* Center: Breakdown Pills */}
-        <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
-            <HardHat className="w-3.5 h-3.5 text-blue-600" />
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+            <HardHat className="h-3.5 w-3.5 text-blue-600" />
             <span>Personnel:</span>
             <strong className="font-mono text-[var(--text-heading)]">{employeesCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
-            <Shield className="w-3.5 h-3.5 text-amber-600" />
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+            <Shield className="h-3.5 w-3.5 text-amber-600" />
             <span>Contractors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{contractorsCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
-            <Users className="w-3.5 h-3.5 text-teal-600" />
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+            <Users className="h-3.5 w-3.5 text-teal-600" />
             <span>Visitors:</span>
             <strong className="font-mono text-[var(--text-heading)]">{visitorsCount}</strong>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/[0.03] border border-black/[0.08] px-3 py-1.5 rounded-lg font-medium text-[var(--text-secondary)] gold-steel-border gold-steel-border-slim">
-            <Truck className="w-3.5 h-3.5 text-indigo-600" />
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 font-medium text-[var(--text-secondary)]">
+            <Truck className="h-3.5 w-3.5 text-indigo-600" />
             <span>Fleet / Trucks:</span>
             <strong className="font-mono text-[var(--text-heading)]">{vehiclesCount}</strong>
           </div>
         </div>
 
         {/* Right: Blast Status & Muster Action */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-          <div className="text-right hidden sm:block">
-            <div className="flex items-center gap-1.5 justify-end">
+        <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+          <div className="hidden text-right sm:block">
+            <div className="flex items-center justify-end gap-1.5">
               {isEmergency ? (
-                <AlertTriangle className="w-4 h-4 text-red-600 animate-bounce" />
+                <AlertTriangle className="h-4 w-4 animate-bounce text-red-600" />
               ) : isStandby ? (
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
               ) : (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               )}
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
+                className={`font-bold text-xs uppercase tracking-wider ${
                   isEmergency ? 'text-red-600' : isStandby ? 'text-amber-600' : 'text-emerald-700'
                 }`}
               >
@@ -113,18 +113,18 @@ export function HeadcountMusterBanner({
                     : 'Clearance: All Clear'}
               </span>
             </div>
-            <p className="text-[11px] text-[var(--text-muted)] font-mono">
+            <p className="font-mono text-[11px] text-[var(--text-muted)]">
               Pit Bench 04 • Next Roll: 14:00
             </p>
           </div>
 
           <Link
             href="/access-control/muster"
-            className="flex items-center gap-2 bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-bold text-white text-xs shadow-sm transition-all hover:bg-[var(--accent-blue)]/90 active:scale-95"
           >
-            <LifeBuoy className="w-4 h-4" />
+            <LifeBuoy className="h-4 w-4" />
             <span>Muster Roll Call</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>

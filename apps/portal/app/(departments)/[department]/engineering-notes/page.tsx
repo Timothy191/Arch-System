@@ -339,7 +339,7 @@ export default async function EngineeringNotesPage({
       />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-[var(--text-heading)]">
+        <h3 className="font-medium text-[var(--text-heading)] text-lg">
           Today&apos;s Engineering Issues &amp; Activity
         </h3>
         <EngineeringNotesList notes={combinedFeed} />

@@ -71,15 +71,15 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-lg overflow-hidden border border-neutral-200',
-          'bg-neutral-950 text-neutral-100 font-mono text-xs shadow-sm',
+          'overflow-hidden rounded-lg border border-neutral-200',
+          'bg-neutral-950 font-mono text-neutral-100 text-xs shadow-sm',
           className
         )}
         {...props}
       >
         {/* Header Bar */}
         {(filename || tabs || switcher || v0) && (
-          <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800 bg-neutral-900/90 select-none">
+          <div className="flex select-none items-center justify-between border-neutral-800 border-b bg-neutral-900/90 px-4 py-2">
             {/* Left: Filename or Tabs */}
             <div className="flex items-center gap-3">
               {tabs ? (
@@ -90,10 +90,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                       type="button"
                       onClick={() => tabs.onChange(opt.value)}
                       className={cn(
-                        'px-2.5 py-1 rounded text-xs font-medium transition-colors',
+                        'rounded px-2.5 py-1 font-medium text-xs transition-colors',
                         tabs.value === opt.value
                           ? 'bg-neutral-800 text-white shadow-2xs'
-                          : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50'
+                          : 'text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200'
                       )}
                     >
                       {opt.label}
@@ -101,8 +101,8 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                   ))}
                 </div>
               ) : filename ? (
-                <div className="flex items-center gap-2 text-neutral-300 font-medium">
-                  <Terminal className="w-3.5 h-3.5 text-neutral-500" />
+                <div className="flex items-center gap-2 font-medium text-neutral-300">
+                  <Terminal className="h-3.5 w-3.5 text-neutral-500" />
                   <span>{filename}</span>
                 </div>
               ) : null}
@@ -114,7 +114,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <select
                   value={switcher.value}
                   onChange={(e) => switcher.onChange(e.target.value)}
-                  className="bg-neutral-800 text-neutral-300 text-xs px-2 py-0.5 rounded border border-neutral-700 focus:outline-none cursor-pointer"
+                  className="cursor-pointer rounded border border-neutral-700 bg-neutral-800 px-2 py-0.5 text-neutral-300 text-xs focus:outline-none"
                 >
                   {switcher.options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -128,10 +128,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <button
                   type="button"
                   onClick={() => window.open(`https://v0.dev/${v0}`, '_blank')}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors border border-neutral-700"
+                  className="inline-flex items-center gap-1 rounded border border-neutral-700 bg-neutral-800 px-2 py-0.5 font-medium text-[11px] text-neutral-300 transition-colors hover:bg-neutral-700"
                 >
                   <span>Open in v0</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="h-3 w-3" />
                 </button>
               )}
 
@@ -139,12 +139,12 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 type="button"
                 onClick={handleCopy}
                 aria-label={copied ? 'Copied' : 'Copy code'}
-                className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
               >
                 {copied ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <Check className="h-3.5 w-3.5 text-emerald-400" />
                 ) : (
-                  <Copy className="w-3.5 h-3.5" />
+                  <Copy className="h-3.5 w-3.5" />
                 )}
               </button>
             </div>
@@ -159,12 +159,12 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
               type="button"
               onClick={handleCopy}
               aria-label={copied ? 'Copied' : 'Copy code'}
-              className="absolute right-3 top-3 p-1.5 rounded bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+              className="absolute top-3 right-3 rounded border border-neutral-800 bg-neutral-900/80 p-1.5 text-neutral-400 transition-colors hover:text-white"
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
               ) : (
-                <Copy className="w-3.5 h-3.5" />
+                <Copy className="h-3.5 w-3.5" />
               )}
             </button>
           )}
@@ -180,16 +180,16 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <div
                   key={lineNum}
                   className={cn(
-                    'flex items-center -mx-4 px-4 py-0.5 transition-colors',
-                    isHighlighted && 'bg-blue-500/15 border-l-2 border-l-blue-400',
-                    isAdded && 'bg-emerald-500/15 border-l-2 border-l-emerald-400 text-emerald-200',
-                    isRemoved && 'bg-red-500/15 border-l-2 border-l-red-400 text-red-200 opacity-75'
+                    '-mx-4 flex items-center px-4 py-0.5 transition-colors',
+                    isHighlighted && 'border-l-2 border-l-blue-400 bg-blue-500/15',
+                    isAdded && 'border-l-2 border-l-emerald-400 bg-emerald-500/15 text-emerald-200',
+                    isRemoved && 'border-l-2 border-l-red-400 bg-red-500/15 text-red-200 opacity-75'
                   )}
                 >
                   {!hideLineNumbers && (
                     <span
                       aria-hidden="true"
-                      className="w-8 shrink-0 text-right pr-4 text-neutral-500 select-none text-[11px]"
+                      className="w-8 shrink-0 select-none pr-4 text-right text-[11px] text-neutral-500"
                     >
                       {lineNum}
                     </span>
@@ -197,12 +197,12 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                   {isAdded ? (
                     <span
                       aria-hidden="true"
-                      className="select-none text-emerald-400 font-bold mr-2"
+                      className="mr-2 select-none font-bold text-emerald-400"
                     >
                       +
                     </span>
                   ) : isRemoved ? (
-                    <span aria-hidden="true" className="select-none text-red-400 font-bold mr-2">
+                    <span aria-hidden="true" className="mr-2 select-none font-bold text-red-400">
                       -
                     </span>
                   ) : null}

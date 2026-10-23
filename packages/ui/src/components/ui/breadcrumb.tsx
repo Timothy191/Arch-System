@@ -33,7 +33,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
         >
           <ol
             className={cn(
-              'flex items-center flex-wrap list-none p-0 m-0',
+              'm-0 flex list-none flex-wrap items-center p-0',
               type === 'menu' ? 'gap-1.5' : 'gap-2 text-sm'
             )}
           >
@@ -47,10 +47,10 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
                     <span
                       aria-hidden="true"
                       className={cn(
-                        'select-none shrink-0',
+                        'shrink-0 select-none',
                         type === 'menu'
-                          ? 'text-neutral-400 text-xs mx-0.5'
-                          : 'text-neutral-400 font-mono text-xs'
+                          ? 'mx-0.5 text-neutral-400 text-xs'
+                          : 'font-mono text-neutral-400 text-xs'
                       )}
                     >
                       {separator}
@@ -82,19 +82,19 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
     let contentClasses = '';
     if (type === 'menu') {
       contentClasses = cn(
-        'inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors border select-none',
+        'inline-flex select-none items-center justify-center rounded-md border px-2.5 py-1 font-medium text-xs transition-colors',
         active
-          ? 'bg-neutral-900 text-white border-transparent shadow-xs font-semibold'
-          : 'bg-neutral-100 text-neutral-600 border-neutral-200/80 hover:bg-neutral-200/70 hover:text-neutral-900',
-        disabled && 'opacity-40 pointer-events-none cursor-not-allowed border-transparent'
+          ? 'border-transparent bg-neutral-900 font-semibold text-white shadow-xs'
+          : 'border-neutral-200/80 bg-neutral-100 text-neutral-600 hover:bg-neutral-200/70 hover:text-neutral-900',
+        disabled && 'pointer-events-none cursor-not-allowed border-transparent opacity-40'
       );
     } else {
       contentClasses = cn(
         'inline-flex items-center text-sm transition-colors',
         active
-          ? 'text-neutral-900 font-semibold cursor-default'
+          ? 'cursor-default font-semibold text-neutral-900'
           : 'text-neutral-500 hover:text-neutral-900',
-        disabled && 'opacity-40 pointer-events-none cursor-not-allowed'
+        disabled && 'pointer-events-none cursor-not-allowed opacity-40'
       );
     }
 

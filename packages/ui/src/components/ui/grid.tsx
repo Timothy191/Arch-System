@@ -74,7 +74,7 @@ export interface GridPageProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function GridPage({ className, children, ...props }: GridPageProps) {
   return (
-    <div className={cn('max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8', className)} {...props}>
+    <div className={cn('mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8', className)} {...props}>
       {children}
     </div>
   );
@@ -82,9 +82,9 @@ export function GridPage({ className, children, ...props }: GridPageProps) {
 
 export function GridCross({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('relative w-4 h-4 text-muted', className)} {...props}>
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-currentColor -translate-x-1/2" />
-      <div className="absolute top-1/2 left-0 right-0 h-px bg-currentColor -translate-y-1/2" />
+    <div className={cn('relative h-4 w-4 text-muted', className)} {...props}>
+      <div className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-currentColor" />
+      <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-currentColor" />
     </div>
   );
 }

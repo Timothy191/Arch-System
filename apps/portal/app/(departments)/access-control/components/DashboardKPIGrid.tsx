@@ -69,28 +69,27 @@ function KPICard({
   return (
     <div
       key={id}
-      className={`rounded-xl border shadow-card hover:shadow-card-hover transition-all duration-200 p-5 flex flex-col justify-between
-        ${styles.card} ${hero ? 'min-h-[140px]' : 'min-h-[120px]'}`}
+      className={`flex flex-col justify-between rounded-xl border p-5 shadow-card transition-all duration-200 hover:shadow-card-hover ${styles.card} ${hero ? 'min-h-[140px]' : 'min-h-[120px]'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+          <p className="mb-1 font-semibold text-[11px] text-muted-foreground uppercase tracking-widest">
             {title}
           </p>
-          <p className={`tabular-nums font-bold ${hero ? 'text-4xl' : 'text-3xl'} ${styles.value}`}>
+          <p className={`font-bold tabular-nums ${hero ? 'text-4xl' : 'text-3xl'} ${styles.value}`}>
             {value}
           </p>
         </div>
         <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${styles.icon}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${styles.icon}`}
         >
           <IconComp size={20} />
         </div>
       </div>
-      <div className="flex items-center justify-between mt-3">
-        <p className="text-xs text-muted-foreground">{subtext}</p>
+      <div className="mt-3 flex items-center justify-between">
+        <p className="text-muted-foreground text-xs">{subtext}</p>
         {trend && (
-          <span className={`flex items-center gap-1 text-xs font-medium ${trendColor}`}>
+          <span className={`flex items-center gap-1 font-medium text-xs ${trendColor}`}>
             <TrendIcon size={12} />
             {trend.label}
           </span>
@@ -164,7 +163,7 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div className="sm:col-span-2 lg:col-span-2">
         <KPICard {...kpiData[0]!} />
       </div>
