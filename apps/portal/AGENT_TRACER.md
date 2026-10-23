@@ -1,3 +1,14 @@
+## 2026-10-23T07:53:00+02:00: Control Room SCADA Dashboard Sub-tab, Summary Golden Graphs, Excavator/Loaded Machines Panel & Admin Operational Targets
+
+- **Purpose**: Implement 5 `/control-room` design feedback items: expose `SCADA Dashboard` sub-tab, add HeroCard-style Golden Graphs to the 5 summary KPI cards, redesign `ScadaPanel` for Excavator Activity & Registered Machines with Loaded Loads, and add Shift/Daily/Monthly Operational Targets in Administration (`/admin?tab=targets`) with visual target trajectory graphs in `AlertPanel`.
+- **Changes**:
+  - `apps/portal/app/(departments)/{control-room/page.tsx,[department]/page.tsx,[department]/shift-compilation/ShiftCompilationClient.tsx}`: Updated Control Room Dashboard sub-tab label to `SCADA Dashboard`.
+  - `apps/portal/app/(departments)/[department]/ControlRoomSummaryGridClient.tsx`: Added `HeroSummaryGoldenGraph` (metallic gold `#d4af37` area/bar/polyline telemetry graph with Arch emblem nodes) to all 5 summary cards.
+  - `apps/portal/features/departments/components/control-room/ScadaPanel.tsx`: Redesigned to show live/fallback **Excavator Activity** and **Registered Machines with Loaded Loads**.
+  - `apps/portal/features/admin/{actions/targets.ts,tabs/TargetsTab.tsx,components/AdminTabs.tsx}` & `apps/portal/app/admin/page.tsx`: Added Shift, Daily, and Monthly Operational Targets configuration tab to Administration.
+  - `apps/portal/features/departments/components/control-room/AlertPanel.tsx`: Redesigned to render Shift, Daily, and Monthly target graphs, radial attainment gauge, and multi-metric progress bars pulled from Administration targets.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="ControlRoomPanels|DepartmentLayout"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T06:05:00+02:00: Site Footer Gold Borders & System Tray Popover Gold `|` Separators
 
 - **Purpose**: Implement `/hub` design feedback on the global Site Footer (`apps/portal/app/layout.tsx`) and `SystemTrayPill` (`apps/portal/components/system/SystemTray.tsx`).

@@ -1,5 +1,12 @@
 # Contract Package Agent Tracer
 
+## 2026-10-23T07:53:00+02:00: Operational Targets (Shift, Daily, Monthly) Admin Schema
+
+- **Purpose**: Define canonical Zod schemas (`operationalTargetWindowSchema`, `adminOperationalTargetsSchema`) and types (`OperationalTargetWindow`, `AdminOperationalTargets`) for Administration Shift, Daily, and Monthly operational targets.
+- **Changes**:
+  - `packages/contract/src/schemas/admin.schema.ts` & `packages/contract/src/index.ts`: Added and exported `operationalTargetWindowSchema` and `adminOperationalTargetsSchema`.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## 2026-10-06: C66 Camera/Dropdown Machine and Operator Contract
 
 - Request schema supports machine/operator IDs from dropdowns or scanned machine/badge codes, and rejects conflicting selection methods.

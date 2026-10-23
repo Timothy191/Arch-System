@@ -241,7 +241,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         >
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text-heading)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
           >
             <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
             <span>Back to Hub</span>
@@ -251,7 +251,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               type="button"
               onClick={togglePin}
               aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-              className="p-1.5 rounded hover:bg-black/5 text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
+              className="p-1.5 rounded hover:bg-black/5 text-[var(--text-heading)] hover:text-[var(--accent-blue)] transition-colors cursor-pointer"
               title={isPinned ? 'Unpin sidebar (auto-collapse)' : 'Pin sidebar (always open)'}
             >
               <Pin
@@ -288,7 +288,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               return <DeptIcon className="w-3.5 h-3.5" />;
             })()}
           </div>
-          <span className="text-[12px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+          <span className="text-[12px] font-semibold text-[var(--text-heading)] uppercase tracking-wider">
             {department.displayName}
           </span>
         </div>
@@ -309,6 +309,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               (pathname === `${basePath}/shift-compilation` ||
                 pathname === `${basePath}/shift-coverage` ||
                 pathname === `${basePath}/shift-closeout`);
+            const isScadaDashboardSubtabActive =
+              hasDashboardSubtabs && pathname === basePath && !isShiftOperationsSubtabActive;
             const isShiftOperationsActive =
               tab.name === 'shift-compilation' &&
               (pathname === `${basePath}/shift-compilation` ||
@@ -341,8 +343,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     className={cn(
                       'flex-1 flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
                       isActive
-                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium gold-steel-border gold-steel-border-slim'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                        ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
+                        : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                     )}
                   >
                     {isActive && (
@@ -357,7 +359,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           'w-3.5 h-3.5 shrink-0 transition-colors',
                           isActive
                             ? 'text-[var(--accent-blue)]'
-                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
                         )}
                       />
                     )}
@@ -378,7 +380,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
                         isRouteMatch
                           ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                          : 'text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                       )}
                     >
                       <ChevronRight
@@ -402,7 +404,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         'p-1.5 rounded-md transition-colors cursor-pointer shrink-0',
                         isRouteMatch
                           ? 'text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/10'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                          : 'text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                       )}
                     >
                       <ChevronRight
@@ -420,18 +422,44 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                     className="pl-6 space-y-0.5 border-l border-black/[0.06] ml-4 mt-0.5"
                   >
                     <Link
+                      href={basePath}
+                      data-testid="dashboard-subtab-scada"
+                      className={cn(
+                        'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
+                        isScadaDashboardSubtabActive
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
+                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
+                      )}
+                    >
+                      {isScadaDashboardSubtabActive && (
+                        <m.div
+                          layoutId="active-dashboard-subtab"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
+                        />
+                      )}
+                      <Activity
+                        className={cn(
+                          'w-3 h-3 shrink-0 transition-colors',
+                          isScadaDashboardSubtabActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
+                        )}
+                      />
+                      <span>SCADA Dashboard</span>
+                    </Link>
+                    <Link
                       href={`${basePath}/shift-compilation`}
                       data-testid="dashboard-subtab-shift-operations"
                       className={cn(
                         'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
                         isShiftOperationsSubtabActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium gold-steel-border gold-steel-border-slim'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
+                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                       )}
                     >
                       {isShiftOperationsSubtabActive && (
                         <m.div
-                          layoutId="active-sidebar-subtab"
+                          layoutId="active-dashboard-subtab"
                           className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[var(--accent-blue)]"
                         />
                       )}
@@ -440,7 +468,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           'w-3 h-3 shrink-0 transition-colors',
                           isShiftOperationsSubtabActive
                             ? 'text-[var(--accent-blue)]'
-                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
                         )}
                       />
                       <span>Shift Operations</span>
@@ -458,8 +486,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       className={cn(
                         'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
                         isReportsDashboardActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
+                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                       )}
                     >
                       {isReportsDashboardActive && (
@@ -473,7 +501,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           'w-3 h-3 shrink-0 transition-colors',
                           isReportsDashboardActive
                             ? 'text-[var(--accent-blue)]'
-                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
                         )}
                       />
                       <span>Dashboard</span>
@@ -484,8 +512,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       className={cn(
                         'flex items-center gap-2 px-2.5 py-1 rounded-md text-[12px] transition-all relative group',
                         isPdfReportActive
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
+                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-semibold gold-steel-border gold-steel-border-slim'
+                          : 'text-[var(--text-heading)] font-medium hover:text-[var(--accent-blue)] hover:bg-black/[0.04]'
                       )}
                     >
                       {isPdfReportActive && (
@@ -499,7 +527,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           'w-3 h-3 shrink-0 transition-colors',
                           isPdfReportActive
                             ? 'text-[var(--accent-blue)]'
-                            : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
                         )}
                       />
                       <span>PDF Report</span>
@@ -520,7 +548,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         >
           <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-[var(--accent-green)]/8 border border-[var(--accent-green)]/15 gold-steel-border gold-steel-border-slim">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
-            <span className="text-[11px] text-[var(--text-muted)] font-medium tracking-wide">
+            <span className="text-[11px] text-[var(--text-heading)] font-medium tracking-wide">
               Connection Secure
             </span>
           </div>

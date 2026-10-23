@@ -49,3 +49,20 @@ export const adminMineralRegistrySchema = z.object({
 });
 
 export type AdminMineralRegistry = z.infer<typeof adminMineralRegistrySchema>;
+
+export const operationalTargetWindowSchema = z.object({
+  loadsTarget: z.coerce.number().min(1, 'Loads target must be at least 1'),
+  coalTonnesTarget: z.coerce.number().min(1, 'Coal tonnes target must be at least 1'),
+  wasteTonnesTarget: z.coerce.number().min(1, 'Waste tonnes target must be at least 1'),
+  volumeBcmTarget: z.coerce.number().min(1, 'Volume BCM target must be at least 1'),
+  smrHoursTarget: z.coerce.number().min(1, 'SMR hours target must be at least 1'),
+});
+
+export const adminOperationalTargetsSchema = z.object({
+  shift: operationalTargetWindowSchema,
+  daily: operationalTargetWindowSchema,
+  monthly: operationalTargetWindowSchema,
+});
+
+export type OperationalTargetWindow = z.infer<typeof operationalTargetWindowSchema>;
+export type AdminOperationalTargets = z.infer<typeof adminOperationalTargetsSchema>;

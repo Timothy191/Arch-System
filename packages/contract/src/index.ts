@@ -24,11 +24,15 @@ export { ValidationError } from './validation';
 
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from './schemas/access-card.schema';
 export {
+  type AdminOperationalTargets,
   adminAddSiteSchema,
   adminDataDeleteSchema,
   adminDataQuerySchema,
   adminDataUpdateSchema,
+  adminOperationalTargetsSchema,
   adminUpdateSiteSchema,
+  type OperationalTargetWindow,
+  operationalTargetWindowSchema,
 } from './schemas/admin.schema';
 export {
   aiChatSchema,

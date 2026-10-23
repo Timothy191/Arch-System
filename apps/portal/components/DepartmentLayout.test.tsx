@@ -34,13 +34,17 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(screen.getByText('Control Room Main Content')).toBeInTheDocument();
 
     // Verify all Control Room tabs are present in the side menu
-    const dashboardLinks = screen.getAllByRole('link', { name: /Dashboard/i });
+    const dashboardLinks = screen.getAllByRole('link', { name: /^Dashboard$/i });
     expect(dashboardLinks).toHaveLength(2);
     expect(dashboardLinks[0]).toHaveAttribute('href', '/control-room');
     expect(screen.getByTestId('reports-subtab-dashboard')).toHaveAttribute(
       'href',
       '/control-room/reports'
     );
+    const scadaDashboardSubtab = screen.getByTestId('dashboard-subtab-scada');
+    expect(scadaDashboardSubtab).toBeInTheDocument();
+    expect(scadaDashboardSubtab).toHaveAttribute('href', '/control-room');
+    expect(scadaDashboardSubtab).toHaveTextContent('SCADA Dashboard');
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Machine Operations/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Eng Notes/i })).toBeInTheDocument();

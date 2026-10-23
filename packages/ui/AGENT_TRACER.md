@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-23T07:53:00+02:00 - Control Room SCADA Dashboard Sub-tab & Global Dark Black Sidebar Typography with Gold Active Tabs
+
+- **Purpose**: Add `SCADA Dashboard` sub-tab (`dashboard-subtab-scada`) under `Dashboard` in `DepartmentLayout.tsx`, set global sidebar text/icons to Dark Black (`var(--text-heading)`), and highlight selected tabs/sub-tabs in Gold (`var(--accent-blue)`).
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Added `SCADA Dashboard` sub-tab under `Dashboard`, updated unselected sidebar text and icon classes to `text-[var(--text-heading)]`, and styled active tabs/sub-tabs in gold (`text-[var(--accent-blue)] bg-[var(--accent-blue)]/10 gold-steel-border gold-steel-border-slim`).
+  - `packages/ui/src/components/MacTitleBar.tsx`: Updated title text color to `text-[var(--text-heading)]`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter portal test -- --testPathPatterns="DepartmentLayout"` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T07:12:00+02:00 - Move Control Room Shift Operations Into Sub-tab Under Dashboard in DepartmentLayout
 
 - **Purpose**: Make `Shift Operations` (`/control-room/shift-compilation`) a sub-tab under `Dashboard` (`/control-room`) in the Control Room sidebar (`DepartmentLayout.tsx`) with an expandable/collapsible chevron toggle (`dashboard-subtabs-toggle`) so operators landing on Dashboard can immediately navigate to `Shift Operations` to inspect previous/current shift operations.

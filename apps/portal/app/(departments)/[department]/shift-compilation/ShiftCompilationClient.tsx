@@ -78,17 +78,17 @@ export function ShiftCompilationClient({
 
   return (
     <div className="space-y-6">
-      {/* Dashboard / Shift Operations Sub-tab Navigation */}
+      {/* SCADA Dashboard / Shift Operations Sub-tab Navigation */}
       <div
         aria-label="Control Room Dashboard Sub-tabs"
         className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)]/60 pb-2.5"
       >
         <Link
           href={`/${departmentSlug}`}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-heading)] hover:text-[var(--accent-blue)] hover:bg-black/[0.04] border border-transparent hover:border-[var(--border-subtle)] transition-all"
         >
-          <BarChart3 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span>Dashboard</span>
+          <BarChart3 className="w-3.5 h-3.5 text-[var(--text-heading)]" />
+          <span>SCADA Dashboard</span>
         </Link>
         <Link
           href={`/${departmentSlug}/shift-compilation`}

@@ -64,7 +64,7 @@ export function MacTitleBar({
 
       {/* Centered title */}
       {title && (
-        <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] truncate">
+        <span className="flex-1 text-center text-[13px] font-semibold text-[var(--text-heading)] truncate">
           {title}
         </span>
       )}
