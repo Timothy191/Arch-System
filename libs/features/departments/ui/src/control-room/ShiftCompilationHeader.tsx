@@ -76,7 +76,7 @@ export function ShiftCompilationHeader({
   const isClosed = status === 'closed';
 
   return (
-    <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-arch-border-subtle bg-arch-surface-secondary/80 p-5 shadow-card backdrop-blur-xl xl:flex-row xl:items-center">
+    <div className="gold-steel-border gold-steel-border-slim flex flex-col items-start justify-between gap-4 rounded-2xl border border-arch-border-subtle bg-arch-surface-secondary/80 p-5 shadow-card backdrop-blur-xl xl:flex-row xl:items-center">
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
           <h1 className="font-bold text-arch-text-heading text-xl tracking-tight">

@@ -79,6 +79,12 @@ interface HourlyLoadsGridProps {
 const DAY_HOUR_LABELS = ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17'];
 const NIGHT_HOUR_LABELS = ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
 
+/** Shared KPI tile shell — golden steel border over the vibrancy surface. */
+const KPI_TILE_CLASS =
+  'gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs';
+const KPI_TILE_ROW_CLASS = `${KPI_TILE_CLASS} flex items-center justify-between`;
+const KPI_TILE_STACK_CLASS = `${KPI_TILE_CLASS} flex flex-col justify-between`;
+
 interface HourCellProps {
   value: number;
   rowIndex: number;
@@ -1014,7 +1020,7 @@ function HourlyLoadsGrid({
         {/* Redesigned Live KPI Strip */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {/* KPI 1: Total Loads Captured */}
-          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
+          <div className={KPI_TILE_ROW_CLASS}>
             <div className="space-y-0.5">
               <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Total Shift Loads
@@ -1039,7 +1045,7 @@ function HourlyLoadsGrid({
           </div>
 
           {/* KPI 2: Machines Active */}
-          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
+          <div className={KPI_TILE_ROW_CLASS}>
             <div className="space-y-0.5">
               <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Machines Active
@@ -1064,7 +1070,7 @@ function HourlyLoadsGrid({
           </div>
 
           {/* KPI 3: Avg Loads / Machine */}
-          <div className="flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
+          <div className={KPI_TILE_ROW_CLASS}>
             <div className="space-y-0.5">
               <span className="block font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Avg Loads / Machine
@@ -1088,7 +1094,7 @@ function HourlyLoadsGrid({
           </div>
 
           {/* KPI 4: Waste vs Coal Split */}
-          <div className="flex flex-col justify-between rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5 shadow-xs">
+          <div className={KPI_TILE_STACK_CLASS}>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
                 Material Split
@@ -1190,7 +1196,7 @@ function HourlyLoadsGrid({
                   >
                     {slot.totalLoads}
                   </span>
-                  <div className="flex h-16 w-full max-w-[38px] flex-col justify-end overflow-hidden rounded-t-md border border-black/[0.05] bg-black/[0.04]">
+                  <div className="gold-steel-border gold-steel-border-slim flex h-16 w-full max-w-[38px] flex-col justify-end overflow-hidden rounded-t-md border border-black/[0.05] bg-black/[0.04]">
                     {slot.totalLoads > 0 ? (
                       <div
                         className="flex w-full flex-col justify-end overflow-hidden rounded-t-sm transition-all duration-300"

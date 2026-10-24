@@ -11,6 +11,7 @@ import {
   ShiftCompilationHeader,
   UnifiedShiftCloseoutModal,
 } from '@repo/departments/ui';
+import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { cn } from '@repo/ui/lib/utils';
 import { BarChart3, CheckSquare, ClipboardCheck, Users } from 'lucide-react';
@@ -79,29 +80,31 @@ export function ShiftCompilationClient({
   return (
     <div className="space-y-6">
       {/* SCADA Dashboard / Shift Operations Sub-tab Navigation */}
-      <div
-        aria-label="Control Room Dashboard Sub-tabs"
-        className="flex flex-wrap items-center gap-2 border-[var(--border-subtle)]/60 border-b pb-2.5"
-      >
-        <Link
-          href={`/${departmentSlug}`}
-          className="inline-flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--border-subtle)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]"
+      <GlassCard padding={false} className="flex flex-wrap items-center gap-2 p-3">
+        <div
+          aria-label="Control Room Dashboard Sub-tabs"
+          className="flex flex-wrap items-center gap-2"
         >
-          <BarChart3 className="h-3.5 w-3.5 text-[var(--text-heading)]" />
-          <span>SCADA Dashboard</span>
-        </Link>
-        <Link
-          href={`/${departmentSlug}/shift-compilation`}
-          aria-current="page"
-          className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-semibold text-[var(--accent-blue)] text-xs transition-all"
-        >
-          <ClipboardCheck className="h-3.5 w-3.5" />
-          <span>Shift Operations</span>
-        </Link>
-      </div>
+          <Link
+            href={`/${departmentSlug}`}
+            className="inline-flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--border-subtle)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]"
+          >
+            <BarChart3 className="h-3.5 w-3.5 text-[var(--text-heading)]" />
+            <span>SCADA Dashboard</span>
+          </Link>
+          <Link
+            href={`/${departmentSlug}/shift-compilation`}
+            aria-current="page"
+            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-semibold text-[var(--accent-blue)] text-xs transition-all"
+          >
+            <ClipboardCheck className="h-3.5 w-3.5" />
+            <span>Shift Operations</span>
+          </Link>
+        </div>
+      </GlassCard>
 
       {/* Unified Shift Operations Section Switcher */}
-      <div className="flex flex-col justify-between gap-3 border-[var(--border-subtle)] border-b pb-3 sm:flex-row sm:items-center">
+      <GlassCard className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h1 className="font-bold text-[var(--text-heading)] text-xl tracking-tight">
             Shift Operations
@@ -162,7 +165,7 @@ export function ShiftCompilationClient({
             Shift Closeout
           </button>
         </div>
-      </div>
+      </GlassCard>
 
       {activeSection === 'coverage' ? (
         <ShiftCoverageClient
@@ -200,7 +203,7 @@ export function ShiftCompilationClient({
           />
 
           {/* View Switcher: Department Shift vs Multi-Site Operations */}
-          <div className="flex items-center justify-between border-arch-border-subtle border-b pb-2">
+          <GlassCard padding={false} className="flex items-center justify-between p-3">
             <div className="flex items-center gap-2 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary/70 p-1">
               <button
                 type="button"
@@ -227,7 +230,7 @@ export function ShiftCompilationClient({
                 Multi-Site Operational Report (BKF / EXT / PLANT)
               </button>
             </div>
-          </div>
+          </GlassCard>
 
           {activeTab === 'multisite' && multiSiteReport ? (
             <MultiSiteShiftReportClient initialReport={multiSiteReport} />
