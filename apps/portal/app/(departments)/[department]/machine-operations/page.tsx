@@ -2,6 +2,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
 
 const MachineOperationsForm = dynamic(
   () => import('./MachineOperationsForm').then((m) => m.MachineOperationsForm),
@@ -103,31 +104,7 @@ export default async function MachineOperationsPage({
       .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
 
-  const parseBreakdownDelayHours = (b: {
-    reason?: string | null;
-    date_in?: string | null;
-    time_in?: string | null;
-    date_out?: string | null;
-    time_out?: string | null;
-    delay_hours?: number | null;
-  }): number => {
-    if (typeof b.delay_hours === 'number' && !Number.isNaN(b.delay_hours) && b.delay_hours > 0) {
-      return Math.min(12, Math.max(0, b.delay_hours));
-    }
-    const tagMatch = b.reason?.match(/\[Shift Delay:\s*([\d.]+)h\]/i);
-    if (tagMatch?.[1]) {
-      const parsed = parseFloat(tagMatch[1]);
-      if (!Number.isNaN(parsed) && parsed > 0) return Math.min(12, parsed);
-    }
-    if (b.date_in && b.time_in && b.date_out && b.time_out) {
-      const startMs = new Date(`${b.date_in}T${b.time_in.slice(0, 8)}`).getTime();
-      const endMs = new Date(`${b.date_out}T${b.time_out.slice(0, 8)}`).getTime();
-      if (!Number.isNaN(startMs) && !Number.isNaN(endMs) && endMs > startMs) {
-        return Math.min(12, Number(((endMs - startMs) / 3600000).toFixed(2)));
-      }
-    }
-    return 0;
-  };
+  const parseBreakdownDelayHours = (b: BreakdownDelaySource): number => breakdownShiftDelayHours(b);
 
   // Map Engineering breakdown delay hours by machine.id and serial_number
   const engineeringDelaysByMachine: Record<

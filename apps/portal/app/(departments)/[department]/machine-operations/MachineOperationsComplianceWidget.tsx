@@ -5,11 +5,61 @@ import { getCurrentShift } from '@repo/utils/client';
 import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import type { MachineCoverageStatus, ShiftCompleteness } from '@/lib/shift-completeness';
+import type {
+  DelayBucketKey,
+  MachineCoverageStatus,
+  ShiftCompleteness,
+} from '@/lib/shift-completeness';
 
 interface Props {
   departmentId: string;
   departmentSlug: string;
+}
+
+/**
+ * Shift-sheet delay columns. Keys map to `DelayBucketMinutes`; the header
+ * tooltip names the `delay_categories` rows that feed each bucket.
+ */
+const DELAY_COLUMNS: ReadonlyArray<{ key: DelayBucketKey; label: string; title: string }> = [
+  { key: 'blasting', label: 'Blasting', title: 'Blasting / explosive clearance hold' },
+  { key: 'natural', label: 'Natural', title: 'Weather, ground conditions, visibility' },
+  { key: 'noOperator', label: 'No Operator', title: 'No operator available for the machine' },
+  { key: 'otherProduction', label: 'Other Prod.', title: 'Other production delay' },
+  {
+    key: 'greasingStartup',
+    label: 'Greasing & Startup',
+    title: 'Greasing, pre-start checks and machine startup',
+  },
+  {
+    key: 'maintenanceGet',
+    label: 'Maint. & GET',
+    title: 'Scheduled maintenance and ground engaging tools',
+  },
+  {
+    key: 'breakdown',
+    label: 'Breakdown',
+    title: 'Unplanned breakdown, including Engineering breakdown delays',
+  },
+];
+
+const HEADER_CELL_CLASS =
+  'whitespace-nowrap px-3 py-2 font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider';
+const BODY_CELL_CLASS = 'whitespace-nowrap px-3 py-2 text-xs';
+const NUMERIC_CELL_CLASS = `${BODY_CELL_CLASS} text-right font-mono tabular-nums`;
+
+function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours}h` : `${hours}h${String(rest).padStart(2, '0')}`;
+}
+
+function formatSmr(reading: number | null | undefined): string {
+  if (reading === null || reading === undefined || Number.isNaN(reading)) return '—';
+  return reading.toLocaleString('en-ZA', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 }
 
 function todayDate(): string {
@@ -123,24 +173,77 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
         </div>
       </div>
 
-      {/* Expanded checklist */}
+      {/* Expanded shift sheet: one row per machine, 12 reporting columns */}
       {expanded && (
-        <div className="divide-y divide-[var(--border-default)] border-[var(--border-default)] border-t">
-          {statuses.map((s: MachineCoverageStatus) => (
-            <MachineRow key={s.machineId} status={s} departmentSlug={departmentSlug} />
-          ))}
+        <div className="overflow-x-auto border-[var(--border-default)] border-t">
+          <table className="w-full min-w-[1120px] border-collapse text-left">
+            <caption className="sr-only">
+              Machine operations shift sheet — operator, SMR readings, delay minutes per bucket, and
+              comment for every active machine.
+            </caption>
+            <thead className="bg-[var(--bg-tertiary)]">
+              <tr>
+                <th scope="col" className={HEADER_CELL_CLASS}>
+                  Machine ID
+                </th>
+                <th scope="col" className={HEADER_CELL_CLASS}>
+                  Operator
+                </th>
+                <th
+                  scope="col"
+                  className={`${HEADER_CELL_CLASS} text-right`}
+                  title="Start SMR (hours)"
+                >
+                  Start SMR
+                </th>
+                <th
+                  scope="col"
+                  className={`${HEADER_CELL_CLASS} text-right`}
+                  title="Stop SMR (hours)"
+                >
+                  Stop SMR
+                </th>
+                {DELAY_COLUMNS.map((column) => (
+                  <th
+                    key={column.key}
+                    scope="col"
+                    className={`${HEADER_CELL_CLASS} text-right`}
+                    title={`${column.title} (minutes)`}
+                  >
+                    {column.label}
+                  </th>
+                ))}
+                <th scope="col" className={HEADER_CELL_CLASS}>
+                  Comment
+                </th>
+                <th scope="col" className={`${HEADER_CELL_CLASS} text-right`}>
+                  Shift Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-default)]">
+              {statuses.map((status: MachineCoverageStatus) => (
+                <SheetRow key={status.machineId} status={status} departmentSlug={departmentSlug} />
+              ))}
+            </tbody>
+          </table>
           {statuses.length === 0 && (
             <p className="px-4 py-3 text-center text-[var(--text-muted)] text-sm">
               No active machines in this department.
             </p>
           )}
+          <p className="border-[var(--border-default)] border-t px-4 py-2 text-[10px] text-[var(--text-muted)]">
+            Delays in minutes, logged through machine-operation delay entries (categories: Blasting,
+            Natural, No Operator, Other Production Delay, Greasing &amp; Startup, Maintenance &amp;
+            GET, Breakdown). SMR in hours. Breakdown includes Engineering breakdown records.
+          </p>
         </div>
       )}
     </GlassCard>
   );
 }
 
-function MachineRow({
+function SheetRow({
   status,
   departmentSlug,
 }: {
@@ -148,47 +251,70 @@ function MachineRow({
   departmentSlug: string;
 }) {
   const router = useRouter();
-
-  if (status.exempt) {
-    return (
-      <div className="flex items-center gap-3 px-4 py-2.5 opacity-50">
-        <ShieldOff className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-        <span className="flex-1 text-[var(--text-muted)] text-sm">
-          {status.machineName}
-          <span className="ml-2 text-[var(--text-muted)] text-xs">({status.machineType})</span>
-        </span>
-        <span className="text-[var(--text-muted)] text-xs">Exempt</span>
-      </div>
-    );
-  }
-
-  if (status.hasEntry) {
-    return (
-      <div className="flex items-center gap-3 px-4 py-2.5">
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-accent-green" />
-        <span className="flex-1 text-[var(--text-secondary)] text-sm">
-          {status.machineName}
-          <span className="ml-2 text-[var(--text-muted)] text-xs">({status.machineType})</span>
-        </span>
-        <span className="text-accent-green text-xs">{status.formLabel}</span>
-      </div>
-    );
-  }
+  const isMissing = !status.hasEntry && !status.exempt;
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split('/').pop()}`)}
-      className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-accent-red/5"
+    <tr
+      className={`transition-colors ${
+        status.exempt
+          ? 'opacity-60'
+          : isMissing
+            ? 'hover:bg-accent-red/5'
+            : 'hover:bg-[var(--bg-tertiary)]'
+      }`}
     >
-      <XCircle className="h-4 w-4 shrink-0 text-accent-red" />
-      <span className="flex-1 font-medium text-[var(--text-heading)] text-sm">
-        {status.machineName}
-        <span className="ml-2 font-normal text-[var(--text-muted)] text-xs">
+      <th scope="row" className={`${BODY_CELL_CLASS} text-left font-medium`}>
+        <span className="text-[var(--text-heading)]">{status.machineName}</span>
+        <span className="ml-1.5 font-normal text-[10px] text-[var(--text-muted)]">
           ({status.machineType})
         </span>
-      </span>
-      <span className="text-accent-red text-xs group-hover:underline">→ {status.formLabel}</span>
-    </button>
+      </th>
+      <td className={`${BODY_CELL_CLASS} text-[var(--text-secondary)]`}>
+        {status.operatorName ?? '—'}
+      </td>
+      <td className={NUMERIC_CELL_CLASS}>{formatSmr(status.smrStart)}</td>
+      <td className={NUMERIC_CELL_CLASS}>{formatSmr(status.smrStop)}</td>
+      {DELAY_COLUMNS.map((column) => {
+        const minutes = status.delayMinutes?.[column.key] ?? 0;
+        return (
+          <td
+            key={column.key}
+            className={`${NUMERIC_CELL_CLASS} ${
+              minutes > 0 ? 'text-[var(--text-heading)]' : 'text-[var(--text-muted)] opacity-50'
+            }`}
+          >
+            {minutes > 0 ? formatMinutes(minutes) : '—'}
+          </td>
+        );
+      })}
+      <td
+        className={`${BODY_CELL_CLASS} max-w-[240px] truncate text-[var(--text-secondary)]`}
+        title={status.comment ?? undefined}
+      >
+        {status.comment ?? '—'}
+      </td>
+      <td className={`${BODY_CELL_CLASS} text-right`}>
+        {status.exempt ? (
+          <span className="inline-flex items-center gap-1 text-[var(--text-muted)]">
+            <ShieldOff className="h-3.5 w-3.5" />
+            Exempt
+          </span>
+        ) : status.hasEntry ? (
+          <span className="inline-flex items-center gap-1 text-accent-green">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.formLabel}
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => router.push(`/${departmentSlug}/${status.formPath.split('/').pop()}`)}
+            className="group inline-flex items-center gap-1 text-accent-red hover:underline"
+          >
+            <XCircle className="h-3.5 w-3.5 shrink-0" />
+            <span className="group-hover:underline">Log {status.formLabel}</span>
+          </button>
+        )}
+      </td>
+    </tr>
   );
 }

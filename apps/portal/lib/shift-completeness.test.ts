@@ -108,6 +108,7 @@ describe('Shift Completeness Validation', () => {
       excavatorActs: any[];
       dozerRolls: any[];
       hourlyLoads: any[];
+      breakdowns?: any[];
     }) => {
       return {
         from: jest.fn().mockImplementation((table: string) => {
@@ -117,10 +118,12 @@ describe('Shift Completeness Validation', () => {
           else if (table === 'excavator_activity') responseData = data.excavatorActs;
           else if (table === 'dozer_rolls') responseData = data.dozerRolls;
           else if (table === 'hourly_loads') responseData = data.hourlyLoads;
+          else if (table === 'breakdowns') responseData = data.breakdowns ?? [];
 
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
             order: jest.fn().mockResolvedValue({ data: responseData, error: null }),
             // Handle cases where .order is not called but it resolves
             then: jest
@@ -238,6 +241,99 @@ describe('Shift Completeness Validation', () => {
       expect(res.statuses[0]!.hasEntry).toBe(true);
       expect(res.statuses[1]!.hasEntry).toBe(false);
       expect(res.statuses[1]!.exempt).toBe(true);
+    });
+
+    it('aggregates the shift-sheet columns per machine', async () => {
+      const supabase = mockSupabaseBuilder({
+        machines: [
+          {
+            id: 'm-1',
+            name: 'DT-101',
+            machine_type: 'dump truck',
+            serial_number: 'SN-101',
+            report_exempt: false,
+          },
+        ],
+        machineOps: [
+          {
+            machine_id: 'm-1',
+            hours_worked: 9.5,
+            operator_name: null,
+            start_smu: 1200,
+            end_smu: 1209.5,
+            operator: { full_name: 'A. Mokoena' },
+            delay_entries: [
+              {
+                status: 'committed',
+                duration_hours: 0.5,
+                manual_duration_hours: null,
+                is_manual_override: false,
+                description: 'Bench 4 blast window',
+                deleted_at: null,
+                delay_category: { name: 'Blasting' },
+              },
+              {
+                status: 'committed',
+                duration_hours: 0,
+                manual_duration_hours: 1.25,
+                is_manual_override: true,
+                description: 'Waiting for operator',
+                deleted_at: null,
+                delay_category: { name: 'Operator Unavailable' },
+              },
+              {
+                // Draft entries and soft-deleted rows must not reach the sheet.
+                status: 'draft',
+                duration_hours: 2,
+                manual_duration_hours: null,
+                is_manual_override: false,
+                description: 'Draft — ignore',
+                deleted_at: null,
+                delay_category: { name: 'Breakdown' },
+              },
+              {
+                status: 'committed',
+                duration_hours: 3,
+                manual_duration_hours: null,
+                is_manual_override: false,
+                description: 'Deleted — ignore',
+                deleted_at: '2026-06-15T10:00:00Z',
+                delay_category: { name: 'Natural' },
+              },
+            ],
+          },
+        ],
+        excavatorActs: [],
+        dozerRolls: [],
+        hourlyLoads: [{ machine_id: 'm-1', total_loads: 12 }],
+        breakdowns: [
+          // Resolved by serial number, 1h shift delay.
+          { id: 'b-1', fleet_id: 'SN-101', reason: 'Hydraulic leak', delay_hours: 1 },
+        ],
+      });
+
+      const res = await getShiftCompleteness(
+        supabase,
+        'dept-1',
+        'control-room',
+        '2026-06-15',
+        'day'
+      );
+
+      const sheet = res.statuses[0]!;
+      expect(sheet.operatorName).toBe('A. Mokoena');
+      expect(sheet.smrStart).toBe(1200);
+      expect(sheet.smrStop).toBe(1209.5);
+      expect(sheet.comment).toBe('Bench 4 blast window · Waiting for operator');
+      expect(sheet.delayMinutes).toEqual({
+        blasting: 30,
+        natural: 0,
+        noOperator: 75,
+        otherProduction: 0,
+        greasingStartup: 0,
+        maintenanceGet: 0,
+        breakdown: 60,
+      });
     });
   });
 });
