@@ -310,14 +310,25 @@ export default async function EngineeringNotesPage({
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   // Calculate statistics across all Engineering issues, breakdowns, and activities
-  const criticalCount = combinedFeed.filter((n) => n.severity === 'critical').length;
-  const openCount = combinedFeed.filter(
-    (n) => n.status === 'open' || n.status === 'in_progress'
-  ).length;
-  const resolvedCount = combinedFeed.filter(
-    (n) => n.status === 'resolved' || n.status === 'closed'
-  ).length;
-  const followUpCount = combinedFeed.filter((n) => n.requires_follow_up).length;
+  // Performance Optimization: Replaced 4 sequential .filter() array allocations with a single-pass loop
+  let criticalCount = 0;
+  let openCount = 0;
+  let resolvedCount = 0;
+  let followUpCount = 0;
+
+  for (const item of combinedFeed) {
+    if (item.severity === 'critical') {
+      criticalCount++;
+    }
+    if (item.status === 'open' || item.status === 'in_progress') {
+      openCount++;
+    } else if (item.status === 'resolved' || item.status === 'closed') {
+      resolvedCount++;
+    }
+    if (item.requires_follow_up) {
+      followUpCount++;
+    }
+  }
 
   return (
     <div className="space-y-6">
