@@ -34,6 +34,7 @@ module.exports = {
     '^@/lib/(.*)$': '<rootDir>/../../../../apps/portal/lib/$1',
     '^@/(.*)$': '<rootDir>/../../../../apps/portal/$1',
     '^~/(.*)$': '<rootDir>/../../../../apps/portal/$1',
+    '^@repo/contract/(.*)$': '<rootDir>/../../../../packages/contract/src/$1',
     // Workspace packages (@repo/*) resolve through pnpm workspace symlinks;
     // their sources live outside node_modules so SWC transforms them.
   },

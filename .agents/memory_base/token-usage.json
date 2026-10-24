@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-23T11:44:49.992Z",
+  "lastUpdated": "2026-10-24T00:54:03.698Z",
   "exchangeRateZAR": 18.52,
   "claudeCodeRatesUSDPerMTok": {
     "inputUncached": 3,
@@ -7,18 +7,18 @@
     "cacheRead": 0.3,
     "output": 15
   },
-  "totalTokens": 196243700,
-  "totalInputTokens": 170848000,
-  "totalOutputTokens": 25395700,
-  "cacheReadTokens": 143558940,
-  "cacheWriteTokens": 13655440,
-  "uncachedInputTokens": 13633620,
-  "totalSessions": 355,
-  "totalTurns": 4990,
+  "totalTokens": 197748200,
+  "totalInputTokens": 172303000,
+  "totalOutputTokens": 25445200,
+  "cacheReadTokens": 144781140,
+  "cacheWriteTokens": 13771840,
+  "uncachedInputTokens": 13750020,
+  "totalSessions": 358,
+  "totalTurns": 5032,
   "avgUsage": {
-    "avgInputTokensPerTurn": 34238,
-    "avgOutputTokensPerTurn": 5089,
-    "avgTotalTokensPerTurn": 39327,
+    "avgInputTokensPerTurn": 34241,
+    "avgOutputTokensPerTurn": 5057,
+    "avgTotalTokensPerTurn": 39298,
     "cacheHitRatePct": 84,
     "cacheMissRatePct": 16,
     "avgLatencyMs": 1840,
@@ -26,25 +26,25 @@
     "tokensPerSecond": 78.4
   },
   "claudeCodeCost": {
-    "totalCostUSD": 516.11,
-    "totalCostZAR": 9558.36,
-    "uncachedBaselineUSD": 893.48,
-    "uncachedBaselineZAR": 16547.24,
-    "cacheSavingsUSD": 377.37,
-    "cacheSavingsZAR": 6988.89,
-    "costPerBugResolvedZAR": 92.8,
-    "costPerCommitZAR": 28.2,
+    "totalCostUSD": 518.01,
+    "totalCostZAR": 9593.55,
+    "uncachedBaselineUSD": 898.59,
+    "uncachedBaselineZAR": 16641.83,
+    "cacheSavingsUSD": 380.58,
+    "cacheSavingsZAR": 7048.34,
+    "costPerBugResolvedZAR": 92.25,
+    "costPerCommitZAR": 28.05,
     "breakdownZAR": {
-      "uncachedInputZAR": 757.48,
-      "cacheWriteZAR": 948.37,
-      "cacheReadZAR": 797.61,
-      "outputZAR": 7054.93
+      "uncachedInputZAR": 763.95,
+      "cacheWriteZAR": 956.45,
+      "cacheReadZAR": 804.4,
+      "outputZAR": 7068.68
     }
   },
   "engineeringVelocity": {
-    "totalCommits": 339,
-    "fixCommits": 69,
-    "featCommits": 137,
+    "totalCommits": 342,
+    "fixCommits": 70,
+    "featCommits": 138,
     "refactorCommits": 95,
     "filesTouched": 5778,
     "linesInserted": 528743,
@@ -52,88 +52,88 @@
     "sqlMigrations": 144,
     "retrospectivesCount": 13,
     "tracerMilestones": 13,
-    "bugsResolved": 103,
-    "activeRulesTokens": 24571,
-    "activeSkillsTokens": 11458
+    "bugsResolved": 104,
+    "activeRulesTokens": 25604,
+    "activeSkillsTokens": 13661
   },
   "agentFleetBreakdown": [
     {
       "agent": "Claude Code (Sonnet 4 / 3.7 Architect)",
       "role": "Primary Full-Stack & Database Engineering",
       "sharePct": 54,
-      "tokens": 105971598,
-      "inputTokens": 92257920,
-      "outputTokens": 13713678,
-      "cachedTokens": 80393006,
+      "tokens": 106784028,
+      "inputTokens": 93043620,
+      "outputTokens": 13740408,
+      "cachedTokens": 81077438,
       "avgLatencyMs": 1920,
-      "costZAR": 5161.51,
+      "costZAR": 5180.52,
       "bugsResolved": 57
     },
     {
       "agent": "Antigravity Kernel (Gemini 2.5 Pro)",
       "role": "Autonomous Verification, Audit & Orchestration",
       "sharePct": 26,
-      "tokens": 51023362,
-      "inputTokens": 44420480,
-      "outputTokens": 6602882,
-      "cachedTokens": 37325324,
+      "tokens": 51414532,
+      "inputTokens": 44798780,
+      "outputTokens": 6615752,
+      "cachedTokens": 37643096,
       "avgLatencyMs": 1680,
-      "costZAR": 2485.17,
+      "costZAR": 2494.32,
       "bugsResolved": 28
     },
     {
       "agent": "Claude Code Subagents (Reviewer / Security / Test)",
       "role": "Adversarial Code Review, RLS & Jest/Playwright Verification",
       "sharePct": 14,
-      "tokens": 27474118,
-      "inputTokens": 23918720,
-      "outputTokens": 3555398,
-      "cachedTokens": 18662662,
+      "tokens": 27684748,
+      "inputTokens": 24122420,
+      "outputTokens": 3562328,
+      "cachedTokens": 18821548,
       "avgLatencyMs": 1490,
-      "costZAR": 1338.17,
-      "bugsResolved": 14
+      "costZAR": 1343.1,
+      "bugsResolved": 15
     },
     {
       "agent": "Scout & Codemap Indexer (Fast AST / GraphRAG)",
       "role": "Structural Code Discovery & Context Leasing",
       "sharePct": 6,
-      "tokens": 11774622,
-      "inputTokens": 10250880,
-      "outputTokens": 1523742,
-      "cachedTokens": 7177947,
+      "tokens": 11864892,
+      "inputTokens": 10338180,
+      "outputTokens": 1526712,
+      "cachedTokens": 7239057,
       "avgLatencyMs": 640,
-      "costZAR": 573.5,
+      "costZAR": 575.61,
       "bugsResolved": 4
     }
   ],
   "phaseBreakdown": [
     {
       "phase": "Core Portal, Next.js 16 App Router & Auth/RLS",
-      "tokens": 60835547,
-      "costZAR": 2963.09,
+      "tokens": 61301942,
+      "costZAR": 2974,
       "commits": 75,
       "bugsResolved": 23
     },
     {
       "phase": "Department Modules (Drilling, Control Room, Excavators, Mustering)",
-      "tokens": 56910673,
-      "costZAR": 2771.92,
+      "tokens": 57346978,
+      "costZAR": 2782.13,
       "commits": 70,
       "bugsResolved": 21
     },
     {
       "phase": "Database Schema (136 Migrations), Supabase & Hybrid L1/L2 Redis",
-      "tokens": 43173614,
-      "costZAR": 2102.84,
+      "tokens": 43504604,
+      "costZAR": 2110.58,
       "commits": 53,
       "bugsResolved": 17
     },
     {
       "phase": "AI Orchestration, MCP Integrations, Guardrails & E2E/Unit Suites",
-      "tokens": 35323866,
-      "costZAR": 1720.5,
-      "commits": 141,
-      "bugsResolved": 42
+      "tokens": 35594676,
+      "costZAR": 1726.84,
+      "commits": 144,
+      "bugsResolved": 43
     }
   ],
   "sessions": [

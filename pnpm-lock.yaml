@@ -637,6 +637,9 @@ importers:
 
   libs/features/departments/data-access:
     devDependencies:
+      jest:
+        specifier: ^30.0.0
+        version: 30.2.0(@types/node@26.6.5)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.1))(ts-node@10.9.2(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@26.6.5)(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1238,6 +1241,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.19
+      jest:
+        specifier: ^30.0.0
+        version: 30.2.0(@types/node@22.19.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.1))(ts-node@10.9.2(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@22.19.19)(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
