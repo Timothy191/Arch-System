@@ -10,6 +10,7 @@ import type {
   MachineCoverageStatus,
   ShiftCompleteness,
 } from '@/lib/shift-completeness';
+import { DELAY_BUCKET_KEYS } from '@/lib/shift-completeness';
 
 interface Props {
   departmentId: string;
@@ -17,30 +18,30 @@ interface Props {
 }
 
 /**
- * Shift-sheet delay columns. Keys map to `DelayBucketMinutes`; the header
- * tooltip names the `delay_categories` rows that feed each bucket.
+ * Header copy for each delay bucket. Typed as a full `Record` so adding a
+ * bucket to `DELAY_BUCKET_KEYS` fails type-check until it gets a column here.
  */
-const DELAY_COLUMNS: ReadonlyArray<{ key: DelayBucketKey; label: string; title: string }> = [
-  { key: 'blasting', label: 'Blasting', title: 'Blasting / explosive clearance hold' },
-  { key: 'natural', label: 'Natural', title: 'Weather, ground conditions, visibility' },
-  { key: 'noOperator', label: 'No Operator', title: 'No operator available for the machine' },
-  { key: 'otherProduction', label: 'Other Prod.', title: 'Other production delay' },
-  {
-    key: 'greasingStartup',
+const DELAY_COLUMN_META: Record<DelayBucketKey, { label: string; title: string }> = {
+  blasting: { label: 'Blasting', title: 'Blasting / explosive clearance hold' },
+  natural: { label: 'Natural', title: 'Weather, ground conditions, visibility' },
+  noOperator: { label: 'No Operator', title: 'No operator available for the machine' },
+  otherProduction: { label: 'Other Prod.', title: 'Other production delay' },
+  greasingStartup: {
     label: 'Greasing & Startup',
     title: 'Greasing, pre-start checks and machine startup',
   },
-  {
-    key: 'maintenanceGet',
+  maintenanceGet: {
     label: 'Maint. & GET',
     title: 'Scheduled maintenance and ground engaging tools',
   },
-  {
-    key: 'breakdown',
+  breakdown: {
     label: 'Breakdown',
     title: 'Unplanned breakdown, including Engineering breakdown delays',
   },
-];
+};
+
+const DELAY_COLUMNS: ReadonlyArray<{ key: DelayBucketKey; label: string; title: string }> =
+  DELAY_BUCKET_KEYS.map((key) => ({ key, ...DELAY_COLUMN_META[key] }));
 
 const HEADER_CELL_CLASS =
   'whitespace-nowrap px-3 py-2 font-semibold text-[10px] text-[var(--text-muted)] uppercase tracking-wider';

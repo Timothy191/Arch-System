@@ -54,7 +54,7 @@ const DELAY_BUCKET_BY_CATEGORY: Record<string, DelayBucketKey> = {
   'equipment breakdown': 'breakdown',
 };
 
-export function emptyDelayBuckets(): DelayBucketMinutes {
+function emptyDelayBuckets(): DelayBucketMinutes {
   return {
     blasting: 0,
     natural: 0,
