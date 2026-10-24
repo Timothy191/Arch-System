@@ -741,7 +741,7 @@
     "/api/telemetry/drilling/stream": {
       "get": {
         "summary": "Real-Time Drill Rig Telemetry SSE Stream",
-        "description": "Server-Sent Events (SSE) endpoint subscribing to Redis pub/sub channel `drilling:telemetry:stream` to stream live rig telemetry updates.",
+        "description": "Server-Sent Events (SSE) endpoint reading the capped Redis stream `drilling:telemetry:stream`. Reconnects replay missed entries via the standard Last-Event-ID header. Blocking XREAD on TCP, short polls on serverless REST.",
         "tags": [
           "Telemetry"
         ],
