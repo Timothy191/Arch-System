@@ -62,10 +62,10 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     // Verify exact ordering (Dashboard at the top with Shift Operations as its sub-tab)
     expect(controlRoomTabs.map((t) => t.label)).toEqual([
       'Dashboard',
+      'Excavator Activity',
       'Hourly Loads',
       'Machine Operations',
       'Eng Notes',
-      'Excavator Activity',
       'Reports',
     ]);
   });

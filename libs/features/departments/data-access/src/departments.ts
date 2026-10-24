@@ -261,10 +261,10 @@ export const DEPARTMENT_TABS = [
  */
 export const CONTROL_ROOM_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'excavator-activity', label: 'Excavator Activity', icon: 'Pickaxe' },
   { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
   { name: 'machine-operations', label: 'Machine Operations', icon: 'Cpu' },
   { name: 'engineering-notes', label: 'Eng Notes', icon: 'ClipboardList' },
-  { name: 'excavator-activity', label: 'Excavator Activity', icon: 'Pickaxe' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 

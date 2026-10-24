@@ -49,6 +49,13 @@ export const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
     icon: ClipboardCheck,
   },
   {
+    name: 'excavator-activity',
+    label: 'Excavator Activity',
+    href: '/control-room/excavator-activity',
+    description: 'Dig face tracking & bucket cycles',
+    icon: Pickaxe,
+  },
+  {
     name: 'hourly-loads',
     label: 'Hourly Loads',
     href: '/control-room/hourly-loads',
@@ -68,13 +75,6 @@ export const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
     href: '/control-room/engineering-notes',
     description: 'Breakdowns, inspections & maintenance notes',
     icon: ClipboardList,
-  },
-  {
-    name: 'excavator-activity',
-    label: 'Excavator Activity',
-    href: '/control-room/excavator-activity',
-    description: 'Dig face tracking & bucket cycles',
-    icon: Pickaxe,
   },
   {
     name: 'reports',
