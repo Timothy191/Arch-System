@@ -1,0 +1,60 @@
+{
+  "mcp": {
+    "enableAllProjectMcpServers": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".qoder/hooks/auto-format.sh",
+            "name": "auto-format",
+            "statusMessage": "Formatting changed file with Biome",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".qoder/hooks/lint-migration.sh",
+            "name": "lint-migration",
+            "statusMessage": "Linting changed SQL migration (Squawk + RLS)",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".qoder/hooks/protect-paths.sh",
+            "name": "protect-paths",
+            "statusMessage": "Checking protected paths",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".qoder/hooks/commit-guard.sh",
+            "if": "Bash(git commit:*)",
+            "name": "commit-guard",
+            "statusMessage": "Checking commit flags",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

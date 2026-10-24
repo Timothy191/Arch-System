@@ -4,17 +4,20 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
       "description": "Safe local filesystem operations and directory tree inspection",
-      "type": "stdio"
+      "type": "stdio",
+      "disabled": true
     },
     "memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "cwd": "/tmp",
       "description": "Persistent Knowledge Graph Memory across conversations and agents",
       "type": "stdio"
     },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "cwd": "/tmp",
       "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
       "type": "stdio"
     },
@@ -76,6 +79,7 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"],
+      "cwd": "/tmp",
       "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
     },
@@ -85,21 +89,23 @@
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
-    "docker": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-docker"],
-      "description": "Docker container management and introspection",
-      "type": "stdio"
-    },
     "postgres": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"],
       "description": "PostgreSQL database introspection and query execution",
       "type": "stdio"
     },
+    "docker": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "description": "Docker container management and introspection",
+      "type": "stdio",
+      "disabled": true
+    },
     "chrome-devtools": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@1.10.1"],
+      "cwd": "/tmp",
       "description": "Chrome DevTools MCP for browser inspection and automation",
       "type": "stdio"
     },
@@ -109,6 +115,5 @@
       "description": "Next.js DevTools AST & routing inspector",
       "type": "stdio"
     }
-  },
-  "enableAllProjectMcpServers": false
+  }
 }

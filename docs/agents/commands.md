@@ -139,6 +139,63 @@ pnpm mcp:verify
 pnpm mcp:onboard
 ```
 
+### Local CI Runner (Actions Substitute)
+
+`pnpm agent:verify` is a monorepo-wide gate; it is **not** a mirror of
+`.github/workflows/ci.yml`. When Actions cannot run at all (account billing
+lock, runner outage, self-hosted runner offline), pushes get no server-side
+verification. `tools/scripts/local-ci.mjs` replays the runnable subset of the
+three gate workflows (`ci.yml`, `ga.yml`, `theme-ci.yml`) locally, job by job
+and step by step.
+
+```bash
+# Core suite: static/deterministic jobs against the current checkout
+pnpm ci:local
+
+# Add build, test, e2e, lighthouse, redis-integration, migration-replay jobs
+pnpm ci:local:full
+
+# Validate a pull request in an isolated detached worktree (fetch + merge-base + install)
+pnpm ci:local -- --pr=182
+
+# Narrow to specific jobs; see the resolved plan without executing anything
+pnpm ci:local -- --jobs=policy-check,knip
+pnpm ci:local -- --list
+
+# Flags: --suite=core|full  --redis=auto|off  --no-install  --keep  --dry-run  --help
+```
+
+Behaviour worth knowing before trusting the output:
+
+- **Allowlist execution.** Steps are matched by `"<job> :: <step name>"`
+  against a reviewed table. Anything unrecognised is reported `unmp`
+  (UNMAPPED) and never executed, so the runner cannot be talked into running
+  an arbitrary `run:` block. Edit `LOCAL_STEPS` in the script to widen coverage.
+- **Two statuses are not pass.** `gh—` is an Actions-only `uses:` step with no
+  local analogue; `skip` means a required binary or service is absent. Both are
+  echoed under _not covered locally_ and recorded in `uncovered` in the report.
+- **Reports** land in `.ci-local/report-<utc>.json` plus
+  `.ci-local/report-latest.json` (git-ignored) with per-step status, detail,
+  captured output, ref, suite, and Node version — attach that content as merge
+  evidence when Actions is red for non-gate reasons.
+- **Exit code** is 1 if any job has a failing step.
+- PR mode fetches `pull/<n>/head` into `refs/ci-local/pr-<n>`, creates a
+  detached worktree, symlinks the local `.env` files (values are never
+  printed), runs a frozen install, then removes the worktree. `--keep` retains
+  it for inspection; the ref is always deleted.
+- Redis jobs reuse a live `localhost:6379` if reachable, otherwise start an
+  ephemeral `redis:7.4-alpine` container and stop it on exit. gitleaks runs
+  through the upstream Docker image pointed at
+  `config/tools/.gitleaks.toml` (the workflow's `GITLEAKS_CONFIG` path does not
+  exist).
+
+Drift the runner cannot close: CodeQL init/analyze, Trivy, tflint, SBOM
+generation, tier-2 `actions/github-script` checks, and every deploy/preview
+workflow are excluded by design. `pnpm audit --audit-level=high --prod` and
+`pnpm md:lint` currently fail on pre-existing debt that was never gated because
+Actions never ran — read them as a backlog, not as a regression from the change
+under test.
+
 ### Database & Migrations
 
 ```bash

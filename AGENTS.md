@@ -1,7 +1,6 @@
 # AGENTS.md — Arch-System
 
-Scope: this repository only. `CLAUDE.md` here is a symlink to this file, so edits here are the edits.
-`../AGENTS.md` holds workspace-wide notes plus a longer synthesis of Arch-System guidance; this file wins for anything under `Arch-System/`.
+Scope: this repository only; `CLAUDE.md` is a symlink to this file. `../AGENTS.md` holds workspace-wide notes — this file wins under `Arch-System/`.
 
 ## 0. Bootstrap (run before anything else)
 
@@ -12,7 +11,9 @@ export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.lo
 pnpm -v   # 9.15.9
 ```
 
-The 24.15.0 tree supplies `node`/`npm`/`npx`; the 26.8.1 tree supplies `pnpm` (plus `tsc`, `lighthouse`, `vercel`, `repomix`). Other pnpm majors can hang Turborepo, so rely on the pinned 9.15.9.
+The 24.15.0 tree supplies `node`/`npm`/`npx`; 26.8.1 supplies `pnpm` (keeps `tsc`, `vercel`). Other pnpm majors can hang Turborepo — use 9.15.9.
+
+Local env is configured: never run `./setup.sh`, copy `*.example`, or create/edit real `.env*`; report missing keys (never print values).
 
 ## 1. Layout
 
@@ -43,7 +44,7 @@ pnpm --filter @repo/ui storybook                               # port 6006, need
 
 ## 3. Verification
 
-`pnpm agent:verify` (`tools/scripts/agent-verify.sh`) is the 15-step completion gate:
+`pnpm agent:verify` is the 15-step completion gate:
 type-check → lint → test → policy:check → audit:drift → skill-spector → mcp:verify → token:budget-check → rule-drift → maps parity → audit:hooks → deps:lint → cycles → audit:tailwind → knip.
 
 Gates: `pnpm lint:migrations` (Squawk + RLS on changed files; `--all` audits all) and `pnpm cycles` (dependency-cruiser `no-circular`) run in `lint-staged`, CI, and `agent:verify`. RLS exemptions need `-- rls-exempt-table <t>: <why>`.
@@ -62,19 +63,25 @@ Non-obvious fixes: rule-drift ⇒ sync `../.agents/rules/`; maps parity ⇒ `pnp
 
 - **Do not trust training data for Next APIs.** Read `node_modules/next/dist/docs/` before writing route/cache/proxy code.
 - `apps/portal/proxy.ts` replaces `middleware.ts` (Next 16) and also injects the CSP/nonce headers; route gating + auth delegation stays in `server/proxy.ts`.
-- `apps/portal/AGENTS.md` holds a `nextjs-agent-rules` block that `next dev` regenerates — deleting it just recreates it uncommitted; keep it.
+- `apps/portal/AGENTS.md` has a `nextjs-agent-rules` block that `next dev` regenerates — keep it.
 - `cacheComponents: true`; dev runs **webpack** (`next dev --webpack`) while `next build` uses Turbopack. `output: 'standalone'` unless `VERCEL`. `images.unoptimized: true`. `/` redirects to `/hub`.
 - Server-side caching SSoT is `apps/portal/lib/server-cache.ts`: `cacheProfiles` (telemetry/departments/reports/minutes/…), `scopedTag`/`tagTenant`/`tagDepartment`, and `updateTag()` which clears Next's data cache **and** Redis L1/L2. Mutations in `actions.ts` pair `cacheInvalidateTags([...])` with `revalidatePath()`.
-- **Redis has one door.** Every Redis touch goes through a named capability in `@repo/redis` — caching (`cache.ts`/`invalidation.ts`), authorization sessions (`session.ts`; revocation is `bumpPrivilegeVersion`), streams + consumer groups (`streams.ts`), locks + idempotency (`locks.ts`), analytics (`analytics.ts`), vector search with a pgvector fallback (`search.ts`) — all on the transport façade `raw.ts` (`send`/`sendSafe` + `detectCapabilities`). No inline `SET NX` or `GET`→`SET` in apps, and never assume a socket: serverless REST cannot block, subscribe, or run modules. Contract: `.agents/rules/redis-capabilities.md`; real-server behaviour: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` (CI job `redis-integration`, alongside the portal suite).
+- **Redis has one door.** Every Redis touch goes through a named capability in `@repo/redis` — caching, sessions (revoke via `bumpPrivilegeVersion`), streams, locks/idempotency, analytics, vector search (pgvector fallback) — all on `raw.ts` (`send`/`sendSafe` + `detectCapabilities`). No inline `SET NX`/`GET`→`SET` in apps, and never assume a socket: serverless REST cannot block, subscribe, or run modules. Contract: `.agents/rules/redis-capabilities.md`; real server: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration`.
 - `SKIP_TYPE_CHECK=true` only works locally (blocked when `CI=true`) — never use it to make a build pass.
 
 ## 6. Tests
 
 Jest 30 + `@swc/jest`; co-located `*.test.ts(x)`; run with `--runInBand`. `apps/portal/setupTests.ts` globally mocks `next/cache` and `@repo/redis`; `jest.config.cjs` maps `@repo/*` straight to `src/`, so no package build is required. Portal coverage thresholds are 40 statements / 27 branches / 28 functions / 40 lines — adding untested code can fail `test:coverage`.
 
-## 7. Reference map
+## 7. Working agreement
+
+- Broad audit/improvement requests: report evidence first, then stop; edit only after an explicit implement instruction.
+- Stay on `main` in the current checkout; no branches/worktrees/PRs, and no commit/push unless asked.
+
+## 8. Reference map
 
 - `.agents/GUIDE.md` — provider-neutral operations guide (note: it still claims Node ≥22; `engines` says ≥24).
 - `docs/agents/{architecture,commands,invariants,patterns,testing,jest-diagnostics}.md` — deep reference; some entries predate current scripts, verify against `package.json`.
 - `.agents/rules/` (canonical, mirrored to `../.agents/rules/`), `.cursor/rules/*.mdc`, `apps/portal/AGENTS.md`.
-- `codemap` MCP tools index this repo (fresh as of `HEAD`) — prefer symbol/graph queries over grepping large trees. The `code-index` server has a stale, empty index for this repo; don't trust it.
+- `.qoder/` holds project hooks (`settings.json`), skills, and subagents; fix what the hooks report instead of bypassing them.
+- `codemap` MCP tools index this repo — prefer symbol/graph queries to grepping. The `code-index` server's index is stale and empty; don't trust it.

@@ -306,3 +306,9 @@ get-token.js
 # Negate it here so the source and its tests stay tracked.
 !packages/redis/src/locks.ts
 !packages/redis/tests/locks.test.ts
+
+# Local CI runner output and its pull-request validation worktrees.
+.ci-local/
+
+# Agent token telemetry, rewritten by tools/scripts/token-tracker.cjs on every session.
+.agents/memory_base/token-usage.json

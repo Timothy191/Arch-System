@@ -214,6 +214,8 @@
     "prepare": "husky",
     "pre-configure": "echo 'No pre-configure needed'",
     "verify:gates": "bash tools/scripts/enforce-quality-gates.sh",
+    "ci:local": "node tools/scripts/local-ci.mjs",
+    "ci:local:full": "node tools/scripts/local-ci.mjs --suite=full",
     "quality": "turbo run lint type-check test lint:tokens lint:css && pnpm lint:styles && pnpm lint:css-perf && pnpm lint:spelling && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:compliance && pnpm html:check && pnpm verify:gates",
     "setup": "bash setup.sh",
     "setup:clean": "bash setup.sh --clean",
