@@ -5,12 +5,8 @@ import { getCurrentShift } from '@repo/utils/client';
 import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import type {
-  DelayBucketKey,
-  MachineCoverageStatus,
-  ShiftCompleteness,
-} from '@/lib/shift-completeness';
-import { DELAY_BUCKET_KEYS } from '@/lib/shift-completeness';
+import type { MachineCoverageStatus, ShiftCompleteness } from '@/lib/shift-completeness';
+import { DELAY_BUCKET_KEYS, type DelayBucketKey } from '@/lib/shift-sheet-buckets';
 
 interface Props {
   departmentId: string;

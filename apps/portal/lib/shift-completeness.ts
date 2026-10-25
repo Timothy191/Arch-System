@@ -1,6 +1,11 @@
 import { CacheCategory } from '@repo/redis';
 import type { createServerSupabaseClient } from '@repo/supabase/server';
 import { withCache } from '@/lib/cache-utils';
+import {
+  DELAY_BUCKET_BY_CATEGORY,
+  type DelayBucketMinutes,
+  emptyDelayBuckets,
+} from '@/lib/shift-sheet-buckets';
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -9,62 +14,6 @@ export type RequiredForm =
   | 'excavator-activity'
   | 'roll-over'
   | 'hourly-loads';
-
-/**
- * Delay buckets rendered as columns on the machine-operations shift sheet.
- * Buckets are backed by `delay_categories` names (seeded in migration
- * 195_machine_operations_delay_categories.sql) and aggregated from
- * `delay_entries`, not from per-bucket numeric columns.
- */
-export const DELAY_BUCKET_KEYS = [
-  'blasting',
-  'natural',
-  'noOperator',
-  'otherProduction',
-  'greasingStartup',
-  'maintenanceGet',
-  'breakdown',
-] as const;
-
-export type DelayBucketKey = (typeof DELAY_BUCKET_KEYS)[number];
-
-export type DelayBucketMinutes = Record<DelayBucketKey, number>;
-
-/**
- * Category-name → sheet bucket. Lowercased keys; aliases keep the historic
- * generic categories (seeded before the sheet buckets existed) landing in the
- * column a supervisor would expect. Unmapped categories (e.g. `External`) are
- * intentionally excluded so they never inflate a production bucket.
- */
-const DELAY_BUCKET_BY_CATEGORY: Record<string, DelayBucketKey> = {
-  blasting: 'blasting',
-  natural: 'natural',
-  weather: 'natural',
-  'no operator': 'noOperator',
-  'operator unavailable': 'noOperator',
-  'other production delay': 'otherProduction',
-  production: 'otherProduction',
-  other: 'otherProduction',
-  'greasing & startup': 'greasingStartup',
-  'greasing and startup': 'greasingStartup',
-  'maintenance & get': 'maintenanceGet',
-  maintenance: 'maintenanceGet',
-  engineering: 'maintenanceGet',
-  breakdown: 'breakdown',
-  'equipment breakdown': 'breakdown',
-};
-
-function emptyDelayBuckets(): DelayBucketMinutes {
-  return {
-    blasting: 0,
-    natural: 0,
-    noOperator: 0,
-    otherProduction: 0,
-    greasingStartup: 0,
-    maintenanceGet: 0,
-    breakdown: 0,
-  };
-}
 
 export interface BreakdownDelaySource {
   reason?: string | null;
