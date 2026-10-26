@@ -75,7 +75,6 @@
         "hooks/useOfflineQueue.ts",
         "lib/ai/embeddings.ts",
         "lib/api/rate-limit-middleware.ts",
-        "components/dynamic/LazyHeavyComponents.tsx",
         "flags/index.ts",
         "workflows/index.ts",
         ".eslintrc.{js,cjs}"
@@ -116,9 +115,7 @@
       "ignore": [
         "lib/observability/metrics.ts",
         "features/analytics/components/ReportTemplate.tsx",
-        "lib/feature-flags.ts",
         "app/overview/AuditReportsSection.tsx",
-        "components/dynamic/LazyHeavyComponents.tsx",
         "components/LCPObserver.tsx",
         "components/PitConnectivityBanner.tsx",
         "components/WebVitalsReporter.tsx",

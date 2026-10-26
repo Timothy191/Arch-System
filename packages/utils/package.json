@@ -22,7 +22,8 @@
     "./inngest": "./src/inngest.ts",
     "./novu": "./src/novu.ts",
     "./n8n": "./src/n8n.ts",
-    "./hardware": "./src/hardware/index.ts"
+    "./hardware": "./src/hardware/index.ts",
+    "./observability/metrics": "./src/observability/metrics.ts"
   },
   "private": true,
   "scripts": {

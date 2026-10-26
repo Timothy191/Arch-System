@@ -6,13 +6,15 @@ import { EmptyState } from '@repo/ui/EmptyState';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
-import { CloseShiftModal } from './CloseShiftModal';
+import { type CloseShiftFn, CloseShiftModal, type VerifyPinFn } from './CloseShiftModal';
 
-interface ShiftCoverageWidgetProps {
+export interface ShiftCoverageWidgetProps {
   departmentId: string;
   departmentSlug: string;
   today: string;
   currentShift: 'day' | 'night';
+  onCloseShift?: CloseShiftFn;
+  onVerifyPin?: VerifyPinFn;
 }
 
 interface MachineWithOp {
@@ -30,6 +32,8 @@ function ShiftCoverageWidgetBase({
   departmentSlug,
   today,
   currentShift,
+  onCloseShift,
+  onVerifyPin,
 }: ShiftCoverageWidgetProps) {
   const [machines, setMachines] = useState<MachineWithOp[]>([]);
   const [isClosed, setIsClosed] = useState(false);
@@ -238,7 +242,7 @@ function ShiftCoverageWidgetBase({
               </table>
             </div>
 
-            {!isClosed && (
+            {!isClosed && onCloseShift && onVerifyPin && (
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
@@ -252,15 +256,19 @@ function ShiftCoverageWidgetBase({
         )}
       </GlassCard>
 
-      <CloseShiftModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        departmentId={departmentId}
-        departmentSlug={departmentSlug}
-        date={today}
-        shiftType={currentShift}
-        onComplete={() => setShowModal(false)}
-      />
+      {onCloseShift && onVerifyPin && (
+        <CloseShiftModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          departmentId={departmentId}
+          departmentSlug={departmentSlug}
+          date={today}
+          shiftType={currentShift}
+          onComplete={() => setShowModal(false)}
+          onCloseShift={onCloseShift}
+          onVerifyPin={onVerifyPin}
+        />
+      )}
     </>
   );
 }

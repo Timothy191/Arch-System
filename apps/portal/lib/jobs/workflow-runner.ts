@@ -1,4 +1,4 @@
-import { serverlessRedis } from '@repo/redis/serverless-client';
+import { serverlessRedis } from '@repo/redis';
 import { type TriggerN8nOptions, triggerN8nWorkflow } from '@repo/utils/n8n';
 
 export interface WorkflowJobStatus {

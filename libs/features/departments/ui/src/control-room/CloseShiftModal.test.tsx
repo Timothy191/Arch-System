@@ -1,17 +1,11 @@
 // AGENT-TRACE: CloseShiftModal test covering full shift closeout workflow states (validating -> has_errors -> pin_entry -> verifying -> verified -> submitting -> success -> api_error).
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { closeShift, verifyPin } from '@/lib/shift-closeout';
-import { CloseShiftModal } from './CloseShiftModal';
+import { type CloseShiftFn, CloseShiftModal, type VerifyPinFn } from './CloseShiftModal';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     refresh: jest.fn(),
   }),
-}));
-
-jest.mock('@/lib/shift-closeout', () => ({
-  verifyPin: jest.fn(),
-  closeShift: jest.fn(),
 }));
 
 jest.mock('@repo/ui/GlassCard', () => ({
@@ -22,6 +16,9 @@ jest.mock('@repo/ui/GlassCard', () => ({
   ),
 }));
 
+const mockCloseShift = jest.fn<ReturnType<CloseShiftFn>, Parameters<CloseShiftFn>>();
+const mockVerifyPin = jest.fn<ReturnType<VerifyPinFn>, Parameters<VerifyPinFn>>();
+
 const mockProps = {
   open: true,
   onClose: jest.fn(),
@@ -30,6 +27,8 @@ const mockProps = {
   date: '2026-06-15',
   shiftType: 'day' as const,
   onComplete: jest.fn(),
+  onCloseShift: mockCloseShift,
+  onVerifyPin: mockVerifyPin,
 };
 
 describe('CloseShiftModal', () => {
@@ -38,18 +37,18 @@ describe('CloseShiftModal', () => {
   });
 
   it('should show validating state initially and call closeShift as a dry run', async () => {
-    (closeShift as jest.Mock).mockReturnValue(new Promise(() => {})); // Never resolves to keep it in validating state
+    mockCloseShift.mockReturnValue(new Promise(() => {})); // Never resolves to keep it in validating state
 
     await act(async () => {
       render(<CloseShiftModal {...mockProps} />);
     });
 
     expect(screen.getByText('Validating shift data...')).toBeInTheDocument();
-    expect(closeShift).toHaveBeenCalledWith('dept-123', '2026-06-15', 'day', '', '', true);
+    expect(mockCloseShift).toHaveBeenCalledWith('dept-123', '2026-06-15', 'day', '', '', true);
   });
 
   it('should transition to has_errors state if validation fails', async () => {
-    (closeShift as jest.Mock).mockResolvedValue({
+    mockCloseShift.mockResolvedValue({
       errors: ['Machine M001 is missing hourly loads', 'Operator O002 has unacknowledged alerts'],
     });
 
@@ -74,7 +73,7 @@ describe('CloseShiftModal', () => {
   });
 
   it('should transition to pin_entry state if validation succeeds', async () => {
-    (closeShift as jest.Mock).mockResolvedValue({ errors: [] });
+    mockCloseShift.mockResolvedValue({ errors: [] });
 
     await act(async () => {
       render(<CloseShiftModal {...mockProps} />);
@@ -92,8 +91,8 @@ describe('CloseShiftModal', () => {
   });
 
   it('should handle invalid PIN input and display verification error', async () => {
-    (closeShift as jest.Mock).mockResolvedValue({ errors: [] });
-    (verifyPin as jest.Mock).mockResolvedValue({ valid: false });
+    mockCloseShift.mockResolvedValue({ errors: [] });
+    mockVerifyPin.mockResolvedValue({ valid: false });
 
     await act(async () => {
       render(<CloseShiftModal {...mockProps} />);
@@ -126,16 +125,16 @@ describe('CloseShiftModal', () => {
     await act(async () => {
       fireEvent.click(tryAgainBtn);
     });
-    expect(closeShift).toHaveBeenCalledTimes(2);
+    expect(mockCloseShift).toHaveBeenCalledTimes(2);
   });
 
   it('should transition to verified state, handle submitting, and close successfully', async () => {
     jest.useFakeTimers();
-    (closeShift as jest.Mock)
+    mockCloseShift
       .mockResolvedValueOnce({ errors: [] }) // For dry run
       .mockResolvedValueOnce({ success: true }); // For actual close shift submission
 
-    (verifyPin as jest.Mock).mockResolvedValue({
+    mockVerifyPin.mockResolvedValue({
       valid: true,
       employee: { id: 'emp-abc', full_name: 'John Supervisor' },
     });

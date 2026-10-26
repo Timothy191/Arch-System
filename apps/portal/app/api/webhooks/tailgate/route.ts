@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { applyCors } from '@/lib/api/cors';
+import { authorizeIngest } from '@/lib/api/telemetry-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 
 const tailgateSchema = z.object({
@@ -13,6 +14,9 @@ const tailgateSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const authFailure = authorizeIngest(req);
+  if (authFailure) return applyCors(req, authFailure);
+
   try {
     const body = await req.json();
     const alert = tailgateSchema.parse(body);

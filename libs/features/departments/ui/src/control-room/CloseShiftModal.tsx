@@ -4,9 +4,33 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertCircle, CheckCircle, Loader2, Lock, UserCheck, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { closeShift, verifyPin } from '@/lib/shift-closeout';
 
-interface CloseShiftModalProps {
+export interface CloseShiftResult {
+  success?: boolean;
+  errors?: string[];
+  shiftStatusId?: string;
+}
+
+export interface VerifyPinResult {
+  valid: boolean;
+  employee?: { id: string; full_name: string } | null;
+  lockedOut?: boolean;
+  message?: string;
+}
+
+export type CloseShiftFn = (
+  departmentId: string,
+  date: string,
+  shiftType: 'day' | 'night',
+  approvedById: string,
+  pin: string,
+  validateOnly?: boolean,
+  departmentSlug?: string
+) => Promise<CloseShiftResult>;
+
+export type VerifyPinFn = (employeeCode: string, pin: string) => Promise<VerifyPinResult>;
+
+export interface CloseShiftModalProps {
   open: boolean;
   onClose: () => void;
   departmentId: string;
@@ -14,6 +38,8 @@ interface CloseShiftModalProps {
   date: string;
   shiftType: 'day' | 'night';
   onComplete: () => void;
+  onCloseShift: CloseShiftFn;
+  onVerifyPin: VerifyPinFn;
 }
 
 type ModalState =
@@ -34,6 +60,8 @@ export function CloseShiftModal({
   date,
   shiftType,
   onComplete,
+  onCloseShift,
+  onVerifyPin,
 }: CloseShiftModalProps) {
   const router = useRouter();
   const [state, setState] = useState<ModalState>({ type: 'validating' });
@@ -43,7 +71,7 @@ export function CloseShiftModal({
   const validate = useCallback(async () => {
     setState({ type: 'validating' });
     try {
-      const result = await closeShift(departmentId, date, shiftType, '', '', true);
+      const result = await onCloseShift(departmentId, date, shiftType, '', '', true);
       if (result.errors && result.errors.length > 0) {
         setState({ type: 'has_errors', errors: result.errors });
       } else {
@@ -55,7 +83,7 @@ export function CloseShiftModal({
         message: err instanceof Error ? err.message : 'Validation failed',
       });
     }
-  }, [departmentId, date, shiftType]);
+  }, [departmentId, date, shiftType, onCloseShift]);
 
   useEffect(() => {
     if (open) {
@@ -69,7 +97,7 @@ export function CloseShiftModal({
     if (!employeeCode || !pin) return;
     setState({ type: 'verifying' });
     try {
-      const result = await verifyPin(employeeCode, pin);
+      const result = await onVerifyPin(employeeCode, pin);
       if (result.valid && result.employee) {
         setState({
           type: 'verified',
@@ -94,7 +122,7 @@ export function CloseShiftModal({
     if (state.type !== 'verified') return;
     setState({ type: 'submitting' });
     try {
-      const result = await closeShift(
+      const result = await onCloseShift(
         departmentId,
         date,
         shiftType,

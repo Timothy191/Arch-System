@@ -26,17 +26,13 @@
     "test": "jest --config jest.config.js --passWithNoTests --maxWorkers=2"
   },
   "devDependencies": {
-    "@react-three/drei": "^10.7.9",
-    "@react-three/fiber": "^9.8.1",
     "@swc/jest": "^0.2.39",
     "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "@types/three": "^0.186.0",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.2.0",
-    "three": "^0.186.1",
     "typescript": "catalog:"
   }
 }

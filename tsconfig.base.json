@@ -54,8 +54,7 @@
       "@repo/errors": ["packages/errors/src/index.ts"],
       "@repo/errors/*": ["packages/errors/src/*"],
       "@repo/eval": ["packages/eval/src/index.ts"],
-      "@repo/eval/*": ["packages/eval/src/*"],
-      "@/*": ["apps/portal/*"]
+      "@repo/eval/*": ["packages/eval/src/*"]
     }
   },
   "exclude": ["node_modules"]

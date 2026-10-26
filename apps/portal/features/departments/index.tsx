@@ -4,9 +4,7 @@ export {
   type BreakdownControlRoomView,
   type BreakdownMetrics,
   BreakdownsDashboard,
-  BreakdownsTable,
   type Machine,
-  ShiftCoverageWidget,
 } from '@repo/departments/ui';
 export * from './components/control-room/AlertPanel';
 export * from './components/control-room/ControlRoomActivityFeed';

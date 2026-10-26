@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { cacheEvictL1ByPrefix, cacheGet, cacheSet } from '@repo/redis/cache';
 import {
   type EmployeeRecord,
@@ -10,6 +9,8 @@ import {
 import { createMiddlewareClient } from '@repo/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
+
+type MiddlewareClient = Awaited<ReturnType<typeof createMiddlewareClient>>;
 
 /**
  * Copies cookies from a Supabase middleware response onto a target
@@ -121,6 +122,19 @@ const RESTRICTED_ROUTES: Record<string, string[]> = {
   admin: ['admin'],
 };
 
+const PUBLIC_FILE_EXTENSIONS =
+  /\.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$/i;
+
+const PUBLIC_ROOT_FILES = new Set([
+  '/manifest.json',
+  '/manifest.webmanifest',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/browserconfig.xml',
+  '/sw.js',
+  '/workbox-*.js',
+]);
+
 export function normalizeRole(role: unknown): string {
   if (typeof role === 'string') {
     const trimmed = role.trim();
@@ -137,7 +151,11 @@ export function isTokenExpiredError(error: unknown): boolean {
   return msg.includes('Invalid Refresh Token') || msg.includes('Refresh Token Not Found');
 }
 
-function redirectWithError(request: NextRequest, error: string, clientResponse?: NextResponse) {
+function redirectWithError(
+  request: NextRequest,
+  error: string,
+  clientResponse?: NextResponse
+): NextResponse {
   const url = new URL('/', request.url);
   url.searchParams.set('error', error);
   const res = NextResponse.redirect(url);
@@ -146,7 +164,7 @@ function redirectWithError(request: NextRequest, error: string, clientResponse?:
 }
 
 async function resolveDeptUuid(
-  supabase: Awaited<ReturnType<typeof createMiddlewareClient>>['supabase'],
+  supabase: MiddlewareClient['supabase'],
   slug: string
 ): Promise<string | null> {
   const cacheKey = `dept:uuid:${slug}`;
@@ -173,10 +191,7 @@ async function resolveDeptUuid(
   return null;
 }
 
-export async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-
-  // Exempt health, hardware API, Prometheus metrics, and Vercel Speed Insights/observability endpoints from authentication entirely
+function isPublicBypassPath(pathname: string): boolean {
   if (
     pathname.startsWith('/api/c66') ||
     pathname.startsWith('/api/health') ||
@@ -184,116 +199,41 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/_vercel/speed-insights') ||
     pathname.startsWith('/_vercel/insights')
   ) {
-    return NextResponse.next();
+    return true;
   }
 
-  // Exempt password reset and update flows from middleware auth gating
   if (pathname.startsWith('/reset-password') || pathname.startsWith('/update-password')) {
-    return NextResponse.next();
+    return true;
   }
 
-  // Short-circuit static public file extensions BEFORE any auth calls
-  const PUBLIC_FILE_EXTENSIONS =
-    /\.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$/i;
   if (PUBLIC_FILE_EXTENSIONS.test(pathname)) {
-    return NextResponse.next();
+    return true;
   }
 
-  // Short-circuit well-known public root files (PWA manifest, robots, sitemap...)
-  // These are never auth-gated and must never redirect to /login.
-  const PUBLIC_ROOT_FILES = new Set([
-    '/manifest.json',
-    '/manifest.webmanifest',
-    '/robots.txt',
-    '/sitemap.xml',
-    '/browserconfig.xml',
-    '/sw.js',
-    '/workbox-*.js',
-  ]);
-  if (
-    PUBLIC_ROOT_FILES.has(pathname) ||
-    // Catch hashed workbox chunks like /workbox-abc123.js
-    /^\/workbox-.+\.js$/.test(pathname)
-  ) {
-    return NextResponse.next();
-  }
+  return PUBLIC_ROOT_FILES.has(pathname) || /^\/workbox-.+\.js$/.test(pathname);
+}
 
-  // Short-circuit the login page BEFORE calling Supabase — avoids a full
-  // network round-trip (~50 s cold) for a public unauthenticated route.
-  // We only need auth here if there IS a session cookie (to redirect logged-in
-  // users away from /login), so we check that cheaply first.
-  if (pathname.startsWith('/login')) {
-    const hasSession =
-      request.cookies.has('sb-access-token') ||
-      [...request.cookies.getAll()].some(
+function hasSupabaseSessionCookie(request: NextRequest): boolean {
+  return (
+    request.cookies.has('sb-access-token') ||
+    request.cookies
+      .getAll()
+      .some(
         (c) =>
           (c.name.startsWith('sb-') || c.name.includes('sb-')) && c.name.includes('-auth-token')
-      );
+      )
+  );
+}
 
-    if (!hasSession) {
-      // No session cookie at all — serve login instantly, no Supabase call
-      return NextResponse.next();
-    }
-
-    // Has a session cookie — verify it and redirect if valid
-    const client = await createMiddlewareClient(request as any);
-    let sessionUser: { id: string } | null = null;
-    let shouldSignOut = false;
-    try {
-      const result = await client.supabase.auth.getClaims();
-      sessionUser = result.data?.claims?.sub ? { id: result.data.claims.sub } : null;
-      if (result.error && isTokenExpiredError(result.error)) {
-        shouldSignOut = true;
-      }
-    } catch (error) {
-      if (isTokenExpiredError(error)) {
-        shouldSignOut = true;
-      }
-    }
-
-    if (shouldSignOut) {
-      safeRecordJob('auth.middleware.signout', false);
-      await client.supabase.auth.signOut();
-      return client.response;
-    }
-
-    if (sessionUser) {
-      safeRecordJob('auth.middleware.check', true);
-      const redirectParam = request.nextUrl.searchParams.get('redirect');
-      const target =
-        redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith('/login')
-          ? redirectParam
-          : '/hub';
-      const redirectRes = NextResponse.redirect(new URL(target, request.url));
-      copyCookies(client.response, redirectRes);
-      return redirectRes;
-    }
-    safeRecordJob('auth.middleware.check', false);
-    return client.response;
-  }
-
-  // Check if session cookie exists before creating Supabase middleware client or calling auth.getUser().
-  // If no session cookie exists, short-circuit immediately to /login without network round-trip.
-  const hasSessionCookie =
-    request.cookies.has('sb-access-token') ||
-    [...request.cookies.getAll()].some(
-      (c) => (c.name.startsWith('sb-') || c.name.includes('sb-')) && c.name.includes('-auth-token')
-    );
-
-  if (!hasSessionCookie) {
-    const redirectUrl = new URL('/login', request.url);
-    if (isValidRedirect(pathname)) {
-      redirectUrl.searchParams.set('redirect', pathname);
-    }
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  const client = await createMiddlewareClient(request as any);
+async function extractClaimsUser(
+  client: MiddlewareClient
+): Promise<{ user: { id: string } | null; shouldSignOut: boolean }> {
   let user: { id: string } | null = null;
   let shouldSignOut = false;
   try {
     const result = await client.supabase.auth.getClaims();
-    user = result.data?.claims?.sub ? { id: result.data.claims.sub } : null;
+    const sub = result.data?.claims?.sub;
+    user = typeof sub === 'string' && sub.length > 0 ? { id: sub } : null;
     if (result.error && isTokenExpiredError(result.error)) {
       shouldSignOut = true;
     }
@@ -302,40 +242,50 @@ export async function proxy(request: NextRequest) {
       shouldSignOut = true;
     }
   }
+  return { user, shouldSignOut };
+}
+
+async function handleLoginRoute(request: NextRequest): Promise<NextResponse> {
+  if (!hasSupabaseSessionCookie(request)) {
+    return NextResponse.next();
+  }
+
+  const client = await createMiddlewareClient(request);
+  const { user: sessionUser, shouldSignOut } = await extractClaimsUser(client);
 
   if (shouldSignOut) {
+    safeRecordJob('auth.middleware.signout', false);
     await client.supabase.auth.signOut();
-    if (user?.id) {
-      const signedOut = user.id;
-      // Fences every cached copy of this session, not just this instance's L1.
-      await revokeSession(signedOut, { reason: 'logout' }).catch(() => {
-        cacheEvictL1ByPrefix(`arch:auth:employee:${signedOut}`);
-      });
-    }
-    user = null;
+    return client.response;
   }
 
-  // Not authenticated -> login
-  if (!user) {
-    const redirectUrl = new URL('/login', request.url);
-    // Only set redirect parameter if it passes server-side validation
-    if (isValidRedirect(pathname)) {
-      redirectUrl.searchParams.set('redirect', pathname);
-    }
-    const redirectResponse = NextResponse.redirect(redirectUrl);
-    copyCookies(client.response, redirectResponse);
-    return redirectResponse;
+  if (sessionUser) {
+    safeRecordJob('auth.middleware.check', true);
+    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    const target =
+      redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith('/login')
+        ? redirectParam
+        : '/hub';
+    const redirectRes = NextResponse.redirect(new URL(target, request.url));
+    copyCookies(client.response, redirectRes);
+    return redirectRes;
   }
 
-  // Authoritative role/department from the fenced session record — the same
-  // store @repo/supabase/auth reads, so the two writers cannot diverge.
+  safeRecordJob('auth.middleware.check', false);
+  return client.response;
+}
+
+async function resolveEmployeeSession(
+  client: MiddlewareClient,
+  userId: string
+): Promise<EmployeeRecord | null> {
   let employee: EmployeeRecord | null = null;
   try {
     employee = await Promise.race([
-      readSession(user.id),
+      readSession(userId),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), SESSION_READ_BUDGET_MS)),
     ]);
-  } catch (_err) {
+  } catch {
     // Redis offline or too slow — fall through to direct DB fetch
     employee = null;
   }
@@ -344,16 +294,25 @@ export async function proxy(request: NextRequest) {
     const { data } = await client.supabase
       .from('employees')
       .select('id, role, department_id, accessible_departments')
-      .eq('auth_id', user.id)
+      .eq('auth_id', userId)
       .single();
-    employee = data ?? null;
+    employee = (data as EmployeeRecord | null) ?? null;
     if (employee) {
-      await writeSession({ userId: user.id, employee }).catch(() => undefined);
+      await writeSession({ userId, employee }).catch(() => undefined);
     }
   } else {
-    await touchSession(user.id).catch(() => undefined);
+    await touchSession(userId).catch(() => undefined);
   }
 
+  return employee;
+}
+
+async function enforceRouteAccess(
+  request: NextRequest,
+  client: MiddlewareClient,
+  pathname: string,
+  employee: EmployeeRecord | null
+): Promise<NextResponse | null> {
   const userRole = normalizeRole(employee?.role);
   const userDept = employee?.department_id ?? null;
   const accessible = employee?.accessible_departments ?? [];
@@ -365,7 +324,7 @@ export async function proxy(request: NextRequest) {
   // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
     if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
-      return redirectWithError(request as any, 'unauthorized_department', client.response as any);
+      return redirectWithError(request, 'unauthorized_department', client.response);
     }
   }
 
@@ -375,7 +334,7 @@ export async function proxy(request: NextRequest) {
     RESTRICTED_ROUTES.tools &&
     !RESTRICTED_ROUTES.tools.includes(userRole)
   ) {
-    return redirectWithError(request as any, 'unauthorized_department', client.response as any);
+    return redirectWithError(request, 'unauthorized_department', client.response);
   }
 
   // Check department isolation
@@ -384,13 +343,65 @@ export async function proxy(request: NextRequest) {
 
     const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
     if (!deptUuid) {
-      return redirectWithError(request as any, 'unknown_department', client.response as any);
+      return redirectWithError(request, 'unknown_department', client.response);
     }
 
     const hasAccess = isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
     if (!hasAccess) {
-      return redirectWithError(request as any, 'unauthorized_department', client.response as any);
+      return redirectWithError(request, 'unauthorized_department', client.response);
     }
+  }
+
+  return null;
+}
+
+export async function proxy(request: NextRequest): Promise<NextResponse> {
+  const pathname = request.nextUrl.pathname;
+
+  if (isPublicBypassPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith('/login')) {
+    return handleLoginRoute(request);
+  }
+
+  if (!hasSupabaseSessionCookie(request)) {
+    const redirectUrl = new URL('/login', request.url);
+    if (isValidRedirect(pathname)) {
+      redirectUrl.searchParams.set('redirect', pathname);
+    }
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  const client = await createMiddlewareClient(request);
+  let { user, shouldSignOut } = await extractClaimsUser(client);
+
+  if (shouldSignOut) {
+    await client.supabase.auth.signOut();
+    if (user?.id) {
+      const signedOut = user.id;
+      await revokeSession(signedOut, { reason: 'logout' }).catch(() => {
+        cacheEvictL1ByPrefix(`arch:auth:employee:${signedOut}`);
+      });
+    }
+    user = null;
+  }
+
+  if (!user) {
+    const redirectUrl = new URL('/login', request.url);
+    if (isValidRedirect(pathname)) {
+      redirectUrl.searchParams.set('redirect', pathname);
+    }
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    copyCookies(client.response, redirectResponse);
+    return redirectResponse;
+  }
+
+  const employee = await resolveEmployeeSession(client, user.id);
+  const accessDeniedResponse = await enforceRouteAccess(request, client, pathname, employee);
+  if (accessDeniedResponse) {
+    return accessDeniedResponse;
   }
 
   return client.response;

@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { browserLogger, createChildLogger, createLogger, serverLogger } from './index';
 
 describe('@repo/logger structured logging suite', () => {

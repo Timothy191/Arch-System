@@ -4,11 +4,15 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withBodyLimit } from '@/lib/api/body-limit';
 import { applyCors } from '@/lib/api/cors';
+import { authorizeIngest } from '@/lib/api/telemetry-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 
 const bulkTelemetrySchema = z.array(telemetryPushSchema).max(500); // Max 500 records per burst
 
 export async function POST(req: Request) {
+  const authFailure = authorizeIngest(req);
+  if (authFailure) return applyCors(req, authFailure);
+
   return withBodyLimit(
     req,
     async () => {

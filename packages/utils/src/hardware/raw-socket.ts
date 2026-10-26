@@ -1,5 +1,3 @@
-import net from 'node:net';
-
 export interface RawSocketOptions {
   host: string;
   port: number;
@@ -25,12 +23,16 @@ export class RawSocketBridge {
    * Sends raw data (e.g., ZPL commands) to the socket and gracefully closes the connection.
    */
   public async send(data: string | Buffer): Promise<void> {
+    if (typeof window !== 'undefined') {
+      throw new Error('RawSocketBridge is only available on the server runtime');
+    }
+    const net = await import(/* webpackIgnore: true */ 'node:net');
     return new Promise((resolve, reject) => {
       const socket = new net.Socket();
       socket.setTimeout(this.timeout);
 
       socket.connect(this.port, this.host, () => {
-        socket.write(data, (err) => {
+        socket.write(data, (err?: Error | null) => {
           if (err) {
             socket.destroy();
             reject(err);
@@ -44,7 +46,7 @@ export class RawSocketBridge {
         resolve();
       });
 
-      socket.on('error', (err) => {
+      socket.on('error', (err: Error) => {
         socket.destroy();
         reject(err);
       });

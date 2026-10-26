@@ -3,12 +3,7 @@ import { type ToolRiskClass } from '@repo/contract/schemas/integration.schema';
 import { APIError, ForbiddenError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { mcpClientManager } from './mcp-client-manager';
-import {
-  type ActiveIntegration,
-  buildToolIndex,
-  listActiveMcpIntegrations,
-  writeAuditLog,
-} from './service';
+import { type ActiveIntegration, listActiveMcpIntegrations, writeAuditLog } from './service';
 
 /**
  * Tool bridge: the guarded path for invoking integration tools.
@@ -35,7 +30,7 @@ export interface ToolIndexEntry {
   riskClass: ToolRiskClass;
 }
 
-export function resolveRiskClass(config: Record<string, unknown>): ToolRiskClass {
+function resolveRiskClass(config: Record<string, unknown>): ToolRiskClass {
   return config.risk_class === 'write' ? 'write' : 'read';
 }
 
@@ -230,6 +225,3 @@ function parseQualifiedName(name: string): { slug: string; toolName: string } | 
   if (separator <= 0 || separator === rest.length - 2) return null;
   return { slug: rest.slice(0, separator), toolName: rest.slice(separator + 2) };
 }
-
-/** Re-exports for route handlers that want the index without rebuilding it. */
-export { buildToolIndex };
