@@ -200,18 +200,6 @@ export default async function AccessLogsPage({
               totalPages={totalPages}
               totalCount={totalCount}
               pageSize={pageSize}
-              onPageChange={(newPage) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('page', newPage.toString());
-                url.searchParams.set('pageSize', pageSize.toString());
-                window.location.href = url.toString();
-              }}
-              onPageSizeChange={(newSize) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('page', '1');
-                url.searchParams.set('pageSize', newSize.toString());
-                window.location.href = url.toString();
-              }}
             />
           </div>
         )}

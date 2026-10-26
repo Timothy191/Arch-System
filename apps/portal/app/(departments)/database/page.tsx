@@ -25,19 +25,19 @@ import { DATABASE_SCHEMA } from '@/app/overview/lib/data';
 
 const REDIS_KEY_NAMESPACES = [
   {
-    pattern: 'arch:auth:employee:${userId}',
+    pattern: 'arch:auth:employee:<userId>',
     purpose: 'Proxy RBAC & employee department claims cache',
     ttl: '3600s (1 hr)',
     tier: 'L1 + L2 Redis',
   },
   {
-    pattern: 'arch:cache:dept:${deptId}:*',
+    pattern: 'arch:cache:dept:<deptId>:*',
     purpose: 'Department KPIs, shift closeout & telemetry cache',
     ttl: '60s–300s (X-Fetch)',
     tier: 'L1 + L2 Redis',
   },
   {
-    pattern: 'ratelimit:${route}:${ip}',
+    pattern: 'ratelimit:<route>:<ip>',
     purpose: 'Atomic Lua INCR+PEXPIRE fixed-window & sliding rate limits',
     ttl: '60s window',
     tier: 'L2 Redis Lua',

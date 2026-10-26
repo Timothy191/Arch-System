@@ -412,6 +412,55 @@ describe('Shift Completeness Validation', () => {
       ).rejects.toThrow('Failed to load machine_operations for shift completeness');
     });
 
+    it('falls back to baseline machines query when report_exempt column is missing in remote schema', async () => {
+      let machinesCalls = 0;
+      const supabase = {
+        from: jest.fn().mockImplementation((table: string) => {
+          if (table === 'machines') {
+            machinesCalls += 1;
+            const response =
+              machinesCalls === 1
+                ? { data: null, error: { message: 'column machines.report_exempt does not exist' } }
+                : {
+                    data: [
+                      {
+                        id: 'm-1',
+                        name: 'DT-101',
+                        machine_type: 'dump truck',
+                        serial_number: 'SN-101',
+                      },
+                    ],
+                    error: null,
+                  };
+            return {
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              order: jest.fn().mockResolvedValue(response),
+            };
+          }
+          const emptyResponse = { data: [], error: null };
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
+            order: jest.fn().mockResolvedValue(emptyResponse),
+            then: jest.fn().mockImplementation((resolve) => resolve(emptyResponse)),
+          };
+        }),
+      } as any;
+
+      const res = await getShiftCompleteness(
+        supabase,
+        'dept-1',
+        'control-room',
+        '2026-06-15',
+        'day'
+      );
+      expect(machinesCalls).toBe(2);
+      expect(res.totalRequired).toBe(1);
+      expect(res.statuses[0]!.exempt).toBe(false);
+    });
+
     it('includes the department slug in the cache key parts', async () => {
       const supabase = mockSupabaseBuilder({
         machines: [],

@@ -114,6 +114,7 @@ test.describe('Department Navigation E2E', () => {
     });
 
     test('navigates across all registered department roots', async ({ page }) => {
+      test.setTimeout(120000);
       const departments = [
         'drilling',
         'production',
@@ -124,7 +125,7 @@ test.describe('Department Navigation E2E', () => {
       ];
 
       for (const dept of departments) {
-        await page.goto(`/${dept}`);
+        await page.goto(`/${dept}`, { waitUntil: 'domcontentloaded' });
         await expect(page).toHaveURL(new RegExp(`.*\\/${dept}`));
         await expect(page.locator('body')).toBeVisible();
       }

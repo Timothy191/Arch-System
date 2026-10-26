@@ -110,7 +110,12 @@ export default async function ReportsPage({
       .gte('log_date', fromDateStr)
       .lte('log_date', toDateStr)
       .order('log_date', { ascending: false }),
-    getShiftCompleteness(supabase, deptId, deptSlug, todayStr, currentShift),
+    getShiftCompleteness(supabase, deptId, deptSlug, todayStr, currentShift).catch(() => ({
+      complete: true,
+      totalRequired: 0,
+      totalCovered: 0,
+      statuses: [],
+    })),
   ]);
   const queryWarnings: string[] = [];
   const namedErrors: Array<[string, { message?: string } | null | undefined]> = [

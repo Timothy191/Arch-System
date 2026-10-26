@@ -106,7 +106,7 @@ export default async function EngineeringNotesPage({
   params: Promise<{ department: string }>;
 }) {
   const { department } = await params;
-  requireDepartment(department, 'control-room');
+  requireDepartment(department, ['control-room', 'engineering']);
 
   const { deptId, supabase, today } = await getDepartmentContext({
     department,

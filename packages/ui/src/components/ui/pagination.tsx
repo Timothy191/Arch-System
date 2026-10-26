@@ -1,3 +1,5 @@
+'use client';
+
 import { cn } from '@repo/ui/lib/utils';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from './button';
@@ -6,7 +8,7 @@ export interface PaginationProps {
   className?: string;
   currentPage: number;
   totalPages: number;
-  onPageChange: (_page: number) => void;
+  onPageChange?: (_page: number) => void;
   pageSize?: number;
   onPageSizeChange?: (_size: number) => void;
   pageSizeOptions?: number[];
@@ -23,6 +25,31 @@ export function Pagination({
   pageSizeOptions = [10, 20, 50, 100],
   totalCount,
 }: PaginationProps) {
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', newPage.toString());
+      url.searchParams.set('pageSize', pageSize.toString());
+      window.location.href = url.toString();
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', '1');
+      url.searchParams.set('pageSize', newSize.toString());
+      window.location.href = url.toString();
+    }
+  };
   const startRange = (currentPage - 1) * pageSize + 1;
   const endRange = totalCount
     ? Math.min(currentPage * pageSize, totalCount)
@@ -88,28 +115,26 @@ export function Pagination({
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Page size selector */}
-        {onPageSizeChange && (
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor="pageSizeSelect"
-              className="whitespace-nowrap font-medium text-[var(--text-muted)] text-xs"
-            >
-              Show
-            </label>
-            <select
-              id="pageSizeSelect"
-              value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="rounded-lg border border-black/[0.08] bg-white/50 px-2.5 py-1 font-semibold text-[var(--text-heading)] text-xs outline-none transition-all focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20"
-            >
-              {pageSizeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="pageSizeSelect"
+            className="whitespace-nowrap font-medium text-[var(--text-muted)] text-xs"
+          >
+            Show
+          </label>
+          <select
+            id="pageSizeSelect"
+            value={pageSize}
+            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+            className="rounded-lg border border-black/[0.08] bg-white/50 px-2.5 py-1 font-semibold text-[var(--text-heading)] text-xs outline-none transition-all focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20"
+          >
+            {pageSizeOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Page navigation buttons */}
         <div className="flex items-center gap-1.5">
@@ -117,7 +142,7 @@ export function Pagination({
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
-            onClick={() => onPageChange(1)}
+            onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
             aria-label="First page"
           >
@@ -127,7 +152,7 @@ export function Pagination({
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
-            onClick={() => onPageChange(currentPage - 1)}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             aria-label="Previous page"
           >
@@ -151,7 +176,7 @@ export function Pagination({
               <Button
                 key={`page-${page}`}
                 variant={isCurrent ? 'default' : 'outline'}
-                onClick={() => onPageChange(page as number)}
+                onClick={() => handlePageChange(page as number)}
                 className={cn(
                   'h-8 w-8 rounded-lg font-semibold text-sm',
                   isCurrent
@@ -168,7 +193,7 @@ export function Pagination({
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
-            onClick={() => onPageChange(currentPage + 1)}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages || totalPages === 0}
             aria-label="Next page"
           >
@@ -178,7 +203,7 @@ export function Pagination({
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-lg border-black/[0.08] bg-white/50 text-[var(--text-heading)] hover:bg-black/[0.02]"
-            onClick={() => onPageChange(totalPages)}
+            onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages || totalPages === 0}
             aria-label="Last page"
           >

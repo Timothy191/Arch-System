@@ -91,20 +91,85 @@ export async function getBadgesInventory(
     query = query.or(`qr_code.ilike.%${s}%,rfid_code.ilike.%${s}%`);
   }
 
-  const { data: badges, error } = await query;
+  const { data: primaryBadges, error } = await query;
+  let badges: Array<Record<string, unknown>> = (primaryBadges ?? []) as Array<
+    Record<string, unknown>
+  >;
 
   if (error) {
-    throw new DatabaseError('Failed to load badges inventory', {
-      table: 'badges',
-      cause: error,
+    let fallbackQuery = supabase
+      .from('badges')
+      .select(
+        `
+        id,
+        qr_code,
+        entity_type,
+        is_active,
+        issued_at,
+        personnel_id,
+        visitor_id,
+        personnel:personnel_id(id, first_name, surname, emp_code, status, job_title),
+        visitor:visitor_id(id, name, company, status)
+      `
+      )
+      .order('issued_at', { ascending: false })
+      .limit(100);
+
+    if (filterType && filterType !== 'all') {
+      if (filterType === 'coal_truck' || filterType === 'vehicle') {
+        fallbackQuery = fallbackQuery.in('entity_type', ['vehicle', 'fleet']);
+      } else {
+        fallbackQuery = fallbackQuery.eq('entity_type', filterType);
+      }
+    }
+
+    if (search && search.trim().length > 0) {
+      const s = search.trim();
+      fallbackQuery = fallbackQuery.ilike('qr_code', `%${s}%`);
+    }
+
+    const fallbackRes = await fallbackQuery;
+    if (fallbackRes.error) {
+      throw new DatabaseError('Failed to load badges inventory', {
+        table: 'badges',
+        cause: fallbackRes.error,
+      });
+    }
+
+    badges = (fallbackRes.data ?? []).map((b) => {
+      const rawV = b.visitor as unknown as {
+        id: string;
+        name?: string;
+        company?: string;
+        status: string;
+      } | null;
+      const [firstName = '', ...rest] = (rawV?.name ?? '').split(' ');
+      return {
+        ...b,
+        rfid_code: null,
+        expires_at: null,
+        fleet_id: null,
+        equipment_id: null,
+        visitor: rawV
+          ? {
+              id: rawV.id,
+              first_name: firstName,
+              surname: rest.join(' '),
+              company: rawV.company,
+              status: rawV.status,
+            }
+          : null,
+        fleet: null,
+        equipment: null,
+      };
     });
   }
 
-  const results: BadgeInventoryItem[] = (badges ?? []).map((b) => {
+  const results: BadgeInventoryItem[] = badges.map((b) => {
     let entityName = 'Unassigned Credential';
     let entitySubtitle = 'Unknown Target';
     let entityId: string | null = null;
-    let status = b.is_active ? 'Active' : 'Revoked';
+    let status = (b.is_active as boolean) ? 'Active' : 'Revoked';
 
     const p = b.personnel as unknown as {
       id: string;
@@ -167,13 +232,13 @@ export async function getBadgesInventory(
     }
 
     return {
-      id: b.id,
-      qr_code: b.qr_code,
-      rfid_code: b.rfid_code,
-      entity_type: b.entity_type,
-      is_active: b.is_active,
-      issued_at: b.issued_at,
-      expires_at: b.expires_at,
+      id: b.id as string,
+      qr_code: b.qr_code as string,
+      rfid_code: (b.rfid_code as string | null) ?? null,
+      entity_type: b.entity_type as string,
+      is_active: Boolean(b.is_active),
+      issued_at: b.issued_at as string,
+      expires_at: (b.expires_at as string | null) ?? null,
       entity_name: entityName,
       entity_subtitle: entitySubtitle,
       entity_id: entityId,
@@ -249,9 +314,27 @@ export async function getEntityOptions(): Promise<{
       type: 'vehicle',
     }));
 
-  const visitors: EntityOption[] = (vRes.data ?? []).map((v) => ({
+  let visitorsData = vRes.data;
+  if (vRes.error) {
+    const fallbackV = await supabase
+      .from('visitors')
+      .select('id, name, company')
+      .eq('status', 'Checked In')
+      .limit(50);
+    visitorsData = (fallbackV.data ?? []).map((v) => {
+      const [firstName = '', ...rest] = (v.name ?? '').split(' ');
+      return {
+        id: v.id,
+        first_name: firstName,
+        surname: rest.join(' '),
+        company: v.company,
+      };
+    });
+  }
+
+  const visitors: EntityOption[] = (visitorsData ?? []).map((v) => ({
     id: v.id,
-    label: `${v.first_name} ${v.surname}`,
+    label: `${v.first_name} ${v.surname}`.trim(),
     sublabel: v.company || 'Visitor',
     type: 'visitor',
   }));

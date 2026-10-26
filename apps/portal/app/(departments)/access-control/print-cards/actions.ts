@@ -192,13 +192,48 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
     );
   }
 
-  const { data: personnelList, error } = await query;
+  let { data: personnelList, error } = await query;
 
   if (error) {
-    throw new DatabaseError('Failed to load personnel for card printing', {
-      table: 'personnel',
-      cause: error,
-    });
+    let fallbackQuery = supabase
+      .from('personnel')
+      .select(
+        `
+        id,
+        emp_code,
+        first_name,
+        surname,
+        id_number,
+        job_title,
+        department_id,
+        induction_expiry,
+        medical_expiry,
+        status,
+        departments:department_id(display_name)
+      `
+      )
+      .order('surname', { ascending: true })
+      .limit(100);
+
+    if (search && search.trim().length > 0) {
+      const s = search.trim();
+      fallbackQuery = fallbackQuery.or(
+        `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`
+      );
+    }
+
+    const fallbackRes = await fallbackQuery;
+    if (fallbackRes.error) {
+      throw new DatabaseError('Failed to load personnel for card printing', {
+        table: 'personnel',
+        cause: fallbackRes.error,
+      });
+    }
+    personnelList = (fallbackRes.data ?? []).map((p) => ({
+      ...p,
+      area: null,
+      photo_path: null,
+    }));
   }
 
   if (!personnelList || personnelList.length === 0) {
@@ -208,11 +243,23 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
   const personnelIds = personnelList.map((p) => p.id);
 
   // Fetch active badges
-  const { data: badges } = await supabase
+  let { data: badges, error: badgesError } = await supabase
     .from('badges')
     .select('personnel_id, qr_code, rfid_code, is_active')
     .in('personnel_id', personnelIds)
     .eq('is_active', true);
+
+  if (badgesError) {
+    const fallbackBadges = await supabase
+      .from('badges')
+      .select('personnel_id, qr_code, is_active')
+      .in('personnel_id', personnelIds)
+      .eq('is_active', true);
+    badges = (fallbackBadges.data ?? []).map((b) => ({
+      ...b,
+      rfid_code: null,
+    }));
+  }
 
   const badgeMap = new Map<string, { qr_code: string; rfid_code: string | null }>();
   (badges ?? []).forEach((b) => {
@@ -490,7 +537,31 @@ export async function getRecentNeo300Jobs(limit = 10): Promise<CardPrintJob[]> {
     .limit(limit);
 
   if (error) {
-    throw new DatabaseError('Failed to load print jobs', { table: 'print_jobs', cause: error });
+    const fallback = await supabase
+      .from('print_jobs')
+      .select(
+        'id, personnel_id, employee_name, role_title, qr_code_data, status, queued_at, printer_id'
+      )
+      .order('queued_at', { ascending: false })
+      .limit(limit);
+
+    if (fallback.error) {
+      throw new DatabaseError('Failed to load print jobs', {
+        table: 'print_jobs',
+        cause: fallback.error,
+      });
+    }
+
+    return (fallback.data ?? []).map((j) => ({
+      id: j.id,
+      personnel_id: j.personnel_id,
+      employee_name: j.employee_name,
+      role_title: j.role_title,
+      qr_code_data: j.qr_code_data,
+      status: j.status,
+      created_at: (j as { queued_at?: string }).queued_at ?? new Date().toISOString(),
+      printer_id: j.printer_id,
+    }));
   }
 
   return (jobs ?? []) as CardPrintJob[];

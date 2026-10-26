@@ -13,6 +13,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { closeShift, verifyPin } from '@/lib/shift-closeout';
 
 interface ShiftCoverageClientProps {
   departmentId: string;
@@ -376,6 +377,8 @@ export function ShiftCoverageClient({
           setShowModal(false);
           window.location.reload();
         }}
+        onCloseShift={closeShift}
+        onVerifyPin={verifyPin}
       />
     </div>
   );

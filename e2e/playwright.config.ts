@@ -11,6 +11,8 @@ function resolveChromeExecutable(): string | undefined {
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/opt/google/chrome/chrome',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
   ].filter(Boolean) as string[];
   for (const candidate of candidates) {
@@ -57,6 +59,11 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        browserName: 'chromium',
+        launchOptions: chromeExecutable ? { executablePath: chromeExecutable } : undefined,
+      },
     },
     {
       name: 'chromium',

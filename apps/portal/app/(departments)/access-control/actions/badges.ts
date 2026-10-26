@@ -38,10 +38,43 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError('Failed to load badges', {
-      operation: 'select',
-      context: { error: error.message },
+    const fallback = await supabase
+      .from('badges')
+      .select(
+        `
+        id,
+        qr_code,
+        entity_type,
+        is_active,
+        issued_at,
+        personnel:personnel_id(first_name, surname),
+        visitor:visitor_id(name)
+      `,
+        { count: 'exact' }
+      )
+      .order('issued_at', { ascending: false })
+      .range(from, to);
+
+    if (fallback.error) {
+      throw new DatabaseError('Failed to load badges', {
+        operation: 'select',
+        context: { error: fallback.error.message },
+      });
+    }
+
+    const mappedBadges = (fallback.data ?? []).map((b) => {
+      const v = b.visitor as unknown as { name?: string } | null;
+      const [firstName = '', ...rest] = (v?.name ?? '').split(' ');
+      return {
+        ...b,
+        expires_at: null,
+        visitor: v ? { first_name: firstName, surname: rest.join(' ') } : null,
+        fleet: null,
+        equipment: null,
+      };
     });
+
+    return { badges: mappedBadges, totalCount: fallback.count ?? 0 };
   }
 
   return { badges: badges ?? [], totalCount: count ?? 0 };
@@ -79,10 +112,47 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError('Failed to load visitors', {
-      operation: 'select',
-      context: { error: error.message },
+    const fallback = await supabase
+      .from('visitors')
+      .select(
+        `
+        id,
+        name,
+        company,
+        purpose,
+        check_in_time,
+        check_out_time,
+        status
+      `,
+        { count: 'exact' }
+      )
+      .order('check_in_time', { ascending: false })
+      .range(from, to);
+
+    if (fallback.error) {
+      throw new DatabaseError('Failed to load visitors', {
+        operation: 'select',
+        context: { error: fallback.error.message },
+      });
+    }
+
+    const mappedVisitors = (fallback.data ?? []).map((v) => {
+      const [firstName = '', ...rest] = (v.name ?? '').split(' ');
+      return {
+        id: v.id,
+        first_name: firstName,
+        surname: rest.join(' '),
+        id_number: null,
+        company: v.company,
+        visiting: null,
+        reason_for_entry: v.purpose,
+        check_in_time: v.check_in_time,
+        check_out_time: v.check_out_time,
+        status: v.status,
+      };
     });
+
+    return { visitors: mappedVisitors, totalCount: fallback.count ?? 0 };
   }
 
   return { visitors: visitors ?? [], totalCount: count ?? 0 };
@@ -171,10 +241,52 @@ export async function getAccessLogsForDepartment(deptId: string, page = 1, pageS
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError('Failed to load access logs', {
-      operation: 'select',
-      context: { error: error.message },
+    const fallback = await supabase
+      .from('access_logs')
+      .select(
+        `
+        id,
+        scanned_at,
+        gate_location,
+        access_granted,
+        denial_reason,
+        access_type,
+        direction,
+        badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(name))
+      `,
+        { count: 'exact' }
+      )
+      .eq('department_id', deptId)
+      .order('scanned_at', { ascending: false })
+      .range(from, to);
+
+    if (fallback.error) {
+      throw new DatabaseError('Failed to load access logs', {
+        operation: 'select',
+        context: { error: fallback.error.message },
+      });
+    }
+
+    const mappedLogs = (fallback.data ?? []).map((log) => {
+      const b = log.badge as unknown as {
+        qr_code: string;
+        entity_type: string;
+        personnel: { first_name: string; surname: string } | null;
+        visitor: { name?: string } | null;
+      } | null;
+      const [firstName = '', ...rest] = (b?.visitor?.name ?? '').split(' ');
+      return {
+        ...log,
+        badge: b
+          ? {
+              ...b,
+              visitor: b.visitor ? { first_name: firstName, surname: rest.join(' ') } : null,
+            }
+          : null,
+      };
     });
+
+    return { logs: mappedLogs, totalCount: fallback.count ?? 0 };
   }
 
   return { logs: logs ?? [], totalCount: count ?? 0 };

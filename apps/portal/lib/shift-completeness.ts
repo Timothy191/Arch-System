@@ -256,7 +256,7 @@ export async function getShiftCompleteness(
   return withCache(
     async () => {
       const [
-        machinesResult,
+        initialMachinesResult,
         machineOpsResult,
         excavatorActsResult,
         dozerRollsResult,
@@ -308,14 +308,30 @@ export async function getShiftCompleteness(
           .or(`status.eq.active,date_in.eq.${date},date_out.eq.${date}`),
       ]);
 
-      assertQuerySucceeded('machines', machinesResult.error);
+      let machinesError = initialMachinesResult.error;
+      let machinesData = initialMachinesResult.data;
+      if (machinesError?.message?.includes('report_exempt')) {
+        const fallbackMachines = await supabase
+          .from('machines')
+          .select('id, name, machine_type, serial_number')
+          .eq('department_id', deptId)
+          .eq('active', true)
+          .order('name');
+        machinesError = fallbackMachines.error;
+        machinesData = (fallbackMachines.data ?? []).map((m) => ({
+          ...m,
+          report_exempt: false,
+        }));
+      }
+
+      assertQuerySucceeded('machines', machinesError);
       assertQuerySucceeded('machine_operations', machineOpsResult.error);
       assertQuerySucceeded('excavator_activity', excavatorActsResult.error);
       assertQuerySucceeded('dozer_rolls', dozerRollsResult.error);
       assertQuerySucceeded('hourly_loads', hourlyLoadsResult.error);
       assertQuerySucceeded('breakdowns', breakdownsResult.error);
 
-      const machines = machinesResult.data ?? [];
+      const machines = machinesData ?? [];
       const machineOps = machineOpsResult.data ?? [];
       const excavatorActs = excavatorActsResult.data ?? [];
       const dozerRolls = dozerRollsResult.data ?? [];
