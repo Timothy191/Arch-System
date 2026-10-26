@@ -141,6 +141,23 @@ describe('Plant & Processing Workspace Components', () => {
       );
       expect(screen.getByTestId('card-rom-scale')).toBeInTheDocument();
       expect(screen.getByTestId('card-live-production-pulse')).toBeInTheDocument();
+
+      // Verify golden branding border classes on header toolbar, pills, badges, and pulse graph container
+      const hourlySheetLink = screen.getByRole('link', { name: /^Hourly Sheet$/i });
+      const logDelayLink = screen.getByRole('link', { name: /^Log Delay$/i });
+      const exportCsvBtn = screen.getByRole('button', { name: /^Export CSV$/i });
+      expect(hourlySheetLink).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+      expect(logDelayLink).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+      expect(exportCsvBtn).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+      expect(hourlySheetLink.parentElement).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+
+      const priorShiftBadge = screen.getByText(/vs Prior Shift/i, { selector: 'span' });
+      expect(priorShiftBadge).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+      expect(priorShiftBadge.parentElement).toHaveClass('-mt-1', 'self-start');
+
       expect(
         screen.queryByRole('table', { name: /Plant and Processing Hourly Input Sheet/i })
       ).not.toBeInTheDocument();

@@ -208,37 +208,37 @@ function HeroTelemetryGraph({
       className="mt-auto border-slate-200/70 border-t pt-2.5"
       data-testid={`hero-telemetry-graph-${panelName}`}
     >
-      <div className="mb-1.5 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-1.5">
-          <span
-            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
-            aria-hidden="true"
-          />
-          <h3
-            className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm"
-            style={{
-              fontFamily:
-                "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-            }}
-          >
-            {series.title}
-          </h3>
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-emerald-700">
-            <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
-            {series.deltaBadge}
-          </span>
-          <span className="hidden items-center rounded-full border border-slate-300/60 bg-slate-900/5 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-800 tabular-nums sm:inline-flex">
-            {series.currentValue}
-          </span>
-        </div>
-      </div>
-
       <div
         className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 shadow-2xs backdrop-blur-md"
         data-testid={`hero-telemetry-box-${panelName}`}
       >
+        <div className="relative z-10 mb-1 flex items-center justify-between gap-2 border-slate-100/90 border-b pb-1">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span
+              className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
+              aria-hidden="true"
+            />
+            <h3
+              className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm"
+              style={{
+                fontFamily:
+                  "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
+              }}
+            >
+              {series.title}
+            </h3>
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-emerald-700">
+              <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
+              {series.deltaBadge}
+            </span>
+            <span className="hidden items-center rounded-full border border-slate-300/60 bg-slate-900/5 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-800 tabular-nums sm:inline-flex">
+              {series.currentValue}
+            </span>
+          </div>
+        </div>
+
         {/* Animated scanline effect */}
         <div
           className="pointer-events-none absolute inset-0 animate-scanline opacity-30"

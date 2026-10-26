@@ -398,8 +398,8 @@ export function HeroRotator({
       )}
 
       {total > 1 && (
-        <div className="mt-4 flex items-center justify-center px-1">
-          <div className="flex items-center gap-3 sm:gap-3.5">
+        <div className="mt-2 flex items-center justify-center px-1">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {panels.map((p, idx) => (
               <button
                 key={p.id}
@@ -407,9 +407,9 @@ export function HeroRotator({
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  'group/ind flex items-center justify-center rounded-md p-1 transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
+                  'group/ind flex items-center justify-center rounded-md p-0.5 transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)] active:scale-90',
                   idx === activeIndex
-                    ? 'visible -translate-y-0.5 scale-125 text-amber-400 opacity-100 brightness-125 drop-shadow-[0_0_10px_rgba(245,158,11,0.85)]'
+                    ? 'visible -translate-y-0.5 scale-110 text-amber-400 opacity-100 brightness-125 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]'
                     : 'pointer-events-none invisible text-accent-amber/80 opacity-0'
                 )}
               >
@@ -417,8 +417,8 @@ export function HeroRotator({
                   className={cn(
                     'transition-all duration-300 ease-out',
                     idx === activeIndex
-                      ? 'visible h-6 w-6 opacity-100 motion-safe:animate-pulse sm:h-7 sm:w-7'
-                      : 'invisible h-5 w-5 opacity-0 sm:h-[22px] sm:w-[22px]'
+                      ? 'visible h-4 w-4 opacity-100 motion-safe:animate-pulse sm:h-4.5 sm:w-4.5'
+                      : 'invisible h-3.5 w-3.5 opacity-0 sm:h-4 sm:w-4'
                   )}
                 />
               </button>

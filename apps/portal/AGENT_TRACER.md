@@ -1,3 +1,11 @@
+## 2026-10-26T09:17:00+02:00: Plant & Processing Golden Branding Borders & Pulse Graph Badge Alignment
+
+- **Purpose**: Implement all 13 `/plant-processing` design feedback items adding golden branding borders (`gold-steel-border gold-steel-border-slim`) across header action pills, status badges, KPI card badges, and the Live Production Pulse Graph container, and nudging the `+2.9% vs Prior Shift` badge up slightly (`-mt-1 self-start`).
+- **Changes**:
+  - `apps/portal/features/departments/components/plant-processing/PlantHourlySheetClient.tsx`: Extracted `HEADER_GOLD_BTN_BASE` and applied `gold-steel-border gold-steel-border-slim` to the header action toolbar container, `Hourly Sheet` / `Telemetry Dashboard` / `Log Delay` links, `Export CSV` / `Save Hourly Sheet` buttons, header `Activity` icon badge, `DMS-MOD-1 · Day Shift · 11.6h Run` pill, all 5 KPI/Production Mix `<Badge>` elements, the `+2.9% vs Prior Shift` pill (with `-mt-1 self-start`), and the Live Production Pulse Graph inner chart frame.
+  - `apps/portal/features/departments/components/plant-processing/plant-processing.test.tsx`: Added assertions verifying golden branding border classes and vertical alignment on `/plant-processing`.
+- **Verification**: `pnpm --filter portal test -- features/departments/components/plant-processing/plant-processing.test.tsx` ✅; `pnpm audit:tailwind` ✅; `pnpm agent:verify` (27/27 PASS) ✅.
+
 ## 2026-10-23T11:15:00+02:00: Remove Redundant `.prose` Wrapper Classes & Ambiguous Cubic-Bezier Utilities
 
 - **Purpose**: Eliminate 13.4 KB of unused `@tailwindcss/typography` (`.prose`) CSS rules and ambiguous arbitrary cubic-bezier warnings in `apps/portal`.

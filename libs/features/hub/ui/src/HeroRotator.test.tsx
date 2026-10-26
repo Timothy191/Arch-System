@@ -25,23 +25,6 @@ function _makeMotionValue(initial: number): MV {
   };
 }
 
-jest.mock('@react-three/fiber', () => {
-  const React = jest.requireActual('react') as typeof import('react');
-  return {
-    Canvas: ({ children }: { children: React.ReactNode }) =>
-      React.createElement('div', { 'data-testid': 'r3f-canvas' }, children),
-    useFrame: jest.fn(),
-  };
-});
-
-jest.mock('@react-three/drei', () => {
-  const React = jest.requireActual('react') as typeof import('react');
-  return {
-    Html: ({ children }: { children: React.ReactNode }) =>
-      React.createElement('div', { 'data-testid': 'r3f-html' }, children),
-  };
-});
-
 // Removed TrustLogos mock since it's now in @repo/ui
 const baseProps = {
   defaultTitle: 'System Overview',
@@ -332,28 +315,30 @@ describe('HeroRotator', () => {
       'gold-steel-border-slim'
     );
 
-    // Assert telemetry titles are rendered as semantic h3 headings
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Central Operations Telemetry',
-        hidden: true,
-      })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Rig Penetration & Bit Depth',
-        hidden: true,
-      })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Coal & ROM Extraction Yield',
-        hidden: true,
-      })
-    ).toBeInTheDocument();
+    // Assert telemetry titles are rendered as semantic h3 headings inside the telemetry graph box
+    const centralBox = screen.getByTestId('hero-telemetry-box-central-command');
+    const drillingBox = screen.getByTestId('hero-telemetry-box-drilling');
+    const productionBox = screen.getByTestId('hero-telemetry-box-production');
+
+    const centralTitle = screen.getByRole('heading', {
+      level: 3,
+      name: 'Central Operations Telemetry',
+      hidden: true,
+    });
+    const drillingTitle = screen.getByRole('heading', {
+      level: 3,
+      name: 'Rig Penetration & Bit Depth',
+      hidden: true,
+    });
+    const productionTitle = screen.getByRole('heading', {
+      level: 3,
+      name: 'Coal & ROM Extraction Yield',
+      hidden: true,
+    });
+
+    expect(centralBox).toContainElement(centralTitle);
+    expect(drillingBox).toContainElement(drillingTitle);
+    expect(productionBox).toContainElement(productionTitle);
   });
 
   it('renders Plant & Processing slide and Wash Plant Throughput & Recovery telemetry', () => {
@@ -448,21 +433,21 @@ describe('HeroRotator', () => {
     expect(activeIndicator).toHaveClass(
       'opacity-100',
       'visible',
-      'scale-125',
+      'scale-110',
       'text-amber-400',
       'brightness-125'
     );
     expect(inactiveIndicator).toHaveClass('opacity-0', 'invisible');
     expect(activeIndicator.querySelector('svg')).toHaveClass(
-      'w-6',
-      'h-6',
+      'w-4',
+      'h-4',
       'opacity-100',
       'visible',
       'motion-safe:animate-pulse'
     );
     expect(inactiveIndicator.querySelector('svg')).toHaveClass(
-      'w-5',
-      'h-5',
+      'w-3.5',
+      'h-3.5',
       'opacity-0',
       'invisible'
     );

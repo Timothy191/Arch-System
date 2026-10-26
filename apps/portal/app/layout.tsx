@@ -187,15 +187,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
               {/* Content wrapper with main landmark (WCAG 1.3.1) */}
               <div className="relative mx-auto max-w-[1920px] shadow-window">
-                <main id="main-content" aria-label="Main content" className="relative pt-16">
+                <main id="main-content" aria-label="Main content" className="relative pt-16 pb-16">
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>
 
-                {/* Global footer landmark (WCAG 1.3.1) merged with single-line codebase telemetry & eve branding */}
+                {/* Global footer landmark (WCAG 1.3.1) matching top MacMenuBar floating pill geometry & effects */}
                 <footer
                   role="contentinfo"
                   aria-label="Site footer"
-                  className="liquid-glass-light gold-steel-border gold-steel-border-slim relative z-10 mt-3 select-none border-white/45 border-t bg-white/45 px-3 py-1.5 text-[10px] text-[var(--text-muted)] backdrop-blur-xl sm:px-5"
+                  className="liquid-glass-light gold-steel-border fixed inset-x-3 bottom-2 z-navigation flex h-11 items-center rounded-full border border-white/20 px-3.5 text-[10px] text-[var(--text-muted)] shadow-window"
                 >
                   <div className="flex w-full items-center justify-between gap-2.5">
                     <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/75 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset">

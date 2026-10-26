@@ -172,6 +172,9 @@ const PLANT_GRID_STREAMS: ReadonlyArray<PlantGridStreamMeta> = [
   },
 ];
 
+const HEADER_GOLD_BTN_BASE =
+  'gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs';
+
 export function PlantHourlySheetClient({
   initialDate,
   initialSheets,
@@ -563,7 +566,7 @@ export function PlantHourlySheetClient({
       <GlassCard className="p-5">
         <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
           <div className="flex items-start gap-3.5">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10">
+            <div className="gold-steel-border gold-steel-border-slim mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10">
               <Activity className="h-5 w-5 text-emerald-700" />
             </div>
             <div className="space-y-1">
@@ -573,7 +576,7 @@ export function PlantHourlySheetClient({
                     ? 'Plant & Processing — Hourly Input Sheet'
                     : 'Plant & Processing — Wash Plant Telemetry'}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 font-medium font-mono text-[11px] text-emerald-800">
+                <span className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 font-medium font-mono text-[11px] text-emerald-800">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600" />
                   {selectedModule} · {selectedShift === 'day' ? 'Day Shift' : 'Night Shift'} ·{' '}
                   {totals.runHours}h Run
@@ -587,11 +590,11 @@ export function PlantHourlySheetClient({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 self-start rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 p-1.5 xl:self-auto">
+          <div className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center gap-1.5 self-start rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 p-1.5 xl:self-auto">
             {mode === 'sheet' ? (
               <Link
                 href="/plant-processing"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-2xs transition-colors hover:bg-black/[0.03]"
+                className={`${HEADER_GOLD_BTN_BASE} border border-[var(--border-subtle)] bg-[var(--bg-primary)] font-medium text-[var(--text-heading)] transition-colors hover:bg-black/[0.03]`}
               >
                 <BarChart3 className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
                 Telemetry Dashboard
@@ -599,7 +602,7 @@ export function PlantHourlySheetClient({
             ) : (
               <Link
                 href="/plant-processing/hourly-sheet"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs shadow-xs transition-all hover:opacity-95"
+                className={`${HEADER_GOLD_BTN_BASE} bg-[var(--accent-blue)] font-semibold text-white shadow-xs transition-all hover:opacity-95`}
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" />
                 Hourly Sheet
@@ -607,7 +610,7 @@ export function PlantHourlySheetClient({
             )}
             <Link
               href="/plant-processing/delays"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-medium text-amber-800 text-xs transition-colors hover:bg-amber-500/20"
+              className={`${HEADER_GOLD_BTN_BASE} border border-amber-500/30 bg-amber-500/10 font-medium text-amber-800 transition-colors hover:bg-amber-500/20`}
             >
               <AlertTriangle className="h-3.5 w-3.5" />
               Log Delay
@@ -615,7 +618,7 @@ export function PlantHourlySheetClient({
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-colors hover:bg-black/[0.03]"
+              className={`${HEADER_GOLD_BTN_BASE} cursor-pointer border border-[var(--border-subtle)] bg-[var(--bg-primary)] font-medium text-[var(--text-heading)] transition-colors hover:bg-black/[0.03]`}
             >
               <Download className="h-3.5 w-3.5" />
               Export CSV
@@ -626,7 +629,7 @@ export function PlantHourlySheetClient({
                 onClick={handleSaveSheet}
                 disabled={isPending}
                 data-testid="save-plant-hourly-sheet"
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3.5 py-1.5 font-semibold text-white text-xs shadow-xs transition-all hover:opacity-95 disabled:opacity-60"
+                className={`${HEADER_GOLD_BTN_BASE} cursor-pointer bg-[var(--accent-blue)] font-semibold text-white shadow-xs transition-all hover:opacity-95 disabled:opacity-60`}
               >
                 <Save className="h-3.5 w-3.5" />
                 {isPending ? 'Saving Sheet...' : 'Save Hourly Sheet'}
@@ -667,7 +670,7 @@ export function PlantHourlySheetClient({
                   <Scale className="h-3.5 w-3.5 text-emerald-600" />
                   ROM Scale (t / Latest Hour)
                 </span>
-                <Badge className="border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-700 text-xs">
+                <Badge className="gold-steel-border gold-steel-border-slim border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-700 text-xs">
                   {totals.romCapacityPct}% of {totals.nominalRomTph} t/h
                 </Badge>
               </div>
@@ -735,7 +738,7 @@ export function PlantHourlySheetClient({
                   <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                   Product Yield (% Recovery)
                 </span>
-                <Badge className="border border-blue-500/30 bg-blue-500/15 font-mono text-blue-700 text-xs">
+                <Badge className="gold-steel-border gold-steel-border-slim border border-blue-500/30 bg-blue-500/15 font-mono text-blue-700 text-xs">
                   {recoveryDelta >= 0 ? `+${recoveryDelta}%` : `${recoveryDelta}%`} vs Target
                 </Badge>
               </div>
@@ -796,7 +799,7 @@ export function PlantHourlySheetClient({
                 </span>
                 <Badge
                   variant="outline"
-                  className={`font-mono text-xs ${
+                  className={`gold-steel-border gold-steel-border-slim font-mono text-xs ${
                     totals.avgAsh <= 15.0
                       ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-700'
                       : 'border-red-500/30 bg-red-500/15 text-red-700'
@@ -862,7 +865,7 @@ export function PlantHourlySheetClient({
                 </span>
                 <Badge
                   variant="outline"
-                  className="border-amber-500/30 bg-amber-500/15 font-mono text-amber-800 text-xs"
+                  className="gold-steel-border gold-steel-border-slim border-amber-500/30 bg-amber-500/15 font-mono text-amber-800 text-xs"
                 >
                   Setpoint: 1.48 g/cm³
                 </Badge>
@@ -930,7 +933,7 @@ export function PlantHourlySheetClient({
               className="flex flex-col gap-3 p-5 lg:col-span-7"
               data-testid="card-live-production-pulse"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                     <Activity className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
@@ -942,9 +945,9 @@ export function PlantHourlySheetClient({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="-mt-1 flex items-center gap-2 self-start">
                   <span
-                    className={`rounded-full border px-2.5 py-1 font-bold font-mono text-xs ${
+                    className={`gold-steel-border gold-steel-border-slim rounded-full border px-2.5 py-1 font-bold font-mono text-xs ${
                       totals.throughputDeltaPct >= 0
                         ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
                         : 'border-amber-500/30 bg-amber-500/15 text-amber-800'
@@ -958,7 +961,7 @@ export function PlantHourlySheetClient({
               </div>
 
               {/* Alternative Design: Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
-              <div className="relative space-y-2.5 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
+              <div className="gold-steel-border gold-steel-border-slim relative space-y-2.5 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
                 {/* Top Legend & Benchmark Strip */}
                 <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-2 font-mono text-[10px]">
                   <div className="flex flex-wrap items-center gap-3">
@@ -1165,7 +1168,7 @@ export function PlantHourlySheetClient({
                     Recovery
                   </p>
                 </div>
-                <Badge className="border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
+                <Badge className="gold-steel-border gold-steel-border-slim border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
                   {totals.weightedYield.toFixed(1)}% Recovery
                 </Badge>
               </div>
