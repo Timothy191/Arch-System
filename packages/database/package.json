@@ -9,7 +9,7 @@
   },
   "scripts": {
     "db:types": "pnpm --filter @repo/supabase supabase:gen-types",
-    "test": "node --test tests/migration-rls-lint.test.mjs tests/production-summary-functions.test.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
+    "test": "node --test tests/migration-rls-lint.test.mjs tests/production-summary-functions.test.mjs tests/security-invoker-views.test.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
     "test:migration-rollback": "node tests/migration-rollback-safety.mjs",
     "test:migration-replay": "node tests/migration-replay.mjs",
     "check-migrations": "node tests/check-migration-drift.mjs && node tests/migration-rollback-safety.mjs && node tests/offline-mutations-security.mjs",
