@@ -115,28 +115,16 @@
       "ignore": [
         "lib/observability/metrics.ts",
         "features/analytics/components/ReportTemplate.tsx",
-        "app/overview/AuditReportsSection.tsx",
-        "components/LCPObserver.tsx",
-        "components/PitConnectivityBanner.tsx",
         "components/WebVitalsReporter.tsx",
-        "hooks/useDockPreferences.ts",
         "lib/ai/embeddings.ts",
         "lib/api/rate-limit-middleware.ts",
         "lib/performance-analyzer.ts",
-        "api/codebase-maps/route.ts",
-        "api/scada/tags/route.ts",
         "plugins/rust-telemetry-engine/index.tsx",
         "server/proxy.ts",
         "lib/server-cache.ts",
         "app/actions.ts",
         "lib/actions/shift-closeout.ts",
-        "app/(departments)/access-control/card-actions/card-pdf.tsx",
-        "app/(departments)/access-control/card-types.ts",
-        "app/(departments)/access-control/printing.ts",
-        "app/(departments)/[department]/excavator-activity/actions.ts",
-        "app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx",
         "components/control-room/C66MachineOperatorScanner.tsx",
-        "features/auth/components/RefractionGlow.tsx",
         "lib/control-room-shift-report.ts"
       ]
     },
@@ -185,13 +173,7 @@
     },
     "packages/ui": {
       "entry": ["src/**/*.tsx", ".eslintrc.{js,cjs}"],
-      "project": ["src/**/*.{ts,tsx,css}"],
-      "ignore": [
-        "src/components/edges/FlowEdge.tsx",
-        "src/components/nodes/PluginNode.tsx",
-        "src/components/nodes/TriggerNode.tsx",
-        "src/components/WorkflowBuilder.tsx"
-      ]
+      "project": ["src/**/*.{ts,tsx,css}"]
     },
     "packages/redis": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],

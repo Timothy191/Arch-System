@@ -20,31 +20,22 @@ export * from './components/Logo';
 export * from './components/MacMenuBar';
 export * from './components/MacTitleBar';
 export * from './components/motion/AnimationProvider';
-// Motion Primitives
-export * from './components/motion/AnimeNumber';
 export * from './components/motion/AnimeStagger';
-export * from './components/motion/AnimeTimeline';
 export * from './components/N8nIcon';
-// Topology Nodes & Edges
 export * from './components/PageHeader';
 export * from './components/RedisIcon';
 export * from './components/SecondaryButton';
 export * from './components/ShiftToggle';
 export * from './components/TrustLogos';
-export * from './components/ui/action-confirm-dialog';
-// Operational & Industrial Components
-export * from './components/ui/activity-timeline';
 export * from './components/ui/alert';
 // Motion & Animated Components
 export * from './components/ui/animated-button';
 export * from './components/ui/animated-dialog';
 export * from './components/ui/animated-list';
-export * from './components/ui/animated-number';
 export * from './components/ui/avatar';
 export * from './components/ui/avatar-group';
 export * from './components/ui/avatar-with-icon';
 export * from './components/ui/badge';
-export * from './components/ui/bento-grid';
 export * from './components/ui/book';
 export * from './components/ui/breadcrumb';
 export * from './components/ui/browser';
@@ -80,23 +71,17 @@ export * from './components/ui/gauge';
 export * from './components/ui/git-avatar';
 export * from './components/ui/glass-skeleton';
 export * from './components/ui/grid';
-export * from './components/ui/hero-video-dialog';
 export * from './components/ui/input';
 export * from './components/ui/json-view';
 export * from './components/ui/label';
-
 export * from './components/ui/load-more-button';
 export * from './components/ui/loader';
 export * from './components/ui/loading-dots';
-export * from './components/ui/loading-state';
-export * from './components/ui/machine-status-panel';
 export * from './components/ui/marquee';
 export * from './components/ui/menu';
 export * from './components/ui/metric-card';
-export * from './components/ui/number-ticker';
 export * from './components/ui/PrecisionInput';
 export * from './components/ui/pagination';
-export * from './components/ui/reveal-loader';
 export * from './components/ui/scroll-area';
 export * from './components/ui/select';
 export * from './components/ui/separator';
@@ -107,7 +92,6 @@ export * from './components/ui/status-badge';
 export * from './components/ui/table';
 export * from './components/ui/tabs';
 export * from './components/ui/telemetry-chart';
-export * from './components/WorkflowStatusBadge';
 export * from './hooks/useAutoSave';
 // Central Iconography Registry
 export * from './icons/department-icons';

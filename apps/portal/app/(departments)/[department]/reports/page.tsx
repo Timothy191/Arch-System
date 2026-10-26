@@ -18,7 +18,7 @@ export default async function ReportsPage({
 }) {
   const { department: deptSlug } = await params;
   if (deptSlug === 'plant-processing') {
-    redirect('/plant-processing/history');
+    redirect('/plant-processing/hourly-sheet');
   }
   const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
   if (deptSlug === 'plant-inventory') {

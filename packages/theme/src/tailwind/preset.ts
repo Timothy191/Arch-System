@@ -36,15 +36,9 @@ const content = [
   `!${at('**/*.stories.{ts,tsx}')}`,
   `!${at('**/__tests__/**/*')}`,
   `!${at('**/__mocks__/**/*')}`,
-  `!${at('apps/portal/app/overview/AuditReportsSection.tsx')}`,
   `!${at('apps/portal/features/analytics/components/ReportTemplate.tsx')}`,
-  `!${at('apps/portal/components/LCPObserver.tsx')}`,
-  `!${at('apps/portal/components/PitConnectivityBanner.tsx')}`,
   `!${at('apps/portal/components/WebVitalsReporter.tsx')}`,
-  `!${at('apps/portal/app/(departments)/access-control/card-actions/card-pdf.tsx')}`,
-  `!${at('apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorDumperTable.tsx')}`,
   `!${at('apps/portal/components/control-room/C66MachineOperatorScanner.tsx')}`,
-  `!${at('apps/portal/features/auth/components/RefractionGlow.tsx')}`,
 ];
 
 /**

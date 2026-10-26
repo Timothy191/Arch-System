@@ -92,4 +92,30 @@
 
 # Local worktrees, agent caches, and analysis
 /.kilo/
+/.qoder/
+/.husky/
 /analysis/
+/AGENT_TRACER.md
+/CONTRIBUTING.md
+/CHANGELOG.md
+**/codemap.md
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/*.stories.tsx
+
+# Non-build workspace tools (keep tools/scripts/version-manager.mjs for buildCommand)
+/tools/audits/
+/tools/edge/
+/tools/mcp/
+/tools/openrouter/
+/tools/ops/
+/tools/repo/
+/tools/swarms-orchestrator/
+/tools/wiki-viewer/
+/tools/zero-drift-watchdog/
+/tools/real-world-score.cjs
+/packages/database/migrations/
+/packages/database/tests/
+

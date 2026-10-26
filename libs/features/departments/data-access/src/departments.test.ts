@@ -86,10 +86,10 @@ describe('DEPARTMENTS registry', () => {
     }
   });
 
-  it('returns dedicated Plant & Processing tabs (Dashboard, Hourly Sheet, Delays) without Daily Log, History, Machines, Reports, or Tools', () => {
+  it('returns dedicated Plant & Processing tabs (Dashboard, Hourly Sheet, Delays, Reports) without Daily Log, History, Machines, or Tools', () => {
     const tabs = getDepartmentTabs('plant-processing');
     expect(tabs).toBe(PLANT_PROCESSING_TABS);
-    expect(tabs.map((t) => t.name)).toEqual(['dashboard', 'hourly-sheet', 'delays']);
+    expect(tabs.map((t) => t.name)).toEqual(['dashboard', 'hourly-sheet', 'delays', 'reports']);
   });
 
   it('returns dedicated Plant Inventory tabs (Dashboard, Inventory List, Item List, Stock Required, Reports, History of Used)', () => {

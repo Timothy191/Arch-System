@@ -111,12 +111,7 @@ if (fs.existsSync(layoutPath)) {
 
 // ── 3. Validate Static Assets, Logos & Media ──────────────────────────────────
 console.log('3️⃣  Validating core static assets, logos, and PWA manifest...');
-const REQUIRED_ASSETS = [
-  'favicon.ico',
-  'manifest.json',
-  'logo.svg',
-  'archlinux-logo-black-scalable.svg',
-];
+const REQUIRED_ASSETS = ['favicon.ico', 'manifest.json', 'logo.svg'];
 
 let assetsFound = 0;
 REQUIRED_ASSETS.forEach((assetName) => {

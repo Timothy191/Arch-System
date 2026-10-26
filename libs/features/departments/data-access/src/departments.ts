@@ -101,7 +101,7 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: 'plant-processing',
-    displayName: 'Plant & Processing',
+    displayName: 'Plant Processing',
     route: '/plant-processing',
     icon: 'Factory',
     description:
@@ -119,7 +119,7 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     name: 'plant-inventory',
-    displayName: 'Stock Control Department',
+    displayName: 'Plant Inventory',
     route: '/plant-inventory',
     icon: 'Package',
     description:
@@ -320,6 +320,7 @@ export const PLANT_PROCESSING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'hourly-sheet', label: 'Hourly Sheet', icon: 'Clock' },
   { name: 'delays', label: 'Delays', icon: 'AlertTriangle' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 
 /**

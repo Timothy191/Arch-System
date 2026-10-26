@@ -1,7 +1,7 @@
 'use client';
 
 import { dozerRollSchema } from '@repo/contract/schemas/form.schema';
-import { useOfflineQueue } from '@repo/shared/hooks';
+import { useOfflineQueue, useUnsavedChangesWarning } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { ShiftToggle } from '@repo/ui/ShiftToggle';
@@ -9,7 +9,6 @@ import { getCurrentShift } from '@repo/utils';
 import { Calculator, Equal, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { createDozerRoll } from './actions';
 
 interface DozerWithSite {

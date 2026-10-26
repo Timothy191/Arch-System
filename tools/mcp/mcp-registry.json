@@ -34,11 +34,7 @@
       "required": true,
       "category": "core_local",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/home/tim"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
       "type": "stdio"
     },
     "memory": {
@@ -47,10 +43,7 @@
       "required": true,
       "category": "core_local",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "type": "stdio"
     },
     "sequential-thinking": {
@@ -59,10 +52,7 @@
       "required": true,
       "category": "core_local",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "type": "stdio"
     },
     "ripgrep": {
@@ -71,10 +61,7 @@
       "required": true,
       "category": "developer_tools",
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-ripgrep"
-      ],
+      "args": ["-y", "mcp-ripgrep"],
       "type": "stdio"
     },
     "git": {
@@ -83,9 +70,7 @@
       "required": true,
       "category": "developer_tools",
       "command": "uvx",
-      "args": [
-        "mcp-server-git"
-      ],
+      "args": ["mcp-server-git"],
       "type": "stdio"
     },
     "fetch": {
@@ -94,9 +79,7 @@
       "required": true,
       "category": "research_and_web",
       "command": "uvx",
-      "args": [
-        "mcp-server-fetch"
-      ],
+      "args": ["mcp-server-fetch"],
       "type": "stdio"
     },
     "context7": {
@@ -105,10 +88,7 @@
       "required": true,
       "category": "research_and_web",
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
+      "args": ["-y", "@upstash/context7-mcp"],
       "type": "stdio"
     },
     "docker": {
@@ -117,10 +97,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-docker"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
       "type": "stdio"
     },
     "knowledge-rail": {
@@ -129,12 +106,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "npx",
-      "args": [
-        "-y",
-        "knowledge-rail@2.9.1",
-        "--root",
-        "/home/tim/Fork/Arch-System"
-      ],
+      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
       "type": "stdio"
     },
     "chrome-devtools": {
@@ -143,10 +115,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "npx",
-      "args": [
-        "-y",
-        "chrome-devtools-mcp@1.10.1"
-      ],
+      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
       "type": "stdio"
     },
     "next-devtools": {
@@ -155,10 +124,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@0.4.0"
-      ],
+      "args": ["-y", "next-devtools-mcp@0.4.0"],
       "type": "stdio"
     },
     "postgres": {
@@ -167,11 +133,7 @@
       "required": false,
       "category": "cloud_infrastructure",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres@0.6.2",
-        "${SUPABASE_DATABASE_URL}"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"],
       "type": "stdio"
     },
     "redis": {
@@ -195,11 +157,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "/home/tim/.local/bin/codemap",
-      "args": [
-        "mcp",
-        "--root",
-        "/home/tim/Fork/Arch-System"
-      ],
+      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
       "type": "stdio"
     },
     "code-index": {
@@ -208,11 +166,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "/home/tim/.local/bin/code-index",
-      "args": [
-        "serve",
-        "--path",
-        "/home/tim/Fork/Arch-System"
-      ],
+      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
       "env": {
         "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
       },
@@ -224,9 +178,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "node",
-      "args": [
-        "/home/tim/Fork/skills-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
       "type": "stdio"
     },
     "memory-gateway-mcp": {
@@ -235,9 +187,7 @@
       "required": false,
       "category": "cognitive_and_memory",
       "command": "node",
-      "args": [
-        "/home/tim/Fork/memory-gateway-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
       "type": "stdio"
     },
     "slim-tooling-mcp": {
@@ -246,9 +196,7 @@
       "required": false,
       "category": "developer_tools",
       "command": "node",
-      "args": [
-        "/home/tim/Fork/slim-tooling-mcp/dist/index.js"
-      ],
+      "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
       "type": "stdio"
     },
     "supabase": {

@@ -1,21 +1,14 @@
-export * from './control-room/AlertPanel';
 export * from './control-room/BreakdownsShiftWidget';
 export * from './control-room/CloseShiftModal';
-export * from './control-room/ControlRoomActivityFeed';
 export * from './control-room/ControlRoomChecklistWidget';
 export * from './control-room/DozerRollForm';
-// AGENT-TRACE: UniverSheet removed from barrel to preserve next/dynamic code-splitting.
-// Import directly: import UniverSheet from "./tools/UniverSheet"
-// The barrel export was pulling @univerjs (~7 MB OT engine) into every page using @repo/departments/ui
 export { EquipmentDashboard } from './control-room/EquipmentDashboard';
 export * from './control-room/ExportPdfButton';
 export * from './control-room/FleetKpiTable';
-export * from './control-room/MachineControl';
 export * from './control-room/MultiSiteShiftReportClient';
 export * from './control-room/ProductionSummaryCard';
 export * from './control-room/ShiftCompilationHeader';
 export * from './control-room/ShiftCoverageWidget';
-export * from './control-room/ShiftIntelligenceWidget';
 export * from './control-room/UnifiedShiftCloseoutModal';
 export * from './engineering/breakdowns/BookInForm';
 export * from './engineering/breakdowns/BookOutForm';
@@ -25,5 +18,3 @@ export * from './engineering/breakdowns/BreakdownStats';
 export * from './engineering/breakdowns/BreakdownsDashboard';
 export * from './engineering/breakdowns/BreakdownsTable';
 export * from './engineering/breakdowns/types';
-export * from './tools/ToolCard';
-export * from './tools/ToolsPageClient';

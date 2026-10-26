@@ -160,18 +160,9 @@ function RouteBackgroundInner() {
             disablePictureInPicture
             preload="auto"
           >
-            {/* 1. Prioritize ultra-efficient AV1 (instant stream, ~2.0MB) */}
-            <source
-              src={
-                isMobileViewport
-                  ? '/background/video-loop-mobile-av1.webm'
-                  : '/background/video-loop-av1.webm'
-              }
-              type="video/webm; codecs=av01.0.05M.08"
-            />
-            {/* 2. High-performance VP9 hardware-accelerated stream (~3.4MB) */}
+            {/* 1. High-performance VP9 hardware-accelerated stream */}
             <source src={webmSrc} type="video/webm; codecs=vp09.00.41.08" />
-            {/* 3. Universal H.264 MP4 fallback for Safari/iOS */}
+            {/* 2. Universal H.264 MP4 fallback for Safari/iOS */}
             <source src={mp4Src} type="video/mp4" />
           </video>
         </div>

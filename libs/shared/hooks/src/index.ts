@@ -25,5 +25,6 @@ export * from './useRedisCache';
 export * from './useSupabaseRealtime';
 export * from './useThrottle';
 export * from './useThrottledState';
+export * from './useUnsavedChangesWarning';
 export * from './useWorkflowStatus';
 export * from './useWorkflowTrigger';
