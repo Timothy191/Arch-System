@@ -262,35 +262,48 @@ export function PlantHourlySheetClient({
     );
   };
 
+  // Performance Optimization: Replaced 11 separate array iterations (.reduce, .filter, .map)
+  // with a single-pass loop over `rows` to compute totals, averages, latest active slot, and peak ROM.
   const totals = useMemo(() => {
-    const totalRom = rows.reduce((sum, r) => sum + (Number(r.romFeedTonnes) || 0), 0);
-    const totalClean = rows.reduce((sum, r) => sum + (Number(r.cleanCoalTonnes) || 0), 0);
-    const totalDiscard = rows.reduce((sum, r) => sum + (Number(r.discardTonnes) || 0), 0);
+    let totalRom = 0;
+    let totalClean = 0;
+    let totalDiscard = 0;
+    let totalAsh = 0;
+    let totalRd = 0;
+    let totalMoisture = 0;
+    let totalRunMins = 0;
+    let peakHourRom = 1;
+    let latestActiveRow: (typeof rows)[number] | undefined;
+
+    for (const r of rows) {
+      const rom = Number(r.romFeedTonnes) || 0;
+      totalRom += rom;
+      totalClean += Number(r.cleanCoalTonnes) || 0;
+      totalDiscard += Number(r.discardTonnes) || 0;
+      totalAsh += Number(r.productAshPct) || 14.0;
+      totalRd += r.cycloneRd;
+      totalMoisture += r.moisturePct;
+      totalRunMins += Number(r.runMinutes) || 0;
+
+      if (rom > 0) {
+        latestActiveRow = r;
+      }
+      if (rom > peakHourRom) {
+        peakHourRom = rom;
+      }
+    }
+
+    const count = rows.length;
     const weightedYield = calculateRowYield(totalRom, totalClean);
     const discardPct = totalRom > 0 ? Number((100 - weightedYield).toFixed(1)) : 0;
-    const avgAsh =
-      rows.length > 0
-        ? Number(
-            (
-              rows.reduce((sum, r) => sum + (Number(r.productAshPct) || 14.0), 0) / rows.length
-            ).toFixed(1)
-          )
-        : 14.0;
-    const avgRd =
-      rows.length > 0
-        ? Number((rows.reduce((sum, r) => sum + r.cycloneRd, 0) / rows.length).toFixed(2))
-        : 1.48;
-    const avgMoisture =
-      rows.length > 0
-        ? Number((rows.reduce((sum, r) => sum + r.moisturePct, 0) / rows.length).toFixed(1))
-        : 8.0;
-    const totalRunMins = rows.reduce((sum, r) => sum + (Number(r.runMinutes) || 0), 0);
+    const avgAsh = count > 0 ? Number((totalAsh / count).toFixed(1)) : 14.0;
+    const avgRd = count > 0 ? Number((totalRd / count).toFixed(2)) : 1.48;
+    const avgMoisture = count > 0 ? Number((totalMoisture / count).toFixed(1)) : 8.0;
     const runHours = Number((totalRunMins / 60).toFixed(1));
     const avgTph = runHours > 0 ? Math.round(totalRom / runHours) : 0;
 
-    // Latest active hour slot with non-zero ROM feed
-    const activeRows = rows.filter((r) => r.romFeedTonnes > 0);
-    const latestRow = activeRows[activeRows.length - 1] ?? rows[rows.length - 1];
+    // Latest active hour slot with non-zero ROM feed (or last row as fallback)
+    const latestRow = latestActiveRow ?? rows[count - 1];
     const latestHourRom = latestRow?.romFeedTonnes ?? 450;
     const latestHourSlot = latestRow?.hourSlot ?? '17:00 - 18:00';
     const latestHourRd = latestRow?.cycloneRd ?? 1.48;
@@ -301,19 +314,22 @@ export function PlantHourlySheetClient({
     const priorShiftSheet = savedSheets.find(
       (s) => s.shift !== selectedShift || s.date !== selectedDate
     );
-    const priorShiftRomTotal = priorShiftSheet
-      ? priorShiftSheet.rows.reduce((sum, r) => sum + (Number(r.romFeedTonnes) || 0), 0)
-      : 5180;
-    const priorShiftRunHours = priorShiftSheet
-      ? Math.max(
-          1,
-          priorShiftSheet.rows.reduce((sum, r) => sum + (Number(r.runMinutes) || 0), 0) / 60
-        )
-      : 11.8;
+    let priorShiftRomTotal = 5180;
+    let priorShiftRunHours = 11.8;
+
+    if (priorShiftSheet) {
+      let romSum = 0;
+      let runMinsSum = 0;
+      for (const pr of priorShiftSheet.rows) {
+        romSum += Number(pr.romFeedTonnes) || 0;
+        runMinsSum += Number(pr.runMinutes) || 0;
+      }
+      priorShiftRomTotal = romSum;
+      priorShiftRunHours = Math.max(1, runMinsSum / 60);
+    }
     const priorShiftTph = Math.round(priorShiftRomTotal / priorShiftRunHours);
     const throughputDeltaPct =
       priorShiftTph > 0 ? Number((((avgTph - priorShiftTph) / priorShiftTph) * 100).toFixed(1)) : 0;
-    const peakHourRom = Math.max(...rows.map((r) => r.romFeedTonnes), 1);
 
     return {
       totalRom,

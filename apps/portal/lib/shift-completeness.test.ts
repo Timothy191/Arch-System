@@ -102,14 +102,17 @@ describe('Shift Completeness Validation', () => {
   });
 
   describe('getShiftCompleteness', () => {
-    const mockSupabaseBuilder = (data: {
-      machines: any[];
-      machineOps: any[];
-      excavatorActs: any[];
-      dozerRolls: any[];
-      hourlyLoads: any[];
-      breakdowns?: any[];
-    }) => {
+    const mockSupabaseBuilder = (
+      data: {
+        machines: any[];
+        machineOps: any[];
+        excavatorActs: any[];
+        dozerRolls: any[];
+        hourlyLoads: any[];
+        breakdowns?: any[];
+      },
+      options: { failTable?: string } = {}
+    ) => {
       return {
         from: jest.fn().mockImplementation((table: string) => {
           let responseData: any[] = [];
@@ -120,15 +123,18 @@ describe('Shift Completeness Validation', () => {
           else if (table === 'hourly_loads') responseData = data.hourlyLoads;
           else if (table === 'breakdowns') responseData = data.breakdowns ?? [];
 
+          const response =
+            table === options.failTable
+              ? { data: null, error: { message: `${table} unavailable` } }
+              : { data: responseData, error: null };
+
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockReturnThis(),
             or: jest.fn().mockReturnThis(),
-            order: jest.fn().mockResolvedValue({ data: responseData, error: null }),
+            order: jest.fn().mockResolvedValue(response),
             // Handle cases where .order is not called but it resolves
-            then: jest
-              .fn()
-              .mockImplementation((resolve) => resolve({ data: responseData, error: null })),
+            then: jest.fn().mockImplementation((resolve) => resolve(response)),
           };
         }),
       } as any;
@@ -334,6 +340,97 @@ describe('Shift Completeness Validation', () => {
         maintenanceGet: 0,
         breakdown: 60,
       });
+    });
+
+    it('derives operator and SMR start from the earliest operation, SMR stop from the latest', async () => {
+      const supabase = mockSupabaseBuilder({
+        machines: [
+          {
+            id: 'm-1',
+            name: 'DT-101',
+            machine_type: 'dump truck',
+            report_exempt: false,
+          },
+        ],
+        machineOps: [
+          {
+            machine_id: 'm-1',
+            hours_worked: 4,
+            operator_name: null,
+            start_time: '14:00:00',
+            created_at: '2026-06-15T14:00:00Z',
+            start_smu: 1300,
+            end_smu: 1304,
+            operator: { full_name: 'B. Later' },
+            delay_entries: [],
+          },
+          {
+            machine_id: 'm-1',
+            hours_worked: 4,
+            operator_name: null,
+            start_time: '06:00:00',
+            created_at: '2026-06-15T06:00:00Z',
+            start_smu: 1200,
+            end_smu: 1296,
+            operator: { full_name: 'A. Earlier' },
+            delay_entries: [],
+          },
+        ],
+        excavatorActs: [],
+        dozerRolls: [],
+        hourlyLoads: [{ machine_id: 'm-1', total_loads: 12 }],
+      });
+
+      const res = await getShiftCompleteness(
+        supabase,
+        'dept-1',
+        'control-room',
+        '2026-06-15',
+        'day'
+      );
+
+      const sheet = res.statuses[0]!;
+      expect(sheet.operatorName).toBe('A. Earlier');
+      expect(sheet.smrStart).toBe(1200);
+      expect(sheet.smrStop).toBe(1304);
+    });
+
+    it('throws instead of falling back when a query fails', async () => {
+      const supabase = mockSupabaseBuilder(
+        {
+          machines: [],
+          machineOps: [],
+          excavatorActs: [],
+          dozerRolls: [],
+          hourlyLoads: [],
+        },
+        { failTable: 'machine_operations' }
+      );
+
+      await expect(
+        getShiftCompleteness(supabase, 'dept-1', 'control-room', '2026-06-15', 'day')
+      ).rejects.toThrow('Failed to load machine_operations for shift completeness');
+    });
+
+    it('includes the department slug in the cache key parts', async () => {
+      const supabase = mockSupabaseBuilder({
+        machines: [],
+        machineOps: [],
+        excavatorActs: [],
+        dozerRolls: [],
+        hourlyLoads: [],
+      });
+      const { withCache } = jest.requireMock('@/lib/cache-utils');
+      withCache.mockClear();
+
+      await getShiftCompleteness(supabase, 'dept-1', 'control-room', '2026-06-15', 'day');
+
+      expect(withCache).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          keyParts: ['dept-1', 'control-room', '2026-06-15', 'day'],
+        })
+      );
     });
   });
 });

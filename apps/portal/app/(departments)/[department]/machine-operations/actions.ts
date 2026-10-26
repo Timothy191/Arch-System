@@ -1,15 +1,53 @@
 'use server';
 
-import { AuthError, DatabaseError } from '@repo/errors';
+import { AuthError, DatabaseError, ValidationError } from '@repo/errors';
 import { cacheInvalidateTags } from '@repo/redis';
-import { logAuditEvent } from '@repo/shared/data-access';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { breakdownShiftDelayHours } from '@/lib/shift-completeness';
+
+const delayEntryInputSchema = z.object({
+  id: z.uuid().optional(),
+  delay_category_id: z.uuid(),
+  delay_start_time: z.iso.datetime({ offset: true }),
+  delay_end_time: z.iso.datetime({ offset: true }).nullable().optional(),
+  is_manual_override: z.boolean(),
+  manual_duration_hours: z.number().min(0).max(12).nullable(),
+  description: z.string().max(2000).nullable(),
+  status: z.literal('draft').optional(),
+});
+
+const saveDelayEntriesBatchSchema = z.object({
+  machineOperationId: z.uuid(),
+  entries: z.array(delayEntryInputSchema).max(50),
+});
+
+type DelayEntryInput = z.infer<typeof delayEntryInputSchema>;
+
+function delayEntryFields(entry: DelayEntryInput) {
+  return {
+    delay_category_id: entry.delay_category_id,
+    delay_start_time: entry.delay_start_time,
+    delay_end_time: entry.delay_end_time ?? null,
+    is_manual_override: entry.is_manual_override,
+    manual_duration_hours: entry.manual_duration_hours,
+    description: entry.description,
+  };
+}
 
 export async function saveDelayEntriesBatch(payload: {
   machineOperationId: string;
-  entries: any[];
+  entries: unknown[];
 }) {
+  const parsed = saveDelayEntriesBatchSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new ValidationError('Invalid delay entry payload', {
+      context: { issues: parsed.error.issues },
+    });
+  }
+  const { machineOperationId, entries } = parsed.data;
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -25,7 +63,7 @@ export async function saveDelayEntriesBatch(payload: {
   const { data: opRow } = await supabase
     .from('machine_operations')
     .select('id, machine_id, shift_date, machine:machines(serial_number, name)')
-    .eq('id', payload.machineOperationId)
+    .eq('id', machineOperationId)
     .maybeSingle();
 
   let engineeringDelayHours = 0;
@@ -39,33 +77,19 @@ export async function saveDelayEntriesBatch(payload: {
     const shiftDate = opRow.shift_date || new Date().toISOString().slice(0, 10);
     const { data: breakdowns } = await supabase
       .from('breakdowns')
-      .select('fleet_id, reason, date_in, time_in, date_out, time_out, status')
+      .select('fleet_id, reason, delay_hours, date_in, time_in, date_out, time_out, status')
       .in('fleet_id', fleetKeys)
       .or(`status.eq.active,date_in.eq.${shiftDate},date_out.eq.${shiftDate}`);
 
     for (const b of breakdowns || []) {
-      const tagMatch = b.reason?.match(/\[Shift Delay:\s*([\d.]+)h\]/i);
-      if (tagMatch?.[1]) {
-        const parsed = parseFloat(tagMatch[1]);
-        if (!Number.isNaN(parsed) && parsed > 0) {
-          engineeringDelayHours = Math.min(12, engineeringDelayHours + parsed);
-          continue;
-        }
-      }
-      if (b.date_in && b.time_in && b.date_out && b.time_out) {
-        const startMs = new Date(`${b.date_in}T${String(b.time_in).slice(0, 8)}`).getTime();
-        const endMs = new Date(`${b.date_out}T${String(b.time_out).slice(0, 8)}`).getTime();
-        if (!Number.isNaN(startMs) && !Number.isNaN(endMs) && endMs > startMs) {
-          engineeringDelayHours = Math.min(
-            12,
-            engineeringDelayHours + Number(((endMs - startMs) / 3600000).toFixed(2))
-          );
-        }
+      const hrs = breakdownShiftDelayHours(b);
+      if (hrs > 0) {
+        engineeringDelayHours = Math.min(12, engineeringDelayHours + hrs);
       }
     }
   }
 
-  const controlRoomBatchHours = (payload.entries || []).reduce((sum, entry) => {
+  const controlRoomBatchHours = entries.reduce((sum, entry) => {
     if (entry.is_manual_override && typeof entry.manual_duration_hours === 'number') {
       return sum + entry.manual_duration_hours;
     }
@@ -91,9 +115,13 @@ export async function saveDelayEntriesBatch(payload: {
     );
   }
 
-  for (const entry of payload.entries) {
+  for (const entry of entries) {
     if (entry.id) {
-      const { error } = await supabase.from('delay_entries').update(entry).eq('id', entry.id);
+      const { error } = await supabase
+        .from('delay_entries')
+        .update(delayEntryFields(entry))
+        .eq('id', entry.id)
+        .eq('machine_operation_id', machineOperationId);
       if (error) {
         throw new DatabaseError('Failed to update delay entry', {
           operation: 'update',
@@ -102,7 +130,11 @@ export async function saveDelayEntriesBatch(payload: {
         });
       }
     } else {
-      const { error } = await supabase.from('delay_entries').insert(entry);
+      const { error } = await supabase.from('delay_entries').insert({
+        machine_operation_id: machineOperationId,
+        ...delayEntryFields(entry),
+        status: 'draft',
+      });
       if (error) {
         throw new DatabaseError('Failed to insert delay entry', {
           operation: 'insert',

@@ -5,6 +5,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 
 interface Props {
   departmentId: string;
@@ -152,6 +153,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
         metersDrilled: '',
         holesDrilled: '',
       });
+      await invalidateShiftSheetCache({ departmentId }).catch(() => {});
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || 'Unknown error');

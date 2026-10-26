@@ -1,6 +1,18 @@
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getShiftCompleteness } from '@/lib/shift-completeness';
+
+const shiftCompletenessParams = z.object({
+  deptId: z.uuid(),
+  deptSlug: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be a lowercase slug'),
+  date: z.iso.date(),
+  shift: z.enum(['day', 'night']),
+});
 
 /**
  * @swagger
@@ -110,17 +122,22 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = req.nextUrl;
-  const deptId = searchParams.get('deptId');
-  const deptSlug = searchParams.get('deptSlug');
-  const date = searchParams.get('date');
-  const shift = searchParams.get('shift') as 'day' | 'night' | null;
+  const rawParams = {
+    deptId: searchParams.get('deptId'),
+    deptSlug: searchParams.get('deptSlug'),
+    date: searchParams.get('date'),
+    shift: searchParams.get('shift'),
+  };
 
-  if (!deptId || !deptSlug || !date || !shift) {
+  const missing = (Object.keys(rawParams) as Array<keyof typeof rawParams>).filter(
+    (key) => !rawParams[key]
+  );
+  if (missing.length > 0) {
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: 'Missing required params: deptId, deptSlug, date, shift',
+          message: `Missing required params: ${missing.join(', ')}`,
           code: 'API_ERROR',
         },
       },
@@ -128,7 +145,30 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const completeness = await getShiftCompleteness(supabase, deptId, deptSlug, date, shift);
+  const parsed = shiftCompletenessParams.safeParse(rawParams);
+  if (!parsed.success) {
+    const details = parsed.error.issues
+      .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+      .join('; ');
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          message: `Invalid query params: ${details}`,
+          code: 'API_ERROR',
+        },
+      },
+      { status: 400 }
+    );
+  }
+
+  const completeness = await getShiftCompleteness(
+    supabase,
+    parsed.data.deptId,
+    parsed.data.deptSlug,
+    parsed.data.date,
+    parsed.data.shift
+  );
 
   return NextResponse.json(completeness);
 }

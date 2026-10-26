@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Clock, Drill } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { DelayEntriesForm } from './DelayEntriesForm';
 
 interface Machine {
@@ -367,6 +368,7 @@ export function MachineOperationsForm({
           : 'Machine operation logged successfully'
       );
       // Refresh page to show new data
+      await invalidateShiftSheetCache({ departmentId, wroteDozerRolls: isDozer }).catch(() => {});
       router.refresh();
     } catch (_err) {
       toast.error('Failed to save. Please try again.');

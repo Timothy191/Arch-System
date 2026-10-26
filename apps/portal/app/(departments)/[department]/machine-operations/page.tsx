@@ -100,7 +100,9 @@ export default async function MachineOperationsPage({
       .order('name'),
     supabase
       .from('breakdowns')
-      .select('id, fleet_id, reason, repair_notes, status, date_in, time_in, date_out, time_out')
+      .select(
+        'id, fleet_id, reason, repair_notes, status, delay_hours, date_in, time_in, date_out, time_out'
+      )
       .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
 

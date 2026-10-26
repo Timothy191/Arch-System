@@ -448,6 +448,39 @@ export function PlantInventoryWorkspaceClient({
     [stockItems]
   );
 
+  // Performance Optimization: Precompute per-equipment stock line counts, shortfalls, and usage drawdowns in a single pass Map.
+  // Replaces O(E * (U + S)) nested filtering inside component rendering with O(E + U + S) indexing and O(1) Map lookups.
+  const equipmentMetrics = useMemo(() => {
+    const map = new Map<
+      string,
+      { eqDrawdown: number; eqUsageCount: number; eqStockLines: number; eqShortfall: number }
+    >();
+
+    for (const eq of equipmentList) {
+      map.set(eq, { eqDrawdown: 0, eqUsageCount: 0, eqStockLines: 0, eqShortfall: 0 });
+    }
+
+    for (const entry of usageHistory) {
+      const stats = map.get(entry.plantEquipment);
+      if (stats) {
+        stats.eqDrawdown += entry.amountUsed;
+        stats.eqUsageCount += 1;
+      }
+    }
+
+    for (const item of stockItems) {
+      const stats = map.get(item.plantEquipment);
+      if (stats) {
+        stats.eqStockLines += 1;
+        if (item.amountPresent < item.amountRequired) {
+          stats.eqShortfall += 1;
+        }
+      }
+    }
+
+    return map;
+  }, [equipmentList, usageHistory, stockItems]);
+
   // ─── 0. STOCK CONTROL DASHBOARD (/plant-inventory) ─────────────────────────
   if (mode === 'dashboard') {
     return (
@@ -619,12 +652,12 @@ export function PlantInventoryWorkspaceClient({
           </div>
           <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
             {equipmentList.map((equipment) => {
-              const eqUsage = usageHistory.filter((e) => e.plantEquipment === equipment);
-              const eqDrawdown = eqUsage.reduce((sum, e) => sum + e.amountUsed, 0);
-              const eqStockLines = stockItems.filter((i) => i.plantEquipment === equipment).length;
-              const eqShortfall = stockItems.filter(
-                (i) => i.plantEquipment === equipment && i.amountPresent < i.amountRequired
-              ).length;
+              const metrics = equipmentMetrics.get(equipment) ?? {
+                eqDrawdown: 0,
+                eqUsageCount: 0,
+                eqStockLines: 0,
+                eqShortfall: 0,
+              };
               return (
                 <GlassCard
                   key={equipment}
@@ -634,11 +667,13 @@ export function PlantInventoryWorkspaceClient({
                     {equipment}
                   </div>
                   <div className="font-bold font-mono text-[var(--text-heading)] text-lg">
-                    {formatQty(eqDrawdown)}
+                    {formatQty(metrics.eqDrawdown)}
                   </div>
                   <div className="mt-1 text-[var(--text-secondary)] text-xs">
-                    {eqStockLines} stock lines{' '}
-                    {eqShortfall > 0 ? ` · ${eqShortfall} below par` : ' · all nominal'}
+                    {metrics.eqStockLines} stock lines{' '}
+                    {metrics.eqShortfall > 0
+                      ? ` · ${metrics.eqShortfall} below par`
+                      : ' · all nominal'}
                   </div>
                 </GlassCard>
               );
@@ -1684,30 +1719,28 @@ export function PlantInventoryWorkspaceClient({
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {equipmentList.map((equipment) => {
-                    const eqUsage = usageHistory.filter((e) => e.plantEquipment === equipment);
-                    const eqDrawdown = eqUsage.reduce((sum, e) => sum + e.amountUsed, 0);
-                    const eqStockLines = stockItems.filter(
-                      (i) => i.plantEquipment === equipment
-                    ).length;
-                    const eqShortfall = stockItems.filter(
-                      (i) => i.plantEquipment === equipment && i.amountPresent < i.amountRequired
-                    ).length;
+                    const metrics = equipmentMetrics.get(equipment) ?? {
+                      eqDrawdown: 0,
+                      eqUsageCount: 0,
+                      eqStockLines: 0,
+                      eqShortfall: 0,
+                    };
                     return (
                       <tr key={equipment} className="hover:bg-[var(--bg-secondary)]/60">
                         <td className="px-4 py-3 align-top text-[var(--text-heading)] text-sm">
                           {equipment}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-heading)] text-sm">
-                          {formatQty(eqDrawdown)}
+                          {formatQty(metrics.eqDrawdown)}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
-                          {eqUsage.length}
+                          {metrics.eqUsageCount}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
-                          {eqStockLines}
+                          {metrics.eqStockLines}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[var(--text-secondary)] text-sm">
-                          {eqShortfall}
+                          {metrics.eqShortfall}
                         </td>
                       </tr>
                     );

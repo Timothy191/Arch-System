@@ -4,8 +4,10 @@ import { useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertCircle, CheckCircle, Clock, HelpCircle, Info, Plus, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
 import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
 import { saveDelayEntriesBatch } from './actions';
 
@@ -53,13 +55,14 @@ interface DelayEntriesFormProps {
 
 export function DelayEntriesForm({
   machineOperationId,
-  departmentId: _departmentId,
+  departmentId,
   onDelayChange,
   existingDelays: _existingDelays = [],
   readOnly = false,
   engineeringDelayHours = 0,
   engineeringDelayReasons = [],
 }: DelayEntriesFormProps) {
+  const router = useRouter();
   const supabase = createBrowserSupabaseClient();
 
   const [categories, setCategories] = useState<DelayCategory[]>([]);
@@ -426,6 +429,8 @@ export function DelayEntriesForm({
       }
 
       toast.success(`${draftDelays.length} delay entry(ies) committed successfully`);
+      await invalidateShiftSheetCache({ departmentId, wroteDelayEntries: true }).catch(() => {});
+      router.refresh();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to commit delays:', err);

@@ -178,6 +178,45 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
 
       const machineById = new Map(dbMachines.map((m) => [m.id, m]));
 
+      // Performance Optimization: Single-pass aggregation over dbLoads to build
+      // O(1) lookup maps for excavators and haul machines, eliminating O(N*M) nested filter/reduce operations.
+      const loadsByExcavator = new Map<
+        string,
+        { loadedLoads: number; dumperIds: Set<string>; totalBcm: number }
+      >();
+      const loadsByMachine = new Map<
+        string,
+        { loads: number; material: string; excavatorId: string | null }
+      >();
+
+      for (const l of dbLoads) {
+        const loads = l.total_loads || 0;
+        const bf = machineById.get(l.machine_id)?.bin_factor ?? 24;
+
+        if (l.excavator_id) {
+          let exAgg = loadsByExcavator.get(l.excavator_id);
+          if (!exAgg) {
+            exAgg = { loadedLoads: 0, dumperIds: new Set<string>(), totalBcm: 0 };
+            loadsByExcavator.set(l.excavator_id, exAgg);
+          }
+          exAgg.loadedLoads += loads;
+          if (l.machine_id) exAgg.dumperIds.add(l.machine_id);
+          exAgg.totalBcm += loads * bf;
+        }
+
+        if (l.machine_id) {
+          const mAgg = loadsByMachine.get(l.machine_id) ?? {
+            loads: 0,
+            material: l.material_type || 'ROM Coal',
+            excavatorId: l.excavator_id,
+          };
+          mAgg.loads += loads;
+          if (l.material_type) mAgg.material = l.material_type;
+          if (l.excavator_id) mAgg.excavatorId = l.excavator_id;
+          loadsByMachine.set(l.machine_id, mAgg);
+        }
+      }
+
       if (dbActivities.length > 0) {
         const mappedExcavators: ExcavatorActivityRow[] = dbActivities.map((act, idx) => {
           const machineObj = Array.isArray(act.machine) ? act.machine[0] : act.machine;
@@ -185,13 +224,10 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
           const siteObj = Array.isArray(act.site) ? act.site[0] : act.site;
           const blockObj = Array.isArray(act.block_mined) ? act.block_mined[0] : act.block_mined;
 
-          const matchingLoads = dbLoads.filter((l) => l.excavator_id === act.machine_id);
-          const loadedLoads = matchingLoads.reduce((sum, l) => sum + (l.total_loads || 0), 0);
-          const assignedDumperIds = new Set(matchingLoads.map((l) => l.machine_id));
-          const totalBcm = matchingLoads.reduce((sum, l) => {
-            const bf = machineById.get(l.machine_id)?.bin_factor ?? 24;
-            return sum + (l.total_loads || 0) * bf;
-          }, 0);
+          const exAgg = act.machine_id ? loadsByExcavator.get(act.machine_id) : undefined;
+          const loadedLoads = exAgg?.loadedLoads ?? 0;
+          const assignedDumperCount = exAgg?.dumperIds.size ?? 0;
+          const totalBcm = exAgg?.totalBcm ?? 0;
 
           return {
             id: act.id,
@@ -202,7 +238,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
               'Active Pit Face',
             shift: (act.shift_type || 'day').toUpperCase(),
             material: act.material_type || 'ROM Coal',
-            assignedMachines: Math.max(assignedDumperIds.size, 2),
+            assignedMachines: Math.max(assignedDumperCount, 2),
             loadedLoads: loadedLoads > 0 ? loadedLoads : 24 + idx * 6,
             totalBcm: totalBcm > 0 ? Math.round(totalBcm) : (24 + idx * 6) * 25,
             status: idx % 2 === 0 ? 'loading' : 'digging',
@@ -213,22 +249,6 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
 
       const haulMachines = dbMachines.filter((m) => m.machine_type !== 'Excavator');
       if (haulMachines.length > 0 && dbLoads.length > 0) {
-        const loadsByMachine = new Map<
-          string,
-          { loads: number; material: string; excavatorId: string | null }
-        >();
-        for (const l of dbLoads) {
-          const existing = loadsByMachine.get(l.machine_id) ?? {
-            loads: 0,
-            material: l.material_type || 'ROM Coal',
-            excavatorId: l.excavator_id,
-          };
-          existing.loads += l.total_loads || 0;
-          if (l.material_type) existing.material = l.material_type;
-          if (l.excavator_id) existing.excavatorId = l.excavator_id;
-          loadsByMachine.set(l.machine_id, existing);
-        }
-
         const mappedMachines: RegisteredMachineLoadRow[] = haulMachines
           .slice(0, 8)
           .map((m, idx) => {

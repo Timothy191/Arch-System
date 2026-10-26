@@ -93,7 +93,7 @@ describe('GET /api/control-room/shift-completeness', () => {
     });
 
     const req = new NextRequest(
-      'http://localhost:3000/api/control-room/shift-completeness?deptId=dept-1&deptSlug=ops&date=2026-09-07&shift=day'
+      'http://localhost:3000/api/control-room/shift-completeness?deptId=0f160914-d92e-45d9-9547-d3d1a11ef6a1&deptSlug=ops&date=2026-09-07&shift=day'
     );
     const res = await GET(req);
 
@@ -105,10 +105,49 @@ describe('GET /api/control-room/shift-completeness', () => {
     });
     expect(getShiftCompleteness).toHaveBeenCalledWith(
       expect.anything(),
-      'dept-1',
+      '0f160914-d92e-45d9-9547-d3d1a11ef6a1',
       'ops',
       '2026-09-07',
       'day'
     );
+  });
+
+  it('returns 400 when deptId is not a UUID', async () => {
+    createServerSupabaseClient.mockResolvedValue(buildSupabaseAuth({ id: 'user-1' }));
+
+    const req = new NextRequest(
+      'http://localhost:3000/api/control-room/shift-completeness?deptId=dept-1&deptSlug=ops&date=2026-09-07&shift=day'
+    );
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toContain('deptId');
+    expect(getShiftCompleteness).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when the date is not a real calendar date', async () => {
+    createServerSupabaseClient.mockResolvedValue(buildSupabaseAuth({ id: 'user-1' }));
+
+    const req = new NextRequest(
+      'http://localhost:3000/api/control-room/shift-completeness?deptId=0f160914-d92e-45d9-9547-d3d1a11ef6a1&deptSlug=ops&date=2026-02-30&shift=day'
+    );
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toContain('date');
+    expect(getShiftCompleteness).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when shift is not day or night', async () => {
+    createServerSupabaseClient.mockResolvedValue(buildSupabaseAuth({ id: 'user-1' }));
+
+    const req = new NextRequest(
+      'http://localhost:3000/api/control-room/shift-completeness?deptId=0f160914-d92e-45d9-9547-d3d1a11ef6a1&deptSlug=ops&date=2026-09-07&shift=swing'
+    );
+    const res = await GET(req);
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toContain('shift');
+    expect(getShiftCompleteness).not.toHaveBeenCalled();
   });
 });

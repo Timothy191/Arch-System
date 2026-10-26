@@ -11,7 +11,7 @@
     "@repo/ui": "1.0.0",
     "@tremor/react": "catalog:",
     "lucide-react": "catalog:",
-    "next": "^16.3.8",
+    "next": "^16.4.1",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "sonner": "catalog:"
@@ -29,7 +29,7 @@
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "@swc/jest": "^0.2.39",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",

@@ -1,3 +1,4 @@
+import { DatabaseError } from '@repo/errors';
 import { CacheCategory } from '@repo/redis';
 import type { createServerSupabaseClient } from '@repo/supabase/server';
 import { withCache } from '@/lib/cache-utils';
@@ -88,6 +89,17 @@ const EXCAVATOR_KEYWORDS = ['excavator', 'excavation'];
 
 function machineTypeLC(t: string) {
   return t.toLowerCase();
+}
+
+/** Rethrow query failures so `withCache` never caches a partial sheet. */
+function assertQuerySucceeded(table: string, error: { message: string } | null): void {
+  if (error) {
+    throw new DatabaseError(`Failed to load ${table} for shift completeness`, {
+      operation: 'select',
+      table,
+      context: { error: error.message },
+    });
+  }
 }
 
 function requiredFormFor(machineType: string): RequiredForm {
@@ -245,11 +257,11 @@ export async function getShiftCompleteness(
     async () => {
       const [
         machinesResult,
-        { data: machineOps },
-        { data: excavatorActs },
-        { data: dozerRolls },
-        { data: hourlyLoads },
-        { data: breakdowns },
+        machineOpsResult,
+        excavatorActsResult,
+        dozerRollsResult,
+        hourlyLoadsResult,
+        breakdownsResult,
       ] = await Promise.all([
         supabase
           .from('machines')
@@ -260,7 +272,7 @@ export async function getShiftCompleteness(
         supabase
           .from('machine_operations')
           .select(
-            `machine_id, hours_worked, operator_name, start_smu, end_smu,
+            `machine_id, hours_worked, operator_name, start_time, created_at, start_smu, end_smu,
              operator:operators(full_name),
              delay_entries:delay_entries(
                status, duration_hours, manual_duration_hours, is_manual_override,
@@ -292,37 +304,29 @@ export async function getShiftCompleteness(
         supabase
           .from('breakdowns')
           .select('id, fleet_id, reason, status, delay_hours, date_in, time_in, date_out, time_out')
+          .eq('department_id', deptId)
           .or(`status.eq.active,date_in.eq.${date},date_out.eq.${date}`),
       ]);
 
-      let machines: Array<{
-        id: string;
-        name: string;
-        machine_type: string;
-        serial_number?: string | null;
-        report_exempt?: boolean | null;
-      }> | null = machinesResult.data;
+      assertQuerySucceeded('machines', machinesResult.error);
+      assertQuerySucceeded('machine_operations', machineOpsResult.error);
+      assertQuerySucceeded('excavator_activity', excavatorActsResult.error);
+      assertQuerySucceeded('dozer_rolls', dozerRollsResult.error);
+      assertQuerySucceeded('hourly_loads', hourlyLoadsResult.error);
+      assertQuerySucceeded('breakdowns', breakdownsResult.error);
 
-      if (machinesResult.error || !machines || machines.length === 0) {
-        const centralFallback = await supabase
-          .from('machines')
-          .select('id, name, machine_type')
-          .eq('active', true)
-          .order('name');
-        if (centralFallback.data && centralFallback.data.length > 0) {
-          machines = centralFallback.data;
-        }
-      }
+      const machines = machinesResult.data ?? [];
+      const machineOps = machineOpsResult.data ?? [];
+      const excavatorActs = excavatorActsResult.data ?? [];
+      const dozerRolls = dozerRollsResult.data ?? [];
+      const hourlyLoads = hourlyLoadsResult.data ?? [];
+      const breakdowns = breakdownsResult.data ?? [];
 
-      const machineOpIds = new Set(
-        (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id)
-      );
-      const excavatorIds = new Set(
-        (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id)
-      );
-      const dozerIds = new Set((dozerRolls ?? []).map((r: { machine_id: string }) => r.machine_id));
+      const machineOpIds = new Set(machineOps.map((r: { machine_id: string }) => r.machine_id));
+      const excavatorIds = new Set(excavatorActs.map((r: { machine_id: string }) => r.machine_id));
+      const dozerIds = new Set(dozerRolls.map((r: { machine_id: string }) => r.machine_id));
       const loadIds = new Set(
-        (hourlyLoads ?? [])
+        hourlyLoads
           .filter(
             (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0
           )
@@ -330,7 +334,7 @@ export async function getShiftCompleteness(
       );
 
       const machineOpHoursMap = new Map<string, number>();
-      for (const op of machineOps ?? []) {
+      for (const op of machineOps) {
         if (op.machine_id && op.hours_worked !== null) {
           const current = machineOpHoursMap.get(op.machine_id) || 0;
           machineOpHoursMap.set(op.machine_id, current + Number(op.hours_worked));
@@ -338,7 +342,7 @@ export async function getShiftCompleteness(
       }
 
       const dozerHoursMap = new Map<string, number>();
-      for (const roll of dozerRolls ?? []) {
+      for (const roll of dozerRolls) {
         if (roll.machine_id && roll.hours_operated !== null) {
           const current = dozerHoursMap.get(roll.machine_id) || 0;
           dozerHoursMap.set(roll.machine_id, current + Number(roll.hours_operated));
@@ -359,6 +363,8 @@ export async function getShiftCompleteness(
       interface MachineOpDetailRow {
         machine_id: string;
         operator_name: string | null;
+        start_time: string | null;
+        created_at: string | null;
         start_smu: number | string | null;
         end_smu: number | string | null;
         operator: { full_name: string } | null;
@@ -376,7 +382,19 @@ export async function getShiftCompleteness(
       const sheetDetailByMachine = new Map<string, SheetDetail>();
       const sheetCommentsByMachine = new Map<string, Set<string>>();
 
-      for (const op of (machineOps ?? []) as unknown as MachineOpDetailRow[]) {
+      // A machine/shift can hold several operations (the unique key includes
+      // start_smu), so order them explicitly: earliest start first, rows without
+      // a start time last, created_at as the tie-breaker.
+      const orderedOps = [...(machineOps as unknown as MachineOpDetailRow[])].sort((a, b) => {
+        if (a.start_time !== b.start_time) {
+          if (!a.start_time) return 1;
+          if (!b.start_time) return -1;
+          return a.start_time < b.start_time ? -1 : 1;
+        }
+        return (a.created_at ?? '').localeCompare(b.created_at ?? '');
+      });
+
+      for (const op of orderedOps) {
         const detail = sheetDetailByMachine.get(op.machine_id) ?? {
           operatorName: null,
           smrStart: null,
@@ -427,7 +445,7 @@ export async function getShiftCompleteness(
       // roll-over / excavator-activity record (those tables carry no SMR).
       const fallbackOperatorByMachine = new Map<string, string>();
       const fallbackCommentByMachine = new Map<string, string>();
-      for (const row of (excavatorActs ?? []) as unknown as Array<{
+      for (const row of excavatorActs as unknown as Array<{
         machine_id: string;
         notes: string | null;
         operator: { full_name: string } | null;
@@ -437,7 +455,7 @@ export async function getShiftCompleteness(
         }
         if (row.notes?.trim()) fallbackCommentByMachine.set(row.machine_id, row.notes.trim());
       }
-      for (const row of (dozerRolls ?? []) as unknown as Array<{
+      for (const row of dozerRolls as unknown as Array<{
         machine_id: string;
         notes: string | null;
         operator: { full_name: string } | null;
@@ -452,7 +470,7 @@ export async function getShiftCompleteness(
 
       // Engineering breakdown minutes, resolved by machine id / name / serial.
       const machineIdByKey = new Map<string, string>();
-      for (const m of machines ?? []) {
+      for (const m of machines) {
         machineIdByKey.set(m.id, m.id);
         machineIdByKey.set(m.name, m.id);
         const serial = (m as { serial_number?: string | null }).serial_number;
@@ -460,7 +478,7 @@ export async function getShiftCompleteness(
       }
 
       const breakdownMinutesByMachine = new Map<string, number>();
-      for (const breakdown of breakdowns ?? []) {
+      for (const breakdown of breakdowns) {
         const machineId = machineIdByKey.get(String(breakdown.fleet_id ?? '').trim());
         if (!machineId) continue;
         const minutes = Math.round(breakdownShiftDelayHours(breakdown) * 60);
@@ -471,7 +489,7 @@ export async function getShiftCompleteness(
         );
       }
 
-      const statuses: MachineCoverageStatus[] = (machines ?? []).map(
+      const statuses: MachineCoverageStatus[] = machines.map(
         (m: {
           id: string;
           name: string;
@@ -539,7 +557,7 @@ export async function getShiftCompleteness(
     },
     {
       category: CacheCategory.SHIFT,
-      keyParts: [deptId, date, shift],
+      keyParts: [deptId, departmentSlug ?? '', date, shift],
       tags: [
         `dept:${deptId}`,
         'table:machines',
