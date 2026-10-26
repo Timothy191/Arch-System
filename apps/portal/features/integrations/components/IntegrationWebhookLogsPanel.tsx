@@ -458,6 +458,7 @@ export function IntegrationCatalogMarketplace({
               <button
                 key={tab.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => setCatalogFilter(tab.id)}
                 className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-medium text-xs transition-all ${
                   active
@@ -475,6 +476,7 @@ export function IntegrationCatalogMarketplace({
         <div className="relative w-full md:w-72">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
+            aria-label="Filter integrations catalog"
             placeholder="Filter by name, domain, or author…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -483,120 +485,126 @@ export function IntegrationCatalogMarketplace({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredCatalog.map((entry) => {
-          const isInstalled = installedCatalogIds.has(entry.id);
-          const domains = entry.capabilities?.domains ?? [];
-          const isQuickInstalling = installingCatalogId === entry.id;
+      {filteredCatalog.length === 0 ? (
+        <GlassCard className="p-6 text-center text-[var(--text-muted)] text-xs">
+          No integrations match the current filter or search query.
+        </GlassCard>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredCatalog.map((entry) => {
+            const isInstalled = installedCatalogIds.has(entry.id);
+            const domains = entry.capabilities?.domains ?? [];
+            const isQuickInstalling = installingCatalogId === entry.id;
 
-          return (
-            <GlassCard
-              key={entry.id}
-              className="flex flex-col justify-between gap-4 border border-[var(--border-subtle)] p-5 transition-all hover:border-[var(--border-default)]"
-            >
-              <div className="space-y-2.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <h4 className="truncate font-semibold text-[var(--text-heading)] text-sm">
-                        {entry.name}
-                      </h4>
-                      {entry.verified && (
-                        <span
-                          title="Verified Official / First-Party Connector"
-                          className="inline-flex items-center text-[var(--accent-blue)]"
-                        >
-                          <ShieldCheck className="h-4 w-4" />
-                        </span>
-                      )}
+            return (
+              <GlassCard
+                key={entry.id}
+                className="flex flex-col justify-between gap-4 border border-[var(--border-subtle)] p-5 transition-all hover:border-[var(--border-default)]"
+              >
+                <div className="space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <h4 className="truncate font-semibold text-[var(--text-heading)] text-sm">
+                          {entry.name}
+                        </h4>
+                        {entry.verified && (
+                          <span
+                            title="Verified Official / First-Party Connector"
+                            className="inline-flex items-center text-[var(--accent-blue)]"
+                          >
+                            <ShieldCheck className="h-4 w-4" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[var(--text-muted)]">
+                        by {entry.author ?? 'Arch Systems'} ·{' '}
+                        <span className="font-mono">{entry.id}</span>
+                      </p>
                     </div>
-                    <p className="text-[11px] text-[var(--text-muted)]">
-                      by {entry.author ?? 'Arch Systems'} ·{' '}
-                      <span className="font-mono">{entry.id}</span>
-                    </p>
+                    {kindBadge(entry.kind)}
                   </div>
-                  {kindBadge(entry.kind)}
-                </div>
 
-                <p className="line-clamp-3 text-[var(--text-secondary)] text-xs leading-relaxed">
-                  {entry.description}
-                </p>
+                  <p className="line-clamp-3 text-[var(--text-secondary)] text-xs leading-relaxed">
+                    {entry.description}
+                  </p>
 
-                {domains.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    {domains.map((domain) => (
-                      <span
-                        key={domain}
-                        className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[10px] text-[var(--text-secondary)]"
-                      >
-                        {domain}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2.5 border-[var(--border-subtle)] border-t pt-3">
-                <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
-                  {authBadge(entry.auth_type)}
-                  {entry.docs_url && (
-                    <a
-                      href={entry.docs_url}
-                      target={entry.docs_url.startsWith('http') ? '_blank' : undefined}
-                      rel={entry.docs_url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] hover:underline"
-                    >
-                      Docs <ExternalLink className="h-3 w-3" />
-                    </a>
+                  {domains.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      {domains.map((domain) => (
+                        <span
+                          key={domain}
+                          className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[10px] text-[var(--text-secondary)]"
+                        >
+                          {domain}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
-                  <span className="max-w-[180px] truncate font-mono text-[10px] text-[var(--text-muted)]">
-                    {entry.server_url ?? 'native://arch-plugin'}
-                  </span>
+                <div className="space-y-2.5 border-[var(--border-subtle)] border-t pt-3">
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
+                    {authBadge(entry.auth_type)}
+                    {entry.docs_url && (
+                      <a
+                        href={entry.docs_url}
+                        target={entry.docs_url.startsWith('http') ? '_blank' : undefined}
+                        rel={entry.docs_url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] hover:underline"
+                      >
+                        Docs <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
 
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    {isInstalled ? (
-                      <>
-                        <Badge className="border border-emerald-500/30 bg-emerald-500/15 text-[11px] text-emerald-700">
-                          Installed
-                        </Badge>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="max-w-[180px] truncate font-mono text-[10px] text-[var(--text-muted)]">
+                      {entry.server_url ?? 'native://arch-plugin'}
+                    </span>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {isInstalled ? (
+                        <>
+                          <Badge className="border border-emerald-500/30 bg-emerald-500/15 text-[11px] text-emerald-700">
+                            Installed
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs"
+                            onClick={() => onStartInstallFromCatalog(entry)}
+                          >
+                            Add Scope
+                          </Button>
+                        </>
+                      ) : entry.auth_type === 'none' ? (
+                        <Button
+                          size="sm"
+                          className="h-7 px-3 text-xs"
+                          disabled={isQuickInstalling}
+                          onClick={() => onQuickInstall(entry)}
+                        >
+                          {isQuickInstalling ? 'Installing…' : 'Quick Install'}
+                        </Button>
+                      ) : (
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 px-2.5 text-xs"
+                          className="h-7 px-3 text-xs"
                           onClick={() => onStartInstallFromCatalog(entry)}
                         >
-                          Add Scope
+                          Configure & Install
                         </Button>
-                      </>
-                    ) : entry.auth_type === 'none' ? (
-                      <Button
-                        size="sm"
-                        className="h-7 px-3 text-xs"
-                        disabled={isQuickInstalling}
-                        onClick={() => onQuickInstall(entry)}
-                      >
-                        {isQuickInstalling ? 'Installing…' : 'Quick Install'}
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-3 text-xs"
-                        onClick={() => onStartInstallFromCatalog(entry)}
-                      >
-                        Configure & Install
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </GlassCard>
-          );
-        })}
-      </div>
+              </GlassCard>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

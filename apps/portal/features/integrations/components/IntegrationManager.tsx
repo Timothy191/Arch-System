@@ -190,7 +190,12 @@ export function IntegrationManager() {
   const toggleStatus = async (installation: Installation) => {
     setBusyId(installation.id);
     try {
-      const next = installation.status === 'disabled' ? 'pending' : 'disabled';
+      const next =
+        installation.status === 'disabled'
+          ? installation.tools_synced_at
+            ? 'active'
+            : 'pending'
+          : 'disabled';
       await fetchClient.patch(`/api/integrations/${installation.id}`, { status: next });
       fetchIntegrations();
     } catch {
@@ -234,6 +239,8 @@ export function IntegrationManager() {
       return;
     }
     setExpandedId(installation.id);
+    setTestTool('');
+    setTestArgs('{}');
     setTestResult(null);
     try {
       const data = await fetchClient.get<{ auditLogs: AuditLog[] }>(

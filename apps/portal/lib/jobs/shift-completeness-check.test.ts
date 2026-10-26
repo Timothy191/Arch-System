@@ -22,9 +22,8 @@ jest.mock('@repo/utils/inngest', () => ({
 import { shiftCompletenessCheckFn } from './shift-completeness-check';
 
 function mockDepartments(data: unknown) {
-  const mockFinalEq = jest.fn().mockResolvedValue({ data, error: null });
-  const mockFirstEq = jest.fn().mockReturnValue({ eq: mockFinalEq });
-  const mockSelect = jest.fn().mockReturnValue({ eq: mockFirstEq });
+  const mockIs = jest.fn().mockResolvedValue({ data, error: null });
+  const mockSelect = jest.fn().mockReturnValue({ is: mockIs });
   mockFrom.mockImplementation((table: string) =>
     table === 'departments'
       ? { select: mockSelect }
@@ -32,7 +31,17 @@ function mockDepartments(data: unknown) {
   );
 }
 
-const handler = (shiftCompletenessCheckFn as any).handler;
+const handler = (
+  shiftCompletenessCheckFn as unknown as {
+    handler: (ctx: { step: Record<string, unknown> }) => Promise<{
+      success: boolean;
+      message?: string;
+      departments_checked?: number;
+      alerts_generated?: number;
+      alerts?: string[];
+    }>;
+  }
+).handler;
 
 describe('shiftCompletenessCheckFn', () => {
   beforeEach(() => {
@@ -111,9 +120,8 @@ describe('shiftCompletenessCheckFn', () => {
   });
 
   it('logs and re-throws when the departments query fails', async () => {
-    const mockFinalEq = jest.fn().mockResolvedValue({ data: null, error: new Error('db down') });
-    const mockFirstEq = jest.fn().mockReturnValue({ eq: mockFinalEq });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockFirstEq });
+    const mockIs = jest.fn().mockResolvedValue({ data: null, error: new Error('db down') });
+    const mockSelect = jest.fn().mockReturnValue({ is: mockIs });
     mockFrom.mockReturnValue({ select: mockSelect });
 
     await expect(handler({ step: {} })).rejects.toThrow('db down');

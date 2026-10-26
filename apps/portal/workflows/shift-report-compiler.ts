@@ -1,9 +1,30 @@
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { getCurrentShift, getOperationalToday } from '@repo/utils';
 import { logError } from '@/lib/errors/error-logger';
 
 interface TelemetrySummaryStepResult {
   status: string;
   points: number;
+}
+
+function parseShiftIdentifier(shiftId: string): {
+  departmentName: string;
+  reportDate: string;
+  shiftType: 'day' | 'night';
+} {
+  const match = /^shift_(.+)_(\d{4}-\d{2}-\d{2})_(day|night)$/.exec(shiftId);
+  if (match) {
+    return {
+      departmentName: match[1] || 'control-room',
+      reportDate: match[2] || getOperationalToday('Africa/Johannesburg'),
+      shiftType: (match[3] as 'day' | 'night') || getCurrentShift(),
+    };
+  }
+  return {
+    departmentName: 'control-room',
+    reportDate: getOperationalToday('Africa/Johannesburg'),
+    shiftType: getCurrentShift(),
+  };
 }
 
 async function gatherScadaTelemetry(shiftId: string): Promise<TelemetrySummaryStepResult> {
@@ -38,15 +59,31 @@ async function compileReportArtifact(
   'use step';
 
   const supabase = createServiceRoleClient();
-  const reportDate = new Date().toISOString().split('T')[0]!;
+  const { departmentName, reportDate, shiftType } = parseShiftIdentifier(shiftId);
+
+  const { data: deptRow } = await supabase
+    .from('departments')
+    .select('id')
+    .eq('name', departmentName)
+    .maybeSingle();
+
+  const departmentId = (deptRow as { id?: string } | null)?.id;
+  if (!departmentId) {
+    logError(new Error(`Department not found for shift report compilation: ${departmentName}`), {
+      context: 'compile_report_artifact',
+      shiftId,
+    });
+    return { reportId: shiftId };
+  }
 
   // Upsert the compiled report metadata into canonical public.control_room_shift_reports
   const { data, error } = await supabase
     .from('control_room_shift_reports')
     .upsert(
       {
+        department_id: departmentId,
         report_date: reportDate,
-        shift_type: 'day',
+        shift_type: shiftType,
         operator_name: 'Automated Shift Compiler',
         summary_notes: `Compiled shift ${shiftId} with ${telemetryData.points} telemetry points (${telemetryData.status}).`,
         updated_at: new Date().toISOString(),

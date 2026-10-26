@@ -1,9 +1,23 @@
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
+import { getCurrentShift } from '@repo/utils';
 import type { BreakdownControlRoomView } from '@/features/departments';
+import {
+  createStandardOverviewDelays,
+  createZeroOverviewDelays,
+  OVERVIEW_DELAY_BY_CATEGORY,
+} from '@/lib/shift-sheet-buckets';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { breakdownShiftDelayHours } from '~/lib/shift-completeness';
 import { EngineeringNotesForm } from './EngineeringNotesForm';
 import { type EngineeringNote, EngineeringNotesList } from './EngineeringNotesList';
+import { EngineeringNotesTabsClient } from './EngineeringNotesTabsClient';
+import {
+  type CarryOverBreakdownInfo,
+  EngineeringOverviewTable,
+  type MachineOverviewInitialRow,
+  type OverviewOperatorOption,
+} from './EngineeringOverviewTable';
 import { PredictiveAlertsWidget } from './PredictiveAlertsWidget';
 
 interface BreakdownRow {
@@ -102,18 +116,32 @@ function inferBreakdownIssueType(reason: string, machineType: string): string {
 
 export default async function EngineeringNotesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ department: string }>;
+  searchParams?: Promise<{ tab?: string; shift?: string }>;
 }) {
   const { department } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   requireDepartment(department, ['control-room', 'engineering']);
 
   const { deptId, supabase, today } = await getDepartmentContext({
     department,
   });
 
+  const currentShift: 'day' | 'night' =
+    resolvedSearchParams.shift === 'day' || resolvedSearchParams.shift === 'night'
+      ? resolvedSearchParams.shift
+      : getCurrentShift();
+  const initialTab: 'overview' | 'notes' =
+    resolvedSearchParams.tab === 'notes' ? 'notes' : 'overview';
+
   const [
     { data: machines },
+    { data: operators },
+    { data: todayOperations },
+    { data: previousSMRs },
+    { data: baselineSmrReadings },
     { data: engDept },
     { data: todayNotes },
     { data: directBreakdowns },
@@ -122,9 +150,40 @@ export default async function EngineeringNotesPage({
   ] = await Promise.all([
     supabase
       .from('machines')
-      .select('id, name, machine_type, serial_number, sites(name)')
+      .select('id, name, machine_type, serial_number, site_id, sites(name)')
       .eq('active', true)
       .order('name'),
+    supabase
+      .from('operators')
+      .select('id, full_name, employee_code')
+      .eq('active', true)
+      .order('full_name'),
+    supabase
+      .from('machine_operations')
+      .select(
+        `id, machine_id, operator_id, shift_type, start_smu, end_smu, hours_worked,
+         operator:operators(full_name),
+         delay_entries:delay_entries(
+           id, status, duration_hours, manual_duration_hours, is_manual_override,
+           description, deleted_at,
+           delay_category:delay_categories(name)
+         )`
+      )
+      .eq('department_id', deptId)
+      .eq('shift_date', today)
+      .eq('shift_type', currentShift),
+    supabase
+      .from('machine_operations')
+      .select('machine_id, end_smu')
+      .not('end_smu', 'is', null)
+      .order('shift_date', { ascending: false })
+      .order('end_smu', { ascending: false })
+      .limit(500),
+    supabase
+      .from('smr_readings')
+      .select('machine_id, reading_hours')
+      .order('reading_date', { ascending: false })
+      .limit(200),
     supabase.from('departments').select('id').eq('name', 'engineering').maybeSingle(),
     supabase
       .from('engineering_notes')
@@ -330,31 +389,214 @@ export default async function EngineeringNotesPage({
     }
   }
 
+  // Build latest opening SMR map from previous shift operations and smr_readings
+  const latestSmrByMachine = new Map<string, number>();
+  for (const row of (previousSMRs ?? []) as Array<{
+    machine_id: string;
+    end_smu: number | null;
+  }>) {
+    if (!latestSmrByMachine.has(row.machine_id) && row.end_smu !== null) {
+      latestSmrByMachine.set(row.machine_id, Number(row.end_smu));
+    }
+  }
+  for (const row of (baselineSmrReadings ?? []) as Array<{
+    machine_id: string;
+    reading_hours: number | null;
+  }>) {
+    if (!latestSmrByMachine.has(row.machine_id) && row.reading_hours !== null) {
+      latestSmrByMachine.set(row.machine_id, Number(row.reading_hours));
+    }
+  }
+
+  // Build active (unbooked-out) carry-over breakdown lookup by machine id / serial / name
+  const activeBreakdownByMachineId = new Map<string, CarryOverBreakdownInfo>();
+  for (const bd of mergedBreakdowns) {
+    if (bd.status !== 'active') continue;
+    const matchedMachine = (machines || []).find(
+      (m) =>
+        m.id === bd.fleet_id ||
+        m.serial_number === bd.fleet_id ||
+        (bd.machine_name && m.name.toLowerCase() === bd.machine_name.toLowerCase()) ||
+        m.name.toLowerCase() === bd.fleet_id.toLowerCase()
+    );
+    if (!matchedMachine || activeBreakdownByMachineId.has(matchedMachine.id)) continue;
+
+    const isFromPreviousShift =
+      bd.date_in < today ||
+      (bd.date_in === today && inferShiftFromTime(bd.time_in) !== currentShift);
+    const parsedDelay = breakdownShiftDelayHours(bd);
+    activeBreakdownByMachineId.set(matchedMachine.id, {
+      id: bd.id,
+      reason: bd.reason.replace(/\s*\[Shift Delay:\s*[\d.]+h\]/i, '').trim(),
+      dateIn: bd.date_in,
+      timeIn: bd.time_in ?? null,
+      delayHours: parsedDelay > 0 ? parsedDelay : isFromPreviousShift ? 12 : 2,
+      isFromPreviousShift,
+    });
+  }
+
+  // Build current shift operation lookup by machine_id
+  interface RawMachineOpRow {
+    id: string;
+    machine_id: string;
+    operator_id: string | null;
+    shift_type: string;
+    start_smu: number | null;
+    end_smu: number | null;
+    hours_worked: number | null;
+    operator?: { full_name: string } | Array<{ full_name: string }> | null;
+    delay_entries?: Array<{
+      id: string;
+      status: string | null;
+      duration_hours: number | null;
+      manual_duration_hours: number | null;
+      is_manual_override: boolean | null;
+      description: string | null;
+      deleted_at: string | null;
+      delay_category?: { name: string } | Array<{ name: string }> | null;
+    }> | null;
+  }
+
+  const opByMachineId = new Map<string, RawMachineOpRow>();
+  for (const op of (todayOperations ?? []) as unknown as RawMachineOpRow[]) {
+    if (!opByMachineId.has(op.machine_id)) {
+      opByMachineId.set(op.machine_id, op);
+    }
+  }
+
+  const overviewRows: MachineOverviewInitialRow[] = (machines ?? []).map((m) => {
+    const existingOp = opByMachineId.get(m.id);
+    const carryOver = activeBreakdownByMachineId.get(m.id) ?? null;
+    const defaultStartSmr = latestSmrByMachine.get(m.id) ?? 0;
+
+    if (existingOp) {
+      const delays = createZeroOverviewDelays();
+      const comments = new Set<string>();
+      let hasAnyDelayEntry = false;
+
+      for (const entry of existingOp.delay_entries ?? []) {
+        if (entry.deleted_at) continue;
+        const catObj = Array.isArray(entry.delay_category)
+          ? entry.delay_category[0]
+          : entry.delay_category;
+        const catKey = (catObj?.name ?? '').trim().toLowerCase();
+        const bucketKey = OVERVIEW_DELAY_BY_CATEGORY[catKey];
+        const hours =
+          entry.is_manual_override && entry.manual_duration_hours !== null
+            ? Number(entry.manual_duration_hours)
+            : Number(entry.duration_hours ?? 0);
+
+        if (bucketKey && Number.isFinite(hours) && hours > 0) {
+          delays[bucketKey] = Number((delays[bucketKey] + hours).toFixed(2));
+          hasAnyDelayEntry = true;
+        }
+        if (entry.description?.trim()) {
+          comments.add(entry.description.trim());
+        }
+      }
+
+      const finalDelays = hasAnyDelayEntry ? delays : createStandardOverviewDelays();
+      if (carryOver && finalDelays.breakdown === 0) {
+        finalDelays.breakdown = carryOver.delayHours;
+      }
+
+      const opRel = Array.isArray(existingOp.operator)
+        ? existingOp.operator[0]
+        : existingOp.operator;
+      const startSmr =
+        existingOp.start_smu !== null ? Number(existingOp.start_smu) : defaultStartSmr;
+      const stopSmr = existingOp.end_smu !== null ? Number(existingOp.end_smu) : startSmr;
+
+      return {
+        machineId: m.id,
+        machineName: m.name,
+        machineType: m.machine_type,
+        serialNumber: m.serial_number ?? null,
+        siteId: (m as { site_id?: string | null }).site_id ?? null,
+        startSmr,
+        stopSmr,
+        operatorId: existingOp.operator_id ?? null,
+        operatorName: opRel?.full_name ?? null,
+        delays: finalDelays,
+        comment:
+          [...comments].join(' · ') ||
+          (carryOver ? `[Carry-Over Breakdown] ${carryOver.reason}` : ''),
+        hasExistingOperation: true,
+        carryOverBreakdown: carryOver,
+      };
+    }
+
+    const initialDelays = createStandardOverviewDelays();
+    if (carryOver) {
+      initialDelays.breakdown = carryOver.delayHours;
+    }
+
+    return {
+      machineId: m.id,
+      machineName: m.name,
+      machineType: m.machine_type,
+      serialNumber: m.serial_number ?? null,
+      siteId: (m as { site_id?: string | null }).site_id ?? null,
+      startSmr: defaultStartSmr,
+      stopSmr: defaultStartSmr,
+      operatorId: null,
+      operatorName: null,
+      delays: initialDelays,
+      comment: carryOver ? `[Carry-Over Breakdown] ${carryOver.reason}` : '',
+      hasExistingOperation: false,
+      carryOverBreakdown: carryOver,
+    };
+  });
+
+  const operatorOptions: OverviewOperatorOption[] = (operators ?? []).map((op) => ({
+    id: op.id,
+    fullName: op.full_name,
+    employeeCode: op.employee_code,
+  }));
+
   return (
     <div className="space-y-6">
       <PageHeader title="Engineering Notes" />
 
-      <PredictiveAlertsWidget />
+      <EngineeringNotesTabsClient
+        initialTab={initialTab}
+        machineCount={overviewRows.length}
+        notesCount={combinedFeed.length}
+        overviewContent={
+          <EngineeringOverviewTable
+            departmentId={deptId}
+            shiftDate={today}
+            initialShiftType={currentShift}
+            initialRows={overviewRows}
+            operators={operatorOptions}
+          />
+        }
+        notesContent={
+          <div className="space-y-6">
+            <PredictiveAlertsWidget />
 
-      <KPIGrid cols={4}>
-        <KPICard label="Critical" value={criticalCount} color="red" />
-        <KPICard label="Open" value={openCount} color="blue" />
-        <KPICard label="Resolved" value={resolvedCount} color="green" />
-        <KPICard label="Follow-up" value={followUpCount} color="blue" />
-      </KPIGrid>
+            <KPIGrid cols={4}>
+              <KPICard label="Critical" value={criticalCount} color="red" />
+              <KPICard label="Open" value={openCount} color="blue" />
+              <KPICard label="Resolved" value={resolvedCount} color="green" />
+              <KPICard label="Follow-up" value={followUpCount} color="blue" />
+            </KPIGrid>
 
-      <EngineeringNotesForm
-        departmentId={deptId}
-        machines={machines || []}
-        breakdownDrafts={breakdownDrafts}
+            <EngineeringNotesForm
+              departmentId={deptId}
+              machines={machines || []}
+              breakdownDrafts={breakdownDrafts}
+            />
+
+            <div className="space-y-4">
+              <h3 className="font-medium text-[var(--text-heading)] text-lg">
+                Today&apos;s Engineering Issues &amp; Activity
+              </h3>
+              <EngineeringNotesList notes={combinedFeed} />
+            </div>
+          </div>
+        }
       />
-
-      <div className="space-y-4">
-        <h3 className="font-medium text-[var(--text-heading)] text-lg">
-          Today&apos;s Engineering Issues &amp; Activity
-        </h3>
-        <EngineeringNotesList notes={combinedFeed} />
-      </div>
     </div>
   );
 }

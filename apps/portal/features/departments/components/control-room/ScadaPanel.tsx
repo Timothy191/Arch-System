@@ -2,6 +2,7 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { getOperationalToday } from '@repo/utils';
 import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -28,128 +29,19 @@ interface RegisteredMachineLoadRow {
   binFactor: number;
   loadedLoads: number;
   totalBcm: number;
-  status: 'hauling' | 'loading' | 'tipping';
+  status: 'hauling' | 'loading' | 'standby';
 }
 
-const FALLBACK_EXCAVATORS: ExcavatorActivityRow[] = [
-  {
-    id: 'ex-1',
-    excavatorName: 'EX-01 · Liebherr R9150',
-    operatorName: 'T. Mokoena',
-    siteBlock: 'North Pit · Blk N-04',
-    shift: 'DAY',
-    material: 'ROM Coal (Seam 2)',
-    assignedMachines: 4,
-    loadedLoads: 42,
-    totalBcm: 1050,
-    status: 'loading',
-  },
-  {
-    id: 'ex-2',
-    excavatorName: 'EX-02 · CAT 6015B',
-    operatorName: 'S. Dlamini',
-    siteBlock: 'Central Boxcut · Blk C-02',
-    shift: 'DAY',
-    material: 'Hard Overburden',
-    assignedMachines: 3,
-    loadedLoads: 36,
-    totalBcm: 972,
-    status: 'digging',
-  },
-  {
-    id: 'ex-3',
-    excavatorName: 'EX-03 · Komatsu PC1250',
-    operatorName: 'J. Nkosi',
-    siteBlock: 'South Cut · Blk S-01',
-    shift: 'DAY',
-    material: 'Interburden Waste',
-    assignedMachines: 3,
-    loadedLoads: 28,
-    totalBcm: 672,
-    status: 'loading',
-  },
-];
-
-const FALLBACK_MACHINES: RegisteredMachineLoadRow[] = [
-  {
-    id: 'm-1',
-    machineName: 'ADT-101 · Bell B45E',
-    machineType: 'ADT',
-    assignedExcavator: 'EX-01',
-    material: 'ROM Coal (Seam 2)',
-    binFactor: 25,
-    loadedLoads: 16,
-    totalBcm: 400,
-    status: 'hauling',
-  },
-  {
-    id: 'm-2',
-    machineName: 'ADT-104 · Bell B45E',
-    machineType: 'ADT',
-    assignedExcavator: 'EX-01',
-    material: 'ROM Coal (Seam 2)',
-    binFactor: 25,
-    loadedLoads: 14,
-    totalBcm: 350,
-    status: 'loading',
-  },
-  {
-    id: 'm-3',
-    machineName: 'DT-202 · CAT 777G',
-    machineType: 'Rigid Dump Truck',
-    assignedExcavator: 'EX-02',
-    material: 'Hard Overburden',
-    binFactor: 27,
-    loadedLoads: 19,
-    totalBcm: 513,
-    status: 'hauling',
-  },
-  {
-    id: 'm-4',
-    machineName: 'DT-205 · CAT 777G',
-    machineType: 'Rigid Dump Truck',
-    assignedExcavator: 'EX-02',
-    material: 'Hard Overburden',
-    binFactor: 27,
-    loadedLoads: 17,
-    totalBcm: 459,
-    status: 'tipping',
-  },
-  {
-    id: 'm-5',
-    machineName: 'ADT-108 · Volvo A45G',
-    machineType: 'ADT',
-    assignedExcavator: 'EX-03',
-    material: 'Interburden Waste',
-    binFactor: 24,
-    loadedLoads: 15,
-    totalBcm: 360,
-    status: 'hauling',
-  },
-  {
-    id: 'm-6',
-    machineName: 'ADT-112 · Volvo A45G',
-    machineType: 'ADT',
-    assignedExcavator: 'EX-03',
-    material: 'Interburden Waste',
-    binFactor: 24,
-    loadedLoads: 13,
-    totalBcm: 312,
-    status: 'loading',
-  },
-];
-
 export function ScadaPanel({ departmentId }: { departmentId: string }) {
-  const [excavators, setExcavators] = useState<ExcavatorActivityRow[]>(FALLBACK_EXCAVATORS);
-  const [registeredMachines, setRegisteredMachines] =
-    useState<RegisteredMachineLoadRow[]>(FALLBACK_MACHINES);
+  const [excavators, setExcavators] = useState<ExcavatorActivityRow[]>([]);
+  const [registeredMachines, setRegisteredMachines] = useState<RegisteredMachineLoadRow[]>([]);
   const [activeView, setActiveView] = useState<'both' | 'excavators' | 'machines'>('both');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadOperationalData = useCallback(async () => {
     try {
       const supabase = createBrowserSupabaseClient();
-      const today = new Date().toISOString().split('T')[0] ?? '';
+      const today = getOperationalToday('Africa/Johannesburg');
 
       const [activityRes, machinesRes, loadsRes] = await Promise.all([
         supabase
@@ -217,61 +109,53 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         }
       }
 
-      if (dbActivities.length > 0) {
-        const mappedExcavators: ExcavatorActivityRow[] = dbActivities.map((act, idx) => {
-          const machineObj = Array.isArray(act.machine) ? act.machine[0] : act.machine;
-          const operatorObj = Array.isArray(act.operator) ? act.operator[0] : act.operator;
-          const siteObj = Array.isArray(act.site) ? act.site[0] : act.site;
-          const blockObj = Array.isArray(act.block_mined) ? act.block_mined[0] : act.block_mined;
+      const mappedExcavators: ExcavatorActivityRow[] = dbActivities.map((act, idx) => {
+        const machineObj = Array.isArray(act.machine) ? act.machine[0] : act.machine;
+        const operatorObj = Array.isArray(act.operator) ? act.operator[0] : act.operator;
+        const siteObj = Array.isArray(act.site) ? act.site[0] : act.site;
+        const blockObj = Array.isArray(act.block_mined) ? act.block_mined[0] : act.block_mined;
 
-          const exAgg = act.machine_id ? loadsByExcavator.get(act.machine_id) : undefined;
-          const loadedLoads = exAgg?.loadedLoads ?? 0;
-          const assignedDumperCount = exAgg?.dumperIds.size ?? 0;
-          const totalBcm = exAgg?.totalBcm ?? 0;
+        const exAgg = act.machine_id ? loadsByExcavator.get(act.machine_id) : undefined;
+        const loadedLoads = exAgg?.loadedLoads ?? 0;
+        const assignedDumperCount = exAgg?.dumperIds.size ?? 0;
+        const totalBcm = exAgg?.totalBcm ?? 0;
 
-          return {
-            id: act.id,
-            excavatorName: machineObj?.name || `Excavator 0${idx + 1}`,
-            operatorName: operatorObj?.full_name || 'Assigned Operator',
-            siteBlock:
-              [siteObj?.name, blockObj?.code || blockObj?.name].filter(Boolean).join(' · ') ||
-              'Active Pit Face',
-            shift: (act.shift_type || 'day').toUpperCase(),
-            material: act.material_type || 'ROM Coal',
-            assignedMachines: Math.max(assignedDumperCount, 2),
-            loadedLoads: loadedLoads > 0 ? loadedLoads : 24 + idx * 6,
-            totalBcm: totalBcm > 0 ? Math.round(totalBcm) : (24 + idx * 6) * 25,
-            status: idx % 2 === 0 ? 'loading' : 'digging',
-          };
-        });
-        setExcavators(mappedExcavators);
-      }
+        return {
+          id: act.id,
+          excavatorName: machineObj?.name || `Excavator 0${idx + 1}`,
+          operatorName: operatorObj?.full_name || 'Unassigned Operator',
+          siteBlock:
+            [siteObj?.name, blockObj?.code || blockObj?.name].filter(Boolean).join(' · ') ||
+            'Unassigned Block',
+          shift: (act.shift_type || 'day').toUpperCase(),
+          material: act.material_type || 'Unassigned',
+          assignedMachines: assignedDumperCount,
+          loadedLoads,
+          totalBcm: Math.round(totalBcm),
+          status: loadedLoads > 0 ? 'loading' : assignedDumperCount > 0 ? 'digging' : 'standby',
+        };
+      });
+      setExcavators(mappedExcavators);
 
       const haulMachines = dbMachines.filter((m) => m.machine_type !== 'Excavator');
-      if (haulMachines.length > 0 && dbLoads.length > 0) {
-        const mappedMachines: RegisteredMachineLoadRow[] = haulMachines
-          .slice(0, 8)
-          .map((m, idx) => {
-            const agg = loadsByMachine.get(m.id);
-            const loads = agg?.loads ?? (idx < 4 ? 12 + idx * 2 : 0);
-            const bf = m.bin_factor ?? 25;
-            const exName =
-              (agg?.excavatorId && machineById.get(agg.excavatorId)?.name) ||
-              `EX-0${(idx % 3) + 1}`;
-            return {
-              id: m.id,
-              machineName: m.name,
-              machineType: m.machine_type,
-              assignedExcavator: exName,
-              material: agg?.material || (idx % 2 === 0 ? 'ROM Coal' : 'Overburden'),
-              binFactor: bf,
-              loadedLoads: loads,
-              totalBcm: Math.round(loads * bf),
-              status: idx % 3 === 0 ? 'hauling' : idx % 3 === 1 ? 'loading' : 'tipping',
-            };
-          });
-        setRegisteredMachines(mappedMachines);
-      }
+      const mappedMachines: RegisteredMachineLoadRow[] = haulMachines.slice(0, 12).map((m) => {
+        const agg = loadsByMachine.get(m.id);
+        const loads = agg?.loads ?? 0;
+        const bf = m.bin_factor ?? 25;
+        const exName = (agg?.excavatorId && machineById.get(agg.excavatorId)?.name) || 'Unassigned';
+        return {
+          id: m.id,
+          machineName: m.name,
+          machineType: m.machine_type,
+          assignedExcavator: exName,
+          material: agg?.material || 'Unassigned',
+          binFactor: bf,
+          loadedLoads: loads,
+          totalBcm: Math.round(loads * bf),
+          status: loads > 0 ? 'hauling' : agg?.excavatorId ? 'loading' : 'standby',
+        };
+      });
+      setRegisteredMachines(mappedMachines);
     } catch {
       // Keep fallback operational telemetry when offline
     }
@@ -442,38 +326,49 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {excavators.map((ex) => (
-                    <tr
-                      key={ex.id}
-                      className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
-                    >
-                      <td className="px-3 py-2">
-                        <div className="font-bold text-[var(--text-heading)]">
-                          {ex.excavatorName}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-secondary)]">
-                          {ex.operatorName} · {ex.shift}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 font-medium text-[var(--text-heading)]">
-                        {ex.siteBlock}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span className="rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--text-heading)]">
-                          {ex.material}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-center font-mono font-semibold text-[var(--text-heading)]">
-                        {ex.assignedMachines}
-                      </td>
-                      <td className="px-3 py-2 text-right font-bold font-mono text-[var(--accent-blue)]">
-                        {ex.loadedLoads} loads
-                      </td>
-                      <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
-                        {ex.totalBcm.toLocaleString()} BCM
+                  {excavators.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-3 py-6 text-center text-[var(--text-secondary)] text-xs"
+                      >
+                        No excavator activity logged for today&apos;s shift yet.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    excavators.map((ex) => (
+                      <tr
+                        key={ex.id}
+                        className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
+                      >
+                        <td className="px-3 py-2">
+                          <div className="font-bold text-[var(--text-heading)]">
+                            {ex.excavatorName}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-secondary)]">
+                            {ex.operatorName} · {ex.shift}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 font-medium text-[var(--text-heading)]">
+                          {ex.siteBlock}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--text-heading)]">
+                            {ex.material}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-center font-mono font-semibold text-[var(--text-heading)]">
+                          {ex.assignedMachines}
+                        </td>
+                        <td className="px-3 py-2 text-right font-bold font-mono text-[var(--accent-blue)]">
+                          {ex.loadedLoads} loads
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
+                          {ex.totalBcm.toLocaleString()} BCM
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -511,36 +406,49 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {registeredMachines.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
-                    >
-                      <td className="px-3 py-2">
-                        <div className="font-bold text-[var(--text-heading)]">{m.machineName}</div>
-                        <div className="text-[10px] text-[var(--text-secondary)]">
-                          {m.machineType} · Bin {m.binFactor}m³
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 font-mono font-semibold text-[var(--text-heading)]">
-                        {m.assignedExcavator}
-                      </td>
-                      <td className="px-3 py-2 text-[var(--text-heading)]">{m.material}</td>
-                      <td className="px-3 py-2 text-right">
-                        <span className="inline-flex items-center rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-2 py-0.5 font-bold font-mono text-[var(--text-heading)]">
-                          {m.loadedLoads} loads
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
-                        {m.totalBcm.toLocaleString()}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <span className="rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-bold text-[10px] text-accent-green uppercase tracking-wider">
-                          {m.status}
-                        </span>
+                  {registeredMachines.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-3 py-6 text-center text-[var(--text-secondary)] text-xs"
+                      >
+                        No registered haulage machines found for this shift.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    registeredMachines.map((m) => (
+                      <tr
+                        key={m.id}
+                        className="border-[var(--border-subtle)]/70 border-b last:border-b-0 hover:bg-[var(--bg-secondary)]/40"
+                      >
+                        <td className="px-3 py-2">
+                          <div className="font-bold text-[var(--text-heading)]">
+                            {m.machineName}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-secondary)]">
+                            {m.machineType} · Bin {m.binFactor}m³
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 font-mono font-semibold text-[var(--text-heading)]">
+                          {m.assignedExcavator}
+                        </td>
+                        <td className="px-3 py-2 text-[var(--text-heading)]">{m.material}</td>
+                        <td className="px-3 py-2 text-right">
+                          <span className="inline-flex items-center rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-2 py-0.5 font-bold font-mono text-[var(--text-heading)]">
+                            {m.loadedLoads} loads
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
+                          {m.totalBcm.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          <span className="rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-bold text-[10px] text-accent-green uppercase tracking-wider">
+                            {m.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

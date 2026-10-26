@@ -29,7 +29,7 @@ function activeIntegration(overrides: Record<string, unknown> = {}) {
       department_id: null,
       status: 'active',
       config: {},
-      tool_allowlist: [],
+      tool_allowlist: ['lookup_company', 'enrich_contact'],
       tool_cache: {
         tools: [
           { name: 'lookup_company', description: 'Look up a company', inputSchema: {} },
@@ -176,6 +176,38 @@ describe('invokeIntegrationTool', () => {
     }
     expect(last!.ok).toBe(false);
     expect(last!.error).toMatch(/rate limit/i);
+  });
+
+  it('rejects tool args that fail inputSchema validation', async () => {
+    listActiveMcpIntegrations.mockResolvedValue([
+      activeIntegration({
+        tool_cache: {
+          tools: [
+            {
+              name: 'lookup_company',
+              description: 'Look up a company',
+              inputSchema: {
+                type: 'object',
+                required: ['query'],
+                properties: { query: { type: 'string' } },
+              },
+            },
+            { name: 'enrich_contact', description: 'Enrich a contact', inputSchema: {} },
+          ],
+        },
+      }),
+    ]);
+
+    const result = await invokeIntegrationTool({
+      ...CALLER,
+      tool: 'integration__sixtyfour-intelligence__lookup_company',
+      args: {},
+      kind: 'read',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/Missing required argument/);
+    expect(mcpClientManager.callTool).not.toHaveBeenCalled();
   });
 });
 

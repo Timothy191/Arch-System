@@ -7,7 +7,7 @@ import { APIError, DatabaseError, NotFoundError } from '@/lib/errors/error-class
 import { logError } from '@/lib/errors/error-logger';
 import { encryptSecret } from './crypto';
 import { type ManagedInstallation, mcpClientManager } from './mcp-client-manager';
-
+import { assertSafeUrl } from './ssrf-guard';
 /**
  * Registry service for the integration platform.
  *
@@ -481,8 +481,10 @@ export async function installIntegration(
   },
   installedBy: string
 ): Promise<InstallationRecord> {
+  if (input.catalog_entry?.server_url) {
+    assertSafeUrl(input.catalog_entry.server_url);
+  }
   const supabase = createServiceRoleClient();
-
   const { data: catalogEntry } = await supabase
     .from('integration_catalog')
     .select('id, kind, server_url, auth_type')
@@ -621,11 +623,13 @@ export async function updateInstallation(
     secret?: string;
     secret_kind?: string;
     server_url?: string;
+    last_error?: string | null;
   }
 ): Promise<InstallationRecord> {
   const supabase = createServiceRoleClient();
 
   if (patch.server_url) {
+    assertSafeUrl(patch.server_url);
     const installation = await getInstallation(id);
     const { error } = await supabase
       .from('integration_catalog')
@@ -643,6 +647,7 @@ export async function updateInstallation(
   if (patch.status) update.status = patch.status;
   if (patch.config) update.config = patch.config;
   if (patch.tool_allowlist) update.tool_allowlist = patch.tool_allowlist;
+  if (patch.last_error !== undefined) update.last_error = patch.last_error;
 
   if (Object.keys(update).length > 0) {
     const { error } = await supabase.from('integration_installations').update(update).eq('id', id);

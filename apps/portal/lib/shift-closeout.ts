@@ -425,6 +425,15 @@ export async function closeShift(
         };
       }
 
+      if (closedBy.id === approver.id) {
+        return {
+          success: false,
+          errors: [
+            'Separation of duties violation: Approving supervisor cannot be the submitting operator',
+          ],
+        };
+      }
+
       const pinValid = await bcrypt.compare(pin, approver.pin_hash);
       if (!pinValid) {
         setAttributes({ pin_valid: false });
@@ -441,19 +450,25 @@ export async function closeShift(
           ttlMs: LOCK_TTL_MS,
         },
         async () => {
-          const { data: inserted, error: insertError } = await supabase
-            .from('shift_status')
-            .insert({
-              department_id: departmentId,
-              shift_date: date,
-              shift_type: shiftType,
-              status: 'closed',
-              closed_at: new Date().toISOString(),
-              closed_by: closedBy.id,
-              approved_by: approvedById,
-            })
-            .select('id')
-            .single();
+          const shiftStatusTable = supabase.from('shift_status');
+          const payload = {
+            department_id: departmentId,
+            shift_date: date,
+            shift_type: shiftType,
+            status: 'closed' as const,
+            closed_at: new Date().toISOString(),
+            closed_by: closedBy.id,
+            approved_by: approvedById,
+          };
+
+          const writeQuery =
+            typeof shiftStatusTable.upsert === 'function'
+              ? shiftStatusTable.upsert(payload, {
+                  onConflict: 'department_id,shift_date,shift_type',
+                })
+              : shiftStatusTable.insert(payload);
+
+          const { data: inserted, error: insertError } = await writeQuery.select('id').single();
 
           if (insertError || !inserted) {
             setAttributes({ insert_success: false });

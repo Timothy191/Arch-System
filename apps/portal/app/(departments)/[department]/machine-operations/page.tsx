@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { C66MachineOperatorScanner } from '~/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
 
@@ -267,6 +268,17 @@ export default async function MachineOperationsPage({
         fallback={<div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
       >
         <MachineOperationsComplianceWidget departmentId={deptId} departmentSlug={deptSlug} />
+      </Suspense>
+
+      {/* C66 Qualified Operator & Machine Assignment Scanner */}
+      <Suspense
+        fallback={<div className="h-36 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
+      >
+        <C66MachineOperatorScanner
+          departmentId={deptId}
+          machines={machinesWithSmu}
+          sites={sites || []}
+        />
       </Suspense>
 
       {/* Add Operation Form */}

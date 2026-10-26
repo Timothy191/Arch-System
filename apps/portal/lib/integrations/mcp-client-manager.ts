@@ -4,6 +4,7 @@ import type { IntegrationAuthType } from '@repo/contract/schemas/integration.sch
 import { APIError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { decryptSecret } from './crypto';
+import { assertSafeUrl } from './ssrf-guard';
 
 /**
  * Server-side manager for remote streamable-HTTP MCP server connections.
@@ -15,6 +16,7 @@ import { decryptSecret } from './crypto';
  */
 
 const DEFAULT_TIMEOUT_MS = 20_000;
+const CONNECTION_TTL_MS = 5 * 60 * 1000; // evict idle connections after 5 minutes
 const CLIENT_INFO = { name: 'arch-portal', version: '1.5.1' } as const;
 
 export interface ManagedInstallation {
@@ -77,7 +79,18 @@ class McpClientManager {
   /** Returns a live client, connecting (and caching) on first use. */
   private async getClient(installation: ManagedInstallation) {
     const existing = this.connections.get(installation.id);
-    if (existing) return existing.client;
+    if (existing && Date.now() - existing.connectedAt < CONNECTION_TTL_MS) {
+      return existing.client;
+    }
+    if (existing) {
+      // TTL expired — drop and reconnect.
+      this.connections.delete(installation.id);
+      try {
+        await existing.client.close();
+      } catch {
+        // best-effort
+      }
+    }
 
     let headers: Record<string, string>;
     try {
@@ -87,6 +100,7 @@ class McpClientManager {
       logError(error, { context: 'mcp_credential_decrypt', installationId: installation.id });
       throw error;
     }
+    assertSafeUrl(installation.serverUrl);
 
     const client = new Client(CLIENT_INFO);
     const transport = new StreamableHTTPClientTransport(new URL(installation.serverUrl), {

@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
 import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -60,7 +61,7 @@ function formatSmr(reading: number | null | undefined): string {
 }
 
 function todayDate(): string {
-  return new Date().toISOString().split('T')[0]!;
+  return getOperationalToday('Africa/Johannesburg');
 }
 
 export function MachineOperationsComplianceWidget({ departmentId, departmentSlug }: Props) {

@@ -57,7 +57,7 @@ export default async function ShiftCompilationPage({
     supabase
       .from('control_room_shift_reports')
       .select(
-        'id, report_date, shift_type, operator_name, status, submitter_id, approver_id, approval_note, approved_at, created_at'
+        'id, report_date, shift_type, operator_name, status, submitter_id, created_by, approver_id, approval_note, approved_at, created_at'
       )
       .eq('department_id', deptId)
       .order('created_at', { ascending: false })
@@ -103,7 +103,7 @@ export default async function ShiftCompilationPage({
     shiftType: r.shift_type,
     operatorName: r.operator_name,
     status: (r.status ?? 'submitted') as ShiftReportSummary['status'],
-    submitterId: r.submitter_id,
+    submitterId: r.submitter_id ?? r.created_by ?? null,
     approverId: r.approver_id,
     approvalNote: r.approval_note,
     approvedAt: r.approved_at,

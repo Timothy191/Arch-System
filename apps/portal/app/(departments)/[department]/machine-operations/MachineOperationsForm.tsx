@@ -2,6 +2,7 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
 import { ChevronDown, ChevronUp, Clock, Drill } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -292,7 +293,7 @@ export function MachineOperationsForm({
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getOperationalToday('Africa/Johannesburg');
       const startSmuVal = formData.startSmu ? parseFloat(formData.startSmu) : null;
       const endSmuVal = formData.endSmu ? parseFloat(formData.endSmu) : null;
 

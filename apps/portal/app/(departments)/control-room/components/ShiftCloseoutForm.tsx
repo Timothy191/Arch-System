@@ -4,9 +4,39 @@ import { MachineTimeAllocationInput, shiftCloseoutPayloadSchema } from '@repo/co
 import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/components/GlassCard';
+import { getCurrentShift } from '@repo/utils/client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ZodError } from 'zod';
+
+interface CloseoutChecklistItem {
+  id: string;
+  label: string;
+  status: 'pending' | 'completed' | 'failed' | 'n_a';
+}
+
+const DEFAULT_CLOSEOUT_CHECKLIST: CloseoutChecklistItem[] = [
+  {
+    id: 'chk-scada-online',
+    label: 'SCADA & pit telemetry feeds verified online prior to handover',
+    status: 'completed',
+  },
+  {
+    id: 'chk-smr-reconciled',
+    label: 'All active fleet SMR readings, breakdowns, and delays reconciled to 12.0h',
+    status: 'completed',
+  },
+  {
+    id: 'chk-radio-dispatch',
+    label: 'Primary and emergency pit radio dispatch channels tested',
+    status: 'completed',
+  },
+  {
+    id: 'chk-handover-brief',
+    label: 'Incoming shift operator briefed on open Engineering breakdowns and safety holds',
+    status: 'completed',
+  },
+];
 
 export function ShiftCloseoutForm({
   deptId,
@@ -22,8 +52,12 @@ export function ShiftCloseoutForm({
   const { isOnline, isDegraded } = usePitConnectivity();
   const { enqueue, queue, isSyncing } = useOfflineQueue();
 
-  const [shiftType, setShiftType] = useState<'day' | 'night'>('day');
+  const [shiftType, setShiftType] = useState<'day' | 'night'>(() => getCurrentShift());
   const [machines, setMachines] = useState<MachineTimeAllocationInput[]>(initialFleet);
+  const [checklistItems, setChecklistItems] = useState<CloseoutChecklistItem[]>(
+    DEFAULT_CLOSEOUT_CHECKLIST
+  );
+  const [summaryNotes, setSummaryNotes] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [operatorName, setOperatorName] = useState<string>(initialOperatorName || '');
@@ -97,6 +131,8 @@ export function ShiftCloseoutForm({
       operatorName: resolvedOperatorName,
       idempotencyKey,
       allocations: machines,
+      checklistItems,
+      summaryNotes: summaryNotes.trim() || undefined,
     };
 
     // 1. Zod Validation (The Block)
@@ -378,6 +414,45 @@ export function ShiftCloseoutForm({
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/40 p-4">
+          <h3 className="font-semibold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+            Shift Handover Verification &amp; Notes
+          </h3>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {checklistItems.map((item) => (
+              <label
+                key={item.id}
+                className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-[var(--border-subtle)] bg-white/70 p-2.5 text-[var(--text-heading)] text-xs"
+              >
+                <input
+                  type="checkbox"
+                  checked={item.status === 'completed'}
+                  onChange={(e) =>
+                    setChecklistItems((prev) =>
+                      prev.map((chk) =>
+                        chk.id === item.id
+                          ? { ...chk, status: e.target.checked ? 'completed' : 'pending' }
+                          : chk
+                      )
+                    )
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-blue)]"
+                />
+                <span>{item.label}</span>
+              </label>
+            ))}
+          </div>
+          <div>
+            <textarea
+              rows={2}
+              value={summaryNotes}
+              onChange={(e) => setSummaryNotes(e.target.value)}
+              placeholder="Optional shift handover summary notes (open breakdowns, blasting holds, pit conditions)..."
+              className="w-full rounded-lg border border-[var(--border-default)] bg-white/80 px-3 py-2 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
+            />
+          </div>
         </div>
 
         <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-4">

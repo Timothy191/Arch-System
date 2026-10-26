@@ -62,7 +62,8 @@ contract: the model only proposes; the confirmed write call is what executes.
 | `GET/PATCH/DELETE /api/integrations/[id]` | admin (GET also scoped employees)                     | Detail + audit tail / status, config, allowlist, secret rotation, server URL / uninstall (cascades credentials, keeps audit) |
 | `POST /api/integrations/[id]/tools`       | admin                                                 | Re-run MCP `tools/list`, persist to `tool_cache`, set status `active`/`error`                                                |
 | `POST /api/integrations/[id]/test`        | admin                                                 | Invoke one tool through the same guard chain                                                                                 |
-| `GET /api/integrations/manifest`          | admin session or `INTEGRATIONS_MANIFEST_TOKEN` bearer | Machine-readable manifest for dev coding agents                                                                              |
+| `GET /api/integrations/[id]/health`       | admin                                                 | On-demand bounded application-level health check (listTools + latency)                                                       |
+| `GET /api/integrations/manifest`          | admin session or `INTEGRATIONS_MANIFEST_TOKEN` bearer | Machine-readable manifest (`env_refs` only; never emits plaintext secrets)                                                   |
 
 ## Native plugins (first-party)
 
@@ -122,11 +123,10 @@ agent afterwards.
 ## Security notes
 
 - Credentials: AES-256-GCM at rest, decrypted only in-process by the MCP client
-  manager, never logged, never returned by any API route.
-- Audit: arguments SHA-256-digested; every call (success, error, denied) recorded.
+  manager, never logged, never returned by any API route (manifest emits `env_refs` names only).
+- Audit: arguments SHA-256-digested; every call (success, error, denied) recorded; inserts restricted to service role.
 - Allowlists + risk classes gate tool execution; `write` tools always require the
   human-confirmed path.
 - Rate limits: route-level (`withRateLimit`) + per-employee per-installation
   window in the tool bridge.
-- SSRF surface limited by the admin-curated catalog (only admins register server
-  URLs); all outbound MCP calls carry hard timeouts.
+- SSRF guard (`lib/integrations/ssrf-guard.ts`) blocks loopback, RFC1918 private IPs, `.internal`/`.local`, and cloud metadata (`169.254.169.254`); all outbound MCP calls carry hard timeouts.

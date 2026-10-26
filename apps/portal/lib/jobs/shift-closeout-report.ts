@@ -1,5 +1,5 @@
 import { SubagentCoordinator } from '@repo/agents';
-import { createServerSupabaseClient } from '@repo/supabase/server';
+import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { inngest, shiftCloseoutReportEvent } from '@repo/utils/inngest';
 import { logError } from '@/lib/errors/error-logger';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
@@ -8,7 +8,7 @@ export const shiftCloseoutReportFn = inngest.createFunction(
   { id: 'shift-closeout-report', triggers: [{ event: shiftCloseoutReportEvent }] },
   async ({ event }) => {
     const { reportId } = event.data;
-    const supabase = await createServerSupabaseClient();
+    const supabase = createServiceRoleClient();
     const start = performance.now();
     let success = true;
 
@@ -87,7 +87,7 @@ export const shiftCloseoutReportFn = inngest.createFunction(
       };
 
       const doc = React.createElement(ReportTemplate, { data: reportData });
-      const buffer = await pdf(doc as any).toBuffer();
+      const buffer = await pdf(doc as unknown as Parameters<typeof pdf>[0]).toBuffer();
 
       const filename = `shift-reports/${report.department_id}/${report.report_date}_${report.shift_type}_${reportId}.pdf`;
 

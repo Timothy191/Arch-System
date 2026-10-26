@@ -28,12 +28,11 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
     const alerts: string[] = [];
 
     try {
-      // AGENT-TRACE: Get all active departments
+      // AGENT-TRACE: Get all active departments (soft-delete aware)
       const { data: departments, error: deptError } = await serviceRole
         .from('departments')
         .select('id, name')
-        .eq('type', 'operational')
-        .eq('active', true);
+        .is('deleted_at', null);
 
       if (deptError) throw deptError;
       if (!departments || departments.length === 0) {

@@ -188,3 +188,9 @@
 - **Changes**:
   - Updated `smr_latest_tenant_meter_idx` index creation in `migrations/166_harden_legacy_migrations.sql` and `migrations/171_offline_crdt_mutation_log_and_smr.sql` to include `IF NOT EXISTS`.
 - **Verification**: `pnpm --filter @repo/database test` passed with 0 errors.
+
+## 2026-10-26T18:30:00Z: Migration 206 Integration Platform RLS & Constraint Hardening
+
+- **Purpose**: Drop overly permissive `WITH CHECK (true)` insert policy on `integration_audit_logs`, add `auth.users(id)` FKs for `installed_by`/`invoked_by`, add NULL-safe unique index `integration_installations_unique_scope`, and index `(installation_id, created_at DESC)`.
+- **Changes**: `migrations/206_integration_rls_hardening.sql`.
+- **Verification**: `pnpm --filter @repo/database test` passed (156 migrations, 0 errors, 0 warnings).

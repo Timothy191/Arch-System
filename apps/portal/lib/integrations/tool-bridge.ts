@@ -105,8 +105,47 @@ function argsDigest(args: Record<string, unknown> | undefined): string {
 }
 
 function matchesAllowlist(allowlist: string[], toolName: string): boolean {
-  if (allowlist.length === 0) return true; // empty allowlist = all tools permitted
+  if (allowlist.length === 0) return false; // empty allowlist = no tools permitted (secure default)
   return allowlist.includes(toolName);
+}
+
+/**
+ * Shallow structural validation of tool arguments against an MCP `inputSchema`
+ * (JSON Schema). Checks `required` and top-level property types. Returns null on
+ * success or an error message describing the first violation.
+ */
+function validateToolArgs(
+  inputSchema: Record<string, unknown> | undefined,
+  args: Record<string, unknown>
+): string | null {
+  if (!inputSchema || typeof inputSchema !== 'object') return null;
+  const schema = inputSchema as {
+    properties?: Record<string, { type?: string | string[] }>;
+    required?: string[];
+  };
+  const required = Array.isArray(schema.required) ? schema.required : [];
+  for (const key of required) {
+    if (!(key in args)) {
+      return `Missing required argument "${key}"`;
+    }
+  }
+  const properties = schema.properties ?? {};
+  for (const [key, value] of Object.entries(args)) {
+    const propSchema = properties[key];
+    if (!propSchema || typeof propSchema !== 'object') continue;
+    const expected = (propSchema as { type?: string | string[] }).type;
+    if (!expected) continue;
+    const expectedTypes = Array.isArray(expected) ? expected : [expected];
+    const actualType = Array.isArray(value) ? 'array' : typeof value;
+    const normalized = actualType === 'number' && Number.isInteger(value) ? 'integer' : actualType;
+    const ok = expectedTypes.some(
+      (t) => t === actualType || t === normalized || (t === 'number' && actualType === 'number')
+    );
+    if (!ok) {
+      return `Argument "${key}" must be of type ${expectedTypes.join(' | ')}`;
+    }
+  }
+  return null;
 }
 
 function findActiveForTool(
@@ -168,6 +207,24 @@ export async function invokeIntegrationTool(options: InvokeOptions): Promise<Inv
         'This tool is write-classified and requires human confirmation before execution',
         { resource: 'integration_tool', context: { slug, toolName } }
       );
+    }
+
+    const descriptor = match.installation.tool_cache?.tools?.find((t) => t.name === toolName);
+    const validationError = validateToolArgs(
+      (descriptor as { inputSchema?: Record<string, unknown> } | undefined)?.inputSchema,
+      options.args ?? {}
+    );
+    if (validationError) {
+      await writeAuditLog({
+        installationId: match.installation.id,
+        toolName,
+        invokedBy: options.employeeId,
+        argsDigest: argsDigest(options.args),
+        durationMs: Date.now() - started,
+        status: 'denied',
+        errorMessage: validationError,
+      });
+      return { ok: false, error: validationError };
     }
 
     await assertRateLimit(options.employeeId, match.installation.id);

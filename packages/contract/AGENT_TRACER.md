@@ -272,3 +272,9 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
   - `src/schemas/admin.schema.ts`: Added `adminAddMineBlockSchema`, `adminUpdateMineBlockSchema`, and `adminMineralRegistrySchema`.
   - `src/schemas/form.schema.ts`: Relaxed `materialSubCategorySchema` to `z.string().min(1).max(100)` while retaining `WASTE_SUB_CATEGORIES` and `COAL_SUB_CATEGORIES` defaults.
 - **Verification**: `pnpm --filter @repo/contract build && pnpm --filter @repo/contract test` ✅.
+
+## 2026-10-26T18:30:00Z: Integration Manifest Secret Reference Hardening
+
+- **Purpose**: Replace plaintext secret map `env` with `env_refs` string array in `integrationManifestSchema` so `/api/integrations/manifest` never emits decrypted connector secrets.
+- **Changes**: `src/schemas/integration.schema.ts` (`integrationManifestSchema`).
+- **Verification**: `pnpm --filter @repo/contract type-check` and `pnpm audit:drift` pass.

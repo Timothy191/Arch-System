@@ -1,8 +1,10 @@
 import { MachineTimeAllocationInput } from '@repo/contract';
+import { ControlRoomChecklistWidget } from '@repo/departments/ui';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { GlassCard } from '@repo/ui/components/GlassCard';
 import { Divider } from '@repo/ui/Divider';
+import { getCurrentShift } from '@repo/utils';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -44,7 +46,7 @@ async function ShiftCloseoutSection() {
     supabase
       .from('control_room_shift_reports')
       .select(
-        'id, report_date, shift_type, operator_name, status, submitter_id, approver_id, approval_note, approved_at, created_at'
+        'id, report_date, shift_type, operator_name, status, submitter_id, created_by, approver_id, approval_note, approved_at, created_at'
       )
       .eq('department_id', deptId)
       .order('created_at', { ascending: false })
@@ -90,7 +92,7 @@ async function ShiftCloseoutSection() {
     shiftType: r.shift_type,
     operatorName: r.operator_name,
     status: (r.status ?? 'submitted') as ShiftReportSummary['status'],
-    submitterId: r.submitter_id,
+    submitterId: r.submitter_id ?? r.created_by ?? null,
     approverId: r.approver_id,
     approvalNote: r.approval_note,
     approvedAt: r.approved_at,
@@ -99,6 +101,7 @@ async function ShiftCloseoutSection() {
 
   const isSupervisorOrAdmin =
     principal?.employee?.role && ['supervisor', 'admin'].includes(principal.employee.role);
+  const currentShift = getCurrentShift();
 
   return (
     <div className="space-y-8">
@@ -110,6 +113,17 @@ async function ShiftCloseoutSection() {
         />
       )}
       <ShiftCloseoutForm deptId={deptId} shiftDate={today} initialFleet={fleetData} />
+      <ControlRoomChecklistWidget
+        departmentId={deptId}
+        departmentSlug="control-room"
+        date={today}
+        shift={currentShift}
+        initialOperatorName={
+          (principal?.user?.user_metadata?.full_name as string | undefined) ||
+          principal?.user?.email ||
+          undefined
+        }
+      />
     </div>
   );
 }

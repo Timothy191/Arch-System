@@ -21,10 +21,10 @@ export function useControlRoomSummary(deptId: string, today: string) {
           .eq('shift_date', today),
         supabase
           .from('delay_entries')
-          .select('duration_hours, status')
-          .eq('department_id', deptId)
-          .gte('delay_start_time', `${today}T00:00:00`)
-          .lt('delay_start_time', `${today}T23:59:59`),
+          .select('duration_hours, status, machine_operations!inner(department_id, shift_date)')
+          .eq('machine_operations.department_id', deptId)
+          .eq('machine_operations.shift_date', today)
+          .is('deleted_at', null),
         supabase
           .from('hourly_loads')
           .select('total_loads')
@@ -38,16 +38,20 @@ export function useControlRoomSummary(deptId: string, today: string) {
       const activeOperations =
         todayOperations.data?.filter((op) => op.end_smu === null).length || 0;
 
-      const totalDelayHours =
-        todayDelayEntries.data?.reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
-      const committedDelayHours =
-        todayDelayEntries.data
-          ?.filter((d) => d.status === 'committed')
-          .reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
-      const draftDelayHours =
-        todayDelayEntries.data
-          ?.filter((d) => d.status === 'draft')
-          .reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
+      const joinedDelays = todayDelayEntries.data ?? [];
+      const embeddedDelays =
+        todayOperations.data?.flatMap((op) =>
+          Array.isArray(op.delay_entries) ? op.delay_entries : []
+        ) ?? [];
+      const delayRows = joinedDelays.length > 0 ? joinedDelays : embeddedDelays;
+
+      const totalDelayHours = delayRows.reduce((sum, d) => sum + (d.duration_hours || 0), 0);
+      const committedDelayHours = delayRows
+        .filter((d) => d.status === 'committed')
+        .reduce((sum, d) => sum + (d.duration_hours || 0), 0);
+      const draftDelayHours = delayRows
+        .filter((d) => d.status === 'draft')
+        .reduce((sum, d) => sum + (d.duration_hours || 0), 0);
 
       const totalLoads = todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
       const machineCount = machines.count ?? 0;
@@ -60,7 +64,7 @@ export function useControlRoomSummary(deptId: string, today: string) {
         draftDelayHours,
         totalLoads,
         machineCount,
-        delayEntriesCount: todayDelayEntries.data?.length || 0,
+        delayEntriesCount: delayRows.length,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

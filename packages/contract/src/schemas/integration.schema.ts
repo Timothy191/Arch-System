@@ -81,7 +81,7 @@ export const installIntegrationSchema = z
         api_key_header: z.string().min(1).max(64).optional(),
         request_timeout_ms: z.number().int().min(1000).max(120000).optional(),
       })
-      .passthrough()
+      .strict()
       .optional(),
     /** Secret payload; encrypted application-side before storage. */
     secret: z.string().min(1).max(4096).optional(),
@@ -107,7 +107,7 @@ export const updateInstallationSchema = z.object({
       api_key_header: z.string().min(1).max(64).optional(),
       request_timeout_ms: z.number().int().min(1000).max(120000).optional(),
     })
-    .passthrough()
+    .strict()
     .optional(),
   tool_allowlist: z.array(z.string().min(1)).max(200).optional(),
   secret: z.string().min(1).max(4096).optional(),
@@ -208,7 +208,11 @@ export const integrationManifestSchema = z.object({
       tools: z.array(integrationToolDescriptorSchema),
     })
   ),
-  env: z.record(z.string(), z.string()).describe('Env var names to values for .env.integrations'),
+  env_refs: z
+    .array(z.string())
+    .describe(
+      'Env var reference names whose values must be supplied out-of-band in .env.integrations'
+    ),
 });
 export type IntegrationManifest = z.infer<typeof integrationManifestSchema>;
 

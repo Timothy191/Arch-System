@@ -197,6 +197,15 @@ function HeroSummaryGoldenGraph({
   );
 }
 
+function buildSparklinePoints(currentRatio: number, invert = false): number[] {
+  const clamped = Math.max(25, Math.min(98, Math.round(currentRatio)));
+  const start = invert ? Math.min(92, clamped + 22) : Math.max(25, clamped - 28);
+  return Array.from({ length: 8 }, (_, idx) => {
+    const progress = idx / 7;
+    return Math.round(start + (clamped - start) * progress);
+  });
+}
+
 // AGENT-TRACE: Memoized to prevent re-renders when parent Dashboard re-renders.
 // Props (deptId, today) are stable strings — re-renders only from React Query data updates.
 function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryGridClientProps) {
@@ -209,6 +218,20 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
   const delayHoursVal = Math.max(data.totalDelayHours, 0);
   const machinesVal = Math.max(data.machineCount, 0);
   const delayEntriesVal = Math.max(data.delayEntriesCount, 0);
+
+  const shiftCapacityHours = Math.max(machinesVal * 12, 12);
+  const hoursAttainmentPct = Math.min(100, Math.round((hoursVal / shiftCapacityHours) * 100));
+  const loadsPerHour = hoursVal > 0 ? Math.round(loadsVal / hoursVal) : Math.round(loadsVal / 12);
+  const availabilityPct =
+    hoursVal + delayHoursVal > 0
+      ? Math.round((hoursVal / (hoursVal + delayHoursVal)) * 1000) / 10
+      : machinesVal > 0
+        ? 100
+        : 0;
+  const committedRatioPct =
+    delayHoursVal > 0
+      ? Math.round((Math.max(data.committedDelayHours, 0) / delayHoursVal) * 1000) / 10
+      : 100;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -229,20 +252,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <HeroSummaryGoldenGraph
           id="hours-today"
           title="SMR Run Curve"
-          deltaBadge="+4.2%"
+          deltaBadge={`${hoursAttainmentPct}% cap`}
           currentValue={`${hoursVal.toFixed(1)}h`}
-          avgValue={`${Math.max(hoursVal * 0.82, 6.4).toFixed(1)}h`}
-          peakValue={`${Math.max(hoursVal * 1.15, 11.5).toFixed(1)}h`}
-          points={[
-            48,
-            54,
-            61,
-            66,
-            72,
-            78,
-            83,
-            Math.max(Math.min(Math.round(hoursVal * 6), 98), 88),
-          ]}
+          avgValue={`${(hoursVal / Math.max(machinesVal, 1)).toFixed(1)}h/u`}
+          peakValue={`${shiftCapacityHours}h cap`}
+          points={buildSparklinePoints(Math.max(hoursAttainmentPct, 35))}
         />
       </GlassCard>
 
@@ -256,11 +270,13 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <HeroSummaryGoldenGraph
           id="total-loads"
           title="Haulage Velocity"
-          deltaBadge="+6.8%"
+          deltaBadge={`${loadsPerHour}/h`}
           currentValue={`${loadsVal.toLocaleString()} ld`}
-          avgValue={`${Math.max(Math.round(loadsVal * 0.85), 24)}/h`}
-          peakValue={`${Math.max(Math.round(loadsVal * 1.18), 38)}/h`}
-          points={[52, 59, 64, 71, 68, 79, 86, 94]}
+          avgValue={`${loadsPerHour}/h`}
+          peakValue={`${Math.round(loadsVal * 25).toLocaleString()} BCM`}
+          points={buildSparklinePoints(
+            Math.min(96, Math.max(35, Math.round((loadsVal / 180) * 100)))
+          )}
         />
       </GlassCard>
 
@@ -281,11 +297,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <HeroSummaryGoldenGraph
           id="delay-hours"
           title="Downtime Variance"
-          deltaBadge="-1.4h"
+          deltaBadge={`${data.committedDelayHours.toFixed(1)}h lock`}
           currentValue={`${delayHoursVal.toFixed(1)}h`}
-          avgValue={`${Math.max(delayHoursVal * 0.9, 1.2).toFixed(1)}h`}
-          peakValue={`${Math.max(delayHoursVal * 1.3, 2.8).toFixed(1)}h`}
-          points={[74, 68, 65, 59, 62, 54, 49, 44]}
+          avgValue={`${(delayHoursVal / Math.max(delayEntriesVal, 1)).toFixed(1)}h/ev`}
+          peakValue={`${data.draftDelayHours.toFixed(1)}h open`}
+          points={buildSparklinePoints(Math.max(30, 90 - Math.round(delayHoursVal * 5)), true)}
         />
       </GlassCard>
 
@@ -302,11 +318,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <HeroSummaryGoldenGraph
           id="machines"
           title="Fleet Availability"
-          deltaBadge="94.2%"
+          deltaBadge={`${availabilityPct.toFixed(1)}%`}
           currentValue={`${machinesVal} units`}
-          avgValue={`${Math.max(machinesVal - 1, 6)} u`}
-          peakValue={`${Math.max(machinesVal + 2, 10)} u`}
-          points={[66, 70, 74, 78, 82, 85, 89, 93]}
+          avgValue={`${data.activeOperations} open`}
+          peakValue={`${machinesVal} reg`}
+          points={buildSparklinePoints(availabilityPct)}
         />
       </GlassCard>
 
@@ -325,11 +341,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <HeroSummaryGoldenGraph
           id="delay-entries"
           title="Event Resolution"
-          deltaBadge="98.4%"
+          deltaBadge={`${committedRatioPct.toFixed(0)}%`}
           currentValue={`${delayEntriesVal} logs`}
-          avgValue={`${Math.max(Math.round(delayEntriesVal * 0.8), 2)}/sh`}
-          peakValue={`${Math.max(delayEntriesVal + 3, 5)}/sh`}
-          points={[50, 56, 62, 60, 69, 75, 81, 88]}
+          avgValue={`${data.committedDelayHours.toFixed(1)}h com`}
+          peakValue={`${data.draftDelayHours.toFixed(1)}h drf`}
+          points={buildSparklinePoints(committedRatioPct)}
         />
       </GlassCard>
     </div>
