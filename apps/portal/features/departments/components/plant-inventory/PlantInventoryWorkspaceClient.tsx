@@ -17,6 +17,13 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  getPlantInventoryWorkspaceData,
+  recordPlantInventoryUsageAction,
+  updatePlantInventoryAmountsAction,
+  upsertPlantInventoryItemAction,
+} from './actions';
+import { computeStockAutomatedFlags, type PlantStockStatusFlag } from './stock-flags';
 
 export type PlantInventoryViewMode =
   | 'dashboard'
@@ -221,6 +228,19 @@ function formatQty(value: number): string {
     : value.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 });
 }
 
+function getStockStatusBadgeClass(status: PlantStockStatusFlag): string {
+  if (status === 'OUT_OF_STOCK' || status === 'CRITICAL') {
+    return 'rounded-full border border-[var(--accent-alert)]/40 bg-[var(--accent-alert)]/15 px-2 py-0.5 font-semibold text-[11px] text-[var(--accent-alert)]';
+  }
+  if (status === 'REPLENISH') {
+    return 'rounded-full border border-[var(--accent-alert)]/30 bg-[var(--accent-alert)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--accent-alert)]';
+  }
+  if (status === 'SURPLUS') {
+    return 'rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--accent-blue)]';
+  }
+  return 'rounded-full border border-[var(--accent-green)]/30 bg-[var(--accent-green)]/10 px-2 py-0.5 font-medium text-[11px] text-[var(--accent-green)]';
+}
+
 export function PlantInventoryWorkspaceClient({
   mode,
   today,
@@ -236,6 +256,12 @@ export function PlantInventoryWorkspaceClient({
   ]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
+  // Inline Required / Have Amount Editing State
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editRequiredValue, setEditRequiredValue] = useState<string>('');
+  const [editPresentValue, setEditPresentValue] = useState<string>('');
+  const [inlineFeedback, setInlineFeedback] = useState<string | null>(null);
 
   // Add Item Form State (used in `item-list` view)
   const [newStockName, setNewStockName] = useState('');
@@ -261,14 +287,16 @@ export function PlantInventoryWorkspaceClient({
   const [usageOperator, setUsageOperator] = useState('Plant Shift Supervisor');
   const [usageFeedback, setUsageFeedback] = useState<string | null>(null);
 
-  // Hydrate persisted inventory & usage history from localStorage on mount
+  // Hydrate persisted inventory & usage history from localStorage and remote Supabase on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let hasLocalStock = false;
     try {
       const rawStock = window.localStorage.getItem(STOCK_STORAGE_KEY);
       if (rawStock) {
         const parsed = JSON.parse(rawStock) as PlantInventoryStockItem[];
         if (Array.isArray(parsed) && parsed.length > 0) {
+          hasLocalStock = true;
           setStockItems(parsed);
         }
       }
@@ -282,6 +310,25 @@ export function PlantInventoryWorkspaceClient({
     } catch {
       // Ignore storage read errors in restricted environments
     }
+
+    if (!hasLocalStock) {
+      let active = true;
+      void getPlantInventoryWorkspaceData()
+        .then((remote) => {
+          if (!active || !remote) return;
+          if (remote.items.length > 0) {
+            setStockItems(remote.items);
+          }
+          if (remote.usage.length > 0) {
+            setUsageHistory(remote.usage);
+          }
+        })
+        .catch(() => undefined);
+      return () => {
+        active = false;
+      };
+    }
+    return undefined;
   }, []);
 
   const persistStockItems = (nextItems: PlantInventoryStockItem[]) => {
@@ -304,6 +351,36 @@ export function PlantInventoryWorkspaceClient({
         // Ignore storage quota errors
       }
     }
+  };
+
+  const startInlineEditAmounts = (item: PlantInventoryStockItem) => {
+    setEditingItemId(item.id);
+    setEditRequiredValue(String(item.amountRequired));
+    setEditPresentValue(String(item.amountPresent));
+    setInlineFeedback(null);
+  };
+
+  const handleSaveInlineAmounts = (item: PlantInventoryStockItem) => {
+    const reqNum = Number(editRequiredValue);
+    const presNum = Number(editPresentValue);
+    if (Number.isNaN(reqNum) || reqNum < 0 || Number.isNaN(presNum) || presNum < 0) {
+      return;
+    }
+    const flags = computeStockAutomatedFlags(reqNum, presNum);
+    const updated = stockItems.map((row) =>
+      row.id === item.id ? { ...row, amountRequired: reqNum, amountPresent: presNum } : row
+    );
+    persistStockItems(updated);
+    setEditingItemId(null);
+    setInlineFeedback(
+      `Updated "${item.stock}" — Required: ${formatQty(reqNum)} ${item.unit}, Have: ${formatQty(presNum)} ${item.unit} (${flags.statusLabel}, ${flags.coveragePct}% coverage).`
+    );
+    void updatePlantInventoryAmountsAction({
+      id: item.id,
+      code: item.code,
+      amountRequired: reqNum,
+      amountPresent: presNum,
+    }).catch(() => undefined);
   };
 
   const handleAddItem = (e: React.FormEvent) => {
@@ -351,6 +428,17 @@ export function PlantInventoryWorkspaceClient({
     const updated = [createdItem, ...stockItems];
     persistStockItems(updated);
 
+    void upsertPlantInventoryItemAction({
+      stock: createdItem.stock,
+      code: createdItem.code,
+      category: createdItem.category,
+      description: createdItem.description,
+      amountRequired: createdItem.amountRequired,
+      amountPresent: createdItem.amountPresent,
+      unit: createdItem.unit,
+      plantEquipment: createdItem.plantEquipment,
+    }).catch(() => undefined);
+
     setNewStockName('');
     setNewStockCode('');
     setNewDescription('');
@@ -362,10 +450,19 @@ export function PlantInventoryWorkspaceClient({
   };
 
   const handleRestockItem = (itemId: string) => {
+    const target = stockItems.find((item) => item.id === itemId);
     const updated = stockItems.map((item) =>
       item.id === itemId ? { ...item, amountPresent: item.amountRequired } : item
     );
     persistStockItems(updated);
+    if (target) {
+      void updatePlantInventoryAmountsAction({
+        id: target.id,
+        code: target.code,
+        amountRequired: target.amountRequired,
+        amountPresent: target.amountRequired,
+      }).catch(() => undefined);
+    }
   };
 
   const handleRecordUsage = (e: React.FormEvent) => {
@@ -403,6 +500,20 @@ export function PlantInventoryWorkspaceClient({
         : item
     );
     persistStockItems(nextStock);
+
+    void recordPlantInventoryUsageAction({
+      stockId: targetItem.id,
+      stockCode: targetItem.code,
+      stockName: targetItem.stock,
+      date: entry.date,
+      shift: entry.shift,
+      amountUsed: entry.amountUsed,
+      unit: entry.unit,
+      circuitArea: entry.circuitArea,
+      plantEquipment: entry.plantEquipment,
+      description: entry.description,
+      loggedBy: entry.loggedBy,
+    }).catch(() => undefined);
 
     setUsageAmount('');
     setUsageEquipment('');
@@ -771,6 +882,15 @@ export function PlantInventoryWorkspaceClient({
           </div>
         </GlassCard>
 
+        {inlineFeedback && (
+          <div
+            role="status"
+            className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-4 py-2.5 font-medium text-[var(--accent-blue)] text-xs"
+          >
+            {inlineFeedback}
+          </div>
+        )}
+
         {/* Inventory List Table: Stock, Description, Amount Required, Amount Present */}
         <GlassCard className="overflow-hidden p-0">
           <div className="overflow-x-auto">
@@ -805,7 +925,9 @@ export function PlantInventoryWorkspaceClient({
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
                 {filteredStockItems.map((item) => {
-                  const isShortfall = item.amountPresent < item.amountRequired;
+                  const flags = computeStockAutomatedFlags(item.amountRequired, item.amountPresent);
+                  const isShortfall = flags.needsReplenishment;
+                  const isEditing = editingItemId === item.id;
                   return (
                     <tr
                       key={item.id}
@@ -815,7 +937,7 @@ export function PlantInventoryWorkspaceClient({
                         <div className="font-semibold text-[var(--text-heading)] text-sm">
                           {item.stock}
                         </div>
-                        <div className="mt-1 flex items-center gap-2">
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
                           <span className="font-mono text-[var(--text-muted)] text-xs">
                             {item.code}
                           </span>
@@ -831,29 +953,96 @@ export function PlantInventoryWorkspaceClient({
                         {item.description}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right align-top font-medium font-mono text-[var(--text-heading)] text-sm">
-                        {formatQty(item.amountRequired)} {item.unit}
+                        {isEditing ? (
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            <input
+                              type="number"
+                              min="0"
+                              step="any"
+                              aria-label={`Edit Amount Required for ${item.stock}`}
+                              value={editRequiredValue}
+                              onChange={(e) => setEditRequiredValue(e.target.value)}
+                              className="w-24 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs"
+                            />
+                            <span className="text-[var(--text-muted)] text-xs">{item.unit}</span>
+                          </div>
+                        ) : (
+                          <span>
+                            {formatQty(item.amountRequired)} {item.unit}
+                          </span>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right align-top">
-                        <div className="inline-flex items-center justify-end gap-2">
-                          <span
-                            className={`font-bold font-mono text-sm ${
-                              isShortfall
-                                ? 'text-[var(--accent-alert)]'
-                                : 'text-[var(--accent-green)]'
-                            }`}
-                          >
-                            {formatQty(item.amountPresent)} {item.unit}
-                          </span>
-                          <span
-                            className={`rounded-full border px-2 py-0.5 font-medium text-[11px] ${
-                              isShortfall
-                                ? 'border-[var(--accent-alert)]/30 bg-[var(--accent-alert)]/10 text-[var(--accent-alert)]'
-                                : 'border-[var(--accent-green)]/30 bg-[var(--accent-green)]/10 text-[var(--accent-green)]'
-                            }`}
-                          >
-                            {isShortfall ? 'Replenish' : 'Nominal'}
-                          </span>
-                        </div>
+                        {isEditing ? (
+                          <div className="flex flex-col items-end gap-2">
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <input
+                                type="number"
+                                min="0"
+                                step="any"
+                                aria-label={`Edit Have Amount for ${item.stock}`}
+                                value={editPresentValue}
+                                onChange={(e) => setEditPresentValue(e.target.value)}
+                                className="w-24 rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs"
+                              />
+                              <span className="text-[var(--text-muted)] text-xs">{item.unit}</span>
+                            </div>
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleSaveInlineAmounts(item)}
+                                className="rounded-md bg-[var(--accent-blue)] px-2.5 py-1 font-semibold text-[11px] text-white"
+                              >
+                                Save Amounts
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingItemId(null)}
+                                className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 font-medium text-[11px] text-[var(--text-secondary)]"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="inline-flex items-center justify-end gap-2">
+                              <span
+                                className={`font-bold font-mono text-sm ${
+                                  isShortfall
+                                    ? 'text-[var(--accent-alert)]'
+                                    : 'text-[var(--accent-green)]'
+                                }`}
+                              >
+                                {formatQty(item.amountPresent)} {item.unit}
+                              </span>
+                              <span className={getStockStatusBadgeClass(flags.stockStatus)}>
+                                {flags.statusLabel}
+                              </span>
+                            </div>
+                            <div className="inline-flex items-center justify-end gap-2 font-mono text-[11px] text-[var(--text-muted)]">
+                              <span>{flags.coveragePct}% coverage</span>
+                              {flags.needsReplenishment && (
+                                <span className="font-semibold text-[var(--accent-alert)]">
+                                  Auto-Reorder (-{formatQty(flags.shortfallAmount)} {item.unit})
+                                </span>
+                              )}
+                              {!flags.needsReplenishment && flags.surplusAmount > 0 && (
+                                <span className="text-[var(--accent-green)]">
+                                  +{formatQty(flags.surplusAmount)} {item.unit} surplus
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => startInlineEditAmounts(item)}
+                                aria-label={`Update Required and Have Amounts for ${item.stock}`}
+                                className="rounded border border-[var(--border-default)] bg-[var(--bg-secondary)] px-1.5 py-0.5 font-sans text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
+                              >
+                                Edit Amounts
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
@@ -1056,6 +1245,40 @@ export function PlantInventoryWorkspaceClient({
               />
             </div>
 
+            {(newAmountRequired !== '' || newAmountPresent !== '') &&
+              (() => {
+                const previewFlags = computeStockAutomatedFlags(
+                  Number(newAmountRequired) || 0,
+                  Number(newAmountPresent) || 0
+                );
+                return (
+                  <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 py-2 text-xs">
+                    <span className="font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                      Automated Flags:
+                    </span>
+                    <span className={getStockStatusBadgeClass(previewFlags.stockStatus)}>
+                      {previewFlags.statusLabel}
+                    </span>
+                    <span className="font-mono text-[var(--text-secondary)]">
+                      Coverage: <strong>{previewFlags.coveragePct}%</strong>
+                    </span>
+                    {previewFlags.needsReplenishment ? (
+                      <span className="font-mono font-semibold text-[var(--accent-alert)]">
+                        Auto-Reorder Armed (Shortfall: -{formatQty(previewFlags.shortfallAmount)}{' '}
+                        {newUnit || 'units'})
+                      </span>
+                    ) : (
+                      <span className="font-mono text-[var(--accent-green)]">
+                        Par Met
+                        {previewFlags.surplusAmount > 0
+                          ? ` (+${formatQty(previewFlags.surplusAmount)} ${newUnit || 'units'} surplus)`
+                          : ''}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
+
             <div className="flex flex-col justify-between gap-3 pt-2 sm:flex-row sm:items-center">
               {formFeedback ? (
                 <p className="font-medium text-[var(--accent-blue)] text-xs" role="status">
@@ -1116,35 +1339,48 @@ export function PlantInventoryWorkspaceClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
-                {stockItems.map((item) => (
-                  <tr key={item.id} className="transition-colors hover:bg-[var(--bg-secondary)]/60">
-                    <td className="px-6 py-4 align-top">
-                      <div className="font-semibold text-[var(--text-heading)] text-sm">
-                        {item.stock}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="font-mono text-[var(--text-muted)] text-xs">
-                          {item.code}
-                        </span>
-                        <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
-                          {item.category}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
-                      {item.description}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono text-[var(--text-heading)] text-sm">
-                      {formatQty(item.amountRequired)} {item.unit}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono font-semibold text-[var(--text-heading)] text-sm">
-                      {formatQty(item.amountPresent)} {item.unit}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
-                      {item.plantEquipment}
-                    </td>
-                  </tr>
-                ))}
+                {stockItems.map((item) => {
+                  const flags = computeStockAutomatedFlags(item.amountRequired, item.amountPresent);
+                  return (
+                    <tr
+                      key={item.id}
+                      className="transition-colors hover:bg-[var(--bg-secondary)]/60"
+                    >
+                      <td className="px-6 py-4 align-top">
+                        <div className="font-semibold text-[var(--text-heading)] text-sm">
+                          {item.stock}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="font-mono text-[var(--text-muted)] text-xs">
+                            {item.code}
+                          </span>
+                          <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
+                            {item.category}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
+                        {item.description}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top font-mono text-[var(--text-heading)] text-sm">
+                        {formatQty(item.amountRequired)} {item.unit}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-right align-top">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <span className="font-mono font-semibold text-[var(--text-heading)] text-sm">
+                            {formatQty(item.amountPresent)} {item.unit}
+                          </span>
+                          <span className={getStockStatusBadgeClass(flags.stockStatus)}>
+                            {flags.statusLabel}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 align-top text-[var(--text-secondary)] text-sm">
+                        {item.plantEquipment}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

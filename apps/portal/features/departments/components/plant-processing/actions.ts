@@ -42,6 +42,35 @@ export interface LogPlantDelayInput {
 export interface QuickAddPlantEquipmentInput {
   name: string;
 }
+
+interface UntypedPlantTable {
+  select: (columns: string) => {
+    order: (
+      col: string,
+      opts?: { ascending?: boolean }
+    ) => {
+      limit: (n: number) => Promise<{ data: unknown[] | null; error: { message: string } | null }>;
+    };
+  };
+  upsert: (
+    values: Record<string, unknown> | Array<Record<string, unknown>>,
+    opts?: { onConflict?: string }
+  ) => Promise<{ data: unknown | null; error: { message: string } | null }>;
+  update: (values: Record<string, unknown>) => {
+    eq: (
+      col: string,
+      val: string
+    ) => Promise<{ data: unknown | null; error: { message: string } | null }>;
+  };
+  insert: (
+    values: Record<string, unknown>
+  ) => Promise<{ data: unknown | null; error: { message: string } | null }>;
+}
+
+function fromPlantTable(supabase: unknown, table: string): UntypedPlantTable {
+  return (supabase as { from: (t: string) => UntypedPlantTable }).from(table);
+}
+
 export async function getPlantProcessingWorkspaceData(
   dateStr?: string
 ): Promise<PlantWorkspaceData> {
@@ -115,56 +144,56 @@ export async function getPlantProcessingWorkspaceData(
   const initialSheets: PlantHourlySheetRecord[] = [defaultDaySheet, previousNightSheet];
   const initialDelays: PlantDelayEntry[] = buildInitialPlantDelays(currentDate);
 
-  if (departmentId) {
-    try {
-      const { data: dbDelays } = await supabase
-        .from('operational_delays')
-        .select(
-          'id, delay_type, category, duration_hours, start_time, end_time, reason, created_at'
-        )
-        .eq('department_id', departmentId)
-        .order('created_at', { ascending: false })
-        .limit(20);
+  try {
+    const { data: dbDelays } = await fromPlantTable(supabase, 'plant_delays')
+      .select(
+        'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
+      )
+      .order('created_at', { ascending: false })
+      .limit(25);
 
-      if (dbDelays && dbDelays.length > 0) {
-        const mappedDelays: PlantDelayEntry[] = (
-          dbDelays as Array<{
-            id: string;
-            delay_type: string | null;
-            category: string | null;
-            duration_hours: number | null;
-            start_time: string | null;
-            end_time: string | null;
-            reason: string | null;
-            created_at: string | null;
-          }>
-        ).map((d) => ({
-          id: d.id,
-          date: d.created_at?.split('T')[0] ?? currentDate,
-          shift: 'day',
-          circuit: d.delay_type || 'DMS Cyclone Module 1 (DM-301)',
-          category: (d.category as PlantDelayCategory) || 'Mechanical',
-          impactType: 'Reduced Throughput',
-          startTime: d.start_time ? d.start_time.slice(11, 16) : '08:00',
-          endTime: d.end_time ? d.end_time.slice(11, 16) : '',
-          durationMinutes: d.end_time
-            ? Math.max(1, Math.round(Number(d.duration_hours ?? 0.25) * 60))
-            : 0,
-          reason: d.reason || 'Plant operational delay logged',
-          correctiveAction: 'Circuit inspected and restored to nominal feed rate',
-          loggedBy: operatorLabel,
-          status: d.end_time ? 'Resolved' : 'Active',
-        }));
-        return {
-          departmentId,
-          currentDate,
-          initialSheets,
-          initialDelays: [...mappedDelays, ...initialDelays],
-        };
-      }
-    } catch {
-      // Ignore DB lookup errors and return baseline records
+    if (dbDelays && dbDelays.length > 0) {
+      const mappedDelays: PlantDelayEntry[] = (
+        dbDelays as Array<{
+          id: string;
+          delay_date: string | null;
+          shift: PlantShiftType | null;
+          circuit: string | null;
+          category: PlantDelayCategory | null;
+          impact_type: PlantImpactType | null;
+          start_time: string | null;
+          end_time: string | null;
+          duration_minutes: number | null;
+          reason: string | null;
+          corrective_action: string | null;
+          logged_by: string | null;
+          status: 'Active' | 'Resolved' | null;
+        }>
+      ).map((d) => ({
+        id: d.id,
+        date: d.delay_date ?? currentDate,
+        shift: d.shift ?? 'day',
+        circuit: d.circuit || 'DMS Cyclone Module 1 (DM-301)',
+        category: d.category || 'Mechanical',
+        impactType: d.impact_type || 'Reduced Throughput',
+        startTime: d.start_time || '08:00',
+        endTime: d.end_time || '',
+        durationMinutes: Number(d.duration_minutes ?? 0),
+        reason: d.reason || 'Plant operational delay logged',
+        correctiveAction:
+          d.corrective_action || 'Circuit inspected and restored to nominal feed rate',
+        loggedBy: d.logged_by || operatorLabel,
+        status: d.status ?? (d.end_time ? 'Resolved' : 'Active'),
+      }));
+      return {
+        departmentId,
+        currentDate,
+        initialSheets,
+        initialDelays: [...mappedDelays, ...initialDelays],
+      };
     }
+  } catch {
+    // Ignore DB lookup errors and return baseline records
   }
 
   return {
@@ -197,6 +226,35 @@ export async function savePlantHourlySheetAction(
 
     const departmentId = (deptRow as { id?: string } | null)?.id;
     const employeeId = authContext?.employee?.id ?? user?.id;
+    const operatorName =
+      authContext?.user?.email?.split('@')[0] ||
+      user?.email?.split('@')[0] ||
+      'Plant Control Operator';
+
+    // Persist hourly sheet to canonical public.plant_hourly_logs
+    if (input.rows.length > 0) {
+      const totalRom = input.rows.reduce((sum, r) => sum + (Number(r.romFeedTonnes) || 0), 0);
+      const avgYield = totalRom > 0 ? Number(((totalCleanCoal / totalRom) * 100).toFixed(2)) : 0;
+
+      await fromPlantTable(supabase, 'plant_hourly_logs').upsert(
+        {
+          ...(departmentId ? { department_id: departmentId } : {}),
+          operation_date: input.date,
+          shift: input.shift,
+          module_id: input.moduleId,
+          operator_name: operatorName,
+          rows: input.rows as unknown as Record<string, unknown>[],
+          total_rom_tonnes: totalRom,
+          total_clean_coal_tonnes: totalCleanCoal,
+          total_discard_tonnes: totalDiscard,
+          avg_yield_pct: avgYield,
+          updated_at: savedAt,
+        },
+        {
+          onConflict: 'operation_date,shift,module_id',
+        }
+      );
+    }
 
     if (departmentId && employeeId) {
       const { data: logData } = await supabase
@@ -290,33 +348,31 @@ export async function logPlantDelayAction(
     const departmentId = (deptRow as { id?: string } | null)?.id;
     const employeeId = authContext?.employee?.id ?? user?.id;
 
-    if (departmentId && employeeId) {
-      const startIso = `${input.date}T${input.startTime}:00.000Z`;
-      const endIso = hasEndTime ? `${input.date}T${trimmedEndTime}:00.000Z` : null;
-      if (isUpdate && input.id) {
-        await supabase
-          .from('operational_delays')
-          .update({
-            delay_type: input.circuit,
-            category: input.category,
-            start_time: startIso,
-            end_time: endIso,
-            duration_hours: hasEndTime ? Number((newEntry.durationMinutes / 60).toFixed(2)) : 0,
-            reason: `${input.reason} | Action: ${newEntry.correctiveAction}`,
-          })
-          .eq('id', input.id);
-      } else {
-        await supabase.from('operational_delays').insert({
-          department_id: departmentId,
-          delay_type: input.circuit,
-          category: input.category,
-          start_time: startIso,
-          end_time: endIso,
-          duration_hours: hasEndTime ? Number((newEntry.durationMinutes / 60).toFixed(2)) : 0,
-          reason: `${input.reason} | Action: ${newEntry.correctiveAction}`,
-          logged_by: employeeId,
-        });
-      }
+    const delayRowPayload = {
+      ...(departmentId ? { department_id: departmentId } : {}),
+      delay_date: input.date,
+      shift: input.shift,
+      circuit: input.circuit,
+      category: input.category,
+      impact_type: input.impactType,
+      start_time: input.startTime,
+      end_time: hasEndTime ? trimmedEndTime : null,
+      duration_minutes: newEntry.durationMinutes,
+      reason: newEntry.reason,
+      corrective_action: newEntry.correctiveAction,
+      status: newEntry.status,
+      logged_by: loggedBy,
+      updated_at: new Date().toISOString(),
+    };
+
+    const isUuid =
+      Boolean(input.id) &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.id!);
+
+    if (isUpdate && isUuid && input.id) {
+      await fromPlantTable(supabase, 'plant_delays').update(delayRowPayload).eq('id', input.id);
+    } else {
+      await fromPlantTable(supabase, 'plant_delays').insert(delayRowPayload);
     }
 
     await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(

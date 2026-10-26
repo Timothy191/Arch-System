@@ -2,29 +2,27 @@ import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { sleep } from 'workflow';
 import { logError } from '@/lib/errors/error-logger';
 
-// Step 1: Create user record
+// Step 1: Lookup or verify employee profile record
 async function createUser(email: string) {
   'use step';
-  console.log(`[UserSignup] Creating user profile for ${email}...`);
+  console.log(`[UserSignup] Verifying employee profile for ${email}...`);
 
   try {
     const supabase = createServiceRoleClient();
     const { data, error } = await supabase
-      .from('users')
-      .insert({
-        email,
-        created_at: new Date().toISOString(),
-      })
+      .from('employees')
       .select('id, email')
-      .single();
+      .eq('email', email)
+      .maybeSingle();
 
     if (error && error.code !== '42P01') {
       logError(error, { context: 'create_user_step', email });
     }
 
+    const row = data as { id?: string; email?: string } | null;
     return {
-      id: data?.id || `usr_${Date.now()}`,
-      email: data?.email || email,
+      id: row?.id || `usr_${Date.now()}`,
+      email: row?.email || email,
       createdAt: new Date().toISOString(),
     };
   } catch {
@@ -60,7 +58,7 @@ async function sendOnboardingEmail(user: { id: string; email: string }) {
 
 /**
  * Autonomous Durable User Signup Workflow
- * - Step 1: Persist user profile
+ * - Step 1: Verify employee profile
  * - Step 2: Dispatch welcome notification
  * - Sleep: Suspends serverless compute for 5 seconds
  * - Step 3: Dispatch onboarding follow-up after the delay

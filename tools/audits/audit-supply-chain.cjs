@@ -290,9 +290,7 @@ if (isOfflineOrUnreachable) {
         ? adv.findings.some((f) => Array.isArray(f.paths) && f.paths.length > 0)
         : true;
       return (
-        (sev === 'high' || sev === 'critical') &&
-        !ignoredGhsas.has(ghsa) &&
-        hasReachableProdPaths
+        (sev === 'high' || sev === 'critical') && !ignoredGhsas.has(ghsa) && hasReachableProdPaths
       );
     });
 

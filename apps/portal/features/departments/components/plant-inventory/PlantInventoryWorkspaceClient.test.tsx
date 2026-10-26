@@ -46,6 +46,32 @@ describe('PlantInventoryWorkspaceClient', () => {
       expect(screen.getByText('Magnetite Superfine Medium (96% Fe3O4)')).toBeInTheDocument();
       expect(screen.queryByText('Primary Jaw Crusher Toggle Plates')).not.toBeInTheDocument();
     });
+
+    it('When updating Amount Required and Have Amount inline, Then it recalculates automated flags and coverage', () => {
+      render(<PlantInventoryWorkspaceClient mode="inventory-list" today="2026-10-22" />);
+
+      const editBtn = screen.getByRole('button', {
+        name: 'Update Required and Have Amounts for Magnetite Superfine Medium (96% Fe3O4)',
+      });
+      fireEvent.click(editBtn);
+
+      const reqInput = screen.getByLabelText(
+        'Edit Amount Required for Magnetite Superfine Medium (96% Fe3O4)'
+      );
+      const haveInput = screen.getByLabelText(
+        'Edit Have Amount for Magnetite Superfine Medium (96% Fe3O4)'
+      );
+
+      fireEvent.change(reqInput, { target: { value: '200' } });
+      fireEvent.change(haveInput, { target: { value: '80' } });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save Amounts' }));
+
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Updated "Magnetite Superfine Medium (96% Fe3O4)" — Required: 200 t, Have: 80 t (Critical (<50%), 40% coverage).'
+      );
+      expect(screen.getByText('Critical (<50%)')).toBeInTheDocument();
+    });
   });
 
   describe('Given mode="item-list" (/plant-inventory/machines)', () => {

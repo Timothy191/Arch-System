@@ -121,17 +121,14 @@ export async function submitShiftCloseout(
       .single();
 
     if (updateError) {
-      // Fallback update to shifts table if control_room_shift_reports query fails
+      // Fallback update to canonical shift_status table if control_room_shift_reports query fails
       const { data: fallbackData, error: fallbackError } = await supabase
-        .from('shifts')
+        .from('shift_status')
         .update({
           status: 'closed',
-          metrics: {
-            totalLoads: payload.totalLoads,
-            totalOperatingHours: payload.totalOperatingHours,
-            breakdownHours: payload.breakdownHours,
-            operatorNotes: payload.operatorNotes,
-          },
+          closeout_note: payload.operatorNotes || '',
+          closed_by: payload.supervisorId,
+          closed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', payload.shiftId)

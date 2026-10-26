@@ -109,3 +109,90 @@ export const overstayAlertSchema = z.object({
 });
 
 export type OverstayAlertInput = z.infer<typeof overstayAlertSchema>;
+
+export const musterEventsSchema = z.object({
+  id: uuidSchema.optional(),
+  personnel_id: uuidSchema.optional().nullable(),
+  employee_id: uuidSchema.optional().nullable(),
+  badge_code: z.string().max(100).optional().nullable(),
+  full_name: nonEmptyString.max(150),
+  muster_point: z.string().max(150).default('Primary Assembly Point A'),
+  status: z.enum(['accounted', 'missing', 'evacuated', 'medical']).default('accounted'),
+  notes: z.string().max(500).optional().nullable(),
+  recorded_by: uuidSchema.optional().nullable(),
+});
+
+export type MusterEventInput = z.infer<typeof musterEventsSchema>;
+
+export const plantInventoryItemsSchema = z.object({
+  id: uuidSchema.optional(),
+  department_id: uuidSchema.optional().nullable(),
+  stock: nonEmptyString.max(200),
+  code: nonEmptyString.max(80),
+  category: z.enum([
+    'Dense Medium',
+    'Reagents',
+    'Wear Spares',
+    'Screening & Crushing',
+    'Stockpiles',
+  ]),
+  description: nonEmptyString.max(500),
+  plant_equipment: nonEmptyString.max(150),
+  unit: z.string().max(40).default('units'),
+  amount_required: z.number().min(0),
+  amount_present: z.number().min(0),
+});
+
+export type PlantInventoryItemInput = z.infer<typeof plantInventoryItemsSchema>;
+
+export const plantInventoryUsageSchema = z.object({
+  id: uuidSchema.optional(),
+  item_id: uuidSchema.optional().nullable(),
+  stock_code: nonEmptyString.max(80),
+  stock_name: nonEmptyString.max(200),
+  usage_date: dateSchema,
+  shift: z.enum(['Day', 'Night']),
+  amount_used: z.number().positive(),
+  unit: z.string().max(40).default('units'),
+  circuit_area: nonEmptyString.max(150),
+  plant_equipment: nonEmptyString.max(150),
+  description: z.string().max(500).default(''),
+  logged_by: nonEmptyString.max(150),
+});
+
+export type PlantInventoryUsageInput = z.infer<typeof plantInventoryUsageSchema>;
+
+export const plantHourlyLogsSchema = z.object({
+  id: uuidSchema.optional(),
+  department_id: uuidSchema.optional().nullable(),
+  operation_date: dateSchema,
+  shift: z.enum(['day', 'night']),
+  module_id: nonEmptyString.max(50),
+  operator_name: nonEmptyString.max(150),
+  rows: z.array(z.record(z.string(), z.unknown())),
+  total_rom_tonnes: z.number().min(0),
+  total_clean_coal_tonnes: z.number().min(0),
+  total_discard_tonnes: z.number().min(0),
+  avg_yield_pct: z.number().min(0).max(100),
+});
+
+export type PlantHourlyLogInput = z.infer<typeof plantHourlyLogsSchema>;
+
+export const plantDelaysSchema = z.object({
+  id: uuidSchema.optional(),
+  department_id: uuidSchema.optional().nullable(),
+  delay_date: dateSchema,
+  shift: z.enum(['day', 'night']),
+  circuit: nonEmptyString.max(150),
+  category: nonEmptyString.max(80),
+  impact_type: nonEmptyString.max(80),
+  start_time: nonEmptyString.max(10),
+  end_time: z.string().max(10).optional().nullable(),
+  duration_minutes: z.number().int().min(0).default(0),
+  reason: nonEmptyString.max(500),
+  corrective_action: z.string().max(500).default(''),
+  logged_by: nonEmptyString.max(150),
+  status: z.enum(['Active', 'Resolved']).default('Active'),
+});
+
+export type PlantDelayInput = z.infer<typeof plantDelaysSchema>;
