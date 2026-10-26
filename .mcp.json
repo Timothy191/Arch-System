@@ -54,7 +54,7 @@
       "type": "remote"
     },
     "supabase": {
-      "url": "https://mcp.supabase.com/mcp",
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
       "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
       "type": "remote"
     },

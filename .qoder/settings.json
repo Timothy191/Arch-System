@@ -11,7 +11,7 @@
             "type": "command",
             "command": ".qoder/hooks/auto-format.sh",
             "name": "auto-format",
-            "statusMessage": "Formatting changed file with Biome",
+            "statusMessage": "Checking and formatting changed file with Biome",
             "timeout": 30
           }
         ]

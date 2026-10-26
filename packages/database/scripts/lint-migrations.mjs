@@ -362,7 +362,14 @@ function selectFiles({ mode, base, explicitFiles, repoRoot }) {
 
   if (explicitFiles.length > 0) {
     return explicitFiles.map((file) => {
-      const absolute = path.isAbsolute(file) ? file : path.resolve(process.cwd(), file);
+      if (path.isAbsolute(file)) {
+        return path.relative(repoRoot, file).split(path.sep).join('/');
+      }
+      const normalized = file.split(path.sep).join('/');
+      if (normalized.startsWith(`${MIGRATIONS_DIR}/`)) {
+        return normalized;
+      }
+      const absolute = path.resolve(process.cwd(), file);
       return path.relative(repoRoot, absolute).split(path.sep).join('/');
     });
   }
@@ -451,8 +458,20 @@ function parseArgs(argv) {
   return options;
 }
 
-function runSquawk(repoRoot, files) {
-  if (files.length === 0) return true;
+function isNewMigrationFile(repoRoot, file) {
+  try {
+    git(['cat-file', '-e', `HEAD:${file}`], { cwd: repoRoot });
+    return false; // Already exists in HEAD (legacy migration)
+  } catch {
+    return true; // Newly added migration file -> enforce full Squawk lint
+  }
+}
+
+function runSquawk(repoRoot, files, { includeLegacy = false } = {}) {
+  const squawkFiles = includeLegacy
+    ? files
+    : files.filter((file) => isNewMigrationFile(repoRoot, file));
+  if (squawkFiles.length === 0) return true;
 
   const configPath = path.join(repoRoot, '.squawk.toml');
   const localBin = path.join(repoRoot, 'packages/database/node_modules/.bin/squawk');
@@ -460,7 +479,7 @@ function runSquawk(repoRoot, files) {
     process.platform === 'win32' && fs.existsSync(`${localBin}.cmd`) ? `${localBin}.cmd` : localBin;
   const command = fs.existsSync(binary) ? binary : 'squawk';
 
-  const result = spawnSync(command, ['--config', configPath, ...files], {
+  const result = spawnSync(command, ['--config', configPath, ...squawkFiles], {
     cwd: repoRoot,
     stdio: 'inherit',
   });
@@ -565,7 +584,7 @@ export function main(argv = process.argv.slice(2)) {
 
   let squawkOk = true;
   if (options.runSquawk) {
-    squawkOk = runSquawk(repoRoot, files);
+    squawkOk = runSquawk(repoRoot, files, { includeLegacy: options.mode === 'all' });
   }
 
   const results = files.map((file) =>

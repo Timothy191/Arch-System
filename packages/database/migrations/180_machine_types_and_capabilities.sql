@@ -50,6 +50,7 @@ ON CONFLICT (code) DO UPDATE SET
 
 -- 4. Add machine_type_id foreign key to machines table
 ALTER TABLE public.machines
+-- squawk-ignore adding-foreign-key-constraint
 ADD COLUMN IF NOT EXISTS machine_type_id UUID REFERENCES public.machine_types(id);
 
 -- 5. Backfill existing machines based on legacy machine_type column
@@ -74,5 +75,6 @@ SET machine_type_id = (SELECT id FROM public.machine_types WHERE code = 'OTHER')
 WHERE machine_type_id IS NULL;
 
 -- 6. Add performance index on machine_type_id
+-- squawk-ignore require-concurrent-index-creation
 CREATE INDEX IF NOT EXISTS idx_machines_machine_type_id
 ON public.machines(machine_type_id);

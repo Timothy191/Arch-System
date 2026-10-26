@@ -24,7 +24,7 @@ export const options = {
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 const SUPABASE_URL = __ENV.SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co';
 const SUPABASE_ANON_KEY =
-  __ENV.SUPABASE_ANON_KEY || 'sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5';
+  __ENV.SUPABASE_ANON_KEY || 'sb_publishable_xusUcCYxZKn7zosSmoW6iQ_5qVl03XT';
 
 // Credentials come from the environment only — never a committed literal.
 // NOTE: this is a k6 script, so it must use __ENV, not process.env.

@@ -221,6 +221,12 @@ BEGIN
 END;
 $$;
 
+-- The legacy definition returned SETOF hourly_loads_legacy; CREATE OR REPLACE
+-- cannot change a function's return type, so drop the old signature first.
+DROP FUNCTION IF EXISTS public.atomic_split_hourly_load(
+  uuid, uuid, date, text, integer, uuid, text, uuid
+);
+
 CREATE OR REPLACE FUNCTION public.atomic_split_hourly_load(
   p_department_id uuid,
   p_machine_id uuid,

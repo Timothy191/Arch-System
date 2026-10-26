@@ -2,6 +2,80 @@
 -- Description: Populate seeded machines with continuous SMR readings and enforce
 --              close-SMR-to-start-SMR rollover when a new shift starts.
 
+-- 0. Reconcile 027 drift: the shift-level unique constraint (and its archive
+--    support objects) are absent on environments where 027 was recorded as
+--    applied without running. sync_to_drill_operations() upserts with
+--    ON CONFLICT (machine_id, operation_date, shift_type), so the 3-column
+--    constraint must exist before the seed below fires the trigger.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.drill_operations'::regclass
+      AND conname = 'drill_operations_machine_id_operation_date_key'
+  ) THEN
+    ALTER TABLE public.drill_operations
+      DROP CONSTRAINT drill_operations_machine_id_operation_date_key;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.drill_operations'::regclass
+      AND conname = 'uq_drill_ops_machine_date_shift'
+  ) THEN
+    ALTER TABLE public.drill_operations
+      ADD CONSTRAINT uq_drill_ops_machine_date_shift
+      UNIQUE (machine_id, operation_date, shift_type);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.drill_operations'::regclass
+      AND conname = 'chk_shift_type'
+  ) THEN
+    ALTER TABLE public.drill_operations
+      ADD CONSTRAINT chk_shift_type CHECK (shift_type IN ('day', 'night'));
+  END IF;
+
+  IF to_regclass('public.drill_operations_archive') IS NULL THEN
+    CREATE TABLE public.drill_operations_archive (LIKE public.drill_operations INCLUDING ALL);
+    ALTER TABLE public.drill_operations_archive
+      DROP CONSTRAINT IF EXISTS uq_drill_ops_machine_date_shift;
+    ALTER TABLE public.drill_operations_archive ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "drill_operations_archive_select" ON public.drill_operations_archive;
+    CREATE POLICY "drill_operations_archive_select"
+      ON public.drill_operations_archive FOR SELECT
+      TO authenticated
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.employees e
+          WHERE e.auth_id = auth.uid()
+            AND (
+              e.role = 'admin'
+              OR e.department_id = drill_operations_archive.department_id
+              OR drill_operations_archive.department_id = ANY (e.accessible_departments)
+            )
+        )
+      );
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.archive_monthly_drill_operations()
+RETURNS void
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  WITH moved_rows AS (
+    DELETE FROM public.drill_operations
+    WHERE operation_date < date_trunc('month', CURRENT_DATE)
+    RETURNING *
+  )
+  INSERT INTO public.drill_operations_archive
+  SELECT * FROM moved_rows;
+END;
+$$;
+
 -- 1. Resolve latest closing SMR per machine across machine_operations and smr_readings
 CREATE OR REPLACE FUNCTION public.get_machine_latest_closing_smr(p_machine_id UUID)
 RETURNS NUMERIC(10, 1)

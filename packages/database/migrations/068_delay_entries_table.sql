@@ -110,12 +110,12 @@ BEGIN
   -- Calculate total delay hours for this operation (excluding current row if updating)
   IF TG_OP = 'INSERT' THEN
     SELECT COALESCE(SUM(duration_hours), 0) INTO total_hours
-    FROM delay_entries
+    FROM public.delay_entries
     WHERE machine_operation_id = NEW.machine_operation_id
       AND (is_manual_override = false OR is_manual_override IS NULL);
   ELSE -- UPDATE or DELETE
     SELECT COALESCE(SUM(duration_hours), 0) INTO total_hours
-    FROM delay_entries
+    FROM public.delay_entries
     WHERE machine_operation_id = NEW.machine_operation_id
       AND id != NEW.id
       AND (is_manual_override = false OR is_manual_override IS NULL);
@@ -354,7 +354,7 @@ BEGIN
     SELECT mo.shift_date::date + mo.start_time,
            COALESCE(mo.shift_date::date + mo.end_time, mo.shift_date::date + mo.start_time + INTERVAL '12 hours')
     INTO mo_start, mo_end
-    FROM machine_operations mo
+    FROM public.machine_operations mo
     WHERE mo.id = NEW.machine_operation_id;
 
     IF NEW.delay_start_time < mo_start OR NEW.delay_end_time > mo_end THEN

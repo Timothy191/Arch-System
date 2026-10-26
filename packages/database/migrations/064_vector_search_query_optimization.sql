@@ -112,7 +112,7 @@ BEGIN
       )::FLOAT +
       temporal_weight * EXP(-lambda * EXTRACT(EPOCH FROM (NOW() - m.created_at)) / 3600)::FLOAT
     )::FLOAT AS combined_score
-  FROM memory_embeddings m
+  FROM public.memory_embeddings m
   WHERE m.user_id = p_user_id
     AND (p_session_id IS NULL OR m.session_id = p_session_id)
     AND (p_memory_type IS NULL OR m.memory_type = p_memory_type)
@@ -172,7 +172,7 @@ BEGIN
     m.memory_type,
     m.created_at,
     (1 - (m.embedding <=> query_embedding))::FLOAT AS similarity
-  FROM memory_embeddings m
+  FROM public.memory_embeddings m
   WHERE m.user_id = p_user_id
     AND (p_session_id IS NULL OR m.session_id = p_session_id)
     AND (p_memory_type IS NULL OR m.memory_type = p_memory_type)
@@ -235,7 +235,7 @@ RETURNS VARCHAR(64)
 LANGUAGE sql
 STABLE
 SET search_path = '' AS $$
-  SELECT encode(digest(
+  SELECT encode(extensions.digest(
     p_user_id::TEXT || 
     COALESCE(p_memory_type, '') || 
     p_match_count::TEXT || 
@@ -254,7 +254,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = '' AS $$
   SELECT result_data
-  FROM vector_search_cache
+  FROM public.vector_search_cache
   WHERE cache_key = p_cache_key
     AND user_id = p_user_id
     AND created_at + (ttl_seconds || ' seconds')::INTERVAL > NOW()
@@ -276,7 +276,7 @@ SECURITY DEFINER
 SET search_path = '' AS $$
 BEGIN
   -- Update access count and timestamp if cache entry exists
-  UPDATE vector_search_cache
+  UPDATE public.vector_search_cache
   SET 
     result_data = p_result_data,
     last_accessed_at = NOW(),
@@ -285,13 +285,13 @@ BEGIN
   WHERE cache_key = p_cache_key AND user_id = p_user_id;
   
   -- Insert new cache entry if it doesn't exist
-  INSERT INTO vector_search_cache (
+  INSERT INTO public.vector_search_cache (
     cache_key, query_params, result_data, user_id, memory_type, ttl_seconds
   )
   SELECT 
     p_cache_key, p_query_params, p_result_data, p_user_id, p_memory_type, p_ttl_seconds
   WHERE NOT EXISTS (
-    SELECT 1 FROM vector_search_cache 
+    SELECT 1 FROM public.vector_search_cache 
     WHERE cache_key = p_cache_key AND user_id = p_user_id
   );
 END;
@@ -306,7 +306,7 @@ SET search_path = '' AS $$
 DECLARE
   deleted_count INT;
 BEGIN
-  DELETE FROM vector_search_cache
+  DELETE FROM public.vector_search_cache
   WHERE created_at + (ttl_seconds || ' seconds')::INTERVAL < NOW()
     OR access_count < 2 AND created_at < NOW() - INTERVAL '7 days';  -- Remove unpopular old entries
   
@@ -383,7 +383,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = '' AS $$
 BEGIN
-  INSERT INTO vector_search_performance (
+  INSERT INTO public.vector_search_performance (
     user_id, search_type, match_count, ef_search, result_count, execution_time_ms, cache_hit
   ) VALUES (
     p_user_id, p_search_type, p_match_count, p_ef_search, p_result_count, p_execution_time_ms, p_cache_hit

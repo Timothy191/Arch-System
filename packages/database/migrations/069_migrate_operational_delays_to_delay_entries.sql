@@ -175,18 +175,19 @@ COMMENT ON TABLE operational_delays_archive_deprecated_20250115 IS 'DEPRECATED: 
 -- This can be used for reporting and OEE calculations
 
 -- Create a view for machine operations with delay summaries
-CREATE OR REPLACE VIEW machine_operations_with_delays AS
+DROP VIEW IF EXISTS public.machine_operations_with_delays;
+CREATE VIEW public.machine_operations_with_delays WITH (security_invoker = true) AS
 SELECT
   mo.*,
   (
     SELECT COALESCE(SUM(de.duration_hours), 0)
-    FROM delay_entries de
+    FROM public.delay_entries de
     WHERE de.machine_operation_id = mo.id
       AND de.status = 'committed'
   ) AS total_delay_hours,
   (
     SELECT COUNT(*)
-    FROM delay_entries de
+    FROM public.delay_entries de
     WHERE de.machine_operation_id = mo.id
       AND de.status = 'committed'
   ) AS delay_entry_count,
@@ -199,12 +200,12 @@ SELECT
         'end_time', de.delay_end_time
       )
     )
-    FROM delay_entries de
-    JOIN delay_categories dc ON de.delay_category_id = dc.id
+    FROM public.delay_entries de
+    JOIN public.delay_categories dc ON de.delay_category_id = dc.id
     WHERE de.machine_operation_id = mo.id
       AND de.status = 'committed'
   ) AS delay_breakdown
-FROM machine_operations mo;
+FROM public.machine_operations mo;
 
 COMMENT ON VIEW machine_operations_with_delays IS 'Machine operations with delay summary for reporting and OEE calculations';
 

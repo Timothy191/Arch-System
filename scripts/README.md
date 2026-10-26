@@ -326,7 +326,7 @@ See `CLAUDE.md` for full Turbo configuration details.
 **Requirements**:
 
 - `tbls` CLI tool installed
-- Database connection (Cloud Supabase: `postgres://postgres.mrwhtxbhrzyttlsyuofc:<password>@aws-0-us-east-1.pooler.supabase.com:5432/postgres`)
+- Database connection (Cloud Supabase: `postgres://postgres.mrwhtxbhrzyttlsyuofc:<password>@aws-1-eu-west-1.pooler.supabase.com:5432/postgres`)
 
 **Install tbls**:
 
@@ -345,7 +345,7 @@ go install github.com/k1LoW/tbls/cmd/tbls@latest
 ```bash
 # Supabase Cloud
 NEXT_PUBLIC_SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xusUcCYxZKn7zosSmoW6iQ_5qVl03XT
 SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
 SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
 SUPABASE_SERVICE_KEY=<service-role-key>

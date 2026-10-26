@@ -42,12 +42,12 @@ DECLARE
   v_eng_delays NUMERIC := 0;
 BEGIN
   -- Get machine type
-  SELECT machine_type INTO v_machine_type FROM machines WHERE id = NEW.machine_id;
+  SELECT machine_type INTO v_machine_type FROM public.machines WHERE id = NEW.machine_id;
 
   -- Only sync if it's a Drill Rig
   IF v_machine_type = 'Drill Rig' THEN
     -- Get drilling department ID
-    SELECT id INTO v_drilling_dept_id FROM departments WHERE name = 'drilling';
+    SELECT id INTO v_drilling_dept_id FROM public.departments WHERE name = 'drilling';
 
     IF v_drilling_dept_id IS NULL THEN
       RETURN NEW; -- Safety check
@@ -55,11 +55,11 @@ BEGIN
 
     -- Lookups for operator and site
     IF NEW.operator_id IS NOT NULL THEN
-      SELECT full_name INTO v_operator_name FROM operators WHERE id = NEW.operator_id;
+      SELECT full_name INTO v_operator_name FROM public.operators WHERE id = NEW.operator_id;
     END IF;
 
     IF NEW.site_id IS NOT NULL THEN
-      SELECT name INTO v_site_name FROM sites WHERE id = NEW.site_id;
+      SELECT name INTO v_site_name FROM public.sites WHERE id = NEW.site_id;
     END IF;
 
     -- Determine status
@@ -75,13 +75,13 @@ BEGIN
       COALESCE(SUM(CASE WHEN dc.name = 'Production' THEN de.duration_hours * 60 ELSE 0 END), 0),
       COALESCE(SUM(CASE WHEN dc.name = 'Engineering' THEN de.duration_hours * 60 ELSE 0 END), 0)
     INTO v_ext_delays, v_prod_delays, v_eng_delays
-    FROM delay_entries de
-    JOIN delay_categories dc ON de.delay_category_id = dc.id
+    FROM public.delay_entries de
+    JOIN public.delay_categories dc ON de.delay_category_id = dc.id
     WHERE de.machine_operation_id = NEW.id
       AND de.deleted_at IS NULL;
 
     -- Upsert into drill_operations
-    INSERT INTO drill_operations (
+    INSERT INTO public.drill_operations (
       department_id,
       machine_id,
       shift_type,

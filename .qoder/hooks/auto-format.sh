@@ -16,5 +16,7 @@ case "$file" in
   */node_modules/*|*/.next/*|*/dist/*|*/coverage/*) exit 0 ;;
 esac
 
-./node_modules/.bin/biome format --write "$file" >/dev/null 2>&1 || true
+# `check` (not `format`) so nursery.useSortedClasses safe-fixes apply: the
+# canonical class order is a linter rule, invisible to `biome format`.
+./node_modules/.bin/biome check --write "$file" >/dev/null 2>&1 || true
 exit 0

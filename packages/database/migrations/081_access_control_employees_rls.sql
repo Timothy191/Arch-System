@@ -8,7 +8,7 @@ SECURITY DEFINER
 STABLE
 SET search_path = '' AS $$
   SELECT EXISTS (
-    SELECT 1 FROM employees WHERE auth_id = auth.uid() AND role = 'access_control'
+    SELECT 1 FROM public.employees WHERE auth_id = auth.uid() AND role = 'access_control'
   );
 $$;
 

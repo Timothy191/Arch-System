@@ -136,8 +136,9 @@ console.log(
   `Tables with Active Operations: ${matrixRows.filter((r) => r.sel === '🟢' || r.ins === '🟢').length}`
 );
 
-if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
-const reportMd = `# 4-Operation Row-Level Security (RLS) Coverage Matrix Report
+if (process.argv.includes('--write')) {
+  if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
+  const reportMd = `# 4-Operation Row-Level Security (RLS) Coverage Matrix Report
 
 Generated on ${new Date().toISOString()}
 
@@ -154,8 +155,9 @@ ${matrixRows.map((r) => `| \`${r.name}\` | ${r.rls} | ${r.sel} | ${r.ins} | ${r.
 *Legend: 🟢 = Explicit Policy Defined | ⚪ (Deny) = Default Secure Tenant Isolation (Implicit Deny)*
 `;
 
-fs.writeFileSync(path.join(REPORT_DIR, 'rls-matrix-report.md'), reportMd, 'utf8');
-console.log(`📄 Matrix report written to: documentation/03-audit-reports/rls-matrix-report.md`);
+  fs.writeFileSync(path.join(REPORT_DIR, 'rls-matrix-report.md'), reportMd, 'utf8');
+  console.log(`📄 Matrix report written to: documentation/03-audit-reports/rls-matrix-report.md`);
+}
 
 if (missingRlsCount > 0) {
   console.error(`❌ Audit Failed: ${missingRlsCount} table(s) missing RLS.`);

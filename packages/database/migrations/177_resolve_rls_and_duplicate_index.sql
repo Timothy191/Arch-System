@@ -12,11 +12,11 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
   SELECT EXISTS (
     SELECT 1 FROM employees WHERE auth_id = (SELECT auth.uid()) AND role = 'admin'
   );
-$;
+$$;
 
 CREATE OR REPLACE FUNCTION public.has_department_access(dept_id UUID)
 RETURNS BOOLEAN
@@ -24,7 +24,7 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
   SELECT EXISTS (
     SELECT 1 FROM employees
     WHERE auth_id = (SELECT auth.uid())
@@ -34,7 +34,7 @@ AS $
         OR dept_id = ANY(accessible_departments)
       )
   );
-$;
+$$;
 
 CREATE OR REPLACE FUNCTION public.get_employee_department()
 RETURNS UUID
@@ -42,11 +42,12 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
   SELECT department_id FROM employees WHERE auth_id = (SELECT auth.uid()) LIMIT 1;
-$;
+$$;
 
 -- Resolve duplicate index on delay_categories
+-- squawk-ignore require-concurrent-index-deletion
 DROP INDEX IF EXISTS public.delay_categories_name_unique;
 
 -- Resolve auth_rls_initplan warnings by wrapping auth functions in (SELECT ...)

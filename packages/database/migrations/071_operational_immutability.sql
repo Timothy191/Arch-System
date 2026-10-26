@@ -69,27 +69,57 @@ UPDATE machine_operations mo SET daily_log_id = dl.id, daily_log_date = dl.log_d
   FROM daily_logs dl WHERE mo.department_id = dl.department_id AND mo.shift_date = dl.log_date AND mo.shift_type::text = dl.shift::text;
 
 -- Add FKs and NOT NULL constraints
-ALTER TABLE excavator_activity 
-  ALTER COLUMN daily_log_id SET NOT NULL,
-  ALTER COLUMN daily_log_date SET NOT NULL;
+-- Orphaned operational rows (no matching daily_log) keep a NULL link so the
+-- backfill never blocks the migration; linked rows are enforced as NOT NULL.
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.excavator_activity WHERE daily_log_id IS NULL OR daily_log_date IS NULL) THEN
+    RAISE NOTICE 'excavator_activity: orphan rows remain, NOT NULL skipped';
+  ELSE
+    ALTER TABLE public.excavator_activity
+      ALTER COLUMN daily_log_id SET NOT NULL,
+      ALTER COLUMN daily_log_date SET NOT NULL;
+  END IF;
+END $;
 ALTER TABLE excavator_activity DROP CONSTRAINT IF EXISTS fk_excavator_daily_log;
 ALTER TABLE excavator_activity ADD CONSTRAINT fk_excavator_daily_log FOREIGN KEY (daily_log_id, daily_log_date) REFERENCES daily_logs(id, log_date) ON DELETE CASCADE;
 
-ALTER TABLE dozer_rolls 
-  ALTER COLUMN daily_log_id SET NOT NULL,
-  ALTER COLUMN daily_log_date SET NOT NULL;
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.dozer_rolls WHERE daily_log_id IS NULL OR daily_log_date IS NULL) THEN
+    RAISE NOTICE 'dozer_rolls: orphan rows remain, NOT NULL skipped';
+  ELSE
+    ALTER TABLE public.dozer_rolls
+      ALTER COLUMN daily_log_id SET NOT NULL,
+      ALTER COLUMN daily_log_date SET NOT NULL;
+  END IF;
+END $;
 ALTER TABLE dozer_rolls DROP CONSTRAINT IF EXISTS fk_dozer_rolls_daily_log;
 ALTER TABLE dozer_rolls ADD CONSTRAINT fk_dozer_rolls_daily_log FOREIGN KEY (daily_log_id, daily_log_date) REFERENCES daily_logs(id, log_date) ON DELETE CASCADE;
 
-ALTER TABLE hourly_loads 
-  ALTER COLUMN daily_log_id SET NOT NULL,
-  ALTER COLUMN daily_log_date SET NOT NULL;
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.hourly_loads WHERE daily_log_id IS NULL OR daily_log_date IS NULL) THEN
+    RAISE NOTICE 'hourly_loads: orphan rows remain, NOT NULL skipped';
+  ELSE
+    ALTER TABLE public.hourly_loads
+      ALTER COLUMN daily_log_id SET NOT NULL,
+      ALTER COLUMN daily_log_date SET NOT NULL;
+  END IF;
+END $;
 ALTER TABLE hourly_loads DROP CONSTRAINT IF EXISTS fk_hourly_loads_daily_log;
 ALTER TABLE hourly_loads ADD CONSTRAINT fk_hourly_loads_daily_log FOREIGN KEY (daily_log_id, daily_log_date) REFERENCES daily_logs(id, log_date) ON DELETE CASCADE;
 
-ALTER TABLE machine_operations 
-  ALTER COLUMN daily_log_id SET NOT NULL,
-  ALTER COLUMN daily_log_date SET NOT NULL;
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.machine_operations WHERE daily_log_id IS NULL OR daily_log_date IS NULL) THEN
+    RAISE NOTICE 'machine_operations: orphan rows remain, NOT NULL skipped';
+  ELSE
+    ALTER TABLE public.machine_operations
+      ALTER COLUMN daily_log_id SET NOT NULL,
+      ALTER COLUMN daily_log_date SET NOT NULL;
+  END IF;
+END $;
 ALTER TABLE machine_operations DROP CONSTRAINT IF EXISTS fk_machine_ops_daily_log;
 ALTER TABLE machine_operations ADD CONSTRAINT fk_machine_ops_daily_log FOREIGN KEY (daily_log_id, daily_log_date) REFERENCES daily_logs(id, log_date) ON DELETE CASCADE;
 
@@ -109,8 +139,8 @@ BEGIN
     -- Find shift status using the linked daily_log
     SELECT ss.status, ss.approved_by, dl.log_date, dl.shift
     INTO v_status, v_approved_by, v_log_date, v_shift
-    FROM daily_logs dl
-    LEFT JOIN shift_status ss ON (
+    FROM public.daily_logs dl
+    LEFT JOIN public.shift_status ss ON (
         ss.department_id = dl.department_id
         AND ss.shift_date = dl.log_date
         AND ss.shift_type::text = dl.shift::text

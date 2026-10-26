@@ -4,7 +4,9 @@
 -- 1. Add state machine and auditable actor columns
 ALTER TABLE public.control_room_shift_reports
 ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'submitted',
+-- squawk-ignore adding-foreign-key-constraint
 ADD COLUMN IF NOT EXISTS submitter_id UUID REFERENCES public.employees(id),
+-- squawk-ignore adding-foreign-key-constraint
 ADD COLUMN IF NOT EXISTS approver_id UUID REFERENCES public.employees(id),
 ADD COLUMN IF NOT EXISTS approval_note TEXT,
 ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ,

@@ -18,6 +18,7 @@ UPDATE employees SET role = 'operator' WHERE role NOT IN ('operator', 'superviso
 DROP POLICY IF EXISTS "operators_select_all" ON operators;
 DROP POLICY IF EXISTS "operators_insert_admin_supervisor" ON operators;
 DROP POLICY IF EXISTS "operators_update_admin_supervisor" ON operators;
+DROP POLICY IF EXISTS "operators_delete_admin" ON operators;
 
 -- Everyone can read
 CREATE POLICY "operators_select_all"

@@ -143,7 +143,7 @@ HOST=0.0.0.0
 HOSTNAME=0.0.0.0
 NODE_ENV=development
 NEXT_PUBLIC_SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xusUcCYxZKn7zosSmoW6iQ_5qVl03XT
 REDIS_URL=redis://localhost:6379
 INNER_EOF
     success "Created apps/portal/.env with default configuration"

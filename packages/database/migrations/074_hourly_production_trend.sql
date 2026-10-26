@@ -66,7 +66,7 @@ BEGIN
   -- Plain refresh for the function-driven/manual path; the pg_cron job
   -- scheduled below uses REFRESH ... CONCURRENTLY directly (it cannot run
   -- inside a transaction block, i.e. inside a plpgsql function).
-  REFRESH MATERIALIZED VIEW view_hourly_production;
+  REFRESH MATERIALIZED VIEW public.view_hourly_production;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -86,7 +86,7 @@ SET search_path = '' AS $$
     to_char(hour_timestamp, 'HH24:00') as hour_label,
     department_name,
     SUM(total_tonnes)::NUMERIC as tonnes
-  FROM view_hourly_production
+  FROM public.view_hourly_production
   WHERE hour_timestamp >= NOW() - (p_hours_back || ' hours')::interval
     AND (public.has_department_access(department_id) OR public.is_admin())
   GROUP BY hour_timestamp, department_name
@@ -99,7 +99,7 @@ GRANT EXECUTE ON FUNCTION public.get_production_trend(INT) TO authenticated;
 SELECT cron.schedule(
   'refresh-view-hourly-production',
   '*/5 * * * *',
-  'REFRESH MATERIALIZED VIEW CONCURRENTLY view_hourly_production'
+  'REFRESH MATERIALIZED VIEW CONCURRENTLY public.view_hourly_production'
 );
 
 COMMIT;

@@ -33,6 +33,18 @@ case "$rel" in
     echo "Blocked: config/tools/eslint.boundaries.cjs is generated. Change the policy source and run pnpm policy:gen." >&2
     exit 2
     ;;
+  codebase-maps/latest/*|codebase-maps/manifest.json)
+    echo "Blocked: $rel is generated output. Update the maps source and run pnpm maps:sync (checked by pnpm maps:check)." >&2
+    exit 2
+    ;;
+  packages/theme/src/css/variables-generated.css|packages/theme/src/tokens/generated.ts|packages/theme/src/tokens/generated-sd.ts)
+    echo "Blocked: $rel is generated from tokens.json / src/css/variables.css. Edit the source and run pnpm --filter @repo/theme codegen." >&2
+    exit 2
+    ;;
+  packages/supabase/src/database.types.ts)
+    echo "Blocked: $rel is generated from the live schema. Change the migration and run pnpm --filter @repo/database db:types. Hand-written types belong in packages/supabase/src/manual-types.ts." >&2
+    exit 2
+    ;;
 esac
 
 exit 0
