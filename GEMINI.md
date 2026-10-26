@@ -16,6 +16,7 @@ Guidance for Gemini and Antigravity agents operating within the Arch-System ente
    - All primary data fetching in RSC / Server Actions / Route Handlers — never in `'use client'`.
 4. **Type Safety**: Strict TypeScript throughout. Never use `any` or `@ts-ignore`.
 5. **Toolchain Mandate**: Use `code-index`, `codemap`, or `ast-grep` (`sg`) for search, `repomix` (`pnpm context:pack`) for bundling, and `difftastic` (`difft`) for diffs.
+6. **Strict Task Focus**: Never explore unrelated code, files, or anything else outside the user's explicit request — always stay strictly on focused tasks.
 
 ## Mandatory Verification Protocol (6-Pillar Protocol)
 

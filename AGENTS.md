@@ -75,6 +75,7 @@ Jest 30 + `@swc/jest`; co-located `*.test.ts(x)`; run with `--runInBand`. `apps/
 
 ## 7. Working agreement
 
+- **Strict task focus**: Never explore unrelated code, directories, or anything else outside the active objective — always stay strictly on focused tasks.
 - Broad audit/improvement requests: report evidence first, then stop; edit only after an explicit implement instruction.
 - Stay on `main` in the current checkout; no branches/worktrees/PRs, and no commit/push unless asked.
 

@@ -15,6 +15,7 @@ This rule is permanently and autonomously active across all agent sessions.
 Arch-System controls real mining operations. Every agent must:
 
 - **Treat the repository as production-grade operational software** — never as a playground
+- **Strict Task Focus** — never explore unrelated code, files, or anything else outside the user's explicit objective; always stay strictly on focused tasks
 - **Assume real-world consequences** — a single wrong RLS policy or migration can halt production
 - **Verify before claiming** — never assert "works" without empirical evidence (runtime tests, live probes)
 - **Own the full lifecycle** — from design through deployment verification
