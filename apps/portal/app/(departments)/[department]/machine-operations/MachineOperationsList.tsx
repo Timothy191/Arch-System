@@ -1,87 +1,25 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { AlertCircle, CheckCircle2, Clock, Plus, Search } from 'lucide-react';
 import { memo, useMemo, useState } from 'react';
-
-export interface DelayEntry {
-  id: string;
-  delay_category_id: string;
-  delay_start_time: string;
-  delay_end_time: string;
-  duration_hours: number;
-  is_manual_override: boolean;
-  status: 'draft' | 'committed';
-  delay_category?: {
-    name: string;
-  };
-}
-
-export interface MachineOperation {
-  id: string;
-  machine_id: string;
-  operator_id: string | null;
-  site_id: string | null;
-  shift_type: 'day' | 'night';
-  start_time: string;
-  end_time: string | null;
-  hours_worked: number | null;
-  start_smu?: number | null;
-  end_smu?: number | null;
-  block_drilled?: string | null;
-  meters_drilled?: number | null;
-  holes_drilled?: number | null;
-  machine?: {
-    name: string;
-    machine_type?: string;
-    bin_factor?: number;
-    serial_number?: string | null;
-  } | null;
-  operator?: { full_name: string } | null;
-  site?: { name: string } | null;
-  delay_entries?: DelayEntry[];
-}
-
-export interface HourlyLoadSummary {
-  machine_id: string;
-  shift_type: string;
-  total_loads: number;
-}
-
-export interface Breakdown {
-  id: string;
-  fleet_id: string;
-  reason: string;
-  repair_notes: string | null;
-  status: string;
-  date_in: string;
-  date_out: string | null;
-}
-
-export interface MachineItem {
-  id: string;
-  name: string;
-  machine_type: string;
-  serial_number: string | null;
-  site_id?: string | null;
-  latest_smu?: number | null;
-  bin_factor?: number | null;
-  site?: { name: string; site_code?: string } | null;
-}
-
-export interface MachineOperationsListProps {
-  operations: MachineOperation[];
-  todayLoads?: HourlyLoadSummary[];
-  activeBreakdowns?: Breakdown[];
-  machines?: MachineItem[];
-  engineeringDelaysByMachine?: Record<string, { hours: number; reasons: string[]; status: string }>;
-}
-
-function formatTime(timeStr: string) {
-  return timeStr.slice(0, 5); // HH:MM format
-}
-
-type FilterStatus = 'all' | 'operating' | 'standby' | 'breakdown';
+import {
+  FleetMachineCard,
+  MachineOperationsFilterStrip,
+  OperationCard,
+} from './MachineOperationsSummaryStrip';
+import {
+  buildBreakdownsByFleetIdMap,
+  buildFleetMachinesList,
+  buildLegacySiteEntries,
+  buildLoadsByMachineMap,
+  buildOperationsByMachineMap,
+  computeMachineStatusCounts,
+  computeMachinesWithMeta,
+  type FilterStatus,
+  filterMachinesWithMeta,
+  groupMachinesBySite,
+  type MachineOperationsListProps,
+} from './machine-operations-constants';
 
 function MachineOperationsList({
   operations = [],
@@ -93,207 +31,40 @@ function MachineOperationsList({
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // BOLT-OPTIMIZATION: Pre-index todayLoads by machine_id into a Map to replace O(N * L) array filtering
-  // inside renders with O(1) Map lookups. Defensive array fallback (todayLoads || []) handles undefined inputs.
-  const loadsByMachine = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const load of todayLoads || []) {
-      if (!load.machine_id) continue;
-      const current = map.get(load.machine_id) || 0;
-      map.set(load.machine_id, current + (load.total_loads || 0));
-    }
-    return map;
-  }, [todayLoads]);
+  const loadsByMachine = useMemo(() => buildLoadsByMachineMap(todayLoads), [todayLoads]);
 
-  // BOLT-OPTIMIZATION: Pre-index activeBreakdowns by fleet_id into a Map to replace O(N * B) array searching
-  // with O(1) Map lookups. Defensive array fallback (activeBreakdowns || []) handles undefined inputs.
-  const breakdownsByFleetId = useMemo(() => {
-    const map = new Map<string, Breakdown>();
-    for (const breakdown of activeBreakdowns || []) {
-      if (breakdown.fleet_id) {
-        map.set(breakdown.fleet_id, breakdown);
-      }
-    }
-    return map;
-  }, [activeBreakdowns]);
+  const breakdownsByFleetId = useMemo(
+    () => buildBreakdownsByFleetIdMap(activeBreakdowns),
+    [activeBreakdowns]
+  );
 
-  // Index operations by machine_id
-  const operationsByMachine = useMemo(() => {
-    const map = new Map<string, MachineOperation[]>();
-    for (const op of operations) {
-      if (!op.machine_id) continue;
-      const list = map.get(op.machine_id) || [];
-      list.push(op);
-      map.set(op.machine_id, list);
-    }
-    return map;
-  }, [operations]);
+  const operationsByMachine = useMemo(() => buildOperationsByMachineMap(operations), [operations]);
 
   // Mode A: Legacy mode when `machines` prop is not passed
-  // Maintains 100% backwards compatibility with existing tests
-  const legacySiteEntries = useMemo(() => {
-    if (machines !== undefined) return null;
-
-    const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
-
-    for (const op of operations) {
-      const siteKey = op.site_id ?? '__none__';
-      const siteName = op.site?.name ?? 'No Site Assigned';
-      if (!siteMap.has(siteKey)) {
-        siteMap.set(siteKey, { siteName, operations: [] });
-      }
-      siteMap.get(siteKey)!.operations.push(op);
-    }
-
-    return Array.from(siteMap.entries()).sort(([a], [b]) => {
-      if (a === '__none__') return 1;
-      if (b === '__none__') return -1;
-      return 0;
-    });
-  }, [operations, machines]);
+  const legacySiteEntries = useMemo(
+    () => buildLegacySiteEntries(operations, machines),
+    [operations, machines]
+  );
 
   // Mode B: Fleet Machines Mode (when `machines` prop is provided)
-  // Consolidates all fleet machines with their status, SMR, and shifts logged today.
-  const fleetMachines = useMemo(() => {
-    if (!machines) return [];
-    const list: MachineItem[] = [...machines];
-    const knownIds = new Set(machines.map((m) => m.id));
+  const fleetMachines = useMemo(
+    () => buildFleetMachinesList(machines, operations),
+    [machines, operations]
+  );
 
-    // Synthesize entries for any machines present in operations but missing from machines array
-    for (const op of operations) {
-      if (op.machine_id && !knownIds.has(op.machine_id)) {
-        knownIds.add(op.machine_id);
-        list.push({
-          id: op.machine_id,
-          name: op.machine?.name || 'Unknown Machine',
-          machine_type: op.machine?.machine_type || 'Unknown Type',
-          serial_number: op.machine?.serial_number || null,
-          bin_factor: op.machine?.bin_factor,
-          site_id: op.site_id,
-          site: op.site ? { name: op.site.name } : null,
-          latest_smu: op.end_smu ?? op.start_smu ?? null,
-        });
-      }
-    }
+  const machinesWithMeta = useMemo(
+    () => computeMachinesWithMeta(fleetMachines, breakdownsByFleetId, operationsByMachine),
+    [fleetMachines, breakdownsByFleetId, operationsByMachine]
+  );
 
-    return list;
-  }, [machines, operations]);
+  const counts = useMemo(() => computeMachineStatusCounts(machinesWithMeta), [machinesWithMeta]);
 
-  // Pre-calculate status and stats for each machine
-  const machinesWithMeta = useMemo(() => {
-    return fleetMachines.map((machine) => {
-      const breakdown =
-        breakdownsByFleetId.get(machine.id) ||
-        breakdownsByFleetId.get(machine.name) ||
-        (machine.serial_number ? breakdownsByFleetId.get(machine.serial_number) : undefined);
-      const isBreakdown = breakdown?.status === 'active';
+  const filteredMachines = useMemo(
+    () => filterMachinesWithMeta(machinesWithMeta, filterStatus, searchQuery),
+    [machinesWithMeta, filterStatus, searchQuery]
+  );
 
-      const machineOps = operationsByMachine.get(machine.id) || [];
-      const hasOps = machineOps.length > 0;
-      const isInProgress = machineOps.some((op) => op.end_smu == null && op.end_time === null);
-      const totalHours = machineOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
-
-      let status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
-      if (isBreakdown) {
-        status = 'breakdown';
-      } else if (isInProgress) {
-        status = 'in-progress';
-      } else if (hasOps) {
-        status = 'operating';
-      } else {
-        status = 'standby';
-      }
-
-      return {
-        machine,
-        breakdown,
-        operations: machineOps,
-        status,
-        totalHours,
-      };
-    });
-  }, [fleetMachines, breakdownsByFleetId, operationsByMachine]);
-
-  // Metrics counts
-  const counts = useMemo(() => {
-    let operating = 0;
-    let standby = 0;
-    let breakdown = 0;
-
-    for (const item of machinesWithMeta) {
-      if (item.status === 'breakdown') {
-        breakdown++;
-      } else if (item.status === 'operating' || item.status === 'in-progress') {
-        operating++;
-      } else {
-        standby++;
-      }
-    }
-
-    return {
-      total: machinesWithMeta.length,
-      operating,
-      standby,
-      breakdown,
-    };
-  }, [machinesWithMeta]);
-
-  // Filter and search
-  const filteredMachines = useMemo(() => {
-    return machinesWithMeta.filter((item) => {
-      // Status filter
-      if (
-        filterStatus === 'operating' &&
-        item.status !== 'operating' &&
-        item.status !== 'in-progress'
-      ) {
-        return false;
-      }
-      if (filterStatus === 'standby' && item.status !== 'standby') {
-        return false;
-      }
-      if (filterStatus === 'breakdown' && item.status !== 'breakdown') {
-        return false;
-      }
-
-      // Search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const nameMatch = item.machine.name.toLowerCase().includes(query);
-        const typeMatch = item.machine.machine_type.toLowerCase().includes(query);
-        const snMatch = item.machine.serial_number?.toLowerCase().includes(query) ?? false;
-        const siteMatch = item.machine.site?.name?.toLowerCase().includes(query) ?? false;
-        return nameMatch || typeMatch || snMatch || siteMatch;
-      }
-
-      return true;
-    });
-  }, [machinesWithMeta, filterStatus, searchQuery]);
-
-  // Group filtered machines by site
-  const siteGrouped = useMemo(() => {
-    const map = new Map<
-      string,
-      { siteName: string; siteCode?: string; items: typeof filteredMachines }
-    >();
-
-    for (const item of filteredMachines) {
-      const siteKey = item.machine.site_id || item.machine.site?.name || '__unassigned__';
-      const siteName = item.machine.site?.name || 'Unassigned Site';
-      const siteCode = item.machine.site?.site_code;
-
-      if (!map.has(siteKey)) {
-        map.set(siteKey, { siteName, siteCode, items: [] });
-      }
-      map.get(siteKey)!.items.push(item);
-    }
-
-    return Array.from(map.entries()).sort(([a], [b]) => {
-      if (a === '__unassigned__') return 1;
-      if (b === '__unassigned__') return -1;
-      return 0;
-    });
-  }, [filteredMachines]);
+  const siteGrouped = useMemo(() => groupMachinesBySite(filteredMachines), [filteredMachines]);
 
   // Mode A Render: when `machines` prop is not passed
   if (machines === undefined) {
@@ -401,76 +172,14 @@ function MachineOperationsList({
 
   return (
     <div className="space-y-5" data-testid="fleet-machines-list">
-      {/* Search & Filter Controls */}
-      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          <button
-            type="button"
-            onClick={() => setFilterStatus('all')}
-            className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-              filterStatus === 'all'
-                ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
-          >
-            All Machines ({counts.total})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterStatus('operating')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-              filterStatus === 'operating'
-                ? 'bg-accent-green text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
-          >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
-            Operating ({counts.operating})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterStatus('standby')}
-            className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-              filterStatus === 'standby'
-                ? 'bg-[var(--text-heading)] text-white shadow-sm'
-                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-            }`}
-          >
-            Standby ({counts.standby})
-          </button>
-          {counts.breakdown > 0 && (
-            <button
-              type="button"
-              onClick={() => setFilterStatus('breakdown')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-                filterStatus === 'breakdown'
-                  ? 'bg-accent-red text-white shadow-sm'
-                  : 'border border-accent-red/30 bg-accent-red/10 text-accent-red hover:bg-accent-red/20'
-              }`}
-            >
-              <AlertCircle size={12} />
-              Breakdowns ({counts.breakdown})
-            </button>
-          )}
-        </div>
+      <MachineOperationsFilterStrip
+        filterStatus={filterStatus}
+        onFilterStatusChange={setFilterStatus}
+        counts={counts}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+      />
 
-        {/* Search Input */}
-        <div className="relative min-w-[240px]">
-          <Search
-            size={14}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--text-muted)]"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search machine, type, or SN..."
-            className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Filtered Machine Results */}
       {filteredMachines.length === 0 ? (
         <GlassCard>
           <p className="py-6 text-center text-[var(--text-muted)] text-sm">
@@ -546,435 +255,6 @@ function MachineOperationsList({
   );
 }
 
-function FleetMachineCard({
-  machine,
-  breakdown,
-  operations,
-  status,
-  totalHours,
-  loadsByMachine,
-  breakdownsByFleetId,
-  engineeringDelay,
-}: {
-  machine: MachineItem;
-  breakdown?: Breakdown;
-  operations: MachineOperation[];
-  status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
-  totalHours: number;
-  loadsByMachine: Map<string, number>;
-  breakdownsByFleetId: Map<string, Breakdown>;
-  engineeringDelay?: { hours: number; reasons: string[]; status: string };
-}) {
-  const [isExpanded, setIsExpanded] = useState(operations.length > 0);
-
-  const scrollToForm = () => {
-    const formElem = document.getElementById('machine-operations-form');
-    if (formElem) {
-      formElem.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  return (
-    <GlassCard className="px-4 py-3">
-      <div className="space-y-3">
-        {/* Machine Header Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Indicator, Machine Name, Type, SN */}
-          <div className="flex min-w-0 items-center gap-3">
-            {/* Status Indicator */}
-            <div
-              className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                status === 'breakdown'
-                  ? 'animate-pulse bg-accent-red'
-                  : status === 'in-progress'
-                    ? 'animate-pulse bg-accent-blue'
-                    : status === 'operating'
-                      ? 'bg-accent-green'
-                      : 'bg-[var(--text-muted)]/50'
-              }`}
-            />
-
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-[var(--text-heading)] text-sm">
-                  {machine.name}
-                </span>
-                <span className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[11px] text-[var(--text-secondary)]">
-                  {machine.machine_type}
-                </span>
-                {machine.bin_factor != null && machine.bin_factor > 0 && (
-                  <span className="rounded-md border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium font-mono text-[11px] text-[var(--accent-blue)]">
-                    {machine.bin_factor} BCM/load
-                  </span>
-                )}
-                {machine.serial_number && (
-                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                    {machine.serial_number}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: SMR, Status Badge & Actions */}
-          <div className="flex shrink-0 items-center gap-3">
-            {/* Latest SMR */}
-            {machine.latest_smu != null && (
-              <span className="rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-mono text-[var(--text-heading)] text-xs">
-                SMR {machine.latest_smu.toFixed(1)}
-              </span>
-            )}
-
-            {/* Status Badge */}
-            {status === 'breakdown' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-accent-red/20 bg-accent-red/10 px-2 py-0.5 font-medium text-accent-red text-xs">
-                <AlertCircle size={12} />
-                Breakdown
-              </span>
-            )}
-            {status === 'in-progress' && (
-              <span className="inline-flex animate-pulse items-center gap-1 rounded-md border border-[var(--accent-blue)]/20 bg-accent-blue/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
-                <Clock size={12} />
-                In Progress
-              </span>
-            )}
-            {status === 'operating' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-medium text-accent-green text-xs">
-                <CheckCircle2 size={12} />
-                {totalHours.toFixed(1)}h logged
-              </span>
-            )}
-            {status === 'standby' && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
-                Standby
-              </span>
-            )}
-
-            {/* Shift Count / Toggle button */}
-            {operations.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="ml-1 font-medium text-[var(--accent-blue)] text-xs hover:underline"
-              >
-                {operations.length} shift{operations.length !== 1 ? 's' : ''} (
-                {isExpanded ? 'Hide' : 'Show'})
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Breakdown Alert Banner */}
-        {breakdown && breakdown.status === 'active' && (
-          <div className="rounded-lg border border-accent-red/20 bg-accent-red/10 p-2.5 text-xs">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle size={14} className="mt-0.5 shrink-0 text-accent-red" />
-                <div>
-                  <p className="font-semibold text-accent-red">
-                    Engineering Breakdown: {breakdown.reason}
-                  </p>
-                  {breakdown.repair_notes && (
-                    <p className="mt-0.5 text-[var(--text-secondary)]">{breakdown.repair_notes}</p>
-                  )}
-                </div>
-              </div>
-              {engineeringDelay && engineeringDelay.hours > 0 && (
-                <span className="rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 font-mono font-semibold text-[11px] text-amber-900">
-                  Eng Delay: {engineeringDelay.hours.toFixed(1)}h · Remaining Shift Cap:{' '}
-                  {Math.max(0, 12 - engineeringDelay.hours).toFixed(1)}h
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Today's Shifts for this machine */}
-        {operations.length > 0 ? (
-          isExpanded && (
-            <div className="space-y-2 border-[var(--border-default)] border-t pt-2">
-              {operations.map((op) => (
-                <OperationCard
-                  key={op.id}
-                  operation={op}
-                  loadsByMachine={loadsByMachine}
-                  breakdownsByFleetId={breakdownsByFleetId}
-                />
-              ))}
-            </div>
-          )
-        ) : (
-          /* Standby notice when no operations logged */
-          <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-2 text-[var(--text-muted)] text-xs">
-            <span className="italic">Standby — No operations logged today</span>
-            <button
-              type="button"
-              onClick={scrollToForm}
-              className="inline-flex items-center gap-1 font-medium text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80"
-            >
-              <Plus size={12} />
-              Log Shift
-            </button>
-          </div>
-        )}
-      </div>
-    </GlassCard>
-  );
-}
-
-function OperationCard({
-  operation,
-  loadsByMachine,
-  breakdownsByFleetId,
-}: {
-  operation: MachineOperation;
-  loadsByMachine: Map<string, number>;
-  breakdownsByFleetId: Map<string, Breakdown>;
-}) {
-  const isComplete =
-    (operation.end_smu != null || operation.end_time !== null) && operation.hours_worked !== null;
-  const isInProgress = operation.end_smu == null && operation.end_time === null;
-
-  const isDozer =
-    operation.machine?.machine_type === 'Dozer' ||
-    Boolean(operation.machine?.machine_type?.toLowerCase().includes('dozer'));
-
-  // Calculate BCM metrics using pre-indexed Map (O(1) lookup) + fixed Dozer Roll-over (250 BCM/h)
-  const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads = loadsByMachine.get(operation.machine_id) || 0;
-  const materialBCM = isDozer ? (operation.hours_worked || 0) * 250 : machineLoads * binFactor;
-  const bcmPerHour = isDozer
-    ? 250
-    : (operation.hours_worked || 0) > 0
-      ? materialBCM / (operation.hours_worked || 1)
-      : 0;
-
-  // Match breakdown by machine_id, machine name, or serial_number using pre-indexed Map (O(1) lookup)
-  const machineBreakdown =
-    breakdownsByFleetId.get(operation.machine_id) ||
-    (operation.machine?.name ? breakdownsByFleetId.get(operation.machine.name) : undefined) ||
-    (operation.machine?.serial_number
-      ? breakdownsByFleetId.get(operation.machine.serial_number)
-      : undefined);
-
-  // Calculate delay totals by category and status
-  const delayEntries = operation.delay_entries || [];
-  const totalDelayHours = delayEntries.reduce((sum, d) => sum + d.duration_hours, 0);
-  const _committedDelayHours = delayEntries
-    .filter((d) => d.status === 'committed')
-    .reduce((sum, d) => sum + d.duration_hours, 0);
-  const draftDelayHours = delayEntries
-    .filter((d) => d.status === 'draft')
-    .reduce((sum, d) => sum + d.duration_hours, 0);
-
-  // Group delays by category
-  const delaysByCategory = delayEntries.reduce(
-    (acc, delay) => {
-      const categoryName = delay.delay_category?.name || 'Unknown';
-      if (!acc[categoryName]) {
-        acc[categoryName] = 0;
-      }
-      acc[categoryName] += delay.duration_hours;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-
-  const [showDelays, setShowDelays] = useState(false);
-
-  return (
-    <GlassCard className="px-3 py-2.5">
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Status Indicator */}
-            <div
-              className={`h-2 w-2 rounded-full ${
-                machineBreakdown?.status === 'active'
-                  ? 'animate-pulse bg-accent-red'
-                  : isComplete
-                    ? 'bg-accent-green'
-                    : isInProgress
-                      ? 'animate-pulse bg-accent-blue'
-                      : 'bg-[var(--text-secondary)]'
-              }`}
-            />
-
-            {/* Machine & Details */}
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium text-[var(--text-heading)] text-xs sm:text-sm">
-                  {operation.machine?.name || 'Unknown Machine'}
-                </p>
-                <span
-                  className={`rounded px-1.5 py-0.5 font-medium text-[10px] uppercase tracking-wider ${
-                    operation.shift_type === 'day'
-                      ? 'border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/15 text-[var(--accent-amber)]'
-                      : 'border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
-                  }`}
-                >
-                  {operation.shift_type} shift
-                </span>
-                {machineBreakdown && (
-                  <span
-                    className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] ${
-                      machineBreakdown.status === 'active'
-                        ? 'bg-accent-red/10 text-accent-red'
-                        : 'bg-accent-green/10 text-accent-green'
-                    }`}
-                  >
-                    <AlertCircle size={10} />
-                    {machineBreakdown.status === 'active' ? 'Active Breakdown' : 'Repaired'}
-                  </span>
-                )}
-              </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs">
-                <span>{operation.operator?.full_name || 'No Operator'}</span>
-                <span className="text-[var(--border-emphasis)]">|</span>
-                <span>{operation.site?.name || 'No Site'}</span>
-                {operation.block_drilled && (
-                  <>
-                    <span className="text-[var(--border-emphasis)]">|</span>
-                    <span className="font-medium text-[var(--text-heading)]">
-                      Block: {operation.block_drilled}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Time, Hours, Drilling Metrics & BCM */}
-          <div className="text-right">
-            <p className="text-[var(--text-heading)] text-xs sm:text-sm">
-              {operation.start_smu != null && operation.end_smu != null ? (
-                <>
-                  SMR {operation.start_smu.toFixed(1)} – {operation.end_smu.toFixed(1)}
-                </>
-              ) : operation.start_smu != null ? (
-                <>SMR {operation.start_smu.toFixed(1)} – In Progress</>
-              ) : (
-                <>
-                  {formatTime(operation.start_time)} -{' '}
-                  {operation.end_time ? formatTime(operation.end_time) : 'In Progress'}
-                </>
-              )}
-            </p>
-            <div className="mt-0.5 flex flex-wrap items-center justify-end gap-2 text-xs">
-              {operation.start_smu != null ? (
-                <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                  {formatTime(operation.start_time)}
-                  {operation.end_time ? ` - ${formatTime(operation.end_time)}` : ''}
-                </span>
-              ) : null}
-              {operation.hours_worked !== null && (
-                <span className="font-medium text-accent-green">
-                  {operation.hours_worked.toFixed(2)}h
-                </span>
-              )}
-              {operation.meters_drilled != null && (
-                <>
-                  <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="font-medium text-accent-green">
-                    {Number(operation.meters_drilled).toFixed(1)}m
-                  </span>
-                </>
-              )}
-              {operation.holes_drilled != null && (
-                <>
-                  <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="font-medium text-[var(--accent-blue)]">
-                    {operation.holes_drilled} holes
-                  </span>
-                </>
-              )}
-              {(binFactor > 0 || isDozer) && (
-                <>
-                  <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-[var(--accent-blue)]">
-                    {isDozer
-                      ? `Roll-over: ${materialBCM.toFixed(1)} BCM`
-                      : `${materialBCM.toFixed(1)} BCM`}
-                  </span>
-                  <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-accent-blue">{bcmPerHour.toFixed(1)} BCM/h</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Breakdown Summary */}
-        {machineBreakdown && (
-          <div className="border-[var(--border-default)] border-t pt-2">
-            <div className="flex items-start gap-2 text-xs">
-              <AlertCircle
-                size={14}
-                className={
-                  machineBreakdown.status === 'active'
-                    ? 'mt-0.5 shrink-0 text-accent-red'
-                    : 'mt-0.5 shrink-0 text-accent-green'
-                }
-              />
-              <div>
-                <p
-                  className={`font-medium ${machineBreakdown.status === 'active' ? 'text-accent-red' : 'text-accent-green'}`}
-                >
-                  Engineering Breakdown: {machineBreakdown.reason}
-                </p>
-                {machineBreakdown.repair_notes && (
-                  <p className="mt-0.5 text-[var(--text-muted)]">{machineBreakdown.repair_notes}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delay Summary */}
-        {delayEntries.length > 0 && (
-          <div className="border-[var(--border-default)] border-t pt-2">
-            <button
-              type="button"
-              onClick={() => setShowDelays(!showDelays)}
-              className="flex items-center gap-2 text-[var(--text-muted)] text-xs transition-colors hover:text-[var(--text-heading)]"
-            >
-              <Clock size={14} />
-              <span className="font-medium">
-                {delayEntries.length} delay{delayEntries.length > 1 ? 's' : ''}
-              </span>
-              <span className="text-accent-red">{totalDelayHours.toFixed(2)}h total</span>
-              {draftDelayHours > 0 && (
-                <span className="text-[var(--accent-amber)]">
-                  ({draftDelayHours.toFixed(2)}h draft)
-                </span>
-              )}
-            </button>
-
-            {showDelays && (
-              <div className="mt-2 space-y-1 pl-6">
-                {Object.entries(delaysByCategory).map(([category, hours]) => (
-                  <div key={category} className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--text-muted)]">{category}</span>
-                    <span className="text-[var(--text-heading)]">{hours.toFixed(2)}h</span>
-                  </div>
-                ))}
-                {delayEntries.some((d) => d.is_manual_override) && (
-                  <div className="flex items-center gap-1 text-[var(--accent-amber)] text-xs">
-                    <AlertCircle size={12} />
-                    <span>Includes manual override entries</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </GlassCard>
-  );
-}
-
-// AGENT-TRACE: Memoize MachineOperationsList — props (operations, todayLoads,
-// activeBreakdowns, machines) are stable across renders from parent state changes.
 const MemoizedMachineOperationsList = memo(MachineOperationsList);
 
 export { MemoizedMachineOperationsList as MachineOperationsList };

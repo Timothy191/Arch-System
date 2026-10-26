@@ -194,8 +194,6 @@ const nextConfig = {
       '@radix-ui/react-popover',
       '@repo/ui',
     ],
-    // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
-    inlineCss: true,
   },
   async headers() {
     return [

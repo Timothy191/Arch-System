@@ -141,16 +141,56 @@ export async function getPlantProcessingWorkspaceData(
     rows: prevNightRows,
   };
 
-  const initialSheets: PlantHourlySheetRecord[] = [defaultDaySheet, previousNightSheet];
+  let initialSheets: PlantHourlySheetRecord[] = [defaultDaySheet, previousNightSheet];
   const initialDelays: PlantDelayEntry[] = buildInitialPlantDelays(currentDate);
 
   try {
-    const { data: dbDelays } = await fromPlantTable(supabase, 'plant_delays')
-      .select(
-        'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
+    const [{ data: dbSheets }, { data: dbDelays }] = await Promise.all([
+      fromPlantTable(supabase, 'plant_hourly_logs')
+        .select('id, operation_date, shift, module_id, operator_name, rows, updated_at')
+        .order('operation_date', { ascending: false })
+        .limit(10),
+      fromPlantTable(supabase, 'plant_delays')
+        .select(
+          'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
+        )
+        .order('created_at', { ascending: false })
+        .limit(25),
+    ]);
+
+    if (dbSheets && dbSheets.length > 0) {
+      const persistedSheets: PlantHourlySheetRecord[] = (
+        dbSheets as Array<{
+          id: string;
+          operation_date: string;
+          shift: PlantShiftType;
+          module_id: PlantModuleId;
+          operator_name: string | null;
+          rows: PlantHourlyRow[] | null;
+          updated_at: string | null;
+        }>
       )
-      .order('created_at', { ascending: false })
-      .limit(25);
+        .filter((s) => Array.isArray(s.rows) && s.rows.length > 0)
+        .map((s) => ({
+          id: s.id || `sheet-${s.operation_date}-${s.shift}-${s.module_id}`,
+          date: s.operation_date,
+          shift: s.shift,
+          moduleId: s.module_id || 'DMS-MOD-1',
+          operatorName: s.operator_name || operatorLabel,
+          updatedAt: s.updated_at || new Date().toISOString(),
+          rows: s.rows ?? buildDefaultHourlyRows(s.shift),
+        }));
+
+      if (persistedSheets.length > 0) {
+        const persistedKeys = new Set(
+          persistedSheets.map((s) => `${s.date}:${s.shift}:${s.moduleId}`)
+        );
+        initialSheets = [
+          ...persistedSheets,
+          ...initialSheets.filter((s) => !persistedKeys.has(`${s.date}:${s.shift}:${s.moduleId}`)),
+        ];
+      }
+    }
 
     if (dbDelays && dbDelays.length > 0) {
       const mappedDelays: PlantDelayEntry[] = (

@@ -38,7 +38,7 @@ export interface MusterSummary {
 export async function getMusterRollCall(deptId: string): Promise<MusterSummary> {
   const { supabase } = await assertAccessControlRole();
 
-  const [personnelRes, visitorsRes, logsRes] = await Promise.all([
+  const [personnelRes, visitorsRes, logsRes, musterEventsRes] = await Promise.all([
     supabase
       .from('personnel')
       .select(
@@ -58,7 +58,62 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       .eq('department_id', deptId)
       .order('scanned_at', { ascending: false })
       .limit(50),
+    (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (cols: string) => {
+            order: (
+              c: string,
+              opts: { ascending: boolean }
+            ) => {
+              limit: (n: number) => Promise<{
+                data: Array<{
+                  personnel_id: string | null;
+                  badge_code: string | null;
+                  muster_point: string | null;
+                  status: string;
+                  recorded_at: string | null;
+                }> | null;
+              }>;
+            };
+          };
+        };
+      }
+    )
+      .from('muster_events')
+      .select('personnel_id, badge_code, muster_point, status, recorded_at')
+      .order('recorded_at', { ascending: false })
+      .limit(100)
+      .catch(() => ({ data: null })),
   ]);
+
+  const persistedMusterMap = new Map<
+    string,
+    { status: MusterPersonnelRecord['status']; station: string | null; checkedOffAt: string | null }
+  >();
+  for (const ev of musterEventsRes.data ?? []) {
+    const key = ev.personnel_id || ev.badge_code;
+    if (!key || persistedMusterMap.has(key)) continue;
+    const mappedStatus: MusterPersonnelRecord['status'] =
+      ev.status === 'missing'
+        ? 'unaccounted'
+        : ev.status === 'medical'
+          ? 'hospitalized'
+          : ev.status === 'evacuated'
+            ? 'evacuated'
+            : 'accounted';
+    persistedMusterMap.set(key, {
+      status: mappedStatus,
+      station: mappedStatus === 'unaccounted' ? null : (ev.muster_point ?? null),
+      checkedOffAt: ev.recorded_at
+        ? new Date(ev.recorded_at).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : null,
+    });
+  }
 
   const now = new Date();
   const records: MusterPersonnelRecord[] = [];
@@ -97,10 +152,10 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     const isInductionValid = p.induction_expiry ? new Date(p.induction_expiry) > now : true;
     const isMedicalValid = p.medical_expiry ? new Date(p.medical_expiry) > now : true;
 
-    // Simulate initial safe baseline accounting for standard dashboard
-    const isAccounted = index % 4 !== 0;
+    const persisted = persistedMusterMap.get(p.id) ?? persistedMusterMap.get(p.emp_code);
+    const isAccounted = persisted ? persisted.status === 'accounted' : index % 4 !== 0;
     const targetSt = stations[index % stations.length] ?? stations[0]!;
-    const assignedStation = isAccounted ? targetSt.name : null;
+    const assignedStation = persisted ? persisted.station : isAccounted ? targetSt.name : null;
     if (isAccounted && assignedStation) {
       targetSt.count += 1;
     }
@@ -122,15 +177,17 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       lastSeenTime: '12m ago',
       lastSeenGate:
         recentLogs[index % (recentLogs.length || 1)]?.gate_location ?? 'Pit Alpha Turnstiles',
-      status: isAccounted ? 'accounted' : 'unaccounted',
+      status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
       station: assignedStation,
-      checkedOffAt: isAccounted
-        ? new Date().toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : null,
+      checkedOffAt: persisted
+        ? persisted.checkedOffAt
+        : isAccounted
+          ? new Date().toLocaleTimeString('en-US', {
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : null,
       inductionValid: isInductionValid,
       medicalValid: isMedicalValid,
     });

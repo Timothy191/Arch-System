@@ -13,10 +13,12 @@ export async function getDepartmentContext(params: { department: string }): Prom
   const dept = DEPARTMENTS.find((d) => d.name === params.department);
   if (!dept) notFound();
 
-  const deptId = await getDeptId(params.department);
+  const [deptId, supabase] = await Promise.all([
+    getDeptId(params.department),
+    createServerSupabaseClient(),
+  ]);
   if (!deptId) notFound();
 
-  const supabase = await createServerSupabaseClient();
   const today = getOperationalToday();
 
   return {
