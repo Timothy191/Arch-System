@@ -439,27 +439,46 @@ export function buildShiftAndMachineReports(params: {
 
     for (const d of op.delay_entries || []) {
       if (d.deleted_at) continue;
-      const mins = Math.round(Number(d.duration_hours || 0) * 60);
+      const effectiveHours =
+        d.is_manual_override && d.manual_duration_hours != null
+          ? Number(d.manual_duration_hours)
+          : Number(d.duration_hours || 0);
+      const mins = Math.round(effectiveHours * 60);
       if (mins <= 0) continue;
       const catObj = Array.isArray(d.delay_category) ? d.delay_category[0] : d.delay_category;
-      const catName = (catObj?.name || '').toLowerCase();
+      const catName = (catObj?.name || '').trim().toLowerCase();
       const desc = (d.description || '').toLowerCase();
       if (
         catName.includes('weather') ||
         catName.includes('natural') ||
-        /weather|rain|storm|lightning|fog|wind|natural|mud|flood/.test(desc)
+        (!catName && /weather|rain|storm|lightning|fog|wind|natural|mud|flood/.test(desc))
       ) {
         naturalDelayMinutes += mins;
       } else if (
         catName.includes('engineering') ||
         catName.includes('breakdown') ||
         catName.includes('equipment') ||
-        /breakdown|mech|maint|repair|elec|hydraulic|engine|tire|tyre/.test(desc)
+        catName.includes('maintenance') ||
+        catName.includes('tyre') ||
+        catName.includes('tram') ||
+        catName.includes('greas') ||
+        (!catName && /breakdown|mech|maint|repair|elec|hydraulic|engine|tire|tyre/.test(desc))
       ) {
         engineeringDelayMinutes += mins;
       } else if (
+        catName.includes('blasting') ||
+        catName.includes('lunch') ||
+        catName.includes('safety talk') ||
+        catName.includes('refuel') ||
+        catName.includes('no operator') ||
+        catName.includes('operator unavailable') ||
+        catName.includes('standby')
+      ) {
+        productionDelayMinutes += mins;
+      } else if (
+        catName === 'other' ||
+        catName === 'other production delay' ||
         catName.includes('external') ||
-        catName.includes('safety') ||
         catName.includes('non site') ||
         catName.includes('non-site') ||
         /external|eskom|power|community|roadblock|off-site|offsite|non-site/.test(desc)

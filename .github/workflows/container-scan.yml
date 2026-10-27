@@ -1,0 +1,26 @@
+name: Container Scan & SBOM
+on:
+  workflow_run:
+    workflows: ['Docker Build & Push']
+    types: [completed]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/plantcor/arch-system-portal:${{ github.sha }}
+          format: sarif
+          output: trivy.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/plantcor/arch-system-portal:${{ github.sha }}
+          format: spdx-json
+          output-file: sbom.spdx.json

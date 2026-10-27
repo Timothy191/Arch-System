@@ -8,6 +8,8 @@ import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import {
+  computeMachineOverviewMetrics,
+  MAX_SHIFT_HOURS,
   OVERVIEW_DELAY_COLUMNS,
   type OverviewDelayHours,
   validateOverviewRowDelaysAndComment,
@@ -149,6 +151,41 @@ export async function saveMachineOverviewRow(payload: unknown) {
     });
   }
 
+  const rawWorkedHours = Number((row.stopSmr - row.startSmr).toFixed(2));
+  const metrics = computeMachineOverviewMetrics(
+    row.startSmr,
+    row.stopSmr,
+    row.delays as OverviewDelayHours,
+    MAX_SHIFT_HOURS
+  );
+
+  if (rawWorkedHours > MAX_SHIFT_HOURS + 0.001) {
+    throw new ValidationError(
+      `Total SMR worked (${rawWorkedHours.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours per shift`,
+      {
+        context: {
+          machineId: row.machineId,
+          workedHours: rawWorkedHours,
+          maxShiftHours: MAX_SHIFT_HOURS,
+        },
+      }
+    );
+  }
+
+  if (rawWorkedHours + metrics.totalDelayHours > MAX_SHIFT_HOURS + 0.01) {
+    throw new ValidationError(
+      `Combined SMR worked (${rawWorkedHours.toFixed(1)}h) and delays (${metrics.totalDelayHours.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours per shift`,
+      {
+        context: {
+          machineId: row.machineId,
+          workedHours: rawWorkedHours,
+          totalDelayHours: metrics.totalDelayHours,
+          maxShiftHours: MAX_SHIFT_HOURS,
+        },
+      }
+    );
+  }
+
   const commentCheck = validateOverviewRowDelaysAndComment(
     row.delays as OverviewDelayHours,
     row.comment
@@ -252,7 +289,12 @@ export async function saveMachineOverviewRow(payload: unknown) {
       .upsert(
         missingCols.map((c, i) => ({
           name: c.categoryName,
-          color: c.isDowntime ? '#ef4444' : '#0ea5e9',
+          color:
+            c.delayGroup === 'engineering'
+              ? '#e11d48'
+              : c.delayGroup === 'nonProduction'
+                ? '#f59e0b'
+                : '#0ea5e9',
           icon: 'Clock',
           sort_order: 30 + i,
           description: c.label,

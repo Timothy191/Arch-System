@@ -82,8 +82,10 @@ const serverEnvShape = {
     .transform((v) => v === 'true'),
   ALLOWED_ORIGINS: z.string().optional(),
 
-  // ── Inngest / Background jobs ──────────────────────────────────────
+  // ── Inngest / Background jobs / Scheduled Cron & Hardware Scanners ──
   INNGEST_EVENT_KEY: z.string().optional(),
+  CRON_SECRET: z.string().min(16).optional(),
+  SCANNER_API_KEY: z.string().min(16).optional(),
 
   // ── Novu (notifications) ───────────────────────────────────────────
   NOVU_API_KEY: z.string().optional(),
@@ -189,6 +191,8 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       DISABLE_CORS: process.env.DISABLE_CORS,
       ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
       INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+      CRON_SECRET: process.env.CRON_SECRET,
+      SCANNER_API_KEY: process.env.SCANNER_API_KEY,
       NOVU_API_KEY: process.env.NOVU_API_KEY,
       OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
       OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
@@ -240,6 +244,8 @@ function parseEnv(): EnvVars {
     DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT,
     RATE_LIMIT_IP_WHITELIST: process.env.RATE_LIMIT_IP_WHITELIST,
     INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
+    SCANNER_API_KEY: process.env.SCANNER_API_KEY,
     NOVU_API_KEY: process.env.NOVU_API_KEY,
     OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,

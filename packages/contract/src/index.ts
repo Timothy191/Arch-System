@@ -146,7 +146,11 @@ export {
   offlineMutationHlcSchema,
   offlineSmrMutationSchema,
 } from './schemas/offline-mutations.schema';
-export { scannerBadgeSchema } from './schemas/scanner.schema';
+export {
+  scannerBadgeSchema,
+  scannerBatchPayloadSchema,
+  scannerPayloadSchema,
+} from './schemas/scanner.schema';
 export {
   lockAndSignShiftSchema,
   machinePerformanceSchema,
@@ -277,7 +281,11 @@ export type {
   MultiSiteShiftReport,
   TruckTally,
 } from './types/multi-site-production.types';
-export type { ScannerBadgeInput } from './types/scanner.types';
+export type {
+  ScannerBadgeInput,
+  ScannerBatchPayloadInput,
+  ScannerPayloadInput,
+} from './types/scanner.types';
 export type {
   LockAndSignShiftInput,
   MachinePerformance,

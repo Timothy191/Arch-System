@@ -1,4 +1,9 @@
-import { scannerBadgeSchema } from '@repo/contract/schemas/scanner.schema';
+import { timingSafeEqual } from 'node:crypto';
+import {
+  type ScannerBadgeInput,
+  type ScannerPayloadInput,
+  scannerPayloadSchema,
+} from '@repo/contract';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -7,137 +12,61 @@ import { applyCors } from '@/lib/api/cors';
 import { validateBody } from '@/lib/api/response';
 import { logError } from '@/lib/errors/error-logger';
 
-/**
- * @swagger
- * /api/c66:
- *   post:
- *     summary: Badge scanner validation endpoint
- *     description: Validates badge QR codes from C66 hardware scanners. Checks badge status, personnel/visitor authorization, and logs access events. Requires scanner API token authentication.
- *     tags:
- *       - Access Control
- *     security:
- *       - bearerAuth: []
- *     headers:
- *       - name: x-scanner-token
- *         required: true
- *         description: Scanner API token for authentication
- *         schema:
- *           type: string
- *       - name: x-scanner-source
- *         required: true
- *         description: Scanner source identifier
- *         schema:
- *           type: string
- *           enum: [C66-HARDWARE, C66-SCANNER, GATE-TERMINAL]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - code
- *             properties:
- *               code:
- *                 type: string
- *                 description: Badge QR code
- *               barcode:
- *                 type: string
- *                 description: Barcode data (alternative to code)
- *               barcodeData:
- *                 type: string
- *                 description: Barcode data field (alternative to code)
- *               data:
- *                 type: string
- *                 description: Raw data field (alternative to code)
- *               qr_code:
- *                 type: string
- *                 description: QR code field (alternative to code)
- *     responses:
- *       200:
- *         description: Badge validation result
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 name:
- *                   type: string
- *                   description: Personnel or visitor name
- *                 message:
- *                   type: string
- *                   description: Access result message
- *       400:
- *         description: Bad request - empty code payload
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *       401:
- *         description: Unauthorized - invalid scanner token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *       403:
- *         description: Forbidden - unauthorized scanner source or revoked badge
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *       404:
- *         description: Badge not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 name:
- *                   type: string
- *                   example: Unrecognized Badge
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- */
+const MAX_BODY_SIZE_BYTES = 65536;
+const DEFAULT_SCANNER_SOURCE = 'C66-SCANNER';
+const DEFAULT_DIRECTION = 'IN';
+const DEFAULT_ALCOHOL_STATUS = 'Approved';
+const REVALIDATE_TAG_NAME = 'access-control';
+const UNKNOWN_BADGE_NAME = 'Unrecognized Badge / RFID';
+const UNKNOWN_BADGE_DENIAL = 'DENIED - Unrecognized Badge / RFID';
 
-const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(',').map((s) =>
-  s.trim()
-) || ['C66-HARDWARE', 'C66-SCANNER', 'GATE-TERMINAL'];
+const STATUS_OK = 200;
+const STATUS_NO_CONTENT = 204;
+const STATUS_BAD_REQUEST = 400;
+const STATUS_UNAUTHORIZED = 401;
+const STATUS_FORBIDDEN = 403;
+const STATUS_NOT_FOUND = 404;
+const STATUS_INTERNAL_SERVER_ERROR = 500;
+
+const ALLOWED_SCANNER_SOURCES: readonly string[] = process.env.ALLOWED_SCANNER_SOURCES?.split(
+  ','
+).map((sourceIdentifier) => sourceIdentifier.trim()) ?? [
+  'C66-HARDWARE',
+  'C66-SCANNER',
+  'GATE-TERMINAL',
+];
+
+interface LogAccessOptions {
+  readonly badgeId: string | null;
+  readonly entityType: string;
+  readonly denialReason: string | null;
+  readonly gateLocation: string;
+  readonly isAccessGranted: boolean;
+  readonly departmentId?: string | null;
+  readonly direction?: string;
+  readonly deviceId?: string | null;
+  readonly operator?: string | null;
+  readonly alcoholTested?: string;
+  readonly scannedAt?: string | number | null;
+}
+
+interface ProcessScanOptions {
+  readonly scanRecord: ScannerBadgeInput;
+  readonly defaultSource: string;
+  readonly defaultDeviceId: string | null;
+}
+
+interface ScanProcessResult {
+  readonly isSuccess: boolean;
+  readonly httpStatus: number;
+  readonly entityName: string;
+  readonly entityType: string | null;
+  readonly message: string;
+  readonly errorMessage?: string;
+}
 
 export async function OPTIONS(request: Request) {
-  const response = new NextResponse(null, { status: 204 });
+  const response = new NextResponse(null, { status: STATUS_NO_CONTENT });
   return applyCors(request, response);
 }
 
@@ -148,265 +77,403 @@ export async function POST(request: Request) {
       const response = await handlePost(request);
       return applyCors(request, response);
     },
-    { maxSize: 65536 }
+    { maxSize: MAX_BODY_SIZE_BYTES }
   );
 }
 
-async function handlePost(request: Request) {
-  try {
-    const source = request.headers.get('x-scanner-source') || 'unknown';
-    const token = request.headers.get('x-scanner-token');
-    const expectedToken = process.env.SCANNER_API_KEY;
+function tokensMatchConstantTime(provided: string, expected: string): boolean {
+  const providedBuffer = Buffer.from(provided, 'utf8');
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  if (providedBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(providedBuffer, expectedBuffer);
+}
 
-    if (!expectedToken || token !== expectedToken) {
+async function handlePost(request: Request): Promise<NextResponse> {
+  try {
+    const rawSourceHeader = request.headers.get('x-scanner-source');
+    const sourceIdentifier = rawSourceHeader ? rawSourceHeader.trim() : DEFAULT_SCANNER_SOURCE;
+
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    const tokenHeader = request.headers.get('x-scanner-token')?.trim();
+    const receivedToken = tokenHeader || bearerToken || null;
+    const expectedToken = process.env.SCANNER_API_KEY?.trim();
+
+    if (
+      !expectedToken ||
+      !receivedToken ||
+      !tokensMatchConstantTime(receivedToken, expectedToken)
+    ) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized scanner token' },
-        { status: 401 }
+        { status: STATUS_UNAUTHORIZED }
       );
     }
 
-    if (!ALLOWED_SCANNER_SOURCES.includes(source)) {
+    if (!ALLOWED_SCANNER_SOURCES.includes(sourceIdentifier)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized scanner source' },
-        { status: 403 }
+        { status: STATUS_FORBIDDEN }
       );
+    }
+
+    const validationResult = await validateBody(request, scannerPayloadSchema);
+    if (validationResult instanceof NextResponse) {
+      return validationResult;
     }
 
     const supabase = createServiceRoleClient();
+    const payloadInput = validationResult.data as ScannerPayloadInput;
+    const defaultDeviceId = request.headers.get('x-device-id') || null;
 
-    const parsed = await validateBody(request, scannerBadgeSchema);
-    if (parsed instanceof NextResponse) return parsed;
+    const isBatchPayload =
+      Array.isArray(payloadInput) ||
+      (typeof payloadInput === 'object' && payloadInput !== null && 'scans' in payloadInput);
 
-    const code = (
-      parsed.data.code ||
-      parsed.data.barcode ||
-      parsed.data.barcodeData ||
-      parsed.data.data ||
-      parsed.data.qr_code ||
-      ''
-    ).trim();
-    if (!code) {
-      return NextResponse.json({ success: false, error: 'Empty code payload' }, { status: 400 });
-    }
+    const scanRecords: readonly ScannerBadgeInput[] = Array.isArray(payloadInput)
+      ? payloadInput
+      : typeof payloadInput === 'object' && payloadInput !== null && 'scans' in payloadInput
+        ? payloadInput.scans
+        : [payloadInput as ScannerBadgeInput];
 
-    const gateLocation = parsed.data.gate_location || (parsed.data as any).gate || source;
-    const direction = parsed.data.direction || 'IN';
-    const deviceId = parsed.data.device_id || request.headers.get('x-device-id') || null;
-    const operator = parsed.data.operator || null;
-    const alcoholTested = parsed.data.alcohol_tested || 'Approved';
+    if (!isBatchPayload) {
+      const singleScanRecord = scanRecords[0] ?? (payloadInput as ScannerBadgeInput);
+      const singleScanResult = await processSingleScan(supabase, {
+        scanRecord: singleScanRecord,
+        defaultSource: sourceIdentifier,
+        defaultDeviceId,
+      });
 
-    // 1. Find the Badge by QR Code or RFID Chip UID
-    const selectQuery = supabase
-      .from('badges')
-      .select(
-        'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id'
-      );
+      const responseBody: Record<string, unknown> = {
+        success: singleScanResult.isSuccess,
+        name: singleScanResult.entityName,
+        message: singleScanResult.message,
+      };
 
-    const badgeResult =
-      typeof (selectQuery as any).or === 'function'
-        ? await (selectQuery as any).or(`qr_code.eq.${code},rfid_code.eq.${code}`).maybeSingle()
-        : await (selectQuery as any).eq('qr_code', code).single();
-
-    const badge = badgeResult?.data;
-    const badgeError = badgeResult?.error;
-
-    if (badgeError || !badge) {
-      // Badge not found in database at all
-      await logAccess(
-        supabase,
-        null,
-        'UNKNOWN',
-        'DENIED - Unrecognized Badge / RFID',
-        gateLocation,
-        false,
-        null,
-        direction,
-        deviceId,
-        operator,
-        alcoholTested
-      );
-      return NextResponse.json(
-        { success: false, name: 'Unrecognized Badge / RFID' },
-        { status: 404 }
-      );
-    }
-
-    if (!badge.is_active) {
-      // Badge revoked
-      await logAccess(
-        supabase,
-        badge.id,
-        badge.entity_type,
-        'DENIED - Badge Revoked',
-        gateLocation,
-        false,
-        badge.department_id,
-        direction,
-        deviceId,
-        operator,
-        alcoholTested
-      );
-      return NextResponse.json({ success: false, name: 'Revoked Badge' }, { status: 403 });
-    }
-
-    if (badge.expires_at && new Date(badge.expires_at) < new Date()) {
-      // Credential expired
-      await logAccess(
-        supabase,
-        badge.id,
-        badge.entity_type,
-        'DENIED - Credential Expired',
-        gateLocation,
-        false,
-        badge.department_id,
-        direction,
-        deviceId,
-        operator,
-        alcoholTested
-      );
-      return NextResponse.json({ success: false, name: 'Expired Credential' }, { status: 403 });
-    }
-
-    // 2. Resolve the Identity across all entity types
-    let entityName = 'Unknown Entity';
-    let isAuthorized = true;
-    let denialReason: string | null = null;
-
-    if (badge.entity_type === 'personnel' && badge.personnel_id) {
-      const { data: person } = await supabase
-        .from('personnel')
-        .select('first_name, surname, emp_code, status, induction_expiry, medical_expiry')
-        .eq('id', badge.personnel_id)
-        .single();
-      if (person) {
-        entityName = person.emp_code
-          ? `${person.first_name} ${person.surname} (${person.emp_code})`
-          : `${person.first_name} ${person.surname}`;
-        if (person.status !== 'Active') {
-          isAuthorized = false;
-          denialReason = `DENIED - Personnel Status: ${person.status}`;
-        } else if (person.induction_expiry && new Date(person.induction_expiry) < new Date()) {
-          isAuthorized = false;
-          denialReason = 'DENIED - Induction Expired';
-        } else if (person.medical_expiry && new Date(person.medical_expiry) < new Date()) {
-          isAuthorized = false;
-          denialReason = 'DENIED - Medical Clearance Expired';
-        }
+      if (singleScanResult.entityType) {
+        responseBody.entity_type = singleScanResult.entityType;
       }
-    } else if (badge.entity_type === 'visitor' && badge.visitor_id) {
-      const { data: visitor } = await supabase
-        .from('visitors')
-        .select('first_name, surname, company, status')
-        .eq('id', badge.visitor_id)
-        .single();
-      if (visitor) {
-        entityName = `${visitor.first_name} ${visitor.surname} (${visitor.company || 'Visitor'})`;
-        if (visitor.status !== 'Checked In') {
-          isAuthorized = false;
-          denialReason = `DENIED - Visitor Status: ${visitor.status}`;
-        }
+      if (singleScanResult.errorMessage) {
+        responseBody.error = singleScanResult.errorMessage;
       }
-    } else if (
-      (badge.entity_type === 'vehicle' || badge.entity_type === 'fleet') &&
-      badge.fleet_id
-    ) {
-      const { data: fleetUnit } = await supabase
-        .from('fleet')
-        .select('fleet_code, vehicle_type, registration_number, make, model, status')
-        .eq('id', badge.fleet_id)
-        .single();
-      if (fleetUnit) {
-        const isCoalTruck = fleetUnit.vehicle_type?.toLowerCase().includes('coal');
-        const prefix = isCoalTruck ? 'Coal Truck' : fleetUnit.vehicle_type || 'Vehicle';
-        entityName =
-          `${prefix}: ${fleetUnit.fleet_code} [${fleetUnit.registration_number || 'No Plate'}] (${fleetUnit.make || ''} ${fleetUnit.model || ''})`.trim();
-        if (fleetUnit.status !== 'Active') {
-          isAuthorized = false;
-          denialReason = `DENIED - Vehicle Status: ${fleetUnit.status}`;
-        }
-      }
-    } else if (badge.entity_type === 'equipment' && badge.equipment_id) {
-      const { data: equip } = await supabase
-        .from('equipment')
-        .select('equip_code, equipment_type, status, calibration_expiry')
-        .eq('id', badge.equipment_id)
-        .single();
-      if (equip) {
-        entityName = `Equipment: ${equip.equip_code} (${equip.equipment_type})`;
-        if (equip.status !== 'Active') {
-          isAuthorized = false;
-          denialReason = `DENIED - Equipment Status: ${equip.status}`;
-        } else if (equip.calibration_expiry && new Date(equip.calibration_expiry) < new Date()) {
-          isAuthorized = false;
-          denialReason = 'DENIED - Calibration Expired';
-        }
-      }
+
+      return NextResponse.json(responseBody, { status: singleScanResult.httpStatus });
     }
 
-    // 3. Log the Access Event in attendance / gate register
-    await logAccess(
-      supabase,
-      badge.id,
-      badge.entity_type,
-      isAuthorized ? null : denialReason,
-      gateLocation,
-      isAuthorized,
-      badge.department_id,
-      direction,
-      deviceId,
-      operator,
-      alcoholTested
+    const scanResults: ScanProcessResult[] = [];
+    for (const currentRecord of scanRecords) {
+      const currentResult = await processSingleScan(supabase, {
+        scanRecord: currentRecord,
+        defaultSource: sourceIdentifier,
+        defaultDeviceId,
+      });
+      scanResults.push(currentResult);
+    }
+
+    const allSuccessful = scanResults.every((res) => res.isSuccess);
+    return NextResponse.json(
+      {
+        success: allSuccessful,
+        processed: scanResults.length,
+        results: scanResults.map((res) => ({
+          success: res.isSuccess,
+          name: res.entityName,
+          entity_type: res.entityType,
+          message: res.message,
+          status: res.httpStatus,
+          ...(res.errorMessage ? { error: res.errorMessage } : {}),
+        })),
+      },
+      { status: STATUS_OK }
     );
-
-    return NextResponse.json({
-      success: isAuthorized,
-      name: entityName,
-      entity_type: badge.entity_type,
-      message: isAuthorized ? `Access Granted - ${gateLocation}` : denialReason,
-    });
   } catch (error) {
     logError(error, {
       url: '/api/c66',
       method: 'POST',
     });
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Internal Server Error' },
+      { status: STATUS_INTERNAL_SERVER_ERROR }
+    );
   }
+}
+
+async function processSingleScan(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  options: ProcessScanOptions
+): Promise<ScanProcessResult> {
+  const { scanRecord, defaultSource, defaultDeviceId } = options;
+
+  const rawCode = (
+    scanRecord.code ||
+    scanRecord.qr_code ||
+    scanRecord.rfid_code ||
+    scanRecord.barcode ||
+    scanRecord.barcodeData ||
+    scanRecord.data ||
+    scanRecord.tag ||
+    scanRecord.epc ||
+    scanRecord.uid ||
+    ''
+  ).trim();
+
+  if (!rawCode) {
+    return {
+      isSuccess: false,
+      httpStatus: STATUS_BAD_REQUEST,
+      entityName: UNKNOWN_BADGE_NAME,
+      entityType: null,
+      message: 'Empty code payload',
+      errorMessage: 'Empty code payload',
+    };
+  }
+
+  const gateLocation =
+    scanRecord.gate_location || (scanRecord as Record<string, any>).gate || defaultSource;
+  const scanDirection = scanRecord.direction || DEFAULT_DIRECTION;
+  const deviceIdentifier = scanRecord.device_id || scanRecord.scanner_id || defaultDeviceId;
+  const operatorIdentifier = scanRecord.operator || null;
+  const alcoholTestedResult = scanRecord.alcohol_tested || DEFAULT_ALCOHOL_STATUS;
+  const recordTimestamp = scanRecord.scanned_at || null;
+
+  const badgeQuery = supabase
+    .from('badges')
+    .select(
+      'id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id'
+    );
+
+  const badgeLookupResponse =
+    typeof (badgeQuery as any).or === 'function'
+      ? await (badgeQuery as any).or(`qr_code.eq.${rawCode},rfid_code.eq.${rawCode}`).maybeSingle()
+      : await (badgeQuery as any).eq('qr_code', rawCode).single();
+
+  const matchedBadge = badgeLookupResponse?.data;
+  const badgeLookupError = badgeLookupResponse?.error;
+
+  if (badgeLookupError || !matchedBadge) {
+    await logAccess(supabase, {
+      badgeId: null,
+      entityType: 'UNKNOWN',
+      denialReason: UNKNOWN_BADGE_DENIAL,
+      gateLocation,
+      isAccessGranted: false,
+      departmentId: null,
+      direction: scanDirection,
+      deviceId: deviceIdentifier,
+      operator: operatorIdentifier,
+      alcoholTested: alcoholTestedResult,
+      scannedAt: recordTimestamp,
+    });
+
+    return {
+      isSuccess: false,
+      httpStatus: STATUS_NOT_FOUND,
+      entityName: UNKNOWN_BADGE_NAME,
+      entityType: null,
+      message: UNKNOWN_BADGE_DENIAL,
+    };
+  }
+
+  if (!matchedBadge.is_active) {
+    await logAccess(supabase, {
+      badgeId: matchedBadge.id,
+      entityType: matchedBadge.entity_type,
+      denialReason: 'DENIED - Badge Revoked',
+      gateLocation,
+      isAccessGranted: false,
+      departmentId: matchedBadge.department_id,
+      direction: scanDirection,
+      deviceId: deviceIdentifier,
+      operator: operatorIdentifier,
+      alcoholTested: alcoholTestedResult,
+      scannedAt: recordTimestamp,
+    });
+
+    return {
+      isSuccess: false,
+      httpStatus: STATUS_FORBIDDEN,
+      entityName: 'Revoked Badge',
+      entityType: matchedBadge.entity_type,
+      message: 'DENIED - Badge Revoked',
+    };
+  }
+
+  if (matchedBadge.expires_at && new Date(matchedBadge.expires_at) < new Date()) {
+    await logAccess(supabase, {
+      badgeId: matchedBadge.id,
+      entityType: matchedBadge.entity_type,
+      denialReason: 'DENIED - Credential Expired',
+      gateLocation,
+      isAccessGranted: false,
+      departmentId: matchedBadge.department_id,
+      direction: scanDirection,
+      deviceId: deviceIdentifier,
+      operator: operatorIdentifier,
+      alcoholTested: alcoholTestedResult,
+      scannedAt: recordTimestamp,
+    });
+
+    return {
+      isSuccess: false,
+      httpStatus: STATUS_FORBIDDEN,
+      entityName: 'Expired Credential',
+      entityType: matchedBadge.entity_type,
+      message: 'DENIED - Credential Expired',
+    };
+  }
+
+  let resolvedEntityName = 'Unknown Entity';
+  let isAccessGranted = true;
+  let accessDenialReason: string | null = null;
+
+  if (matchedBadge.entity_type === 'personnel' && matchedBadge.personnel_id) {
+    const { data: personnelRecord } = await supabase
+      .from('personnel')
+      .select('first_name, surname, emp_code, status, induction_expiry, medical_expiry')
+      .eq('id', matchedBadge.personnel_id)
+      .single();
+
+    if (personnelRecord) {
+      resolvedEntityName = personnelRecord.emp_code
+        ? `${personnelRecord.first_name} ${personnelRecord.surname} (${personnelRecord.emp_code})`
+        : `${personnelRecord.first_name} ${personnelRecord.surname}`;
+
+      if (personnelRecord.status !== 'Active') {
+        isAccessGranted = false;
+        accessDenialReason = `DENIED - Personnel Status: ${personnelRecord.status}`;
+      } else if (
+        personnelRecord.induction_expiry &&
+        new Date(personnelRecord.induction_expiry) < new Date()
+      ) {
+        isAccessGranted = false;
+        accessDenialReason = 'DENIED - Induction Expired';
+      } else if (
+        personnelRecord.medical_expiry &&
+        new Date(personnelRecord.medical_expiry) < new Date()
+      ) {
+        isAccessGranted = false;
+        accessDenialReason = 'DENIED - Medical Clearance Expired';
+      }
+    }
+  } else if (matchedBadge.entity_type === 'visitor' && matchedBadge.visitor_id) {
+    const { data: visitorRecord } = await supabase
+      .from('visitors')
+      .select('first_name, surname, company, status')
+      .eq('id', matchedBadge.visitor_id)
+      .single();
+
+    if (visitorRecord) {
+      resolvedEntityName = `${visitorRecord.first_name} ${visitorRecord.surname} (${visitorRecord.company || 'Visitor'})`;
+      if (visitorRecord.status !== 'Checked In') {
+        isAccessGranted = false;
+        accessDenialReason = `DENIED - Visitor Status: ${visitorRecord.status}`;
+      }
+    }
+  } else if (
+    (matchedBadge.entity_type === 'vehicle' || matchedBadge.entity_type === 'fleet') &&
+    matchedBadge.fleet_id
+  ) {
+    const { data: fleetRecord } = await supabase
+      .from('fleet')
+      .select('fleet_code, vehicle_type, registration_number, make, model, status')
+      .eq('id', matchedBadge.fleet_id)
+      .single();
+
+    if (fleetRecord) {
+      const isCoalTruck = fleetRecord.vehicle_type?.toLowerCase().includes('coal');
+      const vehicleCategory = isCoalTruck ? 'Coal Truck' : fleetRecord.vehicle_type || 'Vehicle';
+      resolvedEntityName =
+        `${vehicleCategory}: ${fleetRecord.fleet_code} [${fleetRecord.registration_number || 'No Plate'}] (${fleetRecord.make || ''} ${fleetRecord.model || ''})`.trim();
+      if (fleetRecord.status !== 'Active') {
+        isAccessGranted = false;
+        accessDenialReason = `DENIED - Vehicle Status: ${fleetRecord.status}`;
+      }
+    }
+  } else if (matchedBadge.entity_type === 'equipment' && matchedBadge.equipment_id) {
+    const { data: equipmentRecord } = await supabase
+      .from('equipment')
+      .select('equip_code, equipment_type, status, calibration_expiry')
+      .eq('id', matchedBadge.equipment_id)
+      .single();
+
+    if (equipmentRecord) {
+      resolvedEntityName = `Equipment: ${equipmentRecord.equip_code} (${equipmentRecord.equipment_type})`;
+      if (equipmentRecord.status !== 'Active') {
+        isAccessGranted = false;
+        accessDenialReason = `DENIED - Equipment Status: ${equipmentRecord.status}`;
+      } else if (
+        equipmentRecord.calibration_expiry &&
+        new Date(equipmentRecord.calibration_expiry) < new Date()
+      ) {
+        isAccessGranted = false;
+        accessDenialReason = 'DENIED - Calibration Expired';
+      }
+    }
+  }
+
+  await logAccess(supabase, {
+    badgeId: matchedBadge.id,
+    entityType: matchedBadge.entity_type,
+    denialReason: isAccessGranted ? null : accessDenialReason,
+    gateLocation,
+    isAccessGranted,
+    departmentId: matchedBadge.department_id,
+    direction: scanDirection,
+    deviceId: deviceIdentifier,
+    operator: operatorIdentifier,
+    alcoholTested: alcoholTestedResult,
+    scannedAt: recordTimestamp,
+  });
+
+  return {
+    isSuccess: isAccessGranted,
+    httpStatus: STATUS_OK,
+    entityName: resolvedEntityName,
+    entityType: matchedBadge.entity_type,
+    message: isAccessGranted ? `Access Granted - ${gateLocation}` : (accessDenialReason ?? ''),
+  };
+}
+
+function resolveScannedAt(deviceScannedAt?: string | number | null): string {
+  if (!deviceScannedAt) {
+    return new Date().toISOString();
+  }
+  const parsedDate = new Date(deviceScannedAt);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return new Date().toISOString();
+  }
+  return parsedDate.toISOString();
 }
 
 async function logAccess(
   supabase: ReturnType<typeof createServiceRoleClient>,
-  badgeId: string | null,
-  entityType: string,
-  denialReason: string | null,
-  gateLocation: string,
-  accessGranted: boolean = false,
-  departmentId: string | null = null,
-  direction: string = 'IN',
-  deviceId: string | null = null,
-  operator: string | null = null,
-  alcoholTested: string = 'Approved'
-) {
-  const { error } = await supabase.from('access_logs').insert([
-    {
-      badge_id: badgeId,
-      access_type: entityType,
-      direction: direction,
-      gate_location: gateLocation,
-      access_granted: accessGranted,
-      denial_reason: denialReason,
-      department_id: departmentId,
-      alcohol_tested: alcoholTested,
-      operator: operator,
-      device_id: deviceId,
-    },
-  ]);
+  options: LogAccessOptions
+): Promise<void> {
+  const insertPayload = {
+    badge_id: options.badgeId,
+    access_type: options.entityType,
+    direction: options.direction ?? DEFAULT_DIRECTION,
+    gate_location: options.gateLocation,
+    access_granted: options.isAccessGranted,
+    denial_reason: options.denialReason,
+    department_id: options.departmentId ?? null,
+    alcohol_tested: options.alcoholTested ?? DEFAULT_ALCOHOL_STATUS,
+    operator: options.operator ?? null,
+    device_id: options.deviceId ?? null,
+    scanned_at: resolveScannedAt(options.scannedAt),
+  };
+
+  const { error } = await supabase.from('access_logs').insert([insertPayload]);
 
   if (error) {
     logError(new Error(error.message), {
       url: '/api/c66',
       context: 'access_log_write_failed',
     });
-  } else {
-    revalidateTag('access-control', 'max');
+    return;
   }
+
+  revalidateTag(REVALIDATE_TAG_NAME, 'max');
 }

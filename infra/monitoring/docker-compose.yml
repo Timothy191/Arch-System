@@ -61,6 +61,35 @@ services:
     networks:
       - plantcor-monitoring
 
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: plantcor-alertmanager
+    restart: unless-stopped
+    ports:
+      - '9094:9093'
+    volumes:
+      - ../../infra/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - plantcor-monitoring
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: plantcor-loki
+    restart: unless-stopped
+    ports:
+      - '3100:3100'
+    networks:
+      - plantcor-monitoring
+
+  tempo:
+    image: grafana/tempo:2.4.0
+    container_name: plantcor-tempo
+    restart: unless-stopped
+    ports:
+      - '3200:3200'
+    networks:
+      - plantcor-monitoring
+
 volumes:
   prometheus_data:
   grafana_data:

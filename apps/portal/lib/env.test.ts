@@ -41,6 +41,8 @@ describe('env validation', () => {
     'DISABLE_RATE_LIMIT',
     'CI',
     'INNGEST_EVENT_KEY',
+    'CRON_SECRET',
+    'SCANNER_API_KEY',
     'OTEL_SERVICE_NAME',
     'PORTAL_VERSION',
     'SENTRY_ORG',
@@ -164,5 +166,20 @@ describe('env validation', () => {
 
     expect(env.REDIS_URL).toBeUndefined();
     expect(env.OPENAI_API_KEY).toBeUndefined();
+  });
+
+  it('validates CRON_SECRET and SCANNER_API_KEY as server-only secrets (>= 16 chars)', () => {
+    setEnvVar('CRON_SECRET', 'cron-secret-test-value-2026-secure');
+    setEnvVar('SCANNER_API_KEY', 'scanner-api-key-test-value-2026');
+    resetEnv();
+
+    expect(env.CRON_SECRET).toBe('cron-secret-test-value-2026-secure');
+    expect(env.SCANNER_API_KEY).toBe('scanner-api-key-test-value-2026');
+    expect(Object.keys(env).filter((k) => k.startsWith('NEXT_PUBLIC_'))).not.toContain(
+      'CRON_SECRET'
+    );
+    expect(Object.keys(env).filter((k) => k.startsWith('NEXT_PUBLIC_'))).not.toContain(
+      'SCANNER_API_KEY'
+    );
   });
 });

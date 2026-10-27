@@ -236,7 +236,7 @@ export async function getRecentAccessActivity(
       gate_location,
       access_granted,
       denial_reason,
-      badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(name))
+      badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
     `
     )
     .eq('department_id', deptId)

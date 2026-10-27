@@ -1,0 +1,6 @@
+[Unit]
+Description=Arch-System Health Check Timer
+[Timer]
+OnUnitActiveSec=5m
+[Install]
+WantedBy=timers.target

@@ -7,9 +7,13 @@ import { toast } from 'sonner';
 import {
   computeMachineOverviewMetrics,
   createStandardOverviewDelays,
+  MAX_SHIFT_HOURS,
   OVERVIEW_DELAY_COLUMNS,
+  type OverviewDelayGroup,
   type OverviewDelayHours,
   type OverviewDelayKey,
+  reconcileOverviewShiftHoursOnDelayChange,
+  reconcileOverviewShiftHoursOnSmrChange,
   STANDARD_OVERVIEW_DELAY_DEFAULTS,
   validateOverviewRowDelaysAndComment,
 } from '@/lib/shift-sheet-buckets';
@@ -65,8 +69,6 @@ const TH_BASE =
 const TH_NUM =
   'whitespace-nowrap px-2 py-2.5 text-right font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
 const TD_BASE = 'whitespace-nowrap px-2.5 py-2 align-top text-xs';
-const INPUT_NUM_CLASS =
-  'w-16 rounded-md border border-[var(--border-default)] bg-white px-1.5 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
 const INPUT_SMR_CLASS =
   'w-24 rounded-md border border-[var(--border-default)] bg-white px-2 py-1 text-right font-mono text-[var(--text-heading)] text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
 const SELECT_OP_CLASS =
@@ -77,6 +79,39 @@ const BTN_PRIMARY =
   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs transition-opacity hover:opacity-90 disabled:opacity-50';
 const BTN_SECONDARY =
   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs hover:bg-[var(--bg-secondary)]';
+
+const DELAY_GROUP_TH_CLASS: Record<OverviewDelayGroup, string> = {
+  production:
+    'whitespace-nowrap border-sky-500/20 border-x bg-sky-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-sky-900 uppercase tracking-wider',
+  nonProduction:
+    'whitespace-nowrap border-amber-500/20 border-x bg-amber-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-amber-900 uppercase tracking-wider',
+  engineering:
+    'whitespace-nowrap border-rose-500/20 border-x bg-rose-500/15 px-2 py-2.5 text-right font-bold text-[10px] text-rose-900 uppercase tracking-wider',
+};
+
+const DELAY_GROUP_STD_BADGE_CLASS: Record<OverviewDelayGroup, string> = {
+  production: 'font-mono font-semibold text-[9px] text-sky-700',
+  nonProduction: 'font-mono font-semibold text-[9px] text-amber-700',
+  engineering: 'font-mono font-semibold text-[9px] text-rose-700',
+};
+
+const DELAY_GROUP_TD_CLASS: Record<OverviewDelayGroup, string> = {
+  production:
+    'whitespace-nowrap border-sky-500/15 border-x bg-sky-500/5 px-2.5 py-2 text-right align-top text-xs',
+  nonProduction:
+    'whitespace-nowrap border-amber-500/15 border-x bg-amber-500/5 px-2.5 py-2 text-right align-top text-xs',
+  engineering:
+    'whitespace-nowrap border-rose-500/15 border-x bg-rose-500/5 px-2.5 py-2 text-right align-top text-xs',
+};
+
+const DELAY_GROUP_INPUT_CLASS: Record<OverviewDelayGroup, string> = {
+  production:
+    'w-16 rounded-md border border-sky-500/40 bg-sky-50/90 px-1.5 py-1 text-right font-mono text-sky-950 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500',
+  nonProduction:
+    'w-16 rounded-md border border-amber-500/40 bg-amber-50/90 px-1.5 py-1 text-right font-mono text-amber-950 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500',
+  engineering:
+    'w-16 rounded-md border border-rose-500/40 bg-rose-50/90 px-1.5 py-1 text-right font-mono text-rose-950 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500',
+};
 
 const DEFAULT_ALLOWANCE_COMMENT =
   'Standard shift allowances (Refueling 0.2h, Safety Talks 0.5h, Lunches 0.5h, GES/Maint 0.5h, Tyres/Trams 0.2h, Greasing/Startup 0.5h)';
@@ -111,40 +146,55 @@ export function EngineeringOverviewTable({
     const parsed = Number.parseFloat(rawValue);
     const val = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
     setRows((prev) =>
-      prev.map((r) =>
-        r.machineId === machineId
-          ? {
-              ...r,
-              [field]: val,
-              stopSmr: field === 'startSmr' && r.stopSmr < val ? val : r.stopSmr,
-              error: null,
-              saved: false,
-            }
-          : r
-      )
+      prev.map((r) => {
+        if (r.machineId !== machineId) return r;
+        const reconciled = reconcileOverviewShiftHoursOnSmrChange({
+          currentStartSmr: r.startSmr,
+          currentStopSmr: r.stopSmr,
+          changedField: field,
+          nextValue: val,
+          delays: r.delays,
+          maxShiftHours: MAX_SHIFT_HOURS,
+        });
+        return {
+          ...r,
+          startSmr: reconciled.startSmr,
+          stopSmr: reconciled.stopSmr,
+          delays: reconciled.delays,
+          error: null,
+          saved: false,
+        };
+      })
     );
   };
 
   const updateRowDelay = (machineId: string, key: OverviewDelayKey, rawValue: string) => {
     const parsed = Number.parseFloat(rawValue);
-    const val = Number.isNaN(parsed) ? 0 : Math.min(12, Math.max(0, parsed));
+    const val = Number.isNaN(parsed) ? 0 : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsed));
     setRows((prev) =>
       prev.map((r) => {
         if (r.machineId !== machineId) return r;
-        const updatedDelays: OverviewDelayHours = {
-          ...r.delays,
-          [key]: val,
-        };
+        const reconciled = reconcileOverviewShiftHoursOnDelayChange({
+          startSmr: r.startSmr,
+          stopSmr: r.stopSmr,
+          delays: r.delays,
+          changedKey: key,
+          nextDelayValue: val,
+          maxShiftHours: MAX_SHIFT_HOURS,
+        });
+        const appliedVal = reconciled.delays[key];
         const isAbnormalOrChanged =
           !STANDARD_OVERVIEW_DELAY_DEFAULTS[key] ||
-          Math.abs(val - STANDARD_OVERVIEW_DELAY_DEFAULTS[key]) > 0.001;
+          Math.abs(appliedVal - STANDARD_OVERVIEW_DELAY_DEFAULTS[key]) > 0.001;
         const nextComment =
           isAbnormalOrChanged && r.comment === DEFAULT_ALLOWANCE_COMMENT ? '' : r.comment;
 
         return {
           ...r,
-          delays: updatedDelays,
-          endsOnBreakdown: key === 'breakdown' && val > 0 ? true : r.endsOnBreakdown,
+          startSmr: reconciled.startSmr,
+          stopSmr: reconciled.stopSmr,
+          delays: reconciled.delays,
+          endsOnBreakdown: key === 'breakdown' && appliedVal > 0 ? true : r.endsOnBreakdown,
           comment: nextComment,
           error: null,
           saved: false,
@@ -226,6 +276,19 @@ export function EngineeringOverviewTable({
   const validateSingleRow = (row: EditableMachineRow): string | null => {
     if (row.stopSmr < row.startSmr) {
       return 'Stop SMR cannot be less than Start SMR.';
+    }
+    const rawWorked = Number((row.stopSmr - row.startSmr).toFixed(2));
+    if (rawWorked > MAX_SHIFT_HOURS + 0.001) {
+      return `Total SMR worked (${rawWorked.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours.`;
+    }
+    const metrics = computeMachineOverviewMetrics(
+      row.startSmr,
+      row.stopSmr,
+      row.delays,
+      MAX_SHIFT_HOURS
+    );
+    if (rawWorked + metrics.totalDelayHours > MAX_SHIFT_HOURS + 0.01) {
+      return `Combined SMR worked (${rawWorked.toFixed(1)}h) and delays (${metrics.totalDelayHours.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours.`;
     }
     const commentValidation = validateOverviewRowDelaysAndComment(row.delays, row.comment);
     if (!commentValidation.valid) {
@@ -432,7 +495,7 @@ export function EngineeringOverviewTable({
       {/* Controls & Standard Defaults Banner */}
       <GlassCard variant="spotlight" className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <h3 className="font-bold text-[var(--text-heading)] text-sm">
               Full Fleet Shift SMR, Delays, Availability &amp; Utilization Overview
             </h3>
@@ -443,6 +506,24 @@ export function EngineeringOverviewTable({
                 Greasing / Startups = 0.5h · Tyres / Trams = 0.2h
               </span>
             </p>
+            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[10px]">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/15 px-2 py-0.5 font-semibold text-sky-900">
+                <span className="h-2 w-2 rounded-full bg-sky-600" />
+                Production Delays (Blasting, Lunches, Safety Talks, Refueling, No Operator, Standby)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-semibold text-amber-900">
+                <span className="h-2 w-2 rounded-full bg-amber-600" />
+                Natural &amp; Other Delays (Natural Delays, Other)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-rose-500/30 bg-rose-500/15 px-2 py-0.5 font-semibold text-rose-900">
+                <span className="h-2 w-2 rounded-full bg-rose-600" />
+                Engineering Delays (GES / Maintenance, Tyres / Trams, Greasing / Startups,
+                Breakdown)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border-default)] bg-white px-2 py-0.5 font-mono font-semibold text-[var(--text-heading)]">
+                Max {MAX_SHIFT_HOURS}.0h / Shift Cap (SMR Worked + Delays &le; {MAX_SHIFT_HOURS}.0h)
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -485,10 +566,14 @@ export function EngineeringOverviewTable({
                 <th className={TH_NUM}>Stop SMR</th>
                 <th className={TH_NUM}>Total SMR Worked</th>
                 {OVERVIEW_DELAY_COLUMNS.map((col) => (
-                  <th key={col.key} className={TH_NUM}>
+                  <th
+                    key={col.key}
+                    data-delay-group={col.delayGroup}
+                    className={DELAY_GROUP_TH_CLASS[col.delayGroup]}
+                  >
                     <div>{col.label}</div>
                     {col.isStandardAllowance && (
-                      <div className="font-mono font-normal text-[9px] text-[var(--accent-blue)]">
+                      <div className={DELAY_GROUP_STD_BADGE_CLASS[col.delayGroup]}>
                         std {col.standardDefault.toFixed(1)}h
                       </div>
                     )}
@@ -529,6 +614,10 @@ export function EngineeringOverviewTable({
                         {row.serialNumber ? `${row.serialNumber} · ` : ''}
                         {row.machineType}
                       </div>
+                      <div className="mt-0.5 font-mono text-[10px] text-[var(--text-secondary)]">
+                        Max {MAX_SHIFT_HOURS}.0h · {metrics.maxProductionAllowedHours.toFixed(1)}h
+                        prod left · {metrics.maxDelaysAllowedHours.toFixed(1)}h max delays
+                      </div>
                       {row.carryOverBreakdown && (
                         <div className="mt-1 inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 font-semibold text-[10px] text-red-600">
                           <ShieldAlert className="h-3 w-3" />
@@ -557,7 +646,8 @@ export function EngineeringOverviewTable({
                       <input
                         type="number"
                         step="0.1"
-                        min="0"
+                        min={row.startSmr}
+                        max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(2))}
                         aria-label={`Stop SMR ${row.machineName}`}
                         value={row.stopSmr}
                         onChange={(e) => updateRowSmr(row.machineId, 'stopSmr', e.target.value)}
@@ -569,23 +659,30 @@ export function EngineeringOverviewTable({
                     <td
                       className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
                     >
-                      {metrics.totalSmrWorked.toFixed(1)}h
+                      <div>{metrics.totalSmrWorked.toFixed(1)}h</div>
+                      <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                        {metrics.maxDelaysAllowedHours.toFixed(1)}h delay cap
+                      </div>
                     </td>
 
                     {/* 5..16. All 12 Delay Columns */}
                     {OVERVIEW_DELAY_COLUMNS.map((col) => {
                       const val = row.delays[col.key] ?? 0;
                       return (
-                        <td key={col.key} className={`${TD_BASE} text-right`}>
+                        <td
+                          key={col.key}
+                          data-delay-group={col.delayGroup}
+                          className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
+                        >
                           <input
                             type="number"
                             step="0.1"
                             min="0"
-                            max="12"
+                            max={metrics.maxDelaysAllowedHours}
                             aria-label={`${col.label} ${row.machineName}`}
                             value={val}
                             onChange={(e) => updateRowDelay(row.machineId, col.key, e.target.value)}
-                            className={INPUT_NUM_CLASS}
+                            className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
                           />
                         </td>
                       );
@@ -694,6 +791,11 @@ export function EngineeringOverviewTable({
                       </span>
                       <div className="font-normal text-[10px] text-[var(--text-secondary)]">
                         {metrics.totalDelayHours.toFixed(1)}h delays
+                      </div>
+                      <div className="font-normal text-[9px] text-[var(--text-secondary)]">
+                        P:{metrics.productionDelayHours.toFixed(1)}h · N:
+                        {metrics.nonProductionDelayHours.toFixed(1)}h · E:
+                        {metrics.engineeringDelayHours.toFixed(1)}h
                       </div>
                     </td>
 

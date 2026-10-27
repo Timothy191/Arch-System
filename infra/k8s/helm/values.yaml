@@ -1,0 +1,12 @@
+replicaCount: 3
+image:
+  repository: ghcr.io/plantcor/arch-system-portal
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: true
+  host: portal.example.com
+  tlsSecretName: portal-tls

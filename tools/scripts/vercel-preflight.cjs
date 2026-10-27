@@ -274,20 +274,53 @@ if (dbUrl) {
 
 // Production-Specific Secrets
 if (targetEnv === 'production') {
-  const prodSecrets = ['SUPABASE_SERVICE_KEY', 'REDIS_URL', 'CRON_SECRET'];
+  const prodSecrets = ['SUPABASE_SERVICE_KEY', 'REDIS_URL', 'CRON_SECRET', 'SCANNER_API_KEY'];
   for (const secret of prodSecrets) {
     const val = process.env[secret];
     if (!val) {
       recordWarn(
         `Production secret ${secret} not detected in local shell (ensure set in Vercel Dashboard).`
       );
-    } else if (secret === 'CRON_SECRET' && val.length < 16) {
-      recordWarn('CRON_SECRET should be at least 16 characters for cryptographic safety.');
+    } else if ((secret === 'CRON_SECRET' || secret === 'SCANNER_API_KEY') && val.length < 16) {
+      recordWarn(`${secret} should be at least 16 characters for cryptographic safety.`);
     } else if (secret === 'REDIS_URL' && val.includes('localhost')) {
       recordError('Production REDIS_URL cannot point to localhost.');
     } else {
       recordPass(`Production secret ${secret} verified`);
     }
+  }
+}
+
+// Verify turbo.json does not leak secrets in globalEnv or globalPassThroughEnv
+const turboJsonPath = path.join(ROOT_DIR, 'turbo.json');
+if (fs.existsSync(turboJsonPath)) {
+  try {
+    const turboConfig = JSON.parse(fs.readFileSync(turboJsonPath, 'utf8'));
+    const globalList = [
+      ...(turboConfig.globalEnv || []),
+      ...(turboConfig.globalPassThroughEnv || []),
+    ];
+    const forbiddenGlobalSecrets = [
+      'CRON_SECRET',
+      'SCANNER_API_KEY',
+      'SUPABASE_SERVICE_KEY',
+      'SUPABASE_SECRET_KEY',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'METABASE_SECRET_KEY',
+      'UPSTASH_REDIS_REST_TOKEN',
+      'TELEMETRY_INGEST_SECRET',
+      'TELEMETRY_STREAM_SECRET',
+    ];
+    const leakedGlobals = forbiddenGlobalSecrets.filter((s) => globalList.includes(s));
+    if (leakedGlobals.length > 0) {
+      recordError(
+        `turbo.json exposes secret(s) in globalEnv/globalPassThroughEnv instead of task-scoped passThroughEnv: ${leakedGlobals.join(', ')}`
+      );
+    } else {
+      recordPass('turbo.json isolates server secrets to task-scoped passThroughEnv');
+    }
+  } catch (err) {
+    recordError(`Failed to parse turbo.json: ${err.message}`);
   }
 }
 

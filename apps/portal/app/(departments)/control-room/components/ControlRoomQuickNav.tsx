@@ -71,9 +71,9 @@ const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
   },
   {
     name: 'engineering-notes',
-    label: 'Eng Notes',
+    label: 'Operations',
     href: '/control-room/engineering-notes',
-    description: 'Breakdowns, inspections & maintenance notes',
+    description: 'Full-fleet shift SMR, delays, breakdowns & maintenance notes',
     icon: ClipboardList,
   },
   {

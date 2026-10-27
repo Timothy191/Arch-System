@@ -556,7 +556,7 @@ export default async function EngineeringNotesPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Engineering Notes" />
+      <PageHeader title="Operations" />
 
       <EngineeringNotesTabsClient
         initialTab={initialTab}

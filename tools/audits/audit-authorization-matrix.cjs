@@ -29,7 +29,6 @@ const warnings = [];
 const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
   'app/api/ai/metrics/route.ts',
   'app/api/auth/login/route.ts',
-  'app/api/c66/route.ts',
   'app/api/codebase-maps/route.ts',
   'app/api/control-room/scada-status/route.ts',
   'app/api/csp-violations/route.ts',
@@ -62,6 +61,8 @@ const AUTH_GUARD_PATTERNS = [
   /auth\.getClaims/,
   /authorizeIngest/,
   /authorizeTelemetryStream/,
+  /authorizeCronRequest/,
+  /SCANNER_API_KEY/,
   /verifyToken/,
   /isAuthorized/,
   /CRON_SECRET/,
@@ -121,6 +122,11 @@ for (const relRoute of apiRoutes) {
   if (/if\s*\(\s*!secret\s*\)\s*return\s+true/.test(content)) {
     violations.push(
       `apps/portal/${normalized}: Contains fail-open secret check 'if (!secret) return true'`
+    );
+  }
+  if (/`Bearer\s+\$\{process\.env\.CRON_SECRET\}`/.test(content)) {
+    violations.push(
+      `apps/portal/${normalized}: Uses raw 'Bearer \${process.env.CRON_SECRET}' interpolation (fails open to 'Bearer undefined' when unset); use authorizeCronRequest(req) instead.`
     );
   }
 

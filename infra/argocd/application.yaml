@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arch-system
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/plantcor/arch-system.git
+    targetRevision: HEAD
+    path: infra/k8s/kustomize/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arch-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,7 @@
+/opt/arch-system/scripts/backups/*.log {
+  weekly
+  rotate 8
+  compress
+  missingok
+  notifempty
+}

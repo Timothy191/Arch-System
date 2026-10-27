@@ -141,6 +141,8 @@ export interface RawMachineOperationRow {
   site?: { name: string } | { name: string }[] | null;
   delay_entries?: Array<{
     duration_hours: number | null;
+    manual_duration_hours?: number | null;
+    is_manual_override?: boolean | null;
     deleted_at: string | null;
     description?: string | null;
     delay_category?: { name: string } | { name: string }[] | null;
@@ -180,7 +182,7 @@ export async function fetchDepartmentReportsRawData(params: {
     supabase
       .from('machine_operations')
       .select(
-        'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, operator_name, machine:machines(name, machine_type, bin_factor, serial_number, sites(name)), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(duration_hours, deleted_at, description, delay_category:delay_categories(name))'
+        'id, machine_id, shift_date, shift_type, start_smu, end_smu, hours_worked, operator_name, machine:machines(name, machine_type, bin_factor, serial_number, sites(name)), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(duration_hours, manual_duration_hours, is_manual_override, deleted_at, description, delay_category:delay_categories(name))'
       )
       .gte('shift_date', fromDateStr)
       .lte('shift_date', toDateStr)

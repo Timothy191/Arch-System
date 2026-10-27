@@ -110,6 +110,28 @@ describe('EngineeringOverviewTable', () => {
     expect(headers[18]).toContain('Availability');
     expect(headers[19]).toContain('Utilization');
 
+    // Verify 3 distinct color groups on delay headers:
+    // Non-Production (Natural Delays, Other) -> amber
+    // Production (Blasting, Lunches, Safety Talks, Refueling, No Operator, Standby) -> sky (light blue)
+    // Engineering (GES / Maintenance, Tyres / Trams, Greasing / Startups, Breakdown) -> rose
+    const allTh = screen.getAllByRole('columnheader');
+    expect(allTh[4]).toHaveAttribute('data-delay-group', 'nonProduction');
+    expect(allTh[4]?.className).toContain('bg-amber-500/15');
+    expect(allTh[5]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[5]?.className).toContain('bg-sky-500/15');
+    expect(allTh[6]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[7]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[8]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[9]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[10]).toHaveAttribute('data-delay-group', 'production');
+    expect(allTh[11]).toHaveAttribute('data-delay-group', 'nonProduction');
+    expect(allTh[11]?.className).toContain('bg-amber-500/15');
+    expect(allTh[12]).toHaveAttribute('data-delay-group', 'engineering');
+    expect(allTh[12]?.className).toContain('bg-rose-500/15');
+    expect(allTh[13]).toHaveAttribute('data-delay-group', 'engineering');
+    expect(allTh[14]).toHaveAttribute('data-delay-group', 'engineering');
+    expect(allTh[15]).toHaveAttribute('data-delay-group', 'engineering');
+
     // Standard defaults: Refueling = 0.2, Safety Talks = 0.5, Lunches = 0.5, GES/Maint = 0.5, Tyres/Trams = 0.2, Greasing/Startups = 0.5
     expect(screen.getByLabelText('Refueling ADT-101 · Bell B45E')).toHaveValue(0.2);
     expect(screen.getByLabelText('Safety Talks ADT-101 · Bell B45E')).toHaveValue(0.5);
@@ -137,9 +159,9 @@ describe('EngineeringOverviewTable', () => {
       />
     );
 
-    // Record a Natural Delay of 1.5h (which clears the auto-filled standard allowance note)
+    // Record a Natural Delay of 1.2h (8.4h worked + 2.4h std + 1.2h natural = 12.0h max shift cap)
     const naturalInput = screen.getByLabelText('Natural Delays ADT-101 · Bell B45E');
-    fireEvent.change(naturalInput, { target: { value: '1.5' } });
+    fireEvent.change(naturalInput, { target: { value: '1.2' } });
 
     const saveBtn = screen.getByRole('button', { name: /^Save$/i });
     fireEvent.click(saveBtn);
@@ -152,7 +174,7 @@ describe('EngineeringOverviewTable', () => {
     // Provide matching comment and save
     const commentInput = screen.getByLabelText('Comments ADT-101 · Bell B45E');
     fireEvent.change(commentInput, {
-      target: { value: 'Heavy pit rain and visibility hold for 1.5h' },
+      target: { value: 'Heavy pit rain and visibility hold for 1.2h' },
     });
     fireEvent.click(saveBtn);
 
@@ -160,9 +182,9 @@ describe('EngineeringOverviewTable', () => {
       expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
         expect.objectContaining({
           machineId: sampleRow.machineId,
-          comment: 'Heavy pit rain and visibility hold for 1.5h',
+          comment: 'Heavy pit rain and visibility hold for 1.2h',
           delays: expect.objectContaining({
-            natural: 1.5,
+            natural: 1.2,
             refueling: 0.2,
             safetyTalks: 0.5,
             lunches: 0.5,
@@ -173,6 +195,50 @@ describe('EngineeringOverviewTable', () => {
         })
       );
     });
+  });
+
+  it('enforces the 12-hour shift cap (10h worked -> max 2h delays; 10h breakdown -> max 2h production)', () => {
+    const idleMachineRow: MachineOverviewInitialRow = {
+      ...sampleRow,
+      startSmr: 1200,
+      stopSmr: 1200,
+    };
+
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[idleMachineRow]}
+        operators={[]}
+      />
+    );
+
+    // 1. Set 10 hours worked (Start SMR = 1200, Stop SMR = 1210) -> only 2.0h allowed for delays
+    const stopSmrInput = screen.getByLabelText('Stop SMR ADT-101 · Bell B45E');
+    fireEvent.change(stopSmrInput, { target: { value: '1210' } });
+
+    expect(screen.getByText(/2\.0h delay cap/i)).toBeInTheDocument();
+    expect(screen.getByText(/2\.0h delays/i)).toBeInTheDocument();
+
+    // Attempt to enter 5.0h Blasting Delay when 10.0h is already worked -> clamped to 2.0h max
+    const blastingInput = screen.getByLabelText('Blasting Delays ADT-101 · Bell B45E');
+    fireEvent.change(blastingInput, { target: { value: '5' } });
+    expect(blastingInput).toHaveValue(2);
+
+    // 2. Reset Stop SMR to 1200 (0h worked), reset standard defaults, and enter 10h Breakdown -> only 2.0h left for production
+    fireEvent.change(stopSmrInput, { target: { value: '1200' } });
+    fireEvent.click(screen.getByRole('button', { name: /Reset Standard Defaults/i }));
+
+    const breakdownInput = screen.getByLabelText('Breakdown ADT-101 · Bell B45E');
+    fireEvent.change(breakdownInput, { target: { value: '10' } });
+
+    expect(breakdownInput).toHaveValue(10);
+    expect(screen.getByText(/2\.0h prod left/i)).toBeInTheDocument();
+
+    // Attempt to enter 8 hours worked (Stop SMR = 1208) while Breakdown = 10h -> clamped to 1202 (2.0h worked)
+    fireEvent.change(stopSmrInput, { target: { value: '1208' } });
+    expect(stopSmrInput).toHaveValue(1202);
   });
 
   it('displays carried-over breakdown from previous shift and allows booking out', async () => {

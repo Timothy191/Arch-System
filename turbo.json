@@ -2,18 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["tsconfig.json", "pnpm-workspace.yaml", ".npmrc"],
   "globalEnv": ["NODE_ENV", "VERCEL_ENV", "CI"],
-  "globalPassThroughEnv": [
-    "OTEL_EXPORTER_OTLP_ENDPOINT",
-    "OTEL_SERVICE_NAME",
-    "INNGEST_EVENT_KEY",
-    "NOVU_API_KEY",
-    "SUPABASE_URL",
-    "SUPABASE_SERVICE_KEY",
-    "METABASE_SECRET_KEY",
-    "REDIS_URL",
-    "UPSTASH_REDIS_REST_URL",
-    "UPSTASH_REDIS_REST_TOKEN"
-  ],
+  "globalPassThroughEnv": ["OTEL_EXPORTER_OTLP_ENDPOINT", "OTEL_SERVICE_NAME"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "codegen"],
@@ -34,6 +23,124 @@
         "SITE_NAME",
         "DISABLE_RATE_LIMIT",
         "NEXT_PUBLIC_*"
+      ],
+      "cache": true
+    },
+    "portal#build": {
+      "dependsOn": ["^build", "codegen"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/__tests__/**",
+        "!**/*.stories.*",
+        "!**/.storybook/**",
+        "!**/tsconfig.storybook.json"
+      ],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "ANALYZE",
+        "PORTAL_VERSION",
+        "SITE_URL",
+        "SITE_NAME",
+        "DISABLE_RATE_LIMIT",
+        "NEXT_PUBLIC_*"
+      ],
+      "passThroughEnv": [
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "CRON_SECRET",
+        "SCANNER_API_KEY",
+        "ALLOWED_SCANNER_SOURCES",
+        "TELEMETRY_INGEST_SECRET",
+        "TELEMETRY_STREAM_SECRET",
+        "TELEMETRY_WEBHOOK_SECRET",
+        "METABASE_SECRET_KEY",
+        "INNGEST_EVENT_KEY",
+        "NOVU_API_KEY",
+        "DISPATCH_API_KEY"
+      ],
+      "cache": true
+    },
+    "portal#dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "CRON_SECRET",
+        "SCANNER_API_KEY",
+        "ALLOWED_SCANNER_SOURCES",
+        "TELEMETRY_INGEST_SECRET",
+        "TELEMETRY_STREAM_SECRET",
+        "TELEMETRY_WEBHOOK_SECRET",
+        "METABASE_SECRET_KEY",
+        "INNGEST_EVENT_KEY",
+        "NOVU_API_KEY",
+        "DISPATCH_API_KEY"
+      ]
+    },
+    "portal#test": {
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.*"],
+      "outputs": [],
+      "passThroughEnv": [
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "CRON_SECRET",
+        "SCANNER_API_KEY",
+        "ALLOWED_SCANNER_SOURCES",
+        "TELEMETRY_INGEST_SECRET",
+        "TELEMETRY_STREAM_SECRET",
+        "TELEMETRY_WEBHOOK_SECRET"
+      ],
+      "cache": true
+    },
+    "portal#test:integration": {
+      "cache": false,
+      "passThroughEnv": [
+        "REDIS_URL",
+        "REDIS_INTEGRATION",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
+      ]
+    },
+    "@repo/redis#test:integration": {
+      "cache": false,
+      "passThroughEnv": [
+        "REDIS_URL",
+        "REDIS_INTEGRATION",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
+      ]
+    },
+    "@repo/database#test": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": [],
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY"
       ],
       "cache": true
     },

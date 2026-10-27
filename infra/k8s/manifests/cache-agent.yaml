@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-agent
+  namespace: arch-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache-agent
+  template:
+    metadata:
+      labels:
+        app: cache-agent
+    spec:
+      containers:
+        - name: cache-agent
+          image: ghcr.io/plantcor/arch-system-cache-agent:latest
+          envFrom:
+            - secretRef:
+                name: portal-secrets
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '256Mi'

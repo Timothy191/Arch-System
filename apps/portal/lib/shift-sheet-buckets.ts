@@ -97,6 +97,10 @@ export type OverviewDelayKey = (typeof OVERVIEW_DELAY_KEYS)[number];
 
 export type OverviewDelayHours = Record<OverviewDelayKey, number>;
 
+export const MAX_SHIFT_HOURS = 12;
+
+export type OverviewDelayGroup = 'production' | 'nonProduction' | 'engineering';
+
 export interface OverviewDelayColumnMeta {
   key: OverviewDelayKey;
   label: string;
@@ -104,6 +108,7 @@ export interface OverviewDelayColumnMeta {
   standardDefault: number;
   isStandardAllowance: boolean;
   isDowntime: boolean;
+  delayGroup: OverviewDelayGroup;
 }
 
 export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
@@ -114,6 +119,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: false,
+    delayGroup: 'nonProduction',
   },
   {
     key: 'blasting',
@@ -122,6 +128,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'lunches',
@@ -130,6 +137,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.5,
     isStandardAllowance: true,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'safetyTalks',
@@ -138,6 +146,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.5,
     isStandardAllowance: true,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'refueling',
@@ -146,6 +155,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.2,
     isStandardAllowance: true,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'noOperator',
@@ -154,6 +164,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'standby',
@@ -162,6 +173,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: false,
+    delayGroup: 'production',
   },
   {
     key: 'other',
@@ -170,6 +182,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: false,
+    delayGroup: 'nonProduction',
   },
   {
     key: 'gesMaintenance',
@@ -178,6 +191,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.5,
     isStandardAllowance: true,
     isDowntime: true,
+    delayGroup: 'engineering',
   },
   {
     key: 'tyresTracks',
@@ -186,6 +200,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.2,
     isStandardAllowance: true,
     isDowntime: true,
+    delayGroup: 'engineering',
   },
   {
     key: 'greasingStartups',
@@ -194,6 +209,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0.5,
     isStandardAllowance: true,
     isDowntime: true,
+    delayGroup: 'engineering',
   },
   {
     key: 'breakdown',
@@ -202,6 +218,7 @@ export const OVERVIEW_DELAY_COLUMNS: ReadonlyArray<OverviewDelayColumnMeta> = [
     standardDefault: 0,
     isStandardAllowance: false,
     isDowntime: true,
+    delayGroup: 'engineering',
   },
 ] as const;
 
@@ -274,25 +291,47 @@ export const OVERVIEW_DELAY_BY_CATEGORY: Record<string, OverviewDelayKey> = {
 
 export interface MachineOverviewComputedMetrics {
   totalSmrWorked: number;
+  productionDelayHours: number;
+  nonProductionDelayHours: number;
+  engineeringDelayHours: number;
   downtimeHours: number;
   operationalDelayHours: number;
   totalDelayHours: number;
   availableHours: number;
   availabilityPercent: number;
   utilizationPercent: number;
+  maxDelaysAllowedHours: number;
+  maxProductionAllowedHours: number;
+  remainingShiftHours: number;
 }
 
 export function computeMachineOverviewMetrics(
   startSmr: number,
   stopSmr: number,
   delays: OverviewDelayHours,
-  shiftHours = 12
+  shiftHours = MAX_SHIFT_HOURS
 ): MachineOverviewComputedMetrics {
   const safeStart = Number.isFinite(startSmr) ? startSmr : 0;
   const safeStop = Number.isFinite(stopSmr) ? stopSmr : safeStart;
-  const totalSmrWorked = Math.max(0, Number((safeStop - safeStart).toFixed(2)));
+  const totalSmrWorked = Math.min(
+    shiftHours,
+    Math.max(0, Number((safeStop - safeStart).toFixed(2)))
+  );
 
-  const downtimeHours = Number(
+  const productionDelayHours = Number(
+    (
+      (delays.blasting || 0) +
+      (delays.lunches || 0) +
+      (delays.safetyTalks || 0) +
+      (delays.refueling || 0) +
+      (delays.noOperator || 0) +
+      (delays.standby || 0)
+    ).toFixed(2)
+  );
+
+  const nonProductionDelayHours = Number(((delays.natural || 0) + (delays.other || 0)).toFixed(2));
+
+  const engineeringDelayHours = Number(
     (
       (delays.gesMaintenance || 0) +
       (delays.tyresTracks || 0) +
@@ -301,19 +340,8 @@ export function computeMachineOverviewMetrics(
     ).toFixed(2)
   );
 
-  const operationalDelayHours = Number(
-    (
-      (delays.natural || 0) +
-      (delays.blasting || 0) +
-      (delays.lunches || 0) +
-      (delays.safetyTalks || 0) +
-      (delays.refueling || 0) +
-      (delays.noOperator || 0) +
-      (delays.standby || 0) +
-      (delays.other || 0)
-    ).toFixed(2)
-  );
-
+  const downtimeHours = engineeringDelayHours;
+  const operationalDelayHours = Number((productionDelayHours + nonProductionDelayHours).toFixed(2));
   const totalDelayHours = Number((downtimeHours + operationalDelayHours).toFixed(2));
   const availableHours = Math.max(0, Number((shiftHours - downtimeHours).toFixed(2)));
 
@@ -327,14 +355,207 @@ export function computeMachineOverviewMetrics(
       ? Math.min(100, Math.max(0, Number(((totalSmrWorked / availableHours) * 100).toFixed(1))))
       : 0;
 
+  const maxDelaysAllowedHours = Math.max(0, Number((shiftHours - totalSmrWorked).toFixed(2)));
+  const maxProductionAllowedHours = Math.max(0, Number((shiftHours - totalDelayHours).toFixed(2)));
+  const remainingShiftHours = Math.max(
+    0,
+    Number((shiftHours - totalSmrWorked - totalDelayHours).toFixed(2))
+  );
+
   return {
     totalSmrWorked,
+    productionDelayHours,
+    nonProductionDelayHours,
+    engineeringDelayHours,
     downtimeHours,
     operationalDelayHours,
     totalDelayHours,
     availableHours,
     availabilityPercent,
     utilizationPercent,
+    maxDelaysAllowedHours,
+    maxProductionAllowedHours,
+    remainingShiftHours,
+  };
+}
+
+function sumOverviewDelays(delays: OverviewDelayHours): number {
+  let sum = 0;
+  for (const key of OVERVIEW_DELAY_KEYS) {
+    sum += Number(delays[key] ?? 0);
+  }
+  return Number(sum.toFixed(2));
+}
+
+function areAllStandardAllowancesAtDefault(delays: OverviewDelayHours): boolean {
+  for (const col of OVERVIEW_DELAY_COLUMNS) {
+    if (!col.isStandardAllowance) continue;
+    const current = Number(delays[col.key] ?? 0);
+    if (Math.abs(current - col.standardDefault) > 0.001) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function trimDelaysToMaxBudget(
+  delays: OverviewDelayHours,
+  maxTotalDelays: number,
+  protectedKey?: OverviewDelayKey
+): OverviewDelayHours {
+  const nextDelays: OverviewDelayHours = { ...delays };
+  let excess = Number((sumOverviewDelays(nextDelays) - maxTotalDelays).toFixed(2));
+  if (excess <= 0) return nextDelays;
+
+  const standardAllowanceColsReversed = [...OVERVIEW_DELAY_COLUMNS]
+    .filter((c) => c.isStandardAllowance && c.key !== protectedKey)
+    .reverse();
+
+  for (const col of standardAllowanceColsReversed) {
+    if (excess <= 0) break;
+    const current = Number(nextDelays[col.key] ?? 0);
+    if (current <= 0) continue;
+    const cut = Math.min(current, excess);
+    nextDelays[col.key] = Number((current - cut).toFixed(2));
+    excess = Number((excess - cut).toFixed(2));
+  }
+
+  if (excess > 0) {
+    const otherColsReversed = [...OVERVIEW_DELAY_COLUMNS]
+      .filter((c) => !c.isStandardAllowance && c.key !== protectedKey)
+      .reverse();
+    for (const col of otherColsReversed) {
+      if (excess <= 0) break;
+      const current = Number(nextDelays[col.key] ?? 0);
+      if (current <= 0) continue;
+      const cut = Math.min(current, excess);
+      nextDelays[col.key] = Number((current - cut).toFixed(2));
+      excess = Number((excess - cut).toFixed(2));
+    }
+  }
+
+  return nextDelays;
+}
+
+/**
+ * Enforces the 12-hour shift cap when Start SMR or Stop SMR changes:
+ * - Total worked hours (`stopSmr - startSmr`) cannot exceed `12 - explicitNonStandardDelays`
+ *   (e.g. if Breakdown = 10h, max worked hours = 2.0h).
+ * - Remaining delay budget is `12 - workedHours` (e.g. if 10h worked, max delays = 2.0h);
+ *   any excess standard allowances are trimmed to fit the 12h cap.
+ */
+export function reconcileOverviewShiftHoursOnSmrChange(params: {
+  currentStartSmr: number;
+  currentStopSmr: number;
+  changedField: 'startSmr' | 'stopSmr';
+  nextValue: number;
+  delays: OverviewDelayHours;
+  maxShiftHours?: number;
+}): {
+  startSmr: number;
+  stopSmr: number;
+  delays: OverviewDelayHours;
+} {
+  const {
+    currentStartSmr,
+    currentStopSmr,
+    changedField,
+    nextValue,
+    delays,
+    maxShiftHours = MAX_SHIFT_HOURS,
+  } = params;
+
+  let nonStandardDelaySum = 0;
+  for (const col of OVERVIEW_DELAY_COLUMNS) {
+    if (!col.isStandardAllowance) {
+      nonStandardDelaySum += Number(delays[col.key] ?? 0);
+    }
+  }
+  const maxAllowedWorked = Math.max(0, Number((maxShiftHours - nonStandardDelaySum).toFixed(2)));
+
+  const startSmr =
+    changedField === 'startSmr'
+      ? Math.max(0, Number(nextValue.toFixed(2)))
+      : Math.max(0, Number(currentStartSmr.toFixed(2)));
+
+  const rawStopSmr =
+    changedField === 'stopSmr'
+      ? Math.max(startSmr, Number(nextValue.toFixed(2)))
+      : Math.max(startSmr, Number(currentStopSmr.toFixed(2)));
+
+  const rawWorked = Number((rawStopSmr - startSmr).toFixed(2));
+  const clampedWorked = Math.min(maxAllowedWorked, Math.max(0, rawWorked));
+  const stopSmr = Number((startSmr + clampedWorked).toFixed(2));
+
+  const maxDelaysAllowed = Math.max(0, Number((maxShiftHours - clampedWorked).toFixed(2)));
+  const reconciledDelays = trimDelaysToMaxBudget(delays, maxDelaysAllowed);
+
+  return {
+    startSmr,
+    stopSmr,
+    delays: reconciledDelays,
+  };
+}
+
+/**
+ * Enforces the 12-hour shift cap when any Delay column changes:
+ * - Total delays cannot exceed `12 - workedHours` (e.g. if 10h worked, max 2.0h for delays).
+ * - When `breakdown` is entered on a row that still has default standard allowances,
+ *   untouched standard allowances are zeroed so e.g. `10h breakdown` leaves `2.0h` for production.
+ */
+export function reconcileOverviewShiftHoursOnDelayChange(params: {
+  startSmr: number;
+  stopSmr: number;
+  delays: OverviewDelayHours;
+  changedKey: OverviewDelayKey;
+  nextDelayValue: number;
+  maxShiftHours?: number;
+}): {
+  startSmr: number;
+  stopSmr: number;
+  delays: OverviewDelayHours;
+} {
+  const {
+    startSmr,
+    stopSmr,
+    delays,
+    changedKey,
+    nextDelayValue,
+    maxShiftHours = MAX_SHIFT_HOURS,
+  } = params;
+
+  const workedHours = Math.min(maxShiftHours, Math.max(0, Number((stopSmr - startSmr).toFixed(2))));
+  const maxDelaysAllowed = Math.max(0, Number((maxShiftHours - workedHours).toFixed(2)));
+  const requested = Math.min(maxDelaysAllowed, Math.max(0, Number(nextDelayValue.toFixed(2))));
+
+  let candidateDelays: OverviewDelayHours = {
+    ...delays,
+    [changedKey]: requested,
+  };
+
+  if (changedKey === 'breakdown' && requested > 0 && areAllStandardAllowancesAtDefault(delays)) {
+    for (const col of OVERVIEW_DELAY_COLUMNS) {
+      if (col.isStandardAllowance) {
+        candidateDelays[col.key] = 0;
+      }
+    }
+  }
+
+  candidateDelays = trimDelaysToMaxBudget(candidateDelays, maxDelaysAllowed, changedKey);
+
+  let otherSum = 0;
+  for (const key of OVERVIEW_DELAY_KEYS) {
+    if (key !== changedKey) {
+      otherSum += Number(candidateDelays[key] ?? 0);
+    }
+  }
+  const maxForChangedKey = Math.max(0, Number((maxDelaysAllowed - otherSum).toFixed(2)));
+  candidateDelays[changedKey] = Math.min(requested, maxForChangedKey);
+
+  return {
+    startSmr,
+    stopSmr,
+    delays: candidateDelays,
   };
 }
 

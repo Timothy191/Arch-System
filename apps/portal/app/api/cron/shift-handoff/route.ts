@@ -1,10 +1,12 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
 
 export async function GET(req: Request) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('Unauthorized', { status: 401 });
+  const unauthorizedResponse = authorizeCronRequest(req);
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
   }
 
   try {

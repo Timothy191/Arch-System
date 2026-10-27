@@ -133,6 +133,7 @@ function buildServiceRoleMock(overrides?: {
 function makeRequest(opts: {
   source?: string | null;
   token?: string | null;
+  bearerToken?: string | null;
   body?: unknown;
   raw?: string;
 }) {
@@ -144,6 +145,9 @@ function makeRequest(opts: {
   }
   if (opts.token !== null && opts.token !== undefined) {
     headers['x-scanner-token'] = opts.token;
+  }
+  if (opts.bearerToken !== null && opts.bearerToken !== undefined) {
+    headers.Authorization = `Bearer ${opts.bearerToken}`;
   }
   const init: RequestInit = {
     method: 'POST',
@@ -334,5 +338,183 @@ describe('P0 /api/c66 secure access checks', () => {
     const body = await res.json();
     expect(body.success).toBe(false);
     expect(body.name).toBe('Revoked Badge');
+  });
+
+  it('valid Authorization: Bearer token succeeds without x-scanner-token', async () => {
+    const res = await POST(
+      makeRequest({
+        source: 'C66-SCANNER',
+        token: null,
+        bearerToken: TEST_TOKEN,
+        body: { code: 'BADGE-AUTH-01' },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.name).toBe('Test User');
+  });
+
+  it('omitted x-scanner-source defaults to C66-SCANNER and succeeds with valid token', async () => {
+    const res = await POST(
+      makeRequest({
+        source: null,
+        token: TEST_TOKEN,
+        body: { code: 'BADGE-DEFAULT-SOURCE' },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+  });
+
+  it('UHF RFID / EPC payload resolves badge and inserts access log', async () => {
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: { rfid_code: 'E28011606000020478149A50', direction: 'IN' },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(lastServiceRoleClient).not.toBeNull();
+    expect(lastServiceRoleClient!.from).toHaveBeenCalledWith('access_logs');
+  });
+
+  it('batch scan payload with scans array processes all items', async () => {
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: {
+          scans: [
+            { code: 'BADGE-1', direction: 'IN' },
+            { rfid_code: 'E28011606000020478149A50', direction: 'OUT' },
+          ],
+        },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.processed).toBe(2);
+    expect(body.results).toHaveLength(2);
+    expect(body.results[0].success).toBe(true);
+    expect(body.results[1].success).toBe(true);
+  });
+
+  it('device scanned_at timestamp is preserved in access_logs insert', async () => {
+    const deviceTime = '2026-10-27T07:15:30.000Z';
+    const insertMock = jest.fn().mockResolvedValue({ error: null });
+    const mock = buildServiceRoleMock();
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'badges') {
+        return {
+          select: jest.fn().mockReturnValue({
+            or: jest.fn().mockReturnValue({
+              maybeSingle: jest.fn().mockResolvedValue({
+                data: {
+                  id: 'badge-ts-1',
+                  is_active: true,
+                  entity_type: 'personnel',
+                  personnel_id: 'person-1',
+                  expires_at: null,
+                  department_id: null,
+                },
+                error: null,
+              }),
+            }),
+          }),
+        };
+      }
+      if (table === 'personnel') {
+        return {
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { first_name: 'Time', surname: 'Stamp', status: 'Active' },
+                error: null,
+              }),
+            }),
+          }),
+        };
+      }
+      if (table === 'access_logs') {
+        return { insert: insertMock };
+      }
+      return { select: jest.fn() };
+    });
+
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: { code: 'BADGE-TIME-01', scanned_at: deviceTime },
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scanned_at: deviceTime,
+        }),
+      ])
+    );
+  });
+
+  it('expired credential returns 403 Expired Credential', async () => {
+    buildServiceRoleMock({
+      badge: {
+        id: 'badge-expired',
+        is_active: true,
+        expires_at: '2020-01-01T00:00:00Z',
+        entity_type: 'personnel',
+      },
+    });
+
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: { code: 'EXPIRED-BADGE' },
+      })
+    );
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.name).toBe('Expired Credential');
+  });
+
+  it('unrecognized badge returns 404 Unrecognized Badge / RFID', async () => {
+    const mock = buildServiceRoleMock();
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'badges') {
+        return {
+          select: jest.fn().mockReturnValue({
+            or: jest.fn().mockReturnValue({
+              maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+        };
+      }
+      if (table === 'access_logs') {
+        return { insert: jest.fn().mockResolvedValue({ error: null }) };
+      }
+      return { select: jest.fn() };
+    });
+
+    const res = await POST(
+      makeRequest({
+        source: 'C66-HARDWARE',
+        token: TEST_TOKEN,
+        body: { code: 'NONEXISTENT-CODE' },
+      })
+    );
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.name).toBe('Unrecognized Badge / RFID');
   });
 });

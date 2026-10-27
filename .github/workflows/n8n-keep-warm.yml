@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
-      PORTAL_URL: https://arch-system-theta.vercel.app
+      PORTAL_URL: ${{ vars.PRODUCTION_URL || 'https://arch-system-kappa.vercel.app' }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Ping portal routes
         run: |
@@ -32,6 +33,17 @@ jobs:
               echo "::warning ::${path} returned HTTP ${CODE}"
             fi
           done
+
+      - name: Verify scheduled cron authentication (when CRON_SECRET is set)
+        if: env.CRON_SECRET != ''
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${PORTAL_URL}/api/cron/preventative-maintenance")
+          echo "/api/cron/preventative-maintenance -> HTTP ${STATUS}"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::warning ::Scheduled cron endpoint returned HTTP ${STATUS}"
+          fi
 
   ping-n8n:
     name: Ping n8n Health Probe

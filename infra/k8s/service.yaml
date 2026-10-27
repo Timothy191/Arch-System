@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal
+  namespace: arch-system
+spec:
+  selector:
+    app: portal
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache-agent
+  namespace: arch-system
+spec:
+  selector:
+    app: cache-agent
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

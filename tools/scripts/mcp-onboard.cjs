@@ -3,7 +3,7 @@
  * @file tools/scripts/mcp-onboard.cjs
  * @description Master Agent MCP Server Onboarding & Verification Engine.
  * Ensures every incoming AI agent runtime registers and discovers all required
- * MCP servers (Upstash, Filesystem, Memory, Sequential Thinking, Ripgrep, etc.).
+ * MCP servers (Context7, Codemap, Chrome DevTools; Supabase for remote DB work).
  */
 
 const fs = require('fs');
@@ -125,56 +125,14 @@ for (const client of clientConfigs) {
 
   const missingServers = [];
 
-  // Verify and register Upstash
-  if (!config[containerKey].upstash) {
-    missingServers.push('upstash');
-    if (isCheckOnly) {
-      totalIssues++;
-    } else {
-      if (client.type === 'antigravity') {
-        config[containerKey].upstash = {
-          description: servers.upstash.description,
-          disabled: false,
-          autoApprove: [],
-          url: servers.upstash.url,
-        };
-      } else if (client.type === 'opencode') {
-        config[containerKey].upstash = {
-          type: 'remote',
-          url: servers.upstash.url,
-          enabled: true,
-        };
-      } else if (client.type === 'claude' || client.type === 'cursor' || client.type === 'vscode') {
-        config[containerKey].upstash = {
-          type: 'http',
-          url: servers.upstash.url,
-        };
-      } else {
-        config[containerKey].upstash = {
-          url: servers.upstash.url,
-          description: servers.upstash.description,
-          type: 'remote',
-        };
-      }
-      modified = true;
-    }
-  }
-
   // Verify and register Core Tools
+  // Trimmed 2026-10-27: duplicates of built-in agent tools (ripgrep/git/fetch/
+  // filesystem/memory) and supabase-covered (postgres) were removed from live
+  // configs; registry keeps their definitions as an optional catalog.
   const coreStdio = [
-    'memory',
-    'sequential-thinking',
-    'filesystem',
-    'ripgrep',
-    'git',
-    'fetch',
     'context7',
     'codemap',
-    'code-index',
-    'docker',
-    'postgres',
     'chrome-devtools',
-    'next-devtools',
   ];
   for (const toolName of coreStdio) {
     if (!config[containerKey][toolName] && servers[toolName]) {
