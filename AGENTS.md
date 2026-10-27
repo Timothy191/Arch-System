@@ -4,16 +4,7 @@ Scope: this repository only; `CLAUDE.md` is a symlink to this file. `../AGENTS.m
 
 ## 0. Bootstrap (run before anything else)
 
-`node` resolves to `/usr/bin/node` (**v26.8.1**) and `pnpm` through `~/.local/share/mise/shims/pnpm` (**9.15.9**, pinned by `packageManager`). Do not reinstall the toolchain. If a non-login shell lacks `pnpm`, prepend the intact mise installs:
-
-```bash
-export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
-pnpm -v   # 9.15.9
-```
-
-The 24.15.0 tree supplies `node`/`npm`/`npx`; 26.8.1 supplies `pnpm` (keeps `tsc`, `vercel`). Other pnpm majors can hang Turborepo — use 9.15.9.
-
-Local env is configured: never run `./setup.sh`, copy `*.example`, or create/edit real `.env*`; report missing keys (never print values).
+Use the pinned `pnpm@9.15.9` toolchain; do not reinstall it or switch package managers. Local env is configured: never run `./setup.sh`, copy `*.example`, or create/edit real `.env*`; report missing keys (never print values).
 
 ## 1. Layout
 
