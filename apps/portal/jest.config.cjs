@@ -5,6 +5,7 @@ module.exports = {
     '<rootDir>/node_modules/',
     '<rootDir>/test/integration/',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
   transform: {
     '^.+\\.(t|j)sx?$': [

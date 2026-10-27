@@ -28,6 +28,7 @@ const nextConfig = {
   reactCompiler: true,
   // AGENT-TRACE: Next.js 16 Cache Components enabled for 'use cache' directives and granular component prerendering
   cacheComponents: true,
+  partialPrefetching: true,
   // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds
   // (`next build`). Webpack (`next build --webpack`) produces better chunk deduplication (0 vs
   // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
