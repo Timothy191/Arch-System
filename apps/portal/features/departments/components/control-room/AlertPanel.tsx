@@ -1,5 +1,6 @@
 'use client';
 
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import type {
   AdminOperationalTargets,
   OperationalTargetWindow,
@@ -15,6 +16,8 @@ import {
   DEFAULT_OPERATIONAL_TARGETS_CLIENT,
   OPERATIONAL_TARGETS_STORAGE_KEY,
 } from '~/features/admin/tabs/TargetsTab';
+
+const tracer = trace.getTracer('arch-portal');
 
 type TargetHorizon = 'shift' | 'daily' | 'monthly';
 
@@ -76,6 +79,20 @@ function aggregateHorizonMetrics(
   };
 }
 
+function countUnderperformingMetrics(
+  actual: ActualMetrics,
+  target: OperationalTargetWindow
+): number {
+  const pairs: Array<[number, number]> = [
+    [actual.loads, target.loadsTarget],
+    [actual.coalTonnes, target.coalTonnesTarget],
+    [actual.wasteTonnes, target.wasteTonnesTarget],
+    [actual.volumeBcm, target.volumeBcmTarget],
+    [actual.smrHours, target.smrHoursTarget],
+  ];
+  return pairs.filter(([act, tgt]) => act < tgt).length;
+}
+
 export function AlertPanel({ departmentId }: { departmentId: string }) {
   const [horizon, setHorizon] = useState<TargetHorizon>('shift');
   const [targets, setTargets] = useState<AdminOperationalTargets>(
@@ -84,6 +101,16 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
   const [actuals, setActuals] = useState<Record<TargetHorizon, ActualMetrics>>(ZERO_ACTUALS);
 
   const loadTargetsAndActuals = useCallback(async () => {
+    const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
+    const statusSpan = activeTracer?.startSpan?.('alert_status_check', {
+      attributes: {
+        department_id: departmentId,
+        alert_count: 0,
+      },
+    });
+    let resolvedTargets = DEFAULT_OPERATIONAL_TARGETS_CLIENT;
+    let resolvedActuals = ZERO_ACTUALS;
+
     try {
       if (typeof window !== 'undefined') {
         const localRaw = window.localStorage.getItem(OPERATIONAL_TARGETS_STORAGE_KEY);
@@ -91,6 +118,7 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           try {
             const parsedLocal = JSON.parse(localRaw) as AdminOperationalTargets;
             if (parsedLocal?.shift && parsedLocal?.daily && parsedLocal?.monthly) {
+              resolvedTargets = parsedLocal;
               setTargets(parsedLocal);
             }
           } catch {
@@ -101,63 +129,106 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
 
       const remoteTargets = await getOperationalTargets();
       if (remoteTargets) {
+        resolvedTargets = remoteTargets;
         setTargets(remoteTargets);
       }
 
-      const supabase = createBrowserSupabaseClient();
-      const today = getOperationalToday('Africa/Johannesburg');
-      const currentShift = getCurrentShift();
-      const monthStart = `${today.slice(0, 7)}-01`;
+      try {
+        const supabase = createBrowserSupabaseClient();
+        const today = getOperationalToday('Africa/Johannesburg');
+        const currentShift = getCurrentShift();
+        const monthStart = `${today.slice(0, 7)}-01`;
 
-      const [machinesRes, monthLoadsRes, monthOpsRes] = await Promise.all([
-        supabase.from('machines').select('id, bin_factor').eq('active', true),
-        supabase
-          .from('hourly_loads')
-          .select('total_loads, material_type, shift, load_date, machine_id')
-          .eq('department_id', departmentId)
-          .gte('load_date', monthStart)
-          .lte('load_date', today),
-        supabase
-          .from('machine_operations')
-          .select('hours_worked, shift, shift_date')
-          .eq('department_id', departmentId)
-          .gte('shift_date', monthStart)
-          .lte('shift_date', today),
-      ]);
+        const [machinesRes, monthLoadsRes, monthOpsRes] = await Promise.all([
+          supabase.from('machines').select('id, bin_factor').eq('active', true),
+          supabase
+            .from('hourly_loads')
+            .select('total_loads, material_type, shift, load_date, machine_id')
+            .eq('department_id', departmentId)
+            .gte('load_date', monthStart)
+            .lte('load_date', today),
+          supabase
+            .from('machine_operations')
+            .select('hours_worked, shift, shift_date')
+            .eq('department_id', departmentId)
+            .gte('shift_date', monthStart)
+            .lte('shift_date', today),
+        ]);
 
-      const binFactorByMachine = new Map<string, number>();
-      for (const m of machinesRes.data ?? []) {
-        if (m.id && typeof m.bin_factor === 'number' && m.bin_factor > 0) {
-          binFactorByMachine.set(m.id, m.bin_factor);
+        const binFactorByMachine = new Map<string, number>();
+        for (const m of machinesRes.data ?? []) {
+          if (m.id && typeof m.bin_factor === 'number' && m.bin_factor > 0) {
+            binFactorByMachine.set(m.id, m.bin_factor);
+          }
         }
+
+        const monthLoads = (monthLoadsRes.data ?? []) as Array<{
+          total_loads: number | null;
+          material_type: string | null;
+          shift?: string | null;
+          load_date?: string | null;
+          machine_id?: string | null;
+        }>;
+        const monthOps = (monthOpsRes.data ?? []) as Array<{
+          hours_worked: number | null;
+          shift?: string | null;
+          shift_date?: string | null;
+        }>;
+
+        const dailyLoads = monthLoads.filter((r) => !r.load_date || r.load_date === today);
+        const dailyOps = monthOps.filter((r) => !r.shift_date || r.shift_date === today);
+
+        const shiftLoads = dailyLoads.filter((r) => !r.shift || r.shift === currentShift);
+        const shiftOps = dailyOps.filter((r) => !r.shift || r.shift === currentShift);
+
+        resolvedActuals = {
+          shift: aggregateHorizonMetrics(shiftLoads, shiftOps, binFactorByMachine),
+          daily: aggregateHorizonMetrics(dailyLoads, dailyOps, binFactorByMachine),
+          monthly: aggregateHorizonMetrics(monthLoads, monthOps, binFactorByMachine),
+        };
+        setActuals(resolvedActuals);
+      } catch {
+        // Preserve fallback actuals when Supabase client is offline or unconfigured
       }
 
-      const monthLoads = (monthLoadsRes.data ?? []) as Array<{
-        total_loads: number | null;
-        material_type: string | null;
-        shift?: string | null;
-        load_date?: string | null;
-        machine_id?: string | null;
-      }>;
-      const monthOps = (monthOpsRes.data ?? []) as Array<{
-        hours_worked: number | null;
-        shift?: string | null;
-        shift_date?: string | null;
-      }>;
-
-      const dailyLoads = monthLoads.filter((r) => !r.load_date || r.load_date === today);
-      const dailyOps = monthOps.filter((r) => !r.shift_date || r.shift_date === today);
-
-      const shiftLoads = dailyLoads.filter((r) => !r.shift || r.shift === currentShift);
-      const shiftOps = dailyOps.filter((r) => !r.shift || r.shift === currentShift);
-
-      setActuals({
-        shift: aggregateHorizonMetrics(shiftLoads, shiftOps, binFactorByMachine),
-        daily: aggregateHorizonMetrics(dailyLoads, dailyOps, binFactorByMachine),
-        monthly: aggregateHorizonMetrics(monthLoads, monthOps, binFactorByMachine),
+      const alertCount = countUnderperformingMetrics(resolvedActuals.shift, resolvedTargets.shift);
+      statusSpan?.setAttributes?.({
+        department_id: departmentId,
+        alert_count: alertCount,
       });
-    } catch {
+      statusSpan?.addEvent?.('alert_status_evaluated', {
+        department_id: departmentId,
+        alert_count: alertCount,
+      });
+      statusSpan?.setStatus?.({ code: SpanStatusCode.OK });
+
+      const genSpan = activeTracer?.startSpan?.('alert_generation', {
+        attributes: {
+          department_id: departmentId,
+          alert_count: alertCount,
+        },
+      });
+      genSpan?.setAttributes?.({
+        department_id: departmentId,
+        alert_count: alertCount,
+      });
+      genSpan?.addEvent?.('alert_generated', {
+        department_id: departmentId,
+        alert_count: alertCount,
+      });
+      genSpan?.setStatus?.({ code: SpanStatusCode.OK });
+      genSpan?.end?.();
+    } catch (error) {
+      statusSpan?.setStatus?.({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      if (error instanceof Error) {
+        statusSpan?.recordException?.(error);
+      }
       // Preserve last known actuals and targets when offline
+    } finally {
+      statusSpan?.end?.();
     }
   }, [departmentId]);
 

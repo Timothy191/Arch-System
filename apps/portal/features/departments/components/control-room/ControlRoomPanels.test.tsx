@@ -1,3 +1,4 @@
+import { trace } from '@opentelemetry/api';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ControlRoomSummaryGridClient } from '~/app/(departments)/[department]/ControlRoomSummaryGridClient';
 import { TargetsTab } from '~/features/admin/tabs/TargetsTab';
@@ -113,5 +114,89 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
       expect(screen.getByText('Daily Targets')).toBeInTheDocument();
       expect(screen.getByText('Monthly Targets')).toBeInTheDocument();
     });
+  });
+
+  it('emits scada_machine_fetch and scada_realtime_subscription OpenTelemetry spans in ScadaPanel', async () => {
+    const setAttributes = jest.fn();
+    const addEvent = jest.fn();
+    const setStatus = jest.fn();
+    const end = jest.fn();
+    const startSpan = jest.fn(() => ({
+      setAttributes,
+      addEvent,
+      setStatus,
+      end,
+    }));
+    const getTracerSpy = jest.spyOn(trace, 'getTracer').mockReturnValue({
+      startSpan,
+    } as never);
+
+    try {
+      render(<ScadaPanel departmentId="dept-cr" />);
+
+      await waitFor(() => {
+        expect(startSpan).toHaveBeenCalledWith('scada_realtime_subscription', {
+          attributes: { department_id: 'dept-cr' },
+        });
+        expect(startSpan).toHaveBeenCalledWith('scada_machine_fetch', {
+          attributes: { department_id: 'dept-cr' },
+        });
+      });
+
+      expect(setAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({ department_id: 'dept-cr' })
+      );
+      expect(end).toHaveBeenCalled();
+    } finally {
+      getTracerSpy.mockRestore();
+    }
+  });
+
+  it('emits alert_status_check and alert_generation OpenTelemetry spans with department_id and alert_count in AlertPanel', async () => {
+    const setAttributes = jest.fn();
+    const addEvent = jest.fn();
+    const setStatus = jest.fn();
+    const end = jest.fn();
+    const startSpan = jest.fn(() => ({
+      setAttributes,
+      addEvent,
+      setStatus,
+      end,
+    }));
+    const getTracerSpy = jest.spyOn(trace, 'getTracer').mockReturnValue({
+      startSpan,
+    } as never);
+
+    try {
+      render(<AlertPanel departmentId="dept-cr" />);
+
+      await waitFor(() => {
+        expect(startSpan).toHaveBeenCalledWith(
+          'alert_status_check',
+          expect.objectContaining({
+            attributes: expect.objectContaining({ department_id: 'dept-cr' }),
+          })
+        );
+        expect(startSpan).toHaveBeenCalledWith(
+          'alert_generation',
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              department_id: 'dept-cr',
+              alert_count: expect.any(Number),
+            }),
+          })
+        );
+      });
+
+      expect(setAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({
+          department_id: 'dept-cr',
+          alert_count: expect.any(Number),
+        })
+      );
+      expect(end).toHaveBeenCalled();
+    } finally {
+      getTracerSpy.mockRestore();
+    }
   });
 });

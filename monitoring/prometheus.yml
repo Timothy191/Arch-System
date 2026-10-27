@@ -24,3 +24,16 @@ scrape_configs:
     metrics_path: '/api/metrics/prometheus'
     static_configs:
       - targets: ['host.docker.internal:3000']
+
+  - job_name: 'supabase-cloud-metrics'
+    scheme: 'https'
+    scrape_interval: 15s
+    metrics_path: '/customer/v1/privileged/metrics'
+    basic_auth:
+      username: 'service_role'
+      password_file: '/etc/prometheus/secrets/supabase_service_key'
+    static_configs:
+      - targets: ['mrwhtxbhrzyttlsyuofc.supabase.co']
+        labels:
+          environment: 'production'
+          cluster: 'arch-supabase-pg17'

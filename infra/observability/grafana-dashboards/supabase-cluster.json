@@ -1,0 +1,125 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Supabase Node Memory Utilization (%)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100",
+          "legendFormat": "Memory Used %",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "title": "PostgreSQL 17 Shared Buffer Cache Hit Ratio (%)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "(pg_stat_database_blks_hit_total / clamp_min(pg_stat_database_blks_hit_total + pg_stat_database_blks_read_total, 1)) * 100",
+          "legendFormat": "Buffer Cache Hit %",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 }
+    },
+    {
+      "title": "Node CPU Load Average (1m / 5m / 15m)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "node_load1",
+          "legendFormat": "Load 1m",
+          "refId": "A"
+        },
+        {
+          "expr": "node_load5",
+          "legendFormat": "Load 5m",
+          "refId": "B"
+        },
+        {
+          "expr": "node_load15",
+          "legendFormat": "Load 15m",
+          "refId": "C"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 }
+    },
+    {
+      "title": "Active PostgreSQL Connections by Role vs Max Connections",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "connection_stats_connection_count",
+          "legendFormat": "{{username}}",
+          "refId": "A"
+        },
+        {
+          "expr": "max_connections_connection_count",
+          "legendFormat": "Max Connections",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "title": "Supavisor / PgBouncer Pooled SQL Transactions Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(pgbouncer_stats_sql_transactions_pooled_total[5m])",
+          "legendFormat": "Pooled TX / sec ({{database}})",
+          "refId": "A"
+        },
+        {
+          "expr": "pgbouncer_pools_client_waiting_connections",
+          "legendFormat": "Waiting Clients ({{user}})",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    },
+    {
+      "title": "PostgREST JWT Cache Hit Ratio & DB Pool Headroom",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "(pgrst_jwt_cache_hits_total / clamp_min(pgrst_jwt_cache_requests_total, 1)) * 100",
+          "legendFormat": "JWT Cache Hit %",
+          "refId": "A"
+        },
+        {
+          "expr": "pgrst_db_pool_available",
+          "legendFormat": "PostgREST Available Pool Connections",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "style": "light",
+  "tags": ["arch-system", "supabase", "postgres-17", "pgbouncer"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Arch-System Supabase PostgreSQL 17 & PgBouncer Telemetry",
+  "uid": "arch-supabase-cluster",
+  "version": 1
+}

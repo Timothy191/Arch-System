@@ -1,11 +1,15 @@
 'use client';
 
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getOperationalToday } from '@repo/utils';
 import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+
+const tracer = trace.getTracer('arch-portal');
+const REFRESH_SPINNER_DURATION_MS = 400;
 
 interface ExcavatorActivityRow {
   id: string;
@@ -39,6 +43,12 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadOperationalData = useCallback(async () => {
+    const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
+    const span = activeTracer?.startSpan?.('scada_machine_fetch', {
+      attributes: { department_id: departmentId },
+    });
+    span?.setAttributes?.({ department_id: departmentId });
+
     try {
       const supabase = createBrowserSupabaseClient();
       const today = getOperationalToday('Africa/Johannesburg');
@@ -156,20 +166,85 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         };
       });
       setRegisteredMachines(mappedMachines);
-    } catch {
+      span?.setAttributes?.({
+        department_id: departmentId,
+        excavator_count: mappedExcavators.length,
+        machine_count: mappedMachines.length,
+      });
+      span?.addEvent?.('scada_telemetry_loaded', {
+        department_id: departmentId,
+        excavator_count: mappedExcavators.length,
+        machine_count: mappedMachines.length,
+      });
+      span?.setStatus?.({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span?.setStatus?.({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      if (error instanceof Error) {
+        span?.recordException?.(error);
+      }
       // Keep fallback operational telemetry when offline
+    } finally {
+      span?.end?.();
     }
   }, [departmentId]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await loadOperationalData();
-    setTimeout(() => setIsRefreshing(false), 400);
+    setTimeout(() => setIsRefreshing(false), REFRESH_SPINNER_DURATION_MS);
   };
 
   useEffect(() => {
-    loadOperationalData();
-  }, [loadOperationalData]);
+    const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
+    const subSpan = activeTracer?.startSpan?.('scada_realtime_subscription', {
+      attributes: { department_id: departmentId },
+    });
+    subSpan?.setAttributes?.({ department_id: departmentId });
+    subSpan?.addEvent?.('scada_subscription_active', { department_id: departmentId });
+
+    let channel: { unsubscribe?: () => void } | null = null;
+    try {
+      const supabase = createBrowserSupabaseClient();
+      if (typeof supabase?.channel === 'function') {
+        const ch = supabase.channel(`scada-panel:${departmentId}`);
+        if (typeof ch?.on === 'function') {
+          const subscribed = ch
+            .on(
+              'postgres_changes',
+              {
+                event: '*',
+                schema: 'public',
+                table: 'hourly_loads',
+                filter: `department_id=eq.${departmentId}`,
+              },
+              () => {
+                void loadOperationalData();
+              }
+            )
+            .subscribe?.();
+          channel = subscribed ?? ch;
+        }
+      }
+      subSpan?.setStatus?.({ code: SpanStatusCode.OK });
+    } catch {
+      // Ignore realtime channel setup errors when offline or unconfigured
+    } finally {
+      subSpan?.end?.();
+    }
+
+    void loadOperationalData();
+
+    return () => {
+      try {
+        channel?.unsubscribe?.();
+      } catch {
+        // Ignore cleanup errors when offline or mocked
+      }
+    };
+  }, [departmentId, loadOperationalData]);
 
   const totalExcavatorLoads = excavators.reduce((sum, e) => sum + e.loadedLoads, 0);
   const totalMachineLoads = registeredMachines.reduce((sum, m) => sum + m.loadedLoads, 0);

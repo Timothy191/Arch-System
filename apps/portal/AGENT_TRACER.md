@@ -1,3 +1,11 @@
+## 2026-10-27T07:06:00+02:00: Live Supabase Prometheus Exporter, Add-ons, pg_cron & Grafana Integration on /database
+
+- **Purpose**: Implement all 3 Supabase Add-on & Observability integrations:
+  1. Server-side scrape of `/customer/v1/privileged/metrics` (PostgreSQL 17, PgBouncer, PostgREST, GoTrue, Node CPU/Memory/Disk) and Storage/RPC endpoints in `apps/portal/app/(departments)/database/supabase-telemetry.ts`, rendered on `/database` (`apps/portal/app/(departments)/database/page.tsx`).
+  2. Cloud-to-local Prometheus scrape job (`supabase-cloud-metrics`) in `monitoring/prometheus.yml` and `infra/observability/prometheus.yml` plus provisioned Grafana dashboard `infra/observability/grafana-dashboards/supabase-cluster.json`.
+  3. Migration `209_fix_pg_stat_statements_and_cron_health_rpc.sql` schema-qualifying `extensions.pg_stat_statements` and `public.materialized_view_refresh_log` inside `SECURITY DEFINER SET search_path = ''` functions and exposing `public.get_pg_cron_jobs_health()`.
+- **Verification**: `pnpm --filter portal test -- app/(departments)/database/page.test.tsx` ✅; `pnpm --filter @repo/database test` ✅; `pnpm maps:sync` ✅; `pnpm agent:verify` (27/27 PASS) ✅.
+
 ## 2026-10-27T06:35:00+02:00: Merge Single-Pass Machine Ops Meta, Prune Unused Dependencies/Exports & Sync Vercel CRON_SECRET
 
 - **Purpose**: Merge PR #192 (`bolt/machine-ops-meta-single-pass-6290199423473584917`), cherry-pick Jest/preflight improvements, remove unused `@univerjs` dependencies from `@repo/departments/ui`, prune dead value exports flagged by `knip`, and sync `CRON_SECRET` to Vercel Production and Preview environments.

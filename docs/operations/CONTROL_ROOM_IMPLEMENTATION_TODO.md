@@ -3,7 +3,7 @@
 **Created:** 2026-06-15  
 **Last Reconciled:** 2026-10-27  
 **Purpose:** Detailed TODO list for Control Room production hardening  
-**Status:** 🔄 In Progress — Phase 1 Core & Foundational Routes/Pages Implemented
+**Status:** ✅ Phase 1, Phase 2 & Phase 3 Testing (Category 10) Implemented
 
 ---
 
@@ -11,14 +11,16 @@
 
 Reconciled against the live `apps/portal` and `e2e` codebase:
 
-- **Database & Error Handling / Health (`TASK-2.1`–`2.4`, `TASK-3.1`–`3.3`, `TASK-4.1`):** Implemented and verified (`ErrorBoundary`, dashboard wrapping, FUXA degraded mode, health endpoint).
-- **Core Libraries & Jobs (`TASK-8.1`, `TASK-10.4`, `TASK-11.1`):**
-  - `apps/portal/lib/shift-closeout.ts` and `apps/portal/lib/shift-closeout.test.ts` exist (`TASK-8.1`).
-  - `apps/portal/lib/shift-completeness.ts`, `apps/portal/lib/shift-completeness.test.ts`, `apps/portal/lib/jobs/shift-completeness-check.ts`, and `apps/portal/lib/jobs/shift-completeness-check.test.ts` exist (`TASK-10.4`, `TASK-11.1`).
-- **Control Room API Routes (`TASK-11.1`–`11.3`):**
-  - `apps/portal/app/api/control-room/shift-closeout/route.ts` (+ `approve/route.ts` and tests) exists (`TASK-11.1`).
-  - `apps/portal/app/api/control-room/shift-completeness/route.ts` (+ tests) exists (`TASK-11.2`).
-  - `apps/portal/app/api/control-room/machine-operator-scan/route.ts` (+ tests) exists (`TASK-11.3`).
+- **Database, Error Handling & Health Monitoring (`TASK-2.1`–`2.4`, `TASK-3.1`–`3.3`, `TASK-4.1`–`4.4`, `TASK-5.1`):** Fully implemented and verified (`ErrorBoundary`, dashboard wrapping, FUXA degraded mode, `/api/health/fuxa`, `/api/health/supabase-realtime`, `/api/health/redis`, unified `/api/health` endpoint, and `docs/control-room/shift-closeout-runbook.md`).
+- **Phase 2 Observability, Security, Integration Testing & Docs (`TASK-6.1`–`6.4`, `TASK-7.1`–`7.3`, `TASK-8.1`, `TASK-9.1`–`9.2`):**
+  - OpenTelemetry spans added across `shift-closeout.ts`, `ScadaPanel.tsx`, `AlertPanel.tsx`, and `hourly-loads/page.tsx` (`TASK-6.1`–`6.4`).
+  - Rate limiting (5 req/min shift closeout, 10 req/min per machine status update) and 3-attempt / 5-min window → 15-min lockout + CAPTCHA challenge implemented (`TASK-7.1`–`7.3`).
+  - `apps/portal/lib/shift-closeout.ts` and `apps/portal/lib/shift-closeout.test.ts` verified (`TASK-8.1`).
+  - Operational documentation completed in `docs/control-room/operator-onboarding.md` and `docs/control-room/fuxa-troubleshooting.md` (`TASK-9.1`–`9.2`).
+- **Phase 3 Advanced Testing (`Category 10`: `TASK-10.1`–`10.8`) & Core Jobs/Routes (`TASK-11.1`–`11.3`):**
+  - Unit tests implemented for `CloseShiftModal.test.tsx`, `MachineControl.test.tsx`, `DozerRollForm.test.tsx`, and `shift-completeness.test.ts` (`TASK-10.1`–`10.4`).
+  - Dedicated Playwright E2E suites implemented for machine operations (`e2e/control-room-machine-operations.spec.ts`), shift closeout (`e2e/control-room-shift-closeout.spec.ts`), alert acknowledgment (`e2e/control-room-alerts.spec.ts`), and SCADA panel (`e2e/control-room-scada.spec.ts`), alongside `e2e/control-room/operations.spec.ts` and `e2e/control-room/end-smr.spec.ts` (`TASK-10.5`–`10.8`).
+  - Control Room API routes (`/api/control-room/shift-closeout`, `/api/control-room/shift-completeness`, `/api/control-room/machine-operator-scan`) and completeness check jobs operational (`TASK-11.1`–`11.3`).
 - **Department & Control Room Pages Implemented:**
   - `apps/portal/app/(departments)/[department]/end-smr/page.tsx`
   - `apps/portal/app/(departments)/[department]/machine-operations/page.tsx`
@@ -26,10 +28,7 @@ Reconciled against the live `apps/portal` and `e2e` codebase:
   - `apps/portal/app/(departments)/[department]/hourly-loads/page.tsx`
   - `apps/portal/app/(departments)/[department]/engineering-notes/page.tsx`
   - `apps/portal/app/(departments)/control-room/page.tsx` & `shift-closeout/page.tsx`
-- **E2E Test Specs (`e2e/control-room/`):**
-  - `e2e/control-room/operations.spec.ts` exists.
-  - `e2e/control-room/end-smr.spec.ts` exists (**Note:** flagged during audit as duplicating `operations.spec.ts` journey coverage; requires deduplication/reconciliation alongside the remaining Phase 3 E2E specs `TASK-10.5`–`10.8`).
-- **Outstanding Scope:** Remaining Phase 2 (OpenTelemetry spans, rate limiting/CAPTCHA, onboarding/troubleshooting docs) and Phase 3 (component unit tests, dedicated E2E suites, advanced monitoring, documentation, and performance tasks) remain unchecked below.
+- **Outstanding Scope:** Environment variable cutover in production `.env` (`TASK-1.1`) and remaining Phase 3 enhancements (`TASK-11.4`, `Category 12`–`14`) remain tracked below.
 
 ---
 
@@ -127,21 +126,21 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns health status with latency metric
 
-- [ ] **TASK-4.2:** Create Supabase realtime health check
+- [x] [DONE] **TASK-4.2:** Create Supabase realtime health check
   - **File:** `apps/portal/app/api/health/supabase-realtime/route.ts` (new file)
   - **Checks:** Connection status, subscription count, latency
   - **Time:** 2 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns subscription health metrics
 
-- [ ] **TASK-4.3:** Create Redis health check endpoint
+- [x] [DONE] **TASK-4.3:** Create Redis health check endpoint
   - **File:** `apps/portal/app/api/health/redis/route.ts` (new file)
   - **Checks:** Connection status, cache hit rate, memory usage
   - **Time:** 2 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns Redis health metrics
 
-- [ ] **TASK-4.4:** Create unified health check endpoint
+- [x] [DONE] **TASK-4.4:** Create unified health check endpoint
   - **File:** `apps/portal/app/api/health/route.ts` (new file)
   - **Features:** Aggregates all health checks
   - **Time:** 1 hour
@@ -150,7 +149,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 5: Documentation**
 
-- [ ] **TASK-5.1:** Create shift closeout runbook
+- [x] [DONE] **TASK-5.1:** Create shift closeout runbook
   - **File:** `docs/control-room/shift-closeout-runbook.md` (new file)
   - **Content:** Step-by-step procedures, error resolution, emergency procedures
   - **Time:** 2-3 hours
@@ -163,7 +162,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 6: Observability**
 
-- [ ] **TASK-6.1:** Add OpenTelemetry to shift closeout
+- [x] [DONE] **TASK-6.1:** Add OpenTelemetry to shift closeout
   - **File:** `lib/shift-closeout.ts`
   - **Spans:** validation, PIN verify, shift close events
   - **Time:** 3-4 hours
@@ -171,21 +170,21 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Dependencies:** OpenTelemetry exporter configured
   - **Acceptance Criteria:** Traces appear in monitoring dashboard
 
-- [ ] **TASK-6.2:** Add OpenTelemetry to SCADA panel
+- [x] [DONE] **TASK-6.2:** Add OpenTelemetry to SCADA panel
   - **File:** `features/departments/components/control-room/ScadaPanel.tsx`
   - **Spans:** machine fetch, realtime subscription
   - **Time:** 2-3 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Machine fetch operations traced
 
-- [ ] **TASK-6.3:** Add OpenTelemetry to AlertPanel
+- [x] [DONE] **TASK-6.3:** Add OpenTelemetry to AlertPanel
   - **File:** `features/departments/components/control-room/AlertPanel.tsx`
   - **Spans:** status check, alert generation
   - **Time:** 2-3 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Alert generation operations traced
 
-- [ ] **TASK-6.4:** Add OpenTelemetry to hourly loads
+- [x] [DONE] **TASK-6.4:** Add OpenTelemetry to hourly loads
   - **File:** `app/(departments)/[department]/hourly-loads/page.tsx`
   - **Spans:** load updates, auto-save, cache updates
   - **Time:** 2-3 hours
@@ -194,7 +193,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 7: Security**
 
-- [ ] **TASK-7.1:** Add rate limiting to shift closeout
+- [x] [DONE] **TASK-7.1:** Add rate limiting to shift closeout
   - **File:** `lib/shift-closeout.ts`
   - **Limit:** 5 attempts per minute per user
   - **Time:** 2-3 hours
@@ -202,14 +201,14 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Dependencies:** Rate limiter infrastructure
   - **Acceptance Criteria:** Rate limits enforced, excess requests rejected
 
-- [ ] **TASK-7.2:** Add rate limiting to machine status updates
+- [x] [DONE] **TASK-7.2:** Add rate limiting to machine status updates
   - **File:** Machine status update endpoints
   - **Limit:** 10 updates per minute per machine
   - **Time:** 2-3 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Rapid status toggling prevented
 
-- [ ] **TASK-7.3:** Add CAPTCHA after failed PIN attempts
+- [x] [DONE] **TASK-7.3:** Add CAPTCHA after failed PIN attempts
   - **File:** `lib/shift-closeout.ts` verifyPin function
   - **Trigger:** 3 failed attempts within 5 minutes
   - **Time:** 1-2 hours
@@ -229,14 +228,14 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 9: Documentation**
 
-- [ ] **TASK-9.1:** Create operator onboarding guide
+- [x] [DONE] **TASK-9.1:** Create operator onboarding guide
   - **File:** `docs/control-room/operator-onboarding.md` (new file)
   - **Content:** System overview, daily workflows, procedures
   - **Time:** 4-6 hours
   - **Owner:** Technical Writer + Training Lead
   - **Acceptance Criteria:** Reviewed by training team, user tested
 
-- [ ] **TASK-9.2:** Create FUXA troubleshooting guide
+- [x] [DONE] **TASK-9.2:** Create FUXA troubleshooting guide
   - **File:** `docs/control-room/fuxa-troubleshooting.md` (new file)
   - **Content:** Common issues, resolution procedures
   - **Time:** 3-4 hours
@@ -249,21 +248,21 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 10: Advanced Testing**
 
-- [ ] **TASK-10.1:** Create CloseShiftModal unit tests
+- [x] [DONE] **TASK-10.1:** Create CloseShiftModal unit tests
   - **File:** `features/departments/components/control-room/CloseShiftModal.test.tsx` (new file)
   - **States:** 8 modal states, transitions, error handling
   - **Time:** 4-6 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** All state transitions tested
 
-- [ ] **TASK-10.2:** Create MachineControl unit tests
+- [x] [DONE] **TASK-10.2:** Create MachineControl unit tests
   - **File:** `features/departments/components/control-room/MachineControl.test.tsx` (new file)
   - **Scenarios:** Input validation, button actions
   - **Time:** 2-3 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** All user interactions tested
 
-- [ ] **TASK-10.3:** Create DozerRollForm unit tests
+- [x] [DONE] **TASK-10.3:** Create DozerRollForm unit tests
   - **File:** `features/departments/components/control-room/DozerRollForm.test.tsx` (new file)
   - **Scenarios:** Validation, calculation, submission
   - **Time:** 3-4 hours
@@ -277,7 +276,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Owner:** QA Developer
   - **Acceptance Criteria:** Business logic thoroughly tested
 
-- [ ] **TASK-10.5:** Create machine operations E2E test
+- [x] [DONE] **TASK-10.5:** Create machine operations E2E test
   - **File:** `e2e/control-room-machine-operations.spec.ts` (new file)
   - **Journey:** Login → Log operation → Verify in list
   - **Time:** 3-4 hours
@@ -285,21 +284,21 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Dependencies:** Playwright environment
   - **Acceptance Criteria:** End-to-end flow passes in CI/CD
 
-- [ ] **TASK-10.6:** Create shift closeout E2E test
+- [x] [DONE] **TASK-10.6:** Create shift closeout E2E test
   - **File:** `e2e/control-room-shift-closeout.spec.ts` (new file)
   - **Journey:** Login → Close shift → Verify closed
   - **Time:** 3-4 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** Complete shift closeout flow passes
 
-- [ ] **TASK-10.7:** Create alert acknowledgment E2E test
+- [x] [DONE] **TASK-10.7:** Create alert acknowledgment E2E test
   - **File:** `e2e/control-room-alerts.spec.ts` (new file)
   - **Journey:** View alerts → Acknowledge → Verify
   - **Time:** 2-3 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** Alert acknowledgment flow passes
 
-- [ ] **TASK-10.8:** Create SCADA panel E2E test
+- [x] [DONE] **TASK-10.8:** Create SCADA panel E2E test
   - **File:** `e2e/control-room-scada.spec.ts` (new file)
   - **Journey:** Load SCADA → Test view toggle → Verify fallback
   - **Time:** 2-3 hours

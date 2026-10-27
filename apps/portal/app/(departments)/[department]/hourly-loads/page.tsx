@@ -1,6 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
+import { withAsyncSpan } from '@/lib/observability/tracing';
 import { getMineralRegistry } from '~/features/admin/actions/minerals';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { HourlyLoadsGrid } from './HourlyLoadsGrid';
@@ -27,30 +28,55 @@ export default async function HourlyLoadsPage({
     { data: mineBlocks },
     { data: excavatorActivities },
     mineralRegistry,
-  ] = await Promise.all([
-    supabase
-      .from('machines')
-      .select('id, name, machine_type, bin_factor, site_id')
-      .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
-      .eq('active', true)
-      .order('name'),
-    supabase
-      .from('machines')
-      .select('id, name, machine_type, site_id, sites(name)')
-      .eq('machine_type', 'Excavator')
-      .eq('active', true)
-      .order('name'),
-    supabase.from('hourly_loads').select('*').eq('department_id', deptId).eq('load_date', today),
-    supabase.from('sites').select('id, name, site_code').eq('active', true).order('name'),
-    supabase.from('mine_blocks').select('id, name, code, site_id').eq('active', true).order('name'),
-    supabase
-      .from('excavator_activity')
-      .select('id, machine_id, site_id, block_mined_id, material_type, shift_type')
-      .eq('department_id', deptId)
-      .eq('activity_date', today)
-      .order('created_at', { ascending: false }),
-    getMineralRegistry(),
-  ]);
+  ] = await withAsyncSpan(
+    'hourly_loads_load',
+    {
+      department_id: deptId,
+      date: today,
+    },
+    async (span) => {
+      const results = await Promise.all([
+        supabase
+          .from('machines')
+          .select('id, name, machine_type, bin_factor, site_id')
+          .in('machine_type', [...HAUL_TRUCK_MACHINE_TYPES])
+          .eq('active', true)
+          .order('name'),
+        supabase
+          .from('machines')
+          .select('id, name, machine_type, site_id, sites(name)')
+          .eq('machine_type', 'Excavator')
+          .eq('active', true)
+          .order('name'),
+        supabase
+          .from('hourly_loads')
+          .select('*')
+          .eq('department_id', deptId)
+          .eq('load_date', today),
+        supabase.from('sites').select('id, name, site_code').eq('active', true).order('name'),
+        supabase
+          .from('mine_blocks')
+          .select('id, name, code, site_id')
+          .eq('active', true)
+          .order('name'),
+        supabase
+          .from('excavator_activity')
+          .select('id, machine_id, site_id, block_mined_id, material_type, shift_type')
+          .eq('department_id', deptId)
+          .eq('activity_date', today)
+          .order('created_at', { ascending: false }),
+        getMineralRegistry(),
+      ]);
+      span?.setAttributes?.({
+        department_id: deptId,
+        date: today,
+        machine_count: results[0].data?.length ?? 0,
+        excavator_count: results[1].data?.length ?? 0,
+        hourly_load_count: results[2].data?.length ?? 0,
+      });
+      return results;
+    }
+  );
 
   return (
     <div className="space-y-6">

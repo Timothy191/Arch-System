@@ -36,6 +36,7 @@ const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
   'app/api/doc/route.ts',
   'app/api/feedback/route.ts',
   'app/api/health/cache/route.ts',
+  'app/api/health/fuxa/route.ts',
   'app/api/health/live/route.ts',
   'app/api/health/n8n/route.ts',
   'app/api/health/redis/route.ts',

@@ -8,9 +8,11 @@ import {
   Activity,
   ArrowUpRight,
   CheckCircle2,
+  Clock,
   Cpu,
   Database,
   FileText,
+  Gauge,
   HardDrive,
   Layers,
   Lock,
@@ -22,6 +24,7 @@ import {
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { DATABASE_SCHEMA } from '@/app/overview/lib/data';
+import { fetchSupabaseClusterTelemetry } from './supabase-telemetry';
 
 const REDIS_KEY_NAMESPACES = [
   {
@@ -67,6 +70,13 @@ const LIVE_COUNT_TABLES = [
 
 const RECENT_MIGRATIONS = [
   {
+    id: '209',
+    file: '209_fix_pg_stat_statements_and_cron_health_rpc.sql',
+    scope: 'Supabase Add-ons & RPCs',
+    summary:
+      'Schema-qualified extensions.pg_stat_statements, MV refresh logs, and pg_cron health RPC',
+  },
+  {
     id: '186',
     file: '186_database_optimization_remediation.sql',
     scope: 'Performance & Indexing',
@@ -96,16 +106,11 @@ const RECENT_MIGRATIONS = [
     scope: 'Personnel & Badging',
     summary: 'Added 9-field personnel provisioning RPC and medical/induction compliance columns',
   },
-  {
-    id: '181',
-    file: '181_personnel_badges_qr_interlock.sql',
-    scope: 'Access Control C66',
-    summary: 'Bound physical CR80 QR/RFID credentials to personnel records and gate scan RPCs',
-  },
 ] as const;
 
 export default async function DatabaseDashboardPage() {
   await connection();
+  const clusterTelemetry = await fetchSupabaseClusterTelemetry();
 
   const rowCounts: Record<string, number | null> = {};
   let isLiveConnected = false;
@@ -489,6 +494,233 @@ export default async function DatabaseDashboardPage() {
                   <td className="whitespace-nowrap px-4 py-2.5 text-right">
                     <Badge variant="green" size="sm">
                       {ns.tier}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+
+      <Divider
+        variant="fading"
+        label="SUPABASE PROMETHEUS & GRAFANA TELEMETRY (/customer/v1/privileged/metrics)"
+      />
+
+      {/* Live Supabase Prometheus & Grafana Telemetry Panel */}
+      <GlassCard className="overflow-hidden p-0" data-testid="supabase-prometheus-telemetry-card">
+        <div className="flex flex-col justify-between gap-3 border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4 sm:flex-row sm:items-center">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Gauge className="h-4 w-4 text-accent-green" />
+              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
+                Supabase Prometheus Exporter & Grafana Cloud-Bridge (
+                <code className="font-mono text-xs">:9091</code>)
+              </h3>
+              <Badge variant={clusterTelemetry.isPrometheusLive ? 'green' : 'blue'} size="sm">
+                {clusterTelemetry.isPrometheusLive
+                  ? 'Prometheus Exporter Live'
+                  : 'Telemetry Baseline'}
+              </Badge>
+              <Badge variant="green" size="sm">
+                Buffer Hit: {clusterTelemetry.bufferCacheHitPct}%
+              </Badge>
+            </div>
+            <p className="mt-1 text-[var(--text-secondary)] text-xs">
+              Direct scrape of <code className="font-mono">/customer/v1/privileged/metrics</code>{' '}
+              (PostgreSQL 17, PgBouncer, PostgREST & GoTrue) wired into local Prometheus + Grafana (
+              <code className="font-mono">pnpm monitor:grafana</code>).
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="http://localhost:9091"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-3 py-1.5 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:bg-[var(--accent-blue)]/20"
+            >
+              Open Grafana (:9091)
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">Node Memory & CPU Load</span>
+              <Cpu className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.memoryUsedPct}% ({clusterTelemetry.memoryUsedMib} /{' '}
+              {clusterTelemetry.memoryTotalMib} MiB)
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              Load avg (1m/5m/15m): {clusterTelemetry.cpuLoad1m} · {clusterTelemetry.cpuLoad5m} ·{' '}
+              {clusterTelemetry.cpuLoad15m}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">Shared Buffer Cache Hit</span>
+              <Zap className="h-3.5 w-3.5 text-accent-green" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.bufferCacheHitPct}%
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              Commits: {clusterTelemetry.commitsTotal.toLocaleString('en-ZA')} · Tuples:{' '}
+              {clusterTelemetry.tuplesFetchedTotal.toLocaleString('en-ZA')}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">
+                PostgreSQL & Pooler Connections
+              </span>
+              <Activity className="h-3.5 w-3.5 text-accent-green" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.activeConnections} / {clusterTelemetry.maxConnections}
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              PgBouncer Pooled TX:{' '}
+              {clusterTelemetry.pgbouncerPooledTransactions.toLocaleString('en-ZA')} (Waiting:{' '}
+              {clusterTelemetry.pgbouncerWaitingClients})
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">PostgREST JWT Cache Hit</span>
+              <ShieldCheck className="h-3.5 w-3.5 text-accent-green" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.jwtCacheHitPct}%
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              DB Pool Available: {clusterTelemetry.postgrestPoolAvailable} /{' '}
+              {clusterTelemetry.postgrestPoolMax}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">NVMe Filesystem Headroom</span>
+              <HardDrive className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.diskAvailGib} GiB Free
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              Disk Utilization: {clusterTelemetry.diskUsedPct}% used · WAL Healthy
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
+              <span className="font-medium uppercase tracking-wider">
+                GoTrue Identity & Storage
+              </span>
+              <Lock className="h-3.5 w-3.5 text-accent-green" />
+            </div>
+            <p className="mt-1.5 font-bold font-mono text-[var(--text-heading)] text-xl">
+              {clusterTelemetry.authUsersCount} Provisioned Users
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+              S3 Buckets ({clusterTelemetry.storageBuckets.length}):{' '}
+              {clusterTelemetry.storageBuckets.join(', ')}
+            </p>
+          </div>
+        </div>
+      </GlassCard>
+
+      <Divider variant="fading" label="SUPABASE ADD-ONS, PG_CRON SCHEDULES & PG_STAT_STATEMENTS" />
+
+      {/* Supabase Add-ons, pg_cron & pg_stat_statements Health Card */}
+      <GlassCard className="overflow-hidden p-0" data-testid="supabase-addons-health-card">
+        <div className="flex flex-col justify-between gap-2 border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4 sm:flex-row sm:items-center">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Clock className="h-4 w-4 text-[var(--accent-blue)]" />
+              <h3 className="font-semibold text-[var(--text-heading)] text-sm">
+                Active Supabase Extensions, <code className="font-mono text-xs">pg_cron</code>{' '}
+                Schedules & <code className="font-mono text-xs">pg_stat_statements</code>
+              </h3>
+              <Badge variant="green" size="sm">
+                {clusterTelemetry.addons.length} Add-ons Active
+              </Badge>
+              <Badge variant="blue" size="sm">
+                {clusterTelemetry.cronJobs.length} Scheduled Jobs
+              </Badge>
+            </div>
+            <p className="mt-1 text-[var(--text-secondary)] text-xs">
+              Schema-qualified telemetry via{' '}
+              <code className="font-mono">extensions.pg_stat_statements</code>,{' '}
+              <code className="font-mono">public.get_slow_queries()</code>, and{' '}
+              <code className="font-mono">public.get_pg_cron_jobs_health()</code> (Migration #209).
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 border-[var(--border-subtle)] border-b p-4 md:grid-cols-2 lg:grid-cols-3">
+          {clusterTelemetry.addons.map((addon) => (
+            <div
+              key={addon.id}
+              className="flex flex-col justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-white/60 p-3"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-semibold text-[var(--accent-blue)] text-xs">
+                    {addon.name}
+                  </span>
+                  <Badge variant="green" size="sm">
+                    {addon.statusLabel}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-[var(--text-secondary)] text-xs leading-relaxed">
+                  {addon.detail}
+                </p>
+              </div>
+              <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-1.5 font-mono text-[10px] text-[var(--text-muted)]">
+                <span>schema: {addon.schema}</span>
+                <span>{addon.category}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-xs">
+            <thead>
+              <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/30 font-mono text-[11px] text-[var(--text-muted)]">
+                <th className="px-4 py-2.5">pg_cron Job Name</th>
+                <th className="px-4 py-2.5">Cron Expression</th>
+                <th className="px-4 py-2.5">SQL Command Target</th>
+                <th className="px-4 py-2.5 text-right">Execution Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {clusterTelemetry.cronJobs.map((job) => (
+                <tr
+                  key={job.jobname}
+                  className="transition-colors hover:bg-[var(--bg-tertiary)]/50"
+                >
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono font-semibold text-[var(--accent-blue)]">
+                    {job.jobname}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono text-[11px] text-[var(--text-heading)]">
+                    {job.schedule}
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-[11px] text-[var(--text-secondary)]">
+                    {job.command}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                    <Badge variant={job.isActive ? 'green' : 'amber'} size="sm">
+                      {job.isActive ? `Active · ${job.lastRunStatus}` : 'Paused'}
                     </Badge>
                   </td>
                 </tr>

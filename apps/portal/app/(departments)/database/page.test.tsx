@@ -4,6 +4,7 @@ import DatabaseError from './error';
 import DatabaseLayout from './layout';
 import DatabaseLoading from './loading';
 import DatabaseDashboardPage from './page';
+import { parsePrometheusMetrics } from './supabase-telemetry';
 
 const mockFrom = jest.fn();
 const mockCreateReadReplicaClient = jest.fn();
@@ -65,10 +66,30 @@ describe('Database Admin Department Route Module', () => {
       expect(screen.getByText('Supabase Live Connected')).toBeInTheDocument();
       expect(screen.getByText('SUPABASE CLUSTER METRICS')).toBeInTheDocument();
       expect(screen.getByText('122')).toBeInTheDocument();
+      expect(screen.getByText('Migration #209')).toBeInTheDocument();
       expect(screen.getByText('Migration #186')).toBeInTheDocument();
       expect(screen.getByTestId('redis-insight-workbench-card')).toBeInTheDocument();
       expect(screen.getByText('Open RedisInsight (:5540)')).toBeInTheDocument();
       expect(screen.getByText('drilling:telemetry:stream')).toBeInTheDocument();
+      expect(screen.getByTestId('supabase-prometheus-telemetry-card')).toBeInTheDocument();
+      expect(screen.getByText('Open Grafana (:9091)')).toBeInTheDocument();
+      expect(screen.getByTestId('supabase-addons-health-card')).toBeInTheDocument();
+      expect(screen.getByText('refresh-dept-production-summary')).toBeInTheDocument();
+    });
+
+    it('parses Supabase Prometheus metric lines and aggregates labeled series accurately', () => {
+      const sampleMetrics = [
+        '# HELP pg_up Whether the last scrape of metrics from PostgreSQL was able to connect',
+        'pg_up{project="mrwhtxbhrzyttlsyuofc"} 1',
+        'connection_stats_connection_count{username="authenticator"} 4',
+        'connection_stats_connection_count{username="supabase_admin"} 15',
+        'node_load1{project="mrwhtxbhrzyttlsyuofc"} 0.05',
+      ].join('\n');
+
+      const parsed = parsePrometheusMetrics(sampleMetrics);
+      expect(parsed.pg_up).toBe(1);
+      expect(parsed.connection_stats_connection_count).toBe(19);
+      expect(parsed.node_load1).toBeCloseTo(0.05);
     });
 
     it('degrades gracefully to Supabase Standby when read replica connection throws or fails', async () => {

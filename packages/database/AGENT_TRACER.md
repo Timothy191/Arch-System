@@ -1,5 +1,12 @@
 # Database Package Agent Tracer
 
+## 2026-10-27T07:06:00+02:00: Schema-Qualify pg_stat_statements, MV Refresh Logs & Expose get_pg_cron_jobs_health (209)
+
+- **Purpose**: `public.get_slow_queries`, `public.log_mv_refresh_start`, `public.log_mv_refresh_end`, `public.check_mv_freshness`, and `public.get_mv_refresh_stats` set `search_path = ''` while referencing `pg_stat_statements` (installed in `extensions`) and `materialized_view_refresh_log` (in `public`) without schema qualification (`42P01`).
+- **Changes**:
+  - `migrations/209_fix_pg_stat_statements_and_cron_health_rpc.sql`: Schema-qualified `extensions.pg_stat_statements` and `public.materialized_view_refresh_log`, hardened execute grants (`REVOKE ALL FROM PUBLIC, anon`), and added `public.get_pg_cron_jobs_health()` returning `cron.job` schedules joined with latest `cron.job_run_details`.
+- **Verification**: `pnpm --filter @repo/database test` ✅, `pnpm --filter @repo/database lint:migrations` ✅.
+
 ## 2026-10-23T09:05:51+02:00: Repair get_production_summary search_path Replay Failure (194)
 
 - **Purpose**: `get_production_summary` and `refresh_production_summary` declare `SET search_path = ''` but referenced `view_production_summary` unqualified. Creation fails on a fresh replay under the default `check_function_bodies = on`, and calls fail where creation was forced off (the executive Hub silently rendered zero KPIs).

@@ -19,6 +19,7 @@ import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 import { triggerTrackedWorkflow } from '@/lib/jobs/workflow-runner';
+import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
 
 // AGENT-TRACE: Server action fetching unified shift compilation from PostgreSQL RPC.
 export async function getUnifiedShiftReport(
@@ -118,129 +119,156 @@ export async function getMultiSiteShiftReport(
 export async function lockAndSignUnifiedShift(
   payload: LockAndSignShiftInput & { departmentSlug?: string }
 ): Promise<{ success: boolean; error?: string; jobId?: string }> {
-  try {
-    const validated = lockAndSignShiftSchema.parse(payload);
-
-    const supabase = await createServerSupabaseClient();
-    const principal = await getAuthenticatedEmployee(supabase);
-    if (!principal) {
-      throw new AuthError('Unauthorized', {
-        context: { operation: 'lockAndSignUnifiedShift' },
-      });
-    }
-
-    // 1. Fetch current user employee record (PIN + name fields beyond the
-    // helper's common shape — kept here so the auth cache stays small).
-    const { data: currentEmployee } = await supabase
-      .from('employees')
-      .select('id, role, full_name, pin_hash')
-      .eq('auth_id', principal.user.id)
-      .single();
-
-    if (!currentEmployee) {
-      throw new AuthError('Employee record not found', {
-        context: { operation: 'lockAndSignUnifiedShift' },
-      });
-    }
-
-    // 2. Identify approving supervisor (either specified or current employee if supervisor/admin)
-    let approver = currentEmployee;
-    if (validated.approvedById && validated.approvedById !== currentEmployee.id) {
-      const serviceClient = createServiceRoleClient();
-      const { data: specifiedApprover } = await serviceClient
-        .from('employees')
-        .select('id, role, full_name, pin_hash')
-        .eq('id', validated.approvedById)
-        .single();
-
-      if (!specifiedApprover) {
-        return { success: false, error: 'Approving supervisor not found' };
-      }
-      approver = specifiedApprover;
-    }
-
-    if (approver.role !== 'supervisor' && approver.role !== 'admin') {
-      throw new ForbiddenError('Only supervisors and admins can approve shift closeout', {
-        context: { role: approver.role },
-      });
-    }
-
-    if (!approver.pin_hash) {
-      return { success: false, error: 'Supervisor does not have a PIN configured' };
-    }
-
-    // 3. Verify BCrypt PIN
-    const isPinValid = await bcrypt.compare(validated.pin, approver.pin_hash);
-    if (!isPinValid) {
-      return { success: false, error: 'Invalid supervisor PIN' };
-    }
-
-    // 4. Update / Insert Shift Status via service role client
-    const serviceClient = createServiceRoleClient();
-    const { data: updatedStatus, error: upsertError } = await serviceClient
-      .from('shift_status')
-      .upsert(
-        {
+  return withAsyncSpan(
+    'shift_closeout_unified',
+    {
+      department_id: payload.departmentId ?? '',
+      shift: payload.shiftType ?? '',
+      date: payload.shiftDate ?? '',
+    },
+    async (span) => {
+      try {
+        const validated = lockAndSignShiftSchema.parse(payload);
+        const spanAttrs = {
           department_id: validated.departmentId,
-          shift_date: validated.shiftDate,
-          shift_type: validated.shiftType,
-          status: 'closed',
-          closed_at: new Date().toISOString(),
-          closed_by: currentEmployee.id,
-          approved_by: approver.id,
-          notes: validated.notes || null,
-        },
-        {
-          onConflict: 'department_id,shift_date,shift_type',
+          shift: validated.shiftType,
+          date: validated.shiftDate,
+        };
+        span?.setAttributes?.(spanAttrs);
+        setAttributes(spanAttrs);
+
+        const supabase = await createServerSupabaseClient();
+        const principal = await getAuthenticatedEmployee(supabase);
+        if (!principal) {
+          throw new AuthError('Unauthorized', {
+            context: { operation: 'lockAndSignUnifiedShift' },
+          });
         }
-      )
-      .select('id')
-      .single();
 
-    if (upsertError) {
-      serverLogger.error({
-        err: new Error(upsertError.message),
-        context: 'lockAndSignUnifiedShift:upsert',
-        details: upsertError,
-      });
-      return { success: false, error: upsertError.message };
+        // 1. Fetch current user employee record (PIN + name fields beyond the
+        // helper's common shape — kept here so the auth cache stays small).
+        const { data: currentEmployee } = await supabase
+          .from('employees')
+          .select('id, role, full_name, pin_hash')
+          .eq('auth_id', principal.user.id)
+          .single();
+
+        if (!currentEmployee) {
+          throw new AuthError('Employee record not found', {
+            context: { operation: 'lockAndSignUnifiedShift' },
+          });
+        }
+
+        // 2. Identify approving supervisor (either specified or current employee if supervisor/admin)
+        let approver = currentEmployee;
+        if (validated.approvedById && validated.approvedById !== currentEmployee.id) {
+          const serviceClient = createServiceRoleClient();
+          const { data: specifiedApprover } = await serviceClient
+            .from('employees')
+            .select('id, role, full_name, pin_hash')
+            .eq('id', validated.approvedById)
+            .single();
+
+          if (!specifiedApprover) {
+            return { success: false, error: 'Approving supervisor not found' };
+          }
+          approver = specifiedApprover;
+        }
+
+        if (approver.role !== 'supervisor' && approver.role !== 'admin') {
+          throw new ForbiddenError('Only supervisors and admins can approve shift closeout', {
+            context: { role: approver.role },
+          });
+        }
+
+        if (!approver.pin_hash) {
+          return { success: false, error: 'Supervisor does not have a PIN configured' };
+        }
+
+        // 3. Verify BCrypt PIN
+        const isPinValid = await bcrypt.compare(validated.pin, approver.pin_hash);
+        if (!isPinValid) {
+          return { success: false, error: 'Invalid supervisor PIN' };
+        }
+
+        // 4. Update / Insert Shift Status via service role client
+        const serviceClient = createServiceRoleClient();
+        const { data: updatedStatus, error: upsertError } = await serviceClient
+          .from('shift_status')
+          .upsert(
+            {
+              department_id: validated.departmentId,
+              shift_date: validated.shiftDate,
+              shift_type: validated.shiftType,
+              status: 'closed',
+              closed_at: new Date().toISOString(),
+              closed_by: currentEmployee.id,
+              approved_by: approver.id,
+              notes: validated.notes || null,
+            },
+            {
+              onConflict: 'department_id,shift_date,shift_type',
+            }
+          )
+          .select('id')
+          .single();
+
+        if (upsertError) {
+          serverLogger.error({
+            err: new Error(upsertError.message),
+            context: 'lockAndSignUnifiedShift:upsert',
+            details: upsertError,
+          });
+          return { success: false, error: upsertError.message };
+        }
+
+        // 5. Audit logging
+        await logAuditEvent({
+          action: 'update',
+          tableName: 'shift_status',
+          recordId: updatedStatus?.id,
+          departmentId: validated.departmentId,
+          newData: {
+            status: 'closed',
+            approved_by: approver.id,
+            closed_by: currentEmployee.id,
+            shift_date: validated.shiftDate,
+            shift_type: validated.shiftType,
+          },
+        });
+
+        const slug = payload.departmentSlug || 'control-room';
+        revalidatePath(`/${slug}/shift-compilation`);
+        revalidatePath(`/${slug}`);
+        revalidatePath(`/${slug}/shift-coverage`);
+
+        // 6. Trigger background generation of Shift PDF via n8n & Redis
+        const jobId = `shift-closeout-${updatedStatus?.id}-${Date.now()}`;
+        await triggerTrackedWorkflow(jobId, '/webhook/shift-closed', {
+          departmentId: validated.departmentId,
+          shiftDate: validated.shiftDate,
+          shiftType: validated.shiftType,
+          statusId: updatedStatus?.id,
+        });
+
+        const closedEventAttrs = {
+          department_id: validated.departmentId,
+          shift: validated.shiftType,
+          date: validated.shiftDate,
+          shift_status_id: updatedStatus?.id ?? '',
+          job_id: jobId,
+        };
+        span?.addEvent?.('shift_closed', closedEventAttrs);
+        addEvent('shift_closed', closedEventAttrs);
+
+        return { success: true, jobId };
+      } catch (err: unknown) {
+        if (err instanceof ValidationError) {
+          return { success: false, error: err.message };
+        }
+        const message = err instanceof Error ? err.message : 'Failed to sign and close shift';
+        return { success: false, error: message };
+      }
     }
-
-    // 5. Audit logging
-    await logAuditEvent({
-      action: 'update',
-      tableName: 'shift_status',
-      recordId: updatedStatus?.id,
-      departmentId: validated.departmentId,
-      newData: {
-        status: 'closed',
-        approved_by: approver.id,
-        closed_by: currentEmployee.id,
-        shift_date: validated.shiftDate,
-        shift_type: validated.shiftType,
-      },
-    });
-
-    const slug = payload.departmentSlug || 'control-room';
-    revalidatePath(`/${slug}/shift-compilation`);
-    revalidatePath(`/${slug}`);
-    revalidatePath(`/${slug}/shift-coverage`);
-
-    // 6. Trigger background generation of Shift PDF via n8n & Redis
-    const jobId = `shift-closeout-${updatedStatus?.id}-${Date.now()}`;
-    await triggerTrackedWorkflow(jobId, '/webhook/shift-closed', {
-      departmentId: validated.departmentId,
-      shiftDate: validated.shiftDate,
-      shiftType: validated.shiftType,
-      statusId: updatedStatus?.id,
-    });
-
-    return { success: true, jobId };
-  } catch (err: unknown) {
-    if (err instanceof ValidationError) {
-      return { success: false, error: err.message };
-    }
-    const message = err instanceof Error ? err.message : 'Failed to sign and close shift';
-    return { success: false, error: message };
-  }
+  );
 }
