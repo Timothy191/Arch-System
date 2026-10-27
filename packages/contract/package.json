@@ -6,7 +6,7 @@
     "@repo/typescript-config": "1.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
-    "jest": "^30.0.0",
+    "jest": "^30.2.0",
     "openapi-zod-client": "^1.18.3",
     "tsx": "^4.19.0",
     "typescript": "catalog:",

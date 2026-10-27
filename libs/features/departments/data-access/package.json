@@ -7,13 +7,13 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "dependencies": {},
   "scripts": {
     "type-check": "tsc --noEmit",
     "lint": "biome check .",
     "test": "jest --config jest.config.js --passWithNoTests --runInBand"
   },
   "devDependencies": {
+    "jest": "^30.2.0",
     "typescript": "catalog:"
   }
 }

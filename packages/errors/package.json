@@ -12,9 +12,9 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.0.0",
     "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
     "typescript": "catalog:"
   }
 }
