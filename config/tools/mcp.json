@@ -1,57 +1,41 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
-      "description": "Safe local filesystem operations and directory tree inspection",
+    "skills-mcp": {
+      "command": "node",
+      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
+      "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
       "type": "stdio"
     },
-    "memory": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "description": "Persistent Knowledge Graph Memory across conversations and agents",
+    "memory-gateway-mcp": {
+      "command": "node",
+      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
+      "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
       "type": "stdio"
     },
-    "sequential-thinking": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "type": "remote"
+    },
+    "context7": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "cwd": "/tmp",
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
     },
-    "ripgrep": {
-      "command": "npx",
-      "args": ["-y", "mcp-ripgrep"],
-      "description": "Blazing fast AST and regex code search across local projects",
+    "codemap": {
+      "command": "/home/tim/.local/bin/codemap",
+      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
-    "git": {
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "description": "Git repository operations, diffs, branches, and commit tracking",
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
+      "cwd": "/tmp",
+      "description": "Chrome DevTools MCP for browser inspection and automation",
       "type": "stdio"
-    },
-    "codebase-memory": {
-      "command": "npx",
-      "args": ["-y", "codebase-memory-mcp@0.11.0"],
-      "env": {
-        "CODEBASE_MEMORY_PERSIST": "true",
-        "CODEBASE_MEMORY_PROJECT": "arch-systems-fork"
-      }
-    },
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", "${SUPABASE_DATABASE_URL}"]
-    },
-    "redis": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "redis-mcp-server",
-        "redis-mcp-server",
-        "--url",
-        "redis://127.0.0.1:6379/0"
-      ]
     }
   }
 }

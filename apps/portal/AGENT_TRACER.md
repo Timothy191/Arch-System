@@ -1,3 +1,14 @@
+## 2026-10-27T09:15:00+02:00: Pre-Redeploy Consolidation — Control Room Operations, 12h Shift Cap, Cron Secret Isolation & Access Control Attendance Register
+
+- **Purpose**: Consolidate and verify all pending feature, security, and UI updates prior to production redeployment.
+- **Changes**:
+  - `libs/features/departments/data-access/src/departments.ts`, `apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx`, & `apps/portal/app/(departments)/[department]/engineering-notes/page.tsx`: Renamed `"Eng Notes"` / `"Engineering Notes"` to `"Operations"` across sidebar navigation, Quick Jump menu, and page header.
+  - `apps/portal/lib/shift-sheet-buckets.ts` & `apps/portal/app/(departments)/[department]/engineering-notes/{EngineeringOverviewTable.tsx,actions.ts}`: Classified all 12 delay columns into `production` (light blue `sky`), `nonProduction` (separating `amber`), and `engineering` (`rose`), updated delay breakdown formulas, and enforced the 12-hour shift cap per machine (`MAX_SHIFT_HOURS = 12`).
+  - `turbo.json`, `apps/portal/lib/api/cron-auth.ts`, & `apps/portal/app/api/cron/*/route.ts`: Isolated server secrets to task-scoped `passThroughEnv` in `turbo.json` and wired constant-time (`timingSafeEqual`) `authorizeCronRequest` across all 4 scheduled cron endpoints.
+  - `apps/portal/app/(departments)/access-control/{access-logs/page.tsx,access-logs/AccessLogsClient.tsx,access-logs/access-logs.test.tsx,actions/badges.ts,components/QuickActionHub.tsx}` & `scripts/seeds/seed-access-logs.mjs`: Consolidated the Employee Attendance Register Dossier, multi-dimensional access log filters, and Easy Scanner Web Console with strict TypeScript types (zero `any`) and Next.js 16 `revalidateTag('access-control', 'max')`.
+  - `apps/portal/app/(departments)/control-room/page.tsx` & `apps/portal/features/departments/components/control-room/ScadaPanel.tsx`: Added semantic `<time>` header formatting and `gold-steel-border` accents.
+- **Verification**: `pnpm agent:verify` ✅ (27/27 PASS); `node tools/scripts/vercel-preflight.cjs --prod` ✅ (100% PASSED); `node --env-file=apps/portal/.env scripts/verify-c66-database.mjs` ✅ (4/4 PASSED).
+
 ## 2026-10-27T08:52:00+02:00: Chainway C66 Android Scanner Integration & Supabase Database Verification
 
 - **Purpose**: Enable Chainway C66 Android handheld industrial scanners to authenticate and send scan requests to Arch-System on Vercel (`POST /api/c66`) and persist access events to Supabase `access_logs`.

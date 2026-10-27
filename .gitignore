@@ -310,5 +310,11 @@ get-token.js
 # Local CI runner output and its pull-request validation worktrees.
 .ci-local/
 
+# Terraform runtime provider cache & state files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+**/.terraform.lock.hcl
+
 # Agent token telemetry, rewritten by tools/scripts/token-tracker.cjs on every session.
 .agents/memory_base/token-usage.json

@@ -1033,8 +1033,8 @@ graph LR
       },
       {
         label: 'MCP Servers',
-        value: '10 Registered',
-        detail: 'skills-mcp · memory-gateway-mcp · slim-tooling-mcp · langgraph-mcp',
+        value: '6 Registered',
+        detail: 'supabase · context7 · codemap · chrome-devtools · skills-mcp · memory-gateway-mcp',
       },
       {
         label: 'Observability',
@@ -1157,7 +1157,7 @@ graph LR
           {
             name: 'slim-tooling-mcp & langgraph-mcp',
             role: 'Payload compaction proxy and Python LangGraph supervisor + Langfuse tracing',
-            rule: 'Verified by pnpm mcp:verify during agent:verify',
+            rule: 'Optional catalog entries in tools/mcp/mcp-registry.json (not in live registration)',
           },
         ],
       },
@@ -2038,7 +2038,7 @@ flowchart TD
           {
             name: 'langgraph-mcp/',
             role: 'Python (hatchling) MCP server exposing supervisor_* and langfuse_* tools',
-            rule: 'Registered in root .mcp.json alongside 9 other stdio servers',
+            rule: 'Standalone Python server; not part of root .mcp.json registration',
           },
         ],
       },

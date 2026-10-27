@@ -54,6 +54,15 @@ export function QuickActionHub() {
         </div>
 
         <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
+          {/* Action 0: Easy Scanner & Attendance Register */}
+          <Link
+            href="/access-control/access-logs"
+            className="flex items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 font-bold text-blue-800 text-xs transition-colors hover:bg-blue-600 hover:text-white active:scale-95"
+          >
+            <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+            <span>Easy Scanner & Register</span>
+          </Link>
+
           {/* Action 1: Print Badge */}
           <Link
             href="/access-control/print-cards"

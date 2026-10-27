@@ -101,7 +101,7 @@ export function ControlRoomQuickNav() {
         <button
           type="button"
           data-testid="control-room-quick-nav-trigger"
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-sm transition-all duration-200 hover:border-[var(--accent-blue)]/50 hover:bg-[var(--bg-tertiary)] hover:shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:scale-[0.98] sm:text-sm"
+          className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs shadow-sm transition-all duration-200 hover:border-[var(--accent-blue)]/50 hover:bg-[var(--bg-tertiary)] hover:shadow focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 active:scale-[0.98] sm:text-sm"
           aria-label="Quick navigation to other Control Room tabs"
         >
           <Compass className="h-4 w-4 shrink-0 text-[var(--accent-blue)]" />

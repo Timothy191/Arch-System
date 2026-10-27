@@ -1,19 +1,15 @@
-import { AvatarWithIcon, Badge, Breadcrumb, BreadcrumbItem } from '@repo/ui';
-import { Pagination } from '@repo/ui/components/ui/pagination';
+import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@repo/ui/components/ui/table';
-import { GlassCard } from '@repo/ui/GlassCard';
-import { Clock } from 'lucide-react';
-import { getDepartmentContext } from '~/lib/dept-context';
-import { getAccessLogsForDepartment } from '../actions';
+  getAccessLogsWithFilters,
+  getEmployeeAttendanceSummary,
+  getPersonnelListForFilter,
+} from '../actions';
+import { AccessLogsClient, type ResolvedAccessLog } from './AccessLogsClient';
 
-interface AccessLogWithBadge {
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 50;
+
+interface AccessLogWithBadgeRelation {
   id: string;
   scanned_at: string;
   gate_location: string;
@@ -21,49 +17,89 @@ interface AccessLogWithBadge {
   denial_reason: string | null;
   access_type: string;
   direction: string;
-  badge: {
+  alcohol_tested?: string | null;
+  operator?: string | null;
+  device_id?: string | null;
+  badge?: {
+    id: string;
     qr_code: string;
+    rfid_code: string | null;
     entity_type: string;
-    personnel: { first_name: string; surname: string } | null;
-    visitor: { first_name: string; surname: string } | null;
-  };
+    personnel?: {
+      id: string;
+      first_name: string;
+      surname: string;
+      emp_code: string;
+      job_title: string;
+    } | null;
+    visitor?: { id: string; first_name: string; surname: string; company: string } | null;
+    fleet?: { fleet_code: string; registration_number: string } | null;
+  } | null;
 }
 
 export default async function AccessLogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; pageSize?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    pageSize?: string;
+    employeeId?: string;
+    search?: string;
+    direction?: string;
+    status?: string;
+    dateRange?: string;
+  }>;
 }) {
   const params = await searchParams;
-  const page = parseInt(params.page || '1', 10);
-  const pageSize = parseInt(params.pageSize || '50', 10);
+  const page = parseInt(params.page || String(DEFAULT_PAGE), 10);
+  const pageSize = parseInt(params.pageSize || String(DEFAULT_PAGE_SIZE), 10);
+  const employeeId = params.employeeId || null;
+  const searchQuery = params.search || null;
+  const direction = (params.direction as 'IN' | 'OUT' | 'ALL') || 'ALL';
+  const statusFilter = (params.status as 'GRANTED' | 'DENIED' | 'ALL') || 'ALL';
+  const dateRange = (params.dateRange as 'TODAY' | 'WEEK' | 'MONTH' | 'ALL') || 'ALL';
 
-  const { deptId } = await getDepartmentContext({
-    department: 'access-control',
-  });
+  // Fetch personnel list for filtering and initial logs in parallel
+  const [personnelList, logsResult, attendanceSummary] = await Promise.all([
+    getPersonnelListForFilter(),
+    getAccessLogsWithFilters({
+      employeeId,
+      page,
+      pageSize,
+      searchQuery,
+      direction,
+      statusFilter,
+      dateRange,
+    }),
+    employeeId ? getEmployeeAttendanceSummary(employeeId) : Promise.resolve(null),
+  ]);
 
-  const { logs, totalCount } = await getAccessLogsForDepartment(deptId, page, pageSize);
+  const rawLogs = (logsResult.logs ?? []) as unknown as AccessLogWithBadgeRelation[];
 
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  const resolvedLogs = ((logs ?? []) as unknown as AccessLogWithBadge[]).map((log) => {
-    const { badge } = log;
-    let entityName = 'Unknown';
+  const resolvedLogs: ResolvedAccessLog[] = rawLogs.map((log) => {
+    const badge = log.badge;
+    let entityName = 'Unknown Entity';
     let entityType: string = badge?.entity_type ?? 'Unknown';
+    let personnelIdentifier: string | null = null;
 
     if (badge?.personnel) {
       entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
       entityType = 'Employee';
+      personnelIdentifier = badge.personnel.id;
     } else if (badge?.visitor) {
       entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
       entityType = 'Visitor';
+    } else if (badge?.fleet) {
+      entityName = `Fleet: ${badge.fleet.fleet_code}`;
+      entityType = 'Fleet';
     }
 
     let status = log.access_granted ? 'Granted' : 'Denied';
     if (!log.access_granted && log.denial_reason) {
-      if (log.denial_reason.includes('Expired') || log.denial_reason.includes('expired')) {
+      const reasonLower = log.denial_reason.toLowerCase();
+      if (reasonLower.includes('expired')) {
         status = 'Expired Credential';
-      } else if (log.denial_reason.includes('Tailgate')) {
+      } else if (reasonLower.includes('tailgate')) {
         status = 'Tailgate Alert';
       }
     }
@@ -73,10 +109,12 @@ export default async function AccessLogsPage({
       timestamp: log.scanned_at,
       entityName,
       entityType,
-      qrCodeId: badge?.qr_code ?? 'N/A',
+      personnelId: personnelIdentifier,
+      qrCodeId: badge?.qr_code ?? badge?.rfid_code ?? 'N/A',
       zone: log.gate_location,
       accessMethod: log.access_type ?? 'QR Scan',
       status,
+      denialReason: log.denial_reason,
       direction: log.direction,
     };
   });
@@ -86,124 +124,16 @@ export default async function AccessLogsPage({
       <Breadcrumb type="text">
         <BreadcrumbItem href="/">Departments</BreadcrumbItem>
         <BreadcrumbItem href="/access-control/badges">Access Control</BreadcrumbItem>
-        <BreadcrumbItem active>Access Logs</BreadcrumbItem>
+        <BreadcrumbItem active>Access Logs & Attendance</BreadcrumbItem>
       </Breadcrumb>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-bold text-2xl text-[var(--text-heading)]">Access Logs</h2>
-          <p className="mt-1 text-[var(--text-muted)] text-sm">
-            Recent scan events across all entry points for this department.
-          </p>
-        </div>
-      </div>
-
-      <GlassCard className="overflow-hidden p-0">
-        <div className="flex items-center justify-between border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/50 p-4">
-          <h3 className="flex items-center font-semibold text-[var(--text-heading)]">
-            <Clock className="mr-2 h-4 w-4 text-[var(--text-muted)]" />
-            Recent Events
-          </h3>
-          <span className="text-[var(--text-muted)] text-xs">{totalCount} total events</span>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-[var(--border-default)] border-b hover:bg-transparent">
-              <TableHead className="text-[var(--text-muted)]">Time</TableHead>
-              <TableHead className="text-[var(--text-muted)]">Entity</TableHead>
-              <TableHead className="text-[var(--text-muted)]">Type</TableHead>
-              <TableHead className="text-[var(--text-muted)]">QR Code</TableHead>
-              <TableHead className="text-[var(--text-muted)]">Zone</TableHead>
-              <TableHead className="text-[var(--text-muted)]">Direction</TableHead>
-              <TableHead className="text-right text-[var(--text-muted)]">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {resolvedLogs.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-[var(--text-muted)]">
-                  No access logs found for this department.
-                </TableCell>
-              </TableRow>
-            )}
-            {resolvedLogs.map((log) => (
-              <TableRow
-                key={log.id}
-                className="border-[var(--border-default)]/50 border-b transition-colors hover:bg-[var(--bg-tertiary)]"
-              >
-                <TableCell className="font-mono text-[var(--text-secondary)] text-sm">
-                  {new Date(log.timestamp).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false,
-                  })}
-                </TableCell>
-                <TableCell className="font-medium text-[var(--text-heading)]">
-                  <div className="flex items-center gap-2.5">
-                    <AvatarWithIcon
-                      size={24}
-                      letter={log.entityName
-                        .replace(/[^A-Za-z0-9]/g, '')
-                        .slice(0, 2)
-                        .toUpperCase()}
-                      title={log.entityName}
-                      icon={
-                        log.status === 'Granted' ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        ) : (
-                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                        )
-                      }
-                      iconBackground
-                    />
-                    <span>{log.entityName}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-[var(--text-secondary)] capitalize">
-                  {log.entityType}
-                </TableCell>
-                <TableCell className="font-mono text-[var(--accent-blue)] text-sm">
-                  {log.qrCodeId}
-                </TableCell>
-                <TableCell className="text-[var(--text-secondary)]">{log.zone}</TableCell>
-                <TableCell className="text-[var(--text-secondary)]">{log.direction}</TableCell>
-                <TableCell className="text-right">
-                  {log.status === 'Granted' ? (
-                    <Badge variant="green" contrast="low" size="sm">
-                      Granted
-                    </Badge>
-                  ) : log.status === 'Denied' ? (
-                    <Badge variant="red" contrast="low" size="sm">
-                      Denied
-                    </Badge>
-                  ) : log.status === 'Expired Credential' ? (
-                    <Badge variant="amber" contrast="low" size="sm">
-                      Expired
-                    </Badge>
-                  ) : (
-                    <Badge variant="gray" contrast="low" size="sm">
-                      {log.status}
-                    </Badge>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        {/* Pagination */}
-        {totalCount > 0 && (
-          <div className="border-[var(--border-default)] border-t p-4">
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-            />
-          </div>
-        )}
-      </GlassCard>
+      <AccessLogsClient
+        initialLogs={resolvedLogs}
+        initialTotalCount={logsResult.totalCount}
+        personnelList={personnelList}
+        initialEmployeeId={employeeId}
+        initialAttendanceSummary={attendanceSummary}
+      />
     </div>
   );
 }

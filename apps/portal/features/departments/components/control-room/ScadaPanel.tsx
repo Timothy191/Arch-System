@@ -276,7 +276,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
           <div
             role="tablist"
             aria-label="Excavator and Registered Machine views"
-            className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-white/80 p-0.5 text-[11px]"
+            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-white/80 p-0.5 text-[11px]"
           >
             <button
               type="button"
@@ -333,8 +333,8 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
       </div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-4 gap-2 border-[var(--border-subtle)] border-b bg-white/60 px-4 py-2.5">
-        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
+      <div className="gold-steel-border gold-steel-border-slim grid grid-cols-4 gap-2 border-[var(--border-subtle)] border-b bg-white/60 px-4 py-2.5">
+        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
           <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
             Active Excavators
           </span>
@@ -342,7 +342,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             {excavators.length} Digging
           </span>
         </div>
-        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
+        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
           <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
             Registered Fleet
           </span>
@@ -350,7 +350,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             {registeredMachines.length} Units
           </span>
         </div>
-        <div className="rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-1.5">
+        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-1.5">
           <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
             Loaded Loads
           </span>
@@ -358,7 +358,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             {Math.max(totalMachineLoads, totalExcavatorLoads).toLocaleString()} Loads
           </span>
         </div>
-        <div className="rounded-lg border border-accent-green/25 bg-accent-green/10 px-2.5 py-1.5">
+        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-accent-green/25 bg-accent-green/10 px-2.5 py-1.5">
           <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
             Loaded Volume
           </span>

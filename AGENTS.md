@@ -203,7 +203,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - **Root install is blocked on purpose** — `pnpm install` at `/home/tim/Fork` exits 1 via `preinstall` hook. Install inside `Arch-System/`.
 - **Turbopack** is the bundler for both dev and prod (webpack unavailable due to `node:async_hooks` in inngest). `output: standalone` only when not on Vercel.
 - **Env files**: `Arch-System/.env` (template at `Arch-System/.env.example`), `Arch-System/apps/portal/.env` (template at `apps/portal/env/.env.example`), `Arch-System/.env.tools`. Server-side keys (`SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_KEY`, `DATABASE_URL`, etc.) must never reach the client.
-- **MCP registration**: `.mcp.json` at root registers 11 stdio servers + 4 AgentsRoom HTTP servers. `Arch-System/.mcp.json` has 18.
+- **MCP registration**: `.mcp.json` at root registers 5 stdio servers (`skills-mcp`, `memory-gateway-mcp`, `context7`, `codemap`, `chrome-devtools`) + 1 remote (`supabase`). Optional/legacy servers are cataloged in `tools/mcp/mcp-registry.json` (`required: false`).
 - **Target cloud-hosted Supabase exclusively** — no local Supabase container stack. Local Redis with UI runs autonomously on `:5540`.
 
 ## Testing & QA

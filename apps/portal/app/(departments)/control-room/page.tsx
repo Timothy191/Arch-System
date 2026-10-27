@@ -59,14 +59,19 @@ export default async function ControlRoomPage() {
             </div>
             <div className="flex items-center gap-3 self-start sm:self-auto">
               <ControlRoomQuickNav />
-              <p className="whitespace-nowrap text-[var(--text-muted)] text-sm">
-                {new Date().toLocaleDateString('en-ZA', {
-                  weekday: 'long',
+              <time
+                className="whitespace-nowrap text-[var(--text-muted)] text-sm"
+                dateTime={new Date().toISOString()}
+              >
+                {new Date().toLocaleString('en-ZA', {
+                  weekday: 'short',
                   year: 'numeric',
-                  month: 'long',
+                  month: 'short',
                   day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
-              </p>
+              </time>
             </div>
           </div>
 

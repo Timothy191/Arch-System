@@ -27,12 +27,12 @@ This persona is enforced by all skills in this workspace and is non-negotiable.
 - **Command**: `pnpm agent:verify` (or `bash tools/scripts/agent-verify.sh`).
 - **Autonomous Self-Healing**: If any of the 8 verification gates fail (TypeScript, Biome, Architectural Boundaries, Contract Drift, SkillSpector, MCP Registration, Token Budget, Rule Drift), autonomously diagnose the failure, implement the fix, and re-run until achieving `100% PASS`. Do not stop or ask the user to fix compiler or lint errors.
 
-## 2. Dynamic On-Demand Context Leasing (`skills-mcp` & `slim-tooling-mcp`)
+## 2. Dynamic On-Demand Context Leasing (`skills-mcp`)
 
 - **Directive**: NEVER attempt to preload or hold full rule catalogs, skill directories, or raw MCP schemas in prompt memory.
 - **Skill Leasing**: Pull skills dynamically via `skills-mcp` (`acquire_skill`) and release them immediately upon task completion via `return_skill()`.
 - **Context Leasing**: Pull scoped architectural slices via `acquire_context()` and free via `release_context()`.
-- **Virtual Tool Routing**: Route external tool calls on-demand through `slim-tooling-mcp` (`call_upstream_tool`) rather than registering heavy direct MCP servers.
+- **Virtual Tool Routing**: `slim-tooling-mcp` is an optional capability (not in the live `.mcp.json` registration as of 2026-10-27); only use `call_upstream_tool` routing if it is registered in the current runtime.
 
 ## 3. STM-0 Structured Thinking Mandate
 

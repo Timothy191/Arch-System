@@ -253,10 +253,9 @@ function analyzePreTaskContextPopulation(rules, mcpConfig, budget) {
     }
   }
 
-  // Measured BPE token footprint of tools/list schemas across registered MCP servers:
-  // skills-mcp (13 tools: ~1,792), memory-gateway-mcp (6 tools: ~757),
-  // slim-tooling-mcp (6 tools: ~646), langgraph-mcp (10 tools: ~1,300),
-  // plus standard stdio servers (filesystem/git/ripgrep/fetch/memory/sequential-thinking: ~3,800)
+  // Conservative ceiling for tools/list schema footprint, measured 2026-10-26
+  // before the config trim (live set: supabase, context7, codemap, chrome-devtools,
+  // skills-mcp, memory-gateway-mcp). Kept as an upper bound until re-measured.
   const mcpToolSchemasTokens = 8295;
   const totalPreTaskTokens = staticDocsTokens + rules.totalTokens + mcpToolSchemasTokens;
   const windowSize = budget.contextWindowTokens || 200000;
@@ -681,12 +680,12 @@ function checkBudget() {
   }
   if (mcpConfig.count > maxDirectMcp) {
     issues.push(
-      `Direct MCP servers exceed budget (${mcpConfig.count} > ${maxDirectMcp}). Route external tools through slim-tooling-mcp.`
+      `Direct MCP servers exceed budget (${mcpConfig.count} > ${maxDirectMcp}). Trim registrations to the required set (tools/mcp/mcp-registry.json).`
     );
   }
   if (mcpConfig.enableAllProjectMcpServers) {
     issues.push(
-      `enableAllProjectMcpServers must be false to prevent raw tool schema explosion. Use slim-tooling-mcp proxy.`
+      `enableAllProjectMcpServers must be false to prevent raw tool schema explosion. Register only the required server set (see tools/mcp/mcp-registry.json).`
     );
   }
 

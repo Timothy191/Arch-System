@@ -1,89 +1,28 @@
 {
   "mcpServers": {
-    "upstash": {
-      "type": "remote",
-      "url": "https://mcp.upstash.com/mcp",
-      "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
-      "serverUrl": "https://mcp.upstash.com/mcp"
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
-      "description": "Safe local filesystem operations and directory tree inspection",
-      "type": "stdio"
-    },
-    "memory": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "description": "Persistent Knowledge Graph Memory across conversations and agents",
-      "type": "stdio"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
-      "type": "stdio"
-    },
-    "ripgrep": {
-      "command": "npx",
-      "args": ["-y", "mcp-ripgrep"],
-      "description": "Blazing fast AST and regex code search across local projects",
-      "type": "stdio"
-    },
-    "git": {
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "description": "Git repository operations, diffs, branches, and commit tracking",
-      "type": "stdio"
-    },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web Content Fetcher (Zero-Auth)",
-      "type": "stdio"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
-    },
-    "knowledge-rail": {
-      "command": "npx",
-      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"]
-    },
-    "next-devtools": {
-      "command": "npx",
-      "args": ["-y", "next-devtools-mcp@0.4.0"]
-    },
-    "postgres": {
-      "command": "bash",
-      "args": [
-        "-lc",
-        "exec npx -y @modelcontextprotocol/server-postgres@0.6.2 \"$SUPABASE_DATABASE_URL\""
-      ],
-      "env": {
-        "SUPABASE_DATABASE_URL": "${SUPABASE_DATABASE_URL}"
-      }
-    },
-    "redis": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "redis-mcp-server",
-        "redis-mcp-server",
-        "--url",
-        "redis://127.0.0.1:6379/0"
-      ]
-    },
     "skills-mcp": {
       "command": "node",
       "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
-      "description": "On-demand skill, context, and persona registry",
+      "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
       "type": "stdio"
     },
     "memory-gateway-mcp": {
       "command": "node",
       "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
-      "description": "Federated multi-tier memory gateway",
+      "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
+      "type": "stdio"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "type": "remote",
+      "serverUrl": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "cwd": "/tmp",
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
     },
     "codemap": {
@@ -92,24 +31,10 @@
       "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
       "type": "stdio"
     },
-    "code-index": {
-      "command": "/home/tim/.local/bin/code-index",
-      "args": ["serve", "--path", "/home/tim/Fork/Arch-System"],
-      "description": "High-performance Rust AST code indexer: sub-ms symbol search, callers, callees, and FTS",
-      "type": "stdio",
-      "env": {
-        "CODE_INDEX_HOME": "/home/tim/.local/share/code-index"
-      }
-    },
-    "docker": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-docker"],
-      "description": "Docker container management and introspection",
-      "type": "stdio"
-    },
     "chrome-devtools": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@1.10.1"],
+      "cwd": "/tmp",
       "description": "Chrome DevTools MCP for browser inspection and automation",
       "type": "stdio"
     }
