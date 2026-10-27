@@ -1,3 +1,12 @@
+## 2026-10-27T13:25:00+02:00: Remove Unused Font Preload & Fix SystemTray Hydration Mismatch (#418)
+
+- **Purpose**: Eliminate browser preload warnings for unused `Anurati-Regular.otf` font and resolve React hydration mismatch (#418) in `SystemTrayPillInner` on production (`plantcor.app`), plus provision full admin credentials for `Shane@plantcormining.co.za`.
+- **Changes**:
+  - `apps/portal/app/layout.tsx`: Removed `<link rel="preload" href="/fonts/Anurati-Regular.otf" as="font" ... />` since `.font-anurati` maps to geometric display typography (`Outfit` / `IBM Plex Sans`) in `typography.css`.
+  - `apps/portal/components/system/SystemTray.tsx`: Guarded dynamic server health indicator state with a client `mounted` state and `suppressHydrationWarning` so SSR and initial client hydration trees match deterministically.
+  - `.agents/rules/ui-taste-and-motion.md` & `AGENTS.md`: Added hard invariants requiring explicit `id` or `name` attributes on all form fields and explicit dimensions (`width`/`height` or `fill`) on lazy-loaded images.
+- **Verification**: `pnpm --filter portal type-check` ✅; `pnpm --filter portal test -- --testPathPatterns="SystemTray|layout"` ✅; Chrome DevTools MCP verification ✅.
+
 ## 2026-10-27T09:15:00+02:00: Pre-Redeploy Consolidation — Control Room Operations, 12h Shift Cap, Cron Secret Isolation & Access Control Attendance Register
 
 - **Purpose**: Consolidate and verify all pending feature, security, and UI updates prior to production redeployment.

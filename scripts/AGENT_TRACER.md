@@ -1,5 +1,11 @@
 # Scripts Agent Tracer
 
+## 2026-10-27T13:25:00+02:00: Fix `scripts/dev.sh` Case Statement Syntax in Quick Mode
+
+- **Purpose:** Fix shell syntax errors (`;;` orphaned after recent refactor) in `scripts/dev.sh` so `pnpm dev:quick` executes cleanly.
+- **Changes:** Removed duplicate `;;` in CLI flag parser and restored the `case "$sec_redis_host"` and `SUPABASE_ANON_KEY` guard blocks in Phase 2.6 (`Security & Exposure`).
+- **Verification:** `bash -n scripts/dev.sh` ✅; `pnpm dev:quick` ✅.
+
 ## 2026-09-28: Setup Command and Compose Env-File Alignment
 
 - **Purpose:** Make the development and local deployment launchers use the repository's configured Supabase project and Docker tools credentials source.

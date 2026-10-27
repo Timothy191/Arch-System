@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useFetchOfflineQueue } from '@/hooks/useFetchOfflineQueue';
 import {
   BatteryStatusRow,
@@ -61,13 +61,21 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
   const health = useServerHealth();
   const offlineQueue = useFetchOfflineQueue();
 
-  const healthDotColor = health.loading
-    ? 'bg-[var(--text-muted)]'
-    : health.status === 'healthy'
-      ? 'bg-[var(--accent-green)]'
-      : health.status === 'degraded'
-        ? 'bg-[var(--accent-blue)]'
-        : 'bg-[var(--accent-red)]';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isHealthy = mounted && health.status === 'healthy' && !health.loading;
+  const healthDotColor =
+    !mounted || health.loading
+      ? 'bg-[var(--text-muted)]'
+      : health.status === 'healthy'
+        ? 'bg-[var(--accent-green)]'
+        : health.status === 'degraded'
+          ? 'bg-[var(--accent-blue)]'
+          : 'bg-[var(--accent-red)]';
 
   const VolumeIcon =
     volume.muted || volume.volume === 0 ? VolumeX : volume.volume < 50 ? Volume1 : Volume2;
@@ -138,8 +146,8 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             )}
           >
             {/* Server health dot */}
-            <span className="relative flex h-2 w-2">
-              {health.status === 'healthy' && !health.loading && (
+            <span className="relative flex h-2 w-2" suppressHydrationWarning>
+              {isHealthy && (
                 <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-[var(--accent-green)] opacity-75" />
               )}
               <span className={cn('relative inline-flex h-2 w-2 rounded-full', healthDotColor)} />

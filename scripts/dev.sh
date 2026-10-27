@@ -309,7 +309,6 @@ while [ $# -gt 0 ]; do
     CLOUD_MODE=true
     shift
     ;;
-    ;;
   --cms)
     START_CMS=true
     shift
@@ -444,7 +443,8 @@ if [ "$FORCE_RESTART" = "true" ]; then
     check "Python venv" "skip" "not present"
   fi
 
-  clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
+  clean_dir_cache "$REPO_ROOT/.vercel/output" "Vercel output cache (.vercel/output)"
+  clean_dir_cache "$REPO_ROOT/.vercel/cache" "Vercel build cache (.vercel/cache)"
 
   if [ -f "$REPO_ROOT/skills-lock.json" ]; then
     rm -f "$REPO_ROOT/skills-lock.json"
@@ -763,12 +763,27 @@ elif [ "$CLOUD_MODE" = "true" ]; then
   # fi
 fi
 
+# ── Phase 2.6: Security & Exposure ────────────────────────
+phase "2.6" "Security & Exposure"
+
+sec_redis_host="localhost"
+if [ -n "${REDIS_URL:-}" ]; then
+  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E \
+    's#^[[:alpha:]][[:alnum:]+.-]*://##; s#^.*@##; s#[:/].*$##')
+  [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
+fi
+case "$sec_redis_host" in
+localhost | 127.0.0.1 | 0.0.0.0)
+  check "Redis bind" "pass" "localhost-only ($sec_redis_host)"
   ;;
 *)
   check "Redis bind" "warn" "$sec_redis_host is non-local — bind 127.0.0.1 + set a password if exposed"
   ;;
 esac
 
+if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+  check "Anon key" "pass" "NEXT_PUBLIC_SUPABASE_ANON_KEY present"
+else
   check "Anon key" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env"
 fi
 check "RLS advisory" "info" "ensure RLS ENABLED on every non-public table (employees.role/department_id policies)"

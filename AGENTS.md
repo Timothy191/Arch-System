@@ -163,7 +163,8 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - **Light mode only**: canvas `#f3f4f6`; semantic OKLCH tokens from `@repo/theme/src/tokens/`. No `dark:` variants or raw hex/rgb.
 - **Glass surfaces**: `@repo/ui/GlassCard` (`variant="default" | "window" | "spotlight" | "glowborder" | "liquid"`).
 - **Tailwind utility composition**: ≤16 utilities per className (target ≤12); extract repeated chains (≥10 utilities, 3+ uses) into component, CVA variant, `cn()` constant, or theme class. `@apply`/`@layer components` only in `packages/theme` and `packages/ui` globals.
-- **Images**: `next/image` with explicit `width`/`height` or `fill` + sized parent, descriptive `alt`. Raw `<img>` only in root error boundaries.
+- **Images**: `next/image` with explicit `width`/`height` or `fill` + sized parent, descriptive `alt`. Lazy-loaded images must declare explicit dimensions. Raw `<img>` only in root error boundaries.
+- **Form fields & a11y**: Every form field element (`<input>`, `<select>`, `<textarea>`) must have an `id` or `name` attribute and linked `<label htmlFor>`.
 - **Boundaries & imports**: see layering table; import via canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/...`.
 - **Strict TypeScript**: no `any`, no `@ts-ignore`.
 - **Immutable migrations & contract parity**: never rename/renumber applied migrations; every table/column needs a Zod schema in `packages/contract/src/schemas/`.
