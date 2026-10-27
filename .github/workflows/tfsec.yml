@@ -1,0 +1,12 @@
+name: tfsec
+on:
+  push:
+    paths: ['infra/terraform/**']
+  pull_request:
+    paths: ['infra/terraform/**']
+jobs:
+  tfsec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/tfsec-action@v1.0.3

@@ -1,0 +1,14 @@
+name: Kubeconform
+on:
+  push:
+    paths: ['infra/k8s/**']
+  pull_request:
+    paths: ['infra/k8s/**']
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker://ghcr.io/yannh/kubeconform:latest
+        with:
+          args: -strict -summary infra/k8s
