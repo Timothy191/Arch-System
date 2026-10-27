@@ -10,7 +10,7 @@ set -uo pipefail
 
 EVIDENCE_DIR=".ci-local"
 EVIDENCE_JSON="${EVIDENCE_DIR}/agent-verify-evidence.json"
-TMP_GATES_NDJSON="${EVIDENCE_DIR}/.gates-run.ndjson"
+TMP_GATES_NDJSON="${EVIDENCE_DIR}/.gates-run-$$.ndjson"
 mkdir -p "${EVIDENCE_DIR}"
 rm -f "${TMP_GATES_NDJSON}"
 
