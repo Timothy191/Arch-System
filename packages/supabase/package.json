@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
+    "jest": "^30.0.0",
     "next": "^16.4.1",
     "supabase": "catalog:",
     "typescript": "catalog:"

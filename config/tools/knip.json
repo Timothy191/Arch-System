@@ -23,9 +23,11 @@
     "swagger-jsdoc",
     "vite-tsconfig-paths",
     "squawk-cli",
+    "gpt-tokenizer",
     "^@repo/.*"
   ],
   "ignoreBinaries": [
+    "jest",
     "python3",
     "psql",
     "wait-on",

@@ -128,6 +128,42 @@ describe('CloseShiftModal', () => {
     expect(mockCloseShift).toHaveBeenCalledTimes(2);
   });
 
+  it('should display the lockout message when verifyPin returns lockedOut', async () => {
+    mockCloseShift.mockResolvedValue({ errors: [] });
+    mockVerifyPin.mockResolvedValue({
+      valid: false,
+      lockedOut: true,
+      message: 'Too many failed PIN attempts. Please try again in 15 minutes.',
+    });
+
+    await act(async () => {
+      render(<CloseShiftModal {...mockProps} />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('e.g. EMP001')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText('e.g. EMP001'), {
+        target: { value: 'EMP001' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('Enter supervisor PIN'), {
+        target: { value: '9999' },
+      });
+    });
+
+    const verifyBtn = screen.getByRole('button', { name: 'Verify PIN' });
+    await act(async () => {
+      fireEvent.click(verifyBtn);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Too many failed PIN attempts. Please try again in 15 minutes.')
+      ).toBeInTheDocument();
+    });
+  });
   it('should transition to verified state, handle submitting, and close successfully', async () => {
     jest.useFakeTimers();
     mockCloseShift

@@ -233,10 +233,6 @@ export async function updateMachineSite(machineId: string, siteId: string | null
   return { success: true };
 }
 
-export async function updateExcavatorSite(excavatorId: string, siteId: string | null) {
-  return updateMachineSite(excavatorId, siteId);
-}
-
 export async function updateExcavatorAssignmentConfig(
   rawInput: UpdateExcavatorAssignmentConfigInput
 ) {

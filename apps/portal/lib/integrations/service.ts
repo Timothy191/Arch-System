@@ -51,7 +51,7 @@ export interface CatalogRecord {
   } | null;
 }
 
-export const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
+const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
   {
     id: 'sentry',
     name: 'Sentry Error & Performance MCP',
@@ -825,31 +825,14 @@ export async function listActiveMcpIntegrations(
   return active;
 }
 
-export interface IntegrationToolIndexEntry {
+interface IntegrationToolIndexEntry {
   installationId: string;
   toolName: string;
   qualifiedName: string;
   descriptor: IntegrationToolDescriptor;
 }
 
-/** Flattens cached tools into Aria-addressable namespaced entries. */
-export function buildToolIndex(active: ActiveIntegration[]): IntegrationToolIndexEntry[] {
-  const index: IntegrationToolIndexEntry[] = [];
-  for (const entry of active) {
-    const tools = entry.installation.tool_cache?.tools ?? [];
-    for (const descriptor of tools) {
-      index.push({
-        installationId: entry.installation.id,
-        toolName: descriptor.name,
-        qualifiedName: buildIntegrationToolName(entry.slug, descriptor.name),
-        descriptor,
-      });
-    }
-  }
-  return index;
-}
-
-export interface AuditEntry {
+interface AuditEntry {
   installationId: string;
   toolName: string;
   invokedBy?: string;

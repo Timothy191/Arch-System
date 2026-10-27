@@ -1,6 +1,6 @@
 'use server';
 
-import { FixedWindowStrategy, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { FixedWindowStrategy, MemoryStore, RateLimiter, RedisStore } from '@repo/rate-limiter';
 import { getRedisClient, incrWithExpire, readKeyCounter, tryWithLock } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import bcrypt from 'bcryptjs';
@@ -60,11 +60,39 @@ const PIN_MAX_ATTEMPTS = 3;
 const PIN_LOCKOUT_SECONDS = 900;
 /** TTL for the per-shift closeout lock; auto-renews are unnecessary at this size. */
 const LOCK_TTL_MS = 30_000;
+const pinAttemptMemoryStore = new MemoryStore();
+
+async function checkPinAttemptLockoutInMemory(employeeCode: string): Promise<boolean> {
+  if (await pinAttemptMemoryStore.get(PIN_LOCKOUT_KEY(employeeCode))) return true;
+
+  const attempts = Number((await pinAttemptMemoryStore.get(PIN_ATTEMPTS_KEY(employeeCode))) ?? '0');
+  if (attempts >= PIN_MAX_ATTEMPTS) {
+    await pinAttemptMemoryStore.set(PIN_LOCKOUT_KEY(employeeCode), '1', PIN_LOCKOUT_SECONDS);
+    return true;
+  }
+
+  return false;
+}
+
+async function recordFailedPinAttemptInMemory(employeeCode: string): Promise<void> {
+  const current =
+    Number((await pinAttemptMemoryStore.get(PIN_ATTEMPTS_KEY(employeeCode))) ?? '0') + 1;
+  await pinAttemptMemoryStore.set(
+    PIN_ATTEMPTS_KEY(employeeCode),
+    String(current),
+    Math.ceil(PIN_ATTEMPT_WINDOW_MS / 1000)
+  );
+  if (current >= PIN_MAX_ATTEMPTS) {
+    await pinAttemptMemoryStore.set(PIN_LOCKOUT_KEY(employeeCode), '1', PIN_LOCKOUT_SECONDS);
+  }
+}
 
 async function checkPinAttemptLockout(employeeCode: string): Promise<boolean> {
   try {
     const redis = await getRedisClient();
-    if (!redis?.isOpen) return false;
+    if (!redis?.isOpen) {
+      return checkPinAttemptLockoutInMemory(employeeCode);
+    }
 
     if (await redis.get(PIN_LOCKOUT_KEY(employeeCode))) return true;
 
@@ -78,14 +106,17 @@ async function checkPinAttemptLockout(employeeCode: string): Promise<boolean> {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Failed to check PIN attempt lockout:', error);
-    return false;
+    return checkPinAttemptLockoutInMemory(employeeCode);
   }
 }
 
 async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
   try {
     const redis = await getRedisClient();
-    if (!redis?.isOpen) return;
+    if (!redis?.isOpen) {
+      await recordFailedPinAttemptInMemory(employeeCode);
+      return;
+    }
 
     const { value } = await incrWithExpire(PIN_ATTEMPTS_KEY(employeeCode), {
       ttlMs: PIN_ATTEMPT_WINDOW_MS,
@@ -96,11 +127,14 @@ async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Failed to record failed PIN attempt:', error);
+    await recordFailedPinAttemptInMemory(employeeCode);
   }
 }
 
 /** A good PIN clears the strike history; a stale lockout must not outlive success. */
 async function clearPinAttemptState(employeeCode: string): Promise<void> {
+  await pinAttemptMemoryStore.delete(PIN_ATTEMPTS_KEY(employeeCode));
+  await pinAttemptMemoryStore.delete(PIN_LOCKOUT_KEY(employeeCode));
   try {
     const redis = await getRedisClient();
     if (!redis?.isOpen) return;

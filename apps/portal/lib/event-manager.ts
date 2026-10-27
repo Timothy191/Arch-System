@@ -3,19 +3,19 @@
  * Provides type-safe event dispatching and reduces direct window.dispatchEvent calls.
  */
 
-export interface ActiveModuleChangeEvent {
+interface ActiveModuleChangeEvent {
   name: string;
   title: string;
 }
 
-export interface SystemNotificationEvent {
+interface SystemNotificationEvent {
   id: string;
   title: string;
   message: string;
   unread: boolean;
 }
 
-export const ARCH_EVENTS = {
+const ARCH_EVENTS = {
   ACTIVE_MODULE_CHANGE: 'arch:active-module-change',
   SYSTEM_NOTIFICATION: 'arch-system-notification',
 } as const;

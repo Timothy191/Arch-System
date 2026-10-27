@@ -132,7 +132,7 @@ export const PLANT_IMPACT_OPTIONS = [
   'Reduced Throughput',
   'Single Circuit Bypass',
 ] as const;
-export const DAY_SHIFT_HOUR_SLOTS = [
+const DAY_SHIFT_HOUR_SLOTS = [
   '06:00 - 07:00',
   '07:00 - 08:00',
   '08:00 - 09:00',
@@ -147,7 +147,7 @@ export const DAY_SHIFT_HOUR_SLOTS = [
   '17:00 - 18:00',
 ] as const;
 
-export const NIGHT_SHIFT_HOUR_SLOTS = [
+const NIGHT_SHIFT_HOUR_SLOTS = [
   '18:00 - 19:00',
   '19:00 - 20:00',
   '20:00 - 21:00',

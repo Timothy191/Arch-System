@@ -1,3 +1,13 @@
+## 2026-10-27T06:35:00+02:00: Merge Single-Pass Machine Ops Meta, Prune Unused Dependencies/Exports & Sync Vercel CRON_SECRET
+
+- **Purpose**: Merge PR #192 (`bolt/machine-ops-meta-single-pass-6290199423473584917`), cherry-pick Jest/preflight improvements, remove unused `@univerjs` dependencies from `@repo/departments/ui`, prune dead value exports flagged by `knip`, and sync `CRON_SECRET` to Vercel Production and Preview environments.
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/machine-operations/machine-operations-constants.ts`: Merged single-pass `computeMachinesWithMeta` loop optimization.
+  - `libs/features/departments/ui/{package.json,jest.config.js}` & `packages/{logger,supabase,utils}/package.json`: Removed unused `@univerjs/preset-sheets-core` and `@univerjs/presets` dependencies from `@repo/departments/ui`, mapped `@repo/contract` in `jest.config.js`, and aligned `jest` devDependencies.
+  - `apps/portal/**` & `config/tools/knip.json`: Removed unused `export` keywords and dead functions (`updateExcavatorSite`, `useShiftCoverage`, `buildToolIndex`, internal constants) and updated `knip.json` binary/dependency allowlist.
+  - `tools/scripts/vercel-preflight.cjs`: Hardened local vs. Vercel runtime checks for `.vercel/project.json` and public env variables, and synced `CRON_SECRET` to Vercel Production/Preview.
+- **Verification**: `pnpm maps:sync` ✅; `pnpm knip` ✅; `pnpm agent:verify` (27/27 PASS) ✅.
+
 ## 2026-10-27T06:19:00+02:00: Plant Processing Reports History View & Context Budget Symlink Deduplication
 
 - **Purpose**: Render `PlantHistoryDatabaseClient` directly on `/plant-processing/reports` (`apps/portal/app/(departments)/[department]/reports/page.tsx`) and deduplicate symlinked root instruction inodes (`CLAUDE.md -> AGENTS.md`) in `tools/scripts/token-tracker.cjs`.

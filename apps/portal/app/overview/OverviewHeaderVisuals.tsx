@@ -224,7 +224,7 @@ export const STACK_ICON_MAP: Record<StackTechName, React.ReactNode> = {
   ),
 };
 
-export function StackIcon({ name }: { name: StackTechName }) {
+function StackIcon({ name }: { name: StackTechName }) {
   return <>{STACK_ICON_MAP[name] ?? <Cpu className="h-4 w-4 shrink-0" />}</>;
 }
 

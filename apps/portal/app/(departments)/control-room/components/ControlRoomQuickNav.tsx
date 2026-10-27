@@ -33,7 +33,7 @@ interface TabItem {
   icon: ElementType;
 }
 
-export const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
+const CONTROL_ROOM_QUICK_TABS: readonly TabItem[] = [
   {
     name: 'dashboard',
     label: 'Dashboard',

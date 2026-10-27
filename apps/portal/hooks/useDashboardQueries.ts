@@ -105,32 +105,3 @@ export function useNonControlRoomSummary(deptId: string, today: string) {
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
-
-/**
- * Fetch shift coverage data
- * Used by ShiftCoverageWidget
- */
-export function useShiftCoverage(deptId: string, today: string) {
-  return useQuery({
-    queryKey: ['shift-coverage', deptId, today],
-    queryFn: async () => {
-      const { data: todayLogs } = await supabase
-        .from('daily_logs')
-        .select('id, log_date, shift')
-        .eq('department_id', deptId)
-        .eq('log_date', today)
-        .order('shift');
-
-      const shiftCount = todayLogs?.length ?? 0;
-      const latestShift = todayLogs?.[shiftCount - 1]?.shift;
-
-      return {
-        shiftCount,
-        latestShift,
-        logs: todayLogs || [],
-      };
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-}

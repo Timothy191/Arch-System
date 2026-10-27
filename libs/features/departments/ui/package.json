@@ -20,8 +20,6 @@
     "@repo/utils": "1.0.0",
     "@tanstack/react-virtual": "^3.14.13",
     "@tremor/react": "catalog:",
-    "@univerjs/preset-sheets-core": "^0.23.0",
-    "@univerjs/presets": "^0.23.0",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "next": "^16.4.1",

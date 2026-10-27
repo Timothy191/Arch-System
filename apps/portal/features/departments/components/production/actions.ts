@@ -144,9 +144,7 @@ function buildAvailableMonths(): Array<{ value: string; label: string; isPastMon
  * Shared SSoT query so ANY department (Production, Control Room, Drilling, Hub)
  * can pull the monthly Coal & Waste target and current actual progress.
  */
-export async function getMonthlyProductionTarget(
-  monthStr?: string
-): Promise<MonthlyProductionTarget> {
+async function getMonthlyProductionTarget(monthStr?: string): Promise<MonthlyProductionTarget> {
   const supabase = await createServerSupabaseClient();
   const targetMonth = monthStr || new Date().toISOString().slice(0, 7);
 

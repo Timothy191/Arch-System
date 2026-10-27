@@ -5,7 +5,7 @@ const DEFAULT_TIMEOUT_MS = 5_000;
 const MAX_TIMEOUT_MS = 30_000;
 const MS_PER_SECOND = 1_000;
 
-export const ALLOWLISTED_METRICS = [
+const ALLOWLISTED_METRICS = [
   'up',
   'node_cpu_seconds_total',
   'node_memory_MemAvailable_bytes',
@@ -14,15 +14,15 @@ export const ALLOWLISTED_METRICS = [
   'arch_compressor_temperature_celsius',
 ] as const;
 
-export type AllowlistedMetric = (typeof ALLOWLISTED_METRICS)[number];
+type AllowlistedMetric = (typeof ALLOWLISTED_METRICS)[number];
 
-export interface PrometheusQueryOptions {
+interface PrometheusQueryOptions {
   baseUrl: string;
   metric: string;
   timeoutMs?: number;
 }
 
-export interface PrometheusQueryResult {
+interface PrometheusQueryResult {
   metricValue: number | null;
   timestampMs: number;
 }

@@ -221,6 +221,37 @@ describe('verifyPin', () => {
     expect(result.valid).toBe(true);
     expect(result.employee).toEqual({ id: 'e1', full_name: 'Jane' });
   });
+
+  it('enforces 3-attempt lockout via MemoryStore when Redis is unavailable', async () => {
+    redisEnabled.value = false;
+    const hash = await bcrypt.hash('1111', 4);
+    singleQueues.employees = [
+      { data: { id: 'e2', full_name: 'Bob', pin_hash: hash }, error: null },
+      { data: { id: 'e2', full_name: 'Bob', pin_hash: hash }, error: null },
+      { data: { id: 'e2', full_name: 'Bob', pin_hash: hash }, error: null },
+    ];
+
+    await expect(verifyPin('EMP-MEM-1', '9999')).resolves.toEqual({
+      valid: false,
+      employee: null,
+    });
+    await expect(verifyPin('EMP-MEM-1', '9999')).resolves.toEqual({
+      valid: false,
+      employee: null,
+    });
+    await expect(verifyPin('EMP-MEM-1', '9999')).resolves.toEqual({
+      valid: false,
+      employee: null,
+    });
+
+    const lockedResult = await verifyPin('EMP-MEM-1', '1111');
+    expect(lockedResult).toEqual({
+      valid: false,
+      employee: null,
+      lockedOut: true,
+      message: 'Too many failed PIN attempts. Please try again in 15 minutes.',
+    });
+  });
 });
 
 describe('closeShift', () => {
@@ -245,6 +276,17 @@ describe('closeShift', () => {
     );
   });
 
+  it('rejects closeShift when per-user rate limit is exceeded', async () => {
+    redisEnabled.value = true;
+    mockRedisGet.mockResolvedValue(
+      JSON.stringify({ count: 5, windowStart: Math.floor(Date.now() / 60_000) * 60_000 })
+    );
+
+    const result = await closeShift('d1', '2026-08-17', 'day', 'appr-1', '1234');
+    expect(result.success).toBe(false);
+    expect(result.errors?.[0]).toContain('Too many shift closeout attempts');
+    expect(insertCalls).toHaveLength(0);
+  });
   it('returns validation errors when machines are missing', async () => {
     mockGetShiftCompleteness.mockResolvedValue({
       statuses: [{ machineId: 'm1', machineName: 'D1', exempt: false, hasEntry: false }],

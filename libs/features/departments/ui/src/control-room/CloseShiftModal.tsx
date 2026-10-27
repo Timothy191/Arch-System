@@ -107,7 +107,7 @@ export function CloseShiftModal({
       } else {
         setState({
           type: 'api_error',
-          message: 'Invalid employee code or PIN',
+          message: result.message || 'Invalid employee code or PIN',
         });
       }
     } catch (err) {
