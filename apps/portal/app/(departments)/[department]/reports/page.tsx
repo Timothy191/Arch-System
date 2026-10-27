@@ -1,6 +1,7 @@
 import '@/styles/print-report.css';
-import { redirect } from 'next/navigation';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
+import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
+import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ReportsDashboardClient } from './ReportsDashboardClient';
 import {
@@ -18,7 +19,15 @@ export default async function ReportsPage({
 }) {
   const { department: deptSlug } = await params;
   if (deptSlug === 'plant-processing') {
-    redirect('/plant-processing/hourly-sheet');
+    const { today } = await getDepartmentContext({ department: deptSlug });
+    const plantData = await getPlantProcessingWorkspaceData(today);
+    return (
+      <PlantHistoryDatabaseClient
+        initialDate={plantData.currentDate}
+        initialSheets={plantData.initialSheets}
+        initialDelays={plantData.initialDelays}
+      />
+    );
   }
   const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
   if (deptSlug === 'plant-inventory') {

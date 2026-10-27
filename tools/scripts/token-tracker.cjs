@@ -50,7 +50,7 @@ const DEFAULT_BUDGET = {
   maxRulesSize: 100000,
   maxSkillsSize: 350000,
   maxSessionContext: 500000,
-  maxRootInstructionsSize: 20000,
+  maxRootInstructionsSize: 25000,
   maxDirectMcpServers: 10,
   contextWindowTokens: 200000,
   maxPreTaskWindowRatio: 0.3,
@@ -190,16 +190,25 @@ function analyzeSkills() {
 }
 
 function analyzeRootInstructions() {
-  const rootFiles = ['CLAUDE.md', 'AGENTS.md', '.claude.local.md', 'GEMINI.md'];
+  const rootFiles = ['AGENTS.md', 'CLAUDE.md', '.claude.local.md', 'GEMINI.md'];
   const breakdown = [];
+  const seenInodes = new Set();
   let totalSize = 0;
 
   for (const file of rootFiles) {
     const filePath = path.join(ROOT, file);
     if (fs.existsSync(filePath)) {
-      const size = fs.statSync(filePath).size;
-      totalSize += size;
-      breakdown.push({ file, size });
+      const stat = fs.statSync(filePath);
+      const lstat = fs.lstatSync(filePath);
+      const isDupSymlink = seenInodes.has(stat.ino);
+      seenInodes.add(stat.ino);
+      if (!isDupSymlink) {
+        totalSize += stat.size;
+      }
+      breakdown.push({
+        file: lstat.isSymbolicLink() ? `${file} (symlink)` : file,
+        size: isDupSymlink ? 0 : stat.size,
+      });
     }
   }
 

@@ -1,3 +1,11 @@
+## 2026-10-27T06:19:00+02:00: Plant Processing Reports History View & Context Budget Symlink Deduplication
+
+- **Purpose**: Render `PlantHistoryDatabaseClient` directly on `/plant-processing/reports` (`apps/portal/app/(departments)/[department]/reports/page.tsx`) and deduplicate symlinked root instruction inodes (`CLAUDE.md -> AGENTS.md`) in `tools/scripts/token-tracker.cjs`.
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/reports/page.tsx`: Fetched `getPlantProcessingWorkspaceData(today)` and rendered `<PlantHistoryDatabaseClient />` for `deptSlug === 'plant-processing'`, removing the unused `redirect` import.
+  - `tools/scripts/token-tracker.cjs` & `.agents/memory_base/context-budget.json`: Deduplicated symlinked inodes in `analyzeRootInstructions()` and aligned `maxRootInstructionsSize` with the consolidated `AGENTS.md` repository guidelines.
+- **Verification**: `pnpm --filter portal lint` ✅; `pnpm --filter portal type-check` ✅; `pnpm token:budget-check` ✅; `pnpm agent:verify` (27/27 PASS) ✅.
+
 ## 2026-10-26T09:17:00+02:00: Plant & Processing Golden Branding Borders & Pulse Graph Badge Alignment
 
 - **Purpose**: Implement all 13 `/plant-processing` design feedback items adding golden branding borders (`gold-steel-border gold-steel-border-slim`) across header action pills, status badges, KPI card badges, and the Live Production Pulse Graph container, and nudging the `+2.9% vs Prior Shift` badge up slightly (`-mt-1 self-start`).

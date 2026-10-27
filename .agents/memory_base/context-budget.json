@@ -4,7 +4,7 @@
   "maxRulesSize": 100000,
   "maxSkillsSize": 350000,
   "maxSessionContext": 500000,
-  "maxRootInstructionsSize": 20000,
+  "maxRootInstructionsSize": 25000,
   "maxDirectMcpServers": 10,
   "contextWindowTokens": 200000,
   "maxPreTaskWindowRatio": 0.3,
