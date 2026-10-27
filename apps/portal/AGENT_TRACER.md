@@ -1,3 +1,8 @@
+## 2026-10-27T07:35:00+02:00: Live Cloud Supabase Migration 209 Application & /api/health Anon Lockdown Reachability Fix
+
+- **Purpose**: Apply Migration 209 (`209_fix_pg_stat_statements_and_cron_health_rpc.sql`) directly to the live Supabase cluster (`mrwhtxbhrzyttlsyuofc`), reconcile `pg_cron` materialized view schedules (`dept_production_summary`, `machine_utilization_weekly`, `smr_latest`), and update `/api/health` (`apps/portal/app/api/health/route.ts`) so PostgreSQL `42501` (`permission denied`) on unauthenticated `anon` probes is recognized as healthy database + RBAC reachability.
+- **Verification**: `pnpm --filter portal test -- app/api/health/route.test.ts` ✅; `pnpm --filter @repo/database test` ✅; `pnpm agent:verify` (27/27 PASS) ✅.
+
 ## 2026-10-27T07:06:00+02:00: Live Supabase Prometheus Exporter, Add-ons, pg_cron & Grafana Integration on /database
 
 - **Purpose**: Implement all 3 Supabase Add-on & Observability integrations:

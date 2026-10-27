@@ -1,5 +1,10 @@
 # Database Package Agent Tracer
 
+## 2026-10-27T07:35:00+02:00: Live Cloud Application of Migration 209 & Materialized View pg_cron Reconciliation
+
+- **Purpose**: Align `check_mv_freshness` and `get_mv_refresh_stats` OUT parameter names (`mv_name`, `refresh_status`) with the live Supabase PostgreSQL 17 catalog, ensure `dept_production_summary` and `machine_utilization_weekly` materialized views exist with unique indexes, unschedule obsolete `refresh-safety-incident-monthly`, schedule `refresh-smr-latest`, and apply Migration 209 directly to `mrwhtxbhrzyttlsyuofc`.
+- **Verification**: `supabase db query --linked --project-ref mrwhtxbhrzyttlsyuofc` ✅; `pnpm --filter @repo/database test` ✅; `pnpm --filter @repo/database lint:migrations` ✅.
+
 ## 2026-10-27T07:06:00+02:00: Schema-Qualify pg_stat_statements, MV Refresh Logs & Expose get_pg_cron_jobs_health (209)
 
 - **Purpose**: `public.get_slow_queries`, `public.log_mv_refresh_start`, `public.log_mv_refresh_end`, `public.check_mv_freshness`, and `public.get_mv_refresh_stats` set `search_path = ''` while referencing `pg_stat_statements` (installed in `extensions`) and `materialized_view_refresh_log` (in `public`) without schema qualification (`42P01`).

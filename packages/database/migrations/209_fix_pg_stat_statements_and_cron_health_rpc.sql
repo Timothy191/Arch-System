@@ -91,11 +91,11 @@ CREATE OR REPLACE FUNCTION public.check_mv_freshness(
   p_max_age_minutes INT DEFAULT 30
 )
 RETURNS TABLE(
-  view_name TEXT,
+  mv_name TEXT,
   is_fresh BOOLEAN,
   last_refresh TIMESTAMPTZ,
   age_minutes INT,
-  status TEXT
+  refresh_status TEXT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -128,11 +128,11 @@ BEGIN
 
   RETURN QUERY
   SELECT
-    p_view_name::TEXT AS view_name,
+    p_view_name::TEXT AS mv_name,
     v_fresh AS is_fresh,
     v_last_refresh AS last_refresh,
     COALESCE(v_age_mins, 0)::INT AS age_minutes,
-    v_view_status AS status;
+    v_view_status AS refresh_status;
 END;
 $$;
 
@@ -141,7 +141,7 @@ CREATE OR REPLACE FUNCTION public.get_mv_refresh_stats(
   p_days INT DEFAULT 7
 )
 RETURNS TABLE(
-  view_name TEXT,
+  mv_name TEXT,
   total_refreshes INT,
   successful_refreshes INT,
   failed_refreshes INT,
@@ -158,7 +158,7 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    l.view_name AS view_name,
+    l.view_name AS mv_name,
     COUNT(*)::INT AS total_refreshes,
     COUNT(*) FILTER (WHERE l.status = 'completed')::INT AS successful_refreshes,
     COUNT(*) FILTER (WHERE l.status = 'failed')::INT AS failed_refreshes,
@@ -231,3 +231,81 @@ GRANT EXECUTE ON FUNCTION public.get_pg_cron_jobs_health() TO authenticated, ser
 
 COMMENT ON FUNCTION public.get_pg_cron_jobs_health() IS
   'Returns scheduled pg_cron jobs and their latest execution status for /database telemetry.';
+
+-- 4. Ensure dept_production_summary and machine_utilization_weekly materialized views exist
+--    and reconcile pg_cron schedules after safety_incidents removal in migration 154.
+CREATE MATERIALIZED VIEW IF NOT EXISTS public.dept_production_summary AS
+SELECT
+  d.id                          AS department_id,
+  d.name                        AS department_name,
+  d.display_name                AS department_display_name,
+  date_trunc('month', pg_catalog.now())::DATE AS summary_month,
+  COUNT(DISTINCT dl.id)         AS log_count,
+  COALESCE(SUM(pl.coal_tonnes), 0)   AS total_coal_tonnes,
+  COALESCE(SUM(pl.waste_tonnes), 0)  AS total_waste_tonnes,
+  COALESCE(SUM(pl.coal_tonnes + pl.waste_tonnes), 0) AS total_tonnes,
+  pg_catalog.now()              AS last_refreshed_at
+FROM public.departments d
+LEFT JOIN public.daily_logs dl
+  ON dl.department_id = d.id
+  AND dl.log_date >= date_trunc('month', pg_catalog.now())
+  AND dl.log_date <  date_trunc('month', pg_catalog.now()) + INTERVAL '1 month'
+LEFT JOIN public.production_logs pl ON pl.daily_log_id = dl.id
+WHERE d.deleted_at IS NULL
+GROUP BY d.id, d.name, d.display_name;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uidx_dept_production_summary_dept
+  ON public.dept_production_summary(department_id);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS public.machine_utilization_weekly AS
+SELECT
+  m.id                                    AS machine_id,
+  m.name                                  AS machine_name,
+  m.machine_type,
+  m.department_id,
+  d.name                                  AS department_name,
+  COALESCE(SUM(mh.hours_worked), 0)       AS total_hours_worked,
+  COUNT(DISTINCT dl.id)                   AS shifts_recorded,
+  ROUND(
+    COALESCE(SUM(mh.hours_worked), 0) / NULLIF(7 * 24, 0) * 100, 2
+  )                                       AS utilization_pct,
+  pg_catalog.now()                        AS last_refreshed_at
+FROM public.machines m
+JOIN public.departments d ON d.id = m.department_id
+LEFT JOIN public.machine_hours mh ON mh.machine_id = m.id
+LEFT JOIN public.daily_logs dl
+  ON dl.id = mh.daily_log_id
+  AND dl.log_date >= (CURRENT_DATE - INTERVAL '7 days')
+WHERE m.deleted_at IS NULL
+  AND d.deleted_at IS NULL
+GROUP BY m.id, m.name, m.machine_type, m.department_id, d.name;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uidx_machine_utilization_weekly_machine
+  ON public.machine_utilization_weekly(machine_id);
+
+DO $$
+BEGIN
+  IF to_regnamespace('cron') IS NOT NULL THEN
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'refresh-safety-incident-monthly') THEN
+      PERFORM cron.unschedule('refresh-safety-incident-monthly');
+    END IF;
+  END IF;
+END $$;
+
+SELECT cron.schedule(
+  'refresh-dept-production-summary',
+  '*/15 * * * *',
+  'REFRESH MATERIALIZED VIEW CONCURRENTLY public.dept_production_summary'
+);
+
+SELECT cron.schedule(
+  'refresh-machine-utilization-weekly',
+  '5 * * * *',
+  'REFRESH MATERIALIZED VIEW CONCURRENTLY public.machine_utilization_weekly'
+);
+
+SELECT cron.schedule(
+  'refresh-smr-latest',
+  '*/10 * * * *',
+  'REFRESH MATERIALIZED VIEW CONCURRENTLY public.smr_latest'
+);

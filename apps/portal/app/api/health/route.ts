@@ -4,10 +4,24 @@ import { getRedisClient } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 
+const POSTGRES_INSUFFICIENT_PRIVILEGE_CODE = '42501';
+
+function isAnonLockdownResponse(
+  queryError: { readonly code?: string; readonly message?: string } | null
+): boolean {
+  if (!queryError) {
+    return false;
+  }
+  return (
+    queryError.code === POSTGRES_INSUFFICIENT_PRIVILEGE_CODE ||
+    (typeof queryError.message === 'string' && /permission denied/i.test(queryError.message))
+  );
+}
+
 export async function GET() {
   const startedAt = Date.now();
 
-  // 1. Supabase Check (select from machines)
+  // 1. Supabase Check (select from machines; anon 42501 confirms PostgREST + PG + RBAC are live)
   const supabaseStart = Date.now();
   let supabaseStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
   let supabaseError: string | undefined;
@@ -16,10 +30,10 @@ export async function GET() {
     const supabase = await createServerSupabaseClient();
     const { error } = await supabase.from('machines').select('id').limit(1);
 
-    if (error) {
+    if (error && !isAnonLockdownResponse(error)) {
       // Fallback to employees check if machines table is pending migration
       const { error: empError } = await supabase.from('employees').select('id').limit(1);
-      if (empError) {
+      if (empError && !isAnonLockdownResponse(empError)) {
         supabaseStatus = 'degraded';
         supabaseError = empError.message;
       }

@@ -60,4 +60,27 @@ describe('GET /api/health', () => {
     expect(json.status).toBe('unhealthy');
     expect(json.services.supabase.status).toBe('unhealthy');
   });
+
+  it('treats PostgreSQL 42501 anon permission lockdown as healthy database reachability', async () => {
+    createServerSupabaseClient.mockResolvedValue({
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({
+        data: null,
+        error: { code: '42501', message: 'permission denied for table machines' },
+      }),
+    });
+
+    getRedisClient.mockResolvedValue({
+      isOpen: true,
+      ping: jest.fn().mockResolvedValue('PONG'),
+    });
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.status).toBe('healthy');
+    expect(json.services.supabase.status).toBe('healthy');
+    expect(json.services.supabase.error).toBeUndefined();
+  });
 });
