@@ -198,6 +198,7 @@ console.log(
 const envFiles = [
   path.join(PORTAL_DIR, '.env'),
   path.join(ROOT_DIR, '.env.vercel.prod'),
+  path.join(ROOT_DIR, '.env.development.local'),
   path.join(ROOT_DIR, '.env.local'),
   path.join(ROOT_DIR, '.env'),
 ];
@@ -234,7 +235,13 @@ const requiredPublicVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_AN
 for (const v of requiredPublicVars) {
   const val = process.env[v];
   if (!val) {
-    recordError(`Missing public environment variable: ${v}`);
+    const runningInVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV);
+    const message = `Missing public environment variable: ${v}`;
+    if (runningInVercel) {
+      recordError(message);
+    } else {
+      recordWarn(`${message} (not available in the local shell)`);
+    }
   } else if (v === 'NEXT_PUBLIC_SUPABASE_URL' && !val.startsWith('https://')) {
     recordError(`${v} must be a secure HTTPS URL (got '${val}')`);
   } else {
@@ -369,7 +376,14 @@ console.log(c.bold(c.cyan('\n[Tier 5: Vercel Project Linkage & Authorization]'))
 
 const vercelProjectJson = path.join(ROOT_DIR, '.vercel/project.json');
 if (!fs.existsSync(vercelProjectJson)) {
-  recordError('.vercel/project.json not found in root. Run `pnpm dlx vercel link --yes` once.');
+  const runningInVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV);
+  if (runningInVercel) {
+    recordError('.vercel/project.json is missing in the deployment workspace.');
+  } else {
+    recordWarn(
+      '.vercel/project.json is not present locally; deployment linkage is managed by the Vercel project.'
+    );
+  }
 } else {
   try {
     const projectData = JSON.parse(fs.readFileSync(vercelProjectJson, 'utf8'));

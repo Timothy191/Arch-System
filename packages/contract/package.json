@@ -8,6 +8,7 @@
     "@types/node": "catalog:",
     "jest": "^30.0.0",
     "openapi-zod-client": "^1.18.3",
+    "tsx": "^4.19.0",
     "typescript": "catalog:",
     "zod": "catalog:"
   },
