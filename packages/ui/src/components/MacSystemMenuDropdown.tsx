@@ -55,16 +55,16 @@ export function MacSystemMenuDropdown({
             aria-haspopup="true"
             title={`System Menu · Active: ${currentContextLabel}`}
             className={cn(
-              'gold-steel-border gold-steel-border-slim relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full',
-              'border border-white/60 bg-white/80 shadow-xs backdrop-blur-md transition-all duration-150 ease-in-out hover:bg-white hover:shadow-sm',
+              'gold-steel-border gold-steel-border-slim relative z-30 -my-1.5 -ml-1.5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full',
+              'border border-white/75 bg-white/90 shadow-md backdrop-blur-md transition-all duration-150 ease-in-out hover:scale-105 hover:bg-white hover:shadow-lg',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] active:scale-95',
               'data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25'
             )}
           >
-            <Logo className="h-5 w-5 text-[var(--accent-blue)] drop-shadow-xs" />
+            <Logo className="h-7 w-7 scale-110 text-[var(--accent-blue)] drop-shadow-xs" />
             <span
               className={cn(
-                'absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-white shadow-2xs transition-colors',
+                'absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white shadow-2xs transition-colors',
                 systemMenuOpen ? 'bg-[var(--accent-blue)]' : 'bg-accent-green'
               )}
               aria-hidden="true"

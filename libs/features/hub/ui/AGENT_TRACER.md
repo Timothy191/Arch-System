@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-27T14:16:00+02:00 - DepartmentCard Header Separators & HeroRotator Test Updates
+
+- **Purpose**: Add a horizontal separator under the header row of all department panel cards (`DepartmentCard.tsx`) and update unit tests (`DepartmentCard.test.tsx`, `HeroRotator.test.tsx`) to verify the header separators and uncircled Hero carousel highlight buttons.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Added `dept-header-separator-${department.name}` divider directly under `.uiverse-card-title-row`.
+  - `libs/features/hub/ui/src/{DepartmentCard,HeroRotator}.test.tsx`: Added assertions for `dept-header-separator-*`, `hero-header-separator-*`, and uncircled `Previous highlight` / `Next highlight` buttons.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T06:05:00+02:00 - Circular Gold Branding on Department Icons & Footer Telemetry Ticker Gold Borders
 
 - **Purpose**: Apply circular gold branding (`rounded-full gold-steel-border gold-steel-border-slim` + `<Logo variant="gold" />` / `text-accent-amber`) to all department icon badges across `DepartmentCard.tsx` and `HeroRotator.tsx`, and add gold borders (`gold-steel-border gold-steel-border-slim`) and gold `|` separators to all footer telemetry marquee items in `DepartmentReviews.tsx`.

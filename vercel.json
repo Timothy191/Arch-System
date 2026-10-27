@@ -3,5 +3,27 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "node scripts/sync-assets-smart.cjs && node scripts/patch-glass-css.mjs && pnpm turbo run build --filter=portal",
-  "outputDirectory": "apps/portal/.next"
+  "outputDirectory": "apps/portal/.next",
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/shift-handoff",
+      "schedule": "45 5,17 * * *"
+    },
+    {
+      "path": "/api/cron/contractor-expiry",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/preventative-maintenance",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/research-briefing",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }

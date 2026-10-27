@@ -2,7 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Minus, Plus, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import type { PlantHourlyTotals } from './PlantHourlyRollupSection';
 import {
   PLANT_SEAM_OPTIONS,
@@ -46,6 +46,32 @@ interface PlantGridStreamMeta {
 
 const STEPPER_WRAPPER_CLASS =
   'inline-flex items-center justify-center gap-0.5 rounded border border-[var(--border-default)]/60 bg-[var(--bg-secondary)]/50 p-0.5 focus-within:border-[var(--accent-blue)] focus-within:ring-1 focus-within:ring-[var(--accent-blue)]';
+
+const STEPPER_BTN_CLASS =
+  'inline-flex h-6 w-4 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]';
+
+const STEPPER_INPUT_CLASS =
+  'w-12 bg-transparent py-0.5 text-center font-mono font-semibold text-[var(--text-heading)] text-xs [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
+
+const STREAM_FILTER_INPUT_CLASS =
+  'w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] py-1 pr-6 pl-6 font-normal text-[11px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]';
+
+const MATERIAL_SELECT_CLASS =
+  'w-full cursor-pointer rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 font-medium text-[11px] text-[var(--text-heading)] transition-colors hover:border-[var(--accent-blue)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]';
+
+const HEADER_MATERIAL_SELECT_CLASS =
+  'w-full cursor-pointer rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] px-2 py-1 font-medium text-[11px] text-[var(--text-heading)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]';
+
+const VARIANCE_BADGE_BASE_CLASS =
+  'inline-flex min-w-[44px] items-center justify-center rounded border px-1.5 py-0.5 font-mono font-semibold text-[10px] tabular-nums';
+
+const DECIMAL_THRESHOLD_TWO = 0.1;
+const DECIMAL_THRESHOLD_ONE = 1;
+const DECIMALS_TWO = 2;
+const DECIMALS_ONE = 1;
+const DECIMALS_ZERO = 0;
+const YIELD_HIGH_THRESHOLD = 88;
+const YIELD_MID_THRESHOLD = 80;
 
 const PLANT_GRID_STREAMS: ReadonlyArray<PlantGridStreamMeta> = [
   {
@@ -146,6 +172,68 @@ const PLANT_GRID_STREAMS: ReadonlyArray<PlantGridStreamMeta> = [
   },
 ];
 
+function getStepDecimals(step: number): number {
+  if (step < DECIMAL_THRESHOLD_TWO) return DECIMALS_TWO;
+  if (step < DECIMAL_THRESHOLD_ONE) return DECIMALS_ONE;
+  return DECIMALS_ZERO;
+}
+
+function computeHourlyVariance(
+  rows: readonly PlantHourlyRow[],
+  hourIdx: number,
+  streamKey: PlantGridStreamMeta['key']
+): number {
+  const currentRow = rows[hourIdx];
+  if (!currentRow) return 0;
+  const currentMetric = Number(currentRow[streamKey]) || 0;
+  const nextRow = rows[hourIdx + 1];
+  if (nextRow) {
+    const nextMetric = Number(nextRow[streamKey]) || 0;
+    return nextMetric - currentMetric;
+  }
+  const prevRow = rows[hourIdx - 1];
+  if (prevRow) {
+    const prevMetric = Number(prevRow[streamKey]) || 0;
+    return currentMetric - prevMetric;
+  }
+  return 0;
+}
+
+function formatVarianceBadge(rawVariance: number, decimals: number, suffix = '') {
+  const rounded = Number(rawVariance.toFixed(decimals));
+  if (rounded > 0) {
+    return {
+      text: `+${rounded.toFixed(decimals)}${suffix}`,
+      toneClass: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800',
+    };
+  }
+  if (rounded < 0) {
+    return {
+      text: `${rounded.toFixed(decimals)}${suffix}`,
+      toneClass: 'border-amber-500/30 bg-amber-500/10 text-amber-800',
+    };
+  }
+  return {
+    text: `0${suffix}`,
+    toneClass:
+      'border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-[var(--text-muted)]',
+  };
+}
+
+function formatStreamSummary(streamKey: PlantGridStreamMeta['key'], totals: PlantHourlyTotals) {
+  const summaryMap: Record<PlantGridStreamMeta['key'], string> = {
+    romFeedTonnes: `${totals.totalRom.toLocaleString()} t`,
+    cleanCoalTonnes: `${totals.totalClean.toLocaleString()} t`,
+    discardTonnes: `${totals.totalDiscard.toLocaleString()} t`,
+    yieldPct: `${totals.weightedYield.toFixed(DECIMALS_ONE)}%`,
+    productAshPct: `${totals.avgAsh.toFixed(DECIMALS_ONE)}%`,
+    cycloneRd: `${totals.avgRd.toFixed(DECIMALS_TWO)}`,
+    moisturePct: `${totals.avgMoisture.toFixed(DECIMALS_ONE)}%`,
+    runMinutes: `${totals.totalRunMins}m`,
+  };
+  return summaryMap[streamKey];
+}
+
 interface PlantHourlyMatrixSectionProps {
   rows: PlantHourlyRow[];
   totals: PlantHourlyTotals;
@@ -170,30 +258,46 @@ export function PlantHourlyMatrixSection({
   onUpdateCell,
 }: PlantHourlyMatrixSectionProps) {
   const [streamSearch, setStreamSearch] = useState<string>('');
+  const [streamMaterials, setStreamMaterials] = useState<Record<string, string>>({});
 
   const filteredStreams = useMemo(() => {
-    const q = streamSearch.trim().toLowerCase();
-    if (!q) return PLANT_GRID_STREAMS;
+    const query = streamSearch.trim().toLowerCase();
+    if (!query) return PLANT_GRID_STREAMS;
     return PLANT_GRID_STREAMS.filter(
-      (s) =>
-        s.streamName.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q) ||
-        s.unit.toLowerCase().includes(q)
+      (stream) =>
+        stream.streamName.toLowerCase().includes(query) ||
+        stream.code.toLowerCase().includes(query) ||
+        stream.unit.toLowerCase().includes(query)
     );
   }, [streamSearch]);
+
+  const handleGlobalMaterialChange = (nextSeam: string) => {
+    setStreamMaterials({});
+    onSeamBlendChange(nextSeam);
+  };
+
+  const handleStreamMaterialChange = (streamKey: string, nextSeam: string) => {
+    setStreamMaterials((prev) => ({
+      ...prev,
+      [streamKey]: nextSeam,
+    }));
+    if (streamKey === 'romFeedTonnes') {
+      onUpdateCell(0, 'seamSource', nextSeam);
+    }
+  };
 
   const stepCellValue = (rowIndex: number, stream: PlantGridStreamMeta, direction: 1 | -1) => {
     if (!stream.editable || stream.key === 'yieldPct') return;
     const row = rows[rowIndex];
     if (!row) return;
     const current = Number(row[stream.key]) || 0;
-    const decimals = stream.step < 0.1 ? 2 : stream.step < 1 ? 1 : 0;
-    const nextVal = Number(
+    const decimals = getStepDecimals(stream.step);
+    const nextMetric = Number(
       Math.max(stream.min, Math.min(stream.max, current + direction * stream.step)).toFixed(
         decimals
       )
     );
-    onUpdateCell(rowIndex, stream.key, nextVal);
+    onUpdateCell(rowIndex, stream.key, nextMetric);
   };
 
   return (
@@ -214,7 +318,7 @@ export function PlantHourlyMatrixSection({
                   : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]'
               }`}
             >
-              Day Shift (06:00–18:00)
+              Day Shift (05:00–17:00)
             </button>
             <button
               type="button"
@@ -231,9 +335,14 @@ export function PlantHourlyMatrixSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs">
+          <label
+            htmlFor="plant-circuit-module-select"
+            className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs"
+          >
             <span>Circuit:</span>
             <select
+              id="plant-circuit-module-select"
+              name="plantCircuitModule"
               aria-label="Plant Circuit Module"
               value={selectedModule}
               onChange={(e) => onModuleChange(e.target.value as PlantModuleId)}
@@ -244,12 +353,17 @@ export function PlantHourlyMatrixSection({
             </select>
           </label>
 
-          <label className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs">
+          <label
+            htmlFor="plant-feed-seam-blend-select"
+            className="flex items-center gap-2 font-semibold text-[var(--text-heading)] text-xs"
+          >
             <span>Feed Blend:</span>
             <select
+              id="plant-feed-seam-blend-select"
+              name="plantFeedSeamBlend"
               aria-label="Feed Seam Blend"
               value={selectedSeamBlend}
-              onChange={(e) => onSeamBlendChange(e.target.value)}
+              onChange={(e) => handleGlobalMaterialChange(e.target.value)}
               className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 py-1.5 font-medium text-[var(--text-heading)] text-xs"
             >
               {PLANT_SEAM_OPTIONS.map((seam) => (
@@ -262,7 +376,7 @@ export function PlantHourlyMatrixSection({
         </div>
       </div>
 
-      {/* Main 12-Hour Matrix Grid Card (Matching Control Room HourlyLoadsGrid) */}
+      {/* Main 12-Hour Matrix Grid Card with Auto-Calculated Hourly Variance Blocks */}
       <div className="revo-grid-visible">
         <GlassCard className="overflow-hidden border border-[var(--border-default)] bg-[var(--bg-primary)] p-0 shadow-sm">
           <div className="w-full overflow-x-auto">
@@ -283,12 +397,14 @@ export function PlantHourlyMatrixSection({
                       <div className="relative">
                         <Search className="pointer-events-none absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
                         <input
+                          id="plant-stream-filter-input"
+                          name="plantStreamFilter"
                           type="text"
                           value={streamSearch}
                           onChange={(e) => setStreamSearch(e.target.value)}
                           placeholder="Filter plant stream..."
                           aria-label="Filter plant stream"
-                          className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] py-1 pr-6 pl-6 font-normal text-[11px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                          className={STREAM_FILTER_INPUT_CLASS}
                         />
                         {streamSearch && (
                           <button
@@ -303,31 +419,57 @@ export function PlantHourlyMatrixSection({
                       </div>
                     </div>
                   </th>
-                  <th scope="col" className="min-w-[155px] px-3 py-2.5 text-left align-top">
-                    <div className="space-y-1">
-                      <span className="block font-bold text-[var(--text-heading)] text-xs">
-                        Circuit &amp; Unit
-                      </span>
-                      <span className="block font-mono text-[11px] text-[var(--text-secondary)]">
-                        {selectedModule}
-                      </span>
+                  <th scope="col" className="min-w-[180px] px-3 py-2.5 text-left align-top">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="font-bold text-[var(--text-heading)] text-xs">
+                          Circuit &amp; Unit
+                        </span>
+                        <span className="rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
+                          {selectedModule}
+                        </span>
+                      </div>
+                      <select
+                        id="circuit-unit-header-material"
+                        name="circuitUnitHeaderMaterial"
+                        aria-label="Circuit & Unit Material"
+                        value={selectedSeamBlend}
+                        onChange={(e) => handleGlobalMaterialChange(e.target.value)}
+                        className={HEADER_MATERIAL_SELECT_CLASS}
+                      >
+                        {PLANT_SEAM_OPTIONS.map((seam) => (
+                          <option key={seam} value={seam}>
+                            {seam}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </th>
                   {rows.map((row) => {
                     const shortStart = row.hourSlot.split(' - ')[0] ?? row.hourSlot;
+                    const compactWindow = row.hourSlot.replace(' - ', '-');
                     return (
-                      <th
-                        key={row.hourSlot}
-                        scope="col"
-                        className="min-w-[92px] px-1.5 py-2.5 text-center"
-                      >
-                        <span className="block font-bold font-mono text-[var(--text-heading)] text-xs">
-                          {shortStart}
-                        </span>
-                        <span className="block font-mono font-normal text-[9px] text-[var(--text-muted)]">
-                          {row.hourSlot}
-                        </span>
-                      </th>
+                      <Fragment key={row.hourSlot}>
+                        <th scope="col" className="min-w-[92px] px-1.5 py-2.5 text-center">
+                          <span className="block font-bold font-mono text-[var(--text-heading)] text-xs">
+                            {shortStart}
+                          </span>
+                          <span className="block font-mono font-normal text-[9px] text-[var(--text-muted)]">
+                            {row.hourSlot}
+                          </span>
+                        </th>
+                        <th
+                          scope="col"
+                          className="min-w-[64px] border-[var(--border-default)]/50 border-x bg-[var(--bg-secondary)]/85 px-1 py-2.5 text-center"
+                        >
+                          <span className="block font-bold font-mono text-[10px] text-[var(--accent-blue)]">
+                            Δ Var
+                          </span>
+                          <span className="block font-mono font-normal text-[9px] text-[var(--text-muted)]">
+                            {compactWindow}
+                          </span>
+                        </th>
+                      </Fragment>
                     );
                   })}
                   <th scope="col" className="min-w-[95px] px-3 py-2.5 text-right align-middle">
@@ -340,24 +482,9 @@ export function PlantHourlyMatrixSection({
 
               <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
                 {filteredStreams.map((stream) => {
-                  let summaryDisplay = '';
-                  if (stream.key === 'romFeedTonnes') {
-                    summaryDisplay = `${totals.totalRom.toLocaleString()} t`;
-                  } else if (stream.key === 'cleanCoalTonnes') {
-                    summaryDisplay = `${totals.totalClean.toLocaleString()} t`;
-                  } else if (stream.key === 'discardTonnes') {
-                    summaryDisplay = `${totals.totalDiscard.toLocaleString()} t`;
-                  } else if (stream.key === 'yieldPct') {
-                    summaryDisplay = `${totals.weightedYield.toFixed(1)}%`;
-                  } else if (stream.key === 'productAshPct') {
-                    summaryDisplay = `${totals.avgAsh.toFixed(1)}%`;
-                  } else if (stream.key === 'cycloneRd') {
-                    summaryDisplay = `${totals.avgRd.toFixed(2)}`;
-                  } else if (stream.key === 'moisturePct') {
-                    summaryDisplay = `${totals.avgMoisture.toFixed(1)}%`;
-                  } else if (stream.key === 'runMinutes') {
-                    summaryDisplay = `${totals.totalRunMins}m`;
-                  }
+                  const summaryDisplay = formatStreamSummary(stream.key, totals);
+                  const activeMaterial = streamMaterials[stream.key] ?? selectedSeamBlend;
+                  const streamDecimals = getStepDecimals(stream.step);
 
                   return (
                     <tr
@@ -376,77 +503,124 @@ export function PlantHourlyMatrixSection({
                         </div>
                       </td>
 
-                      {/* Circuit / Unit Column */}
-                      <td className="min-w-[140px] px-3 py-2.5">
-                        <div className="flex items-center justify-between gap-1.5">
-                          <span className="truncate font-medium text-[11px] text-[var(--text-secondary)]">
-                            {selectedSeamBlend}
-                          </span>
-                          <span className="shrink-0 rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
-                            {stream.unit}
-                          </span>
+                      {/* Redesigned Circuit & Unit Column with Material Dropdown */}
+                      <td className="min-w-[180px] px-3 py-2">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="font-mono font-semibold text-[10px] text-[var(--text-secondary)]">
+                              {selectedModule}
+                            </span>
+                            <span className="shrink-0 rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
+                              {stream.unit}
+                            </span>
+                          </div>
+                          <select
+                            id={`circuit-material-${stream.key}`}
+                            name={`circuitMaterial_${stream.key}`}
+                            aria-label={`${stream.streamName} Material`}
+                            data-testid={`material-select-${stream.key}`}
+                            value={activeMaterial}
+                            onChange={(e) => handleStreamMaterialChange(stream.key, e.target.value)}
+                            className={MATERIAL_SELECT_CLASS}
+                          >
+                            {PLANT_SEAM_OPTIONS.map((seam) => (
+                              <option key={seam} value={seam}>
+                                {seam}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </td>
 
-                      {/* 12 Hourly Cells (Control Room Stepper + Direct Input Format) */}
+                      {/* 12 Hourly Cells + Auto-Calculated Hourly Variance Block After Each Hour */}
                       {rows.map((row, hourIdx) => {
                         const streamKey = stream.key;
+                        const rawVariance = computeHourlyVariance(rows, hourIdx, streamKey);
+                        const varianceSuffix = streamKey === 'yieldPct' ? '%' : '';
+                        const varianceBadge = formatVarianceBadge(
+                          rawVariance,
+                          streamDecimals,
+                          varianceSuffix
+                        );
+
                         if (!stream.editable || streamKey === 'yieldPct') {
                           const yieldBadgeClass =
-                            row.yieldPct >= 88
+                            row.yieldPct >= YIELD_HIGH_THRESHOLD
                               ? 'bg-emerald-500/15 text-emerald-800 border-emerald-500/30'
-                              : row.yieldPct >= 80
+                              : row.yieldPct >= YIELD_MID_THRESHOLD
                                 ? 'bg-amber-500/15 text-amber-800 border-amber-500/30'
                                 : 'bg-red-500/15 text-red-800 border-red-500/30';
                           return (
-                            <td
-                              key={`${streamKey}-${row.hourSlot}`}
-                              className="bg-black/[0.015] px-1 py-2 text-center"
-                            >
-                              <span
-                                className={`inline-block rounded border px-2 py-0.5 font-mono font-semibold text-[11px] ${yieldBadgeClass}`}
+                            <Fragment key={`${streamKey}-${row.hourSlot}`}>
+                              <td className="bg-black/[0.015] px-1 py-2 text-center">
+                                <span
+                                  className={`inline-block rounded border px-2 py-0.5 font-mono font-semibold text-[11px] ${yieldBadgeClass}`}
+                                >
+                                  {row.yieldPct.toFixed(DECIMALS_ONE)}%
+                                </span>
+                              </td>
+                              <td
+                                data-testid={`variance-${streamKey}-${row.rowNumber}`}
+                                aria-label={`${stream.ariaPrefix} variance ${row.hourSlot}`}
+                                className="border-[var(--border-default)]/40 border-x bg-[var(--bg-secondary)]/30 px-1 py-2 text-center"
                               >
-                                {row.yieldPct.toFixed(1)}%
-                              </span>
-                            </td>
+                                <span
+                                  className={`${VARIANCE_BADGE_BASE_CLASS} ${varianceBadge.toneClass}`}
+                                >
+                                  {varianceBadge.text}
+                                </span>
+                              </td>
+                            </Fragment>
                           );
                         }
 
-                        const cellValue = row[streamKey];
+                        const cellMetric = row[streamKey];
                         return (
-                          <td
-                            key={`${streamKey}-${row.hourSlot}`}
-                            className="px-1 py-1.5 text-center"
-                          >
-                            <div className={STEPPER_WRAPPER_CLASS}>
-                              <button
-                                type="button"
-                                onClick={() => stepCellValue(hourIdx, stream, -1)}
-                                aria-label={`Decrease Row ${row.rowNumber} ${stream.ariaPrefix}`}
-                                className="inline-flex h-6 w-4 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
+                          <Fragment key={`${streamKey}-${row.hourSlot}`}>
+                            <td className="px-1 py-1.5 text-center">
+                              <div className={STEPPER_WRAPPER_CLASS}>
+                                <button
+                                  type="button"
+                                  onClick={() => stepCellValue(hourIdx, stream, -1)}
+                                  aria-label={`Decrease Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                  className={STEPPER_BTN_CLASS}
+                                >
+                                  <Minus className="h-2.5 w-2.5" />
+                                </button>
+                                <input
+                                  id={`cell-${streamKey}-${row.rowNumber}`}
+                                  name={`cell_${streamKey}_${row.rowNumber}`}
+                                  type="number"
+                                  min={stream.min}
+                                  max={stream.max}
+                                  step={stream.step}
+                                  aria-label={`Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                  value={cellMetric}
+                                  onChange={(e) => onUpdateCell(hourIdx, streamKey, e.target.value)}
+                                  className={STEPPER_INPUT_CLASS}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => stepCellValue(hourIdx, stream, 1)}
+                                  aria-label={`Increase Row ${row.rowNumber} ${stream.ariaPrefix}`}
+                                  className={STEPPER_BTN_CLASS}
+                                >
+                                  <Plus className="h-2.5 w-2.5" />
+                                </button>
+                              </div>
+                            </td>
+                            <td
+                              data-testid={`variance-${streamKey}-${row.rowNumber}`}
+                              aria-label={`${stream.ariaPrefix} variance ${row.hourSlot}`}
+                              className="border-[var(--border-default)]/40 border-x bg-[var(--bg-secondary)]/30 px-1 py-1.5 text-center"
+                            >
+                              <span
+                                className={`${VARIANCE_BADGE_BASE_CLASS} ${varianceBadge.toneClass}`}
                               >
-                                <Minus className="h-2.5 w-2.5" />
-                              </button>
-                              <input
-                                type="number"
-                                min={stream.min}
-                                max={stream.max}
-                                step={stream.step}
-                                aria-label={`Row ${row.rowNumber} ${stream.ariaPrefix}`}
-                                value={cellValue}
-                                onChange={(e) => onUpdateCell(hourIdx, streamKey, e.target.value)}
-                                className="w-12 bg-transparent py-0.5 text-center font-mono font-semibold text-[var(--text-heading)] text-xs [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => stepCellValue(hourIdx, stream, 1)}
-                                aria-label={`Increase Row ${row.rowNumber} ${stream.ariaPrefix}`}
-                                className="inline-flex h-6 w-4 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
-                              >
-                                <Plus className="h-2.5 w-2.5" />
-                              </button>
-                            </div>
-                          </td>
+                                {varianceBadge.text}
+                              </span>
+                            </td>
+                          </Fragment>
                         );
                       })}
 
@@ -467,16 +641,24 @@ export function PlantHourlyMatrixSection({
                   <td className="px-3 py-2.5 font-medium font-sans text-[11px] text-[var(--text-secondary)]">
                     Recovery Yield %
                   </td>
-                  {rows.map((row) => (
-                    <td
-                      key={`footer-${row.hourSlot}`}
-                      className="px-1 py-2.5 text-center text-[var(--accent-blue)]"
-                    >
-                      {row.yieldPct.toFixed(1)}%
-                    </td>
-                  ))}
+                  {rows.map((row, hourIdx) => {
+                    const footerVariance = computeHourlyVariance(rows, hourIdx, 'yieldPct');
+                    const footerBadge = formatVarianceBadge(footerVariance, DECIMALS_ONE, '%');
+                    return (
+                      <Fragment key={`footer-${row.hourSlot}`}>
+                        <td className="px-1 py-2.5 text-center text-[var(--accent-blue)]">
+                          {row.yieldPct.toFixed(DECIMALS_ONE)}%
+                        </td>
+                        <td className="border-[var(--border-default)]/40 border-x bg-[var(--bg-secondary)]/50 px-1 py-2.5 text-center">
+                          <span className={`${VARIANCE_BADGE_BASE_CLASS} ${footerBadge.toneClass}`}>
+                            {footerBadge.text}
+                          </span>
+                        </td>
+                      </Fragment>
+                    );
+                  })}
                   <td className="px-3 py-2.5 text-right text-emerald-700">
-                    {totals.weightedYield.toFixed(1)}% ({totals.runHours}h)
+                    {totals.weightedYield.toFixed(DECIMALS_ONE)}% ({totals.runHours}h)
                   </td>
                 </tr>
               </tfoot>

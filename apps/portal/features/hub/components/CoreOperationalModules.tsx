@@ -93,9 +93,9 @@ export function CoreOperationalModules({
       {/* Section Header with Live Filtering & Executive Quick-Access */}
       <div className="flex flex-col justify-between gap-4 border-black/[0.08] border-b pb-4 lg:flex-row lg:items-center">
         <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
-          <h2 className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2.5 rounded-full border border-arch-border-subtle bg-white/85 py-1 pr-3 pl-2 font-semibold text-arch-text-primary text-sm tracking-tight shadow-xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-all duration-300 group-hover/row:border-arch-accent-blue/40 group-hover/row:text-arch-accent-blue sm:text-base">
-            <span className="flex items-center justify-center rounded-full border border-arch-accent-blue/20 bg-arch-accent-blue/10 p-1.5 text-arch-accent-blue shadow-2xs">
-              <Logo className="h-3.5 w-3.5 text-arch-accent-blue" />
+          <h2 className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2.5 rounded-full border border-arch-border-subtle bg-white/85 py-1 pr-3 pl-1 font-semibold text-arch-text-primary text-sm tracking-tight shadow-xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-all duration-300 group-hover/row:border-arch-accent-blue/40 group-hover/row:text-arch-accent-blue sm:text-base">
+            <span className="-my-2 -ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-arch-accent-blue/35 bg-white text-arch-accent-blue shadow-sm">
+              <Logo className="h-6 w-6 scale-110 text-arch-accent-blue drop-shadow-xs" />
             </span>
             <span
               className="font-anurati font-bold uppercase tracking-[0.06em]"
@@ -106,7 +106,10 @@ export function CoreOperationalModules({
             >
               Core Operational Modules
             </span>
-            <span className="ml-0.5 rounded-full border border-arch-border-subtle bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[11px] text-arch-text-secondary tabular-nums">
+            <span
+              data-testid="core-modules-count-badge"
+              className="gold-steel-border gold-steel-border-slim ml-0.5 rounded-full border border-accent-amber/45 bg-arch-surface-secondary px-2.5 py-0.5 font-mono text-[11px] text-arch-text-secondary tabular-nums"
+            >
               {filteredDepartments.length} / {departments.length}
             </span>
           </h2>

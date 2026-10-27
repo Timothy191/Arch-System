@@ -133,6 +133,7 @@ export const PLANT_IMPACT_OPTIONS = [
   'Single Circuit Bypass',
 ] as const;
 const DAY_SHIFT_HOUR_SLOTS = [
+  '05:00 - 06:00',
   '06:00 - 07:00',
   '07:00 - 08:00',
   '08:00 - 09:00',
@@ -144,7 +145,6 @@ const DAY_SHIFT_HOUR_SLOTS = [
   '14:00 - 15:00',
   '15:00 - 16:00',
   '16:00 - 17:00',
-  '17:00 - 18:00',
 ] as const;
 
 const NIGHT_SHIFT_HOUR_SLOTS = [

@@ -600,8 +600,8 @@ export function HeroCardContent({
             </div>
           )}
 
-          {/* Operational Title with Canonical Department Icon & Subtitle */}
-          <div className="space-y-1.5">
+          {/* Operational Title with Canonical Department Icon, Header Separator & Subtitle */}
+          <div className="space-y-2">
             <div className="flex items-center gap-2.5">
               <span
                 className="gold-steel-border gold-steel-border-slim inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent-amber/40 bg-accent-amber/10 text-accent-amber shadow-2xs"
@@ -620,6 +620,11 @@ export function HeroCardContent({
                 {panel.title}
               </h2>
             </div>
+            <div
+              data-testid={`hero-header-separator-${panel.name}`}
+              aria-hidden="true"
+              className="h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-300/80 to-transparent"
+            />
             <p className="max-w-[95%] text-[var(--text-secondary)] text-xs leading-relaxed sm:text-sm">
               {assetSubtitle}
             </p>

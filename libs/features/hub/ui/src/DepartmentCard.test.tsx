@@ -124,5 +124,6 @@ describe('DepartmentCard', () => {
     );
     const heading = screen.getByRole('heading', { name: 'Drilling Operations' });
     expect(heading).toHaveClass('uiverse-card-title', 'font-anurati');
+    expect(screen.getByTestId('dept-header-separator-drilling')).toBeInTheDocument();
   });
 });

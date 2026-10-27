@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-27T14:16:00+02:00 - Hub HeroRotator Uncircled Arrows, Hero Heading Separators & Overlapping System Menu Emblem
+
+- **Purpose**: Address `/hub` design feedback across `@repo/ui` components: remove circle borders from `Previous highlight` and `Next highlight` carousel buttons, add a horizontal separator under all Hero card headings, and enlarge the `System Menu` trigger button and `<Logo>` so its shape slightly overlaps the top taskbar pill edges.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`: Removed `gold-steel-border`, `gold-steel-border-slim`, `rounded-full`, `border`, and `shadow-xs` from `Previous highlight` and `Next highlight` buttons.
+  - `packages/ui/src/components/HeroCardContent.tsx`: Added `hero-header-separator-${panel.name}` gradient divider directly beneath each Hero card `<h2>` heading row.
+  - `packages/ui/src/components/MacSystemMenuDropdown.tsx`: Enlarged `System Menu` button (`-my-1.5 -ml-1.5 h-12 w-12`) and `<Logo>` (`h-7 w-7 scale-110`) to slightly overlap the `h-11` taskbar edges.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T11:15:00+02:00 - Purge Unused Global CSS Keyframes & Replace Ambiguous Cubic-Bezier Classes
 
 - **Purpose**: Minimize compiled CSS bundle size by removing unreferenced top-level keyframes/utilities in `globals.css` and replacing ambiguous `ease-[cubic-bezier(...)]` arbitrary classes with named theme timing tokens.

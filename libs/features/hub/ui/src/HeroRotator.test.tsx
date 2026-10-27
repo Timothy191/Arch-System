@@ -410,23 +410,26 @@ describe('HeroRotator', () => {
     const prevBtn = screen.getByLabelText('Previous highlight');
     const nextBtn = screen.getByLabelText('Next highlight');
     expect(prevBtn).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim',
-      'border-accent-amber/50',
+      'border-0',
+      'bg-transparent',
+      'shadow-none',
       'text-amber-500',
-      'hover:text-amber-400',
-      'rounded-full',
-      'shadow-xs'
+      'hover:text-amber-400'
     );
+    expect(prevBtn).not.toHaveClass('rounded-full', 'gold-steel-border');
     expect(nextBtn).toHaveClass(
-      'gold-steel-border',
-      'gold-steel-border-slim',
-      'border-accent-amber/50',
+      'border-0',
+      'bg-transparent',
+      'shadow-none',
       'text-amber-500',
-      'hover:text-amber-400',
-      'rounded-full',
-      'shadow-xs'
+      'hover:text-amber-400'
     );
+    expect(nextBtn).not.toHaveClass('rounded-full', 'gold-steel-border');
+
+    // Assert separator under each hero card header
+    expect(screen.getByTestId('hero-header-separator-central-command')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-header-separator-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-header-separator-production')).toBeInTheDocument();
 
     const activeIndicator = screen.getByLabelText('Jump to System Overview');
     const inactiveIndicator = screen.getByLabelText('Jump to Drilling Operations');

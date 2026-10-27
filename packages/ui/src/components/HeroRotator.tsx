@@ -354,7 +354,7 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="gold-steel-border gold-steel-border-slim pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 rounded-full border border-0 border-accent-amber/50 bg-transparent p-3 text-amber-500 shadow-none shadow-xs transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-left-4 sm:p-4 lg:-left-6"
+              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-left-4 sm:p-4 lg:-left-6"
               style={{
                 animationDuration: '3s',
                 filter:
@@ -367,7 +367,7 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="gold-steel-border gold-steel-border-slim pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 rounded-full border border-0 border-accent-amber/50 bg-transparent p-3 text-amber-500 shadow-none shadow-xs transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-right-4 sm:p-4 lg:-right-6"
+              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-right-4 sm:p-4 lg:-right-6"
               style={{
                 animationDuration: '3s',
                 animationDelay: '1.5s',

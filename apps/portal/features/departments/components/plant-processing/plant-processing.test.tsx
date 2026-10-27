@@ -96,8 +96,28 @@ describe('Plant & Processing Workspace Components', () => {
       expect(screen.queryByLabelText('Active Cell Reference')).not.toBeInTheDocument();
       expect(screen.queryByText(/Auto-calc Discard/i)).not.toBeInTheDocument();
       expect(screen.getByText('Plant Stream / Metric')).toBeInTheDocument();
+      expect(screen.getByText('05:00 - 06:00')).toBeInTheDocument();
       expect(screen.getByText('06:00 - 07:00')).toBeInTheDocument();
-      expect(screen.getByText('17:00 - 18:00')).toBeInTheDocument();
+      expect(screen.getByText('06:00-07:00')).toBeInTheDocument();
+      expect(screen.getByText('16:00 - 17:00')).toBeInTheDocument();
+
+      // Verify initial auto-calculated variance block between 06:00 (420) and 07:00 (445) -> +25
+      const romVarSlot1 = screen.getByTestId('variance-romFeedTonnes-1');
+      expect(romVarSlot1).toHaveTextContent('+25');
+
+      // Verify redesigned Circuit & Unit column material dropdowns
+      const romMaterialSelect = screen.getByTestId(
+        'material-select-romFeedTonnes'
+      ) as HTMLSelectElement;
+      expect(romMaterialSelect.value).toBe('Seam 2 Lower');
+      fireEvent.change(romMaterialSelect, { target: { value: 'Seam 4 Upper' } });
+      expect(romMaterialSelect.value).toBe('Seam 4 Upper');
+
+      const headerMaterialSelect = screen.getByLabelText(
+        'Circuit & Unit Material'
+      ) as HTMLSelectElement;
+      fireEvent.change(headerMaterialSelect, { target: { value: 'ROM Blend A' } });
+      expect(romMaterialSelect.value).toBe('ROM Blend A');
 
       const row1RomInput = screen.getByLabelText('Row 1 ROM Feed') as HTMLInputElement;
       const row1CleanInput = screen.getByLabelText('Row 1 Clean Coal') as HTMLInputElement;
@@ -110,10 +130,13 @@ describe('Plant & Processing Workspace Components', () => {
 
       expect(row1DiscardInput.value).toBe('50');
       expect(row1AshInput.value).toBe('13.5');
+      // After changing 06:00 ROM Feed to 500, variance (06:00-07:00) auto-calculates 445 - 500 = -55
+      expect(romVarSlot1).toHaveTextContent('-55');
 
-      // Test stepper button (+5 t/hr on ROM Feed)
+      // Test stepper button (+5 t/hr on ROM Feed -> 505, variance becomes 445 - 505 = -60)
       fireEvent.click(screen.getByRole('button', { name: 'Increase Row 1 ROM Feed' }));
       expect(row1RomInput.value).toBe('505');
+      expect(romVarSlot1).toHaveTextContent('-60');
 
       const saveBtn = screen.getByTestId('save-plant-hourly-sheet');
       fireEvent.click(saveBtn);

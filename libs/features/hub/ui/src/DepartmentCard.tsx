@@ -267,6 +267,11 @@ function DepartmentCard({
                 </span>
               )}
             </div>
+            <div
+              data-testid={`dept-header-separator-${department.name}`}
+              aria-hidden="true"
+              className="my-1.5 h-px w-full bg-gradient-to-r from-accent-amber/55 via-slate-300/80 to-transparent"
+            />
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>
 
