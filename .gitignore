@@ -112,7 +112,6 @@ ltm/.venv/
 .kilo/
 
 # Generated service workers
-apps/portal/public/sw.js
 apps/portal/public/sw.js.map
 apps/portal/public/swe-worker-*.js
 apps/portal/public/swe-worker-*.js.map
