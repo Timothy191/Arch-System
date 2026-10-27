@@ -190,8 +190,19 @@ export function computeMachinesWithMeta(
 
     const machineOps = operationsByMachine.get(machine.id) || [];
     const hasOps = machineOps.length > 0;
-    const isInProgress = machineOps.some((op) => op.end_smu == null && op.end_time === null);
-    const totalHours = machineOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
+
+    // Single-pass computation for machine operation metrics (total hours and in-progress status)
+    // to eliminate multiple array iterations (.some() and .reduce()) per fleet machine.
+    let isInProgress = false;
+    let totalHours = 0;
+    for (const op of machineOps) {
+      if (op.end_smu == null && op.end_time === null) {
+        isInProgress = true;
+      }
+      if (op.hours_worked) {
+        totalHours += op.hours_worked;
+      }
+    }
 
     let status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
     if (isBreakdown) {
