@@ -105,7 +105,7 @@ describe('Plant & Processing Workspace Components', () => {
       expect(screen.queryByLabelText('Active Cell Reference')).not.toBeInTheDocument();
       expect(screen.queryByText(/Auto-calc Discard/i)).not.toBeInTheDocument();
       expect(screen.getByText('Plant Stream / Metric')).toBeInTheDocument();
-      expect(screen.getByTestId('stream-row-source')).toHaveTextContent('Source');
+      expect(screen.queryByTestId('stream-row-source')).not.toBeInTheDocument();
       expect(screen.getByText('ROM Scale')).toBeInTheDocument();
       expect(screen.getByText('Plant Feed')).toBeInTheDocument();
       expect(screen.getByText('Cyclone Feed')).toBeInTheDocument();

@@ -334,12 +334,6 @@ export function PlantHourlyMatrixSection({
   const [streamSearch, setStreamSearch] = useState<string>('');
   const [streamMaterials, setStreamMaterials] = useState<Record<string, string>>({});
 
-  const showSourceRow = useMemo(() => {
-    const query = streamSearch.trim().toLowerCase();
-    if (!query) return true;
-    return 'source feed seam stockpile blend'.includes(query);
-  }, [streamSearch]);
-
   const filteredStreams = useMemo(() => {
     const query = streamSearch.trim().toLowerCase();
     if (!query) return PLANT_GRID_STREAMS;
@@ -561,96 +555,6 @@ export function PlantHourlyMatrixSection({
               </thead>
 
               <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
-                {showSourceRow && (
-                  <tr
-                    data-testid="stream-row-source"
-                    className="transition-colors hover:bg-[var(--bg-secondary)]/40"
-                  >
-                    <td className="sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]">
-                      <div className="min-w-[160px]">
-                        <span className="block font-bold text-[var(--text-heading)] text-xs">
-                          Source
-                        </span>
-                        <span className="block text-[10px] text-[var(--text-secondary)]">
-                          Feed Seam / Stockpile
-                        </span>
-                      </div>
-                    </td>
-                    <td className="min-w-[180px] px-3 py-2">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-1.5">
-                          <span className="font-mono font-semibold text-[10px] text-[var(--text-secondary)]">
-                            {selectedModule}
-                          </span>
-                          <span className="shrink-0 rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
-                            Seam
-                          </span>
-                        </div>
-                        <select
-                          id="circuit-material-seamSource"
-                          name="circuitMaterial_seamSource"
-                          aria-label="Source Material"
-                          data-testid="material-select-seamSource"
-                          value={selectedSeamBlend}
-                          onChange={(e) => handleGlobalMaterialChange(e.target.value)}
-                          className={MATERIAL_SELECT_CLASS}
-                        >
-                          {PLANT_SEAM_OPTIONS.map((seam) => (
-                            <option key={seam} value={seam}>
-                              {seam}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                    {rows.map((row, hourIdx) => {
-                      const nextRow = rows[hourIdx + 1];
-                      const prevRow = rows[hourIdx - 1];
-                      const isSourceChanged = nextRow
-                        ? nextRow.seamSource !== row.seamSource
-                        : prevRow
-                          ? prevRow.seamSource !== row.seamSource
-                          : false;
-                      return (
-                        <Fragment key={`source-${row.hourSlot}`}>
-                          <td className="px-1 py-1.5 text-center">
-                            <select
-                              id={`cell-seamSource-${row.rowNumber}`}
-                              name={`cell_seamSource_${row.rowNumber}`}
-                              aria-label={`Row ${row.rowNumber} Source`}
-                              value={row.seamSource}
-                              onChange={(e) => onUpdateCell(hourIdx, 'seamSource', e.target.value)}
-                              className={MATERIAL_SELECT_CLASS}
-                            >
-                              {PLANT_SEAM_OPTIONS.map((seam) => (
-                                <option key={seam} value={seam}>
-                                  {seam}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td
-                            data-testid={`variance-seamSource-${row.rowNumber}`}
-                            className="border-[var(--border-default)]/40 border-x bg-[var(--bg-secondary)]/30 px-1 py-1.5 text-center"
-                          >
-                            <span
-                              className={`${VARIANCE_BADGE_BASE_CLASS} ${
-                                isSourceChanged
-                                  ? 'border-amber-500/30 bg-amber-500/10 text-amber-800'
-                                  : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-[var(--text-muted)]'
-                              }`}
-                            >
-                              {isSourceChanged ? 'Δ Mix' : 'Same'}
-                            </span>
-                          </td>
-                        </Fragment>
-                      );
-                    })}
-                    <td className="min-w-[95px] bg-[var(--bg-secondary)]/30 px-3 py-2.5 text-right font-bold font-mono text-[var(--text-heading)] text-xs">
-                      {selectedSeamBlend}
-                    </td>
-                  </tr>
-                )}
                 {filteredStreams.map((stream) => {
                   const summaryDisplay = formatStreamSummary(stream.key, totals, rows);
                   const activeMaterial = streamMaterials[stream.key] ?? selectedSeamBlend;
