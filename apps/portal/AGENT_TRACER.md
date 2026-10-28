@@ -1,3 +1,11 @@
+## 2026-10-28T06:23:00+02:00: Plant & Processing Dashboard (/plant-processing) — Mass Balance Panel, ROM Quality Panel & Delay Panel Under Production Mix
+
+- **Phase 1 (Comprehension)**: Address 2 design feedback items on `/plant-processing`: (1) add a **Plant Delays Panel** (`card-plant-delays-under-mix`) directly underneath the **Production Mix — Product, Discard & Recovery** (`card-production-mix`) panel; (2) add **Mass Balance** (`card-mass-balance`) and **ROM Quality** (`card-rom-quality`) telemetry panels to the top KPI grid.
+- **Phase 2 (Evidence)**: Inspected `PlantHourlyRollupSection.tsx`, `PlantHourlySheetClient.tsx`, and `plant-processing.test.tsx`.
+- **Phase 3 (Design)**: Expanded the top KPI grid (`md:grid-cols-2 xl:grid-cols-3`) with `card-mass-balance` (12-hour Clean vs Discard stacked mini bars, dual-color split progress bar, and accounted mass closure %) and `card-rom-quality` (Raw Feed Ash %, Moisture %, Feed vs Washed CV MJ/kg, and 12-hour moisture/quality sparkline); wrapped the right-hand `lg:col-span-5` column in Row 2 with `card-production-mix` followed directly by `card-plant-delays-under-mix`.
+- **Phase 4 (Criticism)**: Verified Tailwind utility class counts remain <= 16 per element and updated `plant-processing.test.tsx`.
+- **Phase 5 (Contract)**: Modified `PlantHourlyRollupSection.tsx`, `PlantHourlySheetClient.tsx`, and `plant-processing.test.tsx`.
+
 ## 2026-10-27T18:45:00+02:00: Integrations Marketplace — LSP Servers, Industrial SCADA/ERP Connectors, Rule Presets, Dry-Run Policy Simulator, SLA Telemetry & Manifest Import/Export
 
 - **Phase 1 (Comprehension)**: Enhance the Integrations Marketplace (`/admin` -> Integrations tab) with: (1) `'lsp'` connector kind + 4 LSP & Code/Schema Intelligence servers (`ts-ast-lsp`, `postgres-sqls-lsp`, `plc-iec61131-lsp`, `promql-lsp`); (2) 4 Industrial Mining, SCADA & ERP connectors (`opcua-pi-historian`, `sap-pm-erp`, `weighbridge-tcp`, `leica-jigsaw-fms`); (3) 1-click governance rule presets & interactive 4-pillar policy dry-run simulator; (4) live connector health probes, SLA latency/success badges, circuit-breaker reset button, and JSON manifest export/import.

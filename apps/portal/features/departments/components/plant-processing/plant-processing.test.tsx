@@ -65,7 +65,7 @@ describe('Plant & Processing Workspace Components', () => {
     it('should render the 6 telemetry and chart cards (ROM Scale, Product Yield, Product Ash, Running Density, Live Production Pulse Graph, Production Mix Pie Chart) and update when cells change', async () => {
       render(<PlantHourlySheetClient initialDate="2026-10-21" initialSheets={[sampleSheet]} />);
 
-      // Verify all 6 requested telemetry & visual cards render
+      // Verify all requested telemetry & visual cards render (including Mass Balance, ROM Quality, and Delay Panel under Production Mix)
       expect(screen.getByTestId('card-rom-scale')).toHaveTextContent(
         /ROM Scale \(t \/ Latest Hour\)/i
       );
@@ -74,6 +74,12 @@ describe('Plant & Processing Workspace Components', () => {
       );
       expect(screen.getByTestId('card-product-ash')).toHaveTextContent(/Product Ash \(% ADB\)/i);
       expect(screen.getByTestId('card-running-density')).toHaveTextContent(/Running Density/i);
+      expect(screen.getByTestId('card-mass-balance')).toHaveTextContent(
+        /Mass Balance \(Feed vs Split\)/i
+      );
+      expect(screen.getByTestId('card-rom-quality')).toHaveTextContent(
+        /ROM Quality \(Feed Grade\)/i
+      );
       expect(screen.getByTestId('card-live-production-pulse')).toHaveTextContent(
         /Live Production Pulse Graph — Current Throughput \(t\/h\)/i
       );
@@ -86,6 +92,9 @@ describe('Plant & Processing Workspace Components', () => {
       expect(screen.queryByText(/Live DMS & Belt Scale SSoT/i)).not.toBeInTheDocument();
       expect(screen.getByTestId('card-production-mix')).toHaveTextContent(
         /Production Mix — Product, Discard & Recovery/i
+      );
+      expect(screen.getByTestId('card-plant-delays-under-mix')).toHaveTextContent(
+        /Plant Delays — Active Shift Downtime/i
       );
       expect(screen.getByRole('img', { name: /Production Mix Pie Chart/i })).toBeInTheDocument();
 

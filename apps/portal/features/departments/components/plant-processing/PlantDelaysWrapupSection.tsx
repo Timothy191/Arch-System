@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, Clock, TrendingUp } from 'lucide-react';
+import { Activity, Clock } from 'lucide-react';
+import { useMemo } from 'react';
 import type { PlantDelayEntry } from './types';
 
 export interface PlantDelaysMetrics {
@@ -54,7 +54,7 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
               Plant Delays Wrapup — Logs &amp; Visuals
             </h3>
           </div>
-          <span className="font-mono font-bold text-sm text-[var(--text-heading)]">
+          <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
             {delays.length} events · {metrics.totalMinutes} min
           </span>
         </div>
@@ -136,12 +136,12 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
               Latest logged delays for Plant Processing
             </p>
           </div>
-          <span className="font-mono text-xs text-[var(--text-muted)]">{delays.length} rows</span>
+          <span className="font-mono text-[var(--text-muted)] text-xs">{delays.length} rows</span>
         </div>
 
         {delays.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-sm text-[var(--text-secondary)]">No delay events logged yet.</p>
+            <p className="text-[var(--text-secondary)] text-sm">No delay events logged yet.</p>
             <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
               Log a delay on the{' '}
               <a className="text-[var(--accent-blue)] underline" href="/plant-processing/delays">
@@ -154,7 +154,7 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border-default)] bg-black/[0.025] font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
+                <tr className="border-[var(--border-default)] border-b bg-black/[0.025] font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
                   <th className="px-3 py-2">Date</th>
                   <th className="px-3 py-2">Circuit / Category</th>
                   <th className="px-3 py-2">Booked In / Out</th>
@@ -177,15 +177,15 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
                             : 'bg-red-500/[0.04]'
                       }`}
                     >
-                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] font-semibold text-[var(--text-heading)]">
+                      <td className="whitespace-nowrap px-3 py-2 font-mono font-semibold text-[11px] text-[var(--text-heading)]">
                         {d.date}
                       </td>
                       <td className="px-3 py-2">
-                        <div className="font-mono text-[11px] font-semibold text-[var(--text-heading)]">
+                        <div className="font-mono font-semibold text-[11px] text-[var(--text-heading)]">
                           {d.circuit}
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                          <span className="rounded bg-[var(--bg-primary)] px-1.5 py-0.5 font-semibold text-[9px] uppercase text-[var(--text-secondary)]">
+                          <span className="rounded bg-[var(--bg-primary)] px-1.5 py-0.5 font-semibold text-[9px] text-[var(--text-secondary)] uppercase">
                             {d.category}
                           </span>
                           <span className="text-[10px] text-[var(--text-muted)]">
@@ -197,7 +197,7 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
                         <div>{d.startTime}</div>
                         <div className="font-semibold text-amber-700">{d.endTime ?? 'Pending'}</div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-right font-mono font-bold text-amber-700">
+                      <td className="whitespace-nowrap px-3 py-2 text-right font-bold font-mono text-amber-700">
                         {d.endTime ? `${d.durationMinutes} min` : 'Open'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2">

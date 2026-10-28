@@ -13,10 +13,11 @@ import {
 import Link from 'next/link';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { savePlantHourlySheetAction } from './actions';
+import { PlantDelaysWrapupSection } from './PlantDelaysWrapupSection';
 import { type EditableColumnKey, PlantHourlyMatrixSection } from './PlantHourlyMatrixSection';
 import { PlantHourlyRollupSection, type PlantHourlyTotals } from './PlantHourlyRollupSection';
-import { PlantDelaysWrapupSection } from './PlantDelaysWrapupSection';
 import { loadStoredPlantSheets, saveStoredPlantSheet } from './storage';
+import type { PlantDelayEntry } from './types';
 import {
   buildDefaultHourlyRows,
   calculateRowYield,
@@ -26,7 +27,6 @@ import {
   type PlantModuleId,
   type PlantShiftType,
 } from './types';
-import type { PlantDelayEntry } from './types';
 
 interface PlantHourlySheetClientProps {
   initialDate: string;
@@ -413,15 +413,18 @@ export function PlantHourlySheetClient({
 
       {showDashboard && (
         <>
-          <PlantHourlyRollupSection rows={rows} totals={totals} />
-          <PlantDelaysWrapupSection delays={delays} metrics={{
-            totalEvents: delays.length,
-            totalMinutes: delays.reduce((s, d) => s + d.durationMinutes, 0),
-            totalHours: delays.reduce((s, d) => s + d.durationMinutes, 0) / 60,
-            availabilityPct: 100,
-            topCircuit: delays[0]?.circuit ?? '—',
-            topMins: Math.max(0, ...delays.map((d) => d.durationMinutes)),
-          }} />
+          <PlantHourlyRollupSection rows={rows} totals={totals} delays={delays} />
+          <PlantDelaysWrapupSection
+            delays={delays}
+            metrics={{
+              totalEvents: delays.length,
+              totalMinutes: delays.reduce((s, d) => s + d.durationMinutes, 0),
+              totalHours: delays.reduce((s, d) => s + d.durationMinutes, 0) / 60,
+              availabilityPct: 100,
+              topCircuit: delays[0]?.circuit ?? '—',
+              topMins: Math.max(0, ...delays.map((d) => d.durationMinutes)),
+            }}
+          />
         </>
       )}
 

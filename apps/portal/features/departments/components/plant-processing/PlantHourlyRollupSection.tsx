@@ -2,10 +2,20 @@
 
 import { Badge } from '@repo/ui/components/ui/badge';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, Flame, Gauge, PieChart, Scale, TrendingUp } from 'lucide-react';
+import {
+  Activity,
+  Clock,
+  Flame,
+  Gauge,
+  Layers,
+  PieChart,
+  Scale,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import type { PlantHourlyRow } from './types';
+import type { PlantDelayEntry, PlantHourlyRow } from './types';
 
 export interface PlantHourlyTotals {
   totalRom: number;
@@ -32,13 +42,80 @@ export interface PlantHourlyTotals {
 interface PlantHourlyRollupSectionProps {
   rows: PlantHourlyRow[];
   totals: PlantHourlyTotals;
+  delays?: PlantDelayEntry[];
 }
 
-export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSectionProps) {
+const SHIFT_TOTAL_MINUTES = 720;
+const RAW_ROM_ASH_PCT = 28.4;
+const RAW_ROM_CV_MJKG = 21.8;
+const WASHED_CV_MJKG = 26.4;
+const PERCENT_MULTIPLIER = 100;
+
+export function PlantHourlyRollupSection({
+  rows,
+  totals,
+  delays = [],
+}: PlantHourlyRollupSectionProps) {
   const recoveryDelta = Number((totals.weightedYield - 90.0).toFixed(1));
   const densityDelta = Number((totals.avgRd - 1.48).toFixed(2));
+  const accountedTonnes = Number((totals.totalClean + totals.totalDiscard).toFixed(1));
+  const massBalanceDelta = Number((accountedTonnes - totals.totalRom).toFixed(1));
+  const massBalanceClosurePct =
+    totals.totalRom > 0
+      ? Number(
+          Math.min(
+            PERCENT_MULTIPLIER,
+            (accountedTonnes / totals.totalRom) * PERCENT_MULTIPLIER
+          ).toFixed(1)
+        )
+      : PERCENT_MULTIPLIER;
+  const activeSeamLabel = rows[0]?.seamSource || 'Seam 2 ROM';
+  const ashUpgradePts = Number((RAW_ROM_ASH_PCT - totals.avgAsh).toFixed(1));
 
-  // SVG Pulse Graph coordinates (Card 5) — Alternative Paired-Column & Smooth Spline Matrix Design
+  const delaySummary = useMemo(() => {
+    const loggedMins = delays.reduce((sum, item) => sum + (item.durationMinutes || 0), 0);
+    const sheetDowntimeMins = Math.max(0, SHIFT_TOTAL_MINUTES - totals.totalRunMins);
+    const totalDelayMins = loggedMins > 0 ? loggedMins : sheetDowntimeMins;
+    const availabilityPct = Number(
+      Math.max(
+        0,
+        Math.min(
+          PERCENT_MULTIPLIER,
+          ((SHIFT_TOTAL_MINUTES - totalDelayMins) / SHIFT_TOTAL_MINUTES) * PERCENT_MULTIPLIER
+        )
+      ).toFixed(1)
+    );
+    const displayItems =
+      delays.length > 0
+        ? delays.slice(0, 3)
+        : rows
+            .filter((r) => r.runMinutes < 60)
+            .slice(0, 3)
+            .map((r) => ({
+              id: `slot-${r.rowNumber}`,
+              date: '',
+              shift: 'day' as const,
+              circuit: 'DMS Module 1 — Primary Wash Plant',
+              category: 'Operational' as const,
+              impactType: 'Reduced Rate' as const,
+              startTime: r.hourSlot.split(' - ')[0] ?? '06:00',
+              endTime: r.hourSlot.split(' - ')[1] ?? '07:00',
+              durationMinutes: 60 - r.runMinutes,
+              reason: r.notes || 'Chute / screen rate check',
+              correctiveAction: 'Cleared & resumed nominal feed',
+              loggedBy: 'Control Room',
+              status: 'Resolved' as const,
+            }));
+
+    return {
+      totalDelayMins,
+      availabilityPct,
+      eventCount: delays.length > 0 ? delays.length : displayItems.length,
+      displayItems,
+    };
+  }, [delays, rows, totals.totalRunMins]);
+
+  // SVG Pulse Graph coordinates (Card 5) — Paired-Column & Smooth Spline Matrix Design
   const pulseChartGeometry = useMemo(() => {
     const width = 580;
     const height = 164;
@@ -76,7 +153,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
       };
     });
 
-    // Smooth cubic bezier curve through ROM feed tops
     const smoothRomPath = bars
       .map((b, i) => {
         if (i === 0) return `M${b.centerX},${b.romY}`;
@@ -107,11 +183,11 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
     };
   }, [rows, totals.peakHourRom, totals.priorShiftTph]);
 
-  // SVG Pie / Donut Chart geometry for Production Mix (Card 6)
+  // SVG Pie / Donut Chart geometry for Production Mix
   const pieGeometry = useMemo(() => {
     const radius = 44;
     const circumference = 2 * Math.PI * radius;
-    const recoveryFraction = Math.max(0, Math.min(1, totals.weightedYield / 100));
+    const recoveryFraction = Math.max(0, Math.min(1, totals.weightedYield / PERCENT_MULTIPLIER));
     const productArc = Number((recoveryFraction * circumference).toFixed(2));
     const discardArc = Number(((1 - recoveryFraction) * circumference).toFixed(2));
     return {
@@ -124,8 +200,8 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
 
   return (
     <>
-      {/* ── 4 Primary Plant Telemetry GlassCards (ROM Scale, Product Yield, Product Ash, Running Density) ── */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* ── 6 Primary Plant Telemetry GlassCards (ROM Scale, Product Yield, Product Ash, Running Density, Mass Balance, ROM Quality) ── */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {/* Card 1: ROM Scale (t/latest hour + graphs and visuals) */}
         <GlassCard className="space-y-3 p-5" data-testid="card-rom-scale">
           <div className="flex items-center justify-between">
@@ -152,7 +228,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
               </p>
             </div>
 
-            {/* Mini 12-Hour ROM Scale Bar Graph Visual */}
             <svg
               viewBox="0 0 120 34"
               className="h-9 w-28 shrink-0 overflow-visible"
@@ -181,7 +256,7 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
               className="h-full rounded-full bg-emerald-600 transition-all"
-              style={{ width: `${Math.min(100, totals.romCapacityPct)}%` }}
+              style={{ width: `${Math.min(PERCENT_MULTIPLIER, totals.romCapacityPct)}%` }}
             />
           </div>
 
@@ -213,7 +288,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
               </p>
             </div>
 
-            {/* Mini Recovery Sparkline */}
             <svg
               viewBox="0 0 110 32"
               className="h-8 w-24 shrink-0"
@@ -239,7 +313,7 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
               className="h-full rounded-full bg-blue-600 transition-all"
-              style={{ width: `${Math.min(100, totals.weightedYield)}%` }}
+              style={{ width: `${Math.min(PERCENT_MULTIPLIER, totals.weightedYield)}%` }}
             />
           </div>
 
@@ -274,12 +348,12 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                 {totals.avgAsh.toFixed(1)}% Ash
               </p>
               <p className="mt-0.5 text-[var(--text-muted)] text-xs">
-                Raw Feed Ash: <strong className="text-[var(--text-heading)]">28.4%</strong> ·
+                Raw Feed Ash:{' '}
+                <strong className="text-[var(--text-heading)]">{RAW_ROM_ASH_PCT}%</strong> ·
                 Moisture: {totals.avgMoisture.toFixed(1)}%
               </p>
             </div>
 
-            {/* Mini Ash Profile Bars */}
             <svg
               viewBox="0 0 110 32"
               className="h-8 w-24 shrink-0"
@@ -306,12 +380,14 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
             <div
               className="h-full rounded-full bg-indigo-600 transition-all"
-              style={{ width: `${Math.min(100, Math.round((totals.avgAsh / 20) * 100))}%` }}
+              style={{
+                width: `${Math.min(PERCENT_MULTIPLIER, Math.round((totals.avgAsh / 20) * PERCENT_MULTIPLIER))}%`,
+              }}
             />
           </div>
 
           <p className="font-mono text-[11px] text-[var(--text-secondary)]">
-            Ash Reduction: -{(28.4 - totals.avgAsh).toFixed(1)}% pts via DMS Cyclones
+            Ash Reduction: -{ashUpgradePts}% pts via DMS Cyclones
           </p>
         </GlassCard>
 
@@ -344,7 +420,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
               </p>
             </div>
 
-            {/* Mini Running Density Trace */}
             <svg
               viewBox="0 0 110 32"
               className="h-8 w-24 shrink-0"
@@ -383,11 +458,151 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
             </span>
           </div>
         </GlassCard>
+
+        {/* Card 5: Mass Balance (ROM Feed = Clean Coal + Rejects Discard) */}
+        <GlassCard className="space-y-3 p-5" data-testid="card-mass-balance">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+              <Layers className="h-3.5 w-3.5 text-emerald-600" />
+              Mass Balance (Feed vs Split)
+            </span>
+            <Badge className="gold-steel-border gold-steel-border-slim border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
+              {massBalanceClosurePct}% Accounted
+            </Badge>
+          </div>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
+                {accountedTonnes.toLocaleString()} t Split
+              </p>
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                Clean:{' '}
+                <strong className="text-emerald-700">{totals.totalClean.toLocaleString()} t</strong>{' '}
+                · Discard:{' '}
+                <strong className="text-amber-800">{totals.totalDiscard.toLocaleString()} t</strong>
+              </p>
+            </div>
+
+            <svg
+              viewBox="0 0 110 32"
+              className="h-8 w-24 shrink-0"
+              aria-label="Mass Balance 12-hour Clean vs Discard mini graph"
+            >
+              {rows.map((r, i) => {
+                const cleanH = Math.max(
+                  4,
+                  Math.min(22, Math.round((r.cleanCoalTonnes / 520) * 28))
+                );
+                const discH = Math.max(2, Math.min(8, Math.round((r.discardTonnes / 520) * 28)));
+                const x = i * 8.8 + 2;
+                return (
+                  <g key={r.hourSlot}>
+                    <rect
+                      x={x}
+                      y={30 - cleanH}
+                      width={6}
+                      height={cleanH}
+                      rx={1}
+                      className="fill-emerald-600/75"
+                    />
+                    <rect
+                      x={x}
+                      y={Math.max(1, 30 - cleanH - discH)}
+                      width={6}
+                      height={discH}
+                      rx={1}
+                      className="fill-amber-500/85"
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          <div className="flex h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
+            <div
+              className="h-full bg-emerald-600 transition-all"
+              style={{ width: `${Math.min(PERCENT_MULTIPLIER, totals.weightedYield)}%` }}
+            />
+            <div
+              className="h-full bg-amber-500 transition-all"
+              style={{ width: `${Math.min(PERCENT_MULTIPLIER, totals.discardPct)}%` }}
+            />
+          </div>
+
+          <p className="font-mono text-[11px] text-[var(--text-secondary)]">
+            ROM In: {totals.totalRom.toLocaleString()} t · Balance Δ:{' '}
+            {massBalanceDelta >= 0 ? `+${massBalanceDelta}` : massBalanceDelta} t
+          </p>
+        </GlassCard>
+
+        {/* Card 6: ROM Quality (Raw Feed Grade, Moisture & Calorific Value) */}
+        <GlassCard className="space-y-3 p-5" data-testid="card-rom-quality">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+              ROM Quality (Feed Grade)
+            </span>
+            <Badge className="gold-steel-border gold-steel-border-slim border border-purple-500/30 bg-purple-500/15 font-mono text-purple-800 text-xs">
+              {activeSeamLabel}
+            </Badge>
+          </div>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="font-bold font-mono text-2xl text-[var(--text-heading)]">
+                {RAW_ROM_ASH_PCT}% Raw Ash
+              </p>
+              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                Moisture:{' '}
+                <strong className="text-[var(--text-heading)]">
+                  {totals.avgMoisture.toFixed(1)}%
+                </strong>{' '}
+                · Feed CV: {RAW_ROM_CV_MJKG} MJ/kg
+              </p>
+            </div>
+
+            <svg
+              viewBox="0 0 110 32"
+              className="h-8 w-24 shrink-0"
+              aria-label="ROM Quality hourly moisture and ash profile"
+            >
+              <polyline
+                fill="none"
+                stroke="#7e22ce"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={rows
+                  .map((r, i) => {
+                    const x = (i / Math.max(1, rows.length - 1)) * 102 + 4;
+                    const y = 26 - Math.max(2, Math.min(22, ((r.moisturePct - 6) / 6) * 22));
+                    return `${x.toFixed(1)},${y.toFixed(1)}`;
+                  })
+                  .join(' ')}
+              />
+            </svg>
+          </div>
+
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
+            <div
+              className="h-full rounded-full bg-purple-600 transition-all"
+              style={{
+                width: `${Math.min(PERCENT_MULTIPLIER, Math.round((totals.avgMoisture / 14) * PERCENT_MULTIPLIER))}%`,
+              }}
+            />
+          </div>
+
+          <p className="font-mono text-[11px] text-[var(--text-secondary)]">
+            Washed Product CV: {WASHED_CV_MJKG} MJ/kg · Upgrade: +{ashUpgradePts}% pts
+          </p>
+        </GlassCard>
       </div>
 
-      {/* ── Row 2: Live Production Pulse Graph (lg:col-span-7) & Production Mix Pie Chart (lg:col-span-5) ── */}
+      {/* ── Row 2: Live Production Pulse Graph (lg:col-span-7) & Right Column: Production Mix + Delay Panel (lg:col-span-5) ── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {/* Card 5: Live Production Pulse Graph (Current throughput t/h + % vs prior shift) */}
+        {/* Card 7: Live Production Pulse Graph (Current throughput t/h + % vs prior shift) */}
         <GlassCard
           className="flex flex-col gap-3 p-5 lg:col-span-7"
           data-testid="card-live-production-pulse"
@@ -418,9 +633,8 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
             </div>
           </div>
 
-          {/* Alternative Design: Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
+          {/* Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
           <div className="gold-steel-border gold-steel-border-slim relative space-y-2.5 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
-            {/* Top Legend & Benchmark Strip */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-2 font-mono text-[10px]">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
@@ -441,7 +655,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
               </span>
             </div>
 
-            {/* Paired Hourly Columns + Cubic Bezier Pulse Spline SVG */}
             <svg
               viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
               className="h-40 w-full overflow-visible"
@@ -459,7 +672,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                 </linearGradient>
               </defs>
 
-              {/* Horizontal Y-Axis Gridlines & Labels */}
               {pulseChartGeometry.gridLevels.map((lvl) => (
                 <g key={lvl.val}>
                   <line
@@ -482,12 +694,10 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                 </g>
               ))}
 
-              {/* Paired Hourly Columns (ROM Feed + Clean Coal) */}
               {pulseChartGeometry.bars.map((b, idx) => {
                 const isLatest = idx === pulseChartGeometry.bars.length - 1;
                 return (
                   <g key={b.hourLabel}>
-                    {/* Subtle slot hover/active column backdrop */}
                     {isLatest && (
                       <rect
                         x={b.centerX - 15}
@@ -499,7 +709,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                         strokeWidth="1"
                       />
                     )}
-                    {/* ROM Feed Bar */}
                     <rect
                       x={b.centerX - 10.5}
                       y={b.romY}
@@ -508,7 +717,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                       rx={2.5}
                       fill="url(#romColGrad)"
                     />
-                    {/* Clean Coal Bar */}
                     <rect
                       x={b.centerX + 1}
                       y={b.cleanY}
@@ -517,7 +725,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                       rx={2.5}
                       fill="url(#cleanColGrad)"
                     />
-                    {/* X-Axis Hour Label */}
                     <text
                       x={b.centerX}
                       y={pulseChartGeometry.baselineY + 15}
@@ -532,7 +739,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                 );
               })}
 
-              {/* Prior Shift Average Benchmark Dashed Line */}
               <line
                 x1={pulseChartGeometry.padLeft}
                 y1={pulseChartGeometry.priorY}
@@ -543,7 +749,6 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
                 strokeDasharray="5 3"
               />
 
-              {/* Smooth Cubic Bezier ROM Pulse Trend Line + Nodes */}
               <path
                 d={pulseChartGeometry.smoothRomPath}
                 fill="none"
@@ -610,120 +815,174 @@ export function PlantHourlyRollupSection({ rows, totals }: PlantHourlyRollupSect
           </div>
         </GlassCard>
 
-        {/* Card 6: Production Mix (Pie Chart with Product, Discard, Recovery) */}
-        <GlassCard
-          className="flex flex-col justify-between gap-4 p-5 lg:col-span-5"
-          data-testid="card-production-mix"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-                <PieChart className="h-3.5 w-3.5 text-emerald-600" />
-                Production Mix — Product, Discard &amp; Recovery
-              </h3>
-              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
-                Wash plant mass-balance split across Clean Product, Rejects Discard, and % Recovery
-              </p>
-            </div>
-            <Badge className="gold-steel-border gold-steel-border-slim border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
-              {totals.weightedYield.toFixed(1)}% Recovery
-            </Badge>
-          </div>
-
-          {/* Pie Chart + Mass Balance Breakdown */}
-          <div className="my-auto flex flex-col items-center gap-5 py-1 sm:flex-row">
-            {/* SVG Donut / Pie Chart */}
-            <div className="relative flex h-32 w-32 shrink-0 items-center justify-center">
-              <svg
-                viewBox="0 0 110 110"
-                className="h-32 w-32 -rotate-90"
-                role="img"
-                aria-label={`Production Mix Pie Chart: Product ${totals.weightedYield.toFixed(1)}%, Discard ${totals.discardPct.toFixed(1)}%`}
-              >
-                {/* Background / Discard Ring */}
-                <circle
-                  cx="55"
-                  cy="55"
-                  r={pieGeometry.radius}
-                  fill="transparent"
-                  stroke="#f59e0b"
-                  strokeWidth="16"
-                />
-                {/* Foreground / Clean Coal Product Slice */}
-                <circle
-                  cx="55"
-                  cy="55"
-                  r={pieGeometry.radius}
-                  fill="transparent"
-                  stroke="#10b981"
-                  strokeWidth="16"
-                  strokeDasharray={`${pieGeometry.productArc} ${pieGeometry.circumference}`}
-                  strokeLinecap="butt"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+        {/* Right Column (lg:col-span-5): Production Mix Panel + Plant Delays Panel Directly Underneath */}
+        <div className="flex flex-col gap-4 lg:col-span-5">
+          {/* Card 8: Production Mix (Pie Chart with Product, Discard, Recovery) */}
+          <GlassCard
+            className="flex flex-col justify-between gap-4 p-5"
+            data-testid="card-production-mix"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <PieChart className="h-3.5 w-3.5 text-emerald-600" />
+                  Production Mix — Product, Discard &amp; Recovery
+                </h3>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Wash plant mass-balance split across Clean Product, Rejects Discard, and %
                   Recovery
-                </span>
-                <span className="font-bold font-mono text-[var(--text-heading)] text-base">
-                  {totals.weightedYield.toFixed(1)}%
-                </span>
+                </p>
+              </div>
+              <Badge className="gold-steel-border gold-steel-border-slim border border-emerald-500/30 bg-emerald-500/15 font-mono text-emerald-800 text-xs">
+                {totals.weightedYield.toFixed(1)}% Recovery
+              </Badge>
+            </div>
+
+            <div className="my-auto flex flex-col items-center gap-5 py-1 sm:flex-row">
+              <div className="relative flex h-32 w-32 shrink-0 items-center justify-center">
+                <svg
+                  viewBox="0 0 110 110"
+                  className="h-32 w-32 -rotate-90"
+                  role="img"
+                  aria-label={`Production Mix Pie Chart: Product ${totals.weightedYield.toFixed(1)}%, Discard ${totals.discardPct.toFixed(1)}%`}
+                >
+                  <circle
+                    cx="55"
+                    cy="55"
+                    r={pieGeometry.radius}
+                    fill="transparent"
+                    stroke="#f59e0b"
+                    strokeWidth="16"
+                  />
+                  <circle
+                    cx="55"
+                    cy="55"
+                    r={pieGeometry.radius}
+                    fill="transparent"
+                    stroke="#10b981"
+                    strokeWidth="16"
+                    strokeDasharray={`${pieGeometry.productArc} ${pieGeometry.circumference}`}
+                    strokeLinecap="butt"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                    Recovery
+                  </span>
+                  <span className="font-bold font-mono text-[var(--text-heading)] text-base">
+                    {totals.weightedYield.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-full flex-1 space-y-2 text-xs">
+                <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
+                    <span className="font-semibold text-[var(--text-heading)]">
+                      Product (Clean Coal)
+                    </span>
+                  </div>
+                  <span className="font-bold font-mono text-emerald-700">
+                    {totals.totalClean.toLocaleString()} t ({totals.weightedYield.toFixed(1)}%)
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
+                    <span className="font-semibold text-[var(--text-heading)]">
+                      Discard (Rejects)
+                    </span>
+                  </div>
+                  <span className="font-bold font-mono text-amber-800">
+                    {totals.totalDiscard.toLocaleString()} t ({totals.discardPct.toFixed(1)}%)
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
+                    <span className="font-semibold text-[var(--text-heading)]">Recovery Yield</span>
+                  </div>
+                  <span className="font-bold font-mono text-blue-700">
+                    {totals.weightedYield.toFixed(1)}% (Ash {totals.avgAsh.toFixed(1)}%)
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Product / Discard / Recovery Breakdown Pills */}
-            <div className="w-full flex-1 space-y-2 text-xs">
-              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
-                  <span className="font-semibold text-[var(--text-heading)]">
-                    Product (Clean Coal)
-                  </span>
-                </div>
-                <span className="font-bold font-mono text-emerald-700">
-                  {totals.totalClean.toLocaleString()} t ({totals.weightedYield.toFixed(1)}%)
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
-                  <span className="font-semibold text-[var(--text-heading)]">
-                    Discard (Rejects)
-                  </span>
-                </div>
-                <span className="font-bold font-mono text-amber-800">
-                  {totals.totalDiscard.toLocaleString()} t ({totals.discardPct.toFixed(1)}%)
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
-                  <span className="font-semibold text-[var(--text-heading)]">Recovery Yield</span>
-                </div>
-                <span className="font-bold font-mono text-blue-700">
-                  {totals.weightedYield.toFixed(1)}% (Ash {totals.avgAsh.toFixed(1)}%)
-                </span>
-              </div>
+            <div className="flex flex-wrap gap-2 border-[var(--border-subtle)] border-t pt-1">
+              <Link
+                className="rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90"
+                href="/plant-processing/hourly-sheet"
+              >
+                + Open Hourly Sheet
+              </Link>
+              <Link
+                className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
+                href="/plant-processing/delays"
+              >
+                Log Plant Delays
+              </Link>
             </div>
-          </div>
+          </GlassCard>
 
-          <div className="flex flex-wrap gap-2 border-[var(--border-subtle)] border-t pt-1">
-            <Link
-              className="rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-medium text-white text-xs transition-all hover:bg-[var(--accent-blue)]/90"
-              href="/plant-processing/hourly-sheet"
-            >
-              + Open Hourly Sheet
-            </Link>
-            <Link
-              className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all"
-              href="/plant-processing/delays"
-            >
-              Log Plant Delays
-            </Link>
-          </div>
-        </GlassCard>
+          {/* Card 9: Plant Delays Panel (Directly under Production Mix Panel) */}
+          <GlassCard
+            className="flex flex-col justify-between gap-3 p-5"
+            data-testid="card-plant-delays-under-mix"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <Clock className="h-3.5 w-3.5 text-amber-600" />
+                  Plant Delays — Active Shift Downtime
+                </h3>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Shift circuit stoppages, choke events, and wash-plant availability
+                </p>
+              </div>
+              <Badge className="gold-steel-border gold-steel-border-slim border border-amber-500/30 bg-amber-500/15 font-mono text-amber-800 text-xs">
+                {delaySummary.totalDelayMins}m Down · {delaySummary.availabilityPct}% Avail
+              </Badge>
+            </div>
+
+            <div className="space-y-1.5 text-xs">
+              {delaySummary.displayItems.map((delayItem) => (
+                <div
+                  key={delayItem.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-[var(--text-heading)]">
+                      {delayItem.circuit}
+                    </p>
+                    <p className="truncate text-[11px] text-[var(--text-muted)]">
+                      {delayItem.category} · {delayItem.startTime}–{delayItem.endTime || 'Active'} ·{' '}
+                      {delayItem.reason}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-bold font-mono text-[11px] text-amber-800">
+                    {delayItem.durationMinutes} min
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between border-[var(--border-subtle)] border-t pt-2 text-xs">
+              <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                {delaySummary.eventCount} shift delay event(s) · Run: {totals.runHours} / 12.0h
+              </span>
+              <Link
+                href="/plant-processing/delays"
+                className="font-semibold text-[var(--accent-blue)] hover:underline"
+              >
+                Manage Delays →
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
       </div>
     </>
   );

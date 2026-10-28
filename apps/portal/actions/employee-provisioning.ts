@@ -216,7 +216,7 @@ export async function provisionNewEmployee(
   if (persError || !newPersonnel) {
     throw new DatabaseError('Failed to create employee personnel record', {
       table: 'personnel',
-      cause: persError,
+      cause: persError ?? undefined,
     });
   }
 
@@ -387,7 +387,7 @@ export async function updateEmployeeAction(
   if (persError || !updatedPersonnel) {
     throw new DatabaseError('Failed to update employee personnel record', {
       table: 'personnel',
-      cause: persError,
+      cause: persError ?? undefined,
     });
   }
 
