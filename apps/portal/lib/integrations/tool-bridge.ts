@@ -235,7 +235,7 @@ export async function dispatchIntegrationEventTriggers(
         await writeAuditLog({
           installationId: inst.id,
           toolName: `trigger:${options.eventName ?? rules.threshold_metric ?? 'metric'}`,
-          argsDigest: digestArgs({
+          argsDigest: argsDigest({
             eventName: options.eventName ?? null,
             metrics: options.metrics ?? null,
           }),
