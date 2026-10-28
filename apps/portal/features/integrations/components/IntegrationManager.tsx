@@ -90,13 +90,26 @@ export function IntegrationManager() {
     [installations]
   );
 
+  // Single-pass O(N) aggregation loop to compute kind counts instead of multiple .filter() iterations
   const kindCounts = useMemo(() => {
+    let mcp = 0;
+    let lsp = 0;
+    let action = 0;
+    let native = 0;
+
+    for (const item of catalog) {
+      if (item.kind === 'mcp') mcp++;
+      else if (item.kind === 'lsp') lsp++;
+      else if (item.kind === 'action') action++;
+      else if (item.kind === 'native') native++;
+    }
+
     return {
       all: catalog.length,
-      mcp: catalog.filter((c) => c.kind === 'mcp').length,
-      lsp: catalog.filter((c) => c.kind === 'lsp').length,
-      action: catalog.filter((c) => c.kind === 'action').length,
-      native: catalog.filter((c) => c.kind === 'native').length,
+      mcp,
+      lsp,
+      action,
+      native,
     };
   }, [catalog]);
 
