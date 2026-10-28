@@ -7,6 +7,9 @@ export interface PlantHourlyRow {
   hourSlot: string;
   seamSource: string;
   romFeedTonnes: number;
+  plantFeedTonnes?: number;
+  cycloneFeedTonnes?: number;
+  newProductScaleTonnes?: number;
   cleanCoalTonnes: number;
   discardTonnes: number;
   yieldPct: number;
@@ -192,13 +195,19 @@ export function buildDefaultHourlyRows(shift: PlantShiftType = 'day'): PlantHour
 
   return slots.map((slot, idx) => {
     const romFeedTonnes = baseFeeds[idx] ?? 450;
+    const plantFeedTonnes = Math.round(romFeedTonnes * 0.96);
+    const cycloneFeedTonnes = Math.round(romFeedTonnes * 0.82);
     const cleanCoalTonnes = baseClean[idx] ?? 410;
+    const newProductScaleTonnes = cleanCoalTonnes;
     const discardTonnes = Math.max(0, romFeedTonnes - cleanCoalTonnes);
     return {
       rowNumber: idx + 1,
       hourSlot: slot,
       seamSource: idx >= 6 && idx <= 8 ? 'Seam 4 Upper' : 'Seam 2 Lower',
       romFeedTonnes,
+      plantFeedTonnes,
+      cycloneFeedTonnes,
+      newProductScaleTonnes,
       cleanCoalTonnes,
       discardTonnes,
       yieldPct: calculateRowYield(romFeedTonnes, cleanCoalTonnes),

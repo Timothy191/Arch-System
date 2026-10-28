@@ -20,6 +20,7 @@ import {
   Layers,
   LifeBuoy,
   Menu,
+  MessageSquare,
   Monitor,
   Pickaxe,
   Pin,
@@ -88,6 +89,9 @@ interface DepartmentLayoutProps {
   tabs: readonly Tab[];
   children: React.ReactNode;
 }
+
+const SUBTAB_LINK_BASE =
+  'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all';
 
 export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
@@ -323,9 +327,18 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               isShiftOperationsActive;
             const isPdfReportActive =
               tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
+            const isWhatsappReportActive =
+              tab.name === 'reports' && isRouteMatch && activeTabParam === 'whatsapp-report';
             const isReportsDashboardActive =
-              tab.name === 'reports' && isRouteMatch && !isPdfReportActive;
-            const isActive = isRouteMatch && !isPdfReportActive && !isShiftOperationsSubtabActive;
+              tab.name === 'reports' &&
+              isRouteMatch &&
+              !isPdfReportActive &&
+              !isWhatsappReportActive;
+            const isActive =
+              isRouteMatch &&
+              !isPdfReportActive &&
+              !isWhatsappReportActive &&
+              !isShiftOperationsSubtabActive;
             const Icon = ICON_MAP[tab.icon];
             return (
               <div key={tab.name} className="space-y-0.5">
@@ -425,7 +438,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={basePath}
                       data-testid="dashboard-subtab-scada"
                       className={cn(
-                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
+                        SUBTAB_LINK_BASE,
                         isScadaDashboardSubtabActive
                           ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
                           : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
@@ -451,7 +464,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={`${basePath}/shift-compilation`}
                       data-testid="dashboard-subtab-shift-operations"
                       className={cn(
-                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
+                        SUBTAB_LINK_BASE,
                         isShiftOperationsSubtabActive
                           ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
                           : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
@@ -484,7 +497,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={`${basePath}/reports`}
                       data-testid="reports-subtab-dashboard"
                       className={cn(
-                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
+                        SUBTAB_LINK_BASE,
                         isReportsDashboardActive
                           ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
                           : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
@@ -510,7 +523,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       href={`${basePath}/reports?tab=pdf-report`}
                       data-testid="reports-subtab-pdf-report"
                       className={cn(
-                        'group relative flex items-center gap-2 rounded-md px-2.5 py-1 text-[12px] transition-all',
+                        SUBTAB_LINK_BASE,
                         isPdfReportActive
                           ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
                           : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
@@ -531,6 +544,32 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         )}
                       />
                       <span>PDF Report</span>
+                    </Link>
+                    <Link
+                      href={`${basePath}/reports?tab=whatsapp-report`}
+                      data-testid="reports-subtab-whatsapp-report"
+                      className={cn(
+                        SUBTAB_LINK_BASE,
+                        isWhatsappReportActive
+                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)]'
+                          : 'font-medium text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
+                      )}
+                    >
+                      {isWhatsappReportActive && (
+                        <m.div
+                          layoutId="active-sidebar-subtab"
+                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
+                        />
+                      )}
+                      <MessageSquare
+                        className={cn(
+                          'h-3 w-3 shrink-0 transition-colors',
+                          isWhatsappReportActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
+                        )}
+                      />
+                      <span>WhatsApp Report</span>
                     </Link>
                   </div>
                 )}

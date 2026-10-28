@@ -54,6 +54,13 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     const pdfReportSubtab = screen.getByTestId('reports-subtab-pdf-report');
     expect(pdfReportSubtab).toBeInTheDocument();
     expect(pdfReportSubtab).toHaveAttribute('href', '/control-room/reports?tab=pdf-report');
+    const whatsappReportSubtab = screen.getByTestId('reports-subtab-whatsapp-report');
+    expect(whatsappReportSubtab).toBeInTheDocument();
+    expect(whatsappReportSubtab).toHaveAttribute(
+      'href',
+      '/control-room/reports?tab=whatsapp-report'
+    );
+    expect(whatsappReportSubtab).toHaveTextContent('WhatsApp Report');
     expect(screen.getByTestId('dashboard-subtabs-toggle')).toHaveAttribute('aria-expanded', 'true');
     const shiftOperationsSubtab = screen.getByTestId('dashboard-subtab-shift-operations');
     expect(shiftOperationsSubtab).toBeInTheDocument();

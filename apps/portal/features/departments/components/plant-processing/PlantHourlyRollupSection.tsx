@@ -118,11 +118,11 @@ export function PlantHourlyRollupSection({
   // SVG Pulse Graph coordinates (Card 5) — Paired-Column & Smooth Spline Matrix Design
   const pulseChartGeometry = useMemo(() => {
     const width = 580;
-    const height = 164;
-    const padLeft = 38;
-    const padRight = 14;
+    const height = 220;
+    const padLeft = 40;
+    const padRight = 18;
     const padTop = 18;
-    const padBottom = 26;
+    const padBottom = 28;
     const usableW = width - padLeft - padRight;
     const usableH = height - padTop - padBottom;
     const minVal = 330;
@@ -607,210 +607,214 @@ export function PlantHourlyRollupSection({
           className="flex flex-col gap-3 p-5 lg:col-span-7"
           data-testid="card-live-production-pulse"
         >
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
-                <Activity className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
-                Live Production Pulse Graph — Current Throughput (t/h)
-              </h3>
-              <p className="mt-0.5 text-[var(--text-muted)] text-xs">
-                Hourly ROM belt scale feed vs. washed clean coal output across active shift windows
-              </p>
-            </div>
+          <div className="flex h-full w-full flex-col justify-between gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h3 className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
+                  <Activity className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                  Live Production Pulse Graph — Current Throughput (t/h)
+                </h3>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Hourly ROM belt scale feed vs. washed clean coal output across active shift
+                  windows
+                </p>
+              </div>
 
-            <div className="-mt-1 flex items-center gap-2 self-start">
-              <span
-                className={`gold-steel-border gold-steel-border-slim rounded-full border px-2.5 py-1 font-bold font-mono text-xs ${
-                  totals.throughputDeltaPct >= 0
-                    ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
-                    : 'border-amber-500/30 bg-amber-500/15 text-amber-800'
-                }`}
-              >
-                {totals.throughputDeltaPct >= 0
-                  ? `+${totals.throughputDeltaPct}% vs Prior Shift`
-                  : `${totals.throughputDeltaPct}% vs Prior Shift`}
-              </span>
-            </div>
-          </div>
-
-          {/* Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
-          <div className="gold-steel-border gold-steel-border-slim relative space-y-2.5 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-2 font-mono text-[10px]">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
-                  <span className="inline-block h-2.5 w-2.5 rounded-xs bg-emerald-600" />
-                  ROM Throughput (t/h)
-                </span>
-                <span className="inline-flex items-center gap-1.5 font-semibold text-blue-800">
-                  <span className="inline-block h-2.5 w-2.5 rounded-xs bg-blue-600" />
-                  Clean Coal (t/h)
-                </span>
-                <span className="inline-flex items-center gap-1.5 font-medium text-amber-800">
-                  <span className="inline-block h-0 w-3 border-amber-600 border-t-2 border-dashed" />
-                  Prior Shift Avg: {totals.priorShiftTph} t/h
+              <div className="-mt-1 flex items-center gap-2 self-start">
+                <span
+                  className={`gold-steel-border gold-steel-border-slim rounded-full border px-2.5 py-1 font-bold font-mono text-xs ${
+                    totals.throughputDeltaPct >= 0
+                      ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
+                      : 'border-amber-500/30 bg-amber-500/15 text-amber-800'
+                  }`}
+                >
+                  {totals.throughputDeltaPct >= 0
+                    ? `+${totals.throughputDeltaPct}% vs Prior Shift`
+                    : `${totals.throughputDeltaPct}% vs Prior Shift`}
                 </span>
               </div>
-              <span className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2 py-0.5 font-semibold text-[var(--text-secondary)]">
-                Peak: {totals.peakHourRom} t/h
-              </span>
             </div>
 
-            <svg
-              viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
-              className="h-40 w-full overflow-visible"
-              role="img"
-              aria-label="Live Production Pulse Graph showing hourly throughput in tonnes per hour"
-            >
-              <defs>
-                <linearGradient id="romColGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#059669" stopOpacity="0.92" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.38" />
-                </linearGradient>
-                <linearGradient id="cleanColGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.38" />
-                </linearGradient>
-              </defs>
+            {/* Paired Hourly Column & Smooth Pulse Spline Telemetry Matrix */}
+            <div className="gold-steel-border gold-steel-border-slim relative flex flex-1 flex-col justify-between gap-2.5 overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/70 p-3.5 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-subtle)] border-b pb-2 font-mono text-[10px]">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
+                    <span className="inline-block h-2.5 w-2.5 rounded-xs bg-emerald-600" />
+                    ROM Throughput (t/h)
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-blue-800">
+                    <span className="inline-block h-2.5 w-2.5 rounded-xs bg-blue-600" />
+                    Clean Coal (t/h)
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-medium text-amber-800">
+                    <span className="inline-block h-0 w-3 border-amber-600 border-t-2 border-dashed" />
+                    Prior Shift Avg: {totals.priorShiftTph} t/h
+                  </span>
+                </div>
+                <span className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2 py-0.5 font-semibold text-[var(--text-secondary)]">
+                  Peak: {totals.peakHourRom} t/h
+                </span>
+              </div>
 
-              {pulseChartGeometry.gridLevels.map((lvl) => (
-                <g key={lvl.val}>
-                  <line
-                    x1={pulseChartGeometry.padLeft}
-                    y1={lvl.y}
-                    x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
-                    y2={lvl.y}
-                    stroke="currentColor"
-                    strokeOpacity="0.08"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={pulseChartGeometry.padLeft - 6}
-                    y={lvl.y + 3}
-                    textAnchor="end"
-                    className="fill-[var(--text-muted)] font-mono text-[9px]"
-                  >
-                    {lvl.val}
-                  </text>
-                </g>
-              ))}
+              <svg
+                viewBox={`0 0 ${pulseChartGeometry.width} ${pulseChartGeometry.height}`}
+                preserveAspectRatio="xMidYMid meet"
+                className="h-full max-h-64 min-h-[190px] w-full flex-1 overflow-hidden"
+                role="img"
+                aria-label="Live Production Pulse Graph showing hourly throughput in tonnes per hour"
+              >
+                <defs>
+                  <linearGradient id="romColGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#059669" stopOpacity="0.92" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.38" />
+                  </linearGradient>
+                  <linearGradient id="cleanColGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.38" />
+                  </linearGradient>
+                </defs>
 
-              {pulseChartGeometry.bars.map((b, idx) => {
-                const isLatest = idx === pulseChartGeometry.bars.length - 1;
-                return (
-                  <g key={b.hourLabel}>
-                    {isLatest && (
-                      <rect
-                        x={b.centerX - 15}
-                        y={pulseChartGeometry.padTop - 4}
-                        width={30}
-                        height={pulseChartGeometry.baselineY - pulseChartGeometry.padTop + 6}
-                        rx={5}
-                        className="fill-emerald-500/8 stroke-emerald-500/25"
-                        strokeWidth="1"
-                      />
-                    )}
-                    <rect
-                      x={b.centerX - 10.5}
-                      y={b.romY}
-                      width={9.5}
-                      height={b.romH}
-                      rx={2.5}
-                      fill="url(#romColGrad)"
-                    />
-                    <rect
-                      x={b.centerX + 1}
-                      y={b.cleanY}
-                      width={9.5}
-                      height={b.cleanH}
-                      rx={2.5}
-                      fill="url(#cleanColGrad)"
+                {pulseChartGeometry.gridLevels.map((lvl) => (
+                  <g key={lvl.val}>
+                    <line
+                      x1={pulseChartGeometry.padLeft}
+                      y1={lvl.y}
+                      x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
+                      y2={lvl.y}
+                      stroke="currentColor"
+                      strokeOpacity="0.08"
+                      strokeWidth="1"
                     />
                     <text
-                      x={b.centerX}
-                      y={pulseChartGeometry.baselineY + 15}
-                      textAnchor="middle"
-                      className={`font-mono text-[9px] ${
-                        isLatest ? 'fill-emerald-700 font-bold' : 'fill-[var(--text-muted)]'
-                      }`}
+                      x={pulseChartGeometry.padLeft - 6}
+                      y={lvl.y + 3}
+                      textAnchor="end"
+                      className="fill-[var(--text-muted)] font-mono text-[9px]"
                     >
-                      {b.hourLabel}
+                      {lvl.val}
                     </text>
                   </g>
-                );
-              })}
+                ))}
 
-              <line
-                x1={pulseChartGeometry.padLeft}
-                y1={pulseChartGeometry.priorY}
-                x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
-                y2={pulseChartGeometry.priorY}
-                stroke="#d97706"
-                strokeWidth="1.5"
-                strokeDasharray="5 3"
-              />
+                {pulseChartGeometry.bars.map((b, idx) => {
+                  const isLatest = idx === pulseChartGeometry.bars.length - 1;
+                  return (
+                    <g key={b.hourLabel}>
+                      {isLatest && (
+                        <rect
+                          x={b.centerX - 15}
+                          y={pulseChartGeometry.padTop - 4}
+                          width={30}
+                          height={pulseChartGeometry.baselineY - pulseChartGeometry.padTop + 6}
+                          rx={5}
+                          className="fill-emerald-500/8 stroke-emerald-500/25"
+                          strokeWidth="1"
+                        />
+                      )}
+                      <rect
+                        x={b.centerX - 10.5}
+                        y={b.romY}
+                        width={9.5}
+                        height={b.romH}
+                        rx={2.5}
+                        fill="url(#romColGrad)"
+                      />
+                      <rect
+                        x={b.centerX + 1}
+                        y={b.cleanY}
+                        width={9.5}
+                        height={b.cleanH}
+                        rx={2.5}
+                        fill="url(#cleanColGrad)"
+                      />
+                      <text
+                        x={b.centerX}
+                        y={pulseChartGeometry.baselineY + 15}
+                        textAnchor="middle"
+                        className={`font-mono text-[9px] ${
+                          isLatest ? 'fill-emerald-700 font-bold' : 'fill-[var(--text-muted)]'
+                        }`}
+                      >
+                        {b.hourLabel}
+                      </text>
+                    </g>
+                  );
+                })}
 
-              <path
-                d={pulseChartGeometry.smoothRomPath}
-                fill="none"
-                stroke="#047857"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              {pulseChartGeometry.bars.map((b, idx) => {
-                const isLatest = idx === pulseChartGeometry.bars.length - 1;
-                return (
-                  <circle
-                    key={`node-${b.hourLabel}`}
-                    cx={b.centerX - 5.75}
-                    cy={b.romY}
-                    r={isLatest ? 3.8 : 2.2}
-                    className={
-                      isLatest ? 'fill-emerald-600 stroke-2 stroke-white' : 'fill-emerald-700'
-                    }
-                  />
-                );
-              })}
-            </svg>
-          </div>
+                <line
+                  x1={pulseChartGeometry.padLeft}
+                  y1={pulseChartGeometry.priorY}
+                  x2={pulseChartGeometry.width - pulseChartGeometry.padRight}
+                  y2={pulseChartGeometry.priorY}
+                  stroke="#d97706"
+                  strokeWidth="1.5"
+                  strokeDasharray="5 3"
+                />
 
-          <div className="grid grid-cols-2 gap-2.5 pt-0.5 text-xs sm:grid-cols-4">
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                Current Throughput
-              </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.avgTph.toLocaleString()} t/h
-              </p>
+                <path
+                  d={pulseChartGeometry.smoothRomPath}
+                  fill="none"
+                  stroke="#047857"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                {pulseChartGeometry.bars.map((b, idx) => {
+                  const isLatest = idx === pulseChartGeometry.bars.length - 1;
+                  return (
+                    <circle
+                      key={`node-${b.hourLabel}`}
+                      cx={b.centerX - 5.75}
+                      cy={b.romY}
+                      r={isLatest ? 3.8 : 2.2}
+                      className={
+                        isLatest ? 'fill-emerald-600 stroke-2 stroke-white' : 'fill-emerald-700'
+                      }
+                    />
+                  );
+                })}
+              </svg>
             </div>
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                Latest Hour Scale
-              </p>
-              <p className="mt-0.5 font-bold font-mono text-emerald-700">
-                {totals.latestHourRom.toLocaleString()} t/h
-              </p>
-            </div>
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                Prior Shift Avg
-              </p>
-              <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
-                {totals.priorShiftTph.toLocaleString()} t/h
-              </p>
-            </div>
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
-              <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
-                vs Prior Shift
-              </p>
-              <p
-                className={`mt-0.5 font-bold font-mono ${
-                  totals.throughputDeltaPct >= 0 ? 'text-emerald-700' : 'text-amber-700'
-                }`}
-              >
-                {totals.throughputDeltaPct >= 0
-                  ? `+${totals.throughputDeltaPct}%`
-                  : `${totals.throughputDeltaPct}%`}
-              </p>
+
+            <div className="grid grid-cols-2 gap-2.5 pt-0.5 text-xs sm:grid-cols-4">
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                  Current Throughput
+                </p>
+                <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
+                  {totals.avgTph.toLocaleString()} t/h
+                </p>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                  Latest Hour Scale
+                </p>
+                <p className="mt-0.5 font-bold font-mono text-emerald-700">
+                  {totals.latestHourRom.toLocaleString()} t/h
+                </p>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                  Prior Shift Avg
+                </p>
+                <p className="mt-0.5 font-bold font-mono text-[var(--text-heading)]">
+                  {totals.priorShiftTph.toLocaleString()} t/h
+                </p>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2.5">
+                <p className="font-mono text-[10px] text-[var(--text-muted)] uppercase">
+                  vs Prior Shift
+                </p>
+                <p
+                  className={`mt-0.5 font-bold font-mono ${
+                    totals.throughputDeltaPct >= 0 ? 'text-emerald-700' : 'text-amber-700'
+                  }`}
+                >
+                  {totals.throughputDeltaPct >= 0
+                    ? `+${totals.throughputDeltaPct}%`
+                    : `${totals.throughputDeltaPct}%`}
+                </p>
+              </div>
             </div>
           </div>
         </GlassCard>

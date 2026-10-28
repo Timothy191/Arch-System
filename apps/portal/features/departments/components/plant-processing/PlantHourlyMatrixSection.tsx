@@ -14,6 +14,9 @@ import {
 export type EditableColumnKey =
   | 'seamSource'
   | 'romFeedTonnes'
+  | 'plantFeedTonnes'
+  | 'cycloneFeedTonnes'
+  | 'newProductScaleTonnes'
   | 'cleanCoalTonnes'
   | 'discardTonnes'
   | 'productAshPct'
@@ -24,6 +27,9 @@ export type EditableColumnKey =
 
 type NumericStreamKey =
   | 'romFeedTonnes'
+  | 'plantFeedTonnes'
+  | 'cycloneFeedTonnes'
+  | 'newProductScaleTonnes'
   | 'cleanCoalTonnes'
   | 'discardTonnes'
   | 'productAshPct'
@@ -73,16 +79,55 @@ const DECIMALS_ZERO = 0;
 const YIELD_HIGH_THRESHOLD = 88;
 const YIELD_MID_THRESHOLD = 80;
 
+const PLANT_FEED_RATIO = 0.96;
+const CYCLONE_FEED_RATIO = 0.82;
+
 const PLANT_GRID_STREAMS: ReadonlyArray<PlantGridStreamMeta> = [
   {
     key: 'romFeedTonnes',
-    streamName: 'ROM Scale Feed',
-    code: 'CV-101 Belt Scale',
+    streamName: 'ROM Scale',
+    code: 'CV-101 ROM Scale Feed',
     unit: 't/hr',
     step: 5,
     min: 0,
     max: 2000,
     ariaPrefix: 'ROM Feed',
+    editable: true,
+    summaryType: 'sum',
+  },
+  {
+    key: 'plantFeedTonnes',
+    streamName: 'Plant Feed',
+    code: 'CV-102 Desliming Feed',
+    unit: 't/hr',
+    step: 5,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'Plant Feed',
+    editable: true,
+    summaryType: 'sum',
+  },
+  {
+    key: 'cycloneFeedTonnes',
+    streamName: 'Cyclone Feed',
+    code: 'DM-301 DMS Cyclone Feed',
+    unit: 't/hr',
+    step: 5,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'Cyclone Feed',
+    editable: true,
+    summaryType: 'sum',
+  },
+  {
+    key: 'newProductScaleTonnes',
+    streamName: 'New Product Scale',
+    code: 'CV-204 New Product Belt',
+    unit: 't/hr',
+    step: 5,
+    min: 0,
+    max: 2000,
+    ariaPrefix: 'New Product Scale',
     editable: true,
     summaryType: 'sum',
   },
@@ -178,6 +223,19 @@ function getStepDecimals(step: number): number {
   return DECIMALS_ZERO;
 }
 
+function getRowStreamMetric(row: PlantHourlyRow, streamKey: PlantGridStreamMeta['key']): number {
+  if (streamKey === 'plantFeedTonnes') {
+    return row.plantFeedTonnes ?? Math.round(row.romFeedTonnes * PLANT_FEED_RATIO);
+  }
+  if (streamKey === 'cycloneFeedTonnes') {
+    return row.cycloneFeedTonnes ?? Math.round(row.romFeedTonnes * CYCLONE_FEED_RATIO);
+  }
+  if (streamKey === 'newProductScaleTonnes') {
+    return row.newProductScaleTonnes ?? row.cleanCoalTonnes;
+  }
+  return Number(row[streamKey]) || 0;
+}
+
 function computeHourlyVariance(
   rows: readonly PlantHourlyRow[],
   hourIdx: number,
@@ -185,15 +243,15 @@ function computeHourlyVariance(
 ): number {
   const currentRow = rows[hourIdx];
   if (!currentRow) return 0;
-  const currentMetric = Number(currentRow[streamKey]) || 0;
+  const currentMetric = getRowStreamMetric(currentRow, streamKey);
   const nextRow = rows[hourIdx + 1];
   if (nextRow) {
-    const nextMetric = Number(nextRow[streamKey]) || 0;
+    const nextMetric = getRowStreamMetric(nextRow, streamKey);
     return nextMetric - currentMetric;
   }
   const prevRow = rows[hourIdx - 1];
   if (prevRow) {
-    const prevMetric = Number(prevRow[streamKey]) || 0;
+    const prevMetric = getRowStreamMetric(prevRow, streamKey);
     return currentMetric - prevMetric;
   }
   return 0;
@@ -220,9 +278,25 @@ function formatVarianceBadge(rawVariance: number, decimals: number, suffix = '')
   };
 }
 
-function formatStreamSummary(streamKey: PlantGridStreamMeta['key'], totals: PlantHourlyTotals) {
+function formatStreamSummary(
+  streamKey: PlantGridStreamMeta['key'],
+  totals: PlantHourlyTotals,
+  rows: readonly PlantHourlyRow[]
+) {
+  const totalPlantFeed = rows.reduce((sum, r) => sum + getRowStreamMetric(r, 'plantFeedTonnes'), 0);
+  const totalCycloneFeed = rows.reduce(
+    (sum, r) => sum + getRowStreamMetric(r, 'cycloneFeedTonnes'),
+    0
+  );
+  const totalNewProductScale = rows.reduce(
+    (sum, r) => sum + getRowStreamMetric(r, 'newProductScaleTonnes'),
+    0
+  );
   const summaryMap: Record<PlantGridStreamMeta['key'], string> = {
     romFeedTonnes: `${totals.totalRom.toLocaleString()} t`,
+    plantFeedTonnes: `${totalPlantFeed.toLocaleString()} t`,
+    cycloneFeedTonnes: `${totalCycloneFeed.toLocaleString()} t`,
+    newProductScaleTonnes: `${totalNewProductScale.toLocaleString()} t`,
     cleanCoalTonnes: `${totals.totalClean.toLocaleString()} t`,
     discardTonnes: `${totals.totalDiscard.toLocaleString()} t`,
     yieldPct: `${totals.weightedYield.toFixed(DECIMALS_ONE)}%`,
@@ -260,6 +334,12 @@ export function PlantHourlyMatrixSection({
   const [streamSearch, setStreamSearch] = useState<string>('');
   const [streamMaterials, setStreamMaterials] = useState<Record<string, string>>({});
 
+  const showSourceRow = useMemo(() => {
+    const query = streamSearch.trim().toLowerCase();
+    if (!query) return true;
+    return 'source feed seam stockpile blend'.includes(query);
+  }, [streamSearch]);
+
   const filteredStreams = useMemo(() => {
     const query = streamSearch.trim().toLowerCase();
     if (!query) return PLANT_GRID_STREAMS;
@@ -290,7 +370,7 @@ export function PlantHourlyMatrixSection({
     if (!stream.editable || stream.key === 'yieldPct') return;
     const row = rows[rowIndex];
     if (!row) return;
-    const current = Number(row[stream.key]) || 0;
+    const current = getRowStreamMetric(row, stream.key);
     const decimals = getStepDecimals(stream.step);
     const nextMetric = Number(
       Math.max(stream.min, Math.min(stream.max, current + direction * stream.step)).toFixed(
@@ -481,8 +561,98 @@ export function PlantHourlyMatrixSection({
               </thead>
 
               <tbody className="divide-y divide-[var(--border-default)]/60 text-[var(--text-heading)] text-xs">
+                {showSourceRow && (
+                  <tr
+                    data-testid="stream-row-source"
+                    className="transition-colors hover:bg-[var(--bg-secondary)]/40"
+                  >
+                    <td className="sticky left-0 z-10 bg-[var(--bg-primary)] px-3 py-2.5 font-medium shadow-[1px_0_0_0_var(--border-default)]">
+                      <div className="min-w-[160px]">
+                        <span className="block font-bold text-[var(--text-heading)] text-xs">
+                          Source
+                        </span>
+                        <span className="block text-[10px] text-[var(--text-secondary)]">
+                          Feed Seam / Stockpile
+                        </span>
+                      </div>
+                    </td>
+                    <td className="min-w-[180px] px-3 py-2">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-mono font-semibold text-[10px] text-[var(--text-secondary)]">
+                            {selectedModule}
+                          </span>
+                          <span className="shrink-0 rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
+                            Seam
+                          </span>
+                        </div>
+                        <select
+                          id="circuit-material-seamSource"
+                          name="circuitMaterial_seamSource"
+                          aria-label="Source Material"
+                          data-testid="material-select-seamSource"
+                          value={selectedSeamBlend}
+                          onChange={(e) => handleGlobalMaterialChange(e.target.value)}
+                          className={MATERIAL_SELECT_CLASS}
+                        >
+                          {PLANT_SEAM_OPTIONS.map((seam) => (
+                            <option key={seam} value={seam}>
+                              {seam}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                    {rows.map((row, hourIdx) => {
+                      const nextRow = rows[hourIdx + 1];
+                      const prevRow = rows[hourIdx - 1];
+                      const isSourceChanged = nextRow
+                        ? nextRow.seamSource !== row.seamSource
+                        : prevRow
+                          ? prevRow.seamSource !== row.seamSource
+                          : false;
+                      return (
+                        <Fragment key={`source-${row.hourSlot}`}>
+                          <td className="px-1 py-1.5 text-center">
+                            <select
+                              id={`cell-seamSource-${row.rowNumber}`}
+                              name={`cell_seamSource_${row.rowNumber}`}
+                              aria-label={`Row ${row.rowNumber} Source`}
+                              value={row.seamSource}
+                              onChange={(e) => onUpdateCell(hourIdx, 'seamSource', e.target.value)}
+                              className={MATERIAL_SELECT_CLASS}
+                            >
+                              {PLANT_SEAM_OPTIONS.map((seam) => (
+                                <option key={seam} value={seam}>
+                                  {seam}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td
+                            data-testid={`variance-seamSource-${row.rowNumber}`}
+                            className="border-[var(--border-default)]/40 border-x bg-[var(--bg-secondary)]/30 px-1 py-1.5 text-center"
+                          >
+                            <span
+                              className={`${VARIANCE_BADGE_BASE_CLASS} ${
+                                isSourceChanged
+                                  ? 'border-amber-500/30 bg-amber-500/10 text-amber-800'
+                                  : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/60 text-[var(--text-muted)]'
+                              }`}
+                            >
+                              {isSourceChanged ? 'Δ Mix' : 'Same'}
+                            </span>
+                          </td>
+                        </Fragment>
+                      );
+                    })}
+                    <td className="min-w-[95px] bg-[var(--bg-secondary)]/30 px-3 py-2.5 text-right font-bold font-mono text-[var(--text-heading)] text-xs">
+                      {selectedSeamBlend}
+                    </td>
+                  </tr>
+                )}
                 {filteredStreams.map((stream) => {
-                  const summaryDisplay = formatStreamSummary(stream.key, totals);
+                  const summaryDisplay = formatStreamSummary(stream.key, totals, rows);
                   const activeMaterial = streamMaterials[stream.key] ?? selectedSeamBlend;
                   const streamDecimals = getStepDecimals(stream.step);
 
@@ -574,7 +744,7 @@ export function PlantHourlyMatrixSection({
                           );
                         }
 
-                        const cellMetric = row[streamKey];
+                        const cellMetric = getRowStreamMetric(row, streamKey);
                         return (
                           <Fragment key={`${streamKey}-${row.hourSlot}`}>
                             <td className="px-1 py-1.5 text-center">

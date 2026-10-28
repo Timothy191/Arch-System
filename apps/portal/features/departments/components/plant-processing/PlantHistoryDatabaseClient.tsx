@@ -3,14 +3,18 @@
 import {
   AlertTriangle,
   Calendar,
+  Check,
   Clock,
+  Copy,
   Database,
   Download,
   FileSpreadsheet,
   Layers,
+  MessageSquare,
   Search,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { loadStoredPlantDelays, loadStoredPlantSheets } from './storage';
 import {
@@ -27,7 +31,10 @@ interface PlantHistoryDatabaseClientProps {
   initialDelays: PlantDelayEntry[];
 }
 
-export type PlantReportGranularity = 'monthly' | 'daily' | 'hourly';
+export type PlantReportGranularity = 'monthly' | 'daily' | 'hourly' | 'whatsapp';
+
+const GRANULARITY_TAB_BTN_BASE =
+  'inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all';
 
 const HISTORICAL_DAILY_BASELINE: PlantDailyRollupRecord[] = [
   {
@@ -156,11 +163,22 @@ export function PlantHistoryDatabaseClient({
   initialSheets,
   initialDelays,
 }: PlantHistoryDatabaseClientProps) {
-  const [granularity, setGranularity] = useState<PlantReportGranularity>('daily');
+  const searchParams = useSearchParams?.() ?? null;
+  const activeTabParam = searchParams?.get?.('tab') ?? null;
+  const [granularity, setGranularity] = useState<PlantReportGranularity>(() =>
+    activeTabParam === 'whatsapp-report' ? 'whatsapp' : 'daily'
+  );
   const [sheets, setSheets] = useState<PlantHourlySheetRecord[]>(initialSheets);
   const [delays, setDelays] = useState<PlantDelayEntry[]>(initialDelays);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [shiftFilter, setShiftFilter] = useState<'ALL' | 'day' | 'night'>('ALL');
+  const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
+
+  useEffect(() => {
+    if (activeTabParam === 'whatsapp-report') {
+      setGranularity('whatsapp');
+    }
+  }, [activeTabParam]);
 
   useEffect(() => {
     setSheets(loadStoredPlantSheets(initialSheets));
@@ -264,6 +282,50 @@ export function PlantHistoryDatabaseClient({
     }
     return list;
   }, [sheets]);
+
+  const whatsappReportText = useMemo(() => {
+    const latestDaily = dailyRecords[0];
+    if (!latestDaily) {
+      return `*ARCH OS — PLANT & PROCESSING SHIFT REPORT*\nDate: ${initialDate}\nNo shift telemetry logged.`;
+    }
+    const shiftDelays = delays.filter(
+      (d) => d.date === latestDaily.date && d.shift === latestDaily.shift
+    );
+    const delayLines =
+      shiftDelays.length > 0
+        ? shiftDelays
+            .map(
+              (d) =>
+                `• ${d.startTime}${d.endTime ? `–${d.endTime}` : ' (Active)'} | ${d.circuit}: ${d.reason} (${d.durationMinutes}m)`
+            )
+            .join('\n')
+        : '• Zero unplanned circuit stoppages recorded';
+
+    return [
+      `*ARCH OS — PLANT & PROCESSING SHIFT REPORT*`,
+      `📅 *Date:* ${latestDaily.date} (${latestDaily.shift.toUpperCase()} SHIFT)`,
+      `🏭 *Module:* ${latestDaily.moduleId} | *Operator:* ${latestDaily.operatorName}`,
+      ``,
+      `*MASS BALANCE & SCALE SUMMARY*`,
+      `• *ROM Scale Feed:* ${latestDaily.romFeedTonnes.toLocaleString()} t`,
+      `• *New Product Scale (Clean Coal):* ${latestDaily.cleanCoalTonnes.toLocaleString()} t`,
+      `• *Discard / Rejects:* ${latestDaily.discardTonnes.toLocaleString()} t`,
+      `• *Product Recovery Yield:* ${latestDaily.yieldPct.toFixed(1)}%`,
+      `• *Mean Cyclone RD:* ${latestDaily.avgCycloneRd.toFixed(2)} g/cm³ | *Moisture:* ${latestDaily.avgMoisturePct.toFixed(1)}%`,
+      `• *Circuit Run / Delay:* ${latestDaily.runHours}h run / ${latestDaily.delayMinutes}m downtime`,
+      ``,
+      `*PLANT DELAYS & INTERLOCKS*`,
+      delayLines,
+    ].join('\n');
+  }, [dailyRecords, delays, initialDate]);
+
+  const handleCopyWhatsappReport = async () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(whatsappReportText);
+      setCopiedWhatsapp(true);
+      setTimeout(() => setCopiedWhatsapp(false), 2000);
+    }
+  };
 
   const filteredMonthly = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -430,7 +492,7 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'monthly'}
             onClick={() => setGranularity('monthly')}
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
+            className={`${GRANULARITY_TAB_BTN_BASE} ${
               granularity === 'monthly'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
                 : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
@@ -445,7 +507,7 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'daily'}
             onClick={() => setGranularity('daily')}
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
+            className={`${GRANULARITY_TAB_BTN_BASE} ${
               granularity === 'daily'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
                 : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
@@ -460,7 +522,7 @@ export function PlantHistoryDatabaseClient({
             role="tab"
             aria-selected={granularity === 'hourly'}
             onClick={() => setGranularity('hourly')}
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all ${
+            className={`${GRANULARITY_TAB_BTN_BASE} ${
               granularity === 'hourly'
                 ? 'bg-[var(--accent-blue)] text-white shadow-sm'
                 : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
@@ -468,6 +530,21 @@ export function PlantHistoryDatabaseClient({
           >
             <Clock className="h-3.5 w-3.5" />
             Hourly Reports ({filteredHourly.length})
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={granularity === 'whatsapp'}
+            onClick={() => setGranularity('whatsapp')}
+            className={`${GRANULARITY_TAB_BTN_BASE} ${
+              granularity === 'whatsapp'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-[var(--text-secondary)] hover:bg-black/[0.03] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            WhatsApp Report
           </button>
         </div>
 
@@ -683,6 +760,51 @@ export function PlantHistoryDatabaseClient({
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {granularity === 'whatsapp' && (
+          <div className="space-y-4 p-5" data-testid="whatsapp-report-panel">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-base">
+                  <MessageSquare className="h-4 w-4 text-emerald-600" />
+                  WhatsApp Shift Dispatch Report
+                </h2>
+                <p className="text-[var(--text-secondary)] text-xs">
+                  Formatted wash plant mass-balance &amp; downtime summary ready for instant shift
+                  handover dispatch.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyWhatsappReport}
+                  data-testid="copy-whatsapp-report-btn"
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 font-semibold text-emerald-800 text-xs transition-colors hover:bg-emerald-500/20"
+                >
+                  {copiedWhatsapp ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {copiedWhatsapp ? 'Copied to Clipboard' : 'Copy WhatsApp Text'}
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(whatsappReportText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="share-whatsapp-report-link"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 font-semibold text-white text-xs shadow-xs transition-opacity hover:opacity-95"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  Send via WhatsApp
+                </a>
+              </div>
+            </div>
+            <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-4 font-mono text-[var(--text-heading)] text-xs leading-relaxed">
+              {whatsappReportText}
+            </pre>
           </div>
         )}
       </div>

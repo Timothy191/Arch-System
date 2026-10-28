@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-28T07:45:00+02:00 - Add WhatsApp Report Subtab Under PDF Report in DepartmentLayout Sidebar
+
+- **Purpose**: Add `WhatsApp Report` (`data-testid="reports-subtab-whatsapp-report"`, `href="${basePath}/reports?tab=whatsapp-report"`) directly beneath `PDF Report` (`data-testid="reports-subtab-pdf-report"`) under the `Reports` sidebar group in `DepartmentLayout.tsx`.
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Added `isWhatsappReportActive` state calculation and rendered the `WhatsApp Report` sub-tab link with `MessageSquare` icon directly under `PDF Report`.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="DepartmentLayout"` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-27T14:16:00+02:00 - Hub HeroRotator Uncircled Arrows, Hero Heading Separators & Overlapping System Menu Emblem
 
 - **Purpose**: Address `/hub` design feedback across `@repo/ui` components: remove circle borders from `Previous highlight` and `Next highlight` carousel buttons, add a horizontal separator under all Hero card headings, and enlarge the `System Menu` trigger button and `<Logo>` so its shape slightly overlaps the top taskbar pill edges.

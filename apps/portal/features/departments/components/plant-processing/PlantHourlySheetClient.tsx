@@ -104,14 +104,25 @@ export function PlantHourlySheetClient({
         const num = Math.max(0, Number(rawValue) || 0);
         const updated: PlantHourlyRow = { ...row, [key]: num };
 
-        if (key === 'romFeedTonnes' || key === 'cleanCoalTonnes') {
+        if (
+          key === 'romFeedTonnes' ||
+          key === 'cleanCoalTonnes' ||
+          key === 'newProductScaleTonnes'
+        ) {
           const rom = key === 'romFeedTonnes' ? num : row.romFeedTonnes;
           const clean =
-            key === 'cleanCoalTonnes' ? Math.min(rom, num) : Math.min(rom, row.cleanCoalTonnes);
+            key === 'cleanCoalTonnes' || key === 'newProductScaleTonnes'
+              ? Math.min(rom, num)
+              : Math.min(rom, row.cleanCoalTonnes);
           updated.romFeedTonnes = rom;
           updated.cleanCoalTonnes = clean;
+          updated.newProductScaleTonnes = clean;
           updated.discardTonnes = Number(Math.max(0, rom - clean).toFixed(1));
           updated.yieldPct = calculateRowYield(rom, clean);
+        } else if (key === 'plantFeedTonnes') {
+          updated.plantFeedTonnes = num;
+        } else if (key === 'cycloneFeedTonnes') {
+          updated.cycloneFeedTonnes = num;
         } else if (key === 'discardTonnes') {
           updated.discardTonnes = num;
         } else if (key === 'productAshPct') {
