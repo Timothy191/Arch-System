@@ -6,14 +6,18 @@ import { Input } from '@repo/ui/components/ui/input';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AnimatePresence, m } from 'framer-motion';
 import {
+  Activity,
   CheckCircle,
   ChevronDown,
+  Code2,
   Cpu,
+  Download,
   ExternalLink,
   History,
   KeyRound,
   Plug,
   RefreshCw,
+  RotateCcw,
   Search,
   ShieldCheck,
   Sparkles,
@@ -21,8 +25,13 @@ import {
   Workflow,
   XCircle,
 } from 'lucide-react';
+import {
+  IntegrationRuleSummaryBadges,
+  IntegrationRulesFields,
+  type IntegrationRulesFormState,
+} from './IntegrationRulesPanel';
 
-type IntegrationKind = 'mcp' | 'native' | 'action';
+export type IntegrationKind = 'mcp' | 'native' | 'action' | 'lsp';
 type InstallationStatus = 'pending' | 'active' | 'error' | 'disabled';
 export type AuthType = 'none' | 'api_key' | 'bearer' | 'custom_header' | 'oauth2';
 export type RiskClass = 'read' | 'write';
@@ -76,6 +85,13 @@ export interface Department {
   display_name?: string;
 }
 
+export interface InstallationHealthSummary {
+  status: 'healthy' | 'unhealthy' | 'stale';
+  latencyMs: number;
+  checkedAt: string;
+  error?: string;
+}
+
 export const EMPTY_FORM = {
   catalog_id: '',
   new_entry: false,
@@ -108,8 +124,8 @@ function statusBadge(status: InstallationStatus) {
       className: 'bg-amber-500/15 text-amber-700 border border-amber-500/30',
     },
   };
-  const item = map[status];
-  return <Badge className={item.className}>{item.label}</Badge>;
+  const entry = map[status];
+  return <Badge className={entry.className}>{entry.label}</Badge>;
 }
 
 function kindBadge(kind: IntegrationKind) {
@@ -117,6 +133,10 @@ function kindBadge(kind: IntegrationKind) {
     mcp: {
       label: 'MCP Server',
       className: 'bg-blue-500/12 text-blue-700 border border-blue-500/25',
+    },
+    lsp: {
+      label: 'LSP Server',
+      className: 'bg-amber-500/15 text-amber-800 border border-amber-500/30',
     },
     action: {
       label: 'Action Bridge',
@@ -127,8 +147,8 @@ function kindBadge(kind: IntegrationKind) {
       className: 'bg-emerald-500/12 text-emerald-700 border border-emerald-500/25',
     },
   };
-  const item = map[kind] ?? map.mcp;
-  return <Badge className={`font-medium text-[11px] ${item.className}`}>{item.label}</Badge>;
+  const entry = map[kind] ?? map.mcp;
+  return <Badge className={`font-medium text-[11px] ${entry.className}`}>{entry.label}</Badge>;
 }
 
 function authBadge(auth: AuthType) {
@@ -147,6 +167,24 @@ function authBadge(auth: AuthType) {
   );
 }
 
+const PERCENT_MULTIPLIER = 100;
+
+function computeSlaMetrics(auditLogs: readonly AuditLog[]) {
+  if (auditLogs.length === 0) {
+    return { successRatePct: 100, avgLatencyMs: 0 };
+  }
+  const successCount = auditLogs.filter((log) => log.status === 'success').length;
+  const successRatePct = Math.round((successCount / auditLogs.length) * PERCENT_MULTIPLIER);
+  const durations = auditLogs
+    .map((log) => log.duration_ms)
+    .filter((ms): ms is number => typeof ms === 'number' && ms >= 0);
+  const avgLatencyMs =
+    durations.length > 0
+      ? Math.round(durations.reduce((acc, cur) => acc + cur, 0) / durations.length)
+      : 0;
+  return { successRatePct, avgLatencyMs };
+}
+
 interface IntegrationWebhookLogsPanelProps {
   loading: boolean;
   catalog: CatalogEntry[];
@@ -155,13 +193,21 @@ interface IntegrationWebhookLogsPanelProps {
   busyId: string | null;
   expandedId: string | null;
   auditLogs: AuditLog[];
+  circuitBreakerFailures: number;
+  healthByInstallation: Readonly<Record<string, InstallationHealthSummary>>;
   testTool: string;
-  setTestTool: (val: string) => void;
+  setTestTool: (nextTool: string) => void;
   testArgs: string;
-  setTestArgs: (val: string) => void;
+  setTestArgs: (nextArgs: string) => void;
   testResult: string | null;
+  expandedRulesForm: IntegrationRulesFormState;
+  setExpandedRulesForm: (next: IntegrationRulesFormState) => void;
+  onSaveRules: (installation: Installation) => void;
   onExpand: (installation: Installation) => void;
   onRefreshTools: (installation: Installation) => void;
+  onPingHealth: (installation: Installation) => void;
+  onResetCircuitBreaker: (installation: Installation) => void;
+  onExportManifest: (installation: Installation) => void;
   onToggleStatus: (installation: Installation) => void;
   onRemove: (installation: Installation) => void;
   onRunTest: (installation: Installation) => void;
@@ -175,13 +221,21 @@ export function IntegrationWebhookLogsPanel({
   busyId,
   expandedId,
   auditLogs,
+  circuitBreakerFailures,
+  healthByInstallation,
   testTool,
   setTestTool,
   testArgs,
   setTestArgs,
   testResult,
+  expandedRulesForm,
+  setExpandedRulesForm,
+  onSaveRules,
   onExpand,
   onRefreshTools,
+  onPingHealth,
+  onResetCircuitBreaker,
+  onExportManifest,
   onToggleStatus,
   onRemove,
   onRunTest,
@@ -212,6 +266,9 @@ export function IntegrationWebhookLogsPanel({
             const catalogEntry = catalog.find((entry) => entry.id === installation.catalog_id);
             const tools = installation.tool_cache?.tools ?? [];
             const isExpanded = expandedId === installation.id;
+            const healthInfo = healthByInstallation[installation.id];
+            const sla = isExpanded ? computeSlaMetrics(auditLogs) : null;
+
             return (
               <GlassCard key={installation.id} className="p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -222,6 +279,18 @@ export function IntegrationWebhookLogsPanel({
                       </span>
                       {catalogEntry && kindBadge(catalogEntry.kind)}
                       {statusBadge(installation.status)}
+                      {healthInfo && (
+                        <Badge
+                          className={
+                            healthInfo.status === 'healthy'
+                              ? 'border border-emerald-500/30 bg-emerald-500/15 text-[11px] text-emerald-700'
+                              : 'border border-amber-500/30 bg-amber-500/15 text-[11px] text-amber-800'
+                          }
+                        >
+                          {healthInfo.status === 'healthy' ? 'Healthy' : 'Degraded'} ·{' '}
+                          {healthInfo.latencyMs}ms
+                        </Badge>
+                      )}
                       <Badge variant="outline" className="text-xs">
                         {installation.scope === 'global'
                           ? 'Global'
@@ -231,6 +300,7 @@ export function IntegrationWebhookLogsPanel({
                       <Badge variant="outline" className="text-xs">
                         {installation.config.risk_class === 'write' ? 'write-class' : 'read-class'}
                       </Badge>
+                      <IntegrationRuleSummaryBadges config={installation.config} />
                     </div>
                     <p className="mt-1 truncate text-[var(--text-muted)] text-xs">
                       {catalogEntry?.server_url ?? 'In-process native module'} · {tools.length}{' '}
@@ -250,7 +320,7 @@ export function IntegrationWebhookLogsPanel({
                       size="sm"
                       variant="ghost"
                       onClick={() => onExpand(installation)}
-                      title="Tools & audit log"
+                      title="Tools, SLA telemetry & policy rules"
                       aria-label="Toggle tools and audit log"
                     >
                       <ChevronDown
@@ -261,11 +331,30 @@ export function IntegrationWebhookLogsPanel({
                       size="sm"
                       variant="ghost"
                       disabled={busyId === installation.id}
+                      onClick={() => onPingHealth(installation)}
+                      title="Ping connector health & latency"
+                      aria-label="Ping connector health"
+                    >
+                      <Activity className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busyId === installation.id}
                       onClick={() => onRefreshTools(installation)}
                       title="Refresh tool discovery"
                       aria-label="Refresh tool discovery"
                     >
                       <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onExportManifest(installation)}
+                      title="Export connector JSON manifest"
+                      aria-label="Export connector JSON manifest"
+                    >
+                      <Download className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
@@ -302,6 +391,43 @@ export function IntegrationWebhookLogsPanel({
                       exit={{ opacity: 0, y: -6 }}
                       className="overflow-hidden"
                     >
+                      {/* Live SLA Telemetry & Circuit-Breaker Controls Bar */}
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/55 px-3 py-2">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <Badge variant="outline" className="font-mono text-[11px]">
+                            SLA Success: {sla?.successRatePct ?? 100}%
+                          </Badge>
+                          <Badge variant="outline" className="font-mono text-[11px]">
+                            Avg Latency: {sla?.avgLatencyMs ?? 0}ms
+                          </Badge>
+                          <Badge
+                            className={
+                              circuitBreakerFailures > 0
+                                ? 'border border-amber-500/30 bg-amber-500/15 font-mono text-[11px] text-amber-800'
+                                : 'border border-emerald-500/30 bg-emerald-500/15 font-mono text-[11px] text-emerald-700'
+                            }
+                          >
+                            Circuit Breaker:{' '}
+                            {circuitBreakerFailures > 0
+                              ? `${circuitBreakerFailures} Consecutive Failure(s)`
+                              : 'CLOSED (0 errors)'}
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={busyId === installation.id}
+                            onClick={() => onResetCircuitBreaker(installation)}
+                          >
+                            <RotateCcw className="mr-1 h-3 w-3" />
+                            Reset Circuit Breaker
+                          </Button>
+                        </div>
+                      </div>
+
                       <div className="mt-3 grid grid-cols-1 gap-4 border-[var(--border-default)] border-t pt-3 lg:grid-cols-2">
                         <div>
                           <p className="mb-2 font-medium text-[var(--text-muted)] text-xs uppercase">
@@ -338,7 +464,7 @@ export function IntegrationWebhookLogsPanel({
                           </p>
                           <div className="space-y-2">
                             <Input
-                              placeholder="Raw MCP tool name"
+                              placeholder="Raw MCP / LSP tool name"
                               value={testTool}
                               onChange={(e) => setTestTool(e.target.value)}
                               className="text-xs"
@@ -403,6 +529,16 @@ export function IntegrationWebhookLogsPanel({
                           )}
                         </div>
                       </div>
+
+                      <div className="mt-4">
+                        <IntegrationRulesFields
+                          idPrefix={`installed-${installation.id}`}
+                          rulesForm={expandedRulesForm}
+                          onChange={setExpandedRulesForm}
+                          onSave={() => onSaveRules(installation)}
+                          saving={busyId === installation.id}
+                        />
+                      </div>
                     </m.div>
                   )}
                 </AnimatePresence>
@@ -416,7 +552,7 @@ export function IntegrationWebhookLogsPanel({
 }
 
 interface IntegrationCatalogMarketplaceProps {
-  kindCounts: { all: number; mcp: number; action: number; native: number };
+  kindCounts: { all: number; mcp: number; lsp: number; action: number; native: number };
   catalogFilter: CatalogFilter;
   setCatalogFilter: (val: CatalogFilter) => void;
   searchQuery: string;
@@ -448,6 +584,7 @@ export function IntegrationCatalogMarketplace({
             [
               { id: 'all', label: `All Connectors (${kindCounts.all})`, icon: Sparkles },
               { id: 'mcp', label: `MCP Servers (${kindCounts.mcp})`, icon: Plug },
+              { id: 'lsp', label: `LSP Servers (${kindCounts.lsp})`, icon: Code2 },
               { id: 'action', label: `Action Bridges (${kindCounts.action})`, icon: Workflow },
               { id: 'native', label: `Native Plugins (${kindCounts.native})`, icon: Cpu },
             ] as const

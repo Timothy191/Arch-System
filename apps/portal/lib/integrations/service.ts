@@ -393,6 +393,142 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
       hooks: ['onShiftCloseout', 'onHourlyLoadLogged'],
     },
   },
+  {
+    id: 'ts-ast-lsp',
+    name: 'TypeScript, Biome & AST-Grep Language Server',
+    description:
+      'In-workspace Language Server Protocol (LSP) connector providing go-to-definition, symbol references, type diagnostics, and policy-compiler boundary checks.',
+    author: 'Arch Systems DevTools',
+    icon_url: null,
+    kind: 'lsp',
+    server_url: 'https://lsp.arch-system.internal/ts-ast',
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/overview',
+    capabilities: {
+      domains: ['lsp', 'typescript', 'ast-grep', 'policy-boundaries'],
+      transport: 'jsonrpc-lsp',
+    },
+  },
+  {
+    id: 'postgres-sqls-lsp',
+    name: 'PostgreSQL, Kysely & RLS InitPlan LSP',
+    description:
+      'Database Language Server validating SQL queries against the 102-table @repo/database schema, linting RLS InitPlan policies, and providing Kysely type completions.',
+    author: 'Plantcor Database Engineering',
+    icon_url: null,
+    kind: 'lsp',
+    server_url: 'https://lsp.arch-system.internal/postgres-sqls',
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/admin',
+    capabilities: {
+      domains: ['lsp', 'postgresql', 'rls-initplan', 'kysely-schema'],
+      transport: 'jsonrpc-lsp',
+    },
+  },
+  {
+    id: 'plc-iec61131-lsp',
+    name: 'IEC 61131-3 Structured Text & PLC Register LSP',
+    description:
+      'Industrial automation Language Server for Siemens S7, Allen-Bradley, and Pit Viper 351 PLC Structured Text syntax checking and Modbus register tag verification.',
+    author: 'Plantcor Automation & SCADA',
+    icon_url: null,
+    kind: 'lsp',
+    server_url: 'https://lsp.arch-system.internal/iec61131',
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/drilling/machine-telemetry',
+    capabilities: {
+      domains: ['lsp', 'iec-61131-3', 'modbus-registers', 'plc-ladder'],
+      transport: 'jsonrpc-lsp',
+    },
+  },
+  {
+    id: 'promql-lsp',
+    name: 'PromQL & LogQL Telemetry Query LSP',
+    description:
+      'Observability query Language Server providing metric autocomplete, label-matcher validation, and alert-expression linting for Control Room dashboards.',
+    author: 'Grafana / Prometheus',
+    icon_url: null,
+    kind: 'lsp',
+    server_url: 'https://lsp.arch-system.internal/promql',
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/control-room',
+    capabilities: {
+      domains: ['lsp', 'promql', 'logql', 'alert-expressions'],
+      transport: 'jsonrpc-lsp',
+    },
+  },
+  {
+    id: 'opcua-pi-historian',
+    name: 'OPC-UA & AVEVA PI System Historian Bridge',
+    description:
+      'Industrial process historian MCP connector streaming wash-plant dense medium cyclone SG (cycloneRd), magnetite recovery, and primary crusher power draw.',
+    author: 'Plantcor Process Engineering',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://pi-bridge.plantcor.internal/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: '/plant-processing/hourly-sheet',
+    capabilities: {
+      domains: ['opc-ua', 'pi-historian', 'cyclone-density', 'wash-plant'],
+      transport: 'streamable-http',
+    },
+  },
+  {
+    id: 'sap-pm-erp',
+    name: 'SAP S/4HANA Plant Maintenance & Spares ERP',
+    description:
+      'Enterprise ERP action bridge for automated engineering breakdown work-order creation, artisan job-card dispatch, and critical spares reservation.',
+    author: 'SAP / Plantcor ERP',
+    icon_url: null,
+    kind: 'action',
+    server_url: 'https://sap-gateway.plantcor.internal/api/pm',
+    auth_type: 'api_key',
+    verified: true,
+    docs_url: '/engineering',
+    capabilities: {
+      domains: ['sap-pm', 'work-orders', 'spares-inventory', 'cost-centers'],
+      federated_service: 'sap-s4hana-pm',
+    },
+  },
+  {
+    id: 'weighbridge-tcp',
+    name: 'Avery Berkel & Loadrite Weighbridge Bridge',
+    description:
+      'Native plant & logistics connector capturing real-time ROM and washed-coal haul-truck gross/tare weighbridge tickets and reconciling bin factors.',
+    author: 'Plantcor Logistics & Dispatch',
+    icon_url: null,
+    kind: 'native',
+    server_url: null,
+    auth_type: 'none',
+    verified: true,
+    docs_url: '/production',
+    capabilities: {
+      domains: ['weighbridge', 'rom-tonnage', 'product-coal', 'bin-factor'],
+      hooks: ['onWeighbridgeTicketLogged'],
+    },
+  },
+  {
+    id: 'leica-jigsaw-fms',
+    name: 'Leica Jigsaw & MineSight Fleet Management',
+    description:
+      'High-precision GNSS fleet management MCP server for shovel-truck cycle times, bench elevation coordinates, and drill blast-pattern hole collar sync.',
+    author: 'Hexagon Mining / Leica',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://fms.plantcor.internal/mcp',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: '/production',
+    capabilities: {
+      domains: ['fleet-dispatch', 'gps-bench', 'cycle-times', 'blast-collars'],
+      transport: 'streamable-http',
+    },
+  },
 ];
 
 const INSTALLATION_SELECT = `
@@ -408,6 +544,51 @@ function parseAllowlist(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === 'string')
     : [];
+}
+
+function buildBuiltInToolsForKind(kind: string, catalogId: string): IntegrationToolDescriptor[] {
+  if (kind === 'lsp') {
+    return [
+      {
+        name: 'lsp_hover_symbol',
+        description: `Inspect type signature and documentation via ${catalogId}`,
+      },
+      {
+        name: 'lsp_goto_definition',
+        description: `Resolve symbol definition and AST location via ${catalogId}`,
+      },
+      {
+        name: 'lsp_diagnostics',
+        description: `Run static syntax, type, and policy diagnostics via ${catalogId}`,
+      },
+      {
+        name: 'lsp_completions',
+        description: `Provide context-aware code/schema autocomplete items via ${catalogId}`,
+      },
+    ];
+  }
+  if (kind === 'action') {
+    return [
+      {
+        name: 'dispatch_action_webhook',
+        description: `Trigger authenticated action payload on ${catalogId}`,
+      },
+      {
+        name: 'verify_action_status',
+        description: `Check remote execution status for ${catalogId}`,
+      },
+    ];
+  }
+  return [
+    {
+      name: 'execute_native_hook',
+      description: `Invoke in-process native plugin ${catalogId}`,
+    },
+    {
+      name: 'inspect_native_metrics',
+      description: `Read real-time native telemetry counters for ${catalogId}`,
+    },
+  ];
 }
 
 export async function listCatalog(): Promise<CatalogRecord[]> {
@@ -581,9 +762,14 @@ export async function installIntegration(
       logError(error, { context: 'integration_install_probe', installationId: installation.id });
     }
   } else {
+    const builtInTools = buildBuiltInToolsForKind(effective.kind, input.catalog_id);
     await supabase
       .from('integration_installations')
-      .update({ status: 'active' })
+      .update({
+        status: 'active',
+        tool_cache: { tools: builtInTools },
+        tools_synced_at: new Date().toISOString(),
+      })
       .eq('id', installation.id);
   }
 

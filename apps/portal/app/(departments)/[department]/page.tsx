@@ -61,6 +61,7 @@ export default async function DepartmentDashboard({
       <PlantHourlySheetClient
         initialDate={plantData.currentDate}
         initialSheets={plantData.initialSheets}
+        initialDelays={plantData.initialDelays}
         mode="dashboard"
       />
     );

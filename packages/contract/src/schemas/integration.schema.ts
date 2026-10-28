@@ -2,18 +2,19 @@ import { z } from 'zod';
 import { uuidSchema } from './common.schema';
 
 /**
- * Integration Platform contracts (plugins / MCP connectors / actions).
+ * Integration Platform contracts (plugins / MCP connectors / actions / LSP servers).
  *
- * A single registry backs three plugin kinds:
+ * A single registry backs four plugin kinds:
  *  - `mcp`    remote streamable-HTTP MCP servers (third-party connectors)
  *  - `native` first-party in-process ArchPlugin modules
- *  - `action` authenticated HTTP action endpoints (reserved for a later phase)
+ *  - `action` authenticated HTTP action endpoints
+ *  - `lsp`    Language Server Protocol & code/schema intelligence servers
  *
  * Owned here as part of the @repo/contract SSoT so the portal, the agents
  * package, and dev tooling share one vocabulary.
  */
 
-export const integrationKindSchema = z.enum(['mcp', 'native', 'action']);
+export const integrationKindSchema = z.enum(['mcp', 'native', 'action', 'lsp']);
 export type IntegrationKind = z.infer<typeof integrationKindSchema>;
 
 export const integrationAuthTypeSchema = z.enum([
@@ -64,6 +65,55 @@ export const createCatalogEntrySchema = z.object({
 });
 export type CreateCatalogEntry = z.infer<typeof createCatalogEntrySchema>;
 
+export const integrationRoleSchema = z.enum([
+  'admin',
+  'supervisor',
+  'control_room_operator',
+  'operator',
+]);
+export type IntegrationRole = z.infer<typeof integrationRoleSchema>;
+
+export const integrationShiftWindowSchema = z.enum(['all', 'day', 'night']);
+export type IntegrationShiftWindow = z.infer<typeof integrationShiftWindowSchema>;
+
+export const integrationTriggerOperatorSchema = z.enum(['gt', 'gte', 'lt', 'lte', 'eq']);
+export type IntegrationTriggerOperator = z.infer<typeof integrationTriggerOperatorSchema>;
+
+/** 4-Pillar policy and governance rules attached to an integration installation. */
+export const integrationRulesSchema = z
+  .object({
+    // 1. Access & Governance Rules
+    allowed_roles: z.array(integrationRoleSchema).max(10).optional(),
+    active_shift: integrationShiftWindowSchema.optional(),
+    rate_limit_per_min: z.number().int().min(1).max(600).optional(),
+    require_human_approval: z.boolean().optional(),
+    // 2. Event & Threshold Trigger Rules
+    trigger_events: z.array(z.string().min(1).max(120)).max(50).optional(),
+    threshold_metric: z.string().min(1).max(80).optional(),
+    threshold_operator: integrationTriggerOperatorSchema.optional(),
+    threshold_value: z.number().optional(),
+    // 3. Tool & Payload Policy Rules
+    blocked_arg_keys: z.array(z.string().min(1).max(80)).max(100).optional(),
+    redact_fields: z.array(z.string().min(1).max(80)).max(100).optional(),
+    max_payload_bytes: z.number().int().min(256).max(1048576).optional(),
+    write_tool_overrides: z.array(z.string().min(1).max(120)).max(100).optional(),
+    // 4. Network & Egress Rules
+    egress_domain_allowlist: z.array(z.string().min(1).max(255)).max(50).optional(),
+    circuit_breaker_threshold: z.number().int().min(1).max(50).optional(),
+  })
+  .strict();
+export type IntegrationRules = z.infer<typeof integrationRulesSchema>;
+
+export const integrationConfigSchema = z
+  .object({
+    risk_class: toolRiskClassSchema.optional(),
+    api_key_header: z.string().min(1).max(64).optional(),
+    request_timeout_ms: z.number().int().min(1000).max(120000).optional(),
+    rules: integrationRulesSchema.optional(),
+  })
+  .strict();
+export type IntegrationConfig = z.infer<typeof integrationConfigSchema>;
+
 /** Install an integration: references a catalog entry and carries non-secret config. */
 export const installIntegrationSchema = z
   .object({
@@ -74,15 +124,8 @@ export const installIntegrationSchema = z
       .describe('Provided when the catalog entry does not exist yet (inline registration)'),
     scope: installationScopeSchema.default('global'),
     department_id: uuidSchema.optional(),
-    /** Non-secret settings: risk class, API-key header name, timeout overrides. */
-    config: z
-      .object({
-        risk_class: toolRiskClassSchema.optional(),
-        api_key_header: z.string().min(1).max(64).optional(),
-        request_timeout_ms: z.number().int().min(1000).max(120000).optional(),
-      })
-      .strict()
-      .optional(),
+    /** Non-secret settings: risk class, API-key header name, timeout overrides, and policy rules. */
+    config: integrationConfigSchema.optional(),
     /** Secret payload; encrypted application-side before storage. */
     secret: z.string().min(1).max(4096).optional(),
     secret_kind: z.enum(['api_key', 'bearer', 'custom_header']).optional(),
@@ -101,18 +144,13 @@ export type InstallIntegration = z.infer<typeof installIntegrationSchema>;
 
 export const updateInstallationSchema = z.object({
   status: installationStatusSchema.optional(),
-  config: z
-    .object({
-      risk_class: toolRiskClassSchema.optional(),
-      api_key_header: z.string().min(1).max(64).optional(),
-      request_timeout_ms: z.number().int().min(1000).max(120000).optional(),
-    })
-    .strict()
-    .optional(),
+  config: integrationConfigSchema.optional(),
   tool_allowlist: z.array(z.string().min(1)).max(200).optional(),
   secret: z.string().min(1).max(4096).optional(),
   secret_kind: z.enum(['api_key', 'bearer', 'custom_header']).optional(),
   server_url: z.string().url().max(2048).optional(),
+  reset_circuit_breaker: z.boolean().optional(),
+  ping_health: z.boolean().optional(),
 });
 export type UpdateInstallation = z.infer<typeof updateInstallationSchema>;
 

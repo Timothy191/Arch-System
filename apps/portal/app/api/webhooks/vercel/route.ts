@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authorizeCronRequest } from '@/lib/api/cron-auth';
 import { verifyVercelSignature } from '@/lib/api/vercel-signature';
+import { dispatchIntegrationEventTriggers } from '@/lib/integrations/tool-bridge';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 const logger = createLogger('portal:vercel-webhooks');
@@ -212,6 +213,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   appendRecentWebhookRecord(processedRecord);
   recordJobExecution(`webhook.vercel.${category}`, 0, true);
 
+  const triggeredIntegrations = await dispatchIntegrationEventTriggers({
+    eventName: `vercel.${envelope.type}`,
+  });
+
   logger.info(
     {
       webhookId: processedRecord.id,
@@ -219,6 +224,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       category: processedRecord.category,
       region: processedRecord.region,
       targetName: processedRecord.targetName,
+      triggeredIntegrationsCount: triggeredIntegrations.length,
     },
     'Processed verified Vercel webhook event'
   );
@@ -227,6 +233,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     {
       ok: true,
       event: processedRecord,
+      triggeredIntegrations,
     },
     { status: HTTP_STATUS_OK }
   );

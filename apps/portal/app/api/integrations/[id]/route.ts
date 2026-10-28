@@ -79,12 +79,17 @@ import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 import { validateBody } from '@/lib/api/response';
 import { logError } from '@/lib/errors/error-logger';
+import { checkInstallationHealth } from '@/lib/integrations/health';
 import {
   deleteInstallation,
   getInstallation,
   listAuditLogs,
   updateInstallation,
 } from '@/lib/integrations/service';
+import {
+  getIntegrationCircuitBreakerFailures,
+  resetIntegrationCircuitBreaker,
+} from '@/lib/integrations/tool-bridge';
 
 function canView(
   employee: { role: string; department_id: string | null; accessible_departments: string[] | null },
@@ -122,7 +127,8 @@ async function handleGet(request: NextRequest, { params }: { params: Promise<{ i
   }
 
   const auditLogs = principal.employee.role === 'admin' ? await listAuditLogs(id) : [];
-  return NextResponse.json({ installation, auditLogs });
+  const circuitBreakerFailures = getIntegrationCircuitBreakerFailures(id);
+  return NextResponse.json({ installation, auditLogs, circuitBreakerFailures });
 }
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -148,8 +154,31 @@ async function handlePatch(request: NextRequest, { params }: { params: Promise<{
   if (parsed instanceof NextResponse) return parsed;
 
   const { id } = await params;
-  const installation = await updateInstallation(id, parsed.data);
-  return NextResponse.json({ installation });
+  const { reset_circuit_breaker, ping_health, ...patchFields } = parsed.data;
+
+  if (reset_circuit_breaker) {
+    resetIntegrationCircuitBreaker(id);
+  }
+
+  const installation = await updateInstallation(id, {
+    ...patchFields,
+    ...(reset_circuit_breaker ? { status: patchFields.status ?? 'active', last_error: null } : {}),
+  });
+
+  if (ping_health) {
+    const health = await checkInstallationHealth(id);
+    const refreshed = await getInstallation(id);
+    return NextResponse.json({
+      installation: refreshed,
+      health,
+      circuitBreakerFailures: getIntegrationCircuitBreakerFailures(id),
+    });
+  }
+
+  return NextResponse.json({
+    installation,
+    circuitBreakerFailures: getIntegrationCircuitBreakerFailures(id),
+  });
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {

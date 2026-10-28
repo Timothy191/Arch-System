@@ -1,5 +1,12 @@
 # Database Package Agent Tracer
 
+## 2026-10-27T18:52:00+02:00: Integration Catalog LSP Kind & Industrial SCADA/ERP Connectors (211)
+
+- **Purpose**: Expand `integration_catalog_kind_check` on `integration_catalog` to allow `'lsp'` (`CHECK (kind IN ('mcp', 'native', 'action', 'lsp'))`) and seed the 8 curated LSP (`ts-ast-lsp`, `postgres-sqls-lsp`, `plc-iec61131-lsp`, `promql-lsp`) and Industrial Mining/SCADA/ERP (`opcua-pi-historian`, `sap-pm-erp`, `weighbridge-tcp`, `leica-jigsaw-fms`) connectors.
+- **Changes**:
+  - `migrations/211_integration_catalog_lsp_and_industrial_connectors.sql`: Replaced `integration_catalog_kind_check` using `NOT VALID` + `VALIDATE CONSTRAINT` and upserted the 8 catalog entries.
+- **Verification**: `pnpm --filter @repo/database test` ✅, `pnpm --filter @repo/database check-migrations` ✅.
+
 ## 2026-10-27T07:35:00+02:00: Live Cloud Application of Migration 209 & Materialized View pg_cron Reconciliation
 
 - **Purpose**: Align `check_mv_freshness` and `get_mv_refresh_stats` OUT parameter names (`mv_name`, `refresh_status`) with the live Supabase PostgreSQL 17 catalog, ensure `dept_production_summary` and `machine_utilization_weekly` materialized views exist with unique indexes, unschedule obsolete `refresh-safety-incident-monthly`, schedule `refresh-smr-latest`, and apply Migration 209 directly to `mrwhtxbhrzyttlsyuofc`.

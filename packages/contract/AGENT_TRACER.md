@@ -1,5 +1,19 @@
 # Contract Package Agent Tracer
 
+## 2026-10-27T18:45:00+02:00: Integrations Marketplace — `lsp` Connector Kind, 4-Pillar Rules & Health/Circuit-Breaker Controls
+
+- **Purpose**: Extend `integrationKindSchema` with `'lsp'` (Language Server Protocol), add `reset_circuit_breaker` and `ping_health` flags to `updateInstallationSchema`, and export `integrationRulesSchema` / `integrationConfigSchema` via `packages/contract/src/index.ts`.
+- **Changes**:
+  - `packages/contract/src/schemas/integration.schema.ts` & `packages/contract/src/index.ts`: Added `'lsp'` to `integrationKindSchema`, added `reset_circuit_breaker` & `ping_health` to `updateInstallationSchema`, and exported all 4-pillar rule schemas and types.
+- **Verification**: `pnpm --filter @repo/contract test` and `pnpm audit:drift` ✅.
+
+## 2026-10-27T18:25:00+02:00: 4-Pillar Integration Policy & Governance Rules Schema
+
+- **Purpose**: Add canonical Zod schemas (`integrationRoleSchema`, `integrationShiftWindowSchema`, `integrationTriggerOperatorSchema`, `integrationRulesSchema`, `integrationConfigSchema`) and types (`IntegrationRole`, `IntegrationShiftWindow`, `IntegrationTriggerOperator`, `IntegrationRules`, `IntegrationConfig`) for the Integrations Marketplace 4-pillar rule engine.
+- **Changes**:
+  - `packages/contract/src/schemas/integration.schema.ts`: Added `integrationRulesSchema` and wired `config: integrationConfigSchema.optional()` into `installIntegrationSchema` and `updateInstallationSchema`.
+- **Verification**: `pnpm --filter @repo/contract test` and `pnpm agent:verify` ✅.
+
 ## 2026-10-23T07:53:00+02:00: Operational Targets (Shift, Daily, Monthly) Admin Schema
 
 - **Purpose**: Define canonical Zod schemas (`operationalTargetWindowSchema`, `adminOperationalTargetsSchema`) and types (`OperationalTargetWindow`, `AdminOperationalTargets`) for Administration Shift, Daily, and Monthly operational targets.
