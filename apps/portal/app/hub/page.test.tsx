@@ -87,12 +87,15 @@ jest.mock('@repo/redis', () => ({
 
 // ── Hub feature components (heavy — render stubs) ────────────────────────────
 
+const mockCoreOperationalModules = jest.fn(() => <div data-testid="core-modules" />);
+const mockHeroRotator = jest.fn(() => <div data-testid="hero-rotator" />);
+
 jest.mock('@/features/hub', () => ({
   HeroBackground: () => <div data-testid="hero-bg" />,
-  HeroRotator: () => <div data-testid="hero-rotator" />,
+  HeroRotator: (props: unknown) => mockHeroRotator(props),
   ToolBanner: () => <div data-testid="tool-banner" />,
   DepartmentReviews: () => <div data-testid="dept-reviews" />,
-  CoreOperationalModules: () => <div data-testid="core-modules" />,
+  CoreOperationalModules: (props: unknown) => mockCoreOperationalModules(props),
 }));
 
 jest.mock('@repo/ui/Logo', () => ({
@@ -115,6 +118,45 @@ jest.mock('@repo/departments/data-access', () => ({
       stats: { label: 'Depth', value: '1,240m' },
       trend: [1180, 1195, 1205, 1210, 1220, 1235, 1240, 1245],
       actions: [{ label: 'View Logs', href: '/drilling/drilling-operations' }],
+    },
+    {
+      name: 'control-room',
+      displayName: 'Control Room',
+      route: '/control-room',
+      icon: 'Radar',
+      description: 'SCADA telemetry and dispatch',
+      color: 'blue',
+      type: 'control_room',
+      status: 'active',
+      stats: { label: 'Active Units', value: '18' },
+      trend: [16, 17, 18, 18, 17, 18, 18, 18],
+      actions: [{ label: 'Launch Monitor', href: '/control-room' }],
+    },
+    {
+      name: 'plant-processing',
+      displayName: 'Plant & Processing',
+      route: '/plant-processing',
+      icon: 'Factory',
+      description: 'Wash plant operations',
+      color: 'amber',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Yield', value: '91%' },
+      trend: [90, 91, 91, 92, 91, 91, 91, 91],
+      actions: [{ label: 'Hourly Sheet', href: '/plant-processing/hourly-sheet' }],
+    },
+    {
+      name: 'overview',
+      displayName: 'System Overview',
+      route: '/overview',
+      icon: 'Network',
+      description: 'System topology',
+      color: 'blue',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Health', value: '100%' },
+      trend: [100, 100, 100, 100, 100, 100, 100, 100],
+      actions: [{ label: 'Open Overview', href: '/overview' }],
     },
   ],
   fetchLiveDepartmentMetrics: jest.fn(async () => ({})),
@@ -228,5 +270,22 @@ describe('HubPage — graceful degradation', () => {
 
     await expect(HubPage()).rejects.toThrow('NEXT_REDIRECT');
     expect(mockedRedirect).toHaveBeenCalledWith('/login');
+  });
+
+  it('shows only the Control Room department for a user restricted to control-room', async () => {
+    const { getAccessibleDepartmentNames, getEmployeeRole } = await import('@/lib/hub-departments');
+    (getAccessibleDepartmentNames as jest.Mock).mockResolvedValueOnce(['control-room']);
+    (getEmployeeRole as jest.Mock).mockResolvedValueOnce('operator');
+
+    const jsx = await HubPage();
+    render(jsx);
+
+    expect(mockCoreOperationalModules).toHaveBeenCalledTimes(1);
+    const passedProps = mockCoreOperationalModules.mock.calls[0]?.[0] as {
+      departments: Array<{ name: string }>;
+      canSeeExecutive: boolean;
+    };
+    expect(passedProps.canSeeExecutive).toBe(false);
+    expect(passedProps.departments.map((d) => d.name)).toEqual(['control-room']);
   });
 });

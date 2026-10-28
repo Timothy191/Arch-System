@@ -1,5 +1,10 @@
 # Seeds Package Agent Tracer
 
+## 2026-10-28T10:20:00+02:00: Add Control-Room-Scoped Operator (`ControlRoom@plantcormining.co.za`)
+
+- **Purpose**: Provision and persist `ControlRoom@plantcormining.co.za` (`EMP-CR-ONLY`) scoped exclusively to `control-room` (`accessibleDepartmentNames: ['control-room']`) in `generators/operators.ts`.
+- **Verification**: `pnpm agent:verify` ✅.
+
 ## Session 2026-08-24 (Operational Department Seed Generators & CLI Orchestration)
 
 - **Purpose**: Implement modular, deterministic database seed generators for operational mining departments (Drilling, Production & Processing, Geology & Satellite Monitoring, Control Room).

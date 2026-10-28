@@ -1,3 +1,11 @@
+## 2026-10-28T10:20:00+02:00: Control Room Scoped User (`ControlRoom@plantcormining.co.za`) & Hub Department Filtering
+
+- **Phase 1 (Comprehension)**: Create a new user (`ControlRoom@plantcormining.co.za` / `Yugioh@123#`) who is only able to see and access the Control Room department (`0f160914-d92e-45d9-9547-d3d1a11ef6a1`), and ensure `/hub` does not inject unassigned system modules (`plant-processing`, `plant-inventory`, `overview`, `database`, `reports`) for department-restricted operators.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/hub/page.tsx`, `apps/portal/lib/hub-departments.ts`, `apps/portal/server/proxy.ts`, and `scripts/seeds/generators/operators.ts`.
+- **Phase 3 (Design)**: Provisioned `ControlRoom@plantcormining.co.za` in Supabase Auth, `employees` (`department_id` and `accessible_departments` scoped strictly to `0f160914-d92e-45d9-9547-d3d1a11ef6a1`), `personnel`, `operators`, and `badges`. Updated `apps/portal/app/hub/page.tsx` so system-wide modules (`plant-processing`, `plant-inventory`, `overview`, `database`, `reports`) are only auto-appended when `canSeeExecutive` is true (`admin` / `manager`).
+- **Phase 4 (Criticism)**: Added unit test coverage in `apps/portal/app/hub/page.test.tsx` verifying a `control-room`-only operator sees exclusively `['control-room']`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/hub/page.tsx`, `apps/portal/app/hub/page.test.tsx`, and `scripts/seeds/generators/operators.ts`.
+
 ## 2026-10-28T08:32:00+02:00: Plant & Processing Delays (/plant-processing/delays) — Golden Bordering Across All 20 Header, KPI, Form & Database Elements
 
 - **Phase 1 (Comprehension)**: Address all 20 design feedback items on `/plant-processing/delays` requesting `gold-steel-border gold-steel-border-slim` across the header badge, `Hourly Input Sheet` link, `Export Delays CSV` button, all 4 KPI cards (`Logged Delay Events`, `Cumulative Downtime`, `Plant Circuit Availability`, `Primary Bottleneck Circuit`), the `Log Plant and Processing Delay` form, the `Plant & Processing Delay Database` header/container/filters, and all form inputs, selects, quick-add (`+`) buttons, and textareas.

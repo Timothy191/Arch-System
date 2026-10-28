@@ -11,6 +11,7 @@ interface OperatorSeedSpec {
   jobTitle: string;
   role: 'operator' | 'supervisor';
   departmentName: 'production' | 'control-room' | 'drilling';
+  accessibleDepartmentNames?: Array<'production' | 'control-room' | 'drilling'>;
 }
 
 export async function seedOperators(supabase: SupabaseClient): Promise<void> {
@@ -198,6 +199,20 @@ export async function seedOperators(supabase: SupabaseClient): Promise<void> {
       role: 'operator',
       departmentName: 'control-room',
     },
+    // Control Room Dedicated Operator (strictly scoped to Control Room only)
+    {
+      name: 'Control Room',
+      firstName: 'Control',
+      surname: 'Room',
+      email: 'ControlRoom@plantcormining.co.za',
+      pass: 'Yugioh@123#',
+      empCode: 'EMP-CR-ONLY',
+      idNumber: '9501015009081',
+      jobTitle: 'Control Room Operator',
+      role: 'operator',
+      departmentName: 'control-room',
+      accessibleDepartmentNames: ['control-room'],
+    },
   ];
 
   const { data: existingUsersList } = await supabase.auth.admin.listUsers({ perPage: 200 });
@@ -231,6 +246,11 @@ export async function seedOperators(supabase: SupabaseClient): Promise<void> {
     }
 
     const departmentId = deptByName.get(op.departmentName) ?? operationalDeptIds[0] ?? null;
+    const operatorAccessibleDepts = op.accessibleDepartmentNames
+      ? op.accessibleDepartmentNames
+          .map((name) => deptByName.get(name))
+          .filter((id): id is string => Boolean(id))
+      : operationalDeptIds;
 
     // 1. Upsert into employees
     const { data: existingEmp } = await supabase
@@ -247,7 +267,7 @@ export async function seedOperators(supabase: SupabaseClient): Promise<void> {
           role: op.role,
           employee_code: op.empCode,
           department_id: departmentId,
-          accessible_departments: operationalDeptIds,
+          accessible_departments: operatorAccessibleDepts,
         })
         .eq('id', existingEmp.id);
       if (empUpdateError) {
@@ -260,7 +280,7 @@ export async function seedOperators(supabase: SupabaseClient): Promise<void> {
         role: op.role,
         employee_code: op.empCode,
         department_id: departmentId,
-        accessible_departments: operationalDeptIds,
+        accessible_departments: operatorAccessibleDepts,
       });
       if (empError) {
         console.error(`   [Operators] Error creating employee ${op.name}:`, empError.message);

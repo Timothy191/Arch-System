@@ -1,5 +1,11 @@
 # Scripts Agent Tracer
 
+## 2026-10-28T10:20:00+02:00: Add Control-Room-Scoped Operator (`ControlRoom@plantcormining.co.za`) to Seed Generator
+
+- **Purpose:** Add `ControlRoom@plantcormining.co.za` (`EMP-CR-ONLY`) with `accessibleDepartmentNames: ['control-room']` in `scripts/seeds/generators/operators.ts` so future seed runs preserve strict single-department scoping.
+- **Changes:** Added optional `accessibleDepartmentNames` to `OperatorSeedSpec` and seeded `ControlRoom@plantcormining.co.za`.
+- **Verification:** `pnpm agent:verify` ✅.
+
 ## 2026-10-27T13:25:00+02:00: Fix `scripts/dev.sh` Case Statement Syntax in Quick Mode
 
 - **Purpose:** Fix shell syntax errors (`;;` orphaned after recent refactor) in `scripts/dev.sh` so `pnpm dev:quick` executes cleanly.

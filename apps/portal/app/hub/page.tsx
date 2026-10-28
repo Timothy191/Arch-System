@@ -193,8 +193,9 @@ export default async function HubPage() {
 
   // AGENT-TRACE: Unhide Plant & Processing ('plant-processing'), Plant Inventory ('plant-inventory'),
   // System Overview ('overview'), Database ('database'), and Availability & Utilization ('reports')
-  // Core Operational Modules so they appear on /hub alongside DB-assigned departments.
-  if (rawDepartments.length > 0 || canSeeExecutive) {
+  // Core Operational Modules for executive/admin roles alongside DB-assigned departments.
+  // Department-restricted operators only see the departments explicitly assigned in accessibleDeptIds.
+  if (canSeeExecutive) {
     for (const sysModuleName of [
       'plant-processing',
       'plant-inventory',
