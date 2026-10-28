@@ -11,6 +11,12 @@ let connectingClient: RedisClientType | null = null;
 let subscribers: RedisClientType[] = [];
 let serverlessMode = false;
 
+// Circuit breaker: avoid repeated multi-second connection attempts when Redis is
+// unreachable. After a failed connect, short-circuit for a cooldown window so
+// callers (proxy, cache) fail fast instead of hanging page switches/actions.
+const REDIS_FAILURE_COOLDOWN_MS = 15000;
+let lastFailureAt = 0;
+
 /** True when the active connection is the HTTP/REST (Upstash) adapter. */
 export function isServerlessRedis(): boolean {
   return serverlessMode;
@@ -168,6 +174,13 @@ function createServerlessAdapter(restClient: ServerlessRedisClient): RedisClient
  */
 export async function getRedisClient(): Promise<RedisClientType> {
   if (client?.isOpen) return client;
+
+  // Circuit breaker: if a recent connect attempt failed, fail fast instead of
+  // re-attempting a (potentially multi-second) connection on every request.
+  if (Date.now() - lastFailureAt < REDIS_FAILURE_COOLDOWN_MS) {
+    throw new Error('Redis is in failure cooldown; skipping connection attempt.');
+  }
+
   if (connecting) return connecting;
 
   const explicitRedisUrl = process.env.REDIS_URL;
@@ -212,7 +225,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
         keepAlive: true,
         // Bounded socket timeout: prevents requests from hanging indefinitely
         // if Redis becomes unresponsive. Permanent Redis Rules — Timeouts.
-        connectTimeout: 5000,
+        connectTimeout: 1000,
         reconnectStrategy(retries: number) {
           if (retries > 3) {
             return new Error('Redis connection failed');
@@ -226,6 +239,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
       if (client === next) client = null;
       if (connecting === attempt) connecting = null;
       if (connectingClient === next) connectingClient = null;
+      lastFailureAt = Date.now();
     };
 
     next.on('error', resetIfCurrent);
@@ -236,6 +250,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
     connectingClient = null;
     client = next;
     serverlessMode = false;
+    lastFailureAt = 0;
     return client;
   })();
 
@@ -244,6 +259,8 @@ export async function getRedisClient(): Promise<RedisClientType> {
   try {
     return await attempt;
   } catch (error) {
+    // Record failure for circuit breaker cooldown.
+    lastFailureAt = Date.now();
     // Release the in-flight slot on failure so the next caller retries instead of
     // awaiting a permanently rejected promise.
     if (connecting === attempt) connecting = null;

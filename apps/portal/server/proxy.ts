@@ -359,7 +359,11 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const pathname = request.nextUrl.pathname;
 
   if (isPublicBypassPath(pathname)) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    // Allow browsers/CDN to serve stale public assets/pages while revalidating,
+    // reducing page-switch latency without touching auth-gated routes.
+    res.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    return res;
   }
 
   if (pathname.startsWith('/login')) {

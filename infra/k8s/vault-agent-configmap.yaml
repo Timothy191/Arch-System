@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+  namespace: arch-system
+data:
+  config.hcl: |
+    vault {
+      address = "https://vault.vault.svc:8200"
+      ca_cert = "/vault/certs/ca.crt"
+    }
+    auto_auth {
+      method "kubernetes" {
+        mount_path = "auth/kubernetes"
+        config = { role = "arch-system" }
+      }
+      sink "file" {
+        config = { path = "/vault/.token" }
+      }
+    }
+    template {
+      destination = "/vault/secrets/portal.env"
+      contents = "{{ with secret \"secret/data/arch-system/portal\" }}{{ .Data.data | toJSON }}{{ end }}"
+    }

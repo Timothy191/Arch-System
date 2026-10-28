@@ -27,3 +27,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+      - uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes ghcr.io/plantcor/arch-system-portal:${{ github.sha }}

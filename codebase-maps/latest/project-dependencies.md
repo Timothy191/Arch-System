@@ -1,18 +1,61 @@
 # 🕸️ Project Dependencies & Monorepo Graph Map
 
-**Generated:** 10/27/2026, 7:15:03 AM UTC  
-**Workspace:** Turborepo Monorepo Workspace
+**Generated:** ${dateInfo.displayDate}  
+**Workspace:** Turborepo Monorepo Workspace (pnpm 9.15.9)
 
 ---
 
-## 📦 Package Graph Rules
+## 📦 Package Dependency & Boundary Rules
 
-- **Apps**: `apps/portal` (Unified Portal, Hub & Overview)
-- **Packages**:
-  - `@repo/ui` — Shared OKLCH UI component library
-  - `@repo/theme` — Design tokens and Tailwind configuration
-  - `@repo/supabase` — Supabase client & server factory helpers
-  - `@repo/database` — Database migrations & source-of-truth schemas
-  - `@repo/contract` — Zod API input & mutation contracts
-  - `@repo/redis` — Redis caching categories & rate limiters
-- **Constraint**: `scope:app` -> `scope:package` only; `scope:package:ui` cannot depend on database packages.
+```mermaid
+flowchart TD
+    subgraph Apps ["Applications (scope:app:portal)"]
+        PORTAL["apps/portal (:3000)"]
+    end
+
+    subgraph Features ["Domain Feature Libraries (scope:feature)"]
+        F_HUB["@repo/hub"]
+        F_DEPTS["@repo/departments"]
+        F_AUTH["@repo/auth"]
+    end
+
+    subgraph Packages ["Shared Packages (scope:package)"]
+        P_UI["@repo/ui (scope:package:ui)"]
+        P_THEME["@repo/theme (scope:package:theme)"]
+        P_SUPA["@repo/supabase (scope:package:supabase)"]
+        P_CONTRACT["@repo/contract (scope:package:contract)"]
+        P_REDIS["@repo/redis (scope:package:redis)"]
+    end
+
+    subgraph Database ["Database Core (scope:package:db-internal)"]
+        P_DB["@repo/database (PostgreSQL 17)"]
+    end
+
+    PORTAL --> F_HUB
+    PORTAL --> F_DEPTS
+    PORTAL --> F_AUTH
+    PORTAL --> P_UI
+    PORTAL --> P_SUPA
+    PORTAL --> P_CONTRACT
+    PORTAL --> P_REDIS
+
+    F_HUB --> P_UI
+    F_DEPTS --> P_UI
+    F_AUTH --> P_CONTRACT
+
+    P_UI --> P_THEME
+    P_SUPA --> P_DB
+    P_CONTRACT --> P_DB
+```
+
+---
+
+## 🚫 Module Boundary Enforcement Matrix
+
+| Source Scope          | Allowed Targets                                | Strictly Forbidden Targets                                      | Enforcement Gate    |
+| :-------------------- | :--------------------------------------------- | :-------------------------------------------------------------- | :------------------ |
+| `scope:app`           | `scope:package`, `scope:feature`               | `scope:package:db-internal`                                     | `pnpm policy:check` |
+| `scope:package:ui`    | `scope:package:theme`                          | `scope:package:db-internal`, `scope:package:supabase`, `apps/*` | `pnpm policy:check` |
+| `scope:package:theme` | Tokens source (`tokens.json`)                  | `scope:package:ui`, `apps/*`                                    | `pnpm policy:check` |
+| `scope:feature`       | `@repo/ui`, `@repo/contract`, `@repo/supabase` | `@repo/database` direct access                                  | `pnpm policy:check` |
+| `scope:tool`          | Local Node utilities, static AST tools         | `apps/*`, runtime database clients                              | `pnpm policy:check` |

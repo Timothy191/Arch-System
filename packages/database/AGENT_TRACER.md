@@ -1,5 +1,12 @@
 # Database Package Agent Tracer
 
+## 2026-10-28T07:58:00+02:00: Harden Plant & Muster Events RLS Policies (212)
+
+- **Purpose**: Replace permissive `USING (true)` / `WITH CHECK (true)` RLS policies on `plant_inventory_items`, `plant_inventory_usage`, `plant_hourly_logs`, `plant_delays`, and `muster_events` with department-scoped (`public.has_department_access(department_id)`) and role-scoped (`public.is_admin()`, `'access_control'`, `'supervisor'`) policies.
+- **Changes**:
+  - `migrations/212_harden_plant_and_muster_rls.sql`: Scoped SELECT/INSERT/UPDATE/DELETE policies across all 5 tables.
+- **Verification**: `pnpm --filter @repo/database test` ✅, `pnpm --filter @repo/database check-migrations` ✅.
+
 ## 2026-10-27T18:52:00+02:00: Integration Catalog LSP Kind & Industrial SCADA/ERP Connectors (211)
 
 - **Purpose**: Expand `integration_catalog_kind_check` on `integration_catalog` to allow `'lsp'` (`CHECK (kind IN ('mcp', 'native', 'action', 'lsp'))`) and seed the 8 curated LSP (`ts-ast-lsp`, `postgres-sqls-lsp`, `plc-iec61131-lsp`, `promql-lsp`) and Industrial Mining/SCADA/ERP (`opcua-pi-historian`, `sap-pm-erp`, `weighbridge-tcp`, `leica-jigsaw-fms`) connectors.

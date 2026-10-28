@@ -1,3 +1,11 @@
+## 2026-10-28T07:58:00+02:00: Consolidate IntegrationManager Single-Pass Kind Counts, Server Action Auth Guards & Secret Hardening
+
+- **Phase 1 (Comprehension)**: Consolidate PR #193 (`IntegrationManager` single-pass `kindCounts` optimization + `IntegrationManager.test.tsx`), enforce authenticated employee checks in `plant-inventory/actions.ts` and `plant-processing/actions.ts`, remove fallback secrets in `pdf-actions.ts` and `redis-proxy`, and add `Cache-Control` headers for public bypass paths in `server/proxy.ts`.
+- **Phase 2 (Evidence)**: Inspected `IntegrationManager.tsx`, `plant-inventory/actions.ts`, `plant-processing/actions.ts`, `pdf-actions.ts`, `redis-proxy/v1/[...command]/route.ts`, and `server/proxy.ts`.
+- **Phase 3 (Design)**: Merged `origin/bolt-integration-manager-kind-counts-opt-15296432629363081962`, verified unit test mocks in `plant-processing.test.tsx`, and synchronized codebase maps and version metadata.
+- **Phase 4 (Criticism)**: Verified zero TypeScript or Biome errors and `27/27` verification gates pass.
+- **Phase 5 (Contract)**: Modified `IntegrationManager.tsx`, `IntegrationManager.test.tsx`, `plant-inventory/actions.ts`, `plant-processing/actions.ts`, `pdf-actions.ts`, `redis-proxy/v1/[...command]/route.ts`, and `server/proxy.ts`.
+
 ## 2026-10-28T07:45:00+02:00: Plant & Processing Pulse Graph Panel Fit, WhatsApp Report Subtab & Hourly Sheet Stream Rows (Source, ROM Scale, Plant Feed, Cyclone Feed, New Product Scale)
 
 - **Phase 1 (Comprehension)**: Address 3 design feedback items on `/plant-processing` and `/plant-processing/hourly-sheet`: (1) ensure `Live Production Pulse Graph — Current Throughput (t/h)` (`card-live-production-pulse`) fits its panel horizontally and vertically; (2) add `WhatsApp Report` (`reports-subtab-whatsapp-report`) under `PDF Report` in the sidebar and support `?tab=whatsapp-report` in `PlantHistoryDatabaseClient.tsx`; (3) add `Source`, `ROM Scale`, `Plant Feed`, `Cyclone Feed`, and `New Product Scale` rows in the Hourly Input Sheet table (`PlantHourlyMatrixSection.tsx`).

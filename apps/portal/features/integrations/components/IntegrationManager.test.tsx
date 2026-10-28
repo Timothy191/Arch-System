@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { fetchClient } from '@repo/utils/client';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntegrationManager } from './IntegrationManager';
 
 jest.mock('@repo/supabase/client', () => ({

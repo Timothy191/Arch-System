@@ -8,6 +8,7 @@ node_modules
 # Local env files (.env & .env.local)
 .env
 .env.local
+infra/docker/.env
 
 # Testing
 coverage
@@ -139,6 +140,7 @@ deploy-*.log
 # Local env files
 .env
 .env.local
+infra/docker/.env
 .env.bak
 .env.tools
 

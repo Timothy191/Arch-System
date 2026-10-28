@@ -253,6 +253,14 @@ export async function savePlantHourlySheetAction(
   } = await supabase.auth.getUser();
   const authContext = await getAuthenticatedEmployee().catch(() => null);
 
+  if (!user || !authContext?.employee) {
+    return {
+      success: false,
+      message: 'Unauthorized: valid session required.',
+      savedAt: new Date().toISOString(),
+    };
+  }
+
   const savedAt = new Date().toISOString();
   const totalCleanCoal = input.rows.reduce((sum, r) => sum + (Number(r.cleanCoalTonnes) || 0), 0);
   const totalDiscard = input.rows.reduce((sum, r) => sum + (Number(r.discardTonnes) || 0), 0);
@@ -347,6 +355,15 @@ export async function logPlantDelayAction(
     data: { user },
   } = await supabase.auth.getUser();
   const authContext = await getAuthenticatedEmployee().catch(() => null);
+
+  if (!user || !authContext?.employee) {
+    return {
+      success: false,
+      entry: null as unknown as PlantDelayEntry,
+      message: 'Unauthorized: valid session required.',
+      isUpdate: false,
+    };
+  }
 
   const loggedBy =
     authContext?.user?.email?.split('@')[0] ||
@@ -453,6 +470,18 @@ export async function quickAddPlantEquipmentAction(
   }
 
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const authContext = await getAuthenticatedEmployee().catch(() => null);
+
+  if (!user || !authContext?.employee) {
+    return {
+      success: false,
+      equipmentName: input.name.trim(),
+      message: 'Unauthorized: valid session required.',
+    };
+  }
 
   try {
     const { data: deptRow } = await supabase

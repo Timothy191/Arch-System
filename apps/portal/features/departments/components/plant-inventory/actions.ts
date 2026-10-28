@@ -175,7 +175,17 @@ export async function upsertPlantInventoryItemAction(input: {
   try {
     const supabase = await createServerSupabaseClient();
     const authEmployee = await getAuthenticatedEmployee().catch(() => null);
-    const employeeId = authEmployee?.employee?.id ?? null;
+    if (!authEmployee?.employee) {
+      return { success: false };
+    }
+    const employeeId = authEmployee.employee.id;
+
+    const { data: deptRow } = await supabase
+      .from('departments')
+      .select('id')
+      .eq('name', 'plant-inventory')
+      .maybeSingle();
+    const departmentId = (deptRow as { id?: string } | null)?.id ?? null;
 
     const { data, error } = await fromTable(supabase, 'plant_inventory_items')
       .upsert(
@@ -188,6 +198,7 @@ export async function upsertPlantInventoryItemAction(input: {
           amount_present: Number(input.amountPresent) || 0,
           unit: input.unit.trim() || 'units',
           plant_equipment: input.plantEquipment.trim(),
+          ...(departmentId ? { department_id: departmentId } : {}),
           ...(employeeId ? { updated_by: employeeId } : {}),
           updated_at: new Date().toISOString(),
         },
@@ -262,7 +273,10 @@ export async function updatePlantInventoryAmountsAction(input: {
   try {
     const supabase = await createServerSupabaseClient();
     const authEmployee = await getAuthenticatedEmployee().catch(() => null);
-    const employeeId = authEmployee?.employee?.id ?? null;
+    if (!authEmployee?.employee) {
+      return { success: false };
+    }
+    const employeeId = authEmployee.employee.id;
 
     const payload = {
       amount_required: Math.max(0, Number(input.amountRequired) || 0),
@@ -302,6 +316,10 @@ export async function recordPlantInventoryUsageAction(input: {
 }): Promise<{ success: boolean }> {
   try {
     const supabase = await createServerSupabaseClient();
+    const authEmployee = await getAuthenticatedEmployee().catch(() => null);
+    if (!authEmployee?.employee) {
+      return { success: false };
+    }
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       input.stockId
     );

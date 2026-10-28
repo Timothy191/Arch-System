@@ -129,11 +129,7 @@ for (const client of clientConfigs) {
   // Trimmed 2026-10-27: duplicates of built-in agent tools (ripgrep/git/fetch/
   // filesystem/memory) and supabase-covered (postgres) were removed from live
   // configs; registry keeps their definitions as an optional catalog.
-  const coreStdio = [
-    'context7',
-    'codemap',
-    'chrome-devtools',
-  ];
+  const coreStdio = ['context7', 'codemap', 'chrome-devtools'];
   for (const toolName of coreStdio) {
     if (!config[containerKey][toolName] && servers[toolName]) {
       missingServers.push(toolName);

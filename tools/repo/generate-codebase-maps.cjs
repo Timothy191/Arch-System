@@ -68,38 +68,78 @@ function buildCodebaseMaps(dateInfo) {
       title: 'Route & Feature Architecture Map',
       category: 'Routing & Features',
       summary:
-        'Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.',
+        'Next.js 16 App Router hierarchy, edge proxy, Redis-cached RBAC, and leaf client interactivity.',
       content: `# 🗺️ Route & Feature Architecture Map
 
-**Generated:** ${dateInfo.displayDate}  
-**System:** Arch-Systems Mining Operations Portal (Next.js 16 App Router)
+**Generated:** \${dateInfo.displayDate}  
+**System:** Arch-System Mining Operations Portal (Next.js 16.3.8 App Router + React 19)
 
 ---
 
-## 🏛️ Route Groups & Directory Hierarchy
+## 🔄 End-to-End Request & Server Action Lifecycle
 
-- \`apps/portal/app/\`
-  - \`/\` -> Redirects to \`/hub\`
-  - \`/hub\` — Central Operations Hub & Live Department Grid
-  - \`/overview\` — System Overview Dashboard & Audit Reports
-  - \`/(auth)/\`: Login (\`/login\`), Password Reset (\`/reset-password\`), Update Password (\`/update-password\`)
-  - \`/(departments)/\`:
-    - \`/control-room\` — Live SCADA diagnostics & telemetry monitors
-    - \`/drilling\` — Drill rig operations & bit depth telemetry
-    - \`/production\` — Yield, tonnage & extraction tracking
-    - \`/engineering\` — Maintenance logs, breakdowns & predictive alerts
-    - \`/access-control\` — On-site visitor badging, card actions, QR codes & access logs
-  - \`/database\` — Supabase PostgreSQL 17 schema explorer, live query metrics & backups
-  - \`/admin\` — User provisioning, RBAC governance, Redis cache & workflow administration
-  - \`/api/\`: Audit endpoints (\`/api/audit\`), health checks, webhook handlers
+\`\`\`mermaid
+sequenceDiagram
+    autonumber
+    actor Browser as Mining Pit Client
+    participant Proxy as apps/portal/proxy.ts
+    participant ServerProxy as server/proxy.ts
+    participant Redis as Redis L1/L2 Cache
+    participant Layout as Root Layout & Gating
+    participant Page as RSC Page (cachedRSC)
+    participant Action as Server Action Gate
+    participant Supabase as PostgreSQL 17 / CDC
+
+    Browser->>Proxy: HTTP GET /drilling (Edge Request)
+    Proxy->>Proxy: Generate cryptographic x-nonce & set strict CSP
+    Proxy->>ServerProxy: Check Supabase session & cookies
+    ServerProxy->>Redis: Query arch:auth:employee:uid (TTL 3600s)
+    Redis-->>ServerProxy: Return Employee Role & Department claims
+    ServerProxy->>Layout: Verify route permissions (DEPARTMENT_ROUTES)
+    Layout->>Page: Stream React 19 RSC with Suspense
+    Page->>Redis: Check cachedRSC tag invalidation
+    Page->>Supabase: Execute read query via createServerSupabaseClient()
+    Supabase-->>Page: Return tabular telemetry data
+    Page-->>Browser: Stream HTML + hydration payload
+    Note over Browser,Action: User records shift closeout mutation
+    Browser->>Action: Invoke submitShiftCloseout(payload)
+    Action->>Action: 1. Auth -> 2. Authorize -> 3. Zod Validate -> 4. Rate-Limit
+    Action->>Supabase: Execute atomic PL/pgSQL RPC (ACID transaction)
+    Action->>Action: Invalidate cache tags via updateTagInAction()
+    Action-->>Browser: Return typed result { success: true, data }
+    Supabase-->>Browser: Broadcast Realtime CDC change via WebSocket
+\`\`\`
 
 ---
 
-## 🔒 Authentication & Middleware Flow
+## 🏛️ Route Groups & Operational Department Hierarchy
 
-- **Proxy Delegate**: \`proxy.ts\` delegates token authentication and RBAC checks to \`server/proxy.ts\`.
-- **Exempt Routes**: Auth endpoints (\`/login\`, \`/reset-password\`) and system check APIs (\`/api/c66\`).
-- **User Validation**: Server Actions validate credentials at entry via Zod contracts from \`@repo/contract\`.
+| Route Path | Scope / Access Gate | Core Functionality | Primary Components & SSoT |
+| :--- | :--- | :--- | :--- |
+| \`/\` -> \`/hub\` | Authenticated Mining Staff | Central Operations Hub, Hero Carousel, Bento Department Grid | \`@repo/hub/ui\`, \`LiveKpiStrip\`, \`useSupabaseRealtime\` |
+| \`/overview\` | Authenticated Mining Staff | System Topology, DB Explorer, Codemaps & Invariant Audits | \`DocumentationMaps.tsx\`, \`codebase-maps-data.ts\` |
+| \`/(auth)/*\` | Public / PKCE Handshake | Login (\`/login\`), Reset Password, Update Password | \`@repo/auth/ui\`, Supabase SSR Auth cookies |
+| \`/(departments)/control-room\` | Gated by \`control_room\` claim | SCADA live telemetry, FUXA diagnostics, OPC-UA alert panels | \`AlertPanel.tsx\`, \`ScadaDiagnosticGrid.tsx\` |
+| \`/(departments)/drilling\` | Gated by \`drilling\` claim | Drill rig telemetry, penetration rates, borehole logs | \`DrillRigGrid.tsx\`, \`machine-telemetry/\` |
+| \`/(departments)/production\` | Gated by \`production\` claim | Haulage cycles, payload tonnage, excavator tally | \`HourlyLoadsTable.tsx\`, \`shift-compilation/\` |
+| \`/(departments)/engineering\` | Gated by \`engineering\` claim | Breakdown logs, preventive maintenance schedule | \`BreakdownLedger.tsx\`, \`machine-operations/\` |
+| \`/(departments)/access-control\` | Gated by \`access_control\` claim | On-site C66 visitor badging, card actions, QR scanner | \`BadgeScanner.tsx\`, \`access-logs/\`, \`card-actions/\` |
+| \`/admin/*\` | Gated by Admin / Exec role | Sites, fleet registry, employee RBAC, AI token costs | \`app/admin/layout.tsx\` (independent RBAC re-check) |
+| \`/database\` | Gated by Admin / Lead | Supabase PostgreSQL schema, query latency, index health | \`createReadReplicaClient()\`, schema explorer |
+| \`/api/*\` | Authenticated Handlers | Codebase maps, system health probes, hardware webhooks | \`getAuthenticatedEmployee()\` explicit auth check |
+
+---
+
+## 🔒 Security Invariants & Server Action Contract
+
+Every Server Action strictly adheres to the machine-enforced 7-step execution order:
+1. **Authenticate**: Verify identity via \`getAuthenticatedEmployee()\`.
+2. **Authorize**: Verify role/department claims against resource requirements.
+3. **Validate**: Parse input payload using canonical Zod schemas from \`@repo/contract\`.
+4. **Rate-Limit**: Token-bucket limit via \`@repo/rate-limiter\` (\`RedisStore\` / \`MemoryStore\`).
+5. **Mutate**: Atomic execution via Supabase PL/pgSQL RPC or Kysely query.
+6. **Invalidate**: Clear Next.js data cache and Redis L1/L2 tags via \`updateTagInAction()\`.
+7. **Redirect / Return**: Return typed response or trigger \`redirect()\` only after cache eviction.
 `,
     },
     {
@@ -108,27 +148,125 @@ function buildCodebaseMaps(dateInfo) {
       title: 'Database Schema & Topology Map',
       category: 'Database & Security',
       summary:
-        'Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.',
+        'Postgres schema topology, 189 migrations, 100% InitPlan RLS policy enforcement, and entity relationships.',
       content: `# 🔒 Database Schema & Topology Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Engine:** PostgreSQL via Supabase
+**Generated:** \${dateInfo.displayDate}  
+**Engine:** PostgreSQL 17 via Supabase  
+**Migrations SSoT:** \`packages/database/migrations/\` (189 Applied Immutable Migrations)
 
 ---
 
-## 📊 Core Entity Relationship Overview
+## 📊 Core Mining Entity Relationship Diagram
 
-- **Employees & Access**: \`employees\`, \`departments\`, \`operators\`
-- **Operational Data**: \`daily_logs\`, \`breakdowns\`, \`hourly_loads\`, \`machine_operations\`
-- **Telemetry & Assets**: \`machines\`, \`sites\`, \`mine_blocks\`, \`material_density\`
+\`\`\`mermaid
+erDiagram
+    EMPLOYEES {
+        uuid id PK
+        string email UK
+        string full_name
+        string role
+        string department_id FK
+        boolean is_active
+        timestamp created_at
+    }
+    DEPARTMENTS {
+        string id PK
+        string name UK
+        string description
+        string slug
+    }
+    OPERATORS {
+        uuid id PK
+        uuid employee_id FK
+        string badge_number UK
+        string certification_level
+        string machine_class
+    }
+    SITES {
+        uuid id PK
+        string name UK
+        string location_coordinates
+        string operational_status
+    }
+    MINE_BLOCKS {
+        uuid id PK
+        uuid site_id FK
+        string bench_level
+        float material_density
+    }
+    MACHINES {
+        uuid id PK
+        uuid site_id FK
+        string model
+        string machine_type
+        string telemetry_tag UK
+        string status
+    }
+    DAILY_LOGS {
+        uuid id PK
+        uuid site_id FK
+        uuid created_by FK
+        date log_date
+        string shift_type
+        string status
+    }
+    BREAKDOWNS {
+        uuid id PK
+        uuid machine_id FK
+        uuid reported_by FK
+        timestamp started_at
+        timestamp resolved_at
+        string severity
+        string delay_reason
+    }
+    HOURLY_LOADS {
+        uuid id PK
+        uuid daily_log_id FK
+        uuid machine_id FK
+        int load_count
+        float payload_tonnage
+        int hour_interval
+    }
+    SHIFT_CLOSEOUTS {
+        uuid id PK
+        uuid daily_log_id FK
+        uuid finalized_by FK
+        jsonb supervisor_metrics
+        timestamp closed_at
+    }
+    ACCESS_CARDS {
+        uuid id PK
+        uuid employee_id FK
+        string card_hash UK
+        boolean is_revoked
+    }
+
+    DEPARTMENTS ||--o{ EMPLOYEES : "assigns"
+    EMPLOYEES ||--o{ OPERATORS : "rosters"
+    EMPLOYEES ||--o{ ACCESS_CARDS : "holds"
+    EMPLOYEES ||--o{ DAILY_LOGS : "logs"
+    EMPLOYEES ||--o{ BREAKDOWNS : "reports"
+    SITES ||--o{ MINE_BLOCKS : "contains"
+    SITES ||--o{ MACHINES : "deploys"
+    SITES ||--o{ DAILY_LOGS : "locates"
+    MACHINES ||--o{ BREAKDOWNS : "incurs"
+    MACHINES ||--o{ HOURLY_LOADS : "transports"
+    DAILY_LOGS ||--o{ HOURLY_LOADS : "records"
+    DAILY_LOGS ||--o{ SHIFT_CLOSEOUTS : "finalizes"
+\`\`\`
 
 ---
 
 ## 🛡️ Security & Row Level Security (RLS) Mandates
 
-- **Source of Truth**: \`packages/database/migrations/\` contains all numbered SQL migrations.
-- **100% RLS Enforcement**: Every table has active RLS policy enabled.
-- **Department Isolation**: Multi-tenant separation enforced via \`auth.uid()\` and \`accessible_departments\` mapping.
+1. **100% Table RLS Coverage**: Every table in \`public\` schema has Row Level Security enabled.
+2. **InitPlan Subquery Optimization**: Policies wrap \`auth.uid()\` in scalar subqueries (e.g. \`(SELECT auth.uid())\`), enabling PostgreSQL query planner to evaluate authentication once per query rather than once per row.
+3. **Multi-Tenant Department Isolation**: Employee access is strictly gated by department membership and verified against \`accessible_departments\` claims.
+4. **Primary vs. Read Replica Routing**:
+   - Transactional mutations & RPCs use \`createServerSupabaseClient()\` directed to primary PgBouncer.
+   - Heavy analytical aggregations & overview reports use \`createReadReplicaClient()\` to protect OLTP throughput.
+5. **Contract Parity**: Every database column has a matching runtime Zod validator in \`packages/contract/src/schemas/\`, validated on every commit by \`pnpm audit:drift\`.
 `,
     },
     {
@@ -137,32 +275,76 @@ function buildCodebaseMaps(dateInfo) {
       title: 'CI/CD Pipeline & Quality Gate Map',
       category: 'DevOps & CI/CD',
       summary:
-        'GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.',
+        'Multi-stage pipeline: local preflight, parallel CI matrices, security audits, build, deploy, and health probes.',
       content: `# 🚀 CI/CD Pipeline & Quality Gate Topology Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Orchestration:** GitHub Actions + Local Deploy Scripts
+**Generated:** \${dateInfo.displayDate}  
+**Orchestration:** Local Preflight + GitHub Actions + Vercel Production Deploy
 
 ---
 
-## 🧪 Quality Gate Suite (\`pnpm quality\`)
+## 🧪 Visual Multi-Stage Pipeline & Verification Flow
 
-1. \`turbo run lint\` (ESLint code linting across workspace)
-2. \`turbo run type-check\` (Strict TypeScript check)
-3. \`turbo run test\` (Jest unit & integration tests)
-4. \`pnpm lint:root\` & \`pnpm lint:styles\` (Stylelint CSS OKLCH check)
-5. \`pnpm lint:spelling\` (Cspell spell checking)
-6. \`pnpm deps:lint\` (Syncpack package version consistency)
-7. \`pnpm knip\` (Dead code detection)
-8. \`pnpm policy:check\` (Project tag & security policy compiler)
-9. \`pnpm audit:suite\` (Versioned RLS & Design System compliance auditor)
+\`\`\`mermaid
+flowchart TD
+    subgraph Preflight ["Phase 1: Local Preflight & Completion Gate"]
+        H_PRE["Husky pre-commit (lint-staged, skills check)"]
+        H_PUSH["Husky pre-push -> agent-verify.sh"]
+        GATE["15-Step Gate: TypeCheck -> Lint -> Test -> Policy -> Drift -> Knip"]
+        H_PRE --> H_PUSH
+        H_PUSH --> GATE
+    end
+
+    subgraph CI ["Phase 2: GitHub Actions CI Matrix"]
+        CI_LINT["turbo run lint (Biome)"]
+        CI_TC["turbo run type-check (Strict TS)"]
+        CI_TEST["turbo run test (Jest Unit & Integration)"]
+        CI_AUDIT["pnpm audit:compliance (RLS, Caching, Routing)"]
+        CI_SEC["Security Scans: CodeQL, Gitleaks, Semgrep, Trivy"]
+    end
+
+    subgraph Build ["Phase 3: Deterministic Monorepo Build"]
+        SYNC["sync-assets-smart.cjs (Public Assets SSoT)"]
+        GLASS["patch-glass-css.mjs (OKLCH Glass Token Fixes)"]
+        TURBO_BUILD["turbo run build (Next.js 16 + Remote Cache)"]
+        SYNC --> GLASS
+        GLASS --> TURBO_BUILD
+    end
+
+    subgraph Deploy ["Phase 4: Deployment & Release Engine"]
+        VERCEL["Vercel Production Deploy / Canary"]
+        DOCKER["Docker Multi-Stage Container Build"]
+        KUBE["Kubernetes / Helm Manifest Validation"]
+    end
+
+    subgraph PostDeploy ["Phase 5: Post-Deployment Smoke & Health Probes"]
+        PROBE_LIVE["GET /api/health/live (Process Liveness)"]
+        PROBE_REDIS["GET /api/health/redis (Cache & Limits)"]
+        PROBE_DB["GET /api/health (Database Connection Pool)"]
+        SYNTH["Synthetic Playwright E2E Navigation Canaries"]
+    end
+
+    GATE -->|Git Push| CI
+    CI_LINT --> Build
+    CI_TC --> Build
+    CI_TEST --> Build
+    CI_AUDIT --> Build
+    CI_SEC --> Build
+    TURBO_BUILD --> Deploy
+    Deploy --> PostDeploy
+\`\`\`
 
 ---
 
-## 🚢 Deployment Workflow (\`scripts/deploy.sh\`)
+## 📋 Comprehensive Quality Gates Reference
 
-- Supports local, staging, and production zero-downtime deployment runs.
-- Includes automatic cache purge and rollback triggers on verification failure.
+1. **\`turbo run type-check\`**: Zero \`any\`, zero \`@ts-ignore\`, concurrency=2.
+2. **\`turbo run lint\`**: Biome formatter & linter enforcing single quotes, sorted Tailwind classes, and clean syntax.
+3. **\`turbo run test\`**: Hermetic Jest suites across apps, feature libs, and shared packages.
+4. **\`pnpm policy:check\`**: Monorepo scope-tagging boundaries verified by \`policy-compiler.cjs\`.
+5. **\`pnpm audit:drift\`**: Database schema vs. \`@repo/contract\` Zod definition parity.
+6. **\`pnpm audit:compliance\`**: Exhaustive invariant scan across RLS, server cache profiles, RSC, routing, and design system rules.
+7. **\`pnpm deps:lint\` & \`pnpm knip\`**: Syncpack version harmonization and dead code eradication.
 `,
     },
     {
@@ -171,22 +353,47 @@ function buildCodebaseMaps(dateInfo) {
       title: 'Technology Stack & Catalog Map',
       category: 'Architecture & Stack',
       summary:
-        'Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.',
+        'Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, Redis façade, and Architectural Decision Records.',
       content: `# ⚡ Technology Stack & Catalog Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Architecture:** Turborepo Monorepo + Next.js 16 + Supabase
+**Generated:** \${dateInfo.displayDate}  
+**Architecture:** Federated Turborepo Monorepo + Next.js 16 App Router + Supabase PostgreSQL 17
 
 ---
 
-## 🛠️ Stack Catalog
+## 🛠️ Technology Catalog & Runtime Specifications
 
-- **Monorepo Manager**: Turborepo 2.x + pnpm 9.15.9 workspace
-- **Frontend Core**: Next.js 16 (App Router), React 19, Tailwind CSS
-- **Design System**: OKLCH Palette (\`@repo/theme\`), Glass surfaces, Named shadows only
-- **Database Layer**: Supabase PostgreSQL + Drizzle ORM / Kysely
-- **Caching & Metrics**: Redis Cluster + \`@repo/redis\` rate limiting
-- **Quality & E2E**: Jest, Playwright E2E, DeepEval
+| Layer | Technology | Version / Spec | Responsibility |
+| :--- | :--- | :--- | :--- |
+| **Monorepo Engine** | Turborepo + pnpm | Turbo 2.x, pnpm 9.15.9 | Task pipeline hashing, catalog versioning, remote caching |
+| **Frontend Framework** | Next.js App Router | 16.3.8 | Edge request proxy (\`proxy.ts\`), React Server Components, Server Actions |
+| **UI Runtime** | React | 19.x | Concurrent transitions, \`use()\` promise unwrap, Server Components |
+| **Design System** | OKLCH Tokens + Tailwind | Tailwind 3.4.x | Light-mode only, semantic OKLCH color space, Liquid GlassCard surfaces |
+| **Persistence** | Supabase PostgreSQL | PostgreSQL 17 | PgBouncer pool, 189 immutable SQL migrations, 100% InitPlan RLS |
+| **Cache & Limits** | Redis Cluster | Redis 7.x | L1/L2 cache tags, RBAC sessions, stream consumer groups, token bucket |
+| **Contracts & Validation**| Zod | Zod 3.x (\`@repo/contract\`) | Canonical mutation and query schemas with zero database-to-API drift |
+| **Telemetry & Observability** | OpenTelemetry + Langfuse | OTEL SDK + Langfuse | Distributed spans, AI agent cost accounting, trace inspection |
+| **Testing & Quality** | Biome, Jest, Playwright | Modern Agent Toolchain | Strict linting, unit/integration testing, visual regression testing |
+
+---
+
+## 🏛️ Architectural Decision Records (ADRs)
+
+- **ADR-001: Next.js 16 Request Proxy over middleware.ts**  
+  *Context:* Next.js 16 replaces \`middleware.ts\` with \`proxy.ts\`.  
+  *Decision:* Route all edge requests through \`apps/portal/proxy.ts\` to generate per-request \`x-nonce\` and set strict Content-Security-Policy headers before delegating auth claims to \`server/proxy.ts\`.
+
+- **ADR-002: Capability-Only Redis Façade**  
+  *Context:* Direct Redis command execution introduces vendor lock-in and fails in serverless environments.  
+  *Decision:* All Redis interactions ride the transport façade \`raw.ts\` in \`@repo/redis\`. Exposes dedicated doors: caching, sessions, streams, locks, analytics, and vector search with automatic graceful degradation.
+
+- **ADR-003: Pure Light-Mode OKLCH Design Tokens**  
+  *Context:* Industrial mining pit displays require extreme outdoor daylight contrast.  
+  *Decision:* Enforce a single canonical light mode (canvas \`#f3f4f6\`) using perceptual OKLCH color primitives from \`@repo/theme\`. Dark mode variants (\`dark:\`) and raw hex codes are strictly prohibited.
+
+- **ADR-004: Zod Contract Parity as Single Source of Truth**  
+  *Context:* Discrepancies between SQL schemas and frontend types cause runtime mutation crashes.  
+  *Decision:* All API payloads and database tables require Zod schemas in \`packages/contract/src/schemas/\`. CI enforces 100% parity via \`pnpm audit:drift\`.
 `,
     },
     {
@@ -194,25 +401,69 @@ function buildCodebaseMaps(dateInfo) {
       filename: 'project-dependencies.md',
       title: 'Project Dependencies & Monorepo Graph Map',
       category: 'Workspace Graph',
-      summary: 'Dependency relationships between applications and shared packages in the monorepo.',
+      summary:
+        'Dependency relationships, scope-tag hierarchy, and module boundaries in the monorepo.',
       content: `# 🕸️ Project Dependencies & Monorepo Graph Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Workspace:** Turborepo Monorepo Workspace
+**Generated:** \${dateInfo.displayDate}  
+**Workspace:** Turborepo Monorepo Workspace (pnpm 9.15.9)
 
 ---
 
-## 📦 Package Graph Rules
+## 📦 Package Dependency & Boundary Rules
 
-- **Apps**: \`apps/portal\` (Unified Portal, Hub & Overview)
-- **Packages**:
-  - \`@repo/ui\` — Shared OKLCH UI component library
-  - \`@repo/theme\` — Design tokens and Tailwind configuration
-  - \`@repo/supabase\` — Supabase client & server factory helpers
-  - \`@repo/database\` — Database migrations & source-of-truth schemas
-  - \`@repo/contract\` — Zod API input & mutation contracts
-  - \`@repo/redis\` — Redis caching categories & rate limiters
-- **Constraint**: \`scope:app\` -> \`scope:package\` only; \`scope:package:ui\` cannot depend on database packages.
+\`\`\`mermaid
+flowchart TD
+    subgraph Apps ["Applications (scope:app:portal)"]
+        PORTAL["apps/portal (:3000)"]
+    end
+
+    subgraph Features ["Domain Feature Libraries (scope:feature)"]
+        F_HUB["@repo/hub"]
+        F_DEPTS["@repo/departments"]
+        F_AUTH["@repo/auth"]
+    end
+
+    subgraph Packages ["Shared Packages (scope:package)"]
+        P_UI["@repo/ui (scope:package:ui)"]
+        P_THEME["@repo/theme (scope:package:theme)"]
+        P_SUPA["@repo/supabase (scope:package:supabase)"]
+        P_CONTRACT["@repo/contract (scope:package:contract)"]
+        P_REDIS["@repo/redis (scope:package:redis)"]
+    end
+
+    subgraph Database ["Database Core (scope:package:db-internal)"]
+        P_DB["@repo/database (PostgreSQL 17)"]
+    end
+
+    PORTAL --> F_HUB
+    PORTAL --> F_DEPTS
+    PORTAL --> F_AUTH
+    PORTAL --> P_UI
+    PORTAL --> P_SUPA
+    PORTAL --> P_CONTRACT
+    PORTAL --> P_REDIS
+
+    F_HUB --> P_UI
+    F_DEPTS --> P_UI
+    F_AUTH --> P_CONTRACT
+
+    P_UI --> P_THEME
+    P_SUPA --> P_DB
+    P_CONTRACT --> P_DB
+\`\`\`
+
+---
+
+## 🚫 Module Boundary Enforcement Matrix
+
+| Source Scope | Allowed Targets | Strictly Forbidden Targets | Enforcement Gate |
+| :--- | :--- | :--- | :--- |
+| \`scope:app\` | \`scope:package\`, \`scope:feature\` | \`scope:package:db-internal\` | \`pnpm policy:check\` |
+| \`scope:package:ui\` | \`scope:package:theme\` | \`scope:package:db-internal\`, \`scope:package:supabase\`, \`apps/*\` | \`pnpm policy:check\` |
+| \`scope:package:theme\` | Tokens source (\`tokens.json\`) | \`scope:package:ui\`, \`apps/*\` | \`pnpm policy:check\` |
+| \`scope:feature\` | \`@repo/ui\`, \`@repo/contract\`, \`@repo/supabase\` | \`@repo/database\` direct access | \`pnpm policy:check\` |
+| \`scope:tool\` | Local Node utilities, static AST tools | \`apps/*\`, runtime database clients | \`pnpm policy:check\` |
 `,
     },
     {
@@ -321,7 +572,7 @@ graph TD
 - **Task Pipelines**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\`, \`sync-assets\`
 - **Task Hashing**: Inputs hash includes \`globalDependencies\`, \`globalEnv\`, and \`$TURBO_DEFAULT$\`
 - **Caching**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\` set to \`cache: true\`
-- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via \`eslint-plugin-boundaries\`
+- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via \`policy-compiler.cjs\`
 `,
     },
     {
@@ -333,7 +584,7 @@ graph TD
         'Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.',
       content: `# 🕸️ Monorepo Dependencies & Topology Graph Map
 
-**Generated:** ${dateInfo.displayDate}  
+**Generated:** \${dateInfo.displayDate}  
 **Architecture:** Turborepo Monorepo Topology
 
 ---
@@ -394,7 +645,7 @@ graph LR
 
 ---
 
-## 🚫 ESLint Module Boundary Enforcement Matrix
+## 🚫 Module Boundary Enforcement Matrix
 
 | Source Tag | Allowed Dependencies | Forbidden Dependencies |
 | :--- | :--- | :--- |
@@ -409,22 +660,78 @@ graph LR
       filename: 'package-structure.md',
       title: 'Package Structure & Module Map',
       category: 'Monorepo Packages',
-      summary: 'Directory layout and workspace modularization rules.',
+      summary: 'Directory layout, package responsibilities, and workspace modularization rules.',
       content: `# 📁 Package Structure & Module Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Standard**: XDG Compliance + Clean Workspace Modularization
+**Generated:** \${dateInfo.displayDate}  
+**Standard**: Clean Workspace Modularization + Strict Directional Layering
 
 ---
 
-## 📂 Root Structure Overview
+## 📂 Visual Monorepo Structure & Package Hierarchy
 
-- \`apps/\`: Unified portal application (\`apps/portal\`)
-- \`packages/\`: Shared infrastructure packages (\`ui\`, \`theme\`, \`supabase\`, \`database\`, \`contract\`, \`redis\`, \`agents\`)
-- \`libs/\`: Domain feature libraries (\`features/hub\`, \`features/departments\`, \`features/auth\`)
-- \`tools/\`: Build, audit, and quality automation tools
-- \`codebase-maps/\`: Automated visual codebase topology maps
-- \`documentation/\`: Unified documentation center including audit reports, codebase maps, and system wiki
+\`\`\`mermaid
+flowchart TD
+    ROOT["Fork / Federated Workspace Root"]
+    
+    subgraph AppLayer ["apps/ (Applications)"]
+        PORTAL["portal (Next.js 16 App Router · mining operations)"]
+    end
+
+    subgraph FeatureLayer ["libs/features/ (Domain Feature Libraries)"]
+        AUTH_LIB["@repo/auth (ui · data-access · utils)"]
+        DEPTS_LIB["@repo/departments (ui · data-access · utils)"]
+        HUB_LIB["@repo/hub (ui · data-access · utils)"]
+    end
+
+    subgraph SharedLayer ["libs/shared/ (Shared Feature Primitives)"]
+        SHARED_DA["@repo/shared/data-access"]
+        SHARED_HOOKS["@repo/shared/hooks"]
+        SHARED_UTILS["@repo/shared/utils"]
+    end
+
+    subgraph PackageLayer ["packages/ (Core Infrastructure)"]
+        P_UI["@repo/ui (GlassCard · Radix primitives)"]
+        P_THEME["@repo/theme (OKLCH tokens · Tailwind preset)"]
+        P_CONTRACT["@repo/contract (Canonical Zod Schemas)"]
+        P_SUPABASE["@repo/supabase (SSR client · Kysely factory)"]
+        P_DATABASE["@repo/database (PostgreSQL 17 migrations)"]
+        P_REDIS["@repo/redis (L1/L2 cache · session · streams)"]
+        P_ERRORS["@repo/errors (AppError hierarchy)"]
+        P_LOGGER["@repo/logger (Structured Pino/Winston)"]
+        P_RATELIMIT["@repo/rate-limiter (Token bucket)"]
+        P_AGENTS["@repo/agents (Specialist swarms · Langfuse)"]
+    end
+
+    ROOT --> PORTAL
+    PORTAL --> FeatureLayer
+    FeatureLayer --> SharedLayer
+    FeatureLayer --> PackageLayer
+\`\`\`
+
+---
+
+## 📂 Detailed Directory Responsibilities
+
+- **\`apps/portal/\`**: Unified Next.js 16 App Router application. Contains route groups, \`proxy.ts\`, Server Actions, and \`lib/server-cache.ts\`.
+- **\`packages/\`**: Reusable shared infrastructure libraries:
+  - \`@repo/ui\`: Pure presentational React 19 components (GlassCard, Button, Tabs, Badge). Storybook-tested.
+  - \`@repo/theme\`: Single Source of Truth for OKLCH color primitives and Tailwind configuration preset.
+  - \`@repo/contract\`: Canonical Zod schemas defining all database tables, API mutations, and input validation.
+  - \`@repo/supabase\`: SSR/Browser/Kysely Supabase client factories and auth helpers.
+  - \`@repo/database\`: Numbered SQL migrations (\`migrations/*.sql\`), RLS policies, and generated DB types.
+  - \`@repo/redis\`: Capability-only façade for L1/L2 caching, session management, locks, and streams.
+  - \`@repo/errors\`: Canonical \`AppError\` domain error class hierarchy.
+  - \`@repo/logger\`: Structured telemetry and log formatting.
+  - \`@repo/rate-limiter\`: Token bucket and sliding window rate limiting.
+  - \`@repo/agents\`: Multi-agent orchestration, LLM Critique Council, and Langfuse tracing.
+- **\`libs/features/\`**: Domain-specific business logic divided into \`ui\`, \`data-access\`, and \`utils\`:
+  - \`@repo/auth\`: Authentication forms, session guards, and credential handlers.
+  - \`@repo/departments\`: Mining operational departments (drilling, production, control room, engineering, access control).
+  - \`@repo/hub\`: Central Command Hub carousel, live department grid, and KPI strip.
+- **\`libs/shared/\`**: Cross-feature shared utilities, custom hooks, and data-access adapters.
+- **\`tools/\`**: Build-time verification scripts, policy compiler, anti-drift test suites, and codebase map generators.
+- **\`codebase-maps/\`**: Automated architectural topology maps, versioned snapshots, and metadata manifest index.
 `,
     },
     {
@@ -436,9 +743,9 @@ graph LR
         'Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.',
       content: `# 🤖 Multi-Agent Architecture & Pre-Flight Research Gate Map
 
-**Generated:** ${dateInfo.displayDate}  
+**Generated:** \${dateInfo.displayDate}  
 **Package:** \`@repo/agents\`  
-**Orchestration:** Multi-Agent Specialist Hierarchy + Langfuse Tracing
+**Orchestration:** Multi-Agent Specialist Hierarchy + Langfuse Tracing + MCP Integration
 
 ---
 
@@ -462,7 +769,7 @@ flowchart TD
     subgraph Specialists ["Domain Execution Specialists"]
         DBA["databaseArchitect (PostgreSQL & RLS)"]
         UIE["uiEngineer (React 19 & OKLCH Theme)"]
-        SECG["securityAndQualityGate (ESLint & Playwright)"]
+        SECG["securityAndQualityGate (Biome & Playwright)"]
         RTE["realtimeEngineer (Supabase CDC & WS)"]
         RESE["resilienceEngineer (Harsh Pit Network & HUD)"]
         SIMP["systemSimplifier (Debloat & Bundlesize)"]
@@ -482,13 +789,14 @@ flowchart TD
 
 ## 🔬 Architectural Pre-Flight Research Gate Mandate
 
-- **Rule Source**: \`docs/GEMINI.md\` and \`docs/AGENTS.md\`.
+- **Rule Source**: \`AGENTS.md\` and Canonical Agent Rules.
 - **Implementation**: \`SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)\`.
 - **Benchmark Evaluation Surface**:
   - **Airbnb / PayPal**: Semantic Data Contracts (Zero database-to-contract drift).
-  - **Netflix / ThoughtWorks**: Architecture-as-Code Fitness Functions (Drift Health Index $ge 90\\%$).
+  - **Netflix / ThoughtWorks**: Architecture-as-Code Fitness Functions (Drift Health Index $ge 90%$).
   - **Uber / Sourcegraph**: AST Codebase Maps & Topology Graphs.
   - **Meta / Google**: Perceptual visual diffing & synthetic navigation canaries.
+- **Observability**: Langfuse traces trace every agent invocation, tracking token budget (enforcing $le 30%$ context window usage) and step-by-step tool latency.
 `,
     },
   ];

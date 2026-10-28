@@ -97,4 +97,4 @@ graph TD
 - **Task Pipelines**: `build`, `lint`, `type-check`, `test`, `codegen`, `sync-assets`
 - **Task Hashing**: Inputs hash includes `globalDependencies`, `globalEnv`, and `$TURBO_DEFAULT$`
 - **Caching**: `build`, `lint`, `type-check`, `test`, `codegen` set to `cache: true`
-- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via `eslint-plugin-boundaries`
+- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via `policy-compiler.cjs`

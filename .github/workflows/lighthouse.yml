@@ -1,0 +1,16 @@
+name: Lighthouse CI
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install -g @lhci/cli
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter portal build
+      - run: lhci autorun

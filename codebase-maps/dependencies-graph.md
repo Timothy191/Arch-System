@@ -1,6 +1,6 @@
 # 🕸️ Monorepo Dependencies & Topology Graph Map
 
-**Generated:** 10/27/2026, 7:15:03 AM UTC  
+**Generated:** ${dateInfo.displayDate}  
 **Architecture:** Turborepo Monorepo Topology
 
 ---
@@ -61,7 +61,7 @@ graph LR
 
 ---
 
-## 🚫 ESLint Module Boundary Enforcement Matrix
+## 🚫 Module Boundary Enforcement Matrix
 
 | Source Tag            | Allowed Dependencies             | Forbidden Dependencies                                                    |
 | :-------------------- | :------------------------------- | :------------------------------------------------------------------------ |

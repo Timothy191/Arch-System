@@ -108,3 +108,5 @@ normalised for both shapes.
   6. Consumers migrated to the new inputs: `packages/supabase/src/auth.ts` (`readSession`/`writeSession`/`touchSession` replace raw `cacheGet`/`cacheSet`), `apps/portal/server/proxy.ts`, `apps/portal/lib/shift-closeout.ts`, telemetry ingest and SSE routes, `app/api/sync/fallback/route.ts`, `lib/api/rate-limit-middleware.ts`.
   7. Documented the contract: `.agents/rules/redis-capabilities.md` (canonical, symlinked into the workspace-root mirror), `AGENTS.md`, and this package's `codemap.md` (module table, invariants 7–9, coordination flow, integration-test recipe).
 - **Verification**: `@repo/redis` unit 13/13 suites and 144/144 tests; integration 27/27 against `redis:7.4-alpine` (vector cases no-op without the module, by design); `pnpm --filter portal test:integration` 5/5; `pnpm --filter @repo/redis lint` clean; agent-lint clean for these files including the newly tracked `locks.ts`; `audit-agent-rules-drift` PASS; `@repo/redis`, `@repo/supabase` and portal `type-check` clean.
+
+- 2026-10-27T16:29:46Z — perf: Redis circuit breaker (15s cooldown, 1s connectTimeout)

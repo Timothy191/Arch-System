@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redisEngine } from '@/lib/redis-engine';
 
 function verifyToken(req: NextRequest): boolean {
-  const secret = process.env.REDIS_AUTH_SECRET || 'plantcor-redis-secret';
+  const secret = process.env.REDIS_AUTH_SECRET;
+  if (!secret) return false;
   const authHeader = req.headers.get('authorization') || req.headers.get('x-redis-token');
   if (!authHeader) return false;
   const token = authHeader.replace(/^Bearer\s+/i, '');

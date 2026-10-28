@@ -72,8 +72,10 @@ export async function exportSignedShiftReportPdf(
       signedAt: new Date().toISOString(),
     });
 
+    const signingSecret = process.env.SHIFT_SIGNING_SECRET;
+    if (!signingSecret) throw new Error('SHIFT_SIGNING_SECRET is required');
     const signatureHash = crypto
-      .createHmac('sha256', process.env.SHIFT_SIGNING_SECRET || 'arch-mining-secret-key')
+      .createHmac('sha256', signingSecret)
       .update(hashPayload)
       .digest('hex');
 
