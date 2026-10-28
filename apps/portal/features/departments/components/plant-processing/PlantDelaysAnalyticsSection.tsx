@@ -13,10 +13,16 @@ export interface PlantDelaysMetrics {
   topMins: number;
 }
 
+const DELAY_KPI_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4';
+
+const DELAY_FILTER_CONTROL_CLASS =
+  'gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs';
+
 export function PlantDelaysKpiRow({ metrics }: { metrics: PlantDelaysMetrics }) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+      <div className={DELAY_KPI_CARD_CLASS}>
         <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
           Logged Delay Events
         </div>
@@ -28,7 +34,7 @@ export function PlantDelaysKpiRow({ metrics }: { metrics: PlantDelaysMetrics }) 
         </div>
       </div>
 
-      <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+      <div className={DELAY_KPI_CARD_CLASS}>
         <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
           Cumulative Downtime
         </div>
@@ -40,7 +46,7 @@ export function PlantDelaysKpiRow({ metrics }: { metrics: PlantDelaysMetrics }) 
         </div>
       </div>
 
-      <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+      <div className={DELAY_KPI_CARD_CLASS}>
         <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
           Plant Circuit Availability
         </div>
@@ -52,7 +58,7 @@ export function PlantDelaysKpiRow({ metrics }: { metrics: PlantDelaysMetrics }) 
         </div>
       </div>
 
-      <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4">
+      <div className={DELAY_KPI_CARD_CLASS}>
         <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
           Primary Bottleneck Circuit
         </div>
@@ -110,8 +116,8 @@ export function PlantDelaysAnalyticsSection({
   }, [delays, categoryFilter, statusFilter, searchQuery]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm xl:col-span-8">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-b px-5 py-4">
+    <div className="gold-steel-border gold-steel-border-slim overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm xl:col-span-8">
+      <div className="gold-steel-border gold-steel-border-slim flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-b px-5 py-4">
         <div>
           <h2 className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider">
             Plant &amp; Processing Delay Database ({filteredDelays.length})
@@ -124,10 +130,12 @@ export function PlantDelaysAnalyticsSection({
 
         <div className="flex flex-wrap items-center gap-2">
           <select
+            id="delay-status-filter"
+            name="delayStatusFilter"
             aria-label="Filter by delay status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'OPEN' | 'RESOLVED')}
-            className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
+            className={DELAY_FILTER_CONTROL_CLASS}
           >
             <option value="ALL">All Statuses</option>
             <option value="OPEN">Booked In (Awaiting End Time)</option>
@@ -137,10 +145,12 @@ export function PlantDelaysAnalyticsSection({
           <div className="flex items-center gap-1.5 text-xs">
             <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
             <select
+              id="delay-category-filter"
+              name="delayCategoryFilter"
               aria-label="Filter by delay category"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs"
+              className={DELAY_FILTER_CONTROL_CLASS}
             >
               <option value="ALL">All Categories</option>
               {categoryOptions.map((cat) => (
@@ -152,12 +162,14 @@ export function PlantDelaysAnalyticsSection({
           </div>
 
           <input
+            id="delay-search-input"
+            name="delaySearch"
             type="search"
             aria-label="Search plant delays"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search circuit or cause..."
-            className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs"
+            className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs"
           />
         </div>
       </div>
@@ -196,7 +208,7 @@ export function PlantDelaysAnalyticsSection({
                   <td className="px-4 py-3">
                     <div className="font-semibold text-[var(--text-heading)]">{d.circuit}</div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                      <span className="inline-block rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-semibold text-[10px] text-amber-800">
+                      <span className="gold-steel-border gold-steel-border-slim inline-block rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 font-semibold text-[10px] text-amber-800">
                         {d.category}
                       </span>
                       <span className="text-[11px] text-[var(--text-muted)]">{d.impactType}</span>
@@ -223,7 +235,7 @@ export function PlantDelaysAnalyticsSection({
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 font-semibold text-[10px] uppercase ${
+                      className={`gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full px-2 py-0.5 font-semibold text-[10px] uppercase ${
                         d.status === 'Resolved' && d.endTime
                           ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-800'
                           : 'border border-amber-500/30 bg-amber-500/15 text-amber-800'
@@ -240,7 +252,7 @@ export function PlantDelaysAnalyticsSection({
                         onSelectDelay(d);
                       }}
                       data-testid={`select-delay-${d.id}`}
-                      className={`inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2.5 py-1 font-semibold text-[11px] transition-colors ${
+                      className={`gold-steel-border gold-steel-border-slim inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2.5 py-1 font-semibold text-[11px] transition-colors ${
                         isOpenDelay
                           ? 'border-amber-500/40 bg-amber-500/15 text-amber-900 hover:bg-amber-500/25'
                           : 'border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-heading)] hover:bg-black/[0.04]'

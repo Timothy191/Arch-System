@@ -1,3 +1,11 @@
+## 2026-10-28T08:32:00+02:00: Plant & Processing Delays (/plant-processing/delays) — Golden Bordering Across All 20 Header, KPI, Form & Database Elements
+
+- **Phase 1 (Comprehension)**: Address all 20 design feedback items on `/plant-processing/delays` requesting `gold-steel-border gold-steel-border-slim` across the header badge, `Hourly Input Sheet` link, `Export Delays CSV` button, all 4 KPI cards (`Logged Delay Events`, `Cumulative Downtime`, `Plant Circuit Availability`, `Primary Bottleneck Circuit`), the `Log Plant and Processing Delay` form, the `Plant & Processing Delay Database` header/container/filters, and all form inputs, selects, quick-add (`+`) buttons, and textareas.
+- **Phase 2 (Evidence)**: Inspected `PlantDelaysClient.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `plant-processing.test.tsx`.
+- **Phase 3 (Design)**: Extracted `HEADER_ACTION_BTN_CLASS`, `FORM_INPUT_CLASS`, `FORM_MONO_INPUT_CLASS`, `QUICK_ADD_ICON_BTN_CLASS`, `QUICK_ADD_INLINE_INPUT_CLASS`, `DELAY_KPI_CARD_CLASS`, and `DELAY_FILTER_CONTROL_CLASS` constants with `gold-steel-border gold-steel-border-slim`, added explicit `id`/`name` attributes to all form inputs/selects/textareas, and added unit test assertions for all 20 elements.
+- **Phase 4 (Criticism)**: Verified Tailwind utility class counts and zero repeated 10+ utility chains via `pnpm audit:tailwind`.
+- **Phase 5 (Contract)**: Modified `PlantDelaysClient.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `plant-processing.test.tsx`.
+
 ## 2026-10-28T07:58:00+02:00: Consolidate IntegrationManager Single-Pass Kind Counts, Server Action Auth Guards & Secret Hardening
 
 - **Phase 1 (Comprehension)**: Consolidate PR #193 (`IntegrationManager` single-pass `kindCounts` optimization + `IntegrationManager.test.tsx`), enforce authenticated employee checks in `plant-inventory/actions.ts` and `plant-processing/actions.ts`, remove fallback secrets in `pdf-actions.ts` and `redis-proxy`, and add `Cache-Control` headers for public bypass paths in `server/proxy.ts`.

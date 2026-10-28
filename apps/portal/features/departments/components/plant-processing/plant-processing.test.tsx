@@ -231,6 +231,86 @@ describe('Plant & Processing Workspace Components', () => {
       const causeTextarea = screen.getByPlaceholderText(
         /Oversize ROM rock bridged primary jaw crusher/i
       );
+      expect(causeTextarea).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+
+      // Verify Golden Bordering across all 20 /plant-processing/delays feedback elements
+      expect(screen.getByText(/Plant & Processing Downtime & Delay Log/i)).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByRole('link', { name: /Hourly Input Sheet/i })).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByRole('button', { name: /Export Delays CSV/i })).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByText('Logged Delay Events').parentElement).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByText('Cumulative Downtime').parentElement).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByText('Plant Circuit Availability').parentElement).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByText('Primary Bottleneck Circuit').parentElement).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByRole('form', { name: /Log Plant and Processing Delay/i })).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(
+        screen.getByRole('heading', { name: /Plant & Processing Delay Database/i }).parentElement
+          ?.parentElement
+      ).toHaveClass('gold-steel-border', 'gold-steel-border-slim');
+      expect(screen.getByLabelText('Operational Date')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText('Shift')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText('Plant Circuit / Equipment Section')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByTestId('quick-add-equipment-btn')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText('Delay Category')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByTestId('quick-add-category-btn')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText('Operational Impact')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByTestId('quick-add-impact-btn')).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText(/Booked In Time \(Time Occurred\)/i)).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+      expect(screen.getByLabelText(/End Time/i)).toHaveClass(
+        'gold-steel-border',
+        'gold-steel-border-slim'
+      );
+
       fireEvent.change(causeTextarea, {
         target: { value: 'Magnetite medium pump seal flush interruption' },
       });
