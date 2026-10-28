@@ -226,12 +226,15 @@
     var(--arch15, #d4af37) 100%
   );
   background-size: 300% 300%;
+  background-position: 50% 50%;
   mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: gold-shimmer 3s ease-in-out infinite;
-  animation-delay: var(--shimmer-delay, 0s);
+  /* PERF: static at rest. `background-position` animations are non-composited
+     (CPU paint + mask raster every frame); with 250-330 bordered elements per
+     page this dropped frame rates to 10-24 FPS. Shimmer only runs on hover. */
+  animation: none;
   opacity: 0.95;
   pointer-events: none;
   z-index: 25;
@@ -252,7 +255,7 @@
 }
 
 .gold-steel-border:hover::before {
-  animation-duration: 1.5s;
+  animation: gold-shimmer 1.5s ease-in-out infinite;
   opacity: 1;
 }
 
@@ -277,11 +280,17 @@ input.gold-steel-border {
   background-size:
     100% 100%,
     300% 300%;
-  animation: gold-shimmer 3s ease-in-out infinite;
+  background-position: 50% 50%;
+}
+
+input.gold-steel-border:focus {
+  animation: gold-shimmer 1.5s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gold-steel-border::before {
+  .gold-steel-border::before,
+  .gold-steel-border:hover::before,
+  input.gold-steel-border:focus {
     animation: none;
     background-position: 50% 50%;
   }

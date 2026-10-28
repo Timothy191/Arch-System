@@ -3,7 +3,6 @@ import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
-import { prewarmDepartmentCache } from '@/lib/prewarm-cache';
 
 interface DepartmentLayoutProps {
   children: React.ReactNode;
@@ -28,12 +27,6 @@ export default async function DepartmentRootLayout({ children, params }: Departm
   if (!dept) notFound();
 
   const tabs = getDepartmentTabs(department);
-
-  // Pre-warm department cache in background (non-blocking)
-  // This eliminates cache miss latency on first visit
-  prewarmDepartmentCache().catch(() => {
-    // Silently ignore cache prewarm failures - cache will be populated on-demand
-  });
 
   return (
     <>

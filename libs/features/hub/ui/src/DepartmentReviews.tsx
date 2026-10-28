@@ -128,23 +128,25 @@ function SystemStatTickerItem({
   detail,
   icon: Icon,
 }: SystemStatItem) {
+  // PERF: 48 marquee copies are always moving — no backdrop-blur and only the
+  // outer pill carries the gold border (nested borders = 144 extra mask layers).
   return (
-    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 select-none items-center gap-2 whitespace-nowrap rounded-full border border-black/[0.08] bg-white/80 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-colors hover:border-arch-accent-blue/35">
-      <span className="gold-steel-border gold-steel-border-slim inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent-amber/10 text-accent-amber">
+    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 select-none items-center gap-2 whitespace-nowrap rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset transition-colors hover:border-arch-accent-blue/35">
+      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-accent-amber/40 bg-accent-amber/10 text-accent-amber">
         <Icon className="h-2.5 w-2.5 text-accent-amber" aria-hidden="true" />
       </span>
       <span className="font-semibold text-[10.5px] text-arch-text-primary tracking-tight">
         {subsystem}
       </span>
       <span
-        className={`gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full border px-1.5 py-px font-mono font-semibold text-[9.5px] tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
+        className={`inline-flex items-center rounded-full border px-1.5 py-px font-mono font-semibold text-[9.5px] tabular-nums ${BADGE_TONE_CLASSES[badgeTone]}`}
       >
         {metricBadge}
       </span>
       <span className="font-bold font-mono text-accent-amber" aria-hidden="true">
         |
       </span>
-      <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full bg-white/70 px-2 py-px font-mono text-[10.5px] text-arch-text-secondary">
+      <span className="inline-flex items-center rounded-full border border-accent-amber/30 bg-white/70 px-2 py-px font-mono text-[10.5px] text-arch-text-secondary">
         {detail}
       </span>
     </div>

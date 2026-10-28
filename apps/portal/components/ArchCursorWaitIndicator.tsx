@@ -4,6 +4,8 @@ import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+// PERF: `[role="progressbar"]` was removed — static KPI progress bars kept the
+// indicator permanently "busy" on dashboards.
 const WAIT_SELECTOR = [
   '[aria-busy="true"]',
   '[data-loading="true"]',
@@ -11,8 +13,10 @@ const WAIT_SELECTOR = [
   '.cursor-wait',
   '.cursor-progress',
   'button:disabled .animate-spin',
-  '[role="progressbar"]',
 ].join(', ');
+
+/** Delay before re-scanning the document after a click (lets busy states mount). */
+const POST_CLICK_SCAN_DELAY_MS = 60;
 
 /**
  * Renders a bouncing animated Google Antigravity Logo next to the user's
@@ -39,6 +43,10 @@ export function ArchCursorWaitIndicator() {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     let routeTimer: ReturnType<typeof setTimeout> | null = null;
+    let scanTimer: ReturnType<typeof setTimeout> | null = null;
+    // Result of the last full-document scan. Full scans are expensive on large
+    // DOMs, so they run on discrete events only — never on mousemove.
+    let isRootBusy = false;
 
     const clearRouteTimer = () => {
       if (routeTimer !== null) {
@@ -55,23 +63,20 @@ export function ArchCursorWaitIndicator() {
       }, durationMs);
     };
 
-    const checkDomBusy = (target?: EventTarget | null) => {
-      const rootBusy =
+    const scanDocument = () => {
+      isRootBusy =
         document.readyState !== 'complete' ||
         document.documentElement.dataset.cursorWait === 'true' ||
         document.querySelector(WAIT_SELECTOR) !== null;
+      setIsDomBusy(isRootBusy);
+    };
 
-      if (rootBusy) {
-        setIsDomBusy(true);
-        return;
-      }
-
-      if (target instanceof Element && target.closest(WAIT_SELECTOR)) {
-        setIsDomBusy(true);
-        return;
-      }
-
-      setIsDomBusy(false);
+    const scheduleScan = () => {
+      if (scanTimer !== null) clearTimeout(scanTimer);
+      scanTimer = setTimeout(() => {
+        scanTimer = null;
+        scanDocument();
+      }, POST_CLICK_SCAN_DELAY_MS);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -80,7 +85,10 @@ export function ArchCursorWaitIndicator() {
         node.style.transform = `translate3d(${e.clientX + 20}px, ${e.clientY + 6}px, 0)`;
       }
       setIsPointerVisible(true);
-      checkDomBusy(e.target);
+      // Cheap ancestor walk only (O(depth)), not a full-document query.
+      const target = e.target;
+      const isTargetBusy = target instanceof Element && target.closest(WAIT_SELECTOR) !== null;
+      setIsDomBusy(isRootBusy || isTargetBusy);
     };
 
     const handleMouseLeave = () => {
@@ -90,6 +98,7 @@ export function ArchCursorWaitIndicator() {
     const handleDocumentClick = (e: MouseEvent) => {
       const target = e.target;
       if (!(target instanceof Element)) return;
+      scheduleScan();
 
       const anchor = target.closest('a[href]');
       if (anchor instanceof HTMLAnchorElement) {
@@ -116,12 +125,14 @@ export function ArchCursorWaitIndicator() {
 
     const handleFormSubmit = () => {
       startTimedWait(1600);
+      scheduleScan();
     };
 
     const handleCustomWait = (e: Event) => {
       const custom = e as CustomEvent<{ active?: boolean; durationMs?: number }>;
       if (custom.detail?.active === false) {
         clearRouteTimer();
+        isRootBusy = false;
         setIsRoutePending(false);
         setIsDomBusy(false);
       } else {
@@ -130,10 +141,10 @@ export function ArchCursorWaitIndicator() {
     };
 
     const handleReadyStateChange = () => {
-      checkDomBusy();
+      scanDocument();
     };
 
-    checkDomBusy();
+    scanDocument();
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave, { passive: true });
@@ -144,6 +155,7 @@ export function ArchCursorWaitIndicator() {
 
     return () => {
       clearRouteTimer();
+      if (scanTimer !== null) clearTimeout(scanTimer);
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('click', handleDocumentClick);

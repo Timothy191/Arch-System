@@ -71,38 +71,57 @@ function fromPlantTable(supabase: unknown, table: string): UntypedPlantTable {
   return (supabase as { from: (t: string) => UntypedPlantTable }).from(table);
 }
 
-export async function getPlantProcessingWorkspaceData(
-  dateStr?: string
-): Promise<PlantWorkspaceData> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
-  const currentDate = dateStr || new Date().toISOString().split('T')[0]!;
-  let departmentId: string | null = null;
-  let operatorLabel = user?.email?.split('@')[0] || 'Plant Control Operator';
+interface PlantQueryResult {
+  data: unknown[] | null;
+  error: { message: string } | null;
+}
 
-  try {
-    const authEmployee = await getAuthenticatedEmployee();
-    if (authEmployee?.user?.email) {
-      operatorLabel = authEmployee.user.email.split('@')[0] || operatorLabel;
-    }
-  } catch {
-    // Non-fatal fallback for unauthenticated preview/test contexts
-  }
+const EMPTY_QUERY_RESULT: PlantQueryResult = { data: null, error: null };
 
+async function lookupPlantDepartmentId(supabase: ServerSupabaseClient): Promise<string | null> {
   try {
     const { data: deptRow } = await supabase
       .from('departments')
       .select('id')
       .eq('name', 'plant-processing')
       .maybeSingle();
-
-    departmentId = (deptRow as { id?: string } | null)?.id ?? null;
+    return (deptRow as { id?: string } | null)?.id ?? null;
   } catch {
-    departmentId = null;
+    return null;
   }
+}
+
+export async function getPlantProcessingWorkspaceData(
+  dateStr?: string
+): Promise<PlantWorkspaceData> {
+  const supabase = await createServerSupabaseClient();
+  const currentDate = dateStr || new Date().toISOString().split('T')[0]!;
+
+  // PERF: every lookup below is independent. They used to run as a sequential
+  // waterfall (getUser → getAuthenticatedEmployee (getUser again) → departments
+  // → sheets/delays), costing ~4 cross-region round-trips per page switch.
+  const [authEmployee, departmentId, sheetsResult, delaysResult] = await Promise.all([
+    getAuthenticatedEmployee(supabase).catch(() => null),
+    lookupPlantDepartmentId(supabase),
+    Promise.resolve(
+      fromPlantTable(supabase, 'plant_hourly_logs')
+        .select('id, operation_date, shift, module_id, operator_name, rows, updated_at')
+        .order('operation_date', { ascending: false })
+        .limit(10)
+    ).catch((): PlantQueryResult => EMPTY_QUERY_RESULT),
+    Promise.resolve(
+      fromPlantTable(supabase, 'plant_delays')
+        .select(
+          'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
+        )
+        .order('created_at', { ascending: false })
+        .limit(25)
+    ).catch((): PlantQueryResult => EMPTY_QUERY_RESULT),
+  ]);
+
+  const operatorLabel = authEmployee?.user?.email?.split('@')[0] || 'Plant Control Operator';
 
   const defaultDaySheet: PlantHourlySheetRecord = {
     id: `sheet-${currentDate}-day-DMS-MOD-1`,
@@ -145,18 +164,8 @@ export async function getPlantProcessingWorkspaceData(
   const initialDelays: PlantDelayEntry[] = buildInitialPlantDelays(currentDate);
 
   try {
-    const [{ data: dbSheets }, { data: dbDelays }] = await Promise.all([
-      fromPlantTable(supabase, 'plant_hourly_logs')
-        .select('id, operation_date, shift, module_id, operator_name, rows, updated_at')
-        .order('operation_date', { ascending: false })
-        .limit(10),
-      fromPlantTable(supabase, 'plant_delays')
-        .select(
-          'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
-        )
-        .order('created_at', { ascending: false })
-        .limit(25),
-    ]);
+    const dbSheets = sheetsResult.data;
+    const dbDelays = delaysResult.data;
 
     if (dbSheets && dbSheets.length > 0) {
       const persistedSheets: PlantHourlySheetRecord[] = (
@@ -248,10 +257,10 @@ export async function savePlantHourlySheetAction(
   input: SavePlantHourlySheetInput
 ): Promise<{ success: boolean; message: string; savedAt: string }> {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const authContext = await getAuthenticatedEmployee().catch(() => null);
+  // PERF: getAuthenticatedEmployee already verifies the user via auth.getUser();
+  // a separate getUser() call doubled the Auth round-trip on every action.
+  const authContext = await getAuthenticatedEmployee(supabase).catch(() => null);
+  const user = authContext?.user ?? null;
 
   if (!user || !authContext?.employee) {
     return {
@@ -351,10 +360,10 @@ export async function logPlantDelayAction(
   input: LogPlantDelayInput
 ): Promise<{ success: boolean; entry: PlantDelayEntry; message: string; isUpdate: boolean }> {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const authContext = await getAuthenticatedEmployee().catch(() => null);
+  // PERF: getAuthenticatedEmployee already verifies the user via auth.getUser();
+  // a separate getUser() call doubled the Auth round-trip on every action.
+  const authContext = await getAuthenticatedEmployee(supabase).catch(() => null);
+  const user = authContext?.user ?? null;
 
   if (!user || !authContext?.employee) {
     return {
@@ -470,10 +479,10 @@ export async function quickAddPlantEquipmentAction(
   }
 
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const authContext = await getAuthenticatedEmployee().catch(() => null);
+  // PERF: getAuthenticatedEmployee already verifies the user via auth.getUser();
+  // a separate getUser() call doubled the Auth round-trip on every action.
+  const authContext = await getAuthenticatedEmployee(supabase).catch(() => null);
+  const user = authContext?.user ?? null;
 
   if (!user || !authContext?.employee) {
     return {

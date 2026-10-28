@@ -385,6 +385,8 @@ describe('HeroRotator', () => {
 
     render(<HeroRotator {...baseProps} departments={[plantInventoryDept]} />);
     expect(screen.getByText('Plant Inventory')).toBeInTheDocument();
+    // Only the active slide's KPI strip is mounted — rotate to the Plant Inventory slide.
+    fireEvent.click(screen.getByRole('button', { name: 'Next highlight' }));
     expect(screen.getByTestId('hero-kpi-strip-plant-inventory')).toBeInTheDocument();
     expect(screen.getByText('7 Tracked')).toBeInTheDocument();
     expect(screen.getByText('87.5%')).toBeInTheDocument();

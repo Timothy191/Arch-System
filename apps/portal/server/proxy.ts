@@ -301,7 +301,8 @@ async function resolveEmployeeSession(
       await writeSession({ userId, employee }).catch(() => undefined);
     }
   } else {
-    await touchSession(userId).catch(() => undefined);
+    // Sliding expiry is best-effort and already throttled; never block routing on it.
+    void touchSession(userId).catch(() => undefined);
   }
 
   return employee;
@@ -339,14 +340,16 @@ async function enforceRouteAccess(
 
   // Check department isolation
   if (topSegment && DEPARTMENT_ROUTES.includes(topSegment)) {
-    const isAdmin = userRole === 'admin';
+    // PERF: admins can access every department, so the slug → UUID lookup
+    // (a Redis/DB round-trip on every navigation) is unnecessary for them.
+    if (userRole === 'admin') return null;
 
     const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
     if (!deptUuid) {
       return redirectWithError(request, 'unknown_department', client.response);
     }
 
-    const hasAccess = isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
+    const hasAccess = userDept === deptUuid || accessible.includes(deptUuid);
     if (!hasAccess) {
       return redirectWithError(request, 'unauthorized_department', client.response);
     }

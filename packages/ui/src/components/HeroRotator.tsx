@@ -155,6 +155,10 @@ function HeroSlide({
     }
   };
 
+  // PERF: far slides are fully transparent; skip mounting their heavy content
+  // (SVG glow filters, scanlines, pulses, backdrop blurs) until they rotate in.
+  const isInVisibleSlot = isCenter || isLeft1 || isLeft2 || isRight1 || isRight2;
+
   return (
     <div
       role="group"
@@ -180,25 +184,27 @@ function HeroSlide({
         ...maskStyle,
       }}
     >
-      <div
-        className={cn(
-          'relative h-full w-full select-none overflow-hidden rounded-2xl',
-          'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
-          'transition-[box-shadow,transform] duration-500 ease-mac-decelerate',
-          isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
-        )}
-      >
-        <HeroCardContent
-          panel={panel}
-          idx={idx}
-          isActive={isCenter}
-          failedImages={failedImages}
-          onImageError={onImageError}
-          incidentCount={incidentCount}
-          breakdownCount={breakdownCount}
-          offlineMachineCount={offlineMachineCount}
-        />
-      </div>
+      {isInVisibleSlot && (
+        <div
+          className={cn(
+            'relative h-full w-full select-none overflow-hidden rounded-2xl',
+            'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
+            'transition-[box-shadow,transform] duration-500 ease-mac-decelerate',
+            isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
+          )}
+        >
+          <HeroCardContent
+            panel={panel}
+            idx={idx}
+            isActive={isCenter}
+            failedImages={failedImages}
+            onImageError={onImageError}
+            incidentCount={incidentCount}
+            breakdownCount={breakdownCount}
+            offlineMachineCount={offlineMachineCount}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -381,19 +387,17 @@ export function HeroRotator({
         )}
       </div>
 
-      {/* Slim Operational Subsystem KPI Banner directly under the Hero Card */}
-      {panels.length > 0 && (
+      {/* Slim Operational Subsystem KPI Banner directly under the Hero Card.
+          PERF: only the active strip is mounted (previously all strips rendered hidden). */}
+      {panels[activeIndex] && (
         <div
           className="mx-auto mt-3.5 w-[92%] max-w-[1060px] sm:w-[88%] lg:w-[82%]"
           data-testid="hero-kpi-slim-banner"
         >
-          {panels.map((p, idx) => (
-            <HeroOperationalKpiStrip
-              key={p.id}
-              panelName={p.name}
-              className={idx === activeIndex ? '' : 'hidden'}
-            />
-          ))}
+          <HeroOperationalKpiStrip
+            key={panels[activeIndex].id}
+            panelName={panels[activeIndex].name}
+          />
         </div>
       )}
 
