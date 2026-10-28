@@ -28,3 +28,13 @@ Provide specialized error subclasses under `APIError` to wrap raw browser `TypeE
 ### Changes Made
 
 1. **[src/index.ts](file:///home/tim/Documents/Arch-System/packages/errors/src/index.ts)**: Added `FetchTimeoutError` (504), `NetworkError` (503), and type guards `isFetchTimeoutError` and `isNetworkError`.
+
+## 2026-10-28T07:03:00+02:00: Align APIError & Default Error Messages with Portal Wrapper
+
+### Purpose
+
+Ensure `@repo/errors` and `apps/portal/lib/errors/error-classes.ts` share a unified `AppError` hierarchy (`cause?: unknown`, default messages on `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, and default `statusCode: 500` on `APIError` without `any` casts).
+
+### Changes Made
+
+1. **[src/index.ts](file:///home/tim/Fork/Arch-System/packages/errors/src/index.ts)**: Widened `cause` to `unknown`, added default messages to `AuthError`, `ForbiddenError`, `NotFoundError`, and `ConflictError`, and updated `APIError` to default `statusCode` to `500` and eliminate `any` casts.
