@@ -984,3 +984,5 @@ AIAssistant chat.
 - 2026-10-27T16:29:46Z — perf: add Redis circuit breaker, HTTP SWR cache headers, Vercel Pro route tuning, plant hourly 05-17, logger signature fixes
 
 - **2026-10-28T07:03:00+02:00** — Re-exported canonical `@repo/errors` hierarchy from `apps/portal/lib/errors/error-classes.ts` and aligned the `APIError` (`isResponseLike`), `ConflictError`, and `ForbiddenError` wrappers so cross-package `instanceof` checks and all portal/package unit tests pass.
+
+- **2026-10-28T07:19:30+02:00** — Generated matching Arch OS twilight + cyan/gold SCADA `1280x720` `.jpg` posters and 6-second 24fps H.264 `.mp4` video loops across all Hero cards (`overview`, `admin`, `access-control`, `production`, `drilling`, `plant-inventory`, `engineering`, `control-room`, `database`) using `plant-processing.mp4` as the template.
