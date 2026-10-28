@@ -16,17 +16,14 @@ export default async function DailyLogPage({
   if (department === 'plant-inventory') {
     return <PlantInventoryWorkspaceClient mode="inventory-list" today={today} />;
   }
-  const { data: machines } = await supabase
-    .from('machines')
-    .select('id, name, machine_type')
-    .eq('active', true)
-    .order('name');
-
-  const { data: todayLogs } = await supabase
-    .from('daily_logs')
-    .select('id, shift, notes')
-    .eq('department_id', deptId)
-    .eq('log_date', today);
+  const [{ data: machines }, { data: todayLogs }] = await Promise.all([
+    supabase.from('machines').select('id, name, machine_type').eq('active', true).order('name'),
+    supabase
+      .from('daily_logs')
+      .select('id, shift, notes')
+      .eq('department_id', deptId)
+      .eq('log_date', today),
+  ]);
 
   const existingShifts = (todayLogs || []).map((l) => l.shift as 'day' | 'night');
   const allShiftsLogged = existingShifts.length >= 2;

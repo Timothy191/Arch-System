@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-28] - System Stability & Responsiveness Optimization Pass (Server Waterfalls, JWKS Auth, Proxy Static UUID Fast-Path & Client Route Switching)
+
+- **Action:**
+  - Optimized `getAuthenticatedEmployee` (`packages/supabase/src/auth.ts`) to verify session JWT claims locally via `client.auth.getClaims()` (<1ms) before falling back to `client.auth.getUser()`, lowered `CACHE_TIMEOUT_MS` from 500ms to 150ms, and made sliding session `touchSession()` non-blocking.
+  - Added a 0ms static UUID fast-path (`STATIC_DEPT_UUIDS`) in `enforceRouteAccess` (`apps/portal/server/proxy.ts`) so non-admin department navigations bypass Redis/database UUID lookups when the user's primary or accessible departments match canonical static UUIDs.
+  - Deduplicated concurrent per-request `assertAccessControlRole()` and `get_access_control_metrics_jsonb` RPC calls on `/access-control` via `React.cache()`, parallelized auth + RPC calls in `shift-compilation/actions.ts`, migrated `drilling-operations` and `machine-telemetry` pages to `getDepartmentContext` + `getUserSafely`, and parallelized sequential queries in `breakdowns`, `daily-log`, and `hub/executive`.
+  - Removed unused `usePathname()` from `RouteBackground.tsx`, guarded `DepartmentLayout` and `overview/page.tsx` mousemove handlers when the sidebar is already open or pinned, synced `MacMenuBar` pathname on `arch:active-module-change`, and added `loading.tsx` streaming boundaries for `/[department]` and `/control-room`.
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-19] - System Tray Health Contract Alignment, Shift Compilation UI Cleanup & Root Consolidation
 
 - **Action:**

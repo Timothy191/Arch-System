@@ -1,6 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
 type NetworkInformation = {
@@ -52,7 +51,6 @@ function RouteBackgroundPoster() {
  * and mobile (720x1280) viewports while respecting accessibility and network constraints.
  */
 function RouteBackgroundInner() {
-  const pathname = usePathname();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -108,7 +106,7 @@ function RouteBackgroundInner() {
       clearTimeout(timer);
       mobileQuery.removeEventListener('change', handleViewportChange);
     };
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     if (videoRef.current && shouldLoadVideo) {

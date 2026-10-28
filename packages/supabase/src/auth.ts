@@ -24,13 +24,44 @@ export interface AuthenticatedPrincipal {
 }
 
 export const EMPLOYEE_CACHE_KEY = employeeCacheKey;
-const CACHE_TIMEOUT_MS = 500;
+const CACHE_TIMEOUT_MS = 150;
+
+async function resolveSessionUser(client: SupabaseClient): Promise<User | null> {
+  if (typeof client.auth.getClaims === 'function') {
+    try {
+      const claimsResult = await client.auth.getClaims();
+      const claims = claimsResult?.data?.claims;
+      if (claims?.sub) {
+        return {
+          id: claims.sub as string,
+          email: claims.email as string | undefined,
+          app_metadata: (claims.app_metadata as Record<string, unknown>) ?? {},
+          user_metadata: (claims.user_metadata as Record<string, unknown>) ?? {},
+          aud: (claims.aud as string) ?? 'authenticated',
+          created_at: '',
+        } as User;
+      }
+      if (claimsResult?.error) {
+        return null;
+      }
+    } catch {
+      // Fall back to getUser() if getClaims throws
+    }
+  }
+
+  if (typeof client.auth.getUser === 'function') {
+    const { data: userData } = await client.auth.getUser();
+    return userData?.user ?? null;
+  }
+
+  return null;
+}
 
 /**
  * Resolve the current authenticated user together with their authoritative
  * employee row (id, role, primary department, accessible departments).
  *
- * Session: reads the fenced session record from Redis with a 500 ms budget and
+ * Session: reads the fenced session record from Redis with a 150 ms budget and
  * repopulates it from the database on a miss. A record written under an older
  * privilege version reads as a miss, so a demotion or logout takes effect on
  * the next request instead of after the TTL.
@@ -52,8 +83,7 @@ export async function getAuthenticatedEmployee(
 ): Promise<AuthenticatedPrincipal | null> {
   const client = supabase ?? (await createServerSupabaseClient());
 
-  const { data: userData } = await client.auth.getUser();
-  const user = userData?.user ?? null;
+  const user = await resolveSessionUser(client);
   if (!user) return null;
 
   let employee: EmployeeSummary | null = null;
@@ -70,18 +100,18 @@ export async function getAuthenticatedEmployee(
   // Older cache entries (written before `id` was included) lack the `id`
   // field. Treat as a miss so audit-log writes always have a valid id.
   if (!employee?.id) {
-    const { data } = await client
+    const { data: row } = await client
       .from('employees')
       .select('id, role, department_id, accessible_departments')
       .eq('auth_id', user.id)
       .single();
-    employee = (data as EmployeeSummary | null) ?? null;
+    employee = (row as EmployeeSummary | null) ?? null;
     if (employee) {
       await writeSession({ userId: user.id, employee }).catch(() => undefined);
     }
   } else {
     // Actively used sessions slide forward instead of expiring mid-shift.
-    await touchSession(user.id).catch(() => undefined);
+    void touchSession(user.id).catch(() => undefined);
   }
 
   return { user, employee };

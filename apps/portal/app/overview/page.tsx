@@ -109,17 +109,17 @@ export default function OverviewPage() {
   }, []);
 
   const openSidebar = useCallback(() => {
-    setIsOpen(true);
+    setIsOpen((prev) => (prev ? prev : true));
   }, []);
 
   const handleContainerMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (isPinned) return;
+      if (isPinned || isOpen) return;
       if (e.clientX <= 36) {
         openSidebar();
       }
     },
-    [isPinned, openSidebar]
+    [isPinned, isOpen, openSidebar]
   );
 
   const activeNavMeta =

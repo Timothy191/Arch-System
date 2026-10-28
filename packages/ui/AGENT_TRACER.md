@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-28T14:05:00+02:00 - Guard DepartmentLayout MouseMove & Sync MacMenuBar Route State
+
+- **Purpose**: Eliminate redundant React state updates on cursor movement inside `DepartmentLayout` when the sidebar is already open or pinned, and immediately sync `MacMenuBar` pathname state when `arch:active-module-change` fires during client navigation.
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Guarded `openSidebar` with `setIsOpen((prev) => (prev ? prev : true))` and early-returned from `handleContainerMouseMove` when `isPinned || isOpen`.
+  - `packages/ui/src/components/MacMenuBar.tsx`: Updated `handleModuleChange` to sync `setPathname(window.location.pathname)`.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="DepartmentLayout"` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-28T07:45:00+02:00 - Add WhatsApp Report Subtab Under PDF Report in DepartmentLayout Sidebar
 
 - **Purpose**: Add `WhatsApp Report` (`data-testid="reports-subtab-whatsapp-report"`, `href="${basePath}/reports?tab=whatsapp-report"`) directly beneath `PDF Report` (`data-testid="reports-subtab-pdf-report"`) under the `Reports` sidebar group in `DepartmentLayout.tsx`.

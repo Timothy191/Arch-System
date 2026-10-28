@@ -2,6 +2,15 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 
 const deptCache = new Map<string, string>();
 
+/**
+ * Canonical department UUIDs from the production Supabase `departments` table.
+ * Used as a 0ms fast-path in Edge/Node route access checks when an employee's
+ * `department_id` or `accessible_departments` matches one of these IDs.
+ */
+export const STATIC_DEPT_UUIDS: Readonly<Record<string, string>> = {
+  'control-room': '0f160914-d92e-45d9-9547-d3d1a11ef6a1',
+};
+
 /** Virtual modules that fall back to the `production` department row. */
 const PRODUCTION_FALLBACK_SLUGS = new Set([
   'plant-processing',

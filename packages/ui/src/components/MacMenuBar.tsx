@@ -54,6 +54,7 @@ export function MacMenuBar({
       setSystemMenuOpen(false);
     };
     const handleModuleChange = (e: Event) => {
+      setPathname(window.location.pathname);
       const detail = (e as CustomEvent<{ name?: string; title?: string }>).detail;
       if (detail?.name && detail?.title) {
         setFocusedModule({ name: detail.name, title: detail.title });

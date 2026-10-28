@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@repo/supabase/server';
+import { getUserSafely } from '@repo/supabase/server';
 import { Button } from '@repo/ui/components/ui/button';
 import {
   Table,
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getDepartmentContext } from '~/lib/dept-context';
 
 interface TelemetryRecord {
   period: string;
@@ -66,67 +67,50 @@ async function getTelemetryData(selectedMachineId?: string): Promise<{
   drills: { id: string; name: string }[];
   monthlySummary: DrillMonthlySummary[];
 }> {
-  const supabase = await createServerSupabaseClient();
+  const { deptId, supabase } = await getDepartmentContext({
+    department: 'drilling',
+  });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserSafely(supabase);
   if (!user) {
     redirect('/login');
   }
 
-  // Get drilling department ID
-  const { data: dept } = await supabase
-    .from('departments')
-    .select('id')
-    .eq('name', 'drilling')
-    .single();
-
-  if (!dept) {
-    return {
-      currentMonth: '',
-      telemetry: [],
-      archives: [],
-      drills: [],
-      monthlySummary: [],
-    };
-  }
-
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
 
-  // Parallel fetch: drill rigs, telemetry, archives, machine name map, monthly summary
+  // Parallel fetch: all drill rigs (active + inactive in 1 query), telemetry, archives, monthly summary
   const [
-    { data: drills },
+    { data: allDrillMachines },
     { data: telemetry },
     { data: archives },
-    { data: allMachines },
     { data: monthlySummary },
   ] = await Promise.all([
     supabase
       .from('machines')
-      .select('id, name')
+      .select('id, name, active')
       .eq('machine_type', 'Drill Rig')
-      .eq('active', true)
       .order('name'),
     supabase.rpc('get_telemetry_summary', {
-      p_department_id: dept.id,
+      p_department_id: deptId,
       p_machine_id: selectedMachineId || null,
       p_granularity: 'day',
     }),
     supabase
       .from('machine_telemetry_archive')
       .select('id, year_month, archived_at, record_count, machine_id')
-      .eq('department_id', dept.id)
+      .eq('department_id', deptId)
       .order('archived_at', { ascending: false })
       .limit(12),
-    supabase.from('machines').select('id, name').eq('machine_type', 'Drill Rig'),
     supabase.rpc('get_drill_monthly_summary', {
-      p_department_id: dept.id,
+      p_department_id: deptId,
       p_year_month: currentMonth,
     }),
   ]);
 
-  const machineNameMap = new Map((allMachines || []).map((m) => [m.id, m.name]));
+  const drills = (allDrillMachines || [])
+    .filter((m) => m.active)
+    .map((m) => ({ id: m.id, name: m.name }));
+  const machineNameMap = new Map((allDrillMachines || []).map((m) => [m.id, m.name]));
 
   const transformedArchives: ArchivedMonth[] = (archives || []).map((a) => ({
     id: a.id,

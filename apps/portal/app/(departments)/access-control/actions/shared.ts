@@ -1,6 +1,17 @@
-import { getAuthenticatedEmployee } from '@repo/supabase';
+import {
+  type AuthenticatedPrincipal,
+  type EmployeeSummary,
+  getAuthenticatedEmployee,
+} from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { cache } from 'react';
 import { AuthError, ForbiddenError } from '@/lib/errors/error-classes';
+
+const getCachedAccessControlSession = cache(async () => {
+  const supabase = await createServerSupabaseClient();
+  const principal = await getAuthenticatedEmployee(supabase);
+  return { supabase, principal };
+});
 
 /**
  * Shared auth helper for access-control server actions.
@@ -8,11 +19,15 @@ import { AuthError, ForbiddenError } from '@/lib/errors/error-classes';
  */
 export async function assertAccessControlRole(options?: { requireWrite?: boolean }): Promise<{
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
-  user: any;
-  employee: any;
+  user: AuthenticatedPrincipal['user'];
+  employee: EmployeeSummary;
 }> {
-  const supabase = await createServerSupabaseClient();
-  const principal = await getAuthenticatedEmployee(supabase);
+  const { supabase, principal } = options?.requireWrite
+    ? {
+        supabase: await createServerSupabaseClient(),
+        principal: await getAuthenticatedEmployee(),
+      }
+    : await getCachedAccessControlSession();
 
   if (options?.requireWrite) {
     if (!principal?.employee) {

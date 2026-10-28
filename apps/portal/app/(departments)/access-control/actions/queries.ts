@@ -2,10 +2,19 @@
 
 import { CacheCategory } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { cache } from 'react';
 import { withCache } from '@/lib/cache-utils';
 import { DatabaseError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
 import { assertAccessControlRole } from './shared';
+
+const fetchAccessControlMetricsRpc = cache(async (deptId: string) => {
+  const { supabase } = await assertAccessControlRole();
+  const rpcResult = await supabase.rpc('get_access_control_metrics_jsonb', {
+    p_department_id: deptId,
+  });
+  return { supabase, data: rpcResult.data, error: rpcResult.error };
+});
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -140,11 +149,7 @@ const EMPTY_METRICS_FALLBACK: MetricsFallback = {
 export async function getAccessControlMetrics(deptId: string): Promise<AccessControlMetrics> {
   return withCache(
     async () => {
-      const { supabase } = await assertAccessControlRole();
-
-      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
-        p_department_id: deptId,
-      });
+      const { supabase, data, error } = await fetchAccessControlMetricsRpc(deptId);
 
       let fallback: MetricsFallback = EMPTY_METRICS_FALLBACK;
 
@@ -291,11 +296,7 @@ export async function getRecentAccessActivity(
 export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeStatus[]> {
   return withCache(
     async () => {
-      const { supabase } = await assertAccessControlRole();
-
-      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
-        p_department_id: deptId,
-      });
+      const { data, error } = await fetchAccessControlMetricsRpc(deptId);
 
       if (error) {
         logError(
@@ -408,11 +409,7 @@ export async function getBadgeStatusDistribution(
 ): Promise<BadgeStatusDistribution[]> {
   return withCache(
     async () => {
-      const { supabase } = await assertAccessControlRole();
-
-      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
-        p_department_id: deptId,
-      });
+      const { supabase, data, error } = await fetchAccessControlMetricsRpc(deptId);
 
       let active = 0;
       let expiring_soon = 0;

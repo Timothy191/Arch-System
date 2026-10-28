@@ -8,6 +8,7 @@ import {
 } from '@repo/redis/session';
 import { createMiddlewareClient } from '@repo/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
+import { STATIC_DEPT_UUIDS } from '@/lib/dept-registry';
 import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 type MiddlewareClient = Awaited<ReturnType<typeof createMiddlewareClient>>;
@@ -343,6 +344,13 @@ async function enforceRouteAccess(
     // PERF: admins can access every department, so the slug → UUID lookup
     // (a Redis/DB round-trip on every navigation) is unnecessary for them.
     if (userRole === 'admin') return null;
+
+    // PERF: Fast-path static department UUID match (0ms, zero network round-trips)
+    // when the user's primary or accessible departments match the canonical static UUID.
+    const staticUuid = STATIC_DEPT_UUIDS[topSegment];
+    if (staticUuid && (userDept === staticUuid || accessible.includes(staticUuid))) {
+      return null;
+    }
 
     const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
     if (!deptUuid) {

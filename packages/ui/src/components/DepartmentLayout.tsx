@@ -133,7 +133,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       clearTimeout(collapseTimerRef.current);
       collapseTimerRef.current = null;
     }
-    setIsOpen(true);
+    setIsOpen((prev) => (prev ? prev : true));
   }, []);
 
   const closeSidebarWithDelay = useCallback(
@@ -163,13 +163,13 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
   // Global mousemove proximity detection near left edge
   const handleContainerMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (isPinned) return;
+      if (isPinned || isOpen) return;
       // If cursor is close enough to the left edge (within 36px), auto-reveal
       if (e.clientX <= 36) {
         openSidebar();
       }
     },
-    [isPinned, openSidebar]
+    [isPinned, isOpen, openSidebar]
   );
 
   return (

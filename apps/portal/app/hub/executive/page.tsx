@@ -193,28 +193,26 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
 }
 
 export default async function ExecutiveDashboardPage() {
-  const supabase = await createServerSupabaseClient();
+  const [supabase, db, cookieStore] = await Promise.all([
+    createServerSupabaseClient(),
+    createReadReplicaClient(),
+    cookies(),
+  ]);
   const user = await getUserSafely(supabase);
 
   if (!user?.id) {
     redirect('/login');
   }
 
-  // Gate: admin/manager only — query role from read-replica
-  const db = await createReadReplicaClient();
-  const { data: employee } = await db
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single();
+  const cookieList = cookieStore.getAll();
+  const [{ data: employee }, executiveMetrics] = await Promise.all([
+    db.from('employees').select('role').eq('auth_id', user.id).single(),
+    getExecutiveData(cookieList),
+  ]);
 
   if (employee?.role !== 'admin' && employee?.role !== 'manager') {
     redirect('/');
   }
-
-  const cookieStore = await cookies();
-  const cookieList = cookieStore.getAll();
-  const data = await getExecutiveData(cookieList);
 
   const {
     today,
@@ -235,7 +233,7 @@ export default async function ExecutiveDashboardPage() {
     openIncidents,
     activeEmployees,
     chartData,
-  } = data;
+  } = executiveMetrics;
 
   const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES.red!;
   const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? 'red';

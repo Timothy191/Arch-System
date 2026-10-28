@@ -28,19 +28,20 @@ export async function getUnifiedShiftReport(
   shiftType: 'day' | 'night'
 ): Promise<{ data?: UnifiedShiftReport; error?: string }> {
   try {
-    const principal = await getAuthenticatedEmployee();
+    const supabase = await createServerSupabaseClient();
+    const [principal, { data: rpcPayload, error }] = await Promise.all([
+      getAuthenticatedEmployee(supabase),
+      supabase.rpc('get_unified_shift_compilation', {
+        p_department_id: departmentId,
+        p_shift_date: shiftDate,
+        p_shift_type: shiftType,
+      }),
+    ]);
     if (!principal) {
       throw new AuthError('Unauthorized: valid session required', {
         context: { operation: 'getUnifiedShiftReport' },
       });
     }
-
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.rpc('get_unified_shift_compilation', {
-      p_department_id: departmentId,
-      p_shift_date: shiftDate,
-      p_shift_type: shiftType,
-    });
 
     if (error) {
       serverLogger.error({
@@ -51,7 +52,7 @@ export async function getUnifiedShiftReport(
       return { error: error.message };
     }
 
-    const parsed = unifiedShiftReportSchema.safeParse(data);
+    const parsed = unifiedShiftReportSchema.safeParse(rpcPayload);
     if (!parsed.success) {
       serverLogger.error({
         err: new Error('Failed to validate shift report data structure'),
@@ -75,19 +76,20 @@ export async function getMultiSiteShiftReport(
   shiftType: 'day' | 'night'
 ): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
   try {
-    const principal = await getAuthenticatedEmployee();
+    const supabase = await createServerSupabaseClient();
+    const [principal, { data: rpcPayload, error }] = await Promise.all([
+      getAuthenticatedEmployee(supabase),
+      supabase.rpc('get_multi_site_shift_compilation', {
+        p_department_id: departmentId,
+        p_shift_date: shiftDate,
+        p_shift_type: shiftType,
+      }),
+    ]);
     if (!principal) {
       throw new AuthError('Unauthorized: valid session required', {
         context: { operation: 'getMultiSiteShiftReport' },
       });
     }
-
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.rpc('get_multi_site_shift_compilation', {
-      p_department_id: departmentId,
-      p_shift_date: shiftDate,
-      p_shift_type: shiftType,
-    });
 
     if (error) {
       serverLogger.error({
@@ -98,7 +100,7 @@ export async function getMultiSiteShiftReport(
       return { error: error.message };
     }
 
-    const parsed = multiSiteShiftReportSchema.safeParse(data);
+    const parsed = multiSiteShiftReportSchema.safeParse(rpcPayload);
     if (!parsed.success) {
       serverLogger.error({
         err: new Error('Failed to validate multi-site shift report data structure'),

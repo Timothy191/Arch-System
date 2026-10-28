@@ -1,25 +1,14 @@
-import { createServerSupabaseClient } from '@repo/supabase/server';
-import { getOperationalToday } from '@repo/utils';
+import { getUserSafely } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
+import { getDepartmentContext } from '~/lib/dept-context';
 import { DrillingOperationsTable, type DrillOpRow } from './DrillingOperationsTable';
 
 async function getDrillingOpsData() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { deptId, supabase, today } = await getDepartmentContext({
+    department: 'drilling',
+  });
+  const user = await getUserSafely(supabase);
   if (!user) redirect('/login');
-
-  const { data: dept } = await supabase
-    .from('departments')
-    .select('id')
-    .eq('name', 'drilling')
-    .single();
-  if (!dept) {
-    return { drills: [], ops: [] as DrillOpRow[], operators: [], deptId: '' };
-  }
-
-  const today = getOperationalToday();
 
   const [{ data: drills }, { data: drillOps }, { data: employees }, { data: fleetOperators }] =
     await Promise.all([
@@ -34,12 +23,12 @@ async function getDrillingOpsData() {
         .select(
           'id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, holes, meters_drilled, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, non_productional_delays, production_delays, engineering_delays, comments, notes, status'
         )
-        .eq('department_id', dept.id)
+        .eq('department_id', deptId)
         .eq('operation_date', today),
       supabase
         .from('employees')
         .select('id, full_name')
-        .eq('department_id', dept.id)
+        .eq('department_id', deptId)
         .order('full_name'),
       supabase
         .from('operators')
@@ -161,7 +150,7 @@ async function getDrillingOpsData() {
     drills: drills ?? [],
     ops: Array.from(mergedMap.values()),
     operators: operators ?? [],
-    deptId: dept.id,
+    deptId,
   };
 }
 
