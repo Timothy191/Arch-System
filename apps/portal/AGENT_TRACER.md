@@ -1,3 +1,11 @@
+## 2026-10-29T11:02:00+02:00: Merge PR #194 — Single-Pass Horizon Metric Aggregation in `AlertPanel`
+
+- **Phase 1 (Comprehension)**: Review, verify, and merge open PR #194 (`⚡ Bolt: single-pass horizon metric aggregation in AlertPanel`).
+- **Phase 2 (Evidence)**: Inspected `apps/portal/features/departments/components/control-room/AlertPanel.tsx` and PR #194 (`bcfdce8`).
+- **Phase 3 (Design)**: Replaced multi-pass `.filter()` + `.reduce()` chains across `shift`, `daily`, and `monthly` horizons in `AlertPanel.tsx` with a single-pass `RawAccumulator` (`accumulateLoad`, `finalizeMetrics`) and scalar `countUnderperformingMetrics` counter while extracting named constants (`DEFAULT_BIN_FACTOR_BCM`, `SMR_DECIMAL_FACTOR`).
+- **Phase 4 (Criticism)**: Verified all existing `AlertPanel.test.tsx` tests pass (`100% PASS`).
+- **Phase 5 (Contract)**: Modified `apps/portal/features/departments/components/control-room/AlertPanel.tsx`.
+
 ## 2026-10-29T10:38:00+02:00: Plant & Processing Hourly Sheet (`/plant-processing/hourly-sheet`) Material Options (`4#Lower`, `2#Lower`, `2#Upper`, `5#Seam`)
 
 - **Phase 1 (Comprehension)**: Address design feedback on `select#circuit-unit-header-material` (`/plant-processing/hourly-sheet`): add `4#Lower`, `2#Lower`, `2#Upper`, and `5#Seam` to all Circuit & Unit material selectors.

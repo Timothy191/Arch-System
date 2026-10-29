@@ -40,57 +40,50 @@ const ZERO_ACTUALS: Record<TargetHorizon, ActualMetrics> = {
 
 const COAL_DENSITY_TONNES_PER_BCM = 1.45;
 const WASTE_DENSITY_TONNES_PER_BCM = 2.1;
+const DEFAULT_BIN_FACTOR_BCM = 25;
+const SMR_DECIMAL_FACTOR = 10;
 
-function aggregateHorizonMetrics(
-  loadRows: Array<{
-    total_loads: number | null;
-    material_type: string | null;
-    machine_id?: string | null;
-  }>,
-  opRows: Array<{ hours_worked: number | null }>,
-  binFactorByMachine: Map<string, number>
-): ActualMetrics {
-  let loads = 0;
-  let coalBcm = 0;
-  let wasteBcm = 0;
+interface RawAccumulator {
+  loads: number;
+  coalBcm: number;
+  wasteBcm: number;
+  smrHours: number;
+}
 
-  for (const row of loadRows) {
-    const count = row.total_loads || 0;
-    if (count <= 0) continue;
-    loads += count;
-    const bf = (row.machine_id && binFactorByMachine.get(row.machine_id)) || 25;
-    const bcm = count * bf;
-    const mat = (row.material_type || '').toLowerCase();
-    if (mat.includes('coal')) {
-      coalBcm += bcm;
-    } else {
-      wasteBcm += bcm;
-    }
-  }
-
-  const smrHours = opRows.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
-
+function finalizeMetrics(acc: RawAccumulator): ActualMetrics {
   return {
-    loads,
-    coalTonnes: Math.round(coalBcm * COAL_DENSITY_TONNES_PER_BCM),
-    wasteTonnes: Math.round(wasteBcm * WASTE_DENSITY_TONNES_PER_BCM),
-    volumeBcm: Math.round(coalBcm + wasteBcm),
-    smrHours: Math.round(smrHours * 10) / 10,
+    loads: acc.loads,
+    coalTonnes: Math.round(acc.coalBcm * COAL_DENSITY_TONNES_PER_BCM),
+    wasteTonnes: Math.round(acc.wasteBcm * WASTE_DENSITY_TONNES_PER_BCM),
+    volumeBcm: Math.round(acc.coalBcm + acc.wasteBcm),
+    smrHours: Math.round(acc.smrHours * SMR_DECIMAL_FACTOR) / SMR_DECIMAL_FACTOR,
   };
 }
 
+function accumulateLoad(
+  acc: RawAccumulator,
+  payload: { count: number; bcm: number; isCoal: boolean }
+) {
+  acc.loads += payload.count;
+  if (payload.isCoal) {
+    acc.coalBcm += payload.bcm;
+    return;
+  }
+  acc.wasteBcm += payload.bcm;
+}
+
+// Single-pass metric comparison counter without temporary array allocations
 function countUnderperformingMetrics(
   actual: ActualMetrics,
   target: OperationalTargetWindow
 ): number {
-  const pairs: Array<[number, number]> = [
-    [actual.loads, target.loadsTarget],
-    [actual.coalTonnes, target.coalTonnesTarget],
-    [actual.wasteTonnes, target.wasteTonnesTarget],
-    [actual.volumeBcm, target.volumeBcmTarget],
-    [actual.smrHours, target.smrHoursTarget],
-  ];
-  return pairs.filter(([act, tgt]) => act < tgt).length;
+  let count = 0;
+  if (actual.loads < target.loadsTarget) count++;
+  if (actual.coalTonnes < target.coalTonnesTarget) count++;
+  if (actual.wasteTonnes < target.wasteTonnesTarget) count++;
+  if (actual.volumeBcm < target.volumeBcmTarget) count++;
+  if (actual.smrHours < target.smrHoursTarget) count++;
+  return count;
 }
 
 export function AlertPanel({ departmentId }: { departmentId: string }) {
@@ -175,16 +168,50 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           shift_date?: string | null;
         }>;
 
-        const dailyLoads = monthLoads.filter((r) => !r.load_date || r.load_date === today);
-        const dailyOps = monthOps.filter((r) => !r.shift_date || r.shift_date === today);
+        // Single-pass O(N) aggregation across shift, daily, and monthly horizons
+        // to avoid multiple intermediate .filter() allocations and redundant iterations.
+        const shiftAcc: RawAccumulator = { loads: 0, coalBcm: 0, wasteBcm: 0, smrHours: 0 };
+        const dailyAcc: RawAccumulator = { loads: 0, coalBcm: 0, wasteBcm: 0, smrHours: 0 };
+        const monthlyAcc: RawAccumulator = { loads: 0, coalBcm: 0, wasteBcm: 0, smrHours: 0 };
 
-        const shiftLoads = dailyLoads.filter((r) => !r.shift || r.shift === currentShift);
-        const shiftOps = dailyOps.filter((r) => !r.shift || r.shift === currentShift);
+        for (const r of monthLoads) {
+          const count = r.total_loads || 0;
+          if (count <= 0) continue;
+
+          const bf =
+            (r.machine_id && binFactorByMachine.get(r.machine_id)) || DEFAULT_BIN_FACTOR_BCM;
+          const bcm = count * bf;
+          const isCoal = (r.material_type || '').toLowerCase().includes('coal');
+          const loadEntry = { count, bcm, isCoal };
+
+          accumulateLoad(monthlyAcc, loadEntry);
+          const isDaily = !r.load_date || r.load_date === today;
+          if (!isDaily) continue;
+          accumulateLoad(dailyAcc, loadEntry);
+          const isShift = !r.shift || r.shift === currentShift;
+          if (isShift) {
+            accumulateLoad(shiftAcc, loadEntry);
+          }
+        }
+
+        for (const op of monthOps) {
+          const hours = op.hours_worked || 0;
+          if (hours <= 0) continue;
+
+          monthlyAcc.smrHours += hours;
+          const isDaily = !op.shift_date || op.shift_date === today;
+          if (!isDaily) continue;
+          dailyAcc.smrHours += hours;
+          const isShift = !op.shift || op.shift === currentShift;
+          if (isShift) {
+            shiftAcc.smrHours += hours;
+          }
+        }
 
         resolvedActuals = {
-          shift: aggregateHorizonMetrics(shiftLoads, shiftOps, binFactorByMachine),
-          daily: aggregateHorizonMetrics(dailyLoads, dailyOps, binFactorByMachine),
-          monthly: aggregateHorizonMetrics(monthLoads, monthOps, binFactorByMachine),
+          shift: finalizeMetrics(shiftAcc),
+          daily: finalizeMetrics(dailyAcc),
+          monthly: finalizeMetrics(monthlyAcc),
         };
         setActuals(resolvedActuals);
       } catch {
