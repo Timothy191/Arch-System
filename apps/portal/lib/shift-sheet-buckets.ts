@@ -605,3 +605,62 @@ export function validateOverviewRowDelaysAndComment(
     error: null,
   };
 }
+
+/**
+ * Computes the chronological next shift slot (`day` -> `night` on same date;
+ * `night` -> `day` on next calendar date) for automatic breakdown carry-over.
+ */
+export function computeNextShiftSlot(
+  shiftDate: string,
+  shiftType: 'day' | 'night'
+): {
+  shiftDate: string;
+  shiftType: 'day' | 'night';
+  startTime: string;
+} {
+  if (shiftType === 'day') {
+    return {
+      shiftDate,
+      shiftType: 'night',
+      startTime: '18:00',
+    };
+  }
+  const parsed = new Date(`${shiftDate}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    return {
+      shiftDate,
+      shiftType: 'day',
+      startTime: '06:00',
+    };
+  }
+  parsed.setUTCDate(parsed.getUTCDate() + 1);
+  const nextDate = parsed.toISOString().slice(0, 10);
+  return {
+    shiftDate: nextDate,
+    shiftType: 'day',
+    startTime: '06:00',
+  };
+}
+
+/**
+ * Builds 12h-cap-compliant delay hours when a machine carries over into a new shift on breakdown.
+ */
+export function buildCarryOverBreakdownDelays(params: {
+  carryOverDelayHours?: number;
+  startSmr?: number;
+  stopSmr?: number;
+  baseDelays?: OverviewDelayHours;
+}): OverviewDelayHours {
+  const startSmr = params.startSmr ?? 0;
+  const stopSmr = params.stopSmr ?? startSmr;
+  const baseDelays = params.baseDelays ?? createStandardOverviewDelays();
+  const targetBreakdownHours = params.carryOverDelayHours ?? MAX_SHIFT_HOURS;
+  return reconcileOverviewShiftHoursOnDelayChange({
+    startSmr,
+    stopSmr,
+    delays: baseDelays,
+    changedKey: 'breakdown',
+    nextDelayValue: targetBreakdownHours,
+    maxShiftHours: MAX_SHIFT_HOURS,
+  }).delays;
+}

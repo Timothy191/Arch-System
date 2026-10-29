@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import {
   computeMachineOverviewMetrics,
+  computeNextShiftSlot,
   MAX_SHIFT_HOURS,
   OVERVIEW_DELAY_COLUMNS,
   type OverviewDelayHours,
@@ -224,6 +225,7 @@ export async function saveMachineOverviewRow(payload: unknown) {
   }
 
   let machineOperationId = existingOps?.[0]?.id ?? null;
+  const operationalStatus = row.endsOnBreakdown ? 'BREAKDOWN' : 'ACTIVE';
 
   if (machineOperationId) {
     const { error: updateOpErr } = await serviceClient
@@ -232,6 +234,7 @@ export async function saveMachineOverviewRow(payload: unknown) {
         start_smu: row.startSmr,
         end_smu: row.stopSmr,
         operator_id: row.operatorId ?? null,
+        operational_status: operationalStatus,
       })
       .eq('id', machineOperationId);
 
@@ -256,6 +259,7 @@ export async function saveMachineOverviewRow(payload: unknown) {
         start_time: defaultStartTime,
         start_smu: row.startSmr,
         end_smu: row.stopSmr,
+        operational_status: operationalStatus,
       })
       .select('id')
       .single();
@@ -367,7 +371,8 @@ export async function saveMachineOverviewRow(payload: unknown) {
       .is('deleted_at', null)
       .limit(1);
 
-    const breakdownReason = `${trimmedComment || 'Machine on breakdown'} [Shift Delay: ${row.delays.breakdown.toFixed(1)}h]`;
+    const carryOverHours = row.delays.breakdown > 0 ? row.delays.breakdown : MAX_SHIFT_HOURS;
+    const breakdownReason = `${trimmedComment || 'Machine on breakdown'} [Shift Delay: ${carryOverHours.toFixed(1)}h]`;
 
     if (activeBds && activeBds.length > 0) {
       await serviceClient
@@ -376,7 +381,7 @@ export async function saveMachineOverviewRow(payload: unknown) {
           reason: breakdownReason,
         })
         .eq('id', activeBds[0]!.id);
-    } else if (row.endsOnBreakdown) {
+    } else if (row.endsOnBreakdown || row.delays.breakdown > 0) {
       const fleetIdentifier = row.serialNumber || row.machineName;
       await serviceClient.from('breakdowns').insert({
         department_id: row.departmentId,
@@ -389,6 +394,81 @@ export async function saveMachineOverviewRow(payload: unknown) {
         status: 'active',
         shared_with_departments: ['control-room', 'engineering'],
       });
+    }
+
+    // Auto-carry over into the next shift (machine_operations + 12.0h Breakdown delay_entries)
+    if (row.endsOnBreakdown) {
+      const nextShift = computeNextShiftSlot(row.shiftDate, row.shiftType);
+      const { data: existingNextOps } = await serviceClient
+        .from('machine_operations')
+        .select('id')
+        .eq('department_id', row.departmentId)
+        .eq('machine_id', row.machineId)
+        .eq('shift_date', nextShift.shiftDate)
+        .eq('shift_type', nextShift.shiftType)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      let nextOpId = existingNextOps?.[0]?.id ?? null;
+      if (nextOpId) {
+        await serviceClient
+          .from('machine_operations')
+          .update({
+            start_smu: row.stopSmr,
+            end_smu: row.stopSmr,
+            operational_status: 'BREAKDOWN',
+          })
+          .eq('id', nextOpId);
+      } else {
+        const { data: insertedNextOp } = await serviceClient
+          .from('machine_operations')
+          .insert({
+            department_id: row.departmentId,
+            machine_id: row.machineId,
+            operator_id: row.operatorId ?? null,
+            site_id: row.siteId ?? null,
+            shift_date: nextShift.shiftDate,
+            shift_type: nextShift.shiftType,
+            start_time: nextShift.startTime,
+            start_smu: row.stopSmr,
+            end_smu: row.stopSmr,
+            operational_status: 'BREAKDOWN',
+          })
+          .select('id')
+          .single();
+        nextOpId = insertedNextOp?.id ?? null;
+      }
+
+      const breakdownCatId = categoryIdByName.get('Breakdown');
+      if (nextOpId && breakdownCatId) {
+        const { data: existingNextDelays } = await serviceClient
+          .from('delay_entries')
+          .select('id')
+          .eq('machine_operation_id', nextOpId)
+          .is('deleted_at', null)
+          .limit(1);
+
+        if (!existingNextDelays || existingNextDelays.length === 0) {
+          const nextBaseStartIso = `${nextShift.shiftDate}T${nextShift.startTime}:00+02:00`;
+          const nextStartMs = new Date(nextBaseStartIso).getTime();
+          const nextEndIso = new Date(
+            nextStartMs + Math.round(MAX_SHIFT_HOURS * 3_600_000)
+          ).toISOString();
+          await serviceClient.from('delay_entries').insert({
+            machine_operation_id: nextOpId,
+            delay_category_id: breakdownCatId,
+            delay_start_time: new Date(nextStartMs).toISOString(),
+            delay_end_time: nextEndIso,
+            is_manual_override: true,
+            manual_duration_hours: MAX_SHIFT_HOURS,
+            description: `[Carry-Over Breakdown] ${trimmedComment || 'Machine carried over on breakdown from previous shift'}`,
+            status: 'committed' as const,
+            committed_at: new Date().toISOString(),
+            committed_by: committedById,
+            created_by: committedById,
+          });
+        }
+      }
     }
   }
 

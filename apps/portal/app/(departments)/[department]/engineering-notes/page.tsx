@@ -3,6 +3,7 @@ import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
 import type { BreakdownControlRoomView } from '@/features/departments';
 import {
+  buildCarryOverBreakdownDelays,
   createStandardOverviewDelays,
   createZeroOverviewDelays,
   OVERVIEW_DELAY_BY_CATEGORY,
@@ -174,7 +175,7 @@ export default async function EngineeringNotesPage({
       .eq('shift_type', currentShift),
     supabase
       .from('machine_operations')
-      .select('machine_id, end_smu')
+      .select('id, machine_id, end_smu, operational_status, shift_date, shift_type')
       .not('end_smu', 'is', null)
       .order('shift_date', { ascending: false })
       .order('end_smu', { ascending: false })
@@ -389,14 +390,33 @@ export default async function EngineeringNotesPage({
     }
   }
 
-  // Build latest opening SMR map from previous shift operations and smr_readings
+  // Build latest opening SMR map and previous-shift breakdown status from previous shift operations and smr_readings
   const latestSmrByMachine = new Map<string, number>();
+  const latestPrevOpByMachine = new Map<
+    string,
+    {
+      id: string;
+      machine_id: string;
+      end_smu: number | null;
+      operational_status?: string | null;
+      shift_date?: string | null;
+      shift_type?: string | null;
+    }
+  >();
   for (const row of (previousSMRs ?? []) as Array<{
+    id: string;
     machine_id: string;
     end_smu: number | null;
+    operational_status?: string | null;
+    shift_date?: string | null;
+    shift_type?: string | null;
   }>) {
     if (!latestSmrByMachine.has(row.machine_id) && row.end_smu !== null) {
       latestSmrByMachine.set(row.machine_id, Number(row.end_smu));
+    }
+    const isSameCurrentShift = row.shift_date === today && row.shift_type === currentShift;
+    if (!isSameCurrentShift && !latestPrevOpByMachine.has(row.machine_id)) {
+      latestPrevOpByMachine.set(row.machine_id, row);
     }
   }
   for (const row of (baselineSmrReadings ?? []) as Array<{
@@ -433,6 +453,20 @@ export default async function EngineeringNotesPage({
       delayHours: parsedDelay > 0 ? parsedDelay : isFromPreviousShift ? 12 : 2,
       isFromPreviousShift,
     });
+  }
+
+  // Also auto-carry over any machine whose most recent previous shift operation ended with operational_status = 'BREAKDOWN'
+  for (const [machineId, prevOp] of latestPrevOpByMachine.entries()) {
+    if (prevOp.operational_status === 'BREAKDOWN' && !activeBreakdownByMachineId.has(machineId)) {
+      activeBreakdownByMachineId.set(machineId, {
+        id: `prev-op-bd-${prevOp.id}`,
+        reason: 'Ended previous shift on breakdown (auto-carried over)',
+        dateIn: prevOp.shift_date ?? today,
+        timeIn: null,
+        delayHours: 12,
+        isFromPreviousShift: true,
+      });
+    }
   }
 
   // Build current shift operation lookup by machine_id
@@ -495,17 +529,23 @@ export default async function EngineeringNotesPage({
         }
       }
 
-      const finalDelays = hasAnyDelayEntry ? delays : createStandardOverviewDelays();
-      if (carryOver && finalDelays.breakdown === 0) {
-        finalDelays.breakdown = carryOver.delayHours;
-      }
-
       const opRel = Array.isArray(existingOp.operator)
         ? existingOp.operator[0]
         : existingOp.operator;
       const startSmr =
         existingOp.start_smu !== null ? Number(existingOp.start_smu) : defaultStartSmr;
       const stopSmr = existingOp.end_smu !== null ? Number(existingOp.end_smu) : startSmr;
+
+      const baseDelays = hasAnyDelayEntry ? delays : createStandardOverviewDelays();
+      const finalDelays =
+        carryOver && baseDelays.breakdown === 0
+          ? buildCarryOverBreakdownDelays({
+              carryOverDelayHours: carryOver.delayHours,
+              startSmr,
+              stopSmr,
+              baseDelays,
+            })
+          : baseDelays;
 
       return {
         machineId: m.id,
@@ -526,10 +566,13 @@ export default async function EngineeringNotesPage({
       };
     }
 
-    const initialDelays = createStandardOverviewDelays();
-    if (carryOver) {
-      initialDelays.breakdown = carryOver.delayHours;
-    }
+    const initialDelays = carryOver
+      ? buildCarryOverBreakdownDelays({
+          carryOverDelayHours: carryOver.delayHours,
+          startSmr: defaultStartSmr,
+          stopSmr: defaultStartSmr,
+        })
+      : createStandardOverviewDelays();
 
     return {
       machineId: m.id,

@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, RotateCcw, Save, ShieldAlert, Wrench } fro
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
+  buildCarryOverBreakdownDelays,
   computeMachineOverviewMetrics,
   createStandardOverviewDelays,
   MAX_SHIFT_HOURS,
@@ -244,26 +245,92 @@ export function EngineeringOverviewTable({
 
   const toggleEndsOnBreakdown = (machineId: string, checked: boolean) => {
     setRows((prev) =>
-      prev.map((r) =>
-        r.machineId === machineId
-          ? {
-              ...r,
-              endsOnBreakdown: checked,
-              error: null,
-              saved: false,
-            }
-          : r
-      )
+      prev.map((r) => {
+        if (r.machineId !== machineId) return r;
+        const nextComment =
+          checked && (!r.comment.trim() || r.comment === DEFAULT_ALLOWANCE_COMMENT)
+            ? '[Breakdown Carry-Over] Machine ends shift on breakdown'
+            : r.comment;
+        return {
+          ...r,
+          endsOnBreakdown: checked,
+          comment: nextComment,
+          error: null,
+          saved: false,
+        };
+      })
     );
+  };
+
+  const handleShiftTypeChange = (nextShift: 'day' | 'night') => {
+    if (nextShift === shiftType) return;
+    let carriedOverMachines = 0;
+
+    setRows((prev) =>
+      prev.map((r) => {
+        const nextStartSmr = r.stopSmr >= r.startSmr ? r.stopSmr : r.startSmr;
+        if (r.endsOnBreakdown || r.carryOverBreakdown) {
+          carriedOverMachines++;
+          const rawReason = r.carryOverBreakdown?.reason
+            ? r.carryOverBreakdown.reason
+            : r.comment && r.comment !== DEFAULT_ALLOWANCE_COMMENT
+              ? r.comment.replace(/^\[(Carry-Over Breakdown|Breakdown Carry-Over)\]\s*/i, '').trim()
+              : 'Ended previous shift on breakdown';
+          const carryOverInfo: CarryOverBreakdownInfo = {
+            id: r.carryOverBreakdown?.id ?? `carry-over-${r.machineId}-${shiftDate}`,
+            reason: rawReason || 'Ended previous shift on breakdown',
+            dateIn: r.carryOverBreakdown?.dateIn ?? shiftDate,
+            timeIn: r.carryOverBreakdown?.timeIn ?? null,
+            delayHours: MAX_SHIFT_HOURS,
+            isFromPreviousShift: true,
+          };
+          return {
+            ...r,
+            startSmr: nextStartSmr,
+            stopSmr: nextStartSmr,
+            delays: buildCarryOverBreakdownDelays({
+              carryOverDelayHours: MAX_SHIFT_HOURS,
+              startSmr: nextStartSmr,
+              stopSmr: nextStartSmr,
+            }),
+            carryOverBreakdown: carryOverInfo,
+            endsOnBreakdown: true,
+            comment: `[Carry-Over Breakdown] ${carryOverInfo.reason}`,
+            error: null,
+            saved: false,
+          };
+        }
+
+        return {
+          ...r,
+          startSmr: nextStartSmr,
+          stopSmr: nextStartSmr,
+          delays: createStandardOverviewDelays(),
+          comment: DEFAULT_ALLOWANCE_COMMENT,
+          error: null,
+          saved: false,
+        };
+      })
+    );
+
+    setShiftType(nextShift);
+    if (carriedOverMachines > 0) {
+      toast.info(
+        `Switched to ${nextShift.toUpperCase()} shift · ${carriedOverMachines} breakdown machine${carriedOverMachines === 1 ? '' : 's'} auto-carried over.`
+      );
+    }
   };
 
   const handleResetStandardDefaults = () => {
     setRows((prev) =>
       prev.map((r) => {
-        const std = createStandardOverviewDelays();
-        if (r.carryOverBreakdown) {
-          std.breakdown = r.carryOverBreakdown.delayHours || 12;
-        }
+        const std = r.carryOverBreakdown
+          ? buildCarryOverBreakdownDelays({
+              carryOverDelayHours: r.carryOverBreakdown.delayHours || MAX_SHIFT_HOURS,
+              startSmr: r.startSmr,
+              stopSmr: r.stopSmr,
+            })
+          : createStandardOverviewDelays();
         return {
           ...r,
           delays: std,
@@ -573,7 +640,7 @@ export function EngineeringOverviewTable({
             <select
               aria-label="Shift Type"
               value={shiftType}
-              onChange={(e) => setShiftType(e.target.value as 'day' | 'night')}
+              onChange={(e) => handleShiftTypeChange(e.target.value as 'day' | 'night')}
               className="rounded-lg border border-[var(--border-default)] bg-white px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs"
             >
               <option value="day">Day Shift (06:00 - 18:00)</option>

@@ -381,5 +381,30 @@ describe('MachineOperationsList', () => {
       expect(screen.getByLabelText('Other dozer activity details')).toBeInTheDocument();
       expect(screen.getByTestId('dozer-rollover-summary')).toHaveTextContent('0 BCM');
     });
+
+    it('allows marking a machine as ending shift on breakdown to auto-carry over into the new shift', () => {
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={dozerMachines}
+          operators={[{ id: 'op-1', full_name: 'Sam Dozer', employee_code: 'EMP-01' }]}
+          sites={[{ id: 'site-a', name: 'Pit North', site_code: 'BKF' }]}
+          todayOperations={[]}
+        />
+      );
+
+      const endsOnBreakdownCheckbox = screen.getByTestId(
+        'machine-ops-ends-on-breakdown'
+      ) as HTMLInputElement;
+      expect(endsOnBreakdownCheckbox.checked).toBe(false);
+      expect(screen.queryByLabelText('Breakdown carry-over reason')).not.toBeInTheDocument();
+
+      fireEvent.click(endsOnBreakdownCheckbox);
+      expect(endsOnBreakdownCheckbox.checked).toBe(true);
+      const reasonInput = screen.getByLabelText('Breakdown carry-over reason');
+      expect(reasonInput).toBeInTheDocument();
+      fireEvent.change(reasonInput, { target: { value: 'Final drive oil leak at end of shift' } });
+      expect(reasonInput).toHaveValue('Final drive oil leak at end of shift');
+    });
   });
 });

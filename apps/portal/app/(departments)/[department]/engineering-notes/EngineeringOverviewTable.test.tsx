@@ -315,4 +315,57 @@ describe('EngineeringOverviewTable', () => {
     fireEvent.click(viewToggleBtn);
     expect(screen.getAllByRole('columnheader')).toHaveLength(15);
   });
+
+  it('auto-carries a machine over into the new shift when it ends a shift on breakdown', async () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    // Mark ADT-101 as ending the Day shift on breakdown
+    const breakdownCheckbox = screen.getByRole('checkbox', {
+      name: /Ends shift on breakdown \(carry over\)/i,
+    });
+    fireEvent.click(breakdownCheckbox);
+    expect(breakdownCheckbox).toBeChecked();
+
+    // Switch Shift Type from Day Shift -> Night Shift
+    const shiftTypeSelect = screen.getByLabelText('Shift Type');
+    fireEvent.change(shiftTypeSelect, { target: { value: 'night' } });
+
+    // Verify ADT-101 automatically carried over into Night Shift on full 12.0h breakdown
+    // with opening & closing SMR equal to the Day shift Stop SMR (1208.4)
+    expect(screen.getByText(/Carried Over Breakdown \(Since 2026-10-26\)/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('Start SMR ADT-101 · Bell B45E')).toHaveValue(1208.4);
+    expect(screen.getByLabelText('Stop SMR ADT-101 · Bell B45E')).toHaveValue(1208.4);
+    expect(screen.getByLabelText('Breakdown ADT-101 · Bell B45E')).toHaveValue(12);
+    expect(screen.getByLabelText('Refueling ADT-101 · Bell B45E')).toHaveValue(0);
+
+    // Save the carried-over Night Shift row and verify it persists cleanly within the 12.0h cap
+    const saveBtn = screen.getByRole('button', { name: /^Save$/i });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          machineId: sampleRow.machineId,
+          shiftType: 'night',
+          startSmr: 1208.4,
+          stopSmr: 1208.4,
+          endsOnBreakdown: true,
+          delays: expect.objectContaining({
+            breakdown: 12,
+            refueling: 0,
+            safetyTalks: 0,
+            lunches: 0,
+          }),
+        })
+      );
+    });
+  });
 });

@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Automatic End-of-Shift Breakdown Carry-Over into New Shift (`/control-room/engineering-notes` & `/control-room/machine-operations`)
+
+- **Action:**
+  - Added `computeNextShiftSlot(shiftDate, shiftType)` and `buildCarryOverBreakdownDelays(params)` in `apps/portal/lib/shift-sheet-buckets.ts` so any machine ending a shift on breakdown automatically carries over into the next shift (`day` -> `night` on the same date; `night` -> `day` on the next calendar date) while reconciling the `12.0h` breakdown against the `12.0h` shift cap (zeroing untouched standard allowances so `totalDelayHours === 12.0h`).
+  - Updated `saveMachineOverviewRow` in `apps/portal/app/(departments)/[department]/engineering-notes/actions.ts` so when `endsOnBreakdown` is `true`, it sets `operational_status = 'BREAKDOWN'`, ensures an active `breakdowns` record exists, and auto-creates/updates the next shift's `machine_operations` (`start_smu = stopSmr`, `end_smu = stopSmr`, `operational_status = 'BREAKDOWN'`) and committed `12.0h` `Breakdown` `delay_entries` row.
+  - Updated `apps/portal/app/(departments)/[department]/engineering-notes/page.tsx` and `EngineeringOverviewTable.tsx` (`handleShiftTypeChange`, `toggleEndsOnBreakdown`, `handleResetStandardDefaults`) so carried-over breakdown machines open the new shift with `startSmr = stopSmr`, `breakdown = 12.0h` (cap-reconciled), and switching `Shift Type` (`Day Shift` <-> `Night Shift`) immediately carries breakdown machines into the new shift view.
+  - Added a `"Machine ends shift on breakdown (auto-carry over into new shift)"` checkbox card (`data-testid="machine-ops-ends-on-breakdown"`) in `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx` that persists an active breakdown and pre-populates the next shift's `machine_operations` row on submit.
+- **Verification:** `EngineeringOverviewTable.test.tsx` (`6/6 PASS`), `MachineOperationsList.test.tsx` (`12/12 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Machine Operations (`/control-room/machine-operations`) Dozer Activity Section (`Roll Over` vs `Other` Checkboxes)
 
 - **Action:**

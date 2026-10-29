@@ -4,11 +4,12 @@ import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import { ChevronDown, ChevronUp, Clock, Drill } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Drill, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
+import { computeNextShiftSlot } from '@/lib/shift-sheet-buckets';
 import { DelayEntriesForm } from './DelayEntriesForm';
 
 interface Machine {
@@ -115,6 +116,8 @@ export function MachineOperationsForm({
     holesDrilled: '',
     dozerActivityType: 'rollover' as 'rollover' | 'other',
     dozerOtherDetails: '',
+    endsOnBreakdown: false,
+    breakdownReason: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -317,6 +320,7 @@ export function MachineOperationsForm({
         end_time: formData.endTime || null,
         start_smu: startSmuVal,
         end_smu: endSmuVal,
+        operational_status: formData.endsOnBreakdown ? 'BREAKDOWN' : 'ACTIVE',
       };
 
       if (isDrillRig) {
@@ -363,6 +367,41 @@ export function MachineOperationsForm({
         } as never);
       }
 
+      // If machine ends shift on breakdown, persist active breakdown + auto-carry over into new shift
+      if (formData.endsOnBreakdown && selectedMachine) {
+        const carryOverSmr = endSmuVal ?? startSmuVal ?? 0;
+        const nextShift = computeNextShiftSlot(today, formData.shiftType);
+        const reasonText =
+          formData.breakdownReason.trim() ||
+          'Ended shift on breakdown (auto-carried over into new shift)';
+
+        await Promise.allSettled([
+          supabase.from('breakdowns').insert({
+            department_id: departmentId,
+            fleet_id: selectedMachine.serial_number || selectedMachine.name,
+            machine_name: selectedMachine.name,
+            machine_type: selectedMachine.machine_type,
+            reason: `${reasonText} [Shift Delay: 12.0h]`,
+            date_in: today,
+            time_in: new Date().toTimeString().slice(0, 8),
+            status: 'active',
+            shared_with_departments: ['control-room', 'engineering'],
+          } as never),
+          supabase.from('machine_operations').insert({
+            department_id: departmentId,
+            machine_id: formData.machineId,
+            operator_id: formData.operatorId || null,
+            site_id: formData.siteId || null,
+            shift_date: nextShift.shiftDate,
+            shift_type: nextShift.shiftType,
+            start_time: nextShift.startTime,
+            start_smu: carryOverSmr,
+            end_smu: carryOverSmr,
+            operational_status: 'BREAKDOWN',
+          } as never),
+        ]);
+      }
+
       // Store the operation ID and machine ID for delay entries
       if (data?.id) {
         setLastOperationId(data.id);
@@ -385,6 +424,8 @@ export function MachineOperationsForm({
         holesDrilled: '',
         dozerActivityType: 'rollover',
         dozerOtherDetails: '',
+        endsOnBreakdown: false,
+        breakdownReason: '',
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
@@ -863,6 +904,56 @@ export function MachineOperationsForm({
             )}
           </div>
         )}
+
+        {/* End-of-Shift Breakdown Auto-Carry-Over Option */}
+        <div
+          data-testid="machine-ops-ends-on-breakdown-card"
+          className={`space-y-2.5 rounded-xl border p-3.5 transition-colors ${
+            formData.endsOnBreakdown
+              ? 'border-red-500/40 bg-red-500/5'
+              : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/60'
+          }`}
+        >
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              data-testid="machine-ops-ends-on-breakdown"
+              checked={formData.endsOnBreakdown}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  endsOnBreakdown: e.target.checked,
+                }))
+              }
+              className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] accent-red-600"
+            />
+            <div className="space-y-0.5">
+              <span className="flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-xs">
+                <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+                Machine ends shift on breakdown (auto-carry over into new shift)
+              </span>
+              <span className="block text-[11px] text-[var(--text-muted)]">
+                Automatically carries this machine over into the next shift on active breakdown with
+                opening SMR locked to Stop SMR until booked out.
+              </span>
+            </div>
+          </label>
+          {formData.endsOnBreakdown && (
+            <input
+              type="text"
+              aria-label="Breakdown carry-over reason"
+              placeholder="Enter breakdown fault / reason for next shift handover..."
+              value={formData.breakdownReason}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  breakdownReason: e.target.value,
+                }))
+              }
+              className="w-full rounded-lg border border-red-500/40 bg-white px-3 py-2 text-[var(--text-heading)] text-xs focus:border-red-500 focus:outline-none"
+            />
+          )}
+        </div>
 
         {/* Submit Button */}
         <div className="flex items-center gap-4">
