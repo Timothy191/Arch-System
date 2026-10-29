@@ -18,6 +18,7 @@ import {
   validateOverviewRowDelaysAndComment,
 } from '@/lib/shift-sheet-buckets';
 import { bookOutMachineCarryOverBreakdown, saveMachineOverviewRow } from './actions';
+import { QuickDelayLoggerPanel } from './QuickDelayLoggerPanel';
 
 export interface CarryOverBreakdownInfo {
   id: string;
@@ -127,6 +128,12 @@ export function EngineeringOverviewTable({
   const [savingMachineId, setSavingMachineId] = useState<string | null>(null);
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [bookingOutMachineId, setBookingOutMachineId] = useState<string | null>(null);
+  const [selectedQuickMachineId, setSelectedQuickMachineId] = useState<string>(
+    () => initialRows[0]?.machineId ?? ''
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState('all');
+  const [isSimplifiedView, setIsSimplifiedView] = useState(false);
 
   const [rows, setRows] = useState<EditableMachineRow[]>(() =>
     initialRows.map((r) => ({
@@ -454,6 +461,42 @@ export function EngineeringOverviewTable({
     };
   }, [rows]);
 
+  const visibleDelayColumns = useMemo(
+    () =>
+      isSimplifiedView
+        ? OVERVIEW_DELAY_COLUMNS.filter((col) => !col.isStandardAllowance)
+        : OVERVIEW_DELAY_COLUMNS,
+    [isSimplifiedView]
+  );
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (selectedTypeFilter === 'abnormal') {
+        const hasAbnormal =
+          Boolean(r.carryOverBreakdown) ||
+          r.endsOnBreakdown ||
+          OVERVIEW_DELAY_COLUMNS.some((col) => {
+            const std = STANDARD_OVERVIEW_DELAY_DEFAULTS[col.key] ?? 0;
+            return Math.abs((r.delays[col.key] ?? 0) - std) > 0.01;
+          });
+        if (!hasAbnormal) return false;
+      } else if (
+        selectedTypeFilter !== 'all' &&
+        (r.machineType || 'Other') !== selectedTypeFilter
+      ) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        r.machineName.toLowerCase().includes(q) ||
+        r.machineType.toLowerCase().includes(q) ||
+        (r.serialNumber?.toLowerCase().includes(q) ?? false) ||
+        (r.operatorName?.toLowerCase().includes(q) ?? false)
+      );
+    });
+  }, [rows, searchQuery, selectedTypeFilter]);
+
   return (
     <div className="space-y-4" data-testid="engineering-overview-ledger">
       {/* Top KPI & Standard Allowances Header */}
@@ -555,6 +598,27 @@ export function EngineeringOverviewTable({
         </div>
       </GlassCard>
 
+      {/* Guided 3-Step Quick Delay & Shift SMR Logger + Fleet Filter Bar */}
+      <QuickDelayLoggerPanel
+        rows={rows}
+        operators={operators}
+        selectedMachineId={selectedQuickMachineId}
+        onSelectMachine={setSelectedQuickMachineId}
+        onUpdateSmr={updateRowSmr}
+        onUpdateDelay={updateRowDelay}
+        onUpdateOperator={updateRowOperator}
+        onUpdateComment={updateRowComment}
+        onToggleBreakdown={toggleEndsOnBreakdown}
+        onSaveRow={handleSaveRow}
+        savingMachineId={savingMachineId}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        selectedTypeFilter={selectedTypeFilter}
+        onTypeFilterChange={setSelectedTypeFilter}
+        isSimplifiedView={isSimplifiedView}
+        onToggleSimplifiedView={() => setIsSimplifiedView((prev) => !prev)}
+      />
+
       {/* Full 20-Column Fleet Overview Table */}
       <GlassCard className="overflow-hidden p-0">
         <div className="overflow-x-auto">
@@ -565,7 +629,7 @@ export function EngineeringOverviewTable({
                 <th className={TH_NUM}>Start SMR</th>
                 <th className={TH_NUM}>Stop SMR</th>
                 <th className={TH_NUM}>Total SMR Worked</th>
-                {OVERVIEW_DELAY_COLUMNS.map((col) => (
+                {visibleDelayColumns.map((col) => (
                   <th
                     key={col.key}
                     data-delay-group={col.delayGroup}
@@ -587,7 +651,7 @@ export function EngineeringOverviewTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
-              {rows.map((row) => {
+              {filteredRows.map((row) => {
                 const metrics = computeMachineOverviewMetrics(
                   row.startSmr,
                   row.stopSmr,
@@ -596,6 +660,7 @@ export function EngineeringOverviewTable({
                 const commentCheck = validateOverviewRowDelaysAndComment(row.delays, row.comment);
                 const hasCommentError = !commentCheck.valid || Boolean(row.error);
                 const isCarryOver = Boolean(row.carryOverBreakdown);
+                const isQuickSelected = row.machineId === selectedQuickMachineId;
 
                 return (
                   <tr
@@ -604,12 +669,25 @@ export function EngineeringOverviewTable({
                     className={
                       isCarryOver
                         ? 'bg-red-500/5 hover:bg-red-500/10'
-                        : 'hover:bg-[var(--bg-secondary)]/40'
+                        : isQuickSelected
+                          ? 'bg-[var(--accent-blue)]/8 hover:bg-[var(--accent-blue)]/12'
+                          : 'hover:bg-[var(--bg-secondary)]/40'
                     }
                   >
                     {/* 1. Machine ID */}
                     <td className={TD_BASE}>
-                      <div className="font-bold text-[var(--text-heading)]">{row.machineName}</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-bold text-[var(--text-heading)]">
+                          {row.machineName}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedQuickMachineId(row.machineId)}
+                          className="cursor-pointer rounded border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20"
+                        >
+                          Quick Log
+                        </button>
+                      </div>
                       <div className="text-[10px] text-[var(--text-secondary)]">
                         {row.serialNumber ? `${row.serialNumber} · ` : ''}
                         {row.machineType}
@@ -665,8 +743,8 @@ export function EngineeringOverviewTable({
                       </div>
                     </td>
 
-                    {/* 5..16. All 12 Delay Columns */}
-                    {OVERVIEW_DELAY_COLUMNS.map((col) => {
+                    {/* 5..16. Visible Delay Columns */}
+                    {visibleDelayColumns.map((col) => {
                       const val = row.delays[col.key] ?? 0;
                       return (
                         <td

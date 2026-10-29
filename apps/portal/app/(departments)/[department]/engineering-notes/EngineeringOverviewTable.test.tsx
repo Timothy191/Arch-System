@@ -267,4 +267,52 @@ describe('EngineeringOverviewTable', () => {
       );
     });
   });
+
+  it('allows operators to log delays via the 3-Step Quick Delay Logger and toggle Simplified Table View', async () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow, carryOverRow]}
+        operators={[]}
+      />
+    );
+
+    expect(screen.getByTestId('quick-delay-logger')).toBeInTheDocument();
+
+    // Tap the "1.0h" quick preset for the default selected "Blasting Delays" reason on sampleRow
+    const quickOneHourBtn = screen.getByRole('button', { name: '1.0h' });
+    fireEvent.click(quickOneHourBtn);
+
+    expect(screen.getByLabelText('Blasting Delays ADT-101 · Bell B45E')).toHaveValue(1);
+
+    // Apply a one-tap note template so the mandatory comment requirement is satisfied automatically
+    const templateBtn = screen.getByRole('button', {
+      name: /\+ Pit blast clearance & safety hold/i,
+    });
+    fireEvent.click(templateBtn);
+
+    // Save directly from the Quick Delay Logger
+    const quickSaveBtn = screen.getByTestId('quick-delay-save-btn');
+    fireEvent.click(quickSaveBtn);
+
+    await waitFor(() => {
+      expect(mockSaveMachineOverviewRow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          machineId: sampleRow.machineId,
+          comment: 'Blasting Delays: Pit blast clearance & safety hold',
+          delays: expect.objectContaining({
+            blasting: 1,
+          }),
+        })
+      );
+    });
+
+    // Toggle Simplified Table View (hides the 6 standard allowance columns: 21 -> 15 columnheaders)
+    const viewToggleBtn = screen.getByTestId('table-view-mode-toggle');
+    expect(screen.getAllByRole('columnheader')).toHaveLength(21);
+    fireEvent.click(viewToggleBtn);
+    expect(screen.getAllByRole('columnheader')).toHaveLength(15);
+  });
 });

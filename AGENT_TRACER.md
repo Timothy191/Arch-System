@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Engineering Overview (`/control-room/engineering-notes`) 3-Step Quick Delay Logger, Fleet Filter Bar & Simplified Table View
+
+- **Action:**
+  - Created `apps/portal/app/(departments)/[department]/engineering-notes/QuickDelayLoggerPanel.tsx` and integrated it into `EngineeringOverviewTable.tsx` (`data-testid="engineering-overview-ledger"`).
+  - Provided a guided 3-Step Quick Machine Delay & SMR Logger (`1. Machine & Shift SMR`, `2. Delay Category & Hours` with one-tap duration chips `0h`–`6.0h`, `3. Comment & Save` with one-tap note templates and direct row save) so operators can log delays without hunting across 78 rows × 20 columns.
+  - Added a Fleet Search & Machine-Type Filter Bar (`All`, `Delays / Breakdowns`, and machine-type pills), per-row `Quick Log` selection buttons, and a `Simplified Table (Hide 6 Std Allowance Columns)` toggle (`data-testid="table-view-mode-toggle"`).
+- **Verification:** `EngineeringOverviewTable.test.tsx` (`5/5 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Excavator Activity (`/control-room/excavator-activity`) Instant Material Toggle, Header Cleanup & Sidebar Visual Impact
 
 - **Action:**

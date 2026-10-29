@@ -1,3 +1,11 @@
+## 2026-10-29T08:15:00+02:00: Engineering Overview (`/control-room/engineering-notes`) 3-Step Quick Delay Logger, Fleet Filter Bar & Simplified Table View
+
+- **Phase 1 (Comprehension)**: Address design feedback on `data-testid="engineering-overview-ledger"` (`/control-room/engineering-notes`): keep the full fleet shift SMR/delays/availability/utilization concept while making it much easier for operators to log delays without getting confused by the 78-machine × 20-column table.
+- **Phase 2 (Evidence)**: Inspected `EngineeringOverviewTable.tsx`, `shift-sheet-buckets.ts`, and `EngineeringOverviewTable.test.tsx`.
+- **Phase 3 (Design)**: Created `QuickDelayLoggerPanel.tsx` providing a guided 3-Step Quick Machine Delay & SMR Logger (Step 1: Machine, Start/Stop SMR & Operator with live 12.0h cap budget; Step 2: Color-coded Delay Category & Reason buttons with one-tap duration chips `0h`–`6.0h`; Step 3: One-tap delay note templates + direct `Save Ledger` button), plus a Fleet Search & Machine-Type Filter Bar (`All`, `Delays / Breakdowns`, and machine type pills) and a `Simplified Table (Hide 6 Std Allowance Columns)` toggle.
+- **Phase 4 (Criticism)**: Added unit test coverage in `EngineeringOverviewTable.test.tsx` verifying 3-Step Quick Delay logging, one-tap note templates, and Simplified Table View toggling while preserving all existing 20-column ledger tests.
+- **Phase 5 (Contract)**: Added `apps/portal/app/(departments)/[department]/engineering-notes/QuickDelayLoggerPanel.tsx` and updated `EngineeringOverviewTable.tsx` and `EngineeringOverviewTable.test.tsx`.
+
 ## 2026-10-29T07:55:00+02:00: Excavator Activity (`/control-room/excavator-activity`) Instant Material Toggle & Header Cleanup
 
 - **Phase 1 (Comprehension)**: Address all 4 design & performance feedback items on `/control-room/excavator-activity`: (1) diagnose why switching `Waste / Coal` is slow and make it instantaneous; (2) remove the date text (`Thursday, 29 October 2026`) from `PageHeader`; (3) remove the `Executive Dashboard` button; (4) improve the visual impact of the department sidebar (`aside` in `DepartmentLayout.tsx`).

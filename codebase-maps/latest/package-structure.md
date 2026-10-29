@@ -10,7 +10,7 @@
 ```mermaid
 flowchart TD
     ROOT["Fork / Federated Workspace Root"]
-
+    
     subgraph AppLayer ["apps/ (Applications)"]
         PORTAL["portal (Next.js 16 App Router · mining operations)"]
     end
