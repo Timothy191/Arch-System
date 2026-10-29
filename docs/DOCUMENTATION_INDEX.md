@@ -161,7 +161,7 @@ Arch-System/
 - **Report a security issue**: Follow [SECURITY.md](./SECURITY.md)
 - **Understand quality gates**: Review [AGENTS.md](../AGENTS.md) Quality Gates section
 - **Review historical plans / checklist**: Check [archive/LIQUID_GLASS_CHECKLIST.md](./archive/LIQUID_GLASS_CHECKLIST.md)
-- **Find operational runbooks**: Check [operations/](./operations/)
+- **Find operational runbooks**: Check [operations/](./operations/), [control-room/operator-onboarding.md](./control-room/operator-onboarding.md), and [control-room/shift-closeout-runbook.md](./control-room/shift-closeout-runbook.md)
 - **Explore unified documentation**: Visit [documentation/README.md](../documentation/README.md) for the new documentation center structure
 
 ## 📝 Documentation Maintenance
@@ -173,5 +173,5 @@ Arch-System/
 
 ---
 
-**Last Updated**: 2026-10-19
+**Last Updated**: 2026-10-29
 **Maintained by**: Arch-Systems Development Team & Documentation Specialist Agent

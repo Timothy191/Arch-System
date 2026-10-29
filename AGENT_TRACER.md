@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Documentation Completeness & v1.6.2 Release Notes Synchronization
+
+- **Action:**
+  - Updated [`CHANGELOG.md`](./CHANGELOG.md) with the `[1.6.2] - 2026-10-29` release entry covering the 3-Step Quick Delay Logger, automatic end-of-shift breakdown carry-over, Dozer `Roll Over` vs `Other` activity selection, Plant & Processing coal seam selectors (`4#Lower`, `2#Lower`, `2#Upper`, `5#Seam`), instant Excavator `Waste / Coal` toggle, and `AlertPanel` single-pass horizon aggregation.
+  - Updated [`docs/control-room/operator-onboarding.md`](./docs/control-room/operator-onboarding.md), [`docs/wiki/entities/control-room-department.md`](./docs/wiki/entities/control-room-department.md), [`docs/wiki/concepts/department-features.md`](./docs/wiki/concepts/department-features.md), and [`docs/DOCUMENTATION_INDEX.md`](./docs/DOCUMENTATION_INDEX.md) to reflect all current Control Room and Plant & Processing workflows.
+- **Verification:** `markdownlint`, `prettier`, `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Merge PR #194: Single-Pass Horizon Metric Aggregation in `AlertPanel`
 
 - **Action:**

@@ -43,20 +43,25 @@ Follow this sequential workflow during every 12-hour (`day` or `night`) shift:
 
 ### Phase 2: Machine Operations (`/control-room/machine-operations`)
 
-1. Monitor active fleet state (`Running`, `Standby`, `Maintenance`, `Down`).
-2. Log state transitions promptly when operators call in status changes over radio.
-   - _Note:_ Machine status updates are rate-limited to **10 updates per minute per machine** to prevent accidental rapid toggling.
-3. Log Dozer Roll entries via the **Dozer Roll Form** (`DozerRollForm`) as bench clearing and stockpile pushes complete.
+1. Monitor active fleet state (`Operating`, `Breakdown`, `Standby`) via the Fleet Summary Strip and Machine Operations List.
+2. Log shift machine operations in **Log Machine Operation** (`MachineOperationsForm`):
+   - **Drill Rigs:** When a Drill Rig is selected, enter **Meters**, **Site**, **Block**, and **Holes**; metrics auto-sync to the Drilling Department.
+   - **Dozers:** When a Dozer is selected, check **Roll Over** (auto-calculates rehabilitation push at `250 BCM/h` and syncs to `dozer_rollover_logs`) or **Other** (road/ramp maintenance, stockpile push, floor/pad cleanup, berm construction, with `0 BCM` roll-over).
+   - **End-of-Shift Breakdown Auto-Carry-Over:** If a machine ends the shift on breakdown, check **Machine ends shift on breakdown (auto-carry over into new shift)** and enter the fault reason. The system automatically creates an active breakdown record and pre-populates the next shift's operation (`Start SMR = Stop SMR`, `operational_status = 'BREAKDOWN'`).
 
-### Phase 3: Hourly Loads (`/control-room/hourly-loads`)
+### Phase 3: Hourly Loads & Excavator Activity (`/control-room/hourly-loads` & `/control-room/excavator-activity`)
 
-1. At the top of each hour, record load counts per haul truck and material classification (Ore, Waste, Marginal).
-2. The system automatically multiplies load counts by each machine's calibrated `bin_factor` (e.g., `40.5` tonnes) to compute total hauled tonnage.
-3. Wait for the **Saved** indicator to confirm auto-save and L1/L2 cache synchronization before navigating away.
+1. At the top of each hour, record load counts per haul truck and material classification (`Waste` or `Coal`).
+2. In **Excavator Activity** (`/control-room/excavator-activity`), assign dumpers to active excavators and toggle material (`Waste` / `Coal`) with instant optimistic updates.
+3. The system multiplies load counts by each machine's calibrated `bin_factor` to compute total hauled BCM and tonnage.
 
-### Phase 4: Engineering Notes & Shift Compilation (`/control-room/engineering-notes` & `/control-room/shift-compilation`)
+### Phase 4: Engineering Overview, Delays & Shift Compilation (`/control-room/engineering-notes` & `/control-room/shift-compilation`)
 
-1. Record geotechnical observations, blast delays, haul road conditions, or weather events in **Engineering Notes**.
+1. Open **Operations / Engineering Overview** (`/control-room/engineering-notes`) to manage the full fleet's 12-hour shift SMR, 12 delay buckets, availability, and utilization:
+   - **Standard Shift Allowances (`2.4h` total):** `Refueling = 0.2h`, `Safety Talks = 0.5h`, `Lunches = 0.5h`, `GES / Maintenance = 0.5h`, `Tyres / Trams = 0.2h`, `Greasing / Startups = 0.5h`.
+   - **12.0-Hour Shift Cap:** Combined `Total SMR Worked + Total Delays` never exceeds `12.0h`.
+   - **3-Step Guided Quick Delay Logger:** Select a machine in **Step 1**, choose the delay category and one-tap duration chip (`0h`–`6.0h`) in **Step 2**, and apply a one-tap note template + **Save Ledger** in **Step 3**. Use the **Simplified Table** button to hide the 6 standard allowance columns when focusing on abnormal delays.
+   - **Automatic Breakdown Carry-Over & Book Out:** Checking **Ends shift on breakdown (carry over)** (or logging breakdown hours at shift end) automatically carries the machine into the new shift (`day` $\rightarrow$ `night` or `night` $\rightarrow$ next-day `day`) with `Start SMR = Stop SMR` and `12.0h` Breakdown delay until repaired and cleared via **Book Out**.
 2. Open **Shift Compilation** (`/control-room/shift-compilation`) to review aggregated production KPIs, crusher throughput, and variance against shift targets.
 
 ### Phase 5: End SMR (`/control-room/end-smr`)
