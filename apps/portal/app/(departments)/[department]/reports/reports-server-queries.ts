@@ -157,6 +157,23 @@ export interface RawDailyLogRow {
   notes: string | null;
 }
 
+export interface RawFleetMachineRow {
+  id: string;
+  name: string;
+  machine_type: string;
+  serial_number?: string | null;
+  site_id?: string | null;
+  active?: boolean | null;
+  sites?: { name: string }[] | { name: string } | null;
+}
+
+export interface RawFleetOperatorRow {
+  id: string;
+  full_name: string;
+  employee_code?: string | null;
+  active?: boolean | null;
+}
+
 export async function fetchDepartmentReportsRawData(params: {
   supabase: DepartmentSupabaseClient;
   deptId: string;
@@ -177,6 +194,8 @@ export async function fetchDepartmentReportsRawData(params: {
     { data: breakdowns, error: breakdownsError },
     { data: engNotes, error: engNotesError },
     { data: dailyLogs, error: dailyLogsError },
+    { data: rawMachines },
+    { data: rawOperators },
     completeness,
   ] = await Promise.all([
     supabase
@@ -234,6 +253,11 @@ export async function fetchDepartmentReportsRawData(params: {
       .gte('log_date', fromDateStr)
       .lte('log_date', toDateStr)
       .order('log_date', { ascending: false }),
+    supabase
+      .from('machines')
+      .select('id, name, machine_type, serial_number, site_id, active, sites(name)')
+      .order('name'),
+    supabase.from('operators').select('id, full_name, employee_code, active').order('full_name'),
     getShiftCompleteness(supabase, deptId, deptSlug, todayStr, currentShift).catch(() => ({
       complete: true,
       totalRequired: 0,
@@ -307,6 +331,8 @@ export async function fetchDepartmentReportsRawData(params: {
     breakdowns: (breakdowns || []) as RawBreakdownRow[],
     engNotes: (engNotes || []) as RawEngineeringNoteRow[],
     dailyLogs: (dailyLogs || []) as RawDailyLogRow[],
+    rawMachines: (rawMachines || []) as RawFleetMachineRow[],
+    rawOperators: (rawOperators || []) as RawFleetOperatorRow[],
     completeness,
     queryWarnings,
     machineHoursByLog,

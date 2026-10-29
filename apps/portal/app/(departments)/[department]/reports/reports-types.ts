@@ -1,3 +1,5 @@
+import type { OverviewDelayHours } from '@/lib/shift-sheet-buckets';
+
 export interface MachineOperationLogItem {
   id: string;
   date: string;
@@ -78,7 +80,84 @@ export interface ShiftCoverageMissingItem {
   formLabel: string;
 }
 
-export type ReportSubtab = 'shift' | 'day' | 'archived' | 'pdf-report';
+export type ReportSubtab =
+  | 'shift'
+  | 'day'
+  | 'machine-30d'
+  | 'monthly-summary'
+  | 'archived'
+  | 'pdf-report';
+
+export interface FleetMachineItem {
+  id: string;
+  name: string;
+  machineType: string;
+  serialNumber: string | null;
+  siteId: string | null;
+  siteName: string;
+  baselineSmr: number;
+}
+
+export interface FleetOperatorItem {
+  id: string;
+  fullName: string;
+  employeeCode: string;
+}
+
+export interface MachineDailyOverviewRecord {
+  machineId: string;
+  machineName: string;
+  machineType: string;
+  serialNumber: string | null;
+  siteId: string | null;
+  siteName: string;
+  date: string;
+  dayOfMonth: number;
+  shiftType: 'day' | 'night';
+  startSmr: number;
+  stopSmr: number;
+  operatorId: string | null;
+  operatorName: string | null;
+  delays: OverviewDelayHours;
+  comment: string;
+  endsOnBreakdown: boolean;
+  hasExistingOperation: boolean;
+}
+
+export interface MachineMonthlySummaryRow {
+  machineId: string;
+  machineName: string;
+  machineType: string;
+  serialNumber: string | null;
+  siteName: string;
+  month: string;
+  daysInMonth: number;
+  activeDaysLogged: number;
+  openingSmr: number;
+  closingSmr: number;
+  totalSmrWorked: number;
+  delays: OverviewDelayHours;
+  productionDelayHours: number;
+  nonProductionDelayHours: number;
+  engineeringDelayHours: number;
+  totalDelayHours: number;
+  scheduledHours: number;
+  availableHours: number;
+  availabilityPercent: number;
+  utilizationPercent: number;
+}
+
+export interface ArchivedMachineMonthSnapshot {
+  month: string;
+  archivedAt: string;
+  isSealed: boolean;
+  machineCount: number;
+  totalSmrWorked: number;
+  fleetAvailabilityPercent: number;
+  fleetUtilizationPercent: number;
+  records: MachineDailyOverviewRecord[];
+  summaries: MachineMonthlySummaryRow[];
+}
 
 export interface PdfReportDataPayload {
   title: string;
@@ -108,6 +187,9 @@ export interface ReportsDashboardClientProps {
   exportRows: Record<string, string | number>[];
   pdfReportData: PdfReportDataPayload;
   queryWarnings?: string[];
+  fleetMachines?: FleetMachineItem[];
+  fleetOperators?: FleetOperatorItem[];
+  machineDailyRecords?: MachineDailyOverviewRecord[];
 }
 
 export interface ReportsKpiStats {

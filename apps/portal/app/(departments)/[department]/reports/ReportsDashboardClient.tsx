@@ -2,9 +2,19 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { CopyReportButton } from './CopyReportButton';
+import { MachineMonthlySheetTab } from './MachineMonthlySheetTab';
+import { MachineMonthlySummaryTab } from './MachineMonthlySummaryTab';
+import {
+  buildArchivedMonthSnapshot,
+  computeFleetMonthlySummaryRows,
+  deriveFallbackFleetMachinesFromLogs,
+  loadStoredMachineMonthArchives,
+  saveStoredMachineMonthArchives,
+} from './machine-activity-helpers';
 import {
   ReportsArchivedViewTab,
   ReportsDayViewTab,
@@ -25,7 +35,9 @@ import {
   filterShiftReportRows,
 } from './reports-analytics-helpers';
 import type {
+  ArchivedMachineMonthSnapshot,
   EngineeringLogItem,
+  MachineDailyOverviewRecord,
   MachineOperationLogItem,
   ReportSubtab,
   ReportsDashboardClientProps,
@@ -62,6 +74,9 @@ export function ReportsDashboardClient({
   exportRows,
   pdfReportData,
   queryWarnings = [],
+  fleetMachines = [],
+  fleetOperators = [],
+  machineDailyRecords = [],
 }: ReportsDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<ReportSubtab>(initialTab);
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
@@ -70,6 +85,57 @@ export function ReportsDashboardClient({
   const [showMissingMachines, setShowMissingMachines] = useState<boolean>(false);
 
   const currentMonthPrefix = todayStr.slice(0, 7);
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthPrefix);
+  const [machineShiftType, setMachineShiftType] = useState<'day' | 'night'>(currentShift);
+
+  const fallbackFleet = useMemo(
+    () =>
+      deriveFallbackFleetMachinesFromLogs({
+        fleetMachines,
+        machineOperationLogs,
+      }),
+    [fleetMachines, machineOperationLogs]
+  );
+
+  const effectiveMachines = fallbackFleet.machines;
+  const [selectedMachineId, setSelectedMachineId] = useState<string>(
+    () => effectiveMachines[0]?.id ?? ''
+  );
+
+  const [liveMachineRecords, setLiveMachineRecords] = useState<MachineDailyOverviewRecord[]>(() =>
+    machineDailyRecords.length > 0 ? [...machineDailyRecords] : [...fallbackFleet.records]
+  );
+
+  const initialArchivedSnapshots = useMemo(() => {
+    const distinctMonths = new Set<string>();
+    const fromMonth = fromDateStr.slice(0, 7);
+    if (/^\d{4}-\d{2}$/.test(fromMonth)) {
+      distinctMonths.add(fromMonth);
+    }
+    distinctMonths.add(currentMonthPrefix);
+    for (const rec of liveMachineRecords) {
+      distinctMonths.add(rec.date.slice(0, 7));
+    }
+
+    return Array.from(distinctMonths)
+      .sort((a, b) => b.localeCompare(a))
+      .map((monthStr) =>
+        buildArchivedMonthSnapshot({
+          monthPrefix: monthStr,
+          fleetMachines: effectiveMachines,
+          shiftType: machineShiftType,
+          records: liveMachineRecords,
+          isSealed: monthStr < currentMonthPrefix,
+        })
+      );
+  }, [fromDateStr, currentMonthPrefix, effectiveMachines, machineShiftType, liveMachineRecords]);
+
+  const [archivedSnapshots, setArchivedSnapshots] =
+    useState<ArchivedMachineMonthSnapshot[]>(initialArchivedSnapshots);
+
+  useEffect(() => {
+    setArchivedSnapshots(loadStoredMachineMonthArchives(initialArchivedSnapshots));
+  }, [initialArchivedSnapshots]);
 
   const searchParams = useSearchParams?.() ?? null;
   const urlTabParam = searchParams?.get('tab');
@@ -81,6 +147,8 @@ export function ReportsDashboardClient({
     if (
       urlTabParam === 'pdf-report' ||
       urlTabParam === 'day' ||
+      urlTabParam === 'machine-30d' ||
+      urlTabParam === 'monthly-summary' ||
       urlTabParam === 'archived' ||
       urlTabParam === 'shift'
     ) {
@@ -89,6 +157,56 @@ export function ReportsDashboardClient({
       setActiveTab(initialTab);
     }
   }, [urlTabParam, initialTab]);
+
+  const handleUpsertMachineRecord = (updatedRecord: MachineDailyOverviewRecord) => {
+    setLiveMachineRecords((prev) => {
+      const matchIdx = prev.findIndex(
+        (rec) =>
+          rec.machineId === updatedRecord.machineId &&
+          rec.date === updatedRecord.date &&
+          rec.shiftType === updatedRecord.shiftType
+      );
+      if (matchIdx === -1) {
+        return [...prev, updatedRecord];
+      }
+      return prev.map((rec, idx) => (idx === matchIdx ? updatedRecord : rec));
+    });
+  };
+
+  const isSelectedMonthSealed = useMemo(() => {
+    const matchSnap = archivedSnapshots.find((snap) => snap.month === selectedMonth);
+    return Boolean(matchSnap?.isSealed);
+  }, [archivedSnapshots, selectedMonth]);
+
+  const handleArchiveAndSealMonth = () => {
+    const sealedSnapshot = buildArchivedMonthSnapshot({
+      monthPrefix: selectedMonth,
+      fleetMachines: effectiveMachines,
+      shiftType: machineShiftType,
+      records: liveMachineRecords,
+      isSealed: true,
+    });
+    const nextSnapshots = [
+      sealedSnapshot,
+      ...archivedSnapshots.filter((snap) => snap.month !== selectedMonth),
+    ].sort((a, b) => b.month.localeCompare(a.month));
+    setArchivedSnapshots(nextSnapshots);
+    saveStoredMachineMonthArchives(nextSnapshots);
+    toast.success(
+      `Archived & sealed ${selectedMonth} (${sealedSnapshot.machineCount} machine 30-day tables) into Machine Activity Database.`
+    );
+  };
+
+  const monthlySummaryRows = useMemo(
+    () =>
+      computeFleetMonthlySummaryRows({
+        fleetMachines: effectiveMachines,
+        monthPrefix: selectedMonth,
+        shiftType: machineShiftType,
+        records: liveMachineRecords,
+      }),
+    [effectiveMachines, selectedMonth, machineShiftType, liveMachineRecords]
+  );
 
   const handleSelectTab = (nextTab: ReportSubtab) => {
     setActiveTab(nextTab);
@@ -188,6 +306,7 @@ export function ReportsDashboardClient({
         monthlyRollupsCount={archivedData.monthlyRollups.length}
         historicalRowsCount={archivedData.historicalRows.length}
         pdfSiteGroupsCount={pdfSiteGroups.length}
+        fleetMachinesCount={effectiveMachines.length}
         shiftFilter={shiftFilter}
         onShiftFilterChange={setShiftFilter}
         allSites={allSites}
@@ -209,6 +328,42 @@ export function ReportsDashboardClient({
 
       {activeTab === 'day' && (
         <ReportsDayViewTab dailyAggregatedRows={dailyAggregatedRows} todayStr={todayStr} />
+      )}
+
+      {activeTab === 'machine-30d' && (
+        <MachineMonthlySheetTab
+          departmentId={departmentId}
+          fleetMachines={effectiveMachines}
+          fleetOperators={fleetOperators}
+          selectedMachineId={selectedMachineId}
+          onSelectMachineId={setSelectedMachineId}
+          selectedMonth={selectedMonth}
+          onSelectMonth={setSelectedMonth}
+          shiftType={machineShiftType}
+          onShiftTypeChange={setMachineShiftType}
+          records={liveMachineRecords}
+          onUpsertRecord={handleUpsertMachineRecord}
+          isMonthSealed={isSelectedMonthSealed}
+          onArchiveAndSealMonth={handleArchiveAndSealMonth}
+          onOpenMonthlySummary={() => handleSelectTab('monthly-summary')}
+        />
+      )}
+
+      {activeTab === 'monthly-summary' && (
+        <MachineMonthlySummaryTab
+          selectedMonth={selectedMonth}
+          onSelectMonth={setSelectedMonth}
+          shiftType={machineShiftType}
+          onShiftTypeChange={setMachineShiftType}
+          summaryRows={monthlySummaryRows}
+          archivedSnapshots={archivedSnapshots}
+          isMonthSealed={isSelectedMonthSealed}
+          onArchiveAndSealMonth={handleArchiveAndSealMonth}
+          onInspectMachine30Day={(machineId) => {
+            setSelectedMachineId(machineId);
+            handleSelectTab('machine-30d');
+          }}
+        />
       )}
 
       {activeTab === 'archived' && (

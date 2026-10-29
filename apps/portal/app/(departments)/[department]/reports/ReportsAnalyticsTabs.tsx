@@ -2,7 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
-import { Archive, Calendar, Clock, FileText, Search } from 'lucide-react';
+import { Archive, Calendar, Clock, FileText, Search, Table2, Wrench } from 'lucide-react';
 import type { ArchivedReportData, DailyAggregatedRow, ReportSubtab } from './reports-types';
 
 interface ReportsSubtabsToolbarProps {
@@ -13,6 +13,7 @@ interface ReportsSubtabsToolbarProps {
   monthlyRollupsCount: number;
   historicalRowsCount: number;
   pdfSiteGroupsCount: number;
+  fleetMachinesCount?: number;
   shiftFilter: 'all' | 'day' | 'night';
   onShiftFilterChange: (shift: 'all' | 'day' | 'night') => void;
   allSites: string[];
@@ -30,6 +31,7 @@ export function ReportsSubtabsToolbar({
   monthlyRollupsCount,
   historicalRowsCount,
   pdfSiteGroupsCount,
+  fleetMachinesCount = 0,
   shiftFilter,
   onShiftFilterChange,
   allSites,
@@ -90,6 +92,54 @@ export function ReportsSubtabsToolbar({
             }`}
           >
             {dailyAggregatedRowsCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'machine-30d'}
+          onClick={() => onSelectTab('machine-30d')}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
+            activeTab === 'machine-30d'
+              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+          }`}
+        >
+          <Wrench className="h-4 w-4" />
+          30-Day Machine Sheet
+          <span
+            className={`rounded-full px-1.5 py-0.2 text-xs ${
+              activeTab === 'machine-30d'
+                ? 'bg-white/20 text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+            }`}
+          >
+            30d
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'monthly-summary'}
+          onClick={() => onSelectTab('monthly-summary')}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
+            activeTab === 'monthly-summary'
+              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+          }`}
+        >
+          <Table2 className="h-4 w-4" />
+          Monthly Summary
+          <span
+            className={`rounded-full px-1.5 py-0.2 text-xs ${
+              activeTab === 'monthly-summary'
+                ? 'bg-white/20 text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+            }`}
+          >
+            {fleetMachinesCount}
           </span>
         </button>
 

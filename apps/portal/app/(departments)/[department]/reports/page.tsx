@@ -3,12 +3,14 @@ import { PlantInventoryWorkspaceClient } from '~/features/departments/components
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
 import { getDepartmentContext } from '~/lib/dept-context';
+import { mapOperationsToMachineDailyRecords } from './machine-activity-helpers';
 import { ReportsDashboardClient } from './ReportsDashboardClient';
 import {
   buildEngineeringAndExportPayloads,
   buildShiftAndMachineReports,
 } from './reports-server-helpers';
 import { fetchDepartmentReportsRawData } from './reports-server-queries';
+import type { FleetMachineItem, FleetOperatorItem, ReportSubtab } from './reports-types';
 
 export default async function ReportsPage({
   params,
@@ -34,8 +36,14 @@ export default async function ReportsPage({
     const { today } = await getDepartmentContext({ department: deptSlug });
     return <PlantInventoryWorkspaceClient mode="reports" today={today} />;
   }
-  const initialTab: 'shift' | 'day' | 'archived' | 'pdf-report' =
-    tabParam === 'pdf-report' || tabParam === 'day' || tabParam === 'archived' ? tabParam : 'shift';
+  const initialTab: ReportSubtab =
+    tabParam === 'pdf-report' ||
+    tabParam === 'day' ||
+    tabParam === 'machine-30d' ||
+    tabParam === 'monthly-summary' ||
+    tabParam === 'archived'
+      ? tabParam
+      : 'shift';
   const { dept, deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
@@ -58,6 +66,8 @@ export default async function ReportsPage({
     breakdowns,
     engNotes,
     dailyLogs,
+    rawMachines,
+    rawOperators,
     completeness,
     queryWarnings,
     machineHoursByLog,
@@ -71,6 +81,44 @@ export default async function ReportsPage({
     toDateStr,
     todayStr,
     currentShift,
+  });
+
+  const latestSmrByMachine = new Map<string, number>();
+  for (const op of operations) {
+    if (!op.machine_id || op.end_smu == null) continue;
+    const prevSmr = latestSmrByMachine.get(op.machine_id) ?? 0;
+    const endSmr = Number(op.end_smu);
+    if (Number.isFinite(endSmr) && endSmr > prevSmr) {
+      latestSmrByMachine.set(op.machine_id, endSmr);
+    }
+  }
+
+  const fleetMachines: FleetMachineItem[] = rawMachines
+    .filter((mach) => mach.active !== false)
+    .map((mach) => {
+      const siteRel = Array.isArray(mach.sites) ? mach.sites[0] : mach.sites;
+      return {
+        id: mach.id,
+        name: mach.name,
+        machineType: mach.machine_type || 'Equipment',
+        serialNumber: mach.serial_number ?? null,
+        siteId: mach.site_id ?? null,
+        siteName: siteRel?.name || 'General Pit',
+        baselineSmr: latestSmrByMachine.get(mach.id) ?? 1200,
+      };
+    });
+
+  const fleetOperators: FleetOperatorItem[] = rawOperators
+    .filter((op) => op.active !== false)
+    .map((op) => ({
+      id: op.id,
+      fullName: op.full_name,
+      employeeCode: op.employee_code || '',
+    }));
+
+  const machineDailyRecords = mapOperationsToMachineDailyRecords({
+    operations,
+    fleetMachines,
   });
 
   const { shiftRows, machineOperationLogs } = buildShiftAndMachineReports({
@@ -128,6 +176,9 @@ export default async function ReportsPage({
       exportRows={exportRows}
       pdfReportData={pdfReportData}
       queryWarnings={queryWarnings}
+      fleetMachines={fleetMachines}
+      fleetOperators={fleetOperators}
+      machineDailyRecords={machineDailyRecords}
     />
   );
 }
