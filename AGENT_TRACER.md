@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Login Page (`/login`) Overlapping Brand Logo & Site Footer Marquee Speed Reduction
+
+- **Action:**
+  - Enlarged `<Logo />` in `apps/portal/app/(auth)/login/page.tsx` (`relative z-30 h-14 w-14 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-sm`) so it overlaps the `h-12 w-12` badge container without changing the container size.
+  - Slowed down the global site footer telemetry marquee animation in `libs/features/hub/ui/src/DepartmentReviews.tsx` from `[--duration:42s]` to `[--duration:110s]`.
+- **Verification:** `login/page.test.tsx`, `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Login Page (`/login`) Gold Branding Borders, Rounded Sign-In Button & Gold Footer Typography
 
 - **Action:**

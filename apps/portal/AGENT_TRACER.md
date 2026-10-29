@@ -1,3 +1,11 @@
+## 2026-10-29T07:28:00+02:00: Login Page (`/login`) Overlapping Brand Logo & Site Footer Marquee Speed Reduction
+
+- **Phase 1 (Comprehension)**: Address the 2 design feedback items on `/login`: (1) enlarge `<Logo />` inside the `h-12 w-12` badge container so the logo overlaps the container without changing the container size; (2) slow down the site footer (`footer[aria-label="Site footer"]`) marquee animation.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/(auth)/login/page.tsx`, `libs/features/hub/ui/src/DepartmentReviews.tsx`, and `apps/portal/app/(auth)/login/page.test.tsx`.
+- **Phase 3 (Design)**: Updated `<Logo />` in `apps/portal/app/(auth)/login/page.tsx` from `h-6 w-6` to `relative z-30 h-14 w-14 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-sm` while keeping the `h-12 w-12` badge container unchanged; increased the `<Marquee>` duration in `libs/features/hub/ui/src/DepartmentReviews.tsx` from `[--duration:42s]` to `[--duration:110s]`.
+- **Phase 4 (Criticism)**: Added unit test assertions in `apps/portal/app/(auth)/login/page.test.tsx` verifying the enlarged overlapping logo (`h-14 w-14 scale-110`) inside the `h-12 w-12` container.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(auth)/login/page.tsx`, `apps/portal/app/(auth)/login/page.test.tsx`, and `libs/features/hub/ui/src/DepartmentReviews.tsx`.
+
 ## 2026-10-29T06:16:00+02:00: Login Page (`/login`) Design Feedback — Rounded Sign-In Button, Gold Footer Branding & Gold Borders on Card/Inputs
 
 - **Phase 1 (Comprehension)**: Address all 5 design feedback items on `/login`: (1) add rounded corners to `button "Sign In"`; (2) change `footer "Secure industrial access • Arch-Systems v1.6.2 Security Policy Support"` to gold color to match branding; (3) add gold bordering to `div[data-testid="login-card"]`; (4) add gold bordering to `input#email`; (5) add gold bordering to `input#password`.

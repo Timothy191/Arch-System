@@ -92,7 +92,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             {/* Branding */}
             <div className="mb-6 flex flex-col items-center">
               <div className="gold-steel-border gold-steel-border-slim mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 text-arch-accent-blue shadow-diffusion-sm">
-                <Logo className="h-6 w-6 text-[var(--accent-blue)]" />
+                <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-sm" />
               </div>
               <div className="text-center">
                 <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">

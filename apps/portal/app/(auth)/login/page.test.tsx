@@ -69,6 +69,14 @@ describe('LoginPage Server Component', () => {
     const loginCard = screen.getByTestId('login-card');
     expect(loginCard.className).toContain('gold-steel-border');
 
+    const logoSvg = loginCard.querySelector('svg');
+    expect(logoSvg).not.toBeNull();
+    expect(logoSvg?.getAttribute('class')).toContain('h-14');
+    expect(logoSvg?.getAttribute('class')).toContain('w-14');
+    expect(logoSvg?.getAttribute('class')).toContain('scale-110');
+    expect(logoSvg?.parentElement?.className).toContain('h-12');
+    expect(logoSvg?.parentElement?.className).toContain('w-12');
+
     const loginFooter = screen.getByTestId('login-footer');
     expect(loginFooter.className).toContain('text-[var(--accent-blue)]');
   });

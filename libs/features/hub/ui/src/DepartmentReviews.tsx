@@ -174,7 +174,7 @@ export function DepartmentReviews() {
       </span>
 
       <div className="relative min-w-0 flex-1 overflow-hidden" style={maskStyle}>
-        <Marquee pauseOnHover className="py-0.5 [--duration:42s] [--gap:0.65rem]">
+        <Marquee pauseOnHover className="py-0.5 [--duration:110s] [--gap:0.65rem]">
           {CODEBASE_STATS.map((item) => (
             <SystemStatTickerItem key={item.id} {...item} />
           ))}

@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-29T07:28:00+02:00 - Slow Down Site Footer Telemetry Marquee Animation
+
+- **Purpose**: Slow down the horizontal scrolling telemetry ticker (`DepartmentReviews.tsx`) rendered inside the global `Site footer` from `42s` to `110s` per cycle for comfortable reading.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentReviews.tsx`: Changed `<Marquee>` duration class from `[--duration:42s]` to `[--duration:110s]`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-27T14:16:00+02:00 - DepartmentCard Header Separators & HeroRotator Test Updates
 
 - **Purpose**: Add a horizontal separator under the header row of all department panel cards (`DepartmentCard.tsx`) and update unit tests (`DepartmentCard.test.tsx`, `HeroRotator.test.tsx`) to verify the header separators and uncircled Hero carousel highlight buttons.
