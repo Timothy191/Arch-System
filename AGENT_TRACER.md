@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Availability & Utilization (`/control-room/reports`) 30-Day Per-Machine Activity Tables, Monthly Summary & Safe Monthly Archive Database
+
+- **Action:**
+  - Created [`apps/portal/app/(departments)/[department]/reports/machine-activity-helpers.ts`](<./apps/portal/app/(departments)/[department]/reports/machine-activity-helpers.ts>), [`MachineMonthlySheetTab.tsx`](<./apps/portal/app/(departments)/[department]/reports/MachineMonthlySheetTab.tsx>), and [`MachineMonthlySummaryTab.tsx`](<./apps/portal/app/(departments)/[department]/reports/MachineMonthlySummaryTab.tsx>).
+  - Wired **30-Day Machine Sheet** (`machine-30d`) and **Monthly Summary** (`monthly-summary`) tabs into [`ReportsAnalyticsTabs.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsAnalyticsTabs.tsx>), [`ReportsDashboardClient.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsDashboardClient.tsx>), [`reports-server-queries.ts`](<./apps/portal/app/(departments)/[department]/reports/reports-server-queries.ts>), [`reports-types.ts`](<./apps/portal/app/(departments)/[department]/reports/reports-types.ts>), and [`page.tsx`](<./apps/portal/app/(departments)/[department]/reports/page.tsx>).
+  - Each machine now has a live 30/31-day calendar-month table matching the `/control-room/engineering-notes` 21-column SMR, 12-Delay Category, Availability & Utilization ledger, with a Machine Switcher, Fleet Monthly Summary tab, and safe monthly archiving (`arch_machine_monthly_activity_archive_v1`) to build a historical Machine Activity Database.
+- **Verification:** `ReportsDashboardClient.test.tsx` (`6/6 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Plant & Processing Delays (`/plant-processing/delays`) "Log End Time" Popup Modal
 
 - **Action:**

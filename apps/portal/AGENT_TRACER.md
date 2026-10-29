@@ -1,3 +1,11 @@
+## 2026-10-29T14:33:00+02:00: Availability & Utilization (`/control-room/reports`) 30-Day Per-Machine Tables, Monthly Summary & Safe Monthly Archiving
+
+- **Phase 1 (Comprehension)**: Bring the 21-column SMR & 12-Delay Category table from `/control-room/engineering-notes` into Availability & Utilization (`/control-room/reports`) as a 30-day calendar-month table per machine with machine switching, a Monthly Summary tab, and safe archiving of previous months' machine tables into a Machine Activity Database.
+- **Phase 2 (Evidence)**: Inspected `EngineeringOverviewTable.tsx`, `shift-sheet-buckets.ts`, `ReportsDashboardClient.tsx`, `ReportsAnalyticsTabs.tsx`, `reports-server-queries.ts`, and `page.tsx`.
+- **Phase 3 (Design)**: Created `machine-activity-helpers.ts`, `MachineMonthlySheetTab.tsx`, and `MachineMonthlySummaryTab.tsx`, and wired `machine-30d` and `monthly-summary` tabs into `ReportsDashboardClient.tsx` and `page.tsx`.
+- **Phase 4 (Criticism)**: Added unit tests in `ReportsDashboardClient.test.tsx` verifying 30/31-day row generation, machine switching, Monthly Summary drill-down, and safe month sealing/archiving.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/reports/{page.tsx,reports-types.ts,reports-server-queries.ts,ReportsAnalyticsTabs.tsx,ReportsDashboardClient.tsx,ReportsDashboardClient.test.tsx,machine-activity-helpers.ts,MachineMonthlySheetTab.tsx,MachineMonthlySummaryTab.tsx}`.
+
 ## 2026-10-29T14:11:00+02:00: Plant & Processing Delays (`/plant-processing/delays`) "Log End Time" Popup Modal
 
 - **Phase 1 (Comprehension)**: Address design feedback on `button[data-testid^="select-delay-"]` ("Log End Time") on `/plant-processing/delays`: open a popup with a simple input for End Time when interacted with.

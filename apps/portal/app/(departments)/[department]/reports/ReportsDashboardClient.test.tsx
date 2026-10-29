@@ -52,6 +52,10 @@ jest.mock('@/lib/shift-completeness', () => ({
   getShiftCompleteness: jest.fn(),
 }));
 
+jest.mock('@/app/(departments)/[department]/engineering-notes/actions', () => ({
+  saveMachineOverviewRow: jest.fn().mockResolvedValue({ success: true }),
+}));
+
 describe('ReportsDashboardClient — PDF Report Subtab', () => {
   const shiftRows: ShiftReportRow[] = [
     {
@@ -496,5 +500,42 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     expect(warningBanner).toHaveTextContent(
       'machine_operations: Embed relation delay_categories failed'
     );
+  });
+
+  it('should render the 30-Day Machine Sheet tab with calendar-day rows, allow switching machines, and navigate to Monthly Summary with safe monthly archiving', () => {
+    render(<ReportsDashboardClient {...baseProps} />);
+
+    // 1. Open 30-Day Machine Sheet tab
+    fireEvent.click(screen.getByRole('tab', { name: /30-Day Machine Sheet/i }));
+    expect(screen.getByTestId('machine-30d-sheet-tab')).toBeInTheDocument();
+
+    // Verify all 31 calendar days of October 2026 are rendered for the active machine
+    expect(screen.getByTestId('machine-day-row-2026-10-01')).toBeInTheDocument();
+    expect(screen.getByTestId('machine-day-row-2026-10-30')).toBeInTheDocument();
+    expect(screen.getByTestId('machine-day-row-2026-10-31')).toBeInTheDocument();
+
+    // Verify switching machines via Next button switches the 30-day table
+    fireEvent.click(screen.getByTestId('next-machine-30d-btn'));
+    expect(
+      screen.getByRole('table', { name: /30-Day Activity Table for DZ-02 CAT D9R/i })
+    ).toBeInTheDocument();
+
+    // 2. Open Monthly Summary tab
+    fireEvent.click(screen.getByRole('tab', { name: /Monthly Summary/i }));
+    expect(screen.getByTestId('machine-monthly-summary-tab')).toBeInTheDocument();
+    expect(screen.getByTestId('archived-machine-months-vault')).toBeInTheDocument();
+
+    // Archive and seal the active month into the Machine Activity Database
+    fireEvent.click(screen.getByTestId('seal-monthly-summary-archive-btn'));
+    expect(screen.getByTestId('seal-monthly-summary-archive-btn')).toHaveTextContent(
+      /Archived & Sealed/i
+    );
+
+    // Drill down from Monthly Summary into EX-01 Liebherr 984's 30-day table
+    fireEvent.click(screen.getByTestId('open-machine-30d-mach-ex-01-liebherr-984'));
+    expect(screen.getByTestId('machine-30d-sheet-tab')).toBeInTheDocument();
+    expect(
+      screen.getByRole('table', { name: /30-Day Activity Table for EX-01 Liebherr 984/i })
+    ).toBeInTheDocument();
   });
 });

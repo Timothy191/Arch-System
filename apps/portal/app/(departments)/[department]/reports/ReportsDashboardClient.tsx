@@ -37,6 +37,8 @@ import {
 import type {
   ArchivedMachineMonthSnapshot,
   EngineeringLogItem,
+  FleetMachineItem,
+  FleetOperatorItem,
   MachineDailyOverviewRecord,
   MachineOperationLogItem,
   ReportSubtab,
@@ -54,6 +56,11 @@ export type {
   ShiftCoverageMissingItem,
   ShiftReportRow,
 };
+
+const EMPTY_QUERY_WARNINGS: string[] = [];
+const EMPTY_FLEET_MACHINES: FleetMachineItem[] = [];
+const EMPTY_FLEET_OPERATORS: FleetOperatorItem[] = [];
+const EMPTY_MACHINE_DAILY_RECORDS: MachineDailyOverviewRecord[] = [];
 
 export function ReportsDashboardClient({
   departmentId,
@@ -73,10 +80,10 @@ export function ReportsDashboardClient({
   csvContent,
   exportRows,
   pdfReportData,
-  queryWarnings = [],
-  fleetMachines = [],
-  fleetOperators = [],
-  machineDailyRecords = [],
+  queryWarnings = EMPTY_QUERY_WARNINGS,
+  fleetMachines = EMPTY_FLEET_MACHINES,
+  fleetOperators = EMPTY_FLEET_OPERATORS,
+  machineDailyRecords = EMPTY_MACHINE_DAILY_RECORDS,
 }: ReportsDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<ReportSubtab>(initialTab);
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
@@ -132,8 +139,11 @@ export function ReportsDashboardClient({
 
   const [archivedSnapshots, setArchivedSnapshots] =
     useState<ArchivedMachineMonthSnapshot[]>(initialArchivedSnapshots);
+  const hasHydratedArchivesRef = useRef(false);
 
   useEffect(() => {
+    if (hasHydratedArchivesRef.current) return;
+    hasHydratedArchivesRef.current = true;
     setArchivedSnapshots(loadStoredMachineMonthArchives(initialArchivedSnapshots));
   }, [initialArchivedSnapshots]);
 

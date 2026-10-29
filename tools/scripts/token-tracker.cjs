@@ -47,7 +47,7 @@ const AGENTS_DIR = path.join(ROOT, '.agents');
 const DEFAULT_BUDGET = {
   maxRetrospectives: 50,
   maxRetrospectiveSize: 5000,
-  maxRulesSize: 100000,
+  maxRulesSize: 108000,
   maxSkillsSize: 350000,
   maxSessionContext: 500000,
   maxRootInstructionsSize: 25000,
