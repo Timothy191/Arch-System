@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Machine Operations (`/control-room/machine-operations`) Dozer Activity Section (`Roll Over` vs `Other` Checkboxes)
+
+- **Action:**
+  - Added a dedicated **Dozer Activity Type** section (`data-testid="dozer-activity-section"`) in `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx` whenever a Dozer is selected (`isDozer`), allowing operators to check **`Roll Over`** (`data-testid="dozer-activity-rollover"`) or **`Other`** (`data-testid="dozer-activity-other"`) with quick-select activity presets and optional custom details.
+  - Updated `MachineOperationsForm.tsx`, `MachineOperationsSummaryStrip.tsx`, `MachineOperationsList.tsx`, and `page.tsx` so Dozers checked as `Roll Over` compute `hours * 250 BCM` and sync to `dozer_rollover_logs`, while Dozers checked as `Other` record the activity label and report `0 BCM` roll-over.
+- **Verification:** `MachineOperationsList.test.tsx` (`11/11 PASS`), `pnpm audit:tailwind`, `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Engineering Overview (`/control-room/engineering-notes`) 3-Step Quick Delay Logger, Fleet Filter Bar & Simplified Table View
 
 - **Action:**

@@ -74,6 +74,13 @@ interface MachineOperationsFormProps {
 // Auto-save key for localStorage
 const getAutoSaveKey = (deptId: string) => `machine-ops-draft-${deptId}`;
 
+const DOZER_OTHER_ACTIVITY_PRESETS = [
+  'Road / Ramp Maintenance',
+  'Stockpile Push',
+  'Floor / Pad Cleanup',
+  'Berm Construction',
+] as const;
+
 export function MachineOperationsForm({
   departmentId,
   machines,
@@ -106,6 +113,8 @@ export function MachineOperationsForm({
     metersDrilled: '',
     blockDrilled: '',
     holesDrilled: '',
+    dozerActivityType: 'rollover' as 'rollover' | 'other',
+    dozerOtherDetails: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -314,6 +323,13 @@ export function MachineOperationsForm({
         insertPayload.block_drilled = formData.blockDrilled.trim();
         insertPayload.meters_drilled = parseFloat(formData.metersDrilled);
         insertPayload.holes_drilled = parseInt(formData.holesDrilled, 10);
+      } else if (isDozer) {
+        insertPayload.block_drilled =
+          formData.dozerActivityType === 'rollover'
+            ? 'Roll Over'
+            : formData.dozerOtherDetails.trim()
+              ? `Other: ${formData.dozerOtherDetails.trim()}`
+              : 'Other';
       }
 
       const { data, error } = await supabase
@@ -324,7 +340,14 @@ export function MachineOperationsForm({
 
       if (error) throw error;
 
-      if (isDozer && startSmuVal !== null && endSmuVal !== null && endSmuVal >= startSmuVal) {
+      const isDozerRollover = isDozer && formData.dozerActivityType === 'rollover';
+
+      if (
+        isDozerRollover &&
+        startSmuVal !== null &&
+        endSmuVal !== null &&
+        endSmuVal >= startSmuVal
+      ) {
         const selectedSite = sites.find((s) => s.id === formData.siteId);
         const selectedOperator = operators.find((op) => op.id === formData.operatorId);
         await supabase.from('dozer_rollover_logs').insert({
@@ -360,6 +383,8 @@ export function MachineOperationsForm({
         metersDrilled: '',
         blockDrilled: '',
         holesDrilled: '',
+        dozerActivityType: 'rollover',
+        dozerOtherDetails: '',
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
@@ -369,7 +394,9 @@ export function MachineOperationsForm({
           : 'Machine operation logged successfully'
       );
       // Refresh page to show new data
-      await invalidateShiftSheetCache({ departmentId, wroteDozerRolls: isDozer }).catch(() => {});
+      await invalidateShiftSheetCache({ departmentId, wroteDozerRolls: isDozerRollover }).catch(
+        () => {}
+      );
       router.refresh();
     } catch (_err) {
       toast.error('Failed to save. Please try again.');
@@ -651,6 +678,134 @@ export function MachineOperationsForm({
           </div>
         )}
 
+        {/* Dozer Specific Section: Check Roll Over or Other */}
+        {isDozer && (
+          <div
+            data-testid="dozer-activity-section"
+            className="space-y-3 rounded-xl border border-[var(--accent-blue)]/30 bg-[var(--bg-secondary)]/80 p-4"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="font-semibold text-[var(--text-heading)] text-sm">
+                  Dozer Activity Type
+                </h4>
+                <p className="text-[var(--text-muted)] text-xs">
+                  Check the related box for this Dozer operation: Roll Over or Other
+                </p>
+              </div>
+              <span className="rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-semibold text-[11px] text-[var(--accent-blue)]">
+                {formData.dozerActivityType === 'rollover'
+                  ? 'Roll Over (250 BCM/h)'
+                  : 'Other Dozer Activity'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label
+                data-testid="dozer-activity-rollover-card"
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
+                  formData.dozerActivityType === 'rollover'
+                    ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)]/10'
+                    : 'border-[var(--border-default)] bg-[var(--bg-primary)] hover:border-[var(--accent-blue)]/40'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  data-testid="dozer-activity-rollover"
+                  aria-label="Roll Over"
+                  checked={formData.dozerActivityType === 'rollover'}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      dozerActivityType: 'rollover',
+                    }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] accent-[var(--accent-blue)]"
+                />
+                <div className="space-y-0.5">
+                  <span className="block font-semibold text-[var(--text-heading)] text-sm">
+                    Roll Over
+                  </span>
+                  <span className="block text-[var(--text-muted)] text-xs">
+                    Rehabilitation &amp; overburden push ({DOZER_PUSH_FACTOR_BCM_PER_HOUR} BCM/h
+                    roll-over)
+                  </span>
+                </div>
+              </label>
+
+              <label
+                data-testid="dozer-activity-other-card"
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
+                  formData.dozerActivityType === 'other'
+                    ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)]/10'
+                    : 'border-[var(--border-default)] bg-[var(--bg-primary)] hover:border-[var(--accent-blue)]/40'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  data-testid="dozer-activity-other"
+                  aria-label="Other"
+                  checked={formData.dozerActivityType === 'other'}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      dozerActivityType: 'other',
+                    }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] accent-[var(--accent-blue)]"
+                />
+                <div className="space-y-0.5">
+                  <span className="block font-semibold text-[var(--text-heading)] text-sm">
+                    Other
+                  </span>
+                  <span className="block text-[var(--text-muted)] text-xs">
+                    Road/ramp maintenance, stockpile push, pad prep, or general site work
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {formData.dozerActivityType === 'other' && (
+              <div className="space-y-2 pt-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {DOZER_OTHER_ACTIVITY_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          dozerOtherDetails: preset,
+                        }))
+                      }
+                      className={`rounded-md border px-2 py-1 font-medium text-[11px] transition-colors ${
+                        formData.dozerOtherDetails === preset
+                          ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
+                          : 'border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  aria-label="Other dozer activity details"
+                  placeholder="Specify other dozer activity (optional)..."
+                  value={formData.dozerOtherDetails}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      dozerOtherDetails: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-sm focus:border-[var(--accent-blue)] focus:outline-none"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Hours Worked & Dozer Roll-over Display */}
         {(hoursWorked !== null || isDozer) && (
           <div className="space-y-3">
@@ -673,19 +828,34 @@ export function MachineOperationsForm({
               >
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-[var(--text-heading)] text-sm">
-                    Roll-over Amount:
+                    {formData.dozerActivityType === 'rollover'
+                      ? 'Roll-over Amount:'
+                      : 'Dozer Activity:'}
                   </span>
                   <span className="font-mono text-[var(--text-muted)] text-xs">
-                    ({(hoursWorked ?? 0).toFixed(2)}h &times; {DOZER_PUSH_FACTOR_BCM_PER_HOUR} =
-                    Total Roll-over)
+                    {formData.dozerActivityType === 'rollover' ? (
+                      <>
+                        ({(hoursWorked ?? 0).toFixed(2)}h &times; {DOZER_PUSH_FACTOR_BCM_PER_HOUR} =
+                        Total Roll-over)
+                      </>
+                    ) : (
+                      <>
+                        Other
+                        {formData.dozerOtherDetails.trim()
+                          ? ` — ${formData.dozerOtherDetails.trim()}`
+                          : ' (General / Non-Roll-over)'}
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3.5 py-1.5">
                   <span className="text-[var(--text-muted)] text-xs">Total Roll-over:</span>
                   <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
-                    {Number(
-                      ((hoursWorked ?? 0) * DOZER_PUSH_FACTOR_BCM_PER_HOUR).toFixed(1)
-                    ).toLocaleString()}{' '}
+                    {formData.dozerActivityType === 'rollover'
+                      ? Number(
+                          ((hoursWorked ?? 0) * DOZER_PUSH_FACTOR_BCM_PER_HOUR).toFixed(1)
+                        ).toLocaleString()
+                      : '0'}{' '}
                     BCM
                   </span>
                 </div>

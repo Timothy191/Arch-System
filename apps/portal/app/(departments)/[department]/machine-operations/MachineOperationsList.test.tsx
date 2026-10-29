@@ -1,6 +1,29 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MachineOperationsForm } from './MachineOperationsForm';
 import { MachineOperationsList } from './MachineOperationsList';
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: jest.fn(),
+  }),
+}));
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: () => ({
+    from: () => ({
+      insert: () => ({
+        select: () => ({
+          single: jest.fn().mockResolvedValue({ data: { id: 'op-new' }, error: null }),
+        }),
+      }),
+    }),
+  }),
+}));
+
+jest.mock('@/actions/shift-sheet-cache', () => ({
+  invalidateShiftSheetCache: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('MachineOperationsList', () => {
   const mockOperations = [
@@ -305,6 +328,58 @@ describe('MachineOperationsList', () => {
       expect(screen.getByText('DR-301 (Sandvik DR410i)')).toBeInTheDocument();
       expect(screen.queryByText('EX-101 (CAT 6060)')).not.toBeInTheDocument();
       expect(screen.queryByText('DT-201 (CAT 777)')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('MachineOperationsForm Dozer Activity Selection (Roll Over vs Other)', () => {
+    const dozerMachines = [
+      {
+        id: 'dz-22',
+        name: 'BD-22',
+        machine_type: 'Dozer',
+        serial_number: 'SN-BD22',
+        site_id: 'site-a',
+        latest_smu: 1271,
+      },
+      {
+        id: 'ex-101',
+        name: 'EX-101',
+        machine_type: 'Excavator',
+        serial_number: 'SN-EX101',
+        site_id: 'site-a',
+        latest_smu: 1000,
+      },
+    ];
+
+    it('renders the Dozer Activity Type section with Roll Over and Other checkboxes when a Dozer is selected', () => {
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={dozerMachines}
+          operators={[{ id: 'op-1', full_name: 'Sam Dozer', employee_code: 'EMP-01' }]}
+          sites={[{ id: 'site-a', name: 'Pit North', site_code: 'BKF' }]}
+          todayOperations={[]}
+        />
+      );
+
+      expect(screen.queryByTestId('dozer-activity-section')).not.toBeInTheDocument();
+
+      const selects = screen.getAllByRole('combobox');
+      fireEvent.change(selects[0]!, { target: { value: 'dz-22' } });
+
+      expect(screen.getByTestId('dozer-activity-section')).toBeInTheDocument();
+      const rolloverCheckbox = screen.getByTestId('dozer-activity-rollover') as HTMLInputElement;
+      const otherCheckbox = screen.getByTestId('dozer-activity-other') as HTMLInputElement;
+
+      expect(rolloverCheckbox.checked).toBe(true);
+      expect(otherCheckbox.checked).toBe(false);
+
+      // Switch to Other
+      fireEvent.click(otherCheckbox);
+      expect(rolloverCheckbox.checked).toBe(false);
+      expect(otherCheckbox.checked).toBe(true);
+      expect(screen.getByLabelText('Other dozer activity details')).toBeInTheDocument();
+      expect(screen.getByTestId('dozer-rollover-summary')).toHaveTextContent('0 BCM');
     });
   });
 });

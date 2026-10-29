@@ -290,15 +290,24 @@ export function OperationCard({
   const isDozer =
     operation.machine?.machine_type === 'Dozer' ||
     Boolean(operation.machine?.machine_type?.toLowerCase().includes('dozer'));
+  const isDozerOtherActivity =
+    isDozer && Boolean(operation.block_drilled?.toLowerCase().startsWith('other'));
+  const isDozerRollover = isDozer && !isDozerOtherActivity;
 
   const binFactor = operation.machine?.bin_factor || 0;
   const machineLoads = loadsByMachine.get(operation.machine_id) || 0;
-  const materialBCM = isDozer ? (operation.hours_worked || 0) * 250 : machineLoads * binFactor;
-  const bcmPerHour = isDozer
+  const materialBCM = isDozerRollover
+    ? (operation.hours_worked || 0) * 250
+    : isDozerOtherActivity
+      ? 0
+      : machineLoads * binFactor;
+  const bcmPerHour = isDozerRollover
     ? 250
-    : (operation.hours_worked || 0) > 0
-      ? materialBCM / (operation.hours_worked || 1)
-      : 0;
+    : isDozerOtherActivity
+      ? 0
+      : (operation.hours_worked || 0) > 0
+        ? materialBCM / (operation.hours_worked || 1)
+        : 0;
 
   const machineBreakdown =
     breakdownsByFleetId.get(operation.machine_id) ||
@@ -381,7 +390,9 @@ export function OperationCard({
                   <>
                     <span className="text-[var(--border-emphasis)]">|</span>
                     <span className="font-medium text-[var(--text-heading)]">
-                      Block: {operation.block_drilled}
+                      {isDozer
+                        ? `Activity: ${operation.block_drilled}`
+                        : `Block: ${operation.block_drilled}`}
                     </span>
                   </>
                 )}
@@ -433,16 +444,22 @@ export function OperationCard({
                   </span>
                 </>
               )}
-              {(binFactor > 0 || isDozer) && (
+              {(binFactor > 0 || isDozerRollover) && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
                   <span className="text-[var(--accent-blue)]">
-                    {isDozer
+                    {isDozerRollover
                       ? `Roll-over: ${materialBCM.toFixed(1)} BCM`
                       : `${materialBCM.toFixed(1)} BCM`}
                   </span>
                   <span className="text-[var(--border-emphasis)]">|</span>
                   <span className="text-accent-blue">{bcmPerHour.toFixed(1)} BCM/h</span>
+                </>
+              )}
+              {isDozerOtherActivity && (
+                <>
+                  <span className="text-[var(--border-emphasis)]">|</span>
+                  <span className="text-[var(--text-secondary)]">Other Dozer Activity</span>
                 </>
               )}
             </div>

@@ -87,6 +87,9 @@ function MachineOperationsList({
               op.machine?.machine_type === 'Dozer' ||
               Boolean(op.machine?.machine_type?.toLowerCase().includes('dozer'));
             if (isDozerOp) {
+              if (op.block_drilled?.toLowerCase().startsWith('other')) {
+                return sum;
+              }
               return sum + (op.hours_worked || 0) * 250;
             }
             const bf = op.machine?.bin_factor || 0;

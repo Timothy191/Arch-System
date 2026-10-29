@@ -198,6 +198,13 @@ export default async function MachineOperationsPage({
       op.machine?.machine_type === 'Dozer' ||
       Boolean(op.machine?.machine_type?.toLowerCase().includes('dozer'));
     if (isDozerOp) {
+      if (
+        String(op.block_drilled || '')
+          .toLowerCase()
+          .startsWith('other')
+      ) {
+        return;
+      }
       totalMaterialBCM += (op.hours_worked || 0) * 250;
       return;
     }

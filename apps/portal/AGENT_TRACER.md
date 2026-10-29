@@ -1,3 +1,11 @@
+## 2026-10-29T08:50:00+02:00: Machine Operations (`/control-room/machine-operations`) Dozer Activity Section (`Roll Over` vs `Other` Checkboxes)
+
+- **Phase 1 (Comprehension)**: Address design feedback on `div#machine-operations-form` (`/control-room/machine-operations`): when a Dozer is selected, display a section where the operator checks the related box (`Roll Over` or `Other`).
+- **Phase 2 (Evidence)**: Inspected `MachineOperationsForm.tsx`, `MachineOperationsSummaryStrip.tsx`, `MachineOperationsList.tsx`, and `page.tsx`.
+- **Phase 3 (Design)**: Added `data-testid="dozer-activity-section"` in `MachineOperationsForm.tsx` when `isDozer` is true with `Roll Over` (`data-testid="dozer-activity-rollover"`) and `Other` (`data-testid="dozer-activity-other"`) checkbox cards, quick-select activity chips (`Road / Ramp Maintenance`, `Stockpile Push`, `Floor / Pad Cleanup`, `Berm Construction`), and an optional details input; gated `250 BCM/h` roll-over calculation and `dozer_rollover_logs` insertion on `dozerActivityType === 'rollover'`.
+- **Phase 4 (Criticism)**: Added unit test coverage in `MachineOperationsList.test.tsx` verifying Dozer Activity Type checkbox rendering and `Roll Over` / `Other` switching.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/machine-operations/{MachineOperationsForm.tsx,MachineOperationsSummaryStrip.tsx,MachineOperationsList.tsx,MachineOperationsList.test.tsx,page.tsx}`.
+
 ## 2026-10-29T08:15:00+02:00: Engineering Overview (`/control-room/engineering-notes`) 3-Step Quick Delay Logger, Fleet Filter Bar & Simplified Table View
 
 - **Phase 1 (Comprehension)**: Address design feedback on `data-testid="engineering-overview-ledger"` (`/control-room/engineering-notes`): keep the full fleet shift SMR/delays/availability/utilization concept while making it much easier for operators to log delays without getting confused by the 78-machine × 20-column table.
