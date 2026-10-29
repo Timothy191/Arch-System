@@ -11,7 +11,7 @@
     },
     {
       "path": "/api/cron/shift-handoff",
-      "schedule": "45 5,17 * * *"
+      "schedule": "45 5 * * *"
     },
     {
       "path": "/api/cron/contractor-expiry",

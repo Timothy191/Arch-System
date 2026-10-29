@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Vercel Active Team Migration (`server-management1`), Environment Secret Sync & Daily Cron Schedule
+
+- **Action:**
+  - Provisioned and linked `arch-system` (`prj_0K3wJh33Iqt92KGcXR0kqpPUvUTR`) on the active Vercel team (`team_uW3uV9UOCqr95WZcfih4H6sp` / `server-management1`), replacing the billing-disabled team link (`team_9puAfgXPqVuwIBENr1LmhCxO`).
+  - Synchronized all 63 production and preview environment variables (Supabase, Upstash Serverless Redis, Cron/Scanner secrets, Sentry, and integration keys) to the active Vercel project.
+  - Updated `/api/cron/shift-handoff` schedule in `vercel.json` from `45 5,17 * * *` to `45 5 * * *` to comply with daily cron schedule limits on the active Vercel plan.
+- **Verification:** `node tools/scripts/vercel-preflight.cjs --prod` (`100% PASS`).
+
 ## [2026-10-28] - System Stability & Responsiveness Optimization Pass (Server Waterfalls, JWKS Auth, Proxy Static UUID Fast-Path & Client Route Switching)
 
 - **Action:**
