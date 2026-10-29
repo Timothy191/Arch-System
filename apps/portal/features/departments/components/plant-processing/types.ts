@@ -106,6 +106,10 @@ export interface PlantWorkspaceData {
 export const PLANT_SEAM_OPTIONS = [
   'Seam 2 Lower',
   'Seam 4 Upper',
+  '4#Lower',
+  '2#Lower',
+  '2#Upper',
+  '5#Seam',
   'ROM Blend A',
   'High-Ash Stockpile',
 ] as const;

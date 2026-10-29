@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Plant & Processing Hourly Sheet (`/plant-processing/hourly-sheet`) Material Options (`4#Lower`, `2#Lower`, `2#Upper`, `5#Seam`)
+
+- **Action:**
+  - Added `'4#Lower'`, `'2#Lower'`, `'2#Upper'`, and `'5#Seam'` to `PLANT_SEAM_OPTIONS` in `apps/portal/features/departments/components/plant-processing/types.ts` so `select#circuit-unit-header-material`, `select#plant-feed-seam-blend-select`, and every stream's `select#circuit-material-${stream.key}` on `/plant-processing/hourly-sheet` include all four coal seam options.
+  - Updated `apps/portal/features/departments/components/plant-processing/plant-processing.test.tsx` to assert the presence and selection of `4#Lower`, `2#Lower`, `2#Upper`, and `5#Seam`.
+- **Verification:** `plant-processing.test.tsx` (`7/7 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Automatic End-of-Shift Breakdown Carry-Over into New Shift (`/control-room/engineering-notes` & `/control-room/machine-operations`)
 
 - **Action:**

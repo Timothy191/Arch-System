@@ -119,19 +119,27 @@ describe('Plant & Processing Workspace Components', () => {
       const romVarSlot1 = screen.getByTestId('variance-romFeedTonnes-1');
       expect(romVarSlot1).toHaveTextContent('+25');
 
-      // Verify redesigned Circuit & Unit column material dropdowns
+      // Verify redesigned Circuit & Unit column material dropdowns include 4#Lower, 2#Lower, 2#Upper, 5#Seam
       const romMaterialSelect = screen.getByTestId(
         'material-select-romFeedTonnes'
       ) as HTMLSelectElement;
       expect(romMaterialSelect.value).toBe('Seam 2 Lower');
-      fireEvent.change(romMaterialSelect, { target: { value: 'Seam 4 Upper' } });
-      expect(romMaterialSelect.value).toBe('Seam 4 Upper');
+      const romOptionValues = Array.from(romMaterialSelect.options).map((opt) => opt.value);
+      expect(romOptionValues).toEqual(
+        expect.arrayContaining(['4#Lower', '2#Lower', '2#Upper', '5#Seam'])
+      );
+      fireEvent.change(romMaterialSelect, { target: { value: '4#Lower' } });
+      expect(romMaterialSelect.value).toBe('4#Lower');
 
       const headerMaterialSelect = screen.getByLabelText(
         'Circuit & Unit Material'
       ) as HTMLSelectElement;
-      fireEvent.change(headerMaterialSelect, { target: { value: 'ROM Blend A' } });
-      expect(romMaterialSelect.value).toBe('ROM Blend A');
+      const headerOptionValues = Array.from(headerMaterialSelect.options).map((opt) => opt.value);
+      expect(headerOptionValues).toEqual(
+        expect.arrayContaining(['4#Lower', '2#Lower', '2#Upper', '5#Seam'])
+      );
+      fireEvent.change(headerMaterialSelect, { target: { value: '5#Seam' } });
+      expect(romMaterialSelect.value).toBe('5#Seam');
 
       const row1RomInput = screen.getByLabelText('Row 1 ROM Feed') as HTMLInputElement;
       const row1CleanInput = screen.getByLabelText('Row 1 Clean Coal') as HTMLInputElement;

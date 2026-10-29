@@ -1,3 +1,11 @@
+## 2026-10-29T10:38:00+02:00: Plant & Processing Hourly Sheet (`/plant-processing/hourly-sheet`) Material Options (`4#Lower`, `2#Lower`, `2#Upper`, `5#Seam`)
+
+- **Phase 1 (Comprehension)**: Address design feedback on `select#circuit-unit-header-material` (`/plant-processing/hourly-sheet`): add `4#Lower`, `2#Lower`, `2#Upper`, and `5#Seam` to all Circuit & Unit material selectors.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/features/departments/components/plant-processing/types.ts` and `PlantHourlyMatrixSection.tsx`. Verified that `PLANT_SEAM_OPTIONS` feeds `select#circuit-unit-header-material`, `select#plant-feed-seam-blend-select`, and every stream's `select#circuit-material-${stream.key}` dropdown.
+- **Phase 3 (Design)**: Added `'4#Lower'`, `'2#Lower'`, `'2#Upper'`, and `'5#Seam'` to `PLANT_SEAM_OPTIONS` in `types.ts`.
+- **Phase 4 (Criticism)**: Updated `plant-processing.test.tsx` to assert that `4#Lower`, `2#Lower`, `2#Upper`, and `5#Seam` are present and selectable in both the row material dropdowns and the header material dropdown.
+- **Phase 5 (Contract)**: Modified `apps/portal/features/departments/components/plant-processing/{types.ts,plant-processing.test.tsx}`.
+
 ## 2026-10-29T10:05:00+02:00: Automatic End-of-Shift Breakdown Carry-Over into New Shift
 
 - **Phase 1 (Comprehension)**: Ensure that whenever a machine ends a shift on breakdown, it automatically carries over into the new shift (`day` -> `night` on the same date; `night` -> `day` on the next calendar date) across Control Room Engineering Overview (`/control-room/engineering-notes`) and Machine Operations (`/control-room/machine-operations`).
