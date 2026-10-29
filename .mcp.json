@@ -17,12 +17,6 @@
       "cwd": "/tmp",
       "description": "Chrome DevTools MCP for browser inspection and automation",
       "type": "stdio"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
-      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
-      "type": "stdio"
     }
   }
 }
