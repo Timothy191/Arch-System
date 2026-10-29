@@ -4,6 +4,18 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Client & Redis Load Optimization Phase 3 (P3-T1, P3-T2, F9, Single-Flight, L1 Sweep, Query Tiers & Observability)
+
+- **Action:**
+  - **P3-T1 (Cross-Tab `BroadcastChannel` Coordination)**: Added `subscribeQueryCacheCrossTab` in `apps/portal/lib/query-cache.ts` (`arch:portal:query-cache`) and cross-tab probe result sharing in `libs/shared/hooks/src/usePitConnectivity.ts` (`arch:pit-connectivity`) so follower tabs adopt leader probe status/latency and defer duplicate `/api/health/live` probes.
+  - **P3-T2 (`staleTimes` in `next.config.mjs`)**: Wired `experimental.staleTimes: { dynamic: 30, static: 300 }` in `apps/portal/next.config.mjs` under `cacheComponents: true` to reduce redundant RSC re-fetches on navigation.
+  - **Backend `cacheWrap` Single-Flight Coalescing**: Restructured `cacheWrap` in `packages/redis/src/cache.ts` with pre-lookup and post-lookup `activeMissFetches` coalescing plus `startBackgroundRefresh`.
+  - **Periodic L1 Sweep (`startL1Sweep`)**: Added `startL1Sweep` / `stopL1Sweep` in `packages/redis/src/l1.ts` (with `.unref()`) and wired auto-start in `packages/redis/src/client.ts`.
+  - **Per-Query `staleTime` Tiers, `QUERY_CACHE_BUSTER` Automation & Rehydrate Metrics**: Added `QUERY_STALE_TIMES`, `resolveQueryStaleTime`, `buildQueryCacheBuster` (`portal-v${version}-s${schemaRevision}`), `inspectPersistedCacheHit`, and `getQueryCacheMetrics` in `apps/portal/lib/query-cache.ts` and `apps/portal/app/ReactQueryProvider.tsx`.
+  - **Service Worker Cache Caps (`F9`)**: Added `MAX_CACHE_ENTRIES = 120` and `MAX_CACHE_AGE_MS = 7 days` with `enforceCacheBounds` in `apps/portal/public/sw.js`.
+  - **`ScadaPanel` Merge Immutability & Delete-Path Guard**: Hardened `mergeScadaRows` in `scada-panel-derived.ts` and added frozen-input immutability + `excavator_activity` `DELETE` tests in `ScadaPanel.load.test.tsx`.
+- **Verification:** `@repo/redis` (`13/13 suites, 146/146 tests PASS`), `portal` (`query-cache.test.ts`, `usePitConnectivity.test.ts`, `ScadaPanel.load.test.tsx` `17/17 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - LLM Wiki Enhancements: Missing Department Entities, Wiki Linter & GitHub Wiki Auto-Sync
 
 - **Action:**

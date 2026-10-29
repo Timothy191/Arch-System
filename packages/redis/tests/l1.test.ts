@@ -6,6 +6,8 @@ import {
   memorySet,
   memorySweep,
   readMemory,
+  startL1Sweep,
+  stopL1Sweep,
 } from '../src/l1';
 import { cacheCategoryFromKey, DEFAULT_L1_TTL_SECONDS, l1TtlForKey } from '../src/registry';
 
@@ -66,6 +68,24 @@ describe('L1 in-memory cache', () => {
 
       expect(memorySweep()).toBe(1);
       expect(readMemory('fresh').hit).toBe(true);
+    });
+
+    it('periodically sweeps expired L1 entries via startL1Sweep and cleans up via stopL1Sweep', () => {
+      jest.useFakeTimers();
+      try {
+        memorySet('expired-entry', 'v', -1);
+        memorySet('live-entry', 'v', 120);
+        const onSweep = jest.fn();
+
+        startL1Sweep(1_000, onSweep);
+        jest.advanceTimersByTime(1_050);
+
+        expect(onSweep).toHaveBeenCalledWith(1);
+        expect(memoryRawSize()).toBe(1);
+      } finally {
+        stopL1Sweep();
+        jest.useRealTimers();
+      }
     });
   });
 });

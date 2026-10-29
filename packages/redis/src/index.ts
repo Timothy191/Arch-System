@@ -40,11 +40,14 @@ export {
   cacheWrap,
   cacheWriteThroughSupabase,
   clearMemoryCache,
+  DEFAULT_L1_SWEEP_INTERVAL_MS,
   memoryDeleteByPrefix,
   memoryGet,
   memoryLiveSize,
   memorySet,
   memorySweep,
+  startL1Sweep,
+  stopL1Sweep,
 } from './cache';
 export {
   closeRedis,

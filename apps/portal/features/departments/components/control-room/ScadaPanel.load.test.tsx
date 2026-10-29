@@ -1,6 +1,13 @@
 import { getOperationalToday } from '@repo/utils';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { ScadaPanel } from './ScadaPanel';
+import {
+  deriveScadaPanelRows,
+  mergeScadaRows,
+  type ScadaActivityRow,
+  type ScadaLoadRow,
+  type ScadaMachineRow,
+} from './scada-panel-derived';
 
 const TODAY = getOperationalToday('Africa/Johannesburg');
 
@@ -158,5 +165,99 @@ describe('Given the control-room SCADA panel and a live CDC feed', () => {
     unmount();
 
     expect(mockState.removeChannel).toHaveBeenCalledTimes(2);
+  });
+
+  it('When an excavator_activity row is deleted via CDC, Then it is removed locally without refetching', async () => {
+    render(<ScadaPanel departmentId="dept-cr" />);
+
+    await waitFor(() => expect(mockState.from).toHaveBeenCalledTimes(3));
+    expect(await screen.findByText(/J\. Dlamini/)).toBeInTheDocument();
+
+    const activityHandler = mockState.changeHandlers[1];
+    if (!activityHandler) throw new Error('excavator_activity subscription was never registered');
+
+    act(() => {
+      activityHandler({
+        eventType: 'DELETE',
+        new: {},
+        old: { id: 'act-1' },
+        table: 'excavator_activity',
+        schema: 'public',
+      });
+    });
+
+    await waitFor(() => expect(screen.queryByText(/J\. Dlamini/)).not.toBeInTheDocument());
+    expect(mockState.from).toHaveBeenCalledTimes(3);
+  });
+
+  it('When mergeScadaRows and deriveScadaPanelRows run on frozen inputs, Then they never mutate input arrays or row objects and safely handle missing old.id on DELETE', () => {
+    const frozenActivity: ScadaActivityRow = Object.freeze({
+      id: 'act-1',
+      machine_id: 'ex-1',
+      shift_type: 'day',
+      material_type: 'ROM Coal',
+      activity_date: TODAY,
+      machine: Object.freeze({ name: 'EX-01' }),
+      operator: Object.freeze({ full_name: 'J. Dlamini' }),
+      site: Object.freeze({ name: 'Pit A' }),
+      block_mined: Object.freeze({ name: 'Block 4', code: 'B4' }),
+    });
+    const frozenActivities = Object.freeze([frozenActivity]);
+    const frozenFleet: readonly ScadaMachineRow[] = Object.freeze([
+      Object.freeze({
+        id: 'ht-1',
+        name: 'HT-01',
+        machine_type: 'Haul Truck',
+        bin_factor: 25,
+        active: true,
+      }),
+    ]);
+    const frozenLoad: ScadaLoadRow = Object.freeze({
+      id: 'load-1',
+      machine_id: 'ht-1',
+      excavator_id: 'ex-1',
+      material_type: 'ROM Coal',
+      total_loads: 4,
+      load_date: TODAY,
+    });
+    const frozenLoads = Object.freeze([frozenLoad]);
+
+    const derived = deriveScadaPanelRows({
+      activities: frozenActivities,
+      fleet: frozenFleet,
+      loads: frozenLoads,
+    });
+    expect(derived.excavators[0]?.loadedLoads).toBe(4);
+    expect(derived.registeredMachines[0]?.totalBcm).toBe(100);
+
+    const updatedLoads = mergeScadaRows({
+      rows: frozenLoads,
+      payload: {
+        eventType: 'UPDATE',
+        new: { ...frozenLoad, total_loads: 9 },
+        old: frozenLoad,
+        table: 'hourly_loads',
+        schema: 'public',
+      },
+      today: TODAY,
+      dateField: 'load_date',
+    });
+    expect(updatedLoads[0]?.total_loads).toBe(9);
+    expect(frozenLoads[0]?.total_loads).toBe(4);
+
+    const deletedMissingOld = mergeScadaRows({
+      rows: frozenLoads,
+      payload: {
+        eventType: 'DELETE',
+        new: {} as ScadaLoadRow,
+        old: {} as ScadaLoadRow,
+        table: 'hourly_loads',
+        schema: 'public',
+      },
+      today: TODAY,
+      dateField: 'load_date',
+    });
+    expect(deletedMissingOld).toHaveLength(1);
+    expect(deletedMissingOld).not.toBe(frozenLoads);
   });
 });

@@ -263,7 +263,9 @@ export function mergeScadaRows<T extends { id: string }>({
   dateField: keyof T;
 }): T[] {
   if (payload.eventType === 'DELETE') {
-    const deletedId = payload.old.id;
+    const oldRecord = payload.old as { id?: string } | null | undefined;
+    const newRecord = payload.new as { id?: string } | null | undefined;
+    const deletedId = oldRecord?.id ?? newRecord?.id;
     return deletedId ? rows.filter((row) => row.id !== deletedId) : [...rows];
   }
 
@@ -276,7 +278,7 @@ export function mergeScadaRows<T extends { id: string }>({
   }
 
   const index = rows.findIndex((row) => row.id === incoming.id);
-  if (index === -1) return [...rows, incoming];
+  if (index === -1) return [...rows, { ...incoming }];
 
   const next = [...rows];
   next[index] = { ...next[index], ...incoming };

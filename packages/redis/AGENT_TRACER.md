@@ -116,3 +116,11 @@ normalised for both shapes.
 - **Agent**: Antigravity
 - **Summary**: Raised `MAX_L1_TTL_SECONDS` from `60` to `300` seconds in `src/registry.ts` and documented category-aware L1 TTL resolution in `l1TtlForKey` to reduce L2 round-trips for hot department and equipment entries.
 - **Verification**: `@repo/redis` 13/13 test suites (`144/144 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
+## [2026-10-29T13:56:00+02:00] Restructure `cacheWrap` Single-Flight Coalescing & Add `startL1Sweep` Periodic L1 Reclamation
+
+- **Agent**: Antigravity
+- **Summary**:
+  1. Restructured `cacheWrap` in `src/cache.ts` with pre-lookup and post-lookup `activeMissFetches` single-flight guards and separated `activeBackgroundRefreshes` (`startBackgroundRefresh`).
+  2. Added `startL1Sweep` and `stopL1Sweep` in `src/l1.ts` (using `.unref()`) and wired automatic sweep startup in `src/client.ts` (`getRedisClient` / `closeRedis`).
+- **Verification**: `@repo/redis` 13/13 test suites (`146/146 PASS`), `pnpm agent:verify` (`27/27 PASS`).

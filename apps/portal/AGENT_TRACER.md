@@ -1,3 +1,15 @@
+## 2026-10-29T13:56:00+02:00: Phase 3 Client & Caching Optimizations (P3-T1, P3-T2, F9, Query Tiers, Buster Automation, SCADA Delete Guard & Metrics)
+
+- **Phase 1 (Comprehension)**: Complete the remaining 9 review recommendations across `apps/portal`, `libs/shared/hooks`, and `packages/redis`.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/lib/query-cache.ts`, `apps/portal/app/ReactQueryProvider.tsx`, `apps/portal/next.config.mjs`, `apps/portal/public/sw.js`, and `apps/portal/features/departments/components/control-room/{scada-panel-derived.ts,ScadaPanel.load.test.tsx}`.
+- **Phase 3 (Design)**:
+  - Implemented `buildQueryCacheBuster`, `QUERY_STALE_TIMES`, `resolveQueryStaleTime`, `inspectPersistedCacheHit`, `getQueryCacheMetrics`, and `subscribeQueryCacheCrossTab` in `apps/portal/lib/query-cache.ts`, wired into `apps/portal/app/ReactQueryProvider.tsx`.
+  - Wired `experimental.staleTimes: { dynamic: 30, static: 300 }` and `NEXT_PUBLIC_PORTAL_VERSION` in `apps/portal/next.config.mjs`.
+  - Added `MAX_CACHE_ENTRIES = 120` and `MAX_CACHE_AGE_MS = 7 days` LRU/TTL bounds in `apps/portal/public/sw.js`.
+  - Hardened `mergeScadaRows` in `scada-panel-derived.ts` against missing `old.id` on `DELETE` and shallow-cloned inserted items.
+- **Phase 4 (Criticism)**: Added unit tests in `apps/portal/lib/query-cache.test.ts`, `apps/portal/hooks/usePitConnectivity.test.ts`, and `apps/portal/features/departments/components/control-room/ScadaPanel.load.test.tsx` (`17/17 PASS`).
+- **Phase 5 (Contract)**: Modified `apps/portal/lib/{query-cache.ts,query-cache.test.ts}`, `apps/portal/app/ReactQueryProvider.tsx`, `apps/portal/next.config.mjs`, `apps/portal/public/sw.js`, `apps/portal/hooks/usePitConnectivity.test.ts`, and `apps/portal/features/departments/components/control-room/{scada-panel-derived.ts,ScadaPanel.load.test.tsx}`.
+
 ## 2026-10-29T11:02:00+02:00: Merge PR #194 — Single-Pass Horizon Metric Aggregation in `AlertPanel`
 
 - **Phase 1 (Comprehension)**: Review, verify, and merge open PR #194 (`⚡ Bolt: single-pass horizon metric aggregation in AlertPanel`).

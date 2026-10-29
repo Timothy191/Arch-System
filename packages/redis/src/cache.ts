@@ -2,6 +2,7 @@ import { createRedisSubscriber, getRedisClient } from './client';
 import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
 import {
   clearMemoryCache,
+  DEFAULT_L1_SWEEP_INTERVAL_MS,
   memoryDelete,
   memoryDeleteByPrefix,
   memoryDeleteKeys,
@@ -11,6 +12,8 @@ import {
   memorySet,
   memorySweep,
   readMemory,
+  startL1Sweep,
+  stopL1Sweep,
 } from './l1';
 import { acquireRefreshLease, releaseRefreshLease } from './locks';
 import { l1TtlForKey, resolveSupabaseFallback } from './registry';
@@ -19,6 +22,7 @@ import { shouldEarlyExpire, type XFetchWrapper } from './xfetch';
 
 export {
   clearMemoryCache,
+  DEFAULT_L1_SWEEP_INTERVAL_MS,
   memoryDelete,
   memoryDeleteByPrefix,
   memoryDeleteKeys,
@@ -27,6 +31,8 @@ export {
   memoryRawSize,
   memorySet,
   memorySweep,
+  startL1Sweep,
+  stopL1Sweep,
 } from './l1';
 
 // ------------------------------------------------------------------
@@ -281,55 +287,62 @@ export async function cacheWriteThroughSupabase<T>(
  * If the key exists in cache, returns it; otherwise calls fn, stores result, and returns it.
  * Uses XFetch probabilistic early expiration plus single-flight coalescing.
  */
-// Request Coalescing (Single-Flight) map for active computations
-const activeFetches = new Map<string, Promise<unknown>>();
+// Request Coalescing (Single-Flight) maps for active miss computations and XFetch background refreshes
+const activeMissFetches = new Map<string, Promise<unknown>>();
+const activeBackgroundRefreshes = new Set<string>();
+
+function startBackgroundRefresh<T>(key: string, fn: () => Promise<T>, ttlSeconds: number): void {
+  if (activeBackgroundRefreshes.has(key) || activeMissFetches.has(key)) return;
+  activeBackgroundRefreshes.add(key);
+
+  void (async () => {
+    const hasLease = await acquireRefreshLease(key).catch(() => true);
+    if (!hasLease) return;
+    const fetchStart = performance.now();
+    try {
+      const freshVal = await fn();
+      const delta = performance.now() - fetchStart;
+      const newWrapper: XFetchWrapper<T> = {
+        value: freshVal,
+        ttl: ttlSeconds,
+        delta,
+        computedAt: Date.now(),
+        __isXFetchWrapper: true,
+      };
+      await cacheSet(key, newWrapper, ttlSeconds);
+    } catch {
+      // Serve stale, and drop the lease so the next request can retry immediately
+      await releaseRefreshLease(key).catch(() => undefined);
+    }
+  })().finally(() => {
+    activeBackgroundRefreshes.delete(key);
+  });
+}
 
 export async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
   ttlSeconds: number
 ): Promise<T> {
+  // 1. Pre-lookup Single-Flight Guard: if a cache-miss computation is already in-flight
+  // in this process, coalesce onto it immediately without issuing redundant Redis GETs.
+  const existingFlight = activeMissFetches.get(key);
+  if (existingFlight !== undefined) {
+    return existingFlight as Promise<T>;
+  }
+
   const start = performance.now();
   const cached = await cacheGetRaw<T>(key);
 
+  // 2. Cache Hit (with XFetch early-expiration check)
   if (cached !== null) {
     if (isXFetchWrapper<T>(cached)) {
       if (shouldEarlyExpire(cached)) {
         recordXFetchTrigger(performance.now() - start);
-        // `activeFetches` coalesces this process only, and it must be registered
-        // synchronously: awaiting the lease before the guard would let every
-        // concurrent request through. The lease extends the guard fleet-wide.
-        if (!activeFetches.has(key)) {
-          const fetchPromise = (async () => {
-            const hasLease = await acquireRefreshLease(key).catch(() => true);
-            if (!hasLease) return;
-            const fetchStart = performance.now();
-            try {
-              const freshVal = await fn();
-              const delta = performance.now() - fetchStart;
-              const newWrapper: XFetchWrapper<T> = {
-                value: freshVal,
-                ttl: ttlSeconds,
-                delta,
-                computedAt: Date.now(),
-                __isXFetchWrapper: true,
-              };
-              await cacheSet(key, newWrapper, ttlSeconds);
-            } catch {
-              // Serve stale, and drop the lease so the next request can retry
-              // immediately instead of waiting it out.
-              await releaseRefreshLease(key).catch(() => undefined);
-            }
-          })().finally(() => {
-            activeFetches.delete(key);
-          });
-
-          activeFetches.set(key, fetchPromise);
-        }
+        startBackgroundRefresh(key, fn, ttlSeconds);
       } else {
         recordCacheHit('l2', performance.now() - start);
       }
-
       return cached.value;
     }
 
@@ -339,9 +352,11 @@ export async function cacheWrap<T>(
 
   recordCacheMiss(performance.now() - start);
 
-  // Cache Miss: Check if another request is already computing this key (Single-Flight)
-  if (activeFetches.has(key)) {
-    return activeFetches.get(key) as Promise<T>;
+  // 3. Post-lookup Single-Flight Guard: collapse concurrent callers that entered
+  // cacheGetRaw simultaneously while the cache was cold.
+  const concurrentFlight = activeMissFetches.get(key);
+  if (concurrentFlight !== undefined) {
+    return concurrentFlight as Promise<T>;
   }
 
   const fetchStart = performance.now();
@@ -359,10 +374,10 @@ export async function cacheWrap<T>(
       return freshVal;
     })
     .finally(() => {
-      activeFetches.delete(key);
+      activeMissFetches.delete(key);
     });
 
-  activeFetches.set(key, fetchPromise);
+  activeMissFetches.set(key, fetchPromise);
   return fetchPromise;
 }
 

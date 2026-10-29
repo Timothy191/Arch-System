@@ -1,4 +1,5 @@
 import { createClient, type RedisClientType } from 'redis';
+import { startL1Sweep, stopL1Sweep } from './l1';
 import { ServerlessRedisClient } from './serverless-client';
 
 function resolveRedisUrl(): string {
@@ -207,6 +208,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
     });
     client = createServerlessAdapter(restClient);
     serverlessMode = true;
+    startL1Sweep();
     return client;
   }
 
@@ -251,6 +253,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
     client = next;
     serverlessMode = false;
     lastFailureAt = 0;
+    startL1Sweep();
     return client;
   })();
 
@@ -274,6 +277,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
  * Call on shutdown or test cleanup.
  */
 export async function closeRedis(): Promise<void> {
+  stopL1Sweep();
   const pending = connecting;
   const pendingClient = connectingClient;
   connecting = null;

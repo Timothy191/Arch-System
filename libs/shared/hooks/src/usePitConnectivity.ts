@@ -29,10 +29,31 @@ const DEFAULT_DEGRADED_THRESHOLD_MS = 1_200;
 const DEFAULT_TIMEOUT_MS = 4_000;
 /** Random ± spread applied to every scheduled probe so tabs do not sync up. */
 const JITTER_RATIO = 0.2;
+const JITTER_MIDPOINT = 0.5;
+const BACKOFF_BASE = 2;
 /** Consecutive failures are retried with exponential backoff, capped here. */
 const MAX_BACKOFF_STEPS = 2;
 const MAX_BACKOFF_MULTIPLIER = 4;
 const MIN_PING_INTERVAL_MS = 1_000;
+export const PIT_CONNECTIVITY_CHANNEL = 'arch:pit-connectivity';
+
+interface ProbeBroadcastMessage {
+  type: 'PROBE_RESULT';
+  status: PitConnectivityStatus;
+  latencyMs: number | null;
+  timestamp: number;
+}
+
+function broadcastProbeResult(message: ProbeBroadcastMessage): void {
+  if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') return;
+  try {
+    const channel = new BroadcastChannel(PIT_CONNECTIVITY_CHANNEL);
+    channel.postMessage(message);
+    channel.close();
+  } catch {
+    // BroadcastChannel unavailable
+  }
+}
 
 function isDocumentHidden(): boolean {
   return typeof document !== 'undefined' && document.visibilityState === 'hidden';
@@ -107,16 +128,29 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
       const duration = Math.round(performance.now() - startTime);
       setLatencyMs(duration);
 
-      if (response.ok) {
-        updateStatus(duration > degradedThresholdMs ? 'degraded' : 'online');
-      } else {
-        updateStatus('degraded');
-      }
+      const resolvedStatus: PitConnectivityStatus = response.ok
+        ? duration > degradedThresholdMs
+          ? 'degraded'
+          : 'online'
+        : 'degraded';
+      updateStatus(resolvedStatus);
+      broadcastProbeResult({
+        type: 'PROBE_RESULT',
+        status: resolvedStatus,
+        latencyMs: duration,
+        timestamp: Date.now(),
+      });
     } catch {
       clearTimeout(timeoutId);
       consecutiveFailuresRef.current += 1;
       updateStatus('offline');
       setLatencyMs(null);
+      broadcastProbeResult({
+        type: 'PROBE_RESULT',
+        status: 'offline',
+        latencyMs: null,
+        timestamp: Date.now(),
+      });
     }
   }, [pingUrl, degradedThresholdMs, timeoutMs, updateStatus]);
 
@@ -125,6 +159,7 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
 
     let timer: ReturnType<typeof setTimeout> | null = null;
     let isDisposed = false;
+    let channel: BroadcastChannel | null = null;
 
     function clearTimer() {
       if (timer) {
@@ -139,10 +174,10 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
 
       const backoffSteps = Math.min(consecutiveFailuresRef.current, MAX_BACKOFF_STEPS);
       const baseDelayMs = Math.min(
-        pingIntervalMs * 2 ** backoffSteps,
+        pingIntervalMs * BACKOFF_BASE ** backoffSteps,
         pingIntervalMs * MAX_BACKOFF_MULTIPLIER
       );
-      const jitterMs = (Math.random() - 0.5) * JITTER_RATIO * baseDelayMs;
+      const jitterMs = (Math.random() - JITTER_MIDPOINT) * JITTER_RATIO * baseDelayMs;
       const delayMs = Math.max(Math.round(baseDelayMs + jitterMs), MIN_PING_INTERVAL_MS);
 
       timer = setTimeout(() => {
@@ -154,6 +189,27 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
       if (isDisposed) return;
       if (!isDocumentHidden()) await checkConnectivity();
       scheduleNext();
+    }
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        channel = new BroadcastChannel(PIT_CONNECTIVITY_CHANNEL);
+        channel.onmessage = (event: MessageEvent<ProbeBroadcastMessage>) => {
+          const payload = event.data;
+          if (payload?.type !== 'PROBE_RESULT') return;
+          if (payload.status === 'offline') {
+            consecutiveFailuresRef.current += 1;
+          } else {
+            consecutiveFailuresRef.current = 0;
+          }
+          setLatencyMs(payload.latencyMs);
+          updateStatus(payload.status);
+          // Defer our own probe timer since the leader tab just probed
+          scheduleNext();
+        };
+      } catch {
+        channel = null;
+      }
     }
 
     const handleOnline = () => {
@@ -183,6 +239,11 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
     return () => {
       isDisposed = true;
       clearTimer();
+      try {
+        channel?.close();
+      } catch {
+        // Ignore close errors
+      }
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);

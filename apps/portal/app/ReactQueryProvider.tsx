@@ -5,27 +5,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { type ReactNode, useEffect, useState } from 'react';
 
-// The cache schema version. Bump whenever the persisted snapshot shape changes
-// (new column joins, different filter shapes, etc.) so old caches are dropped
-// and the new session starts with an empty cache rather than inheriting stale data.
-export const QUERY_CACHE_BUSTER = 'portal-v1';
+import {
+  getQueryCacheMetrics,
+  inspectPersistedCacheHit,
+  purgePersistedQueryCache,
+  QUERY_CACHE_BUSTER,
+  QUERY_CACHE_MAX_AGE_MS,
+  QUERY_CACHE_STORAGE_KEY,
+  QUERY_STALE_TIMES,
+  recordCacheRehydrateResult,
+  resolveQueryStaleTime,
+  subscribeQueryCacheCrossTab,
+} from '@/lib/query-cache';
 
-// Old persisted data older than 24h should be discarded on rehydrate.
-export const QUERY_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export {
+  getQueryCacheMetrics,
+  purgePersistedQueryCache,
+  QUERY_CACHE_BUSTER,
+  QUERY_CACHE_MAX_AGE_MS,
+  QUERY_STALE_TIMES,
+  resolveQueryStaleTime,
+};
 
-/**
- * Drop any persisted snapshot before the next user hydrates on a shared
- * control-room terminal. Safe to call repeatedly; if localStorage is disabled
- * the no-op path silently does nothing.
- */
-export function purgePersistedQueryCache(): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.removeItem('arch-portal-query-cache');
-  } catch {
-    // Storage unavailable — nothing to purge.
-  }
-}
+const DEFAULT_QUERY_RETRY_COUNT = 2;
 
 export function ReactQueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -33,11 +35,11 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000,
-            gcTime: 10 * 60 * 1000,
+            staleTime: (query) => resolveQueryStaleTime(query.queryKey),
+            gcTime: QUERY_STALE_TIMES.defaultGcTimeMs,
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
-            retry: 2,
+            retry: DEFAULT_QUERY_RETRY_COUNT,
           },
         },
       })
@@ -46,26 +48,30 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    const didHitPersistedSnapshot = inspectPersistedCacheHit();
+    recordCacheRehydrateResult(didHitPersistedSnapshot);
+
     const storagePersister = createSyncStoragePersister({
       storage: window.localStorage,
+      key: QUERY_CACHE_STORAGE_KEY,
     });
 
-    // Salt the persisted snapshot with the cache buster version. The buster
-    // string forces cache invalidation when the schema changes (bump
-    // QUERY_CACHE_BUSTER) so old caches are not hydrated into the new session.
-    const persistBuster = QUERY_CACHE_BUSTER;
-
-    const persistClient = persistQueryClient({
+    const [, restorePromise] = persistQueryClient({
       queryClient,
       persister: storagePersister,
-      buster: persistBuster,
-      // Bounding the persisted cache age prevents stale data from a prior
-      // operator leaking into a new session on a shared control-room terminal.
+      buster: QUERY_CACHE_BUSTER,
       maxAge: QUERY_CACHE_MAX_AGE_MS,
     });
 
-    // The persistClient is kept alive for the component lifecycle; the
-    // persister automatically hydrates/dehydrates on mount/unmount.
+    void restorePromise;
+
+    const unsubscribeCrossTab = subscribeQueryCacheCrossTab(() => {
+      queryClient.clear();
+    });
+
+    return () => {
+      unsubscribeCrossTab();
+    };
   }, [queryClient]);
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;

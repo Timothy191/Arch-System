@@ -75,6 +75,7 @@ const nextConfig = {
   output: process.env.VERCEL ? undefined : 'standalone',
   env: {
     PORTAL_VERSION,
+    NEXT_PUBLIC_PORTAL_VERSION: PORTAL_VERSION,
   },
   async redirects() {
     return [
@@ -176,6 +177,11 @@ const nextConfig = {
   experimental: {
     // AGENT-TRACE: React 19 Taint APIs enabled to prevent sensitive database objects/tokens crossing RSC boundary
     taint: true,
+    // AGENT-TRACE: Client Router Cache staleTimes under cacheComponents: true to prevent redundant RSC re-fetches on tab navigation
+    staleTimes: {
+      dynamic: 30,
+      static: 300,
+    },
     // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
     optimizePackageImports: [
       'lucide-react',

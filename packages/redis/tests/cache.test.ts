@@ -167,4 +167,26 @@ describe('X-Fetch Cache Wrapper', () => {
     // Background execution should NOT happen
     expect(mockFn).not.toHaveBeenCalled();
   });
+
+  test('Cold-Miss Single-Flight Coalescing (pre-lookup & post-lookup guards)', async () => {
+    const key = testKey();
+    mockRedisGet.mockResolvedValue(null);
+
+    const mockFn = jest.fn().mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      return 'coalesced-value';
+    });
+
+    const firstBatch = Array.from({ length: 25 }).map(() => cacheWrap(key, mockFn, 30));
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    // Second wave arrives while activeMissFetches already holds the in-flight promise
+    const secondBatch = Array.from({ length: 25 }).map(() => cacheWrap(key, mockFn, 30));
+
+    const results = await Promise.all([...firstBatch, ...secondBatch]);
+    expect(results).toHaveLength(50);
+    for (const entry of results) {
+      expect(entry).toBe('coalesced-value');
+    }
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
 });

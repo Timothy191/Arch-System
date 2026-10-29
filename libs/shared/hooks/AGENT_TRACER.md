@@ -47,3 +47,13 @@ re-executed it and a double-tapped closeout could write two rows.
 - The header is the contract with the server: `@repo/redis` `claimIdempotency`
   answers a repeat with the stored result (`'duplicate'`) instead of running the
   work again. Changing the queue id format changes replay semantics.
+
+## 2026-10-29: Cross-tab heartbeat coordination via BroadcastChannel in `usePitConnectivity`
+
+### Purpose
+
+Prevent `N` open foreground tabs from issuing duplicate `/api/health/live` probes in the same heartbeat window (`P3-T1`).
+
+### Changes Made
+
+1. Added `PIT_CONNECTIVITY_CHANNEL` (`arch:pit-connectivity`) `BroadcastChannel` broadcasting and listening in `src/usePitConnectivity.ts`. When any tab completes a probe, peer tabs adopt its `status` and `latencyMs` and reschedule their own probe timer (`scheduleNext()`).

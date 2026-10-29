@@ -8,6 +8,7 @@
  */
 
 export const L1_MAX_ENTRIES = 1000;
+export const DEFAULT_L1_SWEEP_INTERVAL_MS = 60_000;
 
 interface MemoryEntry {
   value: unknown;
@@ -15,6 +16,7 @@ interface MemoryEntry {
 }
 
 const memoryCache = new Map<string, MemoryEntry>();
+let l1SweepTimer: ReturnType<typeof setInterval> | null = null;
 
 /** Presence-aware L1 read. Distinguishes "absent" from a cached falsy value. */
 export type L1Read<T> = { hit: true; value: T } | { hit: false };
@@ -115,4 +117,30 @@ export function memorySweep(): number {
 
 export function clearMemoryCache(): void {
   memoryCache.clear();
+}
+
+/**
+ * Start a periodic background sweep of expired L1 entries.
+ * Uses `.unref()` so the timer never blocks Node/serverless process exit.
+ */
+export function startL1Sweep(
+  intervalMs: number = DEFAULT_L1_SWEEP_INTERVAL_MS,
+  onSweep?: (removedCount: number) => void
+): void {
+  stopL1Sweep();
+  l1SweepTimer = setInterval(() => {
+    const removedCount = memorySweep();
+    if (removedCount > 0) {
+      onSweep?.(removedCount);
+    }
+  }, intervalMs);
+  l1SweepTimer.unref?.();
+}
+
+/** Stop the periodic L1 sweep timer if active. */
+export function stopL1Sweep(): void {
+  if (l1SweepTimer !== null) {
+    clearInterval(l1SweepTimer);
+    l1SweepTimer = null;
+  }
 }

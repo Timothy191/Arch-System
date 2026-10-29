@@ -6,7 +6,13 @@ All items below are **not yet implemented**. Mark each with `[x]` when complete.
 
 ## Client-Side / Frontend
 
-- [ ] Wire `staleTimes` experimental config in `next.config.mjs` to routes (`/api/health`, `/(departments)/[department]`, `/(auth)`)
+- [x] Wire `staleTimes` experimental config in `next.config.mjs` to routes (`/api/health`, `/(departments)/[department]`, `/(auth)`)
+- [x] P3-T1: Cross-tab leader via `BroadcastChannel` to coordinate cache-buster version and prevent duplicate health probes (`query-cache.ts`, `usePitConnectivity.ts`)
+- [x] Per-query `staleTime` differentiation (`QUERY_STALE_TIMES`, `resolveQueryStaleTime`)
+- [x] `QUERY_CACHE_BUSTER` automation tied to build version + schema revision (`buildQueryCacheBuster`)
+- [x] Service Worker cache caps (`MAX_CACHE_ENTRIES = 120`, `MAX_CACHE_AGE_MS = 7d` in `public/sw.js`)
+- [x] `ScadaPanel` merge correctness guard (`mergeScadaRows` immutability + `DELETE` path tests)
+- [x] Observability metrics for persisted-cache rehydrate hit rate and purge calls (`getQueryCacheMetrics`)
 - [ ] Add `sizes` attribute to all `next/image` components (currently partial)
 - [ ] Add `link rel=preload` and `rel=prefetch` hints for critical assets
 - [ ] Add `React.memo` to presentational client components (currently partial — only `HourlyLoadsGrid`)
@@ -19,8 +25,8 @@ All items below are **not yet implemented**. Mark each with `[x]` when complete.
 
 - [ ] Expand `CacheCategory` enum with `TELEMETRY`, `REPORTS`, `SESSIONS`
 - [ ] Implement `cacheInvalidateTagsBatch()` for efficient multi-tag invalidation
-- [ ] Restructure `cacheWrap` single-flight coalescing (guard before cached-value return, background refresh)
-- [ ] Add periodic L1 memory sweep (`startL1Sweep` on Redis client connect)
+- [x] Restructure `cacheWrap` single-flight coalescing (guard before cached-value return, background refresh)
+- [x] Add periodic L1 memory sweep (`startL1Sweep` on Redis client connect)
 - [ ] Add Redis metrics: L1 eviction rate, L2 round-trips, privilege version changes, write-through delay
 - [ ] Implement predictive cache warming (ML-based, background)
 - [ ] Implement SCADA telemetry anomaly detection (ML-based, async stream)
