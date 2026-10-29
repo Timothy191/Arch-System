@@ -55,6 +55,18 @@ const QUICK_ADD_ICON_BTN_CLASS =
 const QUICK_ADD_INLINE_INPUT_CLASS =
   'gold-steel-border gold-steel-border-slim min-w-0 flex-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-2.5 py-1.5 text-[var(--text-heading)] text-xs';
 
+const POPUP_BACKDROP_CLASS =
+  'fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs';
+
+const POPUP_CARD_CLASS =
+  'gold-steel-border gold-steel-border-slim w-full max-w-md space-y-4 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-5 shadow-xl';
+
+const POPUP_PRIMARY_BTN_CLASS =
+  'gold-steel-border gold-steel-border-slim flex-1 cursor-pointer rounded-xl bg-[var(--accent-blue)] px-4 py-2 font-semibold text-white text-xs transition-opacity hover:opacity-95 disabled:opacity-60';
+
+const POPUP_CANCEL_BTN_CLASS =
+  'gold-steel-border gold-steel-border-slim cursor-pointer rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] px-4 py-2 font-semibold text-[var(--text-secondary)] text-xs hover:bg-black/[0.03]';
+
 function computeMinutesBetween(startTime: string, endTime: string): number {
   if (!startTime.trim() || !endTime.trim()) return 0;
   const [sh, sm] = startTime.split(':').map((n) => Number(n) || 0);
@@ -72,6 +84,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
   const [impactOptions, setImpactOptions] = useState<string[]>([...PLANT_IMPACT_OPTIONS]);
 
   const [selectedDelayId, setSelectedDelayId] = useState<string | null>(null);
+  const [popupDelayEntry, setPopupDelayEntry] = useState<PlantDelayEntry | null>(null);
   const [date, setDate] = useState<string>(initialDate);
   const [shift, setShift] = useState<PlantShiftType>('day');
   const [circuit, setCircuit] = useState<string>(PLANT_CIRCUIT_OPTIONS[0]);
@@ -199,6 +212,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
 
   const handleSelectDelayForUpdate = (entry: PlantDelayEntry) => {
     setSelectedDelayId(entry.id);
+    setPopupDelayEntry(entry);
     setDate(entry.date);
     setShift(entry.shift);
     if (!circuitOptions.includes(entry.circuit)) {
@@ -224,9 +238,44 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
 
   const handleClearSelection = () => {
     setSelectedDelayId(null);
+    setPopupDelayEntry(null);
     setEndTime('');
     setReason('');
     setCorrectiveAction('');
+  };
+
+  const handlePopupEndTimeSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!popupDelayEntry || !endTime.trim()) return;
+
+    const targetEntry = popupDelayEntry;
+    const durationMins = computeMinutesBetween(targetEntry.startTime, endTime);
+
+    startTransition(async () => {
+      const res = await logPlantDelayAction({
+        id: targetEntry.id,
+        date: targetEntry.date,
+        shift: targetEntry.shift,
+        circuit: targetEntry.circuit,
+        category: targetEntry.category,
+        impactType: targetEntry.impactType,
+        startTime: targetEntry.startTime,
+        endTime: endTime.trim(),
+        durationMinutes: durationMins,
+        reason: targetEntry.reason,
+        correctiveAction: targetEntry.correctiveAction,
+      });
+
+      const updated = delays.map((d) => (d.id === targetEntry.id ? res.entry : d));
+      setDelays(updated);
+      saveStoredPlantDelays(updated);
+      setPopupDelayEntry(null);
+      setSelectedDelayId(null);
+      setEndTime('');
+      setReason('');
+      setCorrectiveAction('');
+      setFeedbackBanner(res.message);
+    });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -253,6 +302,7 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
         : [res.entry, ...delays];
       setDelays(updated);
       saveStoredPlantDelays(updated);
+      setPopupDelayEntry(null);
       setSelectedDelayId(null);
       setEndTime('');
       setReason('');
@@ -703,6 +753,76 @@ export function PlantDelaysClient({ initialDate, initialDelays }: PlantDelaysCli
           onSelectDelay={handleSelectDelayForUpdate}
         />
       </div>
+
+      {/* Simple Log End Time Popup Modal */}
+      {popupDelayEntry && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Resolve Plant Delay Dialog"
+          data-testid="log-end-time-popup"
+          className={POPUP_BACKDROP_CLASS}
+        >
+          <form onSubmit={handlePopupEndTimeSubmit} className={POPUP_CARD_CLASS}>
+            <div className="flex items-start justify-between gap-3 border-[var(--border-default)] border-b pb-3">
+              <div>
+                <h3
+                  id="log-end-time-popup-title"
+                  className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider"
+                >
+                  Log Delay End Time
+                </h3>
+                <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
+                  {popupDelayEntry.circuit} · Booked in at{' '}
+                  <span className="font-mono font-semibold text-[var(--text-heading)]">
+                    {popupDelayEntry.startTime}
+                  </span>
+                </p>
+              </div>
+              <span className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded bg-amber-500/15 px-2 py-0.5 font-mono font-semibold text-amber-800 text-xs">
+                <Clock className="h-3 w-3" />
+                {endTime.trim()
+                  ? `${computeMinutesBetween(popupDelayEntry.startTime, endTime)} min`
+                  : 'Open'}
+              </span>
+            </div>
+
+            <div className="space-y-1.5 text-xs">
+              <span className="block font-semibold text-[var(--text-secondary)]">End Time</span>
+              <input
+                id="popup-delay-end-time"
+                name="popupDelayEndTime"
+                type="time"
+                required
+                aria-label="Delay Completion Time"
+                data-testid="popup-end-time-input"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className={FORM_MONO_INPUT_CLASS}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setPopupDelayEntry(null)}
+                data-testid="close-popup-end-time-btn"
+                className={POPUP_CANCEL_BTN_CLASS}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isPending || !endTime.trim()}
+                data-testid="confirm-popup-end-time-btn"
+                className={POPUP_PRIMARY_BTN_CLASS}
+              >
+                {isPending ? 'Saving...' : 'Save End Time'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

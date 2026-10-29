@@ -397,6 +397,27 @@ describe('Plant & Processing Workspace Components', () => {
         );
       });
     });
+
+    it('should open the Log End Time popup with a simple input when clicking "Log End Time" and save on confirmation', async () => {
+      const initialDelays = buildInitialPlantDelays('2026-10-21');
+      render(<PlantDelaysClient initialDate="2026-10-21" initialDelays={initialDelays} />);
+
+      fireEvent.click(screen.getByTestId('select-delay-delay-pp-104'));
+
+      expect(screen.getByTestId('log-end-time-popup')).toBeInTheDocument();
+      const popupInput = screen.getByTestId('popup-end-time-input') as HTMLInputElement;
+      expect(popupInput.value).toBe('');
+
+      fireEvent.change(popupInput, { target: { value: '10:12' } });
+      fireEvent.click(screen.getByTestId('confirm-popup-end-time-btn'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('log-end-time-popup')).not.toBeInTheDocument();
+        expect(screen.getByRole('status')).toHaveTextContent(
+          /Updated delay on Tailings Thickener & Press \(TH-501\) — End Time 10:12 logged/i
+        );
+      });
+    });
   });
 
   describe('PlantHistoryDatabaseClient (History Reports Database)', () => {

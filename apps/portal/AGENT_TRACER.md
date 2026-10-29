@@ -1,3 +1,11 @@
+## 2026-10-29T14:11:00+02:00: Plant & Processing Delays (`/plant-processing/delays`) "Log End Time" Popup Modal
+
+- **Phase 1 (Comprehension)**: Address design feedback on `button[data-testid^="select-delay-"]` ("Log End Time") on `/plant-processing/delays`: open a popup with a simple input for End Time when interacted with.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/features/departments/components/plant-processing/PlantDelaysClient.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `plant-processing.test.tsx`.
+- **Phase 3 (Design)**: Added `popupDelayEntry` state and `handlePopupEndTimeSubmit` in `PlantDelaysClient.tsx`, rendering a focused light-mode dialog (`data-testid="log-end-time-popup"`) with a `type="time"` input (`data-testid="popup-end-time-input"`), live duration badge, and Save/Cancel actions while keeping the main delay form synchronized.
+- **Phase 4 (Criticism)**: Added unit test coverage in `plant-processing.test.tsx` (`8/8 PASS`).
+- **Phase 5 (Contract)**: Modified `apps/portal/features/departments/components/plant-processing/{PlantDelaysClient.tsx,plant-processing.test.tsx}`.
+
 ## 2026-10-29T13:56:00+02:00: Phase 3 Client & Caching Optimizations (P3-T1, P3-T2, F9, Query Tiers, Buster Automation, SCADA Delete Guard & Metrics)
 
 - **Phase 1 (Comprehension)**: Complete the remaining 9 review recommendations across `apps/portal`, `libs/shared/hooks`, and `packages/redis`.

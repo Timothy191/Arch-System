@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Plant & Processing Delays (`/plant-processing/delays`) "Log End Time" Popup Modal
+
+- **Action:**
+  - Updated [`apps/portal/features/departments/components/plant-processing/PlantDelaysClient.tsx`](./apps/portal/features/departments/components/plant-processing/PlantDelaysClient.tsx) so clicking the **"Log End Time"** button (`button[data-testid^="select-delay-"]`) opens a clean light-mode popup modal (`data-testid="log-end-time-popup"`) with a simple **End Time** (`type="time"`, `data-testid="popup-end-time-input"`) input, live calculated duration preview, and **Save End Time** / **Cancel** buttons, while keeping the left-hand form synchronized.
+  - Added unit test coverage in [`apps/portal/features/departments/components/plant-processing/plant-processing.test.tsx`](./apps/portal/features/departments/components/plant-processing/plant-processing.test.tsx).
+- **Verification:** `plant-processing.test.tsx` (`8/8 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Client & Redis Load Optimization Phase 3 (P3-T1, P3-T2, F9, Single-Flight, L1 Sweep, Query Tiers & Observability)
 
 - **Action:**

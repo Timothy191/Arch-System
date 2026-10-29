@@ -1,28 +1,9 @@
 {
   "mcpServers": {
-    "skills-mcp": {
-      "command": "node",
-      "args": ["/home/tim/Fork/skills-mcp/dist/index.js"],
-      "description": "Anti-bloat on-demand skill, context & persona registry MCP server",
-      "type": "stdio"
-    },
-    "memory-gateway-mcp": {
-      "command": "node",
-      "args": ["/home/tim/Fork/memory-gateway-mcp/dist/index.js"],
-      "description": "Federated multi-tier memory gateway bridging retrospectives, swarm SQLite, and session remember logs",
-      "type": "stdio"
-    },
     "supabase": {
       "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
       "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
       "type": "remote"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
-      "cwd": "/tmp",
-      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
-      "type": "stdio"
     },
     "codemap": {
       "command": "/home/tim/.local/bin/codemap",
@@ -35,6 +16,12 @@
       "args": ["-y", "chrome-devtools-mcp@1.10.1"],
       "cwd": "/tmp",
       "description": "Chrome DevTools MCP for browser inspection and automation",
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
     }
   }
