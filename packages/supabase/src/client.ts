@@ -1,6 +1,10 @@
 import { createBrowserClient } from '@supabase/ssr';
 
-export function createBrowserSupabaseClient() {
+type BrowserSupabaseClient = ReturnType<typeof createBrowserClient>;
+
+let browserClient: BrowserSupabaseClient | null = null;
+
+function readSupabaseEnv() {
   const envSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   if (!envSupabaseUrl) {
     throw new Error(
@@ -8,6 +12,7 @@ export function createBrowserSupabaseClient() {
     );
   }
   const supabaseUrl = envSupabaseUrl;
+
   // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   const supabaseAnonKey =
@@ -21,6 +26,11 @@ export function createBrowserSupabaseClient() {
     );
   }
 
+  return { supabaseUrl, supabaseAnonKey };
+}
+
+export function createBrowserSupabaseClient() {
+  const { supabaseUrl, supabaseAnonKey } = readSupabaseEnv();
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -33,4 +43,17 @@ export function createBrowserSupabaseClient() {
       expires: undefined,
     },
   });
+}
+
+export function getBrowserSupabaseClient(): BrowserSupabaseClient {
+  if (typeof window === 'undefined') {
+    // Server-side: create a fresh client per request (no document/cache access)
+    return createBrowserSupabaseClient();
+  }
+  if (!browserClient) browserClient = createBrowserSupabaseClient();
+  return browserClient;
+}
+
+export function __resetBrowserSupabaseClientForTests(): void {
+  browserClient = null;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSupabaseRealtime } from '@repo/shared/hooks';
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { getBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Lock, Search, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -49,7 +49,13 @@ function HourlyLoadsGrid({
   today,
   initialShift,
 }: HourlyLoadsGridProps) {
-  const supabase = createBrowserSupabaseClient();
+  const supabase = useMemo(() => {
+    try {
+      return getBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
 
   // AGENT-TRACE: The grid owns its load/site state so edits apply optimistically.
   // No router.refresh() anywhere — each change updates local state instantly and
