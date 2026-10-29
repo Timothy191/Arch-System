@@ -1,46 +1,54 @@
 'use client';
 
 import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { type RealtimePayload, useSupabaseRealtime } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { getOperationalToday } from '@repo/utils';
 import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  deriveScadaPanelRows,
+  type ExcavatorActivityViewRow,
+  mergeScadaRows,
+  type RegisteredMachineLoadViewRow,
+  type ScadaActivityRow,
+  type ScadaLoadRow,
+  type ScadaMachineRow,
+} from './scada-panel-derived';
 
 const tracer = trace.getTracer('arch-portal');
 const REFRESH_SPINNER_DURATION_MS = 400;
 
-interface ExcavatorActivityRow {
-  id: string;
-  excavatorName: string;
-  operatorName: string;
-  siteBlock: string;
-  shift: string;
-  material: string;
-  assignedMachines: number;
-  loadedLoads: number;
-  totalBcm: number;
-  status: 'digging' | 'loading' | 'standby';
-}
+type ExcavatorActivityRow = ExcavatorActivityViewRow;
+type RegisteredMachineLoadRow = RegisteredMachineLoadViewRow;
 
-interface RegisteredMachineLoadRow {
-  id: string;
-  machineName: string;
-  machineType: string;
-  assignedExcavator: string;
-  material: string;
-  binFactor: number;
-  loadedLoads: number;
-  totalBcm: number;
-  status: 'hauling' | 'loading' | 'standby';
-}
+/** Debounce for the rare reconcile that CDC payloads cannot satisfy on their own. */
+const SCADA_RECONCILE_DEBOUNCE_MS = 1000;
+
+/** All operational dates in the control room are resolved in SAST. */
+const OPERATIONAL_TIME_ZONE = 'Africa/Johannesburg';
 
 export function ScadaPanel({ departmentId }: { departmentId: string }) {
-  const [excavators, setExcavators] = useState<ExcavatorActivityRow[]>([]);
-  const [registeredMachines, setRegisteredMachines] = useState<RegisteredMachineLoadRow[]>([]);
+  // The panel is designed to keep rendering fallback telemetry when Supabase is
+  // unconfigured or unreachable, so a missing client must not throw at render.
+  const supabase = useMemo(() => {
+    try {
+      return createBrowserSupabaseClient();
+    } catch {
+      return null;
+    }
+  }, []);
+
   const [activeView, setActiveView] = useState<'both' | 'excavators' | 'machines'>('both');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activities, setActivities] = useState<readonly ScadaActivityRow[]>([]);
+  const [fleet, setFleet] = useState<readonly ScadaMachineRow[]>([]);
+  const [loads, setLoads] = useState<readonly ScadaLoadRow[]>([]);
+
+  const reconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadOperationalData = useCallback(async () => {
     const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
@@ -50,11 +58,11 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     span?.setAttributes?.({ department_id: departmentId });
 
     try {
-      const supabase = createBrowserSupabaseClient();
-      const today = getOperationalToday('Africa/Johannesburg');
+      const client = createBrowserSupabaseClient();
+      const today = getOperationalToday(OPERATIONAL_TIME_ZONE);
 
       const [activityRes, machinesRes, loadsRes] = await Promise.all([
-        supabase
+        client
           .from('excavator_activity')
           .select(
             'id, machine_id, shift_type, material_type, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)'
@@ -62,119 +70,27 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
           .eq('department_id', departmentId)
           .eq('activity_date', today)
           .order('created_at', { ascending: false }),
-        supabase
+        client
           .from('machines')
           .select('id, name, machine_type, bin_factor, active')
           .eq('active', true)
           .order('name'),
-        supabase
+        client
           .from('hourly_loads')
           .select('id, machine_id, excavator_id, material_type, total_loads')
           .eq('department_id', departmentId)
           .eq('load_date', today),
       ]);
 
-      const dbActivities = activityRes.data ?? [];
-      const dbMachines = machinesRes.data ?? [];
-      const dbLoads = loadsRes.data ?? [];
+      setActivities((activityRes.data ?? []) as ScadaActivityRow[]);
+      setFleet((machinesRes.data ?? []) as ScadaMachineRow[]);
+      setLoads((loadsRes.data ?? []) as ScadaLoadRow[]);
 
-      const machineById = new Map(dbMachines.map((m) => [m.id, m]));
-
-      // Performance Optimization: Single-pass aggregation over dbLoads to build
-      // O(1) lookup maps for excavators and haul machines, eliminating O(N*M) nested filter/reduce operations.
-      const loadsByExcavator = new Map<
-        string,
-        { loadedLoads: number; dumperIds: Set<string>; totalBcm: number }
-      >();
-      const loadsByMachine = new Map<
-        string,
-        { loads: number; material: string; excavatorId: string | null }
-      >();
-
-      for (const l of dbLoads) {
-        const loads = l.total_loads || 0;
-        const bf = machineById.get(l.machine_id)?.bin_factor ?? 24;
-
-        if (l.excavator_id) {
-          let exAgg = loadsByExcavator.get(l.excavator_id);
-          if (!exAgg) {
-            exAgg = { loadedLoads: 0, dumperIds: new Set<string>(), totalBcm: 0 };
-            loadsByExcavator.set(l.excavator_id, exAgg);
-          }
-          exAgg.loadedLoads += loads;
-          if (l.machine_id) exAgg.dumperIds.add(l.machine_id);
-          exAgg.totalBcm += loads * bf;
-        }
-
-        if (l.machine_id) {
-          const mAgg = loadsByMachine.get(l.machine_id) ?? {
-            loads: 0,
-            material: l.material_type || 'ROM Coal',
-            excavatorId: l.excavator_id,
-          };
-          mAgg.loads += loads;
-          if (l.material_type) mAgg.material = l.material_type;
-          if (l.excavator_id) mAgg.excavatorId = l.excavator_id;
-          loadsByMachine.set(l.machine_id, mAgg);
-        }
-      }
-
-      const mappedExcavators: ExcavatorActivityRow[] = dbActivities.map((act, idx) => {
-        const machineObj = Array.isArray(act.machine) ? act.machine[0] : act.machine;
-        const operatorObj = Array.isArray(act.operator) ? act.operator[0] : act.operator;
-        const siteObj = Array.isArray(act.site) ? act.site[0] : act.site;
-        const blockObj = Array.isArray(act.block_mined) ? act.block_mined[0] : act.block_mined;
-
-        const exAgg = act.machine_id ? loadsByExcavator.get(act.machine_id) : undefined;
-        const loadedLoads = exAgg?.loadedLoads ?? 0;
-        const assignedDumperCount = exAgg?.dumperIds.size ?? 0;
-        const totalBcm = exAgg?.totalBcm ?? 0;
-
-        return {
-          id: act.id,
-          excavatorName: machineObj?.name || `Excavator 0${idx + 1}`,
-          operatorName: operatorObj?.full_name || 'Unassigned Operator',
-          siteBlock:
-            [siteObj?.name, blockObj?.code || blockObj?.name].filter(Boolean).join(' · ') ||
-            'Unassigned Block',
-          shift: (act.shift_type || 'day').toUpperCase(),
-          material: act.material_type || 'Unassigned',
-          assignedMachines: assignedDumperCount,
-          loadedLoads,
-          totalBcm: Math.round(totalBcm),
-          status: loadedLoads > 0 ? 'loading' : assignedDumperCount > 0 ? 'digging' : 'standby',
-        };
-      });
-      setExcavators(mappedExcavators);
-
-      const haulMachines = dbMachines.filter((m) => m.machine_type !== 'Excavator');
-      const mappedMachines: RegisteredMachineLoadRow[] = haulMachines.slice(0, 12).map((m) => {
-        const agg = loadsByMachine.get(m.id);
-        const loads = agg?.loads ?? 0;
-        const bf = m.bin_factor ?? 25;
-        const exName = (agg?.excavatorId && machineById.get(agg.excavatorId)?.name) || 'Unassigned';
-        return {
-          id: m.id,
-          machineName: m.name,
-          machineType: m.machine_type,
-          assignedExcavator: exName,
-          material: agg?.material || 'Unassigned',
-          binFactor: bf,
-          loadedLoads: loads,
-          totalBcm: Math.round(loads * bf),
-          status: loads > 0 ? 'hauling' : agg?.excavatorId ? 'loading' : 'standby',
-        };
-      });
-      setRegisteredMachines(mappedMachines);
       span?.setAttributes?.({
         department_id: departmentId,
-        excavator_count: mappedExcavators.length,
-        machine_count: mappedMachines.length,
-      });
-      span?.addEvent?.('scada_telemetry_loaded', {
-        department_id: departmentId,
-        excavator_count: mappedExcavators.length,
-        machine_count: mappedMachines.length,
+        activity_count: activityRes.data?.length ?? 0,
+        machine_count: machinesRes.data?.length ?? 0,
+        load_count: loadsRes.data?.length ?? 0,
       });
       span?.setStatus?.({ code: SpanStatusCode.OK });
     } catch (error) {
@@ -191,60 +107,122 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     }
   }, [departmentId]);
 
-  const handleRefresh = async () => {
+  /**
+   * Re-read from PostgREST. Only used when a CDC payload cannot be applied
+   * locally (a new activity row arrives without its joined machine/operator
+   * names, or the operational day rolls over mid-session).
+   */
+  const scheduleReconcile = useCallback(() => {
+    if (reconcileTimerRef.current) return;
+    reconcileTimerRef.current = setTimeout(() => {
+      reconcileTimerRef.current = null;
+      void loadOperationalData();
+    }, SCADA_RECONCILE_DEBOUNCE_MS);
+  }, [loadOperationalData]);
+
+  const handleLoadChange = useCallback(
+    (payload: RealtimePayload<ScadaLoadRow>) => {
+      const today = getOperationalToday(OPERATIONAL_TIME_ZONE);
+      // A payload for another operational day means our snapshot is stale.
+      if (payload.eventType !== 'DELETE' && payload.new.load_date !== today) {
+        scheduleReconcile();
+        return;
+      }
+      setLoads((prev) => mergeScadaRows({ rows: prev, payload, today, dateField: 'load_date' }));
+    },
+    [scheduleReconcile]
+  );
+
+  const handleActivityChange = useCallback(
+    (payload: RealtimePayload<ScadaActivityRow>) => {
+      // INSERT payloads carry raw columns only, so the joined names would blank
+      // out until the next reload. Reconcile instead; it is a once-per-row cost.
+      if (payload.eventType === 'INSERT') {
+        scheduleReconcile();
+        return;
+      }
+      const today = getOperationalToday(OPERATIONAL_TIME_ZONE);
+      setActivities((prev) =>
+        mergeScadaRows({ rows: prev, payload, today, dateField: 'activity_date' })
+      );
+    },
+    [scheduleReconcile]
+  );
+
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await loadOperationalData();
-    setTimeout(() => setIsRefreshing(false), REFRESH_SPINNER_DURATION_MS);
-  };
+    try {
+      await loadOperationalData();
+    } finally {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        refreshTimerRef.current = null;
+        setIsRefreshing(false);
+      }, REFRESH_SPINNER_DURATION_MS);
+    }
+  }, [loadOperationalData]);
 
   useEffect(() => {
+    void loadOperationalData();
+  }, [loadOperationalData]);
+
+  useEffect(() => {
+    return () => {
+      if (reconcileTimerRef.current) clearTimeout(reconcileTimerRef.current);
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
+
+  // CDC payloads are merged in memory; the aggregation below re-runs locally.
+  const loadsRealtime = useSupabaseRealtime<ScadaLoadRow>({
+    supabaseClient: supabase,
+    table: 'hourly_loads',
+    filter: `department_id=eq.${departmentId}`,
+    onChange: handleLoadChange,
+  });
+
+  const activityRealtime = useSupabaseRealtime<ScadaActivityRow>({
+    supabaseClient: supabase,
+    table: 'excavator_activity',
+    filter: `department_id=eq.${departmentId}`,
+    onChange: handleActivityChange,
+  });
+
+  // Report the resolved subscription state once per mount instead of asserting
+  // success at setup time, which previously hid join failures entirely.
+  const hasReportedSubscriptionRef = useRef(false);
+  const loadsStatus = loadsRealtime.status;
+  const activityStatus = activityRealtime.status;
+
+  useEffect(() => {
+    if (hasReportedSubscriptionRef.current) return;
+    if (loadsStatus === 'CONNECTING' && activityStatus === 'CONNECTING') return;
+    hasReportedSubscriptionRef.current = true;
+
     const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
-    const subSpan = activeTracer?.startSpan?.('scada_realtime_subscription', {
+    const span = activeTracer?.startSpan?.('scada_realtime_subscription', {
       attributes: { department_id: departmentId },
     });
-    subSpan?.setAttributes?.({ department_id: departmentId });
-    subSpan?.addEvent?.('scada_subscription_active', { department_id: departmentId });
+    const isFullySubscribed = loadsStatus === 'SUBSCRIBED' && activityStatus === 'SUBSCRIBED';
 
-    let channel: { unsubscribe?: () => void } | null = null;
-    try {
-      const supabase = createBrowserSupabaseClient();
-      if (typeof supabase?.channel === 'function') {
-        const ch = supabase.channel(`scada-panel:${departmentId}`);
-        if (typeof ch?.on === 'function') {
-          const subscribed = ch
-            .on(
-              'postgres_changes',
-              {
-                event: '*',
-                schema: 'public',
-                table: 'hourly_loads',
-                filter: `department_id=eq.${departmentId}`,
-              },
-              () => {
-                void loadOperationalData();
-              }
-            )
-            .subscribe?.();
-          channel = subscribed ?? ch;
-        }
-      }
-      subSpan?.setStatus?.({ code: SpanStatusCode.OK });
-    } catch {
-      // Ignore realtime channel setup errors when offline or unconfigured
-    } finally {
-      subSpan?.end?.();
-    }
+    span?.setAttributes?.({
+      department_id: departmentId,
+      loads_status: loadsStatus,
+      activity_status: activityStatus,
+    });
+    span?.addEvent?.('scada_subscription_active', {
+      department_id: departmentId,
+      loads_status: loadsStatus,
+      activity_status: activityStatus,
+    });
+    span?.setStatus?.({ code: isFullySubscribed ? SpanStatusCode.OK : SpanStatusCode.ERROR });
+    span?.end?.();
+  }, [departmentId, loadsStatus, activityStatus]);
 
-    void loadOperationalData();
-
-    return () => {
-      try {
-        channel?.unsubscribe?.();
-      } catch {
-        // Ignore cleanup errors when offline or mocked
-      }
-    };
-  }, [departmentId, loadOperationalData]);
+  const { excavators, registeredMachines } = useMemo(
+    () => deriveScadaPanelRows({ activities, fleet, loads }),
+    [activities, fleet, loads]
+  );
 
   const totalExcavatorLoads = excavators.reduce((sum, e) => sum + e.loadedLoads, 0);
   const totalMachineLoads = registeredMachines.reduce((sum, m) => sum + m.loadedLoads, 0);

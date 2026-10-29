@@ -1,3 +1,11 @@
+## 2026-10-29T07:55:00+02:00: Excavator Activity (`/control-room/excavator-activity`) Instant Material Toggle & Header Cleanup
+
+- **Phase 1 (Comprehension)**: Address all 4 design & performance feedback items on `/control-room/excavator-activity`: (1) diagnose why switching `Waste / Coal` is slow and make it instantaneous; (2) remove the date text (`Thursday, 29 October 2026`) from `PageHeader`; (3) remove the `Executive Dashboard` button; (4) improve the visual impact of the department sidebar (`aside` in `DepartmentLayout.tsx`).
+- **Phase 2 (Evidence)**: Inspected `ExcavatorActivityForm.tsx`, `hourly-loads/actions.ts`, `excavator-activity/page.tsx`, and `DepartmentLayout.tsx`. Found that `handleExcavatorMaterialChange` mutated `loadsState` without updating `activitiesState`, triggering the `useEffect` (which depended on `loadsState`) on the next render and immediately overwriting `excavatorMaterials[excavatorId]` back to the stale `act.material_type` until `updateExcavatorAssignmentConfig` (7 sequential queries) + `router.refresh()` finished.
+- **Phase 3 (Design)**: Added `upsertOptimisticActivity` and `pendingMutationCountRef` in `ExcavatorActivityForm.tsx`, removed `loadsState` from the `useEffect` dependency array, wrapped `router.refresh()` in `startTransition`, parallelized `updateExcavatorAssignmentConfig` and `syncExcavatorActivityFromHourlyLoads` with `Promise.all`, passed `showDate={false}` to `PageHeader`, and removed the `Executive Dashboard` link in `excavator-activity/page.tsx`.
+- **Phase 4 (Criticism)**: Added regression unit test in `ExcavatorActivityForm.test.tsx` verifying synchronous 0ms `Waste / Coal` toggle when `todayActivities` already contains an entry.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/excavator-activity/{page.tsx,ExcavatorActivityForm.tsx,ExcavatorActivityForm.test.tsx}` and `apps/portal/app/(departments)/[department]/hourly-loads/actions.ts`.
+
 ## 2026-10-29T07:28:00+02:00: Login Page (`/login`) Overlapping Brand Logo & Site Footer Marquee Speed Reduction
 
 - **Phase 1 (Comprehension)**: Address the 2 design feedback items on `/login`: (1) enlarge `<Logo />` inside the `h-12 w-12` badge container so the logo overlaps the container without changing the container size; (2) slow down the site footer (`footer[aria-label="Site footer"]`) marquee animation.

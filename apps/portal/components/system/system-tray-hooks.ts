@@ -315,9 +315,11 @@ export function useServerHealth() {
   const { data, isLoading } = useQuery({
     queryKey: ['server-health'],
     queryFn: async (): Promise<HealthState> => {
+      // The route already ships `max-age=60, stale-while-revalidate=600`, which
+      // matches this poll interval. `no-store` would force a function invocation
+      // (Supabase query + Redis PING) per tab per minute instead.
       const res = await fetch('/api/health', {
         method: 'GET',
-        cache: 'no-store',
       });
       const json = (await res.json()) as RawHealthApiResponse;
       return mapHealthResponseToState(json);

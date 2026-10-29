@@ -115,4 +115,43 @@ describe('ExcavatorActivityForm', () => {
       );
     });
   });
+
+  it('switches Waste / Coal immediately on click even when todayActivities has an existing entry', async () => {
+    render(
+      <ExcavatorActivityForm
+        {...mockProps}
+        todayActivities={[
+          {
+            id: 'act-1',
+            machine_id: 'ex-10',
+            shift_type: 'day',
+            site_id: 'site-1',
+            block_mined_id: 'blk-1',
+            material_type: 'Waste — Overburden',
+            activity_date: '2026-10-23',
+          },
+        ]}
+      />
+    );
+
+    const wasteBtn = screen.getByRole('button', { name: 'Waste' });
+    const coalBtn = screen.getByRole('button', { name: 'Coal' });
+    expect(wasteBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(coalBtn).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(coalBtn);
+
+    // Must switch synchronously before async server action finishes
+    expect(coalBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(wasteBtn).toHaveAttribute('aria-pressed', 'false');
+
+    await waitFor(() => {
+      expect(updateExcavatorAssignmentConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excavatorId: 'ex-10',
+          materialType: 'Coal',
+        })
+      );
+    });
+  });
 });

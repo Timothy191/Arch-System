@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-29T07:55:00+02:00 - Elevate DepartmentLayout Sidebar Visual Impact
+
+- **Purpose**: Enhance the visual impact of the department sidebar (`aside` in `DepartmentLayout.tsx`) with `liquid-glass-light gold-steel-border`, gold-bordered `Back to Hub` and `Pin` pills, a framed Department Identity capsule (`Active Command`), bordered icon badges on primary tabs, and a `Live` telemetry badge in the `Connection Secure` footer strip.
+- **Changes**:
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Upgraded `<aside>`, header controls, department identity banner, navigation tab items, sub-tab tree borders, and bottom status strip while keeping all class strings within the `<= 16` Tailwind utility budget.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns="DepartmentLayout"` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-28T14:05:00+02:00 - Guard DepartmentLayout MouseMove & Sync MacMenuBar Route State
 
 - **Purpose**: Eliminate redundant React state updates on cursor movement inside `DepartmentLayout` when the sidebar is already open or pinned, and immediately sync `MacMenuBar` pathname state when `arch:active-module-change` fires during client navigation.

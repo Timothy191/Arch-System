@@ -47,42 +47,44 @@ export async function syncExcavatorActivityFromHourlyLoads(
     excavatorId: string;
     loadDate: string;
     shiftType: HourlyShift;
+    skipCacheInvalidation?: boolean;
   }
 ) {
-  const { departmentId, excavatorId, loadDate, shiftType } = params;
+  const { departmentId, excavatorId, loadDate, shiftType, skipCacheInvalidation } = params;
   if (!excavatorId) return;
 
-  const { data: assignedLoads, error: loadsError } = await serviceClient
-    .from('hourly_loads')
-    .select('id, machine_id, material_type, shift_type, excavator_id, total_loads')
-    .eq('department_id', departmentId)
-    .eq('load_date', loadDate)
-    .eq('shift_type', shiftType)
-    .eq('excavator_id', excavatorId);
+  const [{ data: assignedLoads, error: loadsError }, { data: existingActivities }] =
+    await Promise.all([
+      serviceClient
+        .from('hourly_loads')
+        .select('id, machine_id, material_type, shift_type, excavator_id, total_loads')
+        .eq('department_id', departmentId)
+        .eq('load_date', loadDate)
+        .eq('shift_type', shiftType)
+        .eq('excavator_id', excavatorId),
+      serviceClient
+        .from('excavator_activity')
+        .select('id, site_id, block_mined_id, material_type, operator_id')
+        .eq('department_id', departmentId)
+        .eq('machine_id', excavatorId)
+        .eq('activity_date', loadDate)
+        .eq('shift_type', shiftType)
+        .order('created_at', { ascending: false }),
+    ]);
 
   if (loadsError || !assignedLoads) return;
-
-  const { data: existingActivities } = await serviceClient
-    .from('excavator_activity')
-    .select('id, site_id, block_mined_id, material_type, operator_id')
-    .eq('department_id', departmentId)
-    .eq('machine_id', excavatorId)
-    .eq('activity_date', loadDate)
-    .eq('shift_type', shiftType)
-    .order('created_at', { ascending: false });
 
   const existingActivity = existingActivities?.[0] ?? null;
 
   if (assignedLoads.length === 0) {
     if (existingActivity) {
-      await serviceClient
-        .from('excavator_dumper_assignments')
-        .delete()
-        .eq('excavator_activity_id', existingActivity.id);
-      await serviceClient
-        .from('excavator_activity')
-        .update({ loads: 0 })
-        .eq('id', existingActivity.id);
+      await Promise.all([
+        serviceClient
+          .from('excavator_dumper_assignments')
+          .delete()
+          .eq('excavator_activity_id', existingActivity.id),
+        serviceClient.from('excavator_activity').update({ loads: 0 }).eq('id', existingActivity.id),
+      ]);
     }
     return;
   }
@@ -173,11 +175,13 @@ export async function syncExcavatorActivityFromHourlyLoads(
     );
   }
 
-  await invalidateHourlyLoadsCache(departmentId, [
-    'table:excavator_activity',
-    'table:excavator_dumper_assignments',
-    `dept:${departmentId}`,
-  ]);
+  if (!skipCacheInvalidation) {
+    await invalidateHourlyLoadsCache(departmentId, [
+      'table:excavator_activity',
+      'table:excavator_dumper_assignments',
+      `dept:${departmentId}`,
+    ]);
+  }
 }
 
 function assertDepartmentAccess(
@@ -263,40 +267,40 @@ export async function updateExcavatorAssignmentConfig(
 
   const serviceClient = createServiceRoleClient();
 
-  let excavatorSiteId: string | null = validated.siteId ?? null;
-  if (validated.siteId !== undefined) {
-    await serviceClient
-      .from('machines')
-      .update({ site_id: validated.siteId })
-      .eq('id', validated.excavatorId);
-  } else {
-    const { data: excavatorMachine } = await serviceClient
-      .from('machines')
-      .select('site_id')
-      .eq('id', validated.excavatorId)
-      .maybeSingle();
-    excavatorSiteId = excavatorMachine?.site_id ?? null;
-  }
-
-  if (validated.materialType) {
-    await serviceClient
-      .from('hourly_loads')
-      .update({ material_type: validated.materialType })
+  const [machineSiteResult, , { data: existingActivities }] = await Promise.all([
+    validated.siteId !== undefined
+      ? serviceClient
+          .from('machines')
+          .update({ site_id: validated.siteId })
+          .eq('id', validated.excavatorId)
+          .then(() => ({ siteId: validated.siteId ?? null }))
+      : serviceClient
+          .from('machines')
+          .select('site_id')
+          .eq('id', validated.excavatorId)
+          .maybeSingle()
+          .then(({ data }) => ({ siteId: data?.site_id ?? null })),
+    validated.materialType
+      ? serviceClient
+          .from('hourly_loads')
+          .update({ material_type: validated.materialType })
+          .eq('department_id', validated.departmentId)
+          .eq('excavator_id', validated.excavatorId)
+          .eq('load_date', validated.loadDate)
+          .eq('shift_type', validated.shiftType)
+          .eq('is_locked', false)
+      : Promise.resolve(null),
+    serviceClient
+      .from('excavator_activity')
+      .select('id, site_id, block_mined_id, material_type')
       .eq('department_id', validated.departmentId)
-      .eq('excavator_id', validated.excavatorId)
-      .eq('load_date', validated.loadDate)
+      .eq('machine_id', validated.excavatorId)
+      .eq('activity_date', validated.loadDate)
       .eq('shift_type', validated.shiftType)
-      .eq('is_locked', false);
-  }
+      .order('created_at', { ascending: false }),
+  ]);
 
-  const { data: existingActivities } = await serviceClient
-    .from('excavator_activity')
-    .select('id, site_id, block_mined_id, material_type')
-    .eq('department_id', validated.departmentId)
-    .eq('machine_id', validated.excavatorId)
-    .eq('activity_date', validated.loadDate)
-    .eq('shift_type', validated.shiftType)
-    .order('created_at', { ascending: false });
+  const excavatorSiteId: string | null = machineSiteResult.siteId;
 
   const existingActivity = existingActivities?.[0] ?? null;
   const parsedExistingMaterial = parseExcavatorMaterial(existingActivity?.material_type);
@@ -343,6 +347,7 @@ export async function updateExcavatorAssignmentConfig(
       excavatorId: validated.excavatorId,
       loadDate: validated.loadDate,
       shiftType: validated.shiftType,
+      skipCacheInvalidation: true,
     });
   } catch {
     // Best-effort sync

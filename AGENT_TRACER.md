@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Excavator Activity (`/control-room/excavator-activity`) Instant Material Toggle, Header Cleanup & Sidebar Visual Impact
+
+- **Action:**
+  - Fixed the `Waste / Coal` toggle delay in `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityForm.tsx` by updating `activitiesState` optimistically (`upsertOptimisticActivity`), removing `loadsState` from the `useEffect` dependency list that was overwriting optimistic material changes back to the stale `activitiesState` value, guarding in-flight mutations via `pendingMutationCountRef`, and wrapping `router.refresh()` in `startTransition`.
+  - Parallelized independent queries in `updateExcavatorAssignmentConfig` and `syncExcavatorActivityFromHourlyLoads` (`apps/portal/app/(departments)/[department]/hourly-loads/actions.ts`) via `Promise.all` and eliminated duplicate Redis cache invalidations.
+  - Removed the date text (`showDate={false}` on `PageHeader`) and `Executive Dashboard` link from `apps/portal/app/(departments)/[department]/excavator-activity/page.tsx`.
+  - Upgraded the visual impact of the department sidebar (`aside` in `packages/ui/src/components/DepartmentLayout.tsx`) with `liquid-glass-light gold-steel-border`, rounded glass capsule framing (`Back to Hub`, `Pin sidebar`, Department Identity card with `Active Command` subtitle, framed navigation icon badges, and `Connection Secure` + `Live` telemetry footer).
+- **Verification:** `ExcavatorActivityForm.test.tsx`, `DepartmentLayout.test.tsx`, `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Login Page (`/login`) Overlapping Brand Logo & Site Footer Marquee Speed Reduction
 
 - **Action:**
