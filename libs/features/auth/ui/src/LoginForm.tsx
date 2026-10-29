@@ -8,6 +8,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+const LOGIN_INPUT_WRAPPER_CLASS =
+  'gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-lg border border-[var(--accent-blue)]/40 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20';
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,10 +66,11 @@ export function LoginForm() {
         >
           Email Address
         </label>
-        <div className="relative flex items-center overflow-hidden rounded-lg border border-neutral-200/90 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20">
-          <Mail className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500" />
+        <div className={LOGIN_INPUT_WRAPPER_CLASS}>
+          <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-neutral-500" />
           <input
             id="email"
+            name="email"
             type="email"
             required
             autoFocus
@@ -84,7 +88,7 @@ export function LoginForm() {
               }
             }}
             placeholder="username@arch-systems.io"
-            className="w-full border-none bg-transparent py-3 pr-4 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
+            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-4 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
             autoComplete="username"
           />
         </div>
@@ -106,10 +110,11 @@ export function LoginForm() {
             Forgot password?
           </Link>
         </div>
-        <div className="relative flex items-center overflow-hidden rounded-lg border border-neutral-200/90 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20">
-          <Lock className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500" />
+        <div className={LOGIN_INPUT_WRAPPER_CLASS}>
+          <Lock className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-neutral-500" />
           <input
             id="password"
+            name="password"
             type={showPassword ? 'text' : 'password'}
             required
             minLength={11}
@@ -124,13 +129,13 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             placeholder="••••••••"
-            className="w-full border-none bg-transparent py-3 pr-11 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
+            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-11 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute top-1/2 right-1 flex min-h-[36px] min-w-[36px] -translate-y-1/2 cursor-pointer items-center justify-center rounded p-2 text-neutral-500 transition-colors hover:text-neutral-800 focus:outline-none"
+            className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-neutral-500 transition-colors hover:text-neutral-800 focus:outline-none"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -170,7 +175,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading || isRateLimited}
-        className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-button bg-[var(--accent-blue)] py-3.5 font-semibold text-white text-xs uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-[var(--accent-blue)]/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        className="group gold-steel-border gold-steel-border-slim flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[var(--accent-blue)] py-3.5 font-semibold text-white text-xs uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-[var(--accent-blue)]/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <span className="flex items-center gap-2">

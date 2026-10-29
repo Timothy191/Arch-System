@@ -66,7 +66,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         {systemUnavailable ? (
           <div
             data-testid="login-card"
-            className="w-full animate-fade-up space-y-4 rounded-card border border-arch-border-subtle bg-arch-surface-secondary/80 p-8 text-center shadow-window backdrop-blur-xl md:p-10"
+            className="gold-steel-border w-full animate-fade-up space-y-4 rounded-card border border-[var(--accent-blue)]/30 bg-arch-surface-secondary/80 p-8 text-center shadow-window backdrop-blur-xl md:p-10"
           >
             <AlertTriangle className="mx-auto h-10 w-10 text-accent-amber" strokeWidth={1.5} />
             <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
@@ -79,7 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <a
               href="/login"
               autoFocus
-              className="mt-4 inline-block rounded-button border border-[var(--accent-blue)]/40 bg-[var(--accent-blue)] px-6 py-2.5 font-semibold text-white text-xs uppercase tracking-wider shadow-diffusion-sm transition-all hover:bg-[var(--accent-blue)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
+              className="gold-steel-border gold-steel-border-slim mt-4 inline-block rounded-xl border border-[var(--accent-blue)]/40 bg-[var(--accent-blue)] px-6 py-2.5 font-semibold text-white text-xs uppercase tracking-wider shadow-diffusion-sm transition-all hover:bg-[var(--accent-blue)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
             >
               Retry
             </a>
@@ -87,11 +87,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         ) : (
           <div
             data-testid="login-card"
-            className="w-full animate-fade-up rounded-card border border-arch-border-subtle bg-arch-surface-secondary/80 p-8 shadow-window backdrop-blur-xl md:p-10"
+            className="gold-steel-border w-full animate-fade-up rounded-card border border-[var(--accent-blue)]/30 bg-arch-surface-secondary/80 p-8 shadow-window backdrop-blur-xl md:p-10"
           >
             {/* Branding */}
             <div className="mb-6 flex flex-col items-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 text-arch-accent-blue shadow-diffusion-sm">
+              <div className="gold-steel-border gold-steel-border-slim mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 text-arch-accent-blue shadow-diffusion-sm">
                 <Logo className="h-6 w-6 text-[var(--accent-blue)]" />
               </div>
               <div className="text-center">
@@ -131,20 +131,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         )}
 
         {/* Footer */}
-        <footer className="mt-8 select-none space-y-2 text-center">
-          <div className="flex items-center justify-center gap-1.5 font-semibold text-[11px] text-neutral-600 uppercase tracking-widest">
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-accent-green" />
+        <footer
+          data-testid="login-footer"
+          className="mt-8 select-none space-y-2 text-center text-[var(--accent-blue)]"
+        >
+          <div className="flex items-center justify-center gap-1.5 font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-widest">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>
           </div>
-          <div className="flex justify-center gap-6 text-neutral-600 text-xs">
+          <div className="flex justify-center gap-6 font-medium text-[var(--accent-blue)] text-xs">
             <a
-              className="inline-flex min-h-[32px] items-center px-2 py-1 :text-white transition-colors hover:text-neutral-900"
+              className="inline-flex min-h-[32px] items-center px-2 py-1 text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80 hover:underline"
               href="/docs"
             >
               Security Policy
             </a>
             <a
-              className="inline-flex min-h-[32px] items-center px-2 py-1 :text-white transition-colors hover:text-neutral-900"
+              className="inline-flex min-h-[32px] items-center px-2 py-1 text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue)]/80 hover:underline"
               href="/docs#support"
             >
               Support

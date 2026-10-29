@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - Login Page (`/login`) Gold Branding Borders, Rounded Sign-In Button & Gold Footer Typography
+
+- **Action:**
+  - Updated `libs/features/auth/ui/src/LoginForm.tsx` to apply `rounded-xl` and `gold-steel-border gold-steel-border-slim` to the `Sign In` submit button and `gold-steel-border gold-steel-border-slim rounded-lg` to `input#email`, `input#password`, and their wrapper containers.
+  - Updated `apps/portal/app/(auth)/login/page.tsx` to apply `gold-steel-border` to `div[data-testid="login-card"]` and its top emblem badge, and styled `footer[data-testid="login-footer"]` (`Secure industrial access • Arch-Systems v1.6.2`, `Security Policy`, and `Support`) in gold branding color (`text-[var(--accent-blue)]`).
+- **Verification:** `LoginForm.test.tsx` & `login/page.test.tsx` (`16/16 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Vercel Active Team Migration (`server-management1`), Environment Secret Sync & Daily Cron Schedule
 
 - **Action:**

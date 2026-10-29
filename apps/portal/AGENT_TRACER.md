@@ -1,3 +1,11 @@
+## 2026-10-29T06:16:00+02:00: Login Page (`/login`) Design Feedback — Rounded Sign-In Button, Gold Footer Branding & Gold Borders on Card/Inputs
+
+- **Phase 1 (Comprehension)**: Address all 5 design feedback items on `/login`: (1) add rounded corners to `button "Sign In"`; (2) change `footer "Secure industrial access • Arch-Systems v1.6.2 Security Policy Support"` to gold color to match branding; (3) add gold bordering to `div[data-testid="login-card"]`; (4) add gold bordering to `input#email`; (5) add gold bordering to `input#password`.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/(auth)/login/page.tsx`, `libs/features/auth/ui/src/LoginForm.tsx`, `packages/theme/src/css/cards.css`, `LoginForm.test.tsx`, and `login/page.test.tsx`.
+- **Phase 3 (Design)**: Replaced undefined `rounded-button` with `rounded-xl gold-steel-border gold-steel-border-slim` on the `Sign In` button (`LoginForm.tsx`) and `Retry` button (`login/page.tsx`); added `gold-steel-border gold-steel-border-slim` to `input#email`, `input#password`, and `LOGIN_INPUT_WRAPPER_CLASS`; added `gold-steel-border` to `div[data-testid="login-card"]`; and updated `footer[data-testid="login-footer"]` text, icon, and links to `text-[var(--accent-blue)]`.
+- **Phase 4 (Criticism)**: Added unit test assertions in `LoginForm.test.tsx` and `login/page.test.tsx` covering all 5 feedback items.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(auth)/login/page.tsx`, `apps/portal/app/(auth)/login/page.test.tsx`, `libs/features/auth/ui/src/LoginForm.tsx`, and `apps/portal/features/auth/components/LoginForm.test.tsx`.
+
 ## 2026-10-28T14:05:00+02:00: System Stability & Responsiveness Optimization Pass (Server Waterfalls, Proxy Static UUID Fast-Path & Client Navigation)
 
 - **Phase 1 (Comprehension)**: Assess the codebase and execute targeted improvements focused on system stability and responsiveness (page load speed, client interactions, data loading, and route switching).

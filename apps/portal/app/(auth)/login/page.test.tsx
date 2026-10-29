@@ -65,6 +65,12 @@ describe('LoginPage Server Component', () => {
 
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
     expect(screen.getByTestId('mock-login-form')).toBeInTheDocument();
+
+    const loginCard = screen.getByTestId('login-card');
+    expect(loginCard.className).toContain('gold-steel-border');
+
+    const loginFooter = screen.getByTestId('login-footer');
+    expect(loginFooter.className).toContain('text-[var(--accent-blue)]');
   });
 
   it('renders the heading with the theme token class', async () => {
