@@ -43,17 +43,17 @@ Most departments share these tabs:
 
 The control room has the most specialized tab set, optimized for real-time mining operations monitoring:
 
-| Tab                | Data Model                                  | Key Features                                                                                               |
-| ------------------ | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| dashboard          | Aggregated KPIs                             | Real-time alerts (`AlertPanel` single-pass horizons), SCADA panels, activity feed                          |
-| hourly-loads       | [[hourly-loads]] table                      | 12-hour shift grid, auto-totals, shift toggle                                                              |
-| machine-operations | [[machine-operations]] table                | Operator assignment, Dozer `Roll Over` (`250 BCM/h`) vs `Other`, Drill Rig sync, breakdown auto-carry-over |
-| operational-delays | [[operational-delays]] table                | Categorized delays, impact assessment, recovery tracking                                                   |
-| engineering-notes  | [[engineering-notes]], [[delay_entries]]    | 20-column Fleet Overview Ledger (`12.0h` cap), 3-Step Quick Delay Logger, automatic breakdown carry-over   |
-| excavator-activity | [[excavator-activity]] table                | Pass/load/cycle tracking, instant optimistic `Waste / Coal` toggle, dumper assignments                     |
-| roll-over          | [[dozer-rolls]] table                       | Dozer roll-over event logging                                                                              |
-| machines           | [[machines]] table                          | Full machine database with bin_factor for dumpers                                                          |
-| reports            | [[report-templates]], [[generated-reports]] | Template-based report generation                                                                           |
+| Tab                | Data Model                              | Key Features                                                                                               |
+| ------------------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| dashboard          | Aggregated KPIs                         | Real-time alerts (`AlertPanel` single-pass horizons), SCADA panels, activity feed                          |
+| hourly-loads       | `hourly_loads` table                    | 12-hour shift grid, auto-totals, shift toggle                                                              |
+| machine-operations | `machine_operations` table              | Operator assignment, Dozer `Roll Over` (`250 BCM/h`) vs `Other`, Drill Rig sync, breakdown auto-carry-over |
+| operational-delays | `operational_delays` table              | Categorized delays, impact assessment, recovery tracking                                                   |
+| engineering-notes  | `engineering_notes`, `delay_entries`    | 20-column Fleet Overview Ledger (`12.0h` cap), 3-Step Quick Delay Logger, automatic breakdown carry-over   |
+| excavator-activity | `excavator_activity` table              | Pass/load/cycle tracking, instant optimistic `Waste / Coal` toggle, dumper assignments                     |
+| roll-over          | `dozer_rolls` table                     | Dozer roll-over event logging                                                                              |
+| machines           | `machines` table                        | Full machine database with bin_factor for dumpers                                                          |
+| reports            | `report_templates`, `generated_reports` | Template-based report generation                                                                           |
 
 ## Plant & Processing (`/plant-processing`)
 
@@ -70,15 +70,15 @@ Forms use the four-state pattern (`idle`/`submitting`/`success`/`error`) with `c
 
 ## Engineering (Breakdowns)
 
-| Tab        | Data Model           | Key Features                                            |
-| ---------- | -------------------- | ------------------------------------------------------- |
-| dashboard  | Aggregated KPIs      | Pending breakdowns count, fleet status                  |
-| breakdowns | [[breakdowns]] table | Book-in/book-out workflow, direct checkout, soft delete |
-| daily-log  | [[daily-logs]]       | Standard shift logging                                  |
-| machines   | [[machines]]         | Equipment registry                                      |
-| history    | [[audit-logs]]       | Audit trail for breakdown changes                       |
-| reports    | [[report-templates]] | Report generation                                       |
-| tools      | External tools       | Flowise, Univer                                         |
+| Tab        | Data Model         | Key Features                                            |
+| ---------- | ------------------ | ------------------------------------------------------- |
+| dashboard  | Aggregated KPIs    | Pending breakdowns count, fleet status                  |
+| breakdowns | `breakdowns` table | Book-in/book-out workflow, direct checkout, soft delete |
+| daily-log  | `daily_logs`       | Standard shift logging                                  |
+| machines   | `machines`         | Equipment registry                                      |
+| history    | `audit_logs`       | Audit trail for breakdown changes                       |
+| reports    | `report_templates` | Report generation                                       |
+| tools      | External tools     | Flowise, Univer                                         |
 
 ### Breakdown Workflow
 
@@ -87,7 +87,7 @@ Forms use the four-state pattern (`idle`/`submitting`/`success`/`error`) with `c
 3. **Direct Checkout**: For cases where book-in was missed — creates completed record with `missing_book_in = true`
 4. **Soft Delete**: Admin-only — sets `deleted_at` timestamp
 
-All operations are audited. See [[breakdowns-actions]] for server action details.
+All operations are audited. See [[engineering-department]] for server action details.
 
 ## System Overview & Database Modules
 

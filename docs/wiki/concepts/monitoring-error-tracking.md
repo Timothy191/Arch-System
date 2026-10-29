@@ -41,9 +41,9 @@ Filters: password, token strings from error reports.
 `instrumentation.ts` — Server-side Sentry initialization:
 
 ```typescript
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
-if (process.env.NEXT_RUNTIME === "nodejs") {
+if (process.env.NEXT_RUNTIME === 'nodejs') {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     tracesSampleRate: 1.0,
@@ -67,7 +67,7 @@ export default withSentryConfig(nextConfig, {
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  tunnelRoute: "/monitoring",
+  tunnelRoute: '/monitoring',
   hideSourceMaps: true,
   disableLogger: true,
 });
@@ -87,18 +87,18 @@ Live data updates use Supabase's `postgres_changes` subscriptions filtered by `d
 
 ```typescript
 supabase
-  .channel("table_changes")
+  .channel('table_changes')
   .on(
-    "postgres_changes",
+    'postgres_changes',
     {
-      event: "*",
-      schema: "public",
-      table: "table_name",
+      event: '*',
+      schema: 'public',
+      table: 'table_name',
       filter: `department_id=eq.${departmentId}`,
     },
     (payload) => {
       // Handle insert/update/delete
-    },
+    }
   )
   .subscribe();
 ```
@@ -194,16 +194,16 @@ Both are started automatically via `./scripts/deploy.sh local`.
 scrape_configs:
   - job_name: portal
     static_configs:
-      - targets: ["portal:3000"]
+      - targets: ['portal:3000']
     metrics_path: /api/metrics
 
   - job_name: redis
     static_configs:
-      - targets: ["redis-exporter:9121"]
+      - targets: ['redis-exporter:9121']
 
   - job_name: postgres
     static_configs:
-      - targets: ["postgres-exporter:9187"]
+      - targets: ['postgres-exporter:9187']
 ```
 
 ### Key Metrics Tracked

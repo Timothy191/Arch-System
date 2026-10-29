@@ -26,7 +26,7 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 ## Monorepo Structure
 
 - `apps/portal/` → Next.js 16 app with App Router, React 19 (main mining portal)
-- `packages/ui/` → [[turbo-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
+- `packages/ui/` → [[turborepo-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
 - `packages/theme/` → [[design-system|@repo/theme]] — design tokens, Style Dictionary pipeline, Tailwind preset
 - `packages/supabase/` → [[supabase-local-dev|@repo/supabase]] — client wrappers (browser, server, middleware, read-replica) and database types
 - `packages/database/` → [[database-schema|@repo/database]] — SQL migrations (111 migrations, source of truth)

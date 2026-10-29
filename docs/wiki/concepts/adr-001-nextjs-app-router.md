@@ -1,5 +1,5 @@
 ---
-title: "ADR-001: Next.js 16 App Router Adoption"
+title: 'ADR-001: Next.js 16 App Router Adoption'
 created: 2026-05-15
 updated: 2026-05-25
 type: decision
@@ -84,4 +84,4 @@ We adopt **Next.js 16 with the App Router**, using **React Server Components (RS
 
 - [[portal-app-architecture]] — Full architecture details
 - [[comparisons/react-patterns]] — Comparison with alternatives
-- [[turbo-monorepo]] — How this fits in monorepo
+- [[turborepo-monorepo]] — How this fits in monorepo

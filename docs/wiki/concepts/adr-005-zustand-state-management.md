@@ -1,5 +1,5 @@
 ---
-title: "ADR-005: Zustand for Client State Management"
+title: 'ADR-005: Zustand for Client State Management'
 created: 2026-05-15
 updated: 2026-05-15
 type: decision
@@ -101,7 +101,7 @@ We will use **Zustand 5** for the minimal client state that exists.
 
 ```typescript
 // apps/portal/lib/stores/app-store.ts
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface AppState {
   sidebarOpen: boolean;

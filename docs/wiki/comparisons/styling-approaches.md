@@ -39,11 +39,11 @@ export const themePreset = {
   theme: {
     extend: {
       colors: {
-        void: "hsl(var(--bg-void))",
-        primary: "hsl(var(--bg-primary))",
-        card: "hsl(var(--bg-card))",
-        border: "hsl(var(--border))",
-        accent: "#3ecf8e",
+        void: 'hsl(var(--bg-void))',
+        primary: 'hsl(var(--bg-primary))',
+        card: 'hsl(var(--bg-card))',
+        border: 'hsl(var(--border))',
+        accent: '#3ecf8e',
       },
     },
   },
@@ -103,4 +103,4 @@ Tailwind's utility-first approach fit the rapid iteration needs better.
 
 - [[design-system]] — Full design system documentation
 - [[deepeval-integration]] — Automated enforcement via DesignSystemComplianceMetric
-- [[turbo-monorepo]] — How @repo/theme is shared across packages
+- [[turborepo-monorepo]] — How @repo/theme is shared across packages

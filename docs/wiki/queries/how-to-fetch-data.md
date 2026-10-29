@@ -1,5 +1,5 @@
 ---
-title: "Q: How should I fetch data?"
+title: 'Q: How should I fetch data?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -92,10 +92,10 @@ export default async function ProductionDashboard({ params }: { params: { depart
 
 ```typescript
 // Server Action — can be in separate file or inline
-"use server";
+'use server';
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidatePath } from 'next/cache';
 
 export async function addMachine(formData: FormData) {
   const supabase = createServerSupabaseClient();
@@ -104,19 +104,19 @@ export async function addMachine(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  if (!user) throw new Error('Not authenticated');
 
   // Insert data
-  const { error } = await supabase.from("machines").insert({
-    name: formData.get("name"),
-    machine_type: formData.get("type"),
-    department_id: formData.get("department_id"),
+  const { error } = await supabase.from('machines').insert({
+    name: formData.get('name'),
+    machine_type: formData.get('type'),
+    department_id: formData.get('department_id'),
   });
 
   if (error) throw new Error(error.message);
 
   // Revalidate the page to show new data
-  revalidatePath("/[department]/machines");
+  revalidatePath('/[department]/machines');
 }
 ```
 
@@ -252,9 +252,9 @@ export function PredictiveAnalysis({ machineData }: { machineData: any }) {
 ```typescript
 // Fetch multiple datasets in parallel
 const [{ data: machines }, { data: operators }, { data: sites }] = await Promise.all([
-  supabase.from("machines").select("*").eq("department_id", dept.id),
-  supabase.from("operators").select("*").eq("department_id", dept.id),
-  supabase.from("sites").select("*").eq("department_id", dept.id),
+  supabase.from('machines').select('*').eq('department_id', dept.id),
+  supabase.from('operators').select('*').eq('department_id', dept.id),
+  supabase.from('sites').select('*').eq('department_id', dept.id),
 ]);
 ```
 
@@ -263,17 +263,17 @@ const [{ data: machines }, { data: operators }, { data: sites }] = await Promise
 ```typescript
 // Include related data in single query
 const { data: logs } = await supabase
-  .from("daily_logs")
+  .from('daily_logs')
   .select(
     `
     *,
     machine_hours(*),
     fuel_logs(*),
     production_logs(*)
-  `,
+  `
   )
-  .eq("department_id", dept.id)
-  .eq("log_date", today);
+  .eq('department_id', dept.id)
+  .eq('log_date', today);
 ```
 
 ### Pattern: Caching
@@ -283,15 +283,15 @@ const { data: logs } = await supabase
 export const revalidate = 300; // 5 minutes
 
 // Or use Next.js cache with tags
-import { unstable_cache } from "next/cache";
+import { unstable_cache } from 'next/cache';
 
 const getCachedMachines = unstable_cache(
   async (deptId) => {
     const supabase = createServerSupabaseClient();
-    return supabase.from("machines").select("*").eq("department_id", deptId);
+    return supabase.from('machines').select('*').eq('department_id', deptId);
   },
-  ["machines"],
-  { revalidate: 300 },
+  ['machines'],
+  { revalidate: 300 }
 );
 ```
 

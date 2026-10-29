@@ -34,8 +34,8 @@ The portal uses **Zustand 5** selectively:
 
 ```typescript
 // Client components with complex state
-"use client";
-import { create } from "zustand";
+'use client';
+import { create } from 'zustand';
 
 interface AppState {
   sidebarOpen: boolean;

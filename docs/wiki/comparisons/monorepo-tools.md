@@ -95,6 +95,6 @@ pnpm workspaces handle installation and linking, but lack:
 
 ## Related
 
-- [[turbo-monorepo]] — Workspace layout and conventions
+- [[turborepo-monorepo]] — Workspace layout and conventions
 - [[arch-systems]] — How the monorepo structure supports the product
-- [[adr-008-turbo-monorepo]] — Architecture Decision Record
+- [[adr-008-turborepo-monorepo]] — Architecture Decision Record

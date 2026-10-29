@@ -2,7 +2,7 @@
 
 > Content catalog for the Arch-Systems (Plantcor) company knowledge base.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-10-19 | Total pages: 84 (16 concepts + 6 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
+> Last updated: 2026-10-29 | Total pages: 87 (19 concepts + 8 entities + 9 comparisons + 10 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
 > Current project version: v1.6.2 (Industrial Command & Turborepo) | Next.js 16 | React 19 | Supabase PostgreSQL 17 | Light Theme | 185 Migrations
 
 ## Quick Reference
@@ -12,7 +12,7 @@
 | Understand project history    | [[gittree/README\|Git Tree & Branches]]               |
 | View project structure        | [[arch-systems]]                                      |
 | Understand system & stack     | [[project-overview]]                                  |
-| Start developing              | [[turbo-monorepo]] → [[supabase-local-dev]]           |
+| Start developing              | [[turborepo-monorepo]] → [[supabase-local-dev]]       |
 | Build a department feature    | [[department-features]] → [[portal-app-architecture]] |
 | Add UI components             | [[design-system]]                                     |
 | Work with database            | [[database-schema]] → [[rls-policy]]                  |
@@ -31,25 +31,28 @@
 | Understand data visualization | [[gittree/visual-graphs-reporting]]                   |
 | Learn code graph analysis     | [[gittree/conceptual-code-graphs]]                    |
 | Study graph algorithms        | [[gittree/graph-data-structures]]                     |
-| See why we chose X            | [[Comparisons]] section below                         |
+| See why we chose X            | [[monorepo-tools\|Comparisons]] section below         |
 
 ---
 
-## Entities (6)
+## Entities (8)
 
 - [[arch-systems|Arch-Systems (Plantcor)]] — Multi-departmental mining operations portal built as a Turborepo monorepo
 - [[drilling-department|Drilling Department]] — Drill rig operations & bit depth telemetry
 - [[production-department|Production Department]] — Coal yield, tonnage & extraction tracking
 - [[access-control-department|Access Control Department]] — Site access, badging & security
 - [[engineering-department|Engineering Department]] — Equipment specs, maintenance & CAD
-- [[control-room-department|Control Room Department]] — SCADA systems & real-time monitoring
+- [[control-room-department|Control Room Department]] — SCADA systems, shift sheets & real-time monitoring
+- [[plant-processing-department|Plant & Processing Department]] — DMS wash plant hourly input sheets, circuit delays & yield rollups
+- [[plant-inventory-department|Plant Inventory Department]] — Wash plant dense medium, reagents & wear spares stock control
 
-## Concepts (17 + 9 ADRs + 5 Operational + 4 Git Tree)
+## Concepts (19 + 10 ADRs + 5 Operational + 4 Git Tree)
 
 ### Architecture & Setup
 
 - [[project-overview|Project Overview & Tech Stack]] — Authoritative entry point for system architecture, the technology stack, design decisions, and development workflow
-- [[turbo-monorepo|Turborepo Monorepo Structure]] — Workspace layout, target configuration defaults, and build commands (migrated from Turborepo)
+- [[overview|System Overview Architecture]] — Interactive React Flow architecture topology and telemetry views
+- [[turborepo-monorepo|Turborepo Monorepo Structure]] — Workspace layout, target configuration defaults, and build commands
 - [[supabase-local-dev|Supabase Local Development]] — Local DB, auth, and storage setup with remote sync
 - [[portal-app-architecture|Portal App Architecture]] — Next.js 16 App Router, RSC, server actions, and feature organization
 
@@ -62,7 +65,9 @@
 - [[adr-005-zustand-state-management|ADR-005]] — Zustand for client state
 - [[adr-006-multi-provider-ai|ADR-006 (Superseded)]] — Multi-provider AI with failover
 - [[adr-007-react-19-adoption|ADR-007]] — React 19 adoption strategy
-- [[adr-008-turbo-monorepo|ADR-008]] — Turborepo for Monorepo Management (supersedes ADR-003)
+- [[adr-008-turborepo-monorepo|ADR-008]] — Turborepo for Monorepo Management (supersedes ADR-003)
+- [[adr-011-turborepo-monorepo|ADR-011]] — Turborepo 2.x Task Pipeline Standardization
+- [[adr-012-asynchronous-processing-topology|ADR-012]] — Asynchronous Processing Topology
 
 #### Operational Guides
 

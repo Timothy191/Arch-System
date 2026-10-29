@@ -82,7 +82,7 @@ Parent log for each department per day/shift.
 
 UNIQUE: (department_id, log_date, shift). Append-only — no DELETE policy.
 
-Child tables: [[machine-hours]], [[fuel-logs]], [[production-logs]]
+Child tables: `machine_hours`, `fuel_logs`, `production_logs`
 
 ### machine_hours, fuel_logs, production_logs
 

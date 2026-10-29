@@ -106,6 +106,7 @@
     "audit:resilience": "node tools/audits/audit-observability-resilience.cjs",
     "audit:agent-permissions": "node tools/audits/audit-agent-permissions.cjs",
     "audit:ai-hallucination": "node tools/audits/audit-ai-hallucination.cjs",
+    "audit:wiki": "node tools/audits/audit-wiki.mjs",
     "audit:evidence": "node tools/audits/verify-27-gates.cjs --verify-manifest .ci-local/agent-verify-evidence.json",
     "audit:vercel": "node tools/scripts/vercel-preflight.cjs",
     "audit:perf": "lighthouse http://localhost:3000 --chrome-flags=\"--headless\" --output json --output-path=./temp/lighthouse-report.json",

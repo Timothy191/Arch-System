@@ -1,5 +1,5 @@
 ---
-title: "Q: Why is my query returning empty/no data?"
+title: 'Q: Why is my query returning empty/no data?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -78,17 +78,17 @@ In your app code (debugging):
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log("Auth user:", user?.id);
+console.log('Auth user:', user?.id);
 
 const { data: employee } = await supabase
-  .from("employees")
-  .select("*")
-  .eq("auth_id", user?.id)
+  .from('employees')
+  .select('*')
+  .eq('auth_id', user?.id)
   .single();
 
-console.log("Employee record:", employee);
-console.log("Department ID:", employee?.department_id);
-console.log("Role:", employee?.role);
+console.log('Employee record:', employee);
+console.log('Department ID:', employee?.department_id);
+console.log('Role:', employee?.role);
 ```
 
 In SQL:
@@ -156,13 +156,13 @@ WHERE department_id = auth.user_department_id()
 // Create service role client (bypasses all RLS)
 const serviceClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Server-only!
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Server-only!
 );
 
 // Test if data exists without RLS
-const { data } = await serviceClient.from("machines").select("*");
+const { data } = await serviceClient.from('machines').select('*');
 
-console.log("All machines (no RLS):", data);
+console.log('All machines (no RLS):', data);
 ```
 
 If service role returns data but normal client doesn't → **RLS issue confirmed**.
@@ -263,24 +263,24 @@ async function debugDataFetching(supabase: any) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.log("1. Auth user:", user?.id ?? "NOT AUTHENTICATED");
+  console.log('1. Auth user:', user?.id ?? 'NOT AUTHENTICATED');
 
   // 2. Employee record
   const { data: employee } = await supabase
-    .from("employees")
-    .select("*")
-    .eq("auth_id", user?.id)
+    .from('employees')
+    .select('*')
+    .eq('auth_id', user?.id)
     .single();
-  console.log("2. Employee:", employee ?? "NO EMPLOYEE ROW");
+  console.log('2. Employee:', employee ?? 'NO EMPLOYEE ROW');
 
   // 3. Department access
-  console.log("3. Department ID:", employee?.department_id);
-  console.log("4. Accessible departments:", employee?.accessible_departments);
+  console.log('3. Department ID:', employee?.department_id);
+  console.log('4. Accessible departments:', employee?.accessible_departments);
 
   // 5. RLS test query
-  const { data: testData, error } = await supabase.from("machines").select("*").limit(5);
-  console.log("5. Query result:", testData?.length ?? 0, "rows");
-  console.log("6. Query error:", error ?? "none");
+  const { data: testData, error } = await supabase.from('machines').select('*').limit(5);
+  console.log('5. Query result:', testData?.length ?? 0, 'rows');
+  console.log('6. Query error:', error ?? 'none');
 }
 ```
 

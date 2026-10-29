@@ -164,7 +164,7 @@ WHERE state = 'idle' AND state_change < NOW() - INTERVAL '1 hour';
 ```typescript
 // In apps/portal/lib/ai/ai-service.ts
 // Temporarily switch primary provider
-const providerOrder = ["openrouter", "together", "groq"];
+const providerOrder = ['openrouter', 'together', 'groq'];
 ```
 
 #### D. Real-time Updates Broken (P2)

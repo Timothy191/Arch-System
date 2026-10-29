@@ -98,7 +98,7 @@ All functions use `SECURITY DEFINER` with `SET search_path = public`.
 Every server action authenticates before any database operation:
 
 ```typescript
-"use server";
+'use server';
 
 export async function someAction(departmentId: string, input: SomeInput) {
   const supabase = await createServerSupabaseClient();
@@ -106,13 +106,13 @@ export async function someAction(departmentId: string, input: SomeInput) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) throw new Error('Unauthorized');
 
   // Verify department access
   const { data: employee } = await supabase
-    .from("employees")
-    .select("role, department_id, accessible_departments")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('role, department_id, accessible_departments')
+    .eq('auth_id', user.id)
     .single();
 
   // Proceed with operation

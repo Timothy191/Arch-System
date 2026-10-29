@@ -1,0 +1,66 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+      - 'tools/audits/audit-wiki.mjs'
+      - '.github/workflows/sync-wiki.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+      - 'tools/audits/audit-wiki.mjs'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit-and-sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Audit Wiki Integrity (Frontmatter, Wikilinks & Index Coverage)
+        run: node tools/audits/audit-wiki.mjs
+
+      - name: Publish docs/wiki to GitHub Wiki
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WIKI_REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          if ! git ls-remote "${WIKI_REMOTE}" >/dev/null 2>&1; then
+            echo "::notice::GitHub Wiki repository (${GITHUB_REPOSITORY}.wiki.git) is not initialized yet. Create the first page in the GitHub Wiki tab to enable auto-sync."
+            exit 0
+          fi
+
+          git clone --depth 1 "${WIKI_REMOTE}" /tmp/gh-wiki
+          cp docs/wiki/index.md /tmp/gh-wiki/Home.md
+          cp docs/wiki/SCHEMA.md /tmp/gh-wiki/SCHEMA.md
+          cp docs/wiki/log.md /tmp/gh-wiki/log.md
+          find docs/wiki/entities docs/wiki/concepts docs/wiki/comparisons docs/wiki/queries -maxdepth 1 -name '*.md' -exec cp {} /tmp/gh-wiki/ \;
+
+          cd /tmp/gh-wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "GitHub Wiki is already up to date."
+          else
+            git commit -m "docs(wiki): sync from docs/wiki (${GITHUB_SHA::7})"
+            git push origin HEAD
+          fi

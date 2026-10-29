@@ -1,3 +1,12 @@
+---
+title: 'Advanced Analytics & Reporting'
+created: 2026-05-16
+updated: 2026-10-29
+type: concept
+tags: [concept, architecture, integration]
+confidence: high
+---
+
 # Advanced Analytics & Reporting
 
 **Priority:** MEDIUM  

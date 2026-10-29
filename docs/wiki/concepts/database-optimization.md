@@ -1,3 +1,12 @@
+---
+title: 'Database Optimization & Scaling'
+created: 2026-05-16
+updated: 2026-10-29
+type: concept
+tags: [database, architecture, infrastructure]
+confidence: high
+---
+
 # Database Optimization & Scaling
 
 **Priority:** HIGH  
@@ -104,7 +113,7 @@ pgbouncer:
     PGBOUNCER_MAX_CLIENT_CONN: 200
     PGBOUNCER_DEFAULT_POOL_SIZE: 25
   ports:
-    - "5433:5432"
+    - '5433:5432'
 ```
 
 - [x] `docker-compose.pooler.yml` added (pgbouncer service on port 5433)

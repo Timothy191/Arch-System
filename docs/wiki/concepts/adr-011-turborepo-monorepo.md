@@ -1,5 +1,5 @@
 ---
-title: "ADR-011: Turborepo and Boundaries Plugin for Monorepo Management"
+title: 'ADR-011: Turborepo and Boundaries Plugin for Monorepo Management'
 created: 2026-09-10
 updated: 2026-09-10
 type: decision
@@ -13,7 +13,7 @@ confidence: high
 
 ## Status
 
-**Accepted** — Implemented September 2026 (Supersedes [[adr-008-turbo-monorepo]])
+**Accepted** — Implemented September 2026 (Supersedes [[adr-008-turborepo-monorepo]])
 
 ## Context
 
@@ -61,5 +61,5 @@ We migrate the monorepo task orchestration from **Turborepo** to **Turborepo 2.x
 
 ## Related
 
-- [[adr-008-turbo-monorepo]] — Superseded decision record (Turborepo)
+- [[adr-008-turborepo-monorepo]] — Superseded decision record (Turborepo)
 - [[adr-003-turborepo-monorepo]] — Historical Turborepo decision record

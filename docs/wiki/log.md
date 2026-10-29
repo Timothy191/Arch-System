@@ -556,3 +556,12 @@ Documented the migration from Nx to Turborepo build orchestration and the AI ser
 - Fixed [[STATUS]]: Phase 5.1→5.2, Next.js version contradiction
 - Swept Turborepo→Turborepo references in 7 files (onboarding, troubleshooting, how-to-deploy-production, security-posture, final-project-readiness, project-comprehensive-report, project-stability-analysis)
 - Added frontmatter to `breakdown/*.md` files
+
+## [2026-10-29] update | v1.6.2 Department Entities, Wiki Linter & GitHub Wiki Sync
+
+- Created [[plant-processing-department]] documenting the DMS wash plant hourly sheet (`DMS-MOD-1` / `DMS-MOD-2`), coal seam selectors (`4#Lower`, `2#Lower`, `2#Upper`, `5#Seam`, `Seam 2 Lower`, `Seam 4 Upper`, `ROM Blend A`, `High-Ash Stockpile`), and circuit delay tracking.
+- Created [[plant-inventory-department]] documenting wash plant dense medium, reagents, wear spares, and automated stock flags (`computeStockAutomatedFlags`).
+- Created [[supabase-local-dev]] documenting migration SSoT, `@repo/supabase` client factories, and RLS initplan verification.
+- Updated [[control-room-department]] and [[department-features]] with v1.6.2 Automatic Breakdown Carry-Over, 3-Step Quick Delay Logger, and Dozer `Roll Over` vs `Other` classification.
+- Added `tools/audits/audit-wiki.mjs` (`pnpm audit:wiki`) to enforce YAML frontmatter, zero broken `[[wikilinks]]`, and 100% `index.md` coverage.
+- Added `.github/workflows/sync-wiki.yml` to mirror `docs/wiki/` to the repository's GitHub Wiki on pushes to `main`.

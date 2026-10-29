@@ -1,5 +1,5 @@
 ---
-title: "ADR-007: React 19 Adoption Strategy"
+title: 'ADR-007: React 19 Adoption Strategy'
 created: 2026-05-15
 updated: 2026-05-15
 type: decision
@@ -95,10 +95,10 @@ If critical issues arise:
 ```typescript
 // DANGER: Never do this
 // apps/overview/components/chart.tsx
-export { Chart } from "../../overview/components/chart"; // React 18!
+export { Chart } from '../../overview/components/chart'; // React 18!
 
 // SAFE: Always do this
-import { Chart } from "@repo/ui"; // React 19 compatible
+import { Chart } from '@repo/ui'; // React 19 compatible
 ```
 
 ## Migration Path
@@ -139,5 +139,5 @@ import { Chart } from "@repo/ui"; // React 19 compatible
 ## Related
 
 - [[portal-app-architecture]] — React 19 patterns used
-- [[turbo-monorepo]] — Workspace version management
+- [[turborepo-monorepo]] — Workspace version management
 - [[comparisons/react-patterns]] — Why App Router + RSC

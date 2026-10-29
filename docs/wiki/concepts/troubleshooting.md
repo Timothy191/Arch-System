@@ -95,7 +95,7 @@ SELECT relname, relrowsecurity FROM pg_class WHERE relname = 'your_table';
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log("User ID:", user?.id);
+console.log('User ID:', user?.id);
 ```
 
 3. **Test with service role** (bypasses RLS):
@@ -186,7 +186,7 @@ node packages/database/tests/check-migration-drift.mjs
 
 ```typescript
 // apps/portal/features/departments/components/tools/UniverSheet.tsx
-import "@univerjs/preset-sheets-core/lib/index.css"; // Once only here
+import '@univerjs/preset-sheets-core/lib/index.css'; // Once only here
 ```
 
 ---
@@ -308,7 +308,7 @@ pnpm deploy:local  # Seeds test data
 ## Still Stuck?
 
 1. Check [[supabase-local-dev]] for database setup issues
-2. Review [[turbo-monorepo]] for workspace problems
+2. Review [[turborepo-monorepo]] for workspace problems
 3. Consult [[design-system]] for UI/styling questions
 4. Check [[auth-middleware]] for auth flow details
 

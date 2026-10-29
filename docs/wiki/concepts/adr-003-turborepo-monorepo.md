@@ -1,5 +1,5 @@
 ---
-title: "ADR-003: Turborepo for Monorepo Management"
+title: 'ADR-003: Turborepo for Monorepo Management'
 created: 2026-05-15
 updated: 2026-06-03
 type: decision
@@ -12,11 +12,11 @@ confidence: high
 # ADR-003: Turborepo for Monorepo Management
 
 > [!WARNING]
-> This decision has been **superseded** by [[adr-008-turbo-monorepo]]. The project has migrated to Turborepo for workspace task orchestration and stabilized test runners.
+> This decision has been **superseded** by [[adr-008-turborepo-monorepo]]. The project has migrated to Turborepo for workspace task orchestration and stabilized test runners.
 
 ## Status
 
-**Superseded** by [[adr-008-turbo-monorepo]] (June 2026)
+**Superseded** by [[adr-008-turborepo-monorepo]] (June 2026)
 
 ## Context
 

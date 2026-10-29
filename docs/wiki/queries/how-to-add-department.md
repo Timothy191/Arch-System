@@ -1,5 +1,5 @@
 ---
-title: "Q: How do I add a new department?"
+title: 'Q: How do I add a new department?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -25,11 +25,11 @@ Edit `apps/portal/lib/departments.ts`:
 export const DEPARTMENTS: Department[] = [
   // ... existing departments
   {
-    slug: "environmental",
-    displayName: "Environmental",
-    icon: "Leaf", // from lucide-react
-    color: "emerald",
-    description: "Environmental monitoring and compliance tracking",
+    slug: 'environmental',
+    displayName: 'Environmental',
+    icon: 'Leaf', // from lucide-react
+    color: 'emerald',
+    description: 'Environmental monitoring and compliance tracking',
   },
 ];
 ```
@@ -42,11 +42,11 @@ In the same file, add to `DEPARTMENT_TABS`:
 export const DEPARTMENT_TABS: Record<string, TabConfig[]> = {
   // ... existing departments
   environmental: [
-    { slug: "dashboard", label: "Dashboard", icon: "LayoutDashboard" },
-    { slug: "monitoring", label: "Monitoring", icon: "Activity" },
-    { slug: "compliance", label: "Compliance", icon: "Shield" },
-    { slug: "reports", label: "Reports", icon: "FileText" },
-    { slug: "tools", label: "Tools", icon: "Wrench" },
+    { slug: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+    { slug: 'monitoring', label: 'Monitoring', icon: 'Activity' },
+    { slug: 'compliance', label: 'Compliance', icon: 'Shield' },
+    { slug: 'reports', label: 'Reports', icon: 'FileText' },
+    { slug: 'tools', label: 'Tools', icon: 'Wrench' },
   ],
 };
 ```

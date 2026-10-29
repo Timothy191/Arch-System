@@ -96,7 +96,7 @@ Arch-Mk2/
 Read these wiki pages in order:
 
 1. **[[arch-systems]]** — What we're building
-2. **[[turbo-monorepo]]** — How the codebase is organized
+2. **[[turborepo-monorepo]]** — How the codebase is organized
 3. **[[portal-app-architecture]]** — Next.js 16 App Router patterns
 4. **[[design-system]]** — How to build UI components
 
@@ -228,14 +228,14 @@ Avoid starting with database migrations, authentication changes, or cross-packag
 
 Bookmark these for daily reference:
 
-| When you need...      | Go to                  |
-| --------------------- | ---------------------- |
-| Quick issue fix       | [[troubleshooting]]    |
-| Deploy something      | [[deployment]]         |
-| Understand a decision | [[comparisons]] folder |
-| Add a component       | [[design-system]]      |
-| Database questions    | [[database-schema]]    |
-| Auth confusion        | [[auth-middleware]]    |
+| When you need...      | Go to                                  |
+| --------------------- | -------------------------------------- |
+| Quick issue fix       | [[troubleshooting]]                    |
+| Deploy something      | [[deployment]]                         |
+| Understand a decision | [[monorepo-tools\|comparisons]] folder |
+| Add a component       | [[design-system]]                      |
+| Database questions    | [[database-schema]]                    |
+| Auth confusion        | [[auth-middleware]]                    |
 
 ### Tools You'll Use Daily
 
@@ -271,10 +271,10 @@ pnpm add package
 
 ```typescript
 // Don't do this
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 // Do this
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServerSupabaseClient } from '@repo/supabase/server';
 ```
 
 ### 3. Forbidden Tailwind Classes
@@ -291,10 +291,10 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 
 ```typescript
 // Don't do this (React 18 vs 19 conflict)
-import { Component } from "../../overview/components";
+import { Component } from '../../overview/components';
 
 // Do this
-import { Component } from "@repo/ui";
+import { Component } from '@repo/ui';
 ```
 
 ---
@@ -337,5 +337,5 @@ import { Component } from "@repo/ui";
 
 - [[troubleshooting]] — When things go wrong
 - [[deployment]] — How to ship code
-- [[turbo-monorepo]] — Workspace conventions
+- [[turborepo-monorepo]] — Workspace conventions
 - [[design-system]] — UI guidelines

@@ -1,3 +1,12 @@
+---
+title: 'System Overview Architecture'
+created: 2026-05-16
+updated: 2026-10-29
+type: concept
+tags: [concept, architecture, system]
+confidence: high
+---
+
 # Overview
 
 This wiki captures research, design notes, and reference material for the Arch-Mk2 project. It is project-scoped and intended to be indexed by the local wiki tooling.

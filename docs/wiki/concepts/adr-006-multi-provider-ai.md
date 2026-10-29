@@ -1,5 +1,5 @@
 ---
-title: "ADR-006: Multi-Provider AI with Failover"
+title: 'ADR-006: Multi-Provider AI with Failover'
 created: 2026-05-15
 updated: 2026-06-03
 type: decision
@@ -12,11 +12,11 @@ confidence: high
 # ADR-006: Multi-Provider AI with Failover
 
 > [!WARNING]
-> This decision has been **superseded** by [[adr-009-local-ollama-ai]]. The AI service has transitioned to local Ollama running `gemma4:latest` and `nomic-embed-text` to ensure offline execution capabilities for remote mining locations.
+> This decision has been **superseded** by [[deepeval-integration|AI Evaluation & Local Runtime]]. The AI service has transitioned to local Ollama running `gemma4:latest` and `nomic-embed-text` to ensure offline execution capabilities for remote mining locations.
 
 ## Status
 
-**Superseded** by [[adr-009-local-ollama-ai]] (June 2026)
+**Superseded** by [[deepeval-integration|AI Evaluation & Local Runtime]] (June 2026)
 
 ## Context
 
@@ -85,9 +85,9 @@ Response to User
 ```typescript
 // apps/portal/lib/ai/ai-service.ts
 const providers = [
-  { name: "groq", client: groqClient, timeout: 5000 },
-  { name: "openrouter", client: openRouterClient, timeout: 10000 },
-  { name: "together", client: togetherClient, timeout: 15000 },
+  { name: 'groq', client: groqClient, timeout: 5000 },
+  { name: 'openrouter', client: openRouterClient, timeout: 10000 },
+  { name: 'together', client: togetherClient, timeout: 15000 },
 ];
 
 export async function generateWithFailover(prompt: string) {
@@ -99,7 +99,7 @@ export async function generateWithFailover(prompt: string) {
       continue;
     }
   }
-  throw new Error("All AI providers failed");
+  throw new Error('All AI providers failed');
 }
 ```
 
@@ -148,6 +148,5 @@ Track per-provider:
 
 ## Related
 
-- [[comparisons/ai-providers]] — Detailed comparison
-- [[ai-service]] — Full service architecture
+- [[deepeval-integration]] — AI evaluation and runtime integration
 - [[monitoring-error-tracking]] — Observability

@@ -285,8 +285,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
 
       - run: pnpm install
 
@@ -388,6 +388,6 @@ See [[on-premises-deployment]] for full provisioning checklist, Cockpit setup, a
 
 - [[troubleshooting]] — General development issues
 - [[supabase-local-dev]] — Database setup
-- [[turbo-monorepo]] — Build system
+- [[turborepo-monorepo]] — Build system
 - [[monitoring-error-tracking]] — Sentry and observability
 - [[on-premises-deployment]] — Full on-premises server setup & Cockpit guide

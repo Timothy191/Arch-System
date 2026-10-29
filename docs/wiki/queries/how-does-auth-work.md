@@ -1,5 +1,5 @@
 ---
-title: "Q: How does authentication work?"
+title: 'Q: How does authentication work?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -83,16 +83,16 @@ Always import from `@repo/supabase`, never directly:
 ### Browser Client Example
 
 ```typescript
-"use client";
-import { createClient } from "@repo/supabase/client";
+'use client';
+import { createClient } from '@repo/supabase/client';
 
 export function AlertPanel() {
   const supabase = createClient();
 
   useEffect(() => {
     const channel = supabase
-      .channel("alerts")
-      .on("postgres_changes", { event: "*", schema: "public", table: "alerts" }, callback)
+      .channel('alerts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, callback)
       .subscribe();
   }, []);
 }
@@ -102,7 +102,7 @@ export function AlertPanel() {
 
 ```typescript
 // page.tsx (Server Component)
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 export default async function Page() {
   const supabase = createServerSupabaseClient();
@@ -111,9 +111,9 @@ export default async function Page() {
   } = await supabase.auth.getUser();
 
   const { data: machines } = await supabase
-    .from("machines")
-    .select("*")
-    .eq("department_id", employee.department_id);
+    .from('machines')
+    .select('*')
+    .eq('department_id', employee.department_id);
 }
 ```
 
@@ -121,7 +121,7 @@ export default async function Page() {
 
 ```typescript
 // proxy.ts
-import { createMiddlewareClient } from "@repo/supabase/middleware";
+import { createMiddlewareClient } from '@repo/supabase/middleware';
 
 export async function proxy(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res });
@@ -130,7 +130,7 @@ export async function proxy(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user && !isPublicRoute(req.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 }
 ```
@@ -193,9 +193,9 @@ auth.has_department_access(target_dept UUID) → BOOLEAN
 ```typescript
 // proxy.ts
 const RESTRICTED_ROUTES = {
-  "control-room": ["control_room_operator", "admin"],
-  tools: ["admin", "supervisor"],
-  admin: ["admin"],
+  'control-room': ['control_room_operator', 'admin'],
+  tools: ['admin', 'supervisor'],
+  admin: ['admin'],
 };
 ```
 
@@ -228,15 +228,15 @@ Now user can view engineering and safety data while remaining in their primary d
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log("User:", user);
+console.log('User:', user);
 
 // Check employee record
 const { data: employee } = await supabase
-  .from("employees")
-  .select("*")
-  .eq("auth_id", user.id)
+  .from('employees')
+  .select('*')
+  .eq('auth_id', user.id)
   .single();
-console.log("Employee:", employee);
+console.log('Employee:', employee);
 ```
 
 ### Check Department Access

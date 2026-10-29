@@ -1,5 +1,5 @@
 ---
-title: "ADR-008: Turborepo for Monorepo Management"
+title: 'ADR-008: Turborepo for Monorepo Management'
 created: 2026-06-03
 updated: 2026-06-03
 type: decision
@@ -55,6 +55,6 @@ We will migrate the monorepo task orchestration from **Turborepo** to **Turborep
 
 ## Related
 
-- [[turbo-monorepo]] — Updated workspace layout and conventions
+- [[turborepo-monorepo]] — Updated workspace layout and conventions
 - [[adr-003-turborepo-monorepo]] — Superseded decision record (Turborepo)
 - [[comparisons/monorepo-tools]] — Detailed comparison of tools

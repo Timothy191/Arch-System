@@ -1,5 +1,5 @@
 ---
-title: "ADR-002: Supabase as Backend Platform"
+title: 'ADR-002: Supabase as Backend Platform'
 created: 2026-05-15
 updated: 2026-05-15
 type: decision

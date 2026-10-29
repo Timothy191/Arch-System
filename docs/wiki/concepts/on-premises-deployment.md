@@ -1,3 +1,12 @@
+---
+title: 'On-Premises Deployment & Cockpit'
+created: 2026-05-16
+updated: 2026-10-29
+type: concept
+tags: [deployment, infrastructure, procedure]
+confidence: high
+---
+
 # On-Premises Server Setup & Cockpit
 
 **Priority:** CRITICAL  

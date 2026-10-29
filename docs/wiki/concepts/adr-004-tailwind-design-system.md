@@ -1,5 +1,5 @@
 ---
-title: "ADR-004: Tailwind CSS with Design Token Architecture"
+title: 'ADR-004: Tailwind CSS with Design Token Architecture'
 created: 2026-05-15
 updated: 2026-05-15
 type: decision
@@ -99,11 +99,11 @@ export const preset = {
   theme: {
     extend: {
       colors: {
-        "bg-primary": "var(--bg-primary)",
-        "bg-secondary": "var(--bg-secondary)",
-        "border-subtle": "var(--border-subtle)",
-        "text-primary": "var(--text-primary)",
-        "accent-blue": "var(--accent-blue)",
+        'bg-primary': 'var(--bg-primary)',
+        'bg-secondary': 'var(--bg-secondary)',
+        'border-subtle': 'var(--border-subtle)',
+        'text-primary': 'var(--text-primary)',
+        'accent-blue': 'var(--accent-blue)',
       },
     },
   },

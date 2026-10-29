@@ -1,5 +1,5 @@
 ---
-title: "Q: How do I debug issues?"
+title: 'Q: How do I debug issues?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -87,14 +87,14 @@ Quick check:
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log("User:", user?.id); // Should exist
+console.log('User:', user?.id); // Should exist
 
 const { data: employee } = await supabase
-  .from("employees")
-  .select("*")
-  .eq("auth_id", user?.id)
+  .from('employees')
+  .select('*')
+  .eq('auth_id', user?.id)
   .single();
-console.log("Employee:", employee); // Should exist, not null
+console.log('Employee:', employee); // Should exist, not null
 ```
 
 If `employee` is null → [[why-query-returns-empty]]

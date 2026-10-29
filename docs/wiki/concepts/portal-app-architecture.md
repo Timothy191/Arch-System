@@ -92,7 +92,7 @@ Default rendering strategy. Server components:
 ### getDepartmentContext
 
 ```typescript
-import { getDepartmentContext } from "@/lib/dept-context";
+import { getDepartmentContext } from '@/lib/dept-context';
 
 export default async function Page({ params }: { params: { department: string } }) {
   const { dept, deptId, supabase, today } = await getDepartmentContext(params);
@@ -113,7 +113,7 @@ All mutations use the server actions pattern:
 5. Soft deletes use `deleted_at` timestamp, not row removal
 6. Log mutations via `logAuditEvent()` from `@/lib/audit`
 
-Example: [[breakdowns-actions]]
+Example: [[engineering-department|Breakdown Server Actions]]
 
 ## Client Components
 
@@ -132,7 +132,7 @@ Used for:
 Four-state machine: `idle` → `submitting` → `success`/`error`
 
 ```typescript
-const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 ```
 
 - Uses `createBrowserSupabaseClient()` for inserts
@@ -148,14 +148,14 @@ Components like AlertPanel, ScadaPanel, and ControlRoomActivityFeed use:
 supabase
   .channel()
   .on(
-    "postgres_changes",
+    'postgres_changes',
     {
-      event: "*",
-      schema: "public",
-      table: "table_name",
-      filter: "department_id=eq." + departmentId,
+      event: '*',
+      schema: 'public',
+      table: 'table_name',
+      filter: 'department_id=eq.' + departmentId,
     },
-    callback,
+    callback
   )
   .subscribe();
 ```
@@ -192,4 +192,4 @@ Department-specific logic lives in `features/departments/components/<dept>/`:
 
 Hub components are in `features/hub/components/`.
 
-Related pages: [[turbo-monorepo]], [[design-system]], [[rls-policy]], [[supabase-local-dev]]
+Related pages: [[turborepo-monorepo]], [[design-system]], [[rls-policy]], [[supabase-local-dev]]

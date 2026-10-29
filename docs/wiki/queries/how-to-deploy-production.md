@@ -1,5 +1,5 @@
 ---
-title: "Q: How do I deploy to production?"
+title: 'Q: How do I deploy to production?'
 created: 2026-05-15
 updated: 2026-05-15
 type: query
@@ -433,4 +433,4 @@ See [[on-premises-deployment]] for full provisioning checklist, firewall rules, 
 - [[on-premises-deployment]] — On-premises server setup & Cockpit guide
 - [[incident-response]] — If deploy causes issues
 - [[troubleshooting]] — Common issues
-- [[turbo-monorepo]] — Build system
+- [[turborepo-monorepo]] — Build system

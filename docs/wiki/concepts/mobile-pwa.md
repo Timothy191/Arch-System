@@ -1,3 +1,12 @@
+---
+title: 'Mobile Responsiveness & PWA'
+created: 2026-05-16
+updated: 2026-10-29
+type: concept
+tags: [concept, design, application]
+confidence: high
+---
+
 # Mobile Responsiveness & PWA
 
 **Priority:** MEDIUM  
@@ -87,7 +96,7 @@ Add to `apps/portal/app/layout.tsx`:
 
 ```tsx
 export const metadata = {
-  manifest: "/manifest.json",
+  manifest: '/manifest.json',
 };
 ```
 
@@ -108,15 +117,15 @@ pnpm --filter portal add next-pwa
 `next.config.mjs`:
 
 ```js
-import withPWA from "next-pwa";
+import withPWA from 'next-pwa';
 export default withPWA({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: { cacheName: "arch-portal-cache", networkTimeoutSeconds: 10 },
+      handler: 'NetworkFirst',
+      options: { cacheName: 'arch-portal-cache', networkTimeoutSeconds: 10 },
     },
   ],
 })(nextConfig);
@@ -134,16 +143,16 @@ For field operators submitting data with poor connectivity:
 
 ```ts
 // utils/offline-queue.ts
-const QUEUE_KEY = "arch_offline_queue";
+const QUEUE_KEY = 'arch_offline_queue';
 
 export function queueMutation(action: string, payload: unknown) {
-  const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]");
+  const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? '[]');
   queue.push({ action, payload, timestamp: Date.now() });
   localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
 }
 
 export async function flushQueue() {
-  const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]");
+  const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? '[]');
   for (const item of queue) {
     await submitMutation(item.action, item.payload);
   }
@@ -181,10 +190,10 @@ The theme (`@repo/theme`) already uses Tailwind — ensure these patterns are ap
 
 ```tsx
 // Mobile-first responsive classes
-className = "flex flex-col sm:flex-row";
-className = "text-sm sm:text-base";
-className = "p-3 sm:p-6";
-className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+className = 'flex flex-col sm:flex-row';
+className = 'text-sm sm:text-base';
+className = 'p-3 sm:p-6';
+className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 ```
 
 ---

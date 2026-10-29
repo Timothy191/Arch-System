@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-29] - LLM Wiki Enhancements: Missing Department Entities, Wiki Linter & GitHub Wiki Auto-Sync
+
+- **Action:**
+  - Created [`docs/wiki/entities/plant-processing-department.md`](./docs/wiki/entities/plant-processing-department.md), [`docs/wiki/entities/plant-inventory-department.md`](./docs/wiki/entities/plant-inventory-department.md), and [`docs/wiki/concepts/supabase-local-dev.md`](./docs/wiki/concepts/supabase-local-dev.md).
+  - Updated [`docs/wiki/index.md`](./docs/wiki/index.md), [`docs/wiki/log.md`](./docs/wiki/log.md), and [`docs/wiki/concepts/`](./docs/wiki/concepts/) to resolve all broken `[[wikilinks]]` and add missing YAML frontmatter to 6 concept pages.
+  - Added [`tools/audits/audit-wiki.mjs`](./tools/audits/audit-wiki.mjs) (`pnpm audit:wiki`) to enforce YAML frontmatter, zero broken `[[wikilinks]]`, and 100% `index.md` coverage.
+  - Added [`.github/workflows/sync-wiki.yml`](./.github/workflows/sync-wiki.yml) to audit and publish `docs/wiki/` to the repository's GitHub Wiki on pushes to `main`.
+- **Verification:** `pnpm audit:wiki` (`56/56 governed pages PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-29] - Documentation Completeness & v1.6.2 Release Notes Synchronization
 
 - **Action:**
