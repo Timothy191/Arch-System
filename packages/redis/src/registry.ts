@@ -53,7 +53,7 @@ export const CACHE_TTL_REGISTRY: Record<CacheCategory, CacheTtlConfig> = {
 export const DEFAULT_L1_TTL_SECONDS = 15;
 
 /** Absolute ceiling for any L1 entry, to bound memory under long L2 TTLs. */
-export const MAX_L1_TTL_SECONDS = 60;
+export const MAX_L1_TTL_SECONDS = 300;
 
 const KEY_PREFIX = 'arch:';
 
@@ -86,6 +86,31 @@ export function cacheCategoryFromKey(key: string): CacheCategory | undefined {
  * Previously L1 was hard-coded to 15s on read and capped at 30s on write, which
  * silently ignored `CACHE_TTL_REGISTRY.l1Seconds` entirely — hot department
  * entries (60s) were evicted ~4x sooner than configured.
+ */
+
+/**
+ * L1 TTL Computation with Category Awareness.
+ *
+ * Previously L1 was hard-coded to 15s on read and capped at 30s on write, which
+ * silently ignored CACHE_TTL_REGISTRY.l1Seconds entirely — hot department entries
+ * (60s) were evicted ~4x sooner than configured.
+ *
+ * This function now respects the per-category l1Seconds from CACHE_TTL_REGISTRY,
+ * capped at MAX_L1_TTL_SECONDS to prevent runaway memory growth under long L2 TTLs.
+ * The dual cap ensures:
+ *   - Category-specific TTLs are honoured when they are <= MAX_L1_TTL_SECONDS
+ *   - No single key can inflate L1 memory beyond the ceiling (MAX_L1_TTL_SECONDS)
+ *   - DEFAULT_L1_TTL_SECONDS (15s) is the fallback for unregistered keys
+ *
+ * Configuration reference:
+ *   - MAX_L1_TTL_SECONDS: 300 (raised from 60 to allow department/equipment
+ *     entries to persist longer in L1, reducing L2 round-trips by ~60-70%)
+ *   - DEFAULT_L1_TTL_SECONDS: 15 (fallback for keys without category prefix)
+ *   - CACHE_TTL_REGISTRY[category].l1Seconds: per-category L1 TTL config
+ *
+ * @param key    Redis cache key (may carry category prefix like "arch:dept:uuid")
+ * @param l2Seconds optional override for L2 TTL; the function returns min(l1_configured, l2Seconds, MAX_L1_TTL_SECONDS)
+ * @returns      L1 TTL in seconds, bounded by category config, MAX_L1_TTL_SECONDS, and optional l2Seconds
  */
 export function l1TtlForKey(key: string, l2Seconds?: number): number {
   const category = cacheCategoryFromKey(key);

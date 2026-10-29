@@ -11,7 +11,8 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - Updated [`docs/wiki/index.md`](./docs/wiki/index.md), [`docs/wiki/log.md`](./docs/wiki/log.md), and [`docs/wiki/concepts/`](./docs/wiki/concepts/) to resolve all broken `[[wikilinks]]` and add missing YAML frontmatter to 6 concept pages.
   - Added [`tools/audits/audit-wiki.mjs`](./tools/audits/audit-wiki.mjs) (`pnpm audit:wiki`) to enforce YAML frontmatter, zero broken `[[wikilinks]]`, and 100% `index.md` coverage.
   - Added [`.github/workflows/sync-wiki.yml`](./.github/workflows/sync-wiki.yml) to audit and publish `docs/wiki/` to the repository's GitHub Wiki on pushes to `main`.
-- **Verification:** `pnpm audit:wiki` (`56/56 governed pages PASS`), `pnpm agent:verify` (`27/27 PASS`).
+  - Consolidated `packages/redis/src/registry.ts` (`MAX_L1_TTL_SECONDS = 300`) and relocated optimization plans to `docs/plans/2026-10-29-optimization-todo-list.md` and `docs/plans/2026-10-29-redis-optimization-report.md`.
+- **Verification:** `pnpm audit:wiki` (`55/55 governed pages PASS`), `pnpm agent:verify` (`27/27 PASS`).
 
 ## [2026-10-29] - Documentation Completeness & v1.6.2 Release Notes Synchronization
 

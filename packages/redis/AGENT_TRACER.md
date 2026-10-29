@@ -110,3 +110,9 @@ normalised for both shapes.
 - **Verification**: `@repo/redis` unit 13/13 suites and 144/144 tests; integration 27/27 against `redis:7.4-alpine` (vector cases no-op without the module, by design); `pnpm --filter portal test:integration` 5/5; `pnpm --filter @repo/redis lint` clean; agent-lint clean for these files including the newly tracked `locks.ts`; `audit-agent-rules-drift` PASS; `@repo/redis`, `@repo/supabase` and portal `type-check` clean.
 
 - 2026-10-27T16:29:46Z — perf: Redis circuit breaker (15s cooldown, 1s connectTimeout)
+
+## [2026-10-29T12:15:00+02:00] Raise L1 TTL Ceiling (`MAX_L1_TTL_SECONDS = 300`) & Document Category-Aware L1 TTL
+
+- **Agent**: Antigravity
+- **Summary**: Raised `MAX_L1_TTL_SECONDS` from `60` to `300` seconds in `src/registry.ts` and documented category-aware L1 TTL resolution in `l1TtlForKey` to reduce L2 round-trips for hot department and equipment entries.
+- **Verification**: `@repo/redis` 13/13 test suites (`144/144 PASS`), `pnpm agent:verify` (`27/27 PASS`).
