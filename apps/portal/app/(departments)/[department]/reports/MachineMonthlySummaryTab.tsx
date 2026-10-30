@@ -1,13 +1,29 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Archive, ArrowUpRight, Calendar, Database, Lock } from 'lucide-react';
+import {
+  AlertTriangle,
+  Archive,
+  ArrowUpRight,
+  Calendar,
+  Database,
+  Download,
+  Lock,
+  Search,
+  Wrench,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import {
   OVERVIEW_DELAY_COLUMNS,
   type OverviewDelayGroup,
   type OverviewDelayKey,
 } from '@/lib/shift-sheet-buckets';
-import type { ArchivedMachineMonthSnapshot, MachineMonthlySummaryRow } from './reports-types';
+import type {
+  ArchivedMachineMonthSnapshot,
+  EngineeringLogItem,
+  MachineMonthlySummaryRow,
+} from './reports-types';
 
 const TH_BASE =
   'whitespace-nowrap px-2.5 py-2.5 text-left font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';
@@ -18,6 +34,8 @@ const BTN_PRIMARY =
   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--accent-blue)] px-3 py-1.5 font-semibold text-white text-xs hover:opacity-90';
 const BTN_OUTLINE =
   'inline-flex cursor-pointer items-center gap-1 rounded-md border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-2 py-1 font-semibold text-[11px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20';
+const BTN_SECONDARY =
+  'inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 font-semibold text-[var(--text-heading)] text-xs hover:bg-[var(--bg-tertiary)]';
 const KPI_BOX_CLASS =
   'rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5';
 
@@ -44,6 +62,8 @@ const MED_AVAILABILITY_THRESHOLD = 60;
 const HIGH_UTILIZATION_THRESHOLD = 75;
 const MED_UTILIZATION_THRESHOLD = 50;
 const DECIMAL_PLACES_ONE = 1;
+const TOP_BOTTLENECK_LIMIT = 4;
+const EMPTY_ENGINEERING_LOGS: readonly EngineeringLogItem[] = [];
 
 export interface MachineMonthlySummaryTabProps {
   selectedMonth: string;
@@ -55,6 +75,7 @@ export interface MachineMonthlySummaryTabProps {
   isMonthSealed: boolean;
   onArchiveAndSealMonth: () => void;
   onInspectMachine30Day: (machineId: string) => void;
+  engineeringLogs?: readonly EngineeringLogItem[];
 }
 
 export function MachineMonthlySummaryTab({
@@ -67,7 +88,38 @@ export function MachineMonthlySummaryTab({
   isMonthSealed,
   onArchiveAndSealMonth,
   onInspectMachine30Day,
+  engineeringLogs = EMPTY_ENGINEERING_LOGS,
 }: MachineMonthlySummaryTabProps) {
+  const [searchFilter, setSearchFilter] = useState('');
+
+  const filteredSummaryRows = useMemo(() => {
+    const query = searchFilter.trim().toLowerCase();
+    if (!query) return summaryRows;
+    return summaryRows.filter(
+      (row) =>
+        row.machineName.toLowerCase().includes(query) ||
+        row.machineType.toLowerCase().includes(query) ||
+        row.siteName.toLowerCase().includes(query)
+    );
+  }, [summaryRows, searchFilter]);
+
+  const monthEngineeringLogs = useMemo(
+    () => engineeringLogs.filter((item) => item.date.startsWith(selectedMonth)),
+    [engineeringLogs, selectedMonth]
+  );
+
+  const topBottleneckMachines = useMemo(
+    () =>
+      [...summaryRows]
+        .sort(
+          (a, b) =>
+            (b.delays.breakdown ?? 0) - (a.delays.breakdown ?? 0) ||
+            a.availabilityPercent - b.availabilityPercent
+        )
+        .slice(0, TOP_BOTTLENECK_LIMIT),
+    [summaryRows]
+  );
+
   const fleetTotals = summaryRows.reduce(
     (acc, row) => {
       acc.totalSmrWorked += row.totalSmrWorked;
@@ -95,6 +147,48 @@ export function MachineMonthlySummaryTab({
   const fleetAvgUtilization = Number(
     (fleetTotals.utilizationSum / machineCount).toFixed(DECIMAL_PLACES_ONE)
   );
+  const totalBreakdownHours = fleetTotals.delays.breakdown ?? 0;
+
+  const handleExportMonthlyCsv = () => {
+    const headers = [
+      'Machine ID',
+      'Category',
+      'Site',
+      'Opening SMR',
+      'Closing SMR',
+      'Total SMR Worked (h)',
+      ...OVERVIEW_DELAY_COLUMNS.map((c) => `${c.label} (h)`),
+      'Days Logged',
+      'Availability (%)',
+      'Utilization (%)',
+    ];
+    const lines = summaryRows.map((r) => [
+      r.machineName,
+      r.machineType,
+      r.siteName,
+      r.openingSmr.toFixed(DECIMAL_PLACES_ONE),
+      r.closingSmr.toFixed(DECIMAL_PLACES_ONE),
+      r.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE),
+      ...OVERVIEW_DELAY_COLUMNS.map((c) => (r.delays[c.key] ?? 0).toFixed(DECIMAL_PLACES_ONE)),
+      `${r.activeDaysLogged}/${r.daysInMonth}`,
+      r.availabilityPercent.toFixed(DECIMAL_PLACES_ONE),
+      r.utilizationPercent.toFixed(DECIMAL_PLACES_ONE),
+    ]);
+    const csv = [
+      headers.join(','),
+      ...lines.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')),
+    ].join('\n');
+    if (typeof window !== 'undefined' && typeof URL.createObjectURL === 'function') {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `fleet-monthly-summary-${selectedMonth}-${shiftType}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    toast.success(`Exported ${selectedMonth} Fleet Monthly Summary CSV`);
+  };
 
   return (
     <div className="space-y-6" data-testid="machine-monthly-summary-tab">
@@ -104,15 +198,15 @@ export function MachineMonthlySummaryTab({
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
               <Calendar className="h-3.5 w-3.5" />
-              Fleet Monthly Availability, Utilization &amp; 12-Category Delay Rollup
+              CEO &amp; Management Fleet Monthly Availability, Utilization &amp; Delay Rollup
             </div>
             <h3 className="mt-1 font-bold text-[var(--text-heading)] text-lg">
               Monthly Machine Summary — {selectedMonth} ({summaryRows.length} Machines)
             </h3>
             <p className="text-[var(--text-secondary)] text-xs">
               Aggregates each machine&apos;s 30/31-day activity sheet for {selectedMonth}. Click any
-              machine row to open its full 30-day table, or archive and seal previous months to
-              build the historical Machine Activity Database.
+              machine row to open its full 30-day table and inspect daily issues, or archive and
+              seal previous months into the historical Machine Activity Database.
             </p>
           </div>
 
@@ -150,6 +244,16 @@ export function MachineMonthlySummaryTab({
 
             <button
               type="button"
+              onClick={handleExportMonthlyCsv}
+              data-testid="export-monthly-summary-csv-btn"
+              className={BTN_SECONDARY}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export Monthly CSV
+            </button>
+
+            <button
+              type="button"
               onClick={onArchiveAndSealMonth}
               data-testid="seal-monthly-summary-archive-btn"
               className={BTN_PRIMARY}
@@ -167,7 +271,7 @@ export function MachineMonthlySummaryTab({
         </div>
 
         {/* Fleet Monthly KPIs */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <div className={KPI_BOX_CLASS}>
             <div className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
               Working Fleet Count
@@ -214,6 +318,148 @@ export function MachineMonthlySummaryTab({
             <div className="text-[11px] text-[var(--text-secondary)]">
               Archived Months in DB: {archivedSnapshots.length}
             </div>
+          </div>
+
+          <div className={KPI_BOX_CLASS}>
+            <div className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+              Monthly Breakdowns &amp; Issues
+            </div>
+            <div className="mt-1 font-bold font-mono text-rose-700 text-xl">
+              {monthEngineeringLogs.length} Logs ({totalBreakdownHours.toFixed(DECIMAL_PLACES_ONE)}
+              h)
+            </div>
+            <div className="text-[11px] text-[var(--text-secondary)]">
+              Engineering &amp; breakdown tickets in {selectedMonth}
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* CEO Executive Issue & Bottleneck Digest */}
+      <GlassCard className="space-y-4 p-5" data-testid="ceo-monthly-issue-digest">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-rose-700" />
+            <h4 className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider">
+              CEO &amp; Management Executive Issue &amp; Bottleneck Digest — {selectedMonth}
+            </h4>
+          </div>
+          <span className="text-[var(--text-secondary)] text-xs">
+            Lowest-availability / highest-breakdown machines and underlying engineering logs
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* Priority Attention Machines */}
+          <div className="space-y-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-[11px] text-[var(--text-heading)] uppercase">
+                Priority Bottleneck Machines (Highest Downtime / Lowest Availability)
+              </span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                Click to inspect 30-day daily logs
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {topBottleneckMachines.map((row) => (
+                <div
+                  key={`bottleneck-${row.machineId}`}
+                  className="flex items-center justify-between rounded-lg border border-[var(--border-default)] bg-white p-2.5"
+                >
+                  <div>
+                    <div className="font-bold text-[var(--text-heading)] text-xs">
+                      {row.machineName}{' '}
+                      <span className="font-normal text-[10px] text-[var(--text-secondary)]">
+                        ({row.siteName})
+                      </span>
+                    </div>
+                    <div className="mt-0.5 font-mono text-[11px] text-[var(--text-secondary)]">
+                      Avail:{' '}
+                      <strong className="text-amber-700">
+                        {row.availabilityPercent.toFixed(DECIMAL_PLACES_ONE)}%
+                      </strong>{' '}
+                      · Breakdown:{' '}
+                      <strong className="text-rose-700">
+                        {(row.delays.breakdown ?? 0).toFixed(DECIMAL_PLACES_ONE)}h
+                      </strong>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onInspectMachine30Day(row.machineId)}
+                    data-testid={`digest-open-machine-30d-${row.machineId}`}
+                    className={BTN_OUTLINE}
+                  >
+                    Inspect
+                    <ArrowUpRight className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly Underlying Engineering & Breakdown Tickets */}
+          <div className="space-y-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5">
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 font-bold text-[11px] text-[var(--text-heading)] uppercase">
+                <Wrench className="h-3.5 w-3.5 text-rose-700" />
+                Monthly Breakdowns &amp; Engineering Notes ({monthEngineeringLogs.length})
+              </span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                Period: {selectedMonth}
+              </span>
+            </div>
+
+            {monthEngineeringLogs.length === 0 ? (
+              <p className="rounded-lg border border-[var(--border-default)] bg-white p-3 text-[var(--text-secondary)] text-xs">
+                No open breakdowns or critical engineering tickets logged for {selectedMonth}. Open
+                any machine&apos;s 30-Day Sheet below to inspect daily shift notes and delay
+                buckets.
+              </p>
+            ) : (
+              <div className="max-h-40 space-y-2 overflow-y-auto pr-1">
+                {monthEngineeringLogs.map((log) => {
+                  const matchedMachine = summaryRows.find(
+                    (r) =>
+                      log.machineName &&
+                      (r.machineName.toLowerCase() === log.machineName.toLowerCase() ||
+                        log.machineName.toLowerCase().includes(r.machineName.toLowerCase()))
+                  );
+                  return (
+                    <div
+                      key={log.id}
+                      className="rounded-lg border border-rose-500/25 bg-white p-2.5 text-xs"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-bold text-[var(--text-heading)]">
+                          {log.date} · {log.machineName ?? 'Site-Wide'} · {log.category}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="rounded bg-rose-500/15 px-1.5 py-0.5 font-mono font-semibold text-[10px] text-rose-900 uppercase">
+                            {log.severity} · {log.status}
+                          </span>
+                          {matchedMachine && (
+                            <button
+                              type="button"
+                              onClick={() => onInspectMachine30Day(matchedMachine.machineId)}
+                              className={BTN_OUTLINE}
+                            >
+                              30d Sheet
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-1 text-[var(--text-heading)]">{log.description}</p>
+                      {log.actionTaken && (
+                        <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+                          <strong>Action Taken:</strong> {log.actionTaken}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </GlassCard>
@@ -291,6 +537,30 @@ export function MachineMonthlySummaryTab({
 
       {/* Full Fleet Monthly Summary Table (Matching /control-room/engineering-notes columns) */}
       <GlassCard className="overflow-hidden p-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-b px-4 py-3">
+          <div>
+            <h4 className="font-bold text-[var(--text-heading)] text-sm">
+              All Fleet Monthly Machine Rollup ({filteredSummaryRows.length} of {summaryRows.length}{' '}
+              Machines)
+            </h4>
+            <p className="text-[11px] text-[var(--text-secondary)]">
+              Click any row or &ldquo;30-Day Sheet&rdquo; to inspect that machine&apos;s daily SMR,
+              delays, and breakdown logs for {selectedMonth}
+            </p>
+          </div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+            <input
+              type="text"
+              aria-label="Filter Monthly Summary Machines"
+              data-testid="monthly-summary-search-input"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              placeholder="Filter machine, type, site..."
+              className="w-56 rounded-lg border border-[var(--border-default)] bg-white py-1 pr-2.5 pl-8 text-[var(--text-heading)] text-xs"
+            />
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table
             aria-label={`Monthly Machine Summary Table for ${selectedMonth}`}
@@ -318,7 +588,7 @@ export function MachineMonthlySummaryTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
-              {summaryRows.map((row) => (
+              {filteredSummaryRows.map((row) => (
                 <tr
                   key={row.machineId}
                   onClick={() => onInspectMachine30Day(row.machineId)}

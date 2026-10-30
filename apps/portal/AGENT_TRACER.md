@@ -1,3 +1,15 @@
+## 2026-10-30T06:01:00+02:00: Executive Management Drill-Down & Historical Machine Activity Database Integration
+
+- **Phase 1 (Comprehension)**: Enhance the 30-day machine activity tables and monthly summary in Availability & Utilization (`/control-room/reports`) to serve as a detailed executive report for the CEO and senior management. Enable per-day, per-machine drill-downs into underlying operational/breakdown logs, an executive bottleneck digest, and cross-tab access to the historical Machine Activity Database from the `Archived` tab.
+- **Phase 2 (Evidence)**: Inspected `MachineMonthlySheetTab.tsx`, `MachineMonthlySummaryTab.tsx`, `ReportsDashboardClient.tsx`, `ReportsAnalyticsTabs.tsx`, and `ReportsDashboardClient.test.tsx`.
+- **Phase 3 (Design)**:
+  - Added inline daily inspection panel (`data-testid="day-detail-panel-${date}"`) in `MachineMonthlySheetTab.tsx` with expandable delay bucket breakdown and linked breakdown/engineering notes (`severity`, `status`, `description`, `actionTaken`).
+  - Added quick machine search, **Filter Issue Days Only** toggle, 6th KPI card (**Breakdown & Issue Days**), and one-click **Export Machine 30-Day CSV** (`data-testid="export-machine-30d-csv-btn"`).
+  - Added **CEO Executive Issue & Bottleneck Digest** (`data-testid="ceo-monthly-issue-digest"`) in `MachineMonthlySummaryTab.tsx` listing priority bottleneck machines with lowest availability/highest downtime and monthly breakdowns/tickets with direct links into 30-day sheets, plus search filtering and **Export Monthly Fleet Summary CSV** (`data-testid="export-monthly-summary-csv-btn"`).
+  - Integrated the Safe Monthly Machine Activity Database into `ReportsArchivedViewTab` (`data-testid="archived-tab-machine-db-vault"`) allowing management to jump to any historical month's 30-day per-machine sheets or monthly summary directly from the `Archived` tab.
+- **Phase 4 (Criticism)**: Verified with unit tests in `ReportsDashboardClient.test.tsx` (`8/8 PASS`), `pnpm audit:tailwind` (PASS), `pnpm --filter portal lint` (PASS), and `pnpm --filter portal type-check` (PASS).
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/reports/{MachineMonthlySheetTab.tsx,MachineMonthlySummaryTab.tsx,ReportsDashboardClient.tsx,ReportsAnalyticsTabs.tsx,ReportsDashboardClient.test.tsx}`.
+
 ## 2026-10-29T14:33:00+02:00: Availability & Utilization (`/control-room/reports`) 30-Day Per-Machine Tables, Monthly Summary & Safe Monthly Archiving
 
 - **Phase 1 (Comprehension)**: Bring the 21-column SMR & 12-Delay Category table from `/control-room/engineering-notes` into Availability & Utilization (`/control-room/reports`) as a 30-day calendar-month table per machine with machine switching, a Monthly Summary tab, and safe archiving of previous months' machine tables into a Machine Activity Database.

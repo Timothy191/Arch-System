@@ -171,6 +171,21 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     },
   ];
 
+  const mockEngineeringLogs: EngineeringLogItem[] = [
+    {
+      id: 'eng-log-1',
+      date: '2026-10-22',
+      shift: 'day',
+      source: 'breakdown',
+      machineName: 'ADT-04 Bell B40E',
+      category: 'Hydraulics',
+      severity: 'critical',
+      status: 'open',
+      description: 'Boom cylinder seal leak causing high hydraulic temperature',
+      actionTaken: 'Isolated machine, ordered seal kit replacement',
+    },
+  ];
+
   const baseProps = {
     departmentId: 'dept-control-room',
     departmentSlug: 'control-room',
@@ -185,7 +200,7 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     missingCoverage: [],
     shiftRows,
     machineOperationLogs,
-    engineeringLogs: [],
+    engineeringLogs: mockEngineeringLogs,
     csvContent: 'Date,Shift\n2026-10-22,day',
     exportRows: [],
     pdfReportData: {
@@ -514,15 +529,26 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     expect(screen.getByTestId('machine-day-row-2026-10-30')).toBeInTheDocument();
     expect(screen.getByTestId('machine-day-row-2026-10-31')).toBeInTheDocument();
 
+    // Expand per-day underlying issue & breakdown details for 2026-10-22 on EX-01 Liebherr 984
+    fireEvent.click(screen.getByTestId('inspect-day-details-2026-10-22'));
+    const detailPanel = screen.getByTestId('day-detail-panel-2026-10-22');
+    expect(detailPanel).toBeInTheDocument();
+    expect(detailPanel).toHaveTextContent(/Underlying Daily Operational & Engineering Report/i);
+    expect(detailPanel).toHaveTextContent(/Boom cylinder seal leak/i);
+
     // Verify switching machines via Next button switches the 30-day table
     fireEvent.click(screen.getByTestId('next-machine-30d-btn'));
     expect(
       screen.getByRole('table', { name: /30-Day Activity Table for DZ-02 CAT D9R/i })
     ).toBeInTheDocument();
 
-    // 2. Open Monthly Summary tab
+    // 2. Open Monthly Summary tab and verify CEO Executive Issue & Bottleneck Digest
     fireEvent.click(screen.getByRole('tab', { name: /Monthly Summary/i }));
     expect(screen.getByTestId('machine-monthly-summary-tab')).toBeInTheDocument();
+    expect(screen.getByTestId('ceo-monthly-issue-digest')).toBeInTheDocument();
+    expect(screen.getByTestId('ceo-monthly-issue-digest')).toHaveTextContent(
+      /Boom cylinder seal leak/i
+    );
     expect(screen.getByTestId('archived-machine-months-vault')).toBeInTheDocument();
 
     // Archive and seal the active month into the Machine Activity Database
@@ -530,6 +556,12 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     expect(screen.getByTestId('seal-monthly-summary-archive-btn')).toHaveTextContent(
       /Archived & Sealed/i
     );
+
+    // 3. Open Archived tab and verify Historical Monthly Machine Activity Database is accessible
+    fireEvent.click(screen.getByRole('tab', { name: /Archived/i }));
+    expect(screen.getByTestId('archived-tab-machine-db-vault')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('archived-open-summary-2026-10'));
+    expect(screen.getByTestId('machine-monthly-summary-tab')).toBeInTheDocument();
 
     // Drill down from Monthly Summary into EX-01 Liebherr 984's 30-day table
     fireEvent.click(screen.getByTestId('open-machine-30d-mach-ex-01-liebherr-984'));

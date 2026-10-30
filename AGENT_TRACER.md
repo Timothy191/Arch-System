@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Executive Management Issue Drill-Down & Historical Machine Activity Database Integration
+
+- **Action:**
+  - Enhanced [`apps/portal/app/(departments)/[department]/reports/MachineMonthlySheetTab.tsx`](<./apps/portal/app/(departments)/[department]/reports/MachineMonthlySheetTab.tsx>) for CEO & executive review: added expandable inline **Underlying Daily Operational & Engineering Report** panels (`data-testid="day-detail-panel-${date}"`) linking breakdowns and engineering notes with severity, status, root cause, and corrective action, added machine search, **Filter Issue Days Only** toggle, 6th KPI card (**Breakdown & Issue Days**), and one-click **Export Machine 30-Day CSV** (`data-testid="export-machine-30d-csv-btn"`).
+  - Enhanced [`apps/portal/app/(departments)/[department]/reports/MachineMonthlySummaryTab.tsx`](<./apps/portal/app/(departments)/[department]/reports/MachineMonthlySummaryTab.tsx>) with the **CEO Executive Issue & Bottleneck Digest** (`data-testid="ceo-monthly-issue-digest"`) listing priority bottleneck machines (lowest availability/highest breakdown downtime) and monthly breakdown tickets with jump links into 30-day sheets, plus search filtering and one-click **Export Monthly Fleet Summary CSV** (`data-testid="export-monthly-summary-csv-btn"`).
+  - Integrated the Safe Monthly Machine Activity Database into [`ReportsArchivedViewTab`](<./apps/portal/app/(departments)/[department]/reports/ReportsAnalyticsTabs.tsx>) (`data-testid="archived-tab-machine-db-vault"`) in [`ReportsAnalyticsTabs.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsAnalyticsTabs.tsx>) and wired in [`ReportsDashboardClient.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsDashboardClient.tsx>) so management can directly launch any historical month's 30-day per-machine sheets or monthly summary from the `Archived` tab.
+  - Added unit test coverage in [`ReportsDashboardClient.test.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsDashboardClient.test.tsx>).
+- **Verification:** `ReportsDashboardClient.test.tsx` (`8/8 PASS`), `pnpm audit:tailwind` (PASS), `pnpm --filter portal lint` (PASS), `pnpm --filter portal type-check` (PASS).
+
 ## [2026-10-29] - Availability & Utilization (`/control-room/reports`) 30-Day Per-Machine Activity Tables, Monthly Summary & Safe Monthly Archive Database
 
 - **Action:**

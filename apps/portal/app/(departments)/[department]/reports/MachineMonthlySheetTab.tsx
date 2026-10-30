@@ -2,16 +2,20 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
+  AlertTriangle,
   Archive,
   Calendar,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Eye,
   Lock,
   Save,
+  Search,
   Wrench,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { saveMachineOverviewRow } from '@/app/(departments)/[department]/engineering-notes/actions';
 import {
@@ -29,6 +33,7 @@ import {
   computeSingleMachineMonthlySummary,
 } from './machine-activity-helpers';
 import type {
+  EngineeringLogItem,
   FleetMachineItem,
   FleetOperatorItem,
   MachineDailyOverviewRecord,
@@ -91,6 +96,9 @@ const HIGH_UTILIZATION_THRESHOLD = 75;
 const MED_UTILIZATION_THRESHOLD = 50;
 const DECIMAL_PLACES_ONE = 1;
 const DECIMAL_PLACES_TWO = 2;
+const TOTAL_TABLE_COLS = 21;
+
+const EMPTY_ENGINEERING_LOGS: readonly EngineeringLogItem[] = [];
 
 export interface MachineMonthlySheetTabProps {
   departmentId: string;
@@ -103,10 +111,30 @@ export interface MachineMonthlySheetTabProps {
   shiftType: 'day' | 'night';
   onShiftTypeChange: (shift: 'day' | 'night') => void;
   records: readonly MachineDailyOverviewRecord[];
+  engineeringLogs?: readonly EngineeringLogItem[];
   onUpsertRecord: (updatedRecord: MachineDailyOverviewRecord) => void;
   isMonthSealed: boolean;
   onArchiveAndSealMonth: () => void;
   onOpenMonthlySummary: () => void;
+}
+
+function doesRowHaveUnderlyingIssue(
+  dayRow: MachineDailyOverviewRecord,
+  dayIssues: readonly EngineeringLogItem[]
+): boolean {
+  if (dayIssues.length > 0 || dayRow.delays.breakdown > 0 || dayRow.endsOnBreakdown) {
+    return true;
+  }
+  for (const col of OVERVIEW_DELAY_COLUMNS) {
+    const loggedVal = dayRow.delays[col.key] ?? 0;
+    if (!col.isStandardAllowance && loggedVal > 0) {
+      return true;
+    }
+    if (col.isStandardAllowance && Math.abs(loggedVal - col.standardDefault) > 0.01) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function MachineMonthlySheetTab({
@@ -120,12 +148,16 @@ export function MachineMonthlySheetTab({
   shiftType,
   onShiftTypeChange,
   records,
+  engineeringLogs = EMPTY_ENGINEERING_LOGS,
   onUpsertRecord,
   isMonthSealed,
   onArchiveAndSealMonth,
   onOpenMonthlySummary,
 }: MachineMonthlySheetTabProps) {
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
+  const [machineSearch, setMachineSearch] = useState<string>('');
+  const [showIssuesOnly, setShowIssuesOnly] = useState<boolean>(false);
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [savingDate, setSavingDate] = useState<string | null>(null);
   const [savedDates, setSavedDates] = useState<Record<string, boolean>>({});
 
@@ -138,9 +170,18 @@ export function MachineMonthlySheetTab({
   }, [fleetMachines]);
 
   const filteredMachines = useMemo(() => {
-    if (typeFilter === 'ALL') return fleetMachines;
-    return fleetMachines.filter((mach) => mach.machineType === typeFilter);
-  }, [fleetMachines, typeFilter]);
+    const queryLower = machineSearch.trim().toLowerCase();
+    return fleetMachines.filter((mach) => {
+      if (typeFilter !== 'ALL' && mach.machineType !== typeFilter) return false;
+      if (!queryLower) return true;
+      return (
+        mach.name.toLowerCase().includes(queryLower) ||
+        mach.machineType.toLowerCase().includes(queryLower) ||
+        mach.siteName.toLowerCase().includes(queryLower) ||
+        (mach.serialNumber ?? '').toLowerCase().includes(queryLower)
+      );
+    });
+  }, [fleetMachines, typeFilter, machineSearch]);
 
   const activeMachine = useMemo(() => {
     const found = filteredMachines.find((mach) => mach.id === selectedMachineId);
@@ -163,6 +204,34 @@ export function MachineMonthlySheetTab({
     });
   }, [activeMachine, selectedMonth, shiftType, records]);
 
+  const machineIssuesByDate = useMemo(() => {
+    const byDate = new Map<string, EngineeringLogItem[]>();
+    if (!activeMachine) return byDate;
+    const activeNameLower = activeMachine.name.toLowerCase();
+    const serialLower = (activeMachine.serialNumber ?? '').toLowerCase();
+
+    for (const logItem of engineeringLogs) {
+      if (!logItem.date.startsWith(selectedMonth)) continue;
+      const logMachLower = logItem.machineName.toLowerCase();
+      const isMatch =
+        logMachLower === activeNameLower ||
+        activeNameLower.includes(logMachLower) ||
+        logMachLower.includes(activeNameLower) ||
+        (serialLower.length > 0 && logMachLower.includes(serialLower));
+      if (!isMatch) continue;
+      const existing = byDate.get(logItem.date) ?? [];
+      byDate.set(logItem.date, [...existing, logItem]);
+    }
+    return byDate;
+  }, [activeMachine, engineeringLogs, selectedMonth]);
+
+  const visibleDayRows = useMemo(() => {
+    if (!showIssuesOnly) return dayRows;
+    return dayRows.filter((row) =>
+      doesRowHaveUnderlyingIssue(row, machineIssuesByDate.get(row.date) ?? [])
+    );
+  }, [dayRows, showIssuesOnly, machineIssuesByDate]);
+
   const monthlySummary = useMemo(() => {
     if (!activeMachine) return null;
     return computeSingleMachineMonthlySummary({
@@ -171,6 +240,12 @@ export function MachineMonthlySheetTab({
       dayRows,
     });
   }, [activeMachine, selectedMonth, dayRows]);
+
+  const issueDaysCount = useMemo(() => {
+    return dayRows.filter((row) =>
+      doesRowHaveUnderlyingIssue(row, machineIssuesByDate.get(row.date) ?? [])
+    ).length;
+  }, [dayRows, machineIssuesByDate]);
 
   const handleStepMachine = (direction: -1 | 1) => {
     if (filteredMachines.length === 0) return;
@@ -264,12 +339,58 @@ export function MachineMonthlySheetTab({
       setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
       toast.success(`Saved ${dayRow.machineName} for ${dayRow.date} (${dayRow.shiftType} shift)`);
     } catch {
-      // Keep local update persisted even when offline or using synthetic IDs
       setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
       toast.success(`Recorded ${dayRow.machineName} for ${dayRow.date} in activity log`);
     } finally {
       setSavingDate(null);
     }
+  };
+
+  const handleExportMachine30DayCsv = () => {
+    if (!activeMachine) return;
+    const headers = [
+      'Date',
+      'Day',
+      'Shift',
+      'Machine',
+      'Start SMR',
+      'Stop SMR',
+      'Worked Hours',
+      ...OVERVIEW_DELAY_COLUMNS.map((col) => col.label),
+      'Operator',
+      'Comments',
+      'Availability %',
+      'Utilization %',
+    ];
+    const csvLines = [
+      headers.join(','),
+      ...dayRows.map((row) => {
+        const rowMetrics = computeMachineOverviewMetrics(row.startSmr, row.stopSmr, row.delays);
+        return [
+          row.date,
+          `Day ${String(row.dayOfMonth).padStart(DECIMAL_PLACES_TWO, '0')}`,
+          row.shiftType,
+          `"${row.machineName}"`,
+          row.startSmr.toFixed(DECIMAL_PLACES_ONE),
+          row.stopSmr.toFixed(DECIMAL_PLACES_ONE),
+          rowMetrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE),
+          ...OVERVIEW_DELAY_COLUMNS.map((col) =>
+            (row.delays[col.key] ?? 0).toFixed(DECIMAL_PLACES_ONE)
+          ),
+          `"${row.operatorName ?? ''}"`,
+          `"${row.comment.replaceAll('"', '""')}"`,
+          rowMetrics.availabilityPercent.toFixed(DECIMAL_PLACES_ONE),
+          rowMetrics.utilizationPercent.toFixed(DECIMAL_PLACES_ONE),
+        ].join(',');
+      }),
+    ];
+    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = `${activeMachine.name.replace(/\s+/g, '-')}-${selectedMonth}-30day-report.csv`;
+    anchor.click();
+    URL.revokeObjectURL(objectUrl);
   };
 
   if (!activeMachine || !monthlySummary) {
@@ -282,25 +403,35 @@ export function MachineMonthlySheetTab({
 
   return (
     <div className="space-y-4" data-testid="machine-30d-sheet-tab">
-      {/* Top Machine Switcher & Month Archive Controls */}
+      {/* Top Machine Switcher & Executive Month Archive Controls */}
       <GlassCard className="space-y-4 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-md border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
               <Wrench className="h-3.5 w-3.5" />
-              Per-Machine 30-Day SMR, Delays, Availability &amp; Utilization Ledger
+              CEO &amp; Management Per-Machine 30-Day SMR, Delays &amp; Root-Cause Ledger
             </div>
             <h3 className="mt-1 font-bold text-[var(--text-heading)] text-lg">
               {activeMachine.name} — {selectedMonth} ({dayRows.length}-Day Activity Sheet)
             </h3>
             <p className="text-[var(--text-secondary)] text-xs">
-              Switch between any fleet machine below to inspect or log its full 30/31-day calendar
-              table. Standard defaults: Refueling = 0.2h · Safety Talks = 0.5h · Lunches = 0.5h ·
-              GES / Maintenance = 0.5h · Tyres / Trams = 0.2h · Greasing / Startups = 0.5h.
+              Switch between any fleet machine below to inspect its 30/31-day calendar table, daily
+              breakdown root causes, and shift allowances. Click any day&apos;s detail badge to
+              review underlying engineering notes and corrective actions.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportMachine30DayCsv}
+              data-testid="export-machine-30d-csv-btn"
+              className={BTN_SECONDARY}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export Machine 30-Day CSV
+            </button>
+
             <button
               type="button"
               onClick={onOpenMonthlySummary}
@@ -329,7 +460,7 @@ export function MachineMonthlySheetTab({
           </div>
         </div>
 
-        {/* Machine Switcher Bar */}
+        {/* Machine Switcher & Executive Issue Filter Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-[var(--border-default)] border-t pt-3">
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -368,12 +499,42 @@ export function MachineMonthlySheetTab({
               <ChevronRight className="h-4 w-4" />
             </button>
 
+            <div className="relative">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
+                type="search"
+                aria-label="Quick search machine"
+                data-testid="machine-30d-search-input"
+                value={machineSearch}
+                onChange={(e) => setMachineSearch(e.target.value)}
+                placeholder="Find machine..."
+                className="w-36 rounded-lg border border-[var(--border-default)] bg-white py-1.5 pr-2.5 pl-8 text-[var(--text-heading)] text-xs"
+              />
+            </div>
+
             <span className="font-mono text-[var(--text-muted)] text-xs">
               Machine {activeMachineIndex + 1} of {filteredMachines.length}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* CEO Issue Days Filter Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowIssuesOnly((prev) => !prev)}
+              data-testid="toggle-issue-days-only-btn"
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 font-semibold text-xs ${
+                showIssuesOnly
+                  ? 'border-amber-500 bg-amber-500/15 text-amber-900'
+                  : 'border-[var(--border-default)] bg-white text-[var(--text-heading)]'
+              }`}
+            >
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+              {showIssuesOnly
+                ? `Showing Issue / Breakdown Days (${issueDaysCount})`
+                : `Filter Issue Days (${issueDaysCount})`}
+            </button>
+
             {/* Equipment Type Filter */}
             <select
               aria-label="Filter machines by equipment type"
@@ -425,7 +586,7 @@ export function MachineMonthlySheetTab({
         </div>
 
         {/* Active Machine 30-Day KPI Summary Strip */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-6">
           <div className={KPI_BOX_CLASS}>
             <div className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
               Selected Machine
@@ -459,7 +620,7 @@ export function MachineMonthlySheetTab({
               {monthlySummary.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)} h
             </div>
             <div className="text-[11px] text-[var(--text-secondary)]">
-              Of {monthlySummary.scheduledHours}h scheduled shift window
+              Of {monthlySummary.scheduledHours}h scheduled window
             </div>
           </div>
 
@@ -484,6 +645,18 @@ export function MachineMonthlySheetTab({
             </div>
             <div className="text-[11px] text-[var(--text-secondary)]">
               Total Delays: {monthlySummary.totalDelayHours.toFixed(DECIMAL_PLACES_ONE)}h
+            </div>
+          </div>
+
+          <div className={KPI_BOX_CLASS}>
+            <div className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+              Breakdown &amp; Issue Days
+            </div>
+            <div className="mt-0.5 font-bold font-mono text-amber-700 text-base">
+              {issueDaysCount} {issueDaysCount === 1 ? 'Day' : 'Days'}
+            </div>
+            <div className="text-[11px] text-[var(--text-secondary)]">
+              Breakdown Hours: {monthlySummary.delays.breakdown.toFixed(DECIMAL_PLACES_ONE)}h
             </div>
           </div>
         </div>
@@ -520,11 +693,11 @@ export function MachineMonthlySheetTab({
                 <th className={TH_BASE}>Comments (Required on Delay)</th>
                 <th className={TH_NUM}>Availability</th>
                 <th className={TH_NUM}>Utilization</th>
-                <th className={TH_BASE}>Actions</th>
+                <th className={TH_BASE}>Actions / Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
-              {dayRows.map((dayRow) => {
+              {visibleDayRows.map((dayRow) => {
                 const metrics = computeMachineOverviewMetrics(
                   dayRow.startSmr,
                   dayRow.stopSmr,
@@ -532,185 +705,288 @@ export function MachineMonthlySheetTab({
                 );
                 const paddedDay = String(dayRow.dayOfMonth).padStart(DECIMAL_PLACES_TWO, '0');
                 const isRowSaved = Boolean(savedDates[dayRow.date]) || dayRow.hasExistingOperation;
+                const dayIssues = machineIssuesByDate.get(dayRow.date) ?? [];
+                const hasIssue = doesRowHaveUnderlyingIssue(dayRow, dayIssues);
+                const isExpanded = expandedDate === dayRow.date;
 
                 return (
-                  <tr
-                    key={`${dayRow.machineId}-${dayRow.date}-${dayRow.shiftType}`}
-                    data-testid={`machine-day-row-${dayRow.date}`}
-                    className="hover:bg-[var(--bg-secondary)]/40"
-                  >
-                    {/* 1. Day / Date */}
-                    <td className={TD_BASE}>
-                      <div className="font-bold font-mono text-[var(--text-heading)]">
-                        Day {paddedDay} · {dayRow.date}
-                      </div>
-                      <div className="text-[10px] text-[var(--text-secondary)] uppercase">
-                        {dayRow.shiftType} shift · {activeMachine.name}
-                      </div>
-                    </td>
-
-                    {/* 2. Start SMR */}
-                    <td className={`${TD_BASE} text-right`}>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        disabled={isMonthSealed}
-                        aria-label={`Start SMR ${dayRow.date}`}
-                        value={dayRow.startSmr}
-                        onChange={(e) => handleSmrChange(dayRow, 'startSmr', e.target.value)}
-                        className={INPUT_SMR_CLASS}
-                      />
-                    </td>
-
-                    {/* 3. Stop SMR */}
-                    <td className={`${TD_BASE} text-right`}>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min={dayRow.startSmr}
-                        max={Number(
-                          (dayRow.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO)
-                        )}
-                        disabled={isMonthSealed}
-                        aria-label={`Stop SMR ${dayRow.date}`}
-                        value={dayRow.stopSmr}
-                        onChange={(e) => handleSmrChange(dayRow, 'stopSmr', e.target.value)}
-                        className={INPUT_SMR_CLASS}
-                      />
-                    </td>
-
-                    {/* 4. Total SMR Worked */}
-                    <td
-                      className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
+                  <Fragment key={`${dayRow.machineId}-${dayRow.date}-${dayRow.shiftType}`}>
+                    <tr
+                      data-testid={`machine-day-row-${dayRow.date}`}
+                      className={
+                        hasIssue
+                          ? 'bg-amber-500/8 hover:bg-amber-500/12'
+                          : 'hover:bg-[var(--bg-secondary)]/40'
+                      }
                     >
-                      <div>{metrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)}h</div>
-                      <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                        {metrics.maxDelaysAllowedHours.toFixed(DECIMAL_PLACES_ONE)}h delay cap
-                      </div>
-                    </td>
-
-                    {/* 5..16. All 12 Delay Category Columns */}
-                    {OVERVIEW_DELAY_COLUMNS.map((col) => {
-                      const delayHours = dayRow.delays[col.key] ?? 0;
-                      return (
-                        <td
-                          key={col.key}
-                          data-delay-group={col.delayGroup}
-                          className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
-                        >
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            max={metrics.maxDelaysAllowedHours}
-                            disabled={isMonthSealed}
-                            aria-label={`${col.label} ${dayRow.date}`}
-                            value={delayHours}
-                            onChange={(e) => handleDelayChange(dayRow, col.key, e.target.value)}
-                            className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
-                          />
-                        </td>
-                      );
-                    })}
-
-                    {/* 17. Operator */}
-                    <td className={TD_BASE}>
-                      <select
-                        disabled={isMonthSealed}
-                        aria-label={`Operator ${dayRow.date}`}
-                        value={dayRow.operatorId ?? ''}
-                        onChange={(e) => {
-                          const opMatch = fleetOperators.find((op) => op.id === e.target.value);
-                          onUpsertRecord({
-                            ...dayRow,
-                            operatorId: e.target.value || null,
-                            operatorName: opMatch?.fullName ?? null,
-                            hasExistingOperation: true,
-                          });
-                        }}
-                        className={SELECT_OP_CLASS}
-                      >
-                        <option value="">
-                          {dayRow.operatorName ? dayRow.operatorName : 'Assigned Operator'}
-                        </option>
-                        {fleetOperators.map((op) => (
-                          <option key={op.id} value={op.id}>
-                            {op.fullName}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 18. Comments */}
-                    <td className={TD_BASE}>
-                      <input
-                        type="text"
-                        disabled={isMonthSealed}
-                        aria-label={`Comments ${dayRow.date}`}
-                        value={dayRow.comment}
-                        onChange={(e) =>
-                          onUpsertRecord({
-                            ...dayRow,
-                            comment: e.target.value,
-                            hasExistingOperation: true,
-                          })
-                        }
-                        className={INPUT_COMMENT_CLASS}
-                      />
-                    </td>
-
-                    {/* 19. Availability */}
-                    <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                      <span
-                        className={
-                          metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
-                            ? 'text-accent-green'
-                            : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
-                              ? 'text-amber-600'
-                              : 'text-red-600'
-                        }
-                      >
-                        {metrics.availabilityPercent.toFixed(DECIMAL_PLACES_ONE)}%
-                      </span>
-                    </td>
-
-                    {/* 20. Utilization */}
-                    <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                      <span
-                        className={
-                          metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
-                            ? 'text-[var(--accent-blue)]'
-                            : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
-                              ? 'text-[var(--text-heading)]'
-                              : 'text-amber-600'
-                        }
-                      >
-                        {metrics.utilizationPercent.toFixed(DECIMAL_PLACES_ONE)}%
-                      </span>
-                    </td>
-
-                    {/* 21. Actions */}
-                    <td className={TD_BASE}>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          disabled={isMonthSealed || savingDate === dayRow.date}
-                          onClick={() => void handleSaveDayRow(dayRow)}
-                          data-testid={`save-machine-day-${dayRow.date}`}
-                          className={BTN_PRIMARY}
-                        >
-                          <Save className="h-3 w-3" />
-                          {savingDate === dayRow.date ? '...' : 'Save'}
-                        </button>
-                        {isRowSaved && (
-                          <span className="inline-flex items-center text-[10px] text-accent-green">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
+                      {/* 1. Day / Date */}
+                      <td className={TD_BASE}>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold font-mono text-[var(--text-heading)]">
+                            Day {paddedDay} · {dayRow.date}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                          {hasIssue && (
+                            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 font-bold text-[9px] text-amber-900 uppercase">
+                              Issue
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-[var(--text-secondary)] uppercase">
+                          {dayRow.shiftType} shift · {activeMachine.name}
+                        </div>
+                      </td>
+
+                      {/* 2. Start SMR */}
+                      <td className={`${TD_BASE} text-right`}>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          disabled={isMonthSealed}
+                          aria-label={`Start SMR ${dayRow.date}`}
+                          value={dayRow.startSmr}
+                          onChange={(e) => handleSmrChange(dayRow, 'startSmr', e.target.value)}
+                          className={INPUT_SMR_CLASS}
+                        />
+                      </td>
+
+                      {/* 3. Stop SMR */}
+                      <td className={`${TD_BASE} text-right`}>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min={dayRow.startSmr}
+                          max={Number(
+                            (dayRow.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO)
+                          )}
+                          disabled={isMonthSealed}
+                          aria-label={`Stop SMR ${dayRow.date}`}
+                          value={dayRow.stopSmr}
+                          onChange={(e) => handleSmrChange(dayRow, 'stopSmr', e.target.value)}
+                          className={INPUT_SMR_CLASS}
+                        />
+                      </td>
+
+                      {/* 4. Total SMR Worked */}
+                      <td
+                        className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
+                      >
+                        <div>{metrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)}h</div>
+                        <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                          {metrics.maxDelaysAllowedHours.toFixed(DECIMAL_PLACES_ONE)}h delay cap
+                        </div>
+                      </td>
+
+                      {/* 5..16. All 12 Delay Category Columns */}
+                      {OVERVIEW_DELAY_COLUMNS.map((col) => {
+                        const delayHours = dayRow.delays[col.key] ?? 0;
+                        return (
+                          <td
+                            key={col.key}
+                            data-delay-group={col.delayGroup}
+                            className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
+                          >
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max={metrics.maxDelaysAllowedHours}
+                              disabled={isMonthSealed}
+                              aria-label={`${col.label} ${dayRow.date}`}
+                              value={delayHours}
+                              onChange={(e) => handleDelayChange(dayRow, col.key, e.target.value)}
+                              className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
+                            />
+                          </td>
+                        );
+                      })}
+
+                      {/* 17. Operator */}
+                      <td className={TD_BASE}>
+                        <select
+                          disabled={isMonthSealed}
+                          aria-label={`Operator ${dayRow.date}`}
+                          value={dayRow.operatorId ?? ''}
+                          onChange={(e) => {
+                            const opMatch = fleetOperators.find((op) => op.id === e.target.value);
+                            onUpsertRecord({
+                              ...dayRow,
+                              operatorId: e.target.value || null,
+                              operatorName: opMatch?.fullName ?? null,
+                              hasExistingOperation: true,
+                            });
+                          }}
+                          className={SELECT_OP_CLASS}
+                        >
+                          <option value="">
+                            {dayRow.operatorName ? dayRow.operatorName : 'Assigned Operator'}
+                          </option>
+                          {fleetOperators.map((op) => (
+                            <option key={op.id} value={op.id}>
+                              {op.fullName}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
+                      {/* 18. Comments */}
+                      <td className={TD_BASE}>
+                        <input
+                          type="text"
+                          disabled={isMonthSealed}
+                          aria-label={`Comments ${dayRow.date}`}
+                          value={dayRow.comment}
+                          onChange={(e) =>
+                            onUpsertRecord({
+                              ...dayRow,
+                              comment: e.target.value,
+                              hasExistingOperation: true,
+                            })
+                          }
+                          className={INPUT_COMMENT_CLASS}
+                        />
+                      </td>
+
+                      {/* 19. Availability */}
+                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                        <span
+                          className={
+                            metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
+                              ? 'text-accent-green'
+                              : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
+                                ? 'text-amber-600'
+                                : 'text-red-600'
+                          }
+                        >
+                          {metrics.availabilityPercent.toFixed(DECIMAL_PLACES_ONE)}%
+                        </span>
+                      </td>
+
+                      {/* 20. Utilization */}
+                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                        <span
+                          className={
+                            metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
+                              ? 'text-[var(--accent-blue)]'
+                              : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
+                                ? 'text-[var(--text-heading)]'
+                                : 'text-amber-600'
+                          }
+                        >
+                          {metrics.utilizationPercent.toFixed(DECIMAL_PLACES_ONE)}%
+                        </span>
+                      </td>
+
+                      {/* 21. Actions & CEO Day Detail Inspector Toggle */}
+                      <td className={TD_BASE}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            disabled={isMonthSealed || savingDate === dayRow.date}
+                            onClick={() => void handleSaveDayRow(dayRow)}
+                            data-testid={`save-machine-day-${dayRow.date}`}
+                            className={BTN_PRIMARY}
+                          >
+                            <Save className="h-3 w-3" />
+                            {savingDate === dayRow.date ? '...' : 'Save'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedDate((prev) => (prev === dayRow.date ? null : dayRow.date))
+                            }
+                            data-testid={`inspect-day-details-${dayRow.date}`}
+                            className={BTN_SECONDARY}
+                          >
+                            <Eye className="h-3 w-3" />
+                            {isExpanded ? 'Hide' : 'Details'}
+                          </button>
+
+                          {isRowSaved && (
+                            <span className="inline-flex items-center text-[10px] text-accent-green">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Expandable CEO Per-Day Underlying Issue & Delay Breakdown Panel */}
+                    {isExpanded && (
+                      <tr
+                        data-testid={`day-detail-panel-${dayRow.date}`}
+                        className="bg-[var(--bg-secondary)]/90"
+                      >
+                        <td colSpan={TOTAL_TABLE_COLS} className="px-4 py-3 text-xs">
+                          <div className="space-y-2 rounded-xl border border-[var(--border-default)] bg-white p-3.5">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-b pb-2">
+                              <div className="font-bold text-[var(--text-heading)]">
+                                Underlying Daily Operational &amp; Engineering Report —{' '}
+                                {activeMachine.name} on {dayRow.date} ({dayRow.shiftType} shift)
+                              </div>
+                              <div className="font-mono text-[var(--text-secondary)]">
+                                Worked: {metrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)}h · Prod
+                                Delays: {metrics.productionDelayHours.toFixed(DECIMAL_PLACES_ONE)}h
+                                · Non-Prod:{' '}
+                                {metrics.nonProductionDelayHours.toFixed(DECIMAL_PLACES_ONE)}h · Eng
+                                Downtime:{' '}
+                                {metrics.engineeringDelayHours.toFixed(DECIMAL_PLACES_ONE)}h
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                              <div>
+                                <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase">
+                                  Shift Note &amp; Delay Explanation
+                                </div>
+                                <p className="mt-1 text-[var(--text-heading)]">
+                                  {dayRow.comment || 'No shift comment recorded.'}
+                                </p>
+                              </div>
+
+                              <div>
+                                <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase">
+                                  Linked Breakdowns &amp; Engineering Notes ({dayIssues.length})
+                                </div>
+                                {dayIssues.length === 0 ? (
+                                  <p className="mt-1 text-[var(--text-secondary)]">
+                                    No separate breakdown tickets or engineering notes logged on
+                                    this date.
+                                  </p>
+                                ) : (
+                                  <div className="mt-1 space-y-1.5">
+                                    {dayIssues.map((issue) => (
+                                      <div
+                                        key={issue.id}
+                                        className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2"
+                                      >
+                                        <div className="flex items-center justify-between font-semibold text-amber-950">
+                                          <span>
+                                            [{issue.source.toUpperCase()}] {issue.category} (
+                                            {issue.severity.toUpperCase()})
+                                          </span>
+                                          <span className="uppercase">{issue.status}</span>
+                                        </div>
+                                        <p className="mt-0.5 text-[var(--text-heading)]">
+                                          {issue.description}
+                                        </p>
+                                        {issue.actionTaken && (
+                                          <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+                                            Action: {issue.actionTaken}
+                                          </p>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>

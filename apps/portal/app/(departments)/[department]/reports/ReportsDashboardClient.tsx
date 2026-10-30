@@ -356,6 +356,7 @@ export function ReportsDashboardClient({
           isMonthSealed={isSelectedMonthSealed}
           onArchiveAndSealMonth={handleArchiveAndSealMonth}
           onOpenMonthlySummary={() => handleSelectTab('monthly-summary')}
+          engineeringLogs={engineeringLogs}
         />
       )}
 
@@ -373,6 +374,7 @@ export function ReportsDashboardClient({
             setSelectedMachineId(machineId);
             handleSelectTab('machine-30d');
           }}
+          engineeringLogs={engineeringLogs}
         />
       )}
 
@@ -382,6 +384,15 @@ export function ReportsDashboardClient({
           fromDateStr={fromDateStr}
           toDateStr={toDateStr}
           currentMonthPrefix={currentMonthPrefix}
+          archivedMachineSnapshots={archivedSnapshots}
+          onOpenArchivedMonth30Day={(monthStr) => {
+            setSelectedMonth(monthStr);
+            handleSelectTab('machine-30d');
+          }}
+          onOpenArchivedMonthSummary={(monthStr) => {
+            setSelectedMonth(monthStr);
+            handleSelectTab('monthly-summary');
+          }}
         />
       )}
 

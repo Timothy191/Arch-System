@@ -2,8 +2,23 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
-import { Archive, Calendar, Clock, FileText, Search, Table2, Wrench } from 'lucide-react';
-import type { ArchivedReportData, DailyAggregatedRow, ReportSubtab } from './reports-types';
+import {
+  Archive,
+  Calendar,
+  Clock,
+  Database,
+  FileText,
+  Lock,
+  Search,
+  Table2,
+  Wrench,
+} from 'lucide-react';
+import type {
+  ArchivedMachineMonthSnapshot,
+  ArchivedReportData,
+  DailyAggregatedRow,
+  ReportSubtab,
+} from './reports-types';
 
 interface ReportsSubtabsToolbarProps {
   activeTab: ReportSubtab;
@@ -421,11 +436,16 @@ export function ReportsDayViewTab({ dailyAggregatedRows, todayStr }: ReportsDayV
   );
 }
 
+const EMPTY_ARCHIVED_SNAPSHOTS: readonly ArchivedMachineMonthSnapshot[] = [];
+
 interface ReportsArchivedViewTabProps {
   archivedData: ArchivedReportData;
   fromDateStr: string;
   toDateStr: string;
   currentMonthPrefix: string;
+  archivedMachineSnapshots?: readonly ArchivedMachineMonthSnapshot[];
+  onOpenArchivedMonthSummary?: (monthPrefix: string) => void;
+  onOpenArchivedMonth30Day?: (monthPrefix: string) => void;
 }
 
 export function ReportsArchivedViewTab({
@@ -433,9 +453,91 @@ export function ReportsArchivedViewTab({
   fromDateStr,
   toDateStr,
   currentMonthPrefix,
+  archivedMachineSnapshots = EMPTY_ARCHIVED_SNAPSHOTS,
+  onOpenArchivedMonthSummary,
+  onOpenArchivedMonth30Day,
 }: ReportsArchivedViewTabProps) {
   return (
     <div className="space-y-6">
+      {/* Safe Monthly Machine Activity Database (30-Day Sheets & Monthly Rollups) */}
+      {archivedMachineSnapshots.length > 0 && (
+        <GlassCard className="space-y-3 p-5" data-testid="archived-tab-machine-db-vault">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-[var(--accent-blue)]" />
+              <h3 className="font-bold text-[var(--text-heading)] text-sm uppercase tracking-wider">
+                Historical Monthly Machine Activity Database ({archivedMachineSnapshots.length}{' '}
+                Months)
+              </h3>
+            </div>
+            <span className="text-[var(--text-secondary)] text-xs">
+              Open any historical month&apos;s fleet summary or 30-day per-machine SMR &amp; delay
+              tables
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {archivedMachineSnapshots.map((snap) => (
+              <div
+                key={`arch-db-${snap.month}`}
+                className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3.5"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
+                    {snap.month}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent-green/15 px-2 py-0.5 font-semibold text-[10px] text-accent-green">
+                    <Lock className="h-2.5 w-2.5" />
+                    {snap.isSealed ? 'Sealed Archive' : 'Active Month'}
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2 font-mono text-xs">
+                  <div>
+                    <div className="text-[10px] text-[var(--text-muted)]">Machines</div>
+                    <div className="font-bold text-[var(--text-heading)]">{snap.machineCount}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-[var(--text-muted)]">SMR Worked</div>
+                    <div className="font-bold text-[var(--accent-blue)]">
+                      {snap.totalSmrWorked.toFixed(1)}h
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-[var(--text-muted)]">Avail / Util</div>
+                    <div className="font-bold text-accent-green">
+                      {snap.fleetAvailabilityPercent.toFixed(1)}% /{' '}
+                      {snap.fleetUtilizationPercent.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2.5 flex flex-wrap justify-end gap-1.5">
+                  {onOpenArchivedMonth30Day && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenArchivedMonth30Day(snap.month)}
+                      data-testid={`archived-open-30d-${snap.month}`}
+                      className="cursor-pointer rounded-md border border-[var(--border-default)] bg-white px-2 py-1 font-semibold text-[11px] text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]"
+                    >
+                      30-Day Sheets
+                    </button>
+                  )}
+                  {onOpenArchivedMonthSummary && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenArchivedMonthSummary(snap.month)}
+                      data-testid={`archived-open-summary-${snap.month}`}
+                      className="cursor-pointer rounded-md border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-2 py-1 font-semibold text-[11px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20"
+                    >
+                      Monthly Summary
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
+
       {/* Date Range Filter Card */}
       <GlassCard className="p-5">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
