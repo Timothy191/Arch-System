@@ -1,7 +1,16 @@
 'use client';
 
 import { cn } from '@repo/ui/lib/utils';
-import { CheckCheck, MessageSquare, Paperclip, QrCode, RefreshCw, Send } from 'lucide-react';
+import {
+  CheckCheck,
+  ExternalLink,
+  Globe,
+  MessageSquare,
+  Paperclip,
+  QrCode,
+  RefreshCw,
+  Send,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
   CHANNELS,
@@ -14,8 +23,33 @@ import {
 const QUICK_CHIP_CLASS =
   'shrink-0 whitespace-nowrap rounded-full border border-slate-200 bg-white px-2 py-0.5 font-medium text-[10.5px] text-slate-700 shadow-diffusion-sm transition-colors hover:bg-emerald-50 hover:text-emerald-700';
 
+const MODE_TAB_BTN_BASE_CLASS =
+  'flex cursor-pointer items-center gap-1 rounded px-2 py-1 font-semibold text-[10.5px] transition-all';
+
+const DOCKED_WINDOW_HALF_DIVISOR = 2;
+const DOCKED_WINDOW_MIN_WIDTH = 520;
+const DOCKED_WINDOW_MIN_HEIGHT = 760;
+const TIME_PAD_LENGTH = 2;
+
+function openDockedWhatsAppWindow() {
+  if (typeof window === 'undefined') return;
+  const halfWidth = Math.max(
+    Math.floor((window.outerWidth || DOCKED_WINDOW_MIN_WIDTH) / DOCKED_WINDOW_HALF_DIVISOR),
+    DOCKED_WINDOW_MIN_WIDTH
+  );
+  const height = Math.max(window.outerHeight || DOCKED_WINDOW_MIN_HEIGHT, DOCKED_WINDOW_MIN_HEIGHT);
+  const left = (window.screenX || 0) + halfWidth;
+  const top = window.screenY || 0;
+  window.open(
+    WHATSAPP_WEB_URL,
+    'arch_whatsapp_docked_companion',
+    `width=${halfWidth},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`
+  );
+}
+
 export function WhatsAppWebView() {
-  const [activeTab, setActiveTab] = useState<'chat' | 'link'>('chat');
+  const [activeTab, setActiveTab] = useState<'web' | 'chat' | 'link'>('web');
+  const [iframeKey, setIframeKey] = useState(0);
   const [selectedChannel, setSelectedChannel] = useState('haulage');
   const [messages, setMessages] = useState<MessageItem[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
@@ -30,7 +64,7 @@ export function WhatsAppWebView() {
     if (!content) return;
 
     const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const timeStr = `${String(now.getHours()).padStart(TIME_PAD_LENGTH, '0')}:${String(now.getMinutes()).padStart(TIME_PAD_LENGTH, '0')}`;
 
     const newMsg: MessageItem = {
       id: `msg-${Date.now()}`,
@@ -70,23 +104,24 @@ export function WhatsAppWebView() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="truncate font-bold text-xs leading-none tracking-tight">
-                WhatsApp Operations Chat
+                WhatsApp Web • Portal Split View
               </h2>
-              <span className="flex items-center gap-1 rounded-full bg-amber-600/90 px-1.5 py-0.5 font-medium text-[10px] text-amber-50">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
-                Prototype Demo
+              <span className="flex items-center gap-1 rounded-full bg-emerald-900/70 px-1.5 py-0.5 font-medium text-[10px] text-emerald-50">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                Live Portal View
               </span>
             </div>
             <p className="mt-0.5 truncate text-[10.5px] text-emerald-100/90">
-              Simulated Field Dispatch • Non-Production •{' '}
-              {currentChannelObj
-                ? `${currentChannelObj.icon} ${currentChannelObj.name}`
-                : 'Online Dispatch Network'}
+              {activeTab === 'web'
+                ? 'Real web.whatsapp.com • Interact without leaving Arch Portal'
+                : currentChannelObj
+                  ? `${currentChannelObj.icon} ${currentChannelObj.name}`
+                  : 'Online Dispatch Network'}
             </p>
           </div>
         </div>
 
-        {/* View Mode Toggle: Operations Chat vs QR Linking vs Open Web */}
+        {/* View Mode Toggle: Live Web vs Operations Chat vs QR Linking */}
         <div className="flex shrink-0 items-center gap-1.5">
           <button
             type="button"
@@ -108,9 +143,22 @@ export function WhatsAppWebView() {
           <div className="flex items-center rounded-lg border border-emerald-700/60 bg-emerald-800/80 p-0.5">
             <button
               type="button"
+              onClick={() => setActiveTab('web')}
+              className={cn(
+                MODE_TAB_BTN_BASE_CLASS,
+                activeTab === 'web'
+                  ? 'bg-white text-emerald-800 shadow-card'
+                  : 'text-emerald-200 hover:text-white'
+              )}
+            >
+              <Globe className="h-3 w-3" />
+              <span>Live Web</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('chat')}
               className={cn(
-                'flex cursor-pointer items-center gap-1 rounded px-2 py-1 font-semibold text-[10.5px] transition-all',
+                MODE_TAB_BTN_BASE_CLASS,
                 activeTab === 'chat'
                   ? 'bg-white text-emerald-800 shadow-card'
                   : 'text-emerald-200 hover:text-white'
@@ -123,7 +171,7 @@ export function WhatsAppWebView() {
               type="button"
               onClick={() => setActiveTab('link')}
               className={cn(
-                'flex cursor-pointer items-center gap-1 rounded px-2 py-1 font-semibold text-[10.5px] transition-all',
+                MODE_TAB_BTN_BASE_CLASS,
                 activeTab === 'link'
                   ? 'bg-white text-emerald-800 shadow-card'
                   : 'text-emerald-200 hover:text-white'
@@ -135,6 +183,71 @@ export function WhatsAppWebView() {
           </div>
         </div>
       </div>
+
+      {/* ── Sub-view: Real WhatsApp Web Embedded Split View ── */}
+      {activeTab === 'web' && (
+        <div className="flex min-h-0 flex-1 flex-col bg-white">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-slate-200 border-b bg-[#f0f2f5] px-3 py-1.5 text-[11px] text-slate-700">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+              <span className="truncate font-semibold text-slate-800">
+                https://web.whatsapp.com
+              </span>
+              <span className="hidden text-slate-400 sm:inline">•</span>
+              <span className="hidden truncate text-slate-500 sm:inline">
+                In-Portal Live Workspace
+              </span>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setIframeKey((k) => k + 1)}
+                className="inline-flex cursor-pointer items-center gap-1 rounded border border-slate-300 bg-white px-2 py-0.5 font-medium text-[10.5px] text-slate-700 transition-colors hover:bg-slate-50"
+                title="Reload embedded WhatsApp Web view"
+              >
+                <RefreshCw className="h-3 w-3" />
+                <span>Reload</span>
+              </button>
+              <button
+                type="button"
+                data-testid="whatsapp-dock-companion-btn"
+                onClick={openDockedWhatsAppWindow}
+                className="inline-flex cursor-pointer items-center gap-1 rounded bg-[#008069] px-2.5 py-0.5 font-semibold text-[10.5px] text-white shadow-card transition-colors hover:bg-[#00705a]"
+                title="Dock live WhatsApp Web window over split pane if browser restricts cross-origin cookies"
+              >
+                <ExternalLink className="h-3 w-3" />
+                <span>Dock Live Companion</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="relative min-h-0 flex-1 bg-white">
+            <iframe
+              key={iframeKey}
+              data-testid="whatsapp-live-web-iframe"
+              src={WHATSAPP_WEB_URL}
+              title="WhatsApp Web Live View"
+              className="h-full w-full border-0 bg-white"
+              allow="camera; microphone; clipboard-read; clipboard-write; display-capture; notifications"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
+          <div className="flex shrink-0 items-center justify-between gap-2 border-slate-200 border-t bg-slate-50 px-3 py-1.5 text-[10.5px] text-slate-600">
+            <span className="truncate">
+              If your browser blocks cross-origin framing on web.whatsapp.com, click{' '}
+              <strong>Dock Live Companion</strong> or switch to <strong>Chat</strong>.
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('chat')}
+              className="shrink-0 cursor-pointer font-semibold text-[#008069] hover:underline"
+            >
+              In-Portal Chat →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Sub-view: Chat Dispatch ── */}
       {activeTab === 'chat' && (

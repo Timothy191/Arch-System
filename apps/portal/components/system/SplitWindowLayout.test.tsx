@@ -39,6 +39,10 @@ describe('SplitWindowLayout', () => {
 
     await waitFor(() => {
       expect(screen.getByText('WhatsApp')).toBeInTheDocument();
+      expect(screen.getByTestId('whatsapp-live-web-iframe')).toHaveAttribute(
+        'src',
+        'https://web.whatsapp.com/'
+      );
     });
   });
 

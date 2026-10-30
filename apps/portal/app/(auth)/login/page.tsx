@@ -1,8 +1,9 @@
 export const instant = false;
 
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { EveLogo } from '@repo/ui/EveLogo';
 import { Logo } from '@repo/ui/Logo';
-import { AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Cpu, Loader2, ShieldCheck } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -90,25 +91,52 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             className="gold-steel-border w-full animate-fade-up rounded-card border border-[var(--accent-blue)]/30 bg-arch-surface-secondary/80 p-8 shadow-window backdrop-blur-xl md:p-10"
           >
             {/* Branding */}
-            <div className="mb-6 flex flex-col items-center">
+            <div className="mb-5 flex flex-col items-center">
               <div className="gold-steel-border gold-steel-border-slim mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-arch-accent-blue/20 bg-arch-accent-blue/10 text-arch-accent-blue shadow-diffusion-sm">
                 <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-sm" />
               </div>
               <div className="text-center">
-                <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
+                <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-neutral-900 uppercase tracking-wider">
                   Arch Systems
                 </h1>
-                <p className="mt-0.5 font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
+                {/* Golden Separator under Arch Systems */}
+                <div
+                  data-testid="arch-systems-gold-separator"
+                  aria-hidden="true"
+                  className="mx-auto my-2 flex w-44 items-center justify-center gap-2"
+                >
+                  <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                  <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/30 shadow-diffusion-sm" />
+                  <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                </div>
+                <p className="font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
                   Arch OS v{APP_VERSION}
                 </p>
+              </div>
+              {/* Enterprise Security & Telemetry Readiness Strip */}
+              <div
+                data-testid="login-security-telemetry-pill"
+                className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-blue)]/30 bg-white/70 px-3 py-1 font-medium text-[10.5px] text-neutral-600 shadow-diffusion-sm"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span>TLS 1.3 Encrypted</span>
+                <span className="text-neutral-300">•</span>
+                <span>Zero-Trust RBAC</span>
+                <span className="text-neutral-300">•</span>
+                <span className="font-semibold text-[var(--accent-blue)]">SCADA Ready</span>
               </div>
             </div>
 
             {/* Header */}
-            <div className="mb-6">
-              <span className="select-none font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
-                Welcome Back
-              </span>
+            <div className="mb-5 border-[var(--accent-blue)]/15 border-b pb-4">
+              <div className="flex items-center justify-between">
+                <span className="select-none font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
+                  Welcome Back
+                </span>
+                <span className="rounded bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
+                  SSO / EMP-ID
+                </span>
+              </div>
               <h2 className="mt-0.5 font-semibold text-lg text-neutral-900 tracking-tight">
                 Sign in to your account
               </h2>
@@ -133,8 +161,28 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         {/* Footer */}
         <footer
           data-testid="login-footer"
-          className="mt-8 select-none space-y-2 text-center text-[var(--accent-blue)]"
+          className="mt-6 select-none space-y-2.5 text-center text-[var(--accent-blue)]"
         >
+          {/* Eve Branding & Intelligent Agentic Backend Notice */}
+          <div
+            data-testid="eve-agentic-backend-banner"
+            className="gold-steel-border gold-steel-border-slim mx-auto flex flex-col items-center gap-1 rounded-xl border border-[var(--accent-blue)]/25 bg-white/75 px-4 py-2.5 shadow-diffusion-sm backdrop-blur-md"
+          >
+            <div className="flex items-center justify-center gap-2 font-semibold text-[11px] text-neutral-800">
+              <span className="uppercase tracking-wider">Powered by</span>
+              <EveLogo className="h-3.5 w-auto text-[var(--accent-blue)]" />
+              <span className="text-neutral-300">•</span>
+              <span className="inline-flex items-center gap-1 text-[var(--accent-blue)]">
+                <Cpu className="h-3.5 w-3.5 shrink-0" />
+                <span>Fully Intelligent &amp; Agentic Backend</span>
+              </span>
+            </div>
+            <p className="text-[10.5px] text-neutral-600">
+              Agentic Principles Applied • Autonomous Multi-Agent Orchestration &amp; Self-Healing
+              Telemetry
+            </p>
+          </div>
+
           <div className="flex items-center justify-center gap-1.5 font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-widest">
             <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
             <span>Secure industrial access • Arch-Systems v{APP_VERSION}</span>

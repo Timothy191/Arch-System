@@ -2,7 +2,18 @@
 
 import { useLogin } from '@repo/auth/data-access';
 import { isValidPageRedirect } from '@repo/auth/utils';
-import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Loader2,
+  Lock,
+  Mail,
+  Shield,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -60,12 +71,17 @@ export function LoginForm() {
     <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-5">
       {/* Email Field */}
       <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
-        >
-          Email Address
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="email"
+            className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
+          >
+            Email Address
+          </label>
+          <span className="select-none font-medium text-[10.5px] text-neutral-400">
+            Email or Employee Code
+          </span>
+        </div>
         <div className={LOGIN_INPUT_WRAPPER_CLASS}>
           <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-neutral-500" />
           <input
@@ -88,9 +104,19 @@ export function LoginForm() {
               }
             }}
             placeholder="username@arch-systems.io"
-            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-4 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
+            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-9 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
             autoComplete="username"
           />
+          {employeeId.length > 0 && !loading && (
+            <button
+              type="button"
+              onClick={() => setEmployeeId('')}
+              aria-label="Clear email address"
+              className="absolute top-1/2 right-1.5 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-neutral-400 transition-colors hover:text-neutral-700"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -141,6 +167,19 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
+        <div className="flex items-center justify-between pt-0.5 text-[10.5px] text-neutral-500">
+          <span className="inline-flex items-center gap-1">
+            <CheckCircle2
+              className={
+                password.length > 0 ? 'h-3 w-3 text-emerald-600' : 'h-3 w-3 text-neutral-400'
+              }
+            />
+            <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
+          </span>
+          <span className="rounded border border-neutral-300/80 bg-white/60 px-1.5 py-0.2 font-mono text-[10px] text-neutral-600">
+            Enter ↵
+          </span>
+        </div>
         {passwordError && (
           <div
             className="mt-1 flex animate-fade-up items-center gap-1.5 text-red-600 text-xs"
@@ -189,6 +228,21 @@ export function LoginForm() {
           </>
         )}
       </button>
+
+      {/* Enterprise Hardware & Session Security Add-on Strip */}
+      <div
+        data-testid="enterprise-auth-addons"
+        className="grid grid-cols-2 gap-2 border-[var(--accent-blue)]/15 border-t pt-3.5"
+      >
+        <div className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600">
+          <KeyRound className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
+          <span className="truncate font-medium">C66 RFID / SSO Ready</span>
+        </div>
+        <div className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600">
+          <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+          <span className="truncate font-medium">Audit-Logged RBAC</span>
+        </div>
+      </div>
     </form>
   );
 }

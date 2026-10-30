@@ -86,10 +86,12 @@ describe('LoginForm', () => {
     expect(signInBtn.className).toContain('gold-steel-border');
   });
 
-  it('does not render the dead remember-me checkbox', () => {
+  it('does not render the dead remember-me checkbox and renders enterprise auth add-ons', () => {
     render(<LoginForm />);
 
     expect(screen.queryByLabelText(/remember this device/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
+    expect(screen.getByText(/C66 RFID \/ SSO Ready/i)).toBeInTheDocument();
   });
 
   it('accepts a short password and lets the server validate it', async () => {

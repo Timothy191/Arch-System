@@ -81,12 +81,17 @@ describe('LoginPage Server Component', () => {
     expect(loginFooter.className).toContain('text-[var(--accent-blue)]');
   });
 
-  it('renders the heading with the theme token class', async () => {
+  it('renders the heading with the theme token class and golden separator', async () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
     const heading = screen.getByRole('heading', { name: 'Arch Systems' });
     expect(heading).toHaveClass('text-[var(--text-heading)]');
+    expect(heading).toHaveClass('font-display');
+    expect(screen.getByTestId('arch-systems-gold-separator')).toBeInTheDocument();
+    expect(screen.getByTestId('eve-agentic-backend-banner')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'eve' })).toBeInTheDocument();
+    expect(screen.getByText(/Fully Intelligent & Agentic Backend/i)).toBeInTheDocument();
   });
 
   it('redirects authenticated user to /hub when no redirect param', async () => {

@@ -14,10 +14,10 @@ export async function proxy(request: NextRequest) {
 
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const cspHeader = `
-    frame-src 'self' http://localhost:* http://127.0.0.1:* https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app;
+    frame-src 'self' http://localhost:* http://127.0.0.1:* https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://web.whatsapp.com https://*.whatsapp.com;
     frame-ancestors 'none';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
-    connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com;
+    connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com https://web.whatsapp.com https://*.whatsapp.com wss://*.whatsapp.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

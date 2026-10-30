@@ -1,3 +1,15 @@
+## 2026-10-30T14:04:00+02:00: Login UX Upgrade, Golden Separator, Eve Agentic Backend Branding & Live WhatsApp Web Split View
+
+- **Phase 1 (Comprehension)**: Address 4 design feedback items on `/login` and the top navbar WhatsApp Web split-screen button: (1) examine `/login` and implement professional enterprise authentication upgrades on `login-card` and `LoginForm.tsx`; (2) modernize `<h1>Arch Systems</h1>` font and add a Golden Separator beneath `Arch Systems`; (3) add `eve` branding to `login-footer` and inform users that the backend is Fully Intelligent and Agentic Principles are applied; and (4) preserve the direct `web.whatsapp.com` shortcut while providing a live `https://web.whatsapp.com/` view inside the portal split-screen pane.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/(auth)/login/page.tsx`, `libs/features/auth/ui/src/LoginForm.tsx`, `packages/ui/src/components/EveLogo.tsx`, `packages/ui/src/components/MacSystemMenuDropdown.tsx`, `apps/portal/components/system/SplitWindowWhatsAppView.tsx`, and `apps/portal/proxy.ts`.
+- **Phase 3 (Design)**:
+  - Modernized `<h1>Arch Systems</h1>` with `font-display` uppercase styling and inserted `div[data-testid="arch-systems-gold-separator"]` directly beneath `Arch Systems`.
+  - Added `EveLogo` (`aria-label="eve"`) and `div[data-testid="eve-agentic-backend-banner"]` in `footer[data-testid="login-footer"]`.
+  - Added enterprise security/telemetry pills, input quick-clear, credential readiness indicator, and C66 RFID / SSO add-ons in `LoginForm.tsx` and `login/page.tsx`.
+  - Added `https://web.whatsapp.com` to `frame-src` and `connect-src` in `apps/portal/proxy.ts` and made `Live Web` (`activeTab === 'web'`, embedding `https://web.whatsapp.com/` with a 1-click Docked Companion Window sync and In-Portal Operations Chat switcher) the primary view in `SplitWindowWhatsAppView.tsx`.
+- **Phase 4 (Criticism)**: Updated unit tests in `login/page.test.tsx`, `LoginForm.test.tsx`, and `SplitWindowLayout.test.tsx`, extracted `MODE_TAB_BTN_BASE_CLASS` to satisfy `pnpm audit:tailwind`, and verified all gates via `pnpm agent:verify`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(auth)/login/page.tsx`, `apps/portal/app/(auth)/login/page.test.tsx`, `libs/features/auth/ui/src/LoginForm.tsx`, `apps/portal/features/auth/components/LoginForm.test.tsx`, `apps/portal/components/system/SplitWindowWhatsAppView.tsx`, `apps/portal/components/system/SplitWindowLayout.test.tsx`, and `apps/portal/proxy.ts`.
+
 ## 2026-10-30T13:50:00+02:00: Live Postgres Schema vs. Codebase Query Parity Audit & Remediation (0 Mismatches)
 
 - **Phase 1 (Comprehension)**: Test and identify any hidden runtime or schema bugs across the portal and background jobs/workflows that could fail at runtime despite passing TypeScript and mocked Jest unit tests, and remediate all identified issues to achieve 0 schema/query mismatches.

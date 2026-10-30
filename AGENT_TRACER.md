@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Login UX Upgrade, Golden Separator, Eve Agentic Backend Branding & Live WhatsApp Web Split View
+
+- **Action:**
+  - Modernized `<h1>Arch Systems</h1>` typography (`font-bold font-display text-2xl text-[var(--text-heading)] uppercase tracking-wider`) and added a metallic **Golden Separator** (`data-testid="arch-systems-gold-separator"`) directly beneath `Arch Systems` in [`apps/portal/app/(auth)/login/page.tsx`](<./apps/portal/app/(auth)/login/page.tsx>).
+  - Added the official lowercase **`eve`** brand logo (`@repo/ui/EveLogo`) and **Fully Intelligent & Agentic Backend** banner (`data-testid="eve-agentic-backend-banner"`) inside `footer[data-testid="login-footer"]` informing users that agentic principles, autonomous multi-agent orchestration, and self-healing telemetry are applied.
+  - Upgraded [`libs/features/auth/ui/src/LoginForm.tsx`](./libs/features/auth/ui/src/LoginForm.tsx) and `login-card` with enterprise authentication enhancements: Zero-Trust RBAC & TLS 1.3 telemetry pill, Email/Emp-ID format indicator & quick-clear button, password readiness status & `Enter ↵` shortcut hint, and `C66 RFID / SSO Ready` + `Audit-Logged RBAC` enterprise add-on strip.
+  - Upgraded [`apps/portal/components/system/SplitWindowWhatsAppView.tsx`](./apps/portal/components/system/SplitWindowWhatsAppView.tsx) and [`apps/portal/proxy.ts`](./apps/portal/proxy.ts) (`frame-src` / `connect-src`) so opening WhatsApp from the navbar opens `https://web.whatsapp.com/` while simultaneously presenting a live embedded `https://web.whatsapp.com/` split-screen view (`data-testid="whatsapp-live-web-iframe"`), 1-click Docked Companion Window sync, and In-Portal Operations Chat.
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Live Postgres Schema vs. Codebase Query Parity Audit & Remediation (0 Mismatches)
 
 - **Action:**
