@@ -59,7 +59,9 @@
     "scripts/sync-mcp-config.js",
     "scripts/test-langfuse-tracing.mjs",
     "scripts/validate-mcp-servers.js",
-    "scripts/video-generator/render-videos.mjs"
+    "scripts/video-generator/render-videos.mjs",
+    "scripts/verify-c66-database.mjs",
+    "scripts/seeds/seed-access-logs.mjs"
   ],
   "workspaces": {
     ".": {
@@ -127,7 +129,10 @@
         "app/actions.ts",
         "lib/actions/shift-closeout.ts",
         "components/control-room/C66MachineOperatorScanner.tsx",
-        "lib/control-room-shift-report.ts"
+        "lib/control-room-shift-report.ts",
+        "app/(departments)/[department]/reports/actions.ts",
+        "app/(departments)/access-control/actions/badges.ts",
+        "app/(departments)/access-control/actions/gates.ts"
       ]
     },
     "packages/theme": {
@@ -192,7 +197,8 @@
     "packages/contract": {
       "entry": ["src/index.ts", "scripts/**/*.ts"],
       "project": ["src/**/*.ts", "scripts/**/*.ts"],
-      "ignoreDependencies": ["pg"]
+      "ignoreDependencies": ["pg"],
+      "ignore": ["src/schemas/machine-types.schema.ts"]
     },
     "packages/agents": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
@@ -213,5 +219,6 @@
     "duplicates": "warn",
     "unresolved": "warn",
     "catalog": "warn"
-  }
+  },
+  "ignoreExportsUsedInFile": true
 }

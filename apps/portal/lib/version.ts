@@ -22,6 +22,8 @@ export const GIT_COMMIT_FULL: string =
 
 export const BUILD_TIMESTAMP: string = generated.BUILD_TIMESTAMP || new Date().toISOString();
 
+export const GIT_BRANCH: string = generated.GIT_BRANCH || 'main';
+
 export const RELEASE_NAME: string =
   generated.RELEASE_NAME || `Arch OS v${APP_VERSION} // Industrial Command`;
 

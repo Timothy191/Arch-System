@@ -272,9 +272,9 @@ export const COAL_MATERIAL_SUBCATEGORIES = [
 
 export const WASTE_MATERIAL_SUBCATEGORIES = ['Dyke', 'Overburden', 'Interburden', 'Other'] as const;
 
-export type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
-export type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
-export type MaterialSubCategory = string;
+type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
+type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
+type MaterialSubCategory = string;
 
 export function getMaterialSubCategories(
   category: HourlyMaterial,

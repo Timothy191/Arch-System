@@ -61,6 +61,7 @@ export {
   acquireRefreshLease,
   claimIdempotency,
   completeIdempotency,
+  forceReleaseLock,
   type IdempotencyClaim,
   type IdempotencyCompletion,
   type LockHandle,
@@ -163,6 +164,7 @@ export {
   claimIdle,
   consumeStream,
   type DeadLetterInput,
+  destroyConsumerGroup,
   ensureConsumerGroup,
   type GroupRef,
   moveToDeadLetter,
@@ -174,6 +176,7 @@ export {
   readNew,
   readPending,
   readStream,
+  readStreamJson,
   streamLength,
 } from './streams';
 export { shouldEarlyExpire, type XFetchWrapper } from './xfetch';

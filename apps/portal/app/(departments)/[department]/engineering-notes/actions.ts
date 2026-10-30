@@ -75,7 +75,7 @@ const bookOutCarryOverBreakdownSchema = z.object({
   repairNotes: z.string().max(2000).optional(),
 });
 
-export type SaveMachineOverviewRowInput = z.infer<typeof saveMachineOverviewRowSchema>;
+type SaveMachineOverviewRowInput = z.infer<typeof saveMachineOverviewRowSchema>;
 
 export async function createEngineeringNote(payload: unknown) {
   const supabase = await createServerSupabaseClient();

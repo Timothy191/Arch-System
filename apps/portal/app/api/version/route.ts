@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   APP_VERSION,
   BUILD_TIMESTAMP,
+  GIT_BRANCH,
   GIT_COMMIT_FULL,
   GIT_COMMIT_SHA,
   RELEASE_NAME,
@@ -14,6 +15,7 @@ export async function GET() {
       status: 'nominal',
       name: 'Arch-System Portal',
       version: APP_VERSION,
+      branch: GIT_BRANCH,
       commit: GIT_COMMIT_SHA,
       commitFull: GIT_COMMIT_FULL,
       buildTimestamp: BUILD_TIMESTAMP,
