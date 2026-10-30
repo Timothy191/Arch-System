@@ -16,6 +16,7 @@ import { getDepartmentContext } from '~/lib/dept-context';
 import { ControlRoomQuickNav } from '../control-room/components/ControlRoomQuickNav';
 import { ControlRoomSummaryGridClient } from './ControlRoomSummaryGridClient';
 import { NonControlRoomSummaryGridClient } from './NonControlRoomSummaryGridClient';
+import ReportsPage from './reports/page';
 
 // AGENT-TRACE: ControlRoomWidgets consolidated dynamic island — co-locates all control-room
 // specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage) to prevent
@@ -47,10 +48,22 @@ function PlantInventoryDashboard({ today }: { today: string }) {
 
 export default async function DepartmentDashboard({
   params,
+  searchParams,
 }: {
   params: Promise<{ department: string }>;
+  searchParams?: Promise<{ from?: string; to?: string; tab?: string }>;
 }) {
   const { department: deptSlug } = await params;
+
+  if (deptSlug === 'availability-utilization') {
+    return (
+      <ReportsPage
+        params={params}
+        searchParams={searchParams ?? Promise.resolve({ tab: 'machine-30d' })}
+      />
+    );
+  }
+
   const { dept, deptId, today } = await getDepartmentContext({
     department: deptSlug,
   });

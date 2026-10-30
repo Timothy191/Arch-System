@@ -32,6 +32,11 @@ jest.mock('~/features/departments/components/production/ProductionDashboard', ()
   MonthlyProductionTargetBanner: () => <div data-testid="monthly-target-banner" />,
 }));
 
+jest.mock('./reports/page', () => ({
+  __esModule: true,
+  default: () => <div data-testid="availability-utilization-reports-page" />,
+}));
+
 jest.mock('./ControlRoomSummaryGridClient', () => ({
   ControlRoomSummaryGridClient: () => <div data-testid="control-room-summary" />,
 }));
@@ -79,6 +84,17 @@ describe('DepartmentDashboard ([department]/page.tsx)', () => {
       expect(screen.getAllByText('Primary DMC Module CR-101').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Secondary Sizing Screen SC-201').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Tailings Thickener TH-501').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('when department is availability-utilization', () => {
+    it('directly renders ReportsPage configured for Availability & Utilization', async () => {
+      const jsx = await DepartmentDashboard({
+        params: Promise.resolve({ department: 'availability-utilization' }),
+      });
+      render(jsx);
+
+      expect(screen.getByTestId('availability-utilization-reports-page')).toBeInTheDocument();
     });
   });
 });

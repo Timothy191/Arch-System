@@ -104,4 +104,15 @@ describe('DEPARTMENTS registry', () => {
       { name: 'tools', label: 'History of Used' },
     ]);
   });
+
+  it('returns dedicated Availability & Utilization tabs', () => {
+    const tabs = getDepartmentTabs('availability-utilization');
+    expect(tabs.map((t) => t.label)).toEqual([
+      '30-Day Activity',
+      'Monthly Summary',
+      'Shift View',
+      'PDF Report',
+      'Archived',
+    ]);
+  });
 });

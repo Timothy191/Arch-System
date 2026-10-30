@@ -1,3 +1,16 @@
+## 2026-10-30T08:48:00+02:00: Dedicated Availability & Utilization Department Route (`/availability-utilization`)
+
+- **Phase 1 (Comprehension)**: Transition Availability & Utilization from being nested under `/control-room/reports` to a dedicated first-class department (`/availability-utilization`). Ensure clicking the Hub module or navigating directly to `/availability-utilization` presents the dedicated department layout and tabs with the 30-Day Activity Ledger as its primary dashboard, backed by production fleet queries.
+- **Phase 2 (Evidence)**: Investigated `apps/portal/app/hub/page.tsx`, `libs/features/departments/data-access/src/departments.ts`, `apps/portal/server/proxy.ts`, `apps/portal/lib/dept-registry.ts`, and `apps/portal/app/(departments)/[department]/page.tsx`.
+- **Phase 3 (Design)**:
+  - Registered `availability-utilization` department in `libs/features/departments/data-access/src/departments.ts` with dedicated tabs (`30-Day Activity`, `Monthly Summary`, `Shift View`, `PDF Report`, `Archived`).
+  - Added `availability-utilization` to `DEPARTMENT_ROUTES` and URL redirect allowlist in `apps/portal/server/proxy.ts`.
+  - Added `availability-utilization` to `PRODUCTION_FALLBACK_SLUGS` in `apps/portal/lib/dept-registry.ts` to seamlessly resolve database queries to the production fleet context.
+  - Updated `apps/portal/app/hub/page.tsx` so the Availability & Utilization card links directly to `/availability-utilization` rather than `/control-room/reports`.
+  - Routed `/availability-utilization` directly to `ReportsPage` defaulting to the `machine-30d` tab in `apps/portal/app/(departments)/[department]/page.tsx`.
+- **Phase 4 (Criticism)**: Unit tests added and passing in `apps/portal/app/(departments)/[department]/page.test.tsx` and `libs/features/departments/data-access/src/departments.test.ts`. Full 27-gate verification passed (`pnpm agent:verify` 100% pass) and full production build succeeded (`pnpm build`).
+- **Phase 5 (Contract)**: Modified `libs/features/departments/data-access/src/{departments.ts,departments.test.ts}`, `apps/portal/{server/proxy.ts,lib/dept-registry.ts,app/hub/page.tsx,app/(departments)/[department]/page.tsx,app/(departments)/[department]/page.test.tsx,app/(departments)/[department]/reports/page.tsx,jest.config.cjs}`.
+
 ## 2026-10-30T06:24:00+02:00: Executive Recommendations Implementation (Migration 213, Multi-Month Trend Chart, Boardroom Print View & Predictive Maintenance)
 
 - **Phase 1 (Comprehension)**: Implement the 4 approved recommendations from the implementation plan: (1) Cloud sync for monthly sealed archives, (2) Executive multi-month comparative fleet trend graph, (3) Predictive maintenance & proactive alerts (MTBF, MTTR, 250h/500h service interval proximity), and (4) "Print-to-Boardroom" executive one-pager view.

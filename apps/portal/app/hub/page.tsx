@@ -192,7 +192,7 @@ export default async function HubPage() {
   }
 
   // AGENT-TRACE: Unhide Plant & Processing ('plant-processing'), Plant Inventory ('plant-inventory'),
-  // System Overview ('overview'), Database ('database'), and Availability & Utilization ('reports')
+  // System Overview ('overview'), Database ('database'), and Availability & Utilization ('availability-utilization')
   // Core Operational Modules for executive/admin roles alongside DB-assigned departments.
   // Department-restricted operators only see the departments explicitly assigned in accessibleDeptIds.
   if (canSeeExecutive) {
@@ -201,33 +201,12 @@ export default async function HubPage() {
       'plant-inventory',
       'overview',
       'database',
+      'availability-utilization',
     ] as const) {
       const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
       if (sysDept && !rawDepartments.some((d) => d.name === sysModuleName)) {
         rawDepartments = [...rawDepartments, sysDept];
       }
-    }
-
-    if (!rawDepartments.some((d) => d.name === 'reports')) {
-      const availabilityModule: Department = {
-        name: 'reports',
-        displayName: 'Availability & Utilization',
-        route: '/control-room/reports',
-        icon: 'Activity',
-        description:
-          'Fleet mechanical availability, equipment utilization & shift OEE analytics reports',
-        color: 'blue',
-        type: 'control_room',
-        status: 'active',
-        gridSpan: 'md:col-span-1 xl:col-span-1',
-        stats: liveMetrics.engineering?.stats || { label: 'Utilization', value: '94.6%' },
-        trend: liveMetrics.engineering?.trend || [91, 92, 93, 92, 94, 95, 94, 96],
-        actions: [
-          { label: 'View Report', href: '/control-room/reports' },
-          { label: 'Shift Closeout', href: '/control-room/shift-closeout' },
-        ],
-      };
-      rawDepartments = [...rawDepartments, availabilityModule];
     }
   }
 
@@ -240,9 +219,9 @@ export default async function HubPage() {
     'plant-inventory',
     'engineering',
     'control-room',
+    'availability-utilization',
     'overview',
     'database',
-    'reports',
   ];
 
   rawDepartments = [...rawDepartments].sort((a, b) => {

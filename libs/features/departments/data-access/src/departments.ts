@@ -170,6 +170,26 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    name: 'availability-utilization',
+    displayName: 'Availability & Utilization',
+    route: '/availability-utilization',
+    icon: 'Activity',
+    description:
+      'Fleet mechanical availability, equipment utilization, 30-day activity ledgers & monthly SMR summaries',
+    color: 'blue',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Availability', value: '94.6%' },
+    trend: [91, 92, 93, 92, 94, 95, 94, 96],
+    actions: [
+      { label: 'Activity Ledger', href: '/availability-utilization?tab=machine-30d' },
+      { label: 'Monthly Summary', href: '/availability-utilization?tab=monthly-summary' },
+      { label: 'Shift View', href: '/availability-utilization?tab=shift' },
+      { label: 'PDF Report', href: '/availability-utilization?tab=pdf-report' },
+    ],
+  },
+  {
     name: 'overview',
     displayName: 'System Overview',
     route: '/overview',
@@ -335,6 +355,17 @@ export const PLANT_INVENTORY_TABS = [
   { name: 'tools', label: 'History of Used', icon: 'History' },
 ] as const;
 
+/**
+ * Availability & Utilization specific tabs - 30-Day Activity Ledger, Monthly Summary, Shift View, PDF Report & Archives
+ */
+export const AVAILABILITY_UTILIZATION_TABS = [
+  { name: 'reports?tab=machine-30d', label: '30-Day Activity', icon: 'BarChart2' },
+  { name: 'reports?tab=monthly-summary', label: 'Monthly Summary', icon: 'BarChart3' },
+  { name: 'reports?tab=shift', label: 'Shift View', icon: 'Clock' },
+  { name: 'reports?tab=pdf-report', label: 'PDF Report', icon: 'FileText' },
+  { name: 'reports?tab=archived', label: 'Archived', icon: 'History' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -346,6 +377,7 @@ const DEPARTMENT_TABS_MAP: Record<
   database: DATABASE_TABS,
   'plant-processing': PLANT_PROCESSING_TABS,
   'plant-inventory': PLANT_INVENTORY_TABS,
+  'availability-utilization': AVAILABILITY_UTILIZATION_TABS,
 };
 
 /**

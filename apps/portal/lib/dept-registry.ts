@@ -17,6 +17,7 @@ const PRODUCTION_FALLBACK_SLUGS = new Set([
   'plant-inventory',
   'database',
   'overview',
+  'availability-utilization',
 ]);
 
 export async function getDeptId(slug: string): Promise<string | null> {

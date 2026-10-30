@@ -43,7 +43,9 @@ export default async function ReportsPage({
     tabParam === 'monthly-summary' ||
     tabParam === 'archived'
       ? tabParam
-      : 'shift';
+      : deptSlug === 'availability-utilization'
+        ? 'machine-30d'
+        : 'shift';
   const { dept, deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });

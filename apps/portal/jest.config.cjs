@@ -28,6 +28,7 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(.*@t3-oss|@formkit)/)'],
   moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
     '^@formkit/auto-animate/react$':
       '<rootDir>/../../node_modules/.pnpm/@formkit+auto-animate@0.8.4/node_modules/@formkit/auto-animate/react/index.mjs',
     '^@vercel/speed-insights/next$':
