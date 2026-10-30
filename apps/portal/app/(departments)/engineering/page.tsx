@@ -40,7 +40,7 @@ async function getEngineeringHubData(deptId: string) {
         .gte('updated_at', new Date(Date.now() - 86400000).toISOString()),
       db
         .from('breakdowns')
-        .select('id, machine_name, reason, priority, created_at')
+        .select('id, machine_name, reason, status, created_at')
         .eq('department_id', deptId)
         .eq('status', 'active')
         .is('deleted_at', null)
@@ -51,7 +51,14 @@ async function getEngineeringHubData(deptId: string) {
   return {
     activeBreakdowns: activeBreakdowns ?? 0,
     resolvedToday: resolvedToday ?? 0,
-    recentBreakdowns: (recentBreakdowns ?? []) as BreakdownSummary[],
+    recentBreakdowns: (recentBreakdowns ?? []).map((b) => ({
+      id: b.id,
+      machine_name: b.machine_name,
+      reason: b.reason,
+      priority:
+        (b as { priority?: string }).priority ?? (b.status === 'active' ? 'high' : 'normal'),
+      created_at: b.created_at,
+    })) as BreakdownSummary[],
   };
 }
 

@@ -39,13 +39,13 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
       const [notesRes, breakdownsRes, shiftReportsRes, machineOpsRes] = await Promise.all([
         supabase
           .from('engineering_notes')
-          .select('id, note_text, shift, created_at, machine:machines(name)')
+          .select('id, description, shift_type, created_at, machine:machines(name)')
           .eq('department_id', departmentId)
           .order('created_at', { ascending: false })
           .limit(6),
         supabase
           .from('breakdowns')
-          .select('id, description, category, status, created_at, equipment_name')
+          .select('id, reason, machine_type, status, created_at, machine_name, fleet_id')
           .order('created_at', { ascending: false })
           .limit(6),
         supabase
@@ -57,7 +57,7 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
         supabase
           .from('machine_operations')
           .select(
-            'id, shift, hours_worked, created_at, machine:machines(name), operator:operators(full_name)'
+            'id, shift_type, hours_worked, created_at, machine:machines(name), operator:operators(full_name)'
           )
           .eq('department_id', departmentId)
           .eq('shift_date', today)
@@ -73,8 +73,8 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
         items.push({
           id: `note-${note.id}`,
           type: 'note',
-          text: `${prefix}${note.note_text}`,
-          author: `Engineering (${(note.shift || 'day').toUpperCase()})`,
+          text: `${prefix}${note.description}`,
+          author: `Engineering (${(note.shift_type || 'day').toUpperCase()})`,
           time: formatEventTime(note.created_at),
           timestamp: note.created_at ? new Date(note.created_at).getTime() : 0,
         });
@@ -84,7 +84,7 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
         items.push({
           id: `bd-${bd.id}`,
           type: 'action',
-          text: `Breakdown (${bd.status || 'open'}): ${bd.equipment_name || 'Fleet Unit'} — ${bd.description || bd.category || 'Maintenance event'}`,
+          text: `Breakdown (${bd.status || 'open'}): ${bd.machine_name || bd.fleet_id || 'Fleet Unit'} — ${bd.reason || bd.machine_type || 'Maintenance event'}`,
           author: 'Breakdown Alert',
           time: formatEventTime(bd.created_at),
           timestamp: bd.created_at ? new Date(bd.created_at).getTime() : 0,
@@ -110,7 +110,7 @@ export function ControlRoomActivityFeed({ departmentId }: { departmentId: string
         items.push({
           id: `op-${op.id}`,
           type: 'system',
-          text: `${machineObj?.name || 'Machine'} logged ${(op.hours_worked ?? 0).toFixed(1)}h SMR on ${(op.shift || 'day').toUpperCase()} shift.`,
+          text: `${machineObj?.name || 'Machine'} logged ${(op.hours_worked ?? 0).toFixed(1)}h SMR on ${(op.shift_type || 'day').toUpperCase()} shift.`,
           author: operatorObj?.full_name || 'Shift Dispatch',
           time: formatEventTime(op.created_at),
           timestamp: op.created_at ? new Date(op.created_at).getTime() : 0,

@@ -178,7 +178,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       induction_expiry,
       medical_expiry,
       status,
-      photo_path,
+      photo_url,
       departments:department_id(display_name)
     `
     )
@@ -232,7 +232,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
     personnelList = (fallbackRes.data ?? []).map((p) => ({
       ...p,
       area: null,
-      photo_path: null,
+      photo_url: null,
     }));
   }
 
@@ -271,7 +271,9 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
   return personnelList.map((p) => {
     const badge = badgeMap.get(p.id);
     const deptRecord = p.departments as unknown as { display_name: string } | null;
-    const rawPhotoPath = (p as Record<string, unknown>).photo_path as string | null | undefined;
+    const rawPhotoUrl =
+      ((p as Record<string, unknown>).photo_url as string | null | undefined) ??
+      ((p as Record<string, unknown>).photo_path as string | null | undefined);
     return {
       id: p.id,
       emp_code: p.emp_code,
@@ -288,7 +290,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       qr_code: badge?.qr_code ?? null,
       rfid_code: badge?.rfid_code ?? null,
       has_card: !!badge,
-      photo_url: rawPhotoPath ?? null,
+      photo_url: rawPhotoUrl ?? null,
     };
   });
 }
@@ -328,7 +330,7 @@ export async function upsertEmployeeForCardPrinting(
     status: input.status || 'Active',
     induction_expiry: input.induction_expiry || null,
     medical_expiry: input.medical_expiry || null,
-    photo_path: input.photo_url || null,
+    photo_url: input.photo_url || null,
   };
 
   if (personnelId) {

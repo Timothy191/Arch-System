@@ -69,19 +69,6 @@ export default async function DrillingReportsPage({
         production_delays_minutes,
         external_delays_minutes,
         engineering_delays_minutes,
-        delay_blasting,
-        delay_no_operator,
-        delay_natural,
-        delay_tramming,
-        delay_get,
-        delay_mechanical,
-        delay_electrical,
-        delay_hydraulic,
-        delay_scheduled_maintenance,
-        delay_unscheduled_maintenance,
-        delay_supply,
-        delay_power,
-        delay_other,
         status,
         machines!inner(name)
       `
@@ -116,29 +103,12 @@ export default async function DrillingReportsPage({
     const shift = op.shift_type || 'day';
     const key = `${op.machine_id}:${op.operation_date}:${shift}`;
 
-    const prodSub =
-      (Number(op.delay_blasting) || 0) +
-      (Number(op.delay_no_operator) || 0) +
-      (Number(op.delay_natural) || 0) +
-      (Number(op.delay_tramming) || 0) +
-      (Number(op.delay_get) || 0);
-    const nonProdSub =
-      (Number(op.delay_supply) || 0) +
-      (Number(op.delay_power) || 0) +
-      (Number(op.delay_other) || 0);
-    const engSub =
-      (Number(op.delay_mechanical) || 0) +
-      (Number(op.delay_electrical) || 0) +
-      (Number(op.delay_hydraulic) || 0) +
-      (Number(op.delay_scheduled_maintenance) || 0) +
-      (Number(op.delay_unscheduled_maintenance) || 0);
-
     const production_delays =
-      Number(op.production_delays_minutes) || Number(op.production_delays) || prodSub || 0;
+      Number(op.production_delays_minutes) || Number(op.production_delays) || 0;
     const non_productional_delays =
-      Number(op.external_delays_minutes) || Number(op.non_productional_delays) || nonProdSub || 0;
+      Number(op.external_delays_minutes) || Number(op.non_productional_delays) || 0;
     const engineering_delays =
-      Number(op.engineering_delays_minutes) || Number(op.engineering_delays) || engSub || 0;
+      Number(op.engineering_delays_minutes) || Number(op.engineering_delays) || 0;
 
     compiledMap.set(key, {
       id: op.id,

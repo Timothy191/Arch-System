@@ -4,6 +4,16 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Live Postgres Schema vs. Codebase Query Parity Audit & Remediation (0 Mismatches)
+
+- **Action:**
+  - Executed an automated AST/regex scanner comparing every `.from('table').select(...)` and filter/order clause across `apps/portal` and `libs/` against live PostgreSQL `information_schema.columns` (`public` schema), identifying and resolving all hidden runtime query/schema mismatches:
+  - Fixed RLS policies in [`packages/database/migrations/213_monthly_machine_snapshots.sql`](./packages/database/migrations/213_monthly_machine_snapshots.sql) to use `e.auth_id = (SELECT auth.uid())` and `e.accessible_departments` instead of the non-existent `public.employee_departments` table, applied migration 213 to live Supabase PostgreSQL, and synchronized 161 `public.smr_readings` baseline rows with `MAX(machine_operations.end_smu)`.
+  - Aligned `smr_readings` queries (`meter_id, reading`, ordered by `reading_at`) across [`engineering-notes/page.tsx`](<./apps/portal/app/(departments)/[department]/engineering-notes/page.tsx>), [`machine-operations/page.tsx`](<./apps/portal/app/(departments)/[department]/machine-operations/page.tsx>), [`end-smr/page.tsx`](<./apps/portal/app/(departments)/[department]/end-smr/page.tsx>), [`shift-compilation/page.tsx`](<./apps/portal/app/(departments)/[department]/shift-compilation/page.tsx>), and [`control-room/shift-closeout/page.tsx`](<./apps/portal/app/(departments)/control-room/shift-closeout/page.tsx>).
+  - Updated [`useDashboardQueries.ts`](./apps/portal/hooks/useDashboardQueries.ts) to query canonical `hourly_loads`, [`app/api/departments/[departmentId]/fleet/route.ts`](./apps/portal/app/api/departments/[departmentId]/fleet/route.ts) to project `fleet_code, vehicle_type, status` with backward-compatible field aliases, [`access-control/print-cards/actions.ts`](<./apps/portal/app/(departments)/access-control/print-cards/actions.ts>) to project `photo_url` and `queued_at` directly, and [`MachineOperationsForm.tsx`](<./apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>) to clamp restored `localStorage` draft `startSmu` to `selectedMachine.latest_smu` and upsert existing `(department_id, machine_id, shift_date, shift_type)` shift rows.
+  - Aligned background Inngest jobs, workflows, and dashboard feeds (`daily-pdf-report-generation.ts`, `shift-rollover-notification.ts`, `report-generation.ts`, `orphaned-record-detection.ts`, `autonomous-scada-simulation.ts`, `shift-integrity.ts`, `shift-report-compiler.ts`, `user-signup.ts`, `equipment-maintenance.ts`, `drilling/reports/page.tsx`, `engineering/page.tsx`, `predictive-maintenance/route.ts`, `AlertPanel.tsx`, `ControlRoomActivityFeed.tsx`) with canonical live database columns.
+- **Verification:** Live schema-vs-query scanner (`0 bad select columns, 0 missing filter/order columns`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Availability & Utilization KPI Strip Spacing & Control Room Monotonic SMR Odometer Constraints
 
 - **Action:**

@@ -136,13 +136,13 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           supabase.from('machines').select('id, bin_factor').eq('active', true),
           supabase
             .from('hourly_loads')
-            .select('total_loads, material_type, shift, load_date, machine_id')
+            .select('total_loads, material_type, shift_type, load_date, machine_id')
             .eq('department_id', departmentId)
             .gte('load_date', monthStart)
             .lte('load_date', today),
           supabase
             .from('machine_operations')
-            .select('hours_worked, shift, shift_date')
+            .select('hours_worked, shift_type, shift_date')
             .eq('department_id', departmentId)
             .gte('shift_date', monthStart)
             .lte('shift_date', today),
@@ -158,12 +158,14 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
         const monthLoads = (monthLoadsRes.data ?? []) as Array<{
           total_loads: number | null;
           material_type: string | null;
+          shift_type?: string | null;
           shift?: string | null;
           load_date?: string | null;
           machine_id?: string | null;
         }>;
         const monthOps = (monthOpsRes.data ?? []) as Array<{
           hours_worked: number | null;
+          shift_type?: string | null;
           shift?: string | null;
           shift_date?: string | null;
         }>;
@@ -188,7 +190,8 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           const isDaily = !r.load_date || r.load_date === today;
           if (!isDaily) continue;
           accumulateLoad(dailyAcc, loadEntry);
-          const isShift = !r.shift || r.shift === currentShift;
+          const rowShift = r.shift_type || r.shift;
+          const isShift = !rowShift || rowShift === currentShift;
           if (isShift) {
             accumulateLoad(shiftAcc, loadEntry);
           }
@@ -202,7 +205,8 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
           const isDaily = !op.shift_date || op.shift_date === today;
           if (!isDaily) continue;
           dailyAcc.smrHours += hours;
-          const isShift = !op.shift || op.shift === currentShift;
+          const opShift = op.shift_type || op.shift;
+          const isShift = !opShift || opShift === currentShift;
           if (isShift) {
             shiftAcc.smrHours += hours;
           }

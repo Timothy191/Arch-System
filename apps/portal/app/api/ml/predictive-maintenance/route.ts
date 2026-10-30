@@ -53,13 +53,13 @@ export async function GET() {
     // Fetch details of those high risk machines
     const { data: machines } = await supabase
       .from('machines')
-      .select('id, name, type, active')
+      .select('id, name, machine_type, active')
       .in('id', highRiskMachineIds);
 
     const predictions = (machines || []).map((m) => ({
       machine_id: m.id,
       machine_name: m.name,
-      type: m.type,
+      type: m.machine_type ?? (m as { type?: string }).type,
       risk_level: 'HIGH',
       confidence: 0.85,
       reason: `Machine has experienced ${machineBreakdownCount[m.id]} breakdowns in the last 30 days. Model (mock) predicts an 85% chance of critical failure within 72 hours.`,
