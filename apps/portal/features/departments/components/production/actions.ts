@@ -478,30 +478,17 @@ export async function getProductionDepartmentData(
       };
     });
 
-  // Performance Optimization: Replaced 8 separate array iterations (.reduce) with a single O(N) pass loop
-  // to avoid intermediate overhead and redundant array traversals when computing monthly totals.
-  let coalTonnes = 0;
-  let wasteTonnes = 0;
-  let haulTruckLoads = 0;
-  let haulTruckBcm = 0;
-  let excavatorBcm = 0;
-  let dozerPushBcm = 0;
-  let totalBcm = 0;
-  let totalFleetOperatingHours = 0;
-
-  for (const r of dailyRows) {
-    coalTonnes += r.totalCoalTonnes;
-    wasteTonnes += r.totalWasteTonnes;
-    haulTruckLoads += r.haulTruckLoads;
-    haulTruckBcm += r.haulTruckBcm;
-    excavatorBcm += r.excavatorBcm;
-    dozerPushBcm += r.dozerPushBcm;
-    totalBcm += r.totalBcm;
-    totalFleetOperatingHours += r.fleetOperatingHours;
-  }
-
+  const coalTonnes = dailyRows.reduce((s, r) => s + r.totalCoalTonnes, 0);
+  const wasteTonnes = dailyRows.reduce((s, r) => s + r.totalWasteTonnes, 0);
   const totalTonnes = coalTonnes + wasteTonnes;
-  const fleetOperatingHours = Number(totalFleetOperatingHours.toFixed(1));
+  const haulTruckLoads = dailyRows.reduce((s, r) => s + r.haulTruckLoads, 0);
+  const haulTruckBcm = dailyRows.reduce((s, r) => s + r.haulTruckBcm, 0);
+  const excavatorBcm = dailyRows.reduce((s, r) => s + r.excavatorBcm, 0);
+  const dozerPushBcm = dailyRows.reduce((s, r) => s + r.dozerPushBcm, 0);
+  const totalBcm = dailyRows.reduce((s, r) => s + r.totalBcm, 0);
+  const fleetOperatingHours = Number(
+    dailyRows.reduce((s, r) => s + r.fleetOperatingHours, 0).toFixed(1)
+  );
   const stripRatio = coalTonnes > 0 ? Number((wasteTonnes / coalTonnes).toFixed(2)) : 0;
 
   const expectedTonnesFromBcm = Math.round(totalBcm * 1.95);
