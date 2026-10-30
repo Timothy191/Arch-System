@@ -437,8 +437,116 @@ function trimDelaysToMaxBudget(
   return nextDelays;
 }
 
+export interface SmrOdometerValidationParams {
+  startSmr: number | null;
+  stopSmr: number | null;
+  minAllowedStartSmr?: number | null;
+  maxAllowedShiftHours?: number;
+}
+
+export interface SmrOdometerValidationResult {
+  valid: boolean;
+  hasInversion: boolean;
+  hasStopBelowStart: boolean;
+  hasExcessiveShiftHours: boolean;
+  startSmrError: string | null;
+  stopSmrError: string | null;
+  error: string | null;
+}
+
+const SMR_EPSILON = 0.01;
+const DECIMAL_PLACES_ONE = 1;
+const DECIMAL_PLACES_TWO = 2;
+
 /**
- * Enforces the 12-hour shift cap when Start SMR or Stop SMR changes:
+ * Validates Start SMR and Stop SMR against physical equipment hour-meter (odometer) constraints:
+ * 1. Start SMR cannot be less than the machine's current/previous closing SMR (`minAllowedStartSmr`).
+ * 2. Stop SMR cannot be less than Start SMR (or `minAllowedStartSmr`).
+ * 3. Total shift hours (`stopSmr - startSmr`) cannot exceed `maxAllowedShiftHours`.
+ */
+export function validateSmrOdometerEntry(
+  params: SmrOdometerValidationParams
+): SmrOdometerValidationResult {
+  const {
+    startSmr,
+    stopSmr,
+    minAllowedStartSmr = null,
+    maxAllowedShiftHours = MAX_SHIFT_HOURS,
+  } = params;
+
+  let startSmrError: string | null = null;
+  let stopSmrError: string | null = null;
+  let hasInversion = false;
+  let hasStopBelowStart = false;
+  let hasExcessiveShiftHours = false;
+
+  if (startSmr !== null && Number.isFinite(startSmr)) {
+    if (startSmr < 0) {
+      hasInversion = true;
+      startSmrError = 'Start SMR cannot be negative.';
+    } else if (
+      minAllowedStartSmr !== null &&
+      Number.isFinite(minAllowedStartSmr) &&
+      minAllowedStartSmr > 0 &&
+      startSmr < minAllowedStartSmr - SMR_EPSILON
+    ) {
+      hasInversion = true;
+      startSmrError = `Impossible SMR: Start SMR (${startSmr.toFixed(DECIMAL_PLACES_ONE)}h) cannot be less than machine's current SMR (${minAllowedStartSmr.toFixed(DECIMAL_PLACES_ONE)}h). Equipment hour meters cannot run backward.`;
+    }
+  }
+
+  const effectiveFloorSmr =
+    startSmr !== null && Number.isFinite(startSmr)
+      ? Math.max(startSmr, minAllowedStartSmr ?? 0)
+      : (minAllowedStartSmr ?? 0);
+
+  if (stopSmr !== null && Number.isFinite(stopSmr)) {
+    if (stopSmr < 0) {
+      hasInversion = true;
+      hasStopBelowStart = true;
+      stopSmrError = 'Stop SMR cannot be negative.';
+    } else if (startSmr !== null && Number.isFinite(startSmr) && stopSmr < startSmr - SMR_EPSILON) {
+      hasInversion = true;
+      hasStopBelowStart = true;
+      stopSmrError = `Impossible SMR: Stop SMR (${stopSmr.toFixed(DECIMAL_PLACES_ONE)}h) cannot be less than Start SMR (${startSmr.toFixed(DECIMAL_PLACES_ONE)}h). Equipment hour meters cannot run backward.`;
+    } else if (
+      minAllowedStartSmr !== null &&
+      Number.isFinite(minAllowedStartSmr) &&
+      minAllowedStartSmr > 0 &&
+      stopSmr < minAllowedStartSmr - SMR_EPSILON
+    ) {
+      hasInversion = true;
+      hasStopBelowStart = true;
+      stopSmrError = `Impossible SMR: Stop SMR (${stopSmr.toFixed(DECIMAL_PLACES_ONE)}h) cannot be less than machine's current SMR (${minAllowedStartSmr.toFixed(DECIMAL_PLACES_ONE)}h). Equipment hour meters cannot run backward.`;
+    } else if (
+      startSmr !== null &&
+      Number.isFinite(startSmr) &&
+      stopSmr - effectiveFloorSmr > maxAllowedShiftHours + SMR_EPSILON
+    ) {
+      hasExcessiveShiftHours = true;
+      const maxStopSmr = Number(
+        (effectiveFloorSmr + maxAllowedShiftHours).toFixed(DECIMAL_PLACES_ONE)
+      );
+      stopSmrError = `Shift Cap Exceeded: Stop SMR (${stopSmr.toFixed(DECIMAL_PLACES_ONE)}h) exceeds max ${maxAllowedShiftHours.toFixed(DECIMAL_PLACES_ONE)}h shift limit (max Stop SMR: ${maxStopSmr.toFixed(DECIMAL_PLACES_ONE)}h).`;
+    }
+  }
+
+  const error = startSmrError ?? stopSmrError;
+  return {
+    valid: error === null,
+    hasInversion,
+    hasStopBelowStart,
+    hasExcessiveShiftHours,
+    startSmrError,
+    stopSmrError,
+    error,
+  };
+}
+
+/**
+ * Enforces the 12-hour shift cap and monotonic odometer floor when Start SMR or Stop SMR changes:
+ * - Start SMR cannot drop below `minAllowedStartSmr` (machine's previous closing SMR).
+ * - Stop SMR cannot drop below `startSmr`.
  * - Total worked hours (`stopSmr - startSmr`) cannot exceed `12 - explicitNonStandardDelays`
  *   (e.g. if Breakdown = 10h, max worked hours = 2.0h).
  * - Remaining delay budget is `12 - workedHours` (e.g. if 10h worked, max delays = 2.0h);
@@ -451,10 +559,12 @@ export function reconcileOverviewShiftHoursOnSmrChange(params: {
   nextValue: number;
   delays: OverviewDelayHours;
   maxShiftHours?: number;
+  minAllowedStartSmr?: number;
 }): {
   startSmr: number;
   stopSmr: number;
   delays: OverviewDelayHours;
+  smrViolation: string | null;
 } {
   const {
     currentStartSmr,
@@ -463,6 +573,7 @@ export function reconcileOverviewShiftHoursOnSmrChange(params: {
     nextValue,
     delays,
     maxShiftHours = MAX_SHIFT_HOURS,
+    minAllowedStartSmr = 0,
   } = params;
 
   let nonStandardDelaySum = 0;
@@ -471,29 +582,52 @@ export function reconcileOverviewShiftHoursOnSmrChange(params: {
       nonStandardDelaySum += Number(delays[col.key] ?? 0);
     }
   }
-  const maxAllowedWorked = Math.max(0, Number((maxShiftHours - nonStandardDelaySum).toFixed(2)));
+  const maxAllowedWorked = Math.max(
+    0,
+    Number((maxShiftHours - nonStandardDelaySum).toFixed(DECIMAL_PLACES_TWO))
+  );
+
+  const floorStartSmr = Math.max(0, Number(minAllowedStartSmr.toFixed(DECIMAL_PLACES_TWO)));
+  let smrViolation: string | null = null;
+
+  if (changedField === 'startSmr' && floorStartSmr > 0 && nextValue < floorStartSmr - SMR_EPSILON) {
+    smrViolation = `Impossible SMR: Start SMR (${nextValue.toFixed(DECIMAL_PLACES_ONE)}h) cannot be less than machine's current SMR (${floorStartSmr.toFixed(DECIMAL_PLACES_ONE)}h). Equipment hour meters cannot run backward.`;
+  }
 
   const startSmr =
     changedField === 'startSmr'
-      ? Math.max(0, Number(nextValue.toFixed(2)))
-      : Math.max(0, Number(currentStartSmr.toFixed(2)));
+      ? Math.max(floorStartSmr, Number(nextValue.toFixed(DECIMAL_PLACES_TWO)))
+      : Math.max(floorStartSmr, Number(currentStartSmr.toFixed(DECIMAL_PLACES_TWO)));
+
+  if (changedField === 'stopSmr' && nextValue < startSmr - SMR_EPSILON) {
+    smrViolation = `Impossible SMR: Stop SMR (${nextValue.toFixed(DECIMAL_PLACES_ONE)}h) cannot be less than Start SMR (${startSmr.toFixed(DECIMAL_PLACES_ONE)}h). Equipment hour meters cannot run backward.`;
+  }
 
   const rawStopSmr =
     changedField === 'stopSmr'
-      ? Math.max(startSmr, Number(nextValue.toFixed(2)))
-      : Math.max(startSmr, Number(currentStopSmr.toFixed(2)));
+      ? Math.max(startSmr, Number(nextValue.toFixed(DECIMAL_PLACES_TWO)))
+      : Math.max(startSmr, Number(currentStopSmr.toFixed(DECIMAL_PLACES_TWO)));
 
-  const rawWorked = Number((rawStopSmr - startSmr).toFixed(2));
+  const rawWorked = Number((rawStopSmr - startSmr).toFixed(DECIMAL_PLACES_TWO));
+  if (changedField === 'stopSmr' && !smrViolation && rawWorked > maxAllowedWorked + SMR_EPSILON) {
+    const maxStopSmr = Number((startSmr + maxAllowedWorked).toFixed(DECIMAL_PLACES_ONE));
+    smrViolation = `Shift Cap Exceeded: Stop SMR (${nextValue.toFixed(DECIMAL_PLACES_ONE)}h) exceeds max ${maxAllowedWorked.toFixed(DECIMAL_PLACES_ONE)}h shift limit (clamped to ${maxStopSmr.toFixed(DECIMAL_PLACES_ONE)}h).`;
+  }
+
   const clampedWorked = Math.min(maxAllowedWorked, Math.max(0, rawWorked));
-  const stopSmr = Number((startSmr + clampedWorked).toFixed(2));
+  const stopSmr = Number((startSmr + clampedWorked).toFixed(DECIMAL_PLACES_TWO));
 
-  const maxDelaysAllowed = Math.max(0, Number((maxShiftHours - clampedWorked).toFixed(2)));
+  const maxDelaysAllowed = Math.max(
+    0,
+    Number((maxShiftHours - clampedWorked).toFixed(DECIMAL_PLACES_TWO))
+  );
   const reconciledDelays = trimDelaysToMaxBudget(delays, maxDelaysAllowed);
 
   return {
     startSmr,
     stopSmr,
     delays: reconciledDelays,
+    smrViolation,
   };
 }
 

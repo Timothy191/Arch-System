@@ -215,7 +215,17 @@ export function buildMachineMonth30DayRows(params: {
     }
   }
 
-  let runningSmr = machine.baselineSmr > 0 ? machine.baselineSmr : DEFAULT_BASELINE_SMR;
+  const chronologicalExisting = calendarDays
+    .map((dayEntry) => existingByDate.get(dayEntry.date))
+    .filter((rec): rec is MachineDailyOverviewRecord => rec !== undefined);
+
+  const firstMonthRecord = chronologicalExisting[0];
+  let runningSmr =
+    firstMonthRecord && firstMonthRecord.startSmr > 0
+      ? firstMonthRecord.startSmr
+      : machine.baselineSmr > 0
+        ? machine.baselineSmr
+        : DEFAULT_BASELINE_SMR;
 
   return calendarDays.map((dayEntry) => {
     const existing = existingByDate.get(dayEntry.date);

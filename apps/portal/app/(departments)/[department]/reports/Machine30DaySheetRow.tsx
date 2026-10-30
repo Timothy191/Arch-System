@@ -66,16 +66,15 @@ export interface Machine30DaySheetRowProps {
   isExpanded: boolean;
   isSaving: boolean;
   isSaved: boolean;
+  minStartSmr?: number;
   onToggleExpand: (date: string) => void;
   onSmrChange: (
     dayRow: MachineDailyOverviewRecord,
-    changedField: 'startSmr' | 'stopSmr',
-    rawInput: string
+    change: { changedField: 'startSmr' | 'stopSmr'; rawInput: string }
   ) => void;
   onDelayChange: (
     dayRow: MachineDailyOverviewRecord,
-    delayKey: OverviewDelayKey,
-    rawInput: string
+    change: { delayKey: OverviewDelayKey; rawInput: string }
   ) => void;
   onUpsertRecord: (updatedRecord: MachineDailyOverviewRecord) => void;
   onSaveDayRow: (dayRow: MachineDailyOverviewRecord) => void;
@@ -92,6 +91,7 @@ export const Machine30DaySheetRow = memo(function Machine30DaySheetRow({
   isExpanded,
   isSaving,
   isSaved,
+  minStartSmr = 0,
   onToggleExpand,
   onSmrChange,
   onDelayChange,
@@ -132,11 +132,13 @@ export const Machine30DaySheetRow = memo(function Machine30DaySheetRow({
             <input
               type="number"
               step="0.1"
-              min="0"
+              min={minStartSmr}
               disabled={isMonthSealed}
               aria-label={`Start SMR ${dayRow.date}`}
               value={dayRow.startSmr}
-              onChange={(e) => onSmrChange(dayRow, 'startSmr', e.target.value)}
+              onChange={(e) =>
+                onSmrChange(dayRow, { changedField: 'startSmr', rawInput: e.target.value })
+              }
               className={INPUT_SMR_CLASS}
             />
             {anomaly?.hasInversion && (
@@ -170,7 +172,9 @@ export const Machine30DaySheetRow = memo(function Machine30DaySheetRow({
             disabled={isMonthSealed}
             aria-label={`Stop SMR ${dayRow.date}`}
             value={dayRow.stopSmr}
-            onChange={(e) => onSmrChange(dayRow, 'stopSmr', e.target.value)}
+            onChange={(e) =>
+              onSmrChange(dayRow, { changedField: 'stopSmr', rawInput: e.target.value })
+            }
             className={INPUT_SMR_CLASS}
           />
         </td>
@@ -200,7 +204,9 @@ export const Machine30DaySheetRow = memo(function Machine30DaySheetRow({
                 disabled={isMonthSealed}
                 aria-label={`${col.label} ${dayRow.date}`}
                 value={delayHours}
-                onChange={(e) => onDelayChange(dayRow, col.key, e.target.value)}
+                onChange={(e) =>
+                  onDelayChange(dayRow, { delayKey: col.key, rawInput: e.target.value })
+                }
                 className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
               />
             </td>
