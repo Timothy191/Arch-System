@@ -1,0 +1,38 @@
+# Semgrep custom rules for Arch-System (TS/JS/React/Next.js)
+# Rulesets (p/typescript, p/react, p/nextjs, p/owasp-top-ten, p/secrets) are passed via CLI.
+# Used by tools/audits/semgrep-scan.cjs and .github/workflows/semgrep.yml
+rules:
+  - id: no-dangerous-html-without-sanitize
+    patterns:
+      - pattern: 'dangerouslySetInnerHTML="{{__html: $X}}"'
+      - pattern-not: 'dangerouslySetInnerHTML="{{__html: DOMPurify.sanitize($X)}}"'
+      - pattern-not: 'dangerouslySetInnerHTML="{{__html: sanitize($X)}}"'
+    message: 'dangerouslySetInnerHTML without DOMPurify/sanitize — XSS risk'
+    severity: ERROR
+    languages: [typescript, tsx, javascript, jsx]
+
+  - id: no-eval-or-new-function
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+    message: 'eval() / new Function() detected — code injection risk'
+    severity: ERROR
+    languages: [typescript, tsx, javascript, jsx]
+
+  - id: no-raw-sql-concat
+    pattern-either:
+      - pattern: $DB.query($X + $Y)
+      - pattern: $DB.execute($X + $Y)
+    message: 'String-concatenated SQL — use parameterized queries (Kysely)'
+    severity: ERROR
+    languages: [typescript, tsx, javascript, jsx]
+
+  - id: no-service-role-in-client
+    patterns:
+      - pattern: process.env.SUPABASE_SERVICE_ROLE_KEY
+      - pattern-inside: |
+          'use client'
+          ...
+    message: 'service_role key referenced in client component'
+    severity: ERROR
+    languages: [typescript, tsx, javascript, jsx]
