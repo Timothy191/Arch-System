@@ -542,14 +542,24 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
       screen.getByRole('table', { name: /30-Day Activity Table for DZ-02 CAT D9R/i })
     ).toBeInTheDocument();
 
-    // 2. Open Monthly Summary tab and verify CEO Executive Issue & Bottleneck Digest
+    // 2. Open Monthly Summary tab and verify CEO Executive Issue & Bottleneck Digest and Multi-Month Trend Chart
     fireEvent.click(screen.getByRole('tab', { name: /Monthly Summary/i }));
     expect(screen.getByTestId('machine-monthly-summary-tab')).toBeInTheDocument();
+    expect(screen.getByTestId('multi-month-trend-chart')).toBeInTheDocument();
     expect(screen.getByTestId('ceo-monthly-issue-digest')).toBeInTheDocument();
     expect(screen.getByTestId('ceo-monthly-issue-digest')).toHaveTextContent(
       /Boom cylinder seal leak/i
     );
     expect(screen.getByTestId('archived-machine-months-vault')).toBeInTheDocument();
+
+    // Verify Boardroom Executive Print View opens and renders
+    fireEvent.click(screen.getByTestId('open-boardroom-print-view-btn'));
+    expect(screen.getByTestId('executive-boardroom-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('executive-boardroom-modal')).toHaveTextContent(
+      /Monthly Fleet Operational & Reliability Report/i
+    );
+    fireEvent.click(screen.getByTestId('close-boardroom-modal-btn'));
+    expect(screen.queryByTestId('executive-boardroom-modal')).not.toBeInTheDocument();
 
     // Archive and seal the active month into the Machine Activity Database
     fireEvent.click(screen.getByTestId('seal-monthly-summary-archive-btn'));

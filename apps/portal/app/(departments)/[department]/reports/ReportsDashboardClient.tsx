@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
+import { saveMonthlyMachineSnapshotAction } from './actions';
 import { CopyReportButton } from './CopyReportButton';
 import { MachineMonthlySheetTab } from './MachineMonthlySheetTab';
 import { MachineMonthlySummaryTab } from './MachineMonthlySummaryTab';
@@ -188,7 +189,7 @@ export function ReportsDashboardClient({
     return Boolean(matchSnap?.isSealed);
   }, [archivedSnapshots, selectedMonth]);
 
-  const handleArchiveAndSealMonth = () => {
+  const handleArchiveAndSealMonth = async () => {
     const sealedSnapshot = buildArchivedMonthSnapshot({
       monthPrefix: selectedMonth,
       fleetMachines: effectiveMachines,
@@ -202,9 +203,32 @@ export function ReportsDashboardClient({
     ].sort((a, b) => b.month.localeCompare(a.month));
     setArchivedSnapshots(nextSnapshots);
     saveStoredMachineMonthArchives(nextSnapshots);
-    toast.success(
-      `Archived & sealed ${selectedMonth} (${sealedSnapshot.machineCount} machine 30-day tables) into Machine Activity Database.`
-    );
+
+    // Synchronize to Supabase PostgreSQL cloud storage asynchronously
+    try {
+      await saveMonthlyMachineSnapshotAction({
+        departmentId,
+        month: selectedMonth,
+        shiftType: machineShiftType,
+        machineCount: sealedSnapshot.machineCount,
+        totalSmrWorked: sealedSnapshot.totalSmrWorked,
+        fleetAvailabilityPercent: sealedSnapshot.fleetAvailabilityPercent,
+        fleetUtilizationPercent: sealedSnapshot.fleetUtilizationPercent,
+        totalBreakdownHours: Number(
+          sealedSnapshot.summaries.reduce((acc, r) => acc + (r.delays.breakdown ?? 0), 0).toFixed(1)
+        ),
+        isSealed: true,
+        records: sealedSnapshot.records as unknown as Record<string, unknown>[],
+        summaries: sealedSnapshot.summaries as unknown as Record<string, unknown>[],
+      });
+      toast.success(
+        `Archived & sealed ${selectedMonth} (${sealedSnapshot.machineCount} machine 30-day tables) into Cloud Machine Activity Database.`
+      );
+    } catch {
+      toast.success(
+        `Archived & sealed ${selectedMonth} (${sealedSnapshot.machineCount} machine 30-day tables) into Local Machine Activity Database.`
+      );
+    }
   };
 
   const monthlySummaryRows = useMemo(

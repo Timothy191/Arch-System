@@ -9,6 +9,7 @@ import {
   Database,
   Download,
   Lock,
+  Printer,
   Search,
   Wrench,
 } from 'lucide-react';
@@ -19,6 +20,9 @@ import {
   type OverviewDelayGroup,
   type OverviewDelayKey,
 } from '@/lib/shift-sheet-buckets';
+import { ExecutiveBoardroomPrintView } from './ExecutiveBoardroomPrintView';
+import { MachineMultiMonthTrendChart } from './MachineMultiMonthTrendChart';
+import { computeMachinePredictiveMetrics } from './predictive-maintenance';
 import type {
   ArchivedMachineMonthSnapshot,
   EngineeringLogItem,
@@ -91,6 +95,7 @@ export function MachineMonthlySummaryTab({
   engineeringLogs = EMPTY_ENGINEERING_LOGS,
 }: MachineMonthlySummaryTabProps) {
   const [searchFilter, setSearchFilter] = useState('');
+  const [showBoardroomPrintModal, setShowBoardroomPrintModal] = useState(false);
 
   const filteredSummaryRows = useMemo(() => {
     const query = searchFilter.trim().toLowerCase();
@@ -107,6 +112,17 @@ export function MachineMonthlySummaryTab({
     () => engineeringLogs.filter((item) => item.date.startsWith(selectedMonth)),
     [engineeringLogs, selectedMonth]
   );
+
+  // Derive Predictive Maintenance Metrics for all machines
+  const predictiveMetrics = useMemo(() => {
+    return summaryRows.map((row) =>
+      computeMachinePredictiveMetrics({
+        summaryRow: row,
+        dayRows: [],
+        engineeringLogs: monthEngineeringLogs,
+      })
+    );
+  }, [summaryRows, monthEngineeringLogs]);
 
   const topBottleneckMachines = useMemo(
     () =>
@@ -244,6 +260,16 @@ export function MachineMonthlySummaryTab({
 
             <button
               type="button"
+              onClick={() => setShowBoardroomPrintModal(true)}
+              data-testid="open-boardroom-print-view-btn"
+              className={BTN_SECONDARY}
+            >
+              <Printer className="h-3.5 w-3.5 text-amber-600" />
+              Boardroom Print View
+            </button>
+
+            <button
+              type="button"
               onClick={handleExportMonthlyCsv}
               data-testid="export-monthly-summary-csv-btn"
               className={BTN_SECONDARY}
@@ -334,6 +360,13 @@ export function MachineMonthlySummaryTab({
           </div>
         </div>
       </GlassCard>
+
+      {/* Multi-Month Comparative Fleet Trend Graph */}
+      <MachineMultiMonthTrendChart
+        archivedSnapshots={archivedSnapshots}
+        currentMonth={selectedMonth}
+        onSelectMonth={onSelectMonth}
+      />
 
       {/* CEO Executive Issue & Bottleneck Digest */}
       <GlassCard className="space-y-4 p-5" data-testid="ceo-monthly-issue-digest">
@@ -666,6 +699,18 @@ export function MachineMonthlySummaryTab({
           </table>
         </div>
       </GlassCard>
+
+      {/* Boardroom Executive Modal */}
+      {showBoardroomPrintModal && (
+        <ExecutiveBoardroomPrintView
+          selectedMonth={selectedMonth}
+          shiftType={shiftType}
+          summaryRows={summaryRows}
+          engineeringLogs={engineeringLogs}
+          predictiveMetrics={predictiveMetrics}
+          onClose={() => setShowBoardroomPrintModal(false)}
+        />
+      )}
     </div>
   );
 }

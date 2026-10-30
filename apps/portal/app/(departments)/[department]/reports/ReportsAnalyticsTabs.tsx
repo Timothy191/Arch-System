@@ -13,6 +13,7 @@ import {
   Table2,
   Wrench,
 } from 'lucide-react';
+import { MachineMultiMonthTrendChart } from './MachineMultiMonthTrendChart';
 import type {
   ArchivedMachineMonthSnapshot,
   ArchivedReportData,
@@ -459,6 +460,15 @@ export function ReportsArchivedViewTab({
 }: ReportsArchivedViewTabProps) {
   return (
     <div className="space-y-6">
+      {/* Multi-Month Comparative Fleet Trend Graph in Archive View */}
+      {archivedMachineSnapshots.length > 0 && onOpenArchivedMonthSummary && (
+        <MachineMultiMonthTrendChart
+          archivedSnapshots={archivedMachineSnapshots}
+          currentMonth={currentMonthPrefix}
+          onSelectMonth={onOpenArchivedMonthSummary}
+        />
+      )}
+
       {/* Safe Monthly Machine Activity Database (30-Day Sheets & Monthly Rollups) */}
       {archivedMachineSnapshots.length > 0 && (
         <GlassCard className="space-y-3 p-5" data-testid="archived-tab-machine-db-vault">

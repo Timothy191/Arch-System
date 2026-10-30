@@ -124,6 +124,12 @@ export {
   updateInstallationSchema,
 } from './schemas/integration.schema';
 export {
+  type MonthlyMachineSnapshot,
+  monthlyMachineSnapshotSchema,
+  type SaveMonthlyMachineSnapshotInput,
+  saveMonthlyMachineSnapshotInputSchema,
+} from './schemas/machine-activity.schema';
+export {
   machineLedgerCloseoutSchema,
   machineTimeAllocationSchema,
 } from './schemas/machine-ledger.schema';

@@ -32,6 +32,7 @@ import {
   buildMachineMonth30DayRows,
   computeSingleMachineMonthlySummary,
 } from './machine-activity-helpers';
+import { computeMachinePredictiveMetrics } from './predictive-maintenance';
 import type {
   EngineeringLogItem,
   FleetMachineItem,
@@ -241,6 +242,15 @@ export function MachineMonthlySheetTab({
     });
   }, [activeMachine, selectedMonth, dayRows]);
 
+  const predictiveMetric = useMemo(() => {
+    if (!monthlySummary) return null;
+    return computeMachinePredictiveMetrics({
+      summaryRow: monthlySummary,
+      dayRows,
+      engineeringLogs,
+    });
+  }, [monthlySummary, dayRows, engineeringLogs]);
+
   const issueDaysCount = useMemo(() => {
     return dayRows.filter((row) =>
       doesRowHaveUnderlyingIssue(row, machineIssuesByDate.get(row.date) ?? [])
@@ -411,8 +421,24 @@ export function MachineMonthlySheetTab({
               <Wrench className="h-3.5 w-3.5" />
               CEO &amp; Management Per-Machine 30-Day SMR, Delays &amp; Root-Cause Ledger
             </div>
-            <h3 className="mt-1 font-bold text-[var(--text-heading)] text-lg">
-              {activeMachine.name} — {selectedMonth} ({dayRows.length}-Day Activity Sheet)
+            <h3 className="mt-1 flex flex-wrap items-center gap-2 font-bold text-[var(--text-heading)] text-lg">
+              <span>
+                {activeMachine.name} — {selectedMonth} ({dayRows.length}-Day Activity Sheet)
+              </span>
+              {predictiveMetric && (
+                <span
+                  data-testid="machine-predictive-risk-pill"
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold font-mono text-[10px] uppercase ${
+                    predictiveMetric.healthRiskLevel === 'critical'
+                      ? 'border border-rose-500/40 bg-rose-500/20 text-rose-900'
+                      : predictiveMetric.healthRiskLevel === 'elevated'
+                        ? 'border border-amber-500/40 bg-amber-500/20 text-amber-900'
+                        : 'border border-emerald-500/40 bg-emerald-500/20 text-emerald-900'
+                  }`}
+                >
+                  MTBF: {predictiveMetric.mtbfHours}h · {predictiveMetric.healthRiskLevel} risk
+                </span>
+              )}
             </h3>
             <p className="text-[var(--text-secondary)] text-xs">
               Switch between any fleet machine below to inspect its 30/31-day calendar table, daily
