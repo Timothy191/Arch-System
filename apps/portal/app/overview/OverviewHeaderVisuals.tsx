@@ -621,7 +621,7 @@ export function GitHubProvenanceVisualGraphs() {
 
           <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-slate-500">
             <span>Zero Boundary Drift</span>
-            <span className="font-semibold text-violet-700">8/8 Gates Verified</span>
+            <span className="font-semibold text-violet-700">27/27 Gates Verified</span>
           </div>
         </div>
       </div>

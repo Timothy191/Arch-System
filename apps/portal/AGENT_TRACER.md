@@ -1,3 +1,15 @@
+## 2026-10-30T14:43:00+02:00: System Overview Out-of-Date Content Audit & Synchronization (213 Migrations, 27 Gates, Schema & Route Catalog)
+
+- **Phase 1 (Comprehension)**: Audit `/overview` (`apps/portal/app/overview/**`) for out-of-date migration counts, gate counts, missing routes, missing schema tables, or stale milestone dates/sums, and upgrade all identified content to match the current repository state as of `2026-10-30`.
+- **Phase 2 (Evidence)**: Inspected `DatabaseSchema.tsx`, `TechStack.tsx`, `SystemArchitecture.tsx`, `OverviewHeaderVisuals.tsx`, `lib/data.ts`, `agentic-monitor-data.ts`, and `page.test.tsx`.
+- **Phase 3 (Design)**:
+  - Updated `DatabaseSchema.tsx` and `TechStack.tsx` from `186` to `213` versioned migrations and added `machine_operations`, `smr_readings`, and `monthly_machine_snapshots` to the child/telemetry relationship diagram.
+  - Updated `OverviewHeaderVisuals.tsx` and `SystemArchitecture.tsx` from `8/8 Gates` to `27/27 Gates`.
+  - Updated `lib/data.ts` (`DEPARTMENTS`, `DATABASE_SCHEMA`, `GIT_PROVENANCE_METRICS`) to include all newly added department routes, canonical `machines` columns, `machine_operations`, `smr_readings`, `monthly_machine_snapshots`, and `totalCommits: 446`.
+  - Updated `agentic-monitor-data.ts` `PROJECT_MILESTONES` (`Jun 15 – Oct 30, 2026`) so milestone costs (`R 5,000.00`), savings (`R 15,000.00`), commits (`99`), and bugs (`75`) sum identically to `LIFETIME_METRICS`, and appended `TASK-015`..`TASK-017` to `AGENT_TASK_FEED`.
+- **Phase 4 (Criticism)**: Verified all overview unit tests (`page.test.tsx`) and all 27 gates in `pnpm agent:verify`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/overview/sections/DatabaseSchema.tsx`, `apps/portal/app/overview/sections/TechStack.tsx`, `apps/portal/app/overview/sections/SystemArchitecture.tsx`, `apps/portal/app/overview/OverviewHeaderVisuals.tsx`, `apps/portal/app/overview/lib/data.ts`, and `apps/portal/app/overview/sections/agentic-monitor-data.ts`.
+
 ## 2026-10-30T14:29:00+02:00: Agentic Monitor Overview Cards, Distribution & Container Setup Alignment
 
 - **Phase 1 (Comprehension)**: Verify and adjust the 7 items in the System Overview Agentic Monitor (`AgenticMonitor.tsx`, `agentic-monitor-data.ts`, `AgenticMonitorSpendAndFeed.tsx`): (1) Total Project Spend card (`R 5,000.00` & standard currency format), (2) Cache Ratio card (`90%` & amber icon color), (3) Engineering Time card (`150h` & 11-week timeline text), (4) Bugs & Regressions card (`75 Resolved` & 27/27 quality gate text), (5) Header title & subtitle, (6) Distribution agent percentages (`45% / 30% / 12% / 8% / 5%`) & chart colors, and (7) Container div padding & `max-w-[1600px]` + 6-column histogram grid.

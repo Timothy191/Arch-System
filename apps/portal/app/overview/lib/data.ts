@@ -79,6 +79,11 @@ export const DEPARTMENTS = [
         description: 'Department equipment & drill rigs',
       },
       {
+        path: '/drilling/equipment-overview',
+        name: 'Equipment Overview',
+        description: 'Drill fleet availability & utilization matrix',
+      },
+      {
         path: '/drilling/history',
         name: 'History',
         description: 'Past daily logs',
@@ -127,6 +132,21 @@ export const DEPARTMENTS = [
         path: '/production/excavator-activity',
         name: 'Excavator Activity',
         description: 'Loading cycles & payload distribution',
+      },
+      {
+        path: '/production/equipment-overview',
+        name: 'Equipment Overview',
+        description: 'Pit fleet mechanical availability & utilization',
+      },
+      {
+        path: '/plant-processing',
+        name: 'Plant Processing',
+        description: 'CHPP coal wash plant throughput, DMS & delays',
+      },
+      {
+        path: '/plant-inventory',
+        name: 'Plant Inventory',
+        description: 'CHPP equipment consumables & wear spares',
       },
       {
         path: '/production/history',
@@ -229,6 +249,16 @@ export const DEPARTMENTS = [
         description: 'Department equipment & health',
       },
       {
+        path: '/engineering/equipment-overview',
+        name: 'Equipment Overview',
+        description: 'Engineering fleet availability, MTBF & MTTR',
+      },
+      {
+        path: '/availability-utilization',
+        name: 'Availability & Utilization',
+        description: 'CEO 30-day SMR, delays & root-cause ledger',
+      },
+      {
         path: '/engineering/history',
         name: 'History',
         description: 'Past daily logs',
@@ -272,6 +302,16 @@ export const DEPARTMENTS = [
         path: '/control-room/machine-operations',
         name: 'Machine Operations',
         description: 'SMR hours, diesel burn & delay logging',
+      },
+      {
+        path: '/control-room/end-smr',
+        name: 'End SMR Capture',
+        description: 'Monotonic shift-end SMR odometer ledger',
+      },
+      {
+        path: '/control-room/shift-closeout',
+        name: 'Shift Closeout',
+        description: 'Immutable shift handover & closeout certificate',
       },
       {
         path: '/control-room/engineering-notes',
@@ -653,11 +693,61 @@ export const DATABASE_SCHEMA = [
       'department_id (FK)',
       'site_id (FK)',
       'name',
-      'type',
+      'code',
+      'machine_type',
+      'latest_smu (numeric)',
       'status',
       'created_at',
     ],
     description: 'Pit machinery, drill rigs, excavators, dozers, and haul trucks',
+  },
+  {
+    name: 'machine_operations',
+    rls: true,
+    columns: [
+      'id (UUID PK)',
+      'machine_id (FK)',
+      'operation_date',
+      'shift',
+      'start_smr (numeric)',
+      'end_smr (numeric)',
+      'hours_worked (numeric)',
+      'diesel_litres (numeric)',
+      'operator_id (FK)',
+    ],
+    description:
+      'Per-shift machine SMR odometer readings, monotonic delta interlocks, worked hours, and fuel burn',
+  },
+  {
+    name: 'smr_readings',
+    rls: true,
+    columns: [
+      'id (UUID PK)',
+      'meter_id',
+      'reading (numeric)',
+      'reading_at',
+      'recorded_by (FK)',
+      'created_at',
+    ],
+    description:
+      'Append-only SMR odometer ledger syncing latest_smu across fleet machines via PL/pgSQL trigger',
+  },
+  {
+    name: 'monthly_machine_snapshots',
+    rls: true,
+    columns: [
+      'id (UUID PK)',
+      'machine_id (FK)',
+      'month_year (YYYY-MM)',
+      'opening_smr (numeric)',
+      'closing_smr (numeric)',
+      'worked_hours (numeric)',
+      'availability_pct (numeric)',
+      'utilization_pct (numeric)',
+      'mtbf_hours (numeric)',
+    ],
+    description:
+      'Monthly 30/31-day activity rollups, mechanical availability, utilization, and MTBF snapshots',
   },
   {
     name: 'daily_logs',
@@ -1350,7 +1440,7 @@ export const GIT_PROVENANCE_METRICS = {
   firstCommitTimestamp: '2026-09-26T10:00:59+02:00',
   firstCommitDateFormatted: '26 Sep 2026, 10:00 SAST',
   firstCommitMessage: 'Initial commit: Arch-System codebase',
-  totalCommits: 433,
+  totalCommits: 446,
   totalMigrations: 213,
   activeConnectorCount: 20,
   calculateTimeWorked(now: Date = new Date()) {

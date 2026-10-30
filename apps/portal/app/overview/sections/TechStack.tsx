@@ -194,7 +194,7 @@ export default function TechStack() {
             contracts
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">database/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 186 Supabase PostgreSQL 17 migrations &
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 213 Supabase PostgreSQL 17 migrations &
             generated types
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-accent-green">supabase/</span>

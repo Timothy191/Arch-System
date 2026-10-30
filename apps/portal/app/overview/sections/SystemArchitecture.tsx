@@ -69,7 +69,7 @@ const ARCHITECTURAL_PILLARS = [
   {
     title: 'Strict Monorepo Policy Compiler',
     subtitle: 'Zero Architectural Drift',
-    badge: '8/8 Gates Pass',
+    badge: '27/27 Gates Pass',
     description:
       'Apps never import @repo/database directly (routed via @repo/supabase), @repo/ui remains pure presentational, and @repo/contract validates all boundaries.',
     icon: ShieldCheck,

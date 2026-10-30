@@ -101,6 +101,9 @@ export default function DatabaseSchema() {
             <div className="flex flex-wrap justify-center gap-4">
               {[
                 'badges',
+                'machine_operations',
+                'smr_readings',
+                'monthly_machine_snapshots',
                 'hourly_loads',
                 'delay_entries',
                 'scada_telemetry_records',
@@ -139,7 +142,7 @@ export default function DatabaseSchema() {
         <Card className="p-4">
           <div className="mb-2 flex items-center gap-2">
             <Key className="h-5 w-5 text-accent-blue" />
-            <span className="font-medium text-sm text-text-heading">186 Versioned Migrations</span>
+            <span className="font-medium text-sm text-text-heading">213 Versioned Migrations</span>
           </div>
           <p className="text-text-secondary text-xs">
             Supabase PostgreSQL 17 schema managed via zero-padded declarative migrations & atomic

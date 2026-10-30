@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - System Overview Out-of-Date Content Audit & Synchronization (213 Migrations, 27 Gates, Schema & Route Catalog)
+
+- **Action:**
+  - Updated [`apps/portal/app/overview/sections/DatabaseSchema.tsx`](./apps/portal/app/overview/sections/DatabaseSchema.tsx) and [`apps/portal/app/overview/sections/TechStack.tsx`](./apps/portal/app/overview/sections/TechStack.tsx) from `186 Versioned Migrations` to `213 Versioned Migrations` and added `machine_operations`, `smr_readings`, and `monthly_machine_snapshots` to the schema relationship diagram.
+  - Updated [`apps/portal/app/overview/OverviewHeaderVisuals.tsx`](./apps/portal/app/overview/OverviewHeaderVisuals.tsx) and [`apps/portal/app/overview/sections/SystemArchitecture.tsx`](./apps/portal/app/overview/sections/SystemArchitecture.tsx) from `8/8 Gates Verified` to `27/27 Gates Verified` (`27/27 Gates Pass`).
+  - Updated [`apps/portal/app/overview/lib/data.ts`](./apps/portal/app/overview/lib/data.ts) (`DEPARTMENTS`, `DATABASE_SCHEMA`, `GIT_PROVENANCE_METRICS`) with the latest portal routes (`/availability-utilization`, `/plant-processing`, `/plant-inventory`, `/control-room/end-smr`, `/control-room/shift-closeout`, `/production/equipment-overview`, `/drilling/equipment-overview`, `/engineering/equipment-overview`), canonical `machines` columns (`code`, `machine_type`, `latest_smu`), 3 new telemetry/rollup tables (`machine_operations`, `smr_readings`, `monthly_machine_snapshots`), and `totalCommits: 446`.
+  - Synchronized [`apps/portal/app/overview/sections/agentic-monitor-data.ts`](./apps/portal/app/overview/sections/agentic-monitor-data.ts) `PROJECT_MILESTONES` (`Jun 15 – Oct 30, 2026`) so milestone totals sum identically to `LIFETIME_METRICS` (`R 5,000.00` spend, `$269.98 USD`, `R 15,000.00` saved, `99` commits, `75` bugs fixed) and appended `TASK-015`, `TASK-016`, and `TASK-017` for the Oct 30, 2026 engineering milestones.
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Agentic Monitor Overview Cards, Distribution & Container Setup Alignment
 
 - **Action:**
