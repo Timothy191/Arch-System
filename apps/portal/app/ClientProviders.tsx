@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect } from 'react';
+import { initializeGlobalErrorHandler } from '@/lib/errors/global-error-handler';
 import { ReactQueryProvider } from './ReactQueryProvider';
 
 // AGENT-TRACE: SmoothScrollProvider (Lenis) removed — cosmetic rAF loop overhead on every page.
@@ -40,6 +41,15 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     // Initialize offline queue sync listeners
     import('@repo/shared/hooks').then((mod) => {
       mod.initOfflineQueueListeners();
+    });
+
+    // Initialize global error handling with autonomous recovery
+    initializeGlobalErrorHandler({
+      reportErrors: process.env.NODE_ENV !== 'development',
+      onError: (error: Error, info: { type: string; error: Error }) => {
+        // eslint-disable-next-line no-console
+        console.error('Global error handled:', error, info);
+      },
     });
   }, []);
 
