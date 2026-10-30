@@ -223,3 +223,24 @@ jest.mock('@repo/agents', () => ({
     }
   },
 }));
+
+// Mock next/dynamic to render components synchronously in Jest tests
+jest.mock('next/dynamic', () => {
+  return function dynamic(loadComponent: any) {
+    let Component: any = null;
+    const promise = typeof loadComponent === 'function' ? loadComponent() : loadComponent;
+    if (promise && typeof promise.then === 'function') {
+      promise.then((mod: any) => {
+        Component = mod?.default || mod;
+      });
+    }
+
+    return function DynamicMock(props: any) {
+      if (!Component) {
+        // If not yet loaded synchronously, try require if possible or invoke promise
+        return null;
+      }
+      return Component(props);
+    };
+  };
+});

@@ -13,6 +13,7 @@ import {
   Search,
   Wrench,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -20,14 +21,22 @@ import {
   type OverviewDelayGroup,
   type OverviewDelayKey,
 } from '@/lib/shift-sheet-buckets';
-import { ExecutiveBoardroomPrintView } from './ExecutiveBoardroomPrintView';
-import { MachineMultiMonthTrendChart } from './MachineMultiMonthTrendChart';
 import { computeMachinePredictiveMetrics } from './predictive-maintenance';
 import type {
   ArchivedMachineMonthSnapshot,
   EngineeringLogItem,
   MachineMonthlySummaryRow,
 } from './reports-types';
+
+const ExecutiveBoardroomPrintView = dynamic(
+  () => import('./ExecutiveBoardroomPrintView').then((mod) => mod.ExecutiveBoardroomPrintView),
+  { ssr: false }
+);
+
+const MachineMultiMonthTrendChart = dynamic(
+  () => import('./MachineMultiMonthTrendChart').then((mod) => mod.MachineMultiMonthTrendChart),
+  { ssr: false }
+);
 
 const TH_BASE =
   'whitespace-nowrap px-2.5 py-2.5 text-left font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider';

@@ -29,6 +29,64 @@ export const DEFAULT_MONTHLY_ALLOWANCE_COMMENT =
 
 export const MACHINE_ACTIVITY_ARCHIVE_STORAGE_KEY = 'arch_machine_monthly_activity_archive_v1';
 
+export interface SmrAnomalyCheckResult {
+  hasInversion: boolean;
+  hasGapJump: boolean;
+  expectedStartSmr: number;
+  deltaFromPrevious: number;
+  message: string | null;
+}
+
+export function checkSmrSequenceAnomaly(params: {
+  currentRecord: MachineDailyOverviewRecord;
+  previousRecord: MachineDailyOverviewRecord | null;
+}): SmrAnomalyCheckResult {
+  const { currentRecord, previousRecord } = params;
+  if (!previousRecord) {
+    return {
+      hasInversion: false,
+      hasGapJump: false,
+      expectedStartSmr: currentRecord.startSmr,
+      deltaFromPrevious: 0,
+      message: null,
+    };
+  }
+
+  const expectedStart = previousRecord.stopSmr;
+  const delta = Number((currentRecord.startSmr - expectedStart).toFixed(DECIMAL_PLACES_TWO));
+
+  // Inversion: start SMR is strictly less than previous stop SMR (e.g. meter went backward)
+  if (delta < -0.01) {
+    return {
+      hasInversion: true,
+      hasGapJump: false,
+      expectedStartSmr: expectedStart,
+      deltaFromPrevious: delta,
+      message: `Odometer Inversion: Start SMR is ${Math.abs(delta).toFixed(DECIMAL_PLACES_ONE)}h below Day ${previousRecord.dayOfMonth} Stop SMR (${expectedStart.toFixed(DECIMAL_PLACES_ONE)})`,
+    };
+  }
+
+  // Gap Jump: start SMR unexpectedly jumped forward without activity between shifts
+  const MAX_EXPECTED_DRIFT_HOURS = 24;
+  if (delta > MAX_EXPECTED_DRIFT_HOURS) {
+    return {
+      hasInversion: false,
+      hasGapJump: true,
+      expectedStartSmr: expectedStart,
+      deltaFromPrevious: delta,
+      message: `Unexplained SMR Jump: +${delta.toFixed(DECIMAL_PLACES_ONE)}h gap from Day ${previousRecord.dayOfMonth} Stop SMR`,
+    };
+  }
+
+  return {
+    hasInversion: false,
+    hasGapJump: false,
+    expectedStartSmr: expectedStart,
+    deltaFromPrevious: delta,
+    message: null,
+  };
+}
+
 export interface MonthCalendarDay {
   date: string;
   dayOfMonth: number;
@@ -274,12 +332,27 @@ export function computeFleetMonthlySummaryRows(params: {
   records: readonly MachineDailyOverviewRecord[];
 }): MachineMonthlySummaryRow[] {
   const { fleetMachines, monthPrefix, shiftType, records } = params;
+
+  // Pre-index records by machineId for O(1) retrieval during fleet reduction
+  const recordsByMachineId = new Map<string, MachineDailyOverviewRecord[]>();
+  for (const rec of records) {
+    if (rec.shiftType === shiftType && rec.date.startsWith(monthPrefix)) {
+      const existing = recordsByMachineId.get(rec.machineId);
+      if (existing) {
+        existing.push(rec);
+      } else {
+        recordsByMachineId.set(rec.machineId, [rec]);
+      }
+    }
+  }
+
   return fleetMachines.map((machine) => {
+    const machineRecords = recordsByMachineId.get(machine.id) ?? [];
     const dayRows = buildMachineMonth30DayRows({
       machine,
       monthPrefix,
       shiftType,
-      records,
+      records: machineRecords,
     });
     return computeSingleMachineMonthlySummary({
       machine,

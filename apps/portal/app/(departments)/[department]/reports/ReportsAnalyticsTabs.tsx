@@ -13,13 +13,18 @@ import {
   Table2,
   Wrench,
 } from 'lucide-react';
-import { MachineMultiMonthTrendChart } from './MachineMultiMonthTrendChart';
+import dynamic from 'next/dynamic';
 import type {
   ArchivedMachineMonthSnapshot,
   ArchivedReportData,
   DailyAggregatedRow,
   ReportSubtab,
 } from './reports-types';
+
+const MachineMultiMonthTrendChart = dynamic(
+  () => import('./MachineMultiMonthTrendChart').then((mod) => mod.MachineMultiMonthTrendChart),
+  { ssr: false }
+);
 
 interface ReportsSubtabsToolbarProps {
   activeTab: ReportSubtab;

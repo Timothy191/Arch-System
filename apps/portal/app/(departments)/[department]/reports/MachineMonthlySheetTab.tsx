@@ -5,17 +5,14 @@ import {
   AlertTriangle,
   Archive,
   Calendar,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Download,
-  Eye,
   Lock,
-  Save,
   Search,
   Wrench,
 } from 'lucide-react';
-import { Fragment, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { saveMachineOverviewRow } from '@/app/(departments)/[department]/engineering-notes/actions';
 import {
@@ -28,8 +25,10 @@ import {
   reconcileOverviewShiftHoursOnSmrChange,
   validateOverviewRowDelaysAndComment,
 } from '@/lib/shift-sheet-buckets';
+import { Machine30DaySheetRow } from './Machine30DaySheetRow';
 import {
   buildMachineMonth30DayRows,
+  checkSmrSequenceAnomaly,
   computeSingleMachineMonthlySummary,
 } from './machine-activity-helpers';
 import { computeMachinePredictiveMetrics } from './predictive-maintenance';
@@ -267,94 +266,105 @@ export function MachineMonthlySheetTab({
     }
   };
 
-  const handleSmrChange = (
-    dayRow: MachineDailyOverviewRecord,
-    changedField: 'startSmr' | 'stopSmr',
-    rawInput: string
-  ) => {
-    if (isMonthSealed) return;
-    const parsedNum = Number.parseFloat(rawInput);
-    const numericVal = Number.isNaN(parsedNum) ? 0 : Math.max(0, parsedNum);
-    const reconciled = reconcileOverviewShiftHoursOnSmrChange({
-      currentStartSmr: dayRow.startSmr,
-      currentStopSmr: dayRow.stopSmr,
-      changedField,
-      nextValue: numericVal,
-      delays: dayRow.delays,
-      maxShiftHours: MAX_SHIFT_HOURS,
-    });
-    onUpsertRecord({
-      ...dayRow,
-      startSmr: reconciled.startSmr,
-      stopSmr: reconciled.stopSmr,
-      delays: reconciled.delays,
-      hasExistingOperation: true,
-    });
-  };
+  const handleSmrChange = useCallback(
+    (
+      dayRow: MachineDailyOverviewRecord,
+      changedField: 'startSmr' | 'stopSmr',
+      rawInput: string
+    ) => {
+      if (isMonthSealed) return;
+      const parsedNum = Number.parseFloat(rawInput);
+      const numericVal = Number.isNaN(parsedNum) ? 0 : Math.max(0, parsedNum);
+      const reconciled = reconcileOverviewShiftHoursOnSmrChange({
+        currentStartSmr: dayRow.startSmr,
+        currentStopSmr: dayRow.stopSmr,
+        changedField,
+        nextValue: numericVal,
+        delays: dayRow.delays,
+        maxShiftHours: MAX_SHIFT_HOURS,
+      });
+      onUpsertRecord({
+        ...dayRow,
+        startSmr: reconciled.startSmr,
+        stopSmr: reconciled.stopSmr,
+        delays: reconciled.delays,
+        hasExistingOperation: true,
+      });
+    },
+    [isMonthSealed, onUpsertRecord]
+  );
 
-  const handleDelayChange = (
-    dayRow: MachineDailyOverviewRecord,
-    delayKey: OverviewDelayKey,
-    rawInput: string
-  ) => {
-    if (isMonthSealed) return;
-    const parsedNum = Number.parseFloat(rawInput);
-    const numericVal = Number.isNaN(parsedNum)
-      ? 0
-      : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsedNum));
-    const reconciled = reconcileOverviewShiftHoursOnDelayChange({
-      startSmr: dayRow.startSmr,
-      stopSmr: dayRow.stopSmr,
-      delays: dayRow.delays,
-      changedKey: delayKey,
-      nextDelayValue: numericVal,
-      maxShiftHours: MAX_SHIFT_HOURS,
-    });
-    onUpsertRecord({
-      ...dayRow,
-      startSmr: reconciled.startSmr,
-      stopSmr: reconciled.stopSmr,
-      delays: reconciled.delays,
-      endsOnBreakdown:
-        delayKey === 'breakdown' && reconciled.delays.breakdown > 0 ? true : dayRow.endsOnBreakdown,
-      hasExistingOperation: true,
-    });
-  };
-
-  const handleSaveDayRow = async (dayRow: MachineDailyOverviewRecord) => {
-    if (isMonthSealed) return;
-    const validation = validateOverviewRowDelaysAndComment(dayRow.delays, dayRow.comment);
-    if (!validation.valid) {
-      toast.error(validation.error ?? 'Comment required when a delay is recorded.');
-      return;
-    }
-    setSavingDate(dayRow.date);
-    try {
-      await saveMachineOverviewRow({
-        departmentId,
-        machineId: dayRow.machineId,
-        machineName: dayRow.machineName,
-        machineType: dayRow.machineType,
-        serialNumber: dayRow.serialNumber,
-        siteId: dayRow.siteId,
-        shiftDate: dayRow.date,
-        shiftType: dayRow.shiftType,
+  const handleDelayChange = useCallback(
+    (dayRow: MachineDailyOverviewRecord, delayKey: OverviewDelayKey, rawInput: string) => {
+      if (isMonthSealed) return;
+      const parsedNum = Number.parseFloat(rawInput);
+      const numericVal = Number.isNaN(parsedNum)
+        ? 0
+        : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsedNum));
+      const reconciled = reconcileOverviewShiftHoursOnDelayChange({
         startSmr: dayRow.startSmr,
         stopSmr: dayRow.stopSmr,
-        operatorId: dayRow.operatorId,
-        comment: dayRow.comment,
-        endsOnBreakdown: dayRow.endsOnBreakdown,
         delays: dayRow.delays,
+        changedKey: delayKey,
+        nextDelayValue: numericVal,
+        maxShiftHours: MAX_SHIFT_HOURS,
       });
-      setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
-      toast.success(`Saved ${dayRow.machineName} for ${dayRow.date} (${dayRow.shiftType} shift)`);
-    } catch {
-      setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
-      toast.success(`Recorded ${dayRow.machineName} for ${dayRow.date} in activity log`);
-    } finally {
-      setSavingDate(null);
-    }
-  };
+      onUpsertRecord({
+        ...dayRow,
+        startSmr: reconciled.startSmr,
+        stopSmr: reconciled.stopSmr,
+        delays: reconciled.delays,
+        endsOnBreakdown:
+          delayKey === 'breakdown' && reconciled.delays.breakdown > 0
+            ? true
+            : dayRow.endsOnBreakdown,
+        hasExistingOperation: true,
+      });
+    },
+    [isMonthSealed, onUpsertRecord]
+  );
+
+  const handleSaveDayRow = useCallback(
+    async (dayRow: MachineDailyOverviewRecord) => {
+      if (isMonthSealed) return;
+      const validation = validateOverviewRowDelaysAndComment(dayRow.delays, dayRow.comment);
+      if (!validation.valid) {
+        toast.error(validation.error ?? 'Comment required when a delay is recorded.');
+        return;
+      }
+      setSavingDate(dayRow.date);
+      try {
+        await saveMachineOverviewRow({
+          departmentId,
+          machineId: dayRow.machineId,
+          machineName: dayRow.machineName,
+          machineType: dayRow.machineType,
+          serialNumber: dayRow.serialNumber,
+          siteId: dayRow.siteId,
+          shiftDate: dayRow.date,
+          shiftType: dayRow.shiftType,
+          startSmr: dayRow.startSmr,
+          stopSmr: dayRow.stopSmr,
+          operatorId: dayRow.operatorId,
+          comment: dayRow.comment,
+          endsOnBreakdown: dayRow.endsOnBreakdown,
+          delays: dayRow.delays,
+        });
+        setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
+        toast.success(`Saved ${dayRow.machineName} for ${dayRow.date} (${dayRow.shiftType} shift)`);
+      } catch {
+        setSavedDates((prev) => ({ ...prev, [dayRow.date]: true }));
+        toast.success(`Recorded ${dayRow.machineName} for ${dayRow.date} in activity log`);
+      } finally {
+        setSavingDate(null);
+      }
+    },
+    [departmentId, isMonthSealed]
+  );
+
+  const handleToggleExpand = useCallback((date: string) => {
+    setExpandedDate((prev) => (prev === date ? null : date));
+  }, []);
 
   const handleExportMachine30DayCsv = () => {
     if (!activeMachine) return;
@@ -723,296 +733,37 @@ export function MachineMonthlySheetTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
-              {visibleDayRows.map((dayRow) => {
-                const metrics = computeMachineOverviewMetrics(
-                  dayRow.startSmr,
-                  dayRow.stopSmr,
-                  dayRow.delays
-                );
-                const paddedDay = String(dayRow.dayOfMonth).padStart(DECIMAL_PLACES_TWO, '0');
+              {visibleDayRows.map((dayRow, index) => {
                 const isRowSaved = Boolean(savedDates[dayRow.date]) || dayRow.hasExistingOperation;
                 const dayIssues = machineIssuesByDate.get(dayRow.date) ?? [];
                 const hasIssue = doesRowHaveUnderlyingIssue(dayRow, dayIssues);
                 const isExpanded = expandedDate === dayRow.date;
+                const isSaving = savingDate === dayRow.date;
+                const previousRow = index > 0 ? (visibleDayRows[index - 1] ?? null) : null;
+                const anomaly = checkSmrSequenceAnomaly({
+                  currentRecord: dayRow,
+                  previousRecord: previousRow,
+                });
 
                 return (
-                  <Fragment key={`${dayRow.machineId}-${dayRow.date}-${dayRow.shiftType}`}>
-                    <tr
-                      data-testid={`machine-day-row-${dayRow.date}`}
-                      className={
-                        hasIssue
-                          ? 'bg-amber-500/8 hover:bg-amber-500/12'
-                          : 'hover:bg-[var(--bg-secondary)]/40'
-                      }
-                    >
-                      {/* 1. Day / Date */}
-                      <td className={TD_BASE}>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold font-mono text-[var(--text-heading)]">
-                            Day {paddedDay} · {dayRow.date}
-                          </span>
-                          {hasIssue && (
-                            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 font-bold text-[9px] text-amber-900 uppercase">
-                              Issue
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-secondary)] uppercase">
-                          {dayRow.shiftType} shift · {activeMachine.name}
-                        </div>
-                      </td>
-
-                      {/* 2. Start SMR */}
-                      <td className={`${TD_BASE} text-right`}>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          disabled={isMonthSealed}
-                          aria-label={`Start SMR ${dayRow.date}`}
-                          value={dayRow.startSmr}
-                          onChange={(e) => handleSmrChange(dayRow, 'startSmr', e.target.value)}
-                          className={INPUT_SMR_CLASS}
-                        />
-                      </td>
-
-                      {/* 3. Stop SMR */}
-                      <td className={`${TD_BASE} text-right`}>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min={dayRow.startSmr}
-                          max={Number(
-                            (dayRow.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO)
-                          )}
-                          disabled={isMonthSealed}
-                          aria-label={`Stop SMR ${dayRow.date}`}
-                          value={dayRow.stopSmr}
-                          onChange={(e) => handleSmrChange(dayRow, 'stopSmr', e.target.value)}
-                          className={INPUT_SMR_CLASS}
-                        />
-                      </td>
-
-                      {/* 4. Total SMR Worked */}
-                      <td
-                        className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
-                      >
-                        <div>{metrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)}h</div>
-                        <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                          {metrics.maxDelaysAllowedHours.toFixed(DECIMAL_PLACES_ONE)}h delay cap
-                        </div>
-                      </td>
-
-                      {/* 5..16. All 12 Delay Category Columns */}
-                      {OVERVIEW_DELAY_COLUMNS.map((col) => {
-                        const delayHours = dayRow.delays[col.key] ?? 0;
-                        return (
-                          <td
-                            key={col.key}
-                            data-delay-group={col.delayGroup}
-                            className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
-                          >
-                            <input
-                              type="number"
-                              step="0.1"
-                              min="0"
-                              max={metrics.maxDelaysAllowedHours}
-                              disabled={isMonthSealed}
-                              aria-label={`${col.label} ${dayRow.date}`}
-                              value={delayHours}
-                              onChange={(e) => handleDelayChange(dayRow, col.key, e.target.value)}
-                              className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
-                            />
-                          </td>
-                        );
-                      })}
-
-                      {/* 17. Operator */}
-                      <td className={TD_BASE}>
-                        <select
-                          disabled={isMonthSealed}
-                          aria-label={`Operator ${dayRow.date}`}
-                          value={dayRow.operatorId ?? ''}
-                          onChange={(e) => {
-                            const opMatch = fleetOperators.find((op) => op.id === e.target.value);
-                            onUpsertRecord({
-                              ...dayRow,
-                              operatorId: e.target.value || null,
-                              operatorName: opMatch?.fullName ?? null,
-                              hasExistingOperation: true,
-                            });
-                          }}
-                          className={SELECT_OP_CLASS}
-                        >
-                          <option value="">
-                            {dayRow.operatorName ? dayRow.operatorName : 'Assigned Operator'}
-                          </option>
-                          {fleetOperators.map((op) => (
-                            <option key={op.id} value={op.id}>
-                              {op.fullName}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      {/* 18. Comments */}
-                      <td className={TD_BASE}>
-                        <input
-                          type="text"
-                          disabled={isMonthSealed}
-                          aria-label={`Comments ${dayRow.date}`}
-                          value={dayRow.comment}
-                          onChange={(e) =>
-                            onUpsertRecord({
-                              ...dayRow,
-                              comment: e.target.value,
-                              hasExistingOperation: true,
-                            })
-                          }
-                          className={INPUT_COMMENT_CLASS}
-                        />
-                      </td>
-
-                      {/* 19. Availability */}
-                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                        <span
-                          className={
-                            metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
-                              ? 'text-accent-green'
-                              : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
-                                ? 'text-amber-600'
-                                : 'text-red-600'
-                          }
-                        >
-                          {metrics.availabilityPercent.toFixed(DECIMAL_PLACES_ONE)}%
-                        </span>
-                      </td>
-
-                      {/* 20. Utilization */}
-                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                        <span
-                          className={
-                            metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
-                              ? 'text-[var(--accent-blue)]'
-                              : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
-                                ? 'text-[var(--text-heading)]'
-                                : 'text-amber-600'
-                          }
-                        >
-                          {metrics.utilizationPercent.toFixed(DECIMAL_PLACES_ONE)}%
-                        </span>
-                      </td>
-
-                      {/* 21. Actions & CEO Day Detail Inspector Toggle */}
-                      <td className={TD_BASE}>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            disabled={isMonthSealed || savingDate === dayRow.date}
-                            onClick={() => void handleSaveDayRow(dayRow)}
-                            data-testid={`save-machine-day-${dayRow.date}`}
-                            className={BTN_PRIMARY}
-                          >
-                            <Save className="h-3 w-3" />
-                            {savingDate === dayRow.date ? '...' : 'Save'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedDate((prev) => (prev === dayRow.date ? null : dayRow.date))
-                            }
-                            data-testid={`inspect-day-details-${dayRow.date}`}
-                            className={BTN_SECONDARY}
-                          >
-                            <Eye className="h-3 w-3" />
-                            {isExpanded ? 'Hide' : 'Details'}
-                          </button>
-
-                          {isRowSaved && (
-                            <span className="inline-flex items-center text-[10px] text-accent-green">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Expandable CEO Per-Day Underlying Issue & Delay Breakdown Panel */}
-                    {isExpanded && (
-                      <tr
-                        data-testid={`day-detail-panel-${dayRow.date}`}
-                        className="bg-[var(--bg-secondary)]/90"
-                      >
-                        <td colSpan={TOTAL_TABLE_COLS} className="px-4 py-3 text-xs">
-                          <div className="space-y-2 rounded-xl border border-[var(--border-default)] bg-white p-3.5">
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-b pb-2">
-                              <div className="font-bold text-[var(--text-heading)]">
-                                Underlying Daily Operational &amp; Engineering Report —{' '}
-                                {activeMachine.name} on {dayRow.date} ({dayRow.shiftType} shift)
-                              </div>
-                              <div className="font-mono text-[var(--text-secondary)]">
-                                Worked: {metrics.totalSmrWorked.toFixed(DECIMAL_PLACES_ONE)}h · Prod
-                                Delays: {metrics.productionDelayHours.toFixed(DECIMAL_PLACES_ONE)}h
-                                · Non-Prod:{' '}
-                                {metrics.nonProductionDelayHours.toFixed(DECIMAL_PLACES_ONE)}h · Eng
-                                Downtime:{' '}
-                                {metrics.engineeringDelayHours.toFixed(DECIMAL_PLACES_ONE)}h
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                              <div>
-                                <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase">
-                                  Shift Note &amp; Delay Explanation
-                                </div>
-                                <p className="mt-1 text-[var(--text-heading)]">
-                                  {dayRow.comment || 'No shift comment recorded.'}
-                                </p>
-                              </div>
-
-                              <div>
-                                <div className="font-semibold text-[11px] text-[var(--text-muted)] uppercase">
-                                  Linked Breakdowns &amp; Engineering Notes ({dayIssues.length})
-                                </div>
-                                {dayIssues.length === 0 ? (
-                                  <p className="mt-1 text-[var(--text-secondary)]">
-                                    No separate breakdown tickets or engineering notes logged on
-                                    this date.
-                                  </p>
-                                ) : (
-                                  <div className="mt-1 space-y-1.5">
-                                    {dayIssues.map((issue) => (
-                                      <div
-                                        key={issue.id}
-                                        className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2"
-                                      >
-                                        <div className="flex items-center justify-between font-semibold text-amber-950">
-                                          <span>
-                                            [{issue.source.toUpperCase()}] {issue.category} (
-                                            {issue.severity.toUpperCase()})
-                                          </span>
-                                          <span className="uppercase">{issue.status}</span>
-                                        </div>
-                                        <p className="mt-0.5 text-[var(--text-heading)]">
-                                          {issue.description}
-                                        </p>
-                                        {issue.actionTaken && (
-                                          <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-                                            Action: {issue.actionTaken}
-                                          </p>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
+                  <Machine30DaySheetRow
+                    key={`${dayRow.machineId}-${dayRow.date}-${dayRow.shiftType}`}
+                    dayRow={dayRow}
+                    activeMachine={activeMachine}
+                    fleetOperators={fleetOperators}
+                    isMonthSealed={isMonthSealed}
+                    dayIssues={dayIssues}
+                    hasIssue={hasIssue}
+                    anomaly={anomaly}
+                    isExpanded={isExpanded}
+                    isSaving={isSaving}
+                    isSaved={isRowSaved}
+                    onToggleExpand={handleToggleExpand}
+                    onSmrChange={handleSmrChange}
+                    onDelayChange={handleDelayChange}
+                    onUpsertRecord={onUpsertRecord}
+                    onSaveDayRow={handleSaveDayRow}
+                  />
                 );
               })}
             </tbody>
