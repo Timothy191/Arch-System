@@ -35,6 +35,7 @@ export interface QuickLoggerMachineRow {
   serialNumber: string | null;
   startSmr: number;
   stopSmr: number;
+  previousClosingSmr?: number;
   operatorId: string | null;
   operatorName: string | null;
   delays: OverviewDelayHours;
@@ -54,8 +55,11 @@ interface QuickDelayLoggerPanelProps {
   operators: readonly OverviewOperatorOption[];
   selectedMachineId: string;
   onSelectMachine: (machineId: string) => void;
-  onUpdateSmr: (machineId: string, field: 'startSmr' | 'stopSmr', rawValue: string) => void;
-  onUpdateDelay: (machineId: string, key: OverviewDelayKey, rawValue: string) => void;
+  onUpdateSmr: (
+    machineId: string,
+    change: { field: 'startSmr' | 'stopSmr'; rawValue: string }
+  ) => void;
+  onUpdateDelay: (machineId: string, change: { key: OverviewDelayKey; rawValue: string }) => void;
   onUpdateOperator: (machineId: string, operatorId: string) => void;
   onUpdateComment: (machineId: string, comment: string) => void;
   onToggleBreakdown: (machineId: string, checked: boolean) => void;
@@ -69,7 +73,26 @@ interface QuickDelayLoggerPanelProps {
   onToggleSimplifiedView: () => void;
 }
 
-const DURATION_PRESETS: readonly number[] = [0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0];
+const PRESET_HALF_HOUR = 0.5;
+const PRESET_ONE_HOUR = 1.0;
+const PRESET_ONE_HALF_HOUR = 1.5;
+const PRESET_TWO_HOURS = 2.0;
+const PRESET_THREE_HOURS = 3.0;
+const PRESET_FOUR_HOURS = 4.0;
+const PRESET_SIX_HOURS = 6.0;
+const ALLOWANCE_DIFF_EPSILON = 0.01;
+const DECIMAL_PLACES_TWO = 2;
+
+const DURATION_PRESETS: readonly number[] = [
+  0,
+  PRESET_HALF_HOUR,
+  PRESET_ONE_HOUR,
+  PRESET_ONE_HALF_HOUR,
+  PRESET_TWO_HOURS,
+  PRESET_THREE_HOURS,
+  PRESET_FOUR_HOURS,
+  PRESET_SIX_HOURS,
+];
 
 const QUICK_COMMENT_TEMPLATES: Readonly<Record<OverviewDelayGroup, readonly string[]>> = {
   production: [
@@ -150,7 +173,7 @@ export function QuickDelayLoggerPanel({
         if (r.carryOverBreakdown || r.endsOnBreakdown) return true;
         return OVERVIEW_DELAY_COLUMNS.some((col) => {
           const std = STANDARD_OVERVIEW_DELAY_DEFAULTS[col.key] ?? 0;
-          return Math.abs((r.delays[col.key] ?? 0) - std) > 0.01;
+          return Math.abs((r.delays[col.key] ?? 0) - std) > ALLOWANCE_DIFF_EPSILON;
         });
       }).length,
     [rows]
@@ -173,7 +196,9 @@ export function QuickDelayLoggerPanel({
   const nonZeroDelays = OVERVIEW_DELAY_COLUMNS.filter((col) => {
     const hours = selectedRow.delays[col.key] ?? 0;
     const std = STANDARD_OVERVIEW_DELAY_DEFAULTS[col.key] ?? 0;
-    return hours > 0 && (!col.isStandardAllowance || Math.abs(hours - std) > 0.01);
+    return (
+      hours > 0 && (!col.isStandardAllowance || Math.abs(hours - std) > ALLOWANCE_DIFF_EPSILON)
+    );
   });
 
   const handleSelectGroup = (group: OverviewDelayGroup) => {
@@ -277,10 +302,15 @@ export function QuickDelayLoggerPanel({
                 <input
                   type="number"
                   step="0.1"
-                  min="0"
+                  min={selectedRow.previousClosingSmr ?? 0}
                   aria-label="Quick Start SMR"
                   value={selectedRow.startSmr}
-                  onChange={(e) => onUpdateSmr(selectedRow.machineId, 'startSmr', e.target.value)}
+                  onChange={(e) =>
+                    onUpdateSmr(selectedRow.machineId, {
+                      field: 'startSmr',
+                      rawValue: e.target.value,
+                    })
+                  }
                   className={`${INPUT_CONTROL_BASE} font-mono`}
                 />
               </div>
@@ -292,14 +322,27 @@ export function QuickDelayLoggerPanel({
                   type="number"
                   step="0.1"
                   min={selectedRow.startSmr}
-                  max={Number((selectedRow.startSmr + MAX_SHIFT_HOURS).toFixed(2))}
+                  max={Number((selectedRow.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO))}
                   aria-label="Quick Stop SMR"
                   value={selectedRow.stopSmr}
-                  onChange={(e) => onUpdateSmr(selectedRow.machineId, 'stopSmr', e.target.value)}
+                  onChange={(e) =>
+                    onUpdateSmr(selectedRow.machineId, {
+                      field: 'stopSmr',
+                      rawValue: e.target.value,
+                    })
+                  }
                   className={`${INPUT_CONTROL_BASE} font-mono`}
                 />
               </div>
             </div>
+            {selectedRow.error?.includes('SMR') && (
+              <p
+                data-testid="quick-smr-error-banner"
+                className="rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 font-semibold text-[10px] text-red-700"
+              >
+                {selectedRow.error}
+              </p>
+            )}
 
             <div>
               <label className="mb-1 block font-semibold text-[11px] text-[var(--text-secondary)]">
@@ -392,7 +435,10 @@ export function QuickDelayLoggerPanel({
                     aria-label="Quick Delay Hours"
                     value={currentDelayVal}
                     onChange={(e) =>
-                      onUpdateDelay(selectedRow.machineId, activeColumnMeta.key, e.target.value)
+                      onUpdateDelay(selectedRow.machineId, {
+                        key: activeColumnMeta.key,
+                        rawValue: e.target.value,
+                      })
                     }
                     className="w-20 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-1 text-right font-bold font-mono text-[var(--text-heading)] text-xs"
                   />
@@ -409,10 +455,13 @@ export function QuickDelayLoggerPanel({
                     key={preset}
                     type="button"
                     onClick={() =>
-                      onUpdateDelay(selectedRow.machineId, activeColumnMeta.key, String(preset))
+                      onUpdateDelay(selectedRow.machineId, {
+                        key: activeColumnMeta.key,
+                        rawValue: String(preset),
+                      })
                     }
                     className={`cursor-pointer rounded border px-2 py-0.5 font-mono font-semibold text-[11px] transition-colors ${
-                      Math.abs(currentDelayVal - preset) < 0.01
+                      Math.abs(currentDelayVal - preset) < ALLOWANCE_DIFF_EPSILON
                         ? 'border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white'
                         : 'border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-heading)] hover:border-[var(--accent-blue)]/50'
                     }`}

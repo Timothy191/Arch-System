@@ -17,6 +17,7 @@ import {
   reconcileOverviewShiftHoursOnSmrChange,
   STANDARD_OVERVIEW_DELAY_DEFAULTS,
   validateOverviewRowDelaysAndComment,
+  validateSmrOdometerEntry,
 } from '@/lib/shift-sheet-buckets';
 import { bookOutMachineCarryOverBreakdown, saveMachineOverviewRow } from './actions';
 import { QuickDelayLoggerPanel } from './QuickDelayLoggerPanel';
@@ -38,6 +39,7 @@ export interface MachineOverviewInitialRow {
   siteId: string | null;
   startSmr: number;
   stopSmr: number;
+  previousClosingSmr?: number;
   operatorId: string | null;
   operatorName: string | null;
   delays: OverviewDelayHours;
@@ -61,6 +63,7 @@ interface EngineeringOverviewTableProps {
 }
 
 interface EditableMachineRow extends MachineOverviewInitialRow {
+  previousClosingSmr: number;
   endsOnBreakdown: boolean;
   error: string | null;
   saved: boolean;
@@ -117,6 +120,13 @@ const DELAY_GROUP_INPUT_CLASS: Record<OverviewDelayGroup, string> = {
 
 const DEFAULT_ALLOWANCE_COMMENT =
   'Standard shift allowances (Refueling 0.2h, Safety Talks 0.5h, Lunches 0.5h, GES/Maint 0.5h, Tyres/Trams 0.2h, Greasing/Startup 0.5h)';
+const STRICT_HOURS_EPSILON = 0.001;
+const ALLOWANCE_DIFF_EPSILON = 0.01;
+const DECIMAL_PLACES_TWO = 2;
+const HIGH_AVAILABILITY_THRESHOLD = 80;
+const MED_AVAILABILITY_THRESHOLD = 60;
+const HIGH_UTILIZATION_THRESHOLD = 75;
+const MED_UTILIZATION_THRESHOLD = 50;
 
 export function EngineeringOverviewTable({
   departmentId,
@@ -139,6 +149,7 @@ export function EngineeringOverviewTable({
   const [rows, setRows] = useState<EditableMachineRow[]>(() =>
     initialRows.map((r) => ({
       ...r,
+      previousClosingSmr: r.previousClosingSmr ?? r.startSmr,
       comment:
         r.comment ||
         (r.carryOverBreakdown
@@ -150,34 +161,56 @@ export function EngineeringOverviewTable({
     }))
   );
 
-  const updateRowSmr = (machineId: string, field: 'startSmr' | 'stopSmr', rawValue: string) => {
-    const parsed = Number.parseFloat(rawValue);
+  const updateRowSmr = (
+    machineId: string,
+    change: { field: 'startSmr' | 'stopSmr'; rawValue: string }
+  ) => {
+    const parsed = Number.parseFloat(change.rawValue);
     const val = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+    const targetRow = rows.find((r) => r.machineId === machineId);
+    if (targetRow) {
+      const preview = reconcileOverviewShiftHoursOnSmrChange({
+        currentStartSmr: targetRow.startSmr,
+        currentStopSmr: targetRow.stopSmr,
+        changedField: change.field,
+        nextValue: val,
+        delays: targetRow.delays,
+        maxShiftHours: MAX_SHIFT_HOURS,
+        minAllowedStartSmr: targetRow.previousClosingSmr,
+      });
+      if (preview.smrViolation) {
+        toast.error(`${targetRow.machineName}: ${preview.smrViolation}`);
+      }
+    }
     setRows((prev) =>
       prev.map((r) => {
         if (r.machineId !== machineId) return r;
         const reconciled = reconcileOverviewShiftHoursOnSmrChange({
           currentStartSmr: r.startSmr,
           currentStopSmr: r.stopSmr,
-          changedField: field,
+          changedField: change.field,
           nextValue: val,
           delays: r.delays,
           maxShiftHours: MAX_SHIFT_HOURS,
+          minAllowedStartSmr: r.previousClosingSmr,
         });
         return {
           ...r,
           startSmr: reconciled.startSmr,
           stopSmr: reconciled.stopSmr,
           delays: reconciled.delays,
-          error: null,
+          error: reconciled.smrViolation,
           saved: false,
         };
       })
     );
   };
 
-  const updateRowDelay = (machineId: string, key: OverviewDelayKey, rawValue: string) => {
-    const parsed = Number.parseFloat(rawValue);
+  const updateRowDelay = (
+    machineId: string,
+    change: { key: OverviewDelayKey; rawValue: string }
+  ) => {
+    const parsed = Number.parseFloat(change.rawValue);
     const val = Number.isNaN(parsed) ? 0 : Math.min(MAX_SHIFT_HOURS, Math.max(0, parsed));
     setRows((prev) =>
       prev.map((r) => {
@@ -186,14 +219,15 @@ export function EngineeringOverviewTable({
           startSmr: r.startSmr,
           stopSmr: r.stopSmr,
           delays: r.delays,
-          changedKey: key,
+          changedKey: change.key,
           nextDelayValue: val,
           maxShiftHours: MAX_SHIFT_HOURS,
         });
-        const appliedVal = reconciled.delays[key];
+        const appliedVal = reconciled.delays[change.key];
         const isAbnormalOrChanged =
-          !STANDARD_OVERVIEW_DELAY_DEFAULTS[key] ||
-          Math.abs(appliedVal - STANDARD_OVERVIEW_DELAY_DEFAULTS[key]) > 0.001;
+          !STANDARD_OVERVIEW_DELAY_DEFAULTS[change.key] ||
+          Math.abs(appliedVal - STANDARD_OVERVIEW_DELAY_DEFAULTS[change.key]) >
+            STRICT_HOURS_EPSILON;
         const nextComment =
           isAbnormalOrChanged && r.comment === DEFAULT_ALLOWANCE_COMMENT ? '' : r.comment;
 
@@ -202,7 +236,7 @@ export function EngineeringOverviewTable({
           startSmr: reconciled.startSmr,
           stopSmr: reconciled.stopSmr,
           delays: reconciled.delays,
-          endsOnBreakdown: key === 'breakdown' && appliedVal > 0 ? true : r.endsOnBreakdown,
+          endsOnBreakdown: change.key === 'breakdown' && appliedVal > 0 ? true : r.endsOnBreakdown,
           comment: nextComment,
           error: null,
           saved: false,
@@ -288,6 +322,7 @@ export function EngineeringOverviewTable({
             ...r,
             startSmr: nextStartSmr,
             stopSmr: nextStartSmr,
+            previousClosingSmr: nextStartSmr,
             delays: buildCarryOverBreakdownDelays({
               carryOverDelayHours: MAX_SHIFT_HOURS,
               startSmr: nextStartSmr,
@@ -305,6 +340,7 @@ export function EngineeringOverviewTable({
           ...r,
           startSmr: nextStartSmr,
           stopSmr: nextStartSmr,
+          previousClosingSmr: nextStartSmr,
           delays: createStandardOverviewDelays(),
           comment: DEFAULT_ALLOWANCE_COMMENT,
           error: null,
@@ -348,11 +384,17 @@ export function EngineeringOverviewTable({
   };
 
   const validateSingleRow = (row: EditableMachineRow): string | null => {
-    if (row.stopSmr < row.startSmr) {
-      return 'Stop SMR cannot be less than Start SMR.';
+    const smrCheck = validateSmrOdometerEntry({
+      startSmr: row.startSmr,
+      stopSmr: row.stopSmr,
+      minAllowedStartSmr: row.previousClosingSmr,
+      maxAllowedShiftHours: MAX_SHIFT_HOURS,
+    });
+    if (!smrCheck.valid) {
+      return smrCheck.error;
     }
-    const rawWorked = Number((row.stopSmr - row.startSmr).toFixed(2));
-    if (rawWorked > MAX_SHIFT_HOURS + 0.001) {
+    const rawWorked = Number((row.stopSmr - row.startSmr).toFixed(DECIMAL_PLACES_TWO));
+    if (rawWorked > MAX_SHIFT_HOURS + STRICT_HOURS_EPSILON) {
       return `Total SMR worked (${rawWorked.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours.`;
     }
     const metrics = computeMachineOverviewMetrics(
@@ -361,7 +403,7 @@ export function EngineeringOverviewTable({
       row.delays,
       MAX_SHIFT_HOURS
     );
-    if (rawWorked + metrics.totalDelayHours > MAX_SHIFT_HOURS + 0.01) {
+    if (rawWorked + metrics.totalDelayHours > MAX_SHIFT_HOURS + ALLOWANCE_DIFF_EPSILON) {
       return `Combined SMR worked (${rawWorked.toFixed(1)}h) and delays (${metrics.totalDelayHours.toFixed(1)}h) cannot exceed ${MAX_SHIFT_HOURS} hours.`;
     }
     const commentValidation = validateOverviewRowDelaysAndComment(row.delays, row.comment);
@@ -545,7 +587,7 @@ export function EngineeringOverviewTable({
           r.endsOnBreakdown ||
           OVERVIEW_DELAY_COLUMNS.some((col) => {
             const std = STANDARD_OVERVIEW_DELAY_DEFAULTS[col.key] ?? 0;
-            return Math.abs((r.delays[col.key] ?? 0) - std) > 0.01;
+            return Math.abs((r.delays[col.key] ?? 0) - std) > ALLOWANCE_DIFF_EPSILON;
           });
         if (!hasAbnormal) return false;
       } else if (
@@ -778,10 +820,15 @@ export function EngineeringOverviewTable({
                       <input
                         type="number"
                         step="0.1"
-                        min="0"
+                        min={row.previousClosingSmr}
                         aria-label={`Start SMR ${row.machineName}`}
                         value={row.startSmr}
-                        onChange={(e) => updateRowSmr(row.machineId, 'startSmr', e.target.value)}
+                        onChange={(e) =>
+                          updateRowSmr(row.machineId, {
+                            field: 'startSmr',
+                            rawValue: e.target.value,
+                          })
+                        }
                         className={INPUT_SMR_CLASS}
                       />
                     </td>
@@ -792,10 +839,15 @@ export function EngineeringOverviewTable({
                         type="number"
                         step="0.1"
                         min={row.startSmr}
-                        max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(2))}
+                        max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO))}
                         aria-label={`Stop SMR ${row.machineName}`}
                         value={row.stopSmr}
-                        onChange={(e) => updateRowSmr(row.machineId, 'stopSmr', e.target.value)}
+                        onChange={(e) =>
+                          updateRowSmr(row.machineId, {
+                            field: 'stopSmr',
+                            rawValue: e.target.value,
+                          })
+                        }
                         className={INPUT_SMR_CLASS}
                       />
                     </td>
@@ -826,7 +878,12 @@ export function EngineeringOverviewTable({
                             max={metrics.maxDelaysAllowedHours}
                             aria-label={`${col.label} ${row.machineName}`}
                             value={val}
-                            onChange={(e) => updateRowDelay(row.machineId, col.key, e.target.value)}
+                            onChange={(e) =>
+                              updateRowDelay(row.machineId, {
+                                key: col.key,
+                                rawValue: e.target.value,
+                              })
+                            }
                             className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
                           />
                         </td>
@@ -907,9 +964,9 @@ export function EngineeringOverviewTable({
                     <td className={`${TD_BASE} text-right font-bold font-mono`}>
                       <span
                         className={
-                          metrics.availabilityPercent >= 80
+                          metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
                             ? 'text-accent-green'
-                            : metrics.availabilityPercent >= 60
+                            : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
                               ? 'text-amber-600'
                               : 'text-red-600'
                         }
@@ -925,9 +982,9 @@ export function EngineeringOverviewTable({
                     <td className={`${TD_BASE} text-right font-bold font-mono`}>
                       <span
                         className={
-                          metrics.utilizationPercent >= 75
+                          metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
                             ? 'text-[var(--accent-blue)]'
-                            : metrics.utilizationPercent >= 50
+                            : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
                               ? 'text-[var(--text-heading)]'
                               : 'text-amber-600'
                         }

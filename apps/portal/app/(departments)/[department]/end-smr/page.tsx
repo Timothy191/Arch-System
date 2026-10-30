@@ -43,19 +43,23 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
 
   const latestSMRMap = new Map<string, number>();
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
-    if (!latestSMRMap.has(row.machine_id) && row.end_smu !== null && row.end_smu !== undefined) {
-      latestSMRMap.set(row.machine_id, Number(row.end_smu));
+    if (row.end_smu !== null && row.end_smu !== undefined) {
+      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
+      const candidate = Number(row.end_smu);
+      if (candidate > currentMax) {
+        latestSMRMap.set(row.machine_id, candidate);
+      }
     }
   });
   (
     baselineSmrReadings as Array<{ machine_id: string; reading_hours: number | null }> | null
   )?.forEach((row) => {
-    if (
-      !latestSMRMap.has(row.machine_id) &&
-      row.reading_hours !== null &&
-      row.reading_hours !== undefined
-    ) {
-      latestSMRMap.set(row.machine_id, Number(row.reading_hours));
+    if (row.reading_hours !== null && row.reading_hours !== undefined) {
+      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
+      const candidate = Number(row.reading_hours);
+      if (candidate > currentMax) {
+        latestSMRMap.set(row.machine_id, candidate);
+      }
     }
   });
 

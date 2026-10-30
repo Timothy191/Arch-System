@@ -411,10 +411,14 @@ export default async function EngineeringNotesPage({
     shift_date?: string | null;
     shift_type?: string | null;
   }>) {
-    if (!latestSmrByMachine.has(row.machine_id) && row.end_smu !== null) {
-      latestSmrByMachine.set(row.machine_id, Number(row.end_smu));
-    }
     const isSameCurrentShift = row.shift_date === today && row.shift_type === currentShift;
+    if (!isSameCurrentShift && row.end_smu !== null) {
+      const currentMax = latestSmrByMachine.get(row.machine_id) ?? 0;
+      const candidate = Number(row.end_smu);
+      if (candidate > currentMax) {
+        latestSmrByMachine.set(row.machine_id, candidate);
+      }
+    }
     if (!isSameCurrentShift && !latestPrevOpByMachine.has(row.machine_id)) {
       latestPrevOpByMachine.set(row.machine_id, row);
     }
@@ -423,8 +427,12 @@ export default async function EngineeringNotesPage({
     machine_id: string;
     reading_hours: number | null;
   }>) {
-    if (!latestSmrByMachine.has(row.machine_id) && row.reading_hours !== null) {
-      latestSmrByMachine.set(row.machine_id, Number(row.reading_hours));
+    if (row.reading_hours !== null) {
+      const currentMax = latestSmrByMachine.get(row.machine_id) ?? 0;
+      const candidate = Number(row.reading_hours);
+      if (candidate > currentMax) {
+        latestSmrByMachine.set(row.machine_id, candidate);
+      }
     }
   }
 
@@ -555,6 +563,7 @@ export default async function EngineeringNotesPage({
         siteId: (m as { site_id?: string | null }).site_id ?? null,
         startSmr,
         stopSmr,
+        previousClosingSmr: defaultStartSmr,
         operatorId: existingOp.operator_id ?? null,
         operatorName: opRel?.full_name ?? null,
         delays: finalDelays,
@@ -582,6 +591,7 @@ export default async function EngineeringNotesPage({
       siteId: (m as { site_id?: string | null }).site_id ?? null,
       startSmr: defaultStartSmr,
       stopSmr: defaultStartSmr,
+      previousClosingSmr: defaultStartSmr,
       operatorId: null,
       operatorName: null,
       delays: initialDelays,

@@ -452,6 +452,7 @@ export interface SmrOdometerValidationResult {
   startSmrError: string | null;
   stopSmrError: string | null;
   error: string | null;
+  violatedField: 'startSmr' | 'stopSmr' | null;
 }
 
 const SMR_EPSILON = 0.01;
@@ -532,6 +533,8 @@ export function validateSmrOdometerEntry(
   }
 
   const error = startSmrError ?? stopSmrError;
+  const violatedField: 'startSmr' | 'stopSmr' | null =
+    error !== null ? (startSmrError ? 'startSmr' : 'stopSmr') : null;
   return {
     valid: error === null,
     hasInversion,
@@ -540,6 +543,7 @@ export function validateSmrOdometerEntry(
     startSmrError,
     stopSmrError,
     error,
+    violatedField,
   };
 }
 

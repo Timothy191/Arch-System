@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
-import { computeNextShiftSlot } from '@/lib/shift-sheet-buckets';
+import { computeNextShiftSlot, validateSmrOdometerEntry } from '@/lib/shift-sheet-buckets';
 import { DelayEntriesForm } from './DelayEntriesForm';
 
 interface Machine {
@@ -224,6 +224,43 @@ export function MachineOperationsForm({
 
   const hoursWorked = calculateHours();
 
+  const handleSmrFieldChange = (field: 'startSmu' | 'endSmu', rawValue: string) => {
+    const nextStartStr = field === 'startSmu' ? rawValue : formData.startSmu;
+    const nextEndStr = field === 'endSmu' ? rawValue : formData.endSmu;
+    setFormData((prev) => ({ ...prev, [field]: rawValue }));
+
+    const parsedStart = nextStartStr.trim() !== '' ? Number.parseFloat(nextStartStr) : null;
+    const parsedEnd = nextEndStr.trim() !== '' ? Number.parseFloat(nextEndStr) : null;
+    const minAllowedStartSmr =
+      selectedMachine?.latest_smu != null ? Number(selectedMachine.latest_smu) : null;
+
+    const smrCheck = validateSmrOdometerEntry({
+      startSmr: parsedStart !== null && !Number.isNaN(parsedStart) ? parsedStart : null,
+      stopSmr: parsedEnd !== null && !Number.isNaN(parsedEnd) ? parsedEnd : null,
+      minAllowedStartSmr,
+      maxAllowedShiftHours,
+    });
+
+    if (!smrCheck.valid && smrCheck.error) {
+      const targetErrKey = smrCheck.violatedField === 'startSmr' ? 'startSmu' : 'endSmu';
+      setErrors((prev) => ({
+        ...prev,
+        [targetErrKey]: smrCheck.error!,
+      }));
+      toast.error(`${selectedMachine?.name ? `${selectedMachine.name}: ` : ''}${smrCheck.error}`, {
+        id: 'smr-odometer-constraint',
+      });
+      return;
+    }
+
+    setErrors((prev) => {
+      const updated = { ...prev };
+      delete updated.startSmu;
+      delete updated.endSmu;
+      return updated;
+    });
+  };
+
   // Validation
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -250,12 +287,21 @@ export function MachineOperationsForm({
       newErrors.endSmu = 'Stop SMR must be a valid number';
     }
 
-    if (formData.startSmu && formData.endSmu) {
-      const s = parseFloat(formData.startSmu);
-      const e = parseFloat(formData.endSmu);
-      if (e < s) {
-        newErrors.endSmu = 'Stop SMR cannot be less than Start SMR';
-      }
+    const parsedStart = formData.startSmu ? parseFloat(formData.startSmu) : null;
+    const parsedEnd = formData.endSmu ? parseFloat(formData.endSmu) : null;
+    const minAllowedStartSmr =
+      selectedMachine?.latest_smu != null ? Number(selectedMachine.latest_smu) : null;
+
+    const smrCheck = validateSmrOdometerEntry({
+      startSmr: parsedStart !== null && !Number.isNaN(parsedStart) ? parsedStart : null,
+      stopSmr: parsedEnd !== null && !Number.isNaN(parsedEnd) ? parsedEnd : null,
+      minAllowedStartSmr,
+      maxAllowedShiftHours,
+    });
+
+    if (!smrCheck.valid && smrCheck.error) {
+      const targetErrKey = smrCheck.startSmrError !== null ? 'startSmu' : 'endSmu';
+      newErrors[targetErrKey] = smrCheck.error;
     }
 
     if (engDelayHours > 0 && hoursWorked !== null && hoursWorked > maxAllowedShiftHours) {
@@ -535,14 +581,19 @@ export function MachineOperationsForm({
           <div className="space-y-2">
             <label className="block text-[var(--text-secondary)] text-sm">
               Start SMR <span className="text-accent-red">*</span>
+              {selectedMachine?.latest_smu != null && (
+                <span className="ml-2 font-mono text-[11px] text-[var(--accent-blue)]">
+                  (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
+                </span>
+              )}
             </label>
             <input
               type="number"
               step="0.1"
-              min="0"
+              min={selectedMachine?.latest_smu ?? 0}
               placeholder="e.g. 1420.5"
               value={formData.startSmu}
-              onChange={(e) => setFormData((prev) => ({ ...prev, startSmu: e.target.value }))}
+              onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
             {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
@@ -550,14 +601,21 @@ export function MachineOperationsForm({
 
           {/* Stop SMR */}
           <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">Stop SMR</label>
+            <label className="block text-[var(--text-secondary)] text-sm">
+              Stop SMR
+              {formData.startSmu && !Number.isNaN(Number(formData.startSmu)) && (
+                <span className="ml-2 font-mono text-[11px] text-[var(--text-muted)]">
+                  (Min: {Number(formData.startSmu).toFixed(1)}h)
+                </span>
+              )}
+            </label>
             <input
               type="number"
               step="0.1"
-              min="0"
+              min={formData.startSmu || selectedMachine?.latest_smu || 0}
               placeholder="e.g. 1431.0"
               value={formData.endSmu}
-              onChange={(e) => setFormData((prev) => ({ ...prev, endSmu: e.target.value }))}
+              onChange={(e) => handleSmrFieldChange('endSmu', e.target.value)}
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
             {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}

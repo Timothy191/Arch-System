@@ -14,6 +14,7 @@ import {
   OVERVIEW_DELAY_COLUMNS,
   type OverviewDelayHours,
   validateOverviewRowDelaysAndComment,
+  validateSmrOdometerEntry,
 } from '@/lib/shift-sheet-buckets';
 
 // AGENT-TRACE: Explicit allowlist of insertable columns. The previous version
@@ -204,6 +205,43 @@ export async function saveMachineOverviewRow(payload: unknown) {
   }
 
   const serviceClient = createServiceRoleClient();
+
+  const { data: prevOpRow } = await serviceClient
+    .from('machine_operations')
+    .select('end_smu')
+    .eq('machine_id', row.machineId)
+    .lt('shift_date', row.shiftDate)
+    .not('end_smu', 'is', null)
+    .order('shift_date', { ascending: false })
+    .order('end_smu', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const previousClosingSmr =
+    prevOpRow?.end_smu !== null && prevOpRow?.end_smu !== undefined
+      ? Number(prevOpRow.end_smu)
+      : null;
+
+  const smrOdometerCheck = validateSmrOdometerEntry({
+    startSmr: row.startSmr,
+    stopSmr: row.stopSmr,
+    minAllowedStartSmr: previousClosingSmr,
+    maxAllowedShiftHours: MAX_SHIFT_HOURS,
+  });
+
+  if (!smrOdometerCheck.valid) {
+    throw new ValidationError(
+      smrOdometerCheck.error ?? 'Invalid SMR odometer hours for machine shift',
+      {
+        context: {
+          machineId: row.machineId,
+          startSmr: row.startSmr,
+          stopSmr: row.stopSmr,
+          previousClosingSmr,
+        },
+      }
+    );
+  }
 
   // 1. Find or create machine_operations record for this machine + shift
   const { data: existingOps, error: findOpErr } = await serviceClient

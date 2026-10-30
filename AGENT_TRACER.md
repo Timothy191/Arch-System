@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Availability & Utilization KPI Strip Spacing & Control Room Monotonic SMR Odometer Constraints
+
+- **Action:**
+  - Balanced vertical spacing above and below the 6-card KPI Summary Strip (`div.grid.grid-cols-2.gap-3.sm:grid-cols-6`) inside `GlassCard` in [`apps/portal/app/(departments)/[department]/reports/MachineMonthlySheetTab.tsx`](<./apps/portal/app/(departments)/[department]/reports/MachineMonthlySheetTab.tsx>) by wrapping card children in a `space-y-5` inner layout container.
+  - Added `validateSmrOdometerEntry` and enhanced `reconcileOverviewShiftHoursOnSmrChange` in [`apps/portal/lib/shift-sheet-buckets.ts`](./apps/portal/lib/shift-sheet-buckets.ts) to enforce monotonic SMR odometer constraints (`startSmr >= minAllowedStartSmr`, `stopSmr >= startSmr`, `stopSmr - startSmr <= maxAllowedShiftHours`) and return immediate user-facing violation messages (`smrViolation`).
+  - Wired immediate real-time SMR validation, clamping, inline error display, and `toast.error` notifications across Control Room (`EngineeringOverviewTable.tsx`, `QuickDelayLoggerPanel.tsx`, `engineering-notes/page.tsx`, `engineering-notes/actions.ts`, `MachineOperationsForm.tsx`, `machine-operations/page.tsx`, `EndSMRForm.tsx`, `end-smr/page.tsx`) and Availability & Utilization (`MachineMonthlySheetTab.tsx`, `Machine30DaySheetRow.tsx`, `machine-activity-helpers.ts`).
+  - Reconciled 140 synthetic non-monotonic rows in `public.machine_operations` so all fleet machines maintain strictly monotonic odometer trajectories from their `2026-09-30` closing SMR.
+- **Verification:** `EngineeringOverviewTable.test.tsx` (`6/6 PASS`), `ReportsDashboardClient.test.tsx` (`6/6 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Peak Scale Operational Hardening (Supavisor 6543 Pooling, Domain Unification & Turborepo Env Matrix)
 
 - **Action:**

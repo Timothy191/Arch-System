@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { toast } from 'sonner';
 import { createStandardOverviewDelays } from '@/lib/shift-sheet-buckets';
 import {
   EngineeringOverviewTable,
@@ -367,5 +368,47 @@ describe('EngineeringOverviewTable', () => {
         })
       );
     });
+  });
+
+  it('prevents impossible SMR odometer inversions (e.g. entering 100 when machine hours are 1200) and notifies the operator immediately', () => {
+    render(
+      <EngineeringOverviewTable
+        departmentId="dept-cr"
+        shiftDate="2026-10-26"
+        initialShiftType="day"
+        initialRows={[sampleRow]}
+        operators={[]}
+      />
+    );
+
+    const startSmrInput = screen.getByLabelText('Start SMR ADT-101 · Bell B45E');
+    expect(startSmrInput).toHaveValue(1200);
+
+    // Operator attempts to enter 100 when machine hours are 1200
+    fireEvent.change(startSmrInput, { target: { value: '100' } });
+
+    // Start SMR is clamped to 1200 and user is notified immediately via toast.error + inline error
+    expect(startSmrInput).toHaveValue(1200);
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /Impossible SMR: Start SMR \(100\.0h\) cannot be less than machine's current SMR \(1200\.0h\)/i
+      )
+    );
+    expect(
+      screen.getAllByText(
+        /Impossible SMR: Start SMR \(100\.0h\) cannot be less than machine's current SMR \(1200\.0h\)/i
+      ).length
+    ).toBeGreaterThanOrEqual(1);
+
+    // Operator attempts to enter 100 for Stop SMR when Start SMR is 1200
+    const stopSmrInput = screen.getByLabelText('Stop SMR ADT-101 · Bell B45E');
+    fireEvent.change(stopSmrInput, { target: { value: '100' } });
+
+    expect(stopSmrInput).toHaveValue(1200);
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /Impossible SMR: Stop SMR \(100\.0h\) cannot be less than Start SMR \(1200\.0h\)/i
+      )
+    );
   });
 });

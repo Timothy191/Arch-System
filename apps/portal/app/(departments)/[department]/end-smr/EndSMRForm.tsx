@@ -6,19 +6,43 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { invalidateShiftSheetCache } from '@/actions/shift-sheet-cache';
+import { MAX_SHIFT_HOURS, validateSmrOdometerEntry } from '@/lib/shift-sheet-buckets';
+
+interface EndSmrMachineItem {
+  id: string;
+  name: string;
+  machine_type: string;
+  site_id?: string | null;
+  latest_smu?: number | null;
+}
+
+interface EndSmrSiteItem {
+  id: string;
+  name: string;
+}
+
+interface EndSmrOperatorItem {
+  id: string;
+  full_name: string;
+  employee_code: string;
+}
 
 interface Props {
   departmentId: string;
-  machines: any[];
-  sites: any[];
-  operators: any[];
+  machines: EndSmrMachineItem[];
+  sites: EndSmrSiteItem[];
+  operators: EndSmrOperatorItem[];
   shiftDate: string;
 }
+
+const DECIMAL_PLACES_TWO = 2;
+const DOZER_ROLLOVER_BCM_PER_HOUR = 250;
 
 export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate }: Props) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smrError, setSmrError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     machineId: '',
@@ -33,7 +57,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
     holesDrilled: '',
   });
 
-  const [selectedMachine, setSelectedMachine] = useState<any>(null);
+  const [selectedMachine, setSelectedMachine] = useState<EndSmrMachineItem | null>(null);
 
   useEffect(() => {
     const machine = machines.find((m) => m.id === formData.machineId);
@@ -54,6 +78,34 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
       ? Number(formData.endSmu) - Number(formData.startSmu)
       : null;
 
+  const handleSmrFieldChange = (field: 'startSmu' | 'endSmu', rawValue: string) => {
+    const nextStartStr = field === 'startSmu' ? rawValue : formData.startSmu;
+    const nextEndStr = field === 'endSmu' ? rawValue : formData.endSmu;
+    setFormData((prev) => ({ ...prev, [field]: rawValue }));
+
+    const parsedStart = nextStartStr.trim() !== '' ? Number.parseFloat(nextStartStr) : null;
+    const parsedEnd = nextEndStr.trim() !== '' ? Number.parseFloat(nextEndStr) : null;
+    const minAllowedStartSmr =
+      selectedMachine?.latest_smu != null ? Number(selectedMachine.latest_smu) : null;
+
+    const smrCheck = validateSmrOdometerEntry({
+      startSmr: parsedStart !== null && !Number.isNaN(parsedStart) ? parsedStart : null,
+      stopSmr: parsedEnd !== null && !Number.isNaN(parsedEnd) ? parsedEnd : null,
+      minAllowedStartSmr,
+      maxAllowedShiftHours: MAX_SHIFT_HOURS,
+    });
+
+    if (!smrCheck.valid && smrCheck.error) {
+      setSmrError(smrCheck.error);
+      toast.error(`${selectedMachine?.name ? `${selectedMachine.name}: ` : ''}${smrCheck.error}`, {
+        id: 'end-smr-odometer-constraint',
+      });
+      return;
+    }
+
+    setSmrError(null);
+  };
+
   const validate = () => {
     if (!formData.machineId) return 'Machine is required.';
     if (!formData.operatorId) return 'Operator is required.';
@@ -62,8 +114,18 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
       return 'Start SMR must be a valid number.';
     if (!formData.endSmu || Number.isNaN(Number(formData.endSmu)))
       return 'End SMR must be a valid number.';
-    if (Number(formData.endSmu) < Number(formData.startSmu))
-      return 'End SMR cannot be less than Start SMR.';
+
+    const minAllowedStartSmr =
+      selectedMachine?.latest_smu != null ? Number(selectedMachine.latest_smu) : null;
+    const smrCheck = validateSmrOdometerEntry({
+      startSmr: Number(formData.startSmu),
+      stopSmr: Number(formData.endSmu),
+      minAllowedStartSmr,
+      maxAllowedShiftHours: MAX_SHIFT_HOURS,
+    });
+    if (!smrCheck.valid && smrCheck.error) {
+      return smrCheck.error;
+    }
 
     if (isDrillRig) {
       if (!formData.blockDrilled?.trim()) return 'Block Drilled is required for Drill Rigs.';
@@ -104,7 +166,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
         .eq('log_date', shiftDate)
         .single();
 
-      const payload: any = {
+      const payload: Record<string, string | number> = {
         department_id: departmentId,
         machine_id: formData.machineId,
         operator_id: formData.operatorId,
@@ -125,7 +187,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
       if (isDrillRig) {
         payload.block_drilled = formData.blockDrilled.trim();
         payload.meters_drilled = parseFloat(formData.metersDrilled);
-        payload.holes_drilled = parseInt(formData.holesDrilled, 10);
+        payload.holes_drilled = Number.parseInt(formData.holesDrilled, 10);
       }
 
       const { error } = await supabase.from('machine_operations').insert(payload);
@@ -142,6 +204,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
       }
 
       toast.success('End SMR saved successfully');
+      setSmrError(null);
       setFormData({
         machineId: '',
         operatorId: '',
@@ -155,8 +218,9 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
       });
       await invalidateShiftSheetCache({ departmentId }).catch(() => {});
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || 'Unknown error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -268,12 +332,18 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
           <div className="space-y-2">
             <label className="block text-[var(--text-secondary)] text-sm">
               Start SMR <span className="text-accent-red">*</span>
+              {selectedMachine?.latest_smu != null && (
+                <span className="ml-2 font-mono text-[11px] text-[var(--accent-blue)]">
+                  (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
+                </span>
+              )}
             </label>
             <input
               type="number"
               step="0.1"
+              min={selectedMachine?.latest_smu ?? 0}
               value={formData.startSmu}
-              onChange={(e) => setFormData((prev) => ({ ...prev, startSmu: e.target.value }))}
+              onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
@@ -286,12 +356,22 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
             <input
               type="number"
               step="0.1"
+              min={formData.startSmu || selectedMachine?.latest_smu || 0}
               value={formData.endSmu}
-              onChange={(e) => setFormData((prev) => ({ ...prev, endSmu: e.target.value }))}
+              onChange={(e) => handleSmrFieldChange('endSmu', e.target.value)}
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             />
           </div>
         </div>
+
+        {smrError && (
+          <p
+            data-testid="end-smr-error-banner"
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 font-medium text-red-700 text-xs"
+          >
+            {smrError}
+          </p>
+        )}
 
         {/* DRILLING PRODUCTION SECTION */}
         {isDrillRig && (
@@ -356,7 +436,7 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
               <div className="flex items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-3">
                 <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
                 <span className="font-medium text-2xl text-[var(--accent-blue)]">
-                  {hoursWorked.toFixed(2)}h
+                  {hoursWorked.toFixed(DECIMAL_PLACES_TWO)}h
                 </span>
                 <span className="text-[var(--text-muted)] text-xs">
                   (SMR calculated: End - Start)
@@ -374,13 +454,17 @@ export function EndSMRForm({ departmentId, machines, sites, operators, shiftDate
                     Roll-over Amount:
                   </span>
                   <span className="font-mono text-[var(--text-muted)] text-xs">
-                    ({(hoursWorked ?? 0).toFixed(2)}h &times; 250 = Total Roll-over)
+                    ({(hoursWorked ?? 0).toFixed(DECIMAL_PLACES_TWO)}h &times;{' '}
+                    {DOZER_ROLLOVER_BCM_PER_HOUR} = Total Roll-over)
                   </span>
                 </div>
                 <div className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3.5 py-1.5">
                   <span className="text-[var(--text-muted)] text-xs">Total Roll-over:</span>
                   <span className="font-mono font-semibold text-[var(--accent-blue)] text-xl">
-                    {Number(((hoursWorked ?? 0) * 250).toFixed(1)).toLocaleString()} BCM
+                    {Number(
+                      ((hoursWorked ?? 0) * DOZER_ROLLOVER_BCM_PER_HOUR).toFixed(1)
+                    ).toLocaleString()}{' '}
+                    BCM
                   </span>
                 </div>
               </div>
