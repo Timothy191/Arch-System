@@ -25,7 +25,7 @@ export const autonomousScadaSimulationFn = inngest.createFunction(
       // Fetch active machines
       const { data: machines, error: mError } = await supabase
         .from('machines')
-        .select('id, machine_type, name')
+        .select('id, department_id, machine_type, name')
         .eq('active', true)
         .limit(10);
 
@@ -36,27 +36,22 @@ export const autonomousScadaSimulationFn = inngest.createFunction(
       const operations = [];
 
       for (const machine of machines) {
+        const recordedAt = new Date().toISOString();
         const payload = {
           machine_id: machine.id,
+          department_id: (machine as { department_id?: string }).department_id,
           engine_rpm: 1000 + Math.floor(Math.random() * 1000),
           engine_temp: 70 + Math.floor(Math.random() * 20),
           hydraulic_pressure: 200 + Math.floor(Math.random() * 50),
           vibration_level: 1 + Math.random() * 2,
           fuel_level: 20 + Math.floor(Math.random() * 80),
           bit_depth: machine.machine_type === 'drill_rig' ? Math.floor(Math.random() * 100) : null,
-          recorded_at: new Date().toISOString(),
+          recorded_at: recordedAt,
+          year_month: recordedAt.slice(0, 7),
         };
 
-        // Insert into scada_telemetry
-        operations.push(
-          supabase.from('scada_telemetry').insert({
-            machine_id: payload.machine_id,
-            timestamp: payload.recorded_at,
-            sensor_id: `sys_gen_${machine.id}`,
-            value: payload.engine_rpm,
-            metadata: payload,
-          })
-        );
+        // Insert into canonical machine_telemetry table
+        operations.push(supabase.from('machine_telemetry').insert(payload));
       }
 
       await Promise.allSettled(operations);

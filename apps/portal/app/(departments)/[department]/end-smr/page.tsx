@@ -30,8 +30,8 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
       .limit(500),
     supabase
       .from('smr_readings')
-      .select('machine_id, reading_hours')
-      .order('reading_date', { ascending: false })
+      .select('meter_id, reading')
+      .order('reading_at', { ascending: false })
       .limit(200),
     supabase.from('sites').select('id, name').eq('active', true).order('name'),
     supabase
@@ -51,17 +51,17 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
       }
     }
   });
-  (
-    baselineSmrReadings as Array<{ machine_id: string; reading_hours: number | null }> | null
-  )?.forEach((row) => {
-    if (row.reading_hours !== null && row.reading_hours !== undefined) {
-      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
-      const candidate = Number(row.reading_hours);
-      if (candidate > currentMax) {
-        latestSMRMap.set(row.machine_id, candidate);
+  (baselineSmrReadings as Array<{ meter_id: string; reading: number | null }> | null)?.forEach(
+    (row) => {
+      if (row.reading !== null && row.reading !== undefined && row.meter_id) {
+        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
+        const candidate = Number(row.reading);
+        if (candidate > currentMax) {
+          latestSMRMap.set(row.meter_id, candidate);
+        }
       }
     }
-  });
+  );
 
   const machinesWithSmu = (machines || []).map((m) => ({
     ...m,

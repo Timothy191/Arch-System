@@ -25,9 +25,8 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
       // AGENT-TRACE: Fetch active operational departments
       const { data: departments, error: deptError } = await serviceRole
         .from('departments')
-        .select('id, name, slug')
-        .eq('type', 'operational')
-        .eq('active', true);
+        .select('id, name, display_name')
+        .is('deleted_at', null);
 
       if (deptError) throw deptError;
       if (!departments || departments.length === 0) {
@@ -44,10 +43,10 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
         // AGENT-TRACE: Check if today's shift log has already been closed out
         const { data: shiftLogs, error: logErrorDb } = await serviceRole
           .from('daily_logs')
-          .select('id, status')
+          .select('id, sync_status')
           .eq('department_id', dept.id)
-          .eq('date', today)
-          .eq('shift_type', currentShift);
+          .eq('log_date', today)
+          .eq('shift', currentShift);
 
         if (logErrorDb) {
           logError(logErrorDb, {
@@ -57,7 +56,12 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
           continue;
         }
 
-        const isClosed = shiftLogs?.some((l) => l.status === 'closed' || l.status === 'verified');
+        const isClosed = shiftLogs?.some((l) => {
+          const statusVal =
+            (l as { sync_status?: string; status?: string }).sync_status ??
+            (l as { status?: string }).status;
+          return statusVal === 'closed' || statusVal === 'verified' || statusVal === 'synced';
+        });
 
         if (!isClosed) {
           // Log audit reminder event for handover

@@ -146,9 +146,9 @@ export const shiftIntegrityReportFn = inngest.createFunction(
 
       const { data: machineOps, error: opsError } = await serviceRole
         .from('machine_operations')
-        .select('id, operation_date, department_id')
-        .gte('operation_date', startDateStr)
-        .lte('operation_date', endDateStr);
+        .select('id, shift_date, department_id')
+        .gte('shift_date', startDateStr)
+        .lte('shift_date', endDateStr);
 
       if (opsError) throw opsError;
 

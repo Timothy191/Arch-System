@@ -186,18 +186,33 @@ export function MachineOperationsForm({
     return () => clearInterval(interval);
   }, [formData, departmentId]);
 
-  // Restore from localStorage on mount
+  // Restore from localStorage on mount (guarding against stale startSmu below machine latest_smu)
   useEffect(() => {
     const saved = localStorage.getItem(getAutoSaveKey(departmentId));
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setFormData((prev) => ({ ...prev, ...parsed }));
+        const restoredMachine = parsed?.machineId
+          ? machines.find((m) => m.id === parsed.machineId)
+          : null;
+        const latestSmu =
+          restoredMachine?.latest_smu != null ? Number(restoredMachine.latest_smu) : null;
+        const parsedStart = parsed?.startSmu ? Number.parseFloat(String(parsed.startSmu)) : null;
+        const safeStartSmu =
+          latestSmu !== null &&
+          (parsedStart === null || Number.isNaN(parsedStart) || parsedStart < latestSmu)
+            ? String(latestSmu)
+            : (parsed?.startSmu ?? '');
+        setFormData((prev) => ({
+          ...prev,
+          ...parsed,
+          startSmu: safeStartSmu,
+        }));
       } catch {
         // ignore parse errors
       }
     }
-  }, [departmentId]);
+  }, [departmentId, machines]);
 
   // Pre-populate operator if there's a pattern
   useEffect(() => {
@@ -382,11 +397,29 @@ export function MachineOperationsForm({
               : 'Other';
       }
 
-      const { data, error } = await supabase
+      const { data: existingShiftOps } = await supabase
         .from('machine_operations')
-        .insert(insertPayload as never)
-        .select()
-        .single();
+        .select('id')
+        .eq('department_id', departmentId)
+        .eq('machine_id', formData.machineId)
+        .eq('shift_date', today)
+        .eq('shift_type', formData.shiftType)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const existingOpId = existingShiftOps?.[0]?.id;
+      const { data, error } = existingOpId
+        ? await supabase
+            .from('machine_operations')
+            .update(insertPayload as never)
+            .eq('id', existingOpId)
+            .select()
+            .single()
+        : await supabase
+            .from('machine_operations')
+            .insert(insertPayload as never)
+            .select()
+            .single();
 
       if (error) throw error;
 

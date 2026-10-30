@@ -49,12 +49,6 @@ jest.mock('@repo/utils', () => ({
   getCurrentShift: () => 'day',
 }));
 
-jest.mock('@repo/supabase/client', () => ({
-  createBrowserSupabaseClient: jest.fn(),
-}));
-
-const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
-
 jest.mock('lucide-react', () => ({
   Plus: () => <div data-testid="icon-plus" />,
   X: () => <div data-testid="icon-x" />,
@@ -275,11 +269,6 @@ describe('DozerRollForm', () => {
   // ── 10. Zod validation: invalid departmentId ────────────────────────────
 
   it('shows Zod validation error for invalid departmentId', async () => {
-    const mockInsert = jest.fn().mockResolvedValue({ error: null });
-    createBrowserSupabaseClient.mockReturnValue({
-      from: jest.fn(() => ({ insert: mockInsert })),
-    });
-
     render(<DozerRollForm departmentId="not-a-uuid" dozers={mockDozers} today="2026-06-15" />);
 
     openForm();

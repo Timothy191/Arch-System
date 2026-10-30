@@ -531,40 +531,31 @@ export async function getRecentNeo300Jobs(limit = 10): Promise<CardPrintJob[]> {
   const { data: jobs, error } = await supabase
     .from('print_jobs')
     .select(
-      'id, personnel_id, employee_name, role_title, qr_code_data, status, created_at, printer_id'
+      'id, personnel_id, employee_name, role_title, qr_code_data, status, queued_at, printer_id'
     )
-    .order('created_at', { ascending: false })
+    .order('queued_at', { ascending: false })
     .limit(limit);
 
   if (error) {
-    const fallback = await supabase
-      .from('print_jobs')
-      .select(
-        'id, personnel_id, employee_name, role_title, qr_code_data, status, queued_at, printer_id'
-      )
-      .order('queued_at', { ascending: false })
-      .limit(limit);
-
-    if (fallback.error) {
-      throw new DatabaseError('Failed to load print jobs', {
-        table: 'print_jobs',
-        cause: fallback.error,
-      });
-    }
-
-    return (fallback.data ?? []).map((j) => ({
-      id: j.id,
-      personnel_id: j.personnel_id,
-      employee_name: j.employee_name,
-      role_title: j.role_title,
-      qr_code_data: j.qr_code_data,
-      status: j.status,
-      created_at: (j as { queued_at?: string }).queued_at ?? new Date().toISOString(),
-      printer_id: j.printer_id,
-    }));
+    throw new DatabaseError('Failed to load print jobs', {
+      table: 'print_jobs',
+      cause: error,
+    });
   }
 
-  return (jobs ?? []) as CardPrintJob[];
+  return (jobs ?? []).map((j) => ({
+    id: j.id,
+    personnel_id: j.personnel_id,
+    employee_name: j.employee_name,
+    role_title: j.role_title,
+    qr_code_data: j.qr_code_data,
+    status: j.status,
+    created_at:
+      (j as { queued_at?: string; created_at?: string }).queued_at ??
+      (j as { created_at?: string }).created_at ??
+      new Date().toISOString(),
+    printer_id: j.printer_id,
+  }));
 }
 
 /**

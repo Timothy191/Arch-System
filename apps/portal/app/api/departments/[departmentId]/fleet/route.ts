@@ -40,8 +40,8 @@ export async function GET(
     // so the UI grid doesn't crash if the seed hasn't run.
     const { data, error } = await supabase
       .from('fleet')
-      .select('id, code, category, status, hour_meter')
-      .order('code');
+      .select('id, fleet_code, vehicle_type, registration_number, make, model, status')
+      .order('fleet_code');
 
     if (error && error.code !== '42P01') {
       return NextResponse.json(
@@ -50,7 +50,14 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(data || []);
+    const mapped = (data || []).map((row) => ({
+      ...row,
+      code: row.fleet_code,
+      category: row.vehicle_type,
+      hour_meter: 0,
+    }));
+
+    return NextResponse.json(mapped);
   } catch (error) {
     return NextResponse.json(
       { success: false, error: { message: 'Failed to fetch fleet', code: 'API_ERROR' } },

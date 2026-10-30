@@ -10,11 +10,16 @@ async function notifyEngineering(equipmentId: string, description: string) {
   );
 
   const supabase = createServiceRoleClient();
-  const { error } = await supabase.from('app_notifications').insert({
-    title: 'Equipment Breakdown',
-    message: `Equipment ${equipmentId} reported broken: ${description}`,
-    priority: 'high',
-    department: 'engineering',
+  const { error } = await supabase.from('audit_logs').insert({
+    action: 'EQUIPMENT_BREAKDOWN_NOTIFICATION',
+    table_name: 'fleet',
+    new_data: {
+      equipment_id: equipmentId,
+      title: 'Equipment Breakdown',
+      message: `Equipment ${equipmentId} reported broken: ${description}`,
+      priority: 'high',
+      department: 'engineering',
+    },
   });
 
   if (error && error.code !== '42P01') {
@@ -32,11 +37,16 @@ async function escalateToSupervisor(equipmentId: string) {
   );
 
   const supabase = createServiceRoleClient();
-  const { error } = await supabase.from('app_notifications').insert({
-    title: 'Equipment Escalation',
-    message: `Equipment ${equipmentId} has been down for over 24 hours without resolution.`,
-    priority: 'critical',
-    department: 'management',
+  const { error } = await supabase.from('audit_logs').insert({
+    action: 'EQUIPMENT_ESCALATION_NOTIFICATION',
+    table_name: 'fleet',
+    new_data: {
+      equipment_id: equipmentId,
+      title: 'Equipment Escalation',
+      message: `Equipment ${equipmentId} has been down for over 24 hours without resolution.`,
+      priority: 'critical',
+      department: 'management',
+    },
   });
 
   if (error && error.code !== '42P01') {

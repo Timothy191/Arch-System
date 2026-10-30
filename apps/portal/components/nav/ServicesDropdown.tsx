@@ -87,7 +87,11 @@ function useSafetyAlerts() {
         timestamp: Date.now() - 7200000,
       },
     ];
-    window.localStorage.setItem('arch-safety-alerts', JSON.stringify(seed));
+    try {
+      window.localStorage.setItem('arch-safety-alerts', JSON.stringify(seed));
+    } catch {
+      /* ignore — localStorage may be full or unavailable */
+    }
     return seed;
   });
 

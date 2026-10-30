@@ -32,10 +32,9 @@ describe('dailyPdfReportGenerationFn', () => {
   });
 
   it('aggregates daily production data and creates generated_reports record', async () => {
-    const departments = [{ id: 'dept-ops', name: 'Operations', slug: 'operations' }];
-    const mockDeptFinalEq = jest.fn().mockResolvedValue({ data: departments, error: null });
-    const mockDeptFirstEq = jest.fn().mockReturnValue({ eq: mockDeptFinalEq });
-    const mockDeptSelect = jest.fn().mockReturnValue({ eq: mockDeptFirstEq });
+    const departments = [{ id: 'dept-ops', name: 'Operations', display_name: 'Operations' }];
+    const mockDeptIs = jest.fn().mockResolvedValue({ data: departments, error: null });
+    const mockDeptSelect = jest.fn().mockReturnValue({ is: mockDeptIs });
 
     // Production logs
     const mockProdSecondEq = jest.fn().mockResolvedValue({

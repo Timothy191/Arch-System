@@ -11,18 +11,18 @@ async function createUser(email: string) {
     const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('employees')
-      .select('id, email')
-      .eq('email', email)
+      .select('id, employee_code, full_name')
+      .eq('employee_code', email)
       .maybeSingle();
 
     if (error && error.code !== '42P01') {
       logError(error, { context: 'create_user_step', email });
     }
 
-    const row = data as { id?: string; email?: string } | null;
+    const row = data as { id?: string; employee_code?: string; full_name?: string } | null;
     return {
       id: row?.id || `usr_${Date.now()}`,
-      email: row?.email || email,
+      email,
       createdAt: new Date().toISOString(),
     };
   } catch {

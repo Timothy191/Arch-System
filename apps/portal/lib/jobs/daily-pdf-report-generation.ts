@@ -37,9 +37,8 @@ export const dailyPdfReportGenerationFn = inngest.createFunction(
       // AGENT-TRACE: Fetch active operational departments
       const { data: departments, error: deptError } = await serviceRole
         .from('departments')
-        .select('id, name, slug')
-        .eq('type', 'operational')
-        .eq('active', true);
+        .select('id, name, display_name')
+        .is('deleted_at', null);
 
       if (deptError) throw deptError;
 
@@ -49,16 +48,16 @@ export const dailyPdfReportGenerationFn = inngest.createFunction(
         // Fetch production logs for the shift
         const { data: productionLogs } = await serviceRole
           .from('production_logs')
-          .select('coal_tonnes, waste_tonnes, seam, pit')
-          .eq('department_id', dept.id)
-          .eq('date', targetDate);
+          .select('coal_tonnes, waste_tonnes, daily_logs!inner(department_id)')
+          .eq('daily_logs.department_id', dept.id)
+          .eq('daily_log_date', targetDate);
 
         // Fetch machine hours
         const { data: machineHours } = await serviceRole
           .from('machine_hours')
-          .select('hours_operated, machine_id')
-          .eq('department_id', dept.id)
-          .eq('date', targetDate);
+          .select('hours_worked, machine_id, daily_logs!inner(department_id)')
+          .eq('daily_logs.department_id', dept.id)
+          .eq('daily_log_date', targetDate);
 
         // Fetch breakdowns
         const { data: breakdowns } = await serviceRole
@@ -73,17 +72,27 @@ export const dailyPdfReportGenerationFn = inngest.createFunction(
           0
         );
         const totalHours = (machineHours || []).reduce(
-          (sum, m) => sum + (m.hours_operated ?? 0),
+          (sum, m) =>
+            sum +
+            ((m as { hours_worked?: number; hours_operated?: number }).hours_worked ??
+              (m as { hours_operated?: number }).hours_operated ??
+              0),
           0
         );
 
         const reportSummary = {
           department_id: dept.id,
-          date_from: targetDate,
-          date_to: targetDate,
-          total_shifts: 1,
-          total_coal_tonnes: totalCoal,
-          total_waste_tonnes: totalWaste,
+          report_date: targetDate,
+          shift_type: shiftType,
+          report_data: {
+            date_from: targetDate,
+            date_to: targetDate,
+            total_shifts: 1,
+            total_coal_tonnes: totalCoal,
+            total_waste_tonnes: totalWaste,
+            total_operating_hours: totalHours,
+            breakdown_count: breakdowns?.length ?? 0,
+          },
           generated_at: new Date().toISOString(),
         };
 

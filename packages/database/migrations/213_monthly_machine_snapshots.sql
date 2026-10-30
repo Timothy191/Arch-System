@@ -40,15 +40,11 @@ CREATE POLICY "Employees can view monthly machine snapshots"
   USING (
     EXISTS (
       SELECT 1 FROM public.employees e
-      WHERE e.id = auth.uid()
+      WHERE e.auth_id = (SELECT auth.uid())
         AND (
-          e.role IN ('system_admin', 'executive', 'auditor')
+          e.role IN ('system_admin', 'executive', 'auditor', 'admin', 'super_admin')
           OR e.department_id = monthly_machine_snapshots.department_id
-          OR EXISTS (
-            SELECT 1 FROM public.employee_departments ed
-            WHERE ed.employee_id = e.id
-              AND ed.department_id = monthly_machine_snapshots.department_id
-          )
+          OR monthly_machine_snapshots.department_id = ANY(e.accessible_departments)
         )
     )
   );
@@ -61,11 +57,11 @@ CREATE POLICY "Supervisors and admins can manage monthly machine snapshots"
   USING (
     EXISTS (
       SELECT 1 FROM public.employees e
-      WHERE e.id = auth.uid()
+      WHERE e.auth_id = (SELECT auth.uid())
         AND (
-          e.role IN ('system_admin', 'executive', 'admin', 'supervisor', 'manager')
+          e.role IN ('system_admin', 'executive', 'admin', 'super_admin', 'supervisor', 'manager')
           OR (
-            e.department_id = monthly_machine_snapshots.department_id
+            (e.department_id = monthly_machine_snapshots.department_id OR monthly_machine_snapshots.department_id = ANY(e.accessible_departments))
             AND e.role IN ('engineer', 'shift_boss')
           )
         )
@@ -74,11 +70,11 @@ CREATE POLICY "Supervisors and admins can manage monthly machine snapshots"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.employees e
-      WHERE e.id = auth.uid()
+      WHERE e.auth_id = (SELECT auth.uid())
         AND (
-          e.role IN ('system_admin', 'executive', 'admin', 'supervisor', 'manager')
+          e.role IN ('system_admin', 'executive', 'admin', 'super_admin', 'supervisor', 'manager')
           OR (
-            e.department_id = monthly_machine_snapshots.department_id
+            (e.department_id = monthly_machine_snapshots.department_id OR monthly_machine_snapshots.department_id = ANY(e.accessible_departments))
             AND e.role IN ('engineer', 'shift_boss')
           )
         )

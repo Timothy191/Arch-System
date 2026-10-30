@@ -195,6 +195,7 @@ export function useAppVolume() {
   });
 
   const persist = useCallback((v: number, m: boolean) => {
+    if (typeof window === 'undefined') return;
     window.localStorage.setItem('arch-app-volume', String(v));
     window.localStorage.setItem('arch-app-muted', String(m));
   }, []);
@@ -232,7 +233,9 @@ export function useNotificationCount() {
 
   const clear = useCallback(() => {
     setCount(0);
-    window.localStorage.setItem('arch-tray-notifications', '0');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('arch-tray-notifications', '0');
+    }
   }, []);
 
   return { count, clear };

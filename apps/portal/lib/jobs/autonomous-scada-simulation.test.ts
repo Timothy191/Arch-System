@@ -77,7 +77,7 @@ describe('autonomousScadaSimulationFn', () => {
 
     mockFrom.mockImplementation((table: string) => {
       if (table === 'machines') return { select: mockSelect };
-      if (table === 'scada_telemetry') return { insert: mockInsert };
+      if (table === 'machine_telemetry') return { insert: mockInsert };
       return {};
     });
 
@@ -92,21 +92,13 @@ describe('autonomousScadaSimulationFn', () => {
     const drillInsert = mockInsert.mock.calls[0][0];
     expect(drillInsert).toMatchObject({
       machine_id: 'mach-drill-1',
-      sensor_id: 'sys_gen_mach-drill-1',
-      metadata: expect.objectContaining({
-        machine_id: 'mach-drill-1',
-        bit_depth: expect.any(Number),
-      }),
+      bit_depth: expect.any(Number),
     });
 
     const truckInsert = mockInsert.mock.calls[1][0];
     expect(truckInsert).toMatchObject({
       machine_id: 'mach-truck-2',
-      sensor_id: 'sys_gen_mach-truck-2',
-      metadata: expect.objectContaining({
-        machine_id: 'mach-truck-2',
-        bit_depth: null,
-      }),
+      bit_depth: null,
     });
 
     expect(mockRecordJobExecution).toHaveBeenCalledWith(

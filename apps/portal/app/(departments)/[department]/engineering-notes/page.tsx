@@ -182,8 +182,8 @@ export default async function EngineeringNotesPage({
       .limit(500),
     supabase
       .from('smr_readings')
-      .select('machine_id, reading_hours')
-      .order('reading_date', { ascending: false })
+      .select('meter_id, reading')
+      .order('reading_at', { ascending: false })
       .limit(200),
     supabase.from('departments').select('id').eq('name', 'engineering').maybeSingle(),
     supabase
@@ -424,14 +424,14 @@ export default async function EngineeringNotesPage({
     }
   }
   for (const row of (baselineSmrReadings ?? []) as Array<{
-    machine_id: string;
-    reading_hours: number | null;
+    meter_id: string;
+    reading: number | null;
   }>) {
-    if (row.reading_hours !== null) {
-      const currentMax = latestSmrByMachine.get(row.machine_id) ?? 0;
-      const candidate = Number(row.reading_hours);
+    if (row.reading !== null && row.meter_id) {
+      const currentMax = latestSmrByMachine.get(row.meter_id) ?? 0;
+      const candidate = Number(row.reading);
       if (candidate > currentMax) {
-        latestSmrByMachine.set(row.machine_id, candidate);
+        latestSmrByMachine.set(row.meter_id, candidate);
       }
     }
   }

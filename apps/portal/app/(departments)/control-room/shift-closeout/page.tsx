@@ -40,8 +40,8 @@ async function ShiftCloseoutSection() {
       .limit(500),
     supabase
       .from('smr_readings')
-      .select('machine_id, reading_hours')
-      .order('reading_date', { ascending: false })
+      .select('meter_id, reading')
+      .order('reading_at', { ascending: false })
       .limit(200),
     supabase
       .from('control_room_shift_reports')
@@ -55,21 +55,25 @@ async function ShiftCloseoutSection() {
 
   const latestSMRMap = new Map<string, number>();
   (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
-    if (!latestSMRMap.has(row.machine_id) && row.end_smu !== null && row.end_smu !== undefined) {
-      latestSMRMap.set(row.machine_id, Number(row.end_smu));
+    if (row.end_smu !== null && row.end_smu !== undefined) {
+      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
+      const candidate = Number(row.end_smu);
+      if (candidate > currentMax) {
+        latestSMRMap.set(row.machine_id, candidate);
+      }
     }
   });
-  (
-    baselineSmrReadings as Array<{ machine_id: string; reading_hours: number | null }> | null
-  )?.forEach((row) => {
-    if (
-      !latestSMRMap.has(row.machine_id) &&
-      row.reading_hours !== null &&
-      row.reading_hours !== undefined
-    ) {
-      latestSMRMap.set(row.machine_id, Number(row.reading_hours));
+  (baselineSmrReadings as Array<{ meter_id: string; reading: number | null }> | null)?.forEach(
+    (row) => {
+      if (row.reading !== null && row.reading !== undefined && row.meter_id) {
+        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
+        const candidate = Number(row.reading);
+        if (candidate > currentMax) {
+          latestSMRMap.set(row.meter_id, candidate);
+        }
+      }
     }
-  });
+  );
 
   const fleetData: MachineTimeAllocationInput[] =
     machines && machines.length > 0

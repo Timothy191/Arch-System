@@ -43,7 +43,7 @@ export function useControlRoomSummary(deptId: string, today: string) {
           .eq('machine_operations.department_id', deptId)
           .eq('machine_operations.shift_date', today),
         supabase
-          .from('production_loads')
+          .from('hourly_loads')
           .select('id', { count: 'exact', head: true })
           .eq('department_id', deptId)
           .eq('load_date', today),

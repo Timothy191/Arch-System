@@ -35,8 +35,8 @@ async function gatherScadaTelemetry(shiftId: string): Promise<TelemetrySummarySt
   // Aggregate end-of-shift telemetry markers from canonical public.machine_telemetry
   const { data: records, error } = await supabase
     .from('machine_telemetry')
-    .select('id, value, timestamp, metric_type')
-    .order('timestamp', { ascending: false })
+    .select('id, machine_id, recorded_at, engine_rpm, operating_hours')
+    .order('recorded_at', { ascending: false })
     .limit(10000);
 
   if (error) {
@@ -108,9 +108,8 @@ async function dispatchManagementNotification(shiftId: string, reportId: string)
   // Record compiled shift report event into canonical public.audit_logs
   const { error } = await supabase.from('audit_logs').insert({
     action: 'SHIFT_REPORT_COMPILED',
-    entity_type: 'control_room_shift_reports',
-    entity_id: reportId,
-    new_values: {
+    table_name: 'control_room_shift_reports',
+    new_data: {
       shift_id: shiftId,
       report_id: reportId,
       title: 'Shift Report Compiled',

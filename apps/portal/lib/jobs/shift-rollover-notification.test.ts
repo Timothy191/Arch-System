@@ -32,9 +32,8 @@ describe('shiftRolloverNotificationFn', () => {
   });
 
   it('returns early when no active operational departments exist', async () => {
-    const mockFinalEq = jest.fn().mockResolvedValue({ data: [], error: null });
-    const mockFirstEq = jest.fn().mockReturnValue({ eq: mockFinalEq });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockFirstEq });
+    const mockIs = jest.fn().mockResolvedValue({ data: [], error: null });
+    const mockSelect = jest.fn().mockReturnValue({ is: mockIs });
 
     mockFrom.mockImplementation((table: string) => {
       if (table === 'departments') return { select: mockSelect };
@@ -51,10 +50,9 @@ describe('shiftRolloverNotificationFn', () => {
   });
 
   it('processes active departments and emits rollover reminder if shift log not closed', async () => {
-    const departments = [{ id: 'dept-1', name: 'mining', slug: 'mining' }];
-    const mockDeptFinalEq = jest.fn().mockResolvedValue({ data: departments, error: null });
-    const mockDeptFirstEq = jest.fn().mockReturnValue({ eq: mockDeptFinalEq });
-    const mockDeptSelect = jest.fn().mockReturnValue({ eq: mockDeptFirstEq });
+    const departments = [{ id: 'dept-1', name: 'mining', display_name: 'Mining' }];
+    const mockDeptIs = jest.fn().mockResolvedValue({ data: departments, error: null });
+    const mockDeptSelect = jest.fn().mockReturnValue({ is: mockDeptIs });
 
     const mockLogsFinalEq = jest
       .fn()

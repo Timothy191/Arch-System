@@ -17,15 +17,15 @@ export const generateReportFn = inngest.createFunction(
         .from('daily_logs')
         .select('*')
         .eq('department_id', departmentId)
-        .gte('date', dateFrom)
-        .lte('date', dateTo);
+        .gte('log_date', dateFrom)
+        .lte('log_date', dateTo);
 
       const { data: productionLogs } = await supabase
         .from('production_logs')
-        .select('*')
-        .eq('department_id', departmentId)
-        .gte('date', dateFrom)
-        .lte('date', dateTo);
+        .select('*, daily_logs!inner(department_id)')
+        .eq('daily_logs.department_id', departmentId)
+        .gte('daily_log_date', dateFrom)
+        .lte('daily_log_date', dateTo);
 
       const totalCoal = productionLogs?.reduce((sum, log) => sum + (log.coal_tonnes ?? 0), 0);
       const totalWaste = productionLogs?.reduce((sum, log) => sum + (log.waste_tonnes ?? 0), 0);
