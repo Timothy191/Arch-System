@@ -26,8 +26,10 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*@t3-oss)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(.*@t3-oss|@formkit)/)'],
   moduleNameMapper: {
+    '^@formkit/auto-animate/react$':
+      '<rootDir>/../../node_modules/.pnpm/@formkit+auto-animate@0.8.4/node_modules/@formkit/auto-animate/react/index.mjs',
     '^@vercel/speed-insights/next$':
       '<rootDir>/node_modules/@vercel/speed-insights/dist/next/index.js',
     '^next/navigation$': '<rootDir>/node_modules/next/navigation.js',

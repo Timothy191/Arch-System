@@ -16,6 +16,10 @@ jest.mock('next/cache', () => ({
   revalidateTag: jest.fn(),
 }));
 
+jest.mock('@formkit/auto-animate/react', () => ({
+  useAutoAnimate: () => [{ current: null }, jest.fn()],
+}));
+
 global.Request =
   global.Request ||
   class Request {
