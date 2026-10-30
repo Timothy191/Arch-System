@@ -17,7 +17,7 @@ import {
   Truck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { classifyReconciliationDrift, RECONCILIATION_UI } from '~/lib/production-reconciliation';
 import type { ProductionMonthReportData } from './actions';
@@ -135,6 +135,18 @@ export function ProductionCommandCenterClient({
   const driftLevel = classifyReconciliationDrift(totals.reconciliationDriftPct);
   const driftUI = RECONCILIATION_UI[driftLevel];
   const passedMonthOption = report.availableMonths[1];
+
+  // Performance Optimization: Single-pass memoized aggregation of shift totals
+  // to avoid inline .reduce() array traversals on table renders.
+  const monthlyShiftTotals = useMemo(() => {
+    let dayShiftCoal = 0;
+    let nightShiftCoal = 0;
+    for (const r of report.dailyRows) {
+      dayShiftCoal += r.dayShiftCoalTonnes;
+      nightShiftCoal += r.nightShiftCoalTonnes;
+    }
+    return { dayShiftCoal, nightShiftCoal };
+  }, [report.dailyRows]);
 
   return (
     <div className="space-y-6">
@@ -672,14 +684,10 @@ export function ProductionCommandCenterClient({
                 <tr>
                   <td className="px-3 py-2.5">MONTHLY TOTAL</td>
                   <td className="px-3 py-2.5 text-right">
-                    {report.dailyRows
-                      .reduce((s, r) => s + r.dayShiftCoalTonnes, 0)
-                      .toLocaleString()}
+                    {monthlyShiftTotals.dayShiftCoal.toLocaleString()}
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    {report.dailyRows
-                      .reduce((s, r) => s + r.nightShiftCoalTonnes, 0)
-                      .toLocaleString()}
+                    {monthlyShiftTotals.nightShiftCoal.toLocaleString()}
                   </td>
                   <td className="px-3 py-2.5 text-right text-emerald-700">
                     {totals.coalTonnes.toLocaleString()} t
