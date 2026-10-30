@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Persist Live Schema Query Parity, Monotonic SMR & Overview Sync Rules (/learn)
+
+- **Action:**
+  - Updated [`.agents/rules/database-migrations.md`](./.agents/rules/database-migrations.md) with `§2 Forbidden legacy join tables in RLS` (forbidding `public.employee_departments` in favor of `public.employees.accessible_departments`) and `§5 Live PostgreSQL Query Parity & Monotonic Telemetry Guardrails` (enforcing live `information_schema.columns` verification for `smr_readings`, `hourly_loads`, and `print_jobs`, `localStorage` draft `startSmu` clamping to `Math.max(draftStartSmu, selectedMachine.latest_smu)`, and shift row upserts).
+  - Updated [`.agents/rules/execution-guardrails.md`](./.agents/rules/execution-guardrails.md) with the `System Overview (/overview) Parity` invariant so migration counts, `27/27` quality gates, route catalogs, and `PROJECT_MILESTONES` expenditure sums remain synchronized with `LIFETIME_METRICS`.
+- **Verification:** `node tools/audits/audit-agent-rules-drift.cjs` & `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - System Overview Out-of-Date Content Audit & Synchronization (213 Migrations, 27 Gates, Schema & Route Catalog)
 
 - **Action:**

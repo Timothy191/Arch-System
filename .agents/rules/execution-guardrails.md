@@ -90,6 +90,7 @@ Before marking any task complete, the agent **MUST autonomously execute**:
 - **Tooling Drift**: If `pnpm policy:check` fails on generated files, run `pnpm policy:gen` to regenerate
 - **Agent Tracing**: Modified packages must append ISO 8601 entries to `AGENT_TRACER.md`
 - **Token & Bug Telemetry**: After completing any non-trivial task, record the session so Claude Code ZAR cost, tokens, and bugs-resolved stay current: `pnpm token:record -- --agent <name> --input <n> --output <n> --bugs <n>` (or set `TASK_TAG`/`TASK_BUGS_RESOLVED` and run `pnpm agent:hook:post-task`). The `/admin/ai-metrics` dashboard and `pnpm token:sync` both read this ledger (`.agents/memory_base/token-usage.json`).
+- **System Overview (`/overview`) Parity**: When adding migrations, routes, quality gates, or updating expenditure telemetry, keep `apps/portal/app/overview/` (`lib/data.ts`, `DatabaseSchema.tsx`, `TechStack.tsx`, `SystemArchitecture.tsx`, `OverviewHeaderVisuals.tsx`, and `agentic-monitor-data.ts`) synchronized so migration counts, gate counts (`27/27`), route catalogs, and `PROJECT_MILESTONES` sums match `LIFETIME_METRICS` (`en-US` period decimal format, e.g. `R 5,000.00`).
 - **Backlog Zero**: Check and complete outstanding tasks before starting new work
 - **Anti-Bloat Leases**: Use `skills-mcp` acquire/return for dynamic context leasing
 
