@@ -46,6 +46,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
           <Link
             key={href}
             href={href}
+            prefetch={true}
             className={cn(
               'flex min-h-[56px] flex-1 touch-manipulation flex-col items-center justify-center gap-0.5 py-2 font-medium text-[10px] transition-colors',
               isActive

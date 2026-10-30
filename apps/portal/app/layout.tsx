@@ -54,7 +54,7 @@ const ibmPlexSans = IBM_Plex_Sans({
   variable: '--font-sans',
   weight: ['400', '500', '600', '700'],
   display: 'swap',
-  preload: false,
+  preload: true,
   adjustFontFallback: true,
 });
 

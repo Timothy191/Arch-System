@@ -1,3 +1,14 @@
+## 2026-10-30T09:27:00+02:00: Next.js 16+ Architecture & Client-Side Responsiveness Optimization
+
+- **Phase 1 (Comprehension)**: Optimize client-side responsiveness, initial bundle parsing, and page transitions across the Next.js 16+ / React 19 architecture without altering UI appearance or violating light-mode design tokens.
+- **Phase 2 (Evidence)**: Bundle analysis revealed synchronous `domAnimation` imports in `@repo/ui/AnimationProvider` that loaded ~16KB of Framer Motion parsing overhead on every page layout hydration, and non-preloaded primary font loading in `app/layout.tsx`.
+- **Phase 3 (Design)**:
+  - Updated `packages/ui/src/components/motion/AnimationProvider.tsx` to dynamically stream features (`loadFeatures={() => import('framer-motion').then(r => r.domAnimation)}`) behind a `'use client'` boundary.
+  - Enabled `preload: true` on `ibmPlexSans` in `apps/portal/app/layout.tsx` to eliminate font-swap flash and layout shifts.
+  - Added explicit `prefetch={true}` on `BottomNav.tsx` links to allow Next.js 16 partial prefetching to pre-warm dynamic routes during hover/touch interactions.
+- **Phase 4 (Criticism)**: Verified via `pnpm lint`, `pnpm type-check`, `pnpm test`, full 27-gate verification suite (`pnpm agent:verify` 27/27 PASS), and production build (`pnpm build` exited 0).
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/motion/AnimationProvider.tsx`, `apps/portal/app/layout.tsx`, `apps/portal/components/nav/BottomNav.tsx`, and `AGENT_TRACER.md`.
+
 ## 2026-10-30T08:48:00+02:00: Dedicated Availability & Utilization Department Route (`/availability-utilization`)
 
 - **Phase 1 (Comprehension)**: Transition Availability & Utilization from being nested under `/control-room/reports` to a dedicated first-class department (`/availability-utilization`). Ensure clicking the Hub module or navigating directly to `/availability-utilization` presents the dedicated department layout and tabs with the 30-Day Activity Ledger as its primary dashboard, backed by production fleet queries.

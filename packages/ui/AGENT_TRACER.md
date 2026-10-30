@@ -614,6 +614,13 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
   - `packages/ui/src/components/ui/input.tsx`: Stopped forwarding `className` (such as `pl-10`, `bg-*`, `border-*`) onto the outer `<div class="relative flex items-center w-full group">` wrapper so the inner `<input>` fills 100% of the wrapper width without a 40px left gutter. Added `wrapperClassName` and grid `col-span-*` forwarding for layout containers.
 - **Verification**: `pnpm --filter portal test -- --testPathPatterns="GeistBatch4"` and `pnpm agent:verify` (8/8 PASS).
 
+## 2026-10-30T09:27:00+02:00: Asynchronous Motion Feature Loading in AnimationProvider
+
+- **Agent**: Antigravity
+- **Changes**:
+  - `packages/ui/src/components/motion/AnimationProvider.tsx`: Added `'use client'` directive and replaced synchronous `domAnimation` bundle import with dynamic feature loader `const loadFeatures = () => import('framer-motion').then(res => res.domAnimation)`. Reduces shared layout bundle weight and parsing delay on initial page hydration.
+- **Verification**: `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm agent:verify` (27/27 PASS), and `pnpm build` (PASS).
+
 ## 2026-10-22T06:00:00Z - Add PDF Report Sub-Tab Under Reports in DepartmentLayout
 
 - **Agent**: Antigravity
