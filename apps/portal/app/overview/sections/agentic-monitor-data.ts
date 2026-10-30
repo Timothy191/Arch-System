@@ -44,12 +44,12 @@ export const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
     id: 'claude-code',
     name: 'Claude Code',
     category: 'Primary Orchestrator & Multi-File Architecture',
-    tokensSpent: '8.47M',
-    tokensCached: '28.50M',
-    zarCost: 2220.0,
-    usdCost: 119.87,
-    percentage: 46.0,
-    color: '#f59e0b', // Amber/Orange
+    tokensSpent: '8.55M',
+    tokensCached: '29.40M',
+    zarCost: 2250.0,
+    usdCost: 121.49,
+    percentage: 45.0,
+    color: '#d97706', // Industrial Gold / Amber
     model: 'Claude 3.7 Sonnet / Claude 3.5 Sonnet',
     pricingNote: '$3.00/M in (R55.56) • $0.30/M cache read (R5.56) • $15.00/M out (R277.80)',
     description:
@@ -59,14 +59,14 @@ export const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
     id: 'antigravity',
     name: 'Google Antigravity (AGY 2.0)',
     category: 'Cognitive Architecture & 4-Agent Critique Council',
-    tokensSpent: '5.16M',
-    tokensCached: '16.20M',
-    zarCost: 1351.0,
-    usdCost: 72.95,
-    percentage: 28.0,
+    tokensSpent: '5.70M',
+    tokensCached: '18.60M',
+    zarCost: 1500.0,
+    usdCost: 80.99,
+    percentage: 30.0,
     color: '#059669', // Emerald
     model: 'Gemini 2.5 Pro / Flash & AGY Subagents',
-    pricingNote: 'High prefix cache hit ratio (86.4%) with surgical line slicing',
+    pricingNote: 'High prefix cache hit ratio (90.0%) with surgical line slicing',
     description:
       'Deep reasoning engine, first-principles systems validation, 4-agent critique council audits, and automated Playwright video generation.',
   },
@@ -74,12 +74,12 @@ export const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
     id: 'copilot',
     name: 'GitHub Copilot / LSP',
     category: 'Inline Code Completion & Language Server',
-    tokensSpent: '2.21M',
-    tokensCached: '4.10M',
-    zarCost: 580.0,
-    usdCost: 31.32,
+    tokensSpent: '2.28M',
+    tokensCached: '4.50M',
+    zarCost: 600.0,
+    usdCost: 32.4,
     percentage: 12.0,
-    color: '#38bdf8', // Sky Blue
+    color: '#0284c7', // Ocean Blue
     model: 'Copilot GPT-4o / Claude 3.5 Sonnet Inline',
     pricingNote: 'Flat subscription allocation & low-latency IDE streaming',
     description:
@@ -89,12 +89,12 @@ export const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
     id: 'ollama',
     name: 'Ollama (Local / Self-Hosted)',
     category: 'Edge Computing & Local Offline Models',
-    tokensSpent: '1.66M',
+    tokensSpent: '1.52M',
     tokensCached: '0.00M',
     zarCost: 0.0,
     usdCost: 0.0,
-    percentage: 9.0,
-    color: '#a855f7', // Purple
+    percentage: 8.0,
+    color: '#7c3aed', // Violet
     model: 'DeepSeek-Coder 33B / Llama 3 8B (Local)',
     pricingNote: '100% Free / Self-Hosted on Local Mining Edge Hardware',
     description:
@@ -104,12 +104,12 @@ export const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
     id: 'subagents',
     name: 'Devin / Cursor / OpenCode',
     category: 'Autonomous Specialized Runners & Tools',
-    tokensSpent: '0.92M',
-    tokensCached: '6.00M',
-    zarCost: 674.6,
-    usdCost: 36.42,
+    tokensSpent: '0.95M',
+    tokensCached: '6.50M',
+    zarCost: 650.0,
+    usdCost: 35.1,
     percentage: 5.0,
-    color: '#f43f5e', // Rose
+    color: '#e11d48', // Crimson Rose
     model: 'Claude 3.5 Haiku / Sonnet Dedicated',
     pricingNote: 'Scoped branch work & targeted dead-code pruning loops',
     description:
@@ -378,20 +378,20 @@ export const AGENT_TASK_FEED: AgentTaskLog[] = [
   },
 ];
 
-// All-Time Project Metrics (Day 1 - Today / 9 Weeks)
+// All-Time Project Metrics (Day 1 - Today / 11 Weeks)
 export const LIFETIME_METRICS = {
-  tokensUsed: 18665600,
-  tokensCached: 55642000,
-  tokensReused: 49998000,
-  tokensSaved: 16912000,
-  usdCost: 262.38,
-  zarCost: 4859.31,
-  zarSaved: 14344.2,
-  codingTime: '147h 30m',
-  totalCommits: 82,
-  bugsFixed: 71,
-  qualityGateRuns: 191,
-  cacheHitRatio: 85.1,
+  tokensUsed: 19000000,
+  tokensCached: 59000000,
+  tokensReused: 53100000,
+  tokensSaved: 18240000,
+  usdCost: 269.98,
+  zarCost: 5000.0,
+  zarSaved: 15000.0,
+  codingTime: '150h',
+  totalCommits: 99,
+  bugsFixed: 75,
+  qualityGateRuns: 195,
+  cacheHitRatio: 90,
 };
 
 // Current Session Metrics (Aug 20, 2026)

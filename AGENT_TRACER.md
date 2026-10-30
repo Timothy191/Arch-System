@@ -4,6 +4,19 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Agentic Monitor Overview Cards, Distribution & Container Setup Alignment
+
+- **Action:**
+  - Updated [`apps/portal/app/overview/sections/agentic-monitor-data.ts`](./apps/portal/app/overview/sections/agentic-monitor-data.ts), [`AgenticMonitor.tsx`](./apps/portal/app/overview/sections/AgenticMonitor.tsx), and [`AgenticMonitorSpendAndFeed.tsx`](./apps/portal/app/overview/sections/AgenticMonitorSpendAndFeed.tsx) across all 7 requested items:
+    1. **Total Project Spend Card**: Updated all-time spend from `4,859,31` (`en-ZA` comma decimal) to `R 5,000.00` (`en-US` standard period decimal format, `$269.98 USD`, `+R 15,000.00 saved`) and removed the inline gradient background from the `<Coins />` SVG icon.
+    2. **Cache Ratio Card**: Updated cache hit ratio from `85.1%` to `90%` and updated the `<Zap />` icon badge to `bg-amber-500/10 text-amber-600`.
+    3. **Engineering Time Card**: Updated all-time coding time from `147h 30m` to `150h` across `99` verified commits and updated the timeline label to `11 Weeks (Jun 15 – Oct 30)`.
+    4. **Bugs & Regressions Card**: Updated resolved count from `71 Resolved` to `75 Resolved` and updated the quality gate pass row to `27/27 Gates • 195 Runs (100%)`.
+    5. **Header**: Updated the banner title to `eve Autonomous Multi-Agent System Monitor & Expenditure Tracker` and expanded the subtitle with 27-gate verification telemetry and 90% prompt caching context.
+    6. **Distribution Section**: Updated agent share percentages (`45%` Claude Code, `30%` Google Antigravity AGY 2.0, `12%` GitHub Copilot / LSP, `8%` Ollama Local, `5%` Devin / Cursor / OpenCode = `100%`, `R 5,000.00` total) and refined chart colors (`#d97706`, `#059669`, `#0284c7`, `#7c3aed`, `#e11d48`).
+    7. **Container Div**: Updated the root container to `mx-auto w-full max-w-[1600px] space-y-6 p-1 sm:p-2` (`data-testid="agentic-monitor-container"`) and fixed the 6-milestone histogram bar grid from `grid-cols-5` to `grid-cols-6`.
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Login UX Upgrade, Golden Separator, Eve Agentic Backend Branding & Live WhatsApp Web Split View
 
 - **Action:**

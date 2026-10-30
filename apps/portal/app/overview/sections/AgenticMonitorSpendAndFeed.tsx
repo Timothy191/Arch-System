@@ -3,6 +3,10 @@
 import { BarChart3, Coins, Terminal } from 'lucide-react';
 import { type AgentTaskLog, PROJECT_MILESTONES } from './agentic-monitor-data';
 
+const MAX_MILESTONE_ZAR = 1300;
+const PERCENT_MULTIPLIER = 100;
+const CURRENCY_DECIMALS = 2;
+
 export function AgenticMonitorSpendAndFeed({
   selectedAgent,
   filteredFeed,
@@ -73,17 +77,16 @@ export function AgenticMonitorSpendAndFeed({
             </h3>
           </div>
           <span className="font-mono text-[var(--text-muted)] text-xs">
-            Total Incurred: <strong className="text-emerald-700">R 4,825.60 ZAR</strong> (~$260.56
+            Total Incurred: <strong className="text-emerald-700">R 5,000.00 ZAR</strong> (~$269.98
             USD)
           </span>
         </div>
 
         {/* Visual Bar Chart Graph */}
         <div className="pt-4 pb-2">
-          <div className="grid h-44 grid-cols-5 items-end gap-3 border-[var(--border-subtle)] border-b px-2 pb-2 sm:gap-6">
+          <div className="grid h-44 grid-cols-6 items-end gap-3 border-[var(--border-subtle)] border-b px-2 pb-2 sm:gap-6">
             {PROJECT_MILESTONES.map((m, idx) => {
-              const maxZar = 1300;
-              const heightPct = Math.round((m.zarCost / maxZar) * 100);
+              const heightPct = Math.round((m.zarCost / MAX_MILESTONE_ZAR) * PERCENT_MULTIPLIER);
               return (
                 <div
                   key={idx}
@@ -141,10 +144,10 @@ export function AgenticMonitorSpendAndFeed({
                   </td>
                   <td className="py-3 text-right font-mono text-emerald-700">{m.tokensCached}</td>
                   <td className="py-3 text-right font-mono font-semibold text-[var(--text-heading)]">
-                    R {m.zarCost.toFixed(2)}
+                    R {m.zarCost.toFixed(CURRENCY_DECIMALS)}
                   </td>
                   <td className="py-3 text-right font-mono text-emerald-400">
-                    +R {m.zarSaved.toFixed(2)}
+                    +R {m.zarSaved.toFixed(CURRENCY_DECIMALS)}
                   </td>
                   <td className="py-3 text-right font-mono text-[var(--text-muted)]">
                     {m.commits}
@@ -153,15 +156,15 @@ export function AgenticMonitorSpendAndFeed({
               ))}
               {/* Total Summary Row */}
               <tr className="border-[var(--border-default)] border-t-2 bg-[var(--bg-secondary)]/60 font-semibold">
-                <td className="py-3 font-mono text-emerald-700">TOTAL (9 Weeks)</td>
+                <td className="py-3 font-mono text-emerald-700">TOTAL (11 Weeks)</td>
                 <td className="py-3 text-[var(--text-heading)]">
                   Entire Project Lifecycle (Day 1 to Today)
                 </td>
-                <td className="py-3 text-right font-mono text-[var(--text-heading)]">18.42M</td>
-                <td className="py-3 text-right font-mono text-emerald-700">54.80M</td>
-                <td className="py-3 text-right font-mono text-emerald-700 text-sm">R 4,825.60</td>
-                <td className="py-3 text-right font-mono text-emerald-400 text-sm">+R 14,280.00</td>
-                <td className="py-3 text-right font-mono text-[var(--text-heading)]">77</td>
+                <td className="py-3 text-right font-mono text-[var(--text-heading)]">19.00M</td>
+                <td className="py-3 text-right font-mono text-emerald-700">59.00M</td>
+                <td className="py-3 text-right font-mono text-emerald-700 text-sm">R 5,000.00</td>
+                <td className="py-3 text-right font-mono text-emerald-400 text-sm">+R 15,000.00</td>
+                <td className="py-3 text-right font-mono text-[var(--text-heading)]">99</td>
               </tr>
             </tbody>
           </table>
@@ -211,7 +214,7 @@ export function AgenticMonitorSpendAndFeed({
                     {task.tokensUsed.toLocaleString()} tokens
                   </span>
                   <span className="font-semibold text-emerald-700">
-                    R {task.zarCost.toFixed(2)}
+                    R {task.zarCost.toFixed(CURRENCY_DECIMALS)}
                   </span>
                   <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-medium text-[10px] text-emerald-700">
                     {task.status}

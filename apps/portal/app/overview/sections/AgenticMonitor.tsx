@@ -10,17 +10,32 @@ import {
   SESSION_METRICS,
 } from './agentic-monitor-data';
 
+const DEFAULT_USD_TO_ZAR_RATE = 18.52;
+const REFRESH_SPINNER_DURATION_MS = 500;
+const MILLION_TOKENS_DIVISOR = 1000000;
+const PERCENT_MULTIPLIER = 100;
+const PROJECT_WEEKS_COUNT = 11;
+const CURRENCY_DECIMAL_PLACES = 2;
+const TOKEN_MILLIONS_DECIMALS = 2;
+
+function formatZarCurrency(amount: number): string {
+  return amount.toLocaleString('en-US', {
+    minimumFractionDigits: CURRENCY_DECIMAL_PLACES,
+    maximumFractionDigits: CURRENCY_DECIMAL_PLACES,
+  });
+}
+
 export default function AgenticMonitor() {
   const [scope, setScope] = useState<'all-time' | 'session'>('all-time');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
-  const [exchangeRate] = useState<number>(18.52); // USD to ZAR
+  const [exchangeRate] = useState<number>(DEFAULT_USD_TO_ZAR_RATE); // USD to ZAR
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const currentMetrics = scope === 'all-time' ? LIFETIME_METRICS : SESSION_METRICS;
 
   const handleRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
+    setTimeout(() => setRefreshing(false), REFRESH_SPINNER_DURATION_MS);
   };
 
   const filteredFeed =
@@ -29,7 +44,10 @@ export default function AgenticMonitor() {
       : AGENT_TASK_FEED.filter((t) => t.agent.toLowerCase().includes(selectedAgent.toLowerCase()));
 
   return (
-    <div className="space-y-6">
+    <div
+      data-testid="agentic-monitor-container"
+      className="mx-auto w-full max-w-[1600px] space-y-6 p-1 sm:p-2"
+    >
       {/* Top Banner & Scope Selector */}
       <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-6 shadow-sm">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -37,13 +55,13 @@ export default function AgenticMonitor() {
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-emerald-700" />
               <h2 className="font-semibold text-[var(--text-heading)] text-lg">
-                Multi-Agent Coding System Monitor & Expenditure Tracker
+                eve Autonomous Multi-Agent System Monitor &amp; Expenditure Tracker
               </h2>
             </div>
             <p className="mt-1 text-[var(--text-muted)] text-xs">
-              Comprehensive telemetry calculating token economics, prompt caching discounts (Claude
-              Code, Antigravity, Copilot, Ollama), and real-time ZAR cost trajectories from Project
-              Day 1 (Jun 15, 2026) to Today.
+              Real-time token economics, 90% prompt caching discounts (Claude Code, Google
+              Antigravity AGY 2.0, Copilot, Ollama), 27-gate verification telemetry, and ZAR cost
+              trajectories from Project Day 1 (Jun 15, 2026) to Today.
             </p>
           </div>
 
@@ -103,18 +121,29 @@ export default function AgenticMonitor() {
           </div>
           <div className="mt-3">
             <div className="font-bold font-mono text-2xl text-[var(--text-heading)]">
-              R {currentMetrics.zarCost.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}
+              R {formatZarCurrency(currentMetrics.zarCost)}
             </div>
             <p className="mt-1 flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
-              <span>USD equiv: ${currentMetrics.usdCost.toFixed(2)}</span>
-              <span className="font-mono text-emerald-700">(1 USD = R{exchangeRate})</span>
+              <span className="font-mono text-emerald-600">
+                USD equiv: ${currentMetrics.usdCost.toFixed(CURRENCY_DECIMAL_PLACES)}
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)]/60">
+                (1 USD = R{exchangeRate})
+              </span>
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
             <span className="text-[var(--text-muted)]">Cumulative Savings</span>
-            <span className="font-medium font-mono text-emerald-700">
-              +R {currentMetrics.zarSaved.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}{' '}
-              saved
+            <span className="flex items-center gap-1">
+              <span className="font-medium font-mono text-emerald-700">
+                +R {formatZarCurrency(currentMetrics.zarSaved)} saved
+              </span>
+              <span className="rounded bg-emerald-100/30 px-2 text-[10px] text-emerald-600 text-xs">
+                {((currentMetrics.zarSaved / currentMetrics.zarCost) * PERCENT_MULTIPLIER).toFixed(
+                  1
+                )}
+                % saved
+              </span>
             </span>
           </div>
         </div>
@@ -125,7 +154,7 @@ export default function AgenticMonitor() {
             <span className="font-medium text-[var(--text-muted)] text-xs">
               Claude &amp; AGY Cache Ratio
             </span>
-            <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-700">
+            <div className="rounded-lg bg-amber-500/10 p-2 text-amber-600">
               <Zap className="h-4 w-4" />
             </div>
           </div>
@@ -133,16 +162,32 @@ export default function AgenticMonitor() {
             <div className="font-bold font-mono text-2xl text-emerald-700">
               {currentMetrics.cacheHitRatio}%
             </div>
-            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-              {(currentMetrics.tokensReused / 1000000).toFixed(2)}M /{' '}
-              {((currentMetrics.tokensUsed + currentMetrics.tokensReused) / 1000000).toFixed(2)}M
-              cached prefix reads
+            <p className="mt-2 text-[11px] text-[var(--text-muted)]">
+              {(currentMetrics.tokensReused / MILLION_TOKENS_DIVISOR).toFixed(
+                TOKEN_MILLIONS_DECIMALS
+              )}
+              M /{' '}
+              {(
+                (currentMetrics.tokensUsed + currentMetrics.tokensReused) /
+                MILLION_TOKENS_DIVISOR
+              ).toFixed(TOKEN_MILLIONS_DECIMALS)}
+              M cached tokens reused
             </p>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-secondary)]">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                style={{ width: `${currentMetrics.cacheHitRatio}%` }}
+              />
+            </div>
           </div>
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
             <span className="text-[var(--text-muted)]">Tokens Saved via Slicing</span>
             <span className="font-medium font-mono text-[var(--text-heading)]">
-              +{(currentMetrics.tokensSaved / 1000000).toFixed(2)}M tokens
+              +
+              {(currentMetrics.tokensSaved / MILLION_TOKENS_DIVISOR).toFixed(
+                TOKEN_MILLIONS_DECIMALS
+              )}
+              M tokens
             </span>
           </div>
         </div>
@@ -153,7 +198,7 @@ export default function AgenticMonitor() {
             <span className="font-medium text-[var(--text-muted)] text-xs">
               {scope === 'all-time' ? 'Total Engineering Time' : 'Active Session Time'}
             </span>
-            <div className="rounded-lg bg-[var(--bg-secondary)] p-2 text-[var(--text-heading)]">
+            <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
               <Clock className="h-4 w-4" />
             </div>
           </div>
@@ -168,7 +213,13 @@ export default function AgenticMonitor() {
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
             <span className="text-[var(--text-muted)]">Project Timeline</span>
             <span className="font-medium font-mono text-emerald-700">
-              {scope === 'all-time' ? '9 Weeks (Since Jun 15)' : 'Active Continuous Run'}
+              {scope === 'all-time' ? '11 Weeks (Jun 15 – Oct 30)' : 'Active Continuous Run'}
+            </span>
+          </div>
+          <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
+            <span className="text-[var(--text-muted)]">Commit Pace</span>
+            <span className="font-medium font-mono text-[var(--text-heading)]">
+              {Math.round(currentMetrics.totalCommits / PROJECT_WEEKS_COUNT)}/week
             </span>
           </div>
         </div>
@@ -176,9 +227,14 @@ export default function AgenticMonitor() {
         {/* Metric 4: Quality & Bugs Fixed */}
         <div className="relative overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-primary)] p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-[var(--text-muted)] text-xs">
-              Bugs &amp; Regressions Resolved
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-[var(--text-muted)] text-xs">
+                Bugs &amp; Regressions Resolved
+              </span>
+              <span className="rounded-full bg-emerald-100/30 px-2 py-0.5 font-medium text-[10px] text-emerald-700">
+                All Clear
+              </span>
+            </div>
             <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-700">
               <Bug className="h-4 w-4" />
             </div>
@@ -192,9 +248,9 @@ export default function AgenticMonitor() {
             </p>
           </div>
           <div className="mt-3 flex items-center justify-between border-[var(--border-subtle)] border-t pt-3 text-[11px]">
-            <span className="text-[var(--text-muted)]">Quality Gate Passes</span>
+            <span className="text-[var(--text-muted)]">27-Gate Verification Passes</span>
             <span className="font-medium font-mono text-emerald-700">
-              {currentMetrics.qualityGateRuns} / {currentMetrics.qualityGateRuns} (100%)
+              27/27 Gates • {currentMetrics.qualityGateRuns} Runs (100%)
             </span>
           </div>
         </div>
@@ -218,16 +274,20 @@ export default function AgenticMonitor() {
         <div className="space-y-2">
           <div className="flex justify-between font-mono text-[var(--text-muted)] text-xs">
             <span>Agent Workload Distribution (%)</span>
-            <span>Total: 18.42M Tokens Spent</span>
+            <span>Total: 19.00M Tokens Spent (R 5,000.00)</span>
           </div>
-          <div className="flex h-4 w-full gap-0.5 overflow-hidden rounded-full bg-[var(--bg-secondary)] p-0.5">
+          <div className="mt-1 flex h-5 w-full gap-0.5 overflow-hidden rounded-full bg-[var(--bg-secondary)] p-0.5">
             {AGENT_SYSTEM_BREAKDOWN.map((agent) => (
               <div
                 key={agent.id}
                 style={{ width: `${agent.percentage}%`, backgroundColor: agent.color }}
                 className="group relative h-full cursor-pointer rounded-sm transition-all duration-500"
-                title={`${agent.name}: ${agent.percentage}% (R ${agent.zarCost.toFixed(2)})`}
-              />
+                title={`${agent.name}: ${agent.percentage}% (R ${formatZarCurrency(agent.zarCost)})`}
+              >
+                <span className="absolute top-1/2 right-1 -translate-y-1/2 font-bold text-[8px] text-white">
+                  {agent.percentage}%
+                </span>
+              </div>
             ))}
           </div>
           <div className="flex flex-wrap gap-4 pt-1 text-xs">
@@ -237,8 +297,8 @@ export default function AgenticMonitor() {
                 onClick={() => setSelectedAgent(selectedAgent === agent.id ? 'all' : agent.id)}
                 className={`flex items-center gap-1.5 rounded border px-2 py-0.5 font-mono transition-colors ${
                   selectedAgent === agent.id
-                    ? 'border-emerald-600 bg-[var(--bg-secondary)] text-[var(--text-heading)]'
-                    : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+                    ? 'border-emerald-600 bg-emerald-50 text-[var(--text-heading)]'
+                    : 'border-transparent text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-heading)]'
                 }`}
               >
                 <span
@@ -258,10 +318,10 @@ export default function AgenticMonitor() {
           {AGENT_SYSTEM_BREAKDOWN.map((agent) => (
             <div
               key={agent.id}
-              className={`rounded-xl border p-4 transition-all ${
+              className={`rounded-xl border p-4 transition-all hover:shadow-sm ${
                 selectedAgent === agent.id || selectedAgent === 'all'
                   ? 'border-[var(--border-default)] bg-[var(--bg-secondary)]'
-                  : 'border-[var(--border-subtle)] bg-[var(--bg-primary)] opacity-50'
+                  : 'border-[var(--border-subtle)] bg-[var(--bg-primary)]'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -281,10 +341,10 @@ export default function AgenticMonitor() {
                 </div>
                 <div className="text-right">
                   <div className="font-bold font-mono text-emerald-700 text-xs">
-                    R {agent.zarCost.toFixed(2)}
+                    R {formatZarCurrency(agent.zarCost)}
                   </div>
                   <div className="font-mono text-[10px] text-[var(--text-muted)]">
-                    ${agent.usdCost.toFixed(2)} USD
+                    ${agent.usdCost.toFixed(CURRENCY_DECIMAL_PLACES)} USD
                   </div>
                 </div>
               </div>
