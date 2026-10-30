@@ -4,9 +4,15 @@ import { Button } from '@repo/ui/components/ui/button';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, type ReactNode } from 'react';
+import { getCircuitBreaker } from '@/lib/errors/circuit-breaker';
+import { isRetryableErrorDefault } from '@/lib/errors/retry-strategy';
 
-// AGENT-TRACE: ErrorBoundary provides graceful degradation when React components fail
+// AGENT-TRACE: ErrorBoundary provides graceful degradation with autonomous recovery
 // Critical for production stability, especially for external dependencies like FUXA SCADA
+
+const DEFAULT_MAX_RETRIES = 3;
+const DEFAULT_BASE_DELAY_MS = 1000;
+const RECOVERY_CIRCUIT_TIMEOUT_MS = 15000;
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -15,21 +21,34 @@ interface ErrorBoundaryProps {
   context?: string;
   title?: string;
   message?: string;
+  /** Recovery strategy: 'retry', 'fallback', 'none' */
+  strategy?: 'retry' | 'fallback' | 'none';
+  /** Max retries before showing error UI */
+  maxRetries?: number;
+  /** Base delay in ms between retries */
+  retryDelayMs?: number;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
   errorInfo: React.ErrorInfo | null;
+  retryCount: number;
+  isRecovering: boolean;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private recoveryTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private isUnmounted = false;
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
+      retryCount: 0,
+      isRecovering: false,
     };
   }
 
@@ -40,27 +59,47 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     };
   }
 
+  componentDidMount() {
+    this.isUnmounted = false;
+  }
+
+  componentWillUnmount() {
+    this.isUnmounted = true;
+    if (this.recoveryTimeoutId) {
+      clearTimeout(this.recoveryTimeoutId);
+    }
+  }
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({
       error,
       errorInfo,
     });
 
-    // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
-    // AGENT-TRACE: Report to Sentry with additional context
+    // Report to Sentry if available in global scope
     try {
-      if (typeof window !== 'undefined' && (window as any).Sentry) {
-        (window as any).Sentry.captureException(error, {
+      if (
+        typeof window !== 'undefined' &&
+        (
+          window as unknown as {
+            Sentry?: { captureException: (err: unknown, ctx: unknown) => void };
+          }
+        ).Sentry
+      ) {
+        (
+          window as unknown as {
+            Sentry: { captureException: (err: unknown, ctx: unknown) => void };
+          }
+        ).Sentry.captureException(error, {
           contexts: {
             react: {
               componentStack: errorInfo.componentStack,
@@ -74,16 +113,75 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         });
       }
     } catch (sentryError) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to report to Sentry:', sentryError);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to report to Sentry:', sentryError);
+      }
+    }
+
+    // Autonomous recovery if strategy is configured
+    if (this.props.strategy && this.props.strategy !== 'none') {
+      this.attemptAutonomousRecovery(error);
+    }
+  }
+
+  private attemptAutonomousRecovery(error: Error): void {
+    const { strategy = 'retry' } = this.props;
+    const maxRetries = this.props.maxRetries ?? DEFAULT_MAX_RETRIES;
+    const baseDelay = this.props.retryDelayMs ?? DEFAULT_BASE_DELAY_MS;
+    const contextKey = this.props.context || 'default';
+
+    if (strategy === 'fallback') {
+      const breaker = getCircuitBreaker(contextKey, {
+        failureThreshold: maxRetries,
+        timeoutMs: RECOVERY_CIRCUIT_TIMEOUT_MS,
+      });
+
+      if (breaker.currentState === 'OPEN') {
+        // Circuit already open, don't loop recoveries
+        return;
+      }
+    }
+
+    // Check if error is deemed non-retryable
+    if (strategy === 'retry' && !isRetryableErrorDefault(error)) {
+      return;
+    }
+
+    if (this.state.retryCount < maxRetries) {
+      const nextAttempt = this.state.retryCount + 1;
+      const delayMs = baseDelay * 2 ** (nextAttempt - 1);
+
+      this.setState({
+        isRecovering: true,
+        retryCount: nextAttempt,
+      });
+
+      this.recoveryTimeoutId = setTimeout(() => {
+        if (!this.isUnmounted) {
+          this.setState({
+            hasError: false,
+            error: null,
+            errorInfo: null,
+            isRecovering: false,
+          });
+        }
+      }, delayMs);
+    } else {
+      this.setState({ isRecovering: false });
     }
   }
 
   handleReset = () => {
+    if (this.recoveryTimeoutId) {
+      clearTimeout(this.recoveryTimeoutId);
+    }
     this.setState({
       hasError: false,
       error: null,
       errorInfo: null,
+      retryCount: 0,
+      isRecovering: false,
     });
   };
 
@@ -93,8 +191,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render() {
     if (this.state.hasError) {
-      // Use custom fallback if provided
-      if (this.props.fallback) {
+      if (this.props.fallback && !this.state.isRecovering) {
         return this.props.fallback;
       }
 
@@ -104,6 +201,36 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         (this.props.context
           ? `An error occurred in ${this.props.context}. Telemetry recorded message.`
           : 'Telemetry recorded message. Attempting component recovery.');
+
+      // Autonomous recovery spinner card
+      if (this.state.isRecovering) {
+        return (
+          <div className="flex min-h-[400px] items-center justify-center p-4">
+            <GlassCard className="w-full max-w-md border-indigo-200 bg-indigo-50/50">
+              <div className="space-y-6">
+                <div className="flex justify-center">
+                  <div className="rounded-full border border-indigo-300 bg-indigo-100 p-4">
+                    <RefreshCw className="h-8 w-8 animate-spin text-indigo-600" />
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-center">
+                  <h3 className="font-medium text-indigo-900 text-lg">
+                    {displayTitle} — Recovering
+                  </h3>
+                  <p className="text-indigo-700 text-sm">
+                    Attempting autonomous component recovery...
+                  </p>
+                  <p className="font-mono text-indigo-500 text-xs">
+                    Retry attempt {this.state.retryCount} of{' '}
+                    {this.props.maxRetries ?? DEFAULT_MAX_RETRIES}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        );
+      }
 
       // Default fallback UI with rose theme
       return (

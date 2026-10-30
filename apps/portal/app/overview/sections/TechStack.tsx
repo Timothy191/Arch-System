@@ -84,7 +84,7 @@ export default function TechStack() {
               <div className="mb-2 text-text-muted text-xs uppercase tracking-wider">Frontend</div>
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-lg border border-accent-green/30 bg-accent-green/10 px-4 py-3 font-medium text-accent-green text-sm">
-                  Next.js 16.3.8
+                  Next.js 16.4.3
                 </div>
                 <div className="rounded-lg border border-accent-green/30 bg-accent-green/10 px-4 py-3 font-medium text-accent-green text-sm">
                   React 19.2
@@ -121,7 +121,7 @@ export default function TechStack() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
-                  PostgreSQL 17 (186 Migrations)
+                  PostgreSQL 17 (213 Migrations)
                 </div>
                 <div className="rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-4 py-3 font-medium text-accent-blue text-sm">
                   100% RLS InitPlan
@@ -174,7 +174,7 @@ export default function TechStack() {
             &nbsp;&nbsp;├── <span className="text-accent-blue">apps/</span>
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">portal/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 16.3.8 App Router portal
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 16.4.3 App Router portal
             (8 Core Operational Modules)
             <br />
             &nbsp;&nbsp;├── <span className="text-accent-blue">libs/</span>

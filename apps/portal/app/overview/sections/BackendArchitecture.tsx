@@ -136,7 +136,7 @@ export default function BackendArchitecture() {
                 Portal Web App (:3000)
               </div>
               <div className="mt-1 font-mono text-[10px] text-text-muted">
-                Next.js 16.3.8 · React 19
+                Next.js 16.4.3 · React 19
               </div>
             </div>
             <div className="rounded-xl border-2 border-sky-400/60 bg-white p-3 shadow-sm">
@@ -210,7 +210,7 @@ export default function BackendArchitecture() {
                 Supabase PostgreSQL 17
               </div>
               <div className="mt-1 font-mono text-[10px] text-text-muted">
-                189 Migrations · 100% RLS InitPlan
+                213 Migrations · 100% RLS InitPlan
               </div>
             </div>
             <div className="rounded-xl border-2 border-red-400/70 bg-white p-3 shadow-sm">

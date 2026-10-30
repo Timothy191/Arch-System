@@ -1,3 +1,16 @@
+## 2026-10-30T10:40:00+02:00: Autonomous Circuit Breaker & Retry Strategy Production Integration
+
+- **Phase 1 (Comprehension)**: Integrate autonomous error recovery and circuit breaker protection into the production error handling pipeline. Transition `retry-strategy.ts` and `circuit-breaker.ts` from isolated prototypes into the active client architecture, safeguarding `ErrorBoundary.tsx` and React Query hooks (`useDashboardQueries.ts`).
+- **Phase 2 (Evidence)**: Network latency, transient 5xx timeouts, and rate limits in remote mining SCADA telemetry occasionally interrupt client dashboard grids. The error pipeline required an automated recovery mechanism that fails fast on persistent outages and autonomously retries transient network/5xx failures before degrading to the fallback UI.
+- **Phase 3 (Design)**:
+  - Finalized `apps/portal/lib/errors/retry-strategy.ts` providing exponential backoff, jitter calculation, abort signal handling, and typed error classifiers (`isNetworkErrorLike`, `isTimeoutErrorLike`, `isRateLimitErrorLike`, `isDatabaseErrorLike`, `isRetryableErrorDefault`).
+  - Finalized `apps/portal/lib/errors/circuit-breaker.ts` with state management (`CLOSED` -> `OPEN` -> `HALF_OPEN`), configurable failure thresholds, fallback execution, and global registry access (`getCircuitBreaker`).
+  - Enhanced `apps/portal/components/ErrorBoundary.tsx` to support configurable autonomous recovery strategies (`strategy="retry" | "fallback" | "none"`), showing a non-intrusive recovery spinner with attempt counters before showing the fallback error card.
+  - Enhanced `apps/portal/hooks/useDashboardQueries.ts` with exponential backoff retry policies for transient network and 5xx errors via `isRetryableErrorDefault`.
+  - Added unit test suites `apps/portal/lib/errors/retry-strategy.test.ts`, `apps/portal/lib/errors/circuit-breaker.test.ts`, and `apps/portal/components/ErrorBoundary.test.tsx`.
+- **Phase 4 (Criticism)**: Verified via `pnpm lint` (0 errors), `pnpm type-check` (0 errors), all test suites passing, full 27-gate verification suite (`pnpm agent:verify` 27/27 PASS, 100%), and full production build (`pnpm build` exited 0).
+- **Phase 5 (Contract)**: Modified `apps/portal/components/ErrorBoundary.tsx`, `apps/portal/hooks/useDashboardQueries.ts`, `apps/portal/AGENT_TRACER.md`, and added `apps/portal/lib/errors/retry-strategy.ts`, `apps/portal/lib/errors/circuit-breaker.ts`, `apps/portal/lib/errors/retry-strategy.test.ts`, `apps/portal/lib/errors/circuit-breaker.test.ts`, and `apps/portal/components/ErrorBoundary.test.tsx`.
+
 ## 2026-10-30T09:27:00+02:00: Next.js 16+ Architecture & Client-Side Responsiveness Optimization
 
 - **Phase 1 (Comprehension)**: Optimize client-side responsiveness, initial bundle parsing, and page transitions across the Next.js 16+ / React 19 architecture without altering UI appearance or violating light-mode design tokens.

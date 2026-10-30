@@ -337,6 +337,45 @@ export const AGENT_TASK_FEED: AgentTaskLog[] = [
     details:
       'Updated AgenticMonitor dashboard with latest model metrics (Gemini 3.6 Flash / Claude 3.7), token cache hit ratios, coding time, and ZAR expenditure.',
   },
+  {
+    id: 'TASK-012',
+    timestamp: '08:45 - 08:50',
+    agent: 'Antigravity',
+    role: 'Full-Stack Operations Architect',
+    action: 'Promote Availability & Utilization to Dedicated Department Route',
+    tokensUsed: 4200,
+    tokensCached: 68500,
+    zarCost: 0.58,
+    status: 'Verified',
+    details:
+      'Registered /availability-utilization as a first-class department route with 30-Day Activity Ledger, monthly summaries, and executive boardroom exports.',
+  },
+  {
+    id: 'TASK-013',
+    timestamp: '09:25 - 09:30',
+    agent: 'Antigravity',
+    role: 'Next.js 16 Performance Architect',
+    action: 'Next.js 16 Client Responsiveness & Partial Prefetching Optimization',
+    tokensUsed: 3800,
+    tokensCached: 74200,
+    zarCost: 0.52,
+    status: 'Optimized',
+    details:
+      'Enabled LazyMotion domAnimation dynamic streaming, IBM Plex Sans font preloading, and BottomNav route prefetching for instant page transitions.',
+  },
+  {
+    id: 'TASK-014',
+    timestamp: '10:35 - 10:40',
+    agent: 'Antigravity',
+    role: 'Industrial Resiliency Specialist',
+    action: 'Circuit Breaker & Autonomous Retry Error Pipeline Integration',
+    tokensUsed: 4600,
+    tokensCached: 82000,
+    zarCost: 0.64,
+    status: 'Verified',
+    details:
+      'Integrated exponential backoff retry-strategy and 3-state CircuitBreaker into ErrorBoundary component and React Query dashboard telemetry.',
+  },
 ];
 
 // All-Time Project Metrics (Day 1 - Today / 9 Weeks)

@@ -158,7 +158,7 @@ export const CODEBASE_MAP_SPECS: CodebaseMapSpec[] = [
         color: '#2563eb',
         items: [
           {
-            name: 'apps/portal (Next.js 16.3.8)',
+            name: 'apps/portal (Next.js 16.4.3)',
             role: 'Unified Mining Operations & Overview Portal',
             rule: 'Consumes @repo/ui, @repo/supabase, @repo/contract, @repo/redis, and libs/features/*',
           },
@@ -217,7 +217,7 @@ export const CODEBASE_MAP_SPECS: CodebaseMapSpec[] = [
       },
       {
         title: 'Database Core (packages/database)',
-        badge: '189 Migrations',
+        badge: '213 Migrations',
         scopeTag: 'scope:package:db-internal',
         color: '#dc2626',
         items: [
@@ -403,7 +403,7 @@ flowchart TD
         title: 'Database Core Schema',
         role: '@repo/database (PostgreSQL 17)',
         detail:
-          'Houses 189 SQL migrations and generated Supabase types consumed strictly by @repo/supabase and @repo/contract.',
+          'Houses 213 SQL migrations and generated Supabase types consumed strictly by @repo/supabase and @repo/contract.',
         protocol: 'scope:package:db-internal',
         ssotPath: 'packages/database/migrations/',
         color: '#dc2626',
@@ -579,7 +579,7 @@ graph LR
     shortLabel: 'Route & Feature Map',
     category: 'Next.js 16 Routing',
     subtitle:
-      'Next.js 16.3.8 App Router hierarchy, CSP request proxy, Redis-cached employee RBAC claims, and 8 core operational modules.',
+      'Next.js 16.4.3 App Router hierarchy, CSP request proxy, Redis-cached employee RBAC claims, and 8 core operational modules.',
     accentColor: '#7c3aed',
     kpis: [
       {
@@ -804,12 +804,12 @@ graph LR
     shortLabel: 'Database Schema',
     category: 'PostgreSQL 17 RLS',
     subtitle:
-      'Supabase PostgreSQL 17 relational topology, 189 immutable SQL migrations, 100% InitPlan Row Level Security, and Zod contract parity.',
+      'Supabase PostgreSQL 17 relational topology, 213 immutable SQL migrations, 100% InitPlan Row Level Security, and Zod contract parity.',
     accentColor: '#0284c7',
     kpis: [
       {
         label: 'SQL Migrations',
-        value: '189 Applied',
+        value: '213 Applied',
         detail: 'Zero-padded immutable ledger in packages/database/migrations/',
       },
       {
@@ -891,7 +891,7 @@ graph LR
     ],
     topologyTitle: 'Core PostgreSQL 17 Entity Relationship Domains',
     topologySubtitle:
-      'Relational table domains governed by 189 migrations and verified by pnpm --filter @repo/database test',
+      'Relational table domains governed by 213 migrations and verified by pnpm --filter @repo/database test',
     topologyGroups: [
       {
         title: 'Identity, RBAC & Access Control',
@@ -949,7 +949,7 @@ graph LR
       },
       {
         title: 'Migration & Rollback Safety Guards',
-        badge: '189 SQL Files',
+        badge: '213 SQL Files',
         scopeTag: 'packages/database/migrations/',
         color: '#7c3aed',
         items: [
@@ -994,7 +994,7 @@ graph LR
     ],
     markdownContent: `# 🔒 Database Schema & Topology Map
 
-**Engine:** PostgreSQL 17 via Supabase (189 Versioned SQL Migrations)
+**Engine:** PostgreSQL 17 via Supabase (213 Versioned SQL Migrations)
 
 ---
 
@@ -1008,7 +1008,7 @@ graph LR
 
 ## 🛡️ Security & Row Level Security (RLS) Mandates
 
-- **Source of Truth**: \`packages/database/migrations/\` contains all 189 numbered SQL migrations.
+- **Source of Truth**: \`packages/database/migrations/\` contains all 213 numbered SQL migrations.
 - **100% RLS Enforcement**: Every table has active RLS policy enabled with InitPlan optimization.
 - **Department Isolation**: Multi-tenant separation enforced via \`(SELECT auth.uid())\` and \`accessible_departments\` mapping.`,
   },
@@ -1477,7 +1477,7 @@ flowchart TD
     shortLabel: 'Technology Stack',
     category: 'Runtime Stack',
     subtitle:
-      'Complete production stack specification across Next.js 16.3.8, React 19.2, TypeScript 5.8, OKLCH Theme, Supabase PostgreSQL 17, and Hybrid Redis 7.4.',
+      'Complete production stack specification across Next.js 16.4.3, React 19.2, TypeScript 5.8, OKLCH Theme, Supabase PostgreSQL 17, and Hybrid Redis 7.4.',
     accentColor: '#2563eb',
     kpis: [
       {
@@ -1509,7 +1509,7 @@ flowchart TD
       {
         id: 'stack-ui',
         step: 'LAYER 01',
-        title: 'Next.js 16.3.8 & React 19.2',
+        title: 'Next.js 16.4.3 & React 19.2',
         role: 'App Router + RSC + TanStack Query',
         detail:
           'Renders server-first operational dashboards with Zustand 5 ephemeral state, XState 5 workflows, and React Hook Form.',
@@ -1545,7 +1545,7 @@ flowchart TD
         title: 'Supabase PG 17 & Hybrid Redis',
         role: '@repo/supabase + @repo/redis',
         detail:
-          'Pairs 189 PostgreSQL 17 migrations and Kysely type-safe builders with L1 LRU + L2 Upstash Redis and Redlock mutexes.',
+          'Pairs 213 PostgreSQL 17 migrations and Kysely type-safe builders with L1 LRU + L2 Upstash Redis and Redlock mutexes.',
         protocol: 'PostgreSQL 17 + Redis REST',
         ssotPath: 'packages/redis/src/',
         color: '#d97706',
@@ -1573,7 +1573,7 @@ flowchart TD
         color: '#2563eb',
         items: [
           {
-            name: 'Next.js 16.3.8, React 19.2 & TypeScript 5.8',
+            name: 'Next.js 16.4.3, React 19.2 & TypeScript 5.8',
             role: 'Server Components, Server Actions, proxy.ts CSP, and strict static typing',
             rule: 'Pinned in pnpm-workspace.yaml catalogs.react19',
           },
@@ -1592,7 +1592,7 @@ flowchart TD
         items: [
           {
             name: 'Supabase PostgreSQL 17 + Kysely + @repo/contract',
-            role: '189 SQL migrations, 100% RLS InitPlan policies, and canonical Zod schemas',
+            role: '213 SQL migrations, 100% RLS InitPlan policies, and canonical Zod schemas',
             rule: 'Primary + Read-Replica client factories in @repo/supabase',
           },
           {
@@ -1667,16 +1667,16 @@ flowchart TD
     ],
     markdownContent: `# ⚡ Technology Stack & Catalog Map
 
-**Architecture:** Turborepo Monorepo + Next.js 16.3.8 + React 19.2 + Supabase PostgreSQL 17
+**Architecture:** Turborepo Monorepo + Next.js 16.4.3 + React 19.2 + Supabase PostgreSQL 17
 
 ---
 
 ## 🛠️ Stack Catalog
 
 - **Monorepo Manager**: Turborepo 2.x + pnpm 9.15.9 workspace (Node.js >= 24)
-- **Frontend Core**: Next.js 16.3.8 (App Router), React 19.2, TypeScript 5.8, Tailwind CSS
+- **Frontend Core**: Next.js 16.4.3 (App Router), React 19.2, TypeScript 5.8, Tailwind CSS
 - **Design System**: OKLCH Palette (\`@repo/theme\`), Liquid Glass surfaces (\`@repo/ui/GlassCard\`), Named shadows only
-- **Database Layer**: Supabase PostgreSQL 17 (189 migrations, 100% RLS InitPlan) + Kysely + \`@repo/contract\` Zod
+- **Database Layer**: Supabase PostgreSQL 17 (213 migrations, 100% RLS InitPlan) + Kysely + \`@repo/contract\` Zod
 - **Caching & Metrics**: Hybrid L1 LRU + L2 Upstash Redis 7.4 + \`@repo/rate-limiter\` + Redlock mutexes
 - **Quality & E2E**: Biome, Stylelint, Syncpack, Knip, Jest 30, Playwright E2E, Storybook axe a11y, DeepEval`,
   },
@@ -1721,7 +1721,7 @@ flowchart TD
         title: 'pnpm Workspace Catalogs',
         role: 'pnpm-workspace.yaml',
         detail:
-          'Centralizes third-party versions (React 19.2, Next 16.3.8, Zod, Kysely, Lucide) via catalog: and catalogs.react19.',
+          'Centralizes third-party versions (React 19.2, Next 16.4.3, Zod, Kysely, Lucide) via catalog: and catalogs.react19.',
         protocol: 'catalog:* Protocol',
         ssotPath: 'pnpm-workspace.yaml',
         color: '#2563eb',
@@ -1801,7 +1801,7 @@ flowchart TD
         items: [
           {
             name: '@repo/database & @repo/contract',
-            role: '189 SQL migrations, generated DB types, and 100% mirrored Zod validation schemas',
+            role: '213 SQL migrations, generated DB types, and 100% mirrored Zod validation schemas',
             rule: 'Every new SQL column requires a matching schema in @repo/contract',
           },
           {
@@ -1887,7 +1887,7 @@ flowchart TD
   - \`@repo/ui\` — Shared OKLCH UI component library (\`GlassCard\`, \`Book\`, \`MacTitleBar\`)
   - \`@repo/theme\` — Design tokens (\`tokens.json\`) and Tailwind configuration
   - \`@repo/supabase\` — Supabase client, server, middleware & Kysely factory helpers
-  - \`@repo/database\` — 189 Database migrations & source-of-truth schemas
+  - \`@repo/database\` — 213 Database migrations & source-of-truth schemas
   - \`@repo/contract\` — Zod API input & mutation contracts
   - \`@repo/redis\` & \`@repo/rate-limiter\` — Hybrid L1/L2 Redis caching & rate limiters
   - \`@repo/errors\`, \`@repo/logger\`, \`@repo/utils\`, \`@repo/agents\`, \`@repo/eval\`
@@ -2014,7 +2014,7 @@ flowchart TD
         items: [
           {
             name: 'packages/database/migrations/ ↔ packages/supabase/migrations',
-            role: '189 canonical SQL migrations (NNN_description.sql) + root supabase/ CLI symlink',
+            role: '213 canonical SQL migrations (NNN_description.sql) + root supabase/ CLI symlink',
             rule: 'Single source of truth in packages/database/migrations/',
           },
           {

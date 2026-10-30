@@ -2,8 +2,26 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { isRetryableErrorDefault } from '@/lib/errors/retry-strategy';
 
 const supabase = createBrowserSupabaseClient();
+
+const QUERY_STALE_TIME_MS = 5 * 60 * 1000; // 5 minutes
+const QUERY_GC_TIME_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_QUERY_RETRIES = 3;
+const BASE_RETRY_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 30000;
+
+function shouldRetryQuery(failureCount: number, error: unknown): boolean {
+  if (failureCount >= MAX_QUERY_RETRIES) {
+    return false;
+  }
+  return isRetryableErrorDefault(error);
+}
+
+function calculateRetryDelay(attempt: number): number {
+  return Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
+}
 
 /**
  * Fetch control room summary data (hours, loads, delays, machines)
@@ -23,37 +41,35 @@ export function useControlRoomSummary(deptId: string, today: string) {
           .from('delay_entries')
           .select('duration_hours, status, machine_operations!inner(department_id, shift_date)')
           .eq('machine_operations.department_id', deptId)
-          .eq('machine_operations.shift_date', today)
-          .is('deleted_at', null),
+          .eq('machine_operations.shift_date', today),
         supabase
-          .from('hourly_loads')
-          .select('total_loads')
+          .from('production_loads')
+          .select('id', { count: 'exact', head: true })
           .eq('department_id', deptId)
           .eq('load_date', today),
         supabase.from('machines').select('*', { count: 'exact', head: true }).eq('active', true),
       ]);
 
-      const totalHours =
-        todayOperations.data?.reduce((sum, op) => sum + (op.hours_worked || 0), 0) || 0;
-      const activeOperations =
-        todayOperations.data?.filter((op) => op.end_smu === null).length || 0;
+      const operations = todayOperations.data ?? [];
+      const delayRows = todayDelayEntries.data ?? [];
 
-      const joinedDelays = todayDelayEntries.data ?? [];
-      const embeddedDelays =
-        todayOperations.data?.flatMap((op) =>
-          Array.isArray(op.delay_entries) ? op.delay_entries : []
-        ) ?? [];
-      const delayRows = joinedDelays.length > 0 ? joinedDelays : embeddedDelays;
+      const totalHours = operations.reduce((sum, op) => sum + (Number(op.hours_worked) || 0), 0);
+      const activeOperations = operations.filter((op) => !op.end_smu).length;
 
-      const totalDelayHours = delayRows.reduce((sum, d) => sum + (d.duration_hours || 0), 0);
-      const committedDelayHours = delayRows
-        .filter((d) => d.status === 'committed')
-        .reduce((sum, d) => sum + (d.duration_hours || 0), 0);
-      const draftDelayHours = delayRows
-        .filter((d) => d.status === 'draft')
-        .reduce((sum, d) => sum + (d.duration_hours || 0), 0);
+      let committedDelayHours = 0;
+      let draftDelayHours = 0;
 
-      const totalLoads = todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+      for (const row of delayRows) {
+        const hours = Number(row.duration_hours) || 0;
+        if (row.status === 'committed') {
+          committedDelayHours += hours;
+        } else {
+          draftDelayHours += hours;
+        }
+      }
+
+      const totalDelayHours = committedDelayHours + draftDelayHours;
+      const totalLoads = todayLoads.count ?? 0;
       const machineCount = machines.count ?? 0;
 
       return {
@@ -67,8 +83,10 @@ export function useControlRoomSummary(deptId: string, today: string) {
         delayEntriesCount: delayRows.length,
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: QUERY_STALE_TIME_MS,
+    gcTime: QUERY_GC_TIME_MS,
+    retry: shouldRetryQuery,
+    retryDelay: calculateRetryDelay,
   });
 }
 
@@ -101,7 +119,9 @@ export function useNonControlRoomSummary(deptId: string, today: string) {
         hasLogs: shiftCount > 0,
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: QUERY_STALE_TIME_MS,
+    gcTime: QUERY_GC_TIME_MS,
+    retry: shouldRetryQuery,
+    retryDelay: calculateRetryDelay,
   });
 }

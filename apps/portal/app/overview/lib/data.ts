@@ -336,7 +336,7 @@ export const DEPARTMENTS = [
     name: 'Database',
     slug: 'database',
     description:
-      'PostgreSQL 17 schema definitions, 189 migrations, and live Supabase telemetry panels',
+      'PostgreSQL 17 schema definitions, 213 migrations, and live Supabase telemetry panels',
     color: '#10b981',
     routes: [
       {
@@ -458,7 +458,7 @@ export const TECH_STACK = [
     items: [
       {
         name: 'Next.js 16',
-        version: '16.3.8',
+        version: '16.4.3',
         description: 'App Router, Cache Components, React Server Components & Server Actions',
       },
       {
@@ -495,7 +495,7 @@ export const TECH_STACK = [
       {
         name: 'Supabase PostgreSQL',
         version: '17.x',
-        description: 'Primary ACID relational database with 189 versioned migrations & pgvector',
+        description: 'Primary ACID relational database with 213 versioned migrations & pgvector',
       },
       {
         name: 'Row Level Security (RLS)',
@@ -864,8 +864,8 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: 'client',
     role: 'Primary Industrial UI',
     description:
-      'Next.js 16.3.8 App Router UI for mining operators, supervisors, and control room dispatchers.',
-    tech: 'Next.js 16.3.8 + React 19.2 + TanStack Query',
+      'Next.js 16.4.3 App Router UI for mining operators, supervisors, and control room dispatchers.',
+    tech: 'Next.js 16.4.3 + React 19.2 + TanStack Query',
     color: '#3ecf8e',
     protocols: ['HTTPS', 'WSS'],
     security: 'HttpOnly Session Cookies, PKCE OAuth',
@@ -945,7 +945,7 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: 'database',
     role: 'Primary ACID Data Store + Read Replica',
     description:
-      'PostgreSQL 17 cluster with 189 versioned migrations, partition pruning, read-replica routing, and 100% Row Level Security InitPlan policies.',
+      'PostgreSQL 17 cluster with 213 versioned migrations, partition pruning, read-replica routing, and 100% Row Level Security InitPlan policies.',
     tech: 'PostgreSQL 17 + PostgREST + pgvector',
     color: '#3ecf8e',
     protocols: ['PostgreSQL Wire (5432)', 'HTTPS / PostgREST'],
@@ -1315,7 +1315,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     protocol: 'Postgres Wire / SSL',
     flowType: 'data',
     description:
-      'Real-time schema graph rendering from 189 migration definitions and RLS policy catalog.',
+      'Real-time schema graph rendering from 213 migration definitions and RLS policy catalog.',
     color: '#3ecf8e',
   },
 
@@ -1350,8 +1350,8 @@ export const GIT_PROVENANCE_METRICS = {
   firstCommitTimestamp: '2026-09-26T10:00:59+02:00',
   firstCommitDateFormatted: '26 Sep 2026, 10:00 SAST',
   firstCommitMessage: 'Initial commit: Arch-System codebase',
-  totalCommits: 263,
-  totalMigrations: 189,
+  totalCommits: 433,
+  totalMigrations: 213,
   activeConnectorCount: 20,
   calculateTimeWorked(now: Date = new Date()) {
     const startMs = new Date(this.firstCommitTimestamp).getTime();
@@ -1359,7 +1359,7 @@ export const GIT_PROVENANCE_METRICS = {
     const totalCalendarHours = Math.max(24, Math.floor(diffMs / 3600000));
     const calendarDays = Math.max(1, Math.floor(totalCalendarHours / 24));
     const remainderHours = totalCalendarHours % 24;
-    // Active engineering hours worked derived from 263 commits & 189 migrations (~1.45h per commit + deep architecture sessions)
+    // Active engineering hours worked derived from 433 commits & 213 migrations (~1.45h per commit + deep architecture sessions)
     const activeEngineeringHours = Math.max(382, Math.round(this.totalCommits * 1.45));
     return {
       calendarDays,

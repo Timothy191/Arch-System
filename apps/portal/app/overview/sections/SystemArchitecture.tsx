@@ -37,7 +37,7 @@ import { SystemArchitectureNodeCanvas } from './SystemArchitectureNodeCanvas';
 
 const ARCHITECTURAL_PILLARS = [
   {
-    title: 'Next.js 16.3.8 App Router + RSC',
+    title: 'Next.js 16.4.3 App Router + RSC',
     subtitle: 'Client / Server Boundary',
     badge: 'Cache Components',
     description:
@@ -48,7 +48,7 @@ const ARCHITECTURAL_PILLARS = [
   },
   {
     title: 'Zero-Trust Supabase PostgreSQL 17',
-    subtitle: '189 Versioned Migrations',
+    subtitle: '213 Versioned Migrations',
     badge: '100% RLS InitPlan',
     description:
       'Every table enforces Row Level Security with cached (select auth.uid()) InitPlan policies, atomic PL/pgSQL RPCs, and read-replica routing.',
