@@ -63,6 +63,7 @@ export * from './components/ui/drawer';
 export * from './components/ui/dropdown-menu';
 export * from './components/ui/entity';
 export * from './components/ui/error-state';
+export * from './components/ui/FastTelemetryChart';
 export * from './components/ui/fieldset';
 export * from './components/ui/file-tree';
 export * from './components/ui/filter-toolbar';
