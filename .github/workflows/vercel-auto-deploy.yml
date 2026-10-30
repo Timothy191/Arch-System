@@ -1,0 +1,57 @@
+name: Vercel Auto Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  workflows: write
+
+concurrency:
+  group: vercel-auto-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify build (type-check, lint, tests)
+        run: |
+          echo "Running type-check..."
+          pnpm type-check
+          echo "Running lint..."
+          pnpm lint
+          echo "Running tests..."
+          pnpm test
+
+      - name: Deploy to Vercel Production
+        if: github.event_name == 'push'
+        run: pnpm dlx vercel deploy --prod --token="${{ secrets.VERCEL_TOKEN }}"
