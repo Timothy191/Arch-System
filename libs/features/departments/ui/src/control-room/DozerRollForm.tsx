@@ -2,7 +2,6 @@
 
 import { dozerRollSchema } from '@repo/contract/schemas/form.schema';
 import { useOfflineQueue, useUnsavedChangesWarning } from '@repo/shared/hooks';
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { ShiftToggle } from '@repo/ui/ShiftToggle';
 import { getCurrentShift } from '@repo/utils';
@@ -27,7 +26,6 @@ interface DozerRollFormProps {
 
 export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProps) {
   const router = useRouter();
-  const supabase = createBrowserSupabaseClient();
 
   const [isOpen, setIsOpen] = useState(false);
   const [machineId, setMachineId] = useState('');

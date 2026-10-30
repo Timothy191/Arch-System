@@ -1,6 +1,5 @@
 'use client';
 
-import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { AvatarGroup, Badge } from '@repo/ui';
 import { EmptyState } from '@repo/ui/EmptyState';
 import { GlassCard } from '@repo/ui/GlassCard';
@@ -43,58 +42,33 @@ function ShiftCoverageWidgetBase({
 
   useEffect(() => {
     let cancelled = false;
-    const supabase = createBrowserSupabaseClient();
 
     async function fetchData() {
       setLoading(true);
       setError(null);
       try {
-        const [machinesRes, opsRes] = await Promise.all([
-          supabase
-            .from('machines')
-            .select('id, name, machine_type')
-            .eq('department_id', departmentId)
-            .eq('active', true)
-            .order('name'),
-          supabase
-            .from('machine_operations')
-            .select('machine_id, hours_worked')
-            .eq('department_id', departmentId)
-            .eq('shift_date', today)
-            .eq('shift_type', currentShift),
-        ]);
+        const res = await fetch(
+          `/api/control-room/shift-completeness?deptId=${encodeURIComponent(departmentId)}&date=${encodeURIComponent(today)}&shift=${encodeURIComponent(currentShift)}`,
+          { method: 'GET' }
+        );
+
+        if (!res.ok) throw new Error(`Failed to load data: ${res.statusText}`);
+        const data = await res.json();
 
         if (cancelled) return;
 
-        if (machinesRes.error) throw machinesRes.error;
-        if (opsRes.error) throw opsRes.error;
-
-        const opsMap = new Map<string, number | null>();
-        const hasEntryMap = new Map<string, boolean>();
-        for (const op of opsRes.data || []) {
-          opsMap.set(op.machine_id, op.hours_worked);
-          hasEntryMap.set(op.machine_id, true);
-        }
-
-        const machinesWithOps: MachineWithOp[] = (machinesRes.data || []).map((m) => ({
-          id: m.id,
-          name: m.name,
-          machine_type: m.machine_type,
-          hours_worked: opsMap.get(m.id) ?? null,
-          has_entry: hasEntryMap.has(m.id),
-        }));
+        const machinesWithOps: MachineWithOp[] =
+          data.statuses?.map((status: any) => ({
+            id: status.machineId,
+            name: status.machineName,
+            machine_type: status.machineType,
+            hours_worked: status.hoursWorked ?? null,
+            has_entry: status.hasEntry ?? false,
+          })) || [];
 
         setMachines(machinesWithOps);
 
-        const { data: statusData } = await supabase
-          .from('shift_status')
-          .select('status')
-          .eq('department_id', departmentId)
-          .eq('shift_date', today)
-          .eq('shift_type', currentShift)
-          .maybeSingle();
-
-        if (statusData?.status === 'closed') {
+        if (data.complete) {
           setIsClosed(true);
         }
       } catch (err) {

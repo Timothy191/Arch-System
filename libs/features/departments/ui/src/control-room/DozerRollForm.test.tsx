@@ -14,10 +14,6 @@ jest.mock('next/navigation', () => {
   };
 });
 
-jest.mock('@repo/supabase/client', () => ({
-  createBrowserSupabaseClient: jest.fn(),
-}));
-
 jest.mock('./actions', () => ({
   createDozerRoll: jest.fn(),
 }));
@@ -52,6 +48,12 @@ jest.mock('@repo/ui/ShiftToggle', () => ({
 jest.mock('@repo/utils', () => ({
   getCurrentShift: () => 'day',
 }));
+
+jest.mock('@repo/supabase/client', () => ({
+  createBrowserSupabaseClient: jest.fn(),
+}));
+
+const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
 jest.mock('lucide-react', () => ({
   Plus: () => <div data-testid="icon-plus" />,
@@ -101,8 +103,6 @@ const defaultProps = {
   dozers: mockDozers,
   today: '2026-06-15',
 };
-
-const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
 // --- Helper ---
 

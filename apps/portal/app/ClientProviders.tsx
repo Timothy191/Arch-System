@@ -38,9 +38,10 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         });
     }
 
-    // Initialize offline queue sync listeners
+    // Initialize offline queue sync listeners with proper cleanup
     import('@repo/shared/hooks').then((mod) => {
-      mod.initOfflineQueueListeners();
+      const cleanup = mod.initOfflineQueueListeners();
+      return cleanup;
     });
 
     // Initialize global error handling with autonomous recovery

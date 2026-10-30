@@ -44,6 +44,7 @@ export function WebVitalsReporter() {
   const loggedIdsRef = useRef<Set<string>>(new Set());
 
   const flush = useCallback(() => {
+    if (typeof window === 'undefined') return;
     if (pendingRef.current.length === 0) return;
     try {
       const batch = pendingRef.current.splice(0);
