@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
-      PORTAL_URL: ${{ vars.PRODUCTION_URL || 'https://arch-system-kappa.vercel.app' }}
+      PORTAL_URL: ${{ vars.PRODUCTION_URL || 'https://arch-system-kappap.vercel.app' }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Ping portal routes

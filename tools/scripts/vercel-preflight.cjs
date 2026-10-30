@@ -250,9 +250,14 @@ for (const v of requiredPublicVars) {
 }
 
 // Database Connection String & Supavisor Pooler Check
-const dbUrl = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
+const poolerUrl = process.env.DATABASE_POOLER_URL;
+const dbUrl = poolerUrl || process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
 if (dbUrl) {
-  if (dbUrl.includes(':5432/')) {
+  if (poolerUrl && poolerUrl.includes(':6543/')) {
+    recordPass(
+      'DATABASE_POOLER_URL is configured and routed to Supavisor transaction pooler (port 6543)'
+    );
+  } else if (dbUrl.includes(':5432/')) {
     recordWarn(
       'DATABASE_URL connects to direct Postgres port 5432. For Vercel Serverless, ' +
         'use Supavisor transaction pooler port 6543 to avoid connection exhaustion.'

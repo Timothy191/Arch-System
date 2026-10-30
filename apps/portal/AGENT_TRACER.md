@@ -1,3 +1,15 @@
+## 2026-10-30T11:52:00+02:00: Peak Scale Operational Hardening (Supavisor 6543 Pooling, Domain Alias Unification & Turborepo Env Pass-Through)
+
+- **Phase 1 (Comprehension)**: Execute all operational recommendations from the real-world readiness audit to harden the system for peak scale: (1) Route Kysely serverless connections through Supabase Supavisor transaction pooler (`:6543/?pgbouncer=true`), (2) Unify production domain references to `https://arch-system-kappap.vercel.app`, (3) Eliminate Turborepo strict environment pass-through warnings on Vercel, and (4) Synchronize CI/CD keep-warm targets.
+- **Phase 2 (Evidence)**: Inspected `packages/supabase/src/kysely.ts`, `tools/scripts/vercel-preflight.cjs`, `turbo.json`, `libs/shared/utils/src/env.ts`, `apps/portal/lib/integrations/service.ts`, and `.github/workflows/n8n-keep-warm.yml`.
+- **Phase 3 (Design)**:
+  - Implemented `resolvePooledDatabaseUrl()` in `packages/supabase/src/kysely.ts` to prefer `DATABASE_POOLER_URL` in production/Vercel and automatically upgrade direct `:5432/` Supabase URLs to `:6543/?pgbouncer=true` with serverless pool bounds (`max: 3`).
+  - Updated `tools/scripts/vercel-preflight.cjs` to validate `DATABASE_POOLER_URL` (port 6543), achieving 100% PASS with 0 warnings.
+  - Updated `turbo.json` (`portal#build`, `portal#dev`, `@repo/database#test`) and `libs/shared/utils/src/env.ts` to pass through `DATABASE_POOLER_URL` and all configured Vercel production environment variables.
+  - Unified legacy `arch-system-kappa.vercel.app` references across `apps/portal/lib/integrations/service.ts`, test suites, `.github/workflows/n8n-keep-warm.yml`, and federated deploy skills to `https://arch-system-kappap.vercel.app`.
+- **Phase 4 (Criticism)**: Added 3 unit tests for `resolvePooledDatabaseUrl` in `packages/supabase/src/__tests__/supabase.test.ts` (`30/30 PASS`), verified `pnpm deploy:vercel:preflight:prod` (`0 warnings`), and ran `pnpm agent:verify` (`27/27 PASS`).
+- **Phase 5 (Contract)**: Modified `packages/supabase/src/{kysely.ts,__tests__/supabase.test.ts}`, `libs/shared/utils/src/env.ts`, `tools/scripts/vercel-preflight.cjs`, `turbo.json`, `apps/portal/lib/integrations/service.ts`, `apps/portal/app/api/webhooks/vercel/route.test.ts`, `apps/portal/lib/api/cron-auth.test.ts`, and `.github/workflows/n8n-keep-warm.yml`.
+
 ## 2026-10-30T10:40:00+02:00: Autonomous Circuit Breaker & Retry Strategy Production Integration
 
 - **Phase 1 (Comprehension)**: Integrate autonomous error recovery and circuit breaker protection into the production error handling pipeline. Transition `retry-strategy.ts` and `circuit-breaker.ts` from isolated prototypes into the active client architecture, safeguarding `ErrorBoundary.tsx` and React Query hooks (`useDashboardQueries.ts`).

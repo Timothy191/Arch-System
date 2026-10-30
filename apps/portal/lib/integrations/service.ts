@@ -315,7 +315,7 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     author: 'Plantcor Control Room',
     icon_url: null,
     kind: 'action',
-    server_url: 'https://arch-system-kappa.vercel.app/api/webhooks',
+    server_url: 'https://arch-system-kappap.vercel.app/api/webhooks',
     auth_type: 'bearer',
     verified: true,
     docs_url: '/control-room/shift-compilation',

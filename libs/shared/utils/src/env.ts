@@ -38,6 +38,7 @@ const serverEnvShape = {
   SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_SERVICE_KEY: z.string().optional(),
   DATABASE_URL: z.string().optional(),
+  DATABASE_POOLER_URL: z.string().optional(),
 
   // ── Server — optional with defaults ────────────────────────────────
   PORT: z.coerce.number().int().positive().default(3000),
@@ -174,6 +175,7 @@ export function createT3Env(skipValidation = process.env.NODE_ENV !== 'productio
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
       DATABASE_URL: process.env.DATABASE_URL,
+      DATABASE_POOLER_URL: process.env.DATABASE_POOLER_URL,
       PORT: process.env.PORT,
       NODE_ENV: process.env.NODE_ENV,
       REDIS_URL: process.env.REDIS_URL,
@@ -228,6 +230,7 @@ function parseEnv(): EnvVars {
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
+    DATABASE_POOLER_URL: process.env.DATABASE_POOLER_URL,
     PORT: process.env.PORT,
     NODE_ENV: process.env.NODE_ENV,
     REDIS_URL: process.env.REDIS_URL,

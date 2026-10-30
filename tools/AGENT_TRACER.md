@@ -1,5 +1,12 @@
 # AGENT_TRACER — tools
 
+## 2026-10-30T11:52:00+02:00 - Supavisor Transaction Pooler Preflight Verification
+
+- **Purpose**: Recognize `DATABASE_POOLER_URL` (port 6543) in `tools/scripts/vercel-preflight.cjs` so Vercel production preflight audits verify Supavisor transaction pooling with zero warnings.
+- **Changes**:
+  - `tools/scripts/vercel-preflight.cjs`: Checked `process.env.DATABASE_POOLER_URL` ahead of `DATABASE_URL` when validating Supavisor port 6543 routing.
+- **Verification**: `pnpm deploy:vercel:preflight:prod` ✅ (0 warnings); `pnpm agent:verify` ✅.
+
 ## 2026-10-23T11:08:00+02:00 - Tailwind Purge & CSS Build Budget Guardrail
 
 - **Purpose**: Enforce strict Tailwind `content` purge rules and tighten the CSS bundle budget so unused classes cannot regress into the build.

@@ -79,6 +79,54 @@ export interface KyselyDatabase {
  *   .execute();
  * ```
  */
+const DEFAULT_POOL_MAX_CONNECTIONS = 10;
+const SERVERLESS_POOL_MAX_CONNECTIONS = 3;
+const POOL_IDLE_TIMEOUT_MS = 30_000;
+const POOL_CONNECTION_TIMEOUT_MS = 5_000;
+const DIRECT_POSTGRES_PORT = ':5432/';
+const SUPAVISOR_POOLER_PORT = ':6543/';
+
+/**
+ * Resolves the optimal Postgres connection string for the current runtime.
+ *
+ * In Vercel Serverless or production environments:
+ * 1. Prefers `DATABASE_POOLER_URL` (Supavisor port 6543) when defined.
+ * 2. Automatically upgrades Supabase direct connection URLs (`:5432/`) to
+ *    Supavisor transaction pooler (`:6543/?pgbouncer=true`) to prevent
+ *    serverless connection exhaustion under concurrent cold starts.
+ */
+export function resolvePooledDatabaseUrl(
+  envVars: Readonly<Record<string, string | undefined>> = process.env
+): string | undefined {
+  const isServerlessOrProd =
+    envVars.VERCEL === '1' || Boolean(envVars.VERCEL_ENV) || envVars.NODE_ENV === 'production';
+
+  const rawUrl =
+    (isServerlessOrProd ? envVars.DATABASE_POOLER_URL : undefined) ??
+    envVars.DATABASE_URL ??
+    envVars.DATABASE_POOLER_URL ??
+    envVars.SUPABASE_DATABASE_URL;
+
+  if (!rawUrl) {
+    return undefined;
+  }
+
+  if (
+    isServerlessOrProd &&
+    rawUrl.includes(DIRECT_POSTGRES_PORT) &&
+    (rawUrl.includes('supabase.co') || rawUrl.includes('pooler.supabase.com'))
+  ) {
+    const pooledPortUrl = rawUrl.replace(DIRECT_POSTGRES_PORT, SUPAVISOR_POOLER_PORT);
+    if (pooledPortUrl.includes('pgbouncer=')) {
+      return pooledPortUrl;
+    }
+    const separator = pooledPortUrl.includes('?') ? '&' : '?';
+    return `${pooledPortUrl}${separator}pgbouncer=true`;
+  }
+
+  return rawUrl;
+}
+
 const globalForKysely = globalThis as unknown as {
   kyselyInstance: Kysely<KyselyDatabase> | undefined;
 };
@@ -86,7 +134,7 @@ const globalForKysely = globalThis as unknown as {
 export function createKyselyClient() {
   if (globalForKysely.kyselyInstance) return globalForKysely.kyselyInstance;
 
-  const url = process.env.DATABASE_URL ?? process.env.SUPABASE_DATABASE_URL;
+  const url = resolvePooledDatabaseUrl(process.env);
 
   if (!url) {
     throw new APIError(
@@ -94,17 +142,18 @@ export function createKyselyClient() {
     );
   }
 
+  const isServerless = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV);
+
   const dialect = new PostgresDialect({
     pool: new Pool({
       connectionString: url,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      max: isServerless ? SERVERLESS_POOL_MAX_CONNECTIONS : DEFAULT_POOL_MAX_CONNECTIONS,
+      idleTimeoutMillis: POOL_IDLE_TIMEOUT_MS,
+      connectionTimeoutMillis: POOL_CONNECTION_TIMEOUT_MS,
     }),
   });
 
   const db = new Kysely<KyselyDatabase>({ dialect });
-  if (process.env.NODE_ENV !== 'production') globalForKysely.kyselyInstance = db;
-  else globalForKysely.kyselyInstance = db;
+  globalForKysely.kyselyInstance = db;
   return db;
 }

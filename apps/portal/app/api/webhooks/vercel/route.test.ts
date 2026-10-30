@@ -104,7 +104,7 @@ describe('/api/webhooks/vercel', () => {
           deployment: {
             id: 'dpl_arch_01',
             name: 'arch-system-portal',
-            url: 'arch-system-kappa.vercel.app',
+            url: 'arch-system-kappap.vercel.app',
           },
         },
         expectedCategory: 'deployment',

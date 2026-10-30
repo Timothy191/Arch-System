@@ -35,7 +35,7 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   });
 
   it('authorizes requests with a valid Bearer CRON_SECRET token', () => {
-    const req = new Request('https://arch-system-kappa.vercel.app/api/cron/shift-handoff', {
+    const req = new Request('https://arch-system-kappap.vercel.app/api/cron/shift-handoff', {
       headers: {
         authorization: `Bearer ${TEST_SECRET}`,
       },
@@ -48,7 +48,7 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   it('fails closed when CRON_SECRET is unset even if caller sends "Bearer undefined"', async () => {
     delete process.env.CRON_SECRET;
 
-    const req = new Request('https://arch-system-kappa.vercel.app/api/cron/shift-handoff', {
+    const req = new Request('https://arch-system-kappap.vercel.app/api/cron/shift-handoff', {
       headers: {
         authorization: 'Bearer undefined',
       },
@@ -66,7 +66,7 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
 
   it('fails closed when CRON_SECRET is shorter than 16 characters', () => {
     process.env.CRON_SECRET = 'short-secret';
-    const req = new Request('https://arch-system-kappa.vercel.app/api/cron/shift-handoff', {
+    const req = new Request('https://arch-system-kappap.vercel.app/api/cron/shift-handoff', {
       headers: {
         authorization: 'Bearer short-secret',
       },
@@ -78,7 +78,7 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   });
 
   it('rejects requests with missing or mismatched Bearer token without leaking secret', async () => {
-    const req = new Request('https://arch-system-kappa.vercel.app/api/cron/shift-handoff', {
+    const req = new Request('https://arch-system-kappap.vercel.app/api/cron/shift-handoff', {
       headers: {
         authorization: 'Bearer wrong-token-value-123456',
       },
@@ -99,11 +99,11 @@ describe('authorizeCronRequest & Scheduled Cron Route Authentication', () => {
   ])(
     'scheduled route /api/cron/%s authenticates valid Bearer token and rejects invalid calls',
     async (name, handler) => {
-      const unauthReq = new Request(`https://arch-system-kappa.vercel.app/api/cron/${name}`);
+      const unauthReq = new Request(`https://arch-system-kappap.vercel.app/api/cron/${name}`);
       const unauthRes = await handler(unauthReq);
       expect(unauthRes.status).toBe(401);
 
-      const authReq = new Request(`https://arch-system-kappa.vercel.app/api/cron/${name}`, {
+      const authReq = new Request(`https://arch-system-kappap.vercel.app/api/cron/${name}`, {
         headers: {
           authorization: `Bearer ${TEST_SECRET}`,
         },

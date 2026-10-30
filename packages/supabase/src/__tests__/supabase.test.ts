@@ -20,6 +20,7 @@ jest.mock('@repo/logger', () => ({
 }));
 
 import { createBrowserSupabaseClient } from '../client';
+import { resolvePooledDatabaseUrl } from '../kysely';
 import { createServerSupabaseClient, getUserSafely, instrumentedFetch } from '../server';
 
 describe('instrumentedFetch', () => {
@@ -405,5 +406,40 @@ describe('createBrowserSupabaseClient', () => {
     );
 
     process.env = originalEnv;
+  });
+});
+
+describe('resolvePooledDatabaseUrl', () => {
+  test('prefers DATABASE_POOLER_URL in production or Vercel environments', () => {
+    const resolved = resolvePooledDatabaseUrl({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://postgres:pass@db.ref.supabase.co:5432/postgres',
+      DATABASE_POOLER_URL:
+        'postgresql://postgres.ref:pass@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true',
+    });
+
+    expect(resolved).toBe(
+      'postgresql://postgres.ref:pass@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true'
+    );
+  });
+
+  test('upgrades direct Supabase port 5432 URL to Supavisor port 6543 in serverless production', () => {
+    const resolved = resolvePooledDatabaseUrl({
+      VERCEL: '1',
+      DATABASE_URL: 'postgresql://postgres:pass@db.ref.supabase.co:5432/postgres',
+    });
+
+    expect(resolved).toBe(
+      'postgresql://postgres:pass@db.ref.supabase.co:6543/postgres?pgbouncer=true'
+    );
+  });
+
+  test('preserves local development port 5432 URL when not in production or Vercel', () => {
+    const resolved = resolvePooledDatabaseUrl({
+      NODE_ENV: 'development',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres',
+    });
+
+    expect(resolved).toBe('postgresql://postgres:postgres@localhost:5432/postgres');
   });
 });

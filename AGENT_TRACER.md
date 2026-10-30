@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-30] - Peak Scale Operational Hardening (Supavisor 6543 Pooling, Domain Unification & Turborepo Env Matrix)
+
+- **Action:**
+  - Implemented `resolvePooledDatabaseUrl()` in [`packages/supabase/src/kysely.ts`](./packages/supabase/src/kysely.ts) to prefer `DATABASE_POOLER_URL` (`:6543`) in production/serverless environments and automatically upgrade direct `:5432/` Supabase URLs to `:6543/?pgbouncer=true` with serverless pool sizing (`max: 3`).
+  - Updated [`tools/scripts/vercel-preflight.cjs`](./tools/scripts/vercel-preflight.cjs) to verify `DATABASE_POOLER_URL` on port 6543 (achieving 100% PASS with 0 warnings).
+  - Expanded [`turbo.json`](./turbo.json) and [`libs/shared/utils/src/env.ts`](./libs/shared/utils/src/env.ts) `passThroughEnv` to cover `DATABASE_POOLER_URL` and all production Vercel environment variables.
+  - Unified legacy `arch-system-kappa.vercel.app` references across [`apps/portal/lib/integrations/service.ts`](./apps/portal/lib/integrations/service.ts), test suites, [`.github/workflows/n8n-keep-warm.yml`](./.github/workflows/n8n-keep-warm.yml), and `.agents/skills/deploy-federation/` to `https://arch-system-kappap.vercel.app`.
+- **Verification:** `pnpm --filter @repo/supabase test` (`30/30 PASS`), `pnpm deploy:vercel:preflight:prod` (`100% PASS, 0 warnings`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Executive Recommendations Implementation (Migration 213, Multi-Month Trend Chart, Boardroom Print View & Predictive Maintenance)
 
 - **Action:**
