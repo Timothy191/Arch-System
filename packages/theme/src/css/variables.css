@@ -483,13 +483,11 @@
        ═══════════════════════════════════════════════════════════════ */
   --theme-transition-duration: 0ms;
 
-  /* Font variables used in Tailwind config preset */
+  /* Font variables used in Tailwind config preset.
+     `next/font` in apps/portal/app/layout.tsx sets the real values on <html>; these are the
+     pre-hydration fallbacks so text never renders in an unintended face stack. */
   --font-sans: 'IBM Plex Sans', Arial, Helvetica, sans-serif;
-  --font-inter:
-    'Inter', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Fallback until next/font hydrates; portal layout overrides via Outfit.variable */
-  --font-outfit: 'Outfit', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-anurati: var(--font-outfit), var(--font-sans), 'IBM Plex Sans', sans-serif;
+  --font-display: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;

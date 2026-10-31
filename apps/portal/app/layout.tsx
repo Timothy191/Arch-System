@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
-import { IBM_Plex_Sans, Inter, JetBrains_Mono, Outfit } from 'next/font/google';
+import { IBM_Plex_Sans, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
@@ -49,19 +49,19 @@ const MacMenuBar = dynamic(
 import { RouteBackground } from '@/components/RouteBackground';
 import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
 
+// Font strategy (measured, latin woff2, self-hosted + immutable-cached by next/font):
+//   --font-sans    IBM Plex Sans  ~40 KB  body/UI
+//   --font-display Space Grotesk  ~22 KB  headings + `.font-anurati`
+//   --font-mono    JetBrains Mono ~31 KB  telemetry/tables (below the fold)
+// All three stay `preload: false`: next/font also injects these preloads into the
+// RSC prefetch `Link` header, which Chrome reports as unused preloads on client
+// navigations (fixed in 79333bf7). Fonts are discovered from the CSS chunk instead.
+// A fourth family (Inter) used to be loaded here, but no CSS rule ever referenced
+// `--font-inter`, so it only added @font-face rules to the render-blocking CSS.
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  preload: false,
-  adjustFontFallback: true,
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  weight: ['400', '500', '600'],
   display: 'swap',
   preload: false,
   adjustFontFallback: true,
@@ -76,10 +76,10 @@ const jetbrainsMono = JetBrains_Mono({
   adjustFontFallback: true,
 });
 
-const outfit = Outfit({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-outfit',
-  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
+  weight: 'variable',
   display: 'swap',
   preload: false,
   adjustFontFallback: true,
@@ -118,7 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} bg-[#f3f4f6]`}
+      className={`${ibmPlexSans.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} bg-[#f3f4f6]`}
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
@@ -148,7 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className={`${ibmPlexSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} relative min-h-screen overflow-x-hidden bg-transparent font-sans text-[var(--text-heading)] antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)]`}
+        className={`${ibmPlexSans.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} relative min-h-screen overflow-x-hidden bg-transparent font-sans text-[var(--text-heading)] antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)]`}
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />

@@ -646,3 +646,4 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - 2026-10-22T11:54:00+02:00 — feat(ui): add HeroOperationalKpiStrip to HeroCardContent and fix SelectItem text rendering
 - 2026-10-23T00:59:00+02:00 — feat(ui): add `variant="gold"` metallic gold gradient option to `Logo.tsx` for top-bar dropdown and excavator emblems
 - 2026-10-23T01:15:00+02:00 — feat(ui): add gold steel border to HeroTelemetryGraph containers, replace hero dept icons with gold Arch System Logo, and promote telemetry titles to semantic h3 headings
+- 2026-10-31T10:49:31+02:00 — perf(ui): drop the duplicated inline `fontFamily` override on both `HeroCardContent` hero headers (`series.title` h3 + `panel.title` h2). The `.font-anurati` class already declares the display family via `var(--font-display)`, so the inline styles were a second, drift-prone copy of the font stack; removing them makes a future display-face swap a one-line theme change.

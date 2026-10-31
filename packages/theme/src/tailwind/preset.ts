@@ -93,20 +93,14 @@ const archTheme: Config = {
           'monospace',
         ],
         heading: [
-          'var(--font-outfit)',
+          'var(--font-display)',
           'var(--font-sans)',
           'IBM Plex Sans',
           'Arial',
           'Helvetica',
           'sans-serif',
         ],
-        anurati: [
-          'var(--font-outfit)',
-          'var(--font-sans)',
-          'IBM Plex Sans',
-          'system-ui',
-          'sans-serif',
-        ],
+        anurati: ['var(--font-display)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Arch palette — direct CSS variable references

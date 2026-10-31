@@ -1,36 +1,25 @@
 /**
  * Arch System — Typography overrides
- * Configures robust heading typography using the application's loaded font hierarchy
- * (Outfit / IBM Plex Sans / Inter / system-ui fallback).
  *
- * NOTE: Anurati is a stylized missing-stroke stencil display font suited only for
- * 1–2 word giant wordmarks (>36px). At 12–24px UI header sizes (e.g. "CORE OPERATIONAL MODULES",
- * "STOCK CONTROL DEPARTMENT", "FEEDBACK & SUPPORT"), missing horizontal/diagonal strokes
- * degrade human reading speed and sunlight scannability. `.font-anurati` therefore maps to
- * geometric industrial display typography (`var(--font-outfit)`, `var(--font-sans)`) with
- * balanced uppercase tracking (`0.06em`) and `600`/`700` weight.
+ * Type roles (all self-hosted by `next/font/google` in `apps/portal/app/layout.tsx`):
+ *   --font-sans    IBM Plex Sans   body, UI copy
+ *   --font-display Space Grotesk   headings, hero cards, operational module headers
+ *   --font-mono    JetBrains Mono  telemetry, asset IDs, timestamps
+ *
+ * `.font-anurati` is the historical class name for the display role. It is kept as the
+ * public API (call sites and tests depend on it) but resolves through `--font-display`,
+ * so the display face is swapped in exactly one place.
+ *
+ * The former `Anurati` display face is gone: it was a missing-stroke stencil OTF whose
+ * `@font-face` pointed at an asset that nothing rendered. The class now uses the
+ * variable display face, which is a single ~22 KB woff2 instead of a per-weight set.
  */
 
-@font-face {
-  font-family: Anurati;
-  src: url('/fonts/Anurati-Regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 .font-anurati {
-  font-family: var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 600;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-}
-
-.font-brand-wordmark {
-  font-family: Anurati, var(--font-outfit), var(--font-sans), system-ui, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
 h1,
@@ -40,7 +29,7 @@ h4,
 h5,
 h6 {
   font-family:
-    var(--font-outfit),
+    var(--font-display),
     var(--font-sans),
     system-ui,
     -apple-system,

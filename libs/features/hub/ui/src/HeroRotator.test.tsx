@@ -395,7 +395,7 @@ describe('HeroRotator', () => {
     expect(screen.getByText('Stockpile & Medium Inventory')).toBeInTheDocument();
   });
 
-  it('applies Anurati font to all hero-card panel headers and Gold branding to Previous/Next highlight buttons', () => {
+  it('applies the display face (font-anurati) to all hero-card panel headers and Gold branding to Previous/Next highlight buttons', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
 
     const overviewHeading = screen.getByRole('heading', { name: 'System Overview', hidden: true });

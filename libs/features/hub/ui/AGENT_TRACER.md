@@ -215,3 +215,4 @@
 - 2026-10-22T11:54:00+02:00 — test(hub): verify HeroOperationalKpiStrip readout tiles in HeroRotator tests
 - 2026-10-22T12:14:00+02:00 — feat(hub): align DepartmentCard geometry and spacing with slimmer rectangular uiverse-card
 - 2026-10-23T01:15:00+02:00 — feat(hub): standardize hero department badge icons to gold Arch System Logo and assert gold telemetry graph containers and h3 trend headings
+- 2026-10-31T10:49:31+02:00 — perf(hub/ui): remove the hard-coded inline `fontFamily` on `DepartmentCard`'s department title (`font-anurati`), so the card inherits the theme's `--font-display` instead of pinning a font stack in JSX. Updated the `HeroRotator` test description from "Anurati font" to "display face (font-anurati)" — the assertion on the `font-anurati` class is unchanged and still green (24/24).

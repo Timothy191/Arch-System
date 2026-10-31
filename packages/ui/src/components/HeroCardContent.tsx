@@ -219,13 +219,7 @@ function HeroTelemetryGraph({
               className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
               aria-hidden="true"
             />
-            <h3
-              className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm"
-              style={{
-                fontFamily:
-                  "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-              }}
-            >
+            <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm">
               {series.title}
             </h3>
           </div>
@@ -614,13 +608,7 @@ export function HeroCardContent({
               >
                 <Logo variant="gold" className="h-4 w-4 text-accent-amber" />
               </span>
-              <h2
-                className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl uppercase leading-snug tracking-[0.04em] sm:text-2xl"
-                style={{
-                  fontFamily:
-                    "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-                }}
-              >
+              <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl uppercase leading-snug tracking-[0.04em] sm:text-2xl">
                 {panel.title}
               </h2>
             </div>

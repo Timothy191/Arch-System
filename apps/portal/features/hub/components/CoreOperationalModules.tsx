@@ -97,13 +97,7 @@ export function CoreOperationalModules({
             <span className="-my-2 -ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-arch-accent-blue/35 bg-white text-arch-accent-blue shadow-sm">
               <Logo className="h-6 w-6 scale-110 text-arch-accent-blue drop-shadow-xs" />
             </span>
-            <span
-              className="font-anurati font-bold uppercase tracking-[0.06em]"
-              style={{
-                fontFamily:
-                  "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-              }}
-            >
+            <span className="font-anurati font-bold uppercase tracking-[0.06em]">
               Core Operational Modules
             </span>
             <span
