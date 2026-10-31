@@ -39,9 +39,34 @@ export const DEPARTMENTS = [
         description: 'SCADA, printer & webhook connectors',
       },
       {
+        path: '/admin?tab=webhooks',
+        name: 'Webhooks',
+        description: 'Outbound webhook dispatch & delivery logs',
+      },
+      {
+        path: '/admin?tab=audit-logs',
+        name: 'Audit Logs',
+        description: 'Immutable security & mutation audit trail',
+      },
+      {
+        path: '/admin?tab=external-content',
+        name: 'External Content',
+        description: 'RAG corpus & external knowledge indexer',
+      },
+      {
         path: '/admin/ai-metrics',
         name: 'AI Metrics',
         description: 'LLM token cache & ZAR cost telemetry',
+      },
+      {
+        path: '/admin/redis',
+        name: 'Redis Telemetry',
+        description: 'L1/L2 cache hit rates & keyspace monitor',
+      },
+      {
+        path: '/admin/workflows',
+        name: 'Workflows',
+        description: 'Durable background job & queue monitor',
       },
     ],
     roles: ['admin', 'super_admin', 'executive'],
@@ -1440,7 +1465,7 @@ export const GIT_PROVENANCE_METRICS = {
   firstCommitTimestamp: '2026-09-26T10:00:59+02:00',
   firstCommitDateFormatted: '26 Sep 2026, 10:00 SAST',
   firstCommitMessage: 'Initial commit: Arch-System codebase',
-  totalCommits: 446,
+  totalCommits: 457,
   totalMigrations: 213,
   activeConnectorCount: 20,
   calculateTimeWorked(now: Date = new Date()) {

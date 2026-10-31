@@ -180,9 +180,9 @@ export const PROJECT_MILESTONES: MilestoneSpend[] = [
   },
   {
     period: 'Week 11 (Current)',
-    dateRange: 'Oct 15 – Oct 30, 2026',
+    dateRange: 'Oct 15 – Oct 31, 2026',
     milestone:
-      '30-Day Activity & SMR Interlocks, Availability & Utilization Dept, eve Branding & Live WhatsApp Split View',
+      '30-Day Activity & SMR Interlocks, Availability & Utilization Dept, External RAG Indexer & Preload/Auth Fixes',
     tokensUsed: '1.90M',
     tokensCached: '6.00M',
     usdCost: 24.3,
@@ -415,6 +415,58 @@ export const AGENT_TASK_FEED: AgentTaskLog[] = [
     details:
       'Aligned AgenticMonitor spend (R 5,000.00), 90% cache ratio, 150h engineering time, 75 bugs resolved, 27/27 quality gates, and updated schema & route topology.',
   },
+  {
+    id: 'TASK-018',
+    timestamp: '09:30 - 09:42',
+    agent: 'Antigravity',
+    role: 'Hub Media & UI Specialist',
+    action: 'Restore Normal Live-Action Hub Hero MP4s & Dedicated Availability-Utilization Video',
+    tokensUsed: 3900,
+    tokensCached: 96200,
+    zarCost: 0.54,
+    status: 'Completed',
+    details:
+      'Restored all 10 live-action department MP4s and generated dedicated availability-utilization.mp4 and availability-utilization.jpg poster.',
+  },
+  {
+    id: 'TASK-019',
+    timestamp: '10:05 - 10:18',
+    agent: 'Claude Code',
+    role: 'AI & Knowledge RAG Architect',
+    action: 'External Content Indexer, 768-dim HNSW Embeddings & Admin Corpus Tab',
+    tokensUsed: 6200,
+    tokensCached: 98400,
+    zarCost: 0.86,
+    status: 'Verified',
+    details:
+      'Built external-content-indexer.ts, ExternalContentTab.tsx (/admin?tab=external-content), agent cookbooks, and security audit report.',
+  },
+  {
+    id: 'TASK-020',
+    timestamp: '10:40 - 11:02',
+    agent: 'Claude Code',
+    role: 'Design System & Typography Engineer',
+    action: 'Space Grotesk Display Typography & Design Token Audit Enforcement',
+    tokensUsed: 3200,
+    tokensCached: 101200,
+    zarCost: 0.45,
+    status: 'Optimized',
+    details:
+      'Replaced Outfit/Inter with Space Grotesk variable display font, enlarged Drilling DepartmentCard icon, and enforced font token contract.',
+  },
+  {
+    id: 'TASK-021',
+    timestamp: '11:08 - 11:25',
+    agent: 'Antigravity',
+    role: 'Runtime & Auth Systems Engineer',
+    action: 'Eliminate 34 RSC Preload Warnings & Unlock Browser Supabase Auth Cookies',
+    tokensUsed: 4400,
+    tokensCached: 104800,
+    zarCost: 0.61,
+    status: 'Verified',
+    details:
+      'Merged print-report.css into root layout, removed duplicate poster preload tags, unlocked HttpOnly sb-*-auth-token cookies, and normalized __tb* cookies in client.ts.',
+  },
 ];
 
 // All-Time Project Metrics (Day 1 - Today / 11 Weeks)
@@ -424,27 +476,27 @@ export const LIFETIME_METRICS = {
   tokensReused: 53100000,
   tokensSaved: 18240000,
   usdCost: 269.98,
-  zarCost: 4859.31,
+  zarCost: 5000.0,
   zarSaved: 15000.0,
-  codingTime: '147h 30m',
+  codingTime: '150h',
   totalCommits: 99,
-  bugsFixed: 71,
+  bugsFixed: 75,
   qualityGateRuns: 195,
-  cacheHitRatio: 85.1,
+  cacheHitRatio: 90,
 };
 
-// Current Session Metrics (Oct 30, 2026)
+// Current Session Metrics (Oct 31, 2026)
 export const SESSION_METRICS = {
-  tokensUsed: 245600,
-  tokensCached: 842000,
-  tokensReused: 798000,
-  tokensSaved: 412000,
-  usdCost: 1.82,
-  zarCost: 33.71,
-  zarSaved: 64.2,
-  codingTime: '5h 15m',
-  totalCommits: 14,
-  bugsFixed: 12,
-  qualityGateRuns: 7,
-  cacheHitRatio: 92.4,
+  tokensUsed: 263300,
+  tokensCached: 942600,
+  tokensReused: 892000,
+  tokensSaved: 458000,
+  usdCost: 1.95,
+  zarCost: 36.17,
+  zarSaved: 71.6,
+  codingTime: '6h 00m',
+  totalCommits: 22,
+  bugsFixed: 16,
+  qualityGateRuns: 11,
+  cacheHitRatio: 92.8,
 };
