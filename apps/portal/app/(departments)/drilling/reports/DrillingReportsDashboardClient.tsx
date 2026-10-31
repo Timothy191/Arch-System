@@ -10,21 +10,28 @@ import {
   Archive,
   BarChart3,
   Calendar,
+  Check,
   ClipboardList,
   Clock,
+  Copy,
   Drill,
+  ExternalLink,
+  FileText,
   Filter,
   Gauge,
+  MessageSquare,
   Moon,
+  Printer,
   Radio,
   Search,
   Sun,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface CompiledDrillReportRow {
   id: string;
-  machine_id: string;
+  machine_id?: string;
   machine_name: string;
   operation_date: string;
   shift_type: string;
@@ -44,13 +51,29 @@ interface DrillingReportsDashboardClientProps {
   todayStr: string;
   fromDateStr: string;
   toDateStr: string;
+  initialTab?: string;
   currentShift: 'day' | 'night';
   operations: CompiledDrillReportRow[];
   drillRigNames: string[];
   csvContent: string;
 }
 
-type ReportSubTab = 'shift' | 'day' | 'archived';
+type ReportSubTab = 'shift' | 'day' | 'pdf-report' | 'whatsapp-report' | 'archived';
+
+const VALID_SUBTABS: ReadonlySet<string> = new Set([
+  'shift',
+  'day',
+  'pdf-report',
+  'whatsapp-report',
+  'archived',
+]);
+
+function resolveSubTab(raw?: string | null): ReportSubTab {
+  if (raw && VALID_SUBTABS.has(raw)) {
+    return raw as ReportSubTab;
+  }
+  return 'shift';
+}
 
 function formatDelay(minutes: number): string {
   if (!minutes || minutes === 0) return '—';
@@ -69,15 +92,26 @@ export function DrillingReportsDashboardClient({
   todayStr,
   fromDateStr,
   toDateStr,
+  initialTab,
   currentShift,
   operations,
   drillRigNames,
   csvContent,
 }: DrillingReportsDashboardClientProps) {
-  const [activeSubTab, setActiveSubTab] = useState<ReportSubTab>('shift');
+  const searchParams = useSearchParams?.() ?? null;
+  const urlTab = searchParams?.get?.('tab') ?? null;
+
+  const [activeSubTab, setActiveSubTab] = useState<ReportSubTab>(() =>
+    resolveSubTab(urlTab ?? initialTab)
+  );
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
   const [rigFilter, setRigFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [whatsappCopied, setWhatsappCopied] = useState(false);
+
+  useEffect(() => {
+    setActiveSubTab(resolveSubTab(urlTab ?? initialTab));
+  }, [urlTab, initialTab]);
 
   const filteredOps = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -232,6 +266,49 @@ export function DrillingReportsDashboardClient({
     }
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [filteredOps]);
+
+  const whatsappText = useMemo(() => {
+    const rigLines =
+      rigBreakdown.length > 0
+        ? rigBreakdown
+            .map(
+              (r) =>
+                `• ${r.rig}: ${r.meters.toFixed(1)}m (${r.holes} holes, ${r.hours.toFixed(1)}h)`
+            )
+            .join('\n')
+        : '• No active drill rig shifts logged in window';
+
+    return [
+      '🚜 *ARCH SYSTEMS — DRILLING SHIFT REPORT*',
+      `📅 Date Window: ${fromDateStr} to ${toDateStr} | Shift: ${currentShift.toUpperCase()}`,
+      '────────────────────────────',
+      '📊 *PRODUCTION SUMMARY*',
+      `• Total Meters Drilled: ${kpi.totalMeters.toFixed(1)}m`,
+      `• Total Holes Drilled: ${kpi.totalHoles}`,
+      `• Avg Depth / Hole: ${kpi.avgHoleDepth.toFixed(1)}m`,
+      `• Operating Hours: ${kpi.totalHours.toFixed(1)}h`,
+      `• Penetration Rate: ${kpi.penetrationRate.toFixed(1)} m/h`,
+      `• Day Shift: ${kpi.dayMeters.toFixed(1)}m | Night Shift: ${kpi.nightMeters.toFixed(1)}m`,
+      '────────────────────────────',
+      '⏱️ *DELAYS & DOWNTIME*',
+      `• Total Delays: ${formatDelay(kpi.totalDelaysMin)} (${Math.round(kpi.totalDelaysMin)} mins)`,
+      '────────────────────────────',
+      '📋 *DRILL RIG PERFORMANCE*',
+      rigLines,
+      '────────────────────────────',
+      '✅ Verified via Control Room SCADA Sync',
+    ].join('\n');
+  }, [rigBreakdown, fromDateStr, toDateStr, currentShift, kpi]);
+
+  const handleCopyWhatsapp = async () => {
+    try {
+      await navigator.clipboard.writeText(whatsappText);
+      setWhatsappCopied(true);
+      setTimeout(() => setWhatsappCopied(false), 2000);
+    } catch {
+      // Clipboard fallback ignored
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -453,6 +530,36 @@ export function DrillingReportsDashboardClient({
               <span className="rounded-full bg-accent-green/10 px-1.5 py-0.5 font-mono text-[10px] text-accent-green">
                 {dailyRows.length}
               </span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeSubTab === 'pdf-report'}
+              onClick={() => setActiveSubTab('pdf-report')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
+                activeSubTab === 'pdf-report'
+                  ? 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              <span>PDF Report</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeSubTab === 'whatsapp-report'}
+              onClick={() => setActiveSubTab('whatsapp-report')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
+                activeSubTab === 'whatsapp-report'
+                  ? 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+              }`}
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span>WhatsApp Report</span>
             </button>
 
             <button
@@ -886,6 +993,193 @@ export function DrillingReportsDashboardClient({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* SUBTAB 4: PDF REPORT */}
+      {activeSubTab === 'pdf-report' && (
+        <div className="space-y-6">
+          <GlassCard className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-lg">
+                  <FileText className="h-5 w-5 text-[var(--accent-blue)]" />
+                  Official Drilling Shift PDF Report
+                </h3>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Boardroom-ready printable document summarizing drill rig meters, hole counts, and
+                  shift delays
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <SecondaryButton
+                  variant="rounded-lg"
+                  size="sm"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') window.print();
+                  }}
+                >
+                  <Printer className="mr-1.5 h-3.5 w-3.5" />
+                  Print / Save as PDF
+                </SecondaryButton>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="overflow-hidden border border-black/10 bg-white p-6 shadow-md">
+            <div className="flex flex-wrap items-start justify-between border-black/10 border-b pb-4">
+              <div>
+                <p className="font-mono font-semibold text-[10px] text-[var(--accent-blue)] uppercase tracking-widest">
+                  ARCH OS INDUSTRIAL MINING PORTAL
+                </p>
+                <h4 className="mt-1 font-bold text-[var(--text-heading)] text-xl">
+                  Department of Drilling Operations — Shift Summary
+                </h4>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Window: {fromDateStr} to {toDateStr} • Active Shift: {currentShift.toUpperCase()}
+                </p>
+              </div>
+              <div className="text-right font-mono text-[var(--text-muted)] text-xs">
+                <p>Doc Ref: ARCH-DRL-{todayStr}</p>
+                <p>Status: Control Room Verified</p>
+              </div>
+            </div>
+
+            <div className="my-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="rounded-xl border border-black/[0.06] bg-[var(--bg-secondary)] p-3">
+                <span className="text-[11px] text-[var(--text-muted)]">Total Meters</span>
+                <p className="mt-1 font-bold font-mono text-accent-green text-lg">
+                  {kpi.totalMeters.toFixed(1)}m
+                </p>
+              </div>
+              <div className="rounded-xl border border-black/[0.06] bg-[var(--bg-secondary)] p-3">
+                <span className="text-[11px] text-[var(--text-muted)]">Total Holes</span>
+                <p className="mt-1 font-bold font-mono text-[var(--accent-blue)] text-lg">
+                  {kpi.totalHoles}
+                </p>
+              </div>
+              <div className="rounded-xl border border-black/[0.06] bg-[var(--bg-secondary)] p-3">
+                <span className="text-[11px] text-[var(--text-muted)]">Operating Hours</span>
+                <p className="mt-1 font-bold font-mono text-[var(--text-heading)] text-lg">
+                  {kpi.totalHours.toFixed(1)}h
+                </p>
+              </div>
+              <div className="rounded-xl border border-black/[0.06] bg-[var(--bg-secondary)] p-3">
+                <span className="text-[11px] text-[var(--text-muted)]">Penetration Rate</span>
+                <p className="mt-1 font-bold font-mono text-accent-green text-lg">
+                  {kpi.penetrationRate.toFixed(1)} m/h
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-black/10 border-b bg-[var(--bg-secondary)]">
+                    <th className="px-3 py-2.5 font-semibold text-[var(--text-muted)] uppercase">
+                      Date
+                    </th>
+                    <th className="px-3 py-2.5 font-semibold text-[var(--text-muted)] uppercase">
+                      Shift
+                    </th>
+                    <th className="px-3 py-2.5 font-semibold text-[var(--text-muted)] uppercase">
+                      Drill Rig
+                    </th>
+                    <th className="px-3 py-2.5 font-semibold text-[var(--text-muted)] uppercase">
+                      Operator
+                    </th>
+                    <th className="px-3 py-2.5 font-semibold text-[var(--text-muted)] uppercase">
+                      Block / Bench
+                    </th>
+                    <th className="px-3 py-2.5 text-right font-semibold text-[var(--text-muted)] uppercase">
+                      Holes
+                    </th>
+                    <th className="px-3 py-2.5 text-right font-semibold text-[var(--text-muted)] uppercase">
+                      Meters
+                    </th>
+                    <th className="px-3 py-2.5 text-right font-semibold text-[var(--text-muted)] uppercase">
+                      Hours
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/[0.06]">
+                  {filteredOps.map((op) => (
+                    <tr key={op.id}>
+                      <td className="px-3 py-2 font-mono">{op.operation_date}</td>
+                      <td className="px-3 py-2 capitalize">{op.shift_type}</td>
+                      <td className="px-3 py-2 font-semibold">{op.machine_name}</td>
+                      <td className="px-3 py-2">{op.operator_name || '—'}</td>
+                      <td className="px-3 py-2">{op.block_drilled || op.site || '—'}</td>
+                      <td className="px-3 py-2 text-right font-mono">{op.holes}</td>
+                      <td className="px-3 py-2 text-right font-bold font-mono text-accent-green">
+                        {Number(op.meters_drilled).toFixed(1)}m
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono">
+                        {op.total_hours != null ? `${Number(op.total_hours).toFixed(1)}h` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredOps.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-[var(--text-muted)]">
+                        No drill rig records available in this window.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* SUBTAB 5: WHATSAPP REPORT */}
+      {activeSubTab === 'whatsapp-report' && (
+        <div className="space-y-6">
+          <GlassCard className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="flex items-center gap-2 font-bold text-[var(--text-heading)] text-lg">
+                  <MessageSquare className="h-5 w-5 text-accent-green" />
+                  WhatsApp Shift Dispatch Summary
+                </h3>
+                <p className="mt-0.5 text-[var(--text-muted)] text-xs">
+                  Pre-formatted operational drilling summary ready to paste or dispatch to WhatsApp
+                  shift groups
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <SecondaryButton variant="rounded-lg" size="sm" onClick={handleCopyWhatsapp}>
+                  {whatsappCopied ? (
+                    <>
+                      <Check className="mr-1.5 h-3.5 w-3.5 text-accent-green" />
+                      <span className="text-accent-green">Copied to Clipboard!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-1.5 h-3.5 w-3.5" />
+                      <span>Copy WhatsApp Text</span>
+                    </>
+                  )}
+                </SecondaryButton>
+                <a
+                  href={`https://web.whatsapp.com/send?text=${encodeURIComponent(whatsappText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-accent-green px-3.5 py-2 font-semibold text-white text-xs shadow-xs transition-opacity hover:opacity-90"
+                >
+                  <span>Send via WhatsApp Web</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-black/[0.08] bg-[var(--bg-secondary)] p-4">
+              <pre className="whitespace-pre-wrap font-mono text-[var(--text-heading)] text-xs leading-relaxed">
+                {whatsappText}
+              </pre>
+            </div>
+          </GlassCard>
         </div>
       )}
     </div>

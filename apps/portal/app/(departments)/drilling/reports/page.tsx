@@ -35,7 +35,7 @@ export default async function DrillingReportsPage({
   searchParams,
 }: DrillingReportsPageProps) {
   await params;
-  const { from: fromParam, to: toParam } = await searchParams;
+  const { from: fromParam, to: toParam, tab: tabParam } = await searchParams;
   const { deptId, supabase, today } = await getDepartmentContext({
     department: 'drilling',
   });
@@ -233,6 +233,7 @@ export default async function DrillingReportsPage({
       todayStr={today || to}
       fromDateStr={from}
       toDateStr={to}
+      initialTab={tabParam}
       currentShift={currentShift}
       operations={operations}
       drillRigNames={drillRigNames}

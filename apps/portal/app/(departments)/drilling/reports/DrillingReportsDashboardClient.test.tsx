@@ -93,4 +93,17 @@ describe('DrillingReportsDashboardClient', () => {
 
     expect(screen.getByText(/No drill rig logs found/i)).toBeInTheDocument();
   });
+
+  it('renders PDF Report subtab when initialTab is pdf-report', () => {
+    render(<DrillingReportsDashboardClient {...defaultProps} initialTab="pdf-report" />);
+
+    expect(screen.getByText(/Official Drilling Shift PDF Report/i)).toBeInTheDocument();
+  });
+
+  it('renders WhatsApp Report subtab when initialTab is whatsapp-report', () => {
+    render(<DrillingReportsDashboardClient {...defaultProps} initialTab="whatsapp-report" />);
+
+    expect(screen.getByText(/WhatsApp Shift Dispatch Summary/i)).toBeInTheDocument();
+    expect(screen.getByText(/Send via WhatsApp Web/i)).toBeInTheDocument();
+  });
 });
