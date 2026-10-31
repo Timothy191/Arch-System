@@ -524,5 +524,34 @@ describe('proxy', () => {
       const invRes = await proxy(makeRequest('/plant-inventory'));
       expect(invRes.status).not.toBe(307);
     });
+
+    it('re-emits sb-*-auth-token cookies with httpOnly: false on authenticated requests', async () => {
+      const { mockResponse } = buildProxyMock({
+        employee: {
+          role: 'admin',
+          department_id: 'dept-uuid-1',
+          accessible_departments: [],
+        },
+      });
+      const setCookieMock = jest.fn();
+      (mockResponse as Record<string, unknown>).cookies = {
+        getAll: () => [],
+        set: setCookieMock,
+      };
+
+      const req = new NextRequest('http://localhost/admin');
+      req.cookies.set('__tb99_sb-mrwhtxbhrzyttlsyuofc-auth-token', 'base64-jwt');
+      await proxy(req);
+
+      expect(setCookieMock).toHaveBeenCalledWith(
+        'sb-mrwhtxbhrzyttlsyuofc-auth-token',
+        'base64-jwt',
+        expect.objectContaining({
+          path: '/',
+          httpOnly: false,
+          sameSite: 'lax',
+        })
+      );
+    });
   });
 });

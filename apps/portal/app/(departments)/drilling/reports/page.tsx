@@ -1,4 +1,3 @@
-import '@/styles/print-report.css';
 import { getCurrentShift } from '@repo/utils';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {

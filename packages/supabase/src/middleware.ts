@@ -55,7 +55,7 @@ export async function createMiddlewareClient(request: NextRequest) {
               ...options,
               maxAge: options?.maxAge ?? 34560000,
               path: options?.path ?? '/',
-              httpOnly: true,
+              httpOnly: options?.httpOnly ?? false,
               secure: process.env.NODE_ENV === 'production',
               sameSite: 'lax',
             })

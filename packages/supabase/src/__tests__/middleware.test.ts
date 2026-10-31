@@ -63,6 +63,17 @@ describe('@repo/supabase middleware suite', () => {
         { name: 'sb-access-token', value: 'new-tok', options: { path: '/' } },
       ]);
       expect(mockRequest.cookies.set).toHaveBeenCalledWith('sb-access-token', 'new-tok');
+      const { NextResponse } = require('next/server');
+      const latestResponse = NextResponse.next.mock.results.at(-1)?.value;
+      expect(latestResponse.cookies.set).toHaveBeenCalledWith(
+        'sb-access-token',
+        'new-tok',
+        expect.objectContaining({
+          path: '/',
+          httpOnly: false,
+          sameSite: 'lax',
+        })
+      );
     });
 
     it('When NEXT_PUBLIC_SUPABASE_URL is missing, Then it throws a descriptive configuration error', async () => {

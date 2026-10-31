@@ -1,4 +1,3 @@
-import '@/styles/print-report.css';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { getAccessReportsData } from '../actions';
 import { AccessReportsStudio } from './access-reports-studio';

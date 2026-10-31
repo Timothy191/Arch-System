@@ -407,6 +407,51 @@ describe('createBrowserSupabaseClient', () => {
 
     process.env = originalEnv;
   });
+
+  test('normalizes tab-isolated cookies and persists browser cookies via document.cookie', () => {
+    const { createBrowserClient } = require('@supabase/ssr');
+    const originalDocument = global.document;
+    let cookieJar = '__tb42_sb-project-auth-token=base64-abc123; theme=light';
+    Object.defineProperty(global, 'document', {
+      configurable: true,
+      value: {
+        get cookie() {
+          return cookieJar;
+        },
+        set cookie(nextCookie: string) {
+          cookieJar = nextCookie;
+        },
+      },
+    });
+
+    try {
+      createBrowserSupabaseClient();
+      const cookieAdapter = createBrowserClient.mock.calls[0][2].cookies;
+      const cookies = cookieAdapter.getAll();
+      expect(cookies).toEqual([
+        { name: '__tb42_sb-project-auth-token', value: 'base64-abc123' },
+        { name: 'theme', value: 'light' },
+        { name: 'sb-project-auth-token', value: 'base64-abc123' },
+      ]);
+
+      cookieAdapter.setAll([
+        {
+          name: 'sb-project-auth-token',
+          value: 'base64-updated',
+          options: { path: '/', maxAge: 3600, sameSite: 'lax' },
+        },
+      ]);
+      expect(cookieJar).toContain('sb-project-auth-token=base64-updated');
+      expect(cookieJar).toContain('Path=/');
+      expect(cookieJar).toContain('Max-Age=3600');
+      expect(cookieJar).toContain('SameSite=lax');
+    } finally {
+      Object.defineProperty(global, 'document', {
+        configurable: true,
+        value: originalDocument,
+      });
+    }
+  });
 });
 
 describe('resolvePooledDatabaseUrl', () => {

@@ -1,4 +1,5 @@
 import '@repo/ui/globals.css';
+import '@/styles/print-report.css';
 import { ArchThemeProvider } from '@repo/theme/react';
 import { AnimationProvider } from '@repo/ui';
 import { EveLogo } from '@repo/ui/EveLogo';
@@ -122,21 +123,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     >
       <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
-        {/* Preload primary LCP background asset off critical path (Desktop & Mobile) */}
-        <link
-          rel="preload"
-          href="/background/global-background-poster.webp"
-          as="image"
-          type="image/webp"
-          media="(min-width: 768px)"
-        />
-        <link
-          rel="preload"
-          href="/background/global-background-poster-mobile.webp"
-          as="image"
-          type="image/webp"
-          media="(max-width: 767px)"
-        />
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}

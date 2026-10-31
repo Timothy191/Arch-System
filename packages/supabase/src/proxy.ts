@@ -70,8 +70,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
               ...options,
               maxAge: undefined,
               expires: undefined,
-              // Enforce security: HttpOnly prevents XSS, Secure ensures HTTPS-only
-              httpOnly: true,
+              httpOnly: options?.httpOnly ?? false,
               secure: process.env.NODE_ENV === 'production',
               sameSite: 'lax',
             });

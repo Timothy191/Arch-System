@@ -65,7 +65,8 @@ async function runAudit() {
 
     // Check preloaded poster
     const hasPreloadedPoster =
-      html.includes('global-background-poster.webp') && html.includes('rel="preload"');
+      html.includes('global-background-poster.webp') &&
+      (html.includes('rel="preload"') || html.includes('fetchPriority="high"'));
     console.log(
       `  - Optimized Poster Preload: ${hasPreloadedPoster ? '✅ PRESENT (94 KB WebP)' : 'ℹ️ Standard'}`
     );

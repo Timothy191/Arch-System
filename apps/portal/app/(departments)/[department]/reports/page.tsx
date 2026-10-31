@@ -1,4 +1,3 @@
-import '@/styles/print-report.css';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';

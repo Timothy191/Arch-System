@@ -47,6 +47,46 @@ function safeRecordJob(name: string, success: boolean): void {
  * proxy serves the request from the database rather than waiting on Redis.
  */
 const SESSION_READ_BUDGET_MS = 150;
+const AUTH_COOKIE_MAX_AGE_SECONDS = 34560000;
+
+/**
+ * Re-emits verified Supabase auth session cookies (`sb-*-auth-token*`) with
+ * `httpOnly: false` if the response has not already written them. This unlocks
+ * existing browser sessions whose auth cookies were previously marked HttpOnly
+ * or stored under a tab-isolation prefix (`__tb<id>_sb-...`), allowing
+ * `@supabase/ssr`'s `createBrowserClient` to read `document.cookie` and attach
+ * the user's JWT to client-side PostgREST queries.
+ */
+function ensureBrowserReadableAuthCookies(
+  request: NextRequest,
+  response: NextResponse | undefined
+): void {
+  if (!response?.cookies?.set) return;
+  const existingNames = new Set(
+    typeof response.cookies.getAll === 'function'
+      ? response.cookies.getAll().map((cookie) => cookie.name)
+      : []
+  );
+
+  for (const cookie of request.cookies.getAll()) {
+    const tabMatch = cookie.name.match(/^__tb\d+_(sb-.*)$/);
+    const canonicalName = tabMatch?.[1] ?? cookie.name;
+    if (!canonicalName.startsWith('sb-') || !canonicalName.includes('-auth-token')) {
+      continue;
+    }
+    if (existingNames.has(canonicalName)) {
+      continue;
+    }
+    response.cookies.set(canonicalName, cookie.value, {
+      path: '/',
+      maxAge: AUTH_COOKIE_MAX_AGE_SECONDS,
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    existingNames.add(canonicalName);
+  }
+}
 
 /**
  * Server-side redirect validation with canonicalization and allowlist
@@ -267,6 +307,7 @@ async function handleLoginRoute(request: NextRequest): Promise<NextResponse> {
 
   if (sessionUser) {
     safeRecordJob('auth.middleware.check', true);
+    ensureBrowserReadableAuthCookies(request, client.response);
     const redirectParam = request.nextUrl.searchParams.get('redirect');
     const target =
       redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith('/login')
@@ -437,6 +478,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return accessDeniedResponse;
   }
 
+  ensureBrowserReadableAuthCookies(request, client.response);
   return client.response;
 }
 
