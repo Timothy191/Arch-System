@@ -9,8 +9,10 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import dynamic from 'next/dynamic';
 import { IBM_Plex_Sans, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import { Suspense } from 'react';
 import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
+import { MenuIdentity, MenuIdentitySkeleton } from '@/components/nav/MenuIdentity';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
 import { SystemTrayPill } from '@/components/system/SystemTray';
 import { DepartmentReviews } from '@/features/hub';
@@ -151,6 +153,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
               <header aria-label="Global navigation">
                 <MacMenuBar
+                  userSlot={
+                    <Suspense fallback={<MenuIdentitySkeleton />}>
+                      <MenuIdentity />
+                    </Suspense>
+                  }
                   rightSlot={
                     <nav id="navigation" aria-label="Main menu">
                       <div className="flex items-center gap-3">

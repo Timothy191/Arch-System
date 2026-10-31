@@ -138,6 +138,7 @@ function isValidRedirect(path: string): boolean {
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
     /^\/overview(\/|$)/, // System Overview topology
+    /^\/profile(\/|$)/, // User profile (identity in the system menu links here)
   ];
 
   // Check if path matches any allowed pattern

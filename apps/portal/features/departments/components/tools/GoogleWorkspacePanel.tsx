@@ -5,11 +5,9 @@ import { cn } from '@repo/ui/lib/utils';
 import {
   CalendarDays,
   CheckCircle2,
-  Clock,
   ExternalLink,
   FilePlus2,
   FileText,
-  PlusCircle,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
@@ -154,33 +152,6 @@ const MINING_DOC_TEMPLATES = [
   },
 ];
 
-const SCHEDULE_MILESTONES = [
-  {
-    title: 'Day Shift Production Window',
-    time: '06:00 - 18:00 SAST',
-    tag: 'Production',
-    color: 'text-dept-production bg-dept-production/10 border-dept-production/20',
-  },
-  {
-    title: 'Pit Blast Exclusion Window',
-    time: '14:00 - 14:45 SAST',
-    tag: 'Safety Critical',
-    color: 'text-accent-amber bg-accent-amber/10 border-accent-amber/20',
-  },
-  {
-    title: 'Night Shift Handover & Briefing',
-    time: '17:45 - 18:15 SAST',
-    tag: 'Handover',
-    color: 'text-[var(--accent-blue)] bg-[var(--accent-blue)]/10 border-[var(--accent-blue)]/20',
-  },
-  {
-    title: 'Drill Rig Routine Maintenance Window',
-    time: '04:00 - 06:00 SAST',
-    tag: 'Engineering',
-    color: 'text-dept-engineering bg-dept-engineering/10 border-dept-engineering/20',
-  },
-];
-
 interface GoogleWorkspacePanelProps {
   readonly service: GoogleWorkspaceService;
   readonly actions: readonly WorkspaceAction[];
@@ -288,15 +259,15 @@ export function GoogleWorkspacePanel({
       </GlassCard>
 
       {/* Operational Context Sections */}
-      {service === 'docs' ? (
+      {service === 'docs' && (
         <GlassCard className="overflow-hidden">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="font-bold text-[var(--text-heading)] text-base">
-                Operational Drilling &amp; Mining Templates
+                Operational Drilling &amp; Mining Document Types
               </h3>
               <p className="text-[var(--text-secondary)] text-xs">
-                Launch standardized shift documentation directly into Google Docs
+                Each card opens a new blank Google Docs document ready for that record
               </p>
             </div>
             <a
@@ -334,55 +305,6 @@ export function GoogleWorkspacePanel({
                   Open template in Docs &rarr;
                 </span>
               </a>
-            ))}
-          </div>
-        </GlassCard>
-      ) : (
-        <GlassCard className="overflow-hidden">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-[var(--text-heading)] text-base">
-                Today&apos;s Site Operational Milestones
-              </h3>
-              <p className="text-[var(--text-secondary)] text-xs">
-                Synchronized shift intervals and mandatory blast safety windows
-              </p>
-            </div>
-            <a
-              href={GOOGLE_CALENDAR_CREATE_EVENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-black/[0.08] bg-white px-3 py-1.5 font-medium text-[11.5px] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-black/[0.03]"
-            >
-              <PlusCircle className="h-3.5 w-3.5 text-dept-control-room" />
-              <span>Schedule Event</span>
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {SCHEDULE_MILESTONES.map((mile) => (
-              <div
-                key={mile.title}
-                className="flex flex-col justify-between rounded-xl border border-black/[0.06] bg-white/70 p-3.5"
-              >
-                <div>
-                  <span
-                    className={cn(
-                      'inline-block rounded-md border px-2 py-0.5 font-semibold text-[10px]',
-                      mile.color
-                    )}
-                  >
-                    {mile.tag}
-                  </span>
-                  <h4 className="mt-2 font-semibold text-[12.5px] text-[var(--text-heading)] leading-snug">
-                    {mile.title}
-                  </h4>
-                </div>
-                <div className="mt-3 flex items-center gap-1.5 font-mono text-[11px] text-[var(--text-muted)]">
-                  <Clock className="h-3 w-3" />
-                  <span>{mile.time}</span>
-                </div>
-              </div>
             ))}
           </div>
         </GlassCard>
