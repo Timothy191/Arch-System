@@ -147,6 +147,7 @@ function getHeroTelemetrySeries(
         fillId: 'grad-database',
         points: [60, 66, 71, 68, 75, 80, 78, 85, 88, 92, 90, 96],
       };
+    case 'availability-utilization':
     case 'reports':
       return {
         title: 'Fleet Availability & Utilization',
@@ -449,6 +450,7 @@ export function getHeroKpiTiles(
         { label: 'Replica RTT', value: '18 ms', subtext: 'Pool Healthy' },
         { label: 'WAL Stream', value: 'Active', subtext: 'Realtime CDC' },
       ];
+    case 'availability-utilization':
     case 'reports':
       return [
         { label: 'Availability', value: '96.2%', subtext: 'Fleet Mean' },
@@ -557,9 +559,11 @@ export function HeroCardContent({
               ? { label: 'Fleet Readiness: 92% [92%]', width: '92%' }
               : panel.name === 'control-room'
                 ? { label: 'SCADA Telemetry: 99.9% [99%]', width: '99%' }
-                : panel.name === 'admin'
-                  ? { label: 'System Compliance: 100% [100%]', width: '100%' }
-                  : { label: 'Target: 1,300m [95%]', width: '95%' };
+                : panel.name === 'availability-utilization' || panel.name === 'reports'
+                  ? { label: 'Availability Target: 95.0% [95%]', width: '95%' }
+                  : panel.name === 'admin'
+                    ? { label: 'System Compliance: 100% [100%]', width: '100%' }
+                    : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||

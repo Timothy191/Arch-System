@@ -1,3 +1,11 @@
+## 2026-10-31T09:42:00+02:00: Restore Normal Live-Action Hub Hero MP4 Videos & Add Dedicated Availability & Utilization MP4
+
+- **Phase 1 (Comprehension)**: Address `/hub` design feedback on `<video data-testid="hero-video-availability-utilization" src="/images/departments/overview.mp4">` ("Identify if we can replace with normal mp4").
+- **Phase 2 (Evidence)**: Inspected `apps/portal/public/images/departments/`, `libs/features/hub/ui/src/HeroRotator.tsx`, `packages/ui/src/components/HeroCardContent.tsx`, and git history (`968e3dfa1`). Found that (1) `availability-utilization.mp4` and `availability-utilization.jpg` were missing so the slide 404'd and fell back to `overview.mp4`, and (2) all 10 `.mp4` files in `apps/portal/public/images/departments/` had been replaced with static-image zoompan videos instead of the normal live-action MP4 videos from commit `968e3dfa1`.
+- **Phase 3 (Design)**: Restored all 10 normal live-action `.mp4` videos from `968e3dfa1`, created a dedicated normal live-action `availability-utilization.mp4` and `availability-utilization.jpg` in `apps/portal/public/images/departments/`, and wired `'availability-utilization'` cases in `HeroCardContent.tsx` and `HeroRotator.tsx`.
+- **Phase 4 (Criticism)**: Added unit test coverage in `HeroRotator.test.tsx` and verified `pnpm agent:verify`.
+- **Phase 5 (Contract)**: Modified `apps/portal/public/images/departments/*.mp4`, `apps/portal/public/images/departments/availability-utilization.{mp4,jpg}`, `libs/features/hub/ui/src/{HeroRotator.tsx,HeroRotator.test.tsx}`, and `packages/ui/src/components/HeroCardContent.tsx`.
+
 ## 2026-10-30T14:43:00+02:00: System Overview Out-of-Date Content Audit & Synchronization (213 Migrations, 27 Gates, Schema & Route Catalog)
 
 - **Phase 1 (Comprehension)**: Audit `/overview` (`apps/portal/app/overview/**`) for out-of-date migration counts, gate counts, missing routes, missing schema tables, or stale milestone dates/sums, and upgrade all identified content to match the current repository state as of `2026-10-30`.

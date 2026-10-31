@@ -277,7 +277,8 @@
     },
     "auditConfig": {
       "ignoreGhsas": [
-        "GHSA-vfj7-8cjw-p6xm"
+        "GHSA-vfj7-8cjw-p6xm",
+        "GHSA-mrwp-f3q8-3g9p"
       ]
     },
     "overrides": {
@@ -297,7 +298,7 @@
       "esbuild@>=0.27.3 <0.28.1": ">=0.28.1",
       "fast-uri@>=3.0.0 <3.1.8": ">=3.1.8",
       "fflate@>=0.4.5 <0.4.9": ">=0.4.9",
-      "follow-redirects@<1.16.1": ">=1.16.1",
+      "follow-redirects@<1.16.2": ">=1.16.2",
       "form-data@>=4.0.0 <4.0.6": ">=4.0.6",
       "glob@>=10.2.0 <10.5.0": ">=10.5.0",
       "handlebars@<=4.7.9": ">=4.7.10",

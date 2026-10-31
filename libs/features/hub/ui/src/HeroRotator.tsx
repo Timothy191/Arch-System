@@ -71,11 +71,13 @@ export function HeroRotator({
                       ? 'PLANT MAINTENANCE // WORKSHOP-03'
                       : dept.name === 'control-room'
                         ? 'SCADA & TELEMETRY // DISPATCH-ROOM'
-                        : dept.name === 'overview'
-                          ? 'SYSTEM ARCHITECTURE // ARCH-OS'
-                          : dept.name === 'database'
-                            ? 'SUPABASE POSTGRESQL // DB-CORE'
-                            : 'FIELD OPERATIONS // MINE-UNIT';
+                        : dept.name === 'availability-utilization'
+                          ? 'FLEET AVAILABILITY & OEE // FLEET-AV01'
+                          : dept.name === 'overview'
+                            ? 'SYSTEM ARCHITECTURE // ARCH-OS'
+                            : dept.name === 'database'
+                              ? 'SUPABASE POSTGRESQL // DB-CORE'
+                              : 'FIELD OPERATIONS // MINE-UNIT';
 
       const assetSubtitle =
         dept.name === 'drilling'

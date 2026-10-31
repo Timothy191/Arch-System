@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-31] - Restore Normal Live-Action Hub Hero MP4 Videos & Add Dedicated Availability & Utilization MP4
+
+- **Action:**
+  - Restored all 10 normal live-action department `.mp4` videos (`access-control.mp4`, `admin.mp4`, `control-room.mp4`, `database.mp4`, `drilling.mp4`, `engineering.mp4`, `overview.mp4`, `plant-inventory.mp4`, `plant-processing.mp4`, `production.mp4`) in `apps/portal/public/images/departments/` from commit `968e3dfa1` (replacing the synthetic static-image zoompan videos).
+  - Created a dedicated normal live-action `apps/portal/public/images/departments/availability-utilization.mp4` and `availability-utilization.jpg` poster so `<video data-testid="hero-video-availability-utilization">` on `/hub` no longer 404s and falls back to `overview.mp4`.
+  - Updated [`libs/features/hub/ui/src/HeroRotator.tsx`](./libs/features/hub/ui/src/HeroRotator.tsx), [`libs/features/hub/ui/src/HeroRotator.test.tsx`](./libs/features/hub/ui/src/HeroRotator.test.tsx), and [`packages/ui/src/components/HeroCardContent.tsx`](./packages/ui/src/components/HeroCardContent.tsx) so `availability-utilization` has its own `assetOverline`, telemetry series (`Fleet Availability & Utilization`), KPI tiles, and HUD target bar (`Availability Target: 95.0% [95%]`).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-30] - Persist Live Schema Query Parity, Monotonic SMR & Overview Sync Rules (/learn)
 
 - **Action:**

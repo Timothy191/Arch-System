@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-31T09:42:00+02:00 - Add Availability & Utilization Overline & Dedicated MP4 Hero Test
+
+- **Purpose**: Map `availability-utilization` to `FLEET AVAILABILITY & OEE // FLEET-AV01` in `HeroRotator.tsx` and verify `hero-video-availability-utilization` resolves `/images/departments/availability-utilization.mp4` and `/images/departments/availability-utilization.jpg` in `HeroRotator.test.tsx`.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Added `dept.name === 'availability-utilization'` overline mapping.
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Added unit test verifying `hero-video-availability-utilization` and `Availability Target: 95.0% [95%]`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-29T07:28:00+02:00 - Slow Down Site Footer Telemetry Marquee Animation
 
 - **Purpose**: Slow down the horizontal scrolling telemetry ticker (`DepartmentReviews.tsx`) rendered inside the global `Site footer` from `42s` to `110s` per cycle for comfortable reading.

@@ -457,4 +457,28 @@ describe('HeroRotator', () => {
       'invisible'
     );
   });
+
+  it('renders dedicated mp4 video, poster, and availability target HUD for availability-utilization', () => {
+    const availabilityDept: Department = {
+      name: 'availability-utilization',
+      displayName: 'Availability & Utilization',
+      route: '/availability-utilization',
+      icon: 'Activity',
+      description: 'Fleet mechanical availability and equipment utilization',
+      color: 'blue',
+      type: 'standard',
+      status: 'active',
+      stats: { label: 'Availability', value: '94.6%' },
+    };
+
+    render(<HeroRotator {...baseProps} departments={[availabilityDept]} />);
+
+    const video = screen.getByTestId('hero-video-availability-utilization');
+    expect(video).toHaveAttribute('src', '/images/departments/availability-utilization.mp4');
+    expect(video).toHaveAttribute('poster', '/images/departments/availability-utilization.jpg');
+
+    fireEvent.click(screen.getByLabelText('Next highlight'));
+    expect(screen.getByText('Availability Target: 95.0% [95%]')).toBeInTheDocument();
+    expect(screen.getByText('Fleet Availability & Utilization')).toBeInTheDocument();
+  });
 });

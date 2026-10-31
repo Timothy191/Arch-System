@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-31T09:42:00+02:00 - Add Availability & Utilization Telemetry Series, KPI Strip & HUD Target in HeroCardContent
+
+- **Purpose**: Support `availability-utilization` directly in `HeroCardContent.tsx` (`getHeroTelemetrySeries`, `getHeroKpiTiles`, and `targetMeta`) so the Availability & Utilization hero card on `/hub` renders `Fleet Availability & Utilization` and `Availability Target: 95.0% [95%]` instead of falling back to the drilling depth target.
+- **Changes**:
+  - `packages/ui/src/components/HeroCardContent.tsx`: Added `case 'availability-utilization':` in `getHeroTelemetrySeries` and `getHeroKpiTiles`, and added `panel.name === 'availability-utilization'` in `targetMeta`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-29T07:55:00+02:00 - Elevate DepartmentLayout Sidebar Visual Impact
 
 - **Purpose**: Enhance the visual impact of the department sidebar (`aside` in `DepartmentLayout.tsx`) with `liquid-glass-light gold-steel-border`, gold-bordered `Back to Hub` and `Pin` pills, a framed Department Identity capsule (`Active Command`), bordered icon badges on primary tabs, and a `Live` telemetry badge in the `Connection Secure` footer strip.
