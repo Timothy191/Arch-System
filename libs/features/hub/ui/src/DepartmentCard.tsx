@@ -233,13 +233,7 @@ function DepartmentCard({
                 >
                   <Logo variant="gold" className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
                 </span>
-                <h3
-                  className="uiverse-card-title truncate font-anurati font-bold uppercase tracking-[0.055em]"
-                  style={{
-                    fontFamily:
-                      "var(--font-outfit), var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif",
-                  }}
-                >
+                <h3 className="uiverse-card-title truncate font-anurati font-bold uppercase tracking-[0.055em]">
                   {department.displayName}
                 </h3>
               </div>
