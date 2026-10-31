@@ -300,13 +300,22 @@ export const ENGINEERING_TABS = [
 ] as const;
 
 /**
- * Drilling specific tabs - focused on rig operations and telemetry
+ * Drilling specific tabs — rig operations and telemetry lead, followed by the
+ * same operational set every other department exposes (Daily Log, Machines,
+ * History, Reports, Tools). Drilling used to expose only four entries, which
+ * left it as the only department without the shared operational pages even
+ * though `app/(departments)/[department]/{daily-log,machines,history,tools}`
+ * already handle `department === 'drilling'`.
  */
 export const DRILLING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'drilling-operations', label: 'Drilling Operations', icon: 'Drill' },
   { name: 'machine-telemetry', label: 'Machine Telemetry', icon: 'Activity' },
+  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'machines', label: 'Machines', icon: 'Cpu' },
+  { name: 'history', label: 'History', icon: 'History' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
+  { name: 'tools', label: 'Tools', icon: 'Wrench' },
 ] as const;
 
 /**

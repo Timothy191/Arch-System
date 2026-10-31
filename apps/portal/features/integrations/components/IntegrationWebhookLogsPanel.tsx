@@ -160,7 +160,10 @@ function authBadge(auth: AuthType) {
     oauth2: 'OAuth 2.0',
   };
   return (
-    <Badge variant="outline" className="gap-1 text-[11px] text-[var(--text-secondary)]">
+    <Badge
+      variant="outline"
+      className="gap-1 border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] shadow-sm"
+    >
       <KeyRound className="h-3 w-3" />
       {labels[auth] ?? auth}
     </Badge>
@@ -617,7 +620,7 @@ export function IntegrationCatalogMarketplace({
             placeholder="Filter by name, domain, or author…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-8 text-xs"
+            className="h-8 border border-[var(--border-subtle)] bg-white/60 pl-8 text-xs shadow-sm transition-all hover:shadow-md focus:shadow-lg"
           />
         </div>
       </div>

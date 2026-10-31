@@ -3,15 +3,16 @@
 import { Activity, ChevronRight, Command, ExternalLink, LayoutGrid, Shield } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type * as React from 'react';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
 import {
   DEPARTMENTS_LIST,
   EXTERNAL_LIST,
+  GOOGLE_CHOOSER_BY_TOOL,
   PRODUCTIVITY_LIST,
   WHATSAPP_WEB_DIRECT_URL,
 } from './mac-menu-bar-constants';
-import { Avatar } from './ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,12 @@ interface MacSystemMenuDropdownProps {
   activeDeptSlug: string;
   isHubRoute: boolean;
   isAdminRoute: boolean;
+  /**
+   * Server-rendered identity block (name, role, link to `/profile`). Passing it
+   * as a node keeps the authenticated employee lookup on the server while this
+   * menu stays a client component.
+   */
+  userSlot?: React.ReactNode;
 }
 
 export function MacSystemMenuDropdown({
@@ -44,6 +51,7 @@ export function MacSystemMenuDropdown({
   activeDeptSlug,
   isHubRoute,
   isAdminRoute,
+  userSlot,
 }: MacSystemMenuDropdownProps) {
   return (
     <DropdownMenu open={systemMenuOpen} onOpenChange={setSystemMenuOpen}>
@@ -218,22 +226,14 @@ export function MacSystemMenuDropdown({
 
         {/* ── Right Column: User + Tools + Admin ── */}
         <div className="flex w-[205px] shrink-0 flex-col border-black/[0.05] border-l bg-black/[0.015]">
-          {/* User Identity */}
-          <div className="flex items-center gap-2.5 border-black/[0.06] border-b px-3.5 py-3">
-            <Avatar
-              size={32}
-              letter="AO"
-              title="Arch Operator"
-              className="shrink-0 border border-black/10 shadow-card"
-            />
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-[12.5px] text-[var(--text-heading)] leading-tight">
-                Arch Operator
-              </span>
-              <span className="truncate text-[10px] text-[var(--text-muted)] leading-tight">
-                admin@arch-systems.com
-              </span>
-            </div>
+          {/* User Identity — server-rendered slot linking to the profile page.
+              Clicks on the slot simply close the system menu. */}
+          <div onClick={() => setSystemMenuOpen(false)}>
+            {userSlot ?? (
+              <div className="border-black/[0.06] border-b px-3.5 py-3 text-[10.5px] text-[var(--text-muted)]">
+                Identity unavailable
+              </div>
+            )}
           </div>
 
           {/* Tools */}
@@ -248,21 +248,45 @@ export function MacSystemMenuDropdown({
             </div>
             {PRODUCTIVITY_LIST.map((tool) => {
               const Icon = tool.icon;
+              const directExternalUrl = GOOGLE_CHOOSER_BY_TOOL[tool.name] ?? null;
+
               return (
-                <Link
+                <div
                   key={tool.name}
-                  href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
-                  onClick={() => {
-                    setPathname(`/${activeDeptSlug}/tools`);
-                    setSystemMenuOpen(false);
-                  }}
-                  className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all hover:bg-black/[0.04] active:bg-black/[0.08]"
+                  className="flex items-center justify-between rounded-lg transition-colors hover:bg-black/[0.04]"
                 >
-                  <Icon className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)} />
-                  <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
-                    {tool.displayName}
-                  </span>
-                </Link>
+                  <Link
+                    href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
+                    onClick={() => {
+                      setPathname(`/${activeDeptSlug}/tools`);
+                      setSystemMenuOpen(false);
+                    }}
+                    className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all active:bg-black/[0.08]"
+                  >
+                    <Icon
+                      className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)}
+                    />
+                    <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
+                      {tool.displayName}
+                    </span>
+                  </Link>
+                  {directExternalUrl && (
+                    <a
+                      href={directExternalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSystemMenuOpen(false);
+                      }}
+                      className="mr-1.5 rounded p-1 text-[var(--text-muted)] opacity-60 transition-opacity hover:text-[var(--accent-blue)] hover:opacity-100"
+                      title={`Open ${tool.displayName} in Google Workspace (auto sign-in)`}
+                      aria-label={`Open ${tool.displayName} in Google Workspace`}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
               );
             })}
           </div>

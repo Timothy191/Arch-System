@@ -115,4 +115,25 @@ describe('DEPARTMENTS registry', () => {
       'Archived',
     ]);
   });
+
+  it('gives Drilling the shared operational tabs alongside its rig-specific pages', () => {
+    const tabs = getDepartmentTabs('drilling');
+    expect(tabs.map((t) => t.name)).toEqual([
+      'dashboard',
+      'drilling-operations',
+      'machine-telemetry',
+      'daily-log',
+      'machines',
+      'history',
+      'reports',
+      'tools',
+    ]);
+
+    // Parity with the generic department tab set: every shared operational page
+    // that `app/(departments)/[department]/*` serves must be reachable.
+    const genericTabNames = getDepartmentTabs('production').map((t) => t.name);
+    for (const sharedTab of genericTabNames) {
+      expect(tabs.map((t) => t.name)).toContain(sharedTab);
+    }
+  });
 });

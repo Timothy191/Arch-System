@@ -27,6 +27,7 @@ export * from './components/RedisIcon';
 export * from './components/SecondaryButton';
 export * from './components/ShiftToggle';
 export * from './components/TrustLogos';
+export * from './components/UserDetailsPreviewModal';
 export * from './components/ui/alert';
 // Motion & Animated Components
 export * from './components/ui/animated-button';

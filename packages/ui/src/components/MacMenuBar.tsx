@@ -37,6 +37,7 @@ export function MacMenuBar({
   menuItems = NAVIGATION_ITEMS,
   centerSlot,
   rightSlot,
+  userSlot,
   className,
 }: MacMenuBarProps) {
   const [pathname, setPathname] = React.useState('/hub');
@@ -132,6 +133,7 @@ export function MacMenuBar({
           activeDeptSlug={activeDeptSlug}
           isHubRoute={isHubRoute}
           isAdminRoute={isAdminRoute}
+          userSlot={userSlot}
         />
 
         {/* Context label pill button */}
@@ -139,7 +141,7 @@ export function MacMenuBar({
           type="button"
           onClick={() => setSystemMenuOpen((open) => !open)}
           className={cn(
-            'gold-steel-border gold-steel-border-slim ml-1 hidden h-7 cursor-pointer select-none items-center gap-1.5 rounded-full',
+            'group/ctx gold-steel-border gold-steel-border-slim ml-1 hidden h-7 cursor-pointer select-none items-center gap-1.5 rounded-full',
             'border border-black/[0.08] bg-white/60 px-2.5 font-medium text-[11px] text-[var(--text-heading)] shadow-2xs backdrop-blur-md transition-all hover:bg-white/85 md:inline-flex'
           )}
           title="Open System Menu"
@@ -148,7 +150,16 @@ export function MacMenuBar({
             className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[var(--accent-blue)]"
             aria-hidden="true"
           />
-          <span className="max-w-[140px] truncate">{currentContextLabel}</span>
+          <span
+            className={cn(
+              'truncate transition-all duration-300 ease-out',
+              systemMenuOpen
+                ? 'max-w-[140px] opacity-100'
+                : 'max-w-0 opacity-0 group-hover/ctx:max-w-[140px] group-hover/ctx:opacity-100 group-focus-visible/ctx:max-w-[140px] group-focus-visible/ctx:opacity-100'
+            )}
+          >
+            {currentContextLabel}
+          </span>
           <Logo
             variant="gold"
             className={cn(

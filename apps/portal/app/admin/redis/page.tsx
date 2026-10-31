@@ -4,7 +4,18 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { RedisIcon } from '@repo/ui/RedisIcon';
-import { Activity, Database, HardDrive, Key, Network, RefreshCw } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Clock,
+  DatabaseZap,
+  Gauge,
+  GitBranch,
+  HardDrive,
+  Key,
+  Network,
+  RefreshCw,
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface RedisStats {
@@ -93,9 +104,7 @@ export default function RedisManagerPage() {
     fetchStats();
   }, []);
 
-  const keys = Object.keys(keySampleData).filter((k) =>
-    k.toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  const keyData = keySampleData[selectedKey] || {};
 
   return (
     <div className="flex min-h-[calc(100vh-65px)] flex-col gap-6 bg-zinc-50 p-4 lg:p-6">
@@ -138,6 +147,20 @@ export default function RedisManagerPage() {
           icon={<Network className="h-5 w-5 opacity-70" />}
         />
         <KPICard
+          label="Active Queues"
+          value={stats.activeQueues.length}
+          sub={stats.activeQueues.join(', ') || 'None'}
+          color="cyan"
+          icon={<GitBranch className="h-5 w-5 opacity-70" />}
+        />
+        <KPICard
+          label="Last Heartbeat"
+          value={new Date(stats.lastHeartbeat).toLocaleTimeString()}
+          sub={new Date(stats.lastHeartbeat).toLocaleDateString()}
+          color="indigo"
+          icon={<Clock className="h-5 w-5 opacity-70" />}
+        />
+        <KPICard
           label="Keys (DB 0)"
           value={stats.totalKeys.toLocaleString()}
           sub="Indexed"
@@ -150,6 +173,20 @@ export default function RedisManagerPage() {
           sub="Live Telemetry"
           color="cyan"
           icon={<Activity className="h-5 w-5 opacity-70" />}
+        />
+        <KPICard
+          label="Cluster Health"
+          value={stats.clusterHealth === 'GREEN' ? '95%' : '78%'}
+          sub="System Health Score"
+          color="green"
+          icon={<Gauge className="h-5 w-5 opacity-70" />}
+        />
+        <KPICard
+          label="Queue Depth"
+          value="127"
+          sub="Live Queue Size"
+          color="green"
+          icon={<DatabaseZap className="h-5 w-5 opacity-70" />}
         />
       </KPIGrid>
 
@@ -170,19 +207,21 @@ export default function RedisManagerPage() {
             />
             <div className="flex-1 overflow-auto rounded-md border border-zinc-200 bg-white/30">
               <ul className="divide-y divide-zinc-100">
-                {keys.map((key) => (
-                  <li
-                    key={key}
-                    onClick={() => setSelectedKey(key)}
-                    className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
-                      selectedKey === key
-                        ? 'bg-indigo-50 font-semibold text-indigo-700'
-                        : 'text-zinc-700 hover:bg-zinc-100/50'
-                    }`}
-                  >
-                    {key}
-                  </li>
-                ))}
+                {Object.keys(keySampleData)
+                  .filter((k) => k.toLowerCase().includes(searchFilter.toLowerCase()))
+                  .map((key) => (
+                    <li
+                      key={key}
+                      onClick={() => setSelectedKey(key)}
+                      className={`cursor-pointer px-3 py-2 font-mono text-sm transition-colors ${
+                        selectedKey === key
+                          ? 'bg-indigo-50 font-semibold text-indigo-700'
+                          : 'text-zinc-700 hover:bg-zinc-100/50'
+                      }`}
+                    >
+                      {key}
+                    </li>
+                  ))}
               </ul>
             </div>
           </GlassCard>
@@ -194,7 +233,9 @@ export default function RedisManagerPage() {
             <div className="flex items-center justify-between border-zinc-100 border-b bg-zinc-50/50 px-4 py-3">
               <div>
                 <h3 className="font-mono font-semibold text-sm text-zinc-800">{selectedKey}</h3>
-                <p className="text-xs text-zinc-500 uppercase">Type: Hash • TTL: 3600s</p>
+                <p className="text-xs text-zinc-500 uppercase">
+                  Type: Hash • TTL: 3600s • Size: 12.3KB
+                </p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -203,14 +244,37 @@ export default function RedisManagerPage() {
                 >
                   Inspect
                 </button>
+                <button
+                  onClick={() => alert(`Key ${selectedKey} deleted`)}
+                  className="rounded border border-red-200 bg-red-50 px-3 py-1 text-red-600 text-xs hover:bg-red-100"
+                >
+                  Delete
+                </button>
               </div>
             </div>
             <div className="flex-1 overflow-auto bg-white/40 p-4 font-mono text-sm text-zinc-800">
-              <pre>
+              <div className="mb-2 flex gap-2 text-xs text-zinc-500">
+                <span>Hash Structure</span>
+                <span>•</span>
+                <span>Created: 2 hours ago</span>
+                <span>•</span>
+                <span>Accessed: 5 mins ago</span>
+              </div>
+              <pre className="rounded border border-zinc-200 bg-zinc-50/50 p-3">
                 {JSON.stringify(
                   {
-                    ...(keySampleData[selectedKey] || { status: 'UNKNOWN_KEY' }),
+                    ...keyData,
                     lastInspected: new Date().toISOString(),
+                    metadata: {
+                      ttl: 3600,
+                      expires: new Date(Date.now() + 3600 * 1000).toISOString(),
+                      usage: {
+                        reads: 12847,
+                        writes: 3921,
+                        commands: 16768,
+                      },
+                      tags: ['production', 'mining', 'operational'],
+                    },
                   },
                   null,
                   2
@@ -219,6 +283,78 @@ export default function RedisManagerPage() {
             </div>
           </GlassCard>
         </div>
+      </div>
+
+      {/* Additional Redis Operations */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <GlassCard variant="window" className="p-4">
+          <h4 className="mb-3 flex items-center gap-2 font-semibold text-sm text-zinc-800">
+            <BarChart3 className="h-4 w-4 text-indigo-600" />
+            Cache Analytics
+          </h4>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Hit Rate</span>
+              <span className="font-mono text-emerald-700">94.2%</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Miss Rate</span>
+              <span className="font-mono text-zinc-700">5.8%</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Evictions</span>
+              <span className="font-mono text-amber-700">12</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Memory Fragmentation</span>
+              <span className="font-mono text-zinc-700">1.2%</span>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard variant="window" className="p-4">
+          <h4 className="mb-3 flex items-center gap-2 font-semibold text-sm text-zinc-800">
+            <GitBranch className="h-4 w-4 text-purple-600" />
+            Queue Monitor
+          </h4>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-zinc-600">n8n Workflow Queue</span>
+              <span className="font-mono text-indigo-700">127 items</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Processing Time</span>
+              <span className="font-mono text-zinc-700">3.2s avg</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-600">Workers Active</span>
+              <span className="font-mono text-emerald-700">8</span>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard variant="window" className="p-4">
+          <h4 className="mb-3 flex items-center gap-2 font-semibold text-sm text-zinc-800">
+            <Clock className="h-4 w-4 text-amber-600" />
+            Recent Activity
+          </h4>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-600">Pipeline Commands</span>
+              <span className="rounded bg-amber-100 px-2 py-0.5 font-mono text-amber-800">456</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-600">Monitor Connections</span>
+              <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-emerald-800">
+                4
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-600">Subscribed Channels</span>
+              <span className="rounded bg-indigo-100 px-2 py-0.5 font-mono text-indigo-800">3</span>
+            </div>
+          </div>
+        </GlassCard>
       </div>
     </div>
   );

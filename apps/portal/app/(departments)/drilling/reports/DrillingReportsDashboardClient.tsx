@@ -2,6 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
+import { cn } from '@repo/ui/lib/utils';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import {
   Activity,
@@ -60,6 +61,9 @@ function formatDelay(minutes: number): string {
   }
   return `${mins}m`;
 }
+
+const HEADER_PANEL_BASE =
+  'liquid-glass-light gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-semibold text-xs shadow-diffusion-sm backdrop-blur-md';
 
 export function DrillingReportsDashboardClient({
   todayStr,
@@ -239,11 +243,23 @@ export function DrillingReportsDashboardClient({
               <h2 className="font-bold text-2xl text-[var(--text-heading)]">
                 Drilling Production Report &amp; Live Stats
               </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-green/20 bg-accent-green/10 px-2.5 py-0.5 font-medium text-accent-green text-xs">
+              <span
+                data-testid="drilling-live-telemetry-panel"
+                className={cn(
+                  HEADER_PANEL_BASE,
+                  'border-accent-green/35 bg-accent-green/12 text-accent-green'
+                )}
+              >
                 <Radio className="h-3.5 w-3.5 animate-pulse" />
                 Live Telemetry &amp; Control Room Sync
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
+              <span
+                data-testid="drilling-active-shift-panel"
+                className={cn(
+                  HEADER_PANEL_BASE,
+                  'border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/12 text-[var(--accent-blue)]'
+                )}
+              >
                 {currentShift === 'day' ? (
                   <Sun className="h-3.5 w-3.5" />
                 ) : (
@@ -252,7 +268,7 @@ export function DrillingReportsDashboardClient({
                 Active Shift: {currentShift.toUpperCase()} ({todayStr})
               </span>
             </div>
-            <p className="mt-1 text-[var(--text-muted)] text-xs">
+            <p className="mt-1.5 font-medium text-[var(--text-heading)] text-xs">
               Compiled from Drilling &amp; Control Room machine operations ({fromDateStr} to{' '}
               {toDateStr}) across Shift, Day, and Archived views.
             </p>

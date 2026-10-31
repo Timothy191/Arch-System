@@ -7,7 +7,7 @@ import {
 
 interface DrillingReportsPageProps {
   params: Promise<{ department: string }>;
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; tab?: string }>;
 }
 
 interface ControlRoomDrillOpRow {

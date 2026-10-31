@@ -19,10 +19,32 @@ import { getServiceUrls } from '../lib/urls';
 
 export const WHATSAPP_WEB_DIRECT_URL = 'https://web.whatsapp.com/';
 
+/**
+ * Google Workspace hand-off URLs.
+ *
+ * Google sends `X-Frame-Options: SAMEORIGIN` on signed-in Docs/Drive/Calendar,
+ * so the portal can never embed them. `accounts.google.com/AccountChooser`
+ * reuses the browser's existing Google session and lands on the requested app,
+ * which is the closest thing to a silent sign-in without Workspace OAuth.
+ */
+export const GOOGLE_DOCS_CHOOSER_URL =
+  'https://accounts.google.com/AccountChooser?continue=https://docs.google.com/document/u/0/';
+
+export const GOOGLE_CALENDAR_CHOOSER_URL =
+  'https://accounts.google.com/AccountChooser?continue=https://calendar.google.com/calendar/u/0/r';
+
+/** Productivity tool name → direct Google Workspace destination (no portal hop). */
+export const GOOGLE_CHOOSER_BY_TOOL: Readonly<Record<string, string>> = {
+  documents: GOOGLE_DOCS_CHOOSER_URL,
+  schedule: GOOGLE_CALENDAR_CHOOSER_URL,
+};
+
 export interface MacMenuBarProps {
   menuItems?: readonly string[];
   centerSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
+  /** Server-rendered identity block rendered at the top of the system menu. */
+  userSlot?: React.ReactNode;
   className?: string;
 }
 

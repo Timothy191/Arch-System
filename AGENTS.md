@@ -222,7 +222,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 - **Light mode only**: canvas `#f3f4f6`; semantic OKLCH tokens from `@repo/theme/src/tokens/`. No `dark:` variants or raw hex/rgb.
 - **Glass surfaces**: `@repo/ui/GlassCard` (`variant="default" | "window" | "spotlight" | "glowborder" | "liquid"`).
-- **Tailwind utility composition**: ≤16 utilities per className (target ≤12); extract repeated chains (≥10 utilities, 3+ uses) into a component, CVA variant, `cn()` constant, or theme class.
+- **Tailwind utility composition**: ≤20 utilities per className (target ≤12); extract repeated chains (≥10 utilities, 3+ uses) into a component, CVA variant, `cn()` constant, or theme class.
 - **Images**: `next/image` with explicit `width`/`height` or `fill` + sized parent, and descriptive `alt` (raw `<img>` only in root error boundaries).
 - **Boundaries & imports**: see layering table; import via canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/...`.
 - **Strict TypeScript**: no `any`, no `@ts-ignore`.

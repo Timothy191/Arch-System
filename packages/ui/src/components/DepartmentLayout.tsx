@@ -39,7 +39,6 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
-import { Logo } from './Logo';
 import { MacTitleBar } from './MacTitleBar';
 
 const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
@@ -210,7 +209,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         ref={sidebarRef}
         className={cn(
-          'group/sidebar liquid-glass-light gold-steel-border absolute inset-y-0 left-0 z-50 flex w-60 flex-col rounded-r-2xl bg-white/85 shadow-2xl transition-transform duration-300',
+          'group/sidebar liquid-glass-light gold-steel-border absolute inset-y-0 left-0 z-50 flex w-60 flex-col overflow-hidden rounded-r-3xl bg-white/90 shadow-window transition-transform duration-300',
           isPinned || isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-12px)]'
         )}
         style={{ borderRight: '1px solid rgba(212, 175, 55, 0.28)' }}
@@ -265,7 +264,6 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 )}
               />
             </button>
-            <Logo variant="gold" className="mr-0.5 h-4 w-4 shrink-0 text-[var(--accent-blue)]" />
           </div>
         </div>
 
@@ -576,23 +574,29 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
           })}
         </nav>
 
-        {/* Bottom status strip */}
+        {/* Profile panel (connection status lives here) */}
         <div
+          data-testid="sidebar-profile-panel"
           className={cn(
-            'flex items-center justify-between gap-2 border-black/[0.06] border-t p-3 transition-opacity duration-200',
+            'border-black/[0.06] border-t p-3 transition-opacity duration-200',
             isPinned || isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
-          <div className="gold-steel-border gold-steel-border-slim flex flex-1 items-center justify-between gap-2 rounded-xl bg-white/80 px-3 py-2 shadow-2xs">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent-green)]" />
-              <span className="font-semibold text-[11px] text-[var(--text-heading)] tracking-wide">
-                Connection Secure
+          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-2.5 rounded-xl bg-white/80 px-3 py-2 shadow-2xs">
+            <div className="relative shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-blue)]/12 font-semibold text-[11px] text-[var(--accent-blue)]">
+                AO
+              </div>
+              <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 animate-pulse rounded-full border-2 border-white bg-[var(--accent-green)]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="block truncate font-semibold text-[12px] text-[var(--text-heading)]">
+                Arch Operator
+              </span>
+              <span className="block font-mono text-[9.5px] text-[var(--accent-green)] uppercase tracking-wider">
+                Connection Secure · Live
               </span>
             </div>
-            <span className="rounded-full bg-[var(--accent-green)]/12 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--accent-green)] uppercase">
-              Live
-            </span>
           </div>
         </div>
       </aside>

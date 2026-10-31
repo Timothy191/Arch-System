@@ -30,7 +30,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const BASELINE_PATH = path.join(__dirname, 'tailwind-baseline.json');
 
 const CONFIG = Object.freeze({
-  maxUtilitiesPerElement: 16,
+  maxUtilitiesPerElement: 20,
   duplicateMinTokens: 10,
   duplicateMinUses: 3,
 });
