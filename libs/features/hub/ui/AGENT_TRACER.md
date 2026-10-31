@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-10-31T19:18:00+02:00 - Unify Drilling Icon Bubble Setup Across All Hub Cards & Enhance Card Title/KPI Badges
+
+- **Purpose**: Apply the Drilling `2.25rem × 2.25rem` `.uiverse-card-icon-bubble` and `h-11 w-11 shrink-0 scale-110` `<Logo variant="gold" />` setup across all 11 Hub department panels, render semantic Lucide icons (`DEPARTMENT_ICON_MAP`) in the inline `.uiverse-card-title-row` badge, and polish the header gold separator and KPI tag row.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Unified `.uiverse-card-icon-bubble` (`2.25rem × 2.25rem`) and `<Logo variant="gold" className="h-11 w-11 shrink-0 scale-110 ..." />` across all departments, added `DEPARTMENT_ICON_MAP` for `.uiverse-card-title-row`, and enhanced `dept-header-separator-*` and `.uiverse-card-tag-row`.
+  - `libs/features/hub/ui/src/{DepartmentCard,HeroRotator}.test.tsx`: Added assertions for unified icon bubble dimensions/classes and `hero-bottom-golden-separator`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-31T09:42:00+02:00 - Add Availability & Utilization Overline & Dedicated MP4 Hero Test
 
 - **Purpose**: Map `availability-utilization` to `FLEET AVAILABILITY & OEE // FLEET-AV01` in `HeroRotator.tsx` and verify `hero-video-availability-utilization` resolves `/images/departments/availability-utilization.mp4` and `/images/departments/availability-utilization.jpg` in `HeroRotator.test.tsx`.

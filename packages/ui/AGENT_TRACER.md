@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-31T19:18:00+02:00 - Add Animated Golden Separator Under Hero Card Selection Indicator
+
+- **Purpose**: Add an animated metallic golden separator (`data-testid="hero-bottom-golden-separator"`) directly beneath the Hero Card selection indicator (`div.mt-2.flex`) in `HeroRotator.tsx` to visually separate the Hero Card selection section from the Bottom Core Operational Modules panel.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`: Added `hero-bottom-golden-separator` with dual tapered gold gradient rails, rotated gold diamond accents, and a central pulsing `ArchEmblemIcon` medallion.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-31T10:30:00+02:00 - Resolve DevTools Issues in MacSystemMenuDropdown & MacMenuBar
 
 - **Purpose**: Resolve Chrome DevTools Issues panel findings (`Lazy-loaded images should have explicit dimensions` on `/whatsapp-logo.jpeg` and `A form field element should have an id or name attribute` on the top menu bar search input).

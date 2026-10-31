@@ -143,6 +143,7 @@ describe('HeroRotator', () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
     expect(screen.getByLabelText('Previous highlight')).toBeInTheDocument();
     expect(screen.getByLabelText('Next highlight')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-bottom-golden-separator')).toBeInTheDocument();
     expect(screen.queryByLabelText('Pause auto rotation')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Resume auto rotation')).not.toBeInTheDocument();
   });

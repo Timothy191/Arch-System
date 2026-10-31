@@ -3,7 +3,19 @@
 import type { Department } from '@repo/departments/data-access';
 import { Logo } from '@repo/ui/Logo';
 import { cn } from '@repo/ui/lib/utils';
-import { ArrowUpRight, Loader2 } from 'lucide-react';
+import {
+  Activity,
+  ArrowUpRight,
+  Database,
+  Drill,
+  Factory,
+  Loader2,
+  type LucideIcon,
+  Monitor,
+  Package,
+  ShieldCheck,
+  Wrench,
+} from 'lucide-react';
 // eslint-disable-next-line no-redeclare
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +23,17 @@ import { useRouter } from 'next/navigation';
 import { memo, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Sparkline } from './Sparkline';
+
+const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
+  Wrench,
+  ShieldCheck,
+  Factory,
+  Drill,
+  Package,
+  Monitor,
+  Activity,
+  Database,
+};
 
 function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; className?: string }) {
   return (
@@ -104,6 +127,7 @@ function DepartmentCard({
   };
 
   const config = COLOR_MAP[department.color] || GOLD_BADGE_CONFIG;
+  const TitleDomainIcon = DEPARTMENT_ICON_MAP[department.icon];
 
   const route = department.route || `/${department.name}`;
 
@@ -207,17 +231,13 @@ function DepartmentCard({
               config.bg,
               config.ringColor
             )}
-            style={
-              department.name === 'drilling' ? { width: '2.25rem', height: '2.25rem' } : undefined
-            }
+            style={{ width: '2.25rem', height: '2.25rem' }}
             aria-hidden="true"
           >
             <Logo
               variant="gold"
               className={cn(
-                department.name === 'drilling'
-                  ? 'h-11 w-11 shrink-0 scale-110 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]'
-                  : 'h-5 w-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
+                'h-11 w-11 shrink-0 scale-110 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
                 config.iconColor
               )}
             />
@@ -236,7 +256,11 @@ function DepartmentCard({
                   )}
                   aria-hidden="true"
                 >
-                  <Logo variant="gold" className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
+                  {TitleDomainIcon ? (
+                    <TitleDomainIcon className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
+                  ) : (
+                    <Logo variant="gold" className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
+                  )}
                 </span>
                 <h3 className="uiverse-card-title truncate font-anurati font-bold uppercase tracking-[0.055em]">
                   {department.displayName}
@@ -269,7 +293,7 @@ function DepartmentCard({
             <div
               data-testid={`dept-header-separator-${department.name}`}
               aria-hidden="true"
-              className="my-1.5 h-px w-full bg-gradient-to-r from-accent-amber/55 via-slate-300/80 to-transparent"
+              className="my-1.5 h-px w-full bg-gradient-to-r from-accent-amber/75 via-accent-amber/35 to-transparent"
             />
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>
@@ -278,6 +302,10 @@ function DepartmentCard({
           {department.stats && (
             <div className="uiverse-card-tag-row group-hover:border-arch-accent-blue/25 group-hover:bg-white/95">
               <div className="flex items-center gap-2">
+                <span
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-amber/80"
+                  aria-hidden="true"
+                />
                 <span className="uiverse-card-tag-row-text">{department.stats.label}</span>
                 {department.trend && (
                   <div className="opacity-90">
@@ -286,7 +314,9 @@ function DepartmentCard({
                 )}
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="uiverse-card-tag-row-value">{department.stats.value}</span>
+                <span className="uiverse-card-tag-row-value tabular-nums">
+                  {department.stats.value}
+                </span>
                 <ArrowUpRight
                   aria-hidden="true"
                   className="h-3.5 w-3.5 text-arch-text-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-arch-accent-blue"

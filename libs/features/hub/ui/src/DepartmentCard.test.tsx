@@ -126,4 +126,21 @@ describe('DepartmentCard', () => {
     expect(heading).toHaveClass('uiverse-card-title', 'font-anurati');
     expect(screen.getByTestId('dept-header-separator-drilling')).toBeInTheDocument();
   });
+
+  it('applies the unified 2.25rem icon bubble and h-11 w-11 scale-110 gold Logo setup to all departments', () => {
+    const accessControlDept: Department = {
+      ...mockDepartment,
+      name: 'access-control',
+      displayName: 'Access Control',
+      route: '/access-control',
+      icon: 'ShieldCheck',
+    };
+    const { container } = render(<DepartmentCard department={accessControlDept} index={1} />);
+    const iconBubble = container.querySelector('.uiverse-card-icon-bubble') as HTMLElement | null;
+    expect(iconBubble).not.toBeNull();
+    expect(iconBubble?.style.width).toBe('2.25rem');
+    expect(iconBubble?.style.height).toBe('2.25rem');
+    const bubbleLogo = iconBubble?.querySelector('svg');
+    expect(bubbleLogo).toHaveClass('h-11', 'w-11', 'scale-110');
+  });
 });

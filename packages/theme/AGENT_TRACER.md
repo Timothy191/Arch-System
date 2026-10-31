@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-10-31T19:18:00+02:00 - Add Missing Hub Department Card Banner Gradients
+
+- **Purpose**: Complete `.uiverse-card-banner-*` gradient definitions in `cards.css` for `availability-utilization`, `overview`, and `database` Hub department cards.
+- **Changes**:
+  - `packages/theme/src/css/cards.css`: Added `.uiverse-card-banner-availability-utilization`, `.uiverse-card-banner-overview`, and `.uiverse-card-banner-database`.
+- **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-23T11:08:00+02:00 - Minimize Tailwind CSS Build Size via Strict Purge Globs
 
 - **Purpose**: Minimize compiled CSS size (-14.34 KB minified, -35.3% build time) and purge unused utility/prose classes.
