@@ -207,12 +207,17 @@ function DepartmentCard({
               config.bg,
               config.ringColor
             )}
+            style={
+              department.name === 'drilling' ? { width: '2.25rem', height: '2.25rem' } : undefined
+            }
             aria-hidden="true"
           >
             <Logo
               variant="gold"
               className={cn(
-                'h-5 w-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
+                department.name === 'drilling'
+                  ? 'h-11 w-11 shrink-0 scale-110 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]'
+                  : 'h-5 w-5 shrink-0 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
                 config.iconColor
               )}
             />
