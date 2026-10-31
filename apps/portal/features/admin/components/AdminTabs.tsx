@@ -3,6 +3,7 @@
 import { Tabs, TabsList, TabsTrigger } from '@repo/ui/components/ui/tabs';
 import {
   Building2,
+  ExternalLink, // Use ExternalLink as icon for external content
   FileText,
   Layers,
   MapPin,
@@ -25,6 +26,7 @@ const TABS = [
   { value: 'webhooks', label: 'Webhooks', icon: Webhook },
   { value: 'audit-logs', label: 'Audit Logs', icon: FileText },
   { value: 'settings', label: 'Settings', icon: Settings },
+  { value: 'external-content', label: 'External Content', icon: ExternalLink },
 ];
 
 interface AdminTabsProps {

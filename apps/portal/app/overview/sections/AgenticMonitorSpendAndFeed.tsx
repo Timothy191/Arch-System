@@ -77,7 +77,7 @@ export function AgenticMonitorSpendAndFeed({
             </h3>
           </div>
           <span className="font-mono text-[var(--text-muted)] text-xs">
-            Total Incurred: <strong className="text-emerald-700">R 5,000.00 ZAR</strong> (~$269.98
+            Total Incurred: <strong className="text-emerald-700">R 4,859.31 ZAR</strong> (~$269.98
             USD)
           </span>
         </div>
@@ -162,7 +162,7 @@ export function AgenticMonitorSpendAndFeed({
                 </td>
                 <td className="py-3 text-right font-mono text-[var(--text-heading)]">19.00M</td>
                 <td className="py-3 text-right font-mono text-emerald-700">59.00M</td>
-                <td className="py-3 text-right font-mono text-emerald-700 text-sm">R 5,000.00</td>
+                <td className="py-3 text-right font-mono text-emerald-700 text-sm">R 4,859.31</td>
                 <td className="py-3 text-right font-mono text-emerald-400 text-sm">+R 15,000.00</td>
                 <td className="py-3 text-right font-mono text-[var(--text-heading)]">99</td>
               </tr>

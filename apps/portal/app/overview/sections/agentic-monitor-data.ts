@@ -424,13 +424,13 @@ export const LIFETIME_METRICS = {
   tokensReused: 53100000,
   tokensSaved: 18240000,
   usdCost: 269.98,
-  zarCost: 5000.0,
+  zarCost: 4859.31,
   zarSaved: 15000.0,
-  codingTime: '150h',
+  codingTime: '147h 30m',
   totalCommits: 99,
-  bugsFixed: 75,
+  bugsFixed: 71,
   qualityGateRuns: 195,
-  cacheHitRatio: 90,
+  cacheHitRatio: 85.1,
 };
 
 // Current Session Metrics (Oct 30, 2026)

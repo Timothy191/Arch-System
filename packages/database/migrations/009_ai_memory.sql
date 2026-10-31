@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS memory_embeddings (
   session_id TEXT NOT NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
-  embedding VECTOR(1536) NOT NULL,
+  embedding VECTOR(768) NOT NULL,
   metadata JSONB NOT NULL DEFAULT '{}',
   memory_type TEXT NOT NULL DEFAULT 'episodic',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -116,7 +116,7 @@ CREATE POLICY "memory_delete_own"
 
 -- Hybrid search: semantic similarity + keyword match + temporal recency
 CREATE OR REPLACE FUNCTION search_memories_hybrid(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   query_text TEXT,
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
@@ -187,7 +187,7 @@ $$;
 
 -- Pure semantic search (fast ANN via HNSW)
 CREATE OR REPLACE FUNCTION search_memories_semantic(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
   p_memory_type TEXT DEFAULT NULL,

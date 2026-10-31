@@ -519,7 +519,7 @@ COMMENT ON COLUMN dozer_rolls.push_count IS 'Number of push operations';
 COMMENT ON TABLE memory_embeddings IS 'AI agent memory with vector embeddings for semantic retrieval';
 COMMENT ON COLUMN memory_embeddings.session_id IS 'Conversation session identifier';
 COMMENT ON COLUMN memory_embeddings.user_id IS 'FK to auth.users (memory owner)';
-COMMENT ON COLUMN memory_embeddings.embedding IS 'OpenAI-compatible 1536-dimension vector';
+COMMENT ON COLUMN memory_embeddings.embedding IS 'Ollama nomic-embed-text 768-dimension vector';
 COMMENT ON COLUMN memory_embeddings.memory_type IS 'episodic (conversations), semantic (facts), procedural (instructions)';
 COMMENT ON COLUMN memory_embeddings.metadata IS 'Flexible JSON metadata for filtering';
 

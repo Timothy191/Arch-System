@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { AdminTabsClient } from '~/features/admin/components/AdminTabsClient';
 import { AuditLogsTab } from '~/features/admin/tabs/AuditLogsTab';
 import { DepartmentsTab } from '~/features/admin/tabs/DepartmentsTab';
+import { ExternalContentTab } from '~/features/admin/tabs/ExternalContentTab';
 import { FleetTab } from '~/features/admin/tabs/FleetTab';
 import { IntegrationsTab } from '~/features/admin/tabs/IntegrationsTab';
 import { MineralsTab } from '~/features/admin/tabs/MineralsTab';
@@ -23,6 +24,7 @@ const TABS = [
   'webhooks',
   'audit-logs',
   'settings',
+  'external-content',
 ];
 
 export default async function AdminPage({
@@ -63,6 +65,7 @@ export default async function AdminPage({
         {activeTab === 'webhooks' && <WebhooksTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}
         {activeTab === 'settings' && <SettingsTab />}
+        {activeTab === 'external-content' && <ExternalContentTab />}
       </AdminTabsClient>
     </div>
   );

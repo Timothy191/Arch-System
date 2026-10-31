@@ -79,7 +79,7 @@ END $$;
 -- ============================================
 
 CREATE OR REPLACE FUNCTION search_memories_hybrid(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   query_text TEXT,
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
@@ -146,7 +146,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION search_memories_semantic(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
   p_memory_type TEXT DEFAULT NULL,
@@ -193,4 +193,4 @@ $$;
 ALTER TABLE memory_embeddings DROP CONSTRAINT IF EXISTS valid_embedding_dim;
 ALTER TABLE memory_embeddings
   ADD CONSTRAINT valid_embedding_dim
-  CHECK (vector_dims(embedding) = 1536);
+  CHECK (vector_dims(embedding) = 768);

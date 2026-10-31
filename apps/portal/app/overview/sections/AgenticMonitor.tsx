@@ -274,7 +274,7 @@ export default function AgenticMonitor() {
         <div className="space-y-2">
           <div className="flex justify-between font-mono text-[var(--text-muted)] text-xs">
             <span>Agent Workload Distribution (%)</span>
-            <span>Total: 19.00M Tokens Spent (R 5,000.00)</span>
+            <span>Total: 19.00M Tokens Spent (R 4,859.31)</span>
           </div>
           <div className="mt-1 flex h-5 w-full gap-0.5 overflow-hidden rounded-full bg-[var(--bg-secondary)] p-0.5">
             {AGENT_SYSTEM_BREAKDOWN.map((agent) => (

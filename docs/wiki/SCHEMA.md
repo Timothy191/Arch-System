@@ -371,17 +371,17 @@ Equipment breakdown book-in/book-out workflow.
 
 Hybrid retrieval system for conversation history and semantic memory.
 
-| Column      | Type                 | Constraints                 | Description       |
-| ----------- | -------------------- | --------------------------- | ----------------- |
-| id          | UUID                 | PK                          | Memory identifier |
-| session_id  | TEXT                 | NOT NULL                    | Session reference |
-| user_id     | UUID                 | FK → auth.users             | User reference    |
-| content     | TEXT                 | NOT NULL                    | Memory content    |
-| embedding   | VECTOR(1536)         | NOT NULL                    | OpenAI embedding  |
-| metadata    | JSONB                | DEFAULT '{}'                | Context metadata  |
-| memory_type | \"memory_type\" ENUM | NOT NULL DEFAULT 'episodic' | episodic/semantic |
-| created_at  | TIMESTAMPTZ          | DEFAULT NOW()               | Creation time     |
-| updated_at  | TIMESTAMPTZ          | DEFAULT NOW()               | Update time       |
+| Column      | Type                 | Constraints                 | Description                       |
+| ----------- | -------------------- | --------------------------- | --------------------------------- |
+| id          | UUID                 | PK                          | Memory identifier                 |
+| session_id  | TEXT                 | NOT NULL                    | Session reference                 |
+| user_id     | UUID                 | FK → auth.users             | User reference                    |
+| content     | TEXT                 | NOT NULL                    | Memory content                    |
+| embedding   | VECTOR(768)          | NOT NULL                    | Ollama nomic-embed-text embedding |
+| metadata    | JSONB                | DEFAULT '{}'                | Context metadata                  |
+| memory_type | \"memory_type\" ENUM | NOT NULL DEFAULT 'episodic' | episodic/semantic                 |
+| created_at  | TIMESTAMPTZ          | DEFAULT NOW()               | Creation time                     |
+| updated_at  | TIMESTAMPTZ          | DEFAULT NOW()               | Update time                       |
 
 **Indexes**:
 

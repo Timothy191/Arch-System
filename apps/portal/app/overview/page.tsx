@@ -291,7 +291,7 @@ export default function OverviewPage() {
       </aside>
 
       {/* Main Content Area beside Department Side Panel */}
-      <div className="mx-auto min-w-0 max-w-[1600px] flex-1 animate-fade-up space-y-6 px-4 py-5 pb-12 sm:px-6">
+      <div className="mx-auto min-w-0 max-w-[1600px] flex-1 animate-fade-up space-y-8 px-6 py-8 pb-16 sm:px-6">
         {/* Header with Official Arch Systems Branding, Full Stack SVG Icons & Visual Provenance Graphs */}
         <header className="gold-steel-border gold-steel-border-slim space-y-4 rounded-xl border border-[var(--border-subtle)] bg-white/80 p-5 shadow-card backdrop-blur-xl">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -307,12 +307,12 @@ export default function OverviewPage() {
                     Active View: {activeNavMeta.label}
                   </span>
                 </h1>
-                <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
-                  Opencast Coal Mine Operations Portal — Interactive Block-and-Line Flow Diagrams,
-                  n8n Node Canvas & Audit Intelligence
-                </p>
               </div>
             </div>
+            <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
+              <span className="text-emerald-600">Opencast Coal Mine Operations Portal</span> —
+              Interactive Block-and-Line Flow Diagrams, n8n Node Canvas & Audit Intelligence
+            </p>
           </div>
 
           {/* Item 5: Visual SVG Illustrators for All Codebase Stack Technologies */}

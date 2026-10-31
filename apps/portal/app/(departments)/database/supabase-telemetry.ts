@@ -183,7 +183,7 @@ function buildAddonModules(
       name: 'pgvector (HNSW)',
       schema: 'extensions',
       category: 'AI Vector Search',
-      statusLabel: 'Active · 1536-dim Cosine',
+      statusLabel: 'Active · 768-dim Cosine',
       detail: 'Powers semantic similarity indexing and hybrid RAG memory retrieval',
     },
     {

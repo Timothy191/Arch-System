@@ -389,7 +389,7 @@ export const CANVAS_NODES: ArchCanvasNode[] = [
     typeLabel: 'AI ENGINE · PGVECTOR',
     title: 'AI Copilot & Vector RAG',
     subtitle: 'HNSW Embeddings + Agent Mesh',
-    metricBadge: '1536-dim HNSW',
+    metricBadge: '768-dim HNSW',
     protocol: 'Claude / OpenAI + MCP',
     status: 'active',
     color: '#8b5cf6',

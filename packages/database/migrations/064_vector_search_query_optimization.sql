@@ -15,7 +15,7 @@
 
 -- Drop existing functions to recreate with optimizations
 DROP FUNCTION IF EXISTS public.search_memories_hybrid(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   query_text TEXT,
   p_user_id UUID,
   p_session_id TEXT,
@@ -27,7 +27,7 @@ DROP FUNCTION IF EXISTS public.search_memories_hybrid(
 );
 
 DROP FUNCTION IF EXISTS public.search_memories_semantic(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   p_user_id UUID,
   p_session_id TEXT,
   p_memory_type TEXT,
@@ -37,7 +37,7 @@ DROP FUNCTION IF EXISTS public.search_memories_semantic(
 
 -- Enhanced hybrid search with adaptive ef_search
 CREATE OR REPLACE FUNCTION search_memories_hybrid(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   query_text TEXT,
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
@@ -123,7 +123,7 @@ $$;
 
 -- Enhanced semantic search with adaptive ef_search
 CREATE OR REPLACE FUNCTION search_memories_semantic(
-  query_embedding VECTOR(1536),
+  query_embedding VECTOR(768),
   p_user_id UUID,
   p_session_id TEXT DEFAULT NULL,
   p_memory_type TEXT DEFAULT NULL,
