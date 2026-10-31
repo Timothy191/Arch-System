@@ -98,7 +98,7 @@ export function MacSystemMenuDropdown({
             alt="WhatsApp Logo"
             width={20}
             height={20}
-            className="shrink-0 rounded-full object-cover drop-shadow-xs"
+            className="h-5 w-5 shrink-0 rounded-full object-cover drop-shadow-xs"
           />
         </button>
       </div>

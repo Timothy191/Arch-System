@@ -404,6 +404,8 @@ export function MacMenuBar({
               />
               <Search className="pointer-events-none absolute top-1/2 right-2.5 z-10 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
+                id="mac-menubar-search"
+                name="q"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

@@ -1,3 +1,15 @@
+## 2026-10-31T10:30:00+02:00: Resolve DevTools Console Errors & 38 Unused Link Preload Warnings on /hub
+
+- **Phase 1 (Comprehension)**: Diagnose and resolve the Chrome DevTools errors and warnings on `/hub`: (1) `c137cbcc62ce02d8/script.js:1 Failed to load resource: 404` + `Refused to execute script ... because its MIME type ('text/html') is not executable` + `[Vercel Web Analytics] Failed to load script`, (2) `availability-utilization.jpg:1 Failed to load resource: 404`, (3) `38 The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event`, and (4) DevTools Issues on `/whatsapp-logo.jpeg` and the menu bar search input.
+- **Phase 2 (Evidence)**: Used `chrome-devtools` MCP (`list_console_messages`, `get_console_message`, `list_network_requests`, `get_network_request`, `evaluate_script`) and inspected `app-page-turbo.runtime.prod.js` (`rH`, `aP`). Confirmed that:
+  1. `@vercel/analytics/next` injects `/<dplId>/script.js` (`c137cbcc62ce02d8/script.js`) via `NEXT_PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG`, which falls through Vercel's Edge when Web Analytics is disabled on the project and hits Next.js `proxy.ts` / App Router (returning `307` or `404` `text/html`).
+  2. Next.js 16 populates `headers.link` in `.meta` from `a.fontPreloads` (`ibmPlexSans` `preload: true`) and `a.highImagePreloads` (`<link rel="preload" as="image" fetchPriority="high">`). Every `?_rsc=` route prefetch response (`19` prefetches on `/hub`) carries that HTTP `Link: rel=preload` header, causing Chrome's Blink `LinkHeader` loader to trigger `19 × 2 = 38` duplicate preloads after `window.load`.
+- **Phase 3 (Design)**:
+  - Added `apps/portal/public/va/script.js`, configured `<Analytics scriptSrc="/va/script.js" />` in `apps/portal/app/layout.tsx`, and added `VERCEL_OBSERVABILITY_SCRIPT_PATTERN` + `js|mjs|css|map` in `apps/portal/server/proxy.ts`.
+  - Updated `apps/portal/app/layout.tsx` (`ibmPlexSans` `preload: false`, omitted `fetchPriority="high"` on `<head>` `<link rel="preload" as="image">` tags while keeping `<link rel="preload">` in `<head>` and `fetchPriority="high"` on `#route-bg-light-image` in `RouteBackground.tsx`).
+- **Phase 4 (Criticism)**: Added unit test coverage in `apps/portal/server/proxy.test.ts` and verified `pnpm agent:verify`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/layout.tsx`, `apps/portal/server/proxy.ts`, `apps/portal/server/proxy.test.ts`, and created `apps/portal/public/va/script.js`.
+
 ## 2026-10-31T09:42:00+02:00: Restore Normal Live-Action Hub Hero MP4 Videos & Add Dedicated Availability & Utilization MP4
 
 - **Phase 1 (Comprehension)**: Address `/hub` design feedback on `<video data-testid="hero-video-availability-utilization" src="/images/departments/overview.mp4">` ("Identify if we can replace with normal mp4").

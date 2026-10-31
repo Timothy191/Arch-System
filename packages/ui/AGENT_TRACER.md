@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-10-31T10:30:00+02:00 - Resolve DevTools Issues in MacSystemMenuDropdown & MacMenuBar
+
+- **Purpose**: Resolve Chrome DevTools Issues panel findings (`Lazy-loaded images should have explicit dimensions` on `/whatsapp-logo.jpeg` and `A form field element should have an id or name attribute` on the top menu bar search input).
+- **Changes**:
+  - `packages/ui/src/components/MacSystemMenuDropdown.tsx`: Added `h-5 w-5` to the `/whatsapp-logo.jpeg` `<Image>` `className` matching `width={20} height={20}`.
+  - `packages/ui/src/components/MacMenuBar.tsx`: Added `id="mac-menubar-search"` and `name="q"` to the top menu bar search `<input>`.
+- **Verification**: `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-31T09:42:00+02:00 - Add Availability & Utilization Telemetry Series, KPI Strip & HUD Target in HeroCardContent
 
 - **Purpose**: Support `availability-utilization` directly in `HeroCardContent.tsx` (`getHeroTelemetrySeries`, `getHeroKpiTiles`, and `targetMeta`) so the Availability & Utilization hero card on `/hub` renders `Fleet Availability & Utilization` and `Availability Target: 95.0% [95%]` instead of falling back to the drilling depth target.

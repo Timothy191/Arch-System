@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-10-31] - Resolve DevTools Console Errors & 38 Unused Link Preload Warnings on /hub
+
+- **Action:**
+  - Created [`apps/portal/public/va/script.js`](./apps/portal/public/va/script.js), configured `<Analytics scriptSrc="/va/script.js" />` in [`apps/portal/app/layout.tsx`](./apps/portal/app/layout.tsx), and added `VERCEL_OBSERVABILITY_SCRIPT_PATTERN` + `js|mjs|css|map` in [`apps/portal/server/proxy.ts`](./apps/portal/server/proxy.ts) so Vercel Web Analytics script requests (`/<dplId>/script.js`, `/_vercel/insights/script.js`, `/va/script.js`) always return `200 OK` `application/javascript` instead of a 404/307 `text/html` response when Web Analytics is not enabled on the Vercel project.
+  - Updated [`apps/portal/app/layout.tsx`](./apps/portal/app/layout.tsx) (`ibmPlexSans` `preload: false` and omitted `fetchPriority="high"` on the `<head>` `<link rel="preload" as="image">` tags while keeping `fetchPriority="high"` on `#route-bg-light-image` in `RouteBackground.tsx`) so Next.js 16 does not emit `Link: <...>; rel=preload` HTTP headers on `?_rsc=` route prefetch responses (which caused Chrome's `LinkHeader` loader to trigger 38 duplicate unused preloads across the 19 prefetched routes on `/hub`).
+  - Added explicit `h-5 w-5` CSS dimensions to the lazy-loaded `/whatsapp-logo.jpeg` `<Image>` in [`packages/ui/src/components/MacSystemMenuDropdown.tsx`](./packages/ui/src/components/MacSystemMenuDropdown.tsx) and `id="mac-menubar-search"` + `name="q"` to the search `<input>` in [`packages/ui/src/components/MacMenuBar.tsx`](./packages/ui/src/components/MacMenuBar.tsx) to resolve Chrome DevTools audit issues.
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-31] - Restore Normal Live-Action Hub Hero MP4 Videos & Add Dedicated Availability & Utilization MP4
 
 - **Action:**

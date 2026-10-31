@@ -54,7 +54,7 @@ const ibmPlexSans = IBM_Plex_Sans({
   variable: '--font-sans',
   weight: ['400', '500', '600', '700'],
   display: 'swap',
-  preload: true,
+  preload: false,
   adjustFontFallback: true,
 });
 
@@ -129,7 +129,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           as="image"
           type="image/webp"
           media="(min-width: 768px)"
-          fetchPriority="high"
         />
         <link
           rel="preload"
@@ -137,7 +136,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           as="image"
           type="image/webp"
           media="(max-width: 767px)"
-          fetchPriority="high"
         />
         <link
           rel="preconnect"
@@ -226,7 +224,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
               <CommandBar />
               <ClientOverlays />
-              <Analytics />
+              <Analytics scriptSrc="/va/script.js" />
               <SpeedInsights />
               <Toaster />
             </AnimationProvider>

@@ -126,7 +126,10 @@ const RESTRICTED_ROUTES: Record<string, string[]> = {
 };
 
 const PUBLIC_FILE_EXTENSIONS =
-  /\.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$/i;
+  /\.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav|js|mjs|css|map)$/i;
+
+const VERCEL_OBSERVABILITY_SCRIPT_PATTERN =
+  /^\/(?:_vercel\/(?:insights|speed-insights)|[0-9a-f]{12,32})\/script\.js$/i;
 
 const PUBLIC_ROOT_FILES = new Set([
   '/manifest.json',
@@ -370,6 +373,19 @@ async function enforceRouteAccess(
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const pathname = request.nextUrl.pathname;
+
+  if (VERCEL_OBSERVABILITY_SCRIPT_PATTERN.test(pathname)) {
+    return new NextResponse(
+      'window.va=window.va||function(...p){(window.vaq=window.vaq||[]).push(p)};window.si=window.si||function(...p){(window.siq=window.siq||[]).push(p)};',
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        },
+      }
+    );
+  }
 
   if (isPublicBypassPath(pathname)) {
     const res = NextResponse.next();

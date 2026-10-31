@@ -165,6 +165,11 @@ describe('proxy', () => {
     const webpRes = await proxy(webpReq);
     expect(webpRes).toBeDefined();
     expect(webpRes.status).not.toBe(307);
+
+    const vaFallbackReq = makeRequest('/c137cbcc62ce02d8/script.js', false);
+    const vaFallbackRes = await proxy(vaFallbackReq);
+    expect(vaFallbackRes.status).toBe(200);
+    expect(vaFallbackRes.headers.get('content-type')).toContain('application/javascript');
   });
 
   it('redirects authenticated user away from /login to /', async () => {
