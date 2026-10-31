@@ -77,29 +77,65 @@ console.log('2️⃣  Validating typography and font configurations...');
 const layoutPath = path.join(ROOT, 'apps', 'portal', 'app', 'layout.tsx');
 if (fs.existsSync(layoutPath)) {
   const layoutContent = fs.readFileSync(layoutPath, 'utf8');
-  const hasInter = layoutContent.includes('Inter({');
-  const hasMono =
-    layoutContent.includes('JetBrains_Mono({') || layoutContent.includes('Geist_Mono({');
-  const hasFontSansVar = layoutContent.includes('--font-sans');
-  const hasFontMonoVar = layoutContent.includes('--font-mono');
 
-  if (!hasInter || !hasFontSansVar) {
+  // Assert the font *contract*, not a family name: fonts must be self-hosted via
+  // next/font and every design-system slot must be wired to a CSS variable. Pinning
+  // this check to `Inter({` produced false positives (and false confidence): the
+  // family may change, while `--font-sans` is the invariant the theme depends on.
+  const usesNextFont = /from\s+['"]next\/font\/(?:google|local)['"]/.test(layoutContent);
+  const declaredFontVariables = new Set(
+    [...layoutContent.matchAll(/variable:\s*['"](--font-[a-z0-9-]+)['"]/g)].map((match) => match[1])
+  );
+  const REQUIRED_FONT_VARIABLES = ['--font-sans', '--font-mono'];
+
+  if (!usesNextFont) {
+    violations.push({
+      file: 'apps/portal/app/layout.tsx',
+      line: 1,
+      type: 'FONT_SOURCE_INVALID',
+      description:
+        'Root layout must self-host fonts via next/font (google or local); no such import found.',
+    });
+  }
+
+  for (const fontVariable of REQUIRED_FONT_VARIABLES) {
+    if (declaredFontVariables.has(fontVariable)) continue;
     violations.push({
       file: 'apps/portal/app/layout.tsx',
       line: 1,
       type: 'FONT_CONFIG_MISSING',
-      description: 'Primary UI sans font (Inter / --font-sans) is missing from root layout.',
+      description: `Design-system font slot ${fontVariable} is not declared in the root layout.`,
     });
   }
-  if (!hasMono || !hasFontMonoVar) {
-    violations.push({
+
+  // Advisory: a family loaded into the root layout but never referenced by any CSS
+  // rule only ships @font-face bloat into the render-blocking stylesheet.
+  const cssConsumers = glob
+    .sync('{packages/theme/src/css,packages/ui/src,apps/portal/app,apps/portal/components}/**/*.css', {
+      cwd: ROOT,
+    })
+    .map((cssPath) => fs.readFileSync(path.join(ROOT, cssPath), 'utf8'));
+  const presetPath = path.join(ROOT, 'packages', 'theme', 'src', 'tailwind', 'preset.ts');
+  if (fs.existsSync(presetPath)) cssConsumers.push(fs.readFileSync(presetPath, 'utf8'));
+  const consumedFontVariables = new Set(
+    cssConsumers.flatMap((source) =>
+      [...source.matchAll(/var\((--font-[a-z0-9-]+)\)/g)].map((match) => match[1])
+    )
+  );
+
+  for (const fontVariable of declaredFontVariables) {
+    if (consumedFontVariables.has(fontVariable)) continue;
+    warnings.push({
       file: 'apps/portal/app/layout.tsx',
       line: 1,
-      type: 'FONT_CONFIG_MISSING',
-      description: 'Monospace code font (--font-mono) is missing from root layout.',
+      type: 'FONT_UNREFERENCED',
+      description: `${fontVariable} is loaded in the root layout but no CSS or Tailwind rule consumes it.`,
     });
   }
-  console.log('   ✓ Font system configured (Inter + JetBrains Mono / --font-sans + --font-mono)');
+
+  console.log(
+    `   ✓ Font system configured via next/font (${[...declaredFontVariables].join(', ')})`
+  );
 } else {
   violations.push({
     file: 'apps/portal/app/layout.tsx',
