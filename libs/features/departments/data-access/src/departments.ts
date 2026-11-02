@@ -284,7 +284,7 @@ export const CONTROL_ROOM_TABS = [
   { name: 'excavator-activity', label: 'Excavator Activity', icon: 'Pickaxe' },
   { name: 'hourly-loads', label: 'Hourly Loads', icon: 'Clock' },
   { name: 'machine-operations', label: 'Machine Operations', icon: 'Cpu' },
-  { name: 'engineering-notes', label: 'Operations', icon: 'ClipboardList' },
+  { name: 'engineering-notes', label: 'Delays', icon: 'ClipboardList' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const;
 

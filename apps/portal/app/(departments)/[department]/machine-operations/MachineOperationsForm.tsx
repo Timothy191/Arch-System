@@ -2,6 +2,7 @@
 
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
+import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
 import { ChevronDown, ChevronUp, Clock, Drill, ShieldAlert } from 'lucide-react';
@@ -999,28 +1000,33 @@ export function MachineOperationsForm({
         {/* End-of-Shift Breakdown Auto-Carry-Over Option */}
         <div
           data-testid="machine-ops-ends-on-breakdown-card"
-          className={`space-y-2.5 rounded-xl border p-3.5 transition-colors ${
+          className={`liquid-glass-light gold-steel-border gold-steel-border-slim space-y-2.5 rounded-xl border p-3.5 transition-colors ${
             formData.endsOnBreakdown
-              ? 'border-red-500/40 bg-red-500/5'
+              ? 'border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/5'
               : 'border-[var(--border-default)] bg-[var(--bg-secondary)]/60'
           }`}
         >
           <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              data-testid="machine-ops-ends-on-breakdown"
-              checked={formData.endsOnBreakdown}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  endsOnBreakdown: e.target.checked,
-                }))
-              }
-              className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] accent-red-600"
-            />
+            <span className="relative mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center">
+              <input
+                type="checkbox"
+                data-testid="machine-ops-ends-on-breakdown"
+                checked={formData.endsOnBreakdown}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    endsOnBreakdown: e.target.checked,
+                  }))
+                }
+                className="peer absolute inset-0 h-4 w-4 cursor-pointer opacity-0"
+              />
+              <span className="flex h-4 w-4 items-center justify-center rounded border border-[var(--border-default)] bg-white transition-colors peer-checked:border-[var(--accent-blue)] peer-checked:bg-[var(--accent-blue)]/10">
+                {formData.endsOnBreakdown && <Logo variant="gold" className="h-3 w-3" />}
+              </span>
+            </span>
             <div className="space-y-0.5">
               <span className="flex items-center gap-1.5 font-semibold text-[var(--text-heading)] text-xs">
-                <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+                <ShieldAlert className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
                 Machine ends shift on breakdown (auto-carry over into new shift)
               </span>
               <span className="block text-[11px] text-[var(--text-muted)]">
@@ -1058,7 +1064,7 @@ export function MachineOperationsForm({
         </div>
 
         {/* Help Text */}
-        <p className="text-[var(--text-muted)] text-xs">
+        <p className="animate-pulse text-neutral-700 text-xs [animation-duration:3s]">
           <span className="text-[var(--accent-blue)]">Tip:</span> Stop SMR is optional. You can come
           back and add it later. Hours are calculated automatically.
         </p>
