@@ -1,10 +1,13 @@
 import { getOperationalToday } from '@repo/utils';
-import { connection } from 'next/server';
+import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
 import { OfficeWorkspaceClient } from '~/features/departments/components/office/OfficeWorkspaceClient';
 
 export default async function OfficeDocumentsPage() {
-  await connection();
+  'use cache';
+  cacheLife('departments');
+  cacheTag(tagDepartment('office', 'documents'));
+
   const today = getOperationalToday();
 
   return (

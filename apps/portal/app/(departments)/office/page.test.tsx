@@ -26,6 +26,11 @@ jest.mock('@/lib/audit', () => ({
 }));
 
 jest.mock('@/lib/server-cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  tagDepartment: jest.fn((dept: string, suffix?: string) =>
+    suffix ? `dept:${dept}:${suffix}` : `dept:${dept}`
+  ),
   updateTagInAction: jest.fn(async () => undefined),
 }));
 
