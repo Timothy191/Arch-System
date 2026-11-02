@@ -4,6 +4,16 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-02] - External 15-Repository Architecture Audit, Feature Flags, ScrollReveal & Rust Idioms
+
+- **Action:**
+  - Audited 15 external repositories (`dereknguyen269/programing-best-practices`, `leonardomso/rust-skills`, `growthbook/growthbook`, `MoonZoon/MoonZoon`, `aidenybai/million`, `twbs/bootstrap`, `tailwindlabs/tailwindcss`, `animate-css/animate.css`, `FortAwesome/Font-Awesome`, `thedaviddias/Front-End-Checklist`, `evanw/esbuild`, `jlmakes/scrollreveal`, `nostalgic-css/NES.css`, `thedaviddias/Front-End-Performance-Checklist`, and `aniftyco/awesome-tailwindcss`) against Arch-System's Next.js 16 + React 19 + OKLCH light-mode invariants.
+  - Added GrowthBook-inspired feature flag and percentage rollout schemas (`packages/contract/src/schemas/feature-flags.schema.ts`) and a zero-dependency SHA-256 deterministic rollout evaluator (`packages/utils/src/feature-flags.ts`).
+  - Added an accessibility-aware `IntersectionObserver` scroll-reveal hook (`libs/shared/hooks/src/useScrollReveal.ts`) that honors `(prefers-reduced-motion: reduce)` on pit tablets.
+  - Refactored `tools/swarms-orchestrator/src/main.rs` following `leonardomso/rust-skills` (`#[must_use]`, `impl Into<String>`, `PathBuf`, eliminating `Vec<Box<SwarmsAgent>>` double-indirection) and added Rust unit tests.
+  - Documented the synthesized patterns in [`docs/agent-cookbooks/frontend-performance-and-rust.md`](./docs/agent-cookbooks/frontend-performance-and-rust.md).
+- **Verification:** `cargo clippy -- -D warnings`, `cargo test` (`2/2 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-10-31] - Resolve DevTools Console Errors & 38 Unused Link Preload Warnings on /hub
 
 - **Action:**
