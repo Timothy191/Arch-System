@@ -1,5 +1,14 @@
 # Contract Package Agent Tracer
 
+## 2026-11-02T14:45:00+02:00: System Resource & Subsystem Diagnostics Health Contracts
+
+- **Purpose**: Provide canonical Zod contracts (`systemHealthReportSchema`, `systemResourceMetricsSchema`, `subsystemComponentHealthSchema`) derived from System Informer observability patterns for real-time telemetry and health monitoring.
+- **Changes**:
+  - `packages/contract/src/schemas/system-health.schema.ts`: Defined schemas for resource metrics and subsystem status.
+  - `packages/contract/src/schemas/system-health.schema.test.ts`: Added unit tests verifying CPU, memory, and connection validation.
+  - `packages/contract/src/index.ts`: Exported schemas and types.
+- **Verification**: `pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, and `pnpm agent:verify` ✅.
+
 ## 2026-11-02T14:24:00+02:00: Dynamic Feature Flag Targeting & Evaluation Contracts
 
 - **Purpose**: Provide canonical Zod contracts (`featureFlagDefinitionSchema`, `featureFlagTargetingRuleSchema`, `evaluationContextSchema`, `featureEvaluationResultSchema`) matching database migration `093_feature_flags.sql` for contextual rollout and runtime experiment evaluation.
