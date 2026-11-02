@@ -1,3 +1,9 @@
+## [2026-11-02T09:35:00+02:00] SCADA Telemetry Stream Capping & Operational Runbook
+
+- **Agent**: Antigravity
+- **Summary**: Implemented `publishScadaTelemetryStream` in `src/streams.ts` with `DEFAULT_SCADA_STREAM_MAX_LEN = 5000` and approximate stream trimming (`MAXLEN ~`). Inspired by `redis/redis` streaming best practices, this helper bounds memory overhead for high-frequency Modbus SCADA telemetry while supporting high-throughput bursts. Added unit test coverage in `tests/streams.test.ts` (147/147 tests pass). Documented comprehensive operational commands in `docs/operations/redis-cheatsheet.md`.
+- **Handoff**: Clean type-checks and test suites. Fully backwards compatible.
+
 ## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit
 
 - **Agent**: Antigravity

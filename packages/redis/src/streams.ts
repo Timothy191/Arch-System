@@ -522,3 +522,39 @@ export async function readStreamJson<T = Record<string, unknown>>(
     }
   });
 }
+
+/** Default maximum entries to keep in a SCADA telemetry stream buffer before approximate trimming. */
+export const DEFAULT_SCADA_STREAM_MAX_LEN = 5000;
+
+export interface ScadaTelemetryStreamInput {
+  tagId: string;
+  value: number | string | boolean;
+  quality?: string;
+  source?: string;
+  timestamp?: number | string;
+  maxLen?: number;
+}
+
+/**
+ * Publishes a real-time SCADA telemetry point to an automatically capped
+ * Redis stream (`telemetry:stream:<tagId>`).
+ * Caps entries using approximate trim (`MAXLEN ~`) inspired by redis/redis
+ * streaming design, bounding memory growth while handling high-throughput bursts.
+ */
+export async function publishScadaTelemetryStream(
+  input: ScadaTelemetryStreamInput
+): Promise<string | null> {
+  const timestamp = input.timestamp ? String(input.timestamp) : new Date().toISOString();
+  return appendToStream({
+    key: `telemetry:stream:${input.tagId}`,
+    fields: {
+      tag: input.tagId,
+      value: String(input.value),
+      quality: input.quality ?? 'GOOD',
+      source: input.source ?? 'SCADA_PLC',
+      ts: timestamp,
+    },
+    maxLen: input.maxLen ?? DEFAULT_SCADA_STREAM_MAX_LEN,
+    approx: true,
+  });
+}

@@ -163,11 +163,13 @@ export {
   type ConsumerRef,
   claimIdle,
   consumeStream,
+  DEFAULT_SCADA_STREAM_MAX_LEN,
   type DeadLetterInput,
   destroyConsumerGroup,
   ensureConsumerGroup,
   type GroupRef,
   moveToDeadLetter,
+  publishScadaTelemetryStream,
   type RangeOptions,
   type ReadGroupInput,
   type ReadNewOptions,
@@ -177,6 +179,7 @@ export {
   readPending,
   readStream,
   readStreamJson,
+  type ScadaTelemetryStreamInput,
   streamLength,
 } from './streams';
 export { shouldEarlyExpire, type XFetchWrapper } from './xfetch';

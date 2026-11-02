@@ -3,8 +3,10 @@ import {
   appendToStream,
   claimIdle,
   consumeStream,
+  DEFAULT_SCADA_STREAM_MAX_LEN,
   ensureConsumerGroup,
   moveToDeadLetter,
+  publishScadaTelemetryStream,
   readFromGroup,
   readNew,
   readPending,
@@ -95,6 +97,38 @@ describe('Redis Streams & Consumer Group Primitives', () => {
 
       const len = await streamLength('telemetry:stream');
       expect(len).toBe(42);
+    });
+
+    test('publishScadaTelemetryStream formats and appends capped telemetry point', async () => {
+      mockSendSafe.mockResolvedValueOnce('1700000000000-5');
+
+      const id = await publishScadaTelemetryStream({
+        tagId: 'PIT_VIPER_351_BIT_DEPTH',
+        value: 48.5,
+        quality: 'GOOD',
+        source: 'MODBUS_TCP',
+        timestamp: '2026-11-02T09:35:00.000Z',
+      });
+
+      expect(id).toBe('1700000000000-5');
+      expect(mockSendSafe).toHaveBeenCalledWith(expect.anything(), [
+        'XADD',
+        'telemetry:stream:PIT_VIPER_351_BIT_DEPTH',
+        'MAXLEN',
+        '~',
+        DEFAULT_SCADA_STREAM_MAX_LEN,
+        '*',
+        'tag',
+        'PIT_VIPER_351_BIT_DEPTH',
+        'value',
+        '48.5',
+        'quality',
+        'GOOD',
+        'source',
+        'MODBUS_TCP',
+        'ts',
+        '2026-11-02T09:35:00.000Z',
+      ]);
     });
   });
 
