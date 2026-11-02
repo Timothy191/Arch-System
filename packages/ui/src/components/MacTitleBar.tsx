@@ -26,11 +26,11 @@ export function MacTitleBar({ title, className, rightSlot }: MacTitleBarProps) {
         {/* Arch Logo with Circle like used on the Login Page */}
         <div
           data-testid="mac-titlebar-arch-logo"
-          className="gold-steel-border gold-steel-border-slim flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] shadow-2xs"
+          className="gold-steel-border gold-steel-border-slim flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--accent-blue)]/25 bg-transparent text-[var(--accent-blue)] shadow-2xs"
         >
           <Logo
             variant="gold"
-            className="h-6 w-6 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-xs"
+            className="h-7 w-7 shrink-0 scale-125 text-[var(--accent-blue)] drop-shadow-xs"
           />
         </div>
 
