@@ -207,7 +207,8 @@ export async function printCardForPersonnel(personnelId: string, templateId?: st
         const bridge = new RawSocketBridge({ host, port: 9100, timeout: 5000 });
         const zplPayload = Buffer.from(`^XA^FO50,50^BQN,2,10^FDQA,${qrCode}^FS^XZ`);
         await bridge.send(zplPayload);
-        cupsJobId = 9999; // Mock ID for raw socket success
+        // Raw socket transmission has no CUPS job ID; leave cupsJobId null so
+        // the print_jobs row stays 'queued' rather than recording a fake ID.
       } else {
         const result = await submitCupsPrintJob(printer.cups_name, `card-${personnelId}`);
         cupsJobId = result.cupsJobId;

@@ -46,7 +46,8 @@ export interface PerformanceBreakdown {
  * Analyze LCP and INP performance with detailed breakdown
  */
 export function analyzePerformance(metrics?: { lcp?: number; inp?: number }): PerformanceBreakdown {
-  // Mock data for analysis (replace with real metrics from WebVitalsReporter)
+  // Default example values when caller does not supply real metrics;
+  // pass live WebVitalsReporter data for production analysis.
   const lcpValue = metrics?.lcp ?? 3200; // Example: 3.2s LCP
   const inpValue = metrics?.inp ?? 350; // Example: 350ms INP
 
