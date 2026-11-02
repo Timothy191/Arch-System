@@ -68,7 +68,7 @@ export async function updateTag(tag: string): Promise<void> {
     if (typeof nextCache.updateTag === 'function') {
       nextCache.updateTag(tag);
     } else {
-      (nextRevalidateTag as any)(tag, 'max');
+      nextRevalidateTag(tag, cacheProfiles.max);
     }
   } catch {
     // Outside request context (e.g. standalone tests)
@@ -94,7 +94,7 @@ export async function updateTags(tags: string[]): Promise<void> {
       if (typeof nextCache.updateTag === 'function') {
         nextCache.updateTag(tag);
       } else {
-        (nextRevalidateTag as any)(tag, 'max');
+        nextRevalidateTag(tag, cacheProfiles.max);
       }
     } catch {
       // Outside request context
@@ -116,10 +116,53 @@ export async function updateTags(tags: string[]): Promise<void> {
  * @param profile The cache life profile ('max', 'hours', 'minutes', etc.)
  */
 export function refreshTag(tag: string, profile: CacheProfile = 'max'): void {
-  (nextRevalidateTag as any)(tag, profile);
+  const config = cacheProfiles[profile] ?? cacheProfiles.default;
+  nextRevalidateTag(tag, config);
 }
 
-// Backward-compatible alias
+/**
+ * Route Handler (`app/api/.../route.ts`) SWR cache revalidator.
+ * Triggers Next.js 16 stale-while-revalidate `revalidateTag(tag, profile)` and
+ * purges distributed L1/L2 Redis cache entries associated with the tag.
+ *
+ * @param tag The cache tag to revalidate
+ * @param profile The Next.js 16 cacheLife profile (defaults to 'max')
+ */
+export async function revalidateTagInRouteHandler(
+  tag: string,
+  profile: CacheProfile = 'max'
+): Promise<void> {
+  try {
+    refreshTag(tag, profile);
+  } catch {
+    // Outside Next.js request context
+  }
+
+  try {
+    await cacheInvalidateTags([tag]);
+  } catch {
+    // Gracefully handle Redis offline
+  }
+}
+
+/**
+ * Server Action (`'use server'`) dynamic data refresher.
+ * Calls Next.js 16 `refresh()` from `next/cache` to re-render uncached dynamic
+ * RSC slices on the active page in the same HTTP round-trip without invalidating
+ * surrounding cached static shells.
+ */
+export function refreshAction(): void {
+  try {
+    const nextCache = require('next/cache') as { refresh?: () => void };
+    if (typeof nextCache.refresh === 'function') {
+      nextCache.refresh();
+    }
+  } catch {
+    // Outside Server Action request context
+  }
+}
+
+// Backward-compatible aliases
 export const revalidateTagWithProfile = refreshTag;
 export const updateTagInAction = updateTag;
 

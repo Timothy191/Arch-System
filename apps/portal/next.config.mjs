@@ -101,6 +101,8 @@ const nextConfig = {
     '@repo/rate-limiter',
     '@repo/logger',
     '@repo/contract',
+    '@repo/errors',
+    '@repo/agents',
     '@repo/auth/ui',
     '@repo/auth/data-access',
     '@repo/auth/utils',
@@ -122,7 +124,8 @@ const nextConfig = {
     // pre-generating AVIF/WebP derivatives with sharp (already in the lockfile) at build time.
     unoptimized: true,
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 3600,
+    minimumCacheTTL: 14400,
+    qualities: [75],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -167,11 +170,12 @@ const nextConfig = {
     return config;
   },
   // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles (moved out of experimental)
+  // Kept in strict sync with apps/portal/lib/server-cache.ts cacheProfiles (the canonical SSoT).
   cacheLife: {
     telemetry: {
-      stale: 5,
+      stale: 10,
       revalidate: 10,
-      expire: 30,
+      expire: 60,
     },
     departments: {
       stale: 300,
@@ -181,7 +185,12 @@ const nextConfig = {
     reports: {
       stale: 60,
       revalidate: 300,
-      expire: 1800,
+      expire: 3600,
+    },
+    max: {
+      stale: 300,
+      revalidate: 3600,
+      expire: 86400,
     },
     hours: {
       stale: 60,
@@ -198,6 +207,11 @@ const nextConfig = {
       revalidate: 15,
       expire: 60,
     },
+    default: {
+      stale: 5,
+      revalidate: 15,
+      expire: 30,
+    },
   },
   logging: {
     fetches: {
@@ -207,6 +221,8 @@ const nextConfig = {
   },
   serverExternalPackages: ['@babel/core', '@babel/traverse', 'p-limit'],
   experimental: {
+    // AGENT-TRACE: Next.js 16 persistent Turbopack file-system cache for ~400% faster warm dev startups
+    turbopackFileSystemCacheForDev: true,
     // AGENT-TRACE: React 19 Taint APIs enabled to prevent sensitive database objects/tokens crossing RSC boundary
     taint: true,
     // AGENT-TRACE: Client Router Cache staleTimes under cacheComponents: true to prevent redundant RSC re-fetches on tab navigation

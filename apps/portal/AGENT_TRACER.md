@@ -1,3 +1,27 @@
+## 2026-11-02T21:31:00+02:00: Caching Consolidation — Correctness Fixes + Docs Alignment
+
+- **Phase 1 (Comprehension)**: Surveyed the full caching layer (`@repo/redis` L1/L2 + XFetch, Next.js Data Cache `'use cache'`/`cacheLife`, client TanStack Query + localStorage) and identified correctness defects: double Next.js invalidation in `revalidateRSC`, `refreshTag` passing a profile-name string to `revalidateTag`, `cacheLife` profile drift between `next.config.mjs` and `server-cache.ts`, `cacheGetOrSet` referenced in docs but absent from code, and stale `MAX_L1_TTL_SECONDS = 60` rule.
+- **Phase 2 (Evidence)**: Read `apps/portal/app/actions.ts`, `apps/portal/lib/server-cache.ts`, `apps/portal/next.config.mjs`, `packages/redis/src/cache.ts`, `packages/redis/src/index.ts`, `.agents/rules/redis-capabilities.md`, AGENTS.md.
+- **Phase 3 (Design)**:
+  - Replaced `updateTag(tag)` + `updateTagInAction(tag)` double call in `revalidateRSC` with a single `await updateTags(tags)` (Next.js Data Cache + Redis L1/L2 in one pass, properly awaited).
+  - Fixed `refreshTag(tag, profile)` to resolve `cacheProfiles[profile]` into a `{stale, revalidate, expire}` config object and pass it to `nextRevalidateTag`, removing the `as any` cast; same cleanup in `updateTag`/`updateTags` fallbacks.
+  - Aligned `next.config.mjs` `cacheLife` profiles with `server-cache.ts` `cacheProfiles` SSoT (telemetry expire 60, reports expire 3600, added `max` and `default`).
+  - Exported `cacheGetOrSet` as an alias of `cacheWrap` in `packages/redis/src/{cache,index}.ts` so docs/code agree.
+  - Updated `.agents/rules/redis-capabilities.md` `MAX_L1_TTL_SECONDS` from 60 to 300.
+- **Phase 4 (Criticism)**: `pnpm --filter portal type-check`, `pnpm --filter @repo/redis type-check`, `pnpm --filter @repo/redis test` (147/147), `pnpm --filter portal test -- cache-utils|query-cache|shift-sheet-cache|useRedisCache` (16/16), `pnpm lint` (clean), `node tools/audits/audit-caching.cjs` (0 violations), `pnpm policy:check` + `policy:security` (clean).
+- **Phase 5 (Contract)**: Modified `apps/portal/app/actions.ts`, `apps/portal/lib/server-cache.ts`, `apps/portal/next.config.mjs`, `packages/redis/src/cache.ts`, `packages/redis/src/index.ts`, `.agents/rules/redis-capabilities.md`.
+
+## 2026-11-02T21:27:00+02:00: Next.js 16 Frontend-as-Backend Cache APIs, Multi-Stage Pruned Dockerfile & Turbopack FS Cache
+
+- **Phase 1 (Comprehension)**: Complete Next.js 16 Frontend-as-Backend cache primitives (`updateTag`, `refreshAction`, `revalidateTagInRouteHandler`), proxy session helpers (`@repo/supabase/proxy`), persistent Turbopack file-system cache (`turbopackFileSystemCacheForDev: true`), Next.js 16 image cache defaults (`minimumCacheTTL: 14400`, `qualities: [75]`), and the 4-stage `turbo prune portal --docker` Dockerfile.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/lib/server-cache.ts`, `apps/portal/proxy.ts`, `apps/portal/server/proxy.ts`, `packages/supabase/src/proxy.ts`, `apps/portal/docker/Dockerfile`, `.dockerignore`, and `apps/portal/next.config.mjs`.
+- **Phase 3 (Design)**:
+  - Added `revalidateTagInRouteHandler(tag, profile)` (Next.js 16 two-argument `revalidateTag` + Redis L1/L2 `cacheInvalidateTags`) and `refreshAction()` (Next.js 16 `refresh()` from `next/cache` for uncached dynamic RSC slices) in `apps/portal/lib/server-cache.ts`, with unit tests in `apps/portal/lib/server-cache.test.ts`.
+  - Enabled `experimental.turbopackFileSystemCacheForDev: true`, `images.minimumCacheTTL: 14400` (4h), `images.qualities: [75]`, and added `@repo/errors` + `@repo/agents` to `transpilePackages` in `apps/portal/next.config.mjs`.
+  - Upgraded `apps/portal/docker/Dockerfile` to Turborepo v2 `turbo prune portal --docker`, BuildKit `/pnpm/store` + `/app/.turbo/cache` + `/app/apps/portal/.next/cache` mounts, and `gcr.io/distroless/nodejs24-debian12` with monorepo standalone asset paths (`CMD ["apps/portal/server.js"]`).
+- **Phase 4 (Criticism)**: Verified with `server-cache.test.ts`, `turbo prune portal --docker`, and the 27-gate `agent-verify.sh` suite.
+- **Phase 5 (Contract)**: Modified `apps/portal/lib/server-cache.ts`, `apps/portal/lib/server-cache.test.ts`, `apps/portal/next.config.mjs`, `apps/portal/package.json`, and `apps/portal/docker/Dockerfile`.
+
 ## 2026-11-02T21:11:00+02:00: Next.js 16 Rendering, Request Memoization, Streaming Skeletons & Package Import Optimization
 
 - **Phase 1 (Comprehension)**: Audit and enhance Next.js 16 rendering, multi-layer caching, streaming `<Suspense>` boundaries, and `optimizePackageImports` across `apps/portal`.

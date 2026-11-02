@@ -382,6 +382,13 @@ export async function cacheWrap<T>(
 }
 
 /**
+ * Alias for {@link cacheWrap}. Referenced as `cacheGetOrSet()` across
+ * AGENTS.md and agent documentation; kept as a stable export so docs and
+ * code never diverge.
+ */
+export { cacheWrap as cacheGetOrSet };
+
+/**
  * Delete a specific key from cache.
  * Also removes from memory cache if Redis unavailable.
  */

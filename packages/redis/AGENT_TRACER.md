@@ -123,6 +123,12 @@ normalised for both shapes.
 - **Summary**: Raised `MAX_L1_TTL_SECONDS` from `60` to `300` seconds in `src/registry.ts` and documented category-aware L1 TTL resolution in `l1TtlForKey` to reduce L2 round-trips for hot department and equipment entries.
 - **Verification**: `@repo/redis` 13/13 test suites (`144/144 PASS`), `pnpm agent:verify` (`27/27 PASS`).
 
+## [2026-11-02T21:31:00+02:00] Export `cacheGetOrSet` alias of `cacheWrap`
+
+- **Agent**: mavis
+- **Summary**: Added `export { cacheWrap as cacheGetOrSet }` in `src/cache.ts` and re-exported it from `src/index.ts` so `cacheGetOrSet()` references across AGENTS.md, `.agents/rules/redis-capabilities.md`, `docs/agents/testing.md`, `docs/agents/patterns.md`, and `codebase-maps-data.ts` resolve to a real export. No behavior change — `cacheGetOrSet` is a stable alias of `cacheWrap`.
+- **Verification**: `@repo/redis` type-check clean; `pnpm --filter @repo/redis test` (147/147 PASS); `pnpm lint` clean.
+
 ## [2026-10-29T13:56:00+02:00] Restructure `cacheWrap` Single-Flight Coalescing & Add `startL1Sweep` Periodic L1 Reclamation
 
 - **Agent**: Antigravity

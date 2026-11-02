@@ -32,6 +32,7 @@ export {
   cacheDeletePattern,
   cacheEvictL1ByPrefix,
   cacheGet,
+  cacheGetOrSet,
   cacheGetWithStats,
   cacheInvalidatePrefixes,
   cacheInvalidateTags,
