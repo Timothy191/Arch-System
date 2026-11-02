@@ -352,6 +352,13 @@ export function ReportsDashboardClient({
 
       {activeTab === 'shift' && (
         <ReportsShiftViewTab
+          departmentId={departmentId}
+          departmentName={departmentName}
+          todayStr={todayStr}
+          currentShift={currentShift}
+          fromDateStr={fromDateStr}
+          toDateStr={toDateStr}
+          shiftFilter={shiftFilter}
           shiftComparison={shiftComparison}
           siteBreakdown={siteBreakdown}
           filteredShiftRows={filteredShiftRows}

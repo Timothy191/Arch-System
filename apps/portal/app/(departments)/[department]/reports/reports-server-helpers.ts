@@ -569,6 +569,13 @@ export function buildShiftAndMachineReports(params: {
       loadsCount: mLoads,
       bladePasses: passes,
       status: op.end_smu != null ? 'completed' : 'active',
+      material:
+        (excSummary ? Array.from(excSummary.materials)[0] : undefined) ||
+        (dumperSummary ? Array.from(dumperSummary.materials)[0] : undefined) ||
+        undefined,
+      blockMined: excSummary ? Array.from(excSummary.blockCodes)[0] : undefined,
+      binFactor: machineObj?.bin_factor ? Number(machineObj.bin_factor) : undefined,
+      assignedExcavatorName: dumperSummary ? Array.from(dumperSummary.excavators)[0] : undefined,
     });
   }
 
@@ -598,6 +605,8 @@ export function buildShiftAndMachineReports(params: {
       loadsCount: exc.totalLoads,
       bladePasses: 0,
       status: 'completed',
+      material: Array.from(exc.materials)[0],
+      blockMined: Array.from(exc.blockCodes)[0],
     });
   }
 
@@ -661,6 +670,8 @@ export function buildShiftAndMachineReports(params: {
       loadsCount: dm.totalLoads,
       bladePasses: 0,
       status: 'completed',
+      material: Array.from(dm.materials)[0],
+      assignedExcavatorName: Array.from(dm.excavators)[0],
     });
   }
 

@@ -1,3 +1,15 @@
+## 2026-11-02T06:55:00+02:00: Live Paginated A4 PDF Page Preview for Shift Report View
+
+- **Phase 1 (Comprehension)**: Replace raw HTML data tables in the Shift Report view with an exact live, paginated PDF Page Preview (A4 portrait 210mm x 297mm sheets rendered on screen), matching the final exported vector PDF 1:1.
+- **Phase 2 (Evidence)**: Users required true A4 pagination, sticky preview toolbar controls (Download Vector PDF, Print Direct `window.print()`, Zoom Fit/100%/75%, Single Page vs All Pages view, Date filtering), Arch-Systems corporate branding on Page 1 with combined executive summary and 3 minimalist static SVG charts (Site Volume, Material Distribution Split, Fleet Utilization), followed by Page 2+ Site-by-Site breakdowns starting on fresh pages (`break-before: page`), Excavator Activity blocks (`break-inside: avoid`), assigned hauling machines table (`Machine ID | Bin Factor | Total SMR Worked | Operator | Loads | Total | Delays`), zero operator math auto-calculated totals, and 4-column categorized delays grid (Production, Engineering, Weather/External, Standard Operational Allowances).
+- **Phase 3 (Design)**:
+  - Created `shift-report-model.ts` providing material-driven bin factor resolver (`resolveMaterialConfig`), row-level calculations (`totalSmrWorked = closingSmr - openingSmr`, `rowTotal = loads * binFactor` in BCM or Tonnes), auto-aggregated excavator totals, pre-populated standard operational allowances (Refueling: 30m, Pre-Start: 15m, Greasing: 30m = 75m), and dynamic Page 1 Executive Summary aggregation matching sum of site blocks.
+  - Implemented `ShiftReportA4Preview.tsx` with strict A4 canvas container (`794px x 1123px`, shadows, `Page X of Y` footers, light-mode background `#ffffff`), sticky toolbar, crisp non-animated SVG charts, and structured excavator blocks.
+  - Updated `ReportsShiftViewTab.tsx` replacing raw data tables with `ShiftReportA4Preview`.
+  - Updated `reports-types.ts` and `reports-server-helpers.ts` to enrich `MachineOperationLogItem` with `material`, `blockMined`, `binFactor`, `assignedExcavatorName`.
+- **Phase 4 (Criticism)**: Unit tested with `ShiftReportA4Preview.test.tsx` (7 tests covering material bin factors, row SMR math, auto-aggregations, delay formatting, Page 1 dynamic sync, DOM toolbar controls, print triggering) and verified all 27 gates in `pnpm agent:verify` (100% PASS).
+- **Phase 5 (Contract)**: Created `ShiftReportA4Preview.tsx`, `shift-report-model.ts`, `ShiftReportA4Preview.test.tsx`; modified `ReportsShiftViewTab.tsx`, `ReportsDashboardClient.tsx`, `reports-types.ts`, `reports-server-helpers.ts`.
+
 ## 2026-11-02T06:30:00+02:00: Side-by-Side Split-Screen Workspaces for Google Docs & Google Calendar
 
 - **Phase 1 (Comprehension)**: When users interact with Documents or Schedule (from Mac System Menu, MenuBar, or department tool panels), open a docked split-screen tab (Portal on the left, interacted Google Workspace on the right) so operators can work on both without navigating away.

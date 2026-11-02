@@ -9,27 +9,41 @@ import type {
   ShiftReportRow,
   SiteBreakdownItem,
 } from './reports-types';
+import { ShiftReportA4Preview } from './ShiftReportA4Preview';
 
-interface ReportsShiftViewTabProps {
-  shiftComparison: ShiftComparisonMetrics;
-  siteBreakdown: SiteBreakdownItem[];
-  filteredShiftRows: ShiftReportRow[];
-  filteredMachineOps: MachineOperationLogItem[];
-  filteredEngineeringLogs: EngineeringLogItem[];
+export interface ReportsShiftViewTabProps {
+  readonly shiftComparison: ShiftComparisonMetrics;
+  readonly siteBreakdown: readonly SiteBreakdownItem[];
+  readonly filteredShiftRows: readonly ShiftReportRow[];
+  readonly filteredMachineOps: readonly MachineOperationLogItem[];
+  readonly filteredEngineeringLogs: readonly EngineeringLogItem[];
+  readonly departmentId?: string;
+  readonly departmentName?: string;
+  readonly todayStr?: string;
+  readonly currentShift?: 'day' | 'night';
+  readonly fromDateStr?: string;
+  readonly toDateStr?: string;
+  readonly shiftFilter?: 'all' | 'day' | 'night';
 }
 
 export function ReportsShiftViewTab({
   shiftComparison,
   siteBreakdown,
-  filteredShiftRows,
   filteredMachineOps,
   filteredEngineeringLogs,
+  departmentId = 'control-room',
+  departmentName = 'Control Room',
+  todayStr = new Date().toISOString().slice(0, 10),
+  currentShift = 'day',
+  fromDateStr = todayStr,
+  toDateStr = todayStr,
+  shiftFilter = 'all',
 }: ReportsShiftViewTabProps) {
   return (
-    <div className="space-y-6">
-      {/* Visual Indicators Row: Day vs Night Shift Split & Site Performance */}
+    <div className="space-y-6" data-testid="reports-shift-view-tab">
+      {/* Visual Shift Split Cards */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Day vs Night Shift Visual Indicator Card */}
+        {/* Day vs Night Performance Card */}
         <GlassCard className="space-y-4 p-5">
           <div className="flex items-center justify-between">
             <div>
@@ -37,7 +51,7 @@ export function ReportsShiftViewTab({
                 Shift Performance Split (Day vs Night)
               </h3>
               <p className="text-[var(--text-muted)] text-xs">
-                Visual comparison of volume moved, haul loads, and operating hours by shift
+                Comparison of volume moved, haul loads, and operating hours by shift
               </p>
             </div>
             <span className="font-mono font-semibold text-[var(--accent-blue)] text-xs">
@@ -98,7 +112,7 @@ export function ReportsShiftViewTab({
           </div>
         </GlassCard>
 
-        {/* Site Production Visual Indicators Card */}
+        {/* Site Production Indicators Card */}
         <GlassCard className="space-y-4 p-5">
           <div className="flex items-center justify-between">
             <div>
@@ -106,7 +120,7 @@ export function ReportsShiftViewTab({
                 Site Volume &amp; Productivity Indicators
               </h3>
               <p className="text-[var(--text-muted)] text-xs">
-                Live production distribution across active pit &amp; stockpile sites
+                Active pit &amp; stockpile site distribution
               </p>
             </div>
             <span className="text-[var(--text-muted)] text-xs">
@@ -144,253 +158,19 @@ export function ReportsShiftViewTab({
         </GlassCard>
       </div>
 
-      {/* Shift Production Logs Table */}
-      <GlassCard className="overflow-hidden p-0">
-        <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
-          <div>
-            <h3 className="font-semibold text-[var(--text-heading)] text-base">
-              Shift Production &amp; Roll-over Logs
-            </h3>
-            <p className="text-[var(--text-muted)] text-xs">
-              Per-shift breakdown of operating hours, haul loads, excavator BCM, Dozer roll-over
-              (Hours &times; 250), and delays
-            </p>
-          </div>
-          <span className="font-mono text-[var(--text-muted)] text-xs">
-            {filteredShiftRows.length} shift record{filteredShiftRows.length === 1 ? '' : 's'}
-          </span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Date
-                </th>
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Shift
-                </th>
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Site
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Hours
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Loads
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Haul BCM
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Roll-over BCM
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Total BCM
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Delay (min)
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
-              {filteredShiftRows.map((row) => (
-                <tr key={row.id} className="transition-colors hover:bg-[var(--bg-tertiary)]/60">
-                  <td className="px-5 py-3.5 font-mono text-[var(--text-heading)] text-sm">
-                    {row.date}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium text-xs ${
-                        row.shift === 'day'
-                          ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
-                          : 'bg-indigo-500/10 text-indigo-500'
-                      }`}
-                    >
-                      {row.shift === 'day' ? (
-                        <Sun className="h-3 w-3" />
-                      ) : (
-                        <Moon className="h-3 w-3" />
-                      )}
-                      {row.shift.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-sm">
-                    {row.site && row.site !== '—' ? (
-                      <span className="inline-flex rounded border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium text-[var(--accent-blue)] text-xs">
-                        {row.site}
-                      </span>
-                    ) : (
-                      <span className="text-[var(--text-muted)] text-xs">All Sites</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-mono text-[var(--text-heading)] text-sm">
-                    {row.hours.toFixed(1)}h
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
-                    {row.loads.toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {Number(row.haulBcm.toFixed(1)).toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-mono text-[var(--accent-blue)] text-sm">
-                    {Number(row.dozerRolloverBcm.toFixed(1)).toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-mono font-semibold text-accent-green text-sm">
-                    {Number(row.totalBcm.toFixed(1)).toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {row.delayMin}
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
-                        row.delayMin > 120
-                          ? 'bg-accent-red/10 text-accent-red'
-                          : 'bg-accent-green/10 text-accent-green'
-                      }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          row.delayMin > 120 ? 'bg-accent-red' : 'bg-accent-green'
-                        }`}
-                      />
-                      {row.delayMin > 120 ? 'High Delay' : 'Optimal'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredShiftRows.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={10}
-                    className="px-6 py-10 text-center text-[var(--text-muted)] text-sm"
-                  >
-                    No shift production logs match the selected filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
+      {/* Live Paginated PDF Page Preview (Replacing Raw Tables) */}
+      <ShiftReportA4Preview
+        departmentId={departmentId}
+        departmentName={departmentName}
+        todayStr={todayStr}
+        currentShift={currentShift}
+        fromDateStr={fromDateStr}
+        toDateStr={toDateStr}
+        shiftFilter={shiftFilter}
+        filteredMachineOps={filteredMachineOps}
+      />
 
-      {/* Machine Operations & SMR Log Table */}
-      <GlassCard className="overflow-hidden p-0">
-        <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">
-          <div>
-            <h3 className="font-semibold text-[var(--text-heading)] text-base">
-              Machine Operations &amp; SMR Shift Log
-            </h3>
-            <p className="text-[var(--text-muted)] text-xs">
-              Individual machine SMR readings, operator assignments, and calculated output
-            </p>
-          </div>
-          <span className="font-mono text-[var(--text-muted)] text-xs">
-            {filteredMachineOps.length} operation{filteredMachineOps.length === 1 ? '' : 's'}
-          </span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)]/60">
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Date &amp; Shift
-                </th>
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Machine
-                </th>
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Operator
-                </th>
-                <th className="px-5 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Site
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Start SMR
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Stop SMR
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Hours Worked
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Volume / Roll-over
-                </th>
-                <th className="px-5 py-3 text-right font-semibold text-[var(--text-muted)] text-xs uppercase">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
-              {filteredMachineOps.slice(0, 50).map((op) => (
-                <tr key={op.id} className="transition-colors hover:bg-[var(--bg-tertiary)]/60">
-                  <td className="px-5 py-3 font-mono text-[var(--text-heading)] text-xs">
-                    {op.date} · <span className="uppercase">{op.shift}</span>
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-[var(--text-heading)] text-sm">
-                        {op.machineName}
-                      </span>
-                      <span className="rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)] text-xs">
-                        {op.machineType}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-[var(--text-secondary)] text-sm">
-                    {op.operatorName}
-                  </td>
-                  <td className="px-5 py-3 text-[var(--text-secondary)] text-sm">{op.siteName}</td>
-                  <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {op.startSmu != null ? op.startSmu.toFixed(1) : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-right font-mono text-[var(--text-secondary)] text-sm">
-                    {op.endSmu != null ? op.endSmu.toFixed(1) : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-right font-medium font-mono text-accent-green text-sm">
-                    {op.hoursWorked.toFixed(2)}h
-                  </td>
-                  <td className="px-5 py-3 text-right font-medium font-mono text-[var(--accent-blue)] text-sm">
-                    {op.isDozer
-                      ? `${Number(op.bcmMoved.toFixed(1)).toLocaleString()} BCM (Roll-over)`
-                      : op.bcmMoved > 0
-                        ? `${Number(op.bcmMoved.toFixed(1)).toLocaleString()} BCM`
-                        : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
-                        op.status === 'completed'
-                          ? 'bg-accent-green/10 text-accent-green'
-                          : 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]'
-                      }`}
-                    >
-                      {op.status === 'completed' ? 'Completed' : 'In Progress'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredMachineOps.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-6 py-8 text-center text-[var(--text-muted)] text-sm"
-                  >
-                    No machine operation logs found for the selected filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
-
-      {/* Engineering Breakdowns & Activity Logs */}
+      {/* Engineering Breakdowns & Department Activity Logs */}
       {filteredEngineeringLogs.length > 0 && (
         <GlassCard className="overflow-hidden p-0">
           <div className="flex items-center justify-between border-[var(--border-default)] border-b px-6 py-4">

@@ -23,6 +23,11 @@ export interface MachineOperationLogItem {
   loadsCount?: number;
   bladePasses?: number;
   status: 'completed' | 'active';
+  material?: string;
+  blockMined?: string;
+  binFactor?: number;
+  assignedExcavatorName?: string;
+  delayReason?: string;
 }
 
 export interface PdfSiteGroup {
