@@ -1,3 +1,31 @@
+## 2026-11-02T08:23:00+02:00: Control Room Dashboard Design Feedback, Liquid-Glass Sub-Tabs & Autonomous Artifact Auto-Approval Invariant
+
+- **Phase 1 (Comprehension)**: Implement design feedback on `/control-room`:
+  1. Remove redundant `<time>` string next to Quick Navigation in Control Room Dashboard header.
+  2. Introduce prominent `liquid-glass-light gold-steel-border gold-steel-border-slim` panel effect on active sub-tabs (`SCADA Dashboard` and `Shift Operations`).
+  3. Remove uppercase `SAST` span from the System Clock button pill in the navigation bar.
+  4. Move Shift Plan Index under the "Shift Cumulative Trajectory vs Admin Target (100%)" graph, expanding the trajectory curve to full width and displaying rich readable target pace metrics.
+  5. Elevate ScadaPanel KPI cards (Active Excavators, Registered Fleet, Loaded Loads, Loaded Volume) with frosted glass panel effects and distinct semantic contrast.
+  6. Codify the user rule: "All artifacts (/artifact) are to be autonomously approved always unless the user explicitly states otherwise."
+- **Phase 2 (Evidence)**:
+  - Header had redundant date/time string duplicate of the global clock pill.
+  - Active sub-tab had basic flat styling lacking physical glass depth.
+  - System Clock button displayed redundant "SAST" text taking up header space.
+  - Shift Plan Index was squeezed into a 1-column cell next to a 2-column graph, causing narrow rendering of the plan index card.
+  - ScadaPanel KPI cards had low-contrast faint borders and washed out backgrounds.
+- **Phase 3 (Design)**:
+  - Created reusable `ControlRoomSubtabs.tsx` component consolidating sub-tab styling and avoiding duplicate Tailwind utility chains.
+  - Removed `<time>` element from `control-room/page.tsx` and matching date text from `[department]/page.tsx`.
+  - Removed `SAST` span from `SystemClock.tsx`.
+  - Restructured `AlertPanel.tsx`: Full-width 24px-height trajectory hero graph on top, with full-width responsive Plan Index row underneath.
+  - Redesigned `ScadaPanel.tsx` KPI strip with `liquid-glass-light` and 4 distinct semantic color styles.
+  - Added invariant to `AGENTS.md` and `.agents/rules/execution-guardrails.md`.
+- **Phase 4 (Criticism)**:
+  - Verified targeted tests: 11 suites, 76/76 PASS.
+  - Verified `pnpm audit:tailwind` (zero new chains, compliant with baseline).
+  - Verified full 27-gate suite: `pnpm agent:verify` (100% PASS).
+- **Phase 5 (Contract)**: Modified `control-room/page.tsx`, `[department]/page.tsx`, `ShiftCompilationClient.tsx`, `SystemClock.tsx`, `AlertPanel.tsx`, `ScadaPanel.tsx`, `AGENTS.md`, `.agents/rules/execution-guardrails.md`, `AGENT_TRACER.md`, and added `ControlRoomSubtabs.tsx`.
+
 ## 2026-11-02T07:55:00+02:00: Discrete A4 Paginated Preview Sheets & Toolbar Navigation for Official Shift Reports
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports` (`div.space-y-8.p-6` in `.print-document` measuring 970x22109 px) by replacing the continuous scrolling web container with discrete A4 portrait preview sheets (`794px × 1123px`), sticky toolbar with page navigation and zoom controls, and aligning test assertions.

@@ -26,13 +26,13 @@ Arch-System/
 
 ### Layering rules (machine-enforced via `tools/repo/policy-compiler.cjs`)
 
-|Source|Forbidden target|Why|
-|---|---|---|
-|`apps/*`|`packages/database`|Route through `@repo/supabase` instead|
-|`packages/ui`|`packages/database`, `packages/supabase`|UI is pure presentation; data lives in `libs/features/*/data-access`|
-|`packages/theme`|`packages/ui`|Theme is consumed by UI, never the reverse|
-|`packages/*`, `tools/*`|`apps/*`|No dependency inversion|
-|`tools/*`|`packages/supabase`|Tools are build-time, not runtime|
+| Source                  | Forbidden target                         | Why                                                                  |
+| ----------------------- | ---------------------------------------- | -------------------------------------------------------------------- |
+| `apps/*`                | `packages/database`                      | Route through `@repo/supabase` instead                               |
+| `packages/ui`           | `packages/database`, `packages/supabase` | UI is pure presentation; data lives in `libs/features/*/data-access` |
+| `packages/theme`        | `packages/ui`                            | Theme is consumed by UI, never the reverse                           |
+| `packages/*`, `tools/*` | `apps/*`                                 | No dependency inversion                                              |
+| `tools/*`               | `packages/supabase`                      | Tools are build-time, not runtime                                    |
 
 Additional invariants: zero circular deps (`pnpm cycles`), zero dead code (`pnpm knip`), `server-only` guard on server packages, env validated via Zod/t3-env.
 
@@ -53,36 +53,36 @@ browser → proxy.ts (Next 16, CSP + x-nonce)
 
 ### Key shared modules
 
-|Module|Role|
-|---|---|
-|`@repo/contract`|Canonical Zod schemas + derived TS types — single source of truth for all input validation across frontend/backend |
-|`@repo/supabase`|Typed DB access (Kysely + Supabase SSR), auth, middleware/proxy clients — the data access boundary |
-|`@repo/database`|SQL migration SSoT + generated types |
-|`@repo/redis`|Multi-tier caching (L1/L2), sessions with privilege revocation, distributed locks, streams, vector search, analytics |
-|`@repo/errors`|`AppError` hierarchy (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `RateLimitError`, `DatabaseError`, etc.) |
-|`@repo/theme`|OKLCH design tokens, Style Dictionary codegen, Tailwind preset, CSS vars |
-|`@repo/ui`|Shared Radix/shadcn primitives — `GlassCard`, `DepartmentLayout`, `KPI`, `Clock`, `PageHeader`, data-table, telemetry-chart |
-|`@repo/logger`|Structured Pino logging (server/browser/next) |
-|`@repo/agents`|AI coordination engine (coordinator, fleet-runner, specialists, swarm, memory, token-budget) |
-|`libs/shared/hooks`|Client React hooks: `useSupabaseRealtime`, `useRedisCache`, `useOfflineQueue`, `useDebounce`, `useWorkflowStatus` |
-|`libs/features/departments/ui`|Domain UI for control-room & engineering (shift closeout, fleet KPI, breakdowns) |
+| Module                         | Role                                                                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@repo/contract`               | Canonical Zod schemas + derived TS types — single source of truth for all input validation across frontend/backend                                 |
+| `@repo/supabase`               | Typed DB access (Kysely + Supabase SSR), auth, middleware/proxy clients — the data access boundary                                                 |
+| `@repo/database`               | SQL migration SSoT + generated types                                                                                                               |
+| `@repo/redis`                  | Multi-tier caching (L1/L2), sessions with privilege revocation, distributed locks, streams, vector search, analytics                               |
+| `@repo/errors`                 | `AppError` hierarchy (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `RateLimitError`, `DatabaseError`, etc.) |
+| `@repo/theme`                  | OKLCH design tokens, Style Dictionary codegen, Tailwind preset, CSS vars                                                                           |
+| `@repo/ui`                     | Shared Radix/shadcn primitives — `GlassCard`, `DepartmentLayout`, `KPI`, `Clock`, `PageHeader`, data-table, telemetry-chart                        |
+| `@repo/logger`                 | Structured Pino logging (server/browser/next)                                                                                                      |
+| `@repo/agents`                 | AI coordination engine (coordinator, fleet-runner, specialists, swarm, memory, token-budget)                                                       |
+| `libs/shared/hooks`            | Client React hooks: `useSupabaseRealtime`, `useRedisCache`, `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`                                  |
+| `libs/features/departments/ui` | Domain UI for control-room & engineering (shift closeout, fleet KPI, breakdowns)                                                                   |
 
 ---
 
 ## Key Directories
 
-|Path|Purpose|
-|---|---|
-|`apps/portal/`|Next.js 16 app: `app/` routes, `components/`, `server/` (proxy), `lib/` (`server-cache.ts`), `hooks/`, `actions/`, `features/` |
-|`apps/portal/app/`|App Router routes: `(auth)`, `(departments)/[department]`, `admin`, `hub`, `overview`, `docs`, `api/` (integrations, cron, telemetry, health, export) |
-|`packages/`|Shared `@repo/*` libraries; SQL migrations in `packages/database/migrations/` (`packages/supabase/migrations` symlinks to it) |
-|`libs/features/`|Domain features: `auth`, `departments`, `hub` (each: `ui/`, `data-access/`, `utils/`) |
-|`libs/shared/`|Cross-cutting: `hooks/`, `data-access/`, `utils/` |
-|`tools/`|Build-time: `repo/` (policy compiler, codebase maps), `audits/` (30+ static audit scripts), `scripts/` (30+ helpers), `zero-drift-watchdog/`, `swarms-orchestrator/` |
-|`scripts/`|Dev/deploy/seed utilities (`dev.sh`, `deploy.sh`, `seeds/`) |
-|`e2e/`|Playwright specs (40+): control-room, visual, load, accessibility |
-|`docs/`|Hand-authored docs: `agent-cookbooks/`, `control-room/`, `operations/`, `plans/`, `agents/`, `wiki/` |
-|`documentation/`|Generated audit reports; `codebase-maps/` holds auto-generated dependency maps |
+| Path               | Purpose                                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/portal/`     | Next.js 16 app: `app/` routes, `components/`, `server/` (proxy), `lib/` (`server-cache.ts`), `hooks/`, `actions/`, `features/`                                       |
+| `apps/portal/app/` | App Router routes: `(auth)`, `(departments)/[department]`, `admin`, `hub`, `overview`, `docs`, `api/` (integrations, cron, telemetry, health, export)                |
+| `packages/`        | Shared `@repo/*` libraries; SQL migrations in `packages/database/migrations/` (`packages/supabase/migrations` symlinks to it)                                        |
+| `libs/features/`   | Domain features: `auth`, `departments`, `hub` (each: `ui/`, `data-access/`, `utils/`)                                                                                |
+| `libs/shared/`     | Cross-cutting: `hooks/`, `data-access/`, `utils/`                                                                                                                    |
+| `tools/`           | Build-time: `repo/` (policy compiler, codebase maps), `audits/` (30+ static audit scripts), `scripts/` (30+ helpers), `zero-drift-watchdog/`, `swarms-orchestrator/` |
+| `scripts/`         | Dev/deploy/seed utilities (`dev.sh`, `deploy.sh`, `seeds/`)                                                                                                          |
+| `e2e/`             | Playwright specs (40+): control-room, visual, load, accessibility                                                                                                    |
+| `docs/`            | Hand-authored docs: `agent-cookbooks/`, `control-room/`, `operations/`, `plans/`, `agents/`, `wiki/`                                                                 |
+| `documentation/`   | Generated audit reports; `codebase-maps/` holds auto-generated dependency maps                                                                                       |
 
 ---
 
@@ -233,23 +233,23 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Important Files
 
-|File|Role|
-|---|---|
-|`AGENTS.md` / `Arch-System/AGENTS.md`|Root federated guide / canonical Arch-System guide (`CLAUDE.md` symlinks to each) |
-|`apps/portal/proxy.ts` → `server/proxy.ts`|Next 16 request proxy (CSP + nonce) → auth refresh, RBAC, `DEPARTMENT_ROUTES` / `RESTRICTED_ROUTES` |
-|`apps/portal/app/layout.tsx`|Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`) |
-|`apps/portal/lib/server-cache.ts`|Server cache profiles, scoped tags, dual-tier Next + Redis L1/L2 invalidation |
-|`apps/portal/next.config.mjs`|`cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`, React 19 taint |
-|`apps/portal/setupTests.ts`|Global Jest mocks (`next/cache`, `@repo/redis`, `packages/redis`, `@repo/agents`, browser globals) |
-|`packages/contract/src/index.ts`|Canonical Zod schema + type exports (`src/schemas/*.schema.ts`) |
-|`packages/database/migrations/`|Canonical SQL migrations (`NNN_description.sql`) |
-|`packages/errors/src/index.ts`|`AppError` hierarchy and type guards |
-|`packages/theme/src/tokens/index.ts`|OKLCH design-token SSoT |
-|`packages/ui/src/components/GlassCard.tsx`|Primary light-mode glass surface component |
-|`packages/typescript-config/base.json`|Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`) |
-|`tools/repo/policy-compiler.cjs`|Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`) |
-|`tools/scripts/agent-verify.sh`|15-step completion gate (`pnpm agent:verify`) |
-|`e2e/playwright.config.ts`|Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`) |
+| File                                       | Role                                                                                                |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` / `Arch-System/AGENTS.md`      | Root federated guide / canonical Arch-System guide (`CLAUDE.md` symlinks to each)                   |
+| `apps/portal/proxy.ts` → `server/proxy.ts` | Next 16 request proxy (CSP + nonce) → auth refresh, RBAC, `DEPARTMENT_ROUTES` / `RESTRICTED_ROUTES` |
+| `apps/portal/app/layout.tsx`               | Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`)  |
+| `apps/portal/lib/server-cache.ts`          | Server cache profiles, scoped tags, dual-tier Next + Redis L1/L2 invalidation                       |
+| `apps/portal/next.config.mjs`              | `cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`, React 19 taint     |
+| `apps/portal/setupTests.ts`                | Global Jest mocks (`next/cache`, `@repo/redis`, `packages/redis`, `@repo/agents`, browser globals)  |
+| `packages/contract/src/index.ts`           | Canonical Zod schema + type exports (`src/schemas/*.schema.ts`)                                     |
+| `packages/database/migrations/`            | Canonical SQL migrations (`NNN_description.sql`)                                                    |
+| `packages/errors/src/index.ts`             | `AppError` hierarchy and type guards                                                                |
+| `packages/theme/src/tokens/index.ts`       | OKLCH design-token SSoT                                                                             |
+| `packages/ui/src/components/GlassCard.tsx` | Primary light-mode glass surface component                                                          |
+| `packages/typescript-config/base.json`     | Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`)                                   |
+| `tools/repo/policy-compiler.cjs`           | Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`)                                  |
+| `tools/scripts/agent-verify.sh`            | 15-step completion gate (`pnpm agent:verify`)                                                       |
+| `e2e/playwright.config.ts`                 | Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`)                       |
 
 ---
 
@@ -304,6 +304,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 All agents operating in this repository MUST follow `.agents/rules/real-world-engineering.md` in addition to this guide. Key non-negotiables:
 
+- **Autonomous artifact auto-approval.** All artifacts (`/artifact`) are to be autonomously approved always unless the user explicitly states otherwise. Never pause or block waiting for manual artifact confirmation; proceed autonomously with execution and verification.
 - **No guessing / no speculation.** Every claim about errors, state, or behavior must be backed by executed commands and quoted output. If evidence is missing, run the verification before claiming.
 - **Grounded reasoning.** Read actual files, check git status, verify signatures via tools before reasoning. Label unverified reasoning as `HYPOTHETICAL:` and follow up with empirical verification.
 - **Prompt the user when unsure.** If a requirement, scope, or expected outcome is ambiguous, ask the user (via `AskUserQuestion`) instead of assuming. Do not invent requirements, defaults, or acceptance criteria.

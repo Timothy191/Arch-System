@@ -429,10 +429,105 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
 
       {/* Main Visual Content */}
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        {/* Top Row: Radial Gauge + Golden Hero Trajectory Graph */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {/* Radial Attainment Visual */}
-          <div className="gold-steel-border gold-steel-border-slim flex items-center gap-3 rounded-xl border border-accent-amber/40 bg-white/85 p-3">
+        {/* Golden Hero Trajectory Graph (Full Width for Maximum Chart Detail & Clarity) */}
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim relative flex flex-col justify-between overflow-hidden rounded-xl border border-accent-amber/40 bg-white/90 p-3.5 shadow-diffusion-sm backdrop-blur-md">
+          <div className="mb-2 flex items-center justify-between text-xs">
+            <span className="font-bold text-[var(--text-heading)] uppercase tracking-wider">
+              {horizon} Cumulative Trajectory vs Admin Target (100%)
+            </span>
+            <span className="font-bold font-mono text-[var(--accent-blue)]">
+              Target: {activeTarget.loadsTarget.toLocaleString()} loads
+            </span>
+          </div>
+
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="h-24 w-full overflow-visible"
+            role="img"
+            aria-label={`${horizon} operational target trajectory graph`}
+          >
+            <defs>
+              <linearGradient id="cr-target-gold-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#d4af37" stopOpacity="0.34" />
+                <stop offset="100%" stopColor="#d4af37" stopOpacity="0.03" />
+              </linearGradient>
+            </defs>
+
+            {/* 100% Admin Target Benchmark Line */}
+            <line
+              x1={padX}
+              y1={targetLineY}
+              x2={width - padX}
+              y2={targetLineY}
+              stroke="#10b981"
+              strokeDasharray="4 3"
+              strokeWidth="1.2"
+            />
+
+            {coords.map((c, i) => {
+              const barHeight = Math.max(height - padY - c.y, 4);
+              return (
+                <rect
+                  key={i}
+                  x={c.x - 5}
+                  y={c.y}
+                  width={10}
+                  height={barHeight}
+                  rx={2}
+                  fill="#d4af37"
+                  fillOpacity={i === coords.length - 1 ? 0.25 : 0.1}
+                />
+              );
+            })}
+
+            <path d={areaPath} fill="url(#cr-target-gold-grad)" />
+            <path
+              d={linePath}
+              fill="none"
+              stroke="#d4af37"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {coords.map((c, i) => {
+              const isLast = i === coords.length - 1;
+              const iconSize = isLast ? 10 : 7;
+              return (
+                <svg
+                  key={i}
+                  x={c.x - iconSize / 2}
+                  y={c.y - iconSize / 2}
+                  width={iconSize}
+                  height={iconSize}
+                  viewBox="22.75 16.625 166.16 166.19"
+                  aria-hidden="true"
+                >
+                  <path
+                    d={ARCH_LOGO_PATH}
+                    fill="#d4af37"
+                    stroke="#ffffff"
+                    strokeWidth="6"
+                    paintOrder="stroke"
+                    fillRule="evenodd"
+                  />
+                </svg>
+              );
+            })}
+          </svg>
+
+          <div className="mt-2 flex items-center justify-between border-slate-200/80 border-t pt-1.5 font-mono text-[10px] text-[var(--text-secondary)]">
+            <span className="font-semibold">START OF {horizon.toUpperCase()}</span>
+            <span className="font-semibold text-accent-green">--- 100% ADMIN TARGET</span>
+            <span className="font-bold text-[var(--text-heading)]">
+              ACTUAL {overallAttainment}%
+            </span>
+          </div>
+        </div>
+
+        {/* Shift Plan Index (Moved Under Trajectory, Fully Visible & Detailed Readable) */}
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col gap-3 rounded-xl border border-accent-amber/40 bg-white/90 p-4 shadow-diffusion-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
             <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
               <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64" aria-hidden="true">
                 <circle
@@ -455,116 +550,37 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
                   strokeDashoffset={dashOffset}
                 />
               </svg>
-              <span className="absolute font-bold font-mono text-[var(--text-heading)] text-xs">
+              <span className="absolute font-bold font-mono text-[var(--text-heading)] text-sm">
                 {overallAttainment}%
               </span>
             </div>
             <div className="min-w-0">
-              <span className="block font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
+              <span className="block font-bold text-[var(--text-secondary)] text-xs uppercase tracking-wider">
                 {horizon.toUpperCase()} PLAN INDEX
               </span>
-              <span className="block truncate font-bold text-[var(--text-heading)] text-sm">
+              <span className="block truncate font-bold text-[var(--text-heading)] text-base">
                 {overallAttainment >= 85 ? 'On Target Pace' : 'Ramp-Up Active'}
               </span>
-              <span className="mt-0.5 inline-flex items-center gap-1 font-mono font-semibold text-[10px] text-accent-green">
-                <TrendingUp className="h-3 w-3" />
-                Admin Benchmark
+              <span className="mt-0.5 inline-flex items-center gap-1 font-mono font-semibold text-accent-green text-xs">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Admin Benchmark ({overallAttainment}% achieved)
               </span>
             </div>
           </div>
 
-          {/* Golden Trajectory Curve vs Target Benchmark */}
-          <div className="gold-steel-border gold-steel-border-slim relative flex flex-col justify-between overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 sm:col-span-2">
-            <div className="mb-1 flex items-center justify-between text-[10px]">
-              <span className="font-bold text-[var(--text-heading)] uppercase tracking-wider">
-                {horizon} Cumulative Trajectory vs Admin Target (100%)
+          <div className="flex flex-wrap items-center gap-3 border-slate-200/80 border-t pt-2 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
+            <div className="rounded-lg border border-slate-200/80 bg-white/80 px-3 py-1.5 shadow-2xs">
+              <span className="block font-medium text-[10px] text-[var(--text-muted)] uppercase">
+                Target
               </span>
-              <span className="font-bold font-mono text-[var(--accent-blue)]">
-                Target: {activeTarget.loadsTarget.toLocaleString()} loads
+              <span className="font-bold font-mono text-[var(--text-heading)] text-xs">
+                {activeTarget.loadsTarget.toLocaleString()} loads
               </span>
             </div>
-
-            <svg
-              viewBox={`0 0 ${width} ${height}`}
-              className="h-16 w-full overflow-visible"
-              role="img"
-              aria-label={`${horizon} operational target trajectory graph`}
-            >
-              <defs>
-                <linearGradient id="cr-target-gold-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d4af37" stopOpacity="0.34" />
-                  <stop offset="100%" stopColor="#d4af37" stopOpacity="0.03" />
-                </linearGradient>
-              </defs>
-
-              {/* 100% Admin Target Benchmark Line */}
-              <line
-                x1={padX}
-                y1={targetLineY}
-                x2={width - padX}
-                y2={targetLineY}
-                stroke="#10b981"
-                strokeDasharray="4 3"
-                strokeWidth="1.2"
-              />
-
-              {coords.map((c, i) => {
-                const barHeight = Math.max(height - padY - c.y, 4);
-                return (
-                  <rect
-                    key={i}
-                    x={c.x - 5}
-                    y={c.y}
-                    width={10}
-                    height={barHeight}
-                    rx={2}
-                    fill="#d4af37"
-                    fillOpacity={i === coords.length - 1 ? 0.25 : 0.1}
-                  />
-                );
-              })}
-
-              <path d={areaPath} fill="url(#cr-target-gold-grad)" />
-              <path
-                d={linePath}
-                fill="none"
-                stroke="#d4af37"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {coords.map((c, i) => {
-                const isLast = i === coords.length - 1;
-                const iconSize = isLast ? 10 : 7;
-                return (
-                  <svg
-                    key={i}
-                    x={c.x - iconSize / 2}
-                    y={c.y - iconSize / 2}
-                    width={iconSize}
-                    height={iconSize}
-                    viewBox="22.75 16.625 166.16 166.19"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d={ARCH_LOGO_PATH}
-                      fill="#d4af37"
-                      stroke="#ffffff"
-                      strokeWidth="6"
-                      paintOrder="stroke"
-                      fillRule="evenodd"
-                    />
-                  </svg>
-                );
-              })}
-            </svg>
-
-            <div className="flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[9px] text-[var(--text-secondary)]">
-              <span>START OF {horizon.toUpperCase()}</span>
-              <span className="font-semibold text-accent-green">--- 100% ADMIN TARGET</span>
-              <span className="font-bold text-[var(--text-heading)]">
-                ACTUAL {overallAttainment}%
+            <div className="rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-3 py-1.5 shadow-2xs">
+              <span className="block font-medium text-[10px] text-amber-800 uppercase">Status</span>
+              <span className="font-bold font-mono text-amber-700 text-xs">
+                {overallAttainment >= 85 ? 'On Target' : 'Under Pace'}
               </span>
             </div>
           </div>

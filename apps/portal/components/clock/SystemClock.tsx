@@ -89,9 +89,6 @@ export function SystemClock() {
           <span className="font-mono font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
             {timeStr}
           </span>
-          <span className="font-semibold text-[9.5px] text-[var(--text-secondary)] uppercase leading-none tracking-wider opacity-70">
-            SAST
-          </span>
         </button>
       </Popover.Trigger>
 

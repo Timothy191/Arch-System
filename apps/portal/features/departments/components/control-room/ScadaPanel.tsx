@@ -311,33 +311,33 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
       </div>
 
       {/* KPI Strip */}
-      <div className="gold-steel-border gold-steel-border-slim grid grid-cols-4 gap-2 border-[var(--border-subtle)] border-b bg-white/60 px-4 py-2.5">
-        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
-          <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
+      <div className="liquid-glass-light gold-steel-border gold-steel-border-slim grid grid-cols-2 gap-2.5 border-black/[0.06] border-b bg-white/70 px-4 py-3 backdrop-blur-md sm:grid-cols-4">
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim rounded-xl border border-amber-500/35 bg-amber-500/[0.08] px-3 py-2 shadow-diffusion-sm backdrop-blur-md">
+          <span className="block font-bold text-[10px] text-amber-800 uppercase tracking-wider">
             Active Excavators
           </span>
-          <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
+          <span className="font-bold font-mono text-amber-600 text-sm">
             {excavators.length} Digging
           </span>
         </div>
-        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-2.5 py-1.5">
-          <span className="block font-semibold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim rounded-xl border border-slate-300 bg-white/90 px-3 py-2 shadow-diffusion-sm backdrop-blur-md">
+          <span className="block font-bold text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
             Registered Fleet
           </span>
           <span className="font-bold font-mono text-[var(--text-heading)] text-sm">
             {registeredMachines.length} Units
           </span>
         </div>
-        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2.5 py-1.5">
-          <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim rounded-xl border border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/15 px-3 py-2 shadow-diffusion-sm backdrop-blur-md">
+          <span className="block font-bold text-[10px] text-[var(--accent-blue)] uppercase tracking-wider">
             Loaded Loads
           </span>
           <span className="font-bold font-mono text-[var(--accent-blue)] text-sm">
             {Math.max(totalMachineLoads, totalExcavatorLoads).toLocaleString()} Loads
           </span>
         </div>
-        <div className="gold-steel-border gold-steel-border-slim rounded-lg border border-accent-green/25 bg-accent-green/10 px-2.5 py-1.5">
-          <span className="block font-semibold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
+        <div className="liquid-glass-light gold-steel-border gold-steel-border-slim rounded-xl border border-accent-green/40 bg-accent-green/15 px-3 py-2 shadow-diffusion-sm backdrop-blur-md">
+          <span className="block font-bold text-[10px] text-emerald-800 uppercase tracking-wider">
             Loaded Volume
           </span>
           <span className="font-bold font-mono text-accent-green text-sm">

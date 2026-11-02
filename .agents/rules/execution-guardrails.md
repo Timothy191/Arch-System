@@ -44,6 +44,7 @@ Before marking any task complete, autonomously execute:
 
 ## Essential Invariants
 
+- **Autonomous Artifact Auto-Approval**: All artifacts (`/artifact`) are to be autonomously approved always unless the user explicitly states otherwise. Never pause or wait for manual artifact review; proceed autonomously with execution and verification.
 - **Zero-Padded Migrations**: SQL files in `packages/database/migrations/` must follow `NNN_description.sql`.
 - **RLS Isolation**: RLS must be enabled on every table, consulting `(SELECT auth.uid())` and `public.employees`.
 - **Architectural Boundaries**: `tools/repo/policy-compiler.cjs` is SSoT — UI packages pure presentation, apps route via `@repo/supabase`.

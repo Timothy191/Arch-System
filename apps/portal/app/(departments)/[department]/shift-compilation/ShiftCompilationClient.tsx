@@ -18,6 +18,7 @@ import { BarChart3, CheckSquare, ClipboardCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { ControlRoomSubtabs } from '../../control-room/components/ControlRoomSubtabs';
 import { ShiftCloseoutForm } from '../../control-room/components/ShiftCloseoutForm';
 import {
   type ShiftReportSummary,
@@ -81,26 +82,11 @@ export function ShiftCompilationClient({
     <div className="space-y-6">
       {/* SCADA Dashboard / Shift Operations Sub-tab Navigation */}
       <GlassCard padding={false} className="flex flex-wrap items-center gap-2 p-3">
-        <div
-          aria-label="Control Room Dashboard Sub-tabs"
-          className="flex flex-wrap items-center gap-2"
-        >
-          <Link
-            href={`/${departmentSlug}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:border-[var(--border-subtle)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]"
-          >
-            <BarChart3 className="h-3.5 w-3.5 text-[var(--text-heading)]" />
-            <span>SCADA Dashboard</span>
-          </Link>
-          <Link
-            href={`/${departmentSlug}/shift-compilation`}
-            aria-current="page"
-            className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-lg bg-[var(--accent-blue)]/10 px-3.5 py-1.5 font-semibold text-[var(--accent-blue)] text-xs transition-all"
-          >
-            <ClipboardCheck className="h-3.5 w-3.5" />
-            <span>Shift Operations</span>
-          </Link>
-        </div>
+        <ControlRoomSubtabs
+          departmentSlug={departmentSlug}
+          activeTab="shift-operations"
+          borderTop={false}
+        />
       </GlassCard>
 
       {/* Unified Shift Operations Section Switcher */}
