@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-02T10:05:00+02:00 - Register Briefcase Icon for Office Department in DepartmentCard
+
+- **Purpose**: Map `Briefcase` in `DEPARTMENT_ICON_MAP` inside `DepartmentCard.tsx` so the `Office` department card renders its canonical briefcase badge in the Hub `Mining Department Modules` grid.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Imported `Briefcase` from `lucide-react` and added `Briefcase` to `DEPARTMENT_ICON_MAP`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅.
+
 ## 2026-10-31T19:18:00+02:00 - Unify Drilling Icon Bubble Setup Across All Hub Cards & Enhance Card Title/KPI Badges
 
 - **Purpose**: Apply the Drilling `2.25rem × 2.25rem` `.uiverse-card-icon-bubble` and `h-11 w-11 shrink-0 scale-110` `<Logo variant="gold" />` setup across all 11 Hub department panels, render semantic Lucide icons (`DEPARTMENT_ICON_MAP`) in the inline `.uiverse-card-title-row` badge, and polish the header gold separator and KPI tag row.

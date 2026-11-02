@@ -9,6 +9,13 @@ export interface ThrottleOptions {
   trailing?: boolean;
 }
 
+export interface ThrottledDebounceOptions {
+  throttleMs?: number;
+  debounceMs?: number;
+  leading?: boolean;
+  trailing?: boolean;
+}
+
 export interface PollingOptions {
   immediate?: boolean;
   autoStart?: boolean;

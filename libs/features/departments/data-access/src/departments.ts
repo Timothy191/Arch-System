@@ -223,6 +223,25 @@ export const DEPARTMENTS: Department[] = [
       { label: 'Panels', href: '/database/panels' },
     ],
   },
+  {
+    name: 'office',
+    displayName: 'Office',
+    route: '/office',
+    icon: 'Briefcase',
+    description:
+      'Enterprise AI Office suite (GenOffice), spreadsheet modeling, document automation, IDE shell completion (inshellisense) & code-map intelligence (trail-code)',
+    color: 'amber',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Workspace', value: '3 Suites' },
+    trend: [92, 94, 95, 96, 97, 98, 99, 100],
+    actions: [
+      { label: 'Office Workspace', href: '/office' },
+      { label: 'Office Panels', href: '/office/panels' },
+      { label: 'Daily Log', href: '/office/daily-log' },
+    ],
+  },
 ];
 
 export const PRODUCTIVITY_TOOLS = [
@@ -375,6 +394,15 @@ export const AVAILABILITY_UTILIZATION_TABS = [
   { name: 'reports?tab=archived', label: 'Archived', icon: 'History' },
 ] as const;
 
+export const OFFICE_TABS = [
+  { name: 'dashboard', label: 'Office Workspace', icon: 'Briefcase' },
+  { name: 'panels', label: 'Office Panels', icon: 'Layers' },
+  { name: 'documents', label: 'Documents', icon: 'FileText' },
+  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+  { name: 'history', label: 'History', icon: 'History' },
+] as const;
+
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -387,6 +415,7 @@ const DEPARTMENT_TABS_MAP: Record<
   'plant-processing': PLANT_PROCESSING_TABS,
   'plant-inventory': PLANT_INVENTORY_TABS,
   'availability-utilization': AVAILABILITY_UTILIZATION_TABS,
+  office: OFFICE_TABS,
 };
 
 /**

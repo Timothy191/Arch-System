@@ -6,6 +6,7 @@ import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
   ArrowUpRight,
+  Briefcase,
   Database,
   Drill,
   Factory,
@@ -48,6 +49,7 @@ const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
   Monitor,
   Activity,
   Database,
+  Briefcase,
 };
 
 function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; className?: string }) {

@@ -200,6 +200,7 @@ export default async function HubPage() {
       'overview',
       'database',
       'availability-utilization',
+      'office',
     ] as const) {
       const sysDept = DEPARTMENTS.find((d) => d.name === sysModuleName);
       if (sysDept && !rawDepartments.some((d) => d.name === sysModuleName)) {
@@ -220,6 +221,7 @@ export default async function HubPage() {
     'availability-utilization',
     'overview',
     'database',
+    'office',
   ];
 
   rawDepartments = [...rawDepartments].sort((a, b) => {

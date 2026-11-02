@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
+import { OfficeWorkspaceClient } from '~/features/departments/components/office/OfficeWorkspaceClient';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHourlySheetClient } from '~/features/departments/components/plant-processing/PlantHourlySheetClient';
@@ -83,6 +84,14 @@ export default async function DepartmentDashboard({
 
   if (deptSlug === 'plant-inventory') {
     return <PlantInventoryDashboard today={today} />;
+  }
+
+  if (deptSlug === 'office') {
+    return (
+      <ErrorBoundary context="Department Dashboard: office">
+        <OfficeWorkspaceClient mode="dashboard" today={today} />
+      </ErrorBoundary>
+    );
   }
 
   if (deptSlug === 'production') {

@@ -43,8 +43,13 @@ export function CollapseGroup({
     [multiple]
   );
 
+  const contextValue = React.useMemo(
+    () => ({ multiple, activeKeys, toggleKey }),
+    [multiple, activeKeys, toggleKey]
+  );
+
   return (
-    <CollapseGroupContext.Provider value={{ multiple, activeKeys, toggleKey }}>
+    <CollapseGroupContext.Provider value={contextValue}>
       <div
         className={cn('divide-y divide-neutral-200 border-neutral-200 border-y', className)}
         {...props}
@@ -96,11 +101,15 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
         ? controlledExpanded
         : uncontrolledExpanded;
 
+    const groupToggleKey = group?.toggleKey;
+    const hasInitializedRef = React.useRef(false);
+
     React.useEffect(() => {
-      if (group?.toggleKey && defaultExpanded) {
-        group.toggleKey(collapseId);
+      if (groupToggleKey && defaultExpanded && !hasInitializedRef.current) {
+        hasInitializedRef.current = true;
+        groupToggleKey(collapseId);
       }
-    }, [group, defaultExpanded, collapseId]);
+    }, [groupToggleKey, defaultExpanded, collapseId]);
 
     const handleToggle = () => {
       if (group) {

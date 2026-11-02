@@ -5,6 +5,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Briefcase,
   CheckSquare,
   ChevronRight,
   Circle,
@@ -71,6 +72,7 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Printer,
   QrCode,
   LifeBuoy,
+  Briefcase,
 };
 
 interface Tab {

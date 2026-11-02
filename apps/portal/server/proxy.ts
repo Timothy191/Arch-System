@@ -135,6 +135,7 @@ function isValidRedirect(path: string): boolean {
     /^\/engineering(\/|$)/, // Engineering department
     /^\/control-room(\/|$)/, // Control room department
     /^\/availability-utilization(\/|$)/, // Availability & Utilization department
+    /^\/office(\/|$)/, // Office department
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
     /^\/overview(\/|$)/, // System Overview topology
@@ -157,6 +158,7 @@ export const DEPARTMENT_ROUTES = [
   'engineering',
   'control-room',
   'availability-utilization',
+  'office',
 ];
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
@@ -224,7 +226,7 @@ async function resolveDeptUuid(
     return data.id;
   }
 
-  if (slug === 'plant-processing' || slug === 'plant-inventory') {
+  if (slug === 'plant-processing' || slug === 'plant-inventory' || slug === 'office') {
     const fallbackQuery = supabase.from('departments').select('id').eq('name', 'production');
     const { data: fallbackData } = await (typeof fallbackQuery.maybeSingle === 'function'
       ? fallbackQuery.maybeSingle()

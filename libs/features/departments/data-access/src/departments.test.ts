@@ -1,6 +1,7 @@
 import {
   DEPARTMENTS,
   getDepartmentTabs,
+  OFFICE_TABS,
   PLANT_INVENTORY_TABS,
   PLANT_PROCESSING_TABS,
   PRODUCTIVITY_TOOLS,
@@ -68,6 +69,7 @@ describe('DEPARTMENTS registry', () => {
     expect(departmentNames).toContain('control-room');
     expect(departmentNames).toContain('admin');
     expect(departmentNames).toContain('overview');
+    expect(departmentNames).toContain('office');
     expect(departmentNames).not.toContain('safety');
     expect(departmentNames).not.toContain('training');
     expect(departmentNames).not.toContain('satellite-monitoring');
@@ -113,6 +115,19 @@ describe('DEPARTMENTS registry', () => {
       'Shift View',
       'PDF Report',
       'Archived',
+    ]);
+  });
+
+  it('returns dedicated Office tabs (Office Workspace, Office Panels, Documents, Daily Log, Reports, History)', () => {
+    const tabs = getDepartmentTabs('office');
+    expect(tabs).toBe(OFFICE_TABS);
+    expect(tabs.map((t) => t.name)).toEqual([
+      'dashboard',
+      'panels',
+      'documents',
+      'daily-log',
+      'reports',
+      'history',
     ]);
   });
 

@@ -57,3 +57,15 @@ Prevent `N` open foreground tabs from issuing duplicate `/api/health/live` probe
 ### Changes Made
 
 1. Added `PIT_CONNECTIVITY_CHANNEL` (`arch:pit-connectivity`) `BroadcastChannel` broadcasting and listening in `src/usePitConnectivity.ts`. When any tab completes a probe, peer tabs adopt its `status` and `latencyMs` and reschedule their own probe timer (`scheduleNext()`).
+
+## 2026-11-02: Add `useThrottledDebounce` and `useThrottledDebounceFn` to `@repo/shared/hooks`
+
+### Purpose
+
+Provide a combined throttle + trailing-debounce hook and controller in `@repo/shared/hooks` (`useThrottledDebounce` and `useThrottledDebounceFn`) for high-frequency filter/table inputs that need periodic visual feedback during continuous typing and guaranteed final-state settlement.
+
+### Changes Made
+
+1. Added `ThrottledDebounceOptions` to `src/types.ts`.
+2. Created `src/useThrottledDebounce.ts` and `src/useThrottledDebounce.test.ts`.
+3. Exported `useThrottledDebounce` from `src/index.ts` and `package.json` `exports`.

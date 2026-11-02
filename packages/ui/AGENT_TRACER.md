@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-02T10:05:00+02:00 - Register Office Department Briefcase Icon in DepartmentLayout & Icon Registry
+
+- **Purpose**: Register `office: Briefcase` in `DEPARTMENT_ICON_REGISTRY` (`packages/ui/src/icons/department-icons.ts`) and `Briefcase` in `ICON_MAP` (`packages/ui/src/components/DepartmentLayout.tsx`) for the Office department workspace and sidebar navigation.
+- **Changes**:
+  - `packages/ui/src/icons/department-icons.ts`: Imported `Briefcase` and added `office: Briefcase`.
+  - `packages/ui/src/components/DepartmentLayout.tsx`: Imported `Briefcase` and added `Briefcase` to `ICON_MAP`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/ui lint` ✅.
+
 ## 2026-11-02T09:25:00+02:00 - Hero Rotator Indicator Dots & Telemetry Graph Separators
 
 - **Purpose**: Address hub hero design feedback items:
