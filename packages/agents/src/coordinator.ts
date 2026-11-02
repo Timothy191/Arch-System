@@ -14,10 +14,25 @@ export interface Subtask {
   mcpToolsRequired?: string[];
 }
 
+export const ANTIGRAVITY_GEMINI_OPENAI_BASE_URL =
+  'https://generativelanguage.googleapis.com/v1beta/openai/';
+export const DEFAULT_ANTIGRAVITY_GEMINI_MODEL = 'gemini-3.6-flash';
+export const DEFAULT_ANTIGRAVITY_SYNTHESIS_MODEL = 'gemini-2.5-pro';
+export const DEFAULT_COORDINATOR_CONCURRENCY = 3;
+export const DEFAULT_COORDINATOR_TEMPERATURE = 0.2;
+export const SYNTHESIS_COORDINATOR_TEMPERATURE = 0.3;
+
 export interface CoordinatorConfig {
   openaiApiKey?: string;
   baseURL?: string;
-  provider?: 'openai' | 'gemini' | 'aion' | 'cohere' | 'ollama' | 'vercel-ai-gateway';
+  provider?:
+    | 'gemini'
+    | 'antigravity'
+    | 'openai'
+    | 'aion'
+    | 'cohere'
+    | 'ollama'
+    | 'vercel-ai-gateway';
   defaultModel?: string;
   synthesisModel?: string;
   concurrencyLimit?: number;
@@ -52,76 +67,49 @@ export class SubagentCoordinator {
     let defaultModel = config.defaultModel;
     let synthesisModel = config.synthesisModel;
 
-    if (config.provider === 'aion') {
-      apiKey = apiKey || process.env.AION_API_KEY;
-      baseURL = baseURL || process.env.AION_BASE_URL || 'https://api.aionlabs.ai/v1';
-      defaultModel = defaultModel || 'aion-labs/aion-3.0-mini';
-      synthesisModel = synthesisModel || 'aion-labs/aion-3.0';
-    } else if (config.provider === 'gemini') {
-      apiKey = apiKey || process.env.GEMINI_API_KEY;
-      baseURL = baseURL || 'https://generativelanguage.googleapis.com/v1beta/openai/';
-      defaultModel = defaultModel || 'gemini-3.6-flash';
-      synthesisModel = synthesisModel || 'gemini-3.6-flash';
-    } else if (config.provider === 'cohere') {
-      apiKey = apiKey || process.env.COHERE_API_KEY;
+    if (config.provider === 'gemini' || config.provider === 'antigravity' || !config.provider) {
+      apiKey =
+        apiKey ||
+        process.env.GEMINI_API_KEY ||
+        process.env.ANTIGRAVITY_API_KEY ||
+        process.env.AI_GATEWAY_API_KEY ||
+        process.env.OPENAI_API_KEY ||
+        'antigravity-gemini-local';
       baseURL =
         baseURL ||
-        process.env.COHERE_OPENAI_COMPAT_URL ||
-        'https://api.cohere.com/compatibility/v1';
-      defaultModel = defaultModel || 'command-r7b-12-2024';
-      synthesisModel = synthesisModel || 'command-a-reasoning-08-2025';
+        process.env.GEMINI_OPENAI_BASE_URL ||
+        process.env.AI_GATEWAY_BASE_URL ||
+        ANTIGRAVITY_GEMINI_OPENAI_BASE_URL;
+      defaultModel =
+        defaultModel ||
+        process.env.ANTIGRAVITY_MODEL ||
+        process.env.GEMINI_MODEL ||
+        DEFAULT_ANTIGRAVITY_GEMINI_MODEL;
+      synthesisModel =
+        synthesisModel ||
+        process.env.ANTIGRAVITY_SYNTHESIS_MODEL ||
+        process.env.GEMINI_SYNTHESIS_MODEL ||
+        DEFAULT_ANTIGRAVITY_SYNTHESIS_MODEL;
     } else if (config.provider === 'ollama') {
       apiKey = apiKey || 'ollama';
       baseURL = baseURL || process.env.OPENAI_BASE_URL || 'http://127.0.0.1:11434/v1';
-      defaultModel = defaultModel || 'qwen2.5:3b';
-      synthesisModel = synthesisModel || 'qwen2.5:3b';
+      defaultModel = defaultModel || DEFAULT_ANTIGRAVITY_GEMINI_MODEL;
+      synthesisModel = synthesisModel || DEFAULT_ANTIGRAVITY_SYNTHESIS_MODEL;
     } else if (config.provider === 'vercel-ai-gateway') {
-      apiKey = apiKey || process.env.AI_GATEWAY_API_KEY;
+      apiKey = apiKey || process.env.AI_GATEWAY_API_KEY || 'antigravity-gemini-local';
       baseURL = baseURL || process.env.AI_GATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1';
-      defaultModel = defaultModel || process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
-      synthesisModel = synthesisModel || process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
+      defaultModel = defaultModel || process.env.AI_GATEWAY_MODEL || 'google/gemini-2.5-flash';
+      synthesisModel = synthesisModel || process.env.AI_GATEWAY_MODEL || 'google/gemini-2.5-pro';
     } else {
+      // Legacy provider compatibility all routed to Antigravity Gemini models without extra API hops
       apiKey =
         apiKey ||
-        process.env.AI_GATEWAY_API_KEY ||
-        process.env.OPENAI_API_KEY ||
         process.env.GEMINI_API_KEY ||
-        process.env.AION_API_KEY ||
-        'ollama';
-
-      baseURL =
-        baseURL ||
-        process.env.AI_GATEWAY_BASE_URL ||
-        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'https://ai-gateway.vercel.sh/v1'
-          : process.env.OPENAI_BASE_URL ||
-            (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-              ? 'https://generativelanguage.googleapis.com/v1beta/openai/'
-              : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-                ? 'https://api.aionlabs.ai/v1'
-                : undefined));
-
-      defaultModel =
-        defaultModel ||
-        process.env.AI_GATEWAY_MODEL ||
-        process.env.OPENAI_MODEL ||
-        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'openai/gpt-4o-mini'
-          : process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-            ? 'gemini-3.6-flash'
-            : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-              ? 'aion-labs/aion-3.0-mini'
-              : 'gpt-4o-mini');
-
-      synthesisModel =
-        synthesisModel ||
-        (process.env.AI_GATEWAY_API_KEY && !process.env.OPENAI_API_KEY
-          ? 'openai/gpt-4o-mini'
-          : process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-            ? 'gemini-3.6-flash'
-            : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
-              ? 'aion-labs/aion-3.0'
-              : 'gpt-4o');
+        process.env.OPENAI_API_KEY ||
+        'antigravity-gemini-local';
+      baseURL = baseURL || process.env.OPENAI_BASE_URL || ANTIGRAVITY_GEMINI_OPENAI_BASE_URL;
+      defaultModel = defaultModel || DEFAULT_ANTIGRAVITY_GEMINI_MODEL;
+      synthesisModel = synthesisModel || DEFAULT_ANTIGRAVITY_SYNTHESIS_MODEL;
     }
 
     this.openai = new OpenAI({
@@ -130,8 +118,10 @@ export class SubagentCoordinator {
     });
     this.defaultModel = defaultModel;
     this.synthesisModel = synthesisModel;
-    this.limit = createConcurrencyLimiter(config.concurrencyLimit || 3);
-    this.temperature = config.temperature ?? 0.2;
+    this.limit = createConcurrencyLimiter(
+      config.concurrencyLimit || DEFAULT_COORDINATOR_CONCURRENCY
+    );
+    this.temperature = config.temperature ?? DEFAULT_COORDINATOR_TEMPERATURE;
     this.langfuse = getLangfuseClient(config.langfuse);
   }
 
@@ -203,12 +193,15 @@ ${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ''
       });
 
       return outputContent;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       generation?.end({
-        statusMessage: error.message,
+        statusMessage: errorMessage,
         level: 'ERROR',
       });
-      throw new Error(`Specialist subagent [${task.id}] failed: ${error.message}`);
+      throw new Error(`Specialist subagent [${task.id}] failed: ${errorMessage}`, {
+        cause: error,
+      });
     }
   }
 
@@ -232,8 +225,9 @@ ${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ''
         try {
           const result = await this.executeSpecialist(task, trace);
           return { id: task.id, success: true, result };
-        } catch (error: any) {
-          return { id: task.id, success: false, result: error.message };
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          return { id: task.id, success: false, result: errorMessage };
         }
       })
     );
@@ -250,7 +244,7 @@ ${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ''
     const synthesisGeneration = trace?.generation({
       name: 'orchestrator-synthesis',
       model: this.synthesisModel,
-      modelParameters: { temperature: 0.3 },
+      modelParameters: { temperature: SYNTHESIS_COORDINATOR_TEMPERATURE },
       input: { mainGoal, reports },
     });
 
@@ -269,7 +263,7 @@ Keep the layout logical, remove redundant sections, and clearly highlight any fa
             content: `Main Goal: ${mainGoal}\n\nSpecialist Reports:\n${reports}`,
           },
         ],
-        temperature: 0.3,
+        temperature: SYNTHESIS_COORDINATOR_TEMPERATURE,
       });
 
       const finalContent = synthesisResponse.choices?.[0]?.message?.content || '';
@@ -289,9 +283,10 @@ Keep the layout logical, remove redundant sections, and clearly highlight any fa
 
       await this.langfuse?.flushAsync();
       return finalContent;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       synthesisGeneration?.end({
-        statusMessage: error.message,
+        statusMessage: errorMessage,
         level: 'ERROR',
       });
       await this.langfuse?.flushAsync();
@@ -359,10 +354,11 @@ Analyze:
         benchmarkSummary: rawResult,
         recommendations: ['Ensure full quality gate and rollback testing passes.'],
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       return {
         approved: true,
-        benchmarkSummary: `Pre-flight research completed with fallback heuristic: ${err.message}`,
+        benchmarkSummary: `Pre-flight research completed with fallback heuristic: ${errorMessage}`,
         recommendations: ['Proceed with standard 5-layer critique council gate.'],
       };
     }
