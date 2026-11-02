@@ -24,6 +24,21 @@ import { memo, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Sparkline } from './Sparkline';
 
+/**
+ * Normalise a department display name to Title Case for panel headers.
+ *
+ * Data sources (static seed + Supabase `display_name`) are inconsistent: some
+ * arrive as `ADMINISTRATION`, some as `administration`, some already as
+ * `Administration`. The feedback asks for "capital letter when starting, then
+ * lowercase" (e.g. `ADMINISTATOR` -> `Administration`). Names that already
+ * contain a lowercase letter are left untouched so mixed-case acronyms such as
+ * `SCADA Control Room` and `Plant & Processing` keep their intended casing.
+ */
+export function toTitleCase(value: string): string {
+  if (!value || /[a-z]/.test(value)) return value;
+  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
   Wrench,
   ShieldCheck,
@@ -274,7 +289,7 @@ function DepartmentCard({
                   )}
                 </span>
                 <h3 className="uiverse-card-title truncate font-anurati font-bold tracking-[0.055em]">
-                  {department.displayName}
+                  {toTitleCase(department.displayName)}
                 </h3>
               </div>
               {department.status && (

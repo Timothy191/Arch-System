@@ -6,6 +6,7 @@ import { HeroRotator as GenericHeroRotator } from '@repo/ui/HeroRotator';
 import { Logo } from '@repo/ui/Logo';
 import { ArrowUpRight } from 'lucide-react';
 import { useMemo } from 'react';
+import { toTitleCase } from './DepartmentCard';
 
 export interface HeroRotatorProps {
   defaultTitle: string;
@@ -87,7 +88,7 @@ export function HeroRotator({
       return {
         id: dept.name,
         name: dept.name,
-        title: dept.displayName,
+        title: toTitleCase(dept.displayName),
         description: dept.description,
         assetOverline,
         assetSubtitle,
