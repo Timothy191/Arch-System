@@ -234,10 +234,13 @@ export function LoginForm() {
         data-testid="enterprise-auth-addons"
         className="grid grid-cols-2 gap-2 border-[var(--accent-blue)]/15 border-t pt-3.5"
       >
-        <div className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600">
+        <Link
+          href="/access-control/qr-codes"
+          className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600 transition-colors hover:bg-[var(--accent-blue)]/10"
+        >
           <KeyRound className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
-          <span className="truncate font-medium">C66 RFID / SSO Ready</span>
-        </div>
+          <span className="truncate font-medium">Visitor QR Code</span>
+        </Link>
         <div className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600">
           <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
           <span className="truncate font-medium">Audit-Logged RBAC</span>

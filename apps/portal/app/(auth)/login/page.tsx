@@ -96,18 +96,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-[var(--accent-blue)] drop-shadow-sm" />
               </div>
               <div className="text-center">
-                <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-neutral-900 uppercase tracking-wider">
+                <h1 className="font-bold font-display text-3xl text-[var(--text-heading)] text-neutral-900 uppercase tracking-[0.22em]">
                   Arch Systems
                 </h1>
                 {/* Golden Separator under Arch Systems */}
                 <div
                   data-testid="arch-systems-gold-separator"
                   aria-hidden="true"
-                  className="mx-auto my-2 flex w-44 items-center justify-center gap-2"
+                  className="mx-auto my-3 flex w-56 items-center justify-center gap-2"
                 >
-                  <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
-                  <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/30 shadow-diffusion-sm" />
-                  <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                  <span className="h-[2px] flex-1 animate-pulse rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                  <span className="h-3 w-3 rotate-45 animate-ping rounded-[2px] border-2 border-[var(--accent-blue)] bg-[var(--accent-blue)]/60 shadow-diffusion-sm" />
+                  <span className="h-[2px] flex-1 animate-pulse rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
                 </div>
                 <p className="font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
                   Arch OS v{APP_VERSION}
@@ -128,7 +128,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             </div>
 
             {/* Header */}
-            <div className="mb-5 border-[var(--accent-blue)]/15 border-b pb-4">
+            <div className="mb-5 pb-4">
               <div className="flex items-center justify-between">
                 <span className="select-none font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
                   Welcome Back
@@ -143,6 +143,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               <p className="mt-1 text-neutral-500 text-xs">
                 Access the mining & operations control panel.
               </p>
+              <div
+                data-testid="welcome-back-gold-separator"
+                aria-hidden="true"
+                className="mx-auto mt-3 flex w-44 items-center justify-center gap-2"
+              >
+                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/30 shadow-diffusion-sm" />
+                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+              </div>
             </div>
 
             {/* Form */}
@@ -176,6 +185,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 <Cpu className="h-3.5 w-3.5 shrink-0" />
                 <span>Fully Intelligent &amp; Agentic Backend</span>
               </span>
+            </div>
+            <div
+              data-testid="eve-agentic-separator"
+              aria-hidden="true"
+              className="mx-auto flex w-44 items-center justify-center gap-2"
+            >
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+              <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/30 shadow-diffusion-sm" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
             </div>
             <p className="text-[10.5px] text-neutral-600">
               Agentic Principles Applied • Autonomous Multi-Agent Orchestration &amp; Self-Healing
