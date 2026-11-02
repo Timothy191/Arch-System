@@ -115,7 +115,7 @@ export function ControlRoomQuickNav() {
       <DropdownMenuContent
         align="end"
         sideOffset={6}
-        className="fade-in-0 zoom-in-95 z-50 w-72 animate-in rounded-xl border border-[var(--border-subtle)] bg-[var(--vibrancy-surface)] p-1.5 shadow-2xl backdrop-blur-xl sm:w-80"
+        className="liquid-glass-light gold-steel-border gold-steel-border-slim fade-in-0 zoom-in-95 z-50 w-72 animate-in rounded-xl border border-white/20 bg-[var(--vibrancy-surface)] p-1.5 shadow-window backdrop-blur-xl sm:w-80"
       >
         <DropdownMenuLabel className="px-2.5 py-2 font-semibold text-[var(--text-heading)] text-xs">
           <div className="flex items-center justify-between">
