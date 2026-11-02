@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/agents
 
+## 2026-11-02T14:08:00+02:00 - Autonomous Coordinator Engine & Dependency Sequencer
+
+- **Purpose**: Implement `AutonomousCoordinator` providing multi-agent plan sequencing, topological task dependency scheduling, specialist persona resolution, critical failure abort policies, and output synthesis.
+- **Changes**:
+  - `src/autonomous-coordinator.ts`: Added `AutonomousCoordinator`, `sequenceSubtasks`, and zero-dependency `createConcurrencyLimiter` replacing ESM `p-limit`.
+  - `src/autonomous-coordinator.test.ts`: Added unit test suite covering parallel stages, linear/diamond dependencies, and critical failure aborts (100% pass).
+  - `src/coordinator.ts`: Switched to in-house `createConcurrencyLimiter` eliminating `p-limit` dependency.
+  - `package.json` & `src/index.ts`: Removed `p-limit` from dependencies (verified Knip clean) and exported `AutonomousCoordinator`.
+- **Verification**: `pnpm --filter @repo/agents test` (4/4 suites pass) and `pnpm --filter @repo/agents type-check` (0 errors).
+
 ## 2026-11-02T09:41:00+02:00 - Outlines Structured Generation Mandate Across All Agents
 
 - **Purpose**: Permanently establish schema-constrained structured output generation across all AI coding agents, specialist swarms, and subagent prompts, inspired by [dottxt-ai/outlines](https://github.com/dottxt-ai/outlines).

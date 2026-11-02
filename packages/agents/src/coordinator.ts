@@ -1,6 +1,6 @@
 import type { Langfuse, LangfuseTraceClient } from 'langfuse';
 import OpenAI from 'openai';
-import pLimit from 'p-limit';
+import { createConcurrencyLimiter, type LimitFunction } from './concurrency';
 import { getLangfuseClient, type LangfuseConfig } from './langfuse';
 
 export interface Subtask {
@@ -42,7 +42,7 @@ export class SubagentCoordinator {
   private openai: OpenAI;
   private defaultModel: string;
   private synthesisModel: string;
-  private limit: ReturnType<typeof pLimit>;
+  private limit: LimitFunction;
   private temperature: number;
   private langfuse: Langfuse | null;
 
@@ -130,7 +130,7 @@ export class SubagentCoordinator {
     });
     this.defaultModel = defaultModel;
     this.synthesisModel = synthesisModel;
-    this.limit = pLimit(config.concurrencyLimit || 3);
+    this.limit = createConcurrencyLimiter(config.concurrencyLimit || 3);
     this.temperature = config.temperature ?? 0.2;
     this.langfuse = getLangfuseClient(config.langfuse);
   }

@@ -191,6 +191,7 @@ export * from './agent-governance';
 export * from './codemod';
 export * from './control-room';
 export * from './schemas/_registry';
+export * from './schemas/audit-log.schema';
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,

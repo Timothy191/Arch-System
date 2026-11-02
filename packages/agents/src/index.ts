@@ -1,3 +1,5 @@
+export * from './autonomous-coordinator';
+export * from './concurrency';
 export type { CoordinatorConfig, RunOptions, Subtask, TaskRunResult } from './coordinator';
 export * from './coordinator';
 export * from './fleet-runner';
