@@ -40,6 +40,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
 import { MacTitleBar } from './MacTitleBar';
+import { Logo } from './Logo';
 
 const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   BarChart2: BarChart3,
@@ -392,7 +393,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           : 'text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
-                      <ChevronRight
+                      <Logo
+                        variant="gold"
                         className={cn(
                           'h-3.5 w-3.5 transition-transform duration-200',
                           isDashboardExpanded && 'rotate-90'
@@ -416,7 +418,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                           : 'text-[var(--text-heading)] hover:bg-black/[0.04] hover:text-[var(--accent-blue)]'
                       )}
                     >
-                      <ChevronRight
+                      <Logo
+                        variant="gold"
                         className={cn(
                           'h-3.5 w-3.5 transition-transform duration-200',
                           isReportsExpanded && 'rotate-90'

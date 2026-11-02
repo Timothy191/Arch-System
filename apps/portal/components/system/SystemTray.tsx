@@ -205,6 +205,13 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
               </>
             )}
 
+            <span
+              aria-hidden="true"
+              data-testid="system-tray-gold-separator"
+              className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+            >
+              |
+            </span>
             <Logo
               variant="gold"
               className={cn(
