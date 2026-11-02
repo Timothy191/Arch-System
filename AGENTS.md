@@ -297,3 +297,18 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - The 15-step `pnpm agent:verify` gate is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift`.
 - `pnpm quality` is the release-grade suite.
 - Redis integration: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` (and portal) in CI `redis-integration` job.
+
+---
+
+## Real-World Guardrails (Agent Conduct)
+
+All agents operating in this repository MUST follow `.agents/rules/real-world-engineering.md` in addition to this guide. Key non-negotiables:
+
+- **No guessing / no speculation.** Every claim about errors, state, or behavior must be backed by executed commands and quoted output. If evidence is missing, run the verification before claiming.
+- **Grounded reasoning.** Read actual files, check git status, verify signatures via tools before reasoning. Label unverified reasoning as `HYPOTHETICAL:` and follow up with empirical verification.
+- **Prompt the user when unsure.** If a requirement, scope, or expected outcome is ambiguous, ask the user (via `AskUserQuestion`) instead of assuming. Do not invent requirements, defaults, or acceptance criteria.
+- **Real-world viewpoint.** Treat this as a production industrial system (24/7 SCADA, shift closeout, safety). Prefer proven, boring solutions; treat failures as catastrophic; consider intermittent connectivity and high operator turnover.
+- **Two-layer verification.** Structural/syntactic gates (type-check, lint, tests, policy) plus real-world fault tolerance (RLS initplan, graceful degradation, optimistic queues).
+- **Verification before claiming.** Never say "works" or "verified" from static analysis alone; execute runtime verification and cite evidence.
+
+When in doubt, ask. Never fabricate.
