@@ -31,7 +31,7 @@ import { Sparkline } from './Sparkline';
  * Data sources (static seed + Supabase `display_name`) are inconsistent: some
  * arrive as `ADMINISTRATION`, some as `administration`, some already as
  * `Administration`. The feedback asks for "capital letter when starting, then
- * lowercase" (e.g. `ADMINISTATOR` -> `Administration`). Names that already
+ * lowercase" (e.g. `ADMINISTRATOR` -> `Administration`). Names that already
  * contain a lowercase letter are left untouched so mixed-case acronyms such as
  * `SCADA Control Room` and `Plant & Processing` keep their intended casing.
  */
