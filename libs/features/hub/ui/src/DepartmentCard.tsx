@@ -142,8 +142,13 @@ function DepartmentCard({
       className={cn('h-full', department.gridSpan)}
     >
       <div
-        className="uiverse-card gold-steel-border group interactive-element relative h-full outline-none ring-1 ring-black/[0.06] hover:ring-arch-accent-blue/35 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(900px)_rotateX(1deg)]"
+        className="uiverse-card gold-steel-border group interactive-element relative h-full w-full shadow-[0_12px_24px_-6px_rgba(0,0,0,0.08),0_8px_16px_-4px_rgba(0,0,0,0.04),0_0_0_1px_rgba(255,255,255,0.7)_inset,0_1px_2px_rgba(0,0,0,0.04)_inset] outline-none ring-1 ring-black/[0.06] hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.16),0_12px_24px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(255,255,255,0.85)_inset,0_2px_4px_rgba(0,0,0,0.08)_inset] hover:ring-arch-accent-blue/35 motion-safe:animate-subtle-float motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(1000px)_rotateX(2deg)_translateZ(4px)]"
         data-testid={`dept-card-${department.name}`}
+        style={{
+          transformStyle: 'preserve-3d',
+          backfaceVisibility: 'hidden',
+          animationDelay: `${index * 50}ms`,
+        }}
       >
         {/* Navigation Loading Overlay */}
         {isNavigating && (
@@ -171,6 +176,12 @@ function DepartmentCard({
           className="absolute inset-0 z-0 rounded-[20px] focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue"
           aria-label={`Open ${department.displayName} department`}
           data-testid={`dept-link-${department.name}`}
+        />
+
+        {/* Liquid glass overlay for 3D depth effect */}
+        <div
+          className="absolute inset-0 z-0 rounded-[20px] bg-white/[0.03] opacity-0 backdrop-blur-sm motion-safe:transition-opacity motion-safe:duration-300 motion-safe:group-hover:opacity-100"
+          aria-hidden="true"
         />
 
         {/* Banner area with photographic / terrain visual background */}
@@ -231,13 +242,13 @@ function DepartmentCard({
               config.bg,
               config.ringColor
             )}
-            style={{ width: '2.25rem', height: '2.25rem' }}
+            style={{ width: '2rem', height: '2rem' }}
             aria-hidden="true"
           >
             <Logo
               variant="gold"
               className={cn(
-                'h-11 w-11 shrink-0 scale-110 drop-shadow-[0_1px_4px_rgba(212,175,55,0.45)]',
+                'h-5 w-5 shrink-0 drop-shadow-[0_1px_3px_rgba(212,175,55,0.4)]',
                 config.iconColor
               )}
             />
@@ -262,7 +273,7 @@ function DepartmentCard({
                     <Logo variant="gold" className={cn('h-3.5 w-3.5 shrink-0', config.iconColor)} />
                   )}
                 </span>
-                <h3 className="uiverse-card-title truncate font-anurati font-bold uppercase tracking-[0.055em]">
+                <h3 className="uiverse-card-title truncate font-anurati font-bold tracking-[0.055em]">
                   {department.displayName}
                 </h3>
               </div>

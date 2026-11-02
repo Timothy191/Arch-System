@@ -1,3 +1,31 @@
+## 2026-11-02T09:25:00+02:00: Hub Design Feedback, Mining Department Modules, Filter Bordering & Telemetry Separators
+
+- **Phase 1 (Comprehension)**: Address 8 design feedback items on `/hub` (`https://arch-system-kappap.vercel.app/hub`):
+  1. Add explicit borders to category filter pills (`All`, `Active`, `Alerts`, `Pinned`).
+  2. Reduce department card logo/icon container dimensions so they scale in proportion to the card layout.
+  3. Make the background of `CoreOperationalModules` (`section.group/row.liquid-glass-light`) more transparent while leaving inner panels as-is.
+  4. Enforce global header rule: text starts with Capital and follows with lowercase letters (remove forced all-caps).
+  5. Darken subsystem indicator pill text in `HeroOperationalKpiStrip` (`SCADA Tags`, etc.) with dark black high-contrast values.
+  6. Rename section heading from "Core Operational Modules" to "Mining Department Modules".
+  7. Move hero rotator indicator dots slightly down (`mt-4 sm:mt-5`) and enlarge slightly.
+  8. Add separator dividers to all telemetry graphs on Hero cards.
+- **Phase 2 (Evidence)**:
+  - Department card logos had `h-11 w-11 scale-110` inside 36px bubbles causing excessive visual weight.
+  - Category filter buttons lacked explicit border definitions in active/inactive states.
+  - Section container had dense specular backdrop overlays.
+  - Headers had `uppercase` classes and `.font-anurati` in `typography.css` forced `text-transform: uppercase`.
+  - Subsystem pill labels were styled with `text-slate-500 uppercase`.
+  - Hero rotator indicator dots were tightly squeezed at `mt-2` with small 16px icons.
+  - Telemetry graphs on Hero cards lacked dedicated gradient separators.
+- **Phase 3 (Design)**:
+  - In `typography.css`: removed `text-transform: uppercase` from `.font-anurati` and enforced `text-transform: none` on `h1..h6`.
+  - In `HeroCardContent.tsx`: removed `uppercase` from `h2`/`h3`, darkened pill labels to `text-slate-900 font-bold`, and added `hero-graph-separator-${panelName}`.
+  - In `CoreOperationalModules.tsx`: renamed heading to "Mining Department Modules", added borders to filter buttons, and increased container background transparency (`bg-white/[0.08] backdrop-blur-md ring-white/40 border-white/30`).
+  - In `DepartmentCard.tsx`: scaled down `.uiverse-card-icon-bubble` to `2rem` and `<Logo>` to `h-5 w-5`, removing `scale-110`.
+  - In `HeroRotator.tsx`: increased top margin to `mt-4 sm:mt-5` and enlarged indicator dots to `h-5.5 w-5.5 sm:h-6 sm:w-6` with `scale-120`.
+- **Phase 4 (Criticism)**: Unit tested with `CoreOperationalModules.test.tsx`, `DepartmentCard.test.tsx`, `HeroRotator.test.tsx` (all PASS). Full 27-gate verification passed (100% PASS).
+- **Phase 5 (Contract)**: Modified `CoreOperationalModules.tsx`, `DepartmentCard.tsx`, `HeroRotator.tsx`, `HeroCardContent.tsx`, `typography.css`, `executive/page.tsx`, `FeedbackWidget.tsx`.
+
 ## 2026-11-02T08:35:00+02:00: Drilling & Engineering Dual-Tier RSC Cache Invalidation & ReactQuery Reconnect Refetch
 
 - **Phase 1 (Comprehension)**: Optimize performance across high-frequency department dashboards (Drilling & Engineering hubs) with dual-tier server caching (`withCache` + `cachedRSC`), tag-based invalidation on machine operations batch writes, and ReactQuery reconnect refetch configuration.
@@ -86,20 +114,6 @@
   - Updated `reports-types.ts` and `reports-server-helpers.ts` to enrich `MachineOperationLogItem` with `material`, `blockMined`, `binFactor`, `assignedExcavatorName`.
 - **Phase 4 (Criticism)**: Unit tested with `ShiftReportA4Preview.test.tsx` (7 tests covering material bin factors, row SMR math, auto-aggregations, delay formatting, Page 1 dynamic sync, DOM toolbar controls, print triggering) and verified all 27 gates in `pnpm agent:verify` (100% PASS).
 - **Phase 5 (Contract)**: Created `ShiftReportA4Preview.tsx`, `shift-report-model.ts`, `ShiftReportA4Preview.test.tsx`; modified `ReportsShiftViewTab.tsx`, `ReportsDashboardClient.tsx`, `reports-types.ts`, `reports-server-helpers.ts`.
-
-## 2026-11-02T06:30:00+02:00: Side-by-Side Split-Screen Workspaces for Google Docs & Google Calendar
-
-- **Phase 1 (Comprehension)**: When users interact with Documents or Schedule (from Mac System Menu, MenuBar, or department tool panels), open a docked split-screen tab (Portal on the left, interacted Google Workspace on the right) so operators can work on both without navigating away.
-- **Phase 2 (Evidence)**: Users requested that clicking Documents or Schedule opens a split tab (50:50 side-by-side) with Google Workspace integration (auto sign-in via `AccountChooser`, live scratchpad, mining document templates, and frameable calendar/popout companion).
-- **Phase 3 (Design)**:
-  - Extended `useSplitWindow` store with `'google-docs'` and `'google-calendar'` services.
-  - Implemented `SplitWindowGoogleDocsView` featuring auto sign-in launch, live draft scratchpad with `localStorage` persistence, clipboard copy, and standard mining templates (Pre-Start, Handover, Blast Pattern, Breakdown Log).
-  - Implemented `SplitWindowGoogleCalendarView` featuring live site calendar iframe, operational shift event creator, and SAST shift roster reference.
-  - Wired `SplitWindowLayout` to mount and render the new Google Workspace views.
-  - Added "Open in Split Tab" buttons in `GoogleWorkspacePanel` and wired `MacSystemMenuDropdown` and `MacMenuBar` to dispatch `open-split-view`.
-  - Added `https://docs.google.com https://drive.google.com` to CSP `frame-src` in `proxy.ts` and `next.config.mjs`.
-- **Phase 4 (Criticism)**: Unit tests added in `SplitWindowLayout.test.tsx` and all 27 verification gates passed (100% PASS).
-- **Phase 5 (Contract)**: Modified `SplitWindowLayout.tsx`, `split-window-data.tsx`, `useSplitWindow.ts`, `GoogleWorkspacePanel.tsx`, `google-workspace.ts`, `proxy.ts`, `next.config.mjs`, and added `SplitWindowGoogleDocsView.tsx` & `SplitWindowGoogleCalendarView.tsx`.
 
 ## 2026-10-31T18:48:00+02:00: Comprehensive Repository Scan, Overview Telemetry Synchronization & Vercel Production Update
 

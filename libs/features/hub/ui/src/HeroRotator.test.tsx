@@ -218,6 +218,11 @@ describe('HeroRotator', () => {
       container.querySelectorAll('svg[aria-label*="telemetry trend graph"] circle')
     ).toHaveLength(0);
 
+    // Separators for telemetry graphs on all hero cards
+    expect(screen.getByTestId('hero-graph-separator-central-command')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-graph-separator-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-graph-separator-production')).toBeInTheDocument();
+
     // Looping MP4 videos on each hero card + slim gold steel borders
     const overviewVideo = screen.getByTestId('hero-video-central-command');
     const drillingVideo = screen.getByTestId('hero-video-drilling');
@@ -439,21 +444,21 @@ describe('HeroRotator', () => {
     expect(activeIndicator).toHaveClass(
       'opacity-100',
       'visible',
-      'scale-110',
+      'scale-120',
       'text-amber-400',
       'brightness-125'
     );
     expect(inactiveIndicator).toHaveClass('opacity-0', 'invisible');
     expect(activeIndicator.querySelector('svg')).toHaveClass(
-      'w-4',
-      'h-4',
+      'w-5.5',
+      'h-5.5',
       'opacity-100',
       'visible',
       'motion-safe:animate-pulse'
     );
     expect(inactiveIndicator.querySelector('svg')).toHaveClass(
-      'w-3.5',
-      'h-3.5',
+      'w-4',
+      'h-4',
       'opacity-0',
       'invisible'
     );

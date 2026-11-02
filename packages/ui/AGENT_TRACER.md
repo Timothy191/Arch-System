@@ -1,11 +1,35 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-02T09:25:00+02:00 - Hero Rotator Indicator Dots & Telemetry Graph Separators
+
+- **Purpose**: Address hub hero design feedback items:
+  1. Increase spacing (`mt-4 sm:mt-5`) between hero card and indicator dots, and enlarge indicator dots with `scale-120` and `h-5.5 w-5.5 sm:h-6 sm:w-6` icons.
+  2. Add dedicated gradient separator dividers (`hero-graph-separator-${panelName}`) under all telemetry graph headers on Hero cards.
+  3. Remove uppercase styling from `h2`/`h3` headers in `HeroCardContent` to enforce sentence/title casing globally.
+  4. Darken subsystem indicator pill text in `HeroOperationalKpiStrip` to high-contrast `text-slate-900 font-bold`.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`: Moved indicator dots container to `mt-4 sm:mt-5` with `p-1` and enlarged `ArchEmblemIcon`.
+  - `packages/ui/src/components/HeroCardContent.tsx`: Added `hero-graph-separator-${panelName}`, darkened subsystem indicator pill text, removed `uppercase` from `h2` and `h3`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅ (27/27 gates passed).
+
 ## 2026-11-02T06:30:00+02:00 - Google Workspace Split-Screen Shortcuts in System Menu & MenuBar
 
-- **Purpose**: Wire "Documents" and "Schedule" tool actions to dispatch `open-split-view` with `google-docs` and `google-calendar` so users can work side-by-side with Arch OS without leaving their active page.
-- **Changes**:
-  - `packages/ui/src/components/MacSystemMenuDropdown.tsx`: Wired Documents and Schedule items to open docked split tabs; added Google Docs Split and Google Calendar Split to the Split Workspace section; extracted `SPLIT_WORKSPACE_BTN` constant.
-  - `packages/ui/src/components/MacMenuBar.tsx`: Added split view triggers for Google Docs and Google Calendar in Tools dropdown menu.
+- **Phase 1 (Comprehension)**: When users interact with Documents or Schedule (from Mac System Menu, MenuBar, or department tool panels), open a docked split-screen tab (Portal on the left, interacted Google Workspace on the right) so operators can work on both without navigating away.
+
+- **Phase 2 (Evidence)**: Users requested that clicking Documents or Schedule opens a split tab (50:50 side-by-side) with Google Workspace integration (auto sign-in via `AccountChooser`, live scratchpad, mining document templates, and frameable calendar/popout companion).
+
+- **Phase 3 (Design)**:
+  - Extended `useSplitWindow` store with `'google-docs'` and `'google-calendar'` services.
+  - Implemented `SplitWindowGoogleDocsView` featuring auto sign-in launch, live draft scratchpad with `localStorage` persistence, clipboard copy, and standard mining templates (Pre-Start, Handover, Blast Pattern, Breakdown Log).
+  - Implemented `SplitWindowGoogleCalendarView` featuring live site calendar iframe, operational shift event creator, and SAST shift roster reference.
+  - Wired `SplitWindowLayout` to mount and render the new Google Workspace views.
+  - Added "Open in Split Tab" buttons in `GoogleWorkspacePanel` and wired `MacSystemMenuDropdown` and `MacMenuBar` to dispatch `open-split-view`.
+  - Added `https://docs.google.com https://drive.google.com` to CSP `frame-src` in `proxy.ts` and `next.config.mjs`.
+
+- **Phase 4 (Criticism)**: Unit tests added in `SplitWindowLayout.test.tsx` and all 27 verification gates passed (100% PASS).
+
+- **Phase 5 (Contract)**: Modified `SplitWindowLayout.tsx`, `split-window-data.tsx`, `useSplitWindow.ts`, `GoogleWorkspacePanel.tsx`, `google-workspace.ts`, `proxy.ts`, `next.config.mjs`, and added `SplitWindowGoogleDocsView.tsx` & `SplitWindowGoogleCalendarView.tsx`.
+
 - **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅ (27/27 gates passed).
 
 ## 2026-10-31T19:18:00+02:00 - Add Animated Golden Separator Under Hero Card Selection Indicator

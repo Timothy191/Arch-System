@@ -87,7 +87,7 @@ export function CoreOperationalModules({
 
   return (
     <section
-      className="group/row liquid-glass-light gold-steel-border relative -translate-y-1.5 animate-fade-up space-y-5 rounded-card border border-white/45 p-4 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.28),0_16px_32px_-8px_rgba(15,23,42,0.16),0_4px_12px_-2px_rgba(15,23,42,0.08),inset_0_1.5px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(15,23,42,0.06)] ring-1 ring-white/75 ring-inset transition-[transform,box-shadow] duration-500 ease-mac-decelerate hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.34),0_20px_40px_-8px_rgba(15,23,42,0.2),inset_0_1.5px_1px_rgba(255,255,255,0.95)] sm:p-6"
+      className="group/row liquid-glass-light gold-steel-border relative -translate-y-1.5 animate-fade-up space-y-5 rounded-card border border-white/30 bg-white/[0.08] p-4 shadow-[0_32px_64px_-12px_rgba(15,23,42,0.22),0_16px_32px_-8px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.06),inset_0_1.5px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(15,23,42,0.04)] ring-1 ring-white/40 ring-inset backdrop-blur-md transition-[transform,box-shadow] duration-500 ease-mac-decelerate hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-12px_rgba(15,23,42,0.28),0_20px_40px_-8px_rgba(15,23,42,0.16),inset_0_1.5px_1px_rgba(255,255,255,0.85)] sm:p-6"
       style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering & Executive Quick-Access */}
@@ -97,8 +97,8 @@ export function CoreOperationalModules({
             <span className="-my-2 -ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-arch-accent-blue/35 bg-white text-arch-accent-blue shadow-sm">
               <Logo className="h-6 w-6 scale-110 text-arch-accent-blue drop-shadow-xs" />
             </span>
-            <span className="font-anurati font-bold uppercase tracking-[0.06em]">
-              Core Operational Modules
+            <span className="font-anurati font-bold tracking-[0.06em]">
+              Mining Department Modules
             </span>
             <span
               data-testid="core-modules-count-badge"
@@ -171,8 +171,8 @@ export function CoreOperationalModules({
               className={cn(
                 'rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'all'
-                  ? 'bg-white font-semibold text-arch-text-primary shadow-card'
-                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
+                  ? 'border border-black/[0.14] bg-white font-semibold text-arch-text-primary shadow-card'
+                  : 'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary'
               )}
             >
               All
@@ -185,8 +185,8 @@ export function CoreOperationalModules({
                 className={cn(
                   'flex items-center gap-1 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                   activeFilter === 'pinned'
-                    ? 'bg-white font-semibold text-arch-accent-blue shadow-card'
-                    : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
+                    ? 'border border-arch-accent-blue/35 bg-white font-semibold text-arch-accent-blue shadow-card'
+                    : 'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary'
                 )}
               >
                 <Star className="h-3 w-3 fill-arch-accent-blue/20" />
@@ -200,8 +200,8 @@ export function CoreOperationalModules({
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'active'
-                  ? 'bg-white font-semibold text-accent-green shadow-card'
-                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
+                  ? 'border border-accent-green/35 bg-white font-semibold text-accent-green shadow-card'
+                  : 'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary'
               )}
             >
               <span>Active</span>
@@ -214,8 +214,8 @@ export function CoreOperationalModules({
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs tabular-nums transition-all',
                 activeFilter === 'critical'
-                  ? 'bg-white font-semibold text-accent-amber shadow-card'
-                  : 'font-medium text-arch-text-secondary hover:text-arch-text-primary'
+                  ? 'border border-accent-amber/40 bg-white font-semibold text-accent-amber shadow-card'
+                  : 'border border-black/[0.06] font-medium text-arch-text-secondary hover:border-black/[0.14] hover:bg-white/60 hover:text-arch-text-primary'
               )}
             >
               {criticalCount > 0 && (

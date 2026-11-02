@@ -17,8 +17,7 @@
 
 .font-anurati {
   font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   font-weight: 600;
 }
 
@@ -35,4 +34,5 @@ h6 {
     -apple-system,
     sans-serif;
   letter-spacing: -0.02em;
+  text-transform: none;
 }

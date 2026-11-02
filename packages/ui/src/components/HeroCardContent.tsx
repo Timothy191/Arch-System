@@ -213,13 +213,13 @@ function HeroTelemetryGraph({
         className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 shadow-2xs backdrop-blur-md"
         data-testid={`hero-telemetry-box-${panelName}`}
       >
-        <div className="relative z-10 mb-1 flex items-center justify-between gap-2 border-slate-100/90 border-b pb-1">
+        <div className="relative z-10 mb-1 flex items-center justify-between gap-2 pb-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
             <span
               className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
               aria-hidden="true"
             />
-            <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase leading-snug tracking-wider sm:text-sm">
+            <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs leading-snug tracking-wider sm:text-sm">
               {series.title}
             </h3>
           </div>
@@ -233,6 +233,13 @@ function HeroTelemetryGraph({
             </span>
           </div>
         </div>
+
+        {/* Separator for Hero Card Graph */}
+        <div
+          data-testid={`hero-graph-separator-${panelName}`}
+          aria-hidden="true"
+          className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+        />
 
         {/* Animated scanline effect */}
         <div
@@ -489,12 +496,12 @@ export function HeroOperationalKpiStrip({
                 |
               </span>
             )}
-            <span className="truncate font-mono font-semibold text-[10px] text-slate-500 uppercase tracking-wider">
+            <span className="truncate font-bold font-mono text-[10px] text-slate-900 tracking-wide">
               {tile.label}
             </span>
           </div>
           <div className="flex shrink-0 items-baseline gap-1.5">
-            <span className="font-bold font-mono text-[var(--text-heading)] text-xs tabular-nums sm:text-[13px]">
+            <span className="font-bold font-mono text-slate-950 text-xs tabular-nums sm:text-[13px]">
               {tile.value}
             </span>
             <span
@@ -608,18 +615,30 @@ export function HeroCardContent({
               >
                 <Logo variant="gold" className="h-4 w-4 text-accent-amber" />
               </span>
-              <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl uppercase leading-snug tracking-[0.04em] sm:text-2xl">
+              <h2 className="pr-4 font-anurati font-bold text-[var(--text-heading)] text-xl leading-snug tracking-[0.04em] sm:text-2xl">
                 {panel.title}
               </h2>
             </div>
             <div
               data-testid={`hero-header-separator-${panel.name}`}
               aria-hidden="true"
-              className="h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-300/80 to-transparent"
+              className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
             />
-            <p className="max-w-[95%] text-[var(--text-secondary)] text-xs leading-relaxed sm:text-sm">
-              {assetSubtitle}
-            </p>
+            <div className="relative">
+              <p className="max-w-[95%] font-medium text-[var(--text-heading)] text-xs leading-relaxed tracking-[0.02em] opacity-80 sm:text-sm">
+                {assetSubtitle}
+              </p>
+              {/* Golden shimmer animation - left to right */}
+              <div className="pointer-events-none absolute -bottom-1.5 left-0 h-px w-full overflow-hidden">
+                <div
+                  className="absolute inset-0 animate-shimmer opacity-60"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)',
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Action CTAs (Cleaned and Accessible, visually decluttered on flanks) */}

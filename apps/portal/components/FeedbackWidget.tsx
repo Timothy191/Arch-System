@@ -110,7 +110,7 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs uppercase tracking-[0.055em]">
+              <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs tracking-[0.055em]">
                 Feedback &amp; Support
               </h3>
               <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/20 bg-accent-green/10 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-accent-green">

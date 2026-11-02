@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-11-02T09:25:00+02:00 - Global Typography Header Casing Rule
+
+- **Purpose**: Remove forced `uppercase` transformation on `.font-anurati` display font and enforce `text-transform: none` on `h1..h6` to support sentence/title casing globally.
+- **Changes**:
+  - `packages/theme/src/css/typography.css`: Removed `text-transform: uppercase` from `.font-anurati` and added `text-transform: none` to `h1..h6`.
+- **Verification**: `pnpm --filter @repo/theme lint` ✅; `pnpm agent:verify` ✅.
+
 ## 2026-10-31T19:18:00+02:00 - Add Missing Hub Department Card Banner Gradients
 
 - **Purpose**: Complete `.uiverse-card-banner-*` gradient definitions in `cards.css` for `availability-utilization`, `overview`, and `database` Hub department cards.

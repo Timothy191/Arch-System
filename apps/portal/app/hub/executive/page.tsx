@@ -308,7 +308,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 1 — Production &amp; Reconciliation */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+        <h2 className="flex items-center gap-1.5 font-semibold text-[var(--text-muted)] text-xs">
           <TrendingUp className="h-3.5 w-3.5" /> Production &amp; Reconciliation (MTD)
         </h2>
         <KPIGrid cols={4}>
@@ -353,7 +353,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 2 — Fleet &amp; Personnel */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+        <h2 className="flex items-center gap-1.5 font-semibold text-[var(--text-muted)] text-xs">
           <Truck className="h-3.5 w-3.5" /> Fleet &amp; Personnel
         </h2>
         <KPIGrid cols={4}>
@@ -379,7 +379,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* KPI Row 3 — Safety &amp; Environment */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+        <h2 className="flex items-center gap-1.5 font-semibold text-[var(--text-muted)] text-xs">
           <ShieldAlert className="h-3.5 w-3.5" /> Safety &amp; Resource Usage
         </h2>
         <KPIGrid cols={4}>
@@ -404,7 +404,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* 30-Day Production Trend Chart */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+        <h2 className="flex items-center gap-1.5 font-semibold text-[var(--text-muted)] text-xs">
           <Activity className="h-3.5 w-3.5" /> 30-Day Production Trend
         </h2>
         <GlassCard>

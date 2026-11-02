@@ -54,10 +54,10 @@ const mockDepartments: Department[] = [
 ];
 
 describe('CoreOperationalModules', () => {
-  it('renders the Core Operational Modules heading with the Arch System Logo icon and department pin buttons', () => {
+  it('renders the Mining Department Modules heading with the Arch System Logo icon and department pin buttons', () => {
     render(<CoreOperationalModules departments={mockDepartments} canSeeExecutive={true} />);
 
-    const heading = screen.getByRole('heading', { name: /Core Operational Modules/i });
+    const heading = screen.getByRole('heading', { name: /Mining Department Modules/i });
     expect(heading).toBeInTheDocument();
 
     const logoSvg = heading.querySelector('span.rounded-full > svg');
