@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
@@ -13,28 +13,36 @@ pub struct OpenAI {
 }
 
 impl OpenAI {
-    pub fn from_url(base_url: String, api_key: String) -> Self {
+    pub fn from_url(base_url: impl Into<String>, api_key: impl Into<String>) -> Self {
         Self {
-            base_url,
-            api_key,
+            base_url: base_url.into(),
+            api_key: api_key.into(),
             model: "deepseek-v4.1-flash:cloud".to_string(),
         }
     }
 
-    pub fn set_model(mut self, model: &str) -> Self {
-        self.model = model.to_string();
+    #[must_use]
+    pub fn set_model(mut self, model: impl Into<String>) -> Self {
+        self.model = model.into();
         self
     }
 
-    pub async fn chat(&self, system_prompt: &str, task: &str) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    pub fn resolve_host_port(&self) -> &str {
         let url = self.base_url.trim_end_matches('/');
-        let host_port = url
-            .strip_prefix("http://")
+        url.strip_prefix("http://")
             .or_else(|| url.strip_prefix("https://"))
             .unwrap_or("127.0.0.1:11434/v1")
             .split('/')
             .next()
-            .unwrap_or("127.0.0.1:11434");
+            .unwrap_or("127.0.0.1:11434")
+    }
+
+    pub async fn chat(
+        &self,
+        system_prompt: &str,
+        task: &str,
+    ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+        let host_port = self.resolve_host_port();
 
         let body = serde_json::to_string(&json!({
             "model": self.model,
@@ -59,12 +67,13 @@ impl OpenAI {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AgentResult {
     pub agent_name: String,
     pub output: String,
 }
 
+#[derive(Clone, Debug)]
 pub struct SwarmsAgent {
     name: String,
     system_prompt: String,
@@ -72,7 +81,10 @@ pub struct SwarmsAgent {
 }
 
 impl SwarmsAgent {
-    pub async fn execute(&self, task: &str) -> Result<AgentResult, Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn execute(
+        &self,
+        task: &str,
+    ) -> Result<AgentResult, Box<dyn std::error::Error + Send + Sync>> {
         let output = self.model.chat(&self.system_prompt, task).await?;
         Ok(AgentResult {
             agent_name: self.name.clone(),
@@ -96,16 +108,19 @@ impl SwarmsAgentBuilder {
         }
     }
 
-    pub fn agent_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
+    #[must_use]
+    pub fn agent_name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
         self
     }
 
-    pub fn system_prompt(mut self, prompt: &str) -> Self {
-        self.system_prompt = prompt.to_string();
+    #[must_use]
+    pub fn system_prompt(mut self, prompt: impl Into<String>) -> Self {
+        self.system_prompt = prompt.into();
         self
     }
 
+    #[must_use]
     pub fn build(self) -> SwarmsAgent {
         SwarmsAgent {
             name: self.name,
@@ -118,42 +133,37 @@ impl SwarmsAgentBuilder {
 pub struct ConcurrentWorkflow {
     name: String,
     description: String,
-    metadata_output_dir: String,
-    agents: Vec<Box<SwarmsAgent>>,
+    metadata_output_dir: PathBuf,
+    agents: Vec<SwarmsAgent>,
 }
 
 pub struct ConcurrentWorkflowBuilder {
     name: String,
     description: String,
-    metadata_output_dir: String,
-    agents: Vec<Box<SwarmsAgent>>,
+    metadata_output_dir: PathBuf,
+    agents: Vec<SwarmsAgent>,
 }
 
 impl ConcurrentWorkflow {
+    #[must_use]
     pub fn builder() -> ConcurrentWorkflowBuilder {
         ConcurrentWorkflowBuilder {
             name: "Workflow".to_string(),
             description: String::new(),
-            metadata_output_dir: "./metadata".to_string(),
+            metadata_output_dir: PathBuf::from("./metadata"),
             agents: Vec::new(),
         }
     }
 
-    pub async fn run(&self, task: &str) -> Result<Vec<AgentResult>, Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn run(
+        &self,
+        task: &str,
+    ) -> Result<Vec<AgentResult>, Box<dyn std::error::Error + Send + Sync>> {
         let mut handles = Vec::with_capacity(self.agents.len());
         for agent in &self.agents {
-            let model = agent.model.clone();
-            let name = agent.name.clone();
-            let prompt = agent.system_prompt.clone();
+            let runner = agent.clone();
             let task_str = task.to_string();
-            handles.push(tokio::spawn(async move {
-                let runner = SwarmsAgent {
-                    name,
-                    system_prompt: prompt,
-                    model,
-                };
-                runner.execute(&task_str).await
-            }));
+            handles.push(tokio::spawn(async move { runner.execute(&task_str).await }));
         }
 
         let mut results = Vec::with_capacity(handles.len());
@@ -162,7 +172,7 @@ impl ConcurrentWorkflow {
             results.push(res);
         }
 
-        let out_dir = Path::new(&self.metadata_output_dir);
+        let out_dir: &Path = &self.metadata_output_dir;
         tokio::fs::create_dir_all(out_dir).await?;
         let metadata = json!({
             "workflow": self.name,
@@ -180,26 +190,31 @@ impl ConcurrentWorkflow {
 }
 
 impl ConcurrentWorkflowBuilder {
-    pub fn name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
+    #[must_use]
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
         self
     }
 
-    pub fn description(mut self, description: &str) -> Self {
-        self.description = description.to_string();
+    #[must_use]
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = description.into();
         self
     }
 
-    pub fn metadata_output_dir(mut self, dir: &str) -> Self {
-        self.metadata_output_dir = dir.to_string();
+    #[must_use]
+    pub fn metadata_output_dir(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.metadata_output_dir = dir.into();
         self
     }
 
-    pub fn add_agent(mut self, agent: Box<SwarmsAgent>) -> Self {
+    #[must_use]
+    pub fn add_agent(mut self, agent: SwarmsAgent) -> Self {
         self.agents.push(agent);
         self
     }
 
+    #[must_use]
     pub fn build(self) -> ConcurrentWorkflow {
         ConcurrentWorkflow {
             name: self.name,
@@ -214,21 +229,24 @@ impl ConcurrentWorkflowBuilder {
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     dotenv().ok();
 
-    let model_name = std::env::var("OLLAMA_MODEL")
-        .unwrap_or_else(|_| "deepseek-v4.1-flash:cloud".to_string());
-    let ollama_url = std::env::var("OLLAMA_BASE_URL")
-        .unwrap_or_else(|_| "http://127.0.0.1:11434/v1".to_string());
+    let model_name =
+        std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "deepseek-v4.1-flash:cloud".to_string());
+    let ollama_url =
+        std::env::var("OLLAMA_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:11434/v1".to_string());
 
-    println!("Initializing Swarms Orchestrator with Ollama model: {}", model_name);
+    println!(
+        "Initializing Swarms Orchestrator with Ollama model: {}",
+        model_name
+    );
 
-    let llm = OpenAI::from_url(ollama_url, "ollama".to_string()).set_model(&model_name);
+    let llm = OpenAI::from_url(ollama_url, "ollama").set_model(&model_name);
 
     let agent1 = SwarmsAgentBuilder::new_with_model(llm.clone())
         .agent_name("Worker")
         .system_prompt("You are a helpful worker.")
         .build();
 
-    let agent2 = SwarmsAgentBuilder::new_with_model(llm.clone())
+    let agent2 = SwarmsAgentBuilder::new_with_model(llm)
         .agent_name("Reviewer")
         .system_prompt("You review work.")
         .build();
@@ -237,8 +255,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .name("MainWorkflow")
         .description("Run concurrently")
         .metadata_output_dir("./metadata")
-        .add_agent(Box::new(agent1))
-        .add_agent(Box::new(agent2))
+        .add_agent(agent1)
+        .add_agent(agent2)
         .build();
 
     let _result = workflow.run("Perform initialization checks.").await?;
@@ -246,4 +264,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     println!("Workflow result received.");
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn resolves_host_port_from_http_and_https_urls() {
+        let client_http = OpenAI::from_url("http://127.0.0.1:11434/v1/", "key");
+        assert_eq!(client_http.resolve_host_port(), "127.0.0.1:11434");
+
+        let client_https = OpenAI::from_url("https://api.example.com/v1/chat", "key");
+        assert_eq!(client_https.resolve_host_port(), "api.example.com");
+    }
+
+    #[test]
+    fn constructs_agents_and_workflow_without_vec_box() {
+        let llm = OpenAI::from_url("http://localhost:11434/v1", "ollama").set_model("qwen2.5:3b");
+        let worker = SwarmsAgentBuilder::new_with_model(llm)
+            .agent_name("PitTelemetryWorker")
+            .system_prompt("Monitor haulage cycles.")
+            .build();
+
+        let workflow = ConcurrentWorkflow::builder()
+            .name("TelemetryCheck")
+            .description("Verify pit telemetry")
+            .metadata_output_dir("./tmp-meta")
+            .add_agent(worker)
+            .build();
+
+        assert_eq!(workflow.agents.len(), 1);
+        assert_eq!(workflow.name, "TelemetryCheck");
+    }
 }
