@@ -320,3 +320,4 @@ get-token.js
 
 # Agent token telemetry, rewritten by tools/scripts/token-tracker.cjs on every session.
 .agents/memory_base/token-usage.json
+.blackboxcli/
