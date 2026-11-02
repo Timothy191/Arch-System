@@ -1,3 +1,21 @@
+## 2026-11-02T07:55:00+02:00: Discrete A4 Paginated Preview Sheets & Toolbar Navigation for Official Shift Reports
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports` (`div.space-y-8.p-6` in `.print-document` measuring 970x22109 px) by replacing the continuous scrolling web container with discrete A4 portrait preview sheets (`794px × 1123px`), sticky toolbar with page navigation and zoom controls, and aligning test assertions.
+- **Phase 2 (Evidence)**:
+  - Target selector was a single 22,109px height DOM node containing all sites, equipment, summary, and drilling logs without discrete page boundary visual containers.
+  - Required A4 sheet containers (`A4SheetContainer`) for Page 1 (Corporate branding, gold separator, 5 gold KPI boxes, Combined Shift Summary, minimalist charts), Pages 2..N (Site Breakdown: site header, excavators first, machines grouped by type, gold site summary card), and Page N+1 (Dedicated Drilling Report with gold separator, Block Mined/Material, 11-column drill table, 3-signature sign-off).
+  - Required toolbar controls: Single Page vs All Pages view mode, Prev/Next page navigation with `Page X of Y` indicator, Zoom controls (`Fit to Width`, `100%`, `75%`), Direct Print, and PDF export.
+- **Phase 3 (Design)**:
+  - Exported `A4SheetContainer` and `A4SheetContainerProps` from `ShiftReportA4Preview.tsx` with discrete A4 styling (`w-[794px] min-h-[1123px]`, `p-[48px]`, page shadow, page footer).
+  - Refactored `ShiftPdfReportTab.tsx` to wrap each logical section in discrete `A4SheetContainer`s. Added state for `pageViewMode` ('all' | 'single'), `currentPage`, `zoomLevel`, and `totalPages`.
+  - Added preview toolbar controls (view mode toggle, previous/next buttons, zoom buttons, date filter).
+  - Updated `DepartmentLayout.test.tsx` to align with canonical `CONTROL_ROOM_TABS` rename (`'Delays'` tab).
+- **Phase 4 (Criticism)**:
+  - Unit tests verified: `ReportsDashboardClient.test.tsx` (10/10 PASS), `ShiftReportA4Preview.test.tsx` (7/7 PASS), `DepartmentLayout.test.tsx` (7/7 PASS).
+  - All 199 portal test suites passed (1,343 tests).
+  - Full 27-gate verification suite passed: `pnpm agent:verify` (100% PASS, 27/27 gates).
+- **Phase 5 (Contract)**: Modified `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `DepartmentLayout.test.tsx`, `packages/ui/src/components/DepartmentLayout.tsx`, `apps/portal/AGENT_TRACER.md`.
+
 ## 2026-11-02T07:15:00+02:00: Shift Report View (`/control-room/reports`) Gold Styling, Machine Type Grouping, Shift Summary & Drilling Report
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports` (`div.space-y-8.p-6` in `div.print-document.overflow-hidden`):

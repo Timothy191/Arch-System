@@ -390,13 +390,13 @@ export function ShiftReportA4Preview({
 // ---------------------------------------------------------------------------
 // A4 Sheet Container Wrapper (Strict 210mm x 297mm Aspect Ratio)
 // ---------------------------------------------------------------------------
-interface A4SheetContainerProps {
+export interface A4SheetContainerProps {
   readonly pageNumber: number;
   readonly totalPages: number;
   readonly children: React.ReactNode;
 }
 
-function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetContainerProps) {
+export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetContainerProps) {
   return (
     <div
       className="a4-page-sheet relative flex min-h-[1123px] w-[794px] flex-col justify-between rounded-lg bg-white p-[48px] text-[#0f172a] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] transition-shadow [print-color-adjust:exact]"

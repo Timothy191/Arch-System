@@ -47,7 +47,7 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     expect(scadaDashboardSubtab).toHaveTextContent('SCADA Dashboard');
     expect(screen.getByRole('link', { name: /Hourly Loads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Machine Operations/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^Operations$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Delays$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Excavator Activity/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Reports/i })).toBeInTheDocument();
     expect(screen.getByTestId('reports-subtabs-toggle')).toHaveAttribute('aria-expanded', 'true');
@@ -72,7 +72,7 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
       'Excavator Activity',
       'Hourly Loads',
       'Machine Operations',
-      'Operations',
+      'Delays',
       'Reports',
     ]);
   });

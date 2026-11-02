@@ -39,8 +39,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDepartmentIcon } from '../icons/department-icons';
 import { cn } from '../lib/utils';
-import { MacTitleBar } from './MacTitleBar';
 import { Logo } from './Logo';
+import { MacTitleBar } from './MacTitleBar';
 
 const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   BarChart2: BarChart3,
