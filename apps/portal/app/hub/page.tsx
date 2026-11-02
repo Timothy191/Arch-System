@@ -12,7 +12,12 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
+import {
+  CoreOperationalModules,
+  HeroBackground,
+  HeroRotator,
+  OperationsCopilot,
+} from '@/features/hub';
 import { withCache } from '@/lib/cache-utils';
 import {
   getAccessibleDepartmentNames,
@@ -275,6 +280,8 @@ export default async function HubPage() {
           offlineMachineCount={offlineMachineCount}
         />
       </section>
+
+      <OperationsCopilot />
 
       {/* Core Operational Modules - Primary Workspace Above the Fold (Fitts's Law & Primacy Effect) */}
       {departments.length === 0 ? (
