@@ -22,6 +22,7 @@ export * from './usePitConnectivity';
 export * from './usePolling';
 // Redis & Automation Hooks
 export * from './useRedisCache';
+export * from './useScrollReveal';
 export * from './useSupabaseRealtime';
 export * from './useThrottle';
 export * from './useThrottledDebounce';

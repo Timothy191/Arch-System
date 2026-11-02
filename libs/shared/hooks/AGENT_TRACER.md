@@ -1,5 +1,23 @@
 # @repo/shared/hooks Agent Tracer
 
+## 2026-11-02T14:35:00+02:00: Accessibility-Aware IntersectionObserver Scroll Reveal Hook
+
+### Purpose
+
+Provide a zero-dependency React 19 hook (`useScrollReveal.ts`) inspired by jlmakes/scrollreveal with automatic `prefers-reduced-motion: reduce` fallback for industrial pit tablets.
+
+### Changes Made
+
+1. **`src/useScrollReveal.ts`**:
+   - Implemented `useScrollReveal` with configurable threshold, rootMargin, and triggerOnce.
+   - Handled reduced motion query by revealing immediately and bypassing IntersectionObserver.
+2. **`src/useScrollReveal.test.ts`**:
+   - Added BDD unit test suite verifying intersection behavior, reduced-motion bypass, and toggle transitions.
+3. **`src/index.ts`**:
+   - Exported `useScrollReveal` and its types.
+
+---
+
 ## 2026-08-17: Add @types/node dependency to fix TypeScript check
 
 ### Purpose
