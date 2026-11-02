@@ -84,7 +84,7 @@ browser → proxy.ts (Next 16, CSP + x-nonce)
 
 ## Development Commands
 
-Run from `Arch-System/` unless noted. Root `Makefile` mirrors the important ones (`make verify`, `make dev-portal`, `make build-all`).
+Run from `Arch-System/` unless noted. Root `Makefile` mirrors the important ones (`make verify` → `pnpm agent:verify`, `make dev-portal` → `pnpm dev:quick`, `make build-all` → `pnpm build`).
 
 ### Build / run
 
@@ -101,10 +101,16 @@ pnpm test               # turbo run test
 ### Completion gate
 
 ```bash
-pnpm agent:verify       # tools/scripts/agent-verify.sh — 15 sequential steps, fails fast
+pnpm agent:verify       # tools/scripts/agent-verify.sh — 27-gate suite, fails fast
 ```
 
-Steps: `type-check` → `lint` → `test` → `policy:check` → `audit:drift` → skill-spector → `mcp:verify` → `token:budget-check` → agent-rule-drift → codebase-map parity → `audit:hooks` → `deps:lint` → `cycles` → `audit:tailwind` → `knip`.
+Gates (source of truth: `tools/scripts/agent-verify.sh`):
+1–5: `type-check` → `lint` → `test` → `boundaries` → `audit:drift`
+6–10: `skill-spector` → `mcp:verify` → `token:budget-check` → `agent-rules` → `codebase-map`
+11–15: `audit:hooks` → `deps:lint` → `cycles` → `audit:tailwind` → `knip`
+16–20: `auth-matrix` → `migrations` → `perf-load` → `e2e` → `supply-chain`
+21–25: `resilience` → `rollback` → `a11y` → `evidence-integrity` → `tool-perms`
+26–27: `hallucination-controls` → `reproducibility`
 
 ### Targeted commands
 
@@ -242,7 +248,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - `packages/ui/src/components/GlassCard.tsx`: Primary light-mode glass surface component.
 - `packages/typescript-config/base.json`: Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`).
 - `tools/repo/policy-compiler.cjs`: Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`).
-- `tools/scripts/agent-verify.sh`: 27-step completion gate (`pnpm agent:verify`).
+- `tools/scripts/agent-verify.sh`: 27-gate completion suite (`pnpm agent:verify`).
 - `e2e/playwright.config.ts`: Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`).
 
 ---
@@ -288,7 +294,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 - BDD-style naming in shared packages: `describe('Given …')` / `it('When …, Then …')`; portal hooks use `should … when …`.
 - Mock at the **network-client boundary** (Supabase / Redis / `next/cache` / server actions), never internal logic.
-- The 15-step `pnpm agent:verify` gate is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift`.
+- The 27-gate `pnpm agent:verify` suite is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift`.
 - `pnpm quality` is the release-grade suite.
 - Redis integration: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` (and portal) in CI `redis-integration` job.
 

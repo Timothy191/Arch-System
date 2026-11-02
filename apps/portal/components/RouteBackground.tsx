@@ -16,6 +16,12 @@ type WindowWithIdleCallback = Window & {
   cancelIdleCallback?: (handle: number) => void;
 };
 
+const MOBILE_VIEWPORT_MAX_WIDTH_PX = 767;
+const MOBILE_VIEWPORT_MEDIA_QUERY = `(max-width: ${MOBILE_VIEWPORT_MAX_WIDTH_PX}px)`;
+const VIDEO_IDLE_TIMEOUT_MS = 800;
+const VIDEO_FALLBACK_TIMEOUT_MS = 350;
+const HTML_MEDIA_HAVE_CURRENT_DATA_READY_STATE = 2;
+
 /**
  * RouteBackgroundPoster
  * Renders the primary LCP asset (PS3 Wave desktop + mobile WebP poster) in native color without overlays or filters.
@@ -28,7 +34,7 @@ function RouteBackgroundPoster() {
     >
       <picture>
         <source
-          media="(max-width: 767px)"
+          media={MOBILE_VIEWPORT_MEDIA_QUERY}
           srcSet="/background/global-background-poster-mobile.webp"
           type="image/webp"
         />
@@ -80,7 +86,7 @@ function RouteBackgroundInner() {
     }
 
     // 3. Detect desktop vs mobile viewport for optimal PS3 Wave stream selection
-    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    const mobileQuery = window.matchMedia(MOBILE_VIEWPORT_MEDIA_QUERY);
     setIsMobileViewport(mobileQuery.matches);
     const handleViewportChange = (e: MediaQueryListEvent) => {
       setIsMobileViewport(e.matches);
@@ -94,14 +100,16 @@ function RouteBackgroundInner() {
 
     const idleWindow = window as WindowWithIdleCallback;
     if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, { timeout: 800 });
+      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, {
+        timeout: VIDEO_IDLE_TIMEOUT_MS,
+      });
       return () => {
         idleWindow.cancelIdleCallback?.(handle);
         mobileQuery.removeEventListener('change', handleViewportChange);
       };
     }
 
-    const timer = setTimeout(loadDeferredVideo, 350);
+    const timer = setTimeout(loadDeferredVideo, VIDEO_FALLBACK_TIMEOUT_MS);
     return () => {
       clearTimeout(timer);
       mobileQuery.removeEventListener('change', handleViewportChange);
@@ -110,7 +118,7 @@ function RouteBackgroundInner() {
 
   useEffect(() => {
     if (videoRef.current && shouldLoadVideo) {
-      if (videoRef.current.readyState >= 2) {
+      if (videoRef.current.readyState >= HTML_MEDIA_HAVE_CURRENT_DATA_READY_STATE) {
         setIsVideoLoaded(true);
       }
       videoRef.current.play().catch(() => {});

@@ -25,6 +25,7 @@ help:
 	@echo "  make status         - Show status of all containers"
 	@echo ""
 	@echo "Workflow shortcuts (dash-named aliases of root pnpm scripts):"
+	@echo "  make verify  dev-portal  build-all"
 	@echo "  make dev  build  test  lint  type-check  format  quality"
 	@echo "  make test-e2e  test-watch  test-coverage  lint-fix  format-check"
 	@echo "  make deps-lint  deps-fix  knip  knip-fix  md-lint  md-fix"
@@ -113,9 +114,15 @@ clean-caches:
 # exposed here as a '-'-named target (test:e2e -> make test-e2e).
 # ==============================================================================
 
-.PHONY: dev dev-quick dev-tools dev-all build
+.PHONY: verify dev dev-portal dev-quick dev-tools dev-all build build-all
+verify:
+	pnpm run agent:verify
+
 dev:
 	pnpm run dev
+
+dev-portal:
+	pnpm run dev:quick
 
 dev-quick:
 	pnpm run dev:quick
@@ -127,6 +134,9 @@ dev-all:
 	pnpm run dev:all:turbo
 
 build:
+	pnpm run build
+
+build-all:
 	pnpm run build
 
 .PHONY: test test-e2e test-watch test-coverage

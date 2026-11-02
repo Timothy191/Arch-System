@@ -67,5 +67,18 @@ Provide a combined throttle + trailing-debounce hook and controller in `@repo/sh
 ### Changes Made
 
 1. Added `ThrottledDebounceOptions` to `src/types.ts`.
-2. Created `src/useThrottledDebounce.ts` and `src/useThrottledDebounce.test.ts`.
+2. Created `src/useThrottledDebounce.ts`, `src/useThrottledDebounce.test.ts`, `src/useDebounce.test.ts`, `src/useThrottle.test.ts`, `src/useCopyToClipboard.test.ts`, and `src/useMediaQuery.test.ts`.
 3. Exported `useThrottledDebounce` from `src/index.ts` and `package.json` `exports`.
+4. Verified all 7 test suites (26/26 tests passing) and zero Knip unlisted dependency warnings.
+
+## 2026-11-02: Add co-located tests for throttle, clipboard, and media query hooks
+
+### Purpose
+
+Cover previously untested shared hooks requested by the test-suite hardening pass.
+
+### Changes Made
+
+1. Added `src/useThrottle.test.ts` for throttled values, leading callback execution, trailing execution, and cancellation.
+2. Added `src/useCopyToClipboard.test.ts` for successful writes, reset behavior, missing clipboard support, and write failures.
+3. Added `src/useMediaQuery.test.ts` for matching snapshots, change subscriptions, cleanup, and missing `matchMedia`.

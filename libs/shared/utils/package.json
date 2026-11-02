@@ -15,9 +15,13 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "test": "jest --config jest.config.js --passWithNoTests --runInBand"
   },
   "devDependencies": {
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
     "typescript": "catalog:"
   }
 }

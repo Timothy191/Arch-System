@@ -25,7 +25,7 @@ interface WithCacheOptions {
  * 6. Generic error + fallback === true + stale cache → returns stale value.
  * 7. Redis unreachable → executes fn() directly (graceful degradation).
  */
-const activePortalFetches = new Map<string, Promise<any>>();
+const activePortalFetches = new Map<string, Promise<unknown>>();
 
 export async function withCache<T>(fn: () => Promise<T>, options: WithCacheOptions): Promise<T> {
   const { category, keyParts = [], tags, fallback = true } = options;
@@ -39,7 +39,7 @@ export async function withCache<T>(fn: () => Promise<T>, options: WithCacheOptio
     return cached.value;
   }
 
-  let activeFetch = activePortalFetches.get(key);
+  let activeFetch = activePortalFetches.get(key) as Promise<T> | undefined;
   if (!activeFetch) {
     activeFetch = fn()
       .then(async (result) => {

@@ -204,6 +204,11 @@
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"],
       "ignoreDependencies": ["@babel/preset-typescript"]
+    },
+    "libs/shared/hooks": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["@testing-library/react", "jsdom"]
     }
   },
   "rules": {

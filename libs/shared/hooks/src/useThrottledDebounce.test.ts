@@ -2,7 +2,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { useThrottledDebounce, useThrottledDebounceFn } from './useThrottledDebounce';
 
-describe('useThrottledDebounce & useThrottledDebounceFn', () => {
+describe('Given useThrottledDebounce and useThrottledDebounceFn', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -11,21 +11,21 @@ describe('useThrottledDebounce & useThrottledDebounceFn', () => {
     jest.useRealTimers();
   });
 
-  describe('useThrottledDebounce', () => {
-    it('initializes with initial value', () => {
+  describe('Given useThrottledDebounce', () => {
+    it('When initialized, Then it returns the initial value immediately', () => {
       const { result } = renderHook(() => useThrottledDebounce('initial', 200));
       expect(result.current).toBe('initial');
     });
 
-    it('debounces rapid updates after inactivity', () => {
+    it('When rapid updates occur, Then it settles to the final value after inactivity', () => {
       const { result, rerender } = renderHook(
-        ({ val }) => useThrottledDebounce(val, { throttleMs: 100, debounceMs: 300 }),
-        { initialProps: { val: 'start' } }
+        ({ inputText }) => useThrottledDebounce(inputText, { throttleMs: 100, debounceMs: 300 }),
+        { initialProps: { inputText: 'start' } }
       );
 
-      rerender({ val: 'update-1' });
-      rerender({ val: 'update-2' });
-      rerender({ val: 'final' });
+      rerender({ inputText: 'update-1' });
+      rerender({ inputText: 'update-2' });
+      rerender({ inputText: 'final' });
 
       expect(result.current).toBe('start');
 
@@ -36,19 +36,20 @@ describe('useThrottledDebounce & useThrottledDebounceFn', () => {
       expect(result.current).toBe('final');
     });
 
-    it('supports leading edge execution when configured', () => {
+    it('When leading edge is enabled, Then it emits the first update immediately', () => {
       const { result, rerender } = renderHook(
-        ({ val }) => useThrottledDebounce(val, { throttleMs: 200, debounceMs: 300, leading: true }),
-        { initialProps: { val: 'first' } }
+        ({ inputText }) =>
+          useThrottledDebounce(inputText, { throttleMs: 200, debounceMs: 300, leading: true }),
+        { initialProps: { inputText: 'first' } }
       );
 
-      rerender({ val: 'immediate' });
+      rerender({ inputText: 'immediate' });
       expect(result.current).toBe('immediate');
     });
   });
 
-  describe('useThrottledDebounceFn', () => {
-    it('executes callback with trailing debounce and supports cancel/flush', () => {
+  describe('Given useThrottledDebounceFn', () => {
+    it('When run, flushed, and canceled, Then it controls trailing callback execution', () => {
       const callback = jest.fn();
       const { result } = renderHook(() =>
         useThrottledDebounceFn(callback, { throttleMs: 100, debounceMs: 200, trailing: true })

@@ -2,7 +2,7 @@ import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
 
-const SKELETON_CARD_IDS = [1, 2, 3] as const;
+const SKELETON_CARD_IDS = ['documents', 'sheets', 'decks'] as const;
 
 export default function OfficeLoading() {
   return (
