@@ -145,6 +145,7 @@ export function EngineeringOverviewTable({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState('all');
   const [isSimplifiedView, setIsSimplifiedView] = useState(false);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
 
   const [rows, setRows] = useState<EditableMachineRow[]>(() =>
     initialRows.map((r) => ({
@@ -298,13 +299,14 @@ export function EngineeringOverviewTable({
 
   const handleShiftTypeChange = (nextShift: 'day' | 'night') => {
     if (nextShift === shiftType) return;
-    let carriedOverMachines = 0;
+    const carriedOverMachines = rows.filter(
+      (r) => r.endsOnBreakdown || Boolean(r.carryOverBreakdown)
+    ).length;
 
     setRows((prev) =>
       prev.map((r) => {
         const nextStartSmr = r.stopSmr >= r.startSmr ? r.stopSmr : r.startSmr;
         if (r.endsOnBreakdown || r.carryOverBreakdown) {
-          carriedOverMachines++;
           const rawReason = r.carryOverBreakdown?.reason
             ? r.carryOverBreakdown.reason
             : r.comment && r.comment !== DEFAULT_ALLOWANCE_COMMENT
@@ -644,8 +646,8 @@ export function EngineeringOverviewTable({
         </GlassCard>
       </div>
 
-      {/* Controls & Standard Defaults Banner */}
-      <GlassCard variant="spotlight" className="p-4">
+      {/* Controls & Standard Defaults Banner (animated legend) */}
+      <GlassCard variant="spotlight" className="animate-in fade-in slide-in-from-top-2 p-4 transition-all duration-500">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1.5">
             <h3 className="font-bold text-[var(--text-heading)] text-sm">
@@ -728,8 +730,21 @@ export function EngineeringOverviewTable({
         onToggleSimplifiedView={() => setIsSimplifiedView((prev) => !prev)}
       />
 
+      {/* Table collapse toggle */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          data-testid="table-collapse-toggle"
+          onClick={() => setIsTableCollapsed((prev) => !prev)}
+          className={BTN_SECONDARY}
+        >
+          {isTableCollapsed ? 'Expand Table' : 'Collapse Table'}
+        </button>
+      </div>
+
       {/* Full 20-Column Fleet Overview Table */}
-      <GlassCard className="overflow-hidden p-0">
+      {!isTableCollapsed && (
+      <GlassCard className="overflow-hidden p-0 transition-all duration-300">
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse text-left text-xs">
             <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80">
@@ -1047,6 +1062,7 @@ export function EngineeringOverviewTable({
           </table>
         </div>
       </GlassCard>
+      )}
     </div>
   );
 }
