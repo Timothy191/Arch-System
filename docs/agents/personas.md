@@ -81,6 +81,6 @@ All agent behavioral rules, operational guides, subagent definitions, protocol s
 ### Mandatory Root Entry Points
 
 - **`AGENTS.md`** (Root): Primary Single Source of Truth (SSoT) for architecture, domain, personas, and invariants.
-- **`CLAUDE.md`** (Root): Thin redirect pointing Claude Code agents to `.agents/GUIDE.md` and `.agents/rules/`.
-- **`GEMINI.md`** (Root): Gemini/Antigravity guide with explicit directives pointing to `.agents/GUIDE.md`.
-- **`.cursorrules`** (Root): Thin redirect pointing Cursor IDE agents to `.agents/GUIDE.md` and `.agents/rules/`.
+- **`CLAUDE.md`** (Root): Symlink → `AGENTS.md`, pointing Claude Code agents at the canonical guide and `.agents/rules/`.
+- **`GEMINI.md`** (Root): Symlink → `AGENTS.md`, pointing Gemini/Antigravity agents at the same canonical guide.
+- **`.cursorrules`** (Root): Symlink → `AGENTS.md`, pointing Cursor IDE agents at the canonical guide.

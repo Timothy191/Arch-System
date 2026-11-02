@@ -12,7 +12,7 @@ alwaysApply: true
 
 **Canonical Location:** `.agents/GUIDE.md`
 **Governing SSoT:** `AGENTS.md` (root) — architecture, domain, personas, data flow.
-**Provider-Specific Redirects:** `CLAUDE.md`, `GEMINI.md`, `.cursorrules` — thin pointers to this file.
+**Provider-Specific Redirects:** `CLAUDE.md`, `GEMINI.md`, `.cursorrules` — thin pointers to the root `AGENTS.md` canonical guide.
 
 > All agents — Claude Code, Gemini/Antigravity, Cursor, Copilot, Cline, Windsurf, Codex, Aider, or any future IDE agent — MUST read this guide and the root `AGENTS.md` before operating. Provider-specific settings (e.g. `.claude/settings.json`) remain at their required locations but contain no behavioral rules.
 
@@ -266,16 +266,16 @@ These hard stops are **always in force**, with no approval path:
 
 ## 10. Cross-References
 
-| Resource                       | Location               | Purpose                                                                    |
-| :----------------------------- | :--------------------- | :------------------------------------------------------------------------- |
-| **Architecture & Domain SSoT** | `AGENTS.md` (root)     | Full architecture, data flow, personas, invariants, SSoT table             |
-| **skills-mcp Registry**        | `skills-mcp/`          | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)      |
-| **Engineering Rules**          | `.agents/rules/`       | 22 permanent rule files covering security, verification, testing, thinking |
-| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 60+ reusable workflow skills (dynamically leased via `acquire_skill`) |
-| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 35+ specialist agent definitions (queried via `list_available_personas`) |
-| **A2A Protocol**               | `.agents/a2a/SPEC.md`  | Agent-to-Agent communication protocol                                      |
-| **Memory Base**                | `.agents/memory_base/` | Cross-session error retrospectives and knowledge graph                     |
-| **CorpOS Loops**               | `.agents/corpos/`      | Autonomous business loop engine                                            |
-| **Lifecycle Hooks**            | `.agents/hooks/`       | Pre/post tool guards and tracing                                           |
+| Resource                       | Location                          | Purpose                                                                    |
+| :----------------------------- | :-------------------------------- | :------------------------------------------------------------------------- |
+| **Architecture & Domain SSoT** | `AGENTS.md` (root)                | Full architecture, data flow, personas, invariants, SSoT table             |
+| **skills-mcp Registry**        | `skills-mcp/`                     | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)      |
+| **Engineering Rules**          | `.agents/rules/`                  | 22 permanent rule files covering security, verification, testing, thinking |
+| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 60+ reusable workflow skills (dynamically leased via `acquire_skill`)      |
+| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 35+ specialist agent definitions (queried via `list_available_personas`)   |
+| **A2A Protocol**               | `.agents/a2a/SPEC.md`             | Agent-to-Agent communication protocol                                      |
+| **Memory Base**                | `.agents/memory_base/`            | Cross-session error retrospectives and knowledge graph                     |
+| **CorpOS Loops**               | `.agents/corpos/`                 | Autonomous business loop engine                                            |
+| **Lifecycle Hooks**            | `.agents/hooks/`                  | Pre/post tool guards and tracing                                           |
 
 Last updated: 2026-10-06

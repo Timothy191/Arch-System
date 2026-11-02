@@ -2070,7 +2070,8 @@ flowchart TD
       },
       {
         source: 'Symlink Topology',
-        allowed: 'CLAUDE.md -> AGENTS.md, .agents/rules -> Arch-System/.agents/rules',
+        allowed:
+          'CLAUDE.md -> AGENTS.md, .cursorrules -> AGENTS.md, .agents/rules -> Arch-System/.agents/rules',
         forbidden: 'Divergent copies of rules or migration directories',
         gate: 'pnpm audit:rule-drift',
       },

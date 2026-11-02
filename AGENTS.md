@@ -235,7 +235,10 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Important Files
 
-- `AGENTS.md` / `Arch-System/AGENTS.md`: Canonical guide (`CLAUDE.md` symlinks to it).
+- `AGENTS.md`: Canonical guide (`CLAUDE.md` and `GEMINI.md` symlink to it).
+- `.agents/GUIDE.md`: Unified agent operational guide — rules, hooks, skills index, and provider-redirect map.
+- `.agents/SYSTEMS.md`: Systems + toolchain matrix (AST RAG, syntax-aware diffing, context bundling).
+- `.agents/references/vercel-infrastructure.md`: Vercel Infrastructure & Fluid Compute reference — deployment, serverless timeouts, Fluid Compute debugging.
 - `apps/portal/proxy.ts` → `server/proxy.ts`: Next 16 request proxy (CSP + nonce) → auth, RBAC, route rules.
 - `apps/portal/app/layout.tsx`: Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`).
 - `apps/portal/lib/server-cache.ts`: Server cache profiles, scoped tags, dual-tier invalidation.
@@ -258,6 +261,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - **Node.js**: `engines` require `>=24`; `.node-version` and `.nvmrc` pin major `24`. Node 26.8.1 also present (supplies pnpm).
 - **Package manager**: **pnpm only** (9.15.9 pinned via `packageManager`). Catalogs live in `pnpm-workspace.yaml` (`catalog:` for shared deps, `catalogs.react19` for React 19). Do not use npm, yarn, or bun.
 - **Task runner**: Turborepo 2.x (`turbo.json`). `build` depends on `^build` + `codegen`.
+- **Toolchain mandate**: prefer structural AST search (`ast-grep` / `sg`, `codemap`) over regex `grep`, syntax-aware diffs (`difftastic` / `difft`) over plain `git diff`, and bundle multi-agent context via `repomix` (`pnpm context:pack`). Full matrix: `.agents/SYSTEMS.md`.
 - **Toolchain resolution**: `node` is `/usr/bin/node` (v26.8.1); `pnpm` resolves through mise shim (9.15.9). If a non-login shell lacks `pnpm`, prepend mise installs:
   ```bash
   export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
@@ -311,6 +315,7 @@ All agents operating in this repository MUST follow `.agents/rules/real-world-en
 - **Real-world viewpoint.** Treat this as a production industrial system (24/7 SCADA, shift closeout, safety). Prefer proven, boring solutions; treat failures as catastrophic; consider intermittent connectivity and high operator turnover.
 - **Two-layer verification.** Structural/syntactic gates (type-check, lint, tests, policy) plus real-world fault tolerance (RLS initplan, graceful degradation, optimistic queues).
 - **Verification before claiming.** Never say "works" or "verified" from static analysis alone; execute runtime verification and cite evidence.
+- **Written plan before code.** Non-trivial changes (multi-file, new dependency, schema/API change) require a written plan before code.
 
 When in doubt, ask. Never fabricate.
 

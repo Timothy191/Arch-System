@@ -107,7 +107,8 @@ When the server starts, it binds to `0.0.0.0:3000`:
 - **[docs/ONBOARDING.md](docs/ONBOARDING.md)**: Step-by-step developer onboarding guide
 - **[docs/MONOREPO.md](docs/MONOREPO.md)**: Monorepo structure, Turbo targets, and security policies
 - **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Comprehensive documentation index
-- **[GEMINI.md](GEMINI.md)**: AI-specific development conventions
+- **[GEMINI.md](GEMINI.md)**: Alias for the canonical agent guide (symlink → `AGENTS.md`)
+- **[`.cursorrules`](.cursorrules)**: Alias for the canonical agent guide (symlink → `AGENTS.md`)
 - **[SECURITY.md](docs/SECURITY.md)**: Security policy and vulnerability reporting
 
 ---
