@@ -5,6 +5,41 @@
   "description": "Canonical Single Source of Truth for MCP server registration, tool discovery, and agent onboarding across all multi-agent runtimes (Antigravity CLI, Claude Code, OpenCode, Cursor, VS Code, and Hermes).",
   "requiredServers": ["context7", "codemap", "chrome-devtools"],
   "servers": {
+    "context7": {
+      "name": "context7",
+      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
+      "required": true,
+      "category": "research_and_web",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "type": "stdio"
+    },
+    "codemap": {
+      "name": "codemap",
+      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
+      "required": true,
+      "category": "developer_tools",
+      "command": "/home/tim/.local/bin/codemap",
+      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
+      "type": "stdio"
+    },
+    "chrome-devtools": {
+      "name": "chrome-devtools",
+      "description": "Chrome DevTools MCP for browser inspection and automation",
+      "required": true,
+      "category": "developer_tools",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
+      "type": "stdio"
+    },
+    "supabase": {
+      "name": "supabase",
+      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
+      "required": false,
+      "category": "cloud_infrastructure",
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+    },
     "upstash": {
       "name": "upstash",
       "description": "Upstash Remote MCP Server: Serverless Redis, QStash, Vector, Search, Box, and Blob",
@@ -19,117 +54,6 @@
       },
       "toolsCount": 55
     },
-    "filesystem": {
-      "name": "filesystem",
-      "description": "Safe local filesystem operations and directory tree inspection",
-      "required": false,
-      "category": "core_local",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/tim"],
-      "type": "stdio"
-    },
-    "memory": {
-      "name": "memory",
-      "description": "Persistent Knowledge Graph Memory across conversations and agents",
-      "required": false,
-      "category": "core_local",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "type": "stdio"
-    },
-    "sequential-thinking": {
-      "name": "sequential-thinking",
-      "description": "Dynamic reasoning, problem decomposition, and chain-of-thought verification",
-      "required": false,
-      "category": "core_local",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "type": "stdio"
-    },
-    "ripgrep": {
-      "name": "ripgrep",
-      "description": "Blazing fast AST and regex code search across local projects",
-      "required": false,
-      "category": "developer_tools",
-      "command": "npx",
-      "args": ["-y", "mcp-ripgrep"],
-      "type": "stdio"
-    },
-    "git": {
-      "name": "git",
-      "description": "Git repository operations, diffs, branches, and commit tracking",
-      "required": false,
-      "category": "developer_tools",
-      "command": "uvx",
-      "args": ["mcp-server-git"],
-      "type": "stdio"
-    },
-    "fetch": {
-      "name": "fetch",
-      "description": "Web Content Fetcher (Zero-Auth)",
-      "required": false,
-      "category": "research_and_web",
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "type": "stdio"
-    },
-    "context7": {
-      "name": "context7",
-      "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
-      "required": true,
-      "category": "research_and_web",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
-      "type": "stdio"
-    },
-    "docker": {
-      "name": "docker",
-      "description": "Docker container management and introspection",
-      "required": false,
-      "category": "developer_tools",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-docker"],
-      "type": "stdio"
-    },
-    "knowledge-rail": {
-      "name": "knowledge-rail",
-      "description": "Deterministic semantic architecture enforcement & codebase navigation rail",
-      "required": false,
-      "category": "developer_tools",
-      "command": "npx",
-      "args": ["-y", "knowledge-rail@2.9.1", "--root", "/home/tim/Fork/Arch-System"],
-      "type": "stdio"
-    },
-    "chrome-devtools": {
-      "name": "chrome-devtools",
-      "description": "Chrome DevTools MCP for browser inspection and automation",
-      "required": false,
-      "category": "developer_tools",
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@1.10.1"],
-      "type": "stdio"
-    },
-    "next-devtools": {
-      "name": "next-devtools",
-      "description": "Next.js DevTools AST & routing inspector",
-      "required": false,
-      "category": "developer_tools",
-      "command": "npx",
-      "args": ["-y", "next-devtools-mcp@0.4.0"],
-      "type": "stdio"
-    },
-    "postgres": {
-      "name": "postgres",
-      "description": "PostgreSQL database introspection and query execution",
-      "required": false,
-      "category": "cloud_infrastructure",
-      "command": "sh",
-      "args": [
-        "-c",
-        "set -a; . /home/tim/Fork/Arch-System/.env; exec npx -y @modelcontextprotocol/server-postgres@0.6.2 \"$SUPABASE_DATABASE_URL\""
-      ],
-      "type": "stdio"
-    },
     "redis": {
       "name": "redis",
       "description": "Redis cache inspection and key-value operations",
@@ -143,15 +67,6 @@
         "--url",
         "redis://127.0.0.1:6379/0"
       ],
-      "type": "stdio"
-    },
-    "codemap": {
-      "name": "codemap",
-      "description": "Codebase structural intelligence: SQLite symbols, imports, AST calls, and design tokens",
-      "required": false,
-      "category": "developer_tools",
-      "command": "/home/tim/.local/bin/codemap",
-      "args": ["mcp", "--root", "/home/tim/Fork/Arch-System"],
       "type": "stdio"
     },
     "code-index": {
@@ -192,14 +107,6 @@
       "command": "node",
       "args": ["/home/tim/Fork/slim-tooling-mcp/dist/index.js"],
       "type": "stdio"
-    },
-    "supabase": {
-      "name": "supabase",
-      "description": "Supabase Official Remote MCP Server: Database migrations, RLS, schema introspection, and Edge Functions",
-      "required": false,
-      "category": "cloud_infrastructure",
-      "type": "remote",
-      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
     }
   }
 }

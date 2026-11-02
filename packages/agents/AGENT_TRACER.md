@@ -50,3 +50,12 @@
 - **Purpose**: Initialize subagent coordination library.
 - **Changes**: Created package structure (`package.json`, `tsconfig.json`, `project.json`, `.eslintrc.js`), implemented `SubagentCoordinator` with concurrent executor and synthesis (GPT-4o/gpt-4o-mini), and exported types.
 - **Handoff**: The package is ready. The next agent can build unit tests or extend specialists with specific tool-call runners.
+
+## 2026-11-02: Multimodal image token budgeting & dual-threshold context compaction
+
+- **Purpose**: Prevent runaway compaction loops caused by multimodal base64 image strings and establish dual-threshold context compaction (soft 85% and critical 95% limits) derived from `alphacode_compaction_core`.
+- **Changes**:
+  1. Added `FLAT_IMAGE_TOKEN_COST` (1,200 tokens) in `src/token-budget.ts` to charge a fixed token allowance per image rather than 50x inflated ASCII base64 char length.
+  2. Implemented `estimateContentBlockTokens`, `estimateMessageTokens`, and `assessContextCompaction` with `COMPACTION_SOFT_THRESHOLD` (85%) and `COMPACTION_CRITICAL_THRESHOLD` (95%) and tail preservation of recent 20 turns.
+  3. Added unit tests in `src/token-budget.test.ts` verifying base64 image flat costs and dual-threshold actions (25/25 tests passing).
+- **Handoff**: Multimodal compaction evaluation is ready to be consumed by agents and coordinators.

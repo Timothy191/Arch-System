@@ -1,4 +1,10 @@
-import { TokenBudgetAgent } from './token-budget';
+import {
+  assessContextCompaction,
+  estimateContentBlockTokens,
+  estimateMessageTokens,
+  FLAT_IMAGE_TOKEN_COST,
+  TokenBudgetAgent,
+} from './token-budget';
 
 describe('TokenBudgetAgent System', () => {
   let agent: TokenBudgetAgent;
@@ -152,6 +158,72 @@ describe('TokenBudgetAgent System', () => {
       expect(success).toBe(true);
       expect(plan.roleAllocations.coordinator?.allocatedTokens).toBe(initialCoordinator - 500);
       expect(plan.roleAllocations.specialist?.allocatedTokens).toBe(initialSpecialist + 500);
+    });
+  });
+
+  describe('Multimodal Token Estimation & Context Compaction', () => {
+    it('charges flat token cost for base64 image blocks instead of raw string bloat', () => {
+      const largeBase64Payload = 'A'.repeat(400_000); // 400KB base64 string
+      const imageBlock = {
+        type: 'image' as const,
+        source: {
+          type: 'base64' as const,
+          media_type: 'image/webp',
+          payloadBase64: largeBase64Payload,
+        },
+      };
+
+      const estimatedImageTokens = estimateContentBlockTokens(imageBlock);
+      expect(estimatedImageTokens).toBe(FLAT_IMAGE_TOKEN_COST);
+      // Raw string would have been 100,000 tokens (400,000 / 4)
+      expect(estimatedImageTokens).toBeLessThan(100_000);
+    });
+
+    it('estimates text and tool results tokens proportionally', () => {
+      const textBlock = {
+        type: 'text' as const,
+        text: '12345678', // 8 chars = 2 tokens
+      };
+      expect(estimateContentBlockTokens(textBlock)).toBe(2);
+
+      const message = {
+        role: 'user' as const,
+        content: [
+          textBlock,
+          {
+            type: 'image' as const,
+            source: {
+              type: 'base64' as const,
+              media_type: 'image/png',
+              payloadBase64: 'abc',
+            },
+          },
+        ],
+      };
+      expect(estimateMessageTokens(message)).toBe(2 + FLAT_IMAGE_TOKEN_COST);
+    });
+
+    it('triggers soft compaction when usage exceeds 85% and critical hard drop at 95%', () => {
+      const safeMessages = [
+        { role: 'user' as const, content: 'Hello' },
+        { role: 'assistant' as const, content: 'Hi there' },
+      ];
+      const safeAssessment = assessContextCompaction(safeMessages, 1000);
+      expect(safeAssessment.shouldCompact).toBe(false);
+      expect(safeAssessment.isCritical).toBe(false);
+      expect(safeAssessment.action).toBe('none');
+
+      // Create messages exceeding 850 tokens (85% of 1000 limit)
+      const heavyMessages = Array.from({ length: 25 }, (_, idx) => ({
+        role: (idx % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: 'x'.repeat(160), // 40 tokens per turn * 25 = 1000 tokens
+      }));
+
+      const compactAssessment = assessContextCompaction(heavyMessages, 1000);
+      expect(compactAssessment.shouldCompact).toBe(true);
+      expect(compactAssessment.isCritical).toBe(true);
+      expect(compactAssessment.action).toBe('critical_hard_drop');
+      expect(compactAssessment.turnsToCompactCount).toBe(5); // 25 turns - 20 preserved
     });
   });
 });

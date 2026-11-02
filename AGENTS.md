@@ -264,7 +264,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
   ```
 - **Root install is blocked on purpose** — `pnpm install` at `/home/tim/Fork` exits 1 via `preinstall` hook. Install inside `Arch-System/` (or each standalone MCP server).
 - **Env files**: `Arch-System/.env` (create from `.env.example`), `Arch-System/apps/portal/.env` (template at `apps/portal/env/.env.example`), `Arch-System/.env.tools`. Server-side Supabase/DB keys must never reach the client.
-- **MCP registration**: `.mcp.json` at root registers 11 stdio servers + 4 AgentsRoom HTTP servers; `Arch-System/.mcp.json` has 18. Standalone MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`) have own lockfiles — build/test from their own dirs.
+- **MCP registration**: `.mcp.json` at root registers 7 lean stdio servers (4 first-party + 3 workspace); `Arch-System/.mcp.json` registers 4 core servers (`supabase`, `codemap`, `chrome-devtools`, `context7`). Standalone MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`) have own lockfiles — build/test from their own dirs.
 
 ---
 

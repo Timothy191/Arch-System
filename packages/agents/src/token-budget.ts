@@ -422,3 +422,124 @@ export class TokenBudgetAgent {
     return true;
   }
 }
+
+/**
+ * Context compaction & multimodal constants inspired by alphacode_compaction_core.
+ */
+export const DEFAULT_CONTEXT_WINDOW_LIMIT = 200_000;
+export const COMPACTION_SOFT_THRESHOLD = 0.85;
+export const COMPACTION_CRITICAL_THRESHOLD = 0.95;
+export const RECENT_TURNS_TO_PRESERVE = 20;
+export const MINIMUM_TURNS_TO_PRESERVE = 2;
+export const EMERGENCY_TOOL_RESULT_MAX_CHARS = 10_000;
+export const EMERGENCY_IMAGE_MAX_CHARS = 1024;
+export const FLAT_IMAGE_TOKEN_COST = 1200;
+export const CHARS_PER_TEXT_TOKEN = 4;
+
+export interface MultimodalContentBlock {
+  type: 'text' | 'image' | 'tool_use' | 'tool_result';
+  text?: string;
+  source?: {
+    type: 'base64';
+    media_type: string;
+    payloadBase64: string;
+  };
+  content?: string | MultimodalContentBlock[];
+}
+
+export interface ContextMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string | MultimodalContentBlock[];
+}
+
+export interface CompactionAssessment {
+  estimatedTokens: number;
+  maxContextTokens: number;
+  usageRatio: number;
+  shouldCompact: boolean;
+  isCritical: boolean;
+  turnsToCompactCount: number;
+  action: 'none' | 'soft_compaction' | 'critical_hard_drop';
+}
+
+/**
+ * Calculates estimated tokens for a single content block.
+ * Uses flat token cost for images to prevent 50x bloat from base64 strings.
+ */
+export function estimateContentBlockTokens(block: MultimodalContentBlock): number {
+  if (block.type === 'image') {
+    return FLAT_IMAGE_TOKEN_COST;
+  }
+
+  if (block.type === 'text') {
+    const textLength = block.text?.length ?? 0;
+    return Math.max(1, Math.ceil(textLength / CHARS_PER_TEXT_TOKEN));
+  }
+
+  if (block.type === 'tool_result' || block.type === 'tool_use') {
+    if (typeof block.content === 'string') {
+      return Math.max(1, Math.ceil(block.content.length / CHARS_PER_TEXT_TOKEN));
+    }
+    if (Array.isArray(block.content)) {
+      return block.content.reduce(
+        (accum, childBlock) => accum + estimateContentBlockTokens(childBlock),
+        0
+      );
+    }
+    const textLength = block.text?.length ?? 0;
+    return Math.max(1, Math.ceil(textLength / CHARS_PER_TEXT_TOKEN));
+  }
+
+  return 1;
+}
+
+/**
+ * Calculates estimated tokens for an entire context message.
+ */
+export function estimateMessageTokens(message: ContextMessage): number {
+  if (typeof message.content === 'string') {
+    return Math.max(1, Math.ceil(message.content.length / CHARS_PER_TEXT_TOKEN));
+  }
+
+  if (Array.isArray(message.content)) {
+    return message.content.reduce((accum, block) => accum + estimateContentBlockTokens(block), 0);
+  }
+
+  return 1;
+}
+
+/**
+ * Assesses whether a conversation history requires compaction using dual-threshold gating.
+ */
+export function assessContextCompaction(
+  messages: readonly ContextMessage[],
+  maxContextTokens = DEFAULT_CONTEXT_WINDOW_LIMIT
+): CompactionAssessment {
+  const estimatedTokens = messages.reduce(
+    (accum, message) => accum + estimateMessageTokens(message),
+    0
+  );
+  const usageRatio = estimatedTokens / maxContextTokens;
+  const isCritical = usageRatio >= COMPACTION_CRITICAL_THRESHOLD;
+  const shouldCompact = usageRatio >= COMPACTION_SOFT_THRESHOLD;
+
+  let action: CompactionAssessment['action'] = 'none';
+  if (isCritical) {
+    action = 'critical_hard_drop';
+  } else if (shouldCompact) {
+    action = 'soft_compaction';
+  }
+
+  const excessTurns = Math.max(0, messages.length - RECENT_TURNS_TO_PRESERVE);
+  const turnsToCompactCount = shouldCompact ? excessTurns : 0;
+
+  return {
+    estimatedTokens,
+    maxContextTokens,
+    usageRatio,
+    shouldCompact,
+    isCritical,
+    turnsToCompactCount,
+    action,
+  };
+}
