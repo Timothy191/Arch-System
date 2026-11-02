@@ -12,7 +12,10 @@ export default function NotFound() {
             alt="404 Not Found"
             width={120}
             height={120}
-            priority
+            // AGENT-TRACE: `priority` was deprecated in Next.js 16 in favour of `preload`
+            // (see next/dist/shared/lib/get-img-props.js). Behaviour is identical: emit a
+            // <link rel="preload"> for this above-the-fold LCP image.
+            preload
             className="opacity-80 transition-opacity duration-200 hover:opacity-100"
           />
         </div>

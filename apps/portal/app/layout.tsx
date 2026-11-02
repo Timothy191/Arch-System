@@ -90,10 +90,57 @@ const spaceGrotesk = Space_Grotesk({
 
 import { APP_VERSION } from '@/lib/version';
 
+const SITE_NAME = 'Arch-Systems';
+const SITE_TITLE = 'Arch-Systems | Arch OS';
+const SITE_DESCRIPTION = 'Multi-departmental industrial operations portal';
+const LOCAL_SITE_ORIGIN = 'http://localhost:3000';
+
+/**
+ * Resolves the canonical origin used to absolutize metadata URLs (Open Graph images,
+ * canonical links). `metadataBase` must be an absolute URL, so the local dev origin is
+ * the safe final fallback rather than an undefined value.
+ */
+function resolveSiteOrigin(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  return LOCAL_SITE_ORIGIN;
+}
+
 export const metadata: Metadata = {
-  title: 'Arch-Systems | Arch OS',
-  description: 'Multi-departmental industrial operations portal',
+  metadataBase: new URL(resolveSiteOrigin()),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   manifest: '/manifest.json',
+  // AGENT-TRACE: This is an authenticated industrial operations portal (SCADA telemetry,
+  // employee records, shift closeout). Nothing here belongs in a search index. Enforced in
+  // three places: this directive, `app/robots.ts`, and the `X-Robots-Tag` response header in
+  // next.config.mjs (which also covers static assets that never hit a React render).
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    nosnippet: true,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'en_GB',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: '/',
+  },
+  // `app/opengraph-image.tsx` supplies the 1200x630 card to both Open Graph and
+  // Twitter via Next's file-convention fallback, so no manual image list is needed.
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

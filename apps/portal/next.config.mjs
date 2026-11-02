@@ -112,14 +112,31 @@ const nextConfig = {
     '@repo/hub/ui',
   ],
   images: {
-    // Fix: Disable built-in Vercel image optimization to prevent hitting storage/optimization quotas.
-    // Cloudinary and Supabase provide their own optimization, so Vercel's is redundant.
+    // DECISION (measured 2026-11): image optimization stays OFF at the Vercel layer.
+    // `unoptimized: true` short-circuits `generateImgAttrs` in next/dist/shared/lib/get-img-props.js
+    // (line ~242), so nothing is resized, no AVIF/WebP variant is produced, and `sizes`/`formats`
+    // below have no runtime effect. Consequence, measured on disk: hub department cards request
+    // a 155-278 KB JPEG into a ~380 px banner (public/images/departments is 2.0 MB of JPEG).
+    // Flip this only together with a custom `loader` (Cloudinary is already allowlisted) — otherwise
+    // Vercel transformation billing resumes on every unique width. The alternative, cheaper path is
+    // pre-generating AVIF/WebP derivatives with sharp (already in the lockfile) at build time.
     unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 3600,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Allowlist for the local asset roots that next/image may touch. Inert while
+    // `unoptimized: true`, but prevents arbitrary-path optimization (and the 400s that
+    // follow) the moment a loader is wired up.
+    localPatterns: [
+      { pathname: '/images/**', search: '' },
+      { pathname: '/background/**', search: '' },
+      { pathname: '/error-pages/**', search: '' },
+      { pathname: '/icons/**', search: '' },
+      { pathname: '/logo.svg', search: '' },
+      { pathname: '/whatsapp-logo.jpeg', search: '' },
+    ],
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
@@ -222,6 +239,13 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          {
+            // AGENT-TRACE: Belt-and-braces crawl refusal. The `robots` metadata directive and
+            // `app/robots.ts` only cover rendered routes and the robots probe; this header also
+            // covers static assets, API responses, and error pages served without a React render.
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
           },
           {
             key: 'Permissions-Policy',
