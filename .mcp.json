@@ -23,6 +23,11 @@
       "args": ["-y", "@upstash/context7-mcp"],
       "description": "Context7: Up-to-date documentation and code examples for libraries and frameworks",
       "type": "stdio"
+    },
+    "frontend-checklist": {
+      "url": "https://mcp.frontendchecklist.io",
+      "description": "Front-End Checklist: 385 quality-gated frontend best practice rules for automated code review",
+      "type": "remote"
     }
   }
 }
