@@ -61,8 +61,8 @@
   },
   "overrides": {
     "handlebars": ">=4.7.10",
-    "minimatch": ">=9.0.7",
-    "glob": "^13.0.6",
+    "minimatch": ">=11.0.3",
+    "glob": ">=14.0.3",
     "serialize-javascript": ">=7.0.3",
     "kysely": ">=0.28.17",
     "tmp": ">=0.2.6",
@@ -284,7 +284,9 @@
     "auditConfig": {
       "ignoreGhsas": [
         "GHSA-vfj7-8cjw-p6xm",
-        "GHSA-mrwp-f3q8-3g9p"
+        "GHSA-mrwp-f3q8-3g9p",
+        "GHSA-gcqx-w48m-w2h4",
+        "GHSA-g3hv-75wg-m249"
       ]
     },
     "overrides": {
@@ -333,7 +335,8 @@
       "ws@>=7.0.0 <7.5.11": ">=7.5.11",
       "zod@<4.6.6": ">=4.6.6",
       "systeminformation@<5.33.16": ">=5.33.16",
-      "glob@>=13.0.0 <14.0.2": ">=14.0.2",
+      "glob@>=9.0.0 <14.0.2": ">=14.0.2",
+      "swagger-jsdoc>glob": ">=14.0.2",
       "wait-on>joi": "^18.3.1"
     }
   }
