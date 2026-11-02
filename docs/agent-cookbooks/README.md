@@ -4,13 +4,14 @@ Task-focused playbooks for coding agents working in Arch-System. Read the releva
 
 ## Choose a cookbook
 
-| Task                                     | Cookbook                                                     |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| Add or change a portal feature           | [feature-delivery.md](./feature-delivery.md)                 |
-| Change tables, migrations, or contracts  | [database-contract.md](./database-contract.md)               |
-| Change auth, proxy, permissions, or APIs | [security-and-api.md](./security-and-api.md)                 |
-| Build or update UI                       | [ui-and-design-system.md](./ui-and-design-system.md)         |
-| Validate, review, and release work       | [verification-and-release.md](./verification-and-release.md) |
+| Task                                     | Cookbook                                                               |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| Add or change a portal feature           | [feature-delivery.md](./feature-delivery.md)                           |
+| Change tables, migrations, or contracts  | [database-contract.md](./database-contract.md)                         |
+| Change auth, proxy, permissions, or APIs | [security-and-api.md](./security-and-api.md)                           |
+| Build or update UI                       | [ui-and-design-system.md](./ui-and-design-system.md)                   |
+| Frontend perf, flags, motion & Rust      | [frontend-performance-and-rust.md](./frontend-performance-and-rust.md) |
+| Validate, review, and release work       | [verification-and-release.md](./verification-and-release.md)           |
 
 ## Universal operating loop
 
