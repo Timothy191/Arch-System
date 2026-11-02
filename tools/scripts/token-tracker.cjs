@@ -773,8 +773,8 @@ function main() {
       const entry = {
         id: `sess-${Date.now()}`,
         timestamp: new Date().toISOString(),
-        agent: getArg('--agent', process.env.OMG_WORKER_NAME || 'claude-code-agent'),
-        model: getArg('--model', 'claude-sonnet-4'),
+        agent: getArg('--agent', process.env.OMG_WORKER_NAME || 'antigravity-gemini-agent'),
+        model: getArg('--model', 'gemini-3.6-flash'),
         inputTokens: parseInt(getArg('--input', '42000'), 10) || 42000,
         cachedTokens: parseInt(getArg('--cached', '35280'), 10) || 35280,
         outputTokens: parseInt(getArg('--output', '7800'), 10) || 7800,

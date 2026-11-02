@@ -79,8 +79,8 @@ import { createAgentSDK } from '@repo/agents';
 
 const sdk = createAgentSDK({
   coordinatorConfig: {
-    provider: 'openai',
-    defaultModel: 'gpt-4o-mini',
+    provider: 'gemini',
+    defaultModel: 'gemini-3.6-flash',
   },
 });
 

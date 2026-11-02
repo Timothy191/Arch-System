@@ -13,8 +13,8 @@
  *   TASK_TAG            - task identifier / commit subject (default: 'unknown')
  *   TASK_DURATION       - wall-clock seconds for the task (default: '0')
  *   TASK_PAYLOAD        - raw prompt/context payload; BPE-counted when gpt-tokenizer is available
- *   TASK_AGENT          - agent name (default: OMG_WORKER_NAME or 'claude-code-agent')
- *   TASK_MODEL          - model id (default: 'claude-sonnet-4')
+ *   TASK_AGENT          - agent name (default: OMG_WORKER_NAME or 'antigravity-gemini-agent')
+ *   TASK_MODEL          - model id (default: 'gemini-3.6-flash')
  *   TASK_BUGS_RESOLVED  - integer count of bugs fixed in this task (default: 0)
  *   TASK_TURNS          - number of reasoning turns (default: 1)
  */
@@ -29,8 +29,8 @@ function main() {
   const taskTag = process.env.TASK_TAG || 'unknown';
   const taskDuration = process.env.TASK_DURATION || '0';
   const taskPayload = process.env.TASK_PAYLOAD || '';
-  const agent = process.env.TASK_AGENT || process.env.OMG_WORKER_NAME || 'claude-code-agent';
-  const model = process.env.TASK_MODEL || 'claude-sonnet-4';
+  const agent = process.env.TASK_AGENT || process.env.OMG_WORKER_NAME || 'antigravity-gemini-agent';
+  const model = process.env.TASK_MODEL || 'gemini-3.6-flash';
   const bugsResolved = Math.max(0, parseInt(process.env.TASK_BUGS_RESOLVED || '0', 10) || 0);
   const turns = Math.max(1, parseInt(process.env.TASK_TURNS || '1', 10) || 1);
 

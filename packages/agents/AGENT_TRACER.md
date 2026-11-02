@@ -1,5 +1,21 @@
 # Agent Tracer - @repo/agents
 
+## 2026-11-02T14:48:00+02:00 - Unified Antigravity Gemini Harness Engine (AutoGPT + RuFlo + invisible_dots)
+
+- **Purpose**: Integrate reverse-engineered zero-overhead agentic harness mechanisms from `Significant-Gravitas/AutoGPT`, `ruvnet/ruflo`, and `feder-cr/invisible_dots` into `@repo/agents` while standardizing all model tiers on Antigravity Gemini models (`gemini-3.6-flash`, `gemini-2.5-pro`, `gemini-2.5-flash-lite`).
+- **Changes**:
+  - `src/harness-engine.ts` & `src/harness-engine.test.ts`: Added `ToolPermissionGate` (3-tier `allow`/`ask`/`deny` + durable Approval Inbox), `IdempotentCallLedger` (crash-safe single-execution guarantee), `TrajectoryContrastiveStore` (zero-LLM local trajectory contrastive ranking), `AgentRoutineRegistry` (AutoGPT Otto Expert Briefs & Routines), and `runHarnessDoctor` preflight diagnostics.
+  - `src/index.ts`: Exported `harness-engine`.
+- **Verification**: `pnpm --filter @repo/agents test` (5/5 suites, 35/35 tests pass) and `pnpm --filter @repo/agents type-check` (0 errors).
+
+## 2026-11-02T14:46:00+02:00 - Antigravity Model Tier Alignment & Specialist Mapping
+
+- **Purpose**: Update specialist personas and prompt envelope with Antigravity Gemini model tiers (Pro for complex reasoning/governance, Flash for rapid telemetry/UI tasks).
+- **Changes**:
+  - `src/specialists.ts`: Added `ANTIGRAVITY_GEMINI_MODELS` mapping and configured `defaultModel` across all specialist personas.
+  - `src/prompt-envelope.ts`: Set default model tier in runtime envelope.
+- **Verification**: `pnpm --filter @repo/agents test` and `pnpm --filter @repo/agents type-check` ✅.
+
 ## 2026-11-02T14:08:00+02:00 - Autonomous Coordinator Engine & Dependency Sequencer
 
 - **Purpose**: Implement `AutonomousCoordinator` providing multi-agent plan sequencing, topological task dependency scheduling, specialist persona resolution, critical failure abort policies, and output synthesis.

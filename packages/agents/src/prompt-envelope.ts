@@ -88,7 +88,7 @@ Operational Mode: ${config.identity.mode}
 Routing Directive: ${config.identity.routingDescription}
 
 ### 2. MODEL & RUNTIME ENVELOPE
-Model Tier: ${config.runtime.modelTier || 'frontier-fast'}
+Model Tier: ${config.runtime.modelTier || 'gemini-3.6-flash (Antigravity Gemini)'}
 Sampling Temperature: ${config.runtime.temperature ?? 0.1} (Strict deterministic)
 Max Execution Steps: ${config.runtime.maxSteps || 10}
 

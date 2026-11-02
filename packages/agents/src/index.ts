@@ -3,6 +3,7 @@ export * from './concurrency';
 export type { CoordinatorConfig, RunOptions, Subtask, TaskRunResult } from './coordinator';
 export * from './coordinator';
 export * from './fleet-runner';
+export * from './harness-engine';
 export * from './langfuse';
 export * from './memory';
 export * from './openrouter';
