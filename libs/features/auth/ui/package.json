@@ -8,7 +8,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "next": "^16.4.1",
     "react": "catalog:react19",

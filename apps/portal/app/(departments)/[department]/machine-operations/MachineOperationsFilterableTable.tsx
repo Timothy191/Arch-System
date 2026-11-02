@@ -45,7 +45,7 @@ interface MachineOperationsFilterableTableProps {
   onSearchQueryChange?: (query: string) => void;
 }
 
-export function MachineOperationsFilterableTable({
+function MachineOperationsFilterableTable({
   machines,
   operations,
   activeBreakdowns,

@@ -127,6 +127,7 @@
     "memory:index": "node tools/scripts/smart-indexer.cjs",
     "memory:recall": "node tools/scripts/smart-indexer.cjs --query",
     "memory:browse": "bash scripts/datasette-swarm-memory.sh",
+    "scada:stream": "bash scripts/inspect-scada-stream.sh",
     "token:analyze": "node tools/scripts/token-tracker.cjs analyze",
     "token:sync": "node tools/scripts/token-tracker.cjs sync",
     "token:record": "node tools/scripts/token-tracker.cjs record",

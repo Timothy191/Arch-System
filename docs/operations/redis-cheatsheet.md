@@ -87,3 +87,33 @@ redis-cli -u $REDIS_URL monitor
 redis-cli -u $REDIS_URL slowlog get 10
 redis-cli -u $REDIS_URL slowlog len
 ```
+
+---
+
+## 6. SCADA Telemetry Stream Inspection
+
+Arch-System buffers incoming machine telemetry in capped Redis streams via `publishScadaTelemetryStream` (`@repo/redis/streams`).
+
+```bash
+# Automated inspection script (reads last 10 entries)
+pnpm scada:stream
+
+# Custom count inspection
+bash scripts/inspect-scada-stream.sh 25
+
+# Direct redis-cli inspection
+redis-cli -u $REDIS_URL xrevrange "stream:telemetry:scada" + - COUNT 10
+
+# Read stream length and verify approximate trimming (~5000 max length)
+redis-cli -u $REDIS_URL xlen "stream:telemetry:scada"
+```
+
+---
+
+## 7. Dragonfly Multi-Threaded Engine Profile
+
+Arch-System's `@repo/redis` client is 100% wire-compatible with [Dragonfly](https://github.com/dragonflydb/dragonfly). Under high-volume SCADA operations (e.g. 100+ haul trucks streaming sensor metrics at 10Hz), Dragonfly can be deployed as a drop-in replacement for Redis:
+
+- **Protocol Compatibility**: Full RESP2 and RESP3 wire compliance.
+- **Zero Monorepo Changes**: Simply set `REDIS_URL=redis://<dragonfly-host>:6379`.
+- **Throughput Advantage**: Multi-threaded shared-nothing architecture delivers up to 25x higher stream and cache ingestion throughput with sub-millisecond p99 latency.
