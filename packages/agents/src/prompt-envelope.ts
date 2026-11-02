@@ -55,6 +55,7 @@ export const MANDATORY_NEGATIVE_CONSTRAINTS = [
   'NEVER import @repo/database or @repo/supabase directly inside pure UI packages (@repo/ui, features UI).',
   'NEVER emit raw Tailwind shadow classes (e.g. shadow-blue-500, shadow-2xl). Use OKLCH tokens and approved shadow classes exclusively.',
   "NEVER use responsive 'dark:' classes. The visual theme is strictly light-mode.",
+  'ALWAYS enforce schema-constrained structured generation (Outlines invariant: https://github.com/dottxt-ai/outlines). All agent outputs, tools, contracts, and handoffs must strictly adhere to validated JSON Schema or Zod contracts, prohibiting unconstrained hallucinated payloads.',
   'IF tests, type-checks, or policy audits fail, perform self-remediation before concluding output.',
 ];
 

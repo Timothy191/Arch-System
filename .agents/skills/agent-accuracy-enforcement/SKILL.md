@@ -128,3 +128,13 @@ Before building any reasoning, analysis, or proposal, you **MUST**:
    - Discard assumptions that fail verification before proceeding
 
 **Violations**: Building multi-step reasoning on unverified assumptions is a critical failure. Ground first, reason second.
+
+## 10. Outlines Schema-Constrained Generation Invariant (`dottxt-ai/outlines`)
+
+**All AI coding agents, specialist swarms, and subagents MUST permanently enforce schema-constrained generation.**
+
+Inspired by the [Outlines](https://github.com/dottxt-ai/outlines) structured generation architecture:
+
+1. **Zero Unconstrained Payloads**: When producing structured outputs, database migrations, RPC parameters, or inter-agent communications, outputs must strictly adhere to validated JSON Schema or Zod contract specifications.
+2. **Deterministic Contract Adherence**: Tool inputs and API payloads must conform 1:1 with `@repo/contract` Zod schemas. Hallucinated or speculative object keys are strictly forbidden.
+3. **Structured Handoffs**: Subagent invocations, coordination tasks, and swarm state machines must communicate exclusively using typed, schema-validated payloads rather than ambiguous natural language summaries.

@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/agents
 
+## 2026-11-02T09:41:00+02:00 - Outlines Structured Generation Mandate Across All Agents
+
+- **Purpose**: Permanently establish schema-constrained structured output generation across all AI coding agents, specialist swarms, and subagent prompts, inspired by [dottxt-ai/outlines](https://github.com/dottxt-ai/outlines).
+- **Changes**:
+  - `packages/agents/src/prompt-envelope.ts`: Added Outlines schema-constrained structured generation invariant to `MANDATORY_NEGATIVE_CONSTRAINTS`.
+  - `.agents/skills/agent-accuracy-enforcement/SKILL.md`: Added Pillar 10: Outlines Schema-Constrained Generation Invariant enforcing deterministic JSON Schema / Zod contract compliance for all agent outputs and tool payloads.
+  - `scripts/datasette-swarm-memory.sh`: Added Datasette launcher for exploring the local RuFlo Swarm SQLite memory database (`.swarm/memory.db`).
+- **Verification**: `pnpm --filter @repo/agents type-check` (0 errors); `pnpm --filter @repo/agents test` (18/18 tests pass).
+
 ## 2026-09-08T10:24:37Z - Multi-Provider LLM Support in SubagentCoordinator
 
 - **Purpose**: Extended `SubagentCoordinator` to support Gemini, Aion, Cohere, and local Ollama providers alongside OpenAI, via explicit `provider` selection or env-based auto-detection, and documented the new keys in `.env.example`.
