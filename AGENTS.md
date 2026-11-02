@@ -312,3 +312,9 @@ All agents operating in this repository MUST follow `.agents/rules/real-world-en
 - **Verification before claiming.** Never say "works" or "verified" from static analysis alone; execute runtime verification and cite evidence.
 
 When in doubt, ask. Never fabricate.
+
+## References
+
+- [AGENTS.md open format](https://agents.md/) — canonical spec; closest AGENTS.md to edited file wins; explicit user prompts override everything.
+- Nested AGENTS.md supported for monorepos (subproject-specific guidance).
+- Treat as living documentation; update when conventions change.
