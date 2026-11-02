@@ -29,11 +29,6 @@ const nextConfig = {
   // AGENT-TRACE: Next.js 16 Cache Components enabled for 'use cache' directives and granular component prerendering
   cacheComponents: true,
   partialPrefetching: true,
-
-  // AGENT-TRACE: Next.js 16 - Cache max memory size for server-side in-memory cache (default: 64MB)
-  // Increased to 128MB to handle larger industrial datasets without eviction
-  cacheMaxMemorySize: '128m',
-
   // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds
   // (`next build`). Webpack (`next build --webpack`) produces better chunk deduplication (0 vs
   // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
@@ -74,21 +69,6 @@ const nextConfig = {
   },
   turbopack: {
     root: workspaceRoot,
-    // AGENT-TRACE: Next.js 16 - Enable filesystem caching for faster rebuilds
-    // Caches compiler artifacts on disk between runs
-    cacheDirectory: path.join(workspaceRoot, '.next/cache/turbopack'),
-
-    // AGENT-TRACE: Next.js 16 - Enable debug IDs for better error messages
-    debugIds: true,
-
-    // AGENT-TRACE: Next.js 16 - Advanced webpack loader conditions for better compatibility
-    // Required for some packages that use Node.js native modules
-    advancedWebpackLoaderConditions: true,
-
-    // AGENT-TRACE: Resolve alias for Sass node_modules imports (legacy support)
-    resolveAlias: {
-      '~*': '*',
-    },
   },
   // AGENT-TRACE: On Vercel, omit standalone output so Next.js uses native Vercel lambda tracing.
   // In Docker/self-hosted environments, produce standalone output.
@@ -202,18 +182,6 @@ const nextConfig = {
       dynamic: 30,
       static: 300,
     },
-    // AGENT-TRACE: Next.js 16 - Parallel Routes + Intercepting Routes support
-    // Enables advanced routing patterns for modular dashboard layouts
-    ppr: true,
-
-    // AGENT-TRACE: Next.js 16 - Server Actions improved caching and validation
-    serverActions: {
-      // Allow Server Actions to be cached and revalidated
-      cache: 'force-cache',
-      // Body size limit for Server Actions (default: '1mb')
-      bodySizeLimit: '4mb',
-    },
-
     // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
     optimizePackageImports: [
       'lucide-react',
@@ -231,31 +199,8 @@ const nextConfig = {
       '@radix-ui/react-select',
       '@radix-ui/react-tooltip',
       '@radix-ui/react-popover',
-      '@radix-ui/react-slot',
-      '@radix-ui/react-label',
-      '@radix-ui/react-separator',
-      '@radix-ui/react-checkbox',
-      '@radix-ui/react-radio-group',
-      '@radix-ui/react-switch',
-      '@radix-ui/react-progress',
-      '@radix-ui/react-accordion',
-      '@radix-ui/react-collapsible',
       '@repo/ui',
-      'react-hook-form',
-      'zustand',
-      'xstate',
     ],
-
-    // AGENT-TRACE: Next.js 16 - Enable middleware inline config for proxy.ts
-    // Allows inline configuration in proxy.ts
-    proxy: {
-      // Enable proxy middleware
-      enabled: true,
-    },
-
-    // AGENT-TRACE: Next.js 16 - Enable cache handlers for custom cache backends
-    // Currently using default in-memory cache, but can be extended to Redis
-    cacheHandlers: [],
   },
   async headers() {
     return [
