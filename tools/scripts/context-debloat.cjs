@@ -29,6 +29,7 @@ const ESSENTIAL_SKILLS = [
   'structured-thinking',
   'testing-rules',
   'todo-completion',
+  'industrial-rca',
 ];
 
 // Skills that are likely unused or duplicates

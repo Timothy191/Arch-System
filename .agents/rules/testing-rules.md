@@ -1,6 +1,6 @@
 ---
 name: testing-rules
-description: 'Canonical JavaScript/TypeScript & Node.js testing standards (distilled from javascript-testing-best-practices & nodebestpractices): Jest 30 + @swc/jest and Playwright SSoT, AAA structure, black-box behavior assertions, boundary-only mocking, and typed AppError verification.'
+description: 'Jest 30, @swc/jest, Playwright SSoT, AAA structure, boundary-only mocking, and typed AppError verification.'
 paths:
   - '**/*.test.{ts,tsx,mjs}'
   - '**/*.spec.{ts,tsx}'
@@ -30,5 +30,11 @@ When writing or modifying unit, integration, or E2E tests across `apps/`, `packa
    - Every Server Action, DAL helper, and API route test suite must verify both the happy path and failure modes using typed `@repo/errors` subclasses (`ValidationError` 400, `AuthError` 401, `ForbiddenError` 403, `NotFoundError` 404, `ConflictError` 409, `RateLimitError` 429, `DatabaseError` 500, `APIError`/`NetworkError`/`FetchTimeoutError` 502/503/504) and type guards (`isAppError`).
 6. **Playwright E2E & Visual Regression Hygiene**:
    - Multi-viewport Chromium projects (`chromium`, `mobile-chrome`, `tablet-chrome`) reuse authenticated storage state (`e2e/.auth/user.json`), forbid `.only` in CI (`forbidOnly: !!process.env.CI`), and enforce deterministic visual snapshot diffs (`maxDiffPixelRatio: 0.02`).
+7. **Severity-Tiered Testing (Agentic QE Risk Model)**:
+   - **Class 1 (Safety/SCADA/RLS)**: 100% boundary tests, rollback safety, and real Redis stream execution.
+   - **Class 2 (Server Actions/Cache)**: Network-boundary mocks and typed `AppError` assertions.
+   - **Class 3 (UI Presentation)**: Storybook a11y (`test:a11y`) and Playwright visual snapshots.
+8. **Evidence Receipts**:
+   - Write JUnit XML and NDJSON evidence to `.ci-local/agent-verify-evidence.json` on verification.
 
 See `skill://testing-rules` for full protocol details.

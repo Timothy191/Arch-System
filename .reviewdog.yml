@@ -1,0 +1,14 @@
+# Reviewdog configuration for Arch-System
+runner:
+  biome:
+    cmd: pnpm biome check --reporter=summary .
+    format: biome-check
+    level: error
+  tsc:
+    cmd: pnpm --filter portal type-check
+    format: tsc
+    level: error
+  fallow:
+    cmd: pnpm fallow:audit
+    format: fallow
+    level: warning

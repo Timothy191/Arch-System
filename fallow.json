@@ -13,5 +13,18 @@
       "scripts/seeds"
     ]
   },
-  "ignorePatterns": ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/coverage/**"]
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "tools/audits/**",
+    "tools/edge/**",
+    "tools/mcp/**",
+    "tools/ops/**",
+    "tools/policy/**",
+    "tools/repo/**",
+    "tools/scripts/**",
+    "tools/agent-lint/**"
+  ]
 }
