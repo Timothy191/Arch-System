@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-31T17:38:35.486Z",
+  "generatedAt": "2026-11-02T11:04:38.733Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
@@ -31,10 +31,6 @@
     "animate-in backdrop-blur-sm bg-black/40 duration-200 fade-in fixed flex inset-0 items-center justify-center p-4 z-50": {
       "tokens": 12,
       "uses": 4
-    },
-    "bg-[var(--accent-blue)]/10 font-semibold gap-2 gold-steel-border gold-steel-border-slim inline-flex items-center px-3.5 py-1.5 rounded-lg text-[var(--accent-blue)] text-xs transition-all": {
-      "tokens": 13,
-      "uses": 3
     },
     "bg-[var(--bg-primary)] border border-[var(--border-default)] disabled:cursor-not-allowed disabled:opacity-50 focus:border-[var(--accent-blue)] focus:outline-none px-2 py-1.5 rounded-lg text-[var(--text-heading)] text-sm w-full": {
       "tokens": 13,
@@ -99,10 +95,6 @@
     "bg-black/[0.03] border border-black/[0.08] flex font-medium gap-1.5 gold-steel-border gold-steel-border-slim items-center px-3 py-1.5 rounded-lg text-[var(--text-secondary)]": {
       "tokens": 13,
       "uses": 4
-    },
-    "border border-transparent font-medium gap-2 hover:bg-black/[0.04] hover:border-[var(--border-subtle)] hover:text-[var(--accent-blue)] inline-flex items-center px-3.5 py-1.5 rounded-lg text-[var(--text-heading)] text-xs transition-all": {
-      "tokens": 15,
-      "uses": 3
     },
     "border-border-subtle border-t flex font-mono items-center justify-between mt-3 pt-2 text-[11px] text-text-muted": {
       "tokens": 10,
