@@ -204,6 +204,7 @@ export type {
   DepartmentAccessLevel,
   EmployeeDepartmentAccess,
 } from './schemas/employee-department-access.schema';
+export * from './schemas/feature-flags.schema';
 export type {
   Equipment,
   EquipmentStatus,
