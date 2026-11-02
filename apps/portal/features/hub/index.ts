@@ -13,3 +13,4 @@
  */
 export * from '@repo/hub/ui';
 export { CoreOperationalModules } from './components/CoreOperationalModules';
+export { OperationsCopilot } from './components/OperationsCopilot';
