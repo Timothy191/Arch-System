@@ -229,23 +229,21 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Important Files
 
-| File                                       | Role                                                                                               |
-| :----------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` / `Arch-System/AGENTS.md`      | Canonical guide (`CLAUDE.md` symlinks to it)                                                       |
-| `apps/portal/proxy.ts` → `server/proxy.ts` | Next 16 request proxy (CSP + nonce) → auth, RBAC, route rules                                      |
-| `apps/portal/app/layout.tsx`               | Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`) |
-| `apps/portal/lib/server-cache.ts`          | Server cache profiles, scoped tags, dual-tier invalidation                                         |
-| `apps/portal/next.config.mjs`              | `cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`                    |
-| `apps/portal/setupTests.ts`                | Global Jest mocks (`next/cache`, `@repo/redis`, browser globals)                                   |
-| `packages/contract/src/index.ts`           | Canonical Zod schema + type exports (`src/schemas/*.schema.ts`)                                    |
-| `packages/database/migrations/`            | Canonical SQL migrations (`NNN_description.sql`)                                                   |
-| `packages/errors/src/index.ts`             | `AppError` hierarchy and type guards                                                               |
-| `packages/theme/src/tokens/index.ts`       | OKLCH design-token SSoT                                                                            |
-| `packages/ui/src/components/GlassCard.tsx` | Primary light-mode glass surface component                                                         |
-| `packages/typescript-config/base.json`     | Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`)                                  |
-| `tools/repo/policy-compiler.cjs`           | Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`)                                 |
-| `tools/scripts/agent-verify.sh`            | 27-step completion gate (`pnpm agent:verify`)                                                      |
-| `e2e/playwright.config.ts`                 | Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`)                      |
+- `AGENTS.md` / `Arch-System/AGENTS.md`: Canonical guide (`CLAUDE.md` symlinks to it).
+- `apps/portal/proxy.ts` → `server/proxy.ts`: Next 16 request proxy (CSP + nonce) → auth, RBAC, route rules.
+- `apps/portal/app/layout.tsx`: Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`).
+- `apps/portal/lib/server-cache.ts`: Server cache profiles, scoped tags, dual-tier invalidation.
+- `apps/portal/next.config.mjs`: `cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`.
+- `apps/portal/setupTests.ts`: Global Jest mocks (`next/cache`, `@repo/redis`, browser globals).
+- `packages/contract/src/index.ts`: Canonical Zod schema + type exports (`src/schemas/*.schema.ts`).
+- `packages/database/migrations/`: Canonical SQL migrations (`NNN_description.sql`).
+- `packages/errors/src/index.ts`: `AppError` hierarchy and type guards.
+- `packages/theme/src/tokens/index.ts`: OKLCH design-token SSoT.
+- `packages/ui/src/components/GlassCard.tsx`: Primary light-mode glass surface component.
+- `packages/typescript-config/base.json`: Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`).
+- `tools/repo/policy-compiler.cjs`: Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`).
+- `tools/scripts/agent-verify.sh`: 27-step completion gate (`pnpm agent:verify`).
+- `e2e/playwright.config.ts`: Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`).
 
 ---
 
