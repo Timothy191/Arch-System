@@ -54,6 +54,12 @@ const withAlpha = (token: string): string =>
 
 const archTheme: Config = {
   content,
+  safelist: [
+    // Dynamic classNames constructed at runtime (badgeColor, availabilityClass, etc.)
+    // must be safelisted or purged. Prefer static lookup maps long-term.
+    { pattern: /^(bg|text|border)-(accent|arch|dept)-(blue|red|green|amber|charcoal|emerald|mint|slate|neutral)/ },
+    { pattern: /^(bg|text|border)-(accent|arch)-(blue|red|green|amber)\/(5|10|15|20|25|30|40|50)$/ },
+  ],
   future: {
     hoverOnlyWhenSupported: true,
   },
@@ -383,6 +389,8 @@ const archTheme: Config = {
         'mac-fluid': 'cubic-bezier(0.25, 1, 0.5, 1)',
       },
       fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        '3xs': ['0.5625rem', { lineHeight: '0.75rem' }],
         'tremor-label': ['0.75rem', { lineHeight: '1rem' }],
         'tremor-default': ['0.875rem', { lineHeight: '1.25rem' }],
         'tremor-title': ['1.125rem', { lineHeight: '1.75rem' }],
