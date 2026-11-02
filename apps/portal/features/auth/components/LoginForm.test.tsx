@@ -91,7 +91,7 @@ describe('LoginForm', () => {
 
     expect(screen.queryByLabelText(/remember this device/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
-    expect(screen.getByText(/C66 RFID \/ SSO Ready/i)).toBeInTheDocument();
+    expect(screen.getByText(/Audit-Logged RBAC/i)).toBeInTheDocument();
   });
 
   it('accepts a short password and lets the server validate it', async () => {

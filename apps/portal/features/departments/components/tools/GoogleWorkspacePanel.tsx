@@ -5,6 +5,7 @@ import { cn } from '@repo/ui/lib/utils';
 import {
   CalendarDays,
   CheckCircle2,
+  Columns2,
   ExternalLink,
   FilePlus2,
   FileText,
@@ -204,6 +205,25 @@ export function GoogleWorkspacePanel({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(
+                    new CustomEvent('open-split-view', {
+                      detail: {
+                        service: service === 'docs' ? 'google-docs' : 'google-calendar',
+                        action: 'open',
+                      },
+                    })
+                  );
+                }
+              }}
+              className="gold-steel-border gold-steel-border-slim inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3.5 py-2 font-semibold text-[var(--text-heading)] text-xs shadow-2xs transition-all hover:bg-black/[0.03] active:scale-95"
+            >
+              <Columns2 className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+              <span>Open in Split Tab</span>
+            </button>
             <button
               type="button"
               onClick={handleDirectRedirect}

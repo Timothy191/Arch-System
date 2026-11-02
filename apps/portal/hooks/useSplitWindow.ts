@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type SplitService = 'github' | 'whatsapp';
+export type SplitService = 'github' | 'whatsapp' | 'google-docs' | 'google-calendar';
 
 interface Tab {
   id: string;

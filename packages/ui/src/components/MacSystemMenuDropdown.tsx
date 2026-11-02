@@ -1,6 +1,15 @@
 'use client';
 
-import { Activity, ChevronRight, Command, ExternalLink, LayoutGrid, Shield } from 'lucide-react';
+import {
+  Activity,
+  CalendarDays,
+  ChevronRight,
+  Command,
+  ExternalLink,
+  FileText,
+  LayoutGrid,
+  Shield,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type * as React from 'react';
@@ -39,6 +48,9 @@ interface MacSystemMenuDropdownProps {
    */
   userSlot?: React.ReactNode;
 }
+
+const SPLIT_WORKSPACE_BTN =
+  'group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all hover:bg-black/[0.04] focus:outline-none active:bg-black/[0.08]';
 
 export function MacSystemMenuDropdown({
   systemMenuOpen,
@@ -249,27 +261,59 @@ export function MacSystemMenuDropdown({
             {PRODUCTIVITY_LIST.map((tool) => {
               const Icon = tool.icon;
               const directExternalUrl = GOOGLE_CHOOSER_BY_TOOL[tool.name] ?? null;
+              const splitService =
+                tool.name === 'documents'
+                  ? 'google-docs'
+                  : tool.name === 'schedule'
+                    ? 'google-calendar'
+                    : null;
 
               return (
                 <div
                   key={tool.name}
                   className="flex items-center justify-between rounded-lg transition-colors hover:bg-black/[0.04]"
                 >
-                  <Link
-                    href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
-                    onClick={() => {
-                      setPathname(`/${activeDeptSlug}/tools`);
-                      setSystemMenuOpen(false);
-                    }}
-                    className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all active:bg-black/[0.08]"
-                  >
-                    <Icon
-                      className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)}
-                    />
-                    <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
-                      {tool.displayName}
-                    </span>
-                  </Link>
+                  {splitService ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent('open-split-view', {
+                            detail: { service: splitService, action: 'open' },
+                          })
+                        );
+                        setSystemMenuOpen(false);
+                      }}
+                      className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all active:bg-black/[0.08]"
+                      title={`Open ${tool.displayName} in side-by-side Split View`}
+                    >
+                      <Icon
+                        className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)}
+                      />
+                      <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
+                        {tool.displayName}
+                      </span>
+                      <span className="ml-auto rounded bg-blue-50 px-1 py-0.2 font-mono text-[9px] text-blue-600 uppercase">
+                        Split
+                      </span>
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/${activeDeptSlug}/tools?tab=${tool.name}`}
+                      onClick={() => {
+                        setPathname(`/${activeDeptSlug}/tools`);
+                        setSystemMenuOpen(false);
+                      }}
+                      className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 transition-all active:bg-black/[0.08]"
+                    >
+                      <Icon
+                        className={cn('h-3.5 w-3.5 shrink-0 transition-colors', tool.colorClass)}
+                      />
+                      <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
+                        {tool.displayName}
+                      </span>
+                    </Link>
+                  )}
                   {directExternalUrl && (
                     <a
                       href={directExternalUrl}
@@ -296,8 +340,46 @@ export function MacSystemMenuDropdown({
           {/* Split View & Quick Actions */}
           <div className="space-y-0.5 px-2.5 pb-1">
             <p className="mb-1 px-2 pt-1 font-medium text-[10.5px] text-[var(--text-muted)] uppercase tracking-widest">
-              Workspace
+              Split Workspace
             </p>
+            <DropdownMenuItem asChild>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent('open-split-view', {
+                      detail: { service: 'google-docs', action: 'toggle' },
+                    })
+                  );
+                  setSystemMenuOpen(false);
+                }}
+                className={SPLIT_WORKSPACE_BTN}
+              >
+                <FileText className="h-3.5 w-3.5 shrink-0 text-dept-drilling" />
+                <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
+                  Google Docs Split
+                </span>
+              </button>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent('open-split-view', {
+                      detail: { service: 'google-calendar', action: 'toggle' },
+                    })
+                  );
+                  setSystemMenuOpen(false);
+                }}
+                className={SPLIT_WORKSPACE_BTN}
+              >
+                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-dept-control-room" />
+                <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
+                  Google Calendar Split
+                </span>
+              </button>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <button
                 type="button"
@@ -309,7 +391,7 @@ export function MacSystemMenuDropdown({
                   );
                   setSystemMenuOpen(false);
                 }}
-                className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all hover:bg-black/[0.04] focus:outline-none active:bg-black/[0.08]"
+                className={SPLIT_WORKSPACE_BTN}
               >
                 <svg
                   className="h-3.5 w-3.5 shrink-0 text-dept-engineering"
@@ -324,7 +406,7 @@ export function MacSystemMenuDropdown({
                   <line x1="12" y1="3" x2="12" y2="21" />
                 </svg>
                 <span className="font-medium text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]">
-                  New Split Tab
+                  WhatsApp Operations Split
                 </span>
               </button>
             </DropdownMenuItem>

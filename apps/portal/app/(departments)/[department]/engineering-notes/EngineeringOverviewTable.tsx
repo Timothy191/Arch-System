@@ -647,7 +647,10 @@ export function EngineeringOverviewTable({
       </div>
 
       {/* Controls & Standard Defaults Banner (animated legend) */}
-      <GlassCard variant="spotlight" className="animate-in fade-in slide-in-from-top-2 p-4 transition-all duration-500">
+      <GlassCard
+        variant="spotlight"
+        className="fade-in slide-in-from-top-2 animate-in p-4 transition-all duration-500"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1.5">
             <h3 className="font-bold text-[var(--text-heading)] text-sm">
@@ -744,324 +747,326 @@ export function EngineeringOverviewTable({
 
       {/* Full 20-Column Fleet Overview Table */}
       {!isTableCollapsed && (
-      <GlassCard className="overflow-hidden p-0 transition-all duration-300">
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse text-left text-xs">
-            <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80">
-              <tr>
-                <th className={TH_BASE}>Machine ID</th>
-                <th className={TH_NUM}>Start SMR</th>
-                <th className={TH_NUM}>Stop SMR</th>
-                <th className={TH_NUM}>Total SMR Worked</th>
-                {visibleDelayColumns.map((col) => (
-                  <th
-                    key={col.key}
-                    data-delay-group={col.delayGroup}
-                    className={DELAY_GROUP_TH_CLASS[col.delayGroup]}
-                  >
-                    <div>{col.label}</div>
-                    {col.isStandardAllowance && (
-                      <div className={DELAY_GROUP_STD_BADGE_CLASS[col.delayGroup]}>
-                        std {col.standardDefault.toFixed(1)}h
-                      </div>
-                    )}
-                  </th>
-                ))}
-                <th className={TH_BASE}>Operator</th>
-                <th className={TH_BASE}>Comments (Required on Delay)</th>
-                <th className={TH_NUM}>Availability</th>
-                <th className={TH_NUM}>Utilization</th>
-                <th className={TH_BASE}>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
-              {filteredRows.map((row) => {
-                const metrics = computeMachineOverviewMetrics(
-                  row.startSmr,
-                  row.stopSmr,
-                  row.delays
-                );
-                const commentCheck = validateOverviewRowDelaysAndComment(row.delays, row.comment);
-                const hasCommentError = !commentCheck.valid || Boolean(row.error);
-                const isCarryOver = Boolean(row.carryOverBreakdown);
-                const isQuickSelected = row.machineId === selectedQuickMachineId;
-
-                return (
-                  <tr
-                    key={row.machineId}
-                    data-testid={`overview-row-${row.machineId}`}
-                    className={
-                      isCarryOver
-                        ? 'bg-red-500/5 hover:bg-red-500/10'
-                        : isQuickSelected
-                          ? 'bg-[var(--accent-blue)]/8 hover:bg-[var(--accent-blue)]/12'
-                          : 'hover:bg-[var(--bg-secondary)]/40'
-                    }
-                  >
-                    {/* 1. Machine ID */}
-                    <td className={TD_BASE}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="font-bold text-[var(--text-heading)]">
-                          {row.machineName}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedQuickMachineId(row.machineId)}
-                          className="cursor-pointer rounded border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20"
-                        >
-                          Quick Log
-                        </button>
-                      </div>
-                      <div className="text-[10px] text-[var(--text-secondary)]">
-                        {row.serialNumber ? `${row.serialNumber} · ` : ''}
-                        {row.machineType}
-                      </div>
-                      <div className="mt-0.5 font-mono text-[10px] text-[var(--text-secondary)]">
-                        Max {MAX_SHIFT_HOURS}.0h · {metrics.maxProductionAllowedHours.toFixed(1)}h
-                        prod left · {metrics.maxDelaysAllowedHours.toFixed(1)}h max delays
-                      </div>
-                      {row.carryOverBreakdown && (
-                        <div className="mt-1 inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 font-semibold text-[10px] text-red-600">
-                          <ShieldAlert className="h-3 w-3" />
-                          {row.carryOverBreakdown.isFromPreviousShift
-                            ? `Carried Over Breakdown (Since ${row.carryOverBreakdown.dateIn})`
-                            : 'Active Breakdown (Until Booked Out)'}
+        <GlassCard className="overflow-hidden p-0 transition-all duration-300">
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-left text-xs">
+              <thead className="border-[var(--border-subtle)] border-b bg-[var(--bg-secondary)]/80">
+                <tr>
+                  <th className={TH_BASE}>Machine ID</th>
+                  <th className={TH_NUM}>Start SMR</th>
+                  <th className={TH_NUM}>Stop SMR</th>
+                  <th className={TH_NUM}>Total SMR Worked</th>
+                  {visibleDelayColumns.map((col) => (
+                    <th
+                      key={col.key}
+                      data-delay-group={col.delayGroup}
+                      className={DELAY_GROUP_TH_CLASS[col.delayGroup]}
+                    >
+                      <div>{col.label}</div>
+                      {col.isStandardAllowance && (
+                        <div className={DELAY_GROUP_STD_BADGE_CLASS[col.delayGroup]}>
+                          std {col.standardDefault.toFixed(1)}h
                         </div>
                       )}
-                    </td>
+                    </th>
+                  ))}
+                  <th className={TH_BASE}>Operator</th>
+                  <th className={TH_BASE}>Comments (Required on Delay)</th>
+                  <th className={TH_NUM}>Availability</th>
+                  <th className={TH_NUM}>Utilization</th>
+                  <th className={TH_BASE}>Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)] bg-white/80">
+                {filteredRows.map((row) => {
+                  const metrics = computeMachineOverviewMetrics(
+                    row.startSmr,
+                    row.stopSmr,
+                    row.delays
+                  );
+                  const commentCheck = validateOverviewRowDelaysAndComment(row.delays, row.comment);
+                  const hasCommentError = !commentCheck.valid || Boolean(row.error);
+                  const isCarryOver = Boolean(row.carryOverBreakdown);
+                  const isQuickSelected = row.machineId === selectedQuickMachineId;
 
-                    {/* 2. Start SMR */}
-                    <td className={`${TD_BASE} text-right`}>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min={row.previousClosingSmr}
-                        aria-label={`Start SMR ${row.machineName}`}
-                        value={row.startSmr}
-                        onChange={(e) =>
-                          updateRowSmr(row.machineId, {
-                            field: 'startSmr',
-                            rawValue: e.target.value,
-                          })
-                        }
-                        className={INPUT_SMR_CLASS}
-                      />
-                    </td>
-
-                    {/* 3. Stop SMR */}
-                    <td className={`${TD_BASE} text-right`}>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min={row.startSmr}
-                        max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO))}
-                        aria-label={`Stop SMR ${row.machineName}`}
-                        value={row.stopSmr}
-                        onChange={(e) =>
-                          updateRowSmr(row.machineId, {
-                            field: 'stopSmr',
-                            rawValue: e.target.value,
-                          })
-                        }
-                        className={INPUT_SMR_CLASS}
-                      />
-                    </td>
-
-                    {/* 4. Total SMR Worked */}
-                    <td
-                      className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
+                  return (
+                    <tr
+                      key={row.machineId}
+                      data-testid={`overview-row-${row.machineId}`}
+                      className={
+                        isCarryOver
+                          ? 'bg-red-500/5 hover:bg-red-500/10'
+                          : isQuickSelected
+                            ? 'bg-[var(--accent-blue)]/8 hover:bg-[var(--accent-blue)]/12'
+                            : 'hover:bg-[var(--bg-secondary)]/40'
+                      }
                     >
-                      <div>{metrics.totalSmrWorked.toFixed(1)}h</div>
-                      <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                        {metrics.maxDelaysAllowedHours.toFixed(1)}h delay cap
-                      </div>
-                    </td>
-
-                    {/* 5..16. Visible Delay Columns */}
-                    {visibleDelayColumns.map((col) => {
-                      const val = row.delays[col.key] ?? 0;
-                      return (
-                        <td
-                          key={col.key}
-                          data-delay-group={col.delayGroup}
-                          className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
-                        >
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            max={metrics.maxDelaysAllowedHours}
-                            aria-label={`${col.label} ${row.machineName}`}
-                            value={val}
-                            onChange={(e) =>
-                              updateRowDelay(row.machineId, {
-                                key: col.key,
-                                rawValue: e.target.value,
-                              })
-                            }
-                            className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
-                          />
-                        </td>
-                      );
-                    })}
-
-                    {/* 17. Operator */}
-                    <td className={TD_BASE}>
-                      <select
-                        aria-label={`Operator ${row.machineName}`}
-                        value={row.operatorId ?? ''}
-                        onChange={(e) => updateRowOperator(row.machineId, e.target.value)}
-                        className={SELECT_OP_CLASS}
-                      >
-                        <option value="">
-                          {row.operatorName ? `${row.operatorName}` : 'Select operator...'}
-                        </option>
-                        {operators.map((op) => (
-                          <option key={op.id} value={op.id}>
-                            {op.fullName} ({op.employeeCode})
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 18. Comments (to add notes) + Breakdown Carry-Over Toggle */}
-                    <td className={TD_BASE}>
-                      <div className="space-y-1">
-                        <input
-                          type="text"
-                          aria-label={`Comments ${row.machineName}`}
-                          placeholder={
-                            commentCheck.hasRecordedDelay
-                              ? 'Required comment for recorded delay(s)...'
-                              : 'Add shift note or comment...'
-                          }
-                          value={row.comment}
-                          onChange={(e) => updateRowComment(row.machineId, e.target.value)}
-                          className={`${INPUT_COMMENT_BASE} ${
-                            hasCommentError
-                              ? 'border-red-500 bg-red-500/5 focus:ring-red-500'
-                              : 'border-[var(--border-default)] focus:ring-[var(--accent-blue)]'
-                          }`}
-                        />
+                      {/* 1. Machine ID */}
+                      <td className={TD_BASE}>
                         <div className="flex items-center justify-between gap-2">
-                          <label className="inline-flex cursor-pointer items-center gap-1.5 text-[10px] text-[var(--text-secondary)]">
-                            <input
-                              type="checkbox"
-                              checked={row.endsOnBreakdown}
-                              onChange={(e) =>
-                                toggleEndsOnBreakdown(row.machineId, e.target.checked)
-                              }
-                              className="h-3.5 w-3.5 rounded border-[var(--border-default)]"
-                            />
-                            <span>Ends shift on breakdown (carry over)</span>
-                          </label>
-                          {!row.comment.trim() && !commentCheck.hasNonStandardDelay && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateRowComment(row.machineId, DEFAULT_ALLOWANCE_COMMENT)
-                              }
-                              className="cursor-pointer font-semibold text-[10px] text-[var(--accent-blue)] hover:underline"
-                            >
-                              Fill std note
-                            </button>
-                          )}
-                        </div>
-                        {hasCommentError && (
-                          <p className="max-w-xs whitespace-normal font-medium text-[10px] text-red-600">
-                            {row.error || commentCheck.error}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* 19. Availability (%) */}
-                    <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                      <span
-                        className={
-                          metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
-                            ? 'text-accent-green'
-                            : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
-                              ? 'text-amber-600'
-                              : 'text-red-600'
-                        }
-                      >
-                        {metrics.availabilityPercent.toFixed(1)}%
-                      </span>
-                      <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                        {metrics.availableHours.toFixed(1)}h avail
-                      </div>
-                    </td>
-
-                    {/* 20. Utilization (%) */}
-                    <td className={`${TD_BASE} text-right font-bold font-mono`}>
-                      <span
-                        className={
-                          metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
-                            ? 'text-[var(--accent-blue)]'
-                            : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
-                              ? 'text-[var(--text-heading)]'
-                              : 'text-amber-600'
-                        }
-                      >
-                        {metrics.utilizationPercent.toFixed(1)}%
-                      </span>
-                      <div className="font-normal text-[10px] text-[var(--text-secondary)]">
-                        {metrics.totalDelayHours.toFixed(1)}h delays
-                      </div>
-                      <div className="font-normal text-[9px] text-[var(--text-secondary)]">
-                        P:{metrics.productionDelayHours.toFixed(1)}h · N:
-                        {metrics.nonProductionDelayHours.toFixed(1)}h · E:
-                        {metrics.engineeringDelayHours.toFixed(1)}h
-                      </div>
-                    </td>
-
-                    {/* 21. Actions (Save Row / Book Out Breakdown) */}
-                    <td className={TD_BASE}>
-                      <div className="flex flex-col gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => void handleSaveRow(row.machineId)}
-                          disabled={savingMachineId === row.machineId}
-                          className={BTN_PRIMARY}
-                        >
-                          <Save className="h-3 w-3" />
-                          {savingMachineId === row.machineId ? 'Saving...' : 'Save'}
-                        </button>
-
-                        {row.carryOverBreakdown && (
+                          <div className="font-bold text-[var(--text-heading)]">
+                            {row.machineName}
+                          </div>
                           <button
                             type="button"
-                            onClick={() => void handleBookOutCarryOver(row)}
-                            disabled={bookingOutMachineId === row.machineId}
-                            className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-accent-green/40 bg-accent-green/10 px-2 py-1 font-semibold text-[10px] text-accent-green hover:bg-accent-green/20"
+                            onClick={() => setSelectedQuickMachineId(row.machineId)}
+                            className="cursor-pointer rounded border border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/20"
                           >
-                            <Wrench className="h-3 w-3" />
-                            {bookingOutMachineId === row.machineId ? 'Booking Out...' : 'Book Out'}
+                            Quick Log
                           </button>
+                        </div>
+                        <div className="text-[10px] text-[var(--text-secondary)]">
+                          {row.serialNumber ? `${row.serialNumber} · ` : ''}
+                          {row.machineType}
+                        </div>
+                        <div className="mt-0.5 font-mono text-[10px] text-[var(--text-secondary)]">
+                          Max {MAX_SHIFT_HOURS}.0h · {metrics.maxProductionAllowedHours.toFixed(1)}h
+                          prod left · {metrics.maxDelaysAllowedHours.toFixed(1)}h max delays
+                        </div>
+                        {row.carryOverBreakdown && (
+                          <div className="mt-1 inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 font-semibold text-[10px] text-red-600">
+                            <ShieldAlert className="h-3 w-3" />
+                            {row.carryOverBreakdown.isFromPreviousShift
+                              ? `Carried Over Breakdown (Since ${row.carryOverBreakdown.dateIn})`
+                              : 'Active Breakdown (Until Booked Out)'}
+                          </div>
                         )}
+                      </td>
 
-                        {row.saved && !hasCommentError && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-accent-green">
-                            <CheckCircle2 className="h-3 w-3" />
-                            Saved
-                          </span>
-                        )}
-                        {hasCommentError && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-red-600">
-                            <AlertTriangle className="h-3 w-3" />
-                            Needs Comment
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
+                      {/* 2. Start SMR */}
+                      <td className={`${TD_BASE} text-right`}>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min={row.previousClosingSmr}
+                          aria-label={`Start SMR ${row.machineName}`}
+                          value={row.startSmr}
+                          onChange={(e) =>
+                            updateRowSmr(row.machineId, {
+                              field: 'startSmr',
+                              rawValue: e.target.value,
+                            })
+                          }
+                          className={INPUT_SMR_CLASS}
+                        />
+                      </td>
+
+                      {/* 3. Stop SMR */}
+                      <td className={`${TD_BASE} text-right`}>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min={row.startSmr}
+                          max={Number((row.startSmr + MAX_SHIFT_HOURS).toFixed(DECIMAL_PLACES_TWO))}
+                          aria-label={`Stop SMR ${row.machineName}`}
+                          value={row.stopSmr}
+                          onChange={(e) =>
+                            updateRowSmr(row.machineId, {
+                              field: 'stopSmr',
+                              rawValue: e.target.value,
+                            })
+                          }
+                          className={INPUT_SMR_CLASS}
+                        />
+                      </td>
+
+                      {/* 4. Total SMR Worked */}
+                      <td
+                        className={`${TD_BASE} text-right font-bold font-mono text-[var(--accent-blue)]`}
+                      >
+                        <div>{metrics.totalSmrWorked.toFixed(1)}h</div>
+                        <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                          {metrics.maxDelaysAllowedHours.toFixed(1)}h delay cap
+                        </div>
+                      </td>
+
+                      {/* 5..16. Visible Delay Columns */}
+                      {visibleDelayColumns.map((col) => {
+                        const val = row.delays[col.key] ?? 0;
+                        return (
+                          <td
+                            key={col.key}
+                            data-delay-group={col.delayGroup}
+                            className={DELAY_GROUP_TD_CLASS[col.delayGroup]}
+                          >
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max={metrics.maxDelaysAllowedHours}
+                              aria-label={`${col.label} ${row.machineName}`}
+                              value={val}
+                              onChange={(e) =>
+                                updateRowDelay(row.machineId, {
+                                  key: col.key,
+                                  rawValue: e.target.value,
+                                })
+                              }
+                              className={DELAY_GROUP_INPUT_CLASS[col.delayGroup]}
+                            />
+                          </td>
+                        );
+                      })}
+
+                      {/* 17. Operator */}
+                      <td className={TD_BASE}>
+                        <select
+                          aria-label={`Operator ${row.machineName}`}
+                          value={row.operatorId ?? ''}
+                          onChange={(e) => updateRowOperator(row.machineId, e.target.value)}
+                          className={SELECT_OP_CLASS}
+                        >
+                          <option value="">
+                            {row.operatorName ? `${row.operatorName}` : 'Select operator...'}
+                          </option>
+                          {operators.map((op) => (
+                            <option key={op.id} value={op.id}>
+                              {op.fullName} ({op.employeeCode})
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
+                      {/* 18. Comments (to add notes) + Breakdown Carry-Over Toggle */}
+                      <td className={TD_BASE}>
+                        <div className="space-y-1">
+                          <input
+                            type="text"
+                            aria-label={`Comments ${row.machineName}`}
+                            placeholder={
+                              commentCheck.hasRecordedDelay
+                                ? 'Required comment for recorded delay(s)...'
+                                : 'Add shift note or comment...'
+                            }
+                            value={row.comment}
+                            onChange={(e) => updateRowComment(row.machineId, e.target.value)}
+                            className={`${INPUT_COMMENT_BASE} ${
+                              hasCommentError
+                                ? 'border-red-500 bg-red-500/5 focus:ring-red-500'
+                                : 'border-[var(--border-default)] focus:ring-[var(--accent-blue)]'
+                            }`}
+                          />
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="inline-flex cursor-pointer items-center gap-1.5 text-[10px] text-[var(--text-secondary)]">
+                              <input
+                                type="checkbox"
+                                checked={row.endsOnBreakdown}
+                                onChange={(e) =>
+                                  toggleEndsOnBreakdown(row.machineId, e.target.checked)
+                                }
+                                className="h-3.5 w-3.5 rounded border-[var(--border-default)]"
+                              />
+                              <span>Ends shift on breakdown (carry over)</span>
+                            </label>
+                            {!row.comment.trim() && !commentCheck.hasNonStandardDelay && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateRowComment(row.machineId, DEFAULT_ALLOWANCE_COMMENT)
+                                }
+                                className="cursor-pointer font-semibold text-[10px] text-[var(--accent-blue)] hover:underline"
+                              >
+                                Fill std note
+                              </button>
+                            )}
+                          </div>
+                          {hasCommentError && (
+                            <p className="max-w-xs whitespace-normal font-medium text-[10px] text-red-600">
+                              {row.error || commentCheck.error}
+                            </p>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* 19. Availability (%) */}
+                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                        <span
+                          className={
+                            metrics.availabilityPercent >= HIGH_AVAILABILITY_THRESHOLD
+                              ? 'text-accent-green'
+                              : metrics.availabilityPercent >= MED_AVAILABILITY_THRESHOLD
+                                ? 'text-amber-600'
+                                : 'text-red-600'
+                          }
+                        >
+                          {metrics.availabilityPercent.toFixed(1)}%
+                        </span>
+                        <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                          {metrics.availableHours.toFixed(1)}h avail
+                        </div>
+                      </td>
+
+                      {/* 20. Utilization (%) */}
+                      <td className={`${TD_BASE} text-right font-bold font-mono`}>
+                        <span
+                          className={
+                            metrics.utilizationPercent >= HIGH_UTILIZATION_THRESHOLD
+                              ? 'text-[var(--accent-blue)]'
+                              : metrics.utilizationPercent >= MED_UTILIZATION_THRESHOLD
+                                ? 'text-[var(--text-heading)]'
+                                : 'text-amber-600'
+                          }
+                        >
+                          {metrics.utilizationPercent.toFixed(1)}%
+                        </span>
+                        <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                          {metrics.totalDelayHours.toFixed(1)}h delays
+                        </div>
+                        <div className="font-normal text-[9px] text-[var(--text-secondary)]">
+                          P:{metrics.productionDelayHours.toFixed(1)}h · N:
+                          {metrics.nonProductionDelayHours.toFixed(1)}h · E:
+                          {metrics.engineeringDelayHours.toFixed(1)}h
+                        </div>
+                      </td>
+
+                      {/* 21. Actions (Save Row / Book Out Breakdown) */}
+                      <td className={TD_BASE}>
+                        <div className="flex flex-col gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => void handleSaveRow(row.machineId)}
+                            disabled={savingMachineId === row.machineId}
+                            className={BTN_PRIMARY}
+                          >
+                            <Save className="h-3 w-3" />
+                            {savingMachineId === row.machineId ? 'Saving...' : 'Save'}
+                          </button>
+
+                          {row.carryOverBreakdown && (
+                            <button
+                              type="button"
+                              onClick={() => void handleBookOutCarryOver(row)}
+                              disabled={bookingOutMachineId === row.machineId}
+                              className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-accent-green/40 bg-accent-green/10 px-2 py-1 font-semibold text-[10px] text-accent-green hover:bg-accent-green/20"
+                            >
+                              <Wrench className="h-3 w-3" />
+                              {bookingOutMachineId === row.machineId
+                                ? 'Booking Out...'
+                                : 'Book Out'}
+                            </button>
+                          )}
+
+                          {row.saved && !hasCommentError && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-accent-green">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Saved
+                            </span>
+                          )}
+                          {hasCommentError && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-red-600">
+                              <AlertTriangle className="h-3 w-3" />
+                              Needs Comment
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
       )}
     </div>
   );

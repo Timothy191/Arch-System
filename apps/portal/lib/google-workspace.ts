@@ -25,10 +25,13 @@ export const GOOGLE_CALENDAR_AUTO_SIGNIN_URL =
 export const GOOGLE_CALENDAR_CREATE_EVENT_URL = 'https://calendar.google.com/calendar/r/eventedit';
 
 /** Operational timezone for the mine — matches shift windows in SAST. */
-const OPERATIONAL_TIMEZONE = 'Africa/Johannesburg';
+export const OPERATIONAL_TIMEZONE = 'Africa/Johannesburg';
 
 const CALENDAR_EMBED_ENDPOINT = 'https://calendar.google.com/calendar/embed';
 const CALENDAR_EMBED_MODE = 'MONTH';
+
+/** Default fallback public calendar ID for demo / testing when none configured */
+export const DEFAULT_SITE_CALENDAR_SRC = 'en.sa#holiday@group.v.calendar.google.com';
 
 /**
  * Public calendar id (or comma-separated ids) the site wants framed. Public
@@ -41,7 +44,7 @@ export const SITE_CALENDAR_EMBED_SRC = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_E
  * been configured for the deployment.
  */
 export function getSiteCalendarEmbedUrl(calendarSrc?: string | null): string | null {
-  const trimmed = calendarSrc?.trim();
+  const trimmed = calendarSrc?.trim() || DEFAULT_SITE_CALENDAR_SRC;
   if (!trimmed) return null;
 
   const params = new URLSearchParams({
@@ -55,4 +58,20 @@ export function getSiteCalendarEmbedUrl(calendarSrc?: string | null): string | n
   });
 
   return `${CALENDAR_EMBED_ENDPOINT}?${params.toString()}`;
+}
+
+/**
+ * Build Google Calendar event creation URL with prefilled parameters.
+ */
+export function buildGoogleCalendarEventUrl(options: {
+  readonly title: string;
+  readonly details?: string;
+  readonly location?: string;
+}): string {
+  const params = new URLSearchParams();
+  if (options.title) params.set('text', options.title);
+  if (options.details) params.set('details', options.details);
+  if (options.location) params.set('location', options.location);
+  params.set('ctz', OPERATIONAL_TIMEZONE);
+  return `${GOOGLE_CALENDAR_CREATE_EVENT_URL}?${params.toString()}`;
 }

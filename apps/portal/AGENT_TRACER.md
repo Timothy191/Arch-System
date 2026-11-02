@@ -1,3 +1,17 @@
+## 2026-11-02T06:30:00+02:00: Side-by-Side Split-Screen Workspaces for Google Docs & Google Calendar
+
+- **Phase 1 (Comprehension)**: When users interact with Documents or Schedule (from Mac System Menu, MenuBar, or department tool panels), open a docked split-screen tab (Portal on the left, interacted Google Workspace on the right) so operators can work on both without navigating away.
+- **Phase 2 (Evidence)**: Users requested that clicking Documents or Schedule opens a split tab (50:50 side-by-side) with Google Workspace integration (auto sign-in via `AccountChooser`, live scratchpad, mining document templates, and frameable calendar/popout companion).
+- **Phase 3 (Design)**:
+  - Extended `useSplitWindow` store with `'google-docs'` and `'google-calendar'` services.
+  - Implemented `SplitWindowGoogleDocsView` featuring auto sign-in launch, live draft scratchpad with `localStorage` persistence, clipboard copy, and standard mining templates (Pre-Start, Handover, Blast Pattern, Breakdown Log).
+  - Implemented `SplitWindowGoogleCalendarView` featuring live site calendar iframe, operational shift event creator, and SAST shift roster reference.
+  - Wired `SplitWindowLayout` to mount and render the new Google Workspace views.
+  - Added "Open in Split Tab" buttons in `GoogleWorkspacePanel` and wired `MacSystemMenuDropdown` and `MacMenuBar` to dispatch `open-split-view`.
+  - Added `https://docs.google.com https://drive.google.com` to CSP `frame-src` in `proxy.ts` and `next.config.mjs`.
+- **Phase 4 (Criticism)**: Unit tests added in `SplitWindowLayout.test.tsx` and all 27 verification gates passed (100% PASS).
+- **Phase 5 (Contract)**: Modified `SplitWindowLayout.tsx`, `split-window-data.tsx`, `useSplitWindow.ts`, `GoogleWorkspacePanel.tsx`, `google-workspace.ts`, `proxy.ts`, `next.config.mjs`, and added `SplitWindowGoogleDocsView.tsx` & `SplitWindowGoogleCalendarView.tsx`.
+
 ## 2026-10-31T18:48:00+02:00: Comprehensive Repository Scan, Overview Telemetry Synchronization & Vercel Production Update
 
 - **Phase 1 (Comprehension)**: Scan all repository changes across recent commits (`b9875dee` through `a08c79a3`), reconcile any drifted overview telemetry or route catalogs, and push a complete update to Vercel Production.

@@ -4,8 +4,10 @@ import { cn } from '@repo/ui/lib/utils';
 import { Columns2, Maximize2, Minimize2, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { useSplitWindow } from '@/hooks/useSplitWindow';
+import { type SplitService, useSplitWindow } from '@/hooks/useSplitWindow';
 import { GitHubMockView } from './SplitWindowGitHubView';
+import { SplitWindowGoogleCalendarView } from './SplitWindowGoogleCalendarView';
+import { SplitWindowGoogleDocsView } from './SplitWindowGoogleDocsView';
 import { WhatsAppWebView } from './SplitWindowWhatsAppView';
 import { SERVICE_META } from './split-window-data';
 
@@ -26,7 +28,7 @@ export const SplitWindowLayout = function SplitWindowLayout({ children }: SplitW
   useEffect(() => {
     const handleToggle = (e: Event) => {
       const customEvent = e as CustomEvent<{
-        service: 'github' | 'whatsapp';
+        service: SplitService;
         action?: 'open' | 'toggle';
       }>;
       if (customEvent.detail?.service) {
@@ -187,6 +189,8 @@ export const SplitWindowLayout = function SplitWindowLayout({ children }: SplitW
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {activeTab?.service === 'github' && <GitHubMockView />}
           {activeTab?.service === 'whatsapp' && <WhatsAppWebView />}
+          {activeTab?.service === 'google-docs' && <SplitWindowGoogleDocsView />}
+          {activeTab?.service === 'google-calendar' && <SplitWindowGoogleCalendarView />}
         </div>
       </div>
     </div>

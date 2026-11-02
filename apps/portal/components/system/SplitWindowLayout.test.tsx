@@ -127,4 +127,50 @@ describe('SplitWindowLayout', () => {
       expect(screen.queryByText('WhatsApp')).not.toBeInTheDocument();
     });
   });
+
+  it('opens Google Docs tab and renders scratchpad and templates', async () => {
+    render(
+      <SplitWindowLayout>
+        <div>Main</div>
+      </SplitWindowLayout>
+    );
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', {
+          detail: { service: 'google-docs' },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Google Docs')).toBeInTheDocument();
+      expect(screen.getByText('Google Docs Workspace')).toBeInTheDocument();
+      expect(screen.getByText('Live Scratchpad & Editor')).toBeInTheDocument();
+      expect(screen.getByText('Mining Templates')).toBeInTheDocument();
+    });
+  });
+
+  it('opens Google Calendar tab and renders live shift schedule controls', async () => {
+    render(
+      <SplitWindowLayout>
+        <div>Main</div>
+      </SplitWindowLayout>
+    );
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent('open-split-view', {
+          detail: { service: 'google-calendar' },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tab-google-calendar')).toBeInTheDocument();
+      expect(screen.getByText('Google Calendar & Schedule')).toBeInTheDocument();
+      expect(screen.getByText('Live Site Calendar')).toBeInTheDocument();
+      expect(screen.getByText('Quick Shift Event')).toBeInTheDocument();
+    });
+  });
 });

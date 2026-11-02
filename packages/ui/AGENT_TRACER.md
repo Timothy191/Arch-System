@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-02T06:30:00+02:00 - Google Workspace Split-Screen Shortcuts in System Menu & MenuBar
+
+- **Purpose**: Wire "Documents" and "Schedule" tool actions to dispatch `open-split-view` with `google-docs` and `google-calendar` so users can work side-by-side with Arch OS without leaving their active page.
+- **Changes**:
+  - `packages/ui/src/components/MacSystemMenuDropdown.tsx`: Wired Documents and Schedule items to open docked split tabs; added Google Docs Split and Google Calendar Split to the Split Workspace section; extracted `SPLIT_WORKSPACE_BTN` constant.
+  - `packages/ui/src/components/MacMenuBar.tsx`: Added split view triggers for Google Docs and Google Calendar in Tools dropdown menu.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; `pnpm --filter @repo/ui lint` ✅; `pnpm agent:verify` ✅ (27/27 gates passed).
+
 ## 2026-10-31T19:18:00+02:00 - Add Animated Golden Separator Under Hero Card Selection Indicator
 
 - **Purpose**: Add an animated metallic golden separator (`data-testid="hero-bottom-golden-separator"`) directly beneath the Hero Card selection indicator (`div.mt-2.flex`) in `HeroRotator.tsx` to visually separate the Hero Card selection section from the Bottom Core Operational Modules panel.

@@ -1,7 +1,8 @@
 import type React from 'react';
+import type { SplitService } from '@/hooks/useSplitWindow';
 
 export const SERVICE_META: Record<
-  'github' | 'whatsapp',
+  SplitService,
   { label: string; shortLabel: string; Icon: React.ReactNode }
 > = {
   github: {
@@ -19,6 +20,30 @@ export const SERVICE_META: Record<
     Icon: (
       <svg className="h-3.5 w-3.5 fill-current text-emerald-600" viewBox="0 0 24 24">
         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.79-4.896c1.675.993 3.324 1.558 5.207 1.559 5.405 0 9.803-4.375 9.806-9.754.002-2.607-1.002-5.06-2.83-6.892-1.829-1.83-4.263-2.836-6.868-2.837-5.39 0-9.786 4.377-9.79 9.753-.001 2.03.535 3.738 1.555 5.262l-.994 3.63 3.74-.981z" />
+      </svg>
+    ),
+  },
+  'google-docs': {
+    label: 'Google Docs: Operations Workspace',
+    shortLabel: 'Google Docs',
+    Icon: (
+      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#4285F4" />
+        <path d="M14 2v6h6z" fill="#A1C2FA" />
+        <path d="M16 13H8m8 4H8m2-8H8" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  'google-calendar': {
+    label: 'Google Calendar: Shift Schedule',
+    shortLabel: 'Google Calendar',
+    Icon: (
+      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="18" rx="3" fill="#4285F4" />
+        <path d="M3 9h18" stroke="#FFFFFF" strokeWidth="1.5" />
+        <path d="M8 2v4M16 2v4" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" />
+        <rect x="7" y="13" width="3" height="3" rx="0.5" fill="#FFFFFF" />
+        <rect x="14" y="13" width="3" height="3" rx="0.5" fill="#FFFFFF" />
       </svg>
     ),
   },
