@@ -1,4 +1,5 @@
 import { GlassCard } from '@repo/ui/GlassCard';
+import { Logo } from '@repo/ui/Logo';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
 import { withAsyncSpan } from '@/lib/observability/tracing';
@@ -80,8 +81,20 @@ export default async function HourlyLoadsPage({
 
   return (
     <div className="space-y-6">
-      <GlassCard className="group relative overflow-hidden">
-        <PageHeader title="Hourly Loads Sheet" showDate={false} />
+      <GlassCard className="group gold-steel-border gold-steel-border-slim relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-amber-500/10 via-amber-300/20 to-amber-500/10"
+        />
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+          <PageHeader title="Hourly Loads Sheet" showDate={false} />
+          <div className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-full border border-accent-amber/50 bg-white/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs">
+            <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              {(machines || []).length} Haulers · {(excavators || []).length} Excavators
+            </span>
+          </div>
+        </div>
       </GlassCard>
 
       <HourlyLoadsGrid

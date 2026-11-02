@@ -1,5 +1,7 @@
+import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import MachineOperationsFilterableTable from './MachineOperationsFilterableTable';
 import { MachineOperationsForm } from './MachineOperationsForm';
 import { MachineOperationsList } from './MachineOperationsList';
 
@@ -7,6 +9,8 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({
     refresh: jest.fn(),
   }),
+  usePathname: () => '/control-room/machine-operations',
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock('@repo/supabase/client', () => ({
@@ -405,6 +409,61 @@ describe('MachineOperationsList', () => {
       expect(reasonInput).toBeInTheDocument();
       fireEvent.change(reasonInput, { target: { value: 'Final drive oil leak at end of shift' } });
       expect(reasonInput).toHaveValue('Final drive oil leak at end of shift');
+    });
+  });
+
+  describe('Design Feedback Verification: Search Pill & Sidebar Bordering', () => {
+    it('renders visible pill-shaped search inputs with golden bordering in MachineOperationsFilterableTable', () => {
+      render(
+        <MachineOperationsFilterableTable
+          machines={[
+            {
+              id: 'm-1',
+              name: 'BD-22',
+              machine_type: 'Dozer',
+              serial_number: 'SN-BD22',
+              site_id: 'site-a',
+              latest_smu: 1200,
+              site: { name: 'Pit North' },
+            },
+          ]}
+          operations={[]}
+        />
+      );
+
+      const searchInputs = screen.getAllByPlaceholderText(/Search machine, type, or SN\.\.\./i);
+      expect(searchInputs.length).toBeGreaterThanOrEqual(2);
+      for (const input of searchInputs) {
+        expect(input.className).toContain('rounded-full');
+        expect(input.className).toContain('gold-steel-border');
+        expect(input.className).toContain('gold-steel-border-slim');
+      }
+    });
+
+    it('renders active Machine Operations sidebar tab without left vertical bar and with refined golden bordering', () => {
+      render(
+        <DepartmentLayout
+          department={{
+            name: 'control-room',
+            displayName: 'Control Room',
+            icon: 'Radio',
+            color: 'blue',
+          }}
+          tabs={[
+            { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+            { name: 'machine-operations', label: 'Machine Operations', icon: 'Cpu' },
+          ]}
+        >
+          <div>Content</div>
+        </DepartmentLayout>
+      );
+
+      const machineOpsLink = screen.getByRole('link', { name: /Machine Operations/i });
+      expect(machineOpsLink.className).toContain('gold-steel-border');
+      expect(machineOpsLink.className).toContain('border-accent-amber/55');
+      expect(machineOpsLink.className).toContain('ring-1');
+      // Verify the small straight vertical line on the left (w-1 h-5) is removed
+      expect(machineOpsLink.querySelector('.h-5.w-1')).toBeNull();
     });
   });
 });

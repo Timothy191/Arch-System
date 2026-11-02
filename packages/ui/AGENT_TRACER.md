@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-02T20:32:00+02:00 - Refine DepartmentLayout Active Sidebar Tab Bordering & FilterToolbar Golden Search Pill
+
+- **Phase 1 (Comprehension)**: Remove the small straight vertical line on the left of active sidebar tabs in `DepartmentLayout.tsx`, refine active/hover tab bordering for professional impact, and make `FilterToolbar`'s search `<Input>` a visible pill (`rounded-full`) with golden bordering (`gold-steel-border gold-steel-border-slim`).
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/DepartmentLayout.tsx` and `packages/ui/src/components/ui/filter-toolbar.tsx`.
+- **Phase 3 (Design)**:
+  - Removed `<m.div layoutId="active-sidebar-tab" ... />` (`h-5 w-1`) and subtab left indicator bars (`h-4 w-0.5`) from `DepartmentLayout.tsx`, and introduced `TAB_LINK_BASE`, `TAB_LINK_ACTIVE`, `TAB_LINK_INACTIVE`, `SUBTAB_LINK_BASE`, `SUBTAB_LINK_ACTIVE`, and `SUBTAB_LINK_INACTIVE` with `gold-steel-border gold-steel-border-slim border-accent-amber/55 bg-white/95 ring-1 ring-accent-amber/30 ring-inset shadow-xs`.
+  - Updated `FilterToolbar` search `<Input>` in `packages/ui/src/components/ui/filter-toolbar.tsx` to `rounded-full` with `gold-steel-border gold-steel-border-slim border-accent-amber/60 bg-white/95 ring-1 ring-accent-amber/30 shadow-xs` and golden `Search` icon (`text-[var(--accent-blue)]`).
+- **Phase 4 (Criticism)**: Verified with `MachineOperationsList.test.tsx` (14/14 PASS) and `@repo/ui` type-check/lint.
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/DepartmentLayout.tsx` and `packages/ui/src/components/ui/filter-toolbar.tsx`.
+
 ## 2026-11-02T10:05:00+02:00 - Register Office Department Briefcase Icon in DepartmentLayout & Icon Registry
 
 - **Purpose**: Register `office: Briefcase` in `DEPARTMENT_ICON_REGISTRY` (`packages/ui/src/icons/department-icons.ts`) and `Briefcase` in `ICON_MAP` (`packages/ui/src/components/DepartmentLayout.tsx`) for the Office department workspace and sidebar navigation.
@@ -695,3 +705,5 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - 2026-10-23T01:15:00+02:00 — feat(ui): add gold steel border to HeroTelemetryGraph containers, replace hero dept icons with gold Arch System Logo, and promote telemetry titles to semantic h3 headings
 - 2026-10-31T10:49:31+02:00 — perf(ui): drop the duplicated inline `fontFamily` override on both `HeroCardContent` hero headers (`series.title` h3 + `panel.title` h2). The `.font-anurati` class already declares the display family via `var(--font-display)`, so the inline styles were a second, drift-prone copy of the font stack; removing them makes a future display-face swap a one-line theme change.
 - 2026-10-31T19:50:25+0200 — feat(ui): system menu identity is now a server-rendered slot. MacMenuBar/MacSystemMenuDropdown accept `userSlot?: ReactNode` (RSC node streamed through the client tree); the fake "Arch Operator / <admin@arch-systems.com>" identity block and the mock `UserDetailsPreviewModal` (deleted) are replaced by `MenuIdentity` (`apps/portal/components/nav/MenuIdentity.tsx`) linking to `/profile`. Tool shortcuts keep their direct Google hand-off via the extracted `GOOGLE_CHOOSER_BY_TOOL` map (`mac-menu-bar-constants.ts`) instead of inline magic URLs.
+
+- 2026-11-02T20:00:00+02:00 — chore(ui): no source changes this pass; tracer appended for audit/CI hygiene alignment (validate-json, .gitlab-ci token-audit job).

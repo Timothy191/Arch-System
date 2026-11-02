@@ -56,8 +56,17 @@ export const MANDATORY_NEGATIVE_CONSTRAINTS = [
   'NEVER emit raw Tailwind shadow classes (e.g. shadow-blue-500, shadow-2xl). Use OKLCH tokens and approved shadow classes exclusively.',
   "NEVER use responsive 'dark:' classes. The visual theme is strictly light-mode.",
   'ALWAYS enforce schema-constrained structured generation (Outlines invariant: https://github.com/dottxt-ai/outlines). All agent outputs, tools, contracts, and handoffs must strictly adhere to validated JSON Schema or Zod contracts, prohibiting unconstrained hallucinated payloads.',
+  'ALWAYS engage the 5-phase Structured Thinking Mandate (STM-0: Phase 1 Comprehension, Phase 2 Evidence, Phase 3 Design, Phase 4 Criticism, Phase 5 Contract) before executing any non-trivial code mutation.',
   'IF tests, type-checks, or policy audits fail, perform self-remediation before concluding output.',
 ];
+
+export const STM_0_MANDATORY_PHASES = [
+  'PHASE 1 (COMPREHENSION): Restate task, identify affected packages/boundaries, map to architecture, name operational personas.',
+  'PHASE 2 (EVIDENCE): Inspect actual source files, trace data flow, verify types/contracts, ground all premises in repository state.',
+  'PHASE 3 (DESIGN): Propose >=2 candidate solutions, score against the 5-pillar Real-World Quality Score (Feasibility, Maintainability, Security, Performance, Industrial Reliability), and select the optimal design.',
+  'PHASE 4 (CRITICISM): Challenge the design for blast radius, invariant violations, edge cases, regression risk, and upstream/downstream dependencies.',
+  'PHASE 5 (EXECUTION CONTRACT): Declare exact files to modify, verification commands to execute, and expected verification outcomes before mutating code.',
+] as const;
 
 export class AgentPillarEnvelope {
   /**
@@ -105,6 +114,9 @@ Forbidden Exclude Paths: ${excludePathsStr}
 
 ### 5. STATEFUL OPERATIONAL RUNBOOK
 ${runbook.map((phase, idx) => `Step ${idx + 1}: ${phase}`).join('\n')}
+
+### 5B. STRUCTURED THINKING MANDATE (STM-0 PROTOCOL)
+${STM_0_MANDATORY_PHASES.map((phase, idx) => `MTP-${idx + 1}: ${phase}`).join('\n')}
 
 ### 6. HARD NEGATIVE CONSTRAINTS (MANDATORY GUARDS)
 ${constraints.map((c) => `- ${c}`).join('\n')}

@@ -45,3 +45,12 @@ Before and upon concluding every turn / output:
 3. **Save-Before-Compact & Anchored Iterative Summarization**:
    - Before recommending or triggering `/compact` (or when context utilization exceeds 75%), flush volatile state into an anchored handoff artifact (`HANDOFF.md` / `RESUME.md`) using the 6-section **Artifact Trail Checklist** defined in [`context-engineering/SKILL.md`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) (Session Intent, Artifact Trail with exact file paths & symbols, Key Decisions & Rejected Alternatives, Verification Ledger E0–E4, Active Leases, Immediate Next Actions).
    - Keep final output concise, structured, and self-contained so the conversation state is clean and ready for the user's next message.
+
+## Compaction Memory Mandate (NEW)
+
+**CRITICAL INVARIANT: Any agent that compacts (summarizes/truncates/offloads context) MUST persist the compacted summary as a memory entry before concluding.**
+
+1. Write the compacted summary to `.agents/memory_base/retrospectives/<id>.json` following the schema in `.agents/memory_base/schema.json` (id, timestamp, taskTag, category, errorSignature, affectedFiles, rootCause, resolution, preventionRule).
+2. Run `pnpm memory:index` to re-index so auto-recall surfaces it.
+3. Verify recall with `node tools/scripts/smart-indexer.cjs --query "<keyword>"`.
+4. Never discard a compaction without a persisted memory entry — the compacted context is otherwise irrecoverable.

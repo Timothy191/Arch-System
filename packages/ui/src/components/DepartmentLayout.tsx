@@ -92,8 +92,19 @@ interface DepartmentLayoutProps {
   children: React.ReactNode;
 }
 
+const TAB_LINK_BASE =
+  'group relative flex flex-1 items-center gap-2.5 rounded-xl border px-2.5 py-1.5 text-[13px] transition-all';
+const TAB_LINK_ACTIVE =
+  'gold-steel-border gold-steel-border-slim border-accent-amber/55 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-xs ring-1 ring-accent-amber/30 ring-inset';
+const TAB_LINK_INACTIVE =
+  'border-transparent font-medium text-[var(--text-heading)] hover:border-accent-amber/30 hover:bg-white/80 hover:text-[var(--accent-blue)]';
+
 const SUBTAB_LINK_BASE =
-  'group relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[12px] transition-all';
+  'group relative flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] transition-all';
+const SUBTAB_LINK_ACTIVE =
+  'gold-steel-border gold-steel-border-slim border-accent-amber/50 bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs ring-1 ring-accent-amber/25 ring-inset';
+const SUBTAB_LINK_INACTIVE =
+  'border-transparent font-medium text-[var(--text-heading)] hover:border-accent-amber/30 hover:bg-white/80 hover:text-[var(--accent-blue)]';
 
 export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
@@ -350,26 +361,15 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         setIsReportsExpanded(true);
                       }
                     }}
-                    className={cn(
-                      'group relative flex flex-1 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] transition-all',
-                      isActive
-                        ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-xs'
-                        : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
-                    )}
+                    className={cn(TAB_LINK_BASE, isActive ? TAB_LINK_ACTIVE : TAB_LINK_INACTIVE)}
                   >
-                    {isActive && (
-                      <m.div
-                        layoutId="active-sidebar-tab"
-                        className="absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                      />
-                    )}
                     {Icon && (
                       <span
                         className={cn(
                           'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-colors',
                           isActive
-                            ? 'border-[var(--accent-blue)]/35 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
-                            : 'border-black/[0.06] bg-white/75 text-[var(--text-heading)] group-hover:border-[var(--accent-blue)]/30 group-hover:text-[var(--accent-blue)]'
+                            ? 'gold-steel-border gold-steel-border-slim border-accent-amber/50 bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] shadow-2xs'
+                            : 'border-black/[0.08] bg-white/80 text-[var(--text-heading)] group-hover:border-accent-amber/40 group-hover:text-[var(--accent-blue)]'
                         )}
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -440,17 +440,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       data-testid="dashboard-subtab-scada"
                       className={cn(
                         SUBTAB_LINK_BASE,
-                        isScadaDashboardSubtabActive
-                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs'
-                          : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
+                        isScadaDashboardSubtabActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
                       )}
                     >
-                      {isScadaDashboardSubtabActive && (
-                        <m.div
-                          layoutId="active-dashboard-subtab"
-                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                        />
-                      )}
                       <Activity
                         className={cn(
                           'h-3 w-3 shrink-0 transition-colors',
@@ -466,17 +458,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       data-testid="dashboard-subtab-shift-operations"
                       className={cn(
                         SUBTAB_LINK_BASE,
-                        isShiftOperationsSubtabActive
-                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs'
-                          : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
+                        isShiftOperationsSubtabActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
                       )}
                     >
-                      {isShiftOperationsSubtabActive && (
-                        <m.div
-                          layoutId="active-dashboard-subtab"
-                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                        />
-                      )}
                       <ClipboardCheck
                         className={cn(
                           'h-3 w-3 shrink-0 transition-colors',
@@ -499,17 +483,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       data-testid="reports-subtab-dashboard"
                       className={cn(
                         SUBTAB_LINK_BASE,
-                        isReportsDashboardActive
-                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs'
-                          : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
+                        isReportsDashboardActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
                       )}
                     >
-                      {isReportsDashboardActive && (
-                        <m.div
-                          layoutId="active-sidebar-subtab"
-                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                        />
-                      )}
                       <BarChart3
                         className={cn(
                           'h-3 w-3 shrink-0 transition-colors',
@@ -525,17 +501,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       data-testid="reports-subtab-pdf-report"
                       className={cn(
                         SUBTAB_LINK_BASE,
-                        isPdfReportActive
-                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs'
-                          : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
+                        isPdfReportActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
                       )}
                     >
-                      {isPdfReportActive && (
-                        <m.div
-                          layoutId="active-sidebar-subtab"
-                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                        />
-                      )}
                       <FileText
                         className={cn(
                           'h-3 w-3 shrink-0 transition-colors',
@@ -551,17 +519,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       data-testid="reports-subtab-whatsapp-report"
                       className={cn(
                         SUBTAB_LINK_BASE,
-                        isWhatsappReportActive
-                          ? 'gold-steel-border gold-steel-border-slim bg-[var(--accent-blue)]/10 font-semibold text-[var(--accent-blue)] shadow-2xs'
-                          : 'font-medium text-[var(--text-heading)] hover:bg-white/75 hover:text-[var(--accent-blue)]'
+                        isWhatsappReportActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
                       )}
                     >
-                      {isWhatsappReportActive && (
-                        <m.div
-                          layoutId="active-sidebar-subtab"
-                          className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]"
-                        />
-                      )}
                       <MessageSquare
                         className={cn(
                           'h-3 w-3 shrink-0 transition-colors',

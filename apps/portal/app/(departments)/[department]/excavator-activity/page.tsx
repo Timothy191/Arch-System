@@ -1,11 +1,11 @@
-import { KPICard, KPIGrid } from '@repo/ui/KPI';
-import { PageHeader } from '@repo/ui/PageHeader';
 import { getCurrentShift } from '@repo/utils';
 import { getMineralRegistry } from '~/features/admin/actions/minerals';
+import { getOperationalTargets } from '~/features/admin/actions/targets';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
-import { HAUL_TRUCK_MACHINE_TYPES } from '../hourly-loads/loads-utils';
+import { HAUL_TRUCK_MACHINE_TYPES, parseExcavatorMaterial } from '../hourly-loads/loads-utils';
 import { ExcavatorActivityForm } from './ExcavatorActivityForm';
 import { ExcavatorActivityList } from './ExcavatorActivityList';
+import { ExcavatorActivityTelemetryOverview } from './ExcavatorActivityTelemetryOverview';
 
 export default async function ExcavatorActivityPage({
   params,
@@ -19,7 +19,7 @@ export default async function ExcavatorActivityPage({
     department: deptSlug,
   });
 
-  // Parallel fetch of independent reference data, today's activity, and mineral registry
+  // Parallel fetch of independent reference data, today's activity, mineral registry, and targets
   const [
     { data: excavators },
     { data: dumpers },
@@ -28,6 +28,7 @@ export default async function ExcavatorActivityPage({
     { data: mineBlocks },
     { data: todayActivity },
     mineralRegistry,
+    operationalTargets,
   ] = await Promise.all([
     supabase
       .from('machines')
@@ -61,6 +62,7 @@ export default async function ExcavatorActivityPage({
       .eq('activity_date', today)
       .order('created_at', { ascending: false }),
     getMineralRegistry(),
+    getOperationalTargets(),
   ]);
 
   // Fetch today's dumper assignments via excavator_activity IDs
@@ -98,22 +100,48 @@ export default async function ExcavatorActivityPage({
   ]);
   todayAssignments = assignments || [];
 
-  // Compute KPIs
+  // Compute KPIs and Global Combined Tally
   const totalLoads = todayAssignments?.reduce((sum, a) => sum + (a.total_loads || 0), 0) || 0;
   const totalBcm = todayAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
   const activeExcavators = new Set(todayActivity?.map((a) => a.machine_id)).size;
+  const fleetExcavatorsCount = excavators?.length || 0;
+
+  let wasteLoads = 0;
+  let coalLoads = 0;
+  for (const a of todayAssignments) {
+    const loadsNum = a.total_loads || 0;
+    if ((a.material_type || '').toLowerCase().includes('coal')) {
+      coalLoads += loadsNum;
+    } else {
+      wasteLoads += loadsNum;
+    }
+  }
+
+  let plantUnitsCount = 0;
+  let otherUnitsCount = 0;
+  const seenMachineForMode = new Set<string>();
+  for (const act of todayActivity || []) {
+    if (seenMachineForMode.has(act.machine_id)) continue;
+    seenMachineForMode.add(act.machine_id);
+    const cat = parseExcavatorMaterial(act.material_type, mineralRegistry).category;
+    if (cat === 'Plant') plantUnitsCount += 1;
+    if (cat === 'Other') otherUnitsCount += 1;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <PageHeader title="Excavator Activity" showDate={false} />
-      </div>
-
-      <KPIGrid cols={3}>
-        <KPICard label="Total BCM" value={totalBcm.toFixed(1)} color="green" />
-        <KPICard label="Total Loads" value={totalLoads.toLocaleString()} color="green" />
-        <KPICard label="Active Excavators" value={activeExcavators} color="cyan" />
-      </KPIGrid>
+      <ExcavatorActivityTelemetryOverview
+        totalBcm={totalBcm}
+        totalLoads={totalLoads}
+        activeExcavators={activeExcavators}
+        fleetExcavatorsCount={fleetExcavatorsCount}
+        wasteLoads={wasteLoads}
+        coalLoads={coalLoads}
+        plantUnitsCount={plantUnitsCount}
+        otherUnitsCount={otherUnitsCount}
+        targetBcm={operationalTargets.shift.volumeBcmTarget}
+        targetLoads={operationalTargets.shift.loadsTarget}
+      />
 
       <ExcavatorActivityForm
         departmentId={deptId}

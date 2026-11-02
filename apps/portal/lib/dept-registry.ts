@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { cache } from 'react';
 
 const deptCache = new Map<string, string>();
 
@@ -21,10 +22,16 @@ const PRODUCTION_FALLBACK_SLUGS = new Set([
   'office',
 ]);
 
-export async function getDeptId(slug: string): Promise<string | null> {
+async function resolveDeptId(slug: string): Promise<string | null> {
   const cached = deptCache.get(slug);
   if (cached) {
     return cached;
+  }
+
+  const staticUuid = STATIC_DEPT_UUIDS[slug];
+  if (staticUuid) {
+    deptCache.set(slug, staticUuid);
+    return staticUuid;
   }
 
   const supabase = await createServerSupabaseClient();
@@ -47,6 +54,8 @@ export async function getDeptId(slug: string): Promise<string | null> {
   deptCache.set(slug, resolvedId);
   return resolvedId;
 }
+
+export const getDeptId = cache(resolveDeptId);
 
 export function clearDeptCache(): void {
   deptCache.clear();

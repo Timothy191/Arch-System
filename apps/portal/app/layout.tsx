@@ -222,25 +222,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   <SplitWindowLayout>{children}</SplitWindowLayout>
                 </main>
 
-                {/* Global footer landmark (WCAG 1.3.1) matching top MacMenuBar floating pill geometry & effects */}
+                {/* Global footer landmark (WCAG 1.3.1) — clean enterprise status bar */}
                 <footer
                   role="contentinfo"
                   aria-label="Site footer"
-                  className="liquid-glass-light gold-steel-border fixed inset-x-3 bottom-2 z-navigation flex h-11 items-center rounded-full border border-white/20 px-3.5 text-[10px] text-[var(--text-muted)] shadow-window"
+                  className="liquid-glass-light gold-steel-border gold-steel-border-slim fixed inset-x-3 bottom-2 z-navigation flex h-9 items-center rounded-full border border-white/25 bg-[var(--material-ultra-thin)] px-3.5 text-[10px] text-[var(--text-muted)] shadow-diffusion-sm backdrop-blur-md"
                 >
-                  <div className="flex w-full items-center justify-between gap-2.5">
-                    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/75 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset">
+                  <div className="flex w-full items-center justify-between gap-3">
+                    <div className="inline-flex shrink-0 items-center gap-2">
                       <span
                         className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green"
                         aria-hidden="true"
                       />
-                      <span className="font-semibold text-[9.5px] text-[var(--text-heading)] uppercase tracking-wider">
+                      <span className="font-semibold text-[10px] text-[var(--text-heading)] tracking-wider">
                         Arch OS
                       </span>
-                      <span className="rounded-full border border-arch-accent-blue/25 bg-arch-accent-blue/10 px-1.5 py-px font-mono font-semibold text-[9px] text-arch-accent-blue tabular-nums">
+                      <span className="rounded-md border border-arch-accent-blue/25 bg-arch-accent-blue/10 px-1.5 py-px font-mono font-semibold text-[9px] text-arch-accent-blue tabular-nums">
                         v{APP_VERSION}
                       </span>
-                      <span className="hidden items-center gap-1 border-black/10 border-l pl-1 font-mono text-[9px] text-[var(--text-secondary)] tabular-nums sm:inline-flex">
+                      <span className="hidden items-center gap-1.5 border-black/10 border-l pl-2 font-mono text-[9.5px] text-[var(--text-secondary)] tabular-nums sm:inline-flex">
                         99.95% SLA · 9 Modules
                       </span>
                     </div>
@@ -249,9 +249,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       <DepartmentReviews />
                     </div>
 
-                    <div className="gold-steel-border gold-steel-border-slim inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/75 px-2.5 py-0.5 shadow-2xs ring-1 ring-white/80 ring-inset">
-                      <span className="hidden items-center gap-1 border-black/10 border-r pr-1.5 font-mono font-semibold text-[9px] text-accent-green md:inline-flex">
-                        ● Sync Active
+                    <div className="inline-flex shrink-0 items-center gap-2">
+                      <span className="hidden items-center gap-1 border-black/10 border-r pr-2 font-mono font-semibold text-[9.5px] text-accent-green md:inline-flex">
+                        <span
+                          className="h-1.5 w-1.5 rounded-full bg-accent-green"
+                          aria-hidden="true"
+                        />
+                        Sync Active
                       </span>
                       <EveLogo className="h-2.5 w-auto text-[var(--text-secondary)]" />
                       <span className="font-medium font-mono text-[9.5px] text-[var(--text-secondary)]">

@@ -62,6 +62,11 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
     expect(screen.getByTestId('summary-golden-graph-delay-hours')).toBeInTheDocument();
     expect(screen.getByTestId('summary-golden-graph-machines')).toBeInTheDocument();
     expect(screen.getByTestId('summary-golden-graph-delay-entries')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-kpi-separator-hours-today')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-kpi-separator-total-loads')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-kpi-separator-delay-hours')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-kpi-separator-machines')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-kpi-separator-delay-entries')).toBeInTheDocument();
     expect(screen.getAllByTestId('summary-graph-arch-node').length).toBeGreaterThan(10);
   });
 
@@ -87,6 +92,7 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
     render(<AlertPanel departmentId="dept-cr" />);
 
     expect(screen.getByTestId('control-room-targets-visual-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('trajectory-header-separator')).toBeInTheDocument();
     expect(screen.getByText(/Operational Target Graphs & KPI Attainment/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Admin Targets/i })).toHaveAttribute(
       'href',

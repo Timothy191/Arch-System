@@ -116,6 +116,24 @@ export function buildShiftAndMachineReports(params: {
   shiftRows: ShiftReportRow[];
   machineOperationLogs: MachineOperationLogItem[];
 } {
+  const ctx = buildShiftReportPhase1(params);
+  return buildShiftReportPhase2(ctx);
+}
+
+function buildShiftReportPhase1(params: {
+  operations: RawMachineOperationRow[];
+  loads: RawHourlyLoadRow[];
+  delays: Array<{ delay_date: string; shift_type: string; delay_minutes: number }>;
+  excavatorAssignments: RawExcavatorAssignmentRow[];
+  dozerRolls: RawDozerRollRow[];
+  breakdowns: RawBreakdownRow[];
+  dailyLogs: RawDailyLogRow[];
+  isControlRoom: boolean;
+  deptId: string;
+  machineHoursByLog: Map<string, number>;
+  fuelLogsByLog: Map<string, number>;
+  productionByLog: Map<string, { coal_tonnes: number; waste_tonnes: number }>;
+}) {
   const {
     operations,
     loads,
@@ -385,6 +403,58 @@ export function buildShiftAndMachineReports(params: {
     }
   }
 
+  return {
+    operations,
+    loads,
+    delays,
+    excavatorAssignments,
+    dozerRolls,
+    breakdowns,
+    dailyLogs,
+    isControlRoom,
+    deptId,
+    machineHoursByLog,
+    fuelLogsByLog,
+    productionByLog,
+    machineDateShiftLoadsMap,
+    excavatorSummaryMap,
+    dumperSummaryMap,
+    rowMap,
+    loadBcmMap,
+    assignmentBcmMap,
+    dozerRollMap,
+    breakdownMinutesByMachineDate,
+    getOrCreate,
+  };
+}
+
+function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>): {
+  shiftRows: ShiftReportRow[];
+  machineOperationLogs: MachineOperationLogItem[];
+} {
+  const {
+    operations,
+    loads,
+    delays,
+    excavatorAssignments,
+    dozerRolls,
+    breakdowns,
+    dailyLogs,
+    isControlRoom,
+    deptId,
+    machineHoursByLog,
+    fuelLogsByLog,
+    productionByLog,
+    machineDateShiftLoadsMap,
+    excavatorSummaryMap,
+    dumperSummaryMap,
+    rowMap,
+    loadBcmMap,
+    assignmentBcmMap,
+    dozerRollMap,
+    breakdownMinutesByMachineDate,
+    getOrCreate,
+  } = ctx;
   const machineOperationLogs: MachineOperationLogItem[] = [];
   const seenMachineShiftKeys = new Set<string>();
 

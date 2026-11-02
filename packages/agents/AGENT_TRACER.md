@@ -1,5 +1,18 @@
 # Agent Tracer - @repo/agents
 
+## 2026-11-02T19:26:00+02:00 - Programmatic STM-0 Structured Thinking Enforcement (`QualityGate`, `ReflectionEngine`, `AgentPillarEnvelope`, `runHarnessDoctor`)
+
+- **Phase 1 (Comprehension)**: Verify and improve the `structured-thinking` (STM-0) mandate across `.agents/rules/structured-thinking-mandate.md`, `.agents/skills/structured-thinking/SKILL.md`, and `@repo/agents` so the 5-phase protocol (Comprehension, Evidence, Design, Criticism, Contract) is programmatically enforced in `QualityGate`, `ReflectionEngine`, `AgentPillarEnvelope`, and `runHarnessDoctor` with zero external API overhead.
+- **Phase 2 (Evidence)**: Inspected `.agents/rules/structured-thinking-mandate.md`, `.agents/skills/structured-thinking/SKILL.md`, `packages/agents/src/{prompt-envelope.ts,quality-gate.ts,reflection-engine.ts,harness-engine.ts,harness-engine.test.ts}`, and `tools/audits/audit-agentic-content.cjs`.
+- **Phase 3 (Design)**:
+  - `src/prompt-envelope.ts`: Added `STM_0_MANDATORY_PHASES` and compiled Section `5B. STRUCTURED THINKING MANDATE (STM-0 PROTOCOL)` into `AgentPillarEnvelope.compileSystemPrompt()`.
+  - `src/quality-gate.ts`: Implemented `QualityGate.validateStructuredThinking()` detecting Format A (`<structured-thinking>`), Format B (`<thinking>`), and Format C (`AGENT_TRACER.md` `Phase 1..5`), flagging `THINKING_MISSING` or `INCOMPLETE_STM_PHASES` when any phase is omitted.
+  - `src/reflection-engine.ts`: Added `requireStructuredThinking?: boolean` to `ReflectionEngineOptions` so specialist outputs missing STM-0 phases trigger self-remediation.
+  - `src/harness-engine.ts`: Added `stm-0-structured-thinking-mandate` check to `runHarnessDoctor()`.
+  - `src/harness-engine.test.ts`: Added unit tests verifying Format A/C validation, `THINKING_MISSING` / `INCOMPLETE_STM_PHASES` detection, `AgentPillarEnvelope` Section 5B compilation, and `runHarnessDoctor` STM-0 diagnostics.
+- **Phase 4 (Criticism)**: Kept `requireStructuredThinking` opt-in in `ReflectionEngineOptions` to preserve backward compatibility with existing unit mocks while enabling strict enforcement.
+- **Phase 5 (Contract)**: Modified `src/{prompt-envelope.ts,quality-gate.ts,reflection-engine.ts,harness-engine.ts,harness-engine.test.ts}` and `.agents/skills/structured-thinking/SKILL.md`; verified with `pnpm --filter @repo/agents test`, `pnpm --filter @repo/agents type-check`, and `bash tools/scripts/agent-verify.sh`.
+
 ## 2026-11-02T14:48:00+02:00 - Unified Antigravity Gemini Harness Engine (AutoGPT + RuFlo + invisible_dots)
 
 - **Purpose**: Integrate reverse-engineered zero-overhead agentic harness mechanisms from `Significant-Gravitas/AutoGPT`, `ruvnet/ruflo`, and `feder-cr/invisible_dots` into `@repo/agents` while standardizing all model tiers on Antigravity Gemini models (`gemini-3.6-flash`, `gemini-2.5-pro`, `gemini-2.5-flash-lite`).

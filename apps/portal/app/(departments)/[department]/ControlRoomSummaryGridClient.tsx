@@ -56,10 +56,7 @@ function HeroSummaryGoldenGraph({
   const areaPath = `${linePath} L ${lastX} ${height} L ${firstX} ${height} Z`;
 
   return (
-    <div
-      className="mt-auto border-slate-200/70 border-t pt-2.5"
-      data-testid={`summary-golden-graph-${id}`}
-    >
+    <div className="mt-auto pt-2" data-testid={`summary-golden-graph-${id}`}>
       <div className="mb-1.5 flex items-center justify-between gap-1.5">
         <div className="flex min-w-0 items-center gap-1.5">
           <span
@@ -248,6 +245,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <p className="mt-1 font-bold text-2xl text-accent-charcoal">
             {data.totalHours.toFixed(1)}h
           </p>
+          <div
+            data-testid="summary-kpi-separator-hours-today"
+            aria-hidden="true"
+            className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
         </div>
         <HeroSummaryGoldenGraph
           id="hours-today"
@@ -266,6 +268,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <p className="mt-1 font-bold text-2xl text-text-heading">
             {data.totalLoads.toLocaleString()}
           </p>
+          <div
+            data-testid="summary-kpi-separator-total-loads"
+            aria-hidden="true"
+            className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
         </div>
         <HeroSummaryGoldenGraph
           id="total-loads"
@@ -293,6 +300,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <p className="mt-1 font-bold text-2xl text-accent-red">
             {data.totalDelayHours.toFixed(1)}h
           </p>
+          <div
+            data-testid="summary-kpi-separator-delay-hours"
+            aria-hidden="true"
+            className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
         </div>
         <HeroSummaryGoldenGraph
           id="delay-hours"
@@ -314,6 +326,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
             </span>
           </div>
           <p className="mt-1 font-bold text-2xl text-accent-green">{data.machineCount}</p>
+          <div
+            data-testid="summary-kpi-separator-machines"
+            aria-hidden="true"
+            className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
         </div>
         <HeroSummaryGoldenGraph
           id="machines"
@@ -337,6 +354,11 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
             )}
           </div>
           <p className="mt-1 font-bold text-2xl text-accent-charcoal">{data.delayEntriesCount}</p>
+          <div
+            data-testid="summary-kpi-separator-delay-entries"
+            aria-hidden="true"
+            className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
         </div>
         <HeroSummaryGoldenGraph
           id="delay-entries"

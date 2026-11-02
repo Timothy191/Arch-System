@@ -5,6 +5,27 @@
 
 export type HourlyShift = 'day' | 'night';
 export type HourlyMaterial = 'Waste' | 'Coal';
+export type ExcavatorActivityMaterial = 'Waste' | 'Coal' | 'Plant' | 'Other';
+
+export const EXCAVATOR_ACTIVITY_MATERIALS: readonly ExcavatorActivityMaterial[] = [
+  'Waste',
+  'Coal',
+  'Plant',
+  'Other',
+] as const;
+
+export function isRegularMachineExcavatorActivity(material: string | null | undefined): boolean {
+  if (!material) return false;
+  const trimmed = material.trim().toLowerCase();
+  return (
+    trimmed === 'plant' ||
+    trimmed.startsWith('plant -') ||
+    trimmed.startsWith('plant:') ||
+    trimmed === 'other' ||
+    trimmed.startsWith('other -') ||
+    trimmed.startsWith('other:')
+  );
+}
 
 export interface HourlyLoad {
   id: string;
@@ -272,14 +293,37 @@ export const COAL_MATERIAL_SUBCATEGORIES = [
 
 export const WASTE_MATERIAL_SUBCATEGORIES = ['Dyke', 'Overburden', 'Interburden', 'Other'] as const;
 
+export const PLANT_MATERIAL_SUBCATEGORIES = [
+  'ROM Feed',
+  'Crusher Feed',
+  'Stockpile Reclaim',
+  'Plant Rejects',
+  'Other',
+] as const;
+
+export const OTHER_MATERIAL_SUBCATEGORIES = [
+  'Trenching',
+  'Bench Preparation',
+  'Rehabilitation',
+  'Dewatering Sump',
+  'General Earthworks',
+  'Other',
+] as const;
+
 type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
 type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
 type MaterialSubCategory = string;
 
 export function getMaterialSubCategories(
-  category: HourlyMaterial,
+  category: ExcavatorActivityMaterial,
   customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
 ): readonly string[] {
+  if (category === 'Plant') {
+    return PLANT_MATERIAL_SUBCATEGORIES;
+  }
+  if (category === 'Other') {
+    return OTHER_MATERIAL_SUBCATEGORIES;
+  }
   if (customRegistry) {
     if (category === 'Coal' && customRegistry.coal && customRegistry.coal.length > 0) {
       return customRegistry.coal;
@@ -292,7 +336,7 @@ export function getMaterialSubCategories(
 }
 
 export function isValidSubCategoryForMaterial(
-  category: HourlyMaterial,
+  category: ExcavatorActivityMaterial,
   subCategory: string | null | undefined,
   customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
 ): boolean {
@@ -304,14 +348,14 @@ export function isValidSubCategoryForMaterial(
 
 /**
  * Parses a stored excavator_activity.material_type value (e.g. "Coal - 2#Lower",
- * "Waste - Overburden", "2#Lower", "Overburden", "Coal", "Waste") into its
- * primary category ('Waste' | 'Coal') and optional sub-category.
+ * "Waste - Overburden", "Plant - ROM Feed", "Other - Trenching", "Coal", "Waste", "Plant", "Other")
+ * into its primary category ('Waste' | 'Coal' | 'Plant' | 'Other') and optional sub-category.
  */
 export function parseExcavatorMaterial(
   raw: string | null | undefined,
   customRegistry?: { waste?: readonly string[]; coal?: readonly string[] }
 ): {
-  category: HourlyMaterial;
+  category: ExcavatorActivityMaterial;
   subCategory: string;
 } {
   if (!raw || typeof raw !== 'string') {
@@ -323,10 +367,18 @@ export function parseExcavatorMaterial(
     return { category: 'Waste', subCategory: '' };
   }
 
-  // Handle "Coal - 2#Lower", "Waste - Overburden", "Coal: 2#Lower", "Coal (2#Lower)"
-  const prefixMatch = /^(Coal|Waste)\s*(?:[-:/]|\()\s*([^)]+)\)?$/i.exec(trimmed);
+  // Handle "Coal - 2#Lower", "Waste - Overburden", "Plant - ROM Feed", "Other - Trenching"
+  const prefixMatch = /^(Coal|Waste|Plant|Other)\s*(?:[-:/]|\()\s*([^)]+)\)?$/i.exec(trimmed);
   if (prefixMatch) {
-    const rawCat = prefixMatch[1]?.toLowerCase() === 'coal' ? 'Coal' : 'Waste';
+    const rawCatLower = prefixMatch[1]?.toLowerCase() ?? 'waste';
+    const rawCat: ExcavatorActivityMaterial =
+      rawCatLower === 'coal'
+        ? 'Coal'
+        : rawCatLower === 'plant'
+          ? 'Plant'
+          : rawCatLower === 'other'
+            ? 'Other'
+            : 'Waste';
     const rawSub = (prefixMatch[2] ?? '').trim();
     const normalizedSub = rawSub.toLowerCase() === 'interburdern' ? 'Interburden' : rawSub;
     const options = getMaterialSubCategories(rawCat, customRegistry);
@@ -337,22 +389,43 @@ export function parseExcavatorMaterial(
     };
   }
 
-  if (trimmed.toLowerCase() === 'coal') {
+  const lower = trimmed.toLowerCase();
+  if (lower === 'coal') {
     return { category: 'Coal', subCategory: '' };
   }
-  if (trimmed.toLowerCase() === 'waste') {
+  if (lower === 'waste') {
     return { category: 'Waste', subCategory: '' };
+  }
+  if (lower === 'plant') {
+    return { category: 'Plant', subCategory: '' };
+  }
+  if (lower === 'other') {
+    return { category: 'Other', subCategory: '' };
+  }
+
+  // Check Plant options
+  const plantOptions = getMaterialSubCategories('Plant', customRegistry);
+  const plantMatch = plantOptions.find((s) => s.toLowerCase() === lower);
+  if (plantMatch && plantMatch !== 'Other') {
+    return { category: 'Plant', subCategory: plantMatch };
+  }
+
+  // Check Other activity options
+  const otherOptions = getMaterialSubCategories('Other', customRegistry);
+  const otherMatch = otherOptions.find((s) => s.toLowerCase() === lower);
+  if (otherMatch && otherMatch !== 'Other') {
+    return { category: 'Other', subCategory: otherMatch };
   }
 
   // Check Coal options
   const coalOptions = getMaterialSubCategories('Coal', customRegistry);
-  const coalMatch = coalOptions.find((s) => s.toLowerCase() === trimmed.toLowerCase());
+  const coalMatch = coalOptions.find((s) => s.toLowerCase() === lower);
   if (coalMatch) {
     return { category: 'Coal', subCategory: coalMatch };
   }
 
   // Check Waste options
-  const normalizedTrimmed = trimmed.toLowerCase() === 'interburdern' ? 'Interburden' : trimmed;
+  const normalizedTrimmed = lower === 'interburdern' ? 'Interburden' : trimmed;
   const wasteOptions = getMaterialSubCategories('Waste', customRegistry);
   const wasteMatch = wasteOptions.find((s) => s.toLowerCase() === normalizedTrimmed.toLowerCase());
   if (wasteMatch) {
@@ -363,19 +436,95 @@ export function parseExcavatorMaterial(
 }
 
 /**
- * Formats a primary material category ('Waste' | 'Coal') and optional sub-category
+ * Formats a primary material category ('Waste' | 'Coal' | 'Plant' | 'Other') and optional sub-category
  * for persistence in excavator_activity.material_type while keeping lossless category info.
  */
 export function formatExcavatorMaterial(
-  category: HourlyMaterial,
+  category: ExcavatorActivityMaterial,
   subCategory?: string | null
 ): string {
-  const validCat: HourlyMaterial = category === 'Coal' ? 'Coal' : 'Waste';
+  const validCat: ExcavatorActivityMaterial =
+    category === 'Coal'
+      ? 'Coal'
+      : category === 'Plant'
+        ? 'Plant'
+        : category === 'Other'
+          ? 'Other'
+          : 'Waste';
   const trimmed = subCategory?.trim();
   if (trimmed) {
     return `${validCat} - ${trimmed}`;
   }
   return validCat;
+}
+
+/**
+ * Normalizes a quick-add Mine Block name & code so operators can type shorthand
+ * (e.g. "brakfontein bench d", "bench c", "pit 2 area a") and get a properly formatted
+ * display name and standardized `BLK-...` code.
+ */
+export function normalizeQuickBlockFormat(
+  rawName: string,
+  rawCode?: string | null,
+  siteName?: string | null
+): {
+  formattedName: string;
+  formattedCode: string;
+} {
+  const cleanedName = rawName.trim().replace(/\s+/g, ' ');
+  const formattedName = cleanedName
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => {
+      if (/^[A-Z0-9#-]{1,4}$/i.test(word) && /\d/.test(word)) {
+        return word.toUpperCase();
+      }
+      if (word.length === 1) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+
+  const cleanedCode = (rawCode ?? '')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  if (cleanedCode) {
+    const formattedCode = cleanedCode.startsWith('BLK-')
+      ? cleanedCode.slice(0, 24)
+      : `BLK-${cleanedCode}`.slice(0, 24);
+    return { formattedName: formattedName || 'Pit Block 1', formattedCode };
+  }
+
+  const baseWords = `${siteName ? `${siteName} ` : ''}${formattedName}`
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]+/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w && w !== 'PIT' && w !== 'BLOCK' && w !== 'BENCH' && w !== 'AREA');
+
+  const sourceWords =
+    baseWords.length > 0
+      ? baseWords
+      : formattedName
+          .toUpperCase()
+          .replace(/[^A-Z0-9\s]+/g, ' ')
+          .split(/\s+/)
+          .filter(Boolean);
+
+  const tokenParts =
+    sourceWords.length >= 2
+      ? sourceWords.slice(0, 3).map((w) => w.slice(0, 4))
+      : [(sourceWords[0] || 'PIT').slice(0, 6)];
+
+  const formattedCode = `BLK-${tokenParts.join('-')}`.slice(0, 24);
+  return {
+    formattedName: formattedName || 'Pit Block 1',
+    formattedCode,
+  };
 }
 
 /**

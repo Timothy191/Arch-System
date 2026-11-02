@@ -6,6 +6,7 @@ import {
   CheckSquare,
   Database,
   Factory,
+  FileSpreadsheet,
   FileText,
   Pickaxe,
   ScanFace,
@@ -33,10 +34,14 @@ export const GOOGLE_DOCS_CHOOSER_URL =
 export const GOOGLE_CALENDAR_CHOOSER_URL =
   'https://accounts.google.com/AccountChooser?continue=https://calendar.google.com/calendar/u/0/r';
 
+export const GOOGLE_SHEETS_CHOOSER_URL =
+  'https://accounts.google.com/AccountChooser?continue=https://docs.google.com/spreadsheets/u/0/';
+
 /** Productivity tool name → direct Google Workspace destination (no portal hop). */
 export const GOOGLE_CHOOSER_BY_TOOL: Readonly<Record<string, string>> = {
   documents: GOOGLE_DOCS_CHOOSER_URL,
   schedule: GOOGLE_CALENDAR_CHOOSER_URL,
+  excel: GOOGLE_SHEETS_CHOOSER_URL,
 };
 
 export interface MacMenuBarProps {
@@ -143,6 +148,12 @@ export const PRODUCTIVITY_LIST = [
     displayName: 'Schedule',
     icon: CalendarDays,
     colorClass: 'text-dept-control-room',
+  },
+  {
+    name: 'excel',
+    displayName: 'Excel',
+    icon: FileSpreadsheet,
+    colorClass: 'text-dept-production',
   },
   {
     name: 'calculations',

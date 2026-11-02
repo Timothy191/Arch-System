@@ -6,8 +6,33 @@ import {
   NetworkStatusRow,
   NotificationRow,
   ServerHealthRow,
+  SystemTrayPill,
   VolumeControlRow,
 } from './SystemTray';
+
+jest.mock('@repo/utils/client', () => ({
+  analytics: { track: jest.fn() },
+  fetchClient: { post: jest.fn().mockResolvedValue({ ok: true }) },
+}));
+
+jest.mock('@/hooks/useFetchOfflineQueue', () => ({
+  useFetchOfflineQueue: () => ({ pendingCount: 0 }),
+}));
+
+jest.mock('./system-tray-hooks', () => {
+  const actual = jest.requireActual('./system-tray-hooks');
+  return {
+    ...actual,
+    useServerHealth: () => ({
+      status: 'healthy',
+      db: 'ok',
+      redis: 'ok',
+      fuxa: 'ok',
+      responseTime: 42,
+      loading: false,
+    }),
+  };
+});
 
 describe('formatTimeSeconds', () => {
   it("returns 'Calculating…' for non-finite or non-positive values", () => {
@@ -222,5 +247,35 @@ describe('ServerHealthRow', () => {
     expect(mapped.fuxa).toBe('ok');
     expect(mapped.responseTime).toBe(430);
     expect(mapped.timestamp).toBe('2026-10-19T11:27:52.548Z');
+  });
+});
+
+describe('SystemTrayPill (Unified Control Room Taskbar)', () => {
+  it('renders unified pill merging Return to Hub, Notifications, System Tray, and Support with gold separators', () => {
+    render(<SystemTrayPill />);
+
+    // 1. Return to Hub
+    const homeBtn = screen.getByTestId('taskbar-home-button');
+    expect(homeBtn).toBeInTheDocument();
+    expect(homeBtn).toHaveAttribute('href', '/hub');
+    expect(homeBtn).toHaveAttribute('aria-label', 'Return to Hub');
+
+    // 2. Notifications
+    const notifBtn = screen.getByTestId('taskbar-notifications-bell');
+    expect(notifBtn).toBeInTheDocument();
+    expect(notifBtn).toHaveAttribute('aria-label', 'Notifications');
+
+    // 3. System Tray Popover
+    const trayBtn = screen.getByLabelText('System Tray Popover');
+    expect(trayBtn).toBeInTheDocument();
+
+    // 4. Support Button
+    const supportBtn = screen.getByTitle('Feedback & Support');
+    expect(supportBtn).toBeInTheDocument();
+    expect(supportBtn).toHaveTextContent('Support');
+
+    // 5. Gold Separators
+    const separators = screen.getAllByTestId('system-tray-gold-separator');
+    expect(separators.length).toBeGreaterThanOrEqual(4);
   });
 });

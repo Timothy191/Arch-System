@@ -47,6 +47,17 @@ export const SERVICE_META: Record<
       </svg>
     ),
   },
+  'google-sheets': {
+    label: 'Excel: Google Sheets Workspace',
+    shortLabel: 'Excel',
+    Icon: (
+      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="18" height="18" rx="2" fill="#0F9D58" />
+        <path d="M3 9h18M9 3v18" stroke="#FFFFFF" strokeWidth="1.5" />
+        <rect x="4.5" y="4.5" width="3" height="3" fill="#FFFFFF" opacity="0.9" />
+      </svg>
+    ),
+  },
 };
 
 export const GITHUB_COMMITS = [

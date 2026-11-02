@@ -295,6 +295,7 @@ input.gold-steel-border {
   background-position: 50% 50%;
 }
 
+input.gold-steel-border:hover,
 input.gold-steel-border:focus {
   animation: gold-shimmer 1.5s ease-in-out infinite;
 }
@@ -302,6 +303,7 @@ input.gold-steel-border:focus {
 @media (prefers-reduced-motion: reduce) {
   .gold-steel-border::before,
   .gold-steel-border:hover::before,
+  input.gold-steel-border:hover,
   input.gold-steel-border:focus {
     animation: none;
     background-position: 50% 50%;

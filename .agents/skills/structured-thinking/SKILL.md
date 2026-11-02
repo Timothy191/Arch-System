@@ -219,10 +219,11 @@ Per the autonomous self-healing loop (`pnpm agent:verify`), agents that fail thi
 
 | Model / Provider                      | Thinking Implementation                                                                                                              |
 | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Antigravity Gemini 3.6 Flash / 2.5 Pro** | Enable native thinking mode & Format A/C externalization. All MTP phases execute with zero extra API hops via Antigravity Gemini. |
 | **Claude Opus 4.x (Thinking)**        | Enable extended thinking. MTP phases execute within the native thinking block. Externalize key conclusions in the response.          |
 | **Claude Sonnet 4.x**                 | Use Format A (inline markdown blocks) for all MTP phases.                                                                            |
 | **Gemini 2.5 Pro / Flash (Thinking)** | Enable thinking mode. MTP phases execute within the native thinking block. Externalize key conclusions in the response.              |
-| **Gemini 2.5 Flash**                  | Use Format A (inline markdown blocks) for all MTP phases.                                                                            |
+| **Gemini 2.5 Flash / Flash Lite**     | Use Format A (inline markdown blocks) or Format C (`AGENT_TRACER.md`) for all MTP phases.                                            |
 | **DeepSeek-R1 / Reasonix**            | Native reasoning tokens satisfy Phases 1-3. Agent must still explicitly execute Phase 4 (Criticism) and Phase 5 (Contract).          |
 | **Ollama / Local Models**             | Use Format A (inline markdown blocks). Local models with limited context must still complete at minimum Phase 1 + Phase 4 + Phase 5. |
 | **Background Corpos Loops**           | Use Format C (AGENT_TRACER entries). Abbreviated but complete.                                                                       |

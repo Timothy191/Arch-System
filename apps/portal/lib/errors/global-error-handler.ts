@@ -284,7 +284,7 @@ export function initializeGlobalErrorHandler(options: GlobalErrorHandlerOptions 
 /**
  * Check if global error handler is initialized.
  */
-export function isGlobalErrorHandlerInitialized(): boolean {
+function isGlobalErrorHandlerInitialized(): boolean {
   if (typeof window === 'undefined') return false;
   return (
     (window as unknown as { __globalErrorHandlerInitialized?: boolean })
@@ -295,7 +295,7 @@ export function isGlobalErrorHandlerInitialized(): boolean {
 /**
  * Manually report an error to the global handler (for async errors not caught by listeners).
  */
-export function reportError(error: Error, context?: Record<string, unknown>): void {
+function reportError(error: Error, context?: Record<string, unknown>): void {
   if (typeof window === 'undefined') return;
 
   const info: ErrorHandlerInfo = {

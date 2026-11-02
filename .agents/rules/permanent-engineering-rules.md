@@ -14,6 +14,10 @@ paths:
 
 # Arch-System Permanent Engineering Rules
 
-**Mandatory Skill Activation**: For any code mutation, architectural decision, or infrastructure change, invoke the `permanent-engineering-rules` skill to enforce production reality, security by default, evidence-first protocols, and reliability standards.
+**Mandatory Skill Activation**: For any code mutation, architectural decision, or infrastructure change, invoke the `permanent-engineering-rules` skill to enforce:
+
+- **Production Reality & Industrial Usability**: High-contrast operator ergonomics, assistive input normalization, idempotent mutations, and end-to-end downstream report parity.
+- **Complete Information Gate (Zero Guessing)**: Gather 100% of required context via AST/database/contract inspection and primary research, or prompt the user when ambiguity remains — never assume or invent requirements.
+- **Security by Default & Empirical Verification**: Server-side RBAC, explicit department scoping, controlled errors, and full 27-gate verification (`pnpm agent:verify`) before claiming completion.
 
 See `skill://permanent-engineering-rules` for full protocol details.

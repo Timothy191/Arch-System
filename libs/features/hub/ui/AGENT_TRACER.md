@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-02T19:20:00+02:00 - Redesign Site Footer Telemetry Strip (`DepartmentReviews.tsx`)
+
+- **Purpose**: Replace the distracting scrolling `<Marquee>` and nested gold-bordered pills in `DepartmentReviews.tsx` with a calm, static, scannable enterprise status telemetry strip (`SCADA Stream`, `Redis L1/L2`, `PostgreSQL RLS`, `Zero-Drift Policy`).
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentReviews.tsx`: Replaced animated marquee items with static inline telemetry badges separated by clean dividers.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅.
+
 ## 2026-11-02T10:05:00+02:00 - Register Briefcase Icon for Office Department in DepartmentCard
 
 - **Purpose**: Map `Briefcase` in `DEPARTMENT_ICON_MAP` inside `DepartmentCard.tsx` so the `Office` department card renders its canonical briefcase badge in the Hub `Mining Department Modules` grid.

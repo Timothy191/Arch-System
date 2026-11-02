@@ -73,6 +73,19 @@ describe('getDepartmentContext', () => {
 
     expect(notFound).toHaveBeenCalledTimes(1);
   });
+
+  it('resolves control-room via STATIC_DEPT_UUIDS fast-path without querying departments table', async () => {
+    const fromSpy = jest.fn();
+    createServerSupabaseClient.mockResolvedValue({
+      from: fromSpy,
+    });
+
+    const result = await getDepartmentContext({ department: 'control-room' });
+
+    expect(result.dept.name).toBe('control-room');
+    expect(result.deptId).toBe('0f160914-d92e-45d9-9547-d3d1a11ef6a1');
+    expect(fromSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('requireDepartment', () => {

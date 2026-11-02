@@ -1,9 +1,11 @@
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import {
+  quickAddMineBlock,
   saveHourlyLoad,
   splitMachineHourlyLoad,
   syncExcavatorActivityFromHourlyLoads,
+  updateExcavatorAssignmentConfig,
   updateHourlyLoadExcavator,
   updateMachineSite,
 } from './actions';
@@ -608,6 +610,140 @@ describe('Control Room Hourly Loads actions', () => {
           total_bcm: 240,
         },
       ]);
+    });
+  });
+
+  describe('Excavator Plant/Other Regular Machine Mode & Quick-Add Block Security', () => {
+    const excavatorId = 'd290f1ee-6c54-4b01-90e6-d701748f0901';
+
+    it('rejects unauthenticated updateExcavatorAssignmentConfig calls before touching service client', async () => {
+      jest.mocked(getAuthenticatedEmployee).mockResolvedValue(null);
+
+      await expect(
+        updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: '2026-10-14',
+          shiftType: 'day',
+          materialType: 'Plant',
+        })
+      ).rejects.toThrow('Unauthorized');
+      expect(createServiceRoleClient).not.toHaveBeenCalled();
+    });
+
+    it('stores Plant and Other modes on excavator_activity with regular machine notes and does not mutate hourly_loads', async () => {
+      setPrincipal({ role: 'operator' });
+      const machinesQuery = makeQuery({ site_id: siteId });
+      const hourlyLoadsQuery = makeQuery([]);
+      const activityQuery = makeQuery([]);
+      const assignmentsQuery = makeQuery();
+
+      const customServiceClient = {
+        from: jest.fn((table: string) => {
+          if (table === 'machines') return machinesQuery;
+          if (table === 'hourly_loads') return hourlyLoadsQuery;
+          if (table === 'excavator_activity') return activityQuery;
+          if (table === 'excavator_dumper_assignments') return assignmentsQuery;
+          throw new Error(`Unexpected table: ${table}`);
+        }),
+      };
+      jest.mocked(createServiceRoleClient).mockReturnValue(customServiceClient as never);
+
+      await expect(
+        updateExcavatorAssignmentConfig({
+          departmentId,
+          excavatorId,
+          loadDate: '2026-10-14',
+          shiftType: 'day',
+          materialType: 'Plant',
+          materialSubCategory: 'ROM Feed',
+        })
+      ).resolves.toEqual({ success: true });
+
+      expect(hourlyLoadsQuery.update).not.toHaveBeenCalled();
+      expect(activityQuery.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          department_id: departmentId,
+          machine_id: excavatorId,
+          material_type: 'Plant - ROM Feed',
+          notes: 'Regular machine activity (Plant - ROM Feed)',
+        })
+      );
+    });
+
+    it('rejects quickAddMineBlock from unauthorized departments', async () => {
+      setPrincipal({ role: 'operator', employeeDepartmentId: departmentId });
+
+      await expect(
+        quickAddMineBlock({
+          departmentId: otherDepartmentId,
+          siteId,
+          name: 'Brakfontein Pit Bench D',
+        })
+      ).rejects.toThrow('Not authorized for this Control Room operation');
+      expect(createServiceRoleClient).not.toHaveBeenCalled();
+    });
+
+    it('auto-formats quickAddMineBlock name and code, enforces active site check, and returns idempotently if block code exists', async () => {
+      setPrincipal({ role: 'operator' });
+      const sitesQuery = makeQuery({ id: siteId, name: 'Main Pit' });
+      const existingBlock = {
+        id: 'block-existing-1',
+        name: 'Brakfontein Pit Bench D',
+        code: 'BLK-MAIN-BRAK-D',
+        site_id: siteId,
+      };
+      const mineBlocksQuery = makeQuery(existingBlock);
+
+      const customServiceClient = {
+        from: jest.fn((table: string) => {
+          if (table === 'sites') return sitesQuery;
+          if (table === 'mine_blocks') return mineBlocksQuery;
+          throw new Error(`Unexpected table: ${table}`);
+        }),
+      };
+      jest.mocked(createServiceRoleClient).mockReturnValue(customServiceClient as never);
+
+      const result = await quickAddMineBlock({
+        departmentId,
+        siteId,
+        name: 'brakfontein pit bench d',
+      });
+
+      expect(sitesQuery.eq).toHaveBeenCalledWith('active', true);
+      expect(mineBlocksQuery.eq).toHaveBeenCalledWith('code', 'BLK-MAIN-BRAK-D');
+      expect(mineBlocksQuery.insert).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        block: existingBlock,
+      });
+    });
+
+    it('returns a controlled error when quickAddMineBlock database insert fails without leaking internal DB details', async () => {
+      setPrincipal({ role: 'supervisor' });
+      const sitesQuery = makeQuery({ id: siteId, name: 'Main Pit (BKF)' });
+      const mineBlocksQuery = makeQuery(null);
+      mineBlocksQuery.single.mockResolvedValue({
+        data: null,
+        error: new Error('duplicate key value violates unique constraint "mine_blocks_pkey"'),
+      });
+
+      const customServiceClient = {
+        from: jest.fn((table: string) => {
+          if (table === 'sites') return sitesQuery;
+          if (table === 'mine_blocks') return mineBlocksQuery;
+          throw new Error(`Unexpected table: ${table}`);
+        }),
+      };
+      jest.mocked(createServiceRoleClient).mockReturnValue(customServiceClient as never);
+
+      await expect(
+        quickAddMineBlock({
+          departmentId,
+          siteId,
+          name: 'west bench e',
+        })
+      ).rejects.toThrow('Failed to quick-add mine block');
     });
   });
 });

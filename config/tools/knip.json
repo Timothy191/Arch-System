@@ -71,6 +71,7 @@
     },
     "apps/portal": {
       "entry": [
+        "actions/**/*.{ts,tsx}",
         "app/**/layout.tsx",
         "app/**/page.tsx",
         "app/**/route.ts",
@@ -84,6 +85,7 @@
         ".eslintrc.{js,cjs}"
       ],
       "project": [
+        "actions/**/*.{ts,tsx}",
         "app/**/*.{ts,tsx}",
         "components/**/*.{ts,tsx}",
         "features/**/*.{ts,tsx}",
@@ -129,6 +131,7 @@
         "app/actions.ts",
         "lib/actions/shift-closeout.ts",
         "components/control-room/C66MachineOperatorScanner.tsx",
+        "app/(departments)/[department]/machine-operations/MachineOperationsComplianceWidget.tsx",
         "lib/control-room-shift-report.ts",
         "app/(departments)/[department]/reports/actions.ts",
         "app/(departments)/access-control/actions/badges.ts",

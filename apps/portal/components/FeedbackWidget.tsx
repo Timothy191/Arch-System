@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 interface FeedbackWidgetProps {
   variant?: 'header' | 'floating';
+  embedded?: boolean;
 }
 
 type FeedbackCategory = 'bug' | 'feature' | 'general' | 'support';
@@ -52,7 +53,7 @@ const FEEDBACK_CATEGORIES: readonly FeedbackCategoryItem[] = [
 
 // AGENT-TRACE: Redesigned FeedbackWidget to match Arch OS light-mode liquid-glass design system
 // (Logo emblem, Space Grotesk display typography, tactile category pills, monospace telemetry badges, Sonner toast).
-export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
+export function FeedbackWidget({ variant = 'header', embedded = false }: FeedbackWidgetProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<FeedbackCategory>('bug');
@@ -240,11 +241,13 @@ export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           className={cn(
-            'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full px-2.5 font-medium text-xs',
-            'bg-[var(--material-ultra-thin)] backdrop-blur-md hover:bg-[var(--material-thin)]',
-            'border border-white/20 text-[var(--text-heading)] shadow-diffusion-sm',
-            'transition-all hover:scale-105 active:scale-95',
-            isOpen && 'bg-[var(--material-thin)] ring-1 ring-[var(--accent-blue)]/45'
+            embedded
+              ? 'flex items-center gap-1.5 font-medium text-[var(--text-heading)] text-xs transition-all hover:text-[var(--accent-blue)] active:scale-95'
+              : 'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 font-medium text-[var(--text-heading)] text-xs shadow-diffusion-sm backdrop-blur-md transition-all hover:scale-105 hover:bg-[var(--material-thin)] active:scale-95',
+            isOpen &&
+              (embedded
+                ? 'text-[var(--accent-blue)]'
+                : 'bg-[var(--material-thin)] ring-1 ring-[var(--accent-blue)]/45')
           )}
           title="Feedback & Support"
         >

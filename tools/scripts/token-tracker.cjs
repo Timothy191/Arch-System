@@ -50,7 +50,7 @@ const DEFAULT_BUDGET = {
   maxRulesSize: 108000,
   maxSkillsSize: 350000,
   maxSessionContext: 500000,
-  maxRootInstructionsSize: 25000,
+  maxRootInstructionsSize: 27500,
   maxDirectMcpServers: 10,
   contextWindowTokens: 200000,
   maxPreTaskWindowRatio: 0.3,

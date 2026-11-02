@@ -1,7 +1,13 @@
 {
-  "lastUpdated": "2026-11-02T12:25:14.955Z",
-  "totalRetrospectives": 13,
+  "lastUpdated": "2026-11-02T18:21:21.595Z",
+  "totalRetrospectives": 14,
   "entries": [
+    {
+      "id": "consolidated-20261102-ci-billing-json-knip-tokenization",
+      "category": "TOOLING_CI",
+      "errorSignature": "GitHub Actions account billing lock; Knip unused exports; CSS token sprawl; unvalidated JSON configs",
+      "preventionRule": "When GitHub Actions is billing-locked, use pnpm ci:local + Vercel build gating + .gitlab-ci.yml for merge evidence. Run pnpm validate:json in pre-commit and CI. Remove Knip-unused exports by dropping export. Tokenize CSS in priority order per docs/specs/CSS_TOKENIZATION_ORDER.md (colors -> font sizes -> radius -> z-index -> shadows -> unused vars), one level per spec/PR, verified by audit:tokens + a11y + visual e2e."
+    },
     {
       "id": "err-20260925-vercel-headless-deploy",
       "category": "DEPLOYMENT",

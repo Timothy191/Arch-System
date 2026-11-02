@@ -1,0 +1,78 @@
+# GitLab CI — free alternative to GitHub Actions (billing-blocked).
+# Mirrors the core static jobs from .github/workflows/ci.yml.
+# Self-hosted runner recommended (unlimited minutes); shared runners cap at ~400 min/month.
+#
+# Setup:
+#   1. Create a free GitLab project and mirror this repo (Settings -> Repository -> Mirroring).
+#   2. Register a self-hosted runner: `gitlab-runner register` (executor: shell or docker).
+#   3. Set CI/CD variables: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_URL, etc. (see CI_ENV in tools/scripts/local-ci.mjs).
+#   4. Push; pipeline runs on the runner.
+
+stages:
+  - install
+  - verify
+
+variables:
+  NEXT_TELEMETRY_DISABLED: "1"
+  NODE_VERSION: "24"
+  PNPM_VERSION: "9.15.9"
+
+default:
+  tags: [self-hosted]
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm install --frozen-lockfile
+
+deps-lint:
+  stage: verify
+  script:
+    - pnpm deps:lint
+
+policy-check:
+  stage: verify
+  script:
+    - pnpm policy:check
+    - pnpm --filter @repo/database check-migrations
+    - pnpm --filter @repo/database lint:migrations
+    - pnpm cycles
+
+json-validate:
+  stage: verify
+  script:
+    - pnpm validate:json
+
+token-audit:
+  stage: verify
+  script:
+    - pnpm audit:tokens
+
+knip:
+  stage: verify
+  script:
+    - pnpm knip
+
+type-check:
+  stage: verify
+  script:
+    - pnpm type-check
+
+lint:
+  stage: verify
+  script:
+    - pnpm lint
+
+test:
+  stage: verify
+  script:
+    - pnpm test
+
+# Optional heavier jobs (enable on full suite / nightly):
+# build:
+#   stage: verify
+#   script:
+#     - pnpm build
+# e2e:
+#   stage: verify
+#   script:
+#     - pnpm test:e2e

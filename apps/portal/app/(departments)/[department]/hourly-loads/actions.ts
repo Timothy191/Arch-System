@@ -1,6 +1,7 @@
 'use server';
 
 import {
+  quickAddMineBlockSchema,
   saveHourlyLoadSchema,
   splitHourlyLoadSchema,
   updateExcavatorAssignmentConfigSchema,
@@ -8,6 +9,7 @@ import {
   updateMachineSiteSchema,
 } from '@repo/contract/schemas/form.schema';
 import type {
+  QuickAddMineBlockInput,
   SaveHourlyLoadInput,
   SplitHourlyLoadInput,
   UpdateExcavatorAssignmentConfigInput,
@@ -20,6 +22,8 @@ import {
   deriveExcavatorDumperAssignments,
   formatExcavatorMaterial,
   type HourlyShift,
+  isRegularMachineExcavatorActivity,
+  normalizeQuickBlockFormat,
   parseExcavatorMaterial,
 } from './loads-utils';
 
@@ -253,114 +257,231 @@ export async function updateMachineSite(machineId: string, siteId: string | null
 export async function updateExcavatorAssignmentConfig(
   rawInput: UpdateExcavatorAssignmentConfigInput
 ) {
-  const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
+  return withAsyncSpan(
+    'excavator_assignment_config_update',
+    {
+      department_id: rawInput.departmentId,
+      excavator_id: rawInput.excavatorId,
+      load_date: rawInput.loadDate,
+      shift_type: rawInput.shiftType,
+    },
+    async () => {
+      const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
 
-  const principal = await getAuthenticatedEmployee();
-  if (!principal?.employee) {
-    throw new Error('Unauthorized');
-  }
-  assertDepartmentAccess(principal.employee, validated.departmentId, [
-    'admin',
-    'operator',
-    'supervisor',
-  ]);
+      const principal = await getAuthenticatedEmployee();
+      if (!principal?.employee) {
+        throw new Error('Unauthorized');
+      }
+      assertDepartmentAccess(principal.employee, validated.departmentId, [
+        'admin',
+        'operator',
+        'supervisor',
+      ]);
 
-  const serviceClient = createServiceRoleClient();
+      const serviceClient = createServiceRoleClient();
+      const hourlyLoadMaterial =
+        validated.materialType === 'Coal'
+          ? 'Coal'
+          : validated.materialType === 'Waste'
+            ? 'Waste'
+            : null;
 
-  const [machineSiteResult, , { data: existingActivities }] = await Promise.all([
-    validated.siteId !== undefined
-      ? serviceClient
-          .from('machines')
-          .update({ site_id: validated.siteId })
-          .eq('id', validated.excavatorId)
-          .then(() => ({ siteId: validated.siteId ?? null }))
-      : serviceClient
-          .from('machines')
-          .select('site_id')
-          .eq('id', validated.excavatorId)
-          .maybeSingle()
-          .then(({ data }) => ({ siteId: data?.site_id ?? null })),
-    validated.materialType
-      ? serviceClient
-          .from('hourly_loads')
-          .update({ material_type: validated.materialType })
+      const [machineSiteResult, , { data: existingActivities }] = await Promise.all([
+        validated.siteId !== undefined
+          ? serviceClient
+              .from('machines')
+              .update({ site_id: validated.siteId })
+              .eq('id', validated.excavatorId)
+              .eq('department_id', validated.departmentId)
+              .then(() => ({ siteId: validated.siteId ?? null }))
+          : serviceClient
+              .from('machines')
+              .select('site_id')
+              .eq('id', validated.excavatorId)
+              .eq('department_id', validated.departmentId)
+              .maybeSingle()
+              .then(({ data }) => ({ siteId: data?.site_id ?? null })),
+        hourlyLoadMaterial
+          ? serviceClient
+              .from('hourly_loads')
+              .update({ material_type: hourlyLoadMaterial })
+              .eq('department_id', validated.departmentId)
+              .eq('excavator_id', validated.excavatorId)
+              .eq('load_date', validated.loadDate)
+              .eq('shift_type', validated.shiftType)
+              .eq('is_locked', false)
+          : Promise.resolve(null),
+        serviceClient
+          .from('excavator_activity')
+          .select('id, site_id, block_mined_id, material_type')
           .eq('department_id', validated.departmentId)
-          .eq('excavator_id', validated.excavatorId)
-          .eq('load_date', validated.loadDate)
+          .eq('machine_id', validated.excavatorId)
+          .eq('activity_date', validated.loadDate)
           .eq('shift_type', validated.shiftType)
-          .eq('is_locked', false)
-      : Promise.resolve(null),
-    serviceClient
-      .from('excavator_activity')
-      .select('id, site_id, block_mined_id, material_type')
-      .eq('department_id', validated.departmentId)
-      .eq('machine_id', validated.excavatorId)
-      .eq('activity_date', validated.loadDate)
-      .eq('shift_type', validated.shiftType)
-      .order('created_at', { ascending: false }),
-  ]);
+          .order('created_at', { ascending: false }),
+      ]);
 
-  const excavatorSiteId: string | null = machineSiteResult.siteId;
+      const excavatorSiteId: string | null = machineSiteResult.siteId;
 
-  const existingActivity = existingActivities?.[0] ?? null;
-  const parsedExistingMaterial = parseExcavatorMaterial(existingActivity?.material_type);
-  const nextCategory = validated.materialType ?? parsedExistingMaterial.category;
-  const nextSubCategory =
-    validated.materialSubCategory !== undefined
-      ? validated.materialSubCategory
-      : validated.materialType && validated.materialType !== parsedExistingMaterial.category
-        ? null
-        : parsedExistingMaterial.subCategory || null;
-  const formattedActivityMaterial = formatExcavatorMaterial(nextCategory, nextSubCategory);
+      const existingActivity = existingActivities?.[0] ?? null;
+      const parsedExistingMaterial = parseExcavatorMaterial(existingActivity?.material_type);
+      const nextCategory = validated.materialType ?? parsedExistingMaterial.category;
+      const nextSubCategory =
+        validated.materialSubCategory !== undefined
+          ? validated.materialSubCategory
+          : validated.materialType && validated.materialType !== parsedExistingMaterial.category
+            ? null
+            : parsedExistingMaterial.subCategory || null;
+      const formattedActivityMaterial = formatExcavatorMaterial(nextCategory, nextSubCategory);
+      const regularMachineMode = isRegularMachineExcavatorActivity(formattedActivityMaterial);
 
-  if (existingActivity) {
-    const patch: Record<string, unknown> = {};
-    if (validated.siteId !== undefined) {
-      patch.site_id = validated.siteId;
-    } else if (!existingActivity.site_id && excavatorSiteId) {
-      patch.site_id = excavatorSiteId;
+      if (existingActivity) {
+        const patch: Record<string, unknown> = {};
+        if (validated.siteId !== undefined) {
+          patch.site_id = validated.siteId;
+        } else if (!existingActivity.site_id && excavatorSiteId) {
+          patch.site_id = excavatorSiteId;
+        }
+        if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
+        if (validated.materialType !== undefined || validated.materialSubCategory !== undefined) {
+          patch.material_type = formattedActivityMaterial;
+          if (regularMachineMode) {
+            patch.notes = `Regular machine activity (${formattedActivityMaterial})`;
+          }
+        }
+        if (Object.keys(patch).length > 0) {
+          await serviceClient
+            .from('excavator_activity')
+            .update(patch)
+            .eq('id', existingActivity.id)
+            .eq('department_id', validated.departmentId);
+        }
+      } else {
+        await serviceClient.from('excavator_activity').insert({
+          department_id: validated.departmentId,
+          machine_id: validated.excavatorId,
+          activity_date: validated.loadDate,
+          shift_type: validated.shiftType,
+          site_id: validated.siteId !== undefined ? validated.siteId : excavatorSiteId,
+          block_mined_id: validated.blockMinedId ?? null,
+          material_type: formattedActivityMaterial,
+          notes: regularMachineMode
+            ? `Regular machine activity (${formattedActivityMaterial})`
+            : null,
+          passes: 0,
+          loads: 0,
+        });
+      }
+
+      try {
+        await syncExcavatorActivityFromHourlyLoads(serviceClient, {
+          departmentId: validated.departmentId,
+          excavatorId: validated.excavatorId,
+          loadDate: validated.loadDate,
+          shiftType: validated.shiftType,
+          skipCacheInvalidation: true,
+        });
+      } catch {
+        // Best-effort sync
+      }
+
+      await invalidateHourlyLoadsCache(validated.departmentId, [
+        'table:machines',
+        'table:excavator_activity',
+        'table:excavator_dumper_assignments',
+        `dept:${validated.departmentId}`,
+      ]);
+
+      return { success: true };
     }
-    if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
-    if (validated.materialType !== undefined || validated.materialSubCategory !== undefined) {
-      patch.material_type = formattedActivityMaterial;
+  );
+}
+
+export async function quickAddMineBlock(rawInput: QuickAddMineBlockInput) {
+  return withAsyncSpan(
+    'mine_block_quick_add',
+    {
+      department_id: rawInput.departmentId,
+      site_id: rawInput.siteId ?? 'unassigned',
+    },
+    async () => {
+      const validated = quickAddMineBlockSchema.parse(rawInput);
+
+      const principal = await getAuthenticatedEmployee();
+      if (!principal?.employee) {
+        throw new Error('Unauthorized');
+      }
+      assertDepartmentAccess(principal.employee, validated.departmentId, [
+        'admin',
+        'operator',
+        'supervisor',
+      ]);
+
+      const serviceClient = createServiceRoleClient();
+
+      let siteName: string | null = null;
+      if (validated.siteId) {
+        const { data: siteRow, error: siteError } = await serviceClient
+          .from('sites')
+          .select('id, name')
+          .eq('id', validated.siteId)
+          .eq('active', true)
+          .maybeSingle();
+        if (siteError) {
+          throw new Error('Failed to verify site for mine block');
+        }
+        if (!siteRow) {
+          throw new Error('Active site not found');
+        }
+        siteName = siteRow.name ?? null;
+      }
+
+      const { formattedName, formattedCode } = normalizeQuickBlockFormat(
+        validated.name,
+        validated.code,
+        siteName
+      );
+
+      const { data: existingBlock } = await serviceClient
+        .from('mine_blocks')
+        .select('id, name, code, site_id')
+        .eq('code', formattedCode)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (existingBlock) {
+        return {
+          success: true,
+          block: existingBlock,
+        };
+      }
+
+      const { data: insertedBlock, error: insertError } = await serviceClient
+        .from('mine_blocks')
+        .insert({
+          name: formattedName,
+          code: formattedCode,
+          site_id: validated.siteId || null,
+          active: true,
+        })
+        .select('id, name, code, site_id')
+        .single();
+
+      if (insertError || !insertedBlock) {
+        throw new Error('Failed to quick-add mine block');
+      }
+
+      await invalidateHourlyLoadsCache(validated.departmentId, [
+        'table:mine_blocks',
+        `dept:${validated.departmentId}`,
+      ]);
+
+      return {
+        success: true,
+        block: insertedBlock,
+      };
     }
-    if (Object.keys(patch).length > 0) {
-      await serviceClient.from('excavator_activity').update(patch).eq('id', existingActivity.id);
-    }
-  } else {
-    await serviceClient.from('excavator_activity').insert({
-      department_id: validated.departmentId,
-      machine_id: validated.excavatorId,
-      activity_date: validated.loadDate,
-      shift_type: validated.shiftType,
-      site_id: validated.siteId !== undefined ? validated.siteId : excavatorSiteId,
-      block_mined_id: validated.blockMinedId ?? null,
-      material_type: formattedActivityMaterial,
-      passes: 0,
-      loads: 0,
-    });
-  }
-
-  try {
-    await syncExcavatorActivityFromHourlyLoads(serviceClient, {
-      departmentId: validated.departmentId,
-      excavatorId: validated.excavatorId,
-      loadDate: validated.loadDate,
-      shiftType: validated.shiftType,
-      skipCacheInvalidation: true,
-    });
-  } catch {
-    // Best-effort sync
-  }
-
-  await invalidateHourlyLoadsCache(validated.departmentId, [
-    'table:machines',
-    'table:excavator_activity',
-    'table:excavator_dumper_assignments',
-    `dept:${validated.departmentId}`,
-  ]);
-
-  return { success: true };
+  );
 }
 
 export async function updateHourlyLoadExcavator(

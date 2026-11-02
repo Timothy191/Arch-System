@@ -75,7 +75,8 @@ function HourlyLoadsGrid({
         const act = excavatorActivities.find((a) => a.machine_id === e.id);
         const load = hourlyLoads.find((l) => l.excavator_id === e.id && !l.is_locked);
         const mat = act?.material_type || load?.material_type;
-        return [e.id, parseExcavatorMaterial(mat, mineralRegistry).category];
+        const parsed = parseExcavatorMaterial(mat, mineralRegistry).category;
+        return [e.id, parsed === 'Coal' ? 'Coal' : 'Waste'];
       })
     )
   );
@@ -125,10 +126,13 @@ function HourlyLoadsGrid({
           }));
         }
         if (payload.new.material_type !== undefined) {
+          const parsed = parseExcavatorMaterial(
+            payload.new.material_type,
+            mineralRegistry
+          ).category;
           setExcavatorMaterials((prev) => ({
             ...prev,
-            [machineId]: parseExcavatorMaterial(payload.new.material_type, mineralRegistry)
-              .category,
+            [machineId]: parsed === 'Coal' ? 'Coal' : 'Waste',
           }));
         }
       }
@@ -733,14 +737,14 @@ function HourlyLoadsGrid({
                         Machine
                       </span>
                       <div className="relative">
-                        <Search className="pointer-events-none absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2 text-[var(--text-muted)]" />
+                        <Search className="pointer-events-none absolute top-1/2 left-2.5 z-10 h-3 w-3 -translate-y-1/2 text-[var(--accent-blue)]" />
                         <input
                           type="text"
                           value={machineSearch}
                           onChange={(e) => setMachineSearch(e.target.value)}
                           placeholder="Search machine..."
                           aria-label="Search machine"
-                          className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-primary)] py-1 pr-6 pl-6 font-normal text-[11px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)]"
+                          className="gold-steel-border gold-steel-border-slim w-full rounded-full border border-accent-amber/60 bg-white/95 py-1 pr-6 pl-7 font-medium text-[11px] text-[var(--text-heading)] ring-1 ring-accent-amber/30 focus:outline-none"
                         />
                         {machineSearch && (
                           <button

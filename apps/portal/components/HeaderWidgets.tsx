@@ -5,11 +5,6 @@ import { Suspense } from 'react';
 
 // AGENT-TRACE: Converted React.lazy → next/dynamic for proper Next.js code
 // splitting, chunk prefetching, and SSR control.
-const FeedbackWidget = dynamic(
-  () => import('@/components/FeedbackWidget').then((m) => ({ default: m.FeedbackWidget })),
-  { ssr: false }
-);
-
 const SystemClock = dynamic(
   () => import('@/components/clock/SystemClock').then((m) => ({ default: m.SystemClock })),
   { ssr: false }
@@ -23,8 +18,9 @@ const ServicesDropdown = dynamic(
 /**
  * HeaderWidgets
  *
- * Groups the support/feedback widget, system clock, and services dropdown into a single
- * lazy-loaded chunk for the top taskbar header.
+ * Groups the system clock and services dropdown into a single
+ * lazy-loaded chunk for the top taskbar header. Support / Feedback is now
+ * cleanly merged into SystemTrayPill.
  */
 function WidgetFallback({ width = 'w-7' }: { width?: string }) {
   return (
@@ -38,10 +34,6 @@ function WidgetFallback({ width = 'w-7' }: { width?: string }) {
 export function HeaderWidgets() {
   return (
     <>
-      <Suspense fallback={<WidgetFallback width="w-16" />}>
-        <FeedbackWidget variant="header" />
-      </Suspense>
-
       <Suspense fallback={<WidgetFallback width="w-20" />}>
         <SystemClock />
       </Suspense>

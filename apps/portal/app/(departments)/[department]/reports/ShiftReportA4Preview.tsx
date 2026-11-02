@@ -817,6 +817,10 @@ interface ExcavatorActivityBlockProps {
 }
 
 function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
+  const isRegularMachineActivity =
+    block.material.toLowerCase().startsWith('plant') ||
+    block.material.toLowerCase().startsWith('other');
+
   return (
     <div
       className="excavator-activity-block avoid-break overflow-hidden rounded-lg border border-slate-300 bg-white shadow-2xs"
@@ -837,7 +841,11 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
             Material:
           </span>
           <p className="font-bold text-blue-700">{block.material}</p>
-          <p className="text-[10px] text-slate-500">Unit: {block.materialUnit}</p>
+          <p className="text-[10px] text-slate-500">
+            {isRegularMachineActivity
+              ? 'Mode: Regular Machine Operation'
+              : `Unit: ${block.materialUnit}`}
+          </p>
         </div>
 
         <div>
@@ -908,7 +916,9 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
             {block.assignedMachines.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-4 text-center text-slate-400 text-xs">
-                  No hauling units assigned to this excavator for the shift.
+                  {isRegularMachineActivity
+                    ? `Logged as Regular Machine Operation (${block.material} — No Hauler Dispatch Required).`
+                    : 'No hauling units assigned to this excavator for the shift.'}
                 </td>
               </tr>
             )}

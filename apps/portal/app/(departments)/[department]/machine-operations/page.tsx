@@ -1,7 +1,7 @@
 import { GlassCard } from '@repo/ui/GlassCard';
+import { Logo } from '@repo/ui/Logo';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { C66MachineOperatorScanner } from '~/components/control-room/C66MachineOperatorScanner';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
 
@@ -9,14 +9,6 @@ const MachineOperationsForm = dynamic(
   () => import('./MachineOperationsForm').then((m) => m.MachineOperationsForm),
   {
     loading: () => <div className="h-64 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
-  }
-);
-
-const MachineOperationsComplianceWidget = dynamic(
-  () =>
-    import('./MachineOperationsComplianceWidget').then((m) => m.MachineOperationsComplianceWidget),
-  {
-    loading: () => <div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
   }
 );
 
@@ -270,24 +262,6 @@ export default async function MachineOperationsPage({
         </GlassCard>
       </div>
 
-      {/* Shift Coverage Compliance Widget */}
-      <Suspense
-        fallback={<div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
-      >
-        <MachineOperationsComplianceWidget departmentId={deptId} departmentSlug={deptSlug} />
-      </Suspense>
-
-      {/* C66 Qualified Operator & Machine Assignment Scanner */}
-      <Suspense
-        fallback={<div className="h-36 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />}
-      >
-        <C66MachineOperatorScanner
-          departmentId={deptId}
-          machines={machinesWithSmu}
-          sites={sites || []}
-        />
-      </Suspense>
-
       {/* Add Operation Form */}
       <div id="machine-operations-form" className="scroll-mt-6">
         <Suspense
@@ -307,11 +281,28 @@ export default async function MachineOperationsPage({
 
       {/* Today's Operations List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-[var(--text-heading)] text-lg">
-            Today&apos;s Operations
-          </h3>
-          <span className="font-mono text-[var(--text-muted)] text-xs">
+        <div
+          data-testid="todays-operations-golden-header"
+          className="gold-steel-border gold-steel-border-slim relative flex items-center justify-between overflow-hidden rounded-xl border border-accent-amber/45 bg-white/90 px-4 py-2.5 shadow-2xs"
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 animate-shimmer bg-gradient-to-r from-amber-500/10 via-amber-300/25 to-amber-500/10"
+          />
+          <div className="relative z-10 flex items-center gap-2.5">
+            <Logo variant="gold" className="h-4 w-4 shrink-0" />
+            <h3 className="animate-shimmer bg-gradient-to-r from-amber-700 via-[var(--accent-blue)] to-amber-800 bg-clip-text font-semibold text-lg text-transparent">
+              Today&apos;s Operations
+            </h3>
+          </div>
+          <span
+            data-testid="todays-operations-fleet-count"
+            className="gold-steel-border gold-steel-border-slim relative z-10 inline-flex items-center gap-1.5 rounded-full border border-accent-amber/45 bg-amber-50/90 px-3 py-1 font-mono font-semibold text-[var(--accent-blue)] text-xs shadow-2xs"
+          >
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent-blue)]"
+            />
             {machinesWithSmu.length} fleet machine{machinesWithSmu.length === 1 ? '' : 's'}
           </span>
         </div>

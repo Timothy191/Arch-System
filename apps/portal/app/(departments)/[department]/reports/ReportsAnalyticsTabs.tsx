@@ -66,7 +66,7 @@ export function ReportsSubtabsToolbar({
       <div
         role="tablist"
         aria-label="Report Views"
-        className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1.5"
+        className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1.5"
       >
         <button
           type="button"
@@ -251,13 +251,13 @@ export function ReportsSubtabsToolbar({
         )}
 
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[var(--accent-blue)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search machine, site, date..."
-            className="w-48 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none sm:w-56"
+            className="gold-steel-border gold-steel-border-slim w-48 rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-3.5 pl-8 font-medium text-[var(--text-heading)] text-xs ring-1 ring-accent-amber/30 focus:outline-none sm:w-56"
           />
         </div>
       </div>

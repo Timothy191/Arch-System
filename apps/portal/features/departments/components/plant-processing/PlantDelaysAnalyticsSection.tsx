@@ -1,6 +1,6 @@
 'use client';
 
-import { Edit3, Filter } from 'lucide-react';
+import { Edit3, Filter, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { PlantDelayEntry } from './types';
 
@@ -161,16 +161,22 @@ export function PlantDelaysAnalyticsSection({
             </select>
           </div>
 
-          <input
-            id="delay-search-input"
-            name="delaySearch"
-            type="search"
-            aria-label="Search plant delays"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search circuit or cause..."
-            className="gold-steel-border gold-steel-border-slim rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-heading)] text-xs"
-          />
+          <div className="relative">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[var(--accent-blue)]"
+            />
+            <input
+              id="delay-search-input"
+              name="delaySearch"
+              type="search"
+              aria-label="Search plant delays"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search circuit or cause..."
+              className="gold-steel-border gold-steel-border-slim rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-3.5 pl-8 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus:outline-none"
+            />
+          </div>
         </div>
       </div>
 

@@ -7,9 +7,11 @@ import type {
   directCheckoutSchema,
   dozerRollSchema,
   drillingDailyLogSchema,
+  excavatorActivityMaterialTypeSchema,
   materialSubCategorySchema,
   monthlyReportInputSchema,
   productionDailyLogSchema,
+  quickAddMineBlockSchema,
   saveExcavatorActivitySchema,
   saveHourlyLoadSchema,
   splitHourlyLoadSchema,
@@ -35,6 +37,8 @@ export type SaveExcavatorActivityInput = z.infer<typeof saveExcavatorActivitySch
 export type CoalMaterialSubCategory = z.infer<typeof coalMaterialSubCategorySchema>;
 export type WasteMaterialSubCategory = z.infer<typeof wasteMaterialSubCategorySchema>;
 export type MaterialSubCategory = z.infer<typeof materialSubCategorySchema>;
+export type ExcavatorActivityMaterialType = z.infer<typeof excavatorActivityMaterialTypeSchema>;
+export type QuickAddMineBlockInput = z.infer<typeof quickAddMineBlockSchema>;
 export type UpdateExcavatorAssignmentConfigInput = z.infer<
   typeof updateExcavatorAssignmentConfigSchema
 >;

@@ -1,5 +1,13 @@
 # Contract Package Agent Tracer
 
+## 2026-11-02T19:53:00+02:00: Excavator Activity Material Types (`Plant`, `Other`) & Quick-Add Mine Block Contract
+
+- **Purpose**: Extend `updateExcavatorAssignmentConfigSchema` with `excavatorActivityMaterialTypeSchema` (`'Waste' | 'Coal' | 'Plant' | 'Other'`) so Excavators assigned to `Plant` or `Other` log as regular site machines, and add `quickAddMineBlockSchema` (`QuickAddMineBlockInput`) for inline auto-formatted block creation on `/control-room/excavator-activity`.
+- **Changes**:
+  - `packages/contract/src/schemas/form.schema.ts`: Added `excavatorActivityMaterialTypeSchema` and `quickAddMineBlockSchema`.
+  - `packages/contract/src/types/form.types.ts` & `packages/contract/src/index.ts`: Exported schemas and derived TypeScript types (`ExcavatorActivityMaterialType`, `QuickAddMineBlockInput`).
+- **Verification**: `pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, and `pnpm agent:verify` ✅.
+
 ## 2026-11-02T14:45:00+02:00: System Resource & Subsystem Diagnostics Health Contracts
 
 - **Purpose**: Provide canonical Zod contracts (`systemHealthReportSchema`, `systemResourceMetricsSchema`, `subsystemComponentHealthSchema`) derived from System Informer observability patterns for real-time telemetry and health monitoring.

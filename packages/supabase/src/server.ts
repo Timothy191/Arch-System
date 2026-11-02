@@ -2,6 +2,7 @@
 
 import { serverLogger } from '@repo/logger';
 import { createServerClient } from '@supabase/ssr';
+import { normalizeSupabaseCookies } from './cookie-utils';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
@@ -94,14 +95,7 @@ export async function createServerSupabaseClient() {
     cookies: {
       getAll() {
         const all = cookieStore.getAll();
-        const normalized = [...all];
-        for (const cookie of all) {
-          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-          if (match?.[1] && !all.some((c: { name: string }) => c.name === match[1])) {
-            normalized.push({ name: match[1], value: cookie.value });
-          }
-        }
-        return normalized;
+        return normalizeSupabaseCookies(all);
       },
       setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         try {

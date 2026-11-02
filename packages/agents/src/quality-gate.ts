@@ -24,7 +24,101 @@ export interface QualityAuditResult {
   auditTimestamp: string;
 }
 
+export interface StructuredThinkingValidationResult {
+  readonly compliant: boolean;
+  readonly detectedFormat: 'format-a-inline' | 'format-b-native' | 'format-c-tracer' | 'none';
+  readonly completedPhases: readonly string[];
+  readonly missingPhases: readonly string[];
+  readonly violationCode?: 'THINKING_MISSING' | 'INCOMPLETE_STM_PHASES';
+  readonly remediationDirective?: string;
+}
+
+const STM_PHASE_PATTERNS: ReadonlyArray<{ readonly phaseId: string; readonly regex: RegExp }> = [
+  { phaseId: 'Phase 1 (Comprehension)', regex: /Phase\s*1\b|Comprehension/i },
+  { phaseId: 'Phase 2 (Evidence)', regex: /Phase\s*2\b|Evidence/i },
+  { phaseId: 'Phase 3 (Design)', regex: /Phase\s*3\b|Design|Solution/i },
+  { phaseId: 'Phase 4 (Criticism)', regex: /Phase\s*4\b|Criticism|Critique/i },
+  { phaseId: 'Phase 5 (Contract)', regex: /Phase\s*5\b|Contract|Verification/i },
+];
+
 export class QualityGate {
+  /**
+   * Deterministic STM-0 Structured Thinking validator (`skill://structured-thinking` §3 & §7).
+   * Verifies that non-trivial agent outputs or AGENT_TRACER entries externalize all 5 MTP phases
+   * via Format A (`<structured-thinking>`), Format B (`<thinking>`), or Format C (`Phase 1..5`).
+   */
+  public static validateStructuredThinking(content: string): StructuredThinkingValidationResult {
+    const trimmed = content.trim();
+    if (!trimmed) {
+      return {
+        compliant: false,
+        detectedFormat: 'none',
+        completedPhases: [],
+        missingPhases: STM_PHASE_PATTERNS.map((p) => p.phaseId),
+        violationCode: 'THINKING_MISSING',
+        remediationDirective:
+          'Output is empty. Externalize STM-0 5-phase thinking (<structured-thinking> or AGENT_TRACER Phase 1..5) before mutating code.',
+      };
+    }
+
+    const hasFormatA =
+      /<structured-thinking>[\s\S]*?<\/structured-thinking>/i.test(trimmed) ||
+      trimmed.includes('<structured-thinking>');
+    const hasFormatB = /<thinking>[\s\S]*?<\/thinking>/i.test(trimmed);
+    const hasFormatC =
+      /\*{0,2}Phase\s*1\s*\(Comprehension\)/i.test(trimmed) ||
+      /##\s*Phase\s*1:\s*Situational\s*Comprehension/i.test(trimmed);
+
+    const detectedFormat: StructuredThinkingValidationResult['detectedFormat'] = hasFormatA
+      ? 'format-a-inline'
+      : hasFormatB
+        ? 'format-b-native'
+        : hasFormatC
+          ? 'format-c-tracer'
+          : 'none';
+
+    const completedPhases: string[] = [];
+    const missingPhases: string[] = [];
+
+    for (const phase of STM_PHASE_PATTERNS) {
+      if (phase.regex.test(trimmed)) {
+        completedPhases.push(phase.phaseId);
+      } else {
+        missingPhases.push(phase.phaseId);
+      }
+    }
+
+    if (detectedFormat === 'none' && completedPhases.length === 0) {
+      return {
+        compliant: false,
+        detectedFormat: 'none',
+        completedPhases: [],
+        missingPhases: STM_PHASE_PATTERNS.map((p) => p.phaseId),
+        violationCode: 'THINKING_MISSING',
+        remediationDirective:
+          'THINKING_MISSING: Engage STM-0 Structured Thinking (Format A <structured-thinking>, Format B <thinking>, or Format C AGENT_TRACER Phase 1..5) before executing code changes.',
+      };
+    }
+
+    if (missingPhases.length > 0) {
+      return {
+        compliant: false,
+        detectedFormat,
+        completedPhases,
+        missingPhases,
+        violationCode: 'INCOMPLETE_STM_PHASES',
+        remediationDirective: `INCOMPLETE_STM_PHASES: Missing ${missingPhases.join(', ')}. Complete all 5 STM-0 phases before mutating files.`,
+      };
+    }
+
+    return {
+      compliant: true,
+      detectedFormat: detectedFormat === 'none' ? 'format-c-tracer' : detectedFormat,
+      completedPhases,
+      missingPhases: [],
+    };
+  }
+
   /**
    * Audits code or diff content against strict monorepo rules.
    */
@@ -76,7 +170,24 @@ export class QualityGate {
     lines.forEach((line, idx) => {
       const lineNum = idx + 1;
 
-      // Removed the brittle regex line check for DB imports; now handled safely via Babel AST!
+      // 1. Direct DB / Supabase import fallback inside pure UI files
+      if (
+        isUIFile &&
+        violations.every((v) => v.ruleId !== 'NO_DIRECT_DB_IMPORT_IN_UI') &&
+        /^\s*(?:import|export)\s+[\s\S]*?from\s+['"]@repo\/(database|supabase)(?:\/[^'"]*)?['"]/.test(
+          line
+        )
+      ) {
+        violations.push({
+          filePath,
+          lineNumber: lineNum,
+          ruleId: 'NO_DIRECT_DB_IMPORT_IN_UI',
+          severity: 'CRITICAL',
+          description:
+            'Pure UI component imports database or supabase package directly. Must use feature data-access libraries.',
+          remediationSnippet: 'Refactor import to use @repo/<feature>/data-access',
+        });
+      }
 
       // 2. Forbidden Dark Mode Class Check
       if (/\bdark:[a-zA-Z0-9_/-]+/.test(line)) {

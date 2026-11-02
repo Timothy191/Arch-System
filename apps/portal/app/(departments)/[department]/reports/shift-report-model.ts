@@ -1,3 +1,4 @@
+import { isRegularMachineExcavatorActivity } from '../hourly-loads/loads-utils';
 import type { MachineOperationLogItem, ShiftReportRow } from './reports-types';
 
 export const STANDARD_ALLOWANCE_REFUEL_MINS = 30;
@@ -10,7 +11,7 @@ export const DEFAULT_TOPSOIL_BIN_FACTOR = 20.0;
 export const DEFAULT_DISCARD_BIN_FACTOR = 32.0;
 
 export const RIGID_TRUCK_KEYWORDS = Object.freeze(['cat 777', '777', 'rigid', 'hd785']);
-export const ADT_TRUCK_KEYWORDS = Object.freeze(['adt', 'b40', 'b30', 'b50', 'bell']);
+const ADT_TRUCK_KEYWORDS = Object.freeze(['adt', 'b40', 'b30', 'b50', 'bell']);
 
 export interface MaterialBinConfig {
   readonly unit: 'BCM' | 'Tonnes';
@@ -326,58 +327,167 @@ export function buildExcavatorDelaysGrid(params: {
   };
 }
 
-export function buildSiteShiftReports(
-  filteredMachineOps: readonly MachineOperationLogItem[]
-): SiteShiftReportData[] {
-  const siteMap = new Map<
-    string,
-    {
-      excavators: MachineOperationLogItem[];
-      haulers: MachineOperationLogItem[];
-      dozers: MachineOperationLogItem[];
-      others: MachineOperationLogItem[];
-    }
-  >();
+type SiteBucket = {
+  excavators: MachineOperationLogItem[];
+  haulers: MachineOperationLogItem[];
+  dozers: MachineOperationLogItem[];
+  others: MachineOperationLogItem[];
+};
 
+function classifyMachineLog(log: MachineOperationLogItem): keyof SiteBucket {
+  const typeStr = (log.machineType || '').toLowerCase();
+  const nameStr = (log.machineName || '').toLowerCase();
+  const isRegularExcavator = isRegularMachineExcavatorActivity(log.material);
+
+  if (
+    !isRegularExcavator &&
+    (log.siteGroupRole === 'excavator' ||
+      typeStr.includes('excavator') ||
+      nameStr.includes('excavator') ||
+      nameStr.startsWith('ex-'))
+  ) {
+    return 'excavators';
+  }
+  if (
+    log.isDozer ||
+    log.siteGroupRole === 'rollover' ||
+    typeStr.includes('dozer') ||
+    nameStr.includes('dozer') ||
+    nameStr.startsWith('dz-')
+  ) {
+    return 'dozers';
+  }
+  if (
+    typeStr.includes('adt') ||
+    typeStr.includes('truck') ||
+    typeStr.includes('hauler') ||
+    typeStr.includes('dumper') ||
+    nameStr.startsWith('adt-') ||
+    nameStr.startsWith('dt-') ||
+    log.loadsCount != null
+  ) {
+    return 'haulers';
+  }
+  return 'others';
+}
+
+function buildSiteBuckets(
+  filteredMachineOps: readonly MachineOperationLogItem[]
+): Map<string, SiteBucket> {
+  const siteMap = new Map<string, SiteBucket>();
   for (const log of filteredMachineOps) {
     const siteKey = (log.siteName || 'General Pit').trim() || 'General Pit';
     if (!siteMap.has(siteKey)) {
       siteMap.set(siteKey, { excavators: [], haulers: [], dozers: [], others: [] });
     }
     const bucket = siteMap.get(siteKey)!;
-    const typeStr = (log.machineType || '').toLowerCase();
-    const nameStr = (log.machineName || '').toLowerCase();
+    bucket[classifyMachineLog(log)].push(log);
+  }
+  return siteMap;
+}
 
-    if (
-      log.siteGroupRole === 'excavator' ||
-      typeStr.includes('excavator') ||
-      nameStr.includes('excavator') ||
-      nameStr.startsWith('ex-')
-    ) {
-      bucket.excavators.push(log);
-    } else if (
-      log.isDozer ||
-      log.siteGroupRole === 'rollover' ||
-      typeStr.includes('dozer') ||
-      nameStr.includes('dozer') ||
-      nameStr.startsWith('dz-')
-    ) {
-      bucket.dozers.push(log);
-    } else if (
-      typeStr.includes('adt') ||
-      typeStr.includes('truck') ||
-      typeStr.includes('hauler') ||
-      typeStr.includes('dumper') ||
-      nameStr.startsWith('adt-') ||
-      nameStr.startsWith('dt-') ||
-      log.loadsCount != null
-    ) {
-      bucket.haulers.push(log);
-    } else {
-      bucket.others.push(log);
+function createDefaultExcavator(
+  siteName: string,
+  filteredMachineOps: readonly MachineOperationLogItem[]
+): MachineOperationLogItem {
+  const first = filteredMachineOps[0];
+  return {
+    id: `exc-default-${siteName}`,
+    date: first?.date || new Date().toISOString().slice(0, 10),
+    shift: first?.shift || 'day',
+    machineName: 'EX-01 (Loading Fleet)',
+    machineType: 'Hydraulic Excavator',
+    operatorName: 'Assigned Operator',
+    siteName,
+    startSmu: null,
+    endSmu: null,
+    hoursWorked: 0,
+    bcmMoved: 0,
+    isDozer: false,
+    delayMinutes: 0,
+    status: 'completed' as const,
+  };
+}
+
+function matchHaulersForExcavator(
+  excName: string,
+  haulers: readonly MachineOperationLogItem[],
+  assignedHaulerSet: Set<string>
+): MachineOperationLogItem[] {
+  const matched: MachineOperationLogItem[] = [];
+  for (const hauler of haulers) {
+    if (assignedHaulerSet.has(hauler.id)) continue;
+    const matchesExcavator =
+      hauler.assignedExcavatorName === excName ||
+      Boolean(hauler.excavatorActivity?.includes(excName));
+    if (matchesExcavator) {
+      matched.push(hauler);
+      assignedHaulerSet.add(hauler.id);
     }
   }
+  if (matched.length === 0 && haulers.length > 0) {
+    for (const hauler of haulers) {
+      if (!assignedHaulerSet.has(hauler.id)) {
+        matched.push(hauler);
+        assignedHaulerSet.add(hauler.id);
+      }
+    }
+  }
+  return matched;
+}
 
+function aggregateExcavatorBlock(
+  exc: MachineOperationLogItem,
+  matchedHaulers: readonly MachineOperationLogItem[],
+  materialConfig: ReturnType<typeof resolveMaterialConfig>
+): ExcavatorActivityBlockData {
+  const haulerRows: HaulingMachineRow[] = matchedHaulers.map((haulerLog) =>
+    buildHaulingRow({ log: haulerLog, fallbackMaterial: materialConfig.label })
+  );
+
+  let totalLoads = 0;
+  let totalMaterialMoved = 0;
+  let totalSmrSum = 0;
+  for (const hauler of haulerRows) {
+    totalLoads += hauler.loads;
+    totalMaterialMoved += hauler.rowTotal;
+    totalSmrSum += hauler.totalSmrWorked;
+  }
+  if (haulerRows.length === 0 && exc.bcmMoved > 0) {
+    totalMaterialMoved = exc.bcmMoved;
+    totalLoads = exc.loadsCount || Math.round(exc.bcmMoved / materialConfig.defaultFactor);
+  }
+  const averageHaulerSmr =
+    haulerRows.length > 0 ? Number((totalSmrSum / haulerRows.length).toFixed(1)) : 0;
+
+  const delaysGrid = buildExcavatorDelaysGrid({ excavatorLog: exc, haulerRows });
+  const rawMaterial =
+    exc.material ||
+    (exc.excavatorActivity?.toLowerCase().includes('coal') ? 'ROM Coal' : 'Overburden');
+  // materialConfig already resolved by caller; keep parity
+  void rawMaterial;
+
+  return {
+    excavatorId: exc.machineName,
+    excavatorName: exc.machineName,
+    excavatorModel: exc.machineType || 'Liebherr 984 / CAT 390D',
+    material: materialConfig.label,
+    materialUnit: materialConfig.unit,
+    blockMined: exc.blockMined || 'Pit Bench SS-01',
+    assignedMachines: haulerRows,
+    autoTotals: {
+      totalLoads,
+      totalMaterialMoved: Number(totalMaterialMoved.toFixed(1)),
+      averageHaulerSmr,
+    },
+    delaysGrid,
+  };
+}
+
+export function buildSiteShiftReports(
+  filteredMachineOps: readonly MachineOperationLogItem[]
+): SiteShiftReportData[] {
+  const siteMap = buildSiteBuckets(filteredMachineOps);
   const reports: SiteShiftReportData[] = [];
 
   for (const [siteName, groups] of siteMap.entries()) {
@@ -387,97 +497,19 @@ export function buildSiteShiftReports(
     const activeExcavators =
       groups.excavators.length > 0
         ? groups.excavators
-        : [
-            {
-              id: `exc-default-${siteName}`,
-              date: filteredMachineOps[0]?.date || new Date().toISOString().slice(0, 10),
-              shift: filteredMachineOps[0]?.shift || 'day',
-              machineName: 'EX-01 (Loading Fleet)',
-              machineType: 'Hydraulic Excavator',
-              operatorName: 'Assigned Operator',
-              siteName,
-              startSmu: null,
-              endSmu: null,
-              hoursWorked: 0,
-              bcmMoved: 0,
-              isDozer: false,
-              delayMinutes: 0,
-              status: 'completed' as const,
-            },
-          ];
+        : [createDefaultExcavator(siteName, filteredMachineOps)];
 
     for (const exc of activeExcavators) {
       const excName = exc.machineName;
-      const matchedHaulers: MachineOperationLogItem[] = [];
-
-      for (const hauler of groups.haulers) {
-        if (assignedHaulerSet.has(hauler.id)) continue;
-        const matchesExcavator =
-          hauler.assignedExcavatorName === excName ||
-          Boolean(hauler.excavatorActivity?.includes(excName));
-        if (matchesExcavator) {
-          matchedHaulers.push(hauler);
-          assignedHaulerSet.add(hauler.id);
-        }
-      }
-
-      if (matchedHaulers.length === 0 && groups.haulers.length > 0) {
-        for (const hauler of groups.haulers) {
-          if (!assignedHaulerSet.has(hauler.id)) {
-            matchedHaulers.push(hauler);
-            assignedHaulerSet.add(hauler.id);
-          }
-        }
-      }
+      const matchedHaulers = matchHaulersForExcavator(excName, groups.haulers, assignedHaulerSet);
 
       const rawMaterial =
         exc.material ||
         (exc.excavatorActivity?.toLowerCase().includes('coal') ? 'ROM Coal' : 'Overburden');
       const materialConfig = resolveMaterialConfig(rawMaterial, exc.machineType);
-      const blockMined = exc.blockMined || 'Pit Bench SS-01';
 
-      const haulerRows: HaulingMachineRow[] = matchedHaulers.map((haulerLog) =>
-        buildHaulingRow({ log: haulerLog, fallbackMaterial: materialConfig.label })
-      );
-
-      let totalLoads = 0;
-      let totalMaterialMoved = 0;
-      let totalSmrSum = 0;
-
-      for (const hauler of haulerRows) {
-        totalLoads += hauler.loads;
-        totalMaterialMoved += hauler.rowTotal;
-        totalSmrSum += hauler.totalSmrWorked;
-      }
-
-      if (haulerRows.length === 0 && exc.bcmMoved > 0) {
-        totalMaterialMoved = exc.bcmMoved;
-        totalLoads = exc.loadsCount || Math.round(exc.bcmMoved / materialConfig.defaultFactor);
-      }
-
-      const averageHaulerSmr =
-        haulerRows.length > 0 ? Number((totalSmrSum / haulerRows.length).toFixed(1)) : 0;
-
-      const delaysGrid = buildExcavatorDelaysGrid({
-        excavatorLog: exc,
-        haulerRows,
-      });
-
-      excavatorBlocks.push({
-        excavatorId: exc.machineName,
-        excavatorName: exc.machineName,
-        excavatorModel: exc.machineType || 'Liebherr 984 / CAT 390D',
-        material: materialConfig.label,
-        materialUnit: materialConfig.unit,
-        blockMined,
-        assignedMachines: haulerRows,
-        autoTotals: {
-          totalLoads,
-          totalMaterialMoved: Number(totalMaterialMoved.toFixed(1)),
-          averageHaulerSmr,
-        },
-        delaysGrid,
-      });
+      const block = aggregateExcavatorBlock(exc, matchedHaulers, materialConfig);
+      excavatorBlocks.push(block);
     }
 
     const dozerRollovers: DozerRolloverRow[] = groups.dozers.map((dozerLog) => {
@@ -521,20 +553,14 @@ export function buildSiteShiftReports(
         siteBcmVolume += block.autoTotals.totalMaterialMoved;
       }
     }
-
     for (const dozer of dozerRollovers) {
       siteHours += dozer.hoursWorked;
       siteMaterialMoved += dozer.rolloverBcm;
       siteBcmVolume += dozer.rolloverBcm;
       siteDelaysMin += dozer.delayMinutes;
     }
-
-    for (const exc of groups.excavators) {
-      siteHours += exc.hoursWorked;
-    }
-    for (const hauler of groups.haulers) {
-      siteHours += hauler.hoursWorked;
-    }
+    for (const exc of groups.excavators) siteHours += exc.hoursWorked;
+    for (const hauler of groups.haulers) siteHours += hauler.hoursWorked;
     for (const other of groups.others) {
       siteHours += other.hoursWorked;
       siteDelaysMin += other.delayMinutes;

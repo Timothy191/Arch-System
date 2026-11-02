@@ -1,5 +1,13 @@
 # Database Package Agent Tracer
 
+## 2026-11-02T20:48:00+02:00: Enforce Excavator Activity Material Mode Check Constraint (214)
+
+- **Phase 1 (Comprehension)**: Add forward- and rollback-safe check constraints on `public.excavator_activity.material_type` and `public.excavator_activity_archive.material_type` supporting `Waste`, `Coal`, `Plant`, `Other`, and formatted subcategories (`'Waste — Overburden'`, `'Plant — Wash Plant'`, etc.).
+- **Phase 2 (Evidence)**: Inspected `migrations/002_control_room_tables.sql`, `migrations/046_control_room_archiving.sql`, `migrations/050_hourly_loads_material_type.sql`, and `apps/portal/app/(departments)/[department]/hourly-loads/actions.ts`.
+- **Phase 3 (Design)**: Added `migrations/214_excavator_activity_material_modes_check.sql` using idempotent `DO $$ ... IF NOT EXISTS (SELECT 1 FROM pg_constraint ...) THEN ALTER TABLE ... ADD CONSTRAINT ... NOT VALID; END IF; END $$;` to satisfy Squawk zero-lock rules (`ban-drop-constraint`, `constraint-missing-not-valid`).
+- **Phase 4 (Criticism)**: Verified that formatted strings with subcategories (`formatExcavatorMaterial(category, subCategory)`) up to 120 chars are accepted without breaking existing or new rows.
+- **Phase 5 (Contract)**: Created `packages/database/migrations/214_excavator_activity_material_modes_check.sql`; verified via `node packages/database/scripts/lint-migrations.mjs` and `pnpm --filter @repo/database test`.
+
 ## 2026-10-28T07:58:00+02:00: Harden Plant & Muster Events RLS Policies (212)
 
 - **Purpose**: Replace permissive `USING (true)` / `WITH CHECK (true)` RLS policies on `plant_inventory_items`, `plant_inventory_usage`, `plant_hourly_logs`, `plant_delays`, and `muster_events` with department-scoped (`public.has_department_access(department_id)`) and role-scoped (`public.is_admin()`, `'access_control'`, `'supervisor'`) policies.

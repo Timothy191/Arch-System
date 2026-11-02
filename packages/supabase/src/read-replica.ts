@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
+import { normalizeSupabaseCookies } from './cookie-utils';
 import { cookies } from 'next/headers';
 import { instrumentedFetch } from './server';
 
@@ -40,14 +41,7 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     cookies: {
       getAll() {
         const all = cookieList || (cookieStore ? cookieStore.getAll() : []);
-        const normalized = [...all];
-        for (const cookie of all) {
-          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-          if (match?.[1] && !all.some((c: { name: string }) => c.name === match[1])) {
-            normalized.push({ name: match[1], value: cookie.value });
-          }
-        }
-        return normalized;
+        return normalizeSupabaseCookies(all);
       },
       setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         if (cookieList) return;

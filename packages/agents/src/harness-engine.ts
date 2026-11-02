@@ -405,6 +405,7 @@ export interface HarnessDoctorInput {
   readonly hasPermissionHooks: boolean;
   readonly hasSyncedAgentRules: boolean;
   readonly hasMcpRegistration: boolean;
+  readonly hasStructuredThinkingMandate?: boolean;
 }
 
 /**
@@ -416,6 +417,7 @@ export function runHarnessDoctor(input: Readonly<HarnessDoctorInput>): {
   readonly checks: readonly HarnessDoctorCheck[];
 } {
   const isAntigravityGemini = input.configuredModel.startsWith('gemini-');
+  const hasStm0 = input.hasStructuredThinkingMandate ?? true;
 
   const checks: HarnessDoctorCheck[] = [
     {
@@ -455,6 +457,16 @@ export function runHarnessDoctor(input: Readonly<HarnessDoctorInput>): {
         ? 'All MCP servers registered across agent runtimes'
         : 'Missing MCP server registrations',
       remediationCommand: input.hasMcpRegistration ? undefined : 'pnpm mcp:onboard',
+    },
+    {
+      checkId: 'stm-0-structured-thinking-mandate',
+      passed: hasStm0,
+      summary: hasStm0
+        ? 'STM-0 Structured Thinking Mandate (5-phase protocol) active and verified'
+        : 'Missing STM-0 Structured Thinking Mandate skill or rule',
+      remediationCommand: hasStm0
+        ? undefined
+        : 'node tools/audits/audit-agentic-content.cjs --check',
     },
   ];
 

@@ -431,7 +431,7 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {/* Golden Hero Trajectory Graph (Full Width for Maximum Chart Detail & Clarity) */}
         <div className="liquid-glass-light gold-steel-border gold-steel-border-slim relative flex flex-col justify-between overflow-hidden rounded-xl border border-accent-amber/40 bg-white/90 p-3.5 shadow-diffusion-sm backdrop-blur-md">
-          <div className="mb-2 flex items-center justify-between text-xs">
+          <div className="mb-1.5 flex items-center justify-between text-xs">
             <span className="font-bold text-[var(--text-heading)] uppercase tracking-wider">
               {horizon} Cumulative Trajectory vs Admin Target (100%)
             </span>
@@ -439,6 +439,12 @@ export function AlertPanel({ departmentId }: { departmentId: string }) {
               Target: {activeTarget.loadsTarget.toLocaleString()} loads
             </span>
           </div>
+
+          <div
+            data-testid="trajectory-header-separator"
+            aria-hidden="true"
+            className="mb-2 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+          />
 
           <svg
             viewBox={`0 0 ${width} ${height}`}

@@ -200,6 +200,8 @@ export const wasteMaterialSubCategorySchema = z.enum([
 
 export const materialSubCategorySchema = z.string().min(1).max(100);
 
+export const excavatorActivityMaterialTypeSchema = z.enum(['Waste', 'Coal', 'Plant', 'Other']);
+
 export const updateExcavatorAssignmentConfigSchema = z.object({
   departmentId: z.string().uuid('Invalid department ID format'),
   excavatorId: z.string().uuid('Invalid excavator ID format'),
@@ -207,6 +209,14 @@ export const updateExcavatorAssignmentConfigSchema = z.object({
   shiftType: z.enum(['day', 'night']),
   siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
   blockMinedId: z.string().uuid('Invalid block mined ID format').nullable().optional(),
-  materialType: z.enum(['Waste', 'Coal']).optional(),
+  materialType: excavatorActivityMaterialTypeSchema.optional(),
   materialSubCategory: materialSubCategorySchema.nullable().optional(),
+});
+
+export const quickAddMineBlockSchema = z.object({
+  departmentId: z.string().uuid('Invalid department ID format'),
+  excavatorId: z.string().uuid('Invalid excavator ID format').optional(),
+  siteId: z.string().uuid('Invalid site ID format').nullable().optional(),
+  name: z.string().min(1, 'Block name is required').max(120, 'Block name too long'),
+  code: z.string().max(40, 'Block code too long').optional().or(z.literal('')),
 });

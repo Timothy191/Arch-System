@@ -1,0 +1,11 @@
+{
+  "id": "consolidated-20261102-ci-billing-json-knip-tokenization",
+  "timestamp": "2026-11-02T20:00:00Z",
+  "taskTag": "--task-ci-tooling",
+  "category": "TOOLING_CI",
+  "errorSignature": "GitHub Actions account billing lock; Knip unused exports; CSS token sprawl; unvalidated JSON configs",
+  "affectedFiles": [".gitlab-ci.yml", "vercel.json", "tools/scripts/validate-json.mjs", "apps/portal/lib/ai/external-content-indexer.ts", "apps/portal/lib/errors/global-error-handler.ts", "apps/portal/app/(departments)/[department]/reports/shift-report-model.ts", "docs/specs/CSS_TOKENIZATION_ORDER.md", "docs/specs/SPEC_TEMPLATE.md", ".agents/agents/spec-driven-implementer/agent.md"],
+  "rootCause": "GitHub Actions billing lock blocked all CI. Knip found 6 unused exports. Fallow found 219 distinct colors and token sprawl. JSON configs lacked automated syntax validation.",
+  "resolution": "Added .gitlab-ci.yml (self-hosted runner) + Vercel build gating + validate-json (152 files) + Knip export cleanup + CSS tokenization priority order + spec-driven-implementer agent. Consolidated tracers appended to AGENT_TRACER.md files.",
+  "preventionRule": "When GitHub Actions is billing-locked, use pnpm ci:local + Vercel build gating + .gitlab-ci.yml for merge evidence. Run pnpm validate:json in pre-commit and CI. Remove Knip-unused exports by dropping export. Tokenize CSS in priority order per docs/specs/CSS_TOKENIZATION_ORDER.md (colors -> font sizes -> radius -> z-index -> shadows -> unused vars), one level per spec/PR, verified by audit:tokens + a11y + visual e2e."
+}

@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/theme
 
+## 2026-11-02T20:32:00+02:00 - Add Hover Shimmer Trigger to Gold-Steel Border Inputs
+
+- **Phase 1 (Comprehension)**: Ensure pill-shaped search inputs using `input.gold-steel-border` animate with the golden shimmer effect on both `:hover` and `:focus`.
+- **Phase 2 (Evidence)**: Inspected `packages/theme/src/css/cards.css` lines 274–309.
+- **Phase 3 (Design)**: Added `input.gold-steel-border:hover` alongside `input.gold-steel-border:focus` (including the `prefers-reduced-motion: reduce` media query guard) in `packages/theme/src/css/cards.css`.
+- **Phase 4 (Criticism)**: Verified with `pnpm lint:styles` and `pnpm lint:css-perf`.
+- **Phase 5 (Contract)**: Modified `packages/theme/src/css/cards.css`.
+
 ## 2026-11-02T09:25:00+02:00 - Global Typography Header Casing Rule
 
 - **Purpose**: Remove forced `uppercase` transformation on `.font-anurati` display font and enforce `text-transform: none` on `h1..h6` to support sentence/title casing globally.

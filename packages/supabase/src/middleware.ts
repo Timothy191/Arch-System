@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
+import { normalizeSupabaseCookies } from './cookie-utils';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -35,14 +36,7 @@ export async function createMiddlewareClient(request: NextRequest) {
     cookies: {
       getAll() {
         const all = request.cookies.getAll();
-        const normalized = [...all];
-        for (const cookie of all) {
-          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-          if (match?.[1] && !all.some((c: { name: string }) => c.name === match[1])) {
-            normalized.push({ name: match[1], value: cookie.value });
-          }
-        }
-        return normalized;
+        return normalizeSupabaseCookies(all);
       },
       setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         cookiesToSet.forEach(({ name, value }: { name: string; value: string }) =>

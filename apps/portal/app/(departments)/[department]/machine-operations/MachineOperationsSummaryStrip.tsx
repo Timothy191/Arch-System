@@ -84,14 +84,14 @@ export function MachineOperationsFilterStrip({
       <div className="relative min-w-[240px]">
         <Search
           size={14}
-          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--text-muted)]"
+          className="pointer-events-none absolute top-1/2 left-3.5 z-10 -translate-y-1/2 text-[var(--accent-blue)]"
         />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           placeholder="Search machine, type, or SN..."
-          className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] py-1.5 pr-3 pl-8 text-[var(--text-heading)] text-xs transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+          className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus:outline-none"
         />
       </div>
     </div>

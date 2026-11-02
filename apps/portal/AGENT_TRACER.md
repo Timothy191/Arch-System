@@ -1,3 +1,95 @@
+## 2026-11-02T21:11:00+02:00: Next.js 16 Rendering, Request Memoization, Streaming Skeletons & Package Import Optimization
+
+- **Phase 1 (Comprehension)**: Audit and enhance Next.js 16 rendering, multi-layer caching, streaming `<Suspense>` boundaries, and `optimizePackageImports` across `apps/portal`.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/next.config.mjs`, `apps/portal/lib/{dept-context.ts,dept-registry.ts,server-cache.ts}`, and `apps/portal/app/(departments)/[department]/*`.
+- **Phase 3 (Design)**:
+  - Wrapped `getDeptId` (`lib/dept-registry.ts`) and `getDepartmentContext` (`lib/dept-context.ts`) in `React.cache()` for per-request RSC deduplication, and wired `STATIC_DEPT_UUIDS[slug]` as a 0ms fast-path for `'control-room'`.
+  - Added streaming route-level `<Suspense>` skeletons (`loading.tsx`) for `/[department]/hourly-loads` and `/[department]/delays` using `GlassSkeleton`.
+  - Expanded `experimental.optimizePackageImports` and `cacheLife` profiles (`hours`, `minutes`, `realtime`) in `apps/portal/next.config.mjs`.
+- **Phase 4 (Criticism)**: Added a unit test in `lib/dept-context.test.ts` verifying the 0ms `STATIC_DEPT_UUIDS` fast-path for `'control-room'` (8/8 PASS).
+- **Phase 5 (Contract)**: Modified `apps/portal/next.config.mjs`, `apps/portal/lib/{dept-registry.ts,dept-context.ts,dept-context.test.ts}`, and created `apps/portal/app/(departments)/[department]/{hourly-loads,delays}/loading.tsx`.
+
+## 2026-11-02T20:48:30+02:00: Control Room Hourly Loads, Delays & Reports Golden Header, Pill Search & Regular Machine Mode Parity
+
+- **Phase 1 (Comprehension)**: Unify the golden animated header treatment (`gold-steel-border gold-steel-border-slim`), high-contrast pill search inputs (`rounded-full`), and `Plant`/`Other` regular machine activity indicators across `/control-room/hourly-loads`, `/control-room/delays`, and `/control-room/reports`.
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/(departments)/[department]/hourly-loads/{page.tsx,HourlyLoadsGrid.tsx}`, `apps/portal/features/departments/components/plant-processing/PlantDelaysAnalyticsSection.tsx`, and `apps/portal/app/(departments)/[department]/reports/{ReportsAnalyticsTabs.tsx,ShiftReportA4Preview.tsx}`.
+- **Phase 3 (Design)**:
+  - Upgraded `/control-room/hourly-loads` header `GlassCard` with `gold-steel-border gold-steel-border-slim`, an `animate-shimmer` golden gradient overlay, `Logo variant="gold"`, and a fleet hauler/excavator count badge.
+  - Upgraded the search inputs in `HourlyLoadsGrid.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `ReportsAnalyticsTabs.tsx` to `rounded-full` pills with `gold-steel-border gold-steel-border-slim border-accent-amber/60 bg-white/95 ring-1 ring-accent-amber/30` and golden `Search` icons.
+  - Updated `ExcavatorActivityBlock` in `ShiftReportA4Preview.tsx` so `Plant` and `Other` excavator modes display `Mode: Regular Machine Operation` and `Logged as Regular Machine Operation` when no haulers are dispatched.
+- **Phase 4 (Criticism)**: Kept all `className` chains within the `≤16` Tailwind utility budget and verified `useSortedClasses` ordering.
+- **Phase 5 (Contract)**: Modified `hourly-loads/{page.tsx,HourlyLoadsGrid.tsx}`, `PlantDelaysAnalyticsSection.tsx`, and `reports/{ReportsAnalyticsTabs.tsx,ShiftReportA4Preview.tsx}`.
+
+## 2026-11-02T20:32:00+02:00: Control Room Machine Operations 5-Item Design Feedback (`/control-room/machine-operations`)
+
+- **Phase 1 (Comprehension)**: Address 5 design feedback items on `/control-room/machine-operations` (`https://arch-system-kappap.vercel.app/control-room/machine-operations`):
+  1. Remove `MachineOperationsComplianceWidget` (`"All machines reported 0 / 0 covered"`).
+  2. Remove `C66MachineOperatorScanner` (`"Machine & Operator Assignment 1. Select a machine"`).
+  3. Change the `"Today's Operations · 78 fleet machines"` header bar to Golden animated coloring.
+  4. Make the search input pill shape clearly visible with golden bordering (`rounded-full`, `gold-steel-border gold-steel-border-slim`, `border-accent-amber/60`, `ring-1 ring-accent-amber/30`).
+  5. Remove the small straight vertical line on the left of the active `Machine Operations` sidebar tab and refine its bordering for professional impact.
+- **Phase 2 (Evidence)**:
+  - Inspected `apps/portal/app/(departments)/[department]/machine-operations/page.tsx`, `MachineOperationsSummaryStrip.tsx`, `MachineOperationsFilterableTable.tsx`, `packages/ui/src/components/ui/filter-toolbar.tsx`, `packages/ui/src/components/DepartmentLayout.tsx`, and `packages/theme/src/css/cards.css`.
+- **Phase 3 (Design)**:
+  - Removed `MachineOperationsComplianceWidget` and `C66MachineOperatorScanner` from `apps/portal/app/(departments)/[department]/machine-operations/page.tsx`.
+  - Upgraded the `"Today's Operations"` header bar in `page.tsx` with `gold-steel-border gold-steel-border-slim`, an animated golden shimmer overlay (`animate-shimmer`), `Logo variant="gold"`, animated golden gradient heading text, and a golden-bordered fleet count pill.
+  - Updated `MachineOperationsSummaryStrip.tsx` (`MachineOperationsFilterStrip`) and `packages/ui/src/components/ui/filter-toolbar.tsx` (`FilterToolbar`) search inputs to `rounded-full` pills with `gold-steel-border gold-steel-border-slim`, `border-accent-amber/60`, and `ring-1 ring-accent-amber/30`.
+- **Phase 4 (Criticism)**: Added unit tests in `MachineOperationsList.test.tsx` verifying pill-shaped golden-bordered search inputs and sidebar tab bordering without the left vertical line (14/14 PASS).
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/machine-operations/{page.tsx,MachineOperationsSummaryStrip.tsx,MachineOperationsList.test.tsx}`, `packages/ui/src/components/{DepartmentLayout.tsx,ui/filter-toolbar.tsx}`, `packages/theme/src/css/cards.css`, and `config/tools/knip.json`.
+
+## 2026-11-02T19:53:00+02:00: Control Room Excavator Activity 11-Item Design Feedback, Plant/Other Regular Machine Mode, Quick-Add Block & Golden Telemetry KPIs
+
+- **Phase 1 (Comprehension)**: Address 11 design feedback items on `/control-room/excavator-activity` (`https://arch-system-kappap.vercel.app/control-room/excavator-activity`):
+  1. Add `Plant` and `Other` material activity buttons to all Excavators so that when selected, the Excavator logs as a regular machine (`site_machine`) rather than a haul-loading excavator.
+  2. Add a Golden Separator under every Excavator's Machine ID (`EX-10`, etc.).
+  3. Add a `+` button next to the `Block Mined / Area` select that opens an inline Quick-Add Block drawer with automatic title-case name and `BLK-*` code formatting.
+  4. Add a Golden Separator under the `h3 "Excavator Location, Block Mined & Material Mapping"` heading.
+  5. Extend the `Excavator Activity` header panel across the full window width, add a Golden Separator, and render a Global Combined Tally strip.
+     6–8. Add Golden Bordering (`gold-steel-border gold-steel-border-slim`) to `Total BCM`, `Total Loads`, and `Active Excavators` `.system-label` pills.
+     9–11. Redesign the metric values (`Total BCM`, `Total Loads`, `Active Excavators`) to include `%` attainment/deployment badges, Golden Separators, and interactive SVG Golden Graphs (`ExcavatorGoldenGraph`).
+- **Phase 2 (Evidence)**:
+  - `hourly_loads.material_type` has a database constraint `CHECK (material_type IN ('Waste', 'Coal'))`, while `excavator_activity.material_type` is an unconstrained `TEXT` column.
+  - `ExcavatorActivityForm.tsx` previously rendered only `Waste` and `Coal` buttons, lacked a quick-add block control, and had no Golden Separators under Machine IDs or the section heading.
+  - `excavator-activity/page.tsx` previously used `ControlRoomSectionHeader` (`flex-wrap justify-between`) and plain `GlassCard` KPI boxes without Golden Bordering on labels, `%` badges, or SVG Golden Graphs.
+- **Phase 3 (Design)**:
+  - Created `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityTelemetryOverview.tsx` implementing the full-width header panel, Golden Separator, Global Combined Tally strip, Golden-bordered KPI labels, `%` badges, and `ExcavatorGoldenGraph` SVG sparklines.
+  - Updated `apps/portal/app/(departments)/[department]/hourly-loads/loads-utils.ts` with `EXCAVATOR_ACTIVITY_MATERIALS` (`Waste`, `Coal`, `Plant`, `Other`), `isRegularMachineExcavatorActivity`, `PLANT_MATERIAL_SUBCATEGORIES`, `OTHER_MATERIAL_SUBCATEGORIES`, and `normalizeQuickBlockFormat`.
+  - Updated `apps/portal/app/(departments)/[department]/hourly-loads/actions.ts` (`updateExcavatorAssignmentConfig` and new `quickAddMineBlock` Server Action) and `reports-server-helpers.ts` / `shift-report-model.ts` so `Plant` and `Other` excavators classify as `siteGroupRole: 'site_machine'`.
+  - Updated `ExcavatorActivityForm.tsx`, `ExcavatorActivityList.tsx`, `page.tsx`, and `ExcavatorActivityForm.test.tsx`.
+- **Phase 4 (Criticism)**: Unit tested with `ExcavatorActivityForm.test.tsx`, `ExcavatorActivityList.test.tsx`, `actions.test.ts`, and `ShiftReportA4Preview.test.tsx` (7 suites, 54/54 PASS).
+- **Phase 5 (Contract)**: Modified `loads-utils.ts`, `HourlyLoadsGrid.tsx`, `actions.ts`, `reports-server-helpers.ts`, `shift-report-model.ts`, `ExcavatorActivityTelemetryOverview.tsx`, `ExcavatorActivityForm.tsx`, `ExcavatorActivityList.tsx`, `page.tsx`, and `ExcavatorActivityForm.test.tsx`.
+
+## 2026-11-02T19:20:00+02:00: Control Room Site Footer Redesign & KPI/Trajectory Separators
+
+- **Phase 1 (Comprehension)**: Address 7 design feedback items on `/control-room` (`https://arch-system-kappap.vercel.app/control-room`):
+  1. Redesign the `Site footer` banner (`footer.liquid-glass-light.gold-steel-border` and `DepartmentReviews.tsx`) so it looks clean, calm, and professional rather than an annoying scrolling marquee with nested gold pill boxes.
+  2. Add a horizontal separator underneath `shift Cumulative Trajectory vs Admin Target (100%)` in `AlertPanel.tsx`.
+     3–7. Add horizontal separators directly underneath the 5 summary KPI metric values (`Hours Today`, `Total Loads`, `Delay Hours`, `Machines`, `Delay Entries`) in `ControlRoomSummaryGridClient.tsx`.
+- **Phase 2 (Evidence)**:
+  - The footer previously rendered a 44px bar with nested `gold-steel-border` pills and a continuous scrolling `<Marquee>` of 12 verbose pills.
+  - `AlertPanel.tsx` rendered the trajectory graph header without a separator before the SVG chart.
+  - `ControlRoomSummaryGridClient.tsx` lacked dedicated gradient separators directly beneath the `p.mt-1.font-bold.text-2xl` metric values.
+- **Phase 3 (Design)**:
+  - Redesigned `apps/portal/app/layout.tsx` `Site footer` into a sleek `h-9` frosted glass status bar (`bg-[var(--material-ultra-thin)]`) with clean inline status segments.
+  - Redesigned `libs/features/hub/ui/src/DepartmentReviews.tsx` to replace the scrolling marquee with a calm, static enterprise telemetry strip (`SCADA Stream`, `Redis L1/L2`, `PostgreSQL RLS`, `Zero-Drift Policy`).
+  - Added `data-testid="trajectory-header-separator"` underneath `{horizon} Cumulative Trajectory vs Admin Target (100%)` in `apps/portal/features/departments/components/control-room/AlertPanel.tsx`.
+  - Added `data-testid="summary-kpi-separator-*"` gradient separators directly underneath all 5 KPI values in `apps/portal/app/(departments)/[department]/ControlRoomSummaryGridClient.tsx`.
+- **Phase 4 (Criticism)**: Verified with `ControlRoomPanels.test.tsx`, `pnpm type-check`, `pnpm lint`, and `pnpm audit:tailwind`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/layout.tsx`, `libs/features/hub/ui/src/DepartmentReviews.tsx`, `apps/portal/features/departments/components/control-room/AlertPanel.tsx`, `apps/portal/app/(departments)/[department]/ControlRoomSummaryGridClient.tsx`, and `apps/portal/features/departments/components/control-room/ControlRoomPanels.test.tsx`.
+
+## 2026-11-02T19:05:00+02:00: Unified Control Room Taskbar System Tray Pill Integration
+
+- **Phase 1 (Comprehension)**: Merge disjointed taskbar buttons on `/control-room` (`Notifications` bell, `Return to Hub` home button, `System Tray Popover`, and `Support` feedback widget) into a single, cohesive System Tray pill with gold separators and embedded modal/popover integration.
+- **Phase 2 (Evidence)**: The top navigation bar previously rendered 4 separate, fragmented buttons/pills: `<TaskbarNotificationBell />` (28x28 round button), `<Link href="/hub">` (28x28 round button), `<button aria-label="System Tray Popover">` (200x28 pill), and `<button title="Feedback & Support">` (84x28 pill in HeaderWidgets).
+- **Phase 3 (Design)**:
+  - `apps/portal/components/system/SystemTray.tsx`: Unified the outer container into a single `gold-steel-border gold-steel-border-slim` liquid glass pill (`h-7 rounded-full px-2.5`) housing Return to Hub (`data-testid="taskbar-home-button"`), gold `|` separators, Notifications (`data-testid="taskbar-notifications-bell"`), the System Tray Popover trigger, and Support (`FeedbackWidget embedded`).
+  - `apps/portal/components/system/SystemTrayRows.tsx`: Added `embedded` mode to `TaskbarNotificationBell` allowing seamless integration without duplicate outer circular borders.
+  - `apps/portal/components/FeedbackWidget.tsx`: Added `embedded` mode rendering inline within the pill without duplicating the outer pill container.
+  - `apps/portal/components/HeaderWidgets.tsx`: Removed the redundant standalone `FeedbackWidget` so Support is exclusively unified in the System Tray.
+  - Added unit test suite in `apps/portal/components/system/SystemTray.test.tsx` asserting on the unified control pill.
+- **Phase 4 (Criticism)**: Unit tested with `pnpm --filter portal test -- --testPathPatterns="SystemTray|FeedbackWidget"` (20/20 PASS) and Biome formatted.
+- **Phase 5 (Contract)**: Modified `apps/portal/components/system/SystemTray.tsx`, `apps/portal/components/system/SystemTrayRows.tsx`, `apps/portal/components/FeedbackWidget.tsx`, `apps/portal/components/HeaderWidgets.tsx`, and `apps/portal/components/system/SystemTray.test.tsx`.
+
 ## 2026-11-02T13:28:00+02:00: Taskbar WhatsApp Split View UX Polish & Operational Templates
 
 - **Phase 1 (Comprehension)**: Enhance `SplitWindowWhatsAppView.tsx` with instant 1-click WhatsApp Web launch links (`https://web.whatsapp.com/send?text=...`) and pre-configured operational shift templates (Drilling, Haulage, Breakdown Alert, Emergency Muster).
@@ -1431,3 +1523,5 @@ AIAssistant chat.
 - 2026-10-31T19:50:25+0200 — feat(portal): ship real-data user identity + Google Workspace tools tabs. (1) `/profile` page reads the verified session's `employees` row (`full_name, role, department_id, accessible_departments, created_at, updated_at`) + `departments` registry via `lib/profile.ts`; no synthesised fields (removed a parallel-session mock modal claiming employee code `OP-ADMIN-01`, fake induction dates and privileges). (2) Root layout streams `userSlot` (`MenuIdentity`) into MacMenuBar with a Suspense skeleton; `server/proxy.ts` allowlists `/profile` in `isValidRedirect`. (3) Google Workspace Documents/Schedule tabs (`?tab=documents|schedule`): trimmed the fabricated "Today's Site Operational Milestones" windows (no DB source), keeping deep links (AccountChooser auto sign-in), blank-document shortcuts and the frameable public site-calendar embed (`NEXT_PUBLIC_GOOGLE_CALENDAR_EMBED_SRC`); CSP `frame-src` updated for `calendar.google.com`. Added `lib/profile.test.ts` and `GoogleWorkspacePanel.test.tsx`.
 
 - 2026-11-02T09:47:00+02:00 — perf(portal): close the asset/metadata optimisation audit. (1) Re-encoded all 11 department poster JPEGs in `public/images/departments/` at q80 mozjpeg + progressive with dimensions preserved (1280x720 / 960x540), 2079 KB -> 1575 KB (-24%); the files were already progressive, so the residual weight is genuine photo data. `images.unoptimized: true` is retained deliberately — it is a Vercel transformation-billing decision, and under it the on-disk bytes are exactly the delivered bytes, which is why `sizes` is inert and WebP/AVIF requires a `loaderFile` rather than a config flip. (2) Re-encoded the tracked video payload, preserving container/codec/dimensions/duration: desktop ambient loop VP9 CRF32 + H.264 CRF28 (`video-loop.webm` 3481->1856 KB, `video-loop.mp4` 5164->1525 KB), mobile loop (`video-loop-mobile.webm` 1116->662 KB, `video-loop-mobile.mp4` 1624->571 KB), and the 11 department hero loops at H.264 CRF30 960x540 (7093->2780 KB). Total 18478 KB -> 7394 KB (-60%). (3) `RouteBackground` `preload="auto"` intentionally unchanged: the element only mounts after `requestIdleCallback(800)` behind reduced-motion / `saveData` / `effectiveType` gating, and the element carries both `autoPlay` and an explicit `play()`, so the preload hint has no effect on fetched bytes — the payload size was the real lever and is addressed in (2).
+
+- 2026-11-02T20:00:00+02:00 — chore(portal): remove 6 Knip-unused exports (ADT_TRUCK_KEYWORDS, fetchAndIndexUrl, fetchAndIndexGitHubRepo, indexLocalDocs, isGlobalErrorHandlerInitialized, reportError) by dropping `export`; `pnpm knip` now clean. Add validate-json.mjs (152 JSON/JSONC files) + .gitlab-ci.yml + vercel.json frozen-lockfile gating + spec-driven-implementer agent + CSS tokenization priority order (docs/specs/CSS_TOKENIZATION_ORDER.md).

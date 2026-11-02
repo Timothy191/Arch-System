@@ -381,7 +381,7 @@ const DEFAULT_NOTIFICATIONS: SystemNotificationItem[] = [
   },
 ];
 
-export function TaskbarNotificationBell() {
+export function TaskbarNotificationBell({ embedded = false }: { embedded?: boolean } = {}) {
   const [items, setItems] = useState<SystemNotificationItem[]>(DEFAULT_NOTIFICATIONS);
 
   useEffect(() => {
@@ -444,9 +444,9 @@ export function TaskbarNotificationBell() {
           title="Notifications"
           data-testid="taskbar-notifications-bell"
           className={cn(
-            'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full',
-            'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
-            'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
+            embedded
+              ? 'relative flex h-5 w-5 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:text-[var(--text-heading)] focus-visible:outline-none active:scale-[0.95]'
+              : 'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
           )}
         >
           <Bell className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
@@ -454,7 +454,10 @@ export function TaskbarNotificationBell() {
             <span
               data-testid="notification-unread-dot"
               aria-label={`${unreadCount} unread notifications`}
-              className="absolute top-1 right-1 h-2 w-2 rounded-full bg-[var(--accent-red)] ring-1 ring-white"
+              className={cn(
+                'absolute h-2 w-2 rounded-full bg-[var(--accent-red)] ring-1 ring-white',
+                embedded ? '-top-0.5 -right-0.5' : 'top-1 right-1'
+              )}
             />
           )}
         </button>

@@ -26,6 +26,7 @@ export interface ReflectionEngineOptions {
   pillarConfig?: Partial<AgentPillarConfig>;
   maxReflectionIterations?: number;
   targetFilePath?: string;
+  requireStructuredThinking?: boolean;
 }
 
 export class ReflectionEngine {
@@ -99,6 +100,23 @@ export class ReflectionEngine {
 
       // Audit output with QualityGate
       finalAudit = QualityGate.auditContent(lastOutput, filePath);
+      if (options.requireStructuredThinking) {
+        const stmValidation = QualityGate.validateStructuredThinking(lastOutput);
+        if (!stmValidation.compliant) {
+          finalAudit.criticalViolations.push({
+            filePath,
+            ruleId: stmValidation.violationCode ?? 'THINKING_MISSING',
+            severity: 'CRITICAL',
+            description:
+              stmValidation.remediationDirective ??
+              'Missing STM-0 5-phase structured thinking trace.',
+            remediationSnippet:
+              'Prepend <structured-thinking> block with Phase 1..5 before code output.',
+          });
+          finalAudit.passed = false;
+          finalAudit.score = Math.max(0, finalAudit.score - 20);
+        }
+      }
       const feedback = QualityGate.formatDiagnosticFeedback(finalAudit);
 
       auditTrail.push({

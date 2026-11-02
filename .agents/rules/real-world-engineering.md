@@ -31,23 +31,30 @@ Before modifying any core application logic or schema:
 - **Unit & Integration Tests**: 100% pass rate across all Jest test suites.
 - **Lexical Integrity**: Full compliance with CSpell dictionary.
 
-### Layer 2: Real-World Fault Tolerance
+### Layer 2: Real-World Fault Tolerance & Usability
 
-- **Database & RLS Performance**: All queries and RLS policies utilize `(SELECT auth.uid())` initplan caching to avoid sequential scans.
-- **Fail-Safe Recovery**: Graceful degradation on network failure without data loss.
+- **Database & RLS Performance**: All queries and RLS policies utilize `(SELECT auth.uid())` initplan caching to avoid sequential scans, and service-role mutations explicitly scope by `department_id` / `site_id`.
+- **Fail-Safe Recovery & Idempotency**: Graceful degradation on network failure without data loss; mutations must be idempotent against duplicate clicks or retries.
 - **Optimistic Updates**: Local storage queues for intermittent connectivity scenarios.
-- **Operator Safety**: Clear visual error cues and fail-safe defaults for high-turnover operators.
+- **Operator Usability & Ergonomics**: Clear visual cues, high-contrast light-mode OKLCH tokens, golden structural separators, assistive input auto-formatting, and fail-safe defaults for high-turnover shift operators.
 
-## 4. Verification Before Claiming
+## 4. Complete Information Prerequisite (Research or Prompt User — Zero Guessing)
+
+Never proceed with implementation when required information is missing or ambiguous:
+
+1. **Exhaustive Grounded Research First**: Inspect actual source files, AST call graphs (`ast-grep`, `codemap`), database migrations (`@repo/database`), and Zod contracts (`@repo/contract`), and consult primary documentation (`context7`).
+2. **Prompt the User When Unsure**: If any domain workflow, permission boundary, UI/UX behavior, or acceptance criterion remains ambiguous after research, **STOP and ask the user**. Never invent requirements, silent defaults, or speculative logic.
+
+## 5. Verification Before Claiming
 
 Never claim a change "works" or is "verified" based solely on static analysis. Execute runtime verification:
 
 - For database changes: Run `pnpm audit:drift` and `@repo/database:test:migration-rollback`
-- For UI changes: Run Playwright E2E tests and capture console/accessibility metrics
-- For API changes: Test with authenticated sessions and verify RLS enforcement
+- For UI changes: Run unit/component and Playwright E2E tests and capture console/accessibility metrics
+- For API/Server Action changes: Test authentication, department authorization, idempotency, and controlled error paths
 - For production claims: Require evidence from live preview environments, not just local builds
 
-## 5. Anti-Assumption Mandate (CRITICAL)
+## 6. Anti-Assumption Mandate (CRITICAL)
 
 **NEVER guess, assume, or speculate about errors or issues.**
 

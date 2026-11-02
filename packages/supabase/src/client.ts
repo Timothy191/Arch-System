@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { normalizeSupabaseCookies } from './cookie-utils';
 
 type BrowserSupabaseClient = ReturnType<typeof createBrowserClient>;
 
@@ -46,14 +47,7 @@ function readDocumentCookies(): BrowserCookie[] {
     all.push({ name, value: cookieValue });
   }
 
-  const normalized = [...all];
-  for (const cookie of all) {
-    const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-    if (match?.[1] && !all.some((existing) => existing.name === match[1])) {
-      normalized.push({ name: match[1], value: cookie.value });
-    }
-  }
-  return normalized;
+  return normalizeSupabaseCookies(all);
 }
 
 function writeDocumentCookies(cookiesToSet: readonly BrowserCookieToSet[]): void {

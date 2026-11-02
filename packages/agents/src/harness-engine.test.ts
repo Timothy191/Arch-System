@@ -1,3 +1,7 @@
+jest.mock('@babel/core', () => ({ parseSync: () => null, traverse: () => undefined }), {
+  virtual: true,
+});
+
 import {
   AgentRoutineRegistry,
   HARNESS_GEMINI_TIER_MAP,
@@ -6,6 +10,8 @@ import {
   ToolPermissionGate,
   TrajectoryContrastiveStore,
 } from './harness-engine';
+import { AgentPillarEnvelope } from './prompt-envelope';
+import { QualityGate } from './quality-gate';
 
 describe('Unified Agentic Harness Engine (AutoGPT + RuFlo + invisible_dots)', () => {
   describe('Given ToolPermissionGate (invisible_dots 3-tier permission & inbox)', () => {
@@ -131,6 +137,7 @@ describe('Unified Agentic Harness Engine (AutoGPT + RuFlo + invisible_dots)', ()
         hasPermissionHooks: true,
         hasSyncedAgentRules: true,
         hasMcpRegistration: false,
+        hasStructuredThinkingMandate: false,
       });
 
       expect(unhealthy.healthy).toBe(false);
@@ -139,6 +146,80 @@ describe('Unified Agentic Harness Engine (AutoGPT + RuFlo + invisible_dots)', ()
       );
       expect(modelCheck?.passed).toBe(false);
       expect(modelCheck?.remediationCommand).toContain('ANTIGRAVITY_MODEL="gemini-3.6-flash"');
+
+      const stmCheck = unhealthy.checks.find(
+        (check) => check.checkId === 'stm-0-structured-thinking-mandate'
+      );
+      expect(stmCheck?.passed).toBe(false);
+      expect(stmCheck?.remediationCommand).toContain('audit-agentic-content.cjs --check');
+    });
+  });
+
+  describe('Given STM-0 Structured Thinking Mandate (QualityGate & AgentPillarEnvelope)', () => {
+    it('When validating agent output, Then Format A (<structured-thinking>) and Format C (AGENT_TRACER Phase 1..5) pass while unreasoned outputs fail with THINKING_MISSING', () => {
+      const formatA = `
+<structured-thinking>
+## Phase 1: Situational Comprehension
+Understand Control Room SCADA telemetry flow.
+## Phase 2: Evidence Gathering
+Inspected AlertPanel.tsx and ControlRoomSummaryGridClient.tsx.
+## Phase 3: Solution Design
+Compared inline separator vs component wrapper.
+## Phase 4: Pre-Commit Criticism
+Checked Tailwind 20-class limit and light-mode tokens.
+## Phase 5: Execution Contract
+Verify with pnpm test and pnpm agent:verify.
+</structured-thinking>
+`;
+      const validA = QualityGate.validateStructuredThinking(formatA);
+      expect(validA.compliant).toBe(true);
+      expect(validA.detectedFormat).toBe('format-a-inline');
+      expect(validA.completedPhases).toHaveLength(5);
+
+      const formatC = `
+- **Phase 1 (Comprehension)**: Update Control Room KPI cards.
+- **Phase 2 (Evidence)**: Inspected ControlRoomSummaryGridClient.tsx.
+- **Phase 3 (Design)**: Added gradient separator underneath metric values.
+- **Phase 4 (Criticism)**: Verified zero regressions in ControlRoomPanels.test.tsx.
+- **Phase 5 (Contract)**: Modified ControlRoomSummaryGridClient.tsx.
+`;
+      const validC = QualityGate.validateStructuredThinking(formatC);
+      expect(validC.compliant).toBe(true);
+      expect(validC.detectedFormat).toBe('format-c-tracer');
+
+      const missingThinking = QualityGate.validateStructuredThinking('const x = 1;');
+      expect(missingThinking.compliant).toBe(false);
+      expect(missingThinking.violationCode).toBe('THINKING_MISSING');
+
+      const incompletePhases = QualityGate.validateStructuredThinking(
+        '<structured-thinking>Phase 1: Comprehension only</structured-thinking>'
+      );
+      expect(incompletePhases.compliant).toBe(false);
+      expect(incompletePhases.violationCode).toBe('INCOMPLETE_STM_PHASES');
+      expect(incompletePhases.missingPhases.length).toBeGreaterThan(0);
+    });
+
+    it('When compiling AgentPillarEnvelope system prompt, Then Section 5B STM-0 protocol is embedded', () => {
+      const prompt = AgentPillarEnvelope.compileSystemPrompt({
+        identity: {
+          name: 'test-specialist',
+          mode: 'subagent',
+          routingDescription: 'Test STM-0 prompt compilation',
+        },
+        runtime: {},
+        permissions: {
+          allowedTools: ['read_file'],
+          filesystemAccess: 'read_only',
+          bashAllowed: false,
+        },
+        scope: {
+          includePaths: ['packages/agents/**'],
+        },
+      });
+
+      expect(prompt).toContain('### 5B. STRUCTURED THINKING MANDATE (STM-0 PROTOCOL)');
+      expect(prompt).toContain('MTP-1: PHASE 1 (COMPREHENSION)');
+      expect(prompt).toContain('MTP-5: PHASE 5 (EXECUTION CONTRACT)');
     });
   });
 });

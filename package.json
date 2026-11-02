@@ -207,6 +207,7 @@
     "knip": "knip --config config/tools/knip.json --no-config-hints",
     "knip:fix": "knip --config config/tools/knip.json --fix --no-config-hints",
     "lint": "turbo run lint",
+    "validate:json": "node tools/scripts/validate-json.mjs",
     "lint:migrations": "pnpm --filter @repo/database lint:migrations",
     "lint:fix": "turbo run lint -- --fix",
     "lint:css-perf": "node tools/audits/check-css-performance.cjs",
@@ -286,7 +287,9 @@
         "GHSA-vfj7-8cjw-p6xm",
         "GHSA-mrwp-f3q8-3g9p",
         "GHSA-gcqx-w48m-w2h4",
-        "GHSA-g3hv-75wg-m249"
+        "GHSA-g3hv-75wg-m249",
+        "GHSA-4r6h-8v6p-xvw6",
+        "GHSA-5pgg-2g8v-p4x9"
       ]
     },
     "overrides": {

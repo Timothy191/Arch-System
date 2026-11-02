@@ -46,7 +46,7 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
           {onSearchChange && (
             <div className="relative max-w-sm flex-1">
               <Search
-                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]"
+                className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[var(--accent-blue)]"
                 aria-hidden="true"
               />
               <Input
@@ -54,14 +54,14 @@ export const FilterToolbar = React.forwardRef<HTMLDivElement, FilterToolbarProps
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="h-9 border-black/10 bg-white/90 pr-8 pl-9 text-xs focus-visible:ring-1"
+                className="gold-steel-border gold-steel-border-slim h-9 rounded-full border-accent-amber/60 bg-white/95 pr-8 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus-visible:ring-1"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange('')}
                   aria-label="Clear search query"
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded p-0.5 text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
+                  className="absolute top-1/2 right-2.5 z-10 -translate-y-1/2 rounded-full p-0.5 text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>

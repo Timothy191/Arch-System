@@ -2,6 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { useMemo } from 'react';
+import { isRegularMachineExcavatorActivity } from '../hourly-loads/loads-utils';
 
 const SHIFT_HOURS = 12;
 
@@ -16,6 +17,7 @@ interface ExcavatorActivity {
   notes: string | null;
   site_id: string | null;
   block_mined_id: string | null;
+  material_type?: string | null;
   machine?: { name: string } | null;
   operator?: { full_name: string } | null;
   site?: { name: string } | null;
@@ -161,6 +163,208 @@ export function ExcavatorActivityList({
   );
 }
 
+const SHIFT_BADGE_CLASSES: Record<ExcavatorActivity['shift_type'], string> = {
+  day: 'bg-accent-blue/20 text-accent-blue',
+  night: 'bg-accent-blue/20 text-accent-blue',
+};
+
+const SHIFT_LABELS: Record<ExcavatorActivity['shift_type'], string> = {
+  day: 'Day',
+  night: 'Night',
+};
+
+function computeActivityMetrics(assignments: DumperAssignment[]) {
+  const totalBcm = assignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
+  const totalLoads = assignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
+  const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
+  const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
+  const estimatedScoopMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
+  return { totalBcm, totalLoads, bcmPerHour, loadsPerHour, estimatedScoopMinutes };
+}
+
+function ActivityCardHeader({
+  activity,
+  isRegularMachine,
+}: {
+  activity: ExcavatorActivity;
+  isRegularMachine: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="font-medium text-[var(--text-heading)]">
+          {activity.machine?.name || 'Unknown Excavator'}
+        </p>
+        <div
+          data-testid={`activity-card-separator-${activity.machine?.name || activity.id}`}
+          aria-hidden="true"
+          className="my-1 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+        />
+        <div className="mt-0.5 flex flex-wrap items-center gap-3 text-[var(--text-muted)] text-xs">
+          <span>{activity.operator?.full_name || 'No Operator'}</span>
+          <span className="text-[var(--border-emphasis)]">|</span>
+          <span>{activity.site?.name || 'No Site'}</span>
+          {activity.block_mined && (
+            <>
+              <span className="text-[var(--border-emphasis)]">|</span>
+              <span className="text-accent-blue">Block {activity.block_mined.code}</span>
+            </>
+          )}
+          {isRegularMachine && (
+            <>
+              <span className="text-[var(--border-emphasis)]">|</span>
+              <span className="font-semibold text-accent-green">
+                Regular Machine ({activity.material_type})
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="text-right">
+        <span
+          className={`inline-block rounded px-2 py-0.5 font-medium text-xs ${SHIFT_BADGE_CLASSES[activity.shift_type]}`}
+        >
+          {SHIFT_LABELS[activity.shift_type]} Shift
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function DumperAssignmentsSection({
+  activity,
+  assignments,
+  isRegularMachine,
+  totalLoads,
+  totalBcm,
+}: {
+  activity: ExcavatorActivity;
+  assignments: DumperAssignment[];
+  isRegularMachine: boolean;
+  totalLoads: number;
+  totalBcm: number;
+}) {
+  if (assignments.length > 0) {
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-[var(--border-default)] border-b">
+              <th
+                scope="col"
+                className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
+              >
+                Dumper
+              </th>
+              <th
+                scope="col"
+                className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
+              >
+                Material
+              </th>
+              <th
+                scope="col"
+                className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
+              >
+                Loads
+              </th>
+              <th
+                scope="col"
+                className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
+              >
+                BCM
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignments.map((assignment) => (
+              <tr key={assignment.id} className="border-[var(--border-default)]/30 border-b">
+                <td className="px-2 py-1.5 text-[var(--text-heading)]">
+                  {assignment.dumper?.name || 'Unknown'}
+                  <span className="ml-1 text-[var(--text-muted)] text-xs">
+                    ({assignment.dumper?.machine_type || ''})
+                  </span>
+                </td>
+                <td className="px-2 py-1.5 text-[var(--text-muted)]">{assignment.material_type}</td>
+                <td className="px-2 py-1.5 text-right text-[var(--text-heading)]">
+                  {assignment.total_loads}
+                </td>
+                <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)]">
+                  {(assignment.total_bcm || 0).toFixed(1)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-[var(--border-default)] border-t">
+              <td
+                colSpan={2}
+                className="px-2 py-1.5 font-medium text-[var(--text-heading)] text-xs"
+              >
+                Total
+              </td>
+              <td className="px-2 py-1.5 text-right font-medium text-[var(--text-heading)] text-xs">
+                {totalLoads}
+              </td>
+              <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)] text-xs">
+                {totalBcm.toFixed(1)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    );
+  }
+  if (isRegularMachine) {
+    return (
+      <p className="py-2 text-center font-medium text-accent-green text-sm">
+        Logged as regular machine ({activity.material_type})
+      </p>
+    );
+  }
+  return <p className="py-2 text-center text-[var(--text-muted)] text-sm">No dumper assignments</p>;
+}
+
+function MetricsRow({
+  bcmPerHour,
+  loadsPerHour,
+  estimatedScoopMinutes,
+}: {
+  bcmPerHour: number;
+  loadsPerHour: number;
+  estimatedScoopMinutes: number;
+}) {
+  return (
+    <div className="flex items-center gap-4 text-xs">
+      <div className="flex items-center gap-1.5">
+        <span className="text-[var(--text-muted)]">BCM/h:</span>
+        <span className="font-medium text-accent-blue">{bcmPerHour.toFixed(1)}</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[var(--text-muted)]">Loads/h:</span>
+        <span className="font-medium text-accent-green">{loadsPerHour.toFixed(1)}</span>
+      </div>
+      {estimatedScoopMinutes > 0 && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[var(--text-muted)]">Scoop time:</span>
+          <span className="font-medium text-[var(--text-heading)]">
+            {estimatedScoopMinutes.toFixed(1)} min/load
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActivityNotes({ notes }: { notes: string | null }) {
+  if (!notes) return null;
+  return (
+    <p className="border-[var(--border-default)]/50 border-t pt-2 text-[var(--text-muted)] text-xs italic">
+      {notes}
+    </p>
+  );
+}
+
 function ActivityCard({
   activity,
   assignments,
@@ -168,147 +372,27 @@ function ActivityCard({
   activity: ExcavatorActivity;
   assignments: DumperAssignment[];
 }) {
-  const totalBcm = assignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
-  const totalLoads = assignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
-  const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
-  const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
-  const estimatedScoopMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
+  const { totalBcm, totalLoads, bcmPerHour, loadsPerHour, estimatedScoopMinutes } =
+    computeActivityMetrics(assignments);
+  const isRegularMachine = isRegularMachineExcavatorActivity(activity.material_type);
 
   return (
     <GlassCard className="py-4">
       <div className="space-y-3">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium text-[var(--text-heading)]">
-              {activity.machine?.name || 'Unknown Excavator'}
-            </p>
-            <div className="mt-0.5 flex items-center gap-3 text-[var(--text-muted)] text-xs">
-              <span>{activity.operator?.full_name || 'No Operator'}</span>
-              <span className="text-[var(--border-emphasis)]">|</span>
-              <span>{activity.site?.name || 'No Site'}</span>
-              {activity.block_mined && (
-                <>
-                  <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-accent-blue">Block {activity.block_mined.code}</span>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="text-right">
-            <span
-              className={`inline-block rounded px-2 py-0.5 font-medium text-xs ${
-                activity.shift_type === 'day'
-                  ? 'bg-accent-blue/20 text-accent-blue'
-                  : 'bg-accent-blue/20 text-accent-blue'
-              }`}
-            >
-              {activity.shift_type === 'day' ? 'Day' : 'Night'} Shift
-            </span>
-          </div>
-        </div>
-
-        {/* Dumper Assignments Table */}
-        {assignments.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-[var(--border-default)] border-b">
-                  <th
-                    scope="col"
-                    className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
-                  >
-                    Dumper
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-1.5 text-left font-medium text-[var(--text-muted)] text-xs"
-                  >
-                    Material
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
-                  >
-                    Loads
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-1.5 text-right font-medium text-[var(--text-muted)] text-xs"
-                  >
-                    BCM
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.map((assignment) => (
-                  <tr key={assignment.id} className="border-[var(--border-default)]/30 border-b">
-                    <td className="px-2 py-1.5 text-[var(--text-heading)]">
-                      {assignment.dumper?.name || 'Unknown'}
-                      <span className="ml-1 text-[var(--text-muted)] text-xs">
-                        ({assignment.dumper?.machine_type || ''})
-                      </span>
-                    </td>
-                    <td className="px-2 py-1.5 text-[var(--text-muted)]">
-                      {assignment.material_type}
-                    </td>
-                    <td className="px-2 py-1.5 text-right text-[var(--text-heading)]">
-                      {assignment.total_loads}
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)]">
-                      {(assignment.total_bcm || 0).toFixed(1)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-[var(--border-default)] border-t">
-                  <td
-                    colSpan={2}
-                    className="px-2 py-1.5 font-medium text-[var(--text-heading)] text-xs"
-                  >
-                    Total
-                  </td>
-                  <td className="px-2 py-1.5 text-right font-medium text-[var(--text-heading)] text-xs">
-                    {totalLoads}
-                  </td>
-                  <td className="px-2 py-1.5 text-right font-medium text-[var(--accent-blue)] text-xs">
-                    {totalBcm.toFixed(1)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        ) : (
-          <p className="py-2 text-center text-[var(--text-muted)] text-sm">No dumper assignments</p>
-        )}
-
-        {/* Metrics Row */}
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">BCM/h:</span>
-            <span className="font-medium text-accent-blue">{bcmPerHour.toFixed(1)}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">Loads/h:</span>
-            <span className="font-medium text-accent-green">{loadsPerHour.toFixed(1)}</span>
-          </div>
-          {estimatedScoopMinutes > 0 && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[var(--text-muted)]">Scoop time:</span>
-              <span className="font-medium text-[var(--text-heading)]">
-                {estimatedScoopMinutes.toFixed(1)} min/load
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Notes */}
-        {activity.notes && (
-          <p className="border-[var(--border-default)]/50 border-t pt-2 text-[var(--text-muted)] text-xs italic">
-            {activity.notes}
-          </p>
-        )}
+        <ActivityCardHeader activity={activity} isRegularMachine={isRegularMachine} />
+        <DumperAssignmentsSection
+          activity={activity}
+          assignments={assignments}
+          isRegularMachine={isRegularMachine}
+          totalLoads={totalLoads}
+          totalBcm={totalBcm}
+        />
+        <MetricsRow
+          bcmPerHour={bcmPerHour}
+          loadsPerHour={loadsPerHour}
+          estimatedScoopMinutes={estimatedScoopMinutes}
+        />
+        <ActivityNotes notes={activity.notes} />
       </div>
     </GlassCard>
   );

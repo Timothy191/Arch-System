@@ -266,7 +266,9 @@ export function MacSystemMenuDropdown({
                   ? 'google-docs'
                   : tool.name === 'schedule'
                     ? 'google-calendar'
-                    : null;
+                    : tool.name === 'excel'
+                      ? 'google-sheets'
+                      : null;
 
               return (
                 <div

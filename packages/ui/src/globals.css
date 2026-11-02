@@ -87,10 +87,7 @@
 }
 
 @layer base {
-  :root {
-    --arch-brand-blue: #007aff;
-    --arch-brand-blue-hover: #0066eb;
-  }
+  /* --arch-brand-blue / --arch-brand-blue-hover provided by @repo/theme */
 
   .hide-cursor,
   .hide-cursor :where(*) {

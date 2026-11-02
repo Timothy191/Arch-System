@@ -2,19 +2,15 @@ import { DEPARTMENTS } from '@repo/departments/data-access';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getOperationalToday } from '@repo/utils';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { getDeptId } from './dept-registry';
 
-export async function getDepartmentContext(params: { department: string }): Promise<{
-  dept: (typeof DEPARTMENTS)[number];
-  deptId: string;
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
-  today: string;
-}> {
-  const dept = DEPARTMENTS.find((d) => d.name === params.department);
+const getCachedDepartmentContextBySlug = cache(async (department: string) => {
+  const dept = DEPARTMENTS.find((d) => d.name === department);
   if (!dept) notFound();
 
   const [deptId, supabase] = await Promise.all([
-    getDeptId(params.department),
+    getDeptId(department),
     createServerSupabaseClient(),
   ]);
   if (!deptId) notFound();
@@ -27,6 +23,15 @@ export async function getDepartmentContext(params: { department: string }): Prom
     supabase,
     today,
   };
+});
+
+export async function getDepartmentContext(params: { department: string }): Promise<{
+  dept: (typeof DEPARTMENTS)[number];
+  deptId: string;
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  today: string;
+}> {
+  return getCachedDepartmentContextBySlug(params.department);
 }
 
 export function requireDepartment(departmentSlug: string, allowed: string | string[]) {

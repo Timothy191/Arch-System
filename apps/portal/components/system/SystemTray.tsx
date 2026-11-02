@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
+import { FeedbackWidget } from '@/components/FeedbackWidget';
 import { useFetchOfflineQueue } from '@/hooks/useFetchOfflineQueue';
 import {
   BatteryStatusRow,
@@ -112,23 +113,46 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
     pathname?.startsWith('/update-password');
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div
+      className={cn(
+        'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full px-2.5',
+        'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md',
+        'transition-colors'
+      )}
+    >
       {!isAuthRoute && (
         <>
-          <TaskbarNotificationBell />
           <Link
             href="/hub"
             aria-label="Return to Hub"
             data-testid="taskbar-home-button"
             className={cn(
-              'gold-steel-border gold-steel-border-slim flex h-7 w-7 items-center justify-center rounded-full',
-              'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
-              'transition-colors active:scale-[0.97]'
+              'flex h-5 w-5 items-center justify-center rounded-full',
+              'text-[var(--text-secondary)] hover:text-[var(--text-heading)]',
+              'transition-colors active:scale-[0.95]'
             )}
             title="Home — Return to Hub"
           >
-            <Home className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+            <Home className="h-3.5 w-3.5" />
           </Link>
+
+          <span
+            aria-hidden="true"
+            data-testid="system-tray-gold-separator"
+            className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+          >
+            |
+          </span>
+
+          <TaskbarNotificationBell embedded />
+
+          <span
+            aria-hidden="true"
+            data-testid="system-tray-gold-separator"
+            className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+          >
+            |
+          </span>
         </>
       )}
 
@@ -140,9 +164,8 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             aria-haspopup="dialog"
             title="System status & options"
             className={cn(
-              'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-2 rounded-full px-2.5 outline-none',
-              'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
-              'transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]'
+              'flex cursor-default select-none items-center gap-2 outline-none',
+              'transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.98]'
             )}
           >
             {/* Server health dot */}
@@ -231,6 +254,19 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
             )}
           >
             <div className="space-y-3">
+              {/* Quick Navigation Hub & Arch OS indicator */}
+              <div className="flex items-center justify-between border-black/[0.06] border-b pb-2">
+                <Link
+                  href="/hub"
+                  className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[var(--text-secondary)] text-xs transition-colors hover:bg-black/5 hover:text-[var(--text-heading)]"
+                  title="Return to Hub"
+                >
+                  <Home className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                  <span className="font-medium text-[11px]">Return to Hub</span>
+                </Link>
+                <div className="font-mono text-[10px] text-[var(--text-muted)]">Arch OS</div>
+              </div>
+
               {/* Server Health Section */}
               <ServerHealthRow
                 status={health.status}
@@ -269,6 +305,16 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      <span
+        aria-hidden="true"
+        data-testid="system-tray-gold-separator"
+        className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+      >
+        |
+      </span>
+
+      <FeedbackWidget variant="header" embedded />
     </div>
   );
 };

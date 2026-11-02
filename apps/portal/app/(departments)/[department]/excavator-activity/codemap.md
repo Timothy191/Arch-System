@@ -1,6 +1,6 @@
 # (departments)/[department]/excavator-activity/
 
-**Kind:** page · **Files:** 5
+**Kind:** page · **Files:** 6
 
 ## Responsibility
 
@@ -9,12 +9,13 @@ Server Components fetch data directly (no client-side fetching), pass props down
 
 ## Design
 
-- Client components ("use client"): ExcavatorActivityForm.tsx, ExcavatorActivityList.tsx, ExcavatorDumperTable.tsx
+- Client components ("use client"): ExcavatorActivityForm.tsx, ExcavatorActivityList.tsx, ExcavatorActivityTelemetryOverview.tsx, ExcavatorDumperTable.tsx
 - Hooks referenced: useRouter, useEffect, useState
 - Database tables touched: excavator_activity, excavator_dumper_assignments, machines, operators, sites, mine_blocks, hourly_loads
 - Exports:
   - `ExcavatorActivityForm.tsx` → ExcavatorActivityForm
   - `ExcavatorActivityList.tsx` → ExcavatorActivityList
+  - `ExcavatorActivityTelemetryOverview.tsx` → ExcavatorActivityTelemetryOverview
   - `ExcavatorDumperTable.tsx` → ExcavatorDumperTable
   - `loading.tsx` → ExcavatorActivityLoading, default
   - `page.tsx` → ExcavatorActivityPage, default
@@ -23,7 +24,7 @@ Server Components fetch data directly (no client-side fetching), pass props down
 
 Route params/segments → server data fetch → RSC render → client island hydration.
 
-- Local imports consumed: ExcavatorDumperTable, ExcavatorActivityForm, ExcavatorActivityList
+- Local imports consumed: ExcavatorDumperTable, ExcavatorActivityForm, ExcavatorActivityList, ExcavatorActivityTelemetryOverview
 
 ## Integration
 

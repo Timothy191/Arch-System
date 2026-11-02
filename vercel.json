@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm turbo run build --filter=portal...",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm type-check && pnpm lint && pnpm test -- --passWithNoTests && pnpm turbo run build --filter=portal...",
   "outputDirectory": "apps/portal/.next",
   "crons": [
     {
