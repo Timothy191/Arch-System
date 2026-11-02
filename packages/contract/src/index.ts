@@ -244,6 +244,7 @@ export type {
   OfflineMutationHlc,
   OfflineSmrMutation,
 } from './schemas/offline-mutations.schema';
+export * from './schemas/search.schema';
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from './types/access-card.types';
 export type {
   AdminDataDeleteInput,
