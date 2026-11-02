@@ -3,14 +3,32 @@ import { revalidateTag as nextRevalidateTag, unstable_cache } from 'next/cache';
 
 /**
  * Standard Next.js 16 semantic cache lifetime profiles.
+ * These profiles are used with cacheLife() function in 'use cache' directives.
  */
 export const cacheProfiles = {
+  // Short-lived: Telemetry data that updates frequently
   telemetry: { stale: 10, revalidate: 10, expire: 60 },
+
+  // Medium-lived: Department data that changes occasionally
   departments: { stale: 300, revalidate: 3600, expire: 86400 },
+
+  // Short-lived: Reports that need frequent updates
   reports: { stale: 60, revalidate: 300, expire: 3600 },
+
+  // Long-lived: Static or rarely changing data
   max: { stale: 300, revalidate: 3600, expire: 86400 },
+
+  // Medium-lived: Hourly updates
   hours: { stale: 60, revalidate: 3600, expire: 86400 },
+
+  // Short-lived: Minute-level updates
   minutes: { stale: 10, revalidate: 60, expire: 300 },
+
+  // Ultra-short: Real-time or near real-time data
+  realtime: { stale: 5, revalidate: 15, expire: 60 },
+
+  // Default profile for uncategorized data
+  default: { stale: 5, revalidate: 15, expire: 30 },
 } as const;
 
 export type CacheProfile = keyof typeof cacheProfiles;
@@ -106,10 +124,51 @@ export const revalidateTagWithProfile = refreshTag;
 export const updateTagInAction = updateTag;
 
 /**
+ * Next.js 16 cacheTag function for tagging cache entries.
+ * Used with 'use cache' directive to enable on-demand revalidation.
+ *
+ * @param tag The cache tag to associate with this cache entry
+ */
+export function cacheTag(tag: string): void {
+  // Next.js 16 cacheTag is available in next/cache
+  const { cacheTag: nextCacheTag } = require('next/cache') as typeof import('next/cache');
+  if (typeof nextCacheTag === 'function') {
+    nextCacheTag(tag);
+  }
+}
+
+/**
+ * Next.js 16 cacheLife function for setting cache lifetime profiles.
+ * Used with 'use cache' directive to control stale, revalidate, and expire times.
+ *
+ * @param profile The cache profile name or explicit configuration
+ */
+export function cacheLife(
+  profile: CacheProfile | { stale?: number; revalidate?: number; expire?: number }
+): void {
+  const { cacheLife: nextCacheLife } = require('next/cache') as typeof import('next/cache');
+  if (typeof nextCacheLife !== 'function') {
+    return;
+  }
+
+  if (typeof profile === 'string') {
+    const config = cacheProfiles[profile];
+    if (config) {
+      nextCacheLife(config);
+    } else {
+      nextCacheLife(cacheProfiles.default);
+    }
+  } else {
+    nextCacheLife(profile);
+  }
+}
+
+/**
  * Next.js Data Cache wrapper for React Server Component reads.
  * Supports tags-based revalidation via revalidateTag(tag, profile).
  * Kept for incremental migration from unstable_cache to "use cache".
  *
+ * @deprecated Use 'use cache' directive with cacheTag and cacheLife instead
  * @param keyParts Unique cache keys to distinguish data queries
  * @param fn The async fetch operation to execute and cache
  * @param options Cache parameters including revalidate TTL and tags

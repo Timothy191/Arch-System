@@ -160,9 +160,9 @@ export default async function DepartmentDashboard({
             <div className="flex flex-wrap gap-3">
               <Link
                 href={`/${deptSlug}/machine-operations`}
-                className="gold-steel-border gold-steel-border-slim rounded-lg bg-[var(--accent-blue)] px-4 py-2 font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--accent-blue)]/90 active:scale-[0.98]"
+                className="gold-steel-border gold-steel-border-slim rounded-lg border-[var(--accent-blue)]/20 border-b-2 bg-[var(--accent-blue)] px-4 py-2 font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] hover:bg-[var(--accent-blue)]/90 active:scale-[0.98]"
               >
-                Machine Operations
+                Delays
               </Link>
               <Link
                 href={`/${deptSlug}/hourly-loads`}

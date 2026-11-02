@@ -12,19 +12,6 @@ const MachineOperationsForm = dynamic(
   }
 );
 
-const MachineOperationsList = dynamic(
-  () => import('./MachineOperationsList').then((m) => m.MachineOperationsList),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
-        ))}
-      </div>
-    ),
-  }
-);
-
 const MachineOperationsComplianceWidget = dynamic(
   () =>
     import('./MachineOperationsComplianceWidget').then((m) => m.MachineOperationsComplianceWidget),
@@ -32,6 +19,15 @@ const MachineOperationsComplianceWidget = dynamic(
     loading: () => <div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
   }
 );
+
+const MachineOperationsFilterableTable = dynamic(
+  () => import('./MachineOperationsFilterableTable').then((m) => m.default),
+  {
+    loading: () => <div className="h-96 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
+  }
+);
+
+// MachineOperationsList removed - replaced by MachineOperationsFilterableTable
 
 export default async function MachineOperationsPage({
   params,
@@ -328,10 +324,9 @@ export default async function MachineOperationsPage({
             </div>
           }
         >
-          <MachineOperationsList
+          <MachineOperationsFilterableTable
             machines={machinesWithSmu}
             operations={todayOperations || []}
-            todayLoads={todayLoads || []}
             activeBreakdowns={activeBreakdowns || []}
             engineeringDelaysByMachine={engineeringDelaysByMachine}
           />

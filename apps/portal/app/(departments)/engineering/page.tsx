@@ -1,3 +1,4 @@
+import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
@@ -11,7 +12,12 @@ import {
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
+import { withCache } from '@/lib/cache-utils';
+import { cachedRSC, cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { getDepartmentContext } from '~/lib/dept-context';
+
+const ENGINEERING_HUB_REVALIDATE_SECONDS = 60;
+const MS_PER_DAY = 86_400_000;
 
 interface BreakdownSummary {
   id: string;
@@ -21,8 +27,15 @@ interface BreakdownSummary {
   created_at: string;
 }
 
-async function getEngineeringHubData(deptId: string) {
+interface EngineeringHubMetrics {
+  activeBreakdowns: number;
+  resolvedToday: number;
+  recentBreakdowns: BreakdownSummary[];
+}
+
+async function loadEngineeringHubMetrics(deptId: string): Promise<EngineeringHubMetrics> {
   const db = await createReadReplicaClient();
+  const resolvedSinceIso = new Date(Date.now() - MS_PER_DAY).toISOString();
 
   const [{ count: activeBreakdowns }, { count: resolvedToday }, { data: recentBreakdowns }] =
     await Promise.all([
@@ -37,7 +50,7 @@ async function getEngineeringHubData(deptId: string) {
         .select('*', { count: 'exact', head: true })
         .eq('department_id', deptId)
         .eq('status', 'completed')
-        .gte('updated_at', new Date(Date.now() - 86400000).toISOString()),
+        .gte('updated_at', resolvedSinceIso),
       db
         .from('breakdowns')
         .select('id, machine_name, reason, status, created_at')
@@ -60,6 +73,28 @@ async function getEngineeringHubData(deptId: string) {
       created_at: b.created_at,
     })) as BreakdownSummary[],
   };
+}
+
+/**
+ * Next.js 16 Cache Components with 'use cache' directive.
+ */
+async function getEngineeringHubData(deptId: string): Promise<EngineeringHubMetrics> {
+  'use cache';
+
+  const hubTag = tagDepartment('engineering', 'hub-metrics');
+
+  // Set cache lifetime profile
+  cacheLife('telemetry');
+
+  // Associate cache tags for on-demand revalidation
+  cacheTag(hubTag);
+  cacheTag('table:breakdowns');
+
+  return withCache(() => loadEngineeringHubMetrics(deptId), {
+    category: CacheCategory.METRICS,
+    keyParts: ['engineering', 'hub', deptId],
+    tags: [hubTag, 'table:breakdowns'],
+  });
 }
 
 export default async function EngineeringDashboardPage() {

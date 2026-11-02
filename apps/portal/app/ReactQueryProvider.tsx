@@ -37,8 +37,12 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
           queries: {
             staleTime: (query) => resolveQueryStaleTime(query.queryKey),
             gcTime: QUERY_STALE_TIMES.defaultGcTimeMs,
+            // Keep focus refetch off — pit tablets switch apps constantly and would
+            // stampede the API. Reconnect refetch stays on (TanStack default) so
+            // stale queries refresh when connectivity returns after offline queue sync.
             refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
+            refetchOnReconnect: true,
+            networkMode: 'online',
             retry: DEFAULT_QUERY_RETRY_COUNT,
           },
         },

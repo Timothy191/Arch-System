@@ -1,3 +1,4 @@
+import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
@@ -13,10 +14,35 @@ import {
   MessageSquare,
   Radio,
 } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { withCache } from '@/lib/cache-utils';
+import { cachedRSC, cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-async function getDrillingDashboardData(deptId: string, today: string) {
+const DRILLING_DASHBOARD_REVALIDATE_SECONDS = 120;
+
+export const metadata: Metadata = {
+  title: 'Drilling Dashboard — Arch Systems',
+  description:
+    'Real-time drilling operations dashboard with machine metrics, shift logging, and productivity tracking',
+};
+
+interface DrillingDashboardMetrics {
+  loggedShifts: number;
+  machineCount: number;
+  totalHours: number;
+  totalMeters: number;
+  totalHoles: number;
+  activeOps: number;
+  delayCount: number;
+  delayMinutes: number;
+}
+
+async function loadDrillingDashboardMetrics(
+  deptId: string,
+  today: string
+): Promise<DrillingDashboardMetrics> {
   const db = await createReadReplicaClient();
 
   const [{ data: drills }, { data: todayOperations }, { data: todayDelays }] = await Promise.all([
@@ -113,6 +139,36 @@ async function getDrillingDashboardData(deptId: string, today: string) {
     delayCount,
     delayMinutes,
   };
+}
+
+/**
+ * Next.js 16 Cache Components with 'use cache' directive.
+ * Dual-tier cache: Next.js Data Cache (RSC) + Redis L1/L2 via withCache.
+ * METRICS TTL (L2 300s) keeps shift dashboards responsive without hammering Postgres
+ * on every control-room ↔ drilling navigation.
+ */
+async function getDrillingDashboardData(
+  deptId: string,
+  today: string
+): Promise<DrillingDashboardMetrics> {
+  'use cache';
+
+  const dashboardTag = tagDepartment('drilling', `dashboard:${today}`);
+
+  // Set cache lifetime profile for this function
+  cacheLife('telemetry');
+
+  // Associate cache tags for on-demand revalidation
+  cacheTag(dashboardTag);
+  cacheTag('table:machines');
+  cacheTag('table:drill_operations');
+  cacheTag('table:machine_operations');
+
+  return withCache(() => loadDrillingDashboardMetrics(deptId, today), {
+    category: CacheCategory.METRICS,
+    keyParts: ['drilling', 'dashboard', deptId, today],
+    tags: [dashboardTag, 'table:machines', 'table:drill_operations', 'table:machine_operations'],
+  });
 }
 
 export default async function DrillingDashboardPage() {

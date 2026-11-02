@@ -183,7 +183,10 @@ describe('saveDelayEntriesBatch', () => {
       description: 'New entry',
       status: 'draft',
     });
-    expect(cacheInvalidateTags).toHaveBeenCalledWith(['table:delay_entries']);
+    expect(cacheInvalidateTags).toHaveBeenCalledWith([
+      'table:delay_entries',
+      'table:machine_operations',
+    ]);
     expect(revalidatePath).toHaveBeenCalledWith('/');
   });
 });

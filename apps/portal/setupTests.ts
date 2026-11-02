@@ -14,6 +14,9 @@ jest.mock('next/cache', () => ({
   unstable_cache: jest.fn((cb) => cb),
   revalidatePath: jest.fn(),
   revalidateTag: jest.fn(),
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  updateTag: jest.fn(),
 }));
 
 jest.mock('@formkit/auto-animate/react', () => ({

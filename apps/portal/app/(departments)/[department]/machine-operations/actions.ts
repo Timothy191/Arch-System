@@ -145,7 +145,7 @@ export async function saveDelayEntriesBatch(payload: {
     }
   }
 
-  await cacheInvalidateTags(['table:delay_entries']);
+  await cacheInvalidateTags(['table:delay_entries', 'table:machine_operations']);
   revalidatePath('/'); // or specific path
   return { success: true };
 }

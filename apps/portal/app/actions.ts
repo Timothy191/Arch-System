@@ -5,6 +5,7 @@ import { AuthError, ForbiddenError, isAppError, ValidationError } from '@repo/er
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { aiGenerateEmbeddingEvent, inngest } from '@repo/utils/inngest';
+import { updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { logError } from '@/lib/errors/error-logger';
 import { updateTagInAction } from '@/lib/server-cache';
@@ -73,6 +74,10 @@ export async function revalidateRSC(tags: string[]): Promise<ServerActionRespons
     }
 
     for (const tag of tags) {
+      // Next.js 16: Use both the new updateTag and legacy updateTagInAction
+      // updateTag is the new Next.js 16 API for cache invalidation
+      updateTag(tag);
+      // Also call the legacy function for backward compatibility
       updateTagInAction(tag);
     }
     return { success: true };

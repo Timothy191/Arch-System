@@ -4,11 +4,21 @@ import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server
 import { EveLogo } from '@repo/ui/EveLogo';
 import { Logo } from '@repo/ui/Logo';
 import { AlertTriangle, Cpu, Loader2, ShieldCheck } from 'lucide-react';
+import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { APP_VERSION } from '@/lib/version';
+
+export const metadata: Metadata = {
+  title: 'Login — Arch Systems',
+  description: 'Sign in to access the Arch Systems industrial operations portal',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 interface LoginPageProps {
   searchParams?: Promise<{ redirect?: string }>;
@@ -70,10 +80,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             className="gold-steel-border w-full animate-fade-up space-y-4 rounded-card border border-[var(--accent-blue)]/30 bg-arch-surface-secondary/80 p-8 text-center shadow-window backdrop-blur-xl md:p-10"
           >
             <AlertTriangle className="mx-auto h-10 w-10 text-accent-amber" strokeWidth={1.5} />
-            <h1 className="font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
+            <h1 className="font-display font-semibold text-[var(--text-heading)] text-neutral-900 text-xl tracking-tight">
               System Unavailable
             </h1>
-            <p className="text-neutral-600 text-sm">
+            <p className="font-sans text-neutral-600 text-sm">
               Unable to reach authentication services. Please try again shortly or contact IT
               Support.
             </p>
@@ -105,11 +115,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   aria-hidden="true"
                   className="mx-auto my-3 flex w-56 items-center justify-center gap-2"
                 >
-                  <span className="h-[2px] flex-1 animate-pulse rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
-                  <span className="h-3 w-3 rotate-45 animate-ping rounded-[2px] border-2 border-[var(--accent-blue)] bg-[var(--accent-blue)]/60 shadow-diffusion-sm" />
-                  <span className="h-[2px] flex-1 animate-pulse rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                  <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-[var(--accent-blue)]/40 to-[var(--accent-blue)]" />
+                  <span className="h-3 w-3 rotate-45 rounded-[2px] border-2 border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/20 shadow-diffusion-sm" />
+                  <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-[var(--accent-blue)]/40 to-[var(--accent-blue)]" />
                 </div>
-                <p className="font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
+                <p className="font-sans font-semibold text-[11px] text-neutral-500 uppercase tracking-widest">
                   Arch OS v{APP_VERSION}
                 </p>
               </div>
@@ -130,17 +140,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             {/* Header */}
             <div className="mb-5 pb-4">
               <div className="flex items-center justify-between">
-                <span className="select-none font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
+                <span className="select-none font-sans font-semibold text-[11px] text-[var(--accent-blue)] uppercase tracking-wider">
                   Welcome Back
                 </span>
                 <span className="rounded bg-[var(--accent-blue)]/10 px-2 py-0.5 font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
                   SSO / EMP-ID
                 </span>
               </div>
-              <h2 className="mt-0.5 font-semibold text-lg text-neutral-900 tracking-tight">
+              <h2 className="mt-0.5 font-display font-semibold text-lg text-neutral-900 tracking-tight">
                 Sign in to your account
               </h2>
-              <p className="mt-1 text-neutral-500 text-xs">
+              <p className="mt-1 font-sans text-neutral-500 text-xs">
                 Access the mining & operations control panel.
               </p>
               <div
@@ -148,9 +158,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 aria-hidden="true"
                 className="mx-auto mt-3 flex w-44 items-center justify-center gap-2"
               >
-                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
-                <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)] bg-[var(--accent-blue)]/30 shadow-diffusion-sm" />
-                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[var(--accent-blue)] to-[var(--accent-blue)]" />
+                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-[var(--accent-blue)]/40 to-[var(--accent-blue)]" />
+                <span className="h-2 w-2 rotate-45 rounded-[2px] border border-[var(--accent-blue)]/40 bg-[var(--accent-blue)]/20 shadow-diffusion-sm" />
+                <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-[var(--accent-blue)]/40 to-[var(--accent-blue)]" />
               </div>
             </div>
 

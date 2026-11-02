@@ -89,7 +89,6 @@ async function getLiveDepartmentMetrics(
             'table:hourly_loads',
             'table:daily_logs',
             'table:production_logs',
-
             'table:breakdowns',
             'table:machines',
           ],
@@ -102,7 +101,6 @@ async function getLiveDepartmentMetrics(
         'table:hourly_loads',
         'table:daily_logs',
         'table:production_logs',
-
         'table:breakdowns',
         'table:machines',
       ],

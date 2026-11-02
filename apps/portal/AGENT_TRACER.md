@@ -1,3 +1,18 @@
+## 2026-11-02T08:35:00+02:00: Drilling & Engineering Dual-Tier RSC Cache Invalidation & ReactQuery Reconnect Refetch
+
+- **Phase 1 (Comprehension)**: Optimize performance across high-frequency department dashboards (Drilling & Engineering hubs) with dual-tier server caching (`withCache` + `cachedRSC`), tag-based invalidation on machine operations batch writes, and ReactQuery reconnect refetch configuration.
+- **Phase 2 (Evidence)**:
+  - Drilling dashboard and Engineering hub queries were performing uncached database roundtrips on each navigation.
+  - Delay entries batch mutations (`saveDelayEntriesBatch`) invalidated `table:delay_entries` but needed `table:machine_operations` tag invalidation to keep aggregated operational summaries in sync.
+  - `ReactQueryProvider` required `refetchOnReconnect: true` and `networkMode: 'online'` to recover stale queries when pit connectivity restores.
+- **Phase 3 (Design)**:
+  - Wrapped `getDrillingDashboardData` in `cachedRSC` with 120s TTL and scoped tags (`dashboardTag`, `table:machines`, `table:drill_operations`, `table:machine_operations`).
+  - Wrapped `getEngineeringHubData` in `cachedRSC` with 60s TTL and `table:breakdowns` tag.
+  - Added `table:machine_operations` tag invalidation to `saveDelayEntriesBatch` in `machine-operations/actions.ts`.
+  - Updated `ReactQueryProvider.tsx` with `refetchOnReconnect: true` and `networkMode: 'online'`.
+- **Phase 4 (Criticism)**: Unit tested with `actions.test.ts`, `EngineeringOverviewTable.test.tsx`, `DrillingOperationsTable.test.tsx`, `DrillingReportsDashboardClient.test.tsx` (9 suites, 41/41 PASS). Full 27-gate verification passed (100% PASS).
+- **Phase 5 (Contract)**: Modified `drilling/page.tsx`, `engineering/page.tsx`, `actions.ts`, `actions.test.ts`, `ReactQueryProvider.tsx`, `AGENT_TRACER.md`.
+
 ## 2026-11-02T08:23:00+02:00: Control Room Dashboard Design Feedback, Liquid-Glass Sub-Tabs & Autonomous Artifact Auto-Approval Invariant
 
 - **Phase 1 (Comprehension)**: Implement design feedback on `/control-room`:
