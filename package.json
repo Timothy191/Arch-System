@@ -146,7 +146,7 @@
     "agents:cleanup": "node tools/scripts/agents-cleanup.cjs",
     "agents:cleanup:aggressive": "node tools/scripts/agents-cleanup.cjs --aggressive",
     "build": "node scripts/sync-assets-smart.cjs && node scripts/patch-glass-css.mjs && turbo run build",
-    "build:vercel": "node scripts/sync-assets-smart.cjs && pnpm turbo run build --filter=portal",
+    "build:vercel": "pnpm turbo run build --filter=portal...",
     "commitlint": "commitlint --edit",
     "clean:caches": "node scripts/manage-runtime-caches.mjs --clean",
     "status:caches": "node scripts/manage-runtime-caches.mjs --status",
