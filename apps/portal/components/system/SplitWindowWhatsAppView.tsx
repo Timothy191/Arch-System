@@ -16,6 +16,7 @@ import {
   CHANNELS,
   INITIAL_MESSAGES,
   type MessageItem,
+  SHIFT_DISPATCH_TEMPLATES,
   WHATSAPP_AUTO_ACK_DELAY_MS,
   WHATSAPP_WEB_URL,
 } from './split-window-data';
@@ -84,6 +85,15 @@ export function WhatsAppWebView() {
     setTimeout(() => {
       setMessages((prev) => prev.map((m) => (m.id === newMsg.id ? { ...m, status: 'read' } : m)));
     }, WHATSAPP_AUTO_ACK_DELAY_MS);
+  };
+
+  const handleLaunchWhatsAppWeb = (textToShare?: string) => {
+    if (typeof window === 'undefined') return;
+    const content = (textToShare || inputText).trim();
+    const url = content
+      ? `https://web.whatsapp.com/send?text=${encodeURIComponent(content)}`
+      : WHATSAPP_WEB_URL;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const filteredMessages = messages.filter(
@@ -332,6 +342,24 @@ export function WhatsAppWebView() {
           {/* Operational Dispatch Quick Action Chips */}
           <div className="scrollbar-none flex shrink-0 items-center gap-1.5 overflow-x-auto border-black/[0.05] border-t bg-[#f0f2f5]/90 px-2 py-1.5">
             <span className="mr-0.5 shrink-0 font-bold text-[10px] text-slate-500 uppercase tracking-wider">
+              Templates:
+            </span>
+            {SHIFT_DISPATCH_TEMPLATES.map((tmpl) => (
+              <button
+                key={tmpl.id}
+                type="button"
+                onClick={() => setInputText(tmpl.template)}
+                className={QUICK_CHIP_CLASS}
+                title={`Load ${tmpl.title} template`}
+              >
+                <span>{tmpl.icon}</span>
+                <span>{tmpl.title}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="scrollbar-none flex shrink-0 items-center gap-1.5 overflow-x-auto border-black/[0.05] border-t bg-[#f0f2f5]/90 px-2 py-1.5">
+            <span className="mr-0.5 shrink-0 font-bold text-[10px] text-slate-500 uppercase tracking-wider">
               Quick:
             </span>
             <button
@@ -378,6 +406,15 @@ export function WhatsAppWebView() {
               title="Add Attachment"
             >
               <Paperclip className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLaunchWhatsAppWeb()}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+              title="Send to official WhatsApp Web in new tab"
+              aria-label="Send to official WhatsApp Web in new tab"
+            >
+              <ExternalLink className="h-4 w-4" />
             </button>
             <input
               type="text"

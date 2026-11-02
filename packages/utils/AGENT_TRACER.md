@@ -4,6 +4,23 @@ Every line in this file answers the question: "Would an agent miss this without 
 
 ---
 
+## 2026-11-02T13:28:00+02:00: Tamper-Evident SHA-256 Audit Chaining Utility
+
+### Purpose
+
+Provide zero-dependency cryptographic hash chaining (`crypto-audit.ts`) as a lightweight, zero-overhead Web3 alternative for immutable shift closeouts and safety incident audit trails.
+
+### Changes Made
+
+1. **`src/crypto-audit.ts`**:
+   - Implemented canonical JSON stringification (`canonicalJsonStringify`).
+   - Implemented deterministic SHA-256 hash chaining (`computeTamperEvidentHash`) linking records to `previousHash`.
+   - Implemented linear sequence verification (`verifyTamperEvidentChain`).
+2. **`package.json` & `src/index.ts`**:
+   - Exported `./crypto-audit` and tested 100% pass across tampering and broken chain test cases.
+
+---
+
 ## 2026-06-24: Add Analytics Utility Lint Fixes & Novu SDK Logger Fix
 
 ### Purpose

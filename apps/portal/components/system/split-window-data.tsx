@@ -92,6 +92,44 @@ export const CHANNELS = [
   { id: 'engineering', name: 'Engineering & Breakdown Dispatch', icon: '🔧', unread: 0 },
 ];
 
+export interface ShiftTemplate {
+  id: string;
+  title: string;
+  icon: string;
+  template: string;
+}
+
+export const SHIFT_DISPATCH_TEMPLATES: ShiftTemplate[] = [
+  {
+    id: 'drilling',
+    title: 'Drilling Handover',
+    icon: '⚡',
+    template:
+      '📋 [DRILLING SHIFT DISPATCH]\nShift: Day\nStatus: All Clear\nHoles Drilled: 48\nTotal Depth: 480m\nFleet: 4 Drills Active\nNotes: Bench 3 drilling completed ahead of schedule.',
+  },
+  {
+    id: 'haulage',
+    title: 'Haulage Production',
+    icon: '🚛',
+    template:
+      '📋 [HAULAGE DISPATCH]\nShift: Day\nStatus: All Clear\nHaul Cycles: 84\nPayload: 3,420 Tons\nFleet: 6 Haulers Active\nNotes: Haul Road 2 dust suppression in progress.',
+  },
+  {
+    id: 'engineering',
+    title: 'Breakdown Alert',
+    icon: '🔧',
+    template:
+      '⚠️ [ENGINEERING BREAKDOWN]\nAsset: EX-02 Hydraulic Excavator\nLocation: Bench 4 North\nStatus: Inactive / Hydraulic hose rupture\nETR: 45 mins\nAssigned: Field Fitters Team B',
+  },
+  {
+    id: 'muster',
+    title: 'Muster Call',
+    icon: '🚨',
+    template:
+      '🚨 [EMERGENCY MUSTER ALERT]\nEvent: Pit Wall Sensor Warning\nZone: Sector 4\nMuster Point: Station Bravo\nAction: Immediate evacuation and roll-call.',
+  },
+];
+
 export const INITIAL_MESSAGES: MessageItem[] = [
   {
     id: 'm-1',

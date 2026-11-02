@@ -1,5 +1,14 @@
 # Contract Package Agent Tracer
 
+## 2026-11-02T13:28:00+02:00: Standardized WhatsApp Shift & Emergency Muster Dispatch Contracts
+
+- **Purpose**: Provide canonical Zod contracts (`whatsappShiftDispatchSchema`, `whatsappMusterAlertSchema`, `whatsappDispatchResponseSchema`) and derived types matching migration 188's `whatsapp-shift-dispatch` action bridge and MCP tools.
+- **Changes**:
+  - `packages/contract/src/schemas/whatsapp.schema.ts`: Defined schemas for shift summaries, emergency muster alerts, and delivery confirmations.
+  - `packages/contract/src/schemas/whatsapp.schema.test.ts`: Added unit tests verifying valid and invalid payloads.
+  - `packages/contract/src/index.ts`: Exported schemas and types.
+- **Verification**: `pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, and `pnpm agent:verify` ✅.
+
 ## 2026-10-27T18:45:00+02:00: Integrations Marketplace — `lsp` Connector Kind, 4-Pillar Rules & Health/Circuit-Breaker Controls
 
 - **Purpose**: Extend `integrationKindSchema` with `'lsp'` (Language Server Protocol), add `reset_circuit_breaker` and `ping_health` flags to `updateInstallationSchema`, and export `integrationRulesSchema` / `integrationConfigSchema` via `packages/contract/src/index.ts`.

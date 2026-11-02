@@ -1,3 +1,13 @@
+## 2026-11-02T13:28:00+02:00: Taskbar WhatsApp Split View UX Polish & Operational Templates
+
+- **Phase 1 (Comprehension)**: Enhance `SplitWindowWhatsAppView.tsx` with instant 1-click WhatsApp Web launch links (`https://web.whatsapp.com/send?text=...`) and pre-configured operational shift templates (Drilling, Haulage, Breakdown Alert, Emergency Muster).
+- **Phase 2 (Evidence)**: Browsers enforce `X-Frame-Options: DENY` on `web.whatsapp.com` when embedded in an iframe; adding deep-link dispatch and templated quick chips provides immediate workflow utility without requiring server-side Puppeteer daemons.
+- **Phase 3 (Design)**:
+  - Added `SHIFT_DISPATCH_TEMPLATES` in `split-window-data.tsx`.
+  - Added template quick-picker buttons and direct WhatsApp Web dispatch button (`ExternalLink`) to `SplitWindowWhatsAppView.tsx`.
+- **Phase 4 (Criticism)**: Type-checked portal (`tsc --noEmit`) and ran Biome checks.
+- **Phase 5 (Contract)**: Modified `SplitWindowWhatsAppView.tsx` and `split-window-data.tsx`.
+
 ## 2026-11-02T10:05:00+02:00: Office Department Workspace, GenOffice Online Suite, Inshellisense & Trail-Code Integration
 
 - **Phase 1 (Comprehension)**: Register and integrate the `Office` department (`/office`, `/office/panels`, `/office/documents`) across Hub executive modules (`12 / 12`), proxy route gating (`DEPARTMENT_ROUTES` + `PRODUCTION_FALLBACK_SLUGS`), and department dashboards, backed by authenticated Server Actions with audit logging and dual-tier cache invalidation.

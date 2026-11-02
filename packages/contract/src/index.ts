@@ -245,6 +245,7 @@ export type {
   OfflineSmrMutation,
 } from './schemas/offline-mutations.schema';
 export * from './schemas/search.schema';
+export * from './schemas/whatsapp.schema';
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from './types/access-card.types';
 export type {
   AdminDataDeleteInput,
