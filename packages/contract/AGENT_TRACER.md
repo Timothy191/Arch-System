@@ -1,5 +1,16 @@
 # Contract Package Agent Tracer
 
+## 2026-11-02T14:20:00+02:00: Accessible Combobox & Operational Domain Event Schemas
+
+- **Purpose**: Provide canonical Zod contracts (`comboboxOptionSchema`, `comboboxQuerySchema`, `comboboxFilterResultSchema`) and Operational Domain Event contracts (`domainEventSchema`, `shiftStartedEventPayloadSchema`, `breakdownReportedEventPayloadSchema`, `musterInitiatedEventPayloadSchema`, `shiftSignedEventPayloadSchema`) for accessible UI controls and decoupled event dispatch.
+- **Changes**:
+  - `packages/contract/src/schemas/combobox.schema.ts`: Defined schemas for combobox options, queries, and paginated filter results.
+  - `packages/contract/src/schemas/combobox.schema.test.ts`: Added unit tests verifying validation and defaults.
+  - `packages/contract/src/schemas/domain-events.schema.ts`: Defined schemas for operational domain events and payloads.
+  - `packages/contract/src/schemas/domain-events.schema.test.ts`: Added unit tests for domain event structures.
+  - `packages/contract/src/index.ts`: Exported schemas and types.
+- **Verification**: `pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, and `pnpm agent:verify` ✅.
+
 ## 2026-11-02T14:08:00+02:00: CQRS Operation Result & Enterprise Audit Log Schemas
 
 - **Purpose**: Implement canonical Result envelope schemas (`createOperationResultSchema`, `createPaginatedResultSchema`) and Enterprise Audit Log schemas (`auditLogEntrySchema`, `createAuditLogEntrySchema`) derived from Clean Architecture and ASP.NET Boilerplate / OWASP WSTG standards.

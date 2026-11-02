@@ -192,11 +192,13 @@ export * from './codemod';
 export * from './control-room';
 export * from './schemas/_registry';
 export * from './schemas/audit-log.schema';
+export * from './schemas/combobox.schema';
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,
 } from './schemas/compliance-audit.schema';
 export type { HealthCheckResponse, ShiftCloseoutInput } from './schemas/control-room.schema';
+export * from './schemas/domain-events.schema';
 export type { DrillOperationInput, DrillTelemetryIngestInput } from './schemas/drill.schema';
 export type {
   DepartmentAccessLevel,
