@@ -397,7 +397,7 @@ export function EngineeringNotesForm({
                   }
                   className={`flex-1 rounded-lg px-3 py-2 font-medium text-sm transition-colors ${
                     formData.shiftType === shift
-                      ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
+                      ? 'bg-[var(--accent-blue)] text-white'
                       : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   }`}
                 >
@@ -473,7 +473,7 @@ export function EngineeringNotesForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
+              className="rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-white transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
             >
               {isSubmitting ? 'Saving...' : 'Log Issue'}
             </button>

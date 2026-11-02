@@ -157,7 +157,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 
           {/* Issue Type */}
           <span
-            className="rounded px-2 py-1 font-medium text-[var(--bg-secondary)] text-xs"
+            className="rounded px-2 py-1 font-medium text-white text-xs"
             style={{ backgroundColor: issueColor }}
           >
             {formatIssueTypeLabel(note.issue_type)}
