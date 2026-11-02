@@ -4,6 +4,25 @@ Every line in this file answers the question: "Would an agent miss this without 
 
 ---
 
+## 2026-11-02T14:30:00+02:00: Deterministic Feature Flag & Rollout Evaluation Utility
+
+### Purpose
+
+Provide a zero-dependency, deterministic targeting and percentage-rollout evaluator (`feature-flags.ts`) supporting department, site, role, employee, and shift-type rules with SHA-256 bucketing.
+
+### Changes Made
+
+1. **`src/feature-flags.ts`**:
+   - Implemented deterministic bucketing (`calculatePercentageBucket`).
+   - Implemented rule targeting evaluation (`evaluateTargetingRule`).
+   - Implemented full flag evaluation (`evaluateFeatureFlag`) with fallback to default values.
+2. **`src/feature-flags.test.ts`**:
+   - Added unit test suite covering equality, membership, percentage rollout, and disabled flag semantics.
+3. **`package.json` & `src/index.ts`**:
+   - Exported `./feature-flags` and types.
+
+---
+
 ## 2026-11-02T13:28:00+02:00: Tamper-Evident SHA-256 Audit Chaining Utility
 
 ### Purpose

@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './crypto-audit';
+export * from './feature-flags';
 export * from './fetch-client';
 export * from './fulcra';
 export * from './hardware/raw-socket';
