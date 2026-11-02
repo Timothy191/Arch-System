@@ -71,18 +71,14 @@ browser → proxy.ts (Next 16, CSP + x-nonce)
 
 ## Key Directories
 
-| Path               | Purpose                                                                                                                                                              |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal/`     | Next.js 16 app: `app/` routes, `components/`, `server/` (proxy), `lib/` (`server-cache.ts`), `hooks/`, `actions/`, `features/`                                       |
-| `apps/portal/app/` | App Router routes: `(auth)`, `(departments)/[department]`, `admin`, `hub`, `overview`, `docs`, `api/` (integrations, cron, telemetry, health, export)                |
-| `packages/`        | Shared `@repo/*` libraries; SQL migrations in `packages/database/migrations/` (`packages/supabase/migrations` symlinks to it)                                        |
-| `libs/features/`   | Domain features: `auth`, `departments`, `hub` (each: `ui/`, `data-access/`, `utils/`)                                                                                |
-| `libs/shared/`     | Cross-cutting: `hooks/`, `data-access/`, `utils/`                                                                                                                    |
-| `tools/`           | Build-time: `repo/` (policy compiler, codebase maps), `audits/` (30+ static audit scripts), `scripts/` (30+ helpers), `zero-drift-watchdog/`, `swarms-orchestrator/` |
-| `scripts/`         | Dev/deploy/seed utilities (`dev.sh`, `deploy.sh`, `seeds/`)                                                                                                          |
-| `e2e/`             | Playwright specs (40+): control-room, visual, load, accessibility                                                                                                    |
-| `docs/`            | Hand-authored docs: `agent-cookbooks/`, `control-room/`, `operations/`, `plans/`, `agents/`, `wiki/`                                                                 |
-| `documentation/`   | Generated audit reports; `codebase-maps/` holds auto-generated dependency maps                                                                                       |
+- `apps/portal/`: Next.js 16 App Router app (`app/`, `components/`, `server/`, `lib/`, `hooks/`, `features/`).
+- `packages/`: Shared `@repo/*` packages (`theme`, `ui`, `contract`, `supabase`, `database`, `redis`, `errors`, `logger`, `rate-limiter`, `agents`).
+- `libs/features/`: Domain features: `auth`, `departments`, `hub` (each with `ui/`, `data-access/`, `utils/`).
+- `libs/shared/`: Cross-cutting: `hooks/`, `data-access/`, `utils/`.
+- `tools/`: Build-time policy compiler, audits, helpers, zero-drift watchdog.
+- `scripts/`: Dev/deploy/seed utilities (`dev.sh`, `deploy.sh`, `seeds/`).
+- `e2e/`: Playwright E2E specs (control-room, visual, load, accessibility).
+- `docs/`: Engineering docs, playbooks, operations, wiki.
 
 ---
 
@@ -233,23 +229,23 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Important Files
 
-| File                                       | Role                                                                                                |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` / `Arch-System/AGENTS.md`      | Root federated guide / canonical Arch-System guide (`CLAUDE.md` symlinks to each)                   |
-| `apps/portal/proxy.ts` → `server/proxy.ts` | Next 16 request proxy (CSP + nonce) → auth refresh, RBAC, `DEPARTMENT_ROUTES` / `RESTRICTED_ROUTES` |
-| `apps/portal/app/layout.tsx`               | Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`)  |
-| `apps/portal/lib/server-cache.ts`          | Server cache profiles, scoped tags, dual-tier Next + Redis L1/L2 invalidation                       |
-| `apps/portal/next.config.mjs`              | `cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`, React 19 taint     |
-| `apps/portal/setupTests.ts`                | Global Jest mocks (`next/cache`, `@repo/redis`, `packages/redis`, `@repo/agents`, browser globals)  |
-| `packages/contract/src/index.ts`           | Canonical Zod schema + type exports (`src/schemas/*.schema.ts`)                                     |
-| `packages/database/migrations/`            | Canonical SQL migrations (`NNN_description.sql`)                                                    |
-| `packages/errors/src/index.ts`             | `AppError` hierarchy and type guards                                                                |
-| `packages/theme/src/tokens/index.ts`       | OKLCH design-token SSoT                                                                             |
-| `packages/ui/src/components/GlassCard.tsx` | Primary light-mode glass surface component                                                          |
-| `packages/typescript-config/base.json`     | Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`)                                   |
-| `tools/repo/policy-compiler.cjs`           | Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`)                                  |
-| `tools/scripts/agent-verify.sh`            | 15-step completion gate (`pnpm agent:verify`)                                                       |
-| `e2e/playwright.config.ts`                 | Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`)                       |
+| File                                       | Role                                                                                               |
+| :----------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` / `Arch-System/AGENTS.md`      | Canonical guide (`CLAUDE.md` symlinks to it)                                                       |
+| `apps/portal/proxy.ts` → `server/proxy.ts` | Next 16 request proxy (CSP + nonce) → auth, RBAC, route rules                                      |
+| `apps/portal/app/layout.tsx`               | Root layout (`ArchThemeProvider` → `ClientProviders` → `ReactQueryProvider` → `AnimationProvider`) |
+| `apps/portal/lib/server-cache.ts`          | Server cache profiles, scoped tags, dual-tier invalidation                                         |
+| `apps/portal/next.config.mjs`              | `cacheComponents: true`, `turbopack.root`, `outputFileTracingRoot`, `cacheLife`                    |
+| `apps/portal/setupTests.ts`                | Global Jest mocks (`next/cache`, `@repo/redis`, browser globals)                                   |
+| `packages/contract/src/index.ts`           | Canonical Zod schema + type exports (`src/schemas/*.schema.ts`)                                    |
+| `packages/database/migrations/`            | Canonical SQL migrations (`NNN_description.sql`)                                                   |
+| `packages/errors/src/index.ts`             | `AppError` hierarchy and type guards                                                               |
+| `packages/theme/src/tokens/index.ts`       | OKLCH design-token SSoT                                                                            |
+| `packages/ui/src/components/GlassCard.tsx` | Primary light-mode glass surface component                                                         |
+| `packages/typescript-config/base.json`     | Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`)                                  |
+| `tools/repo/policy-compiler.cjs`           | Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`)                                 |
+| `tools/scripts/agent-verify.sh`            | 27-step completion gate (`pnpm agent:verify`)                                                      |
+| `e2e/playwright.config.ts`                 | Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`)                      |
 
 ---
 
