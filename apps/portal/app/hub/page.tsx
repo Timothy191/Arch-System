@@ -20,7 +20,7 @@ import {
   getEmployeeRole,
 } from '@/lib/hub-departments';
 import { getPluginWidgets } from '@/lib/plugins/consumers';
-import { cachedRSC, cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
+import { cachedRSC } from '@/lib/server-cache';
 
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
@@ -35,18 +35,6 @@ async function getDashboardCounts(
   return cachedRSC(
     ['hub', 'counts', today],
     async () => {
-      'use cache';
-
-      const countsTag = tagDepartment('hub', 'counts');
-
-      // Set cache lifetime profile for real-time dashboard counts
-      cacheLife('telemetry');
-
-      // Associate cache tags for on-demand revalidation
-      cacheTag(countsTag);
-      cacheTag('table:breakdowns');
-      cacheTag('table:machines');
-
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
@@ -89,21 +77,6 @@ async function getLiveDepartmentMetrics(
   return cachedRSC(
     ['hub', 'live-department-metrics', today],
     async () => {
-      'use cache';
-
-      const liveMetricsTag = tagDepartment('hub', 'live-department-metrics');
-
-      // Set cache lifetime profile for live department metrics
-      cacheLife('minutes');
-
-      // Associate cache tags for on-demand revalidation
-      cacheTag(liveMetricsTag);
-      cacheTag('table:hourly_loads');
-      cacheTag('table:daily_logs');
-      cacheTag('table:production_logs');
-      cacheTag('table:breakdowns');
-      cacheTag('table:machines');
-
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
