@@ -6,6 +6,14 @@ import { Fragment, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import type { MachineOperationLogItem, PdfSiteGroup } from './reports-types';
+import {
+  buildDetailedMachineRow,
+  buildSiteDrillingReports,
+  calculateSiteShiftSummary,
+  type DetailedMachineGroup,
+  groupMachinesByType,
+  type SiteDrillReportData,
+} from './shift-report-drilling';
 
 export type { PdfSiteGroup } from './reports-types';
 
@@ -200,6 +208,14 @@ export function ShiftPdfReportTab({
       ? `${fromDateStr} to ${toDateStr}`
       : `${selectedDate} (Single Shift Date)`;
 
+  const siteDrillReports = useMemo(() => {
+    const siteNames = activeSiteGroups.map((g) => g.site);
+    return buildSiteDrillingReports({
+      siteNames,
+      machineLogs: allMachines,
+    });
+  }, [activeSiteGroups, allMachines]);
+
   const handleDownloadShiftPdf = async () => {
     setDownloadingPdf(true);
     try {
@@ -279,8 +295,8 @@ export function ShiftPdfReportTab({
           return headerRow + itemRows;
         };
 
-        return `<div style="margin-bottom:20px;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;">
-          <div style="background:#0f172a;color:#ffffff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+        return `<div style="margin-bottom:20px;border:2px solid #d4af37;border-radius:8px;overflow:hidden;">
+          <div style="background:#0f172a;color:#ffffff;padding:10px 14px;border-bottom:2px solid #d4af37;display:flex;justify-content:space-between;align-items:center;">
             <div>
               <strong style="font-size:13px;letter-spacing:0.04em;">SITE: ${escapeHtml(g.site)}</strong>
               <span style="margin-left:10px;font-size:10px;color:#cbd5e1;">${g.excavators.length} Excavators · ${g.rollovers.length} Roll Over · ${g.siteMachines.length} Machines Worked on Site</span>
@@ -311,6 +327,61 @@ export function ShiftPdfReportTab({
       })
       .join('');
 
+    const drillSectionsHtml = siteDrillReports
+      .map((sd) => {
+        const drillRows = sd.drills
+          .map(
+            (d) => `<tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-weight:600;">${escapeHtml(d.machineId)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;">${escapeHtml(d.startSmr)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;">${escapeHtml(d.stopSmr)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;font-weight:700;color:#16a34a;">${escapeHtml(d.totalSmr)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;">${escapeHtml(d.operator)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;">${escapeHtml(d.productionDelays)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;color:#d97706;">${escapeHtml(d.engineeringDelays)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;color:#9333ea;">${escapeHtml(d.nonSiteRelated)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;font-weight:700;color:#2563eb;">${d.holes}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:monospace;text-align:right;font-weight:700;color:#16a34a;">${escapeHtml(d.meters)}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:10px;">${escapeHtml(d.comment)}</td>
+          </tr>`
+          )
+          .join('');
+
+        return `<div style="page-break-before:always;margin-top:24px;border:2px solid #d4af37;border-radius:8px;overflow:hidden;">
+          <div style="background:#0f172a;color:#ffffff;padding:10px 14px;border-bottom:2px solid #d4af37;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong style="font-size:13px;letter-spacing:0.04em;color:#d4af37;">DRILLING REPORT — ${escapeHtml(sd.siteName)}</strong>
+              <div style="margin-top:4px;font-size:11px;color:#cbd5e1;">Block Mined: <strong style="color:#ffffff;">${escapeHtml(sd.blockMined)}</strong> · Material: <strong style="color:#60a5fa;">${escapeHtml(sd.material)}</strong></div>
+            </div>
+            <div style="font-size:11px;font-family:monospace;text-align:right;">
+              <div>Holes: <strong>${sd.totals.totalHoles}</strong> · Depth: <strong>${escapeHtml(sd.totals.totalMeters)}</strong></div>
+              <div style="color:#94a3b8;">Worked: ${escapeHtml(sd.totals.totalWorkedHours)}</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:10px;">
+            <thead>
+              <tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;text-align:left;">
+                <th style="padding:6px 8px;">Machine ID</th>
+                <th style="padding:6px 8px;text-align:right;">Start SMR</th>
+                <th style="padding:6px 8px;text-align:right;">Stop SMR</th>
+                <th style="padding:6px 8px;text-align:right;">Total SMR</th>
+                <th style="padding:6px 8px;">Operator</th>
+                <th style="padding:6px 8px;text-align:right;">Production Delays</th>
+                <th style="padding:6px 8px;text-align:right;">Engineering Delays</th>
+                <th style="padding:6px 8px;text-align:right;">Non Site related</th>
+                <th style="padding:6px 8px;text-align:right;">Holes</th>
+                <th style="padding:6px 8px;text-align:right;">Meters</th>
+                <th style="padding:6px 8px;">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${drillRows}
+            </tbody>
+          </table>
+        </div>`;
+      })
+      .join('');
+
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -326,7 +397,7 @@ export function ShiftPdfReportTab({
     <div>
       <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.08em;">Plantcor Mining Operations · Shift Report PDF</div>
       <h1 style="margin:4px 0 2px;font-size:20px;">${escapeHtml(departmentName)} — Site-Grouped Shift Report</h1>
-      <div style="font-size:11px;color:#475569;">Period: ${escapeHtml(periodLabel)} · Grouping: Site → 1. Excavators → 2. Roll Over → 3. Machines Worked on Site</div>
+      <div style="font-size:11px;color:#475569;">Period: ${escapeHtml(periodLabel)} · Grouping: Site → 1. Excavators → 2. Machines Grouped by Type → 3. Drilling Report</div>
     </div>
     <div style="text-align:right;font-size:11px;font-family:monospace;">
       <div>Generated: ${escapeHtml(todayStr)}</div>
@@ -334,9 +405,10 @@ export function ShiftPdfReportTab({
     </div>
   </div>
   ${siteSectionsHtml || '<p style="padding:24px;text-align:center;color:#64748b;">No shift machine operations recorded for the selected filters.</p>'}
+  ${drillSectionsHtml}
 </body>
 </html>`;
-  }, [activeSiteGroups, departmentName, periodLabel, todayStr, currentShift]);
+  }, [activeSiteGroups, siteDrillReports, departmentName, periodLabel, todayStr, currentShift]);
 
   return (
     <div className="space-y-6" data-testid="shift-pdf-report-preview">
@@ -448,11 +520,11 @@ export function ShiftPdfReportTab({
       )}
 
       {/* A4 Printable Shift Report PDF Document Sheet */}
-      <div className="print-document overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm">
-        {/* PDF Document Header Banner */}
-        <div className="flex flex-col justify-between gap-4 border-[var(--border-default)] border-b-2 bg-[var(--bg-tertiary)]/50 px-6 py-5 md:flex-row md:items-end">
+      <div className="print-document overflow-hidden rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] shadow-[0_4px_25px_-5px_rgba(212,175,55,0.25)]">
+        {/* PDF Document Header Banner with Gold Accent Separator */}
+        <div className="flex flex-col justify-between gap-4 border-[#d4af37] border-b-2 bg-[var(--bg-tertiary)]/50 px-6 py-5 md:flex-row md:items-end">
           <div className="space-y-1">
-            <p className="font-bold text-[11px] text-[var(--accent-blue)] uppercase tracking-widest">
+            <p className="font-bold text-[#d4af37] text-[11px] uppercase tracking-widest">
               Plantcor Mining Operations · Official Shift Report PDF
             </p>
             <h3 className="font-bold text-[var(--text-heading)] text-xl">
@@ -464,27 +536,27 @@ export function ShiftPdfReportTab({
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 text-right sm:grid-cols-5">
-            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5">
+            <div className="rounded-lg border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 shadow-2xs">
               <p className="text-[10px] text-[var(--text-muted)] uppercase">Total Worked</p>
               <p className="font-bold font-mono text-accent-green text-xs">
                 {pdfDelayTotals.totalHours.toFixed(2)}h
               </p>
             </div>
-            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5">
+            <div className="rounded-lg border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 shadow-2xs">
               <p className="text-[10px] text-[var(--text-muted)] uppercase">Prod Delay</p>
               <p className="font-bold font-mono text-[var(--text-heading)] text-xs">
                 {pdfDelayTotals.prod}m
               </p>
             </div>
-            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5">
+            <div className="rounded-lg border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 shadow-2xs">
               <p className="text-[10px] text-[var(--text-muted)] uppercase">Eng Delay</p>
               <p className="font-bold font-mono text-amber-600 text-xs">{pdfDelayTotals.eng}m</p>
             </div>
-            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5">
+            <div className="rounded-lg border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 shadow-2xs">
               <p className="text-[10px] text-[var(--text-muted)] uppercase">Natural Delay</p>
               <p className="font-bold font-mono text-sky-600 text-xs">{pdfDelayTotals.nat}m</p>
             </div>
-            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5">
+            <div className="rounded-lg border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 shadow-2xs">
               <p className="text-[10px] text-[var(--text-muted)] uppercase">Non-Site Delay</p>
               <p className="font-bold font-mono text-purple-600 text-xs">
                 {pdfDelayTotals.nonSite}m
@@ -496,88 +568,25 @@ export function ShiftPdfReportTab({
         {/* Site-Grouped Shift Tables */}
         <div className="space-y-8 p-6">
           {activeSiteGroups.map((siteGroup) => {
-            const renderRoleSection = (
-              sectionKey: string,
-              sectionTitle: string,
-              roleBadgeLabel: string,
-              items: MachineOperationLogItem[],
-              headerClassName: string,
-              badgeClassName: string
-            ) => {
-              if (items.length === 0) return null;
-              return (
-                <Fragment key={sectionKey}>
-                  <tr className={headerClassName}>
-                    <td
-                      colSpan={9}
-                      className="px-4 py-2 font-bold text-xs uppercase tracking-wider"
-                    >
-                      {sectionTitle} ({items.length})
-                    </td>
-                  </tr>
-                  {items.map((op) => {
-                    const hoursStartStop =
-                      op.startSmu != null && op.endSmu != null
-                        ? `${op.startSmu.toFixed(1)} - ${op.endSmu.toFixed(1)}`
-                        : op.startSmu != null
-                          ? `${op.startSmu.toFixed(1)} - Active`
-                          : '—';
-                    return (
-                      <tr
-                        key={`pdf-${siteGroup.site}-${op.id}`}
-                        className="border-[var(--border-default)] border-b transition-colors hover:bg-[var(--bg-tertiary)]/50"
-                      >
-                        <td className="px-4 py-2.5">
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-[var(--text-heading)] text-xs">
-                                {op.machineName}
-                              </span>
-                              <span
-                                className={`rounded px-1.5 py-0.5 font-semibold text-[10px] ${badgeClassName}`}
-                              >
-                                {roleBadgeLabel}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-[var(--text-secondary)] text-xs">
-                          {hoursStartStop}
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-bold font-mono text-accent-green text-xs">
-                          {op.hoursWorked.toFixed(2)}h
-                        </td>
-                        <td className="px-4 py-2.5 text-[var(--text-heading)] text-xs">
-                          {op.operatorName}
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-[var(--text-secondary)] text-xs">
-                          {op.productionDelayMinutes ?? 0}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-amber-600 text-xs">
-                          {op.engineeringDelayMinutes ?? 0}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-sky-600 text-xs">
-                          {op.naturalDelayMinutes ?? 0}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-purple-600 text-xs">
-                          {op.nonSiteDelayMinutes ?? 0}m
-                        </td>
-                        <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
-                          {op.excavatorActivity || '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </Fragment>
-              );
-            };
+            const nonExcavatorMachines = siteGroup.orderedMachines.filter(
+              (m) => m.siteGroupRole !== 'excavator'
+            );
+            const machineTypeGroups = groupMachinesByType(nonExcavatorMachines);
+            const siteSummary = calculateSiteShiftSummary({
+              totalHours: siteGroup.totalHours,
+              prodMin: siteGroup.productionDelayMin,
+              engMin: siteGroup.engineeringDelayMin,
+              natMin: siteGroup.naturalDelayMin,
+              nonSiteMin: siteGroup.nonSiteDelayMin,
+            });
 
             return (
               <div
                 key={`pdf-site-${siteGroup.site}`}
                 className="avoid-break overflow-hidden rounded-xl border border-[var(--border-default)]"
               >
-                <div className="flex flex-col justify-between gap-2 border-[var(--border-default)] border-b bg-[var(--bg-tertiary)] px-5 py-3.5 sm:flex-row sm:items-center">
+                {/* Site Header Banner with Gold Separator */}
+                <div className="flex flex-col justify-between gap-2 border-[#d4af37] border-b-2 bg-[var(--bg-tertiary)] px-5 py-3.5 sm:flex-row sm:items-center">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--accent-blue)] px-2.5 py-1 font-bold text-[var(--bg-secondary)] text-xs uppercase tracking-wider">
                       <Layers className="h-3.5 w-3.5" />
@@ -597,7 +606,7 @@ export function ShiftPdfReportTab({
                   </div>
                 </div>
 
-                {/* Site Machines Table */}
+                {/* 1. Excavator Activity Table */}
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left">
                     <thead>
@@ -632,61 +641,269 @@ export function ShiftPdfReportTab({
                       </tr>
                     </thead>
                     <tbody>
-                      {renderRoleSection(
-                        'excavator',
-                        '1. Excavators First — Excavator Activity',
-                        'Excavator',
-                        siteGroup.excavators,
-                        'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border-b border-[var(--border-default)]',
-                        'bg-[var(--accent-blue)]/15 text-[var(--accent-blue)]'
-                      )}
-                      {renderRoleSection(
-                        'rollover',
-                        '2. Roll Over — Dozer Operations (Hours × 250 BCM)',
-                        'Roll Over',
-                        siteGroup.rollovers,
-                        'bg-amber-500/10 text-amber-700 border-b border-[var(--border-default)]',
-                        'bg-amber-500/15 text-amber-700'
-                      )}
-                      {renderRoleSection(
-                        'site_machine',
-                        '3. Machines Worked on Site',
-                        'Site Machine',
-                        siteGroup.siteMachines,
-                        'bg-emerald-500/10 text-emerald-700 border-b border-[var(--border-default)]',
-                        'bg-emerald-500/15 text-emerald-700'
-                      )}
-                      <tr className="bg-[var(--bg-tertiary)]/70 font-semibold text-xs">
-                        <td className="px-4 py-2.5 text-[var(--text-heading)]">
-                          {siteGroup.site} Subtotal ({siteGroup.orderedMachines.length} machines)
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-[var(--text-muted)]">
-                          —
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-bold font-mono text-accent-green">
-                          {siteGroup.totalHours.toFixed(2)}h
-                        </td>
-                        <td className="px-4 py-2.5 text-[var(--text-muted)]">—</td>
-                        <td className="px-4 py-2.5 text-right font-mono text-[var(--text-heading)]">
-                          {siteGroup.productionDelayMin}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-amber-600">
-                          {siteGroup.engineeringDelayMin}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-sky-600">
-                          {siteGroup.naturalDelayMin}m
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-purple-600">
-                          {siteGroup.nonSiteDelayMin}m
-                        </td>
-                        <td className="px-4 py-2.5 font-mono text-[var(--accent-blue)]">
-                          Excavator: {Number(siteGroup.excavatorBcm.toFixed(1)).toLocaleString()}{' '}
-                          BCM · Roll-over:{' '}
-                          {Number(siteGroup.rolloverBcm.toFixed(1)).toLocaleString()} BCM
+                      <tr className="border-[var(--border-default)] border-b bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
+                        <td
+                          colSpan={9}
+                          className="px-4 py-2 font-bold text-xs uppercase tracking-wider"
+                        >
+                          1. Excavators First — Excavator Activity ({siteGroup.excavators.length})
                         </td>
                       </tr>
+                      {siteGroup.excavators.map((op) => {
+                        const hoursStartStop =
+                          op.startSmu != null && op.endSmu != null
+                            ? `${op.startSmu.toFixed(1)} - ${op.endSmu.toFixed(1)}`
+                            : op.startSmu != null
+                              ? `${op.startSmu.toFixed(1)} - Active`
+                              : '—';
+                        return (
+                          <tr
+                            key={`pdf-${siteGroup.site}-${op.id}`}
+                            className="border-[var(--border-default)] border-b transition-colors hover:bg-[var(--bg-tertiary)]/50"
+                          >
+                            <td className="px-4 py-2.5">
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-bold text-[var(--text-heading)] text-xs">
+                                    {op.machineName}
+                                  </span>
+                                  <span className="rounded bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
+                                    Excavator
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-[var(--text-secondary)] text-xs">
+                              {hoursStartStop}
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-2.5 text-right font-bold font-mono text-accent-green text-xs">
+                              {op.hoursWorked.toFixed(2)}h
+                            </td>
+                            <td className="px-4 py-2.5 text-[var(--text-heading)] text-xs">
+                              {op.operatorName}
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-mono text-[var(--text-secondary)] text-xs">
+                              {op.productionDelayMinutes ?? 0}m
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-mono text-amber-600 text-xs">
+                              {op.engineeringDelayMinutes ?? 0}m
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-mono text-sky-600 text-xs">
+                              {op.naturalDelayMinutes ?? 0}m
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-mono text-purple-600 text-xs">
+                              {op.nonSiteDelayMinutes ?? 0}m
+                            </td>
+                            <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
+                              {op.excavatorActivity || '—'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {siteGroup.excavators.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={9}
+                            className="px-4 py-3 text-center text-[var(--text-muted)] text-xs"
+                          >
+                            No active excavators for this site in the selected shift window.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
+                </div>
+
+                {/* 2+. Machines Grouped by Type */}
+                <div className="space-y-4 border-[var(--border-default)] border-t bg-[var(--bg-secondary)] p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+                      2. Site Fleet Equipment Grouped by Machine Type
+                    </span>
+                    <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                      {nonExcavatorMachines.length} Support &amp; Hauling Units
+                    </span>
+                  </div>
+
+                  {machineTypeGroups.map((group) => (
+                    <div
+                      key={`group-${siteGroup.site}-${group.groupKey}`}
+                      className="overflow-hidden rounded-lg border border-[var(--border-default)]"
+                    >
+                      <div
+                        className="flex flex-col justify-between gap-1 border-[var(--border-default)] border-b px-4 py-2 sm:flex-row sm:items-center"
+                        style={{ backgroundColor: group.badgeBg }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: group.badgeColor }}
+                          />
+                          <h5
+                            className="font-bold text-xs uppercase tracking-wider"
+                            style={{ color: group.badgeColor }}
+                          >
+                            {group.groupTitle} ({group.rows.length})
+                          </h5>
+                        </div>
+                        <div className="font-mono text-xs" style={{ color: group.badgeColor }}>
+                          Total Worked: <strong>{group.totalWorkedHours.toFixed(2)}h</strong> ·
+                          Delays:{' '}
+                          <strong>
+                            {group.totalProdDelayMin +
+                              group.totalEngDelayMin +
+                              group.totalNonSiteDelayMin}
+                            m
+                          </strong>
+                        </div>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-left">
+                          <thead>
+                            <tr className="border-[var(--border-default)] border-b bg-[var(--bg-tertiary)]/30 font-bold text-[11px] text-[var(--text-muted)] uppercase">
+                              <th className="px-3.5 py-2">Machine ID</th>
+                              <th className="px-3.5 py-2 text-right">Start SMR</th>
+                              <th className="px-3.5 py-2 text-right">Stop SMR</th>
+                              <th className="px-3.5 py-2 text-right">Total SMR</th>
+                              <th className="px-3.5 py-2" aria-label="Machine Operator">
+                                Operator
+                              </th>
+                              <th className="px-3.5 py-2 text-right">Production Delays</th>
+                              <th className="px-3.5 py-2 text-right">Engineering Delays</th>
+                              <th
+                                className="px-3.5 py-2 text-right"
+                                aria-label="Machine Non-Site Related Delays"
+                              >
+                                Non-Site Related Delays
+                              </th>
+                              <th className="px-3.5 py-2">Comment</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[var(--border-default)] text-xs">
+                            {group.rows.map((row) => (
+                              <tr
+                                key={`row-${siteGroup.site}-${row.machineId}`}
+                                className="transition-colors hover:bg-[var(--bg-tertiary)]/50"
+                              >
+                                <td className="px-3.5 py-2 font-bold text-[var(--text-heading)]">
+                                  <div>{row.machineName}</div>
+                                  <div className="font-normal text-[10px] text-[var(--text-muted)]">
+                                    {row.machineType}
+                                  </div>
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-mono text-[var(--text-secondary)]">
+                                  {row.startSmr}
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-mono text-[var(--text-secondary)]">
+                                  {row.stopSmr}
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-bold font-mono text-accent-green">
+                                  <div>{row.totalSmr}</div>
+                                  <div className="font-mono font-normal text-[10px] text-[var(--text-muted)]">
+                                    {row.hoursStartStop}
+                                  </div>
+                                </td>
+                                <td className="px-3.5 py-2 text-[var(--text-heading)]">
+                                  {row.operator}
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-mono text-[var(--text-secondary)]">
+                                  {row.productionDelays}
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-mono text-amber-600">
+                                  {row.engineeringDelays}
+                                </td>
+                                <td className="px-3.5 py-2 text-right font-mono text-purple-600">
+                                  {row.nonSiteDelays}
+                                </td>
+                                <td className="px-3.5 py-2 text-[11px] text-[var(--text-secondary)]">
+                                  {row.comment}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 3. Site Shift Summary directly under Machines */}
+                <div className="border-[var(--border-default)] border-t bg-[var(--bg-tertiary)]/30 p-4">
+                  <div className="rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] p-4 shadow-2xs">
+                    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-[#d4af37]" />
+                          <h4 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+                            Site Shift Summary — {siteGroup.site}
+                          </h4>
+                        </div>
+                        <p className="text-[11px] text-[var(--text-secondary)]">
+                          Aggregated shift reliability, operating duration, and downtime breakdown
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
+                          <p className="text-[10px] text-[var(--text-muted)] uppercase">
+                            Total Worked
+                          </p>
+                          <p className="font-bold font-mono text-accent-green text-sm">
+                            {siteSummary.totalWorkedHours.toFixed(2)}h
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
+                          <p className="text-[10px] text-[var(--text-muted)] uppercase">
+                            Total Delays
+                          </p>
+                          <p className="font-bold font-mono text-amber-600 text-sm">
+                            {siteSummary.totalDelayMinutes}m
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
+                          <p className="text-[10px] text-[var(--text-muted)] uppercase">
+                            Availability %
+                          </p>
+                          <p className="font-bold font-mono text-[var(--accent-blue)] text-sm">
+                            {siteSummary.availabilityPercent.toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
+                          <p className="text-[10px] text-[var(--text-muted)] uppercase">
+                            Utilization %
+                          </p>
+                          <p className="font-bold font-mono text-emerald-600 text-sm">
+                            {siteSummary.utilizationPercent.toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-t pt-2 text-[11px] text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-4 font-mono text-xs">
+                        <span>
+                          Production:{' '}
+                          <strong className="text-[var(--text-heading)]">
+                            {siteSummary.productionDelayMinutes}m
+                          </strong>
+                        </span>
+                        <span>
+                          Engineering:{' '}
+                          <strong className="text-amber-600">
+                            {siteSummary.engineeringDelayMinutes}m
+                          </strong>
+                        </span>
+                        <span>
+                          Non-Site:{' '}
+                          <strong className="text-purple-600">
+                            {siteSummary.nonSiteDelayMinutes}m
+                          </strong>
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                        Volume: {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM · ISO
+                        9001:2015 Verified
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -698,8 +915,198 @@ export function ShiftPdfReportTab({
             </div>
           )}
 
+          {/* 4. New Page: Drilling Report separated by Site */}
+          <div className="avoid-break page-break-before break-before-page space-y-6 pt-4">
+            <div className="flex items-center justify-between border-[#d4af37] border-b-2 pb-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded bg-[#d4af37] px-2 py-0.5 font-black text-[10px] text-slate-900 uppercase tracking-wider">
+                    Drilling Operations
+                  </span>
+                  <h3 className="font-bold text-[var(--text-heading)] text-lg">
+                    Drilling &amp; Blast Pattern Report (Site-by-Site)
+                  </h3>
+                </div>
+                <p className="text-[var(--text-secondary)] text-xs">
+                  Automated blast hole metrics, penetration rates, and drill fleet availability
+                </p>
+              </div>
+              <div className="text-right font-mono text-[var(--text-muted)] text-xs">
+                <div>Report Window: {periodLabel}</div>
+                <div className="font-bold text-[#d4af37]">GOLD STANDARD VERIFIED</div>
+              </div>
+            </div>
+
+            {siteDrillReports.map((siteDrill) => (
+              <div
+                key={`drill-site-${siteDrill.siteName}`}
+                className="avoid-break overflow-hidden rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] shadow-sm"
+              >
+                {/* Site Header + Gold Separator */}
+                <div className="border-[#d4af37] border-b-2 bg-[var(--bg-tertiary)]/70 px-5 py-3.5">
+                  <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-[#d4af37] px-2.5 py-1 font-bold text-slate-900 text-xs uppercase tracking-wider">
+                        Drilling Section — {siteDrill.siteName}
+                      </span>
+                      <span className="font-medium text-[var(--text-heading)] text-xs">
+                        Assigned Drills: <strong>{siteDrill.drills.length} Units Active</strong>
+                      </span>
+                    </div>
+                    <div className="font-mono text-xs">
+                      <span className="text-[var(--text-muted)]">Site Total Holes: </span>
+                      <strong className="text-[var(--accent-blue)]">
+                        {siteDrill.totals.totalHoles}
+                      </strong>
+                      <span className="mx-2 text-[var(--text-muted)]">·</span>
+                      <span className="text-[var(--text-muted)]">Total Meters: </span>
+                      <strong className="text-emerald-600">{siteDrill.totals.totalMeters}</strong>
+                      <span className="mx-2 text-[var(--text-muted)]">·</span>
+                      <span className="text-[var(--text-muted)]">Worked: </span>
+                      <strong className="text-[var(--text-heading)]">
+                        {siteDrill.totals.totalWorkedHours}
+                      </strong>
+                    </div>
+                  </div>
+
+                  {/* Block Mined & Material Subheader directly underneath */}
+                  <div className="mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 text-xs">
+                    <div>
+                      <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                        Block Mined:{' '}
+                      </span>
+                      <strong className="font-mono text-[var(--text-heading)]">
+                        {siteDrill.blockMined}
+                      </strong>
+                    </div>
+                    <div className="text-[var(--border-default)]">|</div>
+                    <div>
+                      <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                        Material:{' '}
+                      </span>
+                      <strong className="text-[var(--accent-blue)]">{siteDrill.material}</strong>
+                    </div>
+                    <div className="text-[var(--border-default)]">|</div>
+                    <div>
+                      <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                        Bench Target:{' '}
+                      </span>
+                      <span className="font-mono text-[var(--text-secondary)]">
+                        10m Sub-Drill Depth
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 11-Column Drill Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-[var(--border-default)] border-b bg-[var(--bg-secondary)] font-bold text-[11px] text-[var(--text-muted)] uppercase">
+                        <th className="px-3.5 py-2.5">Machine ID</th>
+                        <th className="px-3.5 py-2.5 text-right">Start SMR</th>
+                        <th className="px-3.5 py-2.5 text-right">Stop SMR</th>
+                        <th className="px-3.5 py-2.5 text-right">Total SMR</th>
+                        <th className="px-3.5 py-2.5" aria-label="Drill Operator">
+                          Operator
+                        </th>
+                        <th
+                          className="px-3.5 py-2.5 text-right"
+                          aria-label="Drill Production Delays"
+                        >
+                          Production Delays
+                        </th>
+                        <th
+                          className="px-3.5 py-2.5 text-right"
+                          aria-label="Drill Engineering Delays"
+                        >
+                          Engineering Delays
+                        </th>
+                        <th className="px-3.5 py-2.5 text-right">Non Site related</th>
+                        <th className="px-3.5 py-2.5 text-right">Holes</th>
+                        <th className="px-3.5 py-2.5 text-right">Meters</th>
+                        <th className="px-3.5 py-2.5">Comment</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border-default)] text-xs">
+                      {siteDrill.drills.map((drill) => (
+                        <tr
+                          key={drill.machineId}
+                          className="transition-colors hover:bg-[var(--bg-tertiary)]/50"
+                        >
+                          <td className="px-3.5 py-2.5 font-bold text-[var(--text-heading)]">
+                            {drill.machineId}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-mono text-[var(--text-secondary)]">
+                            {drill.startSmr}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-mono text-[var(--text-secondary)]">
+                            {drill.stopSmr}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-bold font-mono text-accent-green">
+                            {drill.totalSmr}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-[var(--text-heading)]">
+                            {drill.operator}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-mono text-[var(--text-secondary)]">
+                            {drill.productionDelays}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-mono text-amber-600">
+                            {drill.engineeringDelays}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-mono text-purple-600">
+                            {drill.nonSiteRelated}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-bold font-mono text-[var(--accent-blue)]">
+                            {drill.holes}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right font-bold font-mono text-emerald-600">
+                            {drill.meters}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-[11px] text-[var(--text-secondary)]">
+                            {drill.comment}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="border-[var(--border-default)] border-t bg-[var(--bg-tertiary)]/70 font-semibold text-xs">
+                        <td className="px-3.5 py-2.5 text-[var(--text-heading)]">
+                          {siteDrill.siteName} Drill Totals
+                        </td>
+                        <td
+                          colSpan={2}
+                          className="px-3.5 py-2.5 text-right font-mono text-[var(--text-muted)]"
+                        >
+                          —
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right font-bold font-mono text-accent-green">
+                          {siteDrill.totals.totalWorkedHours}
+                        </td>
+                        <td
+                          colSpan={4}
+                          className="px-3.5 py-2.5 text-right font-mono text-[var(--text-muted)]"
+                        >
+                          —
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right font-bold font-mono text-[var(--accent-blue)]">
+                          {siteDrill.totals.totalHoles} holes
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right font-bold font-mono text-emerald-600">
+                          {siteDrill.totals.totalMeters}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono text-[10px] text-[var(--text-muted)]">
+                          Pattern Completed
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Official Shift Sign-Off & Verification Block */}
-          <div className="avoid-break grid grid-cols-1 gap-4 border-[var(--border-default)] border-t pt-4 text-[var(--text-secondary)] text-xs md:grid-cols-3">
+          <div className="avoid-break grid grid-cols-1 gap-4 border-[#d4af37] border-t-2 pt-4 text-[var(--text-secondary)] text-xs md:grid-cols-3">
             <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)]/40 p-3">
               <p className="font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                 Control Room Operator Sign-Off
@@ -713,11 +1120,11 @@ export function ShiftPdfReportTab({
                 Shift Supervisor Verification
               </p>
               <p className="mt-4 border-[var(--border-default)] border-t border-dashed pt-2 font-mono text-[11px] text-[var(--text-heading)]">
-                Verified Site Sequence (1 → 2 → 3)
+                Verified Machine &amp; Drilling Operations
               </p>
             </div>
-            <div className="flex flex-col justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)]/40 p-3">
-              <p className="font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+            <div className="flex flex-col justify-between rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 p-3">
+              <p className="font-bold text-[#d4af37] text-[10px] uppercase tracking-wider">
                 Plantcor Document Control
               </p>
               <p className="mt-2 font-mono font-semibold text-[11px] text-[var(--accent-blue)]">

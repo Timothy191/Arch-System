@@ -436,13 +436,13 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
   return (
     <div className="space-y-6">
       {/* Official Arch-Systems Corporate Header */}
-      <div className="flex items-start justify-between border-slate-900 border-b-2 pb-4">
+      <div className="flex items-start justify-between border-[#d4af37] border-b-2 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 font-black text-[10px] text-white tracking-widest">
               ARCH OS
             </span>
-            <span className="font-bold text-[11px] text-blue-700 uppercase tracking-widest">
+            <span className="font-bold text-[#d4af37] text-[11px] uppercase tracking-widest">
               Plantcor Mining Operations
             </span>
           </div>
@@ -480,7 +480,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
         </div>
 
         <div className="grid grid-cols-4 gap-3">
-          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">
               Total Material Moved
             </p>
@@ -490,7 +490,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
             <p className="text-[10px] text-slate-500">BCM / Tonnes Combined</p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total Haul Loads</p>
             <p className="mt-1 font-extrabold font-mono text-slate-900 text-xl">
               {summary.totalLoads.toLocaleString()}
@@ -498,7 +498,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
             <p className="text-[10px] text-slate-500">Dispatched Dump Cycles</p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Fleet SMR Worked</p>
             <p className="mt-1 font-extrabold font-mono text-emerald-700 text-xl">
               {summary.totalFleetSmrWorked.toFixed(1)} h
@@ -508,7 +508,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
             </p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">
               Total Operational Delays
             </p>
@@ -664,8 +664,8 @@ interface PageSiteProps {
 function PageSiteBreakdown({ siteReport }: PageSiteProps) {
   return (
     <div className="space-y-6">
-      {/* Site Header Banner */}
-      <div className="flex items-center justify-between rounded-lg bg-slate-900 px-4 py-3 text-white">
+      {/* Site Header Banner with Gold Separator */}
+      <div className="flex items-center justify-between rounded-lg border-[#d4af37] border-b-2 bg-slate-900 px-4 py-3 text-white">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-blue-400" />
@@ -746,6 +746,65 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
           </table>
         </div>
       )}
+
+      {/* Site Shift Summary directly under Machines */}
+      <div className="avoid-break mt-4 rounded-xl border-2 border-[#d4af37]/80 bg-slate-50 p-4 shadow-2xs">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#d4af37]" />
+              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                Site Shift Summary — {siteReport.siteName}
+              </h4>
+            </div>
+            <p className="text-[11px] text-slate-600">
+              Aggregated shift reliability, operating duration, and downtime breakdown
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
+              <p className="text-[10px] text-slate-500 uppercase">Total Worked</p>
+              <p className="font-bold font-mono text-emerald-700 text-sm">
+                {siteReport.siteTotals.totalHours.toFixed(1)}h
+              </p>
+            </div>
+            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
+              <p className="text-[10px] text-slate-500 uppercase">Total Delays</p>
+              <p className="font-bold font-mono text-amber-700 text-sm">
+                {siteReport.siteTotals.totalDelaysMin}m
+              </p>
+            </div>
+            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
+              <p className="text-[10px] text-slate-500 uppercase">Availability %</p>
+              <p className="font-bold font-mono text-blue-700 text-sm">
+                {(
+                  (siteReport.siteTotals.totalHours /
+                    Math.max(
+                      siteReport.siteTotals.totalHours + siteReport.siteTotals.totalDelaysMin / 60,
+                      1
+                    )) *
+                  100
+                ).toFixed(1)}
+                %
+              </p>
+            </div>
+            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
+              <p className="text-[10px] text-slate-500 uppercase">Utilization %</p>
+              <p className="font-bold font-mono text-emerald-700 text-sm">
+                {(
+                  (siteReport.siteTotals.totalHours /
+                    Math.max(
+                      siteReport.siteTotals.totalHours + siteReport.siteTotals.totalDelaysMin / 60,
+                      1
+                    )) *
+                  100
+                ).toFixed(1)}
+                %
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

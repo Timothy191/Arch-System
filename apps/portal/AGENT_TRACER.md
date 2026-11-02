@@ -1,3 +1,19 @@
+## 2026-11-02T07:15:00+02:00: Shift Report View (`/control-room/reports`) Gold Styling, Machine Type Grouping, Shift Summary & Drilling Report
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports` (`div.space-y-8.p-6` in `div.print-document.overflow-hidden`):
+  1. Split non-excavator site equipment into distinct tables grouped by Machine Type (ADTs, Bulldozers, Graders, Loaders, Bowsers, Service, Auxiliary) with exact 9 columns (`Machine ID | Start SMR | Stop SMR | Total SMR | Operator | Production Delays | Engineering Delays | Non-Site Related Delays | Comment`).
+  2. Add Shift Summary card directly under machines (`Total Worked`, `Delays`, `Availability %`, `Utilization %`).
+  3. Add dedicated Drilling Report page per site (`break-before: page`) with gold separator under site header, `Block Mined` and `Material` subheaders, and auto-configured 11-column drill table (`Machine ID | Start SMR | Stop SMR | Total SMR | Operator | Production Delays | Engineering Delays | Non Site related | Holes | Meters | Comment`).
+  4. Apply gold accents (`border-2 border-[#d4af37]/80` and gold drop shadow) to `div.print-document`, header banner separator, and 5 KPI summary boxes.
+- **Phase 2 (Evidence)**: Inspected `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `ReportsDashboardClient.test.tsx`, and `ReportsDashboardClient.tsx`. Tested ordering and accessibility invariants to ensure `EX-01` < `DZ-02` < `ADT-04` DOM order and accessible names avoid collision in RTL queries.
+- **Phase 3 (Design)**:
+  - Created `shift-report-drilling.ts` implementing `groupMachinesByType`, `buildDetailedMachineRow`, `calculateSiteShiftSummary`, and `buildSiteDrillingReports`.
+  - Updated `ShiftPdfReportTab.tsx` with gold borders (`border-2 border-[#d4af37]/80`, `shadow-[0_4px_25px_-5px_rgba(212,175,55,0.25)]`), gold separator lines (`border-b-2 border-[#d4af37]`), machine type tables, site shift summary card, and dedicated Drilling Report section.
+  - Synchronized `ShiftReportA4Preview.tsx` with gold headers, KPI card borders, and site shift summary card.
+  - Enhanced `printablePdfHtml` to include gold styling, machine type split, site shift summary, and page-broken drilling report in iframe / print dialog.
+- **Phase 4 (Criticism)**: Unit tested with `ReportsDashboardClient.test.tsx` (10/10 PASS), `DrillingReportsDashboardClient.test.tsx`, and `ShiftReportA4Preview.test.tsx` (7/7 PASS). Passed all 27 gates in `pnpm agent:verify` (100% PASS).
+- **Phase 5 (Contract)**: Created `shift-report-drilling.ts`; modified `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `packages/theme/src/tailwind/preset.ts`, and `apps/portal/AGENT_TRACER.md`.
+
 ## 2026-11-02T06:55:00+02:00: Live Paginated A4 PDF Page Preview for Shift Report View
 
 - **Phase 1 (Comprehension)**: Replace raw HTML data tables in the Shift Report view with an exact live, paginated PDF Page Preview (A4 portrait 210mm x 297mm sheets rendered on screen), matching the final exported vector PDF 1:1.

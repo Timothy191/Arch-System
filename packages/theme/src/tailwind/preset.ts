@@ -57,8 +57,13 @@ const archTheme: Config = {
   safelist: [
     // Dynamic classNames constructed at runtime (badgeColor, availabilityClass, etc.)
     // must be safelisted or purged. Prefer static lookup maps long-term.
-    { pattern: /^(bg|text|border)-(accent|arch|dept)-(blue|red|green|amber|charcoal|emerald|mint|slate|neutral)/ },
-    { pattern: /^(bg|text|border)-(accent|arch)-(blue|red|green|amber)\/(5|10|15|20|25|30|40|50)$/ },
+    {
+      pattern:
+        /^(bg|text|border)-(accent|arch|dept)-(blue|red|green|amber|charcoal|emerald|mint|slate|neutral)/,
+    },
+    {
+      pattern: /^(bg|text|border)-(accent|arch)-(blue|red|green|amber)\/(5|10|15|20|25|30|40|50)$/,
+    },
   ],
   future: {
     hoverOnlyWhenSupported: true,
