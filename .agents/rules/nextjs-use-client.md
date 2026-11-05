@@ -59,40 +59,6 @@ All `'use server'` mutations in `apps/portal/actions/` or route action modules a
 6. **Dual-Tier Cache Invalidation**: Call `await updateTagInAction(tag)` / `await updateTag(tag)` / `await updateTags(tags)` from `@/lib/server-cache` to purge both the Next.js Data Cache (read-your-writes) and distributed Redis L1/L2 cache tags (`cacheInvalidateTags`).
 7. **Redirect / Return**: Call `redirect()` ONLY AFTER cache invalidation completes (`redirect()` throws a Next.js control-flow exception; any code after it is unreachable).
 
-```typescript
-'use server';
-
-import { shiftCloseoutSchema, type ShiftCloseoutInput } from '@repo/contract';
-import { AuthError, ForbiddenError, ValidationError } from '@repo/errors';
-import { redirect } from 'next/navigation';
-import { tagDepartment, updateTagInAction } from '@/lib/server-cache';
-
-export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
-  // 1. Authenticate
-  const principal = await getAuthenticatedEmployee();
-  if (!principal) throw new AuthError('Unauthorized');
-
-  // 2. Authorize
-  if (!principal.canCloseShift) throw new ForbiddenError('Insufficient permissions');
-
-  // 3. Validate (@repo/contract Zod safeParse)
-  const parsed = shiftCloseoutSchema.safeParse(rawInput);
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid input');
-  }
-
-  // 4. Rate-limit -> 5. Mutate
-  await enforceShiftActionRateLimit(principal.id);
-  await performShiftCloseoutMutation(principal.id, parsed.data);
-
-  // 6. Dual-tier Next.js + Redis L1/L2 cache invalidation BEFORE redirect()
-  await updateTagInAction(tagDepartment(parsed.data.departmentSlug, 'shift_closeout'));
-
-  // 7. Redirect (or return typed result)
-  redirect(`/${parsed.data.departmentSlug}/handover`);
-}
-```
-
 ---
 
 ## 5. Verification Gates
