@@ -150,6 +150,69 @@ Dashboards and detailed metrics views are structured using a responsive 12-colum
 - **Outer Margins**: Mobile `16px`, Desktop `24px`.
 - Page content sections align to standard Tailwind grid spans (`col-span-12`, `col-span-6`, `col-span-4`, `col-span-3`).
 
+### Flexible Grid Layout (Percentage-Based Widths)
+
+All dashboard layouts use **percentage-based widths** instead of fixed pixel values. This allows elements to adjust smoothly across any screen size without media-query overrides for every breakpoint.
+
+**Core principles:**
+
+- **Grid columns are percentage-driven**: Tailwind's `grid-cols-*` utilities generate fractional widths (`1/12`, `2/12`, `3/12`, etc.) that scale with the container. Never use fixed-width columns (`w-[240px]`) for responsive content areas.
+- **Container widths use `max-w-*` + `w-full`**: The page container stretches to fill available space (`w-full`) and caps at a maximum (`max-w-7xl`), so it grows and shrinks fluidly.
+- **Sidebar is the only fixed element**: The `DepartmentLayout` sidebar is intentionally `240px` fixed — it is a navigation control, not a content region. The content area uses `flex-1` (percentage of remaining space).
+- **Gap values are tokens, not pixels**: Grid gaps use the spacing scale (`gap-md`, `gap-lg`), which resolves to `16px`/`24px` but is defined semantically.
+- **Auto-fit and auto-fill for dynamic content**: When content count varies (e.g., plugin widgets, KPI cards), use `grid-cols-[repeat(auto-fit,minmax(280px,1fr))]` or Tailwind equivalents to let the browser pack items naturally.
+
+**Code references:**
+
+```tsx
+// apps/portal/app/hub/page.tsx:295 — percentage-based responsive grid
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+  {items.map((item) => (
+    <div key={item.id} className={item.gridSpan ?? 'col-span-1'}>
+      {item.content}
+    </div>
+  ))}
+</div>
+```
+
+**Anti-patterns:**
+
+- ❌ Fixed-width content columns (`w-[320px]`, `w-[480px]`) in responsive containers.
+- ❌ Hardcoded pixel margins on grid items (`ml-[24px]`, `mr-[12px]`).
+- ❌ Using `width: N%` inline styles instead of grid utilities.
+
+---
+
+### Media Queries
+
+Media queries customize styles for specific viewport ranges. The portal uses Tailwind's breakpoint prefix system (`sm:`, `md:`, `lg:`, `xl:`) which compiles to `min-width` media queries.
+
+**Breakpoint tokens (source of truth: `packages/theme/src/tokens/`):**
+
+| Prefix | Breakpoint | Media Query                  | Primary Use                            |
+| :----- | :--------- | :--------------------------- | :------------------------------------- |
+| (base) | 0px        | —                            | Mobile-first default styles            |
+| `sm:`  | 640px      | `@media (min-width: 640px)`  | Small tablets, landscape phones        |
+| `md:`  | 1024px     | `@media (min-width: 1024px)` | Tablets, small laptops                 |
+| `lg:`  | 1280px     | `@media (min-width: 1280px)` | Desktop, large monitors                |
+| `xl:`  | 1536px     | `@media (min-width: 1536px)` | 4K displays, side-by-side split panels |
+
+**Rules:**
+
+1. **Mobile-first**: Base styles target mobile (`< 640px`). Each breakpoint _adds_ layout complexity — never define a desktop layout first and then override for mobile.
+2. **Content-driven breakpoints**: Breakpoints are chosen based on content (e.g., a 2-column grid that becomes 4 columns when there's room), not device marketing categories.
+3. **Sidebar behavior**:
+   - `< 640px`: Sidebar collapses to a top bar with department selector.
+   - `640px–1024px`: Sidebar collapsible via toggle.
+   - `> 1024px`: Fixed 240px sidebar.
+4. **Container queries (future)**: Where component-level resizing matters (e.g., a card that should stack when narrow even in a wide viewport), prefer CSS container queries over viewport queries. Not yet adopted; track for future migration.
+
+**Custom media queries (rare):**
+
+If a breakpoint falls outside the Tailwind scale, define it in `packages/theme/src/tokens/` and extend the Tailwind preset. Never use raw `@media` in components — route through the token system.
+
+**Code references:** `apps/portal/app/hub/page.tsx:295`, `packages/ui/src/components/DepartmentLayout.tsx`, `packages/theme/src/tokens/`.
+
 ---
 
 ## Component Specifications & State Matrix

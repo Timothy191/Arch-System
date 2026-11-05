@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -7,8 +8,6 @@ import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import { saveMonthlyMachineSnapshotAction } from './actions';
 import { CopyReportButton } from './CopyReportButton';
-import { MachineMonthlySheetTab } from './MachineMonthlySheetTab';
-import { MachineMonthlySummaryTab } from './MachineMonthlySummaryTab';
 import {
   buildArchivedMonthSnapshot,
   computeFleetMonthlySummaryRows,
@@ -16,11 +15,7 @@ import {
   loadStoredMachineMonthArchives,
   saveStoredMachineMonthArchives,
 } from './machine-activity-helpers';
-import {
-  ReportsArchivedViewTab,
-  ReportsDayViewTab,
-  ReportsSubtabsToolbar,
-} from './ReportsAnalyticsTabs';
+import { ReportsSubtabsToolbar } from './ReportsAnalyticsTabs';
 import { ReportsKpiSummarySection } from './ReportsKpiSummarySection';
 import { ReportsShiftViewTab } from './ReportsShiftViewTab';
 import {
@@ -47,7 +42,42 @@ import type {
   ShiftCoverageMissingItem,
   ShiftReportRow,
 } from './reports-types';
-import { buildPdfSiteGroups, ShiftPdfReportTab } from './ShiftPdfReportTab';
+import { buildPdfSiteGroups } from './ShiftPdfReportTab';
+
+function ReportsTabSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4 py-4" aria-hidden="true">
+      <div className="h-10 w-48 rounded-lg bg-black/[0.05]" />
+      <div className="h-64 rounded-xl bg-black/[0.04]" />
+      <div className="h-48 rounded-xl bg-black/[0.03]" />
+    </div>
+  );
+}
+
+const MachineMonthlySheetTab = dynamic(
+  () => import('./MachineMonthlySheetTab').then((m) => ({ default: m.MachineMonthlySheetTab })),
+  { loading: () => <ReportsTabSkeleton /> }
+);
+
+const MachineMonthlySummaryTab = dynamic(
+  () => import('./MachineMonthlySummaryTab').then((m) => ({ default: m.MachineMonthlySummaryTab })),
+  { loading: () => <ReportsTabSkeleton /> }
+);
+
+const ReportsDayViewTab = dynamic(
+  () => import('./ReportsAnalyticsTabs').then((m) => ({ default: m.ReportsDayViewTab })),
+  { loading: () => <ReportsTabSkeleton /> }
+);
+
+const ReportsArchivedViewTab = dynamic(
+  () => import('./ReportsAnalyticsTabs').then((m) => ({ default: m.ReportsArchivedViewTab })),
+  { loading: () => <ReportsTabSkeleton /> }
+);
+
+const ShiftPdfReportTab = dynamic(
+  () => import('./ShiftPdfReportTab').then((m) => ({ default: m.ShiftPdfReportTab })),
+  { loading: () => <ReportsTabSkeleton /> }
+);
 
 export type {
   EngineeringLogItem,
@@ -116,7 +146,13 @@ export function ReportsDashboardClient({
     machineDailyRecords.length > 0 ? [...machineDailyRecords] : [...fallbackFleet.records]
   );
 
+  const isMonthRelatedTab =
+    activeTab === 'monthly-summary' || activeTab === 'machine-30d' || activeTab === 'archived';
+
   const initialArchivedSnapshots = useMemo(() => {
+    if (!isMonthRelatedTab) {
+      return [];
+    }
     const distinctMonths = new Set<string>();
     const fromMonth = fromDateStr.slice(0, 7);
     if (/^\d{4}-\d{2}$/.test(fromMonth)) {
@@ -138,17 +174,26 @@ export function ReportsDashboardClient({
           isSealed: monthStr < currentMonthPrefix,
         })
       );
-  }, [fromDateStr, currentMonthPrefix, effectiveMachines, machineShiftType, liveMachineRecords]);
+  }, [
+    isMonthRelatedTab,
+    fromDateStr,
+    currentMonthPrefix,
+    effectiveMachines,
+    machineShiftType,
+    liveMachineRecords,
+  ]);
 
   const [archivedSnapshots, setArchivedSnapshots] =
     useState<ArchivedMachineMonthSnapshot[]>(initialArchivedSnapshots);
   const hasHydratedArchivesRef = useRef(false);
 
   useEffect(() => {
-    if (hasHydratedArchivesRef.current) return;
-    hasHydratedArchivesRef.current = true;
-    setArchivedSnapshots(loadStoredMachineMonthArchives(initialArchivedSnapshots));
-  }, [initialArchivedSnapshots]);
+    if (!isMonthRelatedTab || hasHydratedArchivesRef.current) return;
+    if (initialArchivedSnapshots.length > 0) {
+      hasHydratedArchivesRef.current = true;
+      setArchivedSnapshots(loadStoredMachineMonthArchives(initialArchivedSnapshots));
+    }
+  }, [isMonthRelatedTab, initialArchivedSnapshots]);
 
   const searchParams = useSearchParams?.() ?? null;
   const urlTabParam = searchParams?.get('tab');
@@ -233,16 +278,17 @@ export function ReportsDashboardClient({
     }
   };
 
-  const monthlySummaryRows = useMemo(
-    () =>
-      computeFleetMonthlySummaryRows({
-        fleetMachines: effectiveMachines,
-        monthPrefix: selectedMonth,
-        shiftType: machineShiftType,
-        records: liveMachineRecords,
-      }),
-    [effectiveMachines, selectedMonth, machineShiftType, liveMachineRecords]
-  );
+  const monthlySummaryRows = useMemo(() => {
+    if (!isMonthRelatedTab) {
+      return [];
+    }
+    return computeFleetMonthlySummaryRows({
+      fleetMachines: effectiveMachines,
+      monthPrefix: selectedMonth,
+      shiftType: machineShiftType,
+      records: liveMachineRecords,
+    });
+  }, [isMonthRelatedTab, effectiveMachines, selectedMonth, machineShiftType, liveMachineRecords]);
 
   const handleSelectTab = (nextTab: ReportSubtab) => {
     startTabTransition(() => {
