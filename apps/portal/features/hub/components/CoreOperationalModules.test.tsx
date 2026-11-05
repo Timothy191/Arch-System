@@ -84,5 +84,6 @@ describe('CoreOperationalModules', () => {
       'gold-steel-border',
       'gold-steel-border-slim'
     );
+    expect(screen.getByTestId('core-modules-header-separator')).toBeInTheDocument();
   });
 });

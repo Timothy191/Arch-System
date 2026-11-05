@@ -60,9 +60,10 @@
 import { offlineMutationBatchSchema } from '@repo/contract';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
-import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
+import { CACHE_TAGS } from '@/lib/cache-tags';
 import { logError } from '@/lib/errors/error-logger';
+import { revalidateTagInRouteHandler } from '@/lib/server-cache';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -152,7 +153,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       );
     }
 
-    revalidateTag('offline-mutations', 'max');
+    await revalidateTagInRouteHandler(CACHE_TAGS.OFFLINE_MUTATIONS, 'max');
     return NextResponse.json(data);
   } catch (error) {
     await logError(error, { context: 'offline_mutations_route' });

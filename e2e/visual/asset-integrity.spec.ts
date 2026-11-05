@@ -136,8 +136,6 @@ test.describe('Asset Integrity & CSP Gating', () => {
       )
       .catch(() => {});
 
-
-
     const departmentCardStats = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('.uiverse-card-banner'));
       return cards.map((card) => {

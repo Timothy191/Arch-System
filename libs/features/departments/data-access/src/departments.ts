@@ -244,6 +244,24 @@ export const DEPARTMENTS: Department[] = [
       { label: 'Daily Log', href: '/office/daily-log' },
     ],
   },
+  {
+    name: 'executive',
+    displayName: 'Executive Dashboard',
+    route: '/hub/executive',
+    icon: 'BarChart3',
+    description:
+      'Cross-departmental production reconciliation, MTD coal & waste tonnage, fleet availability & executive KPI analytics',
+    color: 'amber',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Reconciliation', value: '99.4%' },
+    trend: [96, 97, 98, 98, 99, 99, 99, 100],
+    actions: [
+      { label: 'Executive Dashboard', href: '/hub/executive' },
+      { label: 'Shift Reports', href: '/control-room/reports' },
+    ],
+  },
 ];
 
 export const PRODUCTIVITY_TOOLS = [

@@ -9,9 +9,7 @@ import fs from 'node:fs';
 
 function stripJsonComments(text) {
   // Strip // line comments and /* */ block comments (JSONC support for tsconfig etc.)
-  return text
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '');
+  return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 }
 
 const jsonFiles = execSync('git ls-files "*.json"', { encoding: 'utf8' })
@@ -20,7 +18,9 @@ const jsonFiles = execSync('git ls-files "*.json"', { encoding: 'utf8' })
   .filter((f) => !f.includes('node_modules'));
 
 // Also cover JSONC-style configs used by TS/Next.js toolchains.
-const jsoncFiles = execSync('git ls-files "*.jsonc" "tsconfig*.json" "jsconfig*.json"', { encoding: 'utf8' })
+const jsoncFiles = execSync('git ls-files "*.jsonc" "tsconfig*.json" "jsconfig*.json"', {
+  encoding: 'utf8',
+})
   .split('\n')
   .filter(Boolean)
   .filter((f) => !f.includes('node_modules'));

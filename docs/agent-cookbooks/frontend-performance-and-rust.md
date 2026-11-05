@@ -40,3 +40,18 @@ When authoring or maintaining Rust tooling (`tools/swarms-orchestrator`, AST ind
    - Parse and validate configuration at the boundary rather than scattering `.unwrap()` calls (`anti-unwrap-abuse`).
 3. **Verification**:
    - Always run `cargo clippy -- -D warnings` and `cargo test` before committing Rust changes.
+
+## 4. Browser Engines, Spatial WebGL & Game Engine Evaluation Playbook
+
+1. **WebKit (`WebKit/WebKit`)**:
+   - Do not embed native C++ WebKit inside the monorepo.
+   - Use `PLAYWRIGHT_WEBKIT=1` (`tablet-safari` iPad Pro 11 target in `e2e/playwright.config.ts`) to validate Safari/iPadOS `backdrop-filter` (`GlassCard`) and OKLCH token rendering (`@repo/theme`) for field tablets.
+2. **Spatial 2D/3D Telemetry (`Three.js`, `PixiJS`, `Taal`)**:
+   - Validate 2D/3D coordinates, bounding boxes, and drill-hole trajectories using `@repo/contract` (`spatial-telemetry.schema.ts`: `spatialPoint2DSchema`, `spatialPoint3DSchema`, `spatialBoundingBox3DSchema`, `boreholeSurveySegmentSchema`, `spatialViewport2DSchema`).
+   - Perform zero-bundle-bloat spatial projection using `@repo/utils/spatial-projection` (`computeBoreholeToeCoordinates`, `projectWorldToCanvas2D`, `computeEuclideanDistance3D`, `isPointWithinBoundingBox3D`) paired with `FastTelemetryChart` Canvas 2D rendering.
+   - If full 3D pit/borehole meshes (`Three.js` + `@react-three/fiber`) or >5,000-node 2D schematics (`PixiJS`) are introduced in the future, isolate them in `'use client'` leaf components loaded via `next/dynamic(..., { ssr: false })` so core portal RSC bundles remain completely unaffected.
+3. **Discarded Engines (`Servo`, `Qt WebEngine`, `Go-Webengine`, `Babylon.js`, `Phaser`, `PlayCanvas`, `InstantEngine`, `WebEngine CMS`)**:
+   - **`servo/servo`**: Discarded — experimental Rust browser layout engine not supported as a standard Playwright target and unnecessary alongside Chromium/WebKit E2E coverage.
+   - **`qt/qtwebengine` & `Use.GPU / Go-Webengine`**: Discarded — desktop C++/Qt and Go native browser embedding wrappers are redundant in a cloud-deployed Next.js 16 web application that already uses Playwright for headless browser automation and `@react-pdf/renderer` for server/client PDF export.
+   - **`BabylonJS/Babylon.js`, `photonstorm/phaser`, `playcanvas/engine`, & `InstantEngine`**: Discarded — heavy consumer game engines with physics loops, audio subsystems, and sprite/scene-graph bloat that violate our strict bundle size, light-mode OKLCH, and WCAG 2.1 AA accessibility budgets.
+   - **`WebEngine CMS` (`lautaroangelico/WebEngine`)**: Discarded — legacy PHP/MySQL Mu Online private server game CMS with zero architectural relevance to industrial mining operations or TypeScript/Next.js systems.

@@ -111,9 +111,12 @@ if (fs.existsSync(layoutPath)) {
   // Advisory: a family loaded into the root layout but never referenced by any CSS
   // rule only ships @font-face bloat into the render-blocking stylesheet.
   const cssConsumers = glob
-    .sync('{packages/theme/src/css,packages/ui/src,apps/portal/app,apps/portal/components}/**/*.css', {
-      cwd: ROOT,
-    })
+    .sync(
+      '{packages/theme/src/css,packages/ui/src,apps/portal/app,apps/portal/components}/**/*.css',
+      {
+        cwd: ROOT,
+      }
+    )
     .map((cssPath) => fs.readFileSync(path.join(ROOT, cssPath), 'utf8'));
   const presetPath = path.join(ROOT, 'packages', 'theme', 'src', 'tailwind', 'preset.ts');
   if (fs.existsSync(presetPath)) cssConsumers.push(fs.readFileSync(presetPath, 'utf8'));

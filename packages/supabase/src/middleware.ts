@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
-import { normalizeSupabaseCookies } from './cookie-utils';
 import { type NextRequest, NextResponse } from 'next/server';
+import { normalizeSupabaseCookies } from './cookie-utils';
 
 /**
  * Creates a Supabase client for use in Next.js middleware.

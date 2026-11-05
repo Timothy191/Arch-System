@@ -586,4 +586,33 @@ They must:
 - verify their own work empirically (`pnpm agent:verify`)
 - **engage structured thinking before every non-trivial mutation** (see `skill://structured-thinking`)
 
+---
+
+## 21. Lifecycle of Reactive Effects & Synchronization Guardrails
+
+Effects have a distinct lifecycle from components: whereas components _mount_, _update_, and _unmount_, a React `useEffect` only **starts synchronizing** an external system and **stops synchronizing** it via its cleanup function.
+
+- **Single Start/Stop Cycle Mindset**: Every `useEffect` must be resilient to starting and stopping synchronization multiple times while mounted (as verified by React Strict Mode's development remount check). Always return a cleanup function for Realtime channels, WebSockets, DOM listeners, intervals/timeouts, and in-flight async work (`let ignore = false; return () => { ignore = true; }`).
+- **One Independent Process per Effect**: Never merge unrelated synchronization processes into a single `useEffect` just because they share dependencies. Split independent processes into separate `useEffect` calls or extract reusable custom Hooks.
+- **Exhaustive Reactive Dependencies (`Object.is`)**: Every prop, state variable, context value, or derived variable declared inside the component body is _reactive_ and must be included in the Effect's dependency array when read. Never suppress `react-hooks/exhaustive-deps` or `useExhaustiveDependencies`. Move non-reactive constants outside the component or inside the Effect body, and use `useSyncExternalStore` for external mutable globals (`ref.current` and `window.location.pathname` are never valid Effect dependencies).
+
+---
+
+## 22. Responding to Events & Hydration Invariants
+
+- **Pass Functions, Never Invoke in JSX**: Pass function references (`onClick={handleClick}` or `onClick={() => handleSelect(id)}`), never `onClick={handleClick()}`. Name internal handlers `handle<Event>` and component callback props `on<Action>`.
+- **Semantic Elements & Explicit Propagation Control**: Attach click/submit handlers to semantic `<button type="button">` and `<form>` elements. Call `e.stopPropagation()` on nested interactive buttons inside clickable cards/table rows so parent handlers do not fire, and `e.preventDefault()` to suppress unwanted browser form reloads. Put interaction-driven side effects inside event handlers rather than `useEffect`.
+- **Hydration (Making Static HTML Interactive)**: Hydration is React's process of attaching event handlers and state fibers to server-rendered static HTML DOM nodes to make them interactive. Initial client render output must match SSR HTML deterministically so event handlers attach cleanly without DOM tree regeneration.
+
+---
+
+## 23. Next.js 16 Fetching, Mutating, Streaming, Data Security, Tainting & Hybrid SPA Invariants
+
+- **RSC Fetching & Waterfall Elimination**: Query databases/APIs directly in Server Components (`createReadReplicaClient` for reads, `createServerSupabaseClient` for writes). Parallelize independent queries via `Promise.all` / `Promise.allSettled`, deduplicate shared request-scoped lookups with `React.cache()`, and use `preload()` to start dependent fetches early.
+- **Streaming (`loading.tsx` & `<Suspense>` + `use(promise)`)**: Provide `loading.tsx` route skeletons for instant navigation feedback and `<Suspense>` boundaries (or unawaited promises unwrapped in Client Components via React 19 `use(promise)`) so slow queries never block the initial HTML shell.
+- **Explicit Cache Directives (`'use cache'` & Canonical Tags)**: Pair every `'use cache'` function with a named `cacheLife()` profile and canonical tags from `apps/portal/lib/cache-tags.ts` (`CACHE_TAGS`, `tagDepartment`, `tagTenant`, `tagAuthUser`). Never invoke `cookies()` or `headers()` directly inside a `'use cache'` function; pass serializable arguments from outside or use `'use cache: private'` for request-bound private caches.
+- **Server Functions & Server Actions (`'use server'`)**: Treat every `'use server'` function as a public HTTP `POST` endpoint: authenticate (`getAuthenticatedEmployee`), authorize (role + department), and validate (`@repo/contract` Zod `.safeParse`) before mutating. Use `updateTag()` / `updateTagInAction()` for read-your-writes invalidation, `refreshAction()` (`refresh()`) to re-render uncached dynamic RSC slices, and `revalidateTagInRouteHandler()` inside `app/api/**/route.ts`. Always execute cache invalidation _before_ `redirect()` (which throws a control-flow exception).
+- **Data Security, DAL & React 19 Tainting (`experimental.taint`)**: Enforce `import 'server-only'` in Data Access Layer modules, minimize DTO payloads crossing into `'use client'` components, and use React 19 `experimental_taintObjectReference` / `experimental_taintUniqueValue` (enabled via `experimental.taint: true` in `next.config.mjs`) so raw credentials or sensitive records can never leak to the client.
+- **Hybrid SPA & Dev Fetch Observability**: Use `window.history.pushState`/`replaceState` with `usePathname`/`useSearchParams` for shallow client URL filtering without server round-trips, and keep `logging.fetches` (`fullUrl` + `hmrRefreshes`) enabled in development.
+
 The objective is a maintainable, secure, observable, usable, and resilient real-world industrial system.

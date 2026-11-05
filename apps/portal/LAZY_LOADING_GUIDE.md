@@ -16,6 +16,11 @@ The following components from `@repo/ui` contain large dependencies that impact 
 
 **Total potential bundle savings: ~1.4MB when these components are loaded on-demand**
 
+### Spatial & High-Frequency Telemetry Alternatives (Zero-Bundle-Bloat First)
+
+- **2D Time-Series & Spatial Projection**: Prefer `@repo/ui/components/ui/FastTelemetryChart` (Canvas 2D at 60 FPS) paired with `@repo/utils/spatial-projection` (`computeBoreholeToeCoordinates`, `projectWorldToCanvas2D`) and `@repo/contract` (`spatial-telemetry.schema.ts`) before introducing WebGL dependencies.
+- **3D Pit / Borehole Digital Twins (`three` / `@react-three/fiber`) & 2D P&ID Schematics (`pixi.js`)**: If full 3D WebGL meshes or >5,000-node 2D schematics are required for `/drilling`, `/production`, or `/control-room`, they MUST be wrapped in `next/dynamic(..., { ssr: false })` leaf `'use client'` components so initial RSC payloads stay within the `1500 kB` gzipped chunk budget.
+
 ## 🚀 Implementation
 
 ### Centralized Dynamic Wrappers
@@ -25,14 +30,14 @@ All heavy components are now imported through a centralized lazy loading wrapper
 **Location:** `apps/portal/components/dynamic/LazyHeavyComponents.tsx`
 
 ```tsx
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 export const DataGrid = dynamic(
-  () => import("@repo/ui/DataGrid").then((m) => ({ default: m.DataGrid })),
+  () => import('@repo/ui/DataGrid').then((m) => ({ default: m.DataGrid })),
   {
     loading: () => <div>Loading grid...</div>,
     ssr: false,
-  },
+  }
 );
 ```
 
@@ -42,10 +47,10 @@ Instead of directly importing heavy components:
 
 ```tsx
 // ❌ Old approach (static import - bad for bundle size)
-import { DataGrid } from "@repo/ui/DataGrid";
+import { DataGrid } from '@repo/ui/DataGrid';
 
 // ✅ New approach (dynamic import - optimal bundle size)
-import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
+import { DataGrid } from '@/components/dynamic/LazyHeavyComponents';
 ```
 
 ### Example Implementation
@@ -106,7 +111,7 @@ const WorkflowPage = () => {
 
   // Preload workflow builder when user hovers over the button
   const handleMouseEnter = () => {
-    import("@repo/ui").then((mod) => mod.WorkflowBuilder);
+    import('@repo/ui').then((mod) => mod.WorkflowBuilder);
   };
 
   return (

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
-import { normalizeSupabaseCookies } from './cookie-utils';
 import { cookies } from 'next/headers';
+import { normalizeSupabaseCookies } from './cookie-utils';
 import { instrumentedFetch } from './server';
 
 /**
@@ -13,7 +13,12 @@ import { instrumentedFetch } from './server';
 export async function createReadReplicaClient(cookieList?: Array<{ name: string; value: string }>) {
   let cookieStore: any = null;
   if (!cookieList) {
-    cookieStore = await cookies();
+    try {
+      cookieStore = await cookies();
+    } catch {
+      // Called inside a 'use cache' scope or unit test outside request context; fall back to empty cookies.
+      cookieStore = null;
+    }
   }
   const replicaUrl =
     process.env.SUPABASE_READ_REPLICA_URL && process.env.SUPABASE_READ_REPLICA_URL.trim() !== ''

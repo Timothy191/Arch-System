@@ -4,6 +4,29 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-02] - Expert Turborepo v2.x Task Graph, Multi-Stage Pruned Dockerfile, JIT UI Exports, INP Yielding, Fluid CSS & Edge SWR / Speculation Rules
+
+- **Action:**
+  - Added parallel `"transit": { "dependsOn": ["^transit"] }` nodes to [`turbo.json`](./turbo.json) (`"ui": "stream"`) and wired `lint`, `test`, `portal#test`, `test:coverage`, and `type-check` to `dependsOn: ["transit"]` (and `portal#dev` to `dependsOn: ["^codegen"]`).
+  - Scoped `inputs` across `build`, `portal#build`, `portal#test`, `@repo/database#test`, `build-storybook`, `lint`, `test`, `test:coverage`, and `type-check` in [`turbo.json`](./turbo.json) to exclude `!README.md`, `!**/*AGENT_TRACER.md`, and `!**/codemap.md` so documentation and tracer updates never bust production or test caches.
+  - Upgraded [`apps/portal/docker/Dockerfile`](./apps/portal/docker/Dockerfile) to Turborepo v2 `turbo prune portal --docker`, BuildKit cache mounts (`/pnpm/store`, `/app/.turbo/cache`, `/app/apps/portal/.next/cache`), and `gcr.io/distroless/nodejs24-debian12` with monorepo standalone asset paths (`CMD ["apps/portal/server.js"]`).
+  - Added `yieldToMain` (`scheduler.yield()` with macrotask fallback) and `useMainThreadYield` in [`libs/shared/hooks/src/useMainThreadYield.ts`](./libs/shared/hooks/src/useMainThreadYield.ts) (tested in `useMainThreadYield.test.ts`), and wired `useDeferredValue` + `useTransition` across `MachineOperationsList.tsx`, `HourlyLoadsGrid.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `ReportsDashboardClient.tsx`.
+  - Added Intrinsic & Fluid CSS utilities (`.cq-inline`, `.grid-intrinsic-sm|md|lg`, `.p-fluid`, `.gap-fluid`, `.cv-auto`) in [`packages/ui/src/globals.css`](./packages/ui/src/globals.css) and `.touch-target-44` (`44×44px`) in [`packages/ui/src/accessibility.css`](./packages/ui/src/accessibility.css).
+  - Added W3C `<SpeculationRules />` (`eagerness: "moderate"`) in [`apps/portal/components/SpeculationRules.tsx`](./apps/portal/components/SpeculationRules.tsx) and Edge CDN `s-maxage` + `stale-while-revalidate` headers in [`apps/portal/next.config.mjs`](./apps/portal/next.config.mjs) and [`apps/portal/server/proxy.ts`](./apps/portal/server/proxy.ts).
+  - Added `revalidateTagInRouteHandler` and `refreshAction` in [`apps/portal/lib/server-cache.ts`](./apps/portal/lib/server-cache.ts) (tested in `apps/portal/lib/server-cache.test.ts`), exported `createProxySessionClient` in [`packages/supabase/src/proxy.ts`](./packages/supabase/src/proxy.ts), and enabled `turbopackFileSystemCacheForDev: true`, `images.minimumCacheTTL: 14400`, and `images.qualities: [75]` in [`apps/portal/next.config.mjs`](./apps/portal/next.config.mjs).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`), `pnpm deploy:vercel:preflight` (`100% PASSED`).
+
+## [2026-11-02] - Browser Engine, Spatial 2D/3D Engine & WebEngine CMS Evaluation and Integration
+
+- **Action:**
+  - Audited 12 browser, spatial 2D/3D, and WebEngine repositories (`WebKit/WebKit`, `servo/servo`, `qt/qtwebengine`, `Go-Webengine`, `mrdoob/three.js`, `pixijs/pixijs`, `Taal`, `BabylonJS/Babylon.js`, `photonstorm/phaser`, `playcanvas/engine`, `InstantEngine`, and `WebEngine CMS`) against Arch-System's Next.js 16 + React 19 + OKLCH light-mode architecture.
+  - Discarded non-fitting engines (`Servo`, `Qt WebEngine`, `Go-Webengine`, `Babylon.js`, `Phaser`, `PlayCanvas`, `InstantEngine`, `WebEngine CMS`) due to desktop C++/Qt/Go embedding redundancy, game-engine bundle bloat, or PHP game CMS irrelevance.
+  - Added an opt-in `tablet-safari` (`iPad Pro 11`, `webkit`) project in [`e2e/playwright.config.ts`](./e2e/playwright.config.ts) gated by `PLAYWRIGHT_WEBKIT=1` while preserving all 4 Gate 19 Chromium targets (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`).
+  - Added spatial 2D/3D coordinate, bounding box, borehole survey segment, and viewport Zod schemas in [`packages/contract/src/schemas/spatial-telemetry.schema.ts`](./packages/contract/src/schemas/spatial-telemetry.schema.ts).
+  - Added zero-dependency 3D-to-2D spatial projection, Euclidean distance, bounding-box containment, and borehole survey toe-coordinate utilities in [`packages/utils/src/spatial-projection.ts`](./packages/utils/src/spatial-projection.ts).
+  - Documented the Browser Engine, Spatial WebGL & Game Engine Evaluation Playbook in [`docs/agent-cookbooks/frontend-performance-and-rust.md`](./docs/agent-cookbooks/frontend-performance-and-rust.md).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-11-02] - External 15-Repository Architecture Audit, Feature Flags, ScrollReveal & Rust Idioms
 
 - **Action:**

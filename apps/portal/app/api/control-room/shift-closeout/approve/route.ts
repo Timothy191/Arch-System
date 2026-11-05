@@ -1,10 +1,10 @@
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
-import { revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { CACHE_TAGS } from '@/lib/cache-tags';
 import { logError } from '@/lib/errors/error-logger';
-import { updateTag } from '@/lib/server-cache';
+import { revalidateTagInRouteHandler, updateTag } from '@/lib/server-cache';
 
 const approveSchema = z.object({
   reportId: z.string().uuid(),
@@ -68,9 +68,9 @@ export async function POST(req: NextRequest) {
       throw new Error(rpcError.message);
     }
 
-    await updateTag('shift-closeout');
-    revalidateTag('control-room', 'max');
-    revalidateTag('shift-closeout', 'max');
+    await updateTag(CACHE_TAGS.SHIFT_CLOSEOUT);
+    await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
+    await revalidateTagInRouteHandler(CACHE_TAGS.SHIFT_CLOSEOUT, 'max');
 
     return NextResponse.json({ success: true, result: rpcResult });
   } catch (error) {

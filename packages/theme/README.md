@@ -59,13 +59,13 @@ The Design System promotes semantic control and accessibility through a set of c
 ### API Properties
 
 ```tsx
-interface GlassCardProps extends HTMLMotionProps<"div"> {
+interface GlassCardProps extends HTMLMotionProps<'div'> {
   children: React.ReactNode;
   className?: string;
   hover?: boolean; // Enable standard scale/lift animation
   onClick?: () => void;
-  accent?: "green" | "blue" | "red" | "none"; // Border highlight color on hover
-  variant?: "default" | "window" | "spotlight" | "glowborder";
+  accent?: 'green' | 'blue' | 'red' | 'none'; // Border highlight color on hover
+  variant?: 'default' | 'window' | 'spotlight' | 'glowborder';
   title?: string; // Title text (only used in "window" variant)
   padding?: boolean; // Enable default padding spacing (24px)
 
@@ -74,7 +74,7 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
 
   // GlowBorder properties
   animationDuration?: number; // Spin duration in seconds (default: 4s)
-  colorPreset?: "nature" | "ocean" | "sunset" | "aurora" | "custom";
+  colorPreset?: 'nature' | 'ocean' | 'sunset' | 'aurora' | 'custom';
   gradientColors?: string[]; // Explicit array of hex/HSL values for custom gradient
   paused?: boolean; // Pause rotating animation
 }
@@ -91,7 +91,7 @@ Legacy components `SpotlightCard` and `GlowBorderCard` have been consolidated in
 **Before:**
 
 ```tsx
-import { SpotlightCard } from "@repo/ui/SpotlightCard";
+import { SpotlightCard } from '@repo/ui/SpotlightCard';
 
 <SpotlightCard spotlightColor="rgba(0, 122, 255, 0.1)">
   <div>Content</div>
@@ -101,7 +101,7 @@ import { SpotlightCard } from "@repo/ui/SpotlightCard";
 **After:**
 
 ```tsx
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 
 <GlassCard variant="spotlight" spotlightColor="rgba(0, 122, 255, 0.1)">
   <div>Content</div>
@@ -113,7 +113,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 **Before:**
 
 ```tsx
-import { GlowBorderCard } from "@repo/ui/GlowBorderCard";
+import { GlowBorderCard } from '@repo/ui/GlowBorderCard';
 
 <GlowBorderCard colorPreset="aurora" animationDuration={5}>
   <div>Content</div>
@@ -123,12 +123,28 @@ import { GlowBorderCard } from "@repo/ui/GlowBorderCard";
 **After:**
 
 ```tsx
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 
 <GlassCard variant="glowborder" colorPreset="aurora" animationDuration={5}>
   <div>Content</div>
 </GlassCard>;
 ```
+
+---
+
+## 📐 7 Design Best Practices
+
+All visual design decisions follow the seven design principles documented in **`docs/DESIGN.md`** ("7 Design Best Practices"):
+
+1. **Balance** — Even distribution of elements for visual stability and equilibrium.
+2. **Hierarchy** — Organization by importance to guide user attention.
+3. **Contrast** — Differences in color, size, or shape to create focus (WCAG 2.1 verified).
+4. **White Space** — Empty spaces that improve readability and cleanliness (4px base grid).
+5. **Alignment** — Arranging elements neatly to create order (12-column grid).
+6. **Repetition** — Reusing colors, fonts, or styles for consistency (semantic design tokens).
+7. **Proximity** — Placing related items close together to show connection (UX Laws #5).
+
+These principles are enforced through design tokens, Stylelint rules, and component variants. See `docs/DESIGN.md` for full guidelines and code references.
 
 ---
 

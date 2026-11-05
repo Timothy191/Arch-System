@@ -64,7 +64,7 @@
 }
 
 /* Focus trap for modals */
-[aria-modal="true"] {
+[aria-modal='true'] {
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -77,4 +77,10 @@ input,
 select,
 textarea {
   color-scheme: light dark;
+}
+
+/* WCAG 2.5.5 / 2.5.8 44x44px minimum touch target utility for pit tablets */
+.touch-target-44 {
+  min-width: 44px;
+  min-height: 44px;
 }

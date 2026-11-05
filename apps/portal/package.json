@@ -89,6 +89,7 @@
     "build": "node scripts/generate-openapi-spec.js && next build",
     "build:analyze": "ANALYZE=true next build",
     "dev": "next dev -H 0.0.0.0 --webpack",
+    "dev:turbopack": "next dev -H 0.0.0.0 --turbopack",
     "lint": "biome check .",
     "start": "next start -H 0.0.0.0",
     "test": "jest --passWithNoTests --runInBand",

@@ -64,7 +64,7 @@ browser → proxy.ts (Next 16, CSP + x-nonce)
 | `@repo/ui`                     | Shared Radix/shadcn primitives — `GlassCard`, `DepartmentLayout`, `KPI`, `Clock`, `PageHeader`, data-table, telemetry-chart                        |
 | `@repo/logger`                 | Structured Pino logging (server/browser/next)                                                                                                      |
 | `@repo/agents`                 | AI coordination engine (coordinator, fleet-runner, specialists, swarm, memory, token-budget)                                                       |
-| `libs/shared/hooks`            | Client React hooks: `useSupabaseRealtime`, `useRedisCache`, `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`                                  |
+| `libs/shared/hooks`            | Client React hooks: `useSupabaseRealtime`, `useClientCache` (alias: `useRedisCache`), `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`        |
 | `libs/features/departments/ui` | Domain UI for control-room & engineering (shift closeout, fleet KPI, breakdowns)                                                                   |
 
 ---

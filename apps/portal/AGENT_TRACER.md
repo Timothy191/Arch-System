@@ -1,3 +1,15 @@
+## 2026-11-05T07:40:00+02:00: Executive Dashboard Hub Module & CoreOperationalModules System Golden Separator (`/hub`)
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/hub`:
+  1. Register `Executive Dashboard` (`name: 'executive'`, `route: '/hub/executive'`) in `apps/portal/app/hub/page.tsx` (`canSeeExecutive` modules + `HUB_MODULE_ORDER`) so it renders both as a Hero Card in `HeroRotator` and as a dedicated Module Card in `CoreOperationalModules`.
+  2. Replace the plain bottom border under the `Mining Department Modules` section header row in `CoreOperationalModules.tsx` with the System Default Golden Separator (`data-testid="core-modules-header-separator"`).
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/hub/page.tsx`, `apps/portal/features/hub/components/CoreOperationalModules.tsx`, and `apps/portal/features/hub/components/CoreOperationalModules.test.tsx`.
+- **Phase 3 (Design)**:
+  - Added `'executive'` to the `canSeeExecutive` loop and `HUB_MODULE_ORDER` in `apps/portal/app/hub/page.tsx`.
+  - Replaced `border-black/[0.08] border-b pb-4` on the `CoreOperationalModules.tsx` header row with `data-testid="core-modules-header-separator"` (dual tapered gold gradient rails, rotated diamonds, and circular `gold-steel-border` Arch Emblem medallion).
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="CoreOperationalModules|app/hub/page"` (9/9 PASS).
+- **Phase 5 (Contract)**: Modified `apps/portal/app/hub/page.tsx`, `apps/portal/features/hub/components/CoreOperationalModules.tsx`, and `apps/portal/features/hub/components/CoreOperationalModules.test.tsx`.
+
 ## 2026-11-05T07:27:00+02:00: Reports Dropdown Selectors, A4 Paper Sizing, Support Logo Rotation & Remove Operations Copilot
 
 - **Phase 1 (Comprehension)**: Address design feedback across `/control-room/reports` (`ShiftPdfReportTab.tsx`, `ReportsAnalyticsTabs.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `print-report.css`, `FeedbackWidget.tsx`) and `/hub` (`page.tsx`):

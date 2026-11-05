@@ -3,10 +3,11 @@ import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { inngest, shiftCloseoutReportEvent } from '@repo/utils/inngest';
 import crypto from 'crypto';
-import { revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+import { CACHE_TAGS } from '@/lib/cache-tags';
 import { logError } from '@/lib/errors/error-logger';
 import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
+import { revalidateTagInRouteHandler } from '@/lib/server-cache';
 
 export const maxDuration = 60;
 
@@ -200,8 +201,10 @@ export async function POST(req: NextRequest) {
       }
 
       await inngest.send({ name: shiftCloseoutReportEvent, data: { reportId } });
-      revalidateTag('control-room', 'max');
-      revalidateTag('shift-closeout', 'max');
+      await Promise.all([
+        revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max'),
+        revalidateTagInRouteHandler(CACHE_TAGS.SHIFT_CLOSEOUT, 'max'),
+      ]);
       return NextResponse.json(closeoutResult, { status: 200 });
     } catch (error: unknown) {
       logError(error, { context: 'shift_closeout_route' });

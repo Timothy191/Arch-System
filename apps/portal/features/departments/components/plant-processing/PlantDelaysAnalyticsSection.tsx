@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit3, Filter, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import type { PlantDelayEntry } from './types';
 
 export interface PlantDelaysMetrics {
@@ -89,6 +89,7 @@ export function PlantDelaysAnalyticsSection({
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'OPEN' | 'RESOLVED'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const filteredDelays = useMemo(() => {
     return delays.filter((item) => {
@@ -102,8 +103,8 @@ export function PlantDelaysAnalyticsSection({
       if (statusFilter === 'RESOLVED' && isItemOpen) {
         return false;
       }
-      if (searchQuery.trim().length > 0) {
-        const q = searchQuery.toLowerCase();
+      if (deferredSearchQuery.trim().length > 0) {
+        const q = deferredSearchQuery.toLowerCase();
         return (
           item.circuit.toLowerCase().includes(q) ||
           item.reason.toLowerCase().includes(q) ||
@@ -113,7 +114,7 @@ export function PlantDelaysAnalyticsSection({
       }
       return true;
     });
-  }, [delays, categoryFilter, statusFilter, searchQuery]);
+  }, [delays, categoryFilter, statusFilter, deferredSearchQuery]);
 
   return (
     <div className="gold-steel-border gold-steel-border-slim overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] shadow-sm xl:col-span-8">

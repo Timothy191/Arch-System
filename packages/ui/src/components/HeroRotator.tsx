@@ -434,15 +434,15 @@ export function HeroRotator({
       <div
         data-testid="hero-bottom-golden-separator"
         aria-hidden="true"
-        className="mx-auto mt-3.5 flex w-[92%] max-w-[1060px] items-center justify-center gap-2.5 sm:w-[88%] lg:w-[82%]"
+        className="mx-auto mt-4 flex w-[92%] max-w-[1060px] items-center justify-center gap-3 sm:w-[88%] lg:w-[82%]"
       >
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber" />
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/95 text-accent-amber shadow-2xs">
-          <ArchEmblemIcon className="h-3 w-3 text-accent-amber" />
+        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+        <span className="gold-steel-border gold-steel-border-slim flex h-6 w-6 items-center justify-center rounded-full border border-accent-amber/45 bg-white/95 text-accent-amber shadow-xs sm:h-7 sm:w-7">
+          <ArchEmblemIcon className="h-3.5 w-3.5 text-accent-amber motion-safe:animate-pulse sm:h-4 sm:w-4" />
         </span>
-        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber" />
+        <span className="h-2 w-2 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+        <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
       </div>
     </div>
   );

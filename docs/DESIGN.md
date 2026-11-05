@@ -397,6 +397,94 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 
 ---
 
+## 7 Design Best Practices
+
+The following seven principles guide all visual design decisions in the Arch Systems portal. They ensure a consistent, accessible, and operator‑focused experience across every dashboard, card, and overlay.
+
+### 1. Balance
+
+- **Definition**: Distributes design elements evenly for visual stability and equilibrium.
+- **Guidelines**:
+  - Use the 12‑column grid system (`apps/portal/packages/ui/src/components/DepartmentLayout.tsx`) to distribute content evenly across the viewport.
+  - Weight visual elements proportionally; avoid concentrating too much emphasis in one area without corresponding balance elsewhere.
+  - Symmetrical layouts convey stability; asymmetrical layouts can guide focus when done intentionally.
+  - Ensure sidebar/content area weight is balanced: sidebar 240px fixed width (`packages/ui/src/components/DepartmentLayout.tsx`), content area fills remaining space.
+- **Code references**: Grid system (`spacing scale`), outer margins (`16px` mobile / `24px` desktop), sidebar width.
+
+### 2. Hierarchy
+
+- **Definition**: Organizes elements by importance to guide user attention through the interface.
+- **Guidelines**:
+  - Rely on scale + weight contrast rather than color variations alone (`DESIGN.md` Typography Rules, section "Hierarchy Cues").
+  - Use the type scale: `font-size-display` (28px desktop) → `font-size-heading` (20px) → `font-size-subheading` (16px) → `font-size-body` (14px) → `font-size-caption` (12px).
+  - Larger, bolder elements attract the eye first; use this for primary CTAs, section titles, and critical data points.
+  - Color can reinforce hierarchy but should not be the sole differentiator (WCAG compliance verified, see Contrast section).
+  - Status indicators (green/red/orange dots) provide immediate hierarchy for operational data.
+- **Code references**: Typography tokens (`font-size-*`, `font-weight-*`), status color tokens (`color-status-*`), focus ring (`0 0 0 3px oklch(25% 0.005 250 / 50%)`).
+
+### 3. Contrast
+
+- **Definition**: Uses differences in color, size, or shape to create focus and ensure accessibility.
+- **Guidelines**:
+  - All core text/background pairings are verified to WCAG 2.1 standards (see DESIGN.md Contrast-Ratio Guarantees table).
+  - Minimum contrast ratios: 4.5:1 for normal text, 3:1 for large text (AA); 7:1 for normal text, 4.5:1 for large text (AAA).
+  - Never use pure `#000`; pure `#fff` is strictly for `color-bg-elevated`.
+  - Accent color usage ≤ 10% of total surface area to maintain visual restraint.
+  - Status colors (positive/warning/danger) are semantic, not decorative — appear as small indicators (dots, borders, badges, rings).
+  - Contrast ratios are verified per pairing in DESIGN.md table (e.g., `color-text-primary` on `color-bg-base` = 11.5:1 AAA).
+- **Code references**: Color tokens (`color-text-*`, `color-bg-*`), Contrast-Ratio Guarantees table in DESIGN.md, Stylelint enforcement of OKLCH syntax.
+
+### 4. White Space
+
+- **Definition**: Empty spaces that improve readability and cleanliness, creating breathing room around elements.
+- **Guidelines**:
+  - Follow the 4px base grid system (`DESIGN.md` Spacing & Layout section).
+  - Use the spacing scale tokens: `0.5x` (2px), `xs` (4px), `sm` (8px), `md` (16px), `lg` (24px), `xl` (32px), `3xl` (48px), `4xl` (64px).
+  - Page outer padding: `md` (16px) mobile, `lg` (24px) desktop.
+  - Card gutter sizes: Mobile `16px` (`md`), Desktop `24px` (`lg`).
+  - Avoid clutter: Minimalist compositions and high‑density industrial alignment maintain readability.
+  - Focus mode dimming uses `opacity-focus-dim` (0.4) + `blur-focus-dim` (`blur(4px)`) to create visual separation without removing content.
+- **Code references**: Spacing tokens (`spacing-*`), Card gutter classes, Focus mode tokens (`opacity-focus-dim`, `blur-focus-dim`).
+
+### 5. Alignment
+
+- **Definition**: Arranges elements neatly to create order and visual cohesion.
+- **Guidelines**:
+  - Use the 12‑column grid system for layout alignment; content sections align to standard Tailwind grid spans (`col-span-12`, `col-span-6`, `col-span-4`, `col-span-3`).
+  - Gutter sizes: Mobile `16px` (`md`), Desktop `24px` (`lg`).
+  - Outer margins: Mobile `16px`, Desktop `24px`.
+  - Consistent alignment within cards: `text-left`, `text-center`, or `text-right` based on content type.
+  - Form labels align above input fields; form controls align vertically with consistent padding (`sm` vertical, `md` horizontal per TABLE cells).
+  - Table rows align to `color-border-subtle` dividers only (no vertical borders).
+  - Tabs have no background fill; they are transparent with bottom border alignment.
+- **Code references**: 12‑column grid configuration, Tailwind grid span utilities, spacing scale.
+
+### 6. Repetition
+
+- **Definition**: Reuses colors, fonts, or styles for consistency across the interface.
+- **Guidelines**:
+  - All colors map to `@repo/theme` semantic tokens (e.g., `arch-text-primary`, `arch-surface-tertiary`, `arch-border-subtle`) — flat hex or standard Tailwind colors are forbidden (enforced by Stylelint).
+  - Typography uses the defined type scale; heading hierarchy follows `font-size-display` → `font-size-heading` → `font-size-subheading` → `font-size-body` → `font-size-caption`.
+  - Shadow tokens follow the normalized light‑mode values in `shadows.ts` (which are auto‑generated from `variables.css`).
+  - Radius scale is systematic: `radius-sm` (4px), `radius-md` (6px), `radius-lg` (8px), `radius-xl` (12px), `radius-full` (9999px).
+  - Z‑index layers are consistent: Base (0), Sticky headers (10), Dropdowns/Popovers (50), Modals/Dialogs (100), Toasts (200).
+  - Component variants follow the same visual language: GlassCard variants (`default`, `window`, `spotlight`, `glowborder`) share underlying tokens.
+- **Code references**: Design token system (`@repo/theme`), `packages/theme/src/tokens/`, Stylelint enforcement, `packages/ui/src/components/GlassCard.tsx` variant system.
+
+### 7. Proximity
+
+- **Definition**: Places related items close together to show connection; unrelated items are spaced farther apart.
+- **Guidelines**:
+  - Group related form labels and inputs directly above each other inside `GlassCard` containers (`UX_Design_Rules.md` Law of Proximity).
+  - Form fields with labels positioned above the field create implicit grouping; related fields share container spacing (`md` = 16px).
+  - Use spacing scale to differentiate related vs. unrelated: tight spacing (`xs`/`sm`) for related items, wider spacing (`md`/`lg`) for separation.
+  - Cards with related content (e.g., KPI metrics for a single sector) use adjacent grid columns (`col-span-6` on tablet, `col-span-4` on desktop) with consistent gap.
+  - Avoid over‑grouping: excessive proximity reduces scannability in operational dashboards.
+  - The Law of Proximity (UX_Design_Rules.md Law #5) is actively applied: all form labels sit directly above their inputs inside a `GlassCard` container.
+- **Code references**: `UX_Design_Rules.md` Law of Proximity, `GlassCard` container usage, spacing scale between related elements.
+
+---
+
 # 🏆 Enterprise-Grade Implementation Blueprint
 
 ## Design System Tokenization, Card Consolidation & Quality Assurance
@@ -1021,4 +1109,3 @@ To maintain a high craft floor and avoid generic AI-generated UI artifacts:
 
 - `HeroRotator.tsx`: 3D perspective cover-flow carousel with strict transform/opacity animations, correct hardware acceleration, and dynamic variants.
 - `SplitWindowLayout.tsx`: The primary layout shell representing industrial data portal aesthetics.
-

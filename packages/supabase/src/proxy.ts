@@ -15,6 +15,11 @@
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 
+export {
+  createMiddlewareClient as createProxySessionClient,
+  refreshSession,
+} from './middleware';
+
 /**
  * Updates the session by refreshing the Auth token if needed.
  * This implements the Supabase Proxy pattern for Server Components.

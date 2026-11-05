@@ -1,7 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { memo, useMemo, useState } from 'react';
+import { memo, useDeferredValue, useMemo, useState } from 'react';
 import {
   FleetMachineCard,
   MachineOperationsFilterStrip,
@@ -30,6 +30,7 @@ function MachineOperationsList({
 }: MachineOperationsListProps) {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const loadsByMachine = useMemo(() => buildLoadsByMachineMap(todayLoads), [todayLoads]);
 
@@ -60,8 +61,8 @@ function MachineOperationsList({
   const counts = useMemo(() => computeMachineStatusCounts(machinesWithMeta), [machinesWithMeta]);
 
   const filteredMachines = useMemo(
-    () => filterMachinesWithMeta(machinesWithMeta, filterStatus, searchQuery),
-    [machinesWithMeta, filterStatus, searchQuery]
+    () => filterMachinesWithMeta(machinesWithMeta, filterStatus, deferredSearchQuery),
+    [machinesWithMeta, filterStatus, deferredSearchQuery]
   );
 
   const siteGrouped = useMemo(() => groupMachinesBySite(filteredMachines), [filteredMachines]);

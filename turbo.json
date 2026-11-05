@@ -1,13 +1,24 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
   "globalDependencies": ["tsconfig.json", "pnpm-workspace.yaml", ".npmrc"],
   "globalEnv": ["NODE_ENV", "VERCEL_ENV", "CI"],
-  "globalPassThroughEnv": ["OTEL_EXPORTER_OTLP_ENDPOINT", "OTEL_SERVICE_NAME"],
+  "globalPassThroughEnv": [
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "OTEL_SERVICE_NAME",
+    "TURBO_REMOTE_CACHE_SIGNATURE_KEY"
+  ],
   "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "build": {
       "dependsOn": ["^build", "codegen"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
         "!**/*.test.*",
         "!**/*.spec.*",
         "!**/__tests__/**",
@@ -30,6 +41,9 @@
       "dependsOn": ["^build", "codegen"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
         "!**/*.test.*",
         "!**/*.spec.*",
         "!**/__tests__/**",
@@ -120,6 +134,7 @@
       "cache": true
     },
     "portal#dev": {
+      "dependsOn": ["^codegen"],
       "cache": false,
       "persistent": true,
       "passThroughEnv": [
@@ -195,7 +210,14 @@
       ]
     },
     "portal#test": {
-      "inputs": ["$TURBO_DEFAULT$", "jest.config.*"],
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "jest.config.*"
+      ],
       "outputs": [],
       "passThroughEnv": [
         "SUPABASE_URL",
@@ -238,7 +260,7 @@
       ]
     },
     "@repo/database#test": {
-      "inputs": ["$TURBO_DEFAULT$"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md", "!**/*AGENT_TRACER.md", "!**/codemap.md"],
       "outputs": [],
       "passThroughEnv": [
         "DATABASE_URL",
@@ -257,7 +279,15 @@
     },
     "build-storybook": {
       "dependsOn": ["^build", "codegen"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.*", "!**/*.spec.*", "!**/__tests__/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/__tests__/**"
+      ],
       "outputs": ["storybook-static/**", "dist/**"],
       "cache": true
     },
@@ -279,7 +309,15 @@
       "persistent": true
     },
     "lint": {
-      "inputs": ["$TURBO_DEFAULT$", "biome.json", ".eslintrc.*"],
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "biome.json",
+        ".eslintrc.*"
+      ],
       "outputs": [],
       "cache": true
     },
@@ -299,17 +337,42 @@
       "cache": true
     },
     "test": {
-      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*", "playwright.config.*"],
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "jest.config.*",
+        "vitest.config.*",
+        "playwright.config.*"
+      ],
       "outputs": [],
       "cache": true
     },
     "test:coverage": {
-      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"],
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "jest.config.*",
+        "vitest.config.*"
+      ],
       "outputs": ["coverage/**"],
       "cache": true
     },
     "type-check": {
-      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "tsconfig.*.json"],
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "tsconfig.json",
+        "tsconfig.*.json"
+      ],
       "outputs": [],
       "cache": true
     },

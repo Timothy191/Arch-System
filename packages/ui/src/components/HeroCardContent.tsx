@@ -7,6 +7,40 @@ import { cn } from '../lib/utils';
 import type { Panel } from './hero-types';
 import { Logo } from './Logo';
 
+export function SystemGoldenSeparator({
+  testId,
+  className,
+}: {
+  testId?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      data-testid={testId}
+      aria-hidden="true"
+      className={cn('flex w-full items-center justify-center gap-2', className)}
+    >
+      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+      <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="22.75 16.625 166.16 166.19"
+          className="h-3 w-3 fill-current text-accent-amber motion-safe:animate-pulse"
+          aria-hidden="true"
+        >
+          <path
+            d="m 105.8125,16.625 c -7.39687,18.135158 -11.858304,29.997682 -20.09375,47.59375 5.04936,5.35232 11.247211,11.585364 21.3125,18.625 C 96.210077,78.390904 88.828713,73.920352 83.3125,69.28125 72.7727,91.274163 56.259864,122.60209 22.75,182.8125 49.087628,167.60733 69.504089,158.23318 88.53125,154.65625 87.714216,151.1422 87.2497,147.34107 87.28125,143.375 l 0.03125,-0.84375 c 0.417917,-16.87382 9.195665,-29.84979 19.59375,-28.96875 10.39809,0.88104 18.48041,15.28242 18.0625,32.15625 -0.0786,3.17512 -0.43674,6.22955 -1.0625,9.0625 18.82058,3.68164 39.01873,13.03179 65,28.03125 -5.123,-9.4318 -9.69572,-17.93388 -14.0625,-26.03125 -6.87839,-5.33121 -14.05289,-12.2698 -28.6875,-19.78125 10.05899,2.61375 17.2611,5.62932 22.875,9 C 124.63297,63.338161 121.03766,52.354109 105.8125,16.625 z"
+            fillRule="evenodd"
+          />
+        </svg>
+      </span>
+      <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+      <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+    </div>
+  );
+}
+
 interface HeroTelemetrySeries {
   title: string;
   unit: string;
@@ -160,6 +194,18 @@ function getHeroTelemetrySeries(
         fillId: 'grad-reports',
         points: [64, 69, 73, 76, 80, 84, 82, 88, 91, 93, 95, 97],
       };
+    case 'executive':
+      return {
+        title: 'Executive Production & OEE Reconciliation',
+        unit: 'reconciliation',
+        currentValue: stats?.value || '99.4% Sync',
+        deltaBadge: '+3.8% MTD Yield',
+        peakValue: '99.9%',
+        avgValue: '98.8%',
+        strokeColor: goldStroke,
+        fillId: 'grad-executive',
+        points: [74, 78, 81, 84, 87, 89, 91, 93, 95, 97, 98, 99],
+      };
     default:
       return {
         title: 'Central Operations Telemetry',
@@ -265,10 +311,9 @@ function HeroTelemetryGraph({
         </div>
 
         {/* Separator for Hero Card Graph */}
-        <div
-          data-testid={`hero-graph-separator-${panelName}`}
-          aria-hidden="true"
-          className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
+        <SystemGoldenSeparator
+          testId={`hero-graph-separator-${panelName}`}
+          className="relative z-10 mb-1.5"
         />
 
         <svg
@@ -548,6 +593,12 @@ export function getHeroKpiTiles(
         { label: 'Utilization', value: '94.6%', subtext: '+4.3% OEE' },
         { label: 'Closeout SLA', value: '100%', subtext: 'Shift Verified' },
       ];
+    case 'executive':
+      return [
+        { label: 'MTD Tonnage', value: '342,800 t', subtext: '+4.6% vs Plan' },
+        { label: 'Reconciliation', value: '99.4%', subtext: '0.6% Drift' },
+        { label: 'Executive OEE', value: '96.8%', subtext: 'All Sites Verified' },
+      ];
     default:
       return [
         { label: 'Active Modules', value: '11 / 11', subtext: 'All Systems Nominal' },
@@ -667,7 +718,9 @@ export function HeroCardContent({
                   ? { label: 'Availability Target: 95.0% [95%]', width: '95%' }
                   : panel.name === 'admin'
                     ? { label: 'System Compliance: 100% [100%]', width: '100%' }
-                    : { label: 'Target: 1,300m [95%]', width: '95%' };
+                    : panel.name === 'executive'
+                      ? { label: 'Reconciliation Target: 99.4% [99%]', width: '99%' }
+                      : { label: 'Target: 1,300m [95%]', width: '95%' };
 
   const isViewLogs =
     panel.primary.label.toLowerCase().includes('log') ||
@@ -722,15 +775,14 @@ export function HeroCardContent({
                 {panel.title}
               </h2>
             </div>
-            <div
-              data-testid={`hero-header-separator-${panel.name}`}
-              aria-hidden="true"
-              className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
-            />
-            <div className="relative">
+            <div className="relative space-y-2">
               <p className="max-w-[95%] font-medium text-slate-800 text-xs leading-relaxed tracking-[0.01em] sm:text-sm">
                 {assetSubtitle}
               </p>
+              <SystemGoldenSeparator
+                testId={`hero-header-separator-${panel.name}`}
+                className="relative z-10"
+              />
             </div>
           </div>
 

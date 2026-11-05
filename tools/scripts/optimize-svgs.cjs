@@ -11,10 +11,7 @@ const { optimize } = require('svgo');
 
 const ROOT = path.resolve(__dirname, '../..');
 
-const SCAN_DIRS = [
-  path.join(ROOT, 'apps/portal/public'),
-  path.join(ROOT, 'packages/ui/src'),
-];
+const SCAN_DIRS = [path.join(ROOT, 'apps/portal/public'), path.join(ROOT, 'packages/ui/src')];
 
 const SVGO_CONFIG = {
   multipass: true,

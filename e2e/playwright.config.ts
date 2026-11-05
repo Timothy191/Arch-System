@@ -95,7 +95,20 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // We only support chromium locally as per requirements, but defining mobile sizes
+    // Default to Chromium locally; enable WebKit field-tablet testing via PLAYWRIGHT_WEBKIT=1
+    ...(process.env.PLAYWRIGHT_WEBKIT === '1'
+      ? [
+          {
+            name: 'tablet-safari',
+            use: {
+              ...devices['iPad Pro 11'],
+              browserName: 'webkit' as const,
+              storageState: 'e2e/.auth/user.json',
+            },
+            dependencies: ['setup'],
+          },
+        ]
+      : []),
   ],
   webServer: process.env.BASE_URL
     ? undefined

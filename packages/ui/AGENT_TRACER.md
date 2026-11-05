@@ -1,5 +1,18 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-05T07:40:00+02:00 - Enlarge Hero Bottom Golden Separator, Standardize System Golden Separator & Add Executive Hero Card
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/hub`:
+  1. Slightly enlarge `hero-bottom-golden-separator` (`mt-4`, `gap-3`, `h-[2px]` gold rails, `h-2 w-2` diamonds) and its center emblem medallion (`h-6 w-6 sm:h-7 sm:w-7` / `h-3.5 w-3.5 sm:h-4 sm:w-4`) in `HeroRotator.tsx`.
+  2. Standardize the System Default Golden Separator (`SystemGoldenSeparator` — tapered gold rails + rotated diamonds + circular `gold-steel-border` Arch Emblem medallion) under the Hero Card subtitle (`hero-header-separator-${panel.name}`) and inside `HeroTelemetryGraph` (`hero-graph-separator-${panelName}`) in `HeroCardContent.tsx`.
+  3. Add `executive` (`Executive Dashboard`) telemetry series, KPI tiles, and target metadata in `HeroCardContent.tsx`.
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/HeroRotator.tsx` and `packages/ui/src/components/HeroCardContent.tsx`.
+- **Phase 3 (Design)**:
+  - Enlarged `hero-bottom-golden-separator` and its center medallion in `packages/ui/src/components/HeroRotator.tsx`.
+  - Created `SystemGoldenSeparator` in `packages/ui/src/components/HeroCardContent.tsx`, wired `hero-header-separator-${panel.name}` under `<p>{assetSubtitle}</p>`, replaced `hero-graph-separator-${panelName}`, and added `case 'executive':` telemetry/KPI support.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/hub/ui test` (25/25 PASS).
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/HeroRotator.tsx` and `packages/ui/src/components/HeroCardContent.tsx`.
+
 ## 2026-11-05T07:27:00+02:00 - Hero Card Telemetry X/Y Axes, Darkened Strip Font, Corporate KPI Bar & Refined 3D Depth
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/hub` Hero Cards (`HeroCardContent.tsx` and `HeroRotator.tsx`):

@@ -21,7 +21,7 @@ describe('DEPARTMENTS registry', () => {
       names.add(dept.name);
 
       expect(dept.displayName).toBeDefined();
-      expect(dept.route).toMatch(/^\/[a-z0-9-]+$/);
+      expect(dept.route).toMatch(/^\/[a-z0-9-]+(?:\/[a-z0-9-]+)*$/);
       expect(routes.has(dept.route)).toBe(false);
       routes.add(dept.route);
 
@@ -70,6 +70,7 @@ describe('DEPARTMENTS registry', () => {
     expect(departmentNames).toContain('admin');
     expect(departmentNames).toContain('overview');
     expect(departmentNames).toContain('office');
+    expect(departmentNames).toContain('executive');
     expect(departmentNames).not.toContain('safety');
     expect(departmentNames).not.toContain('training');
     expect(departmentNames).not.toContain('satellite-monitoring');

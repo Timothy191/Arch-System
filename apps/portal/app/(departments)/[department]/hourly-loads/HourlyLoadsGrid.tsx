@@ -4,7 +4,7 @@ import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { getBrowserSupabaseClient } from '@repo/supabase/client';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Lock, Search, X } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { logError } from '@/lib/errors/error-logger';
 import { trackClientMetric } from '@/lib/observability/client-telemetry';
@@ -618,6 +618,7 @@ function HourlyLoadsGrid({
   );
 
   const [machineSearch, setMachineSearch] = useState('');
+  const deferredMachineSearch = useDeferredValue(machineSearch);
   const [excavatorFilter, setExcavatorFilter] = useState('');
 
   const {
@@ -637,7 +638,7 @@ function HourlyLoadsGrid({
   );
 
   const filteredRows = useMemo(() => {
-    const query = machineSearch.trim().toLowerCase();
+    const query = deferredMachineSearch.trim().toLowerCase();
     return source
       .map((row, originalRowIndex) => ({ row, originalRowIndex }))
       .filter(({ row }) => {
@@ -656,7 +657,7 @@ function HourlyLoadsGrid({
             : row.excavatorId === excavatorFilter);
         return matchesMachine && matchesExcavator;
       });
-  }, [source, machineSearch, excavatorFilter]);
+  }, [source, deferredMachineSearch, excavatorFilter]);
 
   if (machines.length === 0) {
     return (

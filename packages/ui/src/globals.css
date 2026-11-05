@@ -84,6 +84,36 @@
     border-color: var(--arch-brand-blue);
     box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2);
   }
+
+  /* ── Intrinsic & Fluid Layout Utilities (INP & Responsive Design) ── */
+  .cq-inline {
+    container-type: inline-size;
+  }
+  .grid-intrinsic-sm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+  }
+  .grid-intrinsic-md {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+  }
+  .grid-intrinsic-lg {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1.5rem;
+  }
+  .p-fluid {
+    padding: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+  }
+  .gap-fluid {
+    gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+  }
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+  }
 }
 
 @layer base {

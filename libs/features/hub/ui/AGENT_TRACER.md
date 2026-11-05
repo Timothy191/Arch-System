@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-05T07:40:00+02:00 - Standardize Department Header Golden Separator & Executive Dashboard Hero/Module Support
+
+- **Purpose**: Standardize `dept-header-separator-${department.name}` in `DepartmentCard.tsx` using the System Default Golden Separator (tapered gold rails, rotated diamonds, and circular `gold-steel-border` Arch Emblem medallion), register `BarChart3` and `/images/departments/overview.jpg` for the `executive` (`Executive Dashboard`) module in `DepartmentCard.tsx` and `HeroRotator.tsx`, and verify `hero-header-separator-*` in `HeroRotator.test.tsx`.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Upgraded `dept-header-separator-${department.name}` to the System Default Golden Separator and added `BarChart3` / `executive` support.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Added `executive` (`EXECUTIVE ANALYTICS // EXEC-BI01`) mapping and overview media fallback.
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Added assertions for `hero-header-separator-*`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅ (25/25).
+
 ## 2026-11-05T07:27:00+02:00 - Verify Hero Card Telemetry X/Y Axes & High-Contrast Strip in HeroRotator Tests
 
 - **Purpose**: Add unit test assertions in `HeroRotator.test.tsx` verifying `hero-graph-x-axis`, `hero-graph-y-axis`, and darkened `00:00 SHIFT START` (`font-bold text-slate-900`) across Hero Cards.

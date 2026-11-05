@@ -218,10 +218,13 @@ describe('HeroRotator', () => {
       container.querySelectorAll('svg[aria-label*="telemetry trend graph"] circle')
     ).toHaveLength(0);
 
-    // Separators for telemetry graphs on all hero cards
+    // Separators for telemetry graphs and hero headers on all hero cards
     expect(screen.getByTestId('hero-graph-separator-central-command')).toBeInTheDocument();
     expect(screen.getByTestId('hero-graph-separator-drilling')).toBeInTheDocument();
     expect(screen.getByTestId('hero-graph-separator-production')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-header-separator-central-command')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-header-separator-drilling')).toBeInTheDocument();
+    expect(screen.getByTestId('hero-header-separator-production')).toBeInTheDocument();
 
     // Looping MP4 videos on each hero card + slim gold steel borders
     const overviewVideo = screen.getByTestId('hero-video-central-command');

@@ -91,7 +91,7 @@ export function CoreOperationalModules({
       style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering & Executive Quick-Access */}
-      <div className="flex flex-col justify-between gap-4 border-black/[0.08] border-b pb-4 lg:flex-row lg:items-center">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
           <h2 className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2.5 rounded-full border border-arch-border-subtle bg-white/85 py-1 pr-3 pl-1 font-semibold text-arch-text-primary text-sm tracking-tight shadow-xs ring-1 ring-white/80 ring-inset backdrop-blur-md transition-all duration-300 group-hover/row:border-arch-accent-blue/40 group-hover/row:text-arch-accent-blue sm:text-base">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-arch-accent-blue/35 bg-white text-arch-accent-blue shadow-sm">
@@ -233,6 +233,21 @@ export function CoreOperationalModules({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* System Default Golden Separator — divides header bar from module panels below */}
+      <div
+        data-testid="core-modules-header-separator"
+        aria-hidden="true"
+        className="flex w-full items-center justify-center gap-2.5 py-0.5"
+      >
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-[#c59b27]/75 to-[#f3d37a] shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
+        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[#b08318]/65 bg-gradient-to-br from-[#fff6d6] via-[#e6be5a] to-[#9e7312] shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
+        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#c59b27]/70 bg-gradient-to-b from-[#fffdf7] via-[#f7e7b4] to-[#d9ad42] shadow-[0_1px_5px_rgba(180,130,25,0.35),inset_0_1px_1px_rgba(255,255,255,0.95)]">
+          <Logo className="h-3 w-3 text-[#7a5608] drop-shadow-[0_0.5px_0_rgba(255,255,255,0.8)]" />
+        </span>
+        <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-[#b08318]/65 bg-gradient-to-br from-[#fff6d6] via-[#e6be5a] to-[#9e7312] shadow-[0_0_6px_rgba(212,175,55,0.55)]" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-[#c59b27]/75 to-[#f3d37a] shadow-[0_0_8px_rgba(212,175,55,0.45)]" />
       </div>
 
       {/* Grid Display */}

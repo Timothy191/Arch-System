@@ -2,9 +2,9 @@
 
 import { serverLogger } from '@repo/logger';
 import { createServerClient } from '@supabase/ssr';
-import { normalizeSupabaseCookies } from './cookie-utils';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { normalizeSupabaseCookies } from './cookie-utils';
 
 export { createClient };
 

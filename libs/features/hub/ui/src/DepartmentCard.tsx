@@ -6,6 +6,7 @@ import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
   ArrowUpRight,
+  BarChart3,
   Briefcase,
   Database,
   Drill,
@@ -50,6 +51,7 @@ const DEPARTMENT_ICON_MAP: Record<string, LucideIcon> = {
   Activity,
   Database,
   Briefcase,
+  BarChart3,
 };
 
 function ArchBookmarkIcon({ isPinned, className }: { isPinned: boolean; className?: string }) {
@@ -212,7 +214,7 @@ function DepartmentCard({
           <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[18px]">
             <Image
               src={
-                imageError
+                imageError || department.name === 'executive' || department.name === 'office'
                   ? '/images/departments/overview.jpg'
                   : department.name === 'reports'
                     ? '/images/departments/control-room.jpg'
@@ -321,8 +323,19 @@ function DepartmentCard({
             <div
               data-testid={`dept-header-separator-${department.name}`}
               aria-hidden="true"
-              className="my-1.5 h-px w-full bg-gradient-to-r from-accent-amber/75 via-accent-amber/35 to-transparent"
-            />
+              className="my-1.5 flex w-full items-center justify-center gap-2"
+            >
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+              <span className="gold-steel-border gold-steel-border-slim flex h-4.5 w-4.5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
+                <Logo
+                  variant="gold"
+                  className="h-2.5 w-2.5 text-accent-amber motion-safe:animate-pulse"
+                />
+              </span>
+              <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+            </div>
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>
 

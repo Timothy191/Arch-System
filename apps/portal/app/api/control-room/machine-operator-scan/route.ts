@@ -6,10 +6,10 @@ import {
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift, getOperationalToday } from '@repo/utils';
-import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
+import { CACHE_TAGS } from '@/lib/cache-tags';
 import { logError } from '@/lib/errors/error-logger';
-import { updateTag } from '@/lib/server-cache';
+import { revalidateTagInRouteHandler, updateTag } from '@/lib/server-cache';
 
 const serviceRow = <T extends z.ZodType>(schema: T) => z.array(schema);
 
@@ -667,9 +667,9 @@ export async function POST(request: Request) {
               },
             });
             if (!rpcObj.alreadyAssigned) {
-              await updateTag('table:machine_operations');
-              revalidateTag('control-room', 'max');
-              revalidateTag('machine-operations', 'max');
+              await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
+              await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
+              await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
             }
             return NextResponse.json(result, { status: rpcObj.alreadyAssigned ? 200 : 201 });
           }
@@ -762,9 +762,9 @@ export async function POST(request: Request) {
         machineQualification: 'not_configured',
       },
     });
-    await updateTag('table:machine_operations');
-    revalidateTag('control-room', 'max');
-    revalidateTag('machine-operations', 'max');
+    await updateTag(CACHE_TAGS.TABLE_MACHINE_OPERATIONS);
+    await revalidateTagInRouteHandler(CACHE_TAGS.CONTROL_ROOM, 'max');
+    await revalidateTagInRouteHandler(CACHE_TAGS.MACHINE_OPERATIONS, 'max');
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     logError(error, { context: 'control_room_machine_operator_scan' });
