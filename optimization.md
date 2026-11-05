@@ -3473,3 +3473,133 @@ export default async function DepartmentReportPage({
 
 - `instrumentation.ts`: Server startup lifecycle hook runs before request handling to initialize tracing, verify Redis health, and validate Supabase connections.
 - OpenTelemetry export: Traces spans across database queries, external ERP API calls, and SCADA stream ingestion with Pino structured logging.
+
+---
+
+# Section 34: Tailwind CSS Deep Architecture, Responsive Design, OKLCH Tokens & Ecosystem Cross-Analysis
+
+> **Source**: [Tailwind CSS Core Concepts](https://tailwindcss.com/docs), [Tailwind CSS v4 & Next Gen Engine](https://github.com/tailwindlabs/tailwindcss), Materialize CSS, Awesome CSS Frameworks, Water.css, Stitches CSS, Metro UI, React Bits & Reverse Engineering UI Primitives  
+> **Key Focus Areas**: Responsive Design (`sm`, `md`, `lg`, `xl`, `2xl`, mobile-first paradigms), Breakpoint Ranges (`max-*`, arbitrary values), CSS Container Queries (`@container`, `@sm`, `@md`, `@lg`, container units `cqw`/`cqh`/`cqb`), Theme Variables (`@theme`, namespaces `--color-*`, `--spacing-*`, `--radius-*`, `--breakpoint-*`, `--container-*`), OKLCH Color Geometry & Palette Architecture (11-step lightness ramp, perceptual uniformity, wide-gamut display-p3 rendering), Static Class Detection & Scan Boundaries (`@source`, `@source inline()`, no string concatenation), and Monorepo Industrial Adaptation.
+
+---
+
+## 1. Responsive Design & Mobile-First Breakpoint Architecture
+
+### 1.1 The Mobile-First Paradigm
+
+Tailwind CSS adheres strictly to a mobile-first design principle:
+
+1. **Unprefixed Utilities Target All Screens (Mobile First)**: Utilities without breakpoint prefixes (e.g. `block`, `text-sm`, `p-4`) apply unconditionally from 0px viewport width and upward.
+2. **Prefixed Utilities Are Min-Width Breakpoints**: Breakpoints (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`) represent `@media (min-width: ...)` rules. They only activate at or above the designated threshold.
+   - `sm`: `40rem` (640px)
+   - `md`: `48rem` (768px)
+   - `lg`: `64rem` (1024px)
+   - `xl`: `80rem` (1280px)
+   - `2xl`: `96rem` (1536px)
+
+> [!IMPORTANT]
+> Never use `sm:` to style mobile devices. `sm:` means "at 640px and wider". Always author base mobile styles using unprefixed utilities, then override responsively at `md:` and `lg:` breakpoints.
+
+### 1.2 Breakpoint Ranges & Max-Width Media Queries
+
+When UI components need styles bounded to specific viewport spans:
+
+- **Max-width variants**: `max-sm`, `max-md`, `max-lg`, `max-xl`, `max-2xl` apply below the specified width (e.g., `max-md` represents `@media (width < 48rem)`).
+- **Stacked Range Queries**: Combining a min-width variant with a max-width variant isolates styling to an exact interval:
+  ```html
+  <div class="md:max-xl:flex hidden">
+    <!-- Visible only between 768px and 1279px (tablets / small laptops) -->
+  </div>
+  ```
+- **Arbitrary Breakpoints**: When non-standard hardware screens (e.g. rugged mining ruggedized tablets, in-cab haul truck displays) require one-off breakpoints:
+  ```html
+  <div class="min-[360px]:grid max-[1020px]:p-2">...</div>
+  ```
+
+---
+
+## 2. Container Queries (`@container`) & Component-Centric Responsiveness
+
+### 2.1 Why Container Queries Transcend Viewport Queries
+
+In modular component-driven architectures (such as Arch-System's multi-departmental portal with glass panels, sidebars, and drawer modals), a component's available width depends on its container's layout, not the global viewport:
+
+- An equipment status widget inside an expanded 4-column dashboard grid has 280px width.
+- The identical widget in a single-column drill-down drawer modal has 600px width on the exact same device.
+- **Container queries decouple component responsiveness from page layout**.
+
+### 2.2 Standard Container Query Classes
+
+1. **Declare Container**: `@container` creates an inline-size query container (`container-type: inline-size`).
+2. **Container Sizing Queries**:
+   - `@xs`: 20rem (320px)
+   - `@sm`: 24rem (384px)
+   - `@md`: 28rem (448px)
+   - `@lg`: 32rem (512px)
+   - `@xl`: 36rem (576px)
+   - `@2xl`: 42rem (672px)
+   - `@3xl`: 48rem (768px)
+   - `@4xl`: 56rem (896px)
+3. **Named Containers**: Using `@container/kpi` and `@md/kpi:grid-cols-2` enables targeting ancestor containers across nested component boundaries without collision.
+4. **Container Units**: `cqw` (container query width percentage), `cqh` (container query height percentage), and `cqi` (container query inline size) enable fluid mathematical typography and concentric paddings relative to component footprint.
+
+---
+
+## 3. Theme Variables, Namespaces & Design Token SSoT
+
+### 3.1 `@theme` vs. `:root`
+
+- `:root` declares pure CSS custom properties that do not instruct Tailwind's compiler to synthesize utility classes.
+- `@theme` defines compile-time design tokens that simultaneously generate utility classes, variant modifiers, and CSS variables across standard namespaces:
+  - `--color-*` -> `bg-*`, `text-*`, `border-*`, `shadow-*`, `ring-*`
+  - `--spacing-*` -> `p-*`, `m-*`, `w-*`, `h-*`, `gap-*`, `space-*`
+  - `--radius-*` -> `rounded-*`
+  - `--breakpoint-*` -> responsive prefixes (`md:`, `custom:`)
+  - `--container-*` -> container query prefixes (`@sm:`, `@xl:`)
+  - `--animate-*` -> animation classes + `@keyframes`
+
+### 3.2 OKLCH Color Space & Light-Mode Invariant
+
+- **Perceptual Uniformity**: Unlike sRGB or HSL where 50% lightness in yellow is blindingly bright while 50% lightness in blue is nearly black, OKLCH (Lightness, Chroma, Hue) preserves uniform perceived luminance across all color angles.
+- **Alpha Modifiers with CSS Variables**: When CSS variables are wrapped in `color-mix(in srgb, var(--token) calc(alpha * 100%), transparent)`, Tailwind opacity modifiers (`bg-dept-drilling/10`) function seamlessly without hardcoding RGB channels.
+- **Arch-System Light-Mode Invariant**: Semantic tokens in `packages/theme/src/tokens/index.ts` dictate `#f3f4f6` canvas, charcoal neutrals, and vivid OKLCH accent highlights with zero dark-mode variants.
+
+---
+
+## 4. Class Scanning, Static Extraction & Source Boundaries
+
+### 4.1 Plain Text Tokenizer Constraints
+
+Tailwind does not parse JavaScript ASTs; it regex-tokenizes raw source files for valid class candidates:
+
+- **No Dynamic String Interpolation**:
+
+  ```tsx
+  // FORBIDDEN - Fails static detection; CSS classes are purged
+  <div className={`text-${status}-600`} />;
+
+  // CORRECT - Full static strings detectable at build-time
+  const STATUS_CLASSES: Record<EquipmentStatus, string> = {
+    operational: 'text-arch-emerald',
+    warning: 'text-arch-amber',
+    critical: 'text-arch-red',
+  };
+  <div className={STATUS_CLASSES[status]} />;
+  ```
+
+- **Monorepo Source Boundary Registration**:
+  When UI primitives live in a shared package (e.g. `@repo/ui`), Tailwind must be explicitly directed to scan the package files via `@source` or `content` globs in `packages/theme/src/tailwind/preset.ts`.
+- **Safelisting**: Dynamic classes computed at runtime must be explicitly declared in `safelist` regular expressions or forced into the bundle using `@source inline(...)`.
+
+---
+
+## 5. Ecosystem Cross-Analysis & Comparative Paradigms
+
+| Framework / Paradigm     | Core Architecture                                             | Key Strengths                                                                                   | Discarded Aspects (Arch-System Reality)                                                           | Adopted Best Practices                                                            |
+| :----------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------- |
+| **Tailwind CSS v3 / v4** | Utility-first compile-time engine with OKLCH theme tokens     | Minimal runtime overhead, zero CSS bundle bloat, container queries, instant build via Turbopack | Avoid dynamic className interpolation and excessive arbitrary values                              | OKLCH color token SSoT, mobile-first breakpoints, `@container` component sizing   |
+| **Materialize CSS**      | Class-based Material Design CSS framework                     | Clean standardized card components, ripple effects, grid layout                                 | Monolithic CSS bundle, heavy JS runtime dependencies (jQuery/M), material ripple overhead         | Glass elevation layers, structured KPI cards, clear visual hierarchy              |
+| **Water.css**            | Classless semantic HTML stylesheet                            | Automatic default styling for pure semantic tags (`<table`, `<dialog>`, `<form>`)               | Cannot support multi-department industrial dashboards or complex data tables                      | Beautiful, accessible browser defaults for raw prose and fallback states          |
+| **Stitches CSS**         | Zero-runtime CSS-in-JS with variant API                       | Type-safe variants (`variants: { variant: { ... } }`), token interpolation                      | Discontinued maintenance, CSS-in-JS runtime overhead incompatible with React 19 Server Components | CVA (Class Variance Authority) pattern for typed variant dispatch in `@repo/ui`   |
+| **Metro UI**             | Flat Windows Metro-inspired UI tiles and dashboard components | Clean industrial tile dashboards, high information density, status badges                       | Outdated flat design aesthetic, monolithic CSS framework                                          | High-density status tiles, SCADA live metric indicator layout                     |
+| **React Bits**           | Modern animated React components & UI micro-interactions      | High-performance Framer Motion & CSS keyframe animations, glass hover spotlights                | Heavy multi-layer canvas animations that drain field battery life                                 | Spotlight cards, subtle border glow transitions, accessible reduced-motion guards |
