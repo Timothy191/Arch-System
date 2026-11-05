@@ -3603,3 +3603,169 @@ Tailwind does not parse JavaScript ASTs; it regex-tokenizes raw source files for
 | **Stitches CSS**         | Zero-runtime CSS-in-JS with variant API                       | Type-safe variants (`variants: { variant: { ... } }`), token interpolation                      | Discontinued maintenance, CSS-in-JS runtime overhead incompatible with React 19 Server Components | CVA (Class Variance Authority) pattern for typed variant dispatch in `@repo/ui`   |
 | **Metro UI**             | Flat Windows Metro-inspired UI tiles and dashboard components | Clean industrial tile dashboards, high information density, status badges                       | Outdated flat design aesthetic, monolithic CSS framework                                          | High-density status tiles, SCADA live metric indicator layout                     |
 | **React Bits**           | Modern animated React components & UI micro-interactions      | High-performance Framer Motion & CSS keyframe animations, glass hover spotlights                | Heavy multi-layer canvas animations that drain field battery life                                 | Spotlight cards, subtle border glow transitions, accessible reduced-motion guards |
+
+---
+
+# Section 35: High-Performance Toolchain, Bundlers, Runtimes & Library Architecture Assessment
+
+> **Source**: [Webpack](https://github.com/webpack/webpack), [Lodash](https://github.com/lodash/lodash), [Jest](https://github.com/jestjs/jest), [Babel](https://github.com/babel/babel), [Parcel](https://github.com/parcel-bundler/parcel), [ToolJet](https://github.com/ToolJet/ToolJet), [esbuild](https://github.com/evanw/esbuild), [date-fns](https://github.com/date-fns/date-fns), [TheAlgorithms/JavaScript](https://github.com/TheAlgorithms/JavaScript)  
+> **Key Focus Areas**: Bundler Architectures (Webpack vs Turbopack vs esbuild vs Parcel), Transpiler Evolution (Babel vs SWC vs Biome), Modern Testing Frameworks (Jest 30 + `@swc/jest` vs Vitest), Utility Libraries (Native ES2024 / Radix / Zod vs Legacy Lodash), Low-Code & Internal Tool Engines (ToolJet evaluation), Date/Time Handling (`date-fns` v4 / Temporal API vs Moment), and Algorithmic Primitives (SCADA real-time buffers, ring buffers, binary search, debouncing).
+
+---
+
+## 1. Bundler & Transpiler Landscape: Turbopack, Webpack, esbuild & Parcel
+
+### 1.1 Webpack (`webpack/webpack`)
+
+- **Current Role in Arch-System**: Fallback bundler configured via `apps/portal/next.config.mjs` (`dev:webpack` script and production fallback).
+- **Extracted Strengths**:
+  - Fine-grained splitChunks optimization and deterministic module IDs for long-term browser cache invalidation.
+  - Custom webpack performance budgets enforcing asset size ceilings (`maxAssetSize: 1024000` / 1.0 MB).
+- **Discarded Aspects**:
+  - Slow cold starts and heavy disk caching overhead for dev iteration compared to Rust-based bundlers.
+- **Architectural Verdict**: Retain as secondary fallback in `next.config.mjs`, while **Turbopack** (`--turbo`) remains primary for fast local development and Vercel remote builds.
+
+### 1.2 esbuild (`evanw/esbuild`)
+
+- **Current Role in Arch-System**: Pinned at `0.28.1` in root `package.json` for fast node script execution, standalone MCP server builds (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`), and build-time tooling.
+- **Extracted Strengths**:
+  - Near-instantaneous compilation speed written in Go.
+  - Zero-config bundling for CLI scripts and micro-services.
+- **Adopted Invariant**: Dedicated bundling engine for root `tools/` and standalone Node packages.
+
+### 1.3 Parcel (`parcel-bundler/parcel`)
+
+- **Assessment**: Zero-config multicore bundler with automatic worker threads.
+- **Discarded Aspects**: Next.js App Router relies on framework-integrated compilers (Turbopack / Webpack with SWC). Parcel cannot drive Next.js 16 server actions or React 19 RSC payloads.
+- **Architectural Verdict**: Discard from portal core.
+
+---
+
+## 2. Transpilers & Linters: Babel vs SWC vs Biome
+
+### 2.1 Babel (`babel/babel`)
+
+- **Current Role**: Pinned in `package.json` resolutions and selectively used for `babel-plugin-react-compiler` (`React Compiler 1.0.0` memoization).
+- **Discarded Aspects**: Full Babel transpilation pipelines are discarded in favor of `@swc/jest` and Next.js built-in SWC compiler, which runs 20x faster.
+- **Adopted Invariant**: Babel is strictly quarantined to AST plugins (e.g. React Compiler) without handling broad JS/TS transpilation.
+
+### 2.2 Biome
+
+- **Current Role**: Enforced SSoT for linting, formatting, and import sorting (`biome.json`), checking 1,570+ files in under 2 seconds.
+
+---
+
+## 3. Testing Infrastructure: Jest 30 & SWC (`jestjs/jest`)
+
+### 3.1 Current Integration
+
+- **Jest 30 + `@swc/jest`**: Canonical test runner across all monorepo packages (`@repo/contract`, `@repo/errors`, `@repo/rate-limiter`, `@repo/redis`, `@repo/supabase`, `@repo/utils`, `portal`).
+- **Extracted Best Practices**:
+  - JSDOM isolated testing environment with mocked Next.js cache and browser globals.
+  - Network boundary mocking pattern: mock at external clients (Supabase, Redis, fetch), never mock internal domain logic.
+  - Strict coverage thresholds (Portal: lines 40, branches 27, functions 28, statements 40).
+
+---
+
+## 4. Utility Libraries: Native ES2024 vs Lodash (`lodash/lodash`)
+
+### 4.1 Why Lodash is Prohibited
+
+- **Bundle Bloat & Tree-Shaking Failure**: Importing uncurried Lodash or CommonJS modules pollutes client bundles with duplicate helpers and prototype pollution vectors.
+- **Modern JavaScript Equivalence**:
+  - Deep clone: Native `structuredClone()` (ES2022).
+  - Object manipulation: `Object.entries()`, `Object.fromEntries()`, `Object.groupBy()` (ES2024).
+  - Array searching/flattening: `Array.prototype.flat()`, `flatMap()`, `toReversed()`, `toSorted()`.
+  - Type checking & validation: `@repo/contract` Zod schemas provide runtime type safety and validation that Lodash type helpers lack.
+- **Architectural Verdict**: **Discard `lodash` completely**. Prohibit adding `lodash` to workspace dependencies.
+
+---
+
+## 5. Low-Code & Internal Operations: ToolJet Assessment (`ToolJet/ToolJet`)
+
+### 5.1 Assessment
+
+- **What is ToolJet**: An open-source low-code framework for building internal tools on top of databases and APIs.
+- **Arch-System Reality**:
+  - Arch-System is a specialized industrial SCADA and mining operations portal with sub-second WebSocket telemetry, hardware interlocks, and strict light-mode OKLCH aesthetics.
+  - Low-code visual builders lack strict TypeScript contracts, multi-tenant Postgres RLS InitPlan guarantees, and offline form persistence needed in open-pit mining environments.
+- **Extracted Concepts**:
+  - Role-Based Access Control (RBAC) permission matrices.
+  - Dynamic table querying and schema inspection ideas.
+- **Architectural Verdict**: Discard tool adoption; maintain custom Next.js 16 App Router architecture.
+
+---
+
+## 6. Date & Time Architecture: `date-fns` vs Moment (`date-fns/date-fns`)
+
+### 6.1 `date-fns` Adoption in Arch-System
+
+- **Configured Package**: Included in `optimizePackageImports` in `apps/portal/next.config.mjs`.
+- **Extracted Strengths**:
+  - Pure modular functions, immutable date operations, and zero prototype pollution.
+  - 100% tree-shakeable: importing `format`, `differenceInMinutes`, `subDays` loads only a few hundred bytes.
+  - Native timezone safety when combined with `@repo/contract` ISO-8601 UTC timestamps.
+- **Discarded Alternatives**: Heavy monolithic libraries like `moment.js` (un-treeshakeable, mutable state).
+
+---
+
+## 7. Algorithmic Primitives: Mining SCADA Telemetry (`TheAlgorithms/JavaScript`)
+
+### 7.1 SCADA Real-Time Ring Buffer
+
+In high-throughput sensor telemetry (such as drilling depths, blast hole pressure, and excavator tonnage), storing unbounded arrays in React state causes garbage collection thrashing and memory leaks.
+
+- **Ring Buffer (Circular Queue) Implementation**:
+
+  ```typescript
+  export class ScadaRingBuffer<T> {
+    private readonly buffer: (T | undefined)[];
+    private head = 0;
+    private tail = 0;
+    private count = 0;
+
+    constructor(public readonly capacity: number) {
+      this.buffer = new Array<T | undefined>(capacity);
+    }
+
+    push(item: T): void {
+      this.buffer[this.tail] = item;
+      this.tail = (this.tail + 1) % this.capacity;
+      if (this.count < this.capacity) {
+        this.count++;
+      } else {
+        this.head = (this.head + 1) % this.capacity;
+      }
+    }
+
+    toArray(): T[] {
+      const result: T[] = [];
+      for (let i = 0; i < this.count; i++) {
+        const item = this.buffer[(this.head + i) % this.capacity];
+        if (item !== undefined) result.push(item);
+      }
+      return result;
+    }
+  }
+  ```
+
+- **Binary Search on Time-Series Data**:
+  - Finding metric thresholds or sensor incidents in sorted telemetry snapshots runs in $O(\log n)$ instead of linear $O(n)$ scanning.
+- **Debounce & Exponential Backoff**:
+  - Leveraged in `libs/shared/hooks/useDebounce.ts` and `libs/shared/hooks/useSupabaseRealtime.ts` for network reconnect jitter and form autosave throttling.
+
+---
+
+## 8. Summary Toolchain Matrix
+
+| Repository / Tool | Status in Arch-System       | Purpose & Policy                                                          |
+| :---------------- | :-------------------------- | :------------------------------------------------------------------------ |
+| **Webpack**       | Retained (Fallback)         | Next.js fallback bundler; performance asset budgets                       |
+| **esbuild**       | Retained (SSoT CLI/Tooling) | Sub-second builds for standalone MCP servers and internal tools           |
+| **Parcel**        | Discarded                   | Not compatible with Next.js 16 App Router / RSC payload compilation       |
+| **Babel**         | Targeted (Compiler AST)     | Pinned solely for `babel-plugin-react-compiler`                           |
+| **Jest 30**       | Retained (SSoT Testing)     | Monorepo unit and integration runner paired with `@swc/jest`              |
+| **Lodash**        | Prohibited                  | Replaced with native ES2024 (`Object.groupBy`, `structuredClone`) and Zod |
+| **ToolJet**       | Discarded                   | Industrial SCADA demands tailored Next.js 16 + Supabase RLS architecture  |
+| **date-fns**      | Retained (SSoT Dates)       | Modular, tree-shakeable date formatting in `optimizePackageImports`       |
+| **TheAlgorithms** | Extracted Patterns          | SCADA circular ring buffer, binary search on sorted telemetry streams     |
