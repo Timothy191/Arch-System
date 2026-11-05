@@ -6,6 +6,7 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./useMainThreadYield": "./src/useMainThreadYield.ts",
     "./useThrottledDebounce": "./src/useThrottledDebounce.ts"
   },
   "dependencies": {

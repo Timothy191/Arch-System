@@ -14,6 +14,7 @@ import { SkipLinks } from '@/components/accessibility/SkipLinks';
 import { ClientOverlays } from '@/components/ClientOverlays';
 import { MenuIdentity, MenuIdentitySkeleton } from '@/components/nav/MenuIdentity';
 import { RouteAnnouncer } from '@/components/RouteAnnouncer';
+import { SpeculationRules } from '@/components/SpeculationRules';
 import { SystemTrayPill } from '@/components/system/SystemTray';
 import { DepartmentReviews } from '@/features/hub';
 import ClientProviders from './ClientProviders';
@@ -180,10 +181,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           rel="dns-prefetch"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
+        <SpeculationRules />
       </head>
       <body
         suppressHydrationWarning
-        className={`${ibmPlexSans.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} relative min-h-screen overflow-x-hidden bg-transparent font-sans text-[var(--text-heading)] antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)]`}
+        className={`${ibmPlexSans.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} relative min-h-dvh overflow-x-hidden bg-transparent font-sans text-[var(--text-heading)] antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)]`}
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />
