@@ -3769,3 +3769,99 @@ In high-throughput sensor telemetry (such as drilling depths, blast hole pressur
 | **ToolJet**       | Discarded                   | Industrial SCADA demands tailored Next.js 16 + Supabase RLS architecture  |
 | **date-fns**      | Retained (SSoT Dates)       | Modular, tree-shakeable date formatting in `optimizePackageImports`       |
 | **TheAlgorithms** | Extracted Patterns          | SCADA circular ring buffer, binary search on sorted telemetry streams     |
+
+---
+
+# Section 36: Distributed Workflow Orchestration, Event-Driven Topologies & ML Prediction Engines
+
+> **Source**: [Netflix Conductor](https://github.com/Netflix/conductor), [Conductor OSS](https://github.com/conductor-oss/conductor), [Cadence Workflow](https://github.com/cadence-workflow/cadence), [Sheenflow](https://github.com/GuinsooLab/sheenflow), [Ultracode Workflows](https://github.com/hesreallyhim/ultracode-workflows), [XGBoost](https://github.com/dmlc/xgboost), [Dapr Distributed Application Runtime](https://github.com/dapr/dapr)  
+> **Key Focus Areas**: Microservice Workflow Orchestration (Conductor vs Cadence/Temporal vs Inngest/n8n), Durable Execution & State Machines (Cadence event history vs XState vs Redis Streams), Dataflow / Pipeline Orchestration (Sheenflow / Dagster patterns), Agentic Multi-Step Workflows (Ultracode), Gradient Boosted Machine Learning for Predictive Maintenance (XGBoost vs heuristic models), and Cloud-Native Sidecar Runtimes (Dapr state management, pub/sub, service invocation, and secrets).
+
+---
+
+## 1. Enterprise Microservice Workflow Orchestration: Conductor & Cadence
+
+### 1.1 Netflix Conductor (`Netflix/conductor` & `conductor-oss/conductor`)
+
+- **Core Architecture**: Centralized JSON DSL-driven orchestration engine backed by Redis/Cassandra and Elasticsearch/OpenSearch.
+- **Workflow Paradigm**: Directed Acyclic Graphs (DAGs) defined declaratively with tasks (HTTP, worker tasks, fork/join, dynamic forks).
+- **Arch-System Reality & Assessment**:
+  - Heavy Java/JVM server footprint requiring dedicated Elasticsearch/OpenSearch clusters and ZooKeeper/Dynomite coordinators.
+  - Excessive operational burden for a Next.js 16 + Supabase monorepo deployed to Vercel and local Redis.
+- **Extracted Architecture Concepts**:
+  - Task state machine transitions (`SCHEDULED` -> `IN_PROGRESS` -> `COMPLETED` / `FAILED_WITH_TERMINAL_ERROR`).
+  - Worker polling with lease timeouts and exponential backoff retry policies.
+  - Monitored workflow registries (`WORKFLOW_REGISTRY` in `apps/portal/workflows/index.ts`).
+- **Architectural Verdict**: Discard heavy Java Conductor server. Use lightweight TypeScript workflows and Inngest/n8n event triggers.
+
+### 1.2 Cadence (`cadence-workflow/cadence`) & Temporal Paradigm
+
+- **Core Architecture**: Code-as-configuration durable execution engine where workflows are written in standard imperative code (Go/Java/TS) and execution state is preserved via append-only event histories.
+- **Key Invariants**:
+  - Workflows must be deterministic (no non-deterministic `Math.random()`, direct `Date.now()`, or direct I/O inside workflow functions).
+  - All non-deterministic operations must be wrapped in **Activities** with explicit retry policies and timeouts.
+- **Adopted Principles in Arch-System**:
+  - Durable sleep and escalation in `apps/portal/workflows/equipment-maintenance.ts` (e.g., notify engineering -> sleep 24h -> escalate if breakdown unresolved).
+  - XState 5 state machines (`orchestrator.machine.ts`) for deterministic client-side transitions.
+
+---
+
+## 2. Data Pipelines & Agent Workflows: Sheenflow & Ultracode Workflows
+
+### 2.1 Sheenflow (`GuinsooLab/sheenflow`)
+
+- **Core Paradigm**: Dagster-compatible Python/Rust data asset orchestrator emphasizing software-defined assets, lineage tracking, and data observability.
+- **Extracted Concepts**:
+  - Shift compilation pipelines: SCADA telemetry ingestion -> validation -> aggregation -> PDF artifact generation.
+  - Explicit data dependency graphs (`AssetMaterialization`) for shift closeout audits.
+- **Architectural Verdict**: Discard full Python Sheenflow runtime; maintain typed TypeScript pipelines via Kysely and Supabase RPCs.
+
+### 2.2 Ultracode Workflows (`hesreallyhim/ultracode-workflows`)
+
+- **Core Paradigm**: Modular AI coding agent and developer tool workflow pipelines.
+- **Extracted Concepts**:
+  - Multi-phase Agent Execution contracts (comprehension -> evidence -> design -> criticism -> execution) codified in `.agents/skills/structured-thinking/SKILL.md`.
+  - Quality verification gates (27-gate completion criteria in `agent-verify.sh`).
+
+---
+
+## 3. Machine Learning: Gradient Boosted Trees for Predictive Fleet Maintenance (`dmlc/xgboost`)
+
+### 3.1 XGBoost Fleet Anomaly Scoring
+
+- **Context in Arch-System**:
+  Mining equipment (CAT 793 haul trucks, Sandvik drill rigs) produces continuous SCADA metrics:
+  - Cumulative engine hours (SMU)
+  - Oil pressure and hydraulic temperature deltas
+  - Vibration spectra and historical breakdown frequency
+- **Integration Architecture (`apps/portal/app/api/ml/predictive-maintenance/route.ts`)**:
+  - Fast edge heuristic models analyze breakdown frequency and sensor telemetry.
+  - Complex gradient boosted tree inferences (XGBoost binary classification for failure probability within 7 days) are evaluated through external model serving endpoints (e.g. FastAPI/ONNX Runtime) or vectorized SQL feature tables.
+- **Extracted Best Practice**:
+  - Feature engineering pipeline: Windowed aggregations over 30 days (`breakdowns.gte('date_in', thirtyDaysAgo)`), mean time between failures (MTBF), and delta operating temperatures.
+
+---
+
+## 4. Cloud-Native Distributed Systems: Dapr Runtime (`dapr/dapr`)
+
+### 4.1 Dapr (Distributed Application Runtime) Architecture
+
+- **Core Paradigm**: Sidecar architecture providing platform-agnostic building blocks (State Management, Pub/Sub, Service Invocation, Bindings, Secrets).
+- **Arch-System Alignment**:
+  - **State Store**: Abstracted via `@repo/redis` (`cacheGetOrSet`, multi-tier L1/L2 Redis caching, distributed locks).
+  - **Pub/Sub**: Handled via Supabase Realtime CDC channels (`useSupabaseRealtime`) and Redis Streams.
+  - **Secrets Management**: Zod/t3-env validated server-only environment variables without exposing service keys to client bundles.
+- **Architectural Verdict**: Discard Dapr sidecar daemon deployment (Vercel serverless functions do not support long-running sidecar processes); retain Dapr's clean API boundary principles in `@repo/*` packages.
+
+---
+
+## 5. Comparative Orchestration Matrix
+
+| Technology             | Execution Architecture                    | Persistence / Store              | Arch-System Role       | Decision & Justification                                                                 |
+| :--------------------- | :---------------------------------------- | :------------------------------- | :--------------------- | :--------------------------------------------------------------------------------------- |
+| **Netflix Conductor**  | Centralized JSON DAG orchestration        | Dynomite / Redis / Elasticsearch | Discarded              | Heavy Java/JVM server footprint incompatible with lean serverless Next.js                |
+| **Cadence / Temporal** | Replay-based durable event history        | Cassandra / MySQL / Postgres     | Extracted Pattern      | Deterministic workflow vs. activity separation; durable sleep escalation                 |
+| **Sheenflow**          | Software-defined data asset graph         | SQLite / PostgreSQL              | Extracted Pattern      | Shift compilation DAG lineage tracking without Python runtime bloat                      |
+| **Ultracode**          | Multi-agent execution pipelines           | Local filesystem / JSON          | Adopted                | Structured multi-phase thinking & 27-gate verification contracts                         |
+| **XGBoost**            | Gradient boosted decision trees           | libxgboost / ONNX                | Extracted Architecture | Predictive maintenance pipeline for fleet component wear and MTBF scoring                |
+| **Dapr**               | Language-agnostic sidecar building blocks | Pluggable (Redis, Kafka, AWS)    | Extracted Principles   | Unified repository interfaces (`@repo/redis`, `@repo/supabase`) without sidecar overhead |
