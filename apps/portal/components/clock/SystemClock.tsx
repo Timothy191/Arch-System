@@ -5,7 +5,7 @@ import { cn } from '@repo/ui/lib/utils';
 import { useEffect, useState } from 'react';
 
 // AGENT-TRACE: Consolidated clock timer effect and guarded setTime/setTimeStr updates to prevent state update depth recursion in Turbopack.
-export function SystemClock() {
+export function SystemClock({ embedded = false }: { readonly embedded?: boolean } = {}) {
   const [timeStr, setTimeStr] = useState<string>('');
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
@@ -84,9 +84,13 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95"
+          className={cn(
+            embedded
+              ? 'flex cursor-default select-none items-center gap-1 rounded-full px-1 outline-none transition-colors hover:text-[var(--accent-blue)] active:scale-95'
+              : 'gold-steel-border gold-steel-border-slim flex h-7 cursor-default select-none items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm outline-none backdrop-blur-md transition-colors hover:bg-[var(--material-thin)] active:scale-95'
+          )}
         >
-          <span className="font-mono font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
+          <span className="font-mono font-semibold text-[12px] text-[var(--text-heading)] tabular-nums leading-none">
             {timeStr}
           </span>
         </button>

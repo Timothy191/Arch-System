@@ -53,7 +53,11 @@ export {
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
-const SystemTrayPillInner = function SystemTrayPillInner() {
+const SystemTrayPillInner = function SystemTrayPillInner({
+  embedded = false,
+}: {
+  readonly embedded?: boolean;
+}) {
   const [trayOpen, setTrayOpen] = useState(false);
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
@@ -115,9 +119,9 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
   return (
     <div
       className={cn(
-        'gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full px-2.5',
-        'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md',
-        'transition-colors'
+        'flex items-center gap-1.5',
+        !embedded &&
+          'gold-steel-border gold-steel-border-slim h-7 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md transition-colors'
       )}
     >
       {!isAuthRoute && (
@@ -319,10 +323,10 @@ const SystemTrayPillInner = function SystemTrayPillInner() {
   );
 };
 
-export function SystemTrayPill() {
+export function SystemTrayPill({ embedded = false }: { readonly embedded?: boolean } = {}) {
   return (
     <Suspense fallback={null}>
-      <SystemTrayPillInner />
+      <SystemTrayPillInner embedded={embedded} />
     </Suspense>
   );
 }

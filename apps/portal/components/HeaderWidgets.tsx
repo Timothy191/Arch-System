@@ -22,24 +22,37 @@ const ServicesDropdown = dynamic(
  * lazy-loaded chunk for the top taskbar header. Support / Feedback is now
  * cleanly merged into SystemTrayPill.
  */
-function WidgetFallback({ width = 'w-7' }: { width?: string }) {
+function WidgetFallback({ width = 'w-14' }: { width?: string }) {
   return (
-    <div
-      className={`${width} liquid-glass-light h-7 animate-pulse rounded-full border border-white/20`}
-      aria-hidden="true"
-    />
+    <div className={`${width} h-4 animate-pulse rounded-full bg-black/5`} aria-hidden="true" />
   );
 }
 
 export function HeaderWidgets() {
   return (
     <>
-      <Suspense fallback={<WidgetFallback width="w-20" />}>
-        <SystemClock />
+      <span
+        aria-hidden="true"
+        data-testid="system-tray-gold-separator"
+        className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+      >
+        |
+      </span>
+
+      <Suspense fallback={<WidgetFallback width="w-14" />}>
+        <SystemClock embedded />
       </Suspense>
 
-      <Suspense fallback={<WidgetFallback />}>
-        <ServicesDropdown />
+      <span
+        aria-hidden="true"
+        data-testid="system-tray-gold-separator"
+        className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]"
+      >
+        |
+      </span>
+
+      <Suspense fallback={<WidgetFallback width="w-4" />}>
+        <ServicesDropdown embedded />
       </Suspense>
     </>
   );

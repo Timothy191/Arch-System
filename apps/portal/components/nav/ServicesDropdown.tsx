@@ -106,7 +106,7 @@ function useSafetyAlerts() {
  * Shows environmental conditions, shift status, safety alerts,
  * and quick emergency actions.
  */
-export function ServicesDropdown() {
+export function ServicesDropdown({ embedded = false }: { readonly embedded?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const [sleeping, setSleeping] = useState(false);
@@ -156,20 +156,18 @@ export function ServicesDropdown() {
             aria-expanded={open}
             title="System Tray (Alt+S)"
             className={cn(
-              'gold-steel-border gold-steel-border-slim relative flex h-7 w-7 items-center justify-center rounded-full',
-              'border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)]',
-              'text-[var(--text-secondary)]',
-              'active:scale-[0.97]',
-              'transition-all duration-150 ease-in-out',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
-              'cursor-default select-none',
-              open && 'bg-[var(--material-thin)]'
+              'relative flex cursor-default select-none items-center justify-center rounded-full text-[var(--text-secondary)] transition-all duration-150 ease-in-out focus-visible:outline-none',
+              embedded
+                ? 'h-5 w-5 hover:text-[var(--text-heading)] active:scale-[0.95]'
+                : 'gold-steel-border gold-steel-border-slim h-7 w-7 border border-white/20 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md hover:bg-[var(--material-thin)] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.97]',
+              open && !embedded && 'bg-[var(--material-thin)]'
             )}
           >
             <Logo
               variant="gold"
               className={cn(
-                'h-4 w-4 transition-transform duration-200 ease-out',
+                embedded ? 'h-3.5 w-3.5' : 'h-4 w-4',
+                'transition-transform duration-200 ease-out',
                 open ? 'rotate-0' : 'rotate-180'
               )}
             />

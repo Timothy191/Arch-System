@@ -26,10 +26,9 @@ const HeaderWidgets = dynamic(
     })),
   {
     loading: () => (
-      <div className="flex items-center gap-3" aria-hidden="true">
-        <div className="liquid-glass-light h-7 w-7 animate-pulse rounded-full border border-white/20" />
-        <div className="liquid-glass-light h-7 w-20 animate-pulse rounded-full border border-white/20" />
-        <div className="liquid-glass-light h-7 w-7 animate-pulse rounded-full border border-white/20" />
+      <div className="flex items-center gap-1.5" aria-hidden="true">
+        <div className="h-4 w-14 animate-pulse rounded-full bg-black/5" />
+        <div className="h-4 w-4 animate-pulse rounded-full bg-black/5" />
       </div>
     ),
   }
@@ -209,8 +208,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   }
                   rightSlot={
                     <nav id="navigation" aria-label="Main menu">
-                      <div className="flex items-center gap-3">
-                        <SystemTrayPill />
+                      <div
+                        data-testid="taskbar-unified-pill"
+                        className="gold-steel-border gold-steel-border-slim flex h-7 items-center gap-1.5 rounded-full border border-white/20 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md transition-colors"
+                      >
+                        <SystemTrayPill embedded />
                         <HeaderWidgets />
                       </div>
                     </nav>

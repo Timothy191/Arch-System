@@ -1,3 +1,13 @@
+## 2026-11-05T07:08:00+02:00: Combine Right-Side Taskbar Controls into Single Unified Pill (`nav#navigation`)
+
+- **Phase 1 (Comprehension)**: Combine all right-side taskbar containing elements inside `nav#navigation` (`Return to Hub`, `Notifications`, `System Tray Popover`, `Support`, `SystemClock`, and `ServicesDropdown`) into a single pill-shaped container (`gold-steel-border gold-steel-border-slim rounded-full`).
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/layout.tsx`, `apps/portal/components/HeaderWidgets.tsx`, `apps/portal/components/system/SystemTray.tsx`, `apps/portal/components/clock/SystemClock.tsx`, and `apps/portal/components/nav/ServicesDropdown.tsx`.
+- **Phase 3 (Design)**:
+  - Wrapped `<SystemTrayPill embedded />` and `<HeaderWidgets />` inside a single unified `data-testid="taskbar-unified-pill"` pill container in `apps/portal/app/layout.tsx`.
+  - Added `embedded` mode to `SystemTrayPill`, `SystemClock`, and `ServicesDropdown`, and added gold separators (`data-testid="system-tray-gold-separator"`) between `Support`, `SystemClock`, and `ServicesDropdown` in `HeaderWidgets.tsx`.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="SystemTray|SystemClock|ServicesDropdown|HeaderWidgets"` (27/27 PASS) and `pnpm --filter portal lint`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/layout.tsx`, `apps/portal/components/HeaderWidgets.tsx`, `apps/portal/components/system/SystemTray.tsx`, `apps/portal/components/clock/SystemClock.tsx`, and `apps/portal/components/nav/ServicesDropdown.tsx`.
+
 ## 2026-11-05T07:02:00+02:00: Unified Gold Drilling Card Template, Streamlined 5-Column Tables, A4 Footer Logo & Machine Deduplication (`/control-room/reports`)
 
 - **Phase 1 (Comprehension)**: Address 14 design feedback items on `/control-room/reports` (`https://arch-system-kappap.vercel.app/control-room/reports`):
