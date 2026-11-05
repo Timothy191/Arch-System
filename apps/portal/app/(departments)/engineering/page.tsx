@@ -13,10 +13,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { withCache } from '@/lib/cache-utils';
-import { cachedRSC, cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
+import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-const ENGINEERING_HUB_REVALIDATE_SECONDS = 60;
 const MS_PER_DAY = 86_400_000;
 
 interface BreakdownSummary {

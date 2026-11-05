@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Truck,
 } from 'lucide-react';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
@@ -22,7 +21,7 @@ import { ProductionTrendChart } from '@/features/analytics/components/Production
 import { withCache } from '@/lib/cache-utils';
 import { logError } from '@/lib/errors/error-logger';
 import { classifyReconciliationDrift, RECONCILIATION_UI } from '@/lib/production-reconciliation';
-import { cachedRSC } from '@/lib/server-cache';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 // AGENT-TRACE: Typed interface for the get_production_summary RPC response.
 // Replaces the previous `any` annotations throughout this page.
@@ -76,127 +75,120 @@ function toNumber(v: number | string): number {
   return Number(v) || 0;
 }
 
-async function getExecutiveData(cookieList: Array<{ name: string; value: string }>) {
-  return cachedRSC(
-    ['hub', 'executive', new Date().toISOString().split('T')[0]!],
+async function getExecutiveData() {
+  'use cache';
+
+  cacheLife({ stale: 300, revalidate: 300, expire: 300 });
+  cacheTag('table:machines');
+  cacheTag('table:employees');
+  cacheTag('table:breakdowns');
+
+  return withCache(
     async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const today = new Date().toISOString().split('T')[0]!;
-          const monthStart = `${today.slice(0, 7)}-01`;
-          const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
+      const db = await createReadReplicaClient();
+      const today = new Date().toISOString().split('T')[0]!;
+      const monthStart = `${today.slice(0, 7)}-01`;
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
 
-          // Parallel fetch of Unified Production Summary (RPC) and all KPI counters
-          const [
-            { data: summaryData, error: summaryError },
-            { count: activeMachines },
-            { count: totalMachines },
-            { count: activeEmployees },
-            { data: breakdownsMtd },
-          ] = await Promise.all([
-            db.rpc('get_production_summary', {
-              p_start_date: thirtyDaysAgo,
-              p_end_date: today,
-            }),
-            db
-              .from('machines')
-              .select('id', { count: 'exact', head: true })
-              .eq('active', true)
-              .is('deleted_at', null),
-            db.from('machines').select('id', { count: 'exact', head: true }).is('deleted_at', null),
-            db
-              .from('employees')
-              .select('id', { count: 'exact', head: true })
-              .is('deleted_at', null),
-            db
-              .from('breakdowns')
-              .select('id, status')
-              .gte('date_in', monthStart)
-              .is('deleted_at', null),
-          ]);
+      // Parallel fetch of Unified Production Summary (RPC) and all KPI counters
+      const [
+        { data: summaryData, error: summaryError },
+        { count: activeMachines },
+        { count: totalMachines },
+        { count: activeEmployees },
+        { data: breakdownsMtd },
+      ] = await Promise.all([
+        db.rpc('get_production_summary', {
+          p_start_date: thirtyDaysAgo,
+          p_end_date: today,
+        }),
+        db
+          .from('machines')
+          .select('id', { count: 'exact', head: true })
+          .eq('active', true)
+          .is('deleted_at', null),
+        db.from('machines').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+        db.from('employees').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+        db
+          .from('breakdowns')
+          .select('id, status')
+          .gte('date_in', monthStart)
+          .is('deleted_at', null),
+      ]);
 
-          if (summaryError) {
-            await logError(summaryError, {
-              context: 'hub.executive.get_production_summary',
-            });
-          }
+      if (summaryError) {
+        await logError(summaryError, {
+          context: 'hub.executive.get_production_summary',
+        });
+      }
 
-          const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
-          const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
+      const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
+      const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
 
-          // Compute MTD aggregates
-          const totalCoalMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_coal_tonnes), 0);
-          const totalWasteMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_waste_tonnes), 0);
-          const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
-          const totalFuelMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_fuel_litres), 0);
-          const totalHoursMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_hours_worked), 0);
+      // Compute MTD aggregates
+      const totalCoalMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_coal_tonnes), 0);
+      const totalWasteMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_waste_tonnes), 0);
+      const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
+      const totalFuelMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_fuel_litres), 0);
+      const totalHoursMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_hours_worked), 0);
 
-          const avgDriftPct =
-            mtdSummary.length > 0
-              ? mtdSummary.reduce((s, r) => s + Math.abs(toNumber(r.reconciliation_drift_pct)), 0) /
-                mtdSummary.length
-              : 0;
+      const avgDriftPct =
+        mtdSummary.length > 0
+          ? mtdSummary.reduce((s, r) => s + Math.abs(toNumber(r.reconciliation_drift_pct)), 0) /
+            mtdSummary.length
+          : 0;
 
-          const driftLevel = classifyReconciliationDrift(avgDriftPct);
-          const driftUi = RECONCILIATION_UI[driftLevel];
+      const driftLevel = classifyReconciliationDrift(avgDriftPct);
+      const driftUi = RECONCILIATION_UI[driftLevel];
 
-          const fleetPct =
-            totalMachines && totalMachines > 0
-              ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
-              : 0;
-          const fuelPerTonne =
-            totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : '—';
-          const openBreakdowns = breakdownsMtd?.filter((b) => b.status === 'active').length ?? 0;
+      const fleetPct =
+        totalMachines && totalMachines > 0
+          ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
+          : 0;
+      const fuelPerTonne = totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : '—';
+      const openBreakdowns = breakdownsMtd?.filter((b) => b.status === 'active').length ?? 0;
 
-          // Build 30-day chart data from summary
-          const chartData: ChartDataRow[] = typedSummary.map((s) => ({
-            date: s.log_date,
-            coal: toNumber(s.actual_coal_tonnes),
-            waste: toNumber(s.actual_waste_tonnes),
-            drift: toNumber(s.reconciliation_drift_pct),
-          }));
+      // Build 30-day chart data from summary
+      const chartData: ChartDataRow[] = typedSummary.map((s) => ({
+        date: s.log_date,
+        coal: toNumber(s.actual_coal_tonnes),
+        waste: toNumber(s.actual_waste_tonnes),
+        drift: toNumber(s.reconciliation_drift_pct),
+      }));
 
-          return {
-            today,
-            summaryAvailable: !summaryError,
-            totalCoalMtd,
-            totalWasteMtd,
-            totalTonnageMtd,
-            totalFuelMtd,
-            totalHoursMtd,
-            avgDriftPct,
-            driftLevel,
-            driftUi,
-            fleetPct,
-            fuelPerTonne,
-            openBreakdowns,
-            activeMachines: activeMachines ?? 0,
-            totalMachines: totalMachines ?? 0,
-            openIncidents: 0,
-            activeEmployees: activeEmployees ?? 0,
-            chartData,
-          };
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'executive'],
-          tags: ['table:machines', 'table:employees', 'table:breakdowns'],
-        }
-      );
+      return {
+        today,
+        summaryAvailable: !summaryError,
+        totalCoalMtd,
+        totalWasteMtd,
+        totalTonnageMtd,
+        totalFuelMtd,
+        totalHoursMtd,
+        avgDriftPct,
+        driftLevel,
+        driftUi,
+        fleetPct,
+        fuelPerTonne,
+        openBreakdowns,
+        activeMachines: activeMachines ?? 0,
+        totalMachines: totalMachines ?? 0,
+        openIncidents: 0,
+        activeEmployees: activeEmployees ?? 0,
+        chartData,
+      };
     },
     {
-      revalidate: 300,
+      category: CacheCategory.METRICS,
+      keyParts: ['hub', 'executive'],
       tags: ['table:machines', 'table:employees', 'table:breakdowns'],
     }
   );
 }
 
 export default async function ExecutiveDashboardPage() {
-  const [supabase, db, cookieStore] = await Promise.all([
+  const [supabase, db] = await Promise.all([
     createServerSupabaseClient(),
     createReadReplicaClient(),
-    cookies(),
   ]);
   const user = await getUserSafely(supabase);
 
@@ -204,10 +196,9 @@ export default async function ExecutiveDashboardPage() {
     redirect('/login');
   }
 
-  const cookieList = cookieStore.getAll();
   const [{ data: employee }, executiveMetrics] = await Promise.all([
     db.from('employees').select('role').eq('auth_id', user.id).single(),
-    getExecutiveData(cookieList),
+    getExecutiveData(),
   ]);
 
   if (employee?.role !== 'admin' && employee?.role !== 'manager') {

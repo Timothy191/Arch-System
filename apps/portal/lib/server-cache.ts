@@ -1,5 +1,25 @@
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidateTag as nextRevalidateTag, unstable_cache } from 'next/cache';
+import {
+  CACHE_TAGS,
+  type CanonicalCacheTag,
+  scopedTag,
+  tagAuthUser,
+  tagDepartment,
+  tagTable,
+  tagTenant,
+} from '@/lib/cache-tags';
+import { logError } from '@/lib/errors/error-logger';
+
+export {
+  CACHE_TAGS,
+  type CanonicalCacheTag,
+  scopedTag,
+  tagAuthUser,
+  tagDepartment,
+  tagTable,
+  tagTenant,
+};
 
 /**
  * Standard Next.js 16 semantic cache lifetime profiles.
@@ -34,27 +54,6 @@ export const cacheProfiles = {
 export type CacheProfile = keyof typeof cacheProfiles;
 
 /**
- * Helper to build a generic scoped cache tag.
- */
-export function scopedTag(scope: string, id: string): string {
-  return `${scope}:${id}`;
-}
-
-/**
- * Helper to build a tenant-scoped cache tag (prevents cross-tenant leaks).
- */
-export function tagTenant(tenantId: string, resource: string): string {
-  return `tenant:${tenantId}:${resource}`;
-}
-
-/**
- * Helper to build a department-scoped cache tag.
- */
-export function tagDepartment(departmentSlug: string, resource: string): string {
-  return `dept:${departmentSlug}:${resource}`;
-}
-
-/**
  * Server Action read-your-writes cache updater.
  * Invalidates Next.js Data Cache in the active request and asynchronously
  * purges distributed L1/L2 Redis cache entries associated with the tag.
@@ -70,15 +69,23 @@ export async function updateTag(tag: string): Promise<void> {
     } else {
       nextRevalidateTag(tag, cacheProfiles.max);
     }
-  } catch {
+  } catch (err) {
     // Outside request context (e.g. standalone tests)
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.updateTag.nextjs',
+      tag,
+    });
   }
 
   // 2. Distributed L1/L2 Redis cache purge
   try {
     await cacheInvalidateTags([tag]);
-  } catch {
+  } catch (err) {
     // Gracefully handle Redis offline
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.updateTag.redis',
+      tag,
+    });
   }
 }
 
@@ -96,15 +103,23 @@ export async function updateTags(tags: string[]): Promise<void> {
       } else {
         nextRevalidateTag(tag, cacheProfiles.max);
       }
-    } catch {
+    } catch (err) {
       // Outside request context
+      logError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'server-cache.updateTags.nextjs',
+        tag,
+      });
     }
   }
 
   try {
     await cacheInvalidateTags(tags);
-  } catch {
+  } catch (err) {
     // Gracefully handle Redis offline
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.updateTags.redis',
+      tags,
+    });
   }
 }
 
@@ -134,14 +149,23 @@ export async function revalidateTagInRouteHandler(
 ): Promise<void> {
   try {
     refreshTag(tag, profile);
-  } catch {
+  } catch (err) {
     // Outside Next.js request context
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.revalidateTagInRouteHandler.refresh',
+      tag,
+      profile,
+    });
   }
 
   try {
     await cacheInvalidateTags([tag]);
-  } catch {
+  } catch (err) {
     // Gracefully handle Redis offline
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.revalidateTagInRouteHandler.redis',
+      tag,
+    });
   }
 }
 
@@ -157,8 +181,11 @@ export function refreshAction(): void {
     if (typeof nextCache.refresh === 'function') {
       nextCache.refresh();
     }
-  } catch {
+  } catch (err) {
     // Outside Server Action request context
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.refreshAction',
+    });
   }
 }
 
@@ -174,9 +201,16 @@ export const updateTagInAction = updateTag;
  */
 export function cacheTag(tag: string): void {
   // Next.js 16 cacheTag is available in next/cache
-  const { cacheTag: nextCacheTag } = require('next/cache') as typeof import('next/cache');
-  if (typeof nextCacheTag === 'function') {
-    nextCacheTag(tag);
+  try {
+    const { cacheTag: nextCacheTag } = require('next/cache') as typeof import('next/cache');
+    if (typeof nextCacheTag === 'function') {
+      nextCacheTag(tag);
+    }
+  } catch (err) {
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.cacheTag',
+      tag,
+    });
   }
 }
 
@@ -194,15 +228,22 @@ export function cacheLife(
     return;
   }
 
-  if (typeof profile === 'string') {
-    const config = cacheProfiles[profile];
-    if (config) {
-      nextCacheLife(config);
+  try {
+    if (typeof profile === 'string') {
+      const config = cacheProfiles[profile];
+      if (config) {
+        nextCacheLife(config);
+      } else {
+        nextCacheLife(cacheProfiles.default);
+      }
     } else {
-      nextCacheLife(cacheProfiles.default);
+      nextCacheLife(profile);
     }
-  } else {
-    nextCacheLife(profile);
+  } catch (err) {
+    logError(err instanceof Error ? err : new Error(String(err)), {
+      context: 'server-cache.cacheLife',
+      profile: typeof profile === 'string' ? profile : 'object',
+    });
   }
 }
 

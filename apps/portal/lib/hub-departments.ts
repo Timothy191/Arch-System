@@ -1,7 +1,8 @@
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { CACHE_TAGS, tagAuthUser } from '@/lib/cache-tags';
 import { withCache } from '@/lib/cache-utils';
-import { cachedRSC } from '@/lib/server-cache';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 /**
  * Hub department access and employee data utilities.
@@ -28,38 +29,37 @@ export async function getAccessibleDepartmentNames(
   userId: string,
   cookieList?: Array<{ name: string; value: string }>
 ): Promise<string[]> {
-  return cachedRSC(
-    ['user', userId, 'accessible-dept-names'],
+  'use cache';
+
+  const authTag = tagAuthUser(userId);
+  cacheLife('hours');
+  cacheTag(authTag);
+  cacheTag(CACHE_TAGS.TABLE_EMPLOYEES);
+  cacheTag(CACHE_TAGS.TABLE_DEPARTMENTS);
+
+  return withCache(
     async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const { data: empData } = await db
-            .from('employees')
-            .select('accessible_departments')
-            .eq('auth_id', userId)
-            .single();
+      const db = await createReadReplicaClient(cookieList);
+      const { data: empData } = await db
+        .from('employees')
+        .select('accessible_departments')
+        .eq('auth_id', userId)
+        .single();
 
-          const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
-          if (accessibleDeptIds.length === 0) return [];
+      const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
+      if (accessibleDeptIds.length === 0) return [];
 
-          const { data: deptData } = await db
-            .from('departments')
-            .select('name')
-            .in('id', accessibleDeptIds);
+      const { data: deptData } = await db
+        .from('departments')
+        .select('name')
+        .in('id', accessibleDeptIds);
 
-          return (deptData ?? []).map((d) => d.name);
-        },
-        {
-          category: CacheCategory.AUTH,
-          keyParts: ['user', userId, 'accessible-dept-names'],
-          tags: [`auth:${userId}`, 'table:employees', 'table:departments'],
-        }
-      );
+      return (deptData ?? []).map((d) => d.name);
     },
     {
-      revalidate: 3600,
-      tags: [`auth:${userId}`, 'table:employees', 'table:departments'],
+      category: CacheCategory.AUTH,
+      keyParts: ['user', userId, 'accessible-dept-names'],
+      tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES, CACHE_TAGS.TABLE_DEPARTMENTS],
     }
   );
 }
@@ -71,26 +71,24 @@ export async function getEmployeeRole(
   userId: string,
   cookieList?: Array<{ name: string; value: string }>
 ): Promise<string | null> {
-  return cachedRSC(
-    ['user', userId, 'role'],
-    async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const { data } = await db.from('employees').select('role').eq('auth_id', userId).single();
+  'use cache';
 
-          return data?.role ?? null;
-        },
-        {
-          category: CacheCategory.AUTH,
-          keyParts: ['user', userId, 'role'],
-          tags: [`auth:${userId}`, 'table:employees'],
-        }
-      );
+  const authTag = tagAuthUser(userId);
+  cacheLife('hours');
+  cacheTag(authTag);
+  cacheTag(CACHE_TAGS.TABLE_EMPLOYEES);
+
+  return withCache(
+    async () => {
+      const db = await createReadReplicaClient(cookieList);
+      const { data } = await db.from('employees').select('role').eq('auth_id', userId).single();
+
+      return data?.role ?? null;
     },
     {
-      revalidate: 3600,
-      tags: [`auth:${userId}`, 'table:employees'],
+      category: CacheCategory.AUTH,
+      keyParts: ['user', userId, 'role'],
+      tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
     }
   );
 }
@@ -111,65 +109,64 @@ export async function getEmployeeClearance(
   userId: string,
   cookieList?: Array<{ name: string; value: string }>
 ): Promise<EmployeeClearance> {
-  return cachedRSC(
-    ['user', userId, 'clearance'],
+  'use cache';
+
+  const authTag = tagAuthUser(userId);
+  cacheLife('hours');
+  cacheTag(authTag);
+  cacheTag(CACHE_TAGS.TABLE_EMPLOYEES);
+  cacheTag(CACHE_TAGS.TABLE_PERSONNEL);
+
+  return withCache(
     async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList);
 
-          const { data: emp } = await db
-            .from('employees')
-            .select('employee_code')
-            .eq('auth_id', userId)
-            .single();
+      const { data: emp } = await db
+        .from('employees')
+        .select('employee_code')
+        .eq('auth_id', userId)
+        .single();
 
-          if (!emp?.employee_code) {
-            return {
-              state: 'unlinked' as const,
-              details: ['No personnel record linked to your account.'],
-            };
-          }
+      if (!emp?.employee_code) {
+        return {
+          state: 'unlinked' as const,
+          details: ['No personnel record linked to your account.'],
+        };
+      }
 
-          const { data: personnel } = await db
-            .from('personnel')
-            .select('emp_code, induction_expiry, medical_expiry')
-            .eq('emp_code', emp.employee_code)
-            .single();
+      const { data: personnel } = await db
+        .from('personnel')
+        .select('emp_code, induction_expiry, medical_expiry')
+        .eq('emp_code', emp.employee_code)
+        .single();
 
-          if (!personnel) {
-            return {
-              state: 'unlinked' as const,
-              details: ['No personnel record linked to your account.'],
-            };
-          }
+      if (!personnel) {
+        return {
+          state: 'unlinked' as const,
+          details: ['No personnel record linked to your account.'],
+        };
+      }
 
-          const now = new Date();
-          const details: string[] = [];
+      const now = new Date();
+      const details: string[] = [];
 
-          if (!personnel.medical_expiry || new Date(personnel.medical_expiry) <= now) {
-            details.push('Medical clearance missing or expired');
-          }
-          if (!personnel.induction_expiry || new Date(personnel.induction_expiry) <= now) {
-            details.push('Induction clearance missing or expired');
-          }
+      if (!personnel.medical_expiry || new Date(personnel.medical_expiry) <= now) {
+        details.push('Medical clearance missing or expired');
+      }
+      if (!personnel.induction_expiry || new Date(personnel.induction_expiry) <= now) {
+        details.push('Induction clearance missing or expired');
+      }
 
-          if (details.length > 0) {
-            return { state: 'expired' as const, details };
-          }
+      if (details.length > 0) {
+        return { state: 'expired' as const, details };
+      }
 
-          return { state: 'clear' as const, details: [] };
-        },
-        {
-          category: CacheCategory.AUTH,
-          keyParts: ['user', userId, 'clearance'],
-          tags: [`auth:${userId}`, 'table:employees', 'table:personnel'],
-        }
-      );
+      return { state: 'clear' as const, details: [] };
     },
     {
-      revalidate: 3600,
-      tags: [`auth:${userId}`, 'table:employees', 'table:personnel'],
+      category: CacheCategory.AUTH,
+      keyParts: ['user', userId, 'clearance'],
+      tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES, CACHE_TAGS.TABLE_PERSONNEL],
     }
   );
 }

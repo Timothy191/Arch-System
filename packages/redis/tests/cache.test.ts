@@ -1,4 +1,5 @@
 import { cacheWrap, clearMemoryCache } from '../src/cache';
+import { memorySet } from '../src/l1';
 import type { XFetchWrapper } from '../src/xfetch';
 
 // Mock stats and invalidation to avoid side effects
@@ -23,17 +24,26 @@ const mockRedisDel = jest.fn();
 // The client is imported statically by src/cache.ts, so this factory is evaluated
 // during module load — before the `const` mocks below are initialised. Each
 // property therefore defers to call time.
-jest.mock('../src/client', () => ({
-  getRedisClient: jest.fn(async () => ({
-    get: (...args: unknown[]) => mockRedisGet(...args),
-    setEx: (...args: unknown[]) => mockRedisSetEx(...args),
-    del: (...args: unknown[]) => mockRedisDel(...args),
-    isOpen: true,
-  })),
-  createRedisSubscriber: jest.fn(async () => ({
-    subscribe: jest.fn(async () => undefined),
-  })),
-}));
+jest.mock('../src/client', () => {
+  const actual = jest.requireActual('../src/client');
+  return {
+    ...actual,
+    getRedisClient: jest.fn(async () => ({
+      get: (...args: unknown[]) => mockRedisGet(...args),
+      setEx: (...args: unknown[]) => mockRedisSetEx(...args),
+      del: (...args: unknown[]) => mockRedisDel(...args),
+      isOpen: true,
+    })),
+    createRedisSubscriber: jest.fn(async () => ({
+      subscribe: jest.fn(async () => undefined),
+    })),
+    redisCircuitBreaker: {
+      isOpen: jest.fn(() => false),
+      recordSuccess: jest.fn(),
+      recordFailure: jest.fn(),
+    },
+  };
+});
 
 /**
  * Unique key per invocation so repeated runs never share Redis state.
@@ -188,5 +198,66 @@ describe('X-Fetch Cache Wrapper', () => {
       expect(entry).toBe('coalesced-value');
     }
     expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
+  describe('L1 / L2 hit paths', () => {
+    test('L1 hit returns from memory without Redis GET', async () => {
+      const key = testKey();
+      // Pre-populate L1 directly
+      memorySet(key, 'l1-value', 30);
+
+      const mockFn = jest.fn().mockResolvedValue('fresh-data');
+
+      const result = await cacheWrap(key, mockFn, 10);
+
+      expect(result).toBe('l1-value');
+      expect(mockFn).not.toHaveBeenCalled();
+      expect(mockRedisGet).not.toHaveBeenCalled();
+    });
+
+    test('L2 hit returns from Redis and populates L1', async () => {
+      const key = testKey();
+      mockRedisGet.mockResolvedValueOnce(JSON.stringify('l2-value'));
+
+      const mockFn = jest.fn().mockResolvedValue('fresh-data');
+
+      const result = await cacheWrap(key, mockFn, 10);
+
+      expect(result).toBe('l2-value');
+      expect(mockFn).not.toHaveBeenCalled();
+      expect(mockRedisGet).toHaveBeenCalledTimes(1);
+      // L2 hit should have populated L1 (verified by subsequent call not hitting Redis)
+      mockRedisGet.mockClear();
+      const result2 = await cacheWrap(key, mockFn, 10);
+      expect(result2).toBe('l2-value');
+      expect(mockRedisGet).not.toHaveBeenCalled();
+    });
+
+    test('Cache miss calls fn and stores result', async () => {
+      const key = testKey();
+      mockRedisGet.mockResolvedValue(null);
+
+      const mockFn = jest.fn().mockResolvedValue('fresh-data');
+
+      const result = await cacheWrap(key, mockFn, 10);
+
+      expect(result).toBe('fresh-data');
+      expect(mockFn).toHaveBeenCalledTimes(1);
+      expect(mockRedisSetEx).toHaveBeenCalledTimes(1);
+    });
+
+    test('Null result is cached as negative entry when allowNegativeCache (via swrCacheWrap path)', async () => {
+      const key = testKey();
+      mockRedisGet.mockResolvedValue(null);
+
+      const mockFn = jest.fn().mockResolvedValue(null);
+
+      const result = await cacheWrap(key, mockFn, 10);
+
+      expect(result).toBeNull();
+      expect(mockFn).toHaveBeenCalledTimes(1);
+      // cacheWrap caches null results as XFetchWrapper with null value
+      expect(mockRedisSetEx).toHaveBeenCalledWith(key, 10, expect.stringContaining('"value":null'));
+    });
   });
 });

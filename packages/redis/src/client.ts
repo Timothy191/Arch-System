@@ -1,6 +1,14 @@
 import { createClient, type RedisClientType } from 'redis';
+import {
+  type CircuitBreakerConfig,
+  type CircuitState,
+  RedisCircuitBreaker,
+  redisCircuitBreaker,
+} from './circuit-breaker';
 import { startL1Sweep, stopL1Sweep } from './l1';
 import { ServerlessRedisClient } from './serverless-client';
+
+export { type CircuitBreakerConfig, type CircuitState, RedisCircuitBreaker, redisCircuitBreaker };
 
 function resolveRedisUrl(): string {
   return process.env.REDIS_URL || 'redis://localhost:6379';

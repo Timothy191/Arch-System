@@ -1,3 +1,4 @@
+import { redisCircuitBreaker } from './circuit-breaker';
 import { createRedisSubscriber, getRedisClient } from './client';
 import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
 import {
@@ -42,8 +43,15 @@ export {
 let subscriberInitialized = false;
 
 async function getRedisClientSafe() {
+  // Short-circuit when the circuit breaker is open — avoid hitting a known-unhealthy Redis.
+  // In tests where client.ts is partially mocked, redisCircuitBreaker may be undefined.
+  if (!redisCircuitBreaker || redisCircuitBreaker.isOpen()) {
+    return null;
+  }
+
   try {
     const redis = await getRedisClient();
+    redisCircuitBreaker.recordSuccess();
 
     if (!subscriberInitialized) {
       subscriberInitialized = true;
@@ -78,7 +86,9 @@ async function getRedisClientSafe() {
     }
 
     return redis;
-  } catch {
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
+    console.error('[cache:getRedisClientSafe] Redis unavailable:', err);
     return null;
   }
 }
@@ -149,8 +159,10 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
         return unwrap<T>(parsed);
       }
     }
-  } catch {
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
     recordRedisError();
+    console.error('[cache:cacheGet] Redis read error:', err);
   }
 
   // Durability fallback guard: attempt read-through recovery from Supabase if registered
@@ -193,8 +205,10 @@ export async function cacheGetWithStats<T>(
         return { value: unwrap<T>(parsed), source: 'l2' };
       }
     }
-  } catch {
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
     recordRedisError();
+    console.error('[cache:cacheGetWithStats] Redis read error:', err);
   }
 
   const fallback = await resolveSupabaseFallback<T>(key);
@@ -246,8 +260,10 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Pr
     const redis = await getRedisClientSafe();
     if (!redis) return;
     await redis.setEx(key, ttlSeconds, JSON.stringify(value));
-  } catch {
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
     recordRedisError();
+    console.error('[cache:cacheSet] Redis write error:', err);
   }
 }
 
@@ -399,8 +415,10 @@ export async function cacheDelete(key: string): Promise<void> {
     const redis = await getRedisClientSafe();
     if (!redis) return;
     await redis.del(key);
-  } catch {
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
     recordRedisError();
+    console.error('[cache:cacheDelete] Redis delete error:', err);
   }
 }
 

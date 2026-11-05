@@ -425,7 +425,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         status: 200,
         headers: {
           'Content-Type': 'application/javascript; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+          'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
         },
       }
     );
@@ -435,7 +435,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     const res = NextResponse.next();
     // Allow browsers/CDN to serve stale public assets/pages while revalidating,
     // reducing page-switch latency without touching auth-gated routes.
-    res.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.headers.set('Cache-Control', 'public, max-age=60, s-maxage=60, stale-while-revalidate=300');
     return res;
   }
 

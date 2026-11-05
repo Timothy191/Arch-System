@@ -17,10 +17,8 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { withCache } from '@/lib/cache-utils';
-import { cachedRSC, cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
+import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { getDepartmentContext } from '~/lib/dept-context';
-
-const DRILLING_DASHBOARD_REVALIDATE_SECONDS = 120;
 
 export const metadata: Metadata = {
   title: 'Drilling Dashboard — Arch Systems',

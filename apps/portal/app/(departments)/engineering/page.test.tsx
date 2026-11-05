@@ -37,6 +37,10 @@ jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('@/lib/cache-utils', () => ({
+  withCache: jest.fn((fn: () => Promise<unknown>) => fn()),
+}));
+
 describe('Engineering Department Route Module', () => {
   beforeEach(() => {
     jest.clearAllMocks();

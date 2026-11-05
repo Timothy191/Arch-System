@@ -29,7 +29,8 @@ jest.mock('@repo/supabase/read-replica', () => ({
 }));
 
 jest.mock('@/lib/server-cache', () => ({
-  cachedRSC: jest.fn((_keys: string[], fn: () => Promise<unknown>) => fn()),
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
 }));
 
 jest.mock('@/lib/cache-utils', () => ({

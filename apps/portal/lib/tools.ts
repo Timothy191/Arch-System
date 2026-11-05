@@ -1,8 +1,9 @@
 import { PRODUCTIVITY_TOOLS } from '@repo/departments/data-access';
 import { CacheCategory } from '@repo/redis';
 import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { CACHE_TAGS } from '@/lib/cache-tags';
 import { withCache } from '@/lib/cache-utils';
-import { cachedRSC } from '@/lib/server-cache';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 interface Tool {
   id: string;
@@ -29,62 +30,58 @@ interface ExternalTool {
 export async function getTools(
   cookieList?: Array<{ name: string; value: string }>
 ): Promise<Tool[]> {
-  return cachedRSC(
-    ['hub', 'tools'],
+  'use cache';
+
+  cacheLife({ stale: 3600, revalidate: 3600, expire: 3600 });
+  cacheTag(CACHE_TAGS.TABLE_TOOLS);
+
+  return withCache(
     async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList);
 
-          const { data, error } = await db
-            .from('tools')
-            .select('id, name, display_name, description, icon, color')
-            .eq('active', true)
-            .order('sort_order', { ascending: true });
+      const { data, error } = await db
+        .from('tools')
+        .select('id, name, display_name, description, icon, color')
+        .eq('active', true)
+        .order('sort_order', { ascending: true });
 
-          if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to fetch tools from database, falling back to constant:', error);
-            return PRODUCTIVITY_TOOLS.map((t, i) => ({
-              id: String(i),
-              name: t.name,
-              displayName: t.displayName,
-              description: t.description,
-              icon: t.icon,
-              color: t.color,
-            }));
-          }
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to fetch tools from database, falling back to constant:', error);
+        return PRODUCTIVITY_TOOLS.map((t, i) => ({
+          id: String(i),
+          name: t.name,
+          displayName: t.displayName,
+          description: t.description,
+          icon: t.icon,
+          color: t.color,
+        }));
+      }
 
-          if (!data || data.length === 0) {
-            return PRODUCTIVITY_TOOLS.map((t, i) => ({
-              id: String(i),
-              name: t.name,
-              displayName: t.displayName,
-              description: t.description,
-              icon: t.icon,
-              color: t.color,
-            }));
-          }
+      if (!data || data.length === 0) {
+        return PRODUCTIVITY_TOOLS.map((t, i) => ({
+          id: String(i),
+          name: t.name,
+          displayName: t.displayName,
+          description: t.description,
+          icon: t.icon,
+          color: t.color,
+        }));
+      }
 
-          return data.map((t) => ({
-            id: t.id,
-            name: t.name,
-            displayName: t.display_name,
-            description: t.description,
-            icon: t.icon,
-            color: t.color,
-          }));
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'tools'],
-          tags: ['table:tools'],
-        }
-      );
+      return data.map((t) => ({
+        id: t.id,
+        name: t.name,
+        displayName: t.display_name,
+        description: t.description,
+        icon: t.icon,
+        color: t.color,
+      }));
     },
     {
-      revalidate: 3600,
-      tags: ['table:tools'],
+      category: CacheCategory.METRICS,
+      keyParts: ['hub', 'tools'],
+      tags: [CACHE_TAGS.TABLE_TOOLS],
     }
   );
 }

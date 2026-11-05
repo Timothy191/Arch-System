@@ -67,7 +67,8 @@ jest.mock('@repo/supabase/read-replica', () => ({
 // ── Cache layers (bypass so fetchers run directly) ────────────────────────────
 
 jest.mock('@/lib/server-cache', () => ({
-  cachedRSC: jest.fn((_keys: string[], fn: () => Promise<unknown>) => fn()),
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
 }));
 
 jest.mock('@/lib/cache-utils', () => ({
@@ -219,9 +220,9 @@ describe('HubPage — graceful degradation', () => {
   });
 
   it('resolves without throwing when getDashboardCounts rejects', async () => {
-    const { cachedRSC } = await import('@/lib/server-cache');
-    (cachedRSC as jest.Mock).mockImplementationOnce(() =>
-      Promise.reject(new Error('ECONNREFUSED — Supabase down'))
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
+    (createReadReplicaClient as jest.Mock).mockRejectedValueOnce(
+      new Error('ECONNREFUSED — Supabase down')
     );
 
     await expect(HubPage()).resolves.not.toThrow();
@@ -247,10 +248,10 @@ describe('HubPage — graceful degradation', () => {
     // Simulate complete infrastructure outage — every fetcher throws.
     const { getTools } = await import('@/lib/tools');
     const { getAccessibleDepartmentNames } = await import('@/lib/hub-departments');
-    const { cachedRSC } = await import('@/lib/server-cache');
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
 
     const dbError = new Error('ECONNREFUSED — Supabase/Redis down');
-    (cachedRSC as jest.Mock).mockRejectedValue(dbError);
+    (createReadReplicaClient as jest.Mock).mockRejectedValue(dbError);
     (getAccessibleDepartmentNames as jest.Mock).mockRejectedValue(dbError);
     (getTools as jest.Mock).mockRejectedValue(dbError);
 
@@ -261,10 +262,10 @@ describe('HubPage — graceful degradation', () => {
   it('renders hub UI with safe defaults when all fetchers reject', async () => {
     const { getTools } = await import('@/lib/tools');
     const { getAccessibleDepartmentNames } = await import('@/lib/hub-departments');
-    const { cachedRSC } = await import('@/lib/server-cache');
+    const { createReadReplicaClient } = await import('@repo/supabase/read-replica');
 
     const dbError = new Error('DB down');
-    (cachedRSC as jest.Mock).mockRejectedValue(dbError);
+    (createReadReplicaClient as jest.Mock).mockRejectedValue(dbError);
     (getAccessibleDepartmentNames as jest.Mock).mockRejectedValue(dbError);
     (getTools as jest.Mock).mockRejectedValue(dbError);
 

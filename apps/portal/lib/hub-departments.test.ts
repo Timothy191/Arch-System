@@ -8,8 +8,15 @@ jest.mock('@repo/supabase/read-replica', () => ({
   createReadReplicaClient: jest.fn(),
 }));
 
+jest.mock('next/headers', () => ({
+  cookies: jest.fn(() => ({
+    getAll: jest.fn(() => [{ name: 'sb-token', value: 'abc' }]),
+  })),
+}));
+
 jest.mock('@/lib/server-cache', () => ({
-  cachedRSC: jest.fn((_keys: string[], fn: () => Promise<unknown>) => fn()),
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
 }));
 
 jest.mock('@/lib/cache-utils', () => ({
@@ -21,7 +28,8 @@ interface MockReadReplicaModule {
 }
 
 interface MockServerCacheModule {
-  cachedRSC: jest.Mock;
+  cacheLife: jest.Mock;
+  cacheTag: jest.Mock;
 }
 
 interface MockCacheUtilsModule {
@@ -31,13 +39,14 @@ interface MockCacheUtilsModule {
 const { createReadReplicaClient } = jest.requireMock<MockReadReplicaModule>(
   '@repo/supabase/read-replica'
 );
-const { cachedRSC } = jest.requireMock<MockServerCacheModule>('@/lib/server-cache');
+const { cacheLife, cacheTag } = jest.requireMock<MockServerCacheModule>('@/lib/server-cache');
 const { withCache } = jest.requireMock<MockCacheUtilsModule>('@/lib/cache-utils');
 
 describe('hub-departments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    cachedRSC.mockImplementation((_keys: string[], fn: () => Promise<unknown>) => fn());
+    cacheLife.mockImplementation(() => undefined);
+    cacheTag.mockImplementation(() => undefined);
     withCache.mockImplementation((fn: () => Promise<unknown>) => fn());
   });
 
@@ -74,14 +83,8 @@ describe('hub-departments', () => {
 
       expect(result).toEqual(['control-room', 'drilling']);
       expect(createReadReplicaClient).toHaveBeenCalledWith(cookieList);
-      expect(cachedRSC).toHaveBeenCalledWith(
-        ['user', 'user-123', 'accessible-dept-names'],
-        expect.any(Function),
-        {
-          revalidate: 3600,
-          tags: ['auth:user-123', 'table:employees', 'table:departments'],
-        }
-      );
+      expect(cacheLife).toHaveBeenCalledWith('hours');
+      expect(cacheTag).toHaveBeenCalledWith('auth:user-123');
     });
 
     it('returns empty array without querying departments when accessible_departments is empty or missing', async () => {

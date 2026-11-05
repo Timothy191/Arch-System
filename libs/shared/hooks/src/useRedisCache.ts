@@ -98,7 +98,36 @@ export function clearClientCache(): void {
 }
 
 /**
- * Industrial React 19 hook for caching data via the Serverless Redis engine.
+ * Industrial React 19 hook for caching data via a client-side in-memory L1 cache.
+ *
+ * Despite the historical name, this hook never touches Redis — it operates
+ * entirely in the browser's memory via a bounded LRU Map (`clientCache`).
+ * For server-side Redis-backed caching, see `withCache` in `@repo/redis`.
+ *
+ * Features:
+ * - Immediate L1 memory retrieval to prevent CLS
+ * - Bounded LRU + TTL cache eviction
+ * - Background revalidation with stale-while-revalidate semantics
+ * - Safe SSR hydration guard (no window/document leaks)
+ * - Tag invalidation support
+ *
+ * @deprecated Use `useClientCache` instead. `useRedisCache` remains as a
+ * backward-compatible alias.
+ */
+export function useRedisCache<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: UseRedisCacheOptions<T> = {}
+): UseRedisCacheResult<T> {
+  return useClientCache(key, fetcher, options);
+}
+
+/**
+ * Industrial React 19 hook for caching data via a client-side in-memory L1 cache.
+ *
+ * Despite the name, this hook never touches Redis — it operates entirely in
+ * the browser's memory via a bounded LRU Map (`clientCache`).
+ *
  * Features:
  * - Immediate L1 memory retrieval to prevent CLS
  * - Bounded LRU + TTL cache eviction
@@ -106,7 +135,7 @@ export function clearClientCache(): void {
  * - Safe SSR hydration guard (no window/document leaks)
  * - Tag invalidation support
  */
-export function useRedisCache<T>(
+export function useClientCache<T>(
   key: string,
   fetcher: () => Promise<T>,
   options: UseRedisCacheOptions<T> = {}

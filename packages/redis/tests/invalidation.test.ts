@@ -52,9 +52,13 @@ function fakeRedis(members: string[] = [], scanned: string[] = []) {
 let client: ReturnType<typeof fakeRedis>;
 const mockGetRedisClient = jest.fn(async () => client);
 
-jest.mock('../src/client', () => ({
-  getRedisClient: () => mockGetRedisClient(),
-}));
+jest.mock('../src/client', () => {
+  const actual = jest.requireActual('../src/client');
+  return {
+    ...actual,
+    getRedisClient: () => mockGetRedisClient(),
+  };
+});
 
 describe('Cache Invalidation Broadcast', () => {
   beforeEach(() => {

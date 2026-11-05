@@ -6,8 +6,16 @@ jest.mock('@repo/supabase/read-replica', () => ({
   createReadReplicaClient: jest.fn(() => ({ from: mockFrom })),
 }));
 
+jest.mock('next/headers', () => ({
+  cookies: jest.fn(() => ({
+    getAll: jest.fn(() => [{ name: 'sb-token', value: 'abc' }]),
+  })),
+}));
+
 // Bypass caching so tests verify the raw fetch & fallback logic
 jest.mock('@/lib/server-cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
   cachedRSC: jest.fn((_keys, fn) => fn()),
 }));
 

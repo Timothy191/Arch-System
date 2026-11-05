@@ -9,7 +9,6 @@ import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import {
@@ -25,7 +24,7 @@ import {
   getEmployeeRole,
 } from '@/lib/hub-departments';
 import { getPluginWidgets } from '@/lib/plugins/consumers';
-import { cachedRSC } from '@/lib/server-cache';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
 
 export const metadata: Metadata = {
   title: 'Hub — Arch Systems',
@@ -33,40 +32,34 @@ export const metadata: Metadata = {
     'Central operations portal for Arch Systems industrial complexes. Access administration, access control, production, drilling, plant & processing, plant inventory, engineering, control room, system overview, and database dashboards.',
 };
 
-async function getDashboardCounts(
-  today: string,
-  cookieList: Array<{ name: string; value: string }>
-) {
-  return cachedRSC(
-    ['hub', 'counts', today],
-    async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const [breakdowns, machines] = await Promise.all([
-            db
-              .from('breakdowns')
-              .select('id', { count: 'exact', head: true })
-              .eq('status', 'active')
-              .is('deleted_at', null),
+async function getDashboardCounts(today: string) {
+  'use cache';
 
-            db.from('machines').select('id', { count: 'exact', head: true }).eq('active', false),
-          ]);
-          return {
-            incidentCount: 0,
-            breakdownCount: breakdowns.count ?? 0,
-            offlineMachineCount: machines.count ?? 0,
-          };
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'counts', today],
-          tags: ['table:breakdowns', 'table:machines'],
-        }
-      );
+  cacheLife({ stale: 300, revalidate: 300, expire: 300 });
+  cacheTag('table:breakdowns');
+  cacheTag('table:machines');
+
+  return withCache(
+    async () => {
+      const db = await createReadReplicaClient();
+      const [breakdowns, machines] = await Promise.all([
+        db
+          .from('breakdowns')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .is('deleted_at', null),
+
+        db.from('machines').select('id', { count: 'exact', head: true }).eq('active', false),
+      ]);
+      return {
+        incidentCount: 0,
+        breakdownCount: breakdowns.count ?? 0,
+        offlineMachineCount: machines.count ?? 0,
+      };
     },
     {
-      revalidate: 300,
+      category: CacheCategory.METRICS,
+      keyParts: ['hub', 'counts', today],
       tags: ['table:breakdowns', 'table:machines'],
     }
   );
@@ -75,33 +68,24 @@ async function getDashboardCounts(
 // AGENT-TRACE: getEmployeeDepartments moved to @/lib/hub-departments for shared
 // cached access between layout.tsx and page.tsx.
 
-async function getLiveDepartmentMetrics(
-  today: string,
-  cookieList: Array<{ name: string; value: string }>
-): Promise<DepartmentLiveMetricsMap> {
-  return cachedRSC(
-    ['hub', 'live-department-metrics', today],
+async function getLiveDepartmentMetrics(today: string): Promise<DepartmentLiveMetricsMap> {
+  'use cache';
+
+  cacheLife('minutes');
+  cacheTag('table:hourly_loads');
+  cacheTag('table:daily_logs');
+  cacheTag('table:production_logs');
+  cacheTag('table:breakdowns');
+  cacheTag('table:machines');
+
+  return withCache(
     async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          return fetchLiveDepartmentMetrics(db, today);
-        },
-        {
-          category: CacheCategory.METRICS,
-          keyParts: ['hub', 'live-department-metrics', today],
-          tags: [
-            'table:hourly_loads',
-            'table:daily_logs',
-            'table:production_logs',
-            'table:breakdowns',
-            'table:machines',
-          ],
-        }
-      );
+      const db = await createReadReplicaClient();
+      return fetchLiveDepartmentMetrics(db, today);
     },
     {
-      revalidate: 60,
+      category: CacheCategory.METRICS,
+      keyParts: ['hub', 'live-department-metrics', today],
       tags: [
         'table:hourly_loads',
         'table:daily_logs',
@@ -124,9 +108,6 @@ export default async function HubPage() {
   const userId = user.id as string;
   const today = new Date().toISOString().split('T')[0] as string;
 
-  const cookieStore = await cookies();
-  const cookieList = cookieStore.getAll();
-
   // GAP-3: only fetch the fast, above-the-fold data in the main page so the
   // shell streams immediately.
   //
@@ -141,11 +122,11 @@ export default async function HubPage() {
     userRoleResult,
     clearanceResult,
   ] = await Promise.allSettled([
-    getDashboardCounts(today, cookieList),
-    getAccessibleDepartmentNames(userId, cookieList),
-    getLiveDepartmentMetrics(today, cookieList),
-    getEmployeeRole(userId, cookieList),
-    getEmployeeClearance(userId, cookieList),
+    getDashboardCounts(today),
+    getAccessibleDepartmentNames(userId),
+    getLiveDepartmentMetrics(today),
+    getEmployeeRole(userId),
+    getEmployeeClearance(userId),
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =

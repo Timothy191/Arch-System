@@ -126,6 +126,7 @@ jest.mock('@repo/redis', () => {
 });
 
 jest.mock('../../packages/redis/src/client', () => {
+  const actual = jest.requireActual('../../packages/redis/src/client');
   const mockCache = new Map<string, string>();
   const mockRedisClient = {
     get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
@@ -154,6 +155,7 @@ jest.mock('../../packages/redis/src/client', () => {
     isOpen: true,
   };
   return {
+    ...actual,
     getRedisClient: jest.fn(async () => mockRedisClient),
     closeRedis: jest.fn(async () => {}),
     isServerlessRedis: jest.fn(() => false),

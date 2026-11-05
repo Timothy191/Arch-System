@@ -72,4 +72,67 @@ describe('withCache coalescing & single-flight behavior', () => {
     expect(fn).toHaveBeenCalledTimes(1);
     expect(mockCacheSetWithTags).toHaveBeenCalledTimes(1);
   });
+
+  describe('negative caching', () => {
+    it('caches null results with negativeCacheTtl when allowNegativeCache is true', async () => {
+      mockCacheGetWithStats.mockResolvedValue({ value: null, source: null });
+      const fn = jest.fn().mockResolvedValue(null);
+
+      const result = await withCache(fn, {
+        category: 'auth',
+        keyParts: ['null-key'],
+        allowNegativeCache: true,
+        negativeCacheTtl: 30,
+      });
+
+      expect(result).toBeNull();
+      expect(mockCacheSetWithTags).toHaveBeenCalledWith('auth:null-key', null, 30, undefined);
+    });
+
+    it('serves cached null result on subsequent hit', async () => {
+      mockCacheGetWithStats.mockResolvedValue({ value: null, source: 'l2' });
+      const fn = jest.fn().mockResolvedValue('should-not-be-called');
+
+      const result = await withCache(fn, {
+        category: 'auth',
+        keyParts: ['cached-null'],
+      });
+
+      expect(result).toBeNull();
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('skips negative caching when allowNegativeCache is false', async () => {
+      mockCacheGetWithStats.mockResolvedValue({ value: null, source: null });
+      const fn = jest.fn().mockResolvedValue(null);
+
+      await withCache(fn, {
+        category: 'auth',
+        keyParts: ['no-neg-cache'],
+        allowNegativeCache: false,
+      });
+
+      expect(mockCacheSetWithTags).not.toHaveBeenCalled();
+    });
+
+    it('caches non-null results with full l2Seconds TTL', async () => {
+      mockCacheGetWithStats.mockResolvedValue({ value: null, source: null });
+      const fn = jest.fn().mockResolvedValue('fresh-data');
+
+      const result = await withCache(fn, {
+        category: 'auth',
+        keyParts: ['normal-key'],
+        allowNegativeCache: true,
+        negativeCacheTtl: 30,
+      });
+
+      expect(result).toBe('fresh-data');
+      expect(mockCacheSetWithTags).toHaveBeenCalledWith(
+        'auth:normal-key',
+        'fresh-data',
+        3600,
+        undefined
+      );
+    });
+  });
 });

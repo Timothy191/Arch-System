@@ -1,4 +1,5 @@
 import { incrementCounter } from './analytics';
+import { redisCircuitBreaker } from './circuit-breaker';
 import { getRedisClient } from './client';
 import { memoryDeleteByPrefix, memoryDeleteKeys } from './l1';
 
@@ -21,15 +22,23 @@ async function broadcast(payload: InvalidationBroadcast): Promise<void> {
   try {
     const redis = await getRedisClient();
     await redis.publish(BROADCAST_CHANNEL, JSON.stringify(payload));
-  } catch {
+  } catch (err) {
+    console.warn('[redis:invalidation:broadcast] Failed to publish invalidation broadcast:', err);
     await incrementCounter('cache.invalidate.broadcast_failed');
   }
 }
 
 async function getRedisClientSafe() {
+  if (!redisCircuitBreaker || redisCircuitBreaker.isOpen()) {
+    return null;
+  }
   try {
-    return await getRedisClient();
-  } catch {
+    const redis = await getRedisClient();
+    redisCircuitBreaker.recordSuccess();
+    return redis;
+  } catch (err) {
+    redisCircuitBreaker?.recordFailure();
+    console.warn('[redis:invalidation:getRedisClientSafe] Redis unavailable:', err);
     return null;
   }
 }
@@ -50,8 +59,9 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
       pipeline.sAdd(`${TAG_PREFIX}:${tag}`, key);
     }
     await pipeline.exec();
-  } catch {
+  } catch (err) {
     // Tag index inconsistency is acceptable; a miss costs one recompute.
+    console.warn('[redis:invalidation:indexCacheKeyByTags] Failed to index cache key tags:', err);
     await incrementCounter('cache.invalidate.tag_index_failed');
   }
 }
@@ -108,7 +118,8 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
         await incrementCounter('cache.invalidate.broadcast_skipped', { dimension: tags.join(',') });
       }
     }
-  } catch {
+  } catch (err) {
+    console.warn('[redis:invalidation:cacheInvalidateTags] Tag invalidation failed:', err);
     await incrementCounter('cache.invalidate.failed', { dimension: 'tags' });
   }
 
@@ -158,7 +169,8 @@ export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<numbe
     if (deleted > 0) {
       await broadcast({ type: 'prefixes', prefixes });
     }
-  } catch {
+  } catch (err) {
+    console.warn('[redis:invalidation:cacheInvalidatePrefixes] Prefix invalidation failed:', err);
     await incrementCounter('cache.invalidate.failed', { dimension: 'prefixes' });
   }
 

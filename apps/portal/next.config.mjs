@@ -216,6 +216,7 @@ const nextConfig = {
   logging: {
     fetches: {
       fullUrl: !isProduction,
+      hmrRefreshes: !isProduction,
     },
     browserToTerminal: 'warn',
   },
@@ -324,7 +325,43 @@ const nextConfig = {
               headers: [
                 {
                   key: 'Cache-Control',
-                  value: 'public, max-age=3600, stale-while-revalidate=86400',
+                  value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+                },
+              ],
+            },
+            {
+              source: '/manifest.json',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+                },
+              ],
+            },
+            {
+              source: '/images/:path*',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+                },
+              ],
+            },
+            {
+              source: '/background/:path*',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+                },
+              ],
+            },
+            {
+              source: '/icons/:path*',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
                 },
               ],
             },
@@ -360,7 +397,7 @@ const nextConfig = {
               headers: [
                 {
                   key: 'Cache-Control',
-                  value: 'public, max-age=60, stale-while-revalidate=600',
+                  value: 'public, max-age=60, s-maxage=60, stale-while-revalidate=600',
                 },
               ],
             },
