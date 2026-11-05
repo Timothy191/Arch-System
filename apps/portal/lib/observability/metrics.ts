@@ -149,7 +149,7 @@ register.registerMetric(shiftCompletenessRate);
  * Get metrics in Prometheus format
  */
 // AGENT-TRACE: Redis L1/L2 & X-Fetch metrics
-const xFetchTriggersTotal = new promClient.Gauge({
+const xFetchTriggersTotal = new promClient.Counter({
   name: 'redis_cache_xfetch_triggers_total',
   help: 'Total number of X-Fetch probabilistic early expirations triggered',
 });
@@ -160,18 +160,18 @@ const xFetchLatency = new promClient.Histogram({
   buckets: [1, 5, 10, 50, 100],
 });
 
-const redisCacheHitsGauge = new promClient.Gauge({
+const redisCacheHitsTotal = new promClient.Counter({
   name: 'redis_cache_hits_total',
   help: 'Cumulative Redis/L1 cache hits by tier',
   labelNames: ['tier'],
 });
 
-const redisCacheMissesGauge = new promClient.Gauge({
+const redisCacheMissesTotal = new promClient.Counter({
   name: 'redis_cache_misses_total',
   help: 'Cumulative Redis/L1 cache misses',
 });
 
-const redisCacheErrorsGauge = new promClient.Gauge({
+const redisCacheErrorsTotal = new promClient.Counter({
   name: 'redis_cache_errors_total',
   help: 'Cumulative Redis cache errors',
 });
@@ -184,19 +184,23 @@ const redisCacheLatencyGauge = new promClient.Gauge({
 
 register.registerMetric(xFetchTriggersTotal);
 register.registerMetric(xFetchLatency);
-register.registerMetric(redisCacheHitsGauge);
-register.registerMetric(redisCacheMissesGauge);
-register.registerMetric(redisCacheErrorsGauge);
+register.registerMetric(redisCacheHitsTotal);
+register.registerMetric(redisCacheMissesTotal);
+register.registerMetric(redisCacheErrorsTotal);
 register.registerMetric(redisCacheLatencyGauge);
 
 export async function getMetrics(): Promise<string> {
   try {
     const stats = await getCacheStats();
-    xFetchTriggersTotal.set(stats.xFetchTriggers || 0);
-    redisCacheHitsGauge.set({ tier: 'l1' }, stats.l1Hits || 0);
-    redisCacheHitsGauge.set({ tier: 'l2' }, stats.l2Hits || 0);
-    redisCacheMissesGauge.set(stats.misses || 0);
-    redisCacheErrorsGauge.set(stats.redisErrors || 0);
+    xFetchTriggersTotal.reset();
+    xFetchTriggersTotal.inc(stats.xFetchTriggers || 0);
+    redisCacheHitsTotal.reset();
+    redisCacheHitsTotal.inc({ tier: 'l1' }, stats.l1Hits || 0);
+    redisCacheHitsTotal.inc({ tier: 'l2' }, stats.l2Hits || 0);
+    redisCacheMissesTotal.reset();
+    redisCacheMissesTotal.inc(stats.misses || 0);
+    redisCacheErrorsTotal.reset();
+    redisCacheErrorsTotal.inc(stats.redisErrors || 0);
     redisCacheLatencyGauge.set({ quantile: 'avg' }, stats.avgLatencyMs || 0);
     redisCacheLatencyGauge.set({ quantile: 'p95' }, stats.p95LatencyMs || 0);
   } catch {
