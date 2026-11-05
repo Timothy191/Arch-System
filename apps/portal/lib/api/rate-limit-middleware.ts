@@ -117,7 +117,7 @@ function isIpWhitelisted(ip: string): boolean {
   return WHITELISTED_IPS.has(ip);
 }
 
-function getClientIp(request: Request | NextRequest): string {
+export function getClientIp(request: Request | NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIp =
     forwarded?.split(',')[0]?.trim() || ('ip' in request ? (request as any).ip : undefined);
