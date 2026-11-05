@@ -20,6 +20,12 @@ export interface XFetchWrapper<T> {
  *
  * Both `ttl` and `delta` are milliseconds, so the comparison is unit-consistent.
  */
+export function applyTtlJitter(ttlSeconds: number, jitterRatio = DEFAULT_TTL_JITTER_RATIO): number {
+  return Math.max(1, Math.round(ttlSeconds * (1 + (Math.random() - 0.5) * 2 * jitterRatio)));
+}
+
+export const DEFAULT_TTL_JITTER_RATIO = 0.1; // +10% / -10%
+
 export function shouldEarlyExpire(wrapper: XFetchWrapper<unknown>, beta?: number): boolean {
   const ttlRemaining = wrapper.computedAt + wrapper.ttl * 1000 - Date.now();
   if (ttlRemaining <= 0) return true; // already expired

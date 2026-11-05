@@ -1,5 +1,10 @@
 # Errors Package Agent Tracer
 
+## 2026-11-05T11:24:00+02:00: Wire Biome Lint Task into `@repo/errors`
+
+- **Purpose**: Add `"lint": "biome check ."` to `packages/errors/package.json` so `@repo/errors` participates in `pnpm turbo run lint`.
+- **Verification**: `pnpm --filter @repo/errors lint` ✅.
+
 ## 2026-06-24: Resolve ESLint Warnings in Errors Package
 
 ### Purpose

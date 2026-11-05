@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Multi-Gate Quality & Reality Enforcer
 # Validates code against 4 strict pillars before allowing a task to complete.
+set -uo pipefail
 
 echo -e "\e[1;36m[System]\e[0m Initiating Multi-Gate Quality & Reality Verification..."
 
@@ -21,12 +22,11 @@ fi
 echo -e "\n\e[1;34m=== GATE 2: Functionality Verification ===\e[0m"
 if grep -q '"test"' package.json; then
     echo "Running unit tests..."
-    pnpm test > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
+    if pnpm test > /dev/null 2>&1; then
         echo -e "\e[1;32m[PASS]\e[0m Functionality verified. Tests pass."
     else
         echo -e "\e[1;31m[FAIL]\e[0m Tests failed. Code is not functional."
-        ((FAILURES++))
+        FAILURES=$((FAILURES + 1))
     fi
 else
     echo -e "\e[1;33m[WARN]\e[0m No 'test' script found in package.json. Assuming untested functionality."
@@ -41,7 +41,7 @@ if command -v rg &> /dev/null; then
         echo -e "\e[1;32m[PASS]\e[0m No legacy imports detected."
     else
         echo -e "\e[1;31m[FAIL]\e[0m Deprecated/Legacy imports detected. Modernization required."
-        ((FAILURES++))
+        FAILURES=$((FAILURES + 1))
     fi
 else
     echo -e "\e[1;32m[PASS]\e[0m (Skipped legacy grep; ripgrep not installed)"
@@ -49,12 +49,11 @@ fi
 
 # Check Type Safety (Strict TypeScript)
 echo "Checking TypeScript strictness..."
-pnpm turbo run type-check > /dev/null 2>&1
-if [ $? -eq 0 ]; then
+if pnpm turbo run type-check > /dev/null 2>&1; then
     echo -e "\e[1;32m[PASS]\e[0m TypeScript validation passed."
 else
     echo -e "\e[1;31m[FAIL]\e[0m Type-check failed. Strict typing is mandatory."
-    ((FAILURES++))
+    FAILURES=$((FAILURES + 1))
 fi
 
 # GATE 4: Highest Standard (Security & Cleanliness)

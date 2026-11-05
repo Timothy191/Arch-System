@@ -1,5 +1,10 @@
 # Contract Package Agent Tracer
 
+## 2026-11-05T11:24:00+02:00: Synchronize `openapi.generated.json` with `/api/logs` Endpoints
+
+- **Purpose**: Regenerate `openapi.generated.json` with trailing newline and `/api/logs` documentation so `portal#build` is idempotent and does not dirty `packages/contract/openapi.generated.json`.
+- **Verification**: `pnpm --filter @repo/contract lint` ✅.
+
 ## 2026-11-02T20:15:00+02:00: 3D Mine-Block, Borehole Trajectory & Spatial Viewport Projection Contracts
 
 - **Purpose**: Provide canonical Zod contracts (`spatialPoint3DSchema`, `boreholeTrajectorySchema`, `mineBlockVoxelSchema`, `spatialViewportBoundsSchema`) distilled from Three.js, PixiJS, and Taal spatial/voxel telemetry models for 3D mine-block, borehole collar trajectory, and 2D/3D viewport bounds validation.

@@ -10,6 +10,7 @@
  * identically on both, instead of silently degrading on one of them.
  */
 
+import { createHash } from 'node:crypto';
 import { getRedisClient, isServerlessRedis } from './client';
 
 /** `Buffer` rather than `Uint8Array`: that is what node-redis' raw surface takes. */
@@ -88,6 +89,56 @@ export async function sendSafe(
   }
 }
 
+const MAX_SCRIPT_CACHE_ENTRIES = 256;
+const scriptShaCache = new Map<string, string>();
+
+export function computeScriptSha1(scriptBody: string): string {
+  const cached = scriptShaCache.get(scriptBody);
+  if (cached) return cached;
+  const digest = createHash('sha1').update(scriptBody).digest('hex');
+  if (scriptShaCache.size >= MAX_SCRIPT_CACHE_ENTRIES) {
+    const firstKey = scriptShaCache.keys().next().value;
+    if (firstKey !== undefined) scriptShaCache.delete(firstKey);
+  }
+  scriptShaCache.set(scriptBody, digest);
+  return digest;
+}
+
+export interface EvalScriptInput {
+  script: string;
+  keys: readonly string[];
+  args?: readonly (string | number)[];
+  preferEvalSha?: boolean;
+}
+
+export async function evalScript(
+  client: SendCapable,
+  scriptOrInput: string | EvalScriptInput,
+  keys?: readonly string[],
+  args?: readonly (string | number)[]
+): Promise<unknown> {
+  const script = typeof scriptOrInput === 'string' ? scriptOrInput : scriptOrInput.script;
+  const resolvedKeys = typeof scriptOrInput === 'string' ? (keys ?? []) : scriptOrInput.keys;
+  const resolvedArgs =
+    typeof scriptOrInput === 'string' ? (args ?? []) : (scriptOrInput.args ?? []);
+  const preferEvalSha =
+    typeof scriptOrInput === 'string' ? true : scriptOrInput.preferEvalSha !== false;
+  const numKeys = String(resolvedKeys.length);
+
+  if (preferEvalSha) {
+    const sha1 = computeScriptSha1(script);
+    try {
+      return await send(client, ['EVALSHA', sha1, numKeys, ...resolvedKeys, ...resolvedArgs]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.toUpperCase().includes('NOSCRIPT')) {
+        throw error;
+      }
+    }
+  }
+
+  return send(client, ['EVAL', script, numKeys, ...resolvedKeys, ...resolvedArgs]);
+}
 export function currentTransport(): RedisTransport {
   return isServerlessRedis() ? 'serverless-rest' : 'tcp';
 }

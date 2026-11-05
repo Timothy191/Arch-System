@@ -17,6 +17,7 @@
     "./service-role": "./src/service-role.ts"
   },
   "scripts": {
+    "lint": "biome check .",
     "supabase:gen-types": "supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc > src/database.types.ts",
     "test": "jest --config jest.config.js --passWithNoTests --runInBand",
     "type-check": "tsc --noEmit"

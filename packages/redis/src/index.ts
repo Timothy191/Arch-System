@@ -89,6 +89,13 @@ export {
   supportsBlockingReads,
 } from './raw';
 export {
+  assertNegativeTtlLt,
+  bustNegative,
+  type GetOrSetOptions,
+  getOrSet,
+  NULL_SENTINEL,
+} from './read-through';
+export {
   assertDurabilityBoundary,
   buildCacheKey,
   CACHE_TTL_REGISTRY,
@@ -101,7 +108,10 @@ export {
   isDurableKey,
   l1TtlForKey,
   MAX_L1_TTL_SECONDS,
+  MAX_RECOMMENDED_PAYLOAD_BYTES,
+  MAX_TTL_SECONDS,
   registerSupabaseFallback,
+  resolveL2TtlSeconds,
   resolveSupabaseFallback,
   type SupabaseFallbackResolver,
   unregisterSupabaseFallback,
@@ -183,4 +193,9 @@ export {
   type ScadaTelemetryStreamInput,
   streamLength,
 } from './streams';
-export { shouldEarlyExpire, type XFetchWrapper } from './xfetch';
+export {
+  applyTtlJitter,
+  DEFAULT_TTL_JITTER_RATIO,
+  shouldEarlyExpire,
+  type XFetchWrapper,
+} from './xfetch';

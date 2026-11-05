@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-05] - Biome, Turbopack, Turborepo & Workspace Scripts Optimization Suite
+
+- **Action:**
+  - **Biome Optimization**: Added explicit artifact exclusion globs (`!**/.next`, `!**/dist`, `!**/coverage`, `!**/.turbo`, `!**/storybook-static`, `!**/playwright-report`, `!**/test-results`, `!**/.ci-local`) to [`biome.json`](./biome.json), added root `check` / `check:fix` / `lint:ci` scripts to [`package.json`](./package.json), wired `"lint": "biome check ."` into [`packages/supabase/package.json`](./packages/supabase/package.json) and [`packages/errors/package.json`](./packages/errors/package.json) (20/20 workspace packages covered), and resolved all Biome lint/format warnings in [`scripts/sync-integrations-mcp.mjs`](./scripts/sync-integrations-mcp.mjs) and [`tools/scripts/vercel-preflight.cjs`](./tools/scripts/vercel-preflight.cjs).
+  - **Turbopack Dev Default + Webpack Rollback**: Updated [`apps/portal/package.json`](./apps/portal/package.json) so `"dev"` runs `next dev -H 0.0.0.0 --turbopack` (matching `scripts/dev.sh` and `scripts/dev-system-reimagined.sh` expectations and `experimental.turbopackFileSystemCacheForDev: true`) while adding `"dev:webpack": "next dev -H 0.0.0.0 --webpack"` as a 1-command fallback.
+  - **Turborepo Cache & Idempotent Build Scripts**: Updated [`turbo.json`](./turbo.json) with `"biome.json"` in `globalDependencies`, `"$TURBO_ROOT$/biome.json"` in `lint.inputs`, `"src/css/variables-generated.css"` in `codegen.outputs`, and `format:check` / `check` task definitions. Made [`tools/scripts/version-manager.mjs`](./tools/scripts/version-manager.mjs) and [`apps/portal/scripts/generate-openapi-spec.js`](./apps/portal/scripts/generate-openapi-spec.js) idempotent so `portal#prebuild` does not mutate `version.generated.ts` timestamps when `(version, gitCommitFull, gitBranch)` are unchanged, restoring `FULL TURBO` warm build cache hits.
+  - **CI & Shell Script Hardening**: Removed dead `apps/overview/.next/cache` paths from [`.github/workflows/ci.yml`](./.github/workflows/ci.yml), hardened [`tools/scripts/enforce-quality-gates.sh`](./tools/scripts/enforce-quality-gates.sh) with `#!/usr/bin/env bash`, `set -uo pipefail`, and arithmetic-safe `FAILURES=$((FAILURES + 1))`, and removed duplicate `break-after` property in [`apps/portal/styles/print-report.css`](./apps/portal/styles/print-report.css).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-11-05] - Fix Next.js 16 `'use cache'` Read-Replica Auth Fallback & Hub Admin Department Access
 
 - **Action:**

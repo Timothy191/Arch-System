@@ -1,3 +1,9 @@
+## [2026-11-05T11:24:00+02:00] Read-Through Cache Primitives, TTL Jitter & Biome Export Alignment
+
+- **Agent**: Antigravity
+- **Summary**: Added `src/read-through.ts` (`getOrSet`, `NULL_SENTINEL`, `assertNegativeTtlLt`, `bustNegative`), `evalScript` in `src/raw.ts`, `resolveL2TtlSeconds` / `MAX_TTL_SECONDS` in `src/registry.ts`, and `applyTtlJitter` in `src/xfetch.ts`. Exported new helpers in `src/index.ts` and aligned with Biome import/export ordering.
+- **Handoff**: `@repo/redis` passes `type-check`, `build`, `lint`, and `test`.
+
 ## [2026-11-02T09:35:00+02:00] SCADA Telemetry Stream Capping & Operational Runbook
 
 - **Agent**: Antigravity

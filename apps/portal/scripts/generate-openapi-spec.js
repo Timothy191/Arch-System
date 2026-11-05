@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import swaggerJsdoc from 'swagger-jsdoc';
@@ -45,12 +45,11 @@ try {
 
   // Write spec to the contract package
   const outputPath = join(__dirname, '../../../packages/contract/openapi.generated.json');
-  const rawJson = JSON.stringify(spec, null, 2);
+  const formattedJson = `${JSON.stringify(spec, null, 2)}\n`;
 
-  // AGENT-TRACE: Format output with Prettier using repository configuration to prevent working-tree formatting drift.
-  const formattedJson = rawJson;
-
-  writeFileSync(outputPath, formattedJson);
+  if (!existsSync(outputPath) || readFileSync(outputPath, 'utf8') !== formattedJson) {
+    writeFileSync(outputPath, formattedJson);
+  }
   console.log(`✅ OpenAPI spec generated at ${outputPath}`);
   console.log(`Total paths: ${Object.keys(spec.paths).length}`);
   console.log(`Total tags: ${spec.tags?.length || 0}`);

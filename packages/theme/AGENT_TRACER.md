@@ -1,5 +1,10 @@
 # Agent Tracer - @repo/theme
 
+## 2026-11-05T11:24:00+02:00 - Optimize Style Dictionary Codegen & Turborepo Output Caching
+
+- **Purpose**: Eliminate redundant `npx biome format --write` call on `variables-generated.css` (which has Biome formatter disabled in `biome.json`) in `sd.config.mjs` and include `src/css/variables-generated.css` in `codegen.outputs` in `turbo.json`.
+- **Verification**: `pnpm --filter @repo/theme codegen` and `pnpm --filter @repo/theme lint` ✅.
+
 ## 2026-11-02T20:32:00+02:00 - Add Hover Shimmer Trigger to Gold-Steel Border Inputs
 
 - **Phase 1 (Comprehension)**: Ensure pill-shaped search inputs using `input.gold-steel-border` animate with the golden shimmer effect on both `:hover` and `:focus`.

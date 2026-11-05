@@ -17,9 +17,15 @@ import {
   stopL1Sweep,
 } from './l1';
 import { acquireRefreshLease, releaseRefreshLease } from './locks';
-import { l1TtlForKey, resolveSupabaseFallback } from './registry';
+import {
+  l1TtlForKey,
+  MAX_RECOMMENDED_PAYLOAD_BYTES,
+  MAX_TTL_SECONDS,
+  resolveL2TtlSeconds,
+  resolveSupabaseFallback,
+} from './registry';
 import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from './stats';
-import { shouldEarlyExpire, type XFetchWrapper } from './xfetch';
+import { applyTtlJitter, shouldEarlyExpire, type XFetchWrapper } from './xfetch';
 
 export {
   clearMemoryCache,
@@ -249,17 +255,39 @@ async function cacheGetRaw<T>(key: string): Promise<T | XFetchWrapper<T> | null>
   return null;
 }
 
+export interface CacheSetOptions {
+  jitter?: boolean;
+  jitterRatio?: number;
+}
+
 /**
  * Store a value in cache with a TTL (seconds).
  * Writes to both L1 (Memory) and L2 (Redis) - Write-Through.
  */
-export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-  memorySet(key, value, l1TtlForKey(key, ttlSeconds));
+export async function cacheSet<T>(
+  key: string,
+  value: T,
+  ttlSeconds: number,
+  options?: CacheSetOptions
+): Promise<void> {
+  const useJitter = options?.jitter !== false;
+  const jitterRatio = options?.jitterRatio ?? 0.1;
+  const jitteredTtl = useJitter ? applyTtlJitter(ttlSeconds, jitterRatio) : ttlSeconds;
+  const effectiveTtlSeconds = Math.min(MAX_TTL_SECONDS, resolveL2TtlSeconds(key, jitteredTtl));
+
+  memorySet(key, value, l1TtlForKey(key, effectiveTtlSeconds));
 
   try {
     const redis = await getRedisClientSafe();
     if (!redis) return;
-    await redis.setEx(key, ttlSeconds, JSON.stringify(value));
+    const serializedPayload = JSON.stringify(value);
+    const payloadBytes = Buffer.byteLength(serializedPayload, 'utf8');
+    if (payloadBytes > MAX_RECOMMENDED_PAYLOAD_BYTES) {
+      console.warn(
+        `[cache:cacheSet] Big key warning: key="${key}" payloadBytes=${payloadBytes} exceeds 100KB limit`
+      );
+    }
+    await redis.setEx(key, effectiveTtlSeconds, serializedPayload);
   } catch (err) {
     redisCircuitBreaker?.recordFailure();
     recordRedisError();
@@ -325,7 +353,7 @@ function startBackgroundRefresh<T>(key: string, fn: () => Promise<T>, ttlSeconds
         computedAt: Date.now(),
         __isXFetchWrapper: true,
       };
-      await cacheSet(key, newWrapper, ttlSeconds);
+      await cacheSet(key, newWrapper, ttlSeconds, { jitter: false });
     } catch {
       // Serve stale, and drop the lease so the next request can retry immediately
       await releaseRefreshLease(key).catch(() => undefined);
@@ -386,7 +414,7 @@ export async function cacheWrap<T>(
         computedAt: Date.now(),
         __isXFetchWrapper: true,
       };
-      await cacheSet(key, newWrapper, ttlSeconds);
+      await cacheSet(key, newWrapper, ttlSeconds, { jitter: false });
       return freshVal;
     })
     .finally(() => {

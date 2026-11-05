@@ -7,7 +7,23 @@
     "root": "."
   },
   "files": {
-    "includes": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs", "**/*.json"]
+    "includes": [
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.json",
+      "!**/.next",
+      "!**/dist",
+      "!**/coverage",
+      "!**/.turbo",
+      "!**/storybook-static",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!**/.ci-local"
+    ]
   },
   "overrides": [
     {

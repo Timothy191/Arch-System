@@ -270,7 +270,7 @@ for (const v of requiredPublicVars) {
 const poolerUrl = process.env.DATABASE_POOLER_URL;
 const dbUrl = poolerUrl || process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
 if (dbUrl) {
-  if (poolerUrl && poolerUrl.includes(':6543/')) {
+  if (poolerUrl?.includes(':6543/')) {
     recordPass(
       'DATABASE_POOLER_URL is configured and routed to Supavisor transaction pooler (port 6543)'
     );

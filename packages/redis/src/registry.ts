@@ -55,6 +55,11 @@ export const DEFAULT_L1_TTL_SECONDS = 15;
 /** Absolute ceiling for any L1 entry, to bound memory under long L2 TTLs. */
 export const MAX_L1_TTL_SECONDS = 300;
 
+/** Hard ceiling (24h) to prevent accidental immortal keys. */
+export const MAX_TTL_SECONDS = 86_400;
+export const MAX_RECOMMENDED_PAYLOAD_BYTES = 100 * 1024;
+
+const DEFAULT_L2_TTL_SECONDS = 300;
 const KEY_PREFIX = 'arch:';
 
 export function buildCacheKey(
@@ -112,6 +117,19 @@ export function cacheCategoryFromKey(key: string): CacheCategory | undefined {
  * @param l2Seconds optional override for L2 TTL; the function returns min(l1_configured, l2Seconds, MAX_L1_TTL_SECONDS)
  * @returns      L1 TTL in seconds, bounded by category config, MAX_L1_TTL_SECONDS, and optional l2Seconds
  */
+export function resolveL2TtlSeconds(key: string, requestedTtlSeconds?: number): number {
+  if (
+    typeof requestedTtlSeconds === 'number' &&
+    Number.isFinite(requestedTtlSeconds) &&
+    requestedTtlSeconds > 0
+  ) {
+    return Math.min(MAX_TTL_SECONDS, Math.max(1, Math.ceil(requestedTtlSeconds)));
+  }
+  const category = cacheCategoryFromKey(key);
+  const base = category ? CACHE_TTL_REGISTRY[category].l2Seconds : DEFAULT_L2_TTL_SECONDS;
+  return Math.min(MAX_TTL_SECONDS, Math.max(1, base));
+}
+
 export function l1TtlForKey(key: string, l2Seconds?: number): number {
   const category = cacheCategoryFromKey(key);
   const configured = category ? CACHE_TTL_REGISTRY[category].l1Seconds : DEFAULT_L1_TTL_SECONDS;

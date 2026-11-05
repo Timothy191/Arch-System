@@ -1179,6 +1179,173 @@
         }
       }
     },
+    "/api/logs": {
+      "post": {
+        "summary": "Ingest a system log entry",
+        "description": "Accepts structured log entries (client runtime errors, CSP violations, server-side events) and persists them to public.system_logs for the Administration \"System Logs\" console. Authentication is optional so pre-auth errors (e.g. login page) are still captured; identity fields are derived server-side and cannot be forged by the client.\n",
+        "tags": [
+          "System",
+          "Logging"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSystemLogEntry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Log entry accepted"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      },
+      "get": {
+        "summary": "List system log entries",
+        "description": "Admin-only paginated query with level/source/resolved/search filters.",
+        "tags": [
+          "System",
+          "Logging",
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "debug",
+                "info",
+                "warn",
+                "error",
+                "fatal"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "client",
+                "server",
+                "api",
+                "cron",
+                "csp",
+                "integration",
+                "auth"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "resolved",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated log entries"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (admin-only)"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update log resolution state",
+        "description": "Admin-only bulk triage — mark entries resolved or unresolved.",
+        "tags": [
+          "System",
+          "Logging",
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "resolved": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution updated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (admin-only)"
+          }
+        }
+      }
+    },
     "/api/integrations": {
       "get": {
         "summary": "List integration catalog and installations",

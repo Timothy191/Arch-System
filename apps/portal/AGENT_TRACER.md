@@ -1,3 +1,14 @@
+## 2026-11-05T11:17:00+02:00: Enable Turbopack Dev Default, Idempotent OpenAPI/Version Codegen & Print CSS Fix
+
+- **Phase 1 (Comprehension)**: Optimize `portal` dev startup and warm Turborepo build cache hit rate as part of the monorepo build/dev/test pipeline audit.
+- **Phase 2 (Evidence)**: Verified `apps/portal/package.json` used `next dev -H 0.0.0.0 --webpack` for `"dev"`, causing a 42.7% slower startup (`1,048ms` vs `601ms` Ready with Turbopack), and `portal#prebuild` (`version-manager.mjs sync`) rewrote `BUILD_TIMESTAMP` in `lib/version.generated.ts` on every run, invalidating Turborepo warm build cache.
+- **Phase 3 (Design)**:
+  - Switched `"dev"` in `apps/portal/package.json` to `next dev -H 0.0.0.0 --turbopack` and added `"dev:webpack": "next dev -H 0.0.0.0 --webpack"`.
+  - Updated `scripts/generate-openapi-spec.js` and `tools/scripts/version-manager.mjs` to only write files when contents change.
+  - Removed duplicate `break-after: page;` in `styles/print-report.css`.
+- **Phase 4 (Criticism)**: Verified `pnpm lint:styles`, `pnpm check`, and `pnpm turbo run build`.
+- **Phase 5 (Contract)**: Modified `package.json`, `scripts/generate-openapi-spec.js`, `lib/version.generated.ts`, and `styles/print-report.css`.
+
 ## 2026-11-05T10:40:00+02:00: Fix Next.js 16 `'use cache'` Read-Replica Auth Fallback & Hub Admin Department Access
 
 - **Phase 1 (Comprehension)**: Resolve why Admin users saw "No departments assigned to your account" on `/hub` in production.
