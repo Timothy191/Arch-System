@@ -4,11 +4,16 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter';
 
-type DepartmentLayoutProps = LayoutProps<'/[department]'>;
+interface DepartmentLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ department: string }>;
+}
 
 export async function generateMetadata({
   params,
-}: Pick<DepartmentLayoutProps, 'params'>): Promise<Metadata> {
+}: {
+  params: Promise<{ department: string }>;
+}): Promise<Metadata> {
   const { department } = await params;
   const dept = DEPARTMENTS.find((d) => d.name === department);
   return {

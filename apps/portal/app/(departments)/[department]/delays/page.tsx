@@ -2,7 +2,11 @@ import { getPlantProcessingWorkspaceData } from '~/features/departments/componen
 import { PlantDelaysClient } from '~/features/departments/components/plant-processing/PlantDelaysClient';
 import { getDepartmentContext } from '~/lib/dept-context';
 
-export default async function DepartmentDelaysPage({ params }: PageProps<'/[department]/delays'>) {
+export default async function DepartmentDelaysPage({
+  params,
+}: {
+  params: Promise<{ department: string }>;
+}) {
   const { department: deptSlug } = await params;
   const { today } = await getDepartmentContext({
     department: deptSlug,
