@@ -1,5 +1,24 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-05T06:30:00+02:00 - Unify System Menu Trigger with Gold Emblem Logo
+
+- **Phase 1 (Comprehension)**: Unify the System Menu trigger button in `MacSystemMenuDropdown` with the sidebar titlebar gold emblem by switching the logo component to `<Logo variant="gold" />`.
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/MacSystemMenuDropdown.tsx` line 84 which rendered `<Logo className="h-7 w-7 scale-110 text-[var(--accent-blue)] drop-shadow-xs" />` instead of the gold radiant gradient.
+- **Phase 3 (Design)**: Updated `packages/ui/src/components/MacSystemMenuDropdown.tsx` to `<Logo variant="gold" className="h-7 w-7 scale-110 drop-shadow-xs" />`.
+- **Phase 4 (Criticism)**: Verified via `pnpm --filter @repo/ui type-check` and `pnpm --filter @repo/ui lint`.
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/MacSystemMenuDropdown.tsx`.
+
+## 2026-11-02T21:45:00+02:00 - Intrinsic Fluid Layout CSS Boilerplate, 44x44px Touch Targets & Just-in-Time Exports
+
+- **Phase 1 (Comprehension)**: Add production CSS boilerplate for intrinsic/fluid layouts (`.cq-inline`, `.grid-intrinsic-sm|md|lg`, `.p-fluid`, `.gap-fluid`, `.cv-auto`), WCAG 2.5.5/2.5.8 44×44px touch target sizing (`.touch-target-44`), and complete Just-in-Time TypeScript subpath exports in `packages/ui`.
+- **Phase 2 (Evidence)**: Audited `packages/ui/src/globals.css`, `packages/ui/src/accessibility.css`, and `packages/ui/package.json`.
+- **Phase 3 (Design)**:
+  - Added `.cq-inline`, `.grid-intrinsic-sm`, `.grid-intrinsic-md`, `.grid-intrinsic-lg`, `.p-fluid`, `.gap-fluid`, and `.cv-auto` (`content-visibility: auto; contain-intrinsic-size: auto 320px;`) in `packages/ui/src/globals.css`.
+  - Added `.touch-target-44` (`min-width: 44px; min-height: 44px;`) in `packages/ui/src/accessibility.css`.
+  - Added direct `.ts`/`.tsx` subpath exports in `packages/ui/package.json` for `./components/motion/*`, `./hooks/*`, `./AnimationProvider`, `./FastTelemetryChart`, `./FilterToolbar`, and `./PrecisionInput`.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/ui type-check`, `pnpm --filter @repo/ui lint`, and `pnpm --filter @repo/ui lint:css`.
+- **Phase 5 (Contract)**: Modified `packages/ui/src/globals.css`, `packages/ui/src/accessibility.css`, and `packages/ui/package.json`.
+
 ## 2026-11-02T20:32:00+02:00 - Refine DepartmentLayout Active Sidebar Tab Bordering & FilterToolbar Golden Search Pill
 
 - **Phase 1 (Comprehension)**: Remove the small straight vertical line on the left of active sidebar tabs in `DepartmentLayout.tsx`, refine active/hover tab bordering for professional impact, and make `FilterToolbar`'s search `<Input>` a visible pill (`rounded-full`) with golden bordering (`gold-steel-border gold-steel-border-slim`).

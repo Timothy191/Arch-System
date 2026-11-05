@@ -81,7 +81,7 @@ export function MacSystemMenuDropdown({
               'data-[state=open]:border-[var(--accent-blue)]/40 data-[state=open]:bg-[var(--accent-blue)]/15 data-[state=open]:ring-2 data-[state=open]:ring-[var(--accent-blue)]/25'
             )}
           >
-            <Logo className="h-7 w-7 scale-110 text-[var(--accent-blue)] drop-shadow-xs" />
+            <Logo variant="gold" className="h-7 w-7 scale-110 drop-shadow-xs" />
             <span
               className={cn(
                 'absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white shadow-2xs transition-colors',
