@@ -24,7 +24,8 @@
       "!**/test-results",
       "!**/.ci-local",
       "!**/.junie",
-      "!**/.pnpm-store"
+      "!**/.pnpm-store",
+      "!**/vercel.json"
     ]
   },
   "overrides": [

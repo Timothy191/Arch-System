@@ -989,3 +989,4 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   2026-11-05T14:02:00+02:00 root: ignore .pnpm-store in biome.json and .gitignore for Vercel remote builds
   2026-11-05T14:06:00+02:00 docs: add Section 29 Data Fetching Patterns and Best Practices to optimization.md and register agent rule
   2026-11-05T14:08:00+02:00 docs: add Section 30 Rendering Environments and RSC to optimization.md and register agent rule
+  2026-11-05T14:18:00+02:00 ci: ignore vercel.json in biome.json to prevent Vercel CLI rewrite format conflict
