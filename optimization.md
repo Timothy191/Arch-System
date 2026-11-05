@@ -3292,3 +3292,184 @@ export default async function DepartmentReportPage({
   );
 }
 ```
+
+---
+
+# Section 31: Client Components, Composition Patterns & Switchable Runtimes
+
+> **Source**: [Next.js Client Components](https://nextjs.org/docs/14/app/building-your-application/rendering/client-components), [Composition Patterns](https://nextjs.org/docs/14/app/building-your-application/rendering/composition-patterns), and [Edge and Node.js Runtimes](https://nextjs.org/docs/14/app/building-your-application/rendering/edge-and-nodejs-runtimes)  
+> **Key Focus Areas**: Client Components (`'use client'`), Initial Full Page Load vs. Subsequent Navigations, Hydration (`hydrateRoot`), Browser APIs (Geolocation, LocalStorage), Moving Client Components Down the Tree, Serialization, Interleaving (passing Server Components as props/children to Client Components), Context Providers at Layout Root, and Node.js vs. Edge Runtime trade-offs.
+
+---
+
+## 1. Client Component Mechanics & Lifecycle
+
+### 1.1 Opt-in Client Interactivity
+
+- Client rendering in Next.js App Router is **opt-in** via the `'use client'` directive declared at the top of a file.
+- Adding `'use client'` defines a network boundary: all modules imported by that file are bundled into the client JavaScript graph.
+- Client Components have exclusive access to:
+  - React State and Lifecycle hooks (`useState`, `useReducer`, `useEffect`, `useActionState`, `useOptimistic`).
+  - Browser APIs: `window`, `document`, Geolocation (`navigator.geolocation`), Web Storage (`localStorage`, `sessionStorage`), IndexedDB, and WebSockets.
+  - Event listeners: `onClick`, `onChange`, `onSubmit`, pointer gestures.
+
+### 1.2 Rendering Across Lifecycles
+
+- **Full Page Load (Initial Request / Refresh)**:
+  - Next.js pre-renders a static HTML preview on the server for _both_ Server and Client Components to optimize First Contentful Paint (FCP).
+  - The browser displays the non-interactive HTML immediately while downloading the client JS bundle.
+  - React parses the RSC Payload and calls `hydrateRoot` to attach event listeners and activate state.
+- **Subsequent Route Transitions**:
+  - Client Components render entirely in the browser using the updated RSC Payload streamed from the server. No full HTML re-render occurs.
+
+---
+
+## 2. Server & Client Composition Patterns
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                   Server Component (Page)                │
+│  - Fetches database/telemetry data directly via Kysely   │
+│  - Passes serializable data & Server Component slots     │
+│                                                          │
+│   ┌──────────────────────────────────────────────────┐   │
+│   │       Client Component (<InteractiveModal>)       │   │
+│   │       - 'use client' boundary                    │   │
+│   │       - Manages modal isOpen / animations        │   │
+│   │                                                  │   │
+│   │        ┌─────────────────────────────────────┐   │   │
+│   │        │ Server Component Slot ({children})  │   │   │
+│   │        │ - Rendered on server ahead of time  │   │   │
+│   │        │ - Zero client bundle overhead       │   │   │
+│   │        └─────────────────────────────────────┘   │   │
+│   └──────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 2.1 Moving Client Components Down the Tree
+
+- **Rule of Thumb**: Keep layouts and high-level page containers as Server Components. Extract only the interactive buttons, search inputs, or filter bars into leaf Client Components (`<SearchBar />`, `<FilterDropdown />`).
+- Reduces client JavaScript bundle footprint by keeping static structure and layout logic server-only.
+
+### 2.2 Interleaving Server & Client Components
+
+- **Unsupported Pattern**: Importing a Server Component directly into a file that has `'use client'`. Because client bundles cannot execute server-side Node.js code, the imported component is treated as a Client Component, losing direct DB access and inflating bundle size.
+- **Supported Pattern (Children / Slot Pattern)**: Pass the Server Component as a `children` prop or JSX slot to the Client Component wrapper. The Server Component is rendered on the server, and the resulting RSC payload is inserted into the Client Component's render tree without boundary leakage.
+
+### 2.3 Context Providers at the Layout Boundary
+
+- React Context (`createContext`, `useContext`) is unavailable in Server Components.
+- Providers (e.g. `ArchThemeProvider`, `ReactQueryProvider`) must be declared in `'use client'` files and wrapped around `{children}` in `app/layout.tsx`.
+- Keep providers scoped as deeply as practical rather than wrapping the outer `<html>` tag to preserve static shell optimizations.
+
+---
+
+## 3. Runtime Selection: Node.js vs. Edge
+
+| Capability              | Node.js Runtime (Standard)                                | Edge Runtime                                                   |
+| :---------------------- | :-------------------------------------------------------- | :------------------------------------------------------------- |
+| **Monorepo Standard**   | **Primary (`export const runtime = 'nodejs'`)**           | **Restricted to lightweight proxy / routing**                  |
+| **API Surface**         | Full Node.js APIs (`net`, `crypto`, `fs`, `tls`)          | V8 isolate Web APIs (`fetch`, `Request`, `Response`, `Crypto`) |
+| **DB & Driver Support** | Full: Kysely, Postgres pooler, Redis clusters, Modbus TCP | Limited: HTTP/WebSocket only (Supabase Data API, Upstash REST) |
+| **Bundle Size Limit**   | 50 MB (Serverless) / Unlimited (Containers)               | 1 MB – 4 MB per function                                       |
+| **Cold Start**          | 100ms – 400ms                                             | < 50ms                                                         |
+| **Best Used For**       | SCADA ingestion, shift closeout RPCs, PDF report gen      | Geographic redirect, lightweight header inspection             |
+
+---
+
+## 4. Arch-System Audit & Codebase Alignment
+
+| Architecture Principle         | Codebase Implementation Status | Arch-System Reference                                                                                                                              |
+| :----------------------------- | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Leaf Client Components**     | **100% Enforced**              | Monorepo rule `.agents/rules/nextjs-use-client.md` restricts `'use client'` to presentation leaves (`packages/ui`, interactive forms).             |
+| **Provider Root Nesting**      | **100% Compliant**             | `apps/portal/app/layout.tsx` wraps `{children}` inside `ArchThemeProvider` and `ClientProviders` while keeping the root layout a Server Component. |
+| **Children Slot Interleaving** | **Standardized**               | Used across `GlassCard`, modal dialogs, and department dashboards (`DepartmentLayout.tsx`).                                                        |
+| **Browser API SSR Guarding**   | **100% Enforced**              | Hooks accessing `localStorage`, `window`, or `navigator` guard with `typeof window !== 'undefined'` or TanStack `persister` storage wrappers.      |
+| **Node.js Runtime Standard**   | **100% Enforced**              | All data routes and actions standardize on Node.js 24/26 for full Kysely and Redis compatibility.                                                  |
+
+---
+
+# Section 32: Styling Paradigms, CSS Modules, Tailwind CSS & OKLCH Architecture
+
+> **Source**: [Next.js Styling Guide](https://nextjs.org/docs/14/app/building-your-application/styling), [CSS Modules](https://nextjs.org/docs/14/app/building-your-application/styling/css-modules), [Tailwind CSS](https://nextjs.org/docs/14/app/building-your-application/styling/tailwind-css), and [CSS-in-JS Compatibility](https://nextjs.org/docs/14/app/building-your-application/styling/css-in-js)  
+> **Key Focus Areas**: Styling Options (Global CSS, CSS Modules, Tailwind CSS, Sass, CSS-in-JS), Zero-Runtime Styling, Turbopack CSS compilation, OKLCH Semantic Tokens, and Light-Mode Invariant.
+
+---
+
+## 1. Styling Architecture & Evaluation for Arch-System
+
+```
+┌────────────────────────────────────────────────────────┐
+│               Arch-System Styling Hierarchy            │
+└───────────────────────────┬────────────────────────────┘
+                            │
+     ┌──────────────────────┼──────────────────────┐
+     ▼                      ▼                      ▼
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│   Tailwind CSS   │  │   CSS Modules    │  │   CSS-in-JS      │
+├──────────────────┤  ├──────────────────┤  ├──────────────────┤
+│ Primary Standard │  │ Scoped Edge Cases│  │ PROHIBITED       │
+│ Utility-first    │  │ Complex keyframes│  │ Runtime JS cost  │
+│ Zero runtime     │  │ Custom canvas    │  │ Incompatible     │
+│ Turbopack native │  │ overlays         │  │ with Server Comp │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+```
+
+### 1.1 Why Tailwind CSS + OKLCH Tokens is the Monorepo Standard
+
+- **Zero Runtime Overhead**: Utility classes are compiled at build time into pure CSS; zero JavaScript is parsed in the browser for styling.
+- **Turbopack Compatibility**: Native Rust-based CSS parser inside Turbopack compiles Tailwind directives without PostCSS/JS bridge lag.
+- **Light-Mode Invariant**: Arch-System enforces a strict light-mode palette (`#f3f4f6` canvas background) using OKLCH color tokens (`@repo/theme`) for optimal industrial contrast on mining dispatch displays.
+- **CSS-in-JS Prohibited**: Runtime CSS-in-JS libraries (e.g. `styled-components`, `emotion`) require client runtime execution, inflate bundles, and break React Server Component streaming.
+
+### 1.2 CSS Modules for Scoped Industrial Visualizations
+
+- Used selectively for complex animations, keyframes, or canvas overlays where utility classes would be unwieldy (`.module.css`).
+- Automatically hashed and scoped at build time to prevent global cascade contamination.
+
+---
+
+## 2. Arch-System Styling Invariants
+
+1. **Semantic OKLCH Tokens**: All colors must use design tokens defined in `packages/theme/src/tokens/index.ts` (e.g. `bg-bg-primary`, `text-text-primary`, `border-border-subtle`). Hardcoded hex (`#...`) or rgb values in JSX classNames are rejected by Gate 14.
+2. **Utility Composition Cap**: Maximum 20 utilities per `className` (target $\le 12$). Longer chains must be extracted into CVA variants or `@repo/ui` primitives.
+3. **No Dark Variants**: Industrial outdoor visibility requires consistent light-mode contrast. `dark:` variants are prohibited.
+
+---
+
+# Section 33: Next.js Optimizations, Built-in Components & Observability
+
+> **Source**: [Next.js Optimizations Overview](https://nextjs.org/docs/14/app/building-your-application/optimizing), [Built-in Components](https://nextjs.org/docs/14/app/building-your-application/optimizing/images), [Metadata API](https://nextjs.org/docs/14/app/building-your-application/optimizing/metadata), [Static Assets](https://nextjs.org/docs/14/app/building-your-application/optimizing/static-assets), [Bundle Analyzer](https://nextjs.org/docs/14/app/building-your-application/optimizing/bundle-analyzer), [OpenTelemetry & Instrumentation](https://nextjs.org/docs/14/app/building-your-application/optimizing/open-telemetry)  
+> **Key Focus Areas**: Built-in Components (`next/image`, `next/link`, `next/script`), Metadata Configuration, Static Assets (`public/`), Bundle Analysis, Lazy Loading (`next/dynamic`), Analytics, Instrumentation (`instrumentation.ts`), OpenTelemetry, and Third-Party Libraries (`@next/third-parties`).
+
+---
+
+## 1. Built-in Optimizations
+
+### 1.1 Images (`next/image`)
+
+- **Modern Formats**: Automatically converts source images to WebP/AVIF.
+- **Responsive Resizing**: Generates `srcset` based on device viewport.
+- **Layout Shift Defense**: Requires explicit `width`/`height` or `fill` with sized parent to reserve DOM aspect ratio and ensure Cumulative Layout Shift (CLS) = 0.
+- **Monorepo Banner Optimization**: P0 asset pipeline in `scripts/sync-assets-smart.cjs` pre-resizes hero banners to exact dimensions (800x450, 1200x675) with WebP compression.
+
+### 1.2 Links & Partial Prefetching (`next/link`)
+
+- Built-in link prefetching automatically populates the Client Router Cache when links enter the browser viewport.
+- Under Next.js 16 `partialPrefetching: true`, navigation between department tabs is instant because the shared shell is prefetched while dynamic data streams on click.
+
+### 1.3 Metadata API
+
+- Config-based metadata via static `export const metadata: Metadata` or dynamic `generateMetadata`.
+- File-based metadata: `favicon.ico`, `opengraph-image.png`, `robots.txt`, `sitemap.xml`.
+- Arch-System uses centralized metadata in `apps/portal/app/layout.tsx` and department-specific metadata generators.
+
+### 1.4 Bundle Analyzer & Lazy Loading
+
+- `@next/bundle-analyzer` and `analyze:turbopack` scripts verify that client bundles remain lean.
+- Heavy client libraries (e.g. `@react-pdf/renderer`, chart modules, date pickers) are dynamically imported via `next/dynamic` or `Promise.all` dynamic imports.
+
+### 1.5 Observability: Instrumentation & OpenTelemetry
+
+- `instrumentation.ts`: Server startup lifecycle hook runs before request handling to initialize tracing, verify Redis health, and validate Supabase connections.
+- OpenTelemetry export: Traces spans across database queries, external ERP API calls, and SCADA stream ingestion with Pino structured logging.
