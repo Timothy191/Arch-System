@@ -8,4 +8,5 @@ export * from './hlc';
 export * from './n8n';
 export * from './offline-storage';
 export * from './openrouter';
+export * from './spatial-projection';
 export * from './time';

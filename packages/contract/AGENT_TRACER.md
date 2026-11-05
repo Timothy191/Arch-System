@@ -1,5 +1,14 @@
 # Contract Package Agent Tracer
 
+## 2026-11-02T20:15:00+02:00: 3D Mine-Block, Borehole Trajectory & Spatial Viewport Projection Contracts
+
+- **Purpose**: Provide canonical Zod contracts (`spatialPoint3DSchema`, `boreholeTrajectorySchema`, `mineBlockVoxelSchema`, `spatialViewportBoundsSchema`) distilled from Three.js, PixiJS, and Taal spatial/voxel telemetry models for 3D mine-block, borehole collar trajectory, and 2D/3D viewport bounds validation.
+- **Changes**:
+  - `packages/contract/src/schemas/spatial-telemetry.schema.ts`: Defined schemas and derived types (`SpatialPoint3D`, `BoreholeTrajectory`, `MineBlockVoxel`, `SpatialViewportBounds`) with named domain boundary constants.
+  - `packages/contract/src/schemas/spatial-telemetry.schema.test.ts`: Added unit tests verifying valid payloads and boundary/refinement rejections for all four schemas.
+  - `packages/contract/src/index.ts`: Exported `spatial-telemetry.schema` contracts and types.
+- **Verification**: Pending parent verification gate (`pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, `pnpm agent:verify`).
+
 ## 2026-11-02T19:53:00+02:00: Excavator Activity Material Types (`Plant`, `Other`) & Quick-Add Mine Block Contract
 
 - **Purpose**: Extend `updateExcavatorAssignmentConfigSchema` with `excavatorActivityMaterialTypeSchema` (`'Waste' | 'Coal' | 'Plant' | 'Other'`) so Excavators assigned to `Plant` or `Other` log as regular site machines, and add `quickAddMineBlockSchema` (`QuickAddMineBlockInput`) for inline auto-formatted block creation on `/control-room/excavator-activity`.

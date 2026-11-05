@@ -27,7 +27,8 @@
     "./novu": "./src/novu.ts",
     "./n8n": "./src/n8n.ts",
     "./hardware": "./src/hardware/index.ts",
-    "./observability/metrics": "./src/observability/metrics.ts"
+    "./observability/metrics": "./src/observability/metrics.ts",
+    "./spatial-projection": "./src/spatial-projection.ts"
   },
   "private": true,
   "scripts": {
