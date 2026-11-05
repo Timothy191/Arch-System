@@ -4,6 +4,39 @@ Every line in this file answers the question: "Would an agent miss this without 
 
 ---
 
+## 2026-11-05T06:05:00+02:00: Turbopack ESM Compatibility & Strict Types in Excel Utility
+
+### Purpose
+
+Resolve Turbopack ESM bundle failure where `xlsx` lacked a default export, and enforce strict TypeScript invariants (zero `any`) across Excel export/parse functions.
+
+### Changes Made
+
+1. **`src/excel.ts`**:
+   - Replaced default import `import XLSX from 'xlsx'` with namespace import `import * as XLSX from 'xlsx'` for Turbopack ESM compatibility.
+   - Replaced `any[]` with `readonly Record<string, unknown>[]` in `exportToExcel` and `Record<string, unknown>[]` in `parseExcel`.
+   - Formatted with Biome.
+
+---
+
+## 2026-11-02T20:15:00+02:00: 3D Borehole Collar-to-Toe Vector Math & 2D Canvas Viewport Projection
+
+### Purpose
+
+Provide zero-dependency 3D borehole collar-to-toe vector math and 2D Canvas viewport projection/culling (`spatial-projection.ts`) distilled from `Three.js`, `PixiJS`, and `Taal` spatial math so `Arch-System` can project 3D boreholes and 2D pit/muster coordinates onto `FastTelemetryChart`-style Canvas 2D surfaces without heavy WebGL game engine bundles.
+
+### Changes Made
+
+1. **`src/spatial-projection.ts`**:
+   - Implemented `computeBoreholeToeCoordinates` following mining survey conventions (`-90°` vertical down, `0°` horizontal; azimuth `0°` North, `90°` East) with 3-decimal precision rounding.
+   - Implemented `projectWorldToCanvas2D` with normalized viewport bounds checks, North-up Y-axis inversion (`isInvertedNorthAxis ?? true`), and viewport culling (`isWithinViewport`).
+2. **`src/spatial-projection.test.ts`**:
+   - Added unit test suite covering vertical (`-90°`), angled (`-60°`), horizontal (`0°`), negative azimuth boreholes, invalid inputs, and Canvas 2D projection/viewport culling.
+3. **`package.json` & `src/index.ts`**:
+   - Exported `./spatial-projection` and all spatial projection interfaces/constants.
+
+---
+
 ## 2026-11-02T14:30:00+02:00: Deterministic Feature Flag & Rollout Evaluation Utility
 
 ### Purpose

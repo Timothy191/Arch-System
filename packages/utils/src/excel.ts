@@ -1,4 +1,4 @@
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 /**
  * Exports data to an Excel (.xlsx) file.
@@ -7,12 +7,12 @@ import XLSX from 'xlsx';
  * to the filesystem using the provided filename.
  */
 export async function exportToExcel(
-  data: any[],
+  data: readonly Record<string, unknown>[],
   filename: string,
   sheetName: string
 ): Promise<void> {
   const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(data ?? []);
+  const worksheet = XLSX.utils.json_to_sheet([...(data ?? [])]);
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
   const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
@@ -50,7 +50,7 @@ export async function exportToExcel(
  * The first row is treated as the header row. Returns an empty array if the
  * file has no sheets or no data.
  */
-export async function parseExcel(file: File): Promise<any[]> {
+export async function parseExcel(file: File): Promise<Record<string, unknown>[]> {
   const arrayBuffer = await file.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
@@ -66,7 +66,10 @@ export async function parseExcel(file: File): Promise<any[]> {
   if (!worksheet) {
     return [];
   }
-  const json = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: true });
+  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
+    defval: '',
+    raw: true,
+  });
 
   return json;
 }
