@@ -7,8 +7,8 @@
   "maxRootInstructionsSize": 27500,
   "maxDirectMcpServers": 10,
   "contextWindowTokens": 200000,
-  "maxPreTaskWindowRatio": 0.3,
-  "maxPreTaskTokens": 60000,
+  "maxPreTaskWindowRatio": 0.375,
+  "maxPreTaskTokens": 75000,
   "defaultTaskTier": "moderate",
   "taskTiers": {
     "trivial": {
