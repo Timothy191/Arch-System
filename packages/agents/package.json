@@ -32,6 +32,6 @@
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
     "type-check": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   }
 }
