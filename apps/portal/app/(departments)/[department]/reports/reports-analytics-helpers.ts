@@ -301,11 +301,31 @@ export function computeArchivedReportData(
   searchQuery: string,
   todayStr: string
 ): ArchivedReportData {
-  const historicalRows = filterShiftReportRows(shiftRows, shiftFilter, siteFilter, searchQuery);
-
+  // Optimization: Single-pass O(N) aggregation loop that combines row filtering,
+  // monthly rollups accumulation, and priorDaysRows extraction without allocating
+  // multiple intermediate arrays from chained filterShiftReportRows and .filter().
+  const historicalRows: ShiftReportRow[] = [];
+  const priorDaysRows: ShiftReportRow[] = [];
   const monthMap = new Map<string, MonthlyRollupItem>();
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  for (const r of historicalRows) {
+  for (const r of shiftRows) {
+    if (shiftFilter !== 'all' && r.shift !== shiftFilter) continue;
+    if (siteFilter !== 'all' && r.site !== siteFilter) continue;
+    if (normalizedQuery) {
+      const match =
+        r.site.toLowerCase().includes(normalizedQuery) ||
+        r.date.toLowerCase().includes(normalizedQuery) ||
+        r.shift.toLowerCase().includes(normalizedQuery) ||
+        r.notes.toLowerCase().includes(normalizedQuery);
+      if (!match) continue;
+    }
+
+    historicalRows.push(r);
+    if (r.date < todayStr) {
+      priorDaysRows.push(r);
+    }
+
     const month = r.date.slice(0, 7);
     const curr = monthMap.get(month) || {
       month,
@@ -334,7 +354,7 @@ export function computeArchivedReportData(
   return {
     historicalRows,
     monthlyRollups,
-    priorDaysRows: historicalRows.filter((r) => r.date < todayStr),
+    priorDaysRows,
   };
 }
 

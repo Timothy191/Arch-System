@@ -179,6 +179,17 @@ cd slim-tooling-mcp && pnpm run build && pnpm test
 - Migrations: zero-padded 3-digit prefix + snake_case (`163_shift_closeout_rpc.sql`).
 - Tests: co-located `*.test.ts(x)` (Jest); `*.spec.ts` (Playwright).
 
+### Agent rules (auto-apply)
+
+New focused rule files (one practice per rule) under `.agents/rules/`:
+
+- `react-19-patterns.md` — `use()`, `useActionState`, `useOptimistic`, ref-as-prop, Suspense streaming
+- `nextjs-16-caching.md` — `'use cache'` + `cacheLife`, no request APIs in cache, `proxy.ts`, action invalidation order, PPR
+- `postgres-rls-performance.md` — RLS initplan, FK indexes, `security definer` search_path, immutable migrations, partial indexes
+- `css-modern-features.md` — container queries, OKLCH tokens, content-visibility, reduced-motion, logical properties
+- `image-optimization.md` — dimensions, sizes, priority, blur placeholder, fetchPriority
+- `accessibility-wcag.md` — focus-visible, aria-live, skip link, contrast, reduced motion/transparency
+
 ### Error handling
 
 All domain/runtime errors extend `AppError` from `@repo/errors`. Use `isAppError(err)` at boundaries to extract status codes safely. Never leak raw DB errors or service-role keys to client components.

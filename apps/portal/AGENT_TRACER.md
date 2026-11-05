@@ -1,3 +1,13 @@
+## 2026-11-05T09:35:00+02:00: Integrate Bolt Single-Pass Aggregations & Unit Tests (PR #208 & PR #205)
+
+- **Phase 1 (Comprehension)**: Integrate beneficial single-pass $O(N)$ optimizations and unit tests from PR #208 (`computeArchivedReportData`) and PR #205 (`ProductionCommandCenterClient` & `getProductionDepartmentData`), and synthesize `.jules/bolt.md` learnings.
+- **Phase 2 (Evidence)**: Inspected `origin/perf-archived-reports-single-pass-12797443916095229947` (`1db8a1f`) and `origin/pr-205` (`65f7b07`).
+- **Phase 3 (Design)**:
+  - Refactored `computeArchivedReportData` in `reports-analytics-helpers.ts` into a single-pass $O(N)$ accumulator loop and added `reports-analytics-helpers.test.ts`.
+  - Refactored monthly rollup totals in `features/departments/components/production/actions.ts` into a single-pass loop, memoized `monthlyShiftTotals` in `ProductionCommandCenterClient.tsx`, and added `ProductionCommandCenterClient.test.tsx`.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="reports-analytics-helpers|ProductionCommandCenterClient"` (`6/6 PASS`).
+- **Phase 5 (Contract)**: Modified `reports-analytics-helpers.ts`, `reports-analytics-helpers.test.ts`, `ProductionCommandCenterClient.tsx`, `ProductionCommandCenterClient.test.tsx`, and `production/actions.ts`.
+
 ## 2026-11-05T08:16:00+02:00: Performance Optimizations across Reports, Caching, and Client Code-Splitting
 
 - **Phase 1 (Comprehension)**: Audit and autonomously address key performance opportunities across data-fetching, caching, bundle code-splitting, and asset delivery:

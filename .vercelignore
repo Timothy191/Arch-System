@@ -91,6 +91,7 @@
 /tools/swarms-orchestrator/target/
 
 # Local worktrees, agent caches, and analysis
+/.jules/
 /.kilo/
 /.qoder/
 /.husky/
