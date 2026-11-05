@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx';
 
 /**
- * Exports data to an Excel (.xlsx) file.
+ * Exports data to an Excel (.xlsx) file via a browser Blob download.
  *
- * In browser environments this triggers a file download. In Node.js it writes
- * to the filesystem using the provided filename.
+ * This module is the browser-only entry point and must never import Node.js
+ * APIs such as `node:fs`; the server-side filesystem variant lives in
+ * `excel.server.ts` (exposed via the `@repo/utils/server` subpath).
  */
 export async function exportToExcel(
   data: readonly Record<string, unknown>[],
@@ -14,34 +15,20 @@ export async function exportToExcel(
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet([...(data ?? [])]);
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
   const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.Blob !== 'undefined' &&
-    typeof window.URL !== 'undefined'
-  ) {
-    // Browser: trigger download
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
-    a.style.display = 'none';
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  } else if (typeof process !== 'undefined' && process.versions?.node) {
-    // Node.js: write to filesystem
-    const { writeFileSync } = await import('node:fs');
-    writeFileSync(filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`, buffer);
-  } else {
-    throw new Error('Unsupported environment for Excel export');
-  }
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = window.document.createElement('a');
+  a.href = url;
+  a.download = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  a.style.display = 'none';
+  window.document.body.appendChild(a);
+  a.click();
+  window.document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }
 
 /**

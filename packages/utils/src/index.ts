@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './crypto-audit';
+export * from './excel';
 export * from './feature-flags';
 export * from './fetch-client';
 export * from './fulcra';

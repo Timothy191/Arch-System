@@ -28,7 +28,8 @@
     "./n8n": "./src/n8n.ts",
     "./hardware": "./src/hardware/index.ts",
     "./observability/metrics": "./src/observability/metrics.ts",
-    "./spatial-projection": "./src/spatial-projection.ts"
+    "./spatial-projection": "./src/spatial-projection.ts",
+    "./server": "./src/excel.server.ts"
   },
   "private": true,
   "scripts": {
