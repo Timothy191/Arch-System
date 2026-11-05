@@ -117,6 +117,7 @@ function DepartmentCard({
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [uncontrolledIsPinned, setUncontrolledIsPinned] = useState(false);
+  const [imageExt, setImageExt] = useState<'webp' | 'jpg'>('webp');
   const [imageError, setImageError] = useState(false);
 
   const isPinned = controlledIsPinned ?? uncontrolledIsPinned;
@@ -214,11 +215,13 @@ function DepartmentCard({
           <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[18px]">
             <Image
               src={
-                imageError || department.name === 'executive' || department.name === 'office'
+                imageError
                   ? '/images/departments/overview.jpg'
-                  : department.name === 'reports'
-                    ? '/images/departments/control-room.jpg'
-                    : `/images/departments/${department.name}.jpg`
+                  : department.name === 'executive' || department.name === 'office'
+                    ? `/images/departments/overview.${imageExt}`
+                    : department.name === 'reports'
+                      ? `/images/departments/control-room.${imageExt}`
+                      : `/images/departments/${department.name}.${imageExt}`
               }
               alt=""
               aria-hidden="true"
@@ -226,7 +229,9 @@ function DepartmentCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
               onError={() => {
-                if (!imageError) {
+                if (imageExt === 'webp') {
+                  setImageExt('jpg');
+                } else if (!imageError) {
                   setImageError(true);
                 }
               }}

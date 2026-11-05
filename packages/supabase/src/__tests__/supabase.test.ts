@@ -353,6 +353,22 @@ describe('getUserSafely', () => {
 
     expect(result).toBeNull();
   });
+
+  test('falls back to getUser when getClaims is unavailable on mocked clients', async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: { user: { id: 'user-fallback', email: 'fallback@example.com' } },
+          error: null,
+        }),
+      },
+    };
+
+    const result = await getUserSafely(mockSupabase as any);
+
+    expect(result).toEqual({ id: 'user-fallback', email: 'fallback@example.com' });
+    expect(mockSupabase.auth.getUser).toHaveBeenCalled();
+  });
 });
 
 describe('createBrowserSupabaseClient', () => {

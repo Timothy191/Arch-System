@@ -9,6 +9,7 @@ import {
   OVERVIEW_DELAY_BY_CATEGORY,
 } from '@/lib/shift-sheet-buckets';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { getDeptId } from '~/lib/dept-registry';
 import { breakdownShiftDelayHours } from '~/lib/shift-completeness';
 import { EngineeringNotesForm } from './EngineeringNotesForm';
 import { type EngineeringNote, EngineeringNotesList } from './EngineeringNotesList';
@@ -130,6 +131,8 @@ export default async function EngineeringNotesPage({
     department,
   });
 
+  const engDeptId = department === 'engineering' ? deptId : await getDeptId('engineering');
+
   const currentShift: 'day' | 'night' =
     resolvedSearchParams.shift === 'day' || resolvedSearchParams.shift === 'night'
       ? resolvedSearchParams.shift
@@ -143,7 +146,7 @@ export default async function EngineeringNotesPage({
     { data: todayOperations },
     { data: previousSMRs },
     { data: baselineSmrReadings },
-    { data: engDept },
+    { data: engDailyLogs },
     { data: todayNotes },
     { data: directBreakdowns },
     { data: viewBreakdowns },
@@ -185,7 +188,22 @@ export default async function EngineeringNotesPage({
       .select('meter_id, reading')
       .order('reading_at', { ascending: false })
       .limit(200),
-    supabase.from('departments').select('id').eq('name', 'engineering').maybeSingle(),
+    engDeptId
+      ? supabase
+          .from('daily_logs')
+          .select('id, log_date, shift, notes, created_at')
+          .eq('department_id', engDeptId)
+          .eq('log_date', today)
+          .order('created_at', { ascending: false })
+      : Promise.resolve({
+          data: null as Array<{
+            id: string;
+            log_date: string;
+            shift: string;
+            notes: string | null;
+            created_at: string;
+          }> | null,
+        }),
     supabase
       .from('engineering_notes')
       .select('*, machine:machines(name, sites(name))')
@@ -202,6 +220,7 @@ export default async function EngineeringNotesPage({
     supabase
       .from('breakdowns_control_room_view')
       .select('*')
+      .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`)
       .order('created_at', { ascending: false }),
     supabase
       .from('tire_inspections')
@@ -211,23 +230,6 @@ export default async function EngineeringNotesPage({
       .eq('inspection_date', today)
       .order('created_at', { ascending: false }),
   ]);
-
-  const { data: engDailyLogs } = engDept?.id
-    ? await supabase
-        .from('daily_logs')
-        .select('id, log_date, shift, notes, created_at')
-        .eq('department_id', engDept.id)
-        .eq('log_date', today)
-        .order('created_at', { ascending: false })
-    : {
-        data: null as Array<{
-          id: string;
-          log_date: string;
-          shift: string;
-          notes: string | null;
-          created_at: string;
-        }> | null,
-      };
 
   // Merge and deduplicate breakdowns from base table and shared view
   const breakdownMap = new Map<string, BreakdownRow>();

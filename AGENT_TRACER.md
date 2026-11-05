@@ -4,6 +4,17 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-05] - Monorepo Performance Optimization Suite (Reports Query Consolidation, Tab Code-Splitting, WebP Heroes, Employee Cache Deduplication & Composite Shift Indexes)
+
+- **Action:**
+  - Consolidated `fetchDepartmentReportsRawData` in [`apps/portal/app/(departments)/[department]/reports/reports-server-queries.ts`](<./apps/portal/app/(departments)/[department]/reports/reports-server-queries.ts>) to embed `machine_hours`, `fuel_logs`, and `production_logs` into `daily_logs`, scope by `department_id` when `!isControlRoom`, and cache via `withCache` (`CacheCategory.SHIFT`).
+  - Code-split non-default tabs (`MachineMonthlySheetTab`, `MachineMonthlySummaryTab`, `ReportsDayViewTab`, `ReportsArchivedViewTab`, `ShiftPdfReportTab`) with `next/dynamic` and gated `initialArchivedSnapshots` / `monthlySummaryRows` computation on `isMonthRelatedTab` in [`apps/portal/app/(departments)/[department]/reports/ReportsDashboardClient.tsx`](<./apps/portal/app/(departments)/[department]/reports/ReportsDashboardClient.tsx>).
+  - Pre-converted all 11 department hero `.jpg` images in `apps/portal/public/images/departments/` to `.webp` (~77% payload reduction) and updated [`libs/features/hub/ui/src/DepartmentCard.tsx`](./libs/features/hub/ui/src/DepartmentCard.tsx) to prefer `.webp` with automatic `onError` `.jpg` fallback.
+  - Eliminated the sequential `daily_logs` waterfall and bounded the `breakdowns_control_room_view` query in [`apps/portal/app/(departments)/[department]/engineering-notes/page.tsx`](<./apps/portal/app/(departments)/[department]/engineering-notes/page.tsx>).
+  - Consolidated `getAccessibleDepartmentNames`, `getEmployeeRole`, `getEmployeeClearance`, and `getEmployeeIdentity` in [`apps/portal/lib/hub-departments.ts`](./apps/portal/lib/hub-departments.ts) onto a shared cached `getEmployeeBaseRecord` lookup, and wired [`apps/portal/components/nav/MenuIdentity.tsx`](./apps/portal/components/nav/MenuIdentity.tsx) to `getEmployeeIdentity`.
+  - Narrowed the `machines` projection in [`libs/features/departments/data-access/src/department-live-metrics.ts`](./libs/features/departments/data-access/src/department-live-metrics.ts) to `.select('active')`, hardened `getUserSafely` fallback in [`packages/supabase/src/server.ts`](./packages/supabase/src/server.ts), and added migration [`packages/database/migrations/217_composite_operational_shift_indexes.sql`](./packages/database/migrations/217_composite_operational_shift_indexes.sql).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-11-02] - Expert Turborepo v2.x Task Graph, Multi-Stage Pruned Dockerfile, JIT UI Exports, INP Yielding, Fluid CSS & Edge SWR / Speculation Rules
 
 - **Action:**

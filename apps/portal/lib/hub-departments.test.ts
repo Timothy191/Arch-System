@@ -1,6 +1,7 @@
 import {
   getAccessibleDepartmentNames,
   getEmployeeClearance,
+  getEmployeeIdentity,
   getEmployeeRole,
 } from './hub-departments';
 
@@ -309,6 +310,42 @@ describe('hub-departments', () => {
         state: 'clear',
         details: [],
       });
+    });
+  });
+
+  describe('getEmployeeIdentity', () => {
+    it('returns trimmed full name and role when employee row exists', async () => {
+      createReadReplicaClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: { full_name: '  Jane Doe  ', role: 'manager' },
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const identity = await getEmployeeIdentity('user-jane');
+      expect(identity).toEqual({ fullName: 'Jane Doe', role: 'manager' });
+    });
+
+    it('returns null fields when employee row is missing', async () => {
+      createReadReplicaClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: null,
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const identity = await getEmployeeIdentity('user-none');
+      expect(identity).toEqual({ fullName: null, role: null });
     });
   });
 });

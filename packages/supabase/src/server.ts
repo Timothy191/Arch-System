@@ -176,13 +176,23 @@ export async function getUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
 ): Promise<AuthIdentity | null> {
   try {
-    const { data, error } = await supabase.auth.getClaims();
-    const sub = data?.claims?.sub;
-    if (error || !sub) {
-      return null;
+    if (typeof supabase.auth.getClaims === 'function') {
+      const { data, error } = await supabase.auth.getClaims();
+      const sub = data?.claims?.sub;
+      if (error || !sub) {
+        return null;
+      }
+      const email = data.claims.email;
+      return { id: sub, email: typeof email === 'string' ? email : null };
     }
-    const email = data.claims.email;
-    return { id: sub, email: typeof email === 'string' ? email : null };
+    if (typeof supabase.auth.getUser === 'function') {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data?.user?.id) {
+        return null;
+      }
+      return { id: data.user.id, email: data.user.email ?? null };
+    }
+    return null;
   } catch (_error) {
     return null;
   }

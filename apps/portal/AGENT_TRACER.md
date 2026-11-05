@@ -1,3 +1,22 @@
+## 2026-11-05T08:16:00+02:00: Performance Optimizations across Reports, Caching, and Client Code-Splitting
+
+- **Phase 1 (Comprehension)**: Audit and autonomously address key performance opportunities across data-fetching, caching, bundle code-splitting, and asset delivery:
+  1. Consolidate `fetchDepartmentReportsRawData` by embedding `machine_hours`, `fuel_logs`, and `production_logs` relations directly into `daily_logs` query (eliminating 3 sequential queries into 1 pass) and wrapping with dual-layer Redis/RSC `withCache`.
+  2. Code-split non-landing tabs in `ReportsDashboardClient.tsx` using `next/dynamic` (`MachineMonthlySheetTab`, `MachineMonthlySummaryTab`, `ReportsDayViewTab`, `ReportsArchivedViewTab`, `ShiftPdfReportTab`) and lazily compute month-related snapshots and summary rows only when respective tabs are active.
+  3. Pre-convert all 11 department hero images to `.webp` format and update `DepartmentCard.tsx` to prefer WebP with automatic fallback.
+  4. Fix sequential `daily_logs` waterfall and unbounded view scan in `EngineeringNotesPage`.
+  5. Cache `MenuIdentity` employee profile resolution via `getEmployeeIdentity` in `lib/hub-departments.ts`.
+- **Phase 2 (Evidence)**: Inspected query timelines and bundle traces on `/[department]/reports`, `/[department]/engineering-notes`, `/hub`, and `RootLayout`.
+- **Phase 3 (Design)**:
+  - Updated `reports-server-queries.ts` with embedded queries and `withCache`.
+  - Added dynamic imports and lazy computation in `ReportsDashboardClient.tsx`.
+  - Converted department images in `public/images/departments/*.webp`.
+  - Resolved `engDeptId` concurrently and added bounded filter to `breakdowns_control_room_view` in `engineering-notes/page.tsx`.
+  - Created `getEmployeeIdentity` in `hub-departments.ts` and consumed in `MenuIdentity.tsx`.
+  - Fixed `withCache` in `libs/shared/utils/src/cache-utils.ts` to strictly check `cached.source === 'l1' || cached.source === 'l2'`.
+- **Phase 4 (Criticism)**: Verified via `pnpm --filter portal type-check` (0 errors) and `pnpm --filter portal test` (204/204 suites pass, 1398/1398 tests pass).
+- **Phase 5 (Contract)**: Modified `reports-server-queries.ts`, `ReportsDashboardClient.tsx`, `DepartmentCard.tsx`, `engineering-notes/page.tsx`, `MenuIdentity.tsx`, `hub-departments.ts`, `setupTests.ts`, `cache-utils.ts`, and generated `.webp` assets.
+
 ## 2026-11-05T07:40:00+02:00: Executive Dashboard Hub Module & CoreOperationalModules System Golden Separator (`/hub`)
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/hub`:

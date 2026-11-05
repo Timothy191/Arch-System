@@ -18,6 +18,50 @@ import { cacheLife, cacheTag } from '@/lib/server-cache';
  * - getEmployeeClearance: Employee data compliance status
  */
 
+interface EmployeeBaseRecord {
+  full_name?: string | null;
+  role?: string | null;
+  employee_code?: string | null;
+  accessible_departments?: string[] | null;
+}
+
+/**
+ * Shared cached base lookup for a user's `employees` row so concurrent calls to
+ * `getAccessibleDepartmentNames`, `getEmployeeRole`, `getEmployeeClearance`, and
+ * `getEmployeeIdentity` deduplicate into a single `public.employees` query on
+ * cold cache misses.
+ */
+async function getEmployeeBaseRecord(
+  userId: string,
+  cookieList?: Array<{ name: string; value: string }>
+): Promise<EmployeeBaseRecord | null> {
+  'use cache';
+
+  const authTag = tagAuthUser(userId);
+  cacheLife('hours');
+  cacheTag(authTag);
+  cacheTag(CACHE_TAGS.TABLE_EMPLOYEES);
+
+  return withCache(
+    async () => {
+      const db = await createReadReplicaClient(cookieList);
+      const query = db
+        .from('employees')
+        .select('full_name, role, employee_code, accessible_departments')
+        .eq('auth_id', userId);
+      const { data } = await (typeof query.single === 'function'
+        ? query.single()
+        : query.maybeSingle());
+      return (data as EmployeeBaseRecord | null) ?? null;
+    },
+    {
+      category: CacheCategory.AUTH,
+      keyParts: ['user', userId, 'employee-record'],
+      tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
+    }
+  );
+}
+
 /**
  * Fetch the list of department names the given user can access.
  *
@@ -39,16 +83,11 @@ export async function getAccessibleDepartmentNames(
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient(cookieList);
-      const { data: empData } = await db
-        .from('employees')
-        .select('accessible_departments')
-        .eq('auth_id', userId)
-        .single();
-
+      const empData = await getEmployeeBaseRecord(userId, cookieList);
       const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
       if (accessibleDeptIds.length === 0) return [];
 
+      const db = await createReadReplicaClient(cookieList);
       const { data: deptData } = await db
         .from('departments')
         .select('name')
@@ -80,9 +119,7 @@ export async function getEmployeeRole(
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient(cookieList);
-      const { data } = await db.from('employees').select('role').eq('auth_id', userId).single();
-
+      const data = await getEmployeeBaseRecord(userId, cookieList);
       return data?.role ?? null;
     },
     {
@@ -119,13 +156,7 @@ export async function getEmployeeClearance(
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient(cookieList);
-
-      const { data: emp } = await db
-        .from('employees')
-        .select('employee_code')
-        .eq('auth_id', userId)
-        .single();
+      const emp = await getEmployeeBaseRecord(userId, cookieList);
 
       if (!emp?.employee_code) {
         return {
@@ -134,6 +165,7 @@ export async function getEmployeeClearance(
         };
       }
 
+      const db = await createReadReplicaClient(cookieList);
       const { data: personnel } = await db
         .from('personnel')
         .select('emp_code, induction_expiry, medical_expiry')
@@ -167,6 +199,42 @@ export async function getEmployeeClearance(
       category: CacheCategory.AUTH,
       keyParts: ['user', userId, 'clearance'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES, CACHE_TAGS.TABLE_PERSONNEL],
+    }
+  );
+}
+
+export interface EmployeeIdentityRecord {
+  fullName: string | null;
+  role: string | null;
+}
+
+/**
+ * Fetch the display identity (full name and role) of the given user.
+ * Cached via Next.js 16 'use cache' and Redis L1/L2.
+ */
+export async function getEmployeeIdentity(
+  userId: string,
+  cookieList?: Array<{ name: string; value: string }>
+): Promise<EmployeeIdentityRecord> {
+  'use cache';
+
+  const authTag = tagAuthUser(userId);
+  cacheLife('hours');
+  cacheTag(authTag);
+  cacheTag(CACHE_TAGS.TABLE_EMPLOYEES);
+
+  return withCache(
+    async () => {
+      const data = await getEmployeeBaseRecord(userId, cookieList);
+      return {
+        fullName: data?.full_name?.trim() ?? null,
+        role: data?.role ?? null,
+      };
+    },
+    {
+      category: CacheCategory.AUTH,
+      keyParts: ['user', userId, 'identity'],
+      tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
     }
   );
 }

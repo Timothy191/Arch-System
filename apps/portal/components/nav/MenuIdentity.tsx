@@ -1,6 +1,7 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { Avatar } from '@repo/ui/components/ui/avatar';
 import Link from 'next/link';
+import { getEmployeeIdentity } from '@/lib/hub-departments';
 import { formatDisplayNameFromEmail, formatRoleLabel, getInitials } from '~/lib/profile';
 
 /**
@@ -34,15 +35,11 @@ export async function MenuIdentity() {
     );
   }
 
-  const { data: employeeRow } = await supabase
-    .from('employees')
-    .select('full_name, role')
-    .eq('auth_id', identity.id)
-    .maybeSingle();
+  const employeeRow = await getEmployeeIdentity(identity.id);
 
-  const employeeName = employeeRow?.full_name?.trim() ?? '';
+  const employeeName = employeeRow.fullName?.trim() ?? '';
   const fullName = employeeName || formatDisplayNameFromEmail(identity.email);
-  const roleLabel = employeeRow?.role ? formatRoleLabel(employeeRow.role) : '';
+  const roleLabel = employeeRow.role ? formatRoleLabel(employeeRow.role) : '';
   const subtitle = roleLabel || identity.email || 'Signed in';
 
   return (

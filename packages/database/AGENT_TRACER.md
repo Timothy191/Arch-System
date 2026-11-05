@@ -1,5 +1,13 @@
 # Database Package Agent Tracer
 
+## 2026-11-05T08:15:00+02:00: Composite Operational Shift Indexes Migration (217)
+
+- **Phase 1 (Comprehension)**: Add composite B-tree indexes across high-traffic shift reporting, completeness checks, and live telemetry range queries.
+- **Phase 2 (Evidence)**: Inspected range queries on `machine_operations`, `hourly_loads`, `dozer_rolls`, `excavator_activity`, `daily_logs`, and `engineering_notes` filtering by `(department_id, <date>, <shift>)`.
+- **Phase 3 (Design)**: Created `packages/database/migrations/217_composite_operational_shift_indexes.sql` with idempotent `CREATE INDEX IF NOT EXISTS` on composite tuples.
+- **Phase 4 (Criticism)**: Verified via `pnpm lint:migrations` and `pnpm --filter @repo/database test`.
+- **Phase 5 (Contract)**: Created `packages/database/migrations/217_composite_operational_shift_indexes.sql`.
+
 ## 2026-11-05T06:30:00+02:00: Cleanse Fake Sites & Remap Operations to Active Canonical Sites (215)
 
 - **Phase 1 (Comprehension)**: Remove any legacy or mock 'General' / 'General Pit' rows from `sites`, ensure canonical active operational sites (Brakfontein Pit, Brakfontein Plant, Extension Pit) are active, and remap `machine_operations` and `excavator_activity` with null/inactive `site_id` to their machine's active `site_id`.

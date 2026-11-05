@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-05T08:16:00+02:00 - Support WebP Department Images with Automatic Fallback
+
+- **Purpose**: Load `.webp` department images in `DepartmentCard.tsx` with automatic fallback to `.jpg` on error, reducing initial image payload and improving Core Web Vitals on `/hub`.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Added `imageExt` state defaulting to `'webp'` with error handler fallback to `'jpg'`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅ (25/25).
+
 ## 2026-11-05T07:40:00+02:00 - Standardize Department Header Golden Separator & Executive Dashboard Hero/Module Support
 
 - **Purpose**: Standardize `dept-header-separator-${department.name}` in `DepartmentCard.tsx` using the System Default Golden Separator (tapered gold rails, rotated diamonds, and circular `gold-steel-border` Arch Emblem medallion), register `BarChart3` and `/images/departments/overview.jpg` for the `executive` (`Executive Dashboard`) module in `DepartmentCard.tsx` and `HeroRotator.tsx`, and verify `hero-header-separator-*` in `HeroRotator.test.tsx`.
