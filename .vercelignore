@@ -116,6 +116,7 @@
 /tools/wiki-viewer/
 /tools/zero-drift-watchdog/
 /tools/real-world-score.cjs
-/packages/database/migrations/
-/packages/database/tests/
+# NOTE: /packages/database/migrations/ and /packages/database/tests/ must stay
+# uploaded — @repo/database#test (node --test static migration audits) runs in
+# the Vercel build and fails when these paths are excluded.
 
