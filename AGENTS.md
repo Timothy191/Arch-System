@@ -191,6 +191,7 @@ Focused rule files under `.agents/rules/`:
 - `accessibility-wcag.md` — focus-visible, aria-live, skip link, contrast, reduced motion/transparency
 - `nextjs-eslint-conventions.md` — Next.js ESLint conventions, `rootDir`, Core Web Vitals, `eslint-config-prettier`, lint-staged
 - `client-side-data-fetching.md` — TanStack Query (`useQuery`/`useSuspenseQuery`), SWR prohibited, Suspense states
+- `data-fetching-patterns.md` — Server Components first, React `cache()` colocation, `Promise.all` parallelization, streaming Suspense, taint defense
 - `css-in-js.md` — Tailwind CSS + OKLCH tokens standard; CSS-in-JS prohibited; CSS Modules for scoped styles
 - `debugging.md` — VS Code `launch.json`, `pnpm dev --inspect`, DevTools, `next build --debug-prerender`
 - `revalidation.md` — `cacheTag`/`cacheLife`, `updateTag` in Server Actions, `revalidateTag`/`revalidatePath`, dual-tier invalidation

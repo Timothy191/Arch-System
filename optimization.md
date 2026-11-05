@@ -2965,3 +2965,183 @@ export async function renderRunbookMarkdown(relativeFilePath: string) {
    - **Option 1 (Structured SOP Runbooks)**: Use **`@markdoc/markdoc` directly inside a `'use cache'` Server Component** (`Markdoc.parse` + `Markdoc.validate` + `Markdoc.transform` + `Markdoc.renderers.react`) mapped to `@repo/ui` (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`). Zero bundler loader changes, 100% Turbopack native, schema-validated, and zero XSS/code-execution risk.
    - **Option 2 (File-Based Interactive `.mdx` Pages)**: Use **`@next/mdx` with `experimental: { mdxRs: { mdxType: 'gfm' } }`** (Rust SWC MDX compiler) and a root `apps/portal/mdx-components.tsx`.
    - **Option 3 (AI / RAG & Sanitized Dynamic Markdown)**: Use **`remark-parse` + `remark-gfm`** (and `findMarkdownHeadingBoundary` in `apps/portal/lib/ai/chunking.ts`) for heading-aware document chunking and **`rehype-sanitize`** for untrusted/LLM markdown rendering.
+
+---
+
+# Section 29: Data Fetching Patterns and Best Practices
+
+> **Source**: [Next.js Data Fetching Patterns and Best Practices](https://nextjs.org/docs/14/app/building-your-application/data-fetching/patterns) & [Next.js 16 App Router Modern Patterns](https://nextjs.org/docs/app/building-your-application/data-fetching)  
+> **Key Focus Areas**: Fetching data on the server, Colocating data fetching where needed, Layout boundary data isolation, Streaming with Suspense, Parallel vs. Sequential data fetching (eliminating waterfalls), Request memoization (`cache`), Preload pattern (`void fn()`), Server-only boundary enforcement (`server-only`), and Sensitive data leak prevention (React Taint APIs).
+
+---
+
+## 1. Architectural Principles
+
+### 1.1 Fetching Data on the Server
+
+Whenever possible, data fetching in Arch-System is executed on the server inside Server Components (RSC) and Server Actions:
+
+- **Direct Backend & Database Access**: Direct query execution via `@repo/supabase` Kysely instances and Cloud Supabase Postgres clients without intermediate public API hops.
+- **Credential Protection**: Database service keys, Redis passwords, SCADA Modbus credentials, and API gateway secrets never cross the RSC network boundary to client bundles.
+- **Latency & Colocation**: Minimizes client-server round-trips by executing database queries in the cloud runtime closer to the Supabase data source.
+- **Single Round-Trip Hydration**: Eliminates client-side request chatter and offloads main thread parsing.
+
+### 1.2 Fetching Data Where It Is Needed (Colocation)
+
+Rather than fetching data globally at the root layout and threading props through dozens of nested levels, Next.js Server Components allow each component to directly request the data it requires:
+
+- **Zero Prop-Drilling**: Leaf components fetch their own domain models.
+- **Layout / Page Decoupling**: Because App Router layouts do not pass data down to child route segments, both `layout.tsx` and `page.tsx` fetch their required context independently.
+- **Per-Request Deduplication**: Redundant calls within a single request render tree are automatically memoized via `React.cache()` and HTTP fetch cache.
+
+### 1.3 Streaming and Progressive Rendering
+
+- **Instant UI**: Navigating to a route renders the static UI shell immediately while async operations run.
+- **Granular `<Suspense>` Boundaries**: Slow telemetry feeds or complex PDF report compilations are isolated behind `<Suspense fallback={<Skeleton />}>` boundaries, ensuring fast metrics and summary widgets stream to the client without blocking the entire page.
+
+### 1.4 Eliminating Waterfalls: Parallel vs. Sequential Fetching
+
+- **Sequential Waterfalls (Harmful)**: Awaiting multiple independent promises in sequence (`await a(); await b();`) adds latency cumulatively ($T_{total} = T_a + T_b$).
+- **Parallel Fetching (SSoT Standard)**: Independent fetches are initiated simultaneously using `Promise.all` or `Promise.allSettled` ($T_{total} = \max(T_a, T_b)$).
+- **Preload Pattern**: Preload functions (`void fetchResource(id)`) initiate promise execution eagerly in parent components before dependent sub-trees render.
+
+### 1.5 Sensitive Data Defense: React Taint APIs & `server-only`
+
+- **`server-only` Package**: Guarantees that private server modules (e.g. database access, secret resolution, internal RPC calls) throw build-time errors if inadvertently imported into `'use client'` files.
+- **React Taint APIs**: `experimental_taintObjectReference` and `experimental_taintUniqueValue` actively block entire objects (e.g. employee records containing encrypted bank details or password hashes) or specific scalar fields from being serialized into client RSC payloads.
+
+---
+
+## 2. Arch-System Codebase Audit & Implementation State
+
+| Architecture Principle        | Codebase Implementation Status | Arch-System Locations                                                                                                                                                                                                                                      |
+| :---------------------------- | :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Server-Side Data Fetching** | **100% Adopted**               | RSC by default across all department routes (`apps/portal/app/(departments)/...`); mutations routed through typed Server Actions (`packages/contract` Zod validation).                                                                                     |
+| **Data Colocation**           | **100% Adopted**               | `getDepartmentContext({ department })` wrapped in `React.cache()` (`apps/portal/lib/dept-context.ts`), shared between `layout.tsx` and leaf pages with zero prop drilling.                                                                                 |
+| **Streaming UI**              | **100% Adopted**               | Granular `<Suspense>` boundaries on `ControlRoomWidgets.tsx`, `ShiftCloseoutForm.tsx`, and `MachineOperationsFilterableTable.tsx`.                                                                                                                         |
+| **Parallel Execution**        | **100% Adopted**               | Strict repository invariant: `Promise.all` across independent database/Redis queries (e.g. `breakdowns/page.tsx`, `daily-log/page.tsx`, `access-control/actions/muster.ts`). Sequential `await` on independent queries is prohibited by audit gate 4 & 18. |
+| **Request Memoization**       | **100% Adopted**               | Centralized in `apps/portal/lib/dept-context.ts` (`cache(async (department) => ...)`), `apps/portal/lib/dept-registry.ts` (`cache(resolveDeptId)`), and `access-control/actions/shared.ts`.                                                                |
+| **Preload Pattern**           | **Standardized**               | Available for long-running telemetry buffers and complex shift compilations using eagerly initiated promises or `void prefetchQuery(...)`.                                                                                                                 |
+| **Taint Flag & Defense**      | **100% Adopted**               | `experimental: { taint: true }` enabled in `apps/portal/next.config.mjs` (line 231) with React 19 RSC boundary taint protection.                                                                                                                           |
+| **`server-only` Boundary**    | **100% Enforced**              | Enforced statically by policy compiler (`tools/repo/policy-compiler.cjs`), `tools/audits/audit-hooks-and-clients.cjs`, and architecture boundary gate 4.                                                                                                   |
+
+---
+
+## 3. Production Patterns & Concrete Recipes
+
+### Recipe 1: Request-Deduplicated Server Context (React `cache` + Next.js App Router)
+
+```typescript
+// apps/portal/lib/dept-context.ts
+import { cache } from 'react';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { resolveDeptId } from './dept-registry';
+
+/**
+ * React.cache() guarantees that multiple calls with the same slug
+ * within a single HTTP request lifecycle share exactly ONE Supabase query.
+ */
+export const getDepartmentContext = cache(async ({ department }: { department: string }) => {
+  const deptId = await resolveDeptId(department);
+  const supabase = await createServerSupabaseClient();
+  const today = new Date().toISOString().split('T')[0];
+
+  return { deptId, supabase, today };
+});
+```
+
+### Recipe 2: Parallel Fetching with Granular Streaming Suspense
+
+```tsx
+// apps/portal/app/(departments)/[department]/breakdowns/page.tsx
+import { Suspense } from 'react';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { BreakdownsDashboard, BreakdownSkeleton } from '@/features/departments';
+
+export default async function BreakdownsPage({
+  params,
+}: {
+  params: Promise<{ department: string }>;
+}) {
+  const { department: deptSlug } = await params;
+  requireDepartment(deptSlug, 'engineering');
+
+  const { deptId, supabase } = await getDepartmentContext({ department: deptSlug });
+
+  // Initiate database queries in parallel — never sequentially
+  const [{ data: breakdowns }, { data: machines }] = await Promise.all([
+    supabase
+      .from('breakdowns')
+      .select('*, machine_name')
+      .eq('department_id', deptId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('machines')
+      .select('id, name, type, status')
+      .eq('department_id', deptId)
+      .eq('is_active', true),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<BreakdownSkeleton />}>
+        <BreakdownsDashboard breakdowns={breakdowns ?? []} machines={machines ?? []} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### Recipe 3: Preload Pattern with React `cache`
+
+```typescript
+// libs/features/departments/data-access/preload.ts
+import { cache } from 'react';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+
+export const getShiftTelemetryData = cache(async (shiftId: string) => {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase.from('telemetry_records').select('*').eq('shift_id', shiftId);
+  return data ?? [];
+});
+
+/**
+ * Preload helper: calling preloadShiftTelemetry eagerly starts the fetch
+ * in parallel with other asynchronous preparation work before rendering children.
+ */
+export function preloadShiftTelemetry(shiftId: string): void {
+  void getShiftTelemetryData(shiftId);
+}
+```
+
+### Recipe 4: React 19 Taint Protection for Sensitive SCADA / Security Records
+
+```typescript
+// apps/portal/lib/security/taint-helpers.ts
+import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react';
+
+export interface SensitiveEmployeeCredential {
+  employeeId: string;
+  badgeNumber: string;
+  biometricHash: string;
+  pinCode: string;
+}
+
+export function protectEmployeeSecrets(
+  record: SensitiveEmployeeCredential
+): SensitiveEmployeeCredential {
+  if (process.env.NODE_ENV !== 'production' || process.env.__NEXT_EXPERIMENTAL_REACT) {
+    experimental_taintObjectReference(
+      'Do not pass raw security credentials to Client Components',
+      record
+    );
+    experimental_taintUniqueValue(
+      'Do not expose raw biometric hashes or PINs over RSC',
+      record,
+      record.pinCode
+    );
+  }
+  return record;
+}
+```
