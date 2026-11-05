@@ -175,6 +175,33 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
       },
     });
   }
+
+  // AGENT-TRACE: Persist server-side entries to public.system_logs so the
+  // Administration "System Logs" console has durable, queryable telemetry.
+  // Dynamic import keeps the service-role client out of the browser bundle;
+  // recordSystemLog never throws, so telemetry cannot break the request.
+  if (typeof window === 'undefined') {
+    try {
+      const { recordSystemLog } = await import('@/lib/logging/system-logs');
+      await recordSystemLog({
+        level: entry.severity,
+        source: entry.url ? 'api' : 'server',
+        category: 'runtime',
+        message: entry.message,
+        stack: entry.stack,
+        context: {
+          ...(entry.context ?? {}),
+          code: entry.code,
+          statusCode: entry.statusCode,
+          sessionId: entry.sessionId,
+        },
+        url: entry.url,
+        method: entry.method,
+      });
+    } catch {
+      // Persistence is best-effort — never let logging crash the app.
+    }
+  }
 }
 
 /**

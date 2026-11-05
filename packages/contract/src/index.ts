@@ -254,6 +254,7 @@ export * from './schemas/result.schema';
 export * from './schemas/search.schema';
 export * from './schemas/spatial-telemetry.schema';
 export * from './schemas/system-health.schema';
+export * from './schemas/system-log.schema';
 export * from './schemas/whatsapp.schema';
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from './types/access-card.types';
 export type {

@@ -7,6 +7,10 @@ jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('@/lib/logging/system-logs', () => ({
+  recordSystemLog: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { logError } = jest.requireMock('@/lib/errors/error-logger') as {
   logError: jest.Mock;
 };

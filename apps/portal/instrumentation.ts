@@ -24,6 +24,16 @@ export const onRequestError = async (err: any, request: any, context: any) => {
       { err, request: { method: request.method }, context },
       'Global request error'
     );
+
+    // Persist to public.system_logs for the Administration "System Logs" console.
+    const { recordCaughtError } = await import('@/lib/logging/system-logs');
+    await recordCaughtError(err, {
+      source: 'server',
+      category: 'request',
+      method: request?.method,
+      url: request?.path ?? request?.url,
+      context: { routerKind: context?.routerKind, routePath: context?.routePath },
+    });
   } else {
     console.error('Global edge request error:', err);
   }

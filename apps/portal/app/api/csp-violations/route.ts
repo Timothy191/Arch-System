@@ -60,6 +60,7 @@
  */
 
 import { logError } from '@/lib/errors/error-logger';
+import { recordSystemLog } from '@/lib/logging/system-logs';
 
 interface CspReport {
   'document-uri': string;
@@ -96,6 +97,25 @@ export async function POST(req: Request): Promise<Response> {
       blockedUri: blocked,
       documentUri: doc,
       disposition: report.disposition,
+    });
+
+    // Persist to public.system_logs for the admin System Logs console
+    await recordSystemLog({
+      level: 'warn',
+      source: 'csp',
+      category: 'csp-violation',
+      message: `CSP violation: ${directive}`,
+      context: {
+        directive,
+        effectiveDirective: report['effective-directive'],
+        blockedUri: blocked,
+        documentUri: doc,
+        disposition: report.disposition,
+        sourceFile: report['source-file'],
+        lineNumber: report['line-number'],
+        columnNumber: report['column-number'],
+      },
+      url: doc,
     });
 
     return new Response(null, { status: 204 });

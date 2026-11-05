@@ -41,6 +41,9 @@ jest.mock('~/features/admin/tabs/WebhooksTab', () => ({
 jest.mock('~/features/admin/tabs/AuditLogsTab', () => ({
   AuditLogsTab: () => 'AuditLogsTabContent',
 }));
+jest.mock('~/features/admin/tabs/SystemLogsTab', () => ({
+  SystemLogsTab: () => 'SystemLogsTabContent',
+}));
 jest.mock('~/features/admin/tabs/SettingsTab', () => ({
   SettingsTab: () => 'SettingsTabContent',
 }));

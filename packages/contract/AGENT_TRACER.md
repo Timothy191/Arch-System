@@ -358,3 +358,9 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - **Purpose**: Replace plaintext secret map `env` with `env_refs` string array in `integrationManifestSchema` so `/api/integrations/manifest` never emits decrypted connector secrets.
 - **Changes**: `src/schemas/integration.schema.ts` (`integrationManifestSchema`).
 - **Verification**: `pnpm --filter @repo/contract type-check` and `pnpm audit:drift` pass.
+
+## 2026-11-05T07:18:38+02:00: System Log Contract Schemas
+
+- **Purpose**: Canonical Zod contracts for the new `public.system_logs` table (migration 216) powering the Administration "System Logs" console.
+- **Changes**: `src/schemas/system-log.schema.ts` (level/source/category enums, `createSystemLogEntrySchema` ingest payload, `systemLogEntrySchema` row, `systemLogQuerySchema` filters, `updateSystemLogResolutionSchema` triage); exported via `src/index.ts`.
+- **Verification**: `pnpm turbo run build --filter=@repo/contract` passed.

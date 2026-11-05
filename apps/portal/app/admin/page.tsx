@@ -9,6 +9,7 @@ import { IntegrationsTab } from '~/features/admin/tabs/IntegrationsTab';
 import { MineralsTab } from '~/features/admin/tabs/MineralsTab';
 import { SettingsTab } from '~/features/admin/tabs/SettingsTab';
 import { SitesTab } from '~/features/admin/tabs/SitesTab';
+import { SystemLogsTab } from '~/features/admin/tabs/SystemLogsTab';
 import { TargetsTab } from '~/features/admin/tabs/TargetsTab';
 import { UsersTab } from '~/features/admin/tabs/UsersTab';
 import { WebhooksTab } from '~/features/admin/tabs/WebhooksTab';
@@ -23,6 +24,7 @@ const TABS = [
   'integrations',
   'webhooks',
   'audit-logs',
+  'system-logs',
   'settings',
   'external-content',
 ];
@@ -64,6 +66,7 @@ export default async function AdminPage({
         {activeTab === 'integrations' && <IntegrationsTab />}
         {activeTab === 'webhooks' && <WebhooksTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}
+        {activeTab === 'system-logs' && <SystemLogsTab />}
         {activeTab === 'settings' && <SettingsTab />}
         {activeTab === 'external-content' && <ExternalContentTab />}
       </AdminTabsClient>

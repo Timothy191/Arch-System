@@ -34,7 +34,7 @@ export const DEPARTMENTS: Department[] = [
     type: 'standard',
     status: 'active',
     gridSpan: 'md:col-span-1 xl:col-span-1',
-    stats: { label: 'Admin Tools', value: '7 Modules' },
+    stats: { label: 'Admin Tools', value: '12 Modules' },
     trend: [240, 242, 243, 245, 246, 247, 248, 249],
     actions: [
       { label: 'Sites', href: '/admin?tab=sites' },
@@ -42,6 +42,8 @@ export const DEPARTMENTS: Department[] = [
       { label: 'Targets', href: '/admin?tab=targets' },
       { label: 'Users', href: '/admin?tab=users' },
       { label: 'Departments', href: '/admin?tab=departments' },
+      { label: 'Audit Logs', href: '/admin?tab=audit-logs' },
+      { label: 'System Logs', href: '/admin?tab=system-logs' },
       { label: 'Settings', href: '/admin?tab=settings' },
       { label: 'Integrations', href: '/admin?tab=integrations' },
     ],

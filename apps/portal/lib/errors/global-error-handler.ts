@@ -106,6 +106,27 @@ function reportToMonitoring(error: Error, info: ErrorHandlerInfo): void {
       // Silently fail - monitoring should never block the app
     });
   }
+
+  // Persist to public.system_logs via /api/logs for the admin System Logs console
+  import('@/lib/logging/client-log-reporter')
+    .then(({ reportClientLog }) =>
+      reportClientLog({
+        level: 'error',
+        source: 'client',
+        category: info.type === 'circuit-open' ? 'circuit-breaker' : 'runtime',
+        message: error.message,
+        stack: error.stack,
+        context: {
+          handlerType: info.type,
+          ...info.context,
+          circuits: getCircuitContext(),
+        },
+        url: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      })
+    )
+    .catch(() => {
+      // Silently fail - telemetry should never block the app
+    });
 }
 
 /**

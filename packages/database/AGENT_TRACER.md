@@ -236,3 +236,9 @@
 - **Purpose**: Drop overly permissive `WITH CHECK (true)` insert policy on `integration_audit_logs`, add `auth.users(id)` FKs for `installed_by`/`invoked_by`, add NULL-safe unique index `integration_installations_unique_scope`, and index `(installation_id, created_at DESC)`.
 - **Changes**: `migrations/206_integration_rls_hardening.sql`.
 - **Verification**: `pnpm --filter @repo/database test` passed (156 migrations, 0 errors, 0 warnings).
+
+## 2026-11-05T07:18:38+02:00: Migration 216 System Logs Table
+
+- **Purpose**: Persistent application system/error log store (`public.system_logs`) for client runtime errors, server/API failures, CSP violations, cron and integration events; admin-only read/triage via RLS, writes restricted to service role through `POST /api/logs`.
+- **Changes**: `migrations/216_system_logs.sql` — table with level/source/category/message/stack/context/url/employee/department/ip/user_agent/resolved columns, 5 indexes, RLS enabled with admin SELECT/UPDATE policies and no authenticated INSERT policy.
+- **Verification**: pending `pnpm lint:migrations` + `pnpm --filter @repo/database test`.

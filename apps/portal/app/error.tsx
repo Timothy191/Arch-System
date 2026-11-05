@@ -60,14 +60,30 @@ export default function RootError({ error, reset }: RootErrorProps) {
     // Code-split the Sentry-backed structured logger so it never lands in the
     // error boundary's initial bundle. Sentry's global init still captures
     // unhandled errors automatically.
-    import('@/lib/errors/error-logger')
-      .then(({ logError }) => logError(error))
-      .catch(() => {
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      });
+    Promise.all([
+      import('@/lib/errors/error-logger')
+        .then(({ logError }) => logError(error))
+        .catch(() => {
+          if (process.env.NODE_ENV === 'development') {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
+        }),
+      // Persist render-boundary errors to public.system_logs for admin review
+      import('@/lib/logging/client-log-reporter')
+        .then(({ reportClientLog }) =>
+          reportClientLog({
+            level: 'error',
+            source: 'client',
+            category: 'error-boundary',
+            message: error.message,
+            stack: error.stack,
+            context: { digest: error.digest },
+            url: window.location.pathname,
+          })
+        )
+        .catch(() => {}),
+    ]);
   }, [error]);
 
   const title = getErrorTitle(error);

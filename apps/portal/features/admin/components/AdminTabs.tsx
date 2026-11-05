@@ -8,6 +8,7 @@ import {
   Layers,
   MapPin,
   Plug,
+  ScrollText,
   Settings,
   Target,
   Truck,
@@ -25,6 +26,7 @@ const TABS = [
   { value: 'integrations', label: 'Integrations', icon: Plug },
   { value: 'webhooks', label: 'Webhooks', icon: Webhook },
   { value: 'audit-logs', label: 'Audit Logs', icon: FileText },
+  { value: 'system-logs', label: 'System Logs', icon: ScrollText },
   { value: 'settings', label: 'Settings', icon: Settings },
   { value: 'external-content', label: 'External Content', icon: ExternalLink },
 ];
