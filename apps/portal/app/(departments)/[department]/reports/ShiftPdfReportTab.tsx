@@ -22,6 +22,8 @@ import {
   buildSiteDrillingReports,
   calculateSiteShiftSummary,
   type DetailedMachineGroup,
+  deduplicateSiteMachines,
+  formatDelaySummaryText,
   groupMachinesByType,
   type SiteDrillReportData,
 } from './shift-report-drilling';
@@ -195,8 +197,22 @@ export function ShiftPdfReportTab({
   }, [allMachines]);
 
   const activeSiteGroups = useMemo(() => {
-    if (selectedDate === 'all') return pdfSiteGroups;
-    return buildPdfSiteGroups(allMachines.filter((m) => m.date === selectedDate));
+    const source =
+      selectedDate === 'all'
+        ? pdfSiteGroups
+        : buildPdfSiteGroups(allMachines.filter((m) => m.date === selectedDate));
+    return source.map((g) => {
+      const excavators = deduplicateSiteMachines(g.excavators);
+      const rollovers = deduplicateSiteMachines(g.rollovers);
+      const siteMachines = deduplicateSiteMachines(g.siteMachines);
+      return {
+        ...g,
+        excavators,
+        rollovers,
+        siteMachines,
+        orderedMachines: [...excavators, ...rollovers, ...siteMachines],
+      };
+    });
   }, [selectedDate, pdfSiteGroups, allMachines]);
 
   const pdfDelayTotals = useMemo(() => {
@@ -789,13 +805,12 @@ export function ShiftPdfReportTab({
                 (m) => m.siteGroupRole !== 'excavator'
               );
               const machineTypeGroups = groupMachinesByType(nonExcavatorMachines);
-              const siteSummary = calculateSiteShiftSummary({
-                totalHours: siteGroup.totalHours,
-                prodMin: siteGroup.productionDelayMin,
-                engMin: siteGroup.engineeringDelayMin,
-                natMin: siteGroup.naturalDelayMin,
-                nonSiteMin: siteGroup.nonSiteDelayMin,
-              });
+              const siteBlockMined =
+                siteGroup.orderedMachines.find((m) => m.blockMined)?.blockMined ||
+                'Block BLK-PIT-01';
+              const siteMaterial =
+                siteGroup.orderedMachines.find((m) => m.material)?.material ||
+                'Overburden / ROM Coal';
 
               return (
                 <A4SheetContainer
@@ -804,66 +819,93 @@ export function ShiftPdfReportTab({
                   totalPages={totalPages}
                 >
                   <div className="space-y-4">
-                    <div className="avoid-break overflow-hidden rounded-xl border border-[var(--border-default)]">
-                      {/* Site Header Banner with Gold Separator */}
-                      <div className="flex flex-col justify-between gap-2 border-[#d4af37] border-b-2 bg-[var(--bg-tertiary)] px-3.5 py-2 sm:flex-row sm:items-center">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--accent-blue)] px-2.5 py-1 font-bold text-[var(--bg-secondary)] text-xs uppercase tracking-wider">
-                            <Layers className="h-3.5 w-3.5" />
-                            Site: {siteGroup.site}
-                          </span>
-                          <span className="font-medium text-[var(--text-secondary)] text-xs">
-                            1. Excavators: <strong>{siteGroup.excavators.length}</strong> · 2. Roll
-                            Over: <strong>{siteGroup.rollovers.length}</strong> · 3. Site Machines:{' '}
-                            <strong>{siteGroup.siteMachines.length}</strong>
-                          </span>
+                    <div className="avoid-break overflow-hidden rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] shadow-sm">
+                      {/* Site Header Banner with Gold Separator (Unified Drilling Section Template) */}
+                      <div className="border-[#d4af37] border-b-2 bg-[var(--bg-tertiary)]/70 px-5 py-3.5">
+                        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="inline-flex items-center gap-1.5 rounded-md bg-[#d4af37] px-2.5 py-1 font-bold text-slate-900 text-xs uppercase tracking-wider">
+                              <Layers className="h-3.5 w-3.5" />
+                              Site: {siteGroup.site}
+                            </span>
+                            <span className="font-medium text-[var(--text-heading)] text-xs">
+                              1. Excavators: <strong>{siteGroup.excavators.length}</strong> · 2.
+                              Roll Over: <strong>{siteGroup.rollovers.length}</strong> · 3. Site
+                              Machines: <strong>{siteGroup.siteMachines.length}</strong>
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center font-mono text-[var(--text-heading)] text-xs">
+                            <span>
+                              Volume:{' '}
+                              <strong className="text-[var(--accent-blue)]">
+                                {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM
+                              </strong>
+                            </span>
+                            <span
+                              className="mx-2.5 inline-block h-3.5 w-0.5 bg-[#d4af37]"
+                              aria-hidden="true"
+                            />
+                            <span>
+                              Site Worked: <strong>{siteGroup.totalHours.toFixed(2)}h</strong>
+                            </span>
+                          </div>
                         </div>
-                        <div className="font-mono text-[var(--text-heading)] text-xs">
-                          Site Worked: <strong>{siteGroup.totalHours.toFixed(2)}h</strong> · Volume:{' '}
-                          <strong className="text-[var(--accent-blue)]">
-                            {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM
-                          </strong>
+
+                        {/* Block Mined & Material Subheader with Gold Bordering */}
+                        <div className="gold-steel-border gold-steel-border-slim mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 text-xs">
+                          <div>
+                            <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                              Block Mined:{' '}
+                            </span>
+                            <strong className="font-mono text-[var(--text-heading)]">
+                              {siteBlockMined}
+                            </strong>
+                          </div>
+                          <div className="text-[#d4af37]/60">|</div>
+                          <div>
+                            <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                              Material:{' '}
+                            </span>
+                            <strong className="text-[var(--accent-blue)]">{siteMaterial}</strong>
+                          </div>
+                          <div className="text-[#d4af37]/60">|</div>
+                          <div>
+                            <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
+                              Active Fleet:{' '}
+                            </span>
+                            <span className="font-mono text-[var(--text-secondary)]">
+                              {siteGroup.orderedMachines.length} Units Assigned
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* 1. Excavator Activity Table */}
+                      {/* 1. Excavator Activity Table (Streamlined 5 Columns) */}
                       <div className="overflow-x-auto">
                         <table className="w-full border-collapse border border-[var(--border-default)] text-left">
                           <thead>
                             <tr className="divide-x divide-[var(--border-default)] border-[var(--border-default)] border-b bg-[var(--bg-secondary)]">
                               <th className="px-2.5 py-1 font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Machine
+                                Machine ID
                               </th>
                               <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Hours Start - Stop
-                              </th>
-                              <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Total Worked
+                                Worked SMR
                               </th>
                               <th className="px-2.5 py-1 font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                                 Operator
                               </th>
-                              <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Production Delay
-                              </th>
-                              <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Engineering Delay
-                              </th>
-                              <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Natural Delays
-                              </th>
-                              <th className="px-2.5 py-1 text-right font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Non-Site Related Delays
+                              <th className="px-2.5 py-1 font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                                Site / Block
                               </th>
                               <th className="px-2.5 py-1 font-bold text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                                Excavator Activity
+                                Comment
                               </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[var(--border-default)]">
                             <tr className="border-[var(--border-default)] border-b bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
                               <td
-                                colSpan={9}
+                                colSpan={5}
                                 className="px-2.5 py-1 font-bold text-[10px] uppercase tracking-wider"
                               >
                                 1. Excavators First — Excavator Activity (
@@ -877,28 +919,40 @@ export function ShiftPdfReportTab({
                                   : op.startSmu != null
                                     ? `${op.startSmu.toFixed(1)} - Active`
                                     : '—';
+                              const prodMin = op.productionDelayMinutes ?? 0;
+                              const engMin = op.engineeringDelayMinutes ?? 0;
+                              const natMin = op.naturalDelayMinutes ?? 0;
+                              const nonSiteMin = op.nonSiteDelayMinutes ?? 0;
+                              const excComment = formatDelaySummaryText({
+                                prodMin,
+                                engMin,
+                                natMin,
+                                nonSiteMin,
+                                baseComment: op.excavatorActivity || 'Excavator Bench Operations',
+                              });
+                              const excSiteBlock = `${siteGroup.site} · ${op.blockMined || siteBlockMined}${op.material ? ` (${op.material})` : ''}`;
                               return (
                                 <tr
                                   key={`pdf-${siteGroup.site}-${op.id}`}
                                   className="divide-x divide-[var(--border-default)] border-[var(--border-default)] border-b transition-colors hover:bg-[var(--bg-tertiary)]/50"
                                 >
                                   <td className="px-2.5 py-1">
-                                    <div className="flex flex-col gap-0.5">
-                                      <div className="flex flex-wrap items-center gap-1.5">
-                                        <span className="font-bold text-[var(--text-heading)] text-xs">
-                                          {op.machineName}
-                                        </span>
-                                        <span className="rounded bg-[var(--accent-blue)]/15 px-1 py-0.25 font-semibold text-[9px] text-[var(--accent-blue)]">
-                                          Excavator
-                                        </span>
-                                      </div>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      <span className="font-bold text-[var(--text-heading)] text-xs">
+                                        {op.machineName}
+                                      </span>
+                                      <span className="rounded bg-[var(--accent-blue)]/15 px-1 py-0.25 font-semibold text-[9px] text-[var(--accent-blue)]">
+                                        Excavator
+                                      </span>
                                     </div>
                                   </td>
-                                  <td className="whitespace-nowrap px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                    {hoursStartStop}
-                                  </td>
-                                  <td className="whitespace-nowrap px-2.5 py-1 text-right font-bold font-mono text-[11px] text-accent-green">
-                                    {op.hoursWorked.toFixed(2)}h
+                                  <td className="whitespace-nowrap px-2.5 py-1 text-right font-mono text-[11px]">
+                                    <div className="font-bold text-accent-green">
+                                      {op.hoursWorked.toFixed(2)}h
+                                    </div>
+                                    <div className="text-[10px] text-[var(--text-secondary)]">
+                                      {hoursStartStop}
+                                    </div>
                                   </td>
                                   <td
                                     className="max-w-[140px] truncate px-2.5 py-1 text-[var(--text-heading)] text-xs"
@@ -906,20 +960,11 @@ export function ShiftPdfReportTab({
                                   >
                                     {op.operatorName}
                                   </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                    {op.productionDelayMinutes ?? 0}m
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-amber-600">
-                                    {op.engineeringDelayMinutes ?? 0}m
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-sky-600">
-                                    {op.naturalDelayMinutes ?? 0}m
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-purple-600">
-                                    {op.nonSiteDelayMinutes ?? 0}m
+                                  <td className="px-2.5 py-1 font-mono text-[11px] text-[var(--text-heading)]">
+                                    {excSiteBlock}
                                   </td>
                                   <td className="px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                                    {op.excavatorActivity || '—'}
+                                    {excComment}
                                   </td>
                                 </tr>
                               );
@@ -927,7 +972,7 @@ export function ShiftPdfReportTab({
                             {siteGroup.excavators.length === 0 && (
                               <tr>
                                 <td
-                                  colSpan={9}
+                                  colSpan={5}
                                   className="px-3 py-2 text-center text-[var(--text-muted)] text-xs"
                                 >
                                   No active excavators for this site in the selected shift window.
@@ -938,7 +983,7 @@ export function ShiftPdfReportTab({
                         </table>
                       </div>
 
-                      {/* 2+. Machines Grouped by Type */}
+                      {/* 2+. Machines Grouped by Type (Deduplicated per Site, Streamlined 5 Columns) */}
                       <div className="space-y-3 border-[var(--border-default)] border-t bg-[var(--bg-secondary)] p-3">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
@@ -952,10 +997,10 @@ export function ShiftPdfReportTab({
                         {machineTypeGroups.map((group) => (
                           <div
                             key={`group-${siteGroup.site}-${group.groupKey}`}
-                            className="overflow-hidden rounded-lg border border-[var(--border-default)]"
+                            className="overflow-hidden rounded-lg border border-[#d4af37]/60"
                           >
                             <div
-                              className="flex flex-col justify-between gap-1 border-[var(--border-default)] border-b px-3.5 py-1.5 sm:flex-row sm:items-center"
+                              className="flex flex-col justify-between gap-1 border-[#d4af37]/60 border-b px-3.5 py-1.5 sm:flex-row sm:items-center"
                               style={{ backgroundColor: group.badgeBg }}
                             >
                               <div className="flex items-center gap-2">
@@ -971,17 +1016,26 @@ export function ShiftPdfReportTab({
                                 </h5>
                               </div>
                               <div
-                                className="font-mono text-xs"
+                                className="flex items-center font-mono text-xs"
                                 style={{ color: group.badgeColor }}
                               >
-                                Total Worked: <strong>{group.totalWorkedHours.toFixed(2)}h</strong>{' '}
-                                · Delays:{' '}
-                                <strong>
-                                  {group.totalProdDelayMin +
-                                    group.totalEngDelayMin +
-                                    group.totalNonSiteDelayMin}
-                                  m
-                                </strong>
+                                <span>
+                                  Total Worked:{' '}
+                                  <strong>{group.totalWorkedHours.toFixed(2)}h</strong>
+                                </span>
+                                <span
+                                  className="mx-2 inline-block h-3 w-0.5 bg-[#d4af37]"
+                                  aria-hidden="true"
+                                />
+                                <span>
+                                  Delays:{' '}
+                                  <strong>
+                                    {group.totalProdDelayMin +
+                                      group.totalEngDelayMin +
+                                      group.totalNonSiteDelayMin}
+                                    m
+                                  </strong>
+                                </span>
                               </div>
                             </div>
                             <div className="overflow-x-auto">
@@ -989,20 +1043,11 @@ export function ShiftPdfReportTab({
                                 <thead>
                                   <tr className="divide-x divide-[var(--border-default)] border-[var(--border-default)] border-b bg-[var(--bg-tertiary)]/30 font-bold text-[10px] text-[var(--text-muted)] uppercase">
                                     <th className="px-2.5 py-1">Machine ID</th>
-                                    <th className="px-2.5 py-1 text-right">Start SMR</th>
-                                    <th className="px-2.5 py-1 text-right">Stop SMR</th>
-                                    <th className="px-2.5 py-1 text-right">Total SMR</th>
+                                    <th className="px-2.5 py-1 text-right">Worked SMR</th>
                                     <th className="px-2.5 py-1" aria-label="Machine Operator">
                                       Operator
                                     </th>
-                                    <th className="px-2.5 py-1 text-right">Production Delays</th>
-                                    <th className="px-2.5 py-1 text-right">Engineering Delays</th>
-                                    <th
-                                      className="px-2.5 py-1 text-right"
-                                      aria-label="Machine Non-Site Related Delays"
-                                    >
-                                      Non-Site Related Delays
-                                    </th>
+                                    <th className="px-2.5 py-1">Site / Block</th>
                                     <th className="px-2.5 py-1">Comment</th>
                                   </tr>
                                 </thead>
@@ -1018,15 +1063,11 @@ export function ShiftPdfReportTab({
                                           {row.machineType}
                                         </div>
                                       </td>
-                                      <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                        {row.startSmr}
-                                      </td>
-                                      <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                        {row.stopSmr}
-                                      </td>
-                                      <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-accent-green">
-                                        <div>{row.totalSmr}</div>
-                                        <div className="font-mono font-normal text-[9px] text-[var(--text-muted)]">
+                                      <td className="whitespace-nowrap px-2.5 py-1 text-right font-mono text-[11px]">
+                                        <div className="font-bold text-accent-green">
+                                          {row.totalSmr}
+                                        </div>
+                                        <div className="font-mono font-normal text-[10px] text-[var(--text-secondary)]">
                                           {row.hoursStartStop}
                                         </div>
                                       </td>
@@ -1036,14 +1077,8 @@ export function ShiftPdfReportTab({
                                       >
                                         {row.operator}
                                       </td>
-                                      <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                        {row.productionDelays}
-                                      </td>
-                                      <td className="px-2.5 py-1 text-right font-mono text-[11px] text-amber-600">
-                                        {row.engineeringDelays}
-                                      </td>
-                                      <td className="px-2.5 py-1 text-right font-mono text-[11px] text-purple-600">
-                                        {row.nonSiteDelays}
+                                      <td className="px-2.5 py-1 font-mono text-[11px] text-[var(--text-heading)]">
+                                        {row.siteBlock}
                                       </td>
                                       <td className="px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
                                         {row.comment}
@@ -1055,86 +1090,6 @@ export function ShiftPdfReportTab({
                             </div>
                           </div>
                         ))}
-                      </div>
-
-                      {/* 3. Site Shift Summary directly under Machines */}
-                      <div className="border-[var(--border-default)] border-t bg-[var(--bg-tertiary)]/30 p-4">
-                        <div className="rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] p-4 shadow-2xs">
-                          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-[#d4af37]" />
-                                <h4 className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
-                                  Site Shift Summary — {siteGroup.site}
-                                </h4>
-                              </div>
-                              <p className="text-[11px] text-[var(--text-secondary)]">
-                                Aggregated shift reliability, operating duration, and downtime
-                                breakdown
-                              </p>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
-                                <p className="text-[10px] text-[var(--text-muted)] uppercase">
-                                  Total Worked
-                                </p>
-                                <p className="font-bold font-mono text-accent-green text-sm">
-                                  {siteSummary.totalWorkedHours.toFixed(2)}h
-                                </p>
-                              </div>
-                              <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
-                                <p className="text-[10px] text-[var(--text-muted)] uppercase">
-                                  Total Delays
-                                </p>
-                                <p className="font-bold font-mono text-amber-600 text-sm">
-                                  {siteSummary.totalDelayMinutes}m
-                                </p>
-                              </div>
-                              <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
-                                <p className="text-[10px] text-[var(--text-muted)] uppercase">
-                                  Availability %
-                                </p>
-                                <p className="font-bold font-mono text-[var(--accent-blue)] text-sm">
-                                  {siteSummary.availabilityPercent.toFixed(1)}%
-                                </p>
-                              </div>
-                              <div className="rounded-lg border border-[#d4af37]/60 bg-[var(--bg-tertiary)]/40 px-3 py-1.5 text-right shadow-2xs">
-                                <p className="text-[10px] text-[var(--text-muted)] uppercase">
-                                  Utilization %
-                                </p>
-                                <p className="font-bold font-mono text-emerald-600 text-sm">
-                                  {siteSummary.utilizationPercent.toFixed(1)}%
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-[var(--border-default)] border-t pt-2 text-[11px] text-[var(--text-secondary)]">
-                            <div className="flex items-center gap-4 font-mono text-xs">
-                              <span>
-                                Production:{' '}
-                                <strong className="text-[var(--text-heading)]">
-                                  {siteSummary.productionDelayMinutes}m
-                                </strong>
-                              </span>
-                              <span>
-                                Engineering:{' '}
-                                <strong className="text-amber-600">
-                                  {siteSummary.engineeringDelayMinutes}m
-                                </strong>
-                              </span>
-                              <span>
-                                Non-Site:{' '}
-                                <strong className="text-purple-600">
-                                  {siteSummary.nonSiteDelayMinutes}m
-                                </strong>
-                              </span>
-                            </div>
-                            <span className="font-mono text-[10px] text-[var(--text-muted)]">
-                              Volume: {Number(siteGroup.totalBcm.toFixed(1)).toLocaleString()} BCM ·
-                              ISO 9001:2015 Verified
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1161,16 +1116,11 @@ export function ShiftPdfReportTab({
               (pageViewMode === 'all' || currentPage === totalPages) && (
                 <A4SheetContainer pageNumber={totalPages} totalPages={totalPages}>
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between border-[#d4af37] border-b-2 pb-3">
+                    <div className="flex items-end justify-between border-[#d4af37] border-b-2 pb-3">
                       <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 rounded bg-[#d4af37] px-2 py-0.5 font-black text-[10px] text-slate-900 uppercase tracking-wider">
-                            Drilling Operations
-                          </span>
-                          <h3 className="font-bold text-[var(--text-heading)] text-lg">
-                            Drilling &amp; Blast Pattern Report (Site-by-Site)
-                          </h3>
-                        </div>
+                        <h3 className="font-bold text-[var(--text-heading)] text-lg tracking-tight">
+                          Drilling &amp; Blast Pattern Report (Site-by-Site)
+                        </h3>
                         <p className="text-[var(--text-secondary)] text-xs">
                           Automated blast hole metrics, penetration rates, and drill fleet
                           availability
@@ -1178,7 +1128,6 @@ export function ShiftPdfReportTab({
                       </div>
                       <div className="text-right font-mono text-[var(--text-muted)] text-xs">
                         <div>Report Window: {periodLabel}</div>
-                        <div className="font-bold text-[#d4af37]">GOLD STANDARD VERIFIED</div>
                       </div>
                     </div>
 
@@ -1199,26 +1148,28 @@ export function ShiftPdfReportTab({
                                 <strong>{siteDrill.drills.length} Units Active</strong>
                               </span>
                             </div>
-                            <div className="font-mono text-xs">
-                              <span className="text-[var(--text-muted)]">Site Total Holes: </span>
-                              <strong className="text-[var(--accent-blue)]">
+                            <div className="flex flex-wrap items-center font-mono text-xs">
+                              <span className="text-[var(--text-muted)]">Holes / Meters: </span>
+                              <strong className="ml-1 text-[var(--accent-blue)]">
                                 {siteDrill.totals.totalHoles}
                               </strong>
-                              <span className="mx-2 text-[var(--text-muted)]">·</span>
-                              <span className="text-[var(--text-muted)]">Total Meters: </span>
+                              <span className="mx-1 text-[var(--text-muted)]">·</span>
                               <strong className="text-emerald-600">
                                 {siteDrill.totals.totalMeters}
                               </strong>
-                              <span className="mx-2 text-[var(--text-muted)]">·</span>
+                              <span
+                                className="mx-2.5 inline-block h-3.5 w-0.5 bg-[#d4af37]"
+                                aria-hidden="true"
+                              />
                               <span className="text-[var(--text-muted)]">Worked: </span>
-                              <strong className="text-[var(--text-heading)]">
+                              <strong className="ml-1 text-[var(--text-heading)]">
                                 {siteDrill.totals.totalWorkedHours}
                               </strong>
                             </div>
                           </div>
 
-                          {/* Block Mined & Material Subheader directly underneath */}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-1.5 text-xs">
+                          {/* Block Mined & Material Subheader directly underneath with Gold Bordering */}
+                          <div className="gold-steel-border gold-steel-border-slim mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-[#d4af37]/80 bg-[var(--bg-secondary)] px-3 py-1.5 text-xs">
                             <div>
                               <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
                                 Block Mined:{' '}
@@ -1227,7 +1178,7 @@ export function ShiftPdfReportTab({
                                 {siteDrill.blockMined}
                               </strong>
                             </div>
-                            <div className="text-[var(--border-default)]">|</div>
+                            <div className="text-[#d4af37]/60">|</div>
                             <div>
                               <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
                                 Material:{' '}
@@ -1236,7 +1187,7 @@ export function ShiftPdfReportTab({
                                 {siteDrill.material}
                               </strong>
                             </div>
-                            <div className="text-[var(--border-default)]">|</div>
+                            <div className="text-[#d4af37]/60">|</div>
                             <div>
                               <span className="font-semibold text-[10px] text-[var(--text-muted)] uppercase">
                                 Bench Target:{' '}
@@ -1248,33 +1199,17 @@ export function ShiftPdfReportTab({
                           </div>
                         </div>
 
-                        {/* 11-Column Drill Table */}
+                        {/* Streamlined 5-Column Drill Table */}
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse border border-[var(--border-default)] text-left">
                             <thead>
                               <tr className="divide-x divide-[var(--border-default)] border-[var(--border-default)] border-b bg-[var(--bg-secondary)] font-bold text-[10px] text-[var(--text-muted)] uppercase">
                                 <th className="px-2.5 py-1">Machine ID</th>
-                                <th className="px-2.5 py-1 text-right">Start SMR</th>
-                                <th className="px-2.5 py-1 text-right">Stop SMR</th>
-                                <th className="px-2.5 py-1 text-right">Total SMR</th>
+                                <th className="px-2.5 py-1 text-right">Worked SMR</th>
                                 <th className="px-2.5 py-1" aria-label="Drill Operator">
                                   Operator
                                 </th>
-                                <th
-                                  className="px-2.5 py-1 text-right"
-                                  aria-label="Drill Production Delays"
-                                >
-                                  Production Delays
-                                </th>
-                                <th
-                                  className="px-2.5 py-1 text-right"
-                                  aria-label="Drill Engineering Delays"
-                                >
-                                  Engineering Delays
-                                </th>
-                                <th className="px-2.5 py-1 text-right">Non Site related</th>
-                                <th className="px-2.5 py-1 text-right">Holes</th>
-                                <th className="px-2.5 py-1 text-right">Meters</th>
+                                <th className="px-2.5 py-1">Site / Block</th>
                                 <th className="px-2.5 py-1">Comment</th>
                               </tr>
                             </thead>
@@ -1287,14 +1222,13 @@ export function ShiftPdfReportTab({
                                   <td className="px-2.5 py-1 font-bold text-[var(--text-heading)]">
                                     {drill.machineId}
                                   </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                    {drill.startSmr}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                    {drill.stopSmr}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-accent-green">
-                                    {drill.totalSmr}
+                                  <td className="whitespace-nowrap px-2.5 py-1 text-right font-mono text-[11px]">
+                                    <div className="font-bold text-accent-green">
+                                      {drill.totalSmr}
+                                    </div>
+                                    <div className="font-normal text-[10px] text-[var(--text-secondary)]">
+                                      {drill.hoursStartStop}
+                                    </div>
                                   </td>
                                   <td
                                     className="max-w-[140px] truncate px-2.5 py-1 text-[var(--text-heading)] text-xs"
@@ -1302,20 +1236,14 @@ export function ShiftPdfReportTab({
                                   >
                                     {drill.operator}
                                   </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-secondary)]">
-                                    {drill.productionDelays}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-amber-600">
-                                    {drill.engineeringDelays}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-mono text-[11px] text-purple-600">
-                                    {drill.nonSiteRelated}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-[var(--accent-blue)]">
-                                    {drill.holes}
-                                  </td>
-                                  <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-emerald-600">
-                                    {drill.meters}
+                                  <td className="px-2.5 py-1 font-mono text-[11px]">
+                                    <div className="font-semibold text-[var(--text-heading)]">
+                                      {siteDrill.siteName} · {siteDrill.blockMined}
+                                    </div>
+                                    <div className="font-bold text-[10px] text-[var(--accent-blue)]">
+                                      {drill.holes} holes ·{' '}
+                                      <span className="text-emerald-600">{drill.meters}</span>
+                                    </div>
                                   </td>
                                   <td className="px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
                                     {drill.comment}
@@ -1326,26 +1254,17 @@ export function ShiftPdfReportTab({
                                 <td className="px-2.5 py-1 text-[var(--text-heading)]">
                                   {siteDrill.siteName} Drill Totals
                                 </td>
-                                <td
-                                  colSpan={2}
-                                  className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-muted)]"
-                                >
-                                  —
-                                </td>
                                 <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-accent-green">
                                   {siteDrill.totals.totalWorkedHours}
                                 </td>
-                                <td
-                                  colSpan={4}
-                                  className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-muted)]"
-                                >
+                                <td className="px-2.5 py-1 text-right font-mono text-[11px] text-[var(--text-muted)]">
                                   —
                                 </td>
-                                <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-[var(--accent-blue)]">
-                                  {siteDrill.totals.totalHoles} holes
-                                </td>
-                                <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-emerald-600">
-                                  {siteDrill.totals.totalMeters}
+                                <td className="px-2.5 py-1 font-bold font-mono text-[11px] text-[var(--accent-blue)]">
+                                  {siteDrill.totals.totalHoles} holes ·{' '}
+                                  <span className="text-emerald-600">
+                                    {siteDrill.totals.totalMeters}
+                                  </span>
                                 </td>
                                 <td className="px-2.5 py-1 font-mono text-[10px] text-[var(--text-muted)]">
                                   Pattern Completed

@@ -43,6 +43,7 @@ export function MacMenuBar({
   const [pathname, setPathname] = React.useState('/hub');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [systemMenuOpen, setSystemMenuOpen] = React.useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(false);
   const [focusedModule, setFocusedModule] = React.useState<{
     name: string;
     title: string;
@@ -50,6 +51,9 @@ export function MacMenuBar({
 
   React.useEffect(() => {
     setPathname(window.location.pathname);
+    if (typeof document !== 'undefined') {
+      setIsSidebarExpanded(document.documentElement.dataset.sidebarExpanded === 'true');
+    }
     const handlePopState = () => {
       setPathname(window.location.pathname);
       setSystemMenuOpen(false);
@@ -61,11 +65,17 @@ export function MacMenuBar({
         setFocusedModule({ name: detail.name, title: detail.title });
       }
     };
+    const handleSidebarStateChange = (e: Event) => {
+      const detail = (e as CustomEvent<{ expanded?: boolean }>).detail;
+      setIsSidebarExpanded(Boolean(detail?.expanded));
+    };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('arch:active-module-change', handleModuleChange);
+    window.addEventListener('arch:sidebar-state-change', handleSidebarStateChange);
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('arch:active-module-change', handleModuleChange);
+      window.removeEventListener('arch:sidebar-state-change', handleSidebarStateChange);
     };
   }, []);
 
@@ -114,7 +124,8 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'fixed top-2 right-3 left-3 z-navigation flex h-11 items-center justify-between px-3.5',
+        'fixed top-2 right-3 z-navigation flex h-11 items-center justify-between px-3.5 transition-[left] duration-300 ease-out',
+        isSidebarExpanded && !isHubRoute ? 'left-3 md:left-[252px]' : 'left-3',
         'liquid-glass-light gold-steel-border rounded-full border border-white/20 shadow-window',
         className
       )}

@@ -1,5 +1,6 @@
 'use client';
 
+import { Logo } from '@repo/ui/Logo';
 import {
   Calendar,
   ChevronLeft,
@@ -412,6 +413,7 @@ export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetCo
       {/* Strictly Styled Page X of Y Footer */}
       <div className="mt-3 flex items-center justify-between border-slate-300 border-t pt-2 font-mono text-[10px] text-slate-500">
         <div className="flex items-center gap-2">
+          <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
           <span className="font-bold text-slate-700 uppercase tracking-wider">Arch-Systems</span>
           <span>·</span>
           <span>Plantcor Document Control (ISO 9001:2015 Compliant)</span>
@@ -752,65 +754,6 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
           </table>
         </div>
       )}
-
-      {/* Site Shift Summary directly under Machines */}
-      <div className="avoid-break mt-4 rounded-xl border-2 border-[#d4af37]/80 bg-slate-50 p-4 shadow-2xs">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#d4af37]" />
-              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
-                Site Shift Summary — {siteReport.siteName}
-              </h4>
-            </div>
-            <p className="text-[11px] text-slate-600">
-              Aggregated shift reliability, operating duration, and downtime breakdown
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
-              <p className="text-[10px] text-slate-500 uppercase">Total Worked</p>
-              <p className="font-bold font-mono text-emerald-700 text-sm">
-                {siteReport.siteTotals.totalHours.toFixed(1)}h
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
-              <p className="text-[10px] text-slate-500 uppercase">Total Delays</p>
-              <p className="font-bold font-mono text-amber-700 text-sm">
-                {siteReport.siteTotals.totalDelaysMin}m
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
-              <p className="text-[10px] text-slate-500 uppercase">Availability %</p>
-              <p className="font-bold font-mono text-blue-700 text-sm">
-                {(
-                  (siteReport.siteTotals.totalHours /
-                    Math.max(
-                      siteReport.siteTotals.totalHours + siteReport.siteTotals.totalDelaysMin / 60,
-                      1
-                    )) *
-                  100
-                ).toFixed(1)}
-                %
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#d4af37]/60 bg-white px-3 py-1.5 text-right shadow-2xs">
-              <p className="text-[10px] text-slate-500 uppercase">Utilization %</p>
-              <p className="font-bold font-mono text-emerald-700 text-sm">
-                {(
-                  (siteReport.siteTotals.totalHours /
-                    Math.max(
-                      siteReport.siteTotals.totalHours + siteReport.siteTotals.totalDelaysMin / 60,
-                      1
-                    )) *
-                  100
-                ).toFixed(1)}
-                %
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

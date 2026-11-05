@@ -1,3 +1,22 @@
+## 2026-11-05T07:02:00+02:00: Unified Gold Drilling Card Template, Streamlined 5-Column Tables, A4 Footer Logo & Machine Deduplication (`/control-room/reports`)
+
+- **Phase 1 (Comprehension)**: Address 14 design feedback items on `/control-room/reports` (`https://arch-system-kappap.vercel.app/control-room/reports`):
+  - Add `<Logo variant="gold" />` to the footer of all A4 report pages (`A4SheetContainer`).
+  - Introduce gold bordering (`gold-steel-border gold-steel-border-slim border border-[#d4af37]/80`) on the `Block Mined | Material | Bench Target` subheader bar.
+  - Combine `Site Total Holes` and `Total Meters` into `Holes / Meters` with a golden separator before `Worked`.
+  - Apply the `Drilling Section` gold card template (`rounded-xl border-2 border-[#d4af37]/80 bg-[var(--bg-secondary)] shadow-sm`, gold header badge, golden metric separator, and gold-bordered subheader) across all Site Breakdown report pages.
+  - Streamline all PDF report tables (Excavators, Site Fleet Equipment, Drilling) to 5 concise columns: `Machine ID`, `Worked SMR` (hours worked + start–stop SMR), `Operator`, `Site / Block` (site/block/material or holes & meters), and `Comment` (including formatted delay summary when delays > 0).
+  - Remove `"GOLD STANDARD VERIFIED"` and the `"Drilling Operations"` pill badge from the Drilling report page header, keeping the clean heading with a golden bottom separator (`border-[#d4af37] border-b-2`).
+  - Remove redundant `Site Shift Summary` footer cards from all site breakdown pages (`ShiftPdfReportTab.tsx` and `ShiftReportA4Preview.tsx`).
+  - Deduplicate and aggregate machine operation logs per machine per site (`deduplicateSiteMachines`) so each machine appears once per site with its combined worked SMR and delays.
+- **Phase 2 (Evidence)**: Inspected `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `shift-report-drilling.ts`, and `ReportsDashboardClient.test.tsx`.
+- **Phase 3 (Design)**:
+  - Updated `A4SheetContainer` in `ShiftReportA4Preview.tsx` to render `<Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />` in the footer and removed the bottom `Site Shift Summary` card.
+  - Added `deduplicateSiteMachines` and `formatDelaySummaryText` in `shift-report-drilling.ts` and wired them into `groupMachinesByType`, `buildSiteDrillingReports`, and `ShiftPdfReportTab.tsx`.
+  - Updated `ShiftPdfReportTab.tsx` to use the unified gold card template, streamlined 5-column tables, compact `Holes / Meters` metric with golden separator, and cleaned-up Drilling report header.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="reports"` (5 suites, 27/27 PASS) and `pnpm --filter portal lint`.
+- **Phase 5 (Contract)**: Modified `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `shift-report-drilling.ts`, and `ReportsDashboardClient.test.tsx`.
+
 ## 2026-11-05T06:30:00+02:00: Eliminate General Pit, Condense Table Rows with Grid Lines & Optimize PDF Reports Density
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports`: (1) remove 'General Pit' and align all frontend site fallbacks with 'Brakfontein Pit'; (2) make table rows thinner with crisp vertical grid lines for alignment across excavators, haulers, and drills; (3) optimize A4 PDF sheets and export document padding/margins to relay identical data in fewer pages.

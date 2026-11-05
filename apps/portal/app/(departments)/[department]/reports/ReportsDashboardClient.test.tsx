@@ -223,34 +223,22 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     const previewContainer = screen.getByTestId('shift-pdf-report-preview');
     expect(previewContainer).toBeInTheDocument();
 
-    // Verify all required column headers exist
+    // Verify all required streamlined column headers exist
     expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Machine' })
-    ).toBeInTheDocument();
+      within(previewContainer).getAllByRole('columnheader', { name: 'Machine ID' }).length
+    ).toBeGreaterThanOrEqual(1);
     expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Hours Start - Stop' })
-    ).toBeInTheDocument();
+      within(previewContainer).getAllByRole('columnheader', { name: 'Worked SMR' }).length
+    ).toBeGreaterThanOrEqual(1);
     expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Total Worked' })
-    ).toBeInTheDocument();
+      within(previewContainer).getAllByRole('columnheader', { name: 'Operator' }).length
+    ).toBeGreaterThanOrEqual(1);
     expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Operator' })
-    ).toBeInTheDocument();
+      within(previewContainer).getAllByRole('columnheader', { name: 'Site / Block' }).length
+    ).toBeGreaterThanOrEqual(1);
     expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Production Delay' })
-    ).toBeInTheDocument();
-    expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Engineering Delay' })
-    ).toBeInTheDocument();
-    expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Natural Delays' })
-    ).toBeInTheDocument();
-    expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Non-Site Related Delays' })
-    ).toBeInTheDocument();
-    expect(
-      within(previewContainer).getByRole('columnheader', { name: 'Excavator Activity' })
-    ).toBeInTheDocument();
+      within(previewContainer).getAllByRole('columnheader', { name: 'Comment' }).length
+    ).toBeGreaterThanOrEqual(1);
     // Verify Site header
     expect(within(previewContainer).getByText(/Site: Pit North/i)).toBeInTheDocument();
 
@@ -469,12 +457,12 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
 
     const previewContainer = screen.getByTestId('shift-pdf-report-preview');
     // 8 hours * 250 BCM/h = 2,000 BCM once (not 4,000 BCM)
-    expect(
-      within(previewContainer).getByText(/Site Worked:/i).parentElement?.textContent
-    ).toContain('2,000 BCM');
+    expect(within(previewContainer).getByText(/Volume:/i).parentElement?.textContent).toContain(
+      '2,000 BCM'
+    );
     // Verify the 4 delay buckets (30m prod, 15m eng, 30m natural, 15m non-site)
-    expect(within(previewContainer).getAllByText('30m').length).toBeGreaterThanOrEqual(2);
-    expect(within(previewContainer).getAllByText('15m').length).toBeGreaterThanOrEqual(2);
+    expect(within(previewContainer).getByText(/Prod: 30m/i)).toBeInTheDocument();
+    expect(within(previewContainer).getByText(/Eng: 15m/i)).toBeInTheDocument();
   });
 
   it('should display a visible Partial Data Warning banner when a Supabase query returns an error in ReportsPage', async () => {

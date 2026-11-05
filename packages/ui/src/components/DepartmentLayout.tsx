@@ -173,6 +173,33 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
     };
   }, []);
 
+  const isSidebarExpanded = isPinned || isOpen;
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.sidebarExpanded = String(isSidebarExpanded);
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('arch:sidebar-state-change', {
+          detail: { expanded: isSidebarExpanded },
+        })
+      );
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.documentElement.dataset.sidebarExpanded = 'false';
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('arch:sidebar-state-change', {
+            detail: { expanded: false },
+          })
+        );
+      }
+    };
+  }, [isSidebarExpanded]);
+
   // Global mousemove proximity detection near left edge
   const handleContainerMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

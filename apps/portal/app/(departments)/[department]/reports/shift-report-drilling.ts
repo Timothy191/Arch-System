@@ -10,6 +10,7 @@ export interface DetailedMachineRow {
   readonly totalSmr: string;
   readonly totalHours: number;
   readonly operator: string;
+  readonly siteBlock: string;
   readonly productionDelays: string;
   readonly engineeringDelays: string;
   readonly nonSiteDelays: string;
@@ -26,6 +27,82 @@ export interface DetailedMachineGroup {
   readonly totalProdDelayMin: number;
   readonly totalEngDelayMin: number;
   readonly totalNonSiteDelayMin: number;
+}
+
+export function formatDelaySummaryText(params: {
+  prodMin: number;
+  engMin: number;
+  natMin?: number;
+  nonSiteMin: number;
+  baseComment?: string;
+}): string {
+  const { prodMin, engMin, natMin = 0, nonSiteMin, baseComment } = params;
+  const parts: string[] = [];
+  if (prodMin > 0) parts.push(`Prod: ${prodMin}m`);
+  if (engMin > 0) parts.push(`Eng: ${engMin}m`);
+  if (natMin > 0) parts.push(`Nat: ${natMin}m`);
+  if (nonSiteMin > 0) parts.push(`Non-Site: ${nonSiteMin}m`);
+  const delayPrefix = parts.length > 0 ? `Delays (${parts.join(' · ')})` : '';
+  const cleanComment = (baseComment || '').trim();
+  if (delayPrefix && cleanComment && cleanComment !== 'Normal Site Operations') {
+    return `${delayPrefix} — ${cleanComment}`;
+  }
+  return delayPrefix || cleanComment || 'Normal Site Operations';
+}
+
+export function deduplicateSiteMachines(
+  machines: readonly MachineOperationLogItem[]
+): MachineOperationLogItem[] {
+  const map = new Map<string, MachineOperationLogItem>();
+  for (const m of machines) {
+    const key = (m.machineName || m.id).trim();
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, { ...m });
+      continue;
+    }
+    const minStart =
+      existing.startSmu != null && m.startSmu != null
+        ? Math.min(existing.startSmu, m.startSmu)
+        : (existing.startSmu ?? m.startSmu);
+    const maxEnd =
+      existing.endSmu != null && m.endSmu != null
+        ? Math.max(existing.endSmu, m.endSmu)
+        : (existing.endSmu ?? m.endSmu);
+    const hoursWorked = Number((existing.hoursWorked + m.hoursWorked).toFixed(2));
+    const bcmMoved = Number((existing.bcmMoved + m.bcmMoved).toFixed(1));
+    const loadsCount = (existing.loadsCount ?? 0) + (m.loadsCount ?? 0);
+    const bladePasses = (existing.bladePasses ?? 0) + (m.bladePasses ?? 0);
+    const prodMin =
+      (existing.productionDelayMinutes ?? existing.delayMinutes ?? 0) +
+      (m.productionDelayMinutes ?? m.delayMinutes ?? 0);
+    const engMin = (existing.engineeringDelayMinutes ?? 0) + (m.engineeringDelayMinutes ?? 0);
+    const natMin = (existing.naturalDelayMinutes ?? 0) + (m.naturalDelayMinutes ?? 0);
+    const nonSiteMin = (existing.nonSiteDelayMinutes ?? 0) + (m.nonSiteDelayMinutes ?? 0);
+
+    map.set(key, {
+      ...existing,
+      startSmu: minStart,
+      endSmu: maxEnd,
+      hoursWorked,
+      bcmMoved,
+      loadsCount: loadsCount > 0 ? loadsCount : existing.loadsCount,
+      bladePasses: bladePasses > 0 ? bladePasses : existing.bladePasses,
+      delayMinutes: prodMin + engMin + natMin + nonSiteMin,
+      productionDelayMinutes: prodMin,
+      engineeringDelayMinutes: engMin,
+      naturalDelayMinutes: natMin,
+      nonSiteDelayMinutes: nonSiteMin,
+      operatorName:
+        existing.operatorName && existing.operatorName !== 'Unassigned'
+          ? existing.operatorName
+          : m.operatorName,
+      blockMined: existing.blockMined || m.blockMined,
+      material: existing.material || m.material,
+      excavatorActivity: existing.excavatorActivity || m.excavatorActivity,
+    });
+  }
+  return Array.from(map.values());
 }
 
 export function buildDetailedMachineRow(log: MachineOperationLogItem): DetailedMachineRow {
@@ -46,15 +123,36 @@ export function buildDetailedMachineRow(log: MachineOperationLogItem): DetailedM
   const operator = log.operatorName || 'Assigned Operator';
   const prodMin = log.productionDelayMinutes ?? log.delayMinutes ?? 0;
   const engMin = log.engineeringDelayMinutes ?? 0;
-  const nonSiteMin = (log.naturalDelayMinutes ?? 0) + (log.nonSiteDelayMinutes ?? 0);
+  const natMin = log.naturalDelayMinutes ?? 0;
+  const nonSiteMin = natMin + (log.nonSiteDelayMinutes ?? 0);
 
-  const comment =
+  const siteLabel = log.siteName || 'Brakfontein Pit';
+  const blockOrMaterial =
+    log.blockMined && log.material
+      ? `${log.blockMined} · ${log.material}`
+      : log.blockMined ||
+        log.material ||
+        (log.isDozer
+          ? `Roll-Over (${(log.hoursWorked * 250).toFixed(0)} BCM)`
+          : log.bcmMoved > 0
+            ? `${log.bcmMoved.toFixed(1)} BCM`
+            : 'Active Bench');
+  const siteBlock = `${siteLabel} · ${blockOrMaterial}`;
+
+  const baseActivity =
     log.excavatorActivity ||
     (log.isDozer
       ? `Roll-over: ${(log.hoursWorked * 250).toFixed(1)} BCM`
       : log.bcmMoved > 0
         ? `${log.bcmMoved.toFixed(1)} BCM Moved`
         : 'Normal Site Operations');
+
+  const comment = formatDelaySummaryText({
+    prodMin,
+    engMin,
+    nonSiteMin,
+    baseComment: baseActivity,
+  });
 
   return {
     machineId: log.machineName,
@@ -66,6 +164,7 @@ export function buildDetailedMachineRow(log: MachineOperationLogItem): DetailedM
     totalSmr,
     totalHours: log.hoursWorked,
     operator,
+    siteBlock,
     productionDelays: `${prodMin}m`,
     engineeringDelays: `${engMin}m`,
     nonSiteDelays: `${nonSiteMin}m`,
@@ -78,6 +177,7 @@ type CategoryKey = 'adt' | 'dozer' | 'grader' | 'loader' | 'bowser' | 'service' 
 export function groupMachinesByType(
   machines: readonly MachineOperationLogItem[]
 ): readonly DetailedMachineGroup[] {
+  const deduplicated = deduplicateSiteMachines(machines);
   const buckets: Record<CategoryKey, MachineOperationLogItem[]> = {
     adt: [],
     dozer: [],
@@ -88,7 +188,7 @@ export function groupMachinesByType(
     auxiliary: [],
   };
 
-  for (const m of machines) {
+  for (const m of deduplicated) {
     const typeLower = (m.machineType || '').toLowerCase();
     const nameLower = (m.machineName || '').toLowerCase();
 
@@ -265,13 +365,16 @@ export interface DrillOperationRowData {
   readonly machineId: string;
   readonly startSmr: string;
   readonly stopSmr: string;
+  readonly hoursStartStop: string;
   readonly totalSmr: string;
   readonly operator: string;
+  readonly siteBlock: string;
   readonly productionDelays: string;
   readonly engineeringDelays: string;
   readonly nonSiteRelated: string;
   readonly holes: number;
   readonly meters: string;
+  readonly holesMeters: string;
   readonly comment: string;
 }
 
@@ -324,9 +427,10 @@ export function buildSiteDrillingReports(params: {
     }
 
     const drillRows: DrillOperationRowData[] = [];
+    const deduplicatedDrillLogs = deduplicateSiteMachines(existingDrillLogs);
 
-    if (existingDrillLogs.length > 0) {
-      for (const d of existingDrillLogs) {
+    if (deduplicatedDrillLogs.length > 0) {
+      for (const d of deduplicatedDrillLogs) {
         const start = d.startSmu != null ? d.startSmu.toFixed(1) : '1540.0';
         const stop =
           d.endSmu != null
@@ -337,19 +441,30 @@ export function buildSiteDrillingReports(params: {
         const hours = d.hoursWorked > 0 ? d.hoursWorked : 8.5;
         const holes = d.loadsCount && d.loadsCount > 0 ? d.loadsCount : Math.round(hours * 2.8);
         const meters = (holes * 9.2).toFixed(1);
+        const prodMin = d.productionDelayMinutes ?? d.delayMinutes ?? 0;
+        const engMin = d.engineeringDelayMinutes ?? 0;
+        const nonSiteMin = (d.naturalDelayMinutes ?? 0) + (d.nonSiteDelayMinutes ?? 0);
 
         drillRows.push({
           machineId: d.machineName,
           startSmr: start,
           stopSmr: stop,
+          hoursStartStop: `${start} - ${stop}`,
           totalSmr: `${hours.toFixed(1)}h`,
           operator: d.operatorName || 'Jane Driller',
-          productionDelays: `${d.productionDelayMinutes ?? d.delayMinutes ?? 0}m`,
-          engineeringDelays: `${d.engineeringDelayMinutes ?? 0}m`,
-          nonSiteRelated: `${(d.naturalDelayMinutes ?? 0) + (d.nonSiteDelayMinutes ?? 0)}m`,
+          siteBlock: `${siteName} · ${blockMined} · ${holes} holes (${meters}m)`,
+          productionDelays: `${prodMin}m`,
+          engineeringDelays: `${engMin}m`,
+          nonSiteRelated: `${nonSiteMin}m`,
           holes,
           meters: `${meters}m`,
-          comment: d.excavatorActivity || 'Production Blast Pattern Completed',
+          holesMeters: `${holes} holes · ${meters}m`,
+          comment: formatDelaySummaryText({
+            prodMin,
+            engMin,
+            nonSiteMin,
+            baseComment: d.excavatorActivity || 'Production Blast Pattern Completed',
+          }),
         });
       }
     } else {
@@ -384,20 +499,29 @@ export function buildSiteDrillingReports(params: {
       ];
 
       for (const def of drillsDef) {
+        const startStr = def.start.toFixed(1);
         const stop = (def.start + def.hours).toFixed(1);
         const totalMeters = (def.holes * def.metersPerHole).toFixed(1);
         drillRows.push({
           machineId: def.id,
-          startSmr: def.start.toFixed(1),
+          startSmr: startStr,
           stopSmr: stop,
+          hoursStartStop: `${startStr} - ${stop}`,
           totalSmr: `${def.hours.toFixed(1)}h`,
           operator: def.operator,
+          siteBlock: `${siteName} · ${blockMined} · ${def.holes} holes (${totalMeters}m)`,
           productionDelays: `${def.prodDelay}m`,
           engineeringDelays: `${def.engDelay}m`,
           nonSiteRelated: '0m',
           holes: def.holes,
           meters: `${totalMeters}m`,
-          comment: def.comment,
+          holesMeters: `${def.holes} holes · ${totalMeters}m`,
+          comment: formatDelaySummaryText({
+            prodMin: def.prodDelay,
+            engMin: def.engDelay,
+            nonSiteMin: 0,
+            baseComment: def.comment,
+          }),
         });
       }
     }

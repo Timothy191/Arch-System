@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-05T07:02:00+02:00 - Auto-Resize MacMenuBar Offset When DepartmentLayout Sidebar Expands
+
+- **Phase 1 (Comprehension)**: Prevent the top fixed `MacMenuBar` (`div.fixed.top-2`) and the `DepartmentLayout` sidebar (`w-60` / `240px`) from overlapping when the sidebar expands (`isPinned || isOpen`).
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/DepartmentLayout.tsx` and `packages/ui/src/components/MacMenuBar.tsx`.
+- **Phase 3 (Design)**:
+  - Dispatched `arch:sidebar-state-change` custom events and updated `document.documentElement.dataset.sidebarExpanded` in `DepartmentLayout.tsx` whenever `isPinned || isOpen` changes (resetting to `false` on unmount).
+  - Subscribed to `arch:sidebar-state-change` in `MacMenuBar.tsx` and applied `left-3 md:left-[252px]` (`transition-[left] duration-300 ease-out`) when the department sidebar is expanded on non-hub routes.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/ui lint` and `pnpm --filter @repo/ui type-check`.
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/DepartmentLayout.tsx` and `packages/ui/src/components/MacMenuBar.tsx`.
+
 ## 2026-11-05T06:30:00+02:00 - Unify System Menu Trigger with Gold Emblem Logo
 
 - **Phase 1 (Comprehension)**: Unify the System Menu trigger button in `MacSystemMenuDropdown` with the sidebar titlebar gold emblem by switching the logo component to `<Logo variant="gold" />`.
