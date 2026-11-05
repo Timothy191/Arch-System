@@ -214,7 +214,7 @@ jest.mock('../../packages/redis/src/cache', () => {
   return {
     ...actual,
     cacheGet: jest.fn(async () => null),
-    cacheGetWithStats: jest.fn(async () => ({ value: null, stats: null })),
+    cacheGetWithStats: jest.fn(async () => ({ value: null, source: null })),
     cacheSet: jest.fn(async () => undefined),
     cacheSetWithTags: jest.fn(async () => undefined),
     cacheWrap: jest.fn(async (_key, _ttl, loader) => loader()),

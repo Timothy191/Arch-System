@@ -46,9 +46,9 @@ export async function withCache<T>(fn: () => Promise<T>, options: WithCacheOptio
   const key = buildCacheKey(category, ...keyParts);
   const ttlConfig = CACHE_TTL_REGISTRY[category];
 
-  // Try cache first — serve cached null/negative entries too (source !== null)
+  // Try cache first — serve cached null/negative entries too (source === 'l1' | 'l2')
   const cached = await cacheGetWithStats<T>(key);
-  if (cached.source !== null) {
+  if (cached && (cached.source === 'l1' || cached.source === 'l2')) {
     return cached.value as T;
   }
 
