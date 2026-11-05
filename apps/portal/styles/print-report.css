@@ -22,18 +22,32 @@
   footer,
   button,
   .no-print,
-  [role="navigation"] {
+  [role='navigation'] {
     display: none;
   }
 
   /* Report Document Container */
   .print-document {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
+    width: 210mm;
+    max-width: 210mm;
+    margin: 0 auto;
     padding: 0;
     box-shadow: var(--shadow-none, none);
     border: none;
+  }
+
+  .a4-page-sheet {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    padding: 10mm 12mm !important;
+    box-sizing: border-box !important;
+    box-shadow: var(--shadow-none, none);
+    border: none !important;
+    border-radius: 0 !important;
+    break-after: page;
+    break-after: page;
   }
 
   /* Page Break Controls */
