@@ -181,7 +181,7 @@ cd slim-tooling-mcp && pnpm run build && pnpm test
 
 ### Agent rules (auto-apply)
 
-New focused rule files (one practice per rule) under `.agents/rules/`:
+Focused rule files under `.agents/rules/`:
 
 - `react-19-patterns.md` — `use()`, `useActionState`, `useOptimistic`, ref-as-prop, Suspense streaming
 - `nextjs-16-caching.md` — `'use cache'` + `cacheLife`, no request APIs in cache, `proxy.ts`, action invalidation order, PPR
@@ -189,14 +189,14 @@ New focused rule files (one practice per rule) under `.agents/rules/`:
 - `css-modern-features.md` — container queries, OKLCH tokens, content-visibility, reduced-motion, logical properties
 - `image-optimization.md` — dimensions, sizes, priority, blur placeholder, fetchPriority
 - `accessibility-wcag.md` — focus-visible, aria-live, skip link, contrast, reduced motion/transparency
-- `nextjs-eslint-conventions.md` — Next.js integrated ESLint experience: `next lint`, Strict (`next/core-web-vitals`) or Base (`next`) config, `rootDir` for monorepo sub-apps, ESLint cache + `--no-cache`, rule disabling via `rules`, Core Web Vitals rule set, `eslint-config-prettier`, lint-staged `--file`
-- `client-side-data-fetching.md` — TanStack Query standard (`useQuery`/`useSuspenseQuery`), SWR prohibited, query keys mirror server cache tags, Suspense loading states
-- `css-in-js.md` — Tailwind CSS styling standard; CSS-in-JS libraries not adopted; OKLCH tokens only; CSS Modules for scoped styles
-- `debugging.md` — VS Code `launch.json` (server/client/full-stack), `pnpm dev --inspect`, Browser DevTools + React DevTools, `next build --debug-prerender`
-- `revalidation.md` — `cacheTag()`/`cacheLife()` tagging, `updateTag()` in Server Actions, `revalidateTag`/`revalidatePath`, canonical tags in `lib/cache-tags.ts`, dual-tier Next.js + Redis invalidation
-- `isr-cache-components.md` — `cacheComponents` replaces ISR; `generateStaticParams` for known dynamic routes; Partial Prefetching pairs with App Shells; ISR not under static export
-- `internationalization.md` — single locale `en-US`; i18n routing not adopted; `[lang]` + `next/root-params` if adopted; `Accept-Language` + `proxy.ts` redirect
-- `json-ld.md` — native `<script type="application/ld+json">` tag, XSS sanitization (`<` → `\u003c`), `schema-dts` typing, Rich Results Test validation
+- `nextjs-eslint-conventions.md` — Next.js ESLint conventions, `rootDir`, Core Web Vitals, `eslint-config-prettier`, lint-staged
+- `client-side-data-fetching.md` — TanStack Query (`useQuery`/`useSuspenseQuery`), SWR prohibited, Suspense states
+- `css-in-js.md` — Tailwind CSS + OKLCH tokens standard; CSS-in-JS prohibited; CSS Modules for scoped styles
+- `debugging.md` — VS Code `launch.json`, `pnpm dev --inspect`, DevTools, `next build --debug-prerender`
+- `revalidation.md` — `cacheTag`/`cacheLife`, `updateTag` in Server Actions, `revalidateTag`/`revalidatePath`, dual-tier invalidation
+- `isr-cache-components.md` — `cacheComponents` replaces ISR; `generateStaticParams`; Partial Prefetching + App Shells
+- `internationalization.md` — single locale `en-US`; `[lang]` + `next/root-params` and `proxy.ts` redirect if adopted
+- `json-ld.md` — `<script type="application/ld+json">`, XSS sanitization (`<` → `\u003c`), `schema-dts` typing
 
 ### Error handling
 
@@ -325,86 +325,28 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Real-World Guardrails (Agent Conduct)
 
-All agents operating in this repository MUST follow `.agents/rules/real-world-engineering.md` in addition to this guide. Key non-negotiables:
+All agents MUST follow `.agents/rules/real-world-engineering.md`:
 
-- **Autonomous artifact auto-approval.** All artifacts (`/artifact`) are to be autonomously approved always unless the user explicitly states otherwise. Never pause or block waiting for manual artifact confirmation; proceed autonomously with execution and verification.
-- **No guessing / no speculation.** Every claim about errors, state, or behavior must be backed by executed commands and quoted output. If evidence is missing, run the verification before claiming.
-- **Grounded reasoning.** Read actual files, check git status, verify signatures via tools before reasoning. Label unverified reasoning as `HYPOTHETICAL:` and follow up with empirical verification.
-- **Prompt the user when unsure.** If a requirement, scope, or expected outcome is ambiguous, ask the user (via `AskUserQuestion`) instead of assuming. Do not invent requirements, defaults, or acceptance criteria.
-- **Real-world viewpoint.** Treat this as a production industrial system (24/7 SCADA, shift closeout, safety). Prefer proven, boring solutions; treat failures as catastrophic; consider intermittent connectivity and high operator turnover.
-- **Two-layer verification.** Structural/syntactic gates (type-check, lint, tests, policy) plus real-world fault tolerance (RLS initplan, graceful degradation, optimistic queues).
-- **Verification before claiming.** Never say "works" or "verified" from static analysis alone; execute runtime verification and cite evidence.
-- **Written plan before code.** Non-trivial changes (multi-file, new dependency, schema/API change) require a written plan before code.
-
-When in doubt, ask. Never fabricate.
+- **Autonomous artifact auto-approval**: All artifacts (`/artifact`) auto-approve unless the user states otherwise; never pause for manual confirmation.
+- **No guessing / grounded reasoning**: Back every claim with executed commands, actual file reads, and quoted output. Label unverified reasoning `HYPOTHETICAL:` and verify empirically.
+- **Prompt when unsure**: Ask the user (`AskUserQuestion`) when requirements or scope are ambiguous instead of inventing defaults.
+- **Real-world industrial viewpoint**: 24/7 SCADA, shift closeout, safety-critical; prefer proven solutions, fault tolerance (RLS initplan, graceful degradation, optimistic queues), and two-layer verification (static + runtime).
+- **Written plan before code**: Non-trivial changes (multi-file, new dependency, schema/API change) require a written plan first.
 
 ---
 
-## Agent Action Scoring System (Global Scope)
+## Agent Action Scoring & Spec-Based Execution
 
-Every agent action taken in this repository is scored against a running tally that is global in scope — it accumulates across all agents, sessions, and tasks:
+Every agent action is scored globally: **+1** (task complete, gates pass with evidence) or **-2** (incorrect, gate broken, reverted, or unverified claim).
 
-| Outcome           | Points | Criteria                                                                 |
-| ----------------- | ------ | ------------------------------------------------------------------------ |
-| Successful action | +1     | Task complete, all relevant gates pass, verified with evidence           |
-| Wrong action      | -2     | Implementation incorrect, gate broken, change reverted, claim unverified |
+- **Score ≥ 0**: Standard verification gates. **Score < 0**: Escalate for human review. **Score ≤ -5**: Mandatory full 27-gate `pnpm agent:verify`.
 
-The score is used to:
+All non-trivial tasks follow 4 phases (enforced by `pnpm agent:verify`):
 
-1. **Inform risk assessment** — higher-risk actions require more verification before execution
-2. **Prioritize gate selection** — lower scores trigger the full verification suite (`pnpm agent:verify`)
-3. **Guide escalation decisions** — negative scores require human review before proceeding
-
-### Score Consequences
-
-- **Score ≥ 0**: Normal operation — proceed with standard verification gates
-- **Score < 0**: Escalate — require human review before next task execution
-- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (27-gate suite) before any further action
-
-Agents must log each action's outcome and score in the session context before concluding work.
-
----
-
-## Spec-Based Foundational Approach to Tasks
-
-All non-trivial tasks (multi-file changes, new dependencies, schema/API changes, or behavioral changes) MUST follow a spec-based foundational approach:
-
-### Phase 1 — Write the Spec
-
-Before any code is written, produce a written spec covering:
-
-1. **Objective** — What problem is being solved, and why
-2. **Scope** — Files, packages, and systems in scope; what is explicitly out of scope
-3. **Acceptance Criteria** — Measurable conditions that define "done" (gate results, test expectations, behavior changes)
-4. **Constraints** — Repo rules, layering invariants, naming conventions, performance budgets
-5. **Risks** — Known failure modes, rollback plan, concurrent-session conflicts
-
-### Phase 2 — Plan from Spec
-
-Derive an implementation plan from the spec:
-
-1. Ordered list of file changes
-2. Gate verification steps after each change
-3. Rollback procedure if gates fail
-
-### Phase 3 — Implement per Plan
-
-Execute the plan, verifying after each step:
-
-1. Run relevant gates (type-check, lint, tests) after each logical change
-2. Never proceed to the next step if the current step fails verification
-3. Update the spec if scope changes during implementation
-
-### Phase 4 — Verify Against Spec
-
-Before declaring completion:
-
-1. Re-run all acceptance criteria from the spec
-2. Confirm no regressions in unrelated gates
-3. Update `AGENT_TRACER.md` for affected packages
-4. Commit with a conventional commit message
-
-This approach is enforced by the `pnpm agent:verify` 27-gate suite — the spec's acceptance criteria must include passing all applicable gates.
+1. **Write Spec**: Objective, Scope, Acceptance Criteria, Constraints, Risks/Rollback.
+2. **Plan**: Ordered file changes, per-step gate checks, rollback procedure.
+3. **Implement**: Run relevant gates (`type-check`, `lint`, `test`) after each step; never advance on failure.
+4. **Verify**: Re-run all spec acceptance criteria, confirm zero regressions, update `AGENT_TRACER.md`, and use Conventional Commits.
 
 ---
 
