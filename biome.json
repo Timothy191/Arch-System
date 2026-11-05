@@ -23,7 +23,8 @@
       "!**/playwright-report",
       "!**/test-results",
       "!**/.ci-local",
-      "!**/.junie"
+      "!**/.junie",
+      "!**/.pnpm-store"
     ]
   },
   "overrides": [

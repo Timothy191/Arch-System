@@ -2,6 +2,7 @@
 
 # Dependencies
 node_modules
+.pnpm-store
 tools/bin/
 .pnp
 .pnp.js
