@@ -179,7 +179,7 @@ async function getExecutiveData() {
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ['hub', 'executive'],
+      keyParts: ['hub', 'executive-v2'],
       tags: ['table:machines', 'table:employees', 'table:breakdowns'],
     }
   );

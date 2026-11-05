@@ -39,14 +39,28 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     process.env.SUPABASE_ANON_KEY ||
     '';
 
-  return createServerClient(replicaUrl, anonKey, {
+  const resolvedCookies = normalizeSupabaseCookies(
+    cookieList || (cookieStore ? cookieStore.getAll() : [])
+  );
+  const hasAuthCookie = resolvedCookies.some(
+    (cookie) =>
+      cookie.name === 'sb-access-token' ||
+      (cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token'))
+  );
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    '';
+  const supabaseKey = !hasAuthCookie && serviceKey ? serviceKey : anonKey;
+
+  return createServerClient(replicaUrl, supabaseKey, {
     global: {
       fetch: instrumentedFetch,
     },
     cookies: {
       getAll() {
-        const all = cookieList || (cookieStore ? cookieStore.getAll() : []);
-        return normalizeSupabaseCookies(all);
+        return resolvedCookies;
       },
       setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         if (cookieList) return;

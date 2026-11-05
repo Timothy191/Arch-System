@@ -164,7 +164,7 @@ async function getDrillingDashboardData(
 
   return withCache(() => loadDrillingDashboardMetrics(deptId, today), {
     category: CacheCategory.METRICS,
-    keyParts: ['drilling', 'dashboard', deptId, today],
+    keyParts: ['drilling', 'dashboard-v2', deptId, today],
     tags: [dashboardTag, 'table:machines', 'table:drill_operations', 'table:machine_operations'],
   });
 }

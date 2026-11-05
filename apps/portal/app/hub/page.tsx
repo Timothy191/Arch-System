@@ -54,7 +54,7 @@ async function getDashboardCounts(today: string) {
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ['hub', 'counts', today],
+      keyParts: ['hub', 'counts-v2', today],
       tags: ['table:breakdowns', 'table:machines'],
     }
   );
@@ -80,7 +80,7 @@ async function getLiveDepartmentMetrics(today: string): Promise<DepartmentLiveMe
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ['hub', 'live-department-metrics', today],
+      keyParts: ['hub', 'live-department-metrics-v2', today],
       tags: [
         'table:hourly_loads',
         'table:daily_logs',
@@ -151,10 +151,10 @@ export default async function HubPage() {
   // zero assigned departments get an explicit empty state instead of silently
   // seeing every department (authorization safety).
   const hasAssignedDepts = accessibleDeptIds && accessibleDeptIds.length > 0;
-  let rawDepartments = hasAssignedDepts
-    ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
-    : canSeeExecutive
-      ? DEPARTMENTS
+  let rawDepartments = canSeeExecutive
+    ? DEPARTMENTS
+    : hasAssignedDepts
+      ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
       : [];
 
   // AGENT-TRACE: Administration department is strictly restricted to admin users:

@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-05] - Fix Next.js 16 `'use cache'` Read-Replica Auth Fallback & Hub Admin Department Access
+
+- **Action:**
+  - Updated [`createReadReplicaClient`](./packages/supabase/src/read-replica.ts) to use the server-side service key (`SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_KEY || SUPABASE_SECRET_KEY`) when called inside a Next.js 16 `'use cache'` scope without session cookies (`!hasAuthCookie`), preventing PostgREST `401 (42501: permission denied for table employees)` under the `anon` role while preserving per-user `anonKey` + session cookies when auth cookies are present.
+  - Hardened [`getEmployeeBaseRecord` and `getAccessibleDepartmentNames`](./apps/portal/lib/hub-departments.ts) to throw on PostgREST query errors (`error && error.code !== 'PGRST116'`) instead of caching `null` / `[]` in Redis (`CacheCategory.AUTH`), and bumped cache key versions (`-v2`) across `hub-departments.ts`, `hub/page.tsx`, `hub/executive/page.tsx`, `drilling/page.tsx`, and `engineering/page.tsx` to bypass previously poisoned cache entries.
+  - Updated [`HubPage`](./apps/portal/app/hub/page.tsx) so `canSeeExecutive` (`admin` / `manager`) always resolves `DEPARTMENTS`, and unified [`HubLayout`](./apps/portal/app/hub/layout.tsx) onto `getAccessibleDepartmentNames(user.id)`.
+  - Added regression unit tests in [`packages/supabase/src/__tests__/supabase.test.ts`](./packages/supabase/src/__tests__/supabase.test.ts), [`apps/portal/lib/hub-departments.test.ts`](./apps/portal/lib/hub-departments.test.ts), and [`apps/portal/app/hub/page.test.tsx`](./apps/portal/app/hub/page.test.tsx).
+- **Verification:** `pnpm agent:verify` (`27/27 PASS`).
+
 ## [2026-11-05] - Autonomous Task-Adaptive Token Budgeting, Biome Vercel Ignore Root Fix & Monorepo Performance Optimization Suite
 
 - **Action:**

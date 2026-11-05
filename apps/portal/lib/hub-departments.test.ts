@@ -180,6 +180,25 @@ describe('hub-departments', () => {
       const role = await getEmployeeRole('user-missing');
       expect(role).toBeNull();
     });
+
+    it('throws when employees query returns a PostgREST permission error to prevent caching null', async () => {
+      createReadReplicaClient.mockResolvedValue({
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: null,
+                error: { code: '42501', message: 'permission denied for table employees' },
+              }),
+            }),
+          }),
+        }),
+      });
+
+      await expect(getEmployeeRole('user-rls-blocked')).rejects.toThrow(
+        'Failed to fetch employee record: permission denied for table employees'
+      );
+    });
   });
 
   describe('getEmployeeClearance', () => {

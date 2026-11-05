@@ -1,5 +1,4 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { BottomNav } from '@/components/nav/BottomNav';
 import { getAccessibleDepartmentNames } from '@/lib/hub-departments';
@@ -12,9 +11,7 @@ export default async function HubLayout({ children }: { children: React.ReactNod
     redirect('/login');
   }
 
-  const cookieStore = await cookies();
-  const cookieList = cookieStore.getAll();
-  const accessibleDepartments = await getAccessibleDepartmentNames(user.id, cookieList);
+  const accessibleDepartments = await getAccessibleDepartmentNames(user.id);
 
   return (
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">

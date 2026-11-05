@@ -302,4 +302,27 @@ describe('HubPage — graceful degradation', () => {
     expect(passedProps.canSeeExecutive).toBe(false);
     expect(passedProps.departments.map((d) => d.name)).toEqual(['control-room']);
   });
+
+  it('shows all departments for an admin user even when accessibleDeptIds is empty', async () => {
+    const { getAccessibleDepartmentNames, getEmployeeRole } = await import('@/lib/hub-departments');
+    (getAccessibleDepartmentNames as jest.Mock).mockResolvedValueOnce([]);
+    (getEmployeeRole as jest.Mock).mockResolvedValueOnce('admin');
+
+    const jsx = await HubPage();
+    render(jsx);
+
+    expect(mockCoreOperationalModules).toHaveBeenCalledTimes(1);
+    const passedProps = mockCoreOperationalModules.mock.calls[0]?.[0] as {
+      departments: Array<{ name: string }>;
+      canSeeExecutive: boolean;
+    };
+    expect(passedProps.canSeeExecutive).toBe(true);
+    expect(passedProps.departments.map((d) => d.name)).toEqual([
+      'drilling',
+      'plant-processing',
+      'control-room',
+      'overview',
+      'office',
+    ]);
+  });
 });

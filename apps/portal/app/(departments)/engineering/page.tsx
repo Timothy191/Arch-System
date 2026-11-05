@@ -91,7 +91,7 @@ async function getEngineeringHubData(deptId: string): Promise<EngineeringHubMetr
 
   return withCache(() => loadEngineeringHubMetrics(deptId), {
     category: CacheCategory.METRICS,
-    keyParts: ['engineering', 'hub', deptId],
+    keyParts: ['engineering', 'hub-v2', deptId],
     tags: [hubTag, 'table:breakdowns'],
   });
 }

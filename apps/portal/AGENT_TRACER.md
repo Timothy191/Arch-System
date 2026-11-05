@@ -1,3 +1,14 @@
+## 2026-11-05T10:40:00+02:00: Fix Next.js 16 `'use cache'` Read-Replica Auth Fallback & Hub Admin Department Access
+
+- **Phase 1 (Comprehension)**: Resolve why Admin users saw "No departments assigned to your account" on `/hub` in production.
+- **Phase 2 (Evidence)**: Verified that inside Next.js 16 `'use cache'` scopes (`hub-departments.ts`, `hub/page.tsx`, `hub/executive/page.tsx`, `drilling/page.tsx`, `engineering/page.tsx`), `await cookies()` throws and `createReadReplicaClient()` fell back to `anonKey` with empty cookies, causing PostgREST `401 (42501: permission denied for table employees)` and caching `null` / `[]` in Redis (`CacheCategory.AUTH`).
+- **Phase 3 (Design)**:
+  - Updated `packages/supabase/src/read-replica.ts` to use server-side service key (`SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_KEY || SUPABASE_SECRET_KEY`) when `!hasAuthCookie`.
+  - Updated `lib/hub-departments.ts` to throw on PostgREST errors (`error.code !== 'PGRST116'`) and bumped Redis `keyParts` to `-v2` across `hub-departments.ts`, `app/hub/page.tsx`, `app/hub/executive/page.tsx`, `app/(departments)/drilling/page.tsx`, and `app/(departments)/engineering/page.tsx`.
+  - Updated `app/hub/page.tsx` to prioritize `canSeeExecutive` when resolving `rawDepartments` and aligned `app/hub/layout.tsx` call signature.
+- **Phase 4 (Criticism)**: Added regression tests in `packages/supabase/src/__tests__/supabase.test.ts`, `lib/hub-departments.test.ts`, and `app/hub/page.test.tsx`.
+- **Phase 5 (Contract)**: Modified `lib/hub-departments.ts`, `lib/hub-departments.test.ts`, `app/hub/page.tsx`, `app/hub/page.test.tsx`, `app/hub/layout.tsx`, `app/hub/executive/page.tsx`, `app/(departments)/drilling/page.tsx`, and `app/(departments)/engineering/page.tsx`.
+
 ## 2026-11-05T09:35:00+02:00: Integrate Bolt Single-Pass Aggregations & Unit Tests (PR #208 & PR #205)
 
 - **Phase 1 (Comprehension)**: Integrate beneficial single-pass $O(N)$ optimizations and unit tests from PR #208 (`computeArchivedReportData`) and PR #205 (`ProductionCommandCenterClient` & `getProductionDepartmentData`), and synthesize `.jules/bolt.md` learnings.

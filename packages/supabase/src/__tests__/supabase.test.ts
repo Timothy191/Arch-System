@@ -21,6 +21,7 @@ jest.mock('@repo/logger', () => ({
 
 import { createBrowserSupabaseClient } from '../client';
 import { resolvePooledDatabaseUrl } from '../kysely';
+import { createReadReplicaClient } from '../read-replica';
 import { createServerSupabaseClient, getUserSafely, instrumentedFetch } from '../server';
 
 describe('instrumentedFetch', () => {
@@ -502,5 +503,51 @@ describe('resolvePooledDatabaseUrl', () => {
     });
 
     expect(resolved).toBe('postgresql://postgres:postgres@localhost:5432/postgres');
+  });
+});
+
+describe('createReadReplicaClient', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
+      SUPABASE_SERVICE_KEY: 'server-service-key',
+    };
+    const { createServerClient } = require('@supabase/ssr');
+    createServerClient.mockReturnValue({ from: jest.fn() });
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  test('uses service key when called inside use cache scope without auth cookies', async () => {
+    const { cookies } = require('next/headers');
+    cookies.mockRejectedValueOnce(new Error('cookies() called inside use cache'));
+    const { createServerClient } = require('@supabase/ssr');
+
+    await createReadReplicaClient();
+
+    expect(createServerClient).toHaveBeenCalledWith(
+      'https://default.supabase.co',
+      'server-service-key',
+      expect.any(Object)
+    );
+  });
+
+  test('uses anon key when authenticated session cookies are provided', async () => {
+    const { createServerClient } = require('@supabase/ssr');
+
+    await createReadReplicaClient([{ name: 'sb-default-auth-token', value: 'jwt-123' }]);
+
+    expect(createServerClient).toHaveBeenCalledWith(
+      'https://default.supabase.co',
+      'default-anon-key',
+      expect.any(Object)
+    );
   });
 });

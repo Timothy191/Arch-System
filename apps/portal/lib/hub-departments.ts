@@ -49,14 +49,17 @@ async function getEmployeeBaseRecord(
         .from('employees')
         .select('full_name, role, employee_code, accessible_departments')
         .eq('auth_id', userId);
-      const { data } = await (typeof query.single === 'function'
+      const { data, error } = await (typeof query.single === 'function'
         ? query.single()
         : query.maybeSingle());
+      if (error && error.code !== 'PGRST116') {
+        throw new Error(`Failed to fetch employee record: ${error.message}`);
+      }
       return (data as EmployeeBaseRecord | null) ?? null;
     },
     {
       category: CacheCategory.AUTH,
-      keyParts: ['user', userId, 'employee-record'],
+      keyParts: ['user', userId, 'employee-record-v2'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
     }
   );
@@ -88,16 +91,19 @@ export async function getAccessibleDepartmentNames(
       if (accessibleDeptIds.length === 0) return [];
 
       const db = await createReadReplicaClient(cookieList);
-      const { data: deptData } = await db
+      const { data: deptData, error: deptError } = await db
         .from('departments')
         .select('name')
         .in('id', accessibleDeptIds);
+      if (deptError) {
+        throw new Error(`Failed to fetch accessible departments: ${deptError.message}`);
+      }
 
       return (deptData ?? []).map((d) => d.name);
     },
     {
       category: CacheCategory.AUTH,
-      keyParts: ['user', userId, 'accessible-dept-names'],
+      keyParts: ['user', userId, 'accessible-dept-names-v2'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES, CACHE_TAGS.TABLE_DEPARTMENTS],
     }
   );
@@ -124,7 +130,7 @@ export async function getEmployeeRole(
     },
     {
       category: CacheCategory.AUTH,
-      keyParts: ['user', userId, 'role'],
+      keyParts: ['user', userId, 'role-v2'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
     }
   );
@@ -197,7 +203,7 @@ export async function getEmployeeClearance(
     },
     {
       category: CacheCategory.AUTH,
-      keyParts: ['user', userId, 'clearance'],
+      keyParts: ['user', userId, 'clearance-v2'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES, CACHE_TAGS.TABLE_PERSONNEL],
     }
   );
@@ -233,7 +239,7 @@ export async function getEmployeeIdentity(
     },
     {
       category: CacheCategory.AUTH,
-      keyParts: ['user', userId, 'identity'],
+      keyParts: ['user', userId, 'identity-v2'],
       tags: [authTag, CACHE_TAGS.TABLE_EMPLOYEES],
     }
   );
