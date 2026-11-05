@@ -295,7 +295,7 @@ export function buildSiteDrillingReports(params: {
   const results: SiteDrillReportData[] = [];
 
   for (const siteName of siteNames) {
-    const siteLogs = machineLogs.filter((m) => (m.siteName || 'General Pit') === siteName);
+    const siteLogs = machineLogs.filter((m) => (m.siteName || 'Brakfontein Pit') === siteName);
     const existingDrillLogs = siteLogs.filter((m) => {
       const t = (m.machineType || '').toLowerCase();
       const n = (m.machineName || '').toLowerCase();

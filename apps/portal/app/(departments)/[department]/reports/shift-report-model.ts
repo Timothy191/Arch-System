@@ -376,7 +376,7 @@ function buildSiteBuckets(
 ): Map<string, SiteBucket> {
   const siteMap = new Map<string, SiteBucket>();
   for (const log of filteredMachineOps) {
-    const siteKey = (log.siteName || 'General Pit').trim() || 'General Pit';
+    const siteKey = (log.siteName || 'Brakfontein Pit').trim() || 'Brakfontein Pit';
     if (!siteMap.has(siteKey)) {
       siteMap.set(siteKey, { excavators: [], haulers: [], dozers: [], others: [] });
     }

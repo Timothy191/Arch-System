@@ -177,7 +177,7 @@ export function mapOperationsToMachineDailyRecords(params: {
       machineType: fleetMach?.machineType ?? machRel?.machine_type ?? 'Equipment',
       serialNumber: fleetMach?.serialNumber ?? machRel?.serial_number ?? null,
       siteId: fleetMach?.siteId ?? null,
-      siteName: siteRel?.name ?? fleetMach?.siteName ?? 'General Pit',
+      siteName: siteRel?.name ?? fleetMach?.siteName ?? 'Brakfontein Pit',
       date: opRow.shift_date,
       dayOfMonth: dayNum,
       shiftType,
@@ -489,7 +489,7 @@ export function deriveFallbackFleetMachinesFromLogs(params: {
         machineType: logEntry.machineType || 'Equipment',
         serialNumber: null,
         siteId: null,
-        siteName: logEntry.siteName || 'General Pit',
+        siteName: logEntry.siteName || 'Brakfontein Pit',
         baselineSmr: logEntry.startSmu ?? DEFAULT_BASELINE_SMR,
       });
     }
@@ -506,7 +506,7 @@ export function deriveFallbackFleetMachinesFromLogs(params: {
       machineType: logEntry.machineType || 'Equipment',
       serialNumber: null,
       siteId: null,
-      siteName: logEntry.siteName || 'General Pit',
+      siteName: logEntry.siteName || 'Brakfontein Pit',
       date: logEntry.date,
       dayOfMonth: dayNum,
       shiftType: logEntry.shift,

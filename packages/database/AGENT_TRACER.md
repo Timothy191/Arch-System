@@ -1,5 +1,13 @@
 # Database Package Agent Tracer
 
+## 2026-11-05T06:30:00+02:00: Cleanse Fake Sites & Remap Operations to Active Canonical Sites (215)
+
+- **Phase 1 (Comprehension)**: Remove any legacy or mock 'General' / 'General Pit' rows from `sites`, ensure canonical active operational sites (Brakfontein Pit, Brakfontein Plant, Extension Pit) are active, and remap `machine_operations` and `excavator_activity` with null/inactive `site_id` to their machine's active `site_id`.
+- **Phase 2 (Evidence)**: Inspected live Supabase database records where legacy site pointers resulted in 'General Pit' aggregations on `/control-room/reports`.
+- **Phase 3 (Design)**: Authored `packages/database/migrations/215_fix_machine_operations_and_activity_sites.sql` with safe idempotent SQL updates and child FK integrity.
+- **Phase 4 (Criticism)**: Verified via `pnpm --filter @repo/database test` (18/18 PASS, 0 errors) and `pnpm --filter @repo/database check-migrations`.
+- **Phase 5 (Contract)**: Created `migrations/215_fix_machine_operations_and_activity_sites.sql`.
+
 ## 2026-11-02T20:48:00+02:00: Enforce Excavator Activity Material Mode Check Constraint (214)
 
 - **Phase 1 (Comprehension)**: Add forward- and rollback-safe check constraints on `public.excavator_activity.material_type` and `public.excavator_activity_archive.material_type` supporting `Waste`, `Coal`, `Plant`, `Other`, and formatted subcategories (`'Waste — Overburden'`, `'Plant — Wash Plant'`, etc.).

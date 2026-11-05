@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ExportButton } from '@/features/analytics/components/ExportButton';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
@@ -87,9 +87,11 @@ export function ReportsDashboardClient({
   machineDailyRecords = EMPTY_MACHINE_DAILY_RECORDS,
 }: ReportsDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<ReportSubtab>(initialTab);
+  const [, startTabTransition] = useTransition();
   const [shiftFilter, setShiftFilter] = useState<'all' | 'day' | 'night'>('all');
   const [siteFilter, setSiteFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [showMissingMachines, setShowMissingMachines] = useState<boolean>(false);
 
   const currentMonthPrefix = todayStr.slice(0, 7);
@@ -243,7 +245,9 @@ export function ReportsDashboardClient({
   );
 
   const handleSelectTab = (nextTab: ReportSubtab) => {
-    setActiveTab(nextTab);
+    startTabTransition(() => {
+      setActiveTab(nextTab);
+    });
     if (typeof window !== 'undefined' && window.history?.replaceState) {
       const url = new URL(window.location.href);
       url.searchParams.set('tab', nextTab);
@@ -269,18 +273,24 @@ export function ReportsDashboardClient({
   );
 
   const filteredShiftRows = useMemo(
-    () => filterShiftReportRows(shiftRows, shiftFilter, siteFilter, searchQuery),
-    [shiftRows, shiftFilter, siteFilter, searchQuery]
+    () => filterShiftReportRows(shiftRows, shiftFilter, siteFilter, deferredSearchQuery),
+    [shiftRows, shiftFilter, siteFilter, deferredSearchQuery]
   );
 
   const filteredMachineOps = useMemo(
-    () => filterMachineOperationLogs(machineOperationLogs, shiftFilter, siteFilter, searchQuery),
-    [machineOperationLogs, shiftFilter, siteFilter, searchQuery]
+    () =>
+      filterMachineOperationLogs(
+        machineOperationLogs,
+        shiftFilter,
+        siteFilter,
+        deferredSearchQuery
+      ),
+    [machineOperationLogs, shiftFilter, siteFilter, deferredSearchQuery]
   );
 
   const filteredEngineeringLogs = useMemo(
-    () => filterEngineeringLogItems(engineeringLogs, shiftFilter, searchQuery),
-    [engineeringLogs, shiftFilter, searchQuery]
+    () => filterEngineeringLogItems(engineeringLogs, shiftFilter, deferredSearchQuery),
+    [engineeringLogs, shiftFilter, deferredSearchQuery]
   );
 
   const shiftComparison = useMemo(
@@ -296,8 +306,9 @@ export function ReportsDashboardClient({
   );
 
   const archivedData = useMemo(
-    () => computeArchivedReportData(shiftRows, shiftFilter, siteFilter, searchQuery, todayStr),
-    [shiftRows, shiftFilter, siteFilter, searchQuery, todayStr]
+    () =>
+      computeArchivedReportData(shiftRows, shiftFilter, siteFilter, deferredSearchQuery, todayStr),
+    [shiftRows, shiftFilter, siteFilter, deferredSearchQuery, todayStr]
   );
 
   const pdfSiteGroups = useMemo(() => buildPdfSiteGroups(filteredMachineOps), [filteredMachineOps]);

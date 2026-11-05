@@ -1,3 +1,15 @@
+## 2026-11-05T06:30:00+02:00: Eliminate General Pit, Condense Table Rows with Grid Lines & Optimize PDF Reports Density
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/control-room/reports`: (1) remove 'General Pit' and align all frontend site fallbacks with 'Brakfontein Pit'; (2) make table rows thinner with crisp vertical grid lines for alignment across excavators, haulers, and drills; (3) optimize A4 PDF sheets and export document padding/margins to relay identical data in fewer pages.
+- **Phase 2 (Evidence)**: Inspected `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `reports-server-helpers.ts`, `machine-activity-helpers.ts`, `shift-report-drilling.ts`, `shift-report-model.ts`, and `page.tsx`.
+- **Phase 3 (Design)**:
+  - Replaced all fallback strings `'General Pit'` with `'Brakfontein Pit'`.
+  - Added vertical grid borders (`divide-x divide-[var(--border-default)]` / `divide-x divide-slate-200`) and reduced table row padding from `py-2.5` to `py-1`, doubling row density.
+  - Reduced `A4SheetContainer` outer padding from `p-[48px]` to `px-6 py-5` and tightened section spacing from `space-y-6` to `space-y-3`.
+  - Optimized `ShiftReportPdfDocument.tsx` with reduced margins and row padding plus column divider borders.
+- **Phase 4 (Criticism)**: Verified via `pnpm --filter portal test -- reports` (27/27 PASS), `pnpm --filter portal type-check`, `pnpm --filter portal lint`.
+- **Phase 5 (Contract)**: Modified `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `reports-server-helpers.ts`, `machine-activity-helpers.ts`, `shift-report-drilling.ts`, `shift-report-model.ts`, and `page.tsx`.
+
 ## 2026-11-02T21:31:00+02:00: Caching Consolidation — Correctness Fixes + Docs Alignment
 
 - **Phase 1 (Comprehension)**: Surveyed the full caching layer (`@repo/redis` L1/L2 + XFetch, Next.js Data Cache `'use cache'`/`cacheLife`, client TanStack Query + localStorage) and identified correctness defects: double Next.js invalidation in `revalidateRSC`, `refreshTag` passing a profile-name string to `revalidateTag`, `cacheLife` profile drift between `next.config.mjs` and `server-cache.ts`, `cacheGetOrSet` referenced in docs but absent from code, and stale `MAX_L1_TTL_SECONDS = 60` rule.
@@ -11,16 +23,17 @@
 - **Phase 4 (Criticism)**: `pnpm --filter portal type-check`, `pnpm --filter @repo/redis type-check`, `pnpm --filter @repo/redis test` (147/147), `pnpm --filter portal test -- cache-utils|query-cache|shift-sheet-cache|useRedisCache` (16/16), `pnpm lint` (clean), `node tools/audits/audit-caching.cjs` (0 violations), `pnpm policy:check` + `policy:security` (clean).
 - **Phase 5 (Contract)**: Modified `apps/portal/app/actions.ts`, `apps/portal/lib/server-cache.ts`, `apps/portal/next.config.mjs`, `packages/redis/src/cache.ts`, `packages/redis/src/index.ts`, `.agents/rules/redis-capabilities.md`.
 
-## 2026-11-02T21:27:00+02:00: Next.js 16 Frontend-as-Backend Cache APIs, Multi-Stage Pruned Dockerfile & Turbopack FS Cache
+## 2026-11-02T21:45:00+02:00: INP Main-Thread Yielding, Concurrent React Filtering, Edge SWR Headers & Speculation Rules API
 
-- **Phase 1 (Comprehension)**: Complete Next.js 16 Frontend-as-Backend cache primitives (`updateTag`, `refreshAction`, `revalidateTagInRouteHandler`), proxy session helpers (`@repo/supabase/proxy`), persistent Turbopack file-system cache (`turbopackFileSystemCacheForDev: true`), Next.js 16 image cache defaults (`minimumCacheTTL: 14400`, `qualities: [75]`), and the 4-stage `turbo prune portal --docker` Dockerfile.
-- **Phase 2 (Evidence)**: Inspected `apps/portal/lib/server-cache.ts`, `apps/portal/proxy.ts`, `apps/portal/server/proxy.ts`, `packages/supabase/src/proxy.ts`, `apps/portal/docker/Dockerfile`, `.dockerignore`, and `apps/portal/next.config.mjs`.
+- **Phase 1 (Comprehension)**: Eliminate high INP across Control Room sub-routes using `useDeferredValue` and `useTransition`, add W3C Speculation Rules API (`<SpeculationRules />`), configure Edge CDN Stale-While-Revalidate (`s-maxage` + `stale-while-revalidate`), and complete Next.js 16 Frontend-as-Backend cache APIs and Turborepo v2 pruned `Dockerfile`.
+- **Phase 2 (Evidence)**: Audited `apps/portal/app/layout.tsx`, `apps/portal/next.config.mjs`, `apps/portal/server/proxy.ts`, `apps/portal/lib/server-cache.ts`, `apps/portal/docker/Dockerfile`, and Control Room components (`MachineOperationsList.tsx`, `HourlyLoadsGrid.tsx`, `PlantDelaysAnalyticsSection.tsx`, `ReportsDashboardClient.tsx`).
 - **Phase 3 (Design)**:
-  - Added `revalidateTagInRouteHandler(tag, profile)` (Next.js 16 two-argument `revalidateTag` + Redis L1/L2 `cacheInvalidateTags`) and `refreshAction()` (Next.js 16 `refresh()` from `next/cache` for uncached dynamic RSC slices) in `apps/portal/lib/server-cache.ts`, with unit tests in `apps/portal/lib/server-cache.test.ts`.
-  - Enabled `experimental.turbopackFileSystemCacheForDev: true`, `images.minimumCacheTTL: 14400` (4h), `images.qualities: [75]`, and added `@repo/errors` + `@repo/agents` to `transpilePackages` in `apps/portal/next.config.mjs`.
-  - Upgraded `apps/portal/docker/Dockerfile` to Turborepo v2 `turbo prune portal --docker`, BuildKit `/pnpm/store` + `/app/.turbo/cache` + `/app/apps/portal/.next/cache` mounts, and `gcr.io/distroless/nodejs24-debian12` with monorepo standalone asset paths (`CMD ["apps/portal/server.js"]`).
-- **Phase 4 (Criticism)**: Verified with `server-cache.test.ts`, `turbo prune portal --docker`, and the 27-gate `agent-verify.sh` suite.
-- **Phase 5 (Contract)**: Modified `apps/portal/lib/server-cache.ts`, `apps/portal/lib/server-cache.test.ts`, `apps/portal/next.config.mjs`, `apps/portal/package.json`, and `apps/portal/docker/Dockerfile`.
+  - Created `apps/portal/components/SpeculationRules.tsx` (tested in `SpeculationRules.test.tsx`) and mounted `<SpeculationRules />` in `apps/portal/app/layout.tsx` (`<head>`) alongside `min-h-dvh` on `<body>`.
+  - Wired `useDeferredValue` in `MachineOperationsList.tsx`, `HourlyLoadsGrid.tsx`, `PlantDelaysAnalyticsSection.tsx`, and `ReportsDashboardClient.tsx`, plus `useTransition` (`startTabTransition`) in `ReportsDashboardClient.tsx` `handleSelectTab` for interruptible sub-200ms INP tab switches.
+  - Added `s-maxage` + `stale-while-revalidate` Edge CDN headers in `apps/portal/next.config.mjs` and `apps/portal/server/proxy.ts`.
+  - Added `revalidateTagInRouteHandler` and `refreshAction` in `apps/portal/lib/server-cache.ts` (tested in `apps/portal/lib/server-cache.test.ts`), enabled `turbopackFileSystemCacheForDev: true` and `images.minimumCacheTTL: 14400` in `apps/portal/next.config.mjs`, and upgraded `apps/portal/docker/Dockerfile` (`turbo prune portal --docker`, BuildKit cache mounts, Distroless Node 24 standalone paths).
+- **Phase 4 (Criticism)**: Verified with `SpeculationRules.test.tsx`, `server-cache.test.ts`, `MachineOperationsList.test.tsx`, and `agent-verify.sh`.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/layout.tsx`, `apps/portal/components/SpeculationRules.{tsx,test.tsx}`, `apps/portal/next.config.mjs`, `apps/portal/server/proxy.ts`, `apps/portal/lib/server-cache.{ts,test.ts}`, `apps/portal/docker/Dockerfile`, and Control Room client components.
 
 ## 2026-11-02T21:11:00+02:00: Next.js 16 Rendering, Request Memoization, Streaming Skeletons & Package Import Optimization
 

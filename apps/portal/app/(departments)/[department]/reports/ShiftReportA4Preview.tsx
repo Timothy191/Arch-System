@@ -399,7 +399,7 @@ export interface A4SheetContainerProps {
 export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetContainerProps) {
   return (
     <div
-      className="a4-page-sheet relative flex min-h-[1123px] w-[794px] flex-col justify-between rounded-lg bg-white p-[48px] text-[#0f172a] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] transition-shadow [print-color-adjust:exact]"
+      className="a4-page-sheet relative flex min-h-[1123px] w-[794px] flex-col justify-between rounded-lg bg-white px-6 py-5 text-[#0f172a] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] transition-shadow [print-color-adjust:exact]"
       style={{
         width: '794px',
         minHeight: '1123px',
@@ -410,7 +410,7 @@ export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetCo
       <div className="flex-1">{children}</div>
 
       {/* Strictly Styled Page X of Y Footer */}
-      <div className="mt-6 flex items-center justify-between border-slate-300 border-t pt-3 font-mono text-[10px] text-slate-500">
+      <div className="mt-3 flex items-center justify-between border-slate-300 border-t pt-2 font-mono text-[10px] text-slate-500">
         <div className="flex items-center gap-2">
           <span className="font-bold text-slate-700 uppercase tracking-wider">Arch-Systems</span>
           <span>·</span>
@@ -434,9 +434,9 @@ interface PageOneProps {
 
 function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Official Arch-Systems Corporate Header */}
-      <div className="flex items-start justify-between border-[#d4af37] border-b-2 pb-4">
+      <div className="flex items-start justify-between border-[#d4af37] border-b-2 pb-2.5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 font-black text-[10px] text-white tracking-widest">
@@ -469,7 +469,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
 
       {/* Combined Executive Summary Metric Cards */}
       <div>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-1.5 flex items-center justify-between">
           <h2 className="font-bold text-slate-800 text-xs uppercase tracking-wider">
             Combined Shift Summary (Cross-Site Totals)
           </h2>
@@ -479,28 +479,28 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
-          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
+        <div className="grid grid-cols-4 gap-2.5">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-2 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">
               Total Material Moved
             </p>
-            <p className="mt-1 font-extrabold font-mono text-blue-700 text-xl">
+            <p className="mt-0.5 font-extrabold font-mono text-blue-700 text-lg">
               {summary.totalMaterialMoved.toLocaleString()}
             </p>
             <p className="text-[10px] text-slate-500">BCM / Tonnes Combined</p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-2 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total Haul Loads</p>
-            <p className="mt-1 font-extrabold font-mono text-slate-900 text-xl">
+            <p className="mt-0.5 font-extrabold font-mono text-lg text-slate-900">
               {summary.totalLoads.toLocaleString()}
             </p>
             <p className="text-[10px] text-slate-500">Dispatched Dump Cycles</p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-2 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Fleet SMR Worked</p>
-            <p className="mt-1 font-extrabold font-mono text-emerald-700 text-xl">
+            <p className="mt-0.5 font-extrabold font-mono text-emerald-700 text-lg">
               {summary.totalFleetSmrWorked.toFixed(1)} h
             </p>
             <p className="text-[10px] text-slate-500">
@@ -508,11 +508,11 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-3 shadow-2xs">
+          <div className="rounded-lg border-2 border-[#d4af37]/80 bg-slate-50/70 p-2 shadow-2xs">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">
               Total Operational Delays
             </p>
-            <p className="mt-1 font-extrabold font-mono text-amber-700 text-xl">
+            <p className="mt-0.5 font-extrabold font-mono text-amber-700 text-lg">
               {summary.totalDelayMinutes} m
             </p>
             <p className="text-[10px] text-slate-500">
@@ -523,10 +523,10 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
       </div>
 
       {/* Visuals: 3 Minimalist Crisp SVG Summary Charts */}
-      <div className="space-y-4 pt-1">
+      <div className="space-y-2.5 pt-0.5">
         {/* Chart 1: Total Tonnes / BCM by Site */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-2xs">
-          <div className="mb-2 flex items-center justify-between">
+        <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+          <div className="mb-1.5 flex items-center justify-between">
             <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">
               1. Production Volume by Site
             </h3>
@@ -535,7 +535,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
             </span>
           </div>
 
-          <div className="space-y-2 pt-1">
+          <div className="space-y-1.5 pt-0.5">
             {summary.productionBySite.map((site) => {
               const maxVol = Math.max(...summary.productionBySite.map((s) => s.amount), 1);
               const pct = Math.max(Math.round((site.amount / maxVol) * 100), 5);
@@ -561,7 +561,7 @@ function PageOneExecutiveSummary({ summary, chartPrefix }: PageOneProps) {
         </div>
 
         {/* Chart 2: Material Split */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-2xs">
+        <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">
               2. Material Distribution Split
@@ -710,34 +710,40 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
               {siteReport.dozerRollovers.length === 1 ? '' : 's'} Active
             </span>
           </div>
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-[10px] text-slate-500 uppercase">
+          <table className="w-full border-collapse border border-slate-300 text-left text-xs">
+            <thead className="divide-x divide-slate-200 bg-slate-50 text-[10px] text-slate-500 uppercase">
               <tr>
-                <th className="px-3 py-1.5">Machine</th>
-                <th className="px-3 py-1.5">Operator</th>
-                <th className="px-3 py-1.5 text-right">Start SMR</th>
-                <th className="px-3 py-1.5 text-right">Stop SMR</th>
-                <th className="px-3 py-1.5 text-right">Worked (h)</th>
-                <th className="px-3 py-1.5 text-right">Blade Passes</th>
-                <th className="px-3 py-1.5 text-right">Rollover BCM</th>
-                <th className="px-3 py-1.5 text-right">Delays</th>
+                <th className="px-2 py-1 font-bold">Machine</th>
+                <th className="px-2 py-1 font-bold">Operator</th>
+                <th className="px-2 py-1 text-right font-bold">Start SMR</th>
+                <th className="px-2 py-1 text-right font-bold">Stop SMR</th>
+                <th className="px-2 py-1 text-right font-bold">Worked (h)</th>
+                <th className="px-2 py-1 text-right font-bold">Blade Passes</th>
+                <th className="px-2 py-1 text-right font-bold">Rollover BCM</th>
+                <th className="px-2 py-1 text-right font-bold">Delays</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {siteReport.dozerRollovers.map((d) => (
-                <tr key={d.machineName}>
-                  <td className="px-3 py-1.5 font-bold text-slate-800">{d.machineName}</td>
-                  <td className="px-3 py-1.5 text-slate-600">{d.operatorName}</td>
-                  <td className="px-3 py-1.5 text-right font-mono">{d.openingSmr.toFixed(1)}</td>
-                  <td className="px-3 py-1.5 text-right font-mono">{d.closingSmr.toFixed(1)}</td>
-                  <td className="px-3 py-1.5 text-right font-bold font-mono text-emerald-700">
+                <tr key={d.machineName} className="divide-x divide-slate-200">
+                  <td className="px-2 py-1 font-bold text-[11px] text-slate-800">
+                    {d.machineName}
+                  </td>
+                  <td className="px-2 py-1 text-[11px] text-slate-600">{d.operatorName}</td>
+                  <td className="px-2 py-1 text-right font-mono text-[11px]">
+                    {d.openingSmr.toFixed(1)}
+                  </td>
+                  <td className="px-2 py-1 text-right font-mono text-[11px]">
+                    {d.closingSmr.toFixed(1)}
+                  </td>
+                  <td className="px-2 py-1 text-right font-bold font-mono text-[11px] text-emerald-700">
                     {d.hoursWorked.toFixed(1)}h
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono">{d.bladePasses}</td>
-                  <td className="px-3 py-1.5 text-right font-bold font-mono text-blue-700">
+                  <td className="px-2 py-1 text-right font-mono text-[11px]">{d.bladePasses}</td>
+                  <td className="px-2 py-1 text-right font-bold font-mono text-[11px] text-blue-700">
                     {d.rolloverBcm.toLocaleString()}
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono text-slate-500">
+                  <td className="px-2 py-1 text-right font-mono text-[11px] text-slate-500">
                     {d.delayMinutes > 0 ? `${d.delayMinutes}m` : '-'}
                   </td>
                 </tr>
@@ -827,7 +833,7 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
       style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
     >
       {/* 1. Excavator Header Metadata */}
-      <div className="grid grid-cols-4 gap-2 border-slate-300 border-b bg-slate-100/80 px-4 py-2.5 text-xs">
+      <div className="grid grid-cols-4 gap-2 border-slate-300 border-b bg-slate-100/80 px-3 py-1.5 text-xs">
         <div>
           <span className="font-semibold text-[10px] text-slate-500 uppercase tracking-wider">
             Excavator:
@@ -870,43 +876,48 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
 
       {/* 2. Assigned Hauling Machines Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full border-collapse border border-slate-300 text-left text-xs">
           <thead>
-            <tr className="border-slate-200 border-b bg-slate-50 font-bold text-[10px] text-slate-600 uppercase tracking-wider">
-              <th className="px-3.5 py-2">Machine ID</th>
-              <th className="px-3.5 py-2 text-right">Bin Factor</th>
-              <th className="px-3.5 py-2 text-right">Total SMR Worked</th>
-              <th className="px-3.5 py-2">Operator</th>
-              <th className="px-3.5 py-2 text-right">Loads</th>
-              <th className="px-3.5 py-2 text-right">Total ({block.materialUnit})</th>
-              <th className="px-3.5 py-2">Delays</th>
+            <tr className="divide-x divide-slate-200 border-slate-200 border-b bg-slate-50 font-bold text-[10px] text-slate-600 uppercase tracking-wider">
+              <th className="px-2.5 py-1">Machine ID</th>
+              <th className="px-2.5 py-1 text-right">Bin Factor</th>
+              <th className="px-2.5 py-1 text-right">Total SMR Worked</th>
+              <th className="px-2.5 py-1">Operator</th>
+              <th className="px-2.5 py-1 text-right">Loads</th>
+              <th className="px-2.5 py-1 text-right">Total ({block.materialUnit})</th>
+              <th className="px-2.5 py-1">Delays</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
             {block.assignedMachines.map((hauler) => (
-              <tr key={hauler.machineId} className="hover:bg-slate-50/50">
-                <td className="px-3.5 py-2">
-                  <div className="font-bold text-slate-900">{hauler.machineName}</div>
-                  <div className="text-[10px] text-slate-500">{hauler.machineType}</div>
+              <tr key={hauler.machineId} className="divide-x divide-slate-200 hover:bg-slate-50/50">
+                <td className="px-2.5 py-1">
+                  <div className="font-bold text-slate-900 text-xs">{hauler.machineName}</div>
+                  <div className="text-[9px] text-slate-500">{hauler.machineType}</div>
                 </td>
-                <td className="px-3.5 py-2 text-right font-mono text-slate-700">
+                <td className="px-2.5 py-1 text-right font-mono text-[11px] text-slate-700">
                   {hauler.binFactor.toFixed(1)} {hauler.materialUnit === 'Tonnes' ? 't' : 'BCM'}
                 </td>
-                <td className="px-3.5 py-2 text-right font-bold font-mono text-emerald-700">
+                <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-emerald-700">
                   {hauler.totalSmrWorked.toFixed(1)} hrs
                 </td>
-                <td className="px-3.5 py-2 text-slate-700">{hauler.operator}</td>
-                <td className="px-3.5 py-2 text-right font-bold font-mono text-blue-700">
+                <td
+                  className="max-w-[140px] truncate px-2.5 py-1 text-slate-700 text-xs"
+                  title={hauler.operator}
+                >
+                  {hauler.operator}
+                </td>
+                <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-blue-700">
                   {hauler.loads}
                 </td>
-                <td className="px-3.5 py-2 text-right font-bold font-mono text-slate-900">
+                <td className="px-2.5 py-1 text-right font-bold font-mono text-[11px] text-slate-900">
                   {hauler.rowTotal.toLocaleString()}
                 </td>
-                <td className="px-3.5 py-2 font-mono text-slate-600">
+                <td className="px-2.5 py-1 font-mono text-[11px] text-slate-600">
                   {hauler.delaysDisplay === '-' ? (
                     <span className="text-slate-400">-</span>
                   ) : (
-                    <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 font-medium text-[10px] text-amber-800">
+                    <span className="inline-block rounded bg-amber-50 px-1 py-0.25 font-medium text-[9px] text-amber-800">
                       {hauler.delaysDisplay}
                     </span>
                   )}
@@ -915,7 +926,7 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
             ))}
             {block.assignedMachines.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-4 text-center text-slate-400 text-xs">
+                <td colSpan={7} className="px-3 py-2 text-center text-slate-400 text-xs">
                   {isRegularMachineActivity
                     ? `Logged as Regular Machine Operation (${block.material} — No Hauler Dispatch Required).`
                     : 'No hauling units assigned to this excavator for the shift.'}
@@ -927,7 +938,7 @@ function ExcavatorActivityBlock({ block }: ExcavatorActivityBlockProps) {
       </div>
 
       {/* 3. Auto-Calculated Excavator Totals (Zero Operator Math) */}
-      <div className="flex flex-wrap items-center justify-between border-slate-300 border-t bg-slate-100/90 px-4 py-2 font-semibold text-xs">
+      <div className="flex flex-wrap items-center justify-between border-slate-300 border-t bg-slate-100/90 px-3 py-1.5 font-semibold text-xs">
         <div className="font-bold text-slate-700 uppercase tracking-wider">
           Auto-Calculated Excavator Totals:
         </div>

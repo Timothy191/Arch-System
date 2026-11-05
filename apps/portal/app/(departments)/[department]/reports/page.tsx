@@ -104,7 +104,7 @@ export default async function ReportsPage({
         machineType: mach.machine_type || 'Equipment',
         serialNumber: mach.serial_number ?? null,
         siteId: mach.site_id ?? null,
-        siteName: siteRel?.name || 'General Pit',
+        siteName: siteRel?.name || 'Brakfontein Pit',
         baselineSmr: latestSmrByMachine.get(mach.id) ?? 1200,
       };
     });

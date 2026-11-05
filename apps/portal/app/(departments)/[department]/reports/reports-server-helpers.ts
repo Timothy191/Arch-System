@@ -54,6 +54,8 @@ interface DozerRollAccum {
   hoursOperated: number;
 }
 
+const CANONICAL_DEFAULT_SITE = 'Brakfontein Pit';
+
 function formatExcavatorSummary(exc: ExcavatorSummaryAccum | undefined, fallbackBcm: number) {
   if (!exc || (exc.totalLoads === 0 && exc.totalBcm === 0)) {
     return fallbackBcm > 0
@@ -164,7 +166,7 @@ function buildShiftReportPhase1(params: {
     const excSite = Array.isArray(act.site) ? act.site[0] : act.site;
     const excBlock = Array.isArray(act.block_mined) ? act.block_mined[0] : act.block_mined;
     const dumperMach = Array.isArray(a.dumper) ? a.dumper[0] : a.dumper;
-    const siteName = excSite?.name || 'General Pit';
+    const siteName = excSite?.name || CANONICAL_DEFAULT_SITE;
     const excId = act.machine_id || excMach?.name || 'excavator';
     const excKey = `${excId}|${act.activity_date}|${shift}`;
     const loadsCount = Number(a.total_loads ?? act.loads ?? 0);
@@ -227,7 +229,7 @@ function buildShiftReportPhase1(params: {
 
   const rowMap = new Map<string, ShiftReportRow>();
   const getOrCreate = (siteRaw: string, date: string, shiftRaw: string): ShiftReportRow => {
-    const site = siteRaw.trim() || 'General Pit';
+    const site = siteRaw.trim() || CANONICAL_DEFAULT_SITE;
     const shift: 'day' | 'night' = shiftRaw === 'night' ? 'night' : 'day';
     const k = `${site}|${date}|${shift}`;
     if (!rowMap.has(k)) {
@@ -270,7 +272,7 @@ function buildShiftReportPhase1(params: {
     const siteName =
       (Array.isArray(excSites) ? excSites[0]?.name : excSites?.name) ||
       (Array.isArray(machSites) ? machSites[0]?.name : machSites?.name) ||
-      'General Pit';
+      CANONICAL_DEFAULT_SITE;
 
     const row = getOrCreate(siteName, l.load_date, shift);
     const loadCount = Number(l.total_loads || 0);
@@ -340,7 +342,8 @@ function buildShiftReportPhase1(params: {
       : a.excavator_activity;
     if (act) {
       const rawSite = act.site;
-      const siteName = (Array.isArray(rawSite) ? rawSite[0]?.name : rawSite?.name) || 'General Pit';
+      const siteName =
+        (Array.isArray(rawSite) ? rawSite[0]?.name : rawSite?.name) || CANONICAL_DEFAULT_SITE;
       const row = getOrCreate(siteName, act.activity_date, act.shift_type);
       const k = `${row.site}|${row.date}|${row.shift}`;
       assignmentBcmMap.set(k, (assignmentBcmMap.get(k) || 0) + Number(a.total_bcm || 0));
@@ -353,7 +356,7 @@ function buildShiftReportPhase1(params: {
     const opObj = Array.isArray(r.operator) ? r.operator[0] : r.operator;
     const machSites = machObj?.sites;
     const siteName =
-      (Array.isArray(machSites) ? machSites[0]?.name : machSites?.name) || 'General Pit';
+      (Array.isArray(machSites) ? machSites[0]?.name : machSites?.name) || CANONICAL_DEFAULT_SITE;
     const shift: 'day' | 'night' = r.shift_type === 'night' ? 'night' : 'day';
     const row = getOrCreate(siteName, r.roll_date, shift);
     const passes = Number(r.blade_passes || 0);
@@ -480,7 +483,7 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
       dumperSummary?.siteName ||
       dozerSummary?.siteName ||
       machineSiteName ||
-      'General Pit';
+      CANONICAL_DEFAULT_SITE;
 
     const hours =
       op.hours_worked != null
@@ -746,7 +749,9 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
   }
 
   for (const d of delays) {
-    getOrCreate('General Pit', d.delay_date, d.shift_type).delayMin += Number(d.delay_minutes || 0);
+    getOrCreate(CANONICAL_DEFAULT_SITE, d.delay_date, d.shift_type).delayMin += Number(
+      d.delay_minutes || 0
+    );
   }
 
   for (const dl of dailyLogs) {
@@ -755,7 +760,7 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
     const fl = fuelLogsByLog.get(dl.id) || 0;
     const pl = productionByLog.get(dl.id);
     if (mh > 0 || fl > 0 || pl || dl.notes) {
-      const row = getOrCreate('General Pit', dl.log_date, dl.shift);
+      const row = getOrCreate(CANONICAL_DEFAULT_SITE, dl.log_date, dl.shift);
       if (row.hours === 0 && mh > 0) row.hours += mh;
       row.fuelLitres += fl;
       row.coalTonnes += Number(pl?.coal_tonnes || 0);
