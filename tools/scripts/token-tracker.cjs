@@ -43,11 +43,64 @@ const TOKEN_TRACKER_FILE = path.join(MEMORY_DIR, 'token-usage.json');
 const CONTEXT_BUDGET_FILE = path.join(MEMORY_DIR, 'context-budget.json');
 const AGENTS_DIR = path.join(ROOT, '.agents');
 
-// Default budget limits (in characters, approximating tokens)
+// Default budget limits (in characters, approximating tokens) + dynamic task tiers
+const DEFAULT_TASK_TIERS = {
+  trivial: {
+    totalTokens: 3500,
+    contextWindowLimit: 2000,
+    maxOutputTokens: 800,
+    toolCallBudget: 500,
+    reserveMargin: 200,
+    maxLeasedSkills: 1,
+    maxSubagents: 0,
+    maxPreTaskWindowRatio: 0.25,
+  },
+  low: {
+    totalTokens: 8000,
+    contextWindowLimit: 4000,
+    maxOutputTokens: 1500,
+    toolCallBudget: 1500,
+    reserveMargin: 1000,
+    maxLeasedSkills: 1,
+    maxSubagents: 0,
+    maxPreTaskWindowRatio: 0.28,
+  },
+  moderate: {
+    totalTokens: 22000,
+    contextWindowLimit: 12000,
+    maxOutputTokens: 4000,
+    toolCallBudget: 4000,
+    reserveMargin: 2000,
+    maxLeasedSkills: 2,
+    maxSubagents: 1,
+    maxPreTaskWindowRatio: 0.3,
+  },
+  high: {
+    totalTokens: 52000,
+    contextWindowLimit: 32000,
+    maxOutputTokens: 8000,
+    toolCallBudget: 8000,
+    reserveMargin: 4000,
+    maxLeasedSkills: 3,
+    maxSubagents: 3,
+    maxPreTaskWindowRatio: 0.35,
+  },
+  extreme: {
+    totalTokens: 104000,
+    contextWindowLimit: 64000,
+    maxOutputTokens: 16000,
+    toolCallBudget: 16000,
+    reserveMargin: 8000,
+    maxLeasedSkills: 4,
+    maxSubagents: 6,
+    maxPreTaskWindowRatio: 0.4,
+  },
+};
+
 const DEFAULT_BUDGET = {
   maxRetrospectives: 50,
   maxRetrospectiveSize: 5000,
-  maxRulesSize: 108000,
+  maxRulesSize: 135000,
   maxSkillsSize: 350000,
   maxSessionContext: 500000,
   maxRootInstructionsSize: 27500,
@@ -55,7 +108,162 @@ const DEFAULT_BUDGET = {
   contextWindowTokens: 200000,
   maxPreTaskWindowRatio: 0.3,
   maxPreTaskTokens: 60000,
+  defaultTaskTier: 'moderate',
+  taskTiers: DEFAULT_TASK_TIERS,
 };
+
+/**
+ * Autonomously determines the effective token budget and context allocation
+ * based on empirical task scope, prompt dynamics, targeted files, and agent topology.
+ * Mirrors packages/agents/src/token-budget.ts (TokenBudgetAgent.assessDifficulty).
+ */
+function determineEffectiveTaskBudget(taskContext = {}) {
+  const budget = loadContextBudget();
+  const tiers = { ...DEFAULT_TASK_TIERS, ...(budget.taskTiers || {}) };
+
+  const explicitTier = (
+    taskContext.tier ||
+    process.env.TASK_COMPLEXITY ||
+    process.env.TASK_TIER ||
+    ''
+  )
+    .toLowerCase()
+    .trim();
+
+  if (explicitTier && tiers[explicitTier]) {
+    const tierSpec = tiers[explicitTier];
+    const windowSize = budget.contextWindowTokens || 200000;
+    return {
+      level: explicitTier,
+      score:
+        explicitTier === 'trivial'
+          ? 15
+          : explicitTier === 'low'
+            ? 30
+            : explicitTier === 'moderate'
+              ? 50
+              : explicitTier === 'high'
+                ? 75
+                : 95,
+      rationale: `Explicitly pinned to '${explicitTier}' task budget tier.`,
+      factors: { promptComplexity: 0, scopeScale: 0, reasoningDepth: 0, agentTopology: 0 },
+      effectiveBudget: {
+        ...tierSpec,
+        windowSize,
+        maxPreTaskTokens: Math.floor(
+          windowSize * (tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3)
+        ),
+      },
+    };
+  }
+
+  const prompt = String(taskContext.prompt || process.env.TASK_PROMPT || '').trim();
+  const promptLen = prompt.length;
+  let promptComplexity = Math.min(30, Math.floor(promptLen / 150));
+
+  const highComplexityKeywords = [
+    'remediate',
+    'forensic',
+    'architecture',
+    'refactor',
+    'security',
+    'audit',
+    'migration',
+    'consensus',
+    'adversarial',
+    'swarm',
+    'rbacc',
+    'rbac',
+    'monorepo',
+    'performance',
+    'deploy',
+  ];
+  const promptLower = prompt.toLowerCase();
+  let keywordHits = 0;
+  for (const kw of highComplexityKeywords) {
+    if (promptLower.includes(kw)) keywordHits++;
+  }
+  promptComplexity = Math.min(30, promptComplexity + keywordHits * 3);
+
+  const steps = Number(taskContext.stepsCount ?? process.env.TASK_STEPS ?? 1) || 1;
+  const tools = Number(taskContext.toolsRequiredCount ?? process.env.TASK_TOOLS ?? 1) || 1;
+  const files = Number(taskContext.filesTargetedCount ?? process.env.TASK_FILES ?? 1) || 1;
+  const scopeScale = Math.min(30, steps * 3 + tools * 2 + files * 4);
+
+  let reasoningDepth = 10;
+  const domain = String(taskContext.domain || process.env.TASK_DOMAIN || 'code').toLowerCase();
+  if (taskContext.requiresReflection || keywordHits >= 3) reasoningDepth += 10;
+  if (domain === 'security' || domain === 'migration') reasoningDepth += 10;
+  else if (domain === 'architecture' || domain === 'audit') reasoningDepth += 8;
+  else if (domain === 'code') reasoningDepth += 5;
+  reasoningDepth = Math.min(25, reasoningDepth);
+
+  const isMultiAgent =
+    Boolean(taskContext.isMultiAgent) ||
+    process.env.TASK_MULTI_AGENT === '1' ||
+    promptLower.includes('swarm') ||
+    promptLower.includes('parallel') ||
+    files >= 7;
+  const agentTopology = isMultiAgent ? 15 : 5;
+
+  // If no prompt or explicit parameters were passed, default to budget.defaultTaskTier ('moderate')
+  const hasExplicitSignals =
+    promptLen > 0 ||
+    taskContext.filesTargetedCount !== undefined ||
+    taskContext.stepsCount !== undefined ||
+    Boolean(process.env.TASK_FILES) ||
+    Boolean(process.env.TASK_STEPS);
+
+  const totalScore = hasExplicitSignals
+    ? Math.max(1, Math.min(100, promptComplexity + scopeScale + reasoningDepth + agentTopology))
+    : 50;
+
+  let level = 'moderate';
+  let rationale =
+    'Multi-step execution, multiple files or tools involved, moderate reasoning requirements.';
+
+  if (totalScore <= 20) {
+    level = 'trivial';
+    rationale = 'Low prompt volume, minimal file touched, straightforward single-step execution.';
+  } else if (totalScore <= 40) {
+    level = 'low';
+    rationale = 'Standard single-agent scope, bounded step count, isolated component/file.';
+  } else if (totalScore <= 65) {
+    level = 'moderate';
+    rationale =
+      'Multi-step execution, multiple files or tools involved, moderate reasoning requirements.';
+  } else if (totalScore <= 85) {
+    level = 'high';
+    rationale =
+      'Cross-boundary system changes, security or architecture impact, multi-agent or reflection required.';
+  } else {
+    level = 'extreme';
+    rationale =
+      'Full-system forensic pass, multi-agent swarm orchestration, high blast radius and high critical reasoning.';
+  }
+
+  const tierSpec = tiers[level] || DEFAULT_TASK_TIERS.moderate;
+  const windowSize = budget.contextWindowTokens || 200000;
+  const maxRatio = tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3;
+
+  return {
+    level,
+    score: totalScore,
+    rationale,
+    factors: {
+      promptComplexity,
+      scopeScale,
+      reasoningDepth,
+      agentTopology,
+    },
+    effectiveBudget: {
+      ...tierSpec,
+      windowSize,
+      maxPreTaskWindowRatio: maxRatio,
+      maxPreTaskTokens: Math.floor(windowSize * maxRatio),
+    },
+  };
+}
 
 function ensureMemoryDir() {
   if (!fs.existsSync(MEMORY_DIR)) {
@@ -652,6 +860,18 @@ function checkBudget() {
     `  Total Pre-Task Load: ${preTask.totalPreTaskTokens.toLocaleString()} / ${preTask.maxTokens.toLocaleString()} tokens (${preTask.ratioPct}% of ${(preTask.windowSize / 1000).toFixed(0)}k window, max ${preTask.maxRatioPct}%)`
   );
 
+  const taskPlan = determineEffectiveTaskBudget();
+  console.log('\n🎯 Autonomous Task-Adaptive Token Budget:');
+  console.log(
+    `  Active Task Tier:    ${taskPlan.level.toUpperCase()} (score ${taskPlan.score}/100 — ${taskPlan.rationale})`
+  );
+  console.log(
+    `  Effective Task Cap:  ${taskPlan.effectiveBudget.totalTokens.toLocaleString()} tokens (context: ${taskPlan.effectiveBudget.contextWindowLimit.toLocaleString()}, output: ${taskPlan.effectiveBudget.maxOutputTokens.toLocaleString()}, tools: ${taskPlan.effectiveBudget.toolCallBudget.toLocaleString()})`
+  );
+  console.log(
+    `  Leasing Allowance:   <= ${taskPlan.effectiveBudget.maxLeasedSkills} leased skill(s), <= ${taskPlan.effectiveBudget.maxSubagents} subagent(s)`
+  );
+
   const issues = [];
   if (preTask.totalPreTaskTokens > preTask.maxTokens) {
     issues.push(
@@ -738,6 +958,71 @@ function main() {
       break;
     }
 
+    case '--task-budget':
+    case 'task-budget': {
+      const getArg = (flag, fallback) => {
+        const idx = args.indexOf(flag);
+        return idx !== -1 && args[idx + 1] ? args[idx + 1] : fallback;
+      };
+      const promptParts = [];
+      for (let i = 1; i < args.length; i++) {
+        const a = args[i];
+        if (
+          a === '--files' ||
+          a === '--steps' ||
+          a === '--tools' ||
+          a === '--domain' ||
+          a === '--tier'
+        ) {
+          i++;
+          continue;
+        }
+        if (a === '--multi-agent' || a === '--reflection' || a === '--json') {
+          continue;
+        }
+        promptParts.push(a);
+      }
+      const plan = determineEffectiveTaskBudget({
+        prompt: promptParts.join(' '),
+        filesTargetedCount: getArg('--files', undefined),
+        stepsCount: getArg('--steps', undefined),
+        toolsRequiredCount: getArg('--tools', undefined),
+        domain: getArg('--domain', undefined),
+        tier: getArg('--tier', undefined),
+        isMultiAgent: args.includes('--multi-agent'),
+        requiresReflection: args.includes('--reflection'),
+      });
+      if (args.includes('--json')) {
+        console.log(JSON.stringify(plan, null, 2));
+      } else {
+        console.log('\n🎯 Autonomous Task-Adaptive Token Budget Assessment\n');
+        console.log(`  Difficulty Tier:   ${plan.level.toUpperCase()} (score ${plan.score}/100)`);
+        console.log(`  Rationale:         ${plan.rationale}`);
+        console.log(
+          `  Total Task Budget: ${plan.effectiveBudget.totalTokens.toLocaleString()} tokens`
+        );
+        console.log(
+          `  Context Allowance: ${plan.effectiveBudget.contextWindowLimit.toLocaleString()} tokens`
+        );
+        console.log(
+          `  Max Output Tokens: ${plan.effectiveBudget.maxOutputTokens.toLocaleString()} tokens`
+        );
+        console.log(
+          `  Tool Call Budget:  ${plan.effectiveBudget.toolCallBudget.toLocaleString()} tokens`
+        );
+        console.log(
+          `  Reserve Margin:    ${plan.effectiveBudget.reserveMargin.toLocaleString()} tokens`
+        );
+        console.log(
+          `  Skill Leases Cap:  <= ${plan.effectiveBudget.maxLeasedSkills} skill(s) | Subagents Cap: <= ${plan.effectiveBudget.maxSubagents}`
+        );
+        console.log(
+          `  Pre-Task Ceiling:  ${plan.effectiveBudget.maxPreTaskTokens.toLocaleString()} tokens (${Math.round(plan.effectiveBudget.maxPreTaskWindowRatio * 100)}% of ${(plan.effectiveBudget.windowSize / 1000).toFixed(0)}k window)\n`
+        );
+      }
+      break;
+    }
+
     case '--set-budget':
     case 'set-budget': {
       const key = args[1];
@@ -800,8 +1085,19 @@ function main() {
       );
       console.log('  prune        - Prune oversized and old retrospectives');
       console.log('  budget-check - Check if within budget limits (exit code 0/1)');
+      console.log(
+        '  task-budget  - Autonomously determine effective task token budget (--files --steps --domain --multi-agent)'
+      );
       console.log('  set-budget   - Set a budget limit (e.g., set-budget maxRetrospectives 100)');
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  determineEffectiveTaskBudget,
+  checkBudget,
+  loadContextBudget,
+};

@@ -1,12 +1,65 @@
 {
   "maxRetrospectives": 50,
   "maxRetrospectiveSize": 5000,
-  "maxRulesSize": 120000,
+  "maxRulesSize": 135000,
   "maxSkillsSize": 350000,
   "maxSessionContext": 500000,
   "maxRootInstructionsSize": 27500,
   "maxDirectMcpServers": 10,
   "contextWindowTokens": 200000,
   "maxPreTaskWindowRatio": 0.3,
-  "maxPreTaskTokens": 60000
+  "maxPreTaskTokens": 60000,
+  "defaultTaskTier": "moderate",
+  "taskTiers": {
+    "trivial": {
+      "totalTokens": 3500,
+      "contextWindowLimit": 2000,
+      "maxOutputTokens": 800,
+      "toolCallBudget": 500,
+      "reserveMargin": 200,
+      "maxLeasedSkills": 1,
+      "maxSubagents": 0,
+      "maxPreTaskWindowRatio": 0.25
+    },
+    "low": {
+      "totalTokens": 8000,
+      "contextWindowLimit": 4000,
+      "maxOutputTokens": 1500,
+      "toolCallBudget": 1500,
+      "reserveMargin": 1000,
+      "maxLeasedSkills": 1,
+      "maxSubagents": 0,
+      "maxPreTaskWindowRatio": 0.28
+    },
+    "moderate": {
+      "totalTokens": 22000,
+      "contextWindowLimit": 12000,
+      "maxOutputTokens": 4000,
+      "toolCallBudget": 4000,
+      "reserveMargin": 2000,
+      "maxLeasedSkills": 2,
+      "maxSubagents": 1,
+      "maxPreTaskWindowRatio": 0.3
+    },
+    "high": {
+      "totalTokens": 52000,
+      "contextWindowLimit": 32000,
+      "maxOutputTokens": 8000,
+      "toolCallBudget": 8000,
+      "reserveMargin": 4000,
+      "maxLeasedSkills": 3,
+      "maxSubagents": 3,
+      "maxPreTaskWindowRatio": 0.35
+    },
+    "extreme": {
+      "totalTokens": 104000,
+      "contextWindowLimit": 64000,
+      "maxOutputTokens": 16000,
+      "toolCallBudget": 16000,
+      "reserveMargin": 8000,
+      "maxLeasedSkills": 4,
+      "maxSubagents": 6,
+      "maxPreTaskWindowRatio": 0.4
+    }
+  }
 }

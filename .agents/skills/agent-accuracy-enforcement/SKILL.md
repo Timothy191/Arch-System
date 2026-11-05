@@ -63,8 +63,13 @@ This persona is enforced by all skills in this workspace and is non-negotiable.
 - **Directive**: For UI changes, invoke browser automation or Chrome DevTools MCP to capture console/accessibility metrics.
 - **Directive**: For RLS policy additions, run `@repo/database:test:migration-rollback` to verify rollback safety.
 
-## 7. Token Budget Discipline
+## 7. Token Budget Discipline & Autonomous Task-Adaptive Allocation
 
+- **Autonomous Task-Scaled Budgeting**: At task start, determine the effective token budget based on task scope and complexity via `pnpm token:task-budget "<prompt>" --files <N> --steps <M> --domain <domain>` (backed by `determineEffectiveTaskBudget` in `tools/scripts/token-tracker.cjs` and `TokenBudgetAgent` in `packages/agents/src/token-budget.ts`):
+  - **Small Tasks (`trivial` / `low` — 1–2 files, single-step)**: `3,500–8,000` tokens (`<= 1` leased skill, `0` subagents, `25%–28%` pre-task window ceiling).
+  - **Medium Tasks (`moderate` — 3–6 files, multi-step)**: `22,000` tokens (`<= 2` leased skills, `<= 1` subagent, `30%` pre-task window ceiling).
+  - **Large Tasks (`high` / `extreme` — 7+ files, cross-package refactor, migrations, security/architecture, or multi-agent swarm)**: `52,000–104,000` tokens (`<= 3–4` leased skills, `<= 3–6` subagents, `35%–40%` pre-task window ceiling).
+- **Self-Healing Gate 8 (`pnpm token:budget-check`)**: If `pnpm token:budget-check` fails due to rule growth or retrospective accumulation, autonomously self-heal by running `pnpm context:debloat` / `pnpm token:prune`, compacting verbose prose in `.agents/rules/*.md`, and verifying `pnpm token:budget-check` + `pnpm audit:rule-drift` pass.
 - **Directive**: Monitor token consumption. If approaching context window limits (>70%), consolidate intermediate results, prune redundant citations, and request context refresh rather than bloating.
 - **Directive**: Prefer concise, structured reporting over verbose prose. Use tables, bulleted lists, and code fences.
 

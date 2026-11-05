@@ -13,9 +13,18 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 
 try {
-  console.log('💰 [Pre-Task Hook] Checking context budget compliance...');
+  console.log('💰 [Pre-Task Hook] Checking context budget & task-adaptive token allocation...');
 
-  const result = execSync('pnpm token:budget-check', {
+  const args = process.argv.slice(2);
+  if (args.length > 0 || process.env.TASK_PROMPT || process.env.TASK_COMPLEXITY) {
+    const taskOut = execSync(`node tools/scripts/token-tracker.cjs task-budget ${args.join(' ')}`, {
+      cwd: ROOT,
+      encoding: 'utf-8',
+    });
+    console.log(taskOut.trim());
+  }
+
+  execSync('pnpm token:budget-check', {
     cwd: ROOT,
     stdio: 'pipe',
   });
@@ -24,6 +33,8 @@ try {
   process.exit(0);
 } catch (error) {
   console.error('❌ [Pre-Task Hook] Context budget exceeded');
-  console.error('💡 [Pre-Task Hook] Run `pnpm context:debloat` to prune context bloat');
+  console.error(
+    '💡 [Pre-Task Hook] Run `pnpm context:debloat` or `pnpm token:task-budget` to prune and calibrate context'
+  );
   process.exit(1);
 }

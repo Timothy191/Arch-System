@@ -18,8 +18,9 @@ Every agent turn MUST strictly follow this two-phase lifecycle across all conver
 
 Immediately upon receiving a user message:
 
-1. **Deterministic Preflight & Budget Triage**:
+1. **Deterministic Preflight & Task-Adaptive Budget Triage**:
    - Verify workspace toolchain alignment (Mise Node `v24.15.0`/`v26.8.1`, `pnpm 9.15.9` in `Arch-System/`), context budget health (`pnpm token:budget-check`), and active leases (`get_active_leases`).
+   - Autonomously determine the effective token budget from task scope via `pnpm token:task-budget "<prompt>" --files <N> --steps <M>` (`trivial`/`low`: `3.5k–8k` tokens, `<=1` skill; `moderate`: `22k` tokens, `<=2` skills; `high`/`extreme`: `52k–104k` tokens, `<=3–4` skills & subagents). If `pnpm token:budget-check` fails, self-heal via `pnpm context:debloat` / `pnpm token:prune` or rule compaction.
 2. **Gather Required Context via Progressive Disclosure Funnel (Broad → Narrow)**:
    - **Step 1 — Catalog & Memory Index**: Query `skills-mcp` (`list_available_context`, `list_available_skills`) and `.agents/memory_base/index.json` (~50–200 tokens).
    - **Step 2 — Ephemeral Leasing**: Lease only relevant slices via `acquire_context` / `acquire_skill`.

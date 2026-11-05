@@ -137,6 +137,7 @@
     "token:record": "node tools/scripts/token-tracker.cjs record",
     "token:prune": "node tools/scripts/token-tracker.cjs prune",
     "token:budget-check": "node tools/scripts/token-tracker.cjs budget-check",
+    "token:task-budget": "node tools/scripts/token-tracker.cjs task-budget",
     "context:debloat:aggressive": "node tools/scripts/context-debloat.cjs --aggressive",
     "retro:cleanup": "node tools/scripts/retrospective-cleanup.cjs",
     "retro:cleanup:old": "node tools/scripts/retrospective-cleanup.cjs --older-than 30",

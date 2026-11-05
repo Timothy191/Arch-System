@@ -300,11 +300,11 @@ function HeroTelemetryGraph({
             </h3>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 font-bold font-mono text-[9px] text-emerald-800">
+            <span className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 font-bold font-mono text-[9px] text-emerald-800">
               <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
               {series.deltaBadge}
             </span>
-            <span className="hidden items-center rounded-full border border-slate-300/80 bg-slate-100 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-900 tabular-nums sm:inline-flex">
+            <span className="gold-steel-border gold-steel-border-slim hidden items-center rounded-full border border-slate-300/80 bg-slate-100 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-900 tabular-nums sm:inline-flex">
               {series.currentValue}
             </span>
           </div>
@@ -635,7 +635,7 @@ export function HeroOperationalKpiStrip({
           )}
         >
           <div className="flex min-w-0 flex-col gap-0.5">
-            <div className="flex items-center gap-1.5">
+            <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5">
               {index > 0 && (
                 <span
                   aria-hidden="true"
@@ -654,14 +654,14 @@ export function HeroOperationalKpiStrip({
               </span>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
+              <span className="gold-steel-border gold-steel-border-slim font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
                 {tile.value}
               </span>
             </div>
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <span className="inline-flex items-center rounded-md border border-blue-200/90 bg-blue-50/90 px-2 py-0.5 font-bold font-mono text-[10px] text-blue-950">
+            <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-md border border-blue-200/90 bg-blue-50/90 px-2 py-0.5 font-bold font-mono text-[10px] text-blue-950">
               {tile.subtext}
             </span>
             <div className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">

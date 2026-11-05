@@ -149,6 +149,23 @@ if (!fs.existsSync(vercelIgnorePath)) {
   }
 }
 
+// biome.json vcs.root guard — ensures Biome finds .gitignore when run from package subdirectories on Vercel
+const biomeJsonPath = path.join(ROOT_DIR, 'biome.json');
+if (fs.existsSync(biomeJsonPath)) {
+  try {
+    const biomeConfig = JSON.parse(fs.readFileSync(biomeJsonPath, 'utf8'));
+    if (biomeConfig.vcs?.useIgnoreFile && !biomeConfig.vcs?.root) {
+      recordError(
+        'biome.json has vcs.useIgnoreFile=true without vcs.root=".". Subpackage lint commands fail in Vercel non-git containers.'
+      );
+    } else {
+      recordPass('biome.json vcs.root configured for subpackage lint in Vercel containers');
+    }
+  } catch (err) {
+    recordError(`Failed to parse biome.json: ${err.message}`);
+  }
+}
+
 // apps/portal/next.config.mjs Architecture Rules
 const nextConfigPath = path.join(PORTAL_DIR, 'next.config.mjs');
 if (!fs.existsSync(nextConfigPath)) {

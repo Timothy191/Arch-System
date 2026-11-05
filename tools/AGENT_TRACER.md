@@ -1,5 +1,13 @@
 # AGENT_TRACER — tools
 
+## 2026-11-05T10:03:00+02:00 - Autonomous Task-Adaptive Token Budgeting & Biome Vercel Root Preflight Guard
+
+- **Purpose**: Enable agents to autonomously determine their effective token budget based on task scope/difficulty (`trivial`/`low`/`moderate`/`high`/`extreme`), prevent fragile byte-ceiling failures in `pnpm token:budget-check`, and guard `biome.json` `vcs.root` for Vercel non-git containers.
+- **Changes**:
+  - `tools/scripts/token-tracker.cjs`: Added `determineEffectiveTaskBudget(taskContext)`, `DEFAULT_TASK_TIERS`, and `task-budget` CLI subcommand (`pnpm token:task-budget`) aligned with `packages/agents/src/token-budget.ts`.
+  - `tools/scripts/vercel-preflight.cjs`: Added `biome.json` `vcs.root` validation so subpackage `biome check .` never fails in Vercel non-git build containers.
+- **Verification**: `pnpm token:task-budget`, `pnpm token:budget-check`, `pnpm deploy:vercel:preflight`, and `pnpm agent:verify` (`27/27 PASS`).
+
 ## 2026-11-05T08:45:00+02:00 - Zero-Drift Watchdog CI/CD Integration
 
 - **Purpose**: Deploy Zero-Drift Watchdog to existing CI/CD pipeline for automated anti-drift synchronization between local Git, GitHub remote, and Vercel deployment states.
