@@ -151,15 +151,21 @@ function chunkDocument(text: string, options: ChunkOptions = {}): Chunk[] {
     let end = Math.min(start + maxChars, text.length);
 
     if (preserveBoundaries && end < text.length) {
-      // Try to break at paragraph boundary
-      const paragraphBreak = text.lastIndexOf('\n\n', end);
-      if (paragraphBreak > start + maxChars * 0.5) {
-        end = paragraphBreak + 2;
+      // 1. Prefer Markdown/MDX/Markdoc heading boundary (\n# ... \n######) outside fenced code blocks
+      const headingBreak = findMarkdownHeadingBoundary(text, start, end);
+      if (headingBreak > start + maxChars * 0.4) {
+        end = headingBreak;
       } else {
-        // Try sentence boundary
-        const sentenceBreak = findSentenceBoundary(text, end);
-        if (sentenceBreak > start + maxChars * 0.5) {
-          end = sentenceBreak;
+        // 2. Try to break at paragraph boundary
+        const paragraphBreak = text.lastIndexOf('\n\n', end);
+        if (paragraphBreak > start + maxChars * 0.5) {
+          end = paragraphBreak + 2;
+        } else {
+          // 3. Try sentence boundary
+          const sentenceBreak = findSentenceBoundary(text, end);
+          if (sentenceBreak > start + maxChars * 0.5) {
+            end = sentenceBreak;
+          }
         }
       }
     }
@@ -250,6 +256,23 @@ function chunkCode(text: string, options: ChunkOptions = {}): Chunk[] {
 // ============================================
 // Boundary Detection Helpers
 // ============================================
+
+function findMarkdownHeadingBoundary(text: string, start: number, targetIndex: number): number {
+  const windowText = text.slice(start, targetIndex);
+  const headingPattern = /\n(?=#{1,6}\s)/g;
+  let lastHeadingPos = -1;
+  let match: RegExpExecArray | null = headingPattern.exec(windowText);
+  while (match !== null) {
+    const candidatePos = start + match.index + 1;
+    // Ensure we are not inside an unclosed ``` fenced code block
+    const fencesBefore = (text.slice(start, candidatePos).match(/^```/gm) ?? []).length;
+    if (fencesBefore % 2 === 0) {
+      lastHeadingPos = candidatePos;
+    }
+    match = headingPattern.exec(windowText);
+  }
+  return lastHeadingPos;
+}
 
 function findSentenceBoundary(text: string, targetIndex: number): number {
   // Look for sentence-ending punctuation followed by space or newline

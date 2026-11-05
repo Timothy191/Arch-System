@@ -317,4 +317,28 @@ describe('detectContentType – edge cases', () => {
     const text = `function doWork() {\n  return true;\n}\n`.repeat(3);
     expect(detectContentType(text)).toBe('code');
   });
+
+  it('prefers Markdown/MDX heading boundaries outside fenced code blocks when chunking documents', () => {
+    const markdownDoc = [
+      '# Section 1: SCADA Telemetry Overview',
+      'Telemetry sensors report every 5 seconds across all active haul trucks and drills in sector 7.',
+      '```bash',
+      '# Comment inside fenced code block that must not be treated as a markdown heading split',
+      'pnpm --filter portal test',
+      '```',
+      '## Section 2: Emergency Failover Runbook',
+      'When Redis L2 becomes unreachable, the portal degrades to L1 memory cache and Supabase read replicas.',
+    ].join('\n\n');
+
+    const chunks = chunkText(markdownDoc, {
+      contentType: 'document',
+      maxChunkSize: 95,
+      overlapSize: 0,
+      preserveBoundaries: true,
+    });
+
+    expect(chunks.length).toBeGreaterThanOrEqual(2);
+    expect(chunks[0]?.text).toContain('```bash');
+    expect(chunks[1]?.text.startsWith('## Section 2:')).toBe(true);
+  });
 });

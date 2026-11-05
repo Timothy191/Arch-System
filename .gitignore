@@ -42,6 +42,7 @@ venv/
 # Provider-specific runtime artifacts (NOT project source)
 .claude/
 .claude-flow/
+.junie/
 .swarm/
 ruvector.db
 ruvector.db-*

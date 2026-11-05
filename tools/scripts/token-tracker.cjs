@@ -289,7 +289,7 @@ function loadTokenTracker() {
 }
 
 function saveTokenTracker(data) {
-  fs.writeFileSync(TOKEN_TRACKER_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  fs.writeFileSync(TOKEN_TRACKER_FILE, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
 }
 
 function loadContextBudget() {
@@ -305,7 +305,7 @@ function loadContextBudget() {
 }
 
 function saveContextBudget(data) {
-  fs.writeFileSync(CONTEXT_BUDGET_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  fs.writeFileSync(CONTEXT_BUDGET_FILE, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
 }
 
 function getDirSize(dirPath, excludeDirs = []) {

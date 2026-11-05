@@ -34,6 +34,7 @@
 25. [Caching with Cache Components (`cacheComponents`, `partialPrefetching`, `'use cache'`, `<Suspense>`, Runtime APIs, `connection()`, PPR & ISR)](#25-caching-with-cache-components-cachecomponents-partialprefetching-use-cache-suspense-runtime-apis-connection-ppr--isr)
 26. [Revalidating Cached Data (`cacheLife`, `cacheTag`, `revalidateTag`, `updateTag`, `revalidatePath`)](#26-revalidating-cached-data-cachelife-cachetag-revalidatetag-updatetag-revalidatepath)
 27. [Error Handling (Expected Errors, `useActionState`, `notFound`, `error.tsx`, `catchError`, `global-error.tsx`)](#27-error-handling-expected-errors-useactionstate-notfound-errortsx-catcherror-global-errortsx)
+28. [Ecosystem Assessment: `MDX`, `@next/mdx`, `remark`, `rehype` & `Markdoc` for Arch-System](#28-ecosystem-assessment-mdx-nextmdx-remark-rehype--markdoc-for-arch-system)
 
 ---
 
@@ -2837,3 +2838,130 @@ An `error.tsx` file cannot catch errors thrown inside the same segment's `layout
 
 - `global-error.tsx` **must** be a Client Component (`'use client'`) and **must** render its own `<html>` and `<body>` tags because it replaces the root layout when active.
 - In [apps/portal/app/global-error.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/global-error.tsx), Arch-System uses zero external UI dependencies (`@repo/ui` and `framer-motion` are intentionally excluded) and self-contained inline light-mode styles (`background: '#f3f4f6'`) so the catastrophic fallback renders reliably even if CSS or chunk loading fails.
+
+---
+
+## 28. Ecosystem Assessment: `MDX`, `@next/mdx`, `remark`, `rehype` & `Markdoc` for Arch-System
+
+- **Evaluated References**:
+  - **MDX**: `https://mdxjs.com/`
+  - **`@next/mdx`**: `https://www.npmjs.com/package/@next/mdx`
+  - **`remark`**: `https://github.com/remarkjs/remark`
+  - **`rehype`**: `https://github.com/rehypejs/rehype`
+  - **Markdoc**: `https://markdoc.dev/docs/nextjs`
+- **Relevant Codebase Touchpoints**:
+  - [apps/portal/app/docs/page.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/docs/page.tsx) & [apps/portal/app/docs/layout.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/docs/layout.tsx)
+  - [apps/portal/app/overview/sections/DocumentationMaps.tsx](file:///home/tim/Fork/Arch-System/apps/portal/app/overview/sections/DocumentationMaps.tsx)
+  - [apps/portal/lib/ai/external-content-indexer.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/external-content-indexer.ts) & [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts)
+  - [packages/ui/.storybook/main.ts](file:///home/tim/Fork/Arch-System/packages/ui/.storybook/main.ts)
+  - `docs/operations/**` & `docs/runbooks/control-room/*.md` (80+ operational Markdown manuals)
+
+### 1. Executive Comparison Matrix
+
+| Technology      | Core Architecture                                                               | Current Footprint in Arch-System                                                                                                                                 | Where It Is Helpful in Arch-System                                                                                                                                                                                                                      | When NOT to Use It in Arch-System                                                                                                                      |
+| :-------------- | :------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MDX**         | Compiles Markdown + embedded JSX (`import`/`export`) into executable React code | `@mdx-js/react@3.1.1` installed in `node_modules`; enabled in [packages/ui/.storybook/main.ts](file:///home/tim/Fork/Arch-System/packages/ui/.storybook/main.ts) | **Storybook Component Docs (`packages/ui`)** & developer-authored interactive `/docs` pages that embed `@repo/ui` components (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`, `<Book>`).                                                                    | **Never** use runtime MDX compilation (`evaluate`) on untrusted operator/shift notes (`daily_logs`, `engineering_notes`) or LLM output (RCE/XSS risk). |
+| **`@next/mdx`** | Next.js Webpack/Turbopack loader for `.md`/`.mdx` routes + `mdx-components.tsx` | Documented in Section 16; `@tailwindcss/typography` (`0.5.16`) already installed in `apps/portal/package.json`                                                   | **Compile-time `.mdx` App Router pages** when paired with **`experimental.mdxRs: { mdxType: 'gfm' }`** (Rust SWC compiler, zero JS plugin serialization overhead under Turbopack).                                                                      | Avoid configuring non-serializable JS function plugins in `next.config.mjs` when running `next dev --turbopack` / `next build`.                        |
+| **`remark`**    | Unified Markdown AST (**mdast**) parser, linter & transformer                   | Conceptual pipeline used by `docs/` audits and AI indexing                                                                                                       | **AST-aware RAG chunking** in [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts) (splitting by heading depth without severing code blocks/tables) & CI runbook linting (`remark-lint`, `remark-gfm`).   | Do not ship `remark` parser bundles to `'use client'` components; run strictly in Server Components, Server Actions, or build scripts.                 |
+| **`rehype`**    | Unified HTML AST (**hast**) transformer, syntax highlighter & sanitizer         | Server-side HTML transformation layer                                                                                                                            | **XSS sanitization (`rehype-sanitize`)** for Operations Copilot / LLM markdown responses, heading anchor generation (`rehype-slug`), and zero-client-JS syntax highlighting (`@shikijs/rehype`).                                                        | Do not run heavy Shiki syntax grammars on the client thread; cache rendered output in Server Components with `'use cache'`.                            |
+| **Markdoc**     | Stripe's **data-only** Markdown parser + schema validator + React renderer      | Pure-function AST library (`Markdoc.parse` → `Markdoc.transform` → `Markdoc.renderers.react`)                                                                    | **Safety-Critical Industrial SOPs & Control-Room Runbooks (`docs/runbooks/control-room/*.md`)**: Validates custom tags (`{% callout %}`) against a strict schema in CI and works natively inside Next.js 16 `'use cache'` RSCs without bundler loaders! | Not needed for Storybook stories where `@mdx-js/react` is already standard.                                                                            |
+
+### 2. Deep-Dive Assessment per Tool
+
+#### A. `MDX` (`https://mdxjs.com/`) & `@next/mdx` (`https://www.npmjs.com/package/@next/mdx`)
+
+- **Strengths for Arch-System**:
+  1. `packages/ui/.storybook/main.ts` already globs `../src/components/**/*.@(mdx|stories.@(js|jsx|ts|tsx))` with `@mdx-js/react@3.1.1` (React 19). Authoring `.mdx` documentation alongside `@repo/ui` primitives (`GlassCard.mdx`, `DepartmentLayout.mdx`) works out of the box with zero new dependencies.
+  2. In `apps/portal`, `@tailwindcss/typography` is already installed in `apps/portal/package.json`. If file-based `.mdx` routes are added under `apps/portal/app/docs/`, enabling `experimental: { mdxRs: { mdxType: 'gfm' } }` with `@next/mdx` compiles GitHub Flavored Markdown (tables, strikethrough, task lists, autolinks) in **Rust** inside Turbopack (`next dev --turbopack` and `next build`) without needing JavaScript `remark-gfm` plugins.
+- **Key Limitation / Risk**:
+  - Because `@next/mdx` treats `.mdx` files as **module code** at bundle time, dynamically rendering the 80+ existing `.md` files in `/home/tim/Fork/Arch-System/docs/runbooks/` or `codebase-maps/` via `@next/mdx` dynamic `import()` requires bundling every `.md` file into the Next.js server compilation graph.
+
+#### B. `remark` (`https://github.com/remarkjs/remark`) & `rehype` (`https://github.com/rehypejs/rehype`)
+
+- **High-Value Use Case 1 — Upgrading RAG Chunking (`apps/portal/lib/ai/chunking.ts`)**:
+  - In [apps/portal/lib/ai/chunking.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/chunking.ts) and [external-content-indexer.ts](file:///home/tim/Fork/Arch-System/apps/portal/lib/ai/external-content-indexer.ts), Markdown heading boundary detection (`findMarkdownHeadingBoundary`) splits `.md` / `.mdx` runbooks on `\n#{1,6}` heading boundaries while keeping fenced code blocks intact inside each vector chunk.
+- **High-Value Use Case 2 — Defense-in-Depth Sanitization (`rehype-sanitize`)**:
+  - When rendering AI Operations Copilot responses or operator shift handover notes as formatted HTML, piping `remark-parse` → `remark-rehype` → **`rehype-sanitize`** → `rehype-stringify` guarantees strict allowlist sanitization on the server before reaching the browser DOM.
+
+#### C. `Markdoc` (`https://markdoc.dev/docs/nextjs`) — Why Markdoc Excels for Industrial Runbooks (`docs/runbooks/**`)
+
+Unlike `@next/mdx`, **Markdoc** treats Markdown as **structured data** rather than executable JavaScript code:
+
+1. **Zero Arbitrary Code Execution (Security by Default)**:
+   - Authors cannot write `import` statements or arbitrary JS expressions (`{process.env...}`) inside a Markdoc file. Only explicitly registered schema tags (`{% callout %}`, `{% step %}`, `{% metric %}`) and nodes (`heading`, `fence`, `table`) are rendered, mapping cleanly to `@repo/ui` components (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`).
+2. **Compile-Time & CI Schema Validation (`Markdoc.validate(ast, config)`)**:
+   - In an industrial mining portal where control-room runbooks (`docs/runbooks/control-room/scada-offline.md`, `closeout-failure.md`, `redis-outage.md`) guide shift supervisors during outages, `Markdoc.validate(ast, schema)` can verify in CI (`pnpm agent:verify`) that every runbook has valid attributes, required parameters, and zero malformed tags.
+3. **100% Native Compatibility with Next.js 16 `'use cache'` & Turbopack**:
+   - Although `@markdoc/next.js` provides a Webpack plugin (which is **not** recommended for Arch-System because Arch-System runs **Turbopack** for both `next dev --turbopack` and `next build`), **`@markdoc/markdoc` core** can be called directly as a pure function inside a Next.js 16 `'use cache'` Server Component!
+   - Example pattern for rendering `docs/runbooks/**/*.md` inside `apps/portal/app/docs/[...slug]/page.tsx` with **Turbopack + `'use cache'`**:
+
+```tsx title="Recommended Turbopack + 'use cache' Markdoc Pattern for apps/portal/app/docs/[...slug]/page.tsx"
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import Markdoc, { type Config } from '@markdoc/markdoc';
+import { CodeBlock } from '@repo/ui/components/ui/code-block';
+import { GlassCard } from '@repo/ui/GlassCard';
+import React from 'react';
+import { cacheLife, cacheTag } from '@/lib/server-cache';
+
+const markdocConfig: Config = {
+  nodes: {
+    fence: {
+      render: 'Fence',
+      attributes: {
+        language: { type: String },
+      },
+    },
+  },
+  tags: {
+    callout: {
+      render: 'Callout',
+      attributes: {
+        title: { type: String, required: true },
+        type: { type: String, matches: ['note', 'warning', 'danger'], default: 'note' },
+      },
+    },
+  },
+};
+
+export async function renderRunbookMarkdown(relativeFilePath: string) {
+  'use cache';
+  cacheLife('max');
+  cacheTag(`runbook:${relativeFilePath}`);
+
+  const fullPath = path.join(process.cwd(), '../../docs', relativeFilePath);
+  const rawMarkdown = await readFile(fullPath, 'utf-8');
+
+  const ast = Markdoc.parse(rawMarkdown);
+  const validationErrors = Markdoc.validate(ast, markdocConfig);
+  if (validationErrors.length > 0) {
+    throw new Error(
+      `Invalid runbook schema in ${relativeFilePath}: ${validationErrors[0]?.error.message}`
+    );
+  }
+
+  const renderableTree = Markdoc.transform(ast, markdocConfig);
+  return Markdoc.renderers.react(renderableTree, React, {
+    components: {
+      Fence: ({ children, language }: { children: string; language?: string }) => (
+        <CodeBlock language={language ?? 'bash'}>{String(children)}</CodeBlock>
+      ),
+      Callout: ({ title, children }: { title: string; children: React.ReactNode }) => (
+        <GlassCard className="my-4 p-4">
+          <strong className="block font-semibold text-sm">{title}</strong>
+          <div className="mt-1 text-xs">{children}</div>
+        </GlassCard>
+      ),
+    },
+  });
+}
+```
+
+### 3. Summary Recommendation for Arch-System
+
+1. **Keep `@mdx-js/react` in `packages/ui` Storybook**: Already installed (`@mdx-js/react@3.1.1`) and configured in `packages/ui/.storybook/main.ts`—ideal for interactive component documentation.
+2. **Do NOT use `@markdoc/next.js` Webpack loader in `apps/portal`**: Because `apps/portal` is standardized on **Turbopack** (`next dev --turbopack` and `next build` with `turbopackFileSystemCacheForBuild: true`), avoid legacy Webpack-only loaders.
+3. **If rendering the 80+ `/docs/**/_.md`operational runbooks or`codebase-maps/_.md`as rich UI inside`apps/portal/app/docs/`\*\*:
+   - **Option 1 (Structured SOP Runbooks)**: Use **`@markdoc/markdoc` directly inside a `'use cache'` Server Component** (`Markdoc.parse` + `Markdoc.validate` + `Markdoc.transform` + `Markdoc.renderers.react`) mapped to `@repo/ui` (`<GlassCard>`, `<CodeBlock>`, `<Collapse>`). Zero bundler loader changes, 100% Turbopack native, schema-validated, and zero XSS/code-execution risk.
+   - **Option 2 (File-Based Interactive `.mdx` Pages)**: Use **`@next/mdx` with `experimental: { mdxRs: { mdxType: 'gfm' } }`** (Rust SWC MDX compiler) and a root `apps/portal/mdx-components.tsx`.
+   - **Option 3 (AI / RAG & Sanitized Dynamic Markdown)**: Use **`remark-parse` + `remark-gfm`** (and `findMarkdownHeadingBoundary` in `apps/portal/lib/ai/chunking.ts`) for heading-aware document chunking and **`rehype-sanitize`** for untrusted/LLM markdown rendering.
