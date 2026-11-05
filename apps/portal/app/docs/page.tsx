@@ -90,6 +90,19 @@ const DOCUMENTATION_VOLUMES = [
     href: '/docs/api',
     badge: 'API Reference',
   },
+  {
+    id: 'react-18-performance',
+    title: 'React 18 Performance Guide',
+    subtitle: 'Concurrent Rendering',
+    description:
+      'How concurrent features like Transitions, Suspense, and React Server Components improve application performance.',
+    variant: 'stripe' as const,
+    color: '#0ea5e9',
+    textColor: '#ffffff',
+    icon: <Layers className="h-4 w-4" />,
+    href: '/docs/react-18-performance',
+    badge: 'Frontend Performance',
+  },
 ];
 
 const TELEMETRY_CODE_EXAMPLE = `import { ArchTelemetryClient } from "@arch/telemetry-sdk";
