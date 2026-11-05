@@ -11,9 +11,29 @@ import { registry } from '@repo/utils/observability/metrics';
 import { NextResponse } from 'next/server';
 import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
 
+function escapeLabelValue(value: string): string {
+  return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '\\n');
+}
+
+function labelValue(value: string | number): string {
+  return `"${escapeLabelValue(String(value))}"`;
+}
+
 export async function GET() {
-  const cacheStats = await getCacheStats();
-  const { jobMetrics, dbMetrics } = await getObservabilityMetrics();
+  const [cacheStats, observability] = await Promise.all([
+    getCacheStats().catch(() => ({
+      hits: 0,
+      misses: 0,
+      l1Hits: 0,
+      l2Hits: 0,
+      redisErrors: 1,
+      avgLatencyMs: 0,
+      p95LatencyMs: 0,
+      xFetchTriggers: 0,
+    })),
+    getObservabilityMetrics(),
+  ]);
+  const { jobMetrics, dbMetrics } = observability;
   let body = '';
 
   // 1. Cache Metrics
@@ -45,7 +65,7 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_inngest_job_executions_total counter
 `;
   for (const [jobId, entry] of jobMetrics.entries()) {
-    body += `portal_inngest_job_executions_total{job_id="${jobId}"} ${entry.count}\n`;
+    body += `portal_inngest_job_executions_total{job_id=${labelValue(jobId)}} ${entry.count}\n`;
   }
   body += `\n`;
 
@@ -53,7 +73,7 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_inngest_job_errors_total counter
 `;
   for (const [jobId, entry] of jobMetrics.entries()) {
-    body += `portal_inngest_job_errors_total{job_id="${jobId}"} ${entry.errors}\n`;
+    body += `portal_inngest_job_errors_total{job_id=${labelValue(jobId)}} ${entry.errors}\n`;
   }
   body += `\n`;
 
@@ -61,7 +81,7 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_inngest_job_duration_ms_total counter
 `;
   for (const [jobId, entry] of jobMetrics.entries()) {
-    body += `portal_inngest_job_duration_ms_total{job_id="${jobId}"} ${Math.round(entry.totalDurationMs * 100) / 100}\n`;
+    body += `portal_inngest_job_duration_ms_total{job_id=${labelValue(jobId)}} ${Math.round(entry.totalDurationMs * 100) / 100}\n`;
   }
   body += `\n`;
 
@@ -70,8 +90,8 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_db_query_executions_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(':');
-    body += `portal_db_query_executions_total{table="${tableName}",operation="${operation}"} ${entry.count}\n`;
+    const [tableName = '', operation = 'unknown'] = key.split(':');
+    body += `portal_db_query_executions_total{table=${labelValue(tableName)},operation=${labelValue(operation)}} ${entry.count}\n`;
   }
   body += `\n`;
 
@@ -79,8 +99,8 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_db_query_errors_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(':');
-    body += `portal_db_query_errors_total{table="${tableName}",operation="${operation}"} ${entry.errors}\n`;
+    const [tableName = '', operation = 'unknown'] = key.split(':');
+    body += `portal_db_query_errors_total{table=${labelValue(tableName)},operation=${labelValue(operation)}} ${entry.errors}\n`;
   }
   body += `\n`;
 
@@ -88,8 +108,8 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
 # TYPE portal_db_query_duration_ms_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(':');
-    body += `portal_db_query_duration_ms_total{table="${tableName}",operation="${operation}"} ${Math.round(entry.totalDurationMs * 100) / 100}\n`;
+    const [tableName = '', operation = 'unknown'] = key.split(':');
+    body += `portal_db_query_duration_ms_total{table=${labelValue(tableName)},operation=${labelValue(operation)}} ${Math.round(entry.totalDurationMs * 100) / 100}\n`;
   }
   body += `\n`;
 
