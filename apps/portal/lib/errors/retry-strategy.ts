@@ -7,11 +7,9 @@
 
 import {
   DatabaseError,
-  FetchTimeoutError,
   isAppError,
   isFetchTimeoutError,
   isNetworkError,
-  NetworkError,
   RateLimitError,
 } from '@/lib/errors/error-classes';
 

@@ -130,7 +130,7 @@ interface SwrEntry<T> {
   ttlSeconds: number;
 }
 
-const swrInFlight = new Map<string, Promise<any>>();
+const swrInFlight = new Map<string, Promise<unknown>>();
 const lastDedupedTimes = new Map<string, number>();
 
 /**
@@ -181,7 +181,7 @@ export function swrCacheWrap<T>(
   const inFlight = swrInFlight.get(key);
   const lastTime = lastDedupedTimes.get(key) || 0;
   if (inFlight && now - lastTime < dedupingIntervalMs) {
-    return inFlight;
+    return inFlight as Promise<T>;
   }
 
   // 2. Create the core workflow promise synchronously to coalesce concurrent requests
@@ -242,7 +242,7 @@ export function swrCacheWrap<T>(
       // Cache penetration defense: if data is null/undefined, apply short negative cache
       if (freshData === null || freshData === undefined) {
         if (allowNegativeCache) {
-          const negEntry: SwrEntry<any> = {
+          const negEntry: SwrEntry<null> = {
             data: null,
             cachedAt: Date.now(),
             ttlSeconds: negativeCacheTtl,

@@ -2,23 +2,12 @@
 
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
-import {
-  BranchNotFoundError,
-  GitError,
-  GitHubApiError,
-  RateLimitError,
-  WatchdogError,
-} from '../../src/errors.mjs';
+import { BranchNotFoundError, GitHubApiError, RateLimitError } from '../../src/errors.mjs';
 import {
   compareCommits,
-  createGitHubHeaders,
-  discoverGitHubContext,
   fetchBranchHeadSha,
   inspectGitHubRemote,
-  inspectLocalGit,
   parseGitHubRemoteUrl,
-  resolveGitHubToken,
-  runGit,
 } from '../../src/git-inspector.mjs';
 import { createMockGitRepo } from '../fixtures/mock-git.mjs';
 import { createMockGitHubServer } from '../fixtures/mock-github.mjs';

@@ -1,19 +1,6 @@
 'use client';
-
-import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  AlertOctagon,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Printer,
-  ShieldAlert,
-  Sparkles,
-  Wrench,
-  X,
-} from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { OVERVIEW_DELAY_COLUMNS } from '@/lib/shift-sheet-buckets';
+import { AlertOctagon, Printer, Sparkles, Wrench, X } from 'lucide-react';
+import { useMemo } from 'react';
 import type { MachinePredictiveMetric } from './predictive-maintenance';
 import type { EngineeringLogItem, MachineMonthlySummaryRow } from './reports-types';
 

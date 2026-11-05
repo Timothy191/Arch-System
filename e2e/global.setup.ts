@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test as setup } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 import { TEST_EMAIL, TEST_PASSWORD } from './helpers/credentials';
 
 const __filename = fileURLToPath(import.meta.url);

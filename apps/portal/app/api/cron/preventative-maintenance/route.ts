@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       }),
     ]);
     return NextResponse.json({ success: true, message: 'PM SMU sweep initiated', jobId });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

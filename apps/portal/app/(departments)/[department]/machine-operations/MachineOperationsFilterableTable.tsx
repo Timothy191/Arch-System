@@ -1,7 +1,6 @@
 'use client';
 
 import { DataTable } from '@repo/ui/components/ui/data-table';
-import { GlassCard } from '@repo/ui/GlassCard';
 import { useMemo, useState } from 'react';
 import { MachineOperationsFilterStrip } from './MachineOperationsSummaryStrip';
 import {
@@ -16,7 +15,6 @@ import {
   groupMachinesBySite,
   type MachineItem,
   type MachineOperation,
-  type MachineStatusCounts,
 } from './machine-operations-constants';
 
 interface MachineTableRow {
@@ -55,8 +53,8 @@ function MachineOperationsFilterableTable({
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [_sortKey, _setSortKey] = useState<string | null>(null);
+  const [_sortDirection, _setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Prepare machine data with meta
   const machineOps = useMemo(() => buildOperationsByMachineMap(operations), [operations]);
@@ -81,7 +79,7 @@ function MachineOperationsFilterableTable({
     () => computeMachineStatusCounts(allMachinesWithMeta),
     [allMachinesWithMeta]
   );
-  const siteGrouped = useMemo(
+  const _siteGrouped = useMemo(
     () => groupMachinesBySite(allMachinesWithMeta),
     [allMachinesWithMeta]
   );

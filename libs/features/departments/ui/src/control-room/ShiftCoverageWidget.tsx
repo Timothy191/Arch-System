@@ -58,13 +58,21 @@ function ShiftCoverageWidgetBase({
         if (cancelled) return;
 
         const machinesWithOps: MachineWithOp[] =
-          data.statuses?.map((status: any) => ({
-            id: status.machineId,
-            name: status.machineName,
-            machine_type: status.machineType,
-            hours_worked: status.hoursWorked ?? null,
-            has_entry: status.hasEntry ?? false,
-          })) || [];
+          data.statuses?.map(
+            (status: {
+              machineId: string;
+              machineName: string;
+              machineType: string;
+              hoursWorked?: number | null;
+              hasEntry?: boolean;
+            }) => ({
+              id: status.machineId,
+              name: status.machineName,
+              machine_type: status.machineType,
+              hours_worked: status.hoursWorked ?? null,
+              has_entry: status.hasEntry ?? false,
+            })
+          ) || [];
 
         setMachines(machinesWithOps);
 

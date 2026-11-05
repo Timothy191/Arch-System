@@ -14,19 +14,19 @@ export interface PluginEngine {
    * Run custom computations or statistical algorithms.
    * Can be invoked dynamically by the host application.
    */
-  execute?: (_params?: Record<string, any>) => Promise<Record<string, any>>;
+  execute?: (_params?: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }
 
 export interface PluginHooks {
   /**
    * Lifecycle trigger executing when a daily log is created/synced.
    */
-  onLogCreated?: (_log: any) => Promise<void> | void;
+  onLogCreated?: (_log: unknown) => Promise<void> | void;
 
   /**
    * Lifecycle trigger executing when a machinery breakdown is reported.
    */
-  onBreakdownAdded?: (_breakdown: any) => Promise<void> | void;
+  onBreakdownAdded?: (_breakdown: unknown) => Promise<void> | void;
 }
 
 export interface PluginWidget {

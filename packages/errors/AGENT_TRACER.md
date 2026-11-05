@@ -1,5 +1,10 @@
 # Errors Package Agent Tracer
 
+## 2026-11-05T12:55:00+02:00: Add Optional `digest` Property to `AppError` for Next.js Error Boundaries
+
+- **Purpose**: Allow `isAppError(error)` to cleanly narrow Next.js `Error & { digest?: string }` error boundary props without `as any` casts under `suspicious.noExplicitAny: "error"`.
+- **Verification**: `pnpm --filter @repo/errors type-check` & `pnpm biome ci .` ✅.
+
 ## 2026-11-05T11:24:00+02:00: Wire Biome Lint Task into `@repo/errors`
 
 - **Purpose**: Add `"lint": "biome check ."` to `packages/errors/package.json` so `@repo/errors` participates in `pnpm turbo run lint`.

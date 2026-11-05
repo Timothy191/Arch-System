@@ -20,7 +20,7 @@ export interface DatePreset {
 
 export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: DateRange | Date | null;
-  onChange?: (value: DateRange | any) => void;
+  onChange?: (value: DateRange | null) => void;
   size?: 'small' | 'medium';
   allowClear?: boolean;
   compact?: boolean;

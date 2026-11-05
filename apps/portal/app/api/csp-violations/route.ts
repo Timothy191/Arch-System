@@ -59,6 +59,7 @@
  * from Report-Only to enforcement mode.
  */
 
+import { type NextRequest, NextResponse } from 'next/server';
 import { logError } from '@/lib/errors/error-logger';
 import { recordSystemLog } from '@/lib/logging/system-logs';
 
@@ -77,7 +78,7 @@ interface CspReport {
   'column-number'?: number;
 }
 
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const raw = await req.json();
 
@@ -85,7 +86,7 @@ export async function POST(req: Request): Promise<Response> {
     const report: CspReport | null = raw['csp-report'] ?? raw.cspReport ?? null;
 
     if (!report) {
-      return new Response(null, { status: 204 });
+      return new NextResponse(null, { status: 204 });
     }
 
     const { 'violated-directive': directive, 'blocked-uri': blocked, 'document-uri': doc } = report;
@@ -118,10 +119,10 @@ export async function POST(req: Request): Promise<Response> {
       url: doc,
     });
 
-    return new Response(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch {
     // CSP spec says the endpoint must always return 204, even on malformed
     // reports. Silently ignore parse failures.
-    return new Response(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
   }
 }

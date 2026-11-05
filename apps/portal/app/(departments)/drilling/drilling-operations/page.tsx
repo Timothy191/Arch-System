@@ -96,23 +96,45 @@ async function getDrillingOpsData() {
     });
   }
 
-  for (const cr of (controlRoomOps ?? []) as any[]) {
+  interface ControlRoomDelayEntry {
+    duration_hours?: number | null;
+    deleted_at?: string | null;
+    delay_category?: { name?: string | null } | null;
+  }
+
+  interface ControlRoomOpRow {
+    id: string;
+    machine_id: string;
+    shift_type?: string | null;
+    shift_date?: string | null;
+    start_smu?: number | null;
+    end_smu?: number | null;
+    hours_worked?: number | null;
+    block_drilled?: string | null;
+    meters_drilled?: number | null;
+    holes_drilled?: number | null;
+    operator?: { full_name?: string | null } | null;
+    site?: { name?: string | null } | null;
+    delay_entries?: ControlRoomDelayEntry[] | null;
+  }
+
+  for (const cr of (controlRoomOps ?? []) as unknown as ControlRoomOpRow[]) {
     const shift = (cr.shift_type === 'night' ? 'night' : 'day') as 'day' | 'night';
     const key = `${cr.machine_id}:${shift}`;
     const existing = mergedMap.get(key);
 
     const delays = Array.isArray(cr.delay_entries)
-      ? cr.delay_entries.filter((d: any) => !d.deleted_at)
+      ? cr.delay_entries.filter((d) => !d.deleted_at)
       : [];
     const extMin = delays
-      .filter((d: any) => d.delay_category?.name === 'External')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => d.delay_category?.name === 'External')
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
     const prodMin = delays
-      .filter((d: any) => d.delay_category?.name === 'Production')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => d.delay_category?.name === 'Production')
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
     const engMin = delays
-      .filter((d: any) => d.delay_category?.name === 'Engineering')
-      .reduce((s: number, d: any) => s + Number(d.duration_hours || 0) * 60, 0);
+      .filter((d) => d.delay_category?.name === 'Engineering')
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
 
     const startSmu = cr.start_smu != null ? Number(cr.start_smu) : (existing?.open_hours ?? null);
     const endSmu = cr.end_smu != null ? Number(cr.end_smu) : (existing?.close_hours ?? null);

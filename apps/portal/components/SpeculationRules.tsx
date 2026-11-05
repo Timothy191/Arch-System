@@ -55,13 +55,21 @@ export const SPECULATION_RULES_PAYLOAD = {
 
 export const SPECULATION_RULES_JSON = JSON.stringify(SPECULATION_RULES_PAYLOAD);
 
+export interface SpeculationRulesProps {
+  nonce?: string;
+}
+
 /**
  * Browser Speculation Rules API (`<script type="speculationrules">`)
  * Prerenders and prefetches high-probability department and hub routes
  * on hover/pointerdown (`eagerness: "moderate"`) for near-0ms LCP navigation.
  */
-export function SpeculationRules(): React.JSX.Element {
+export function SpeculationRules({ nonce }: SpeculationRulesProps = {}): React.JSX.Element {
   return (
-    <script type="speculationrules" dangerouslySetInnerHTML={{ __html: SPECULATION_RULES_JSON }} />
+    <script
+      type="speculationrules"
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: SPECULATION_RULES_JSON }}
+    />
   );
 }

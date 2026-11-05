@@ -21,7 +21,7 @@ export async function revalidateRSC(tags: string[]) {
       if (typeof nextCache.updateTag === 'function') {
         nextCache.updateTag(tag);
       } else {
-        (revalidateTag as any)(tag, 'max');
+        (revalidateTag as (tag: string, profile?: string) => void)(tag, 'max');
       }
     } catch {
       // Outside request context

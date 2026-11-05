@@ -11,7 +11,7 @@ import { instrumentedFetch } from './server';
  * Always use createServerSupabaseClient() for mutations.
  */
 export async function createReadReplicaClient(cookieList?: Array<{ name: string; value: string }>) {
-  let cookieStore: any = null;
+  let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
   if (!cookieList) {
     try {
       cookieStore = await cookies();
@@ -62,12 +62,26 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
       getAll() {
         return resolvedCookies;
       },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         if (cookieList) return;
         try {
           cookiesToSet.forEach(
-            ({ name, value, options }: { name: string; value: string; options?: any }) =>
-              cookieStore?.set(name, value, options)
+            ({
+              name,
+              value,
+              options,
+            }: {
+              name: string;
+              value: string;
+              options?: Record<string, unknown>;
+            }) =>
+              cookieStore?.set(
+                name,
+                value,
+                options as Parameters<NonNullable<typeof cookieStore>['set']>[2]
+              )
           );
         } catch {
           // Called from a Server Component — safe to ignore.

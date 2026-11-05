@@ -366,7 +366,7 @@ export class INPMonitor {
     if (typeof PerformanceObserver === 'undefined') return;
 
     this.observer = new PerformanceObserver((entryList) => {
-      const entries = entryList.getEntries() as any[];
+      const entries = entryList.getEntries() as PerformanceEventTiming[];
       this.entries.push(...entries);
 
       // Keep only last 50 interactions

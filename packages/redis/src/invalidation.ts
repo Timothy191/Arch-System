@@ -5,6 +5,7 @@ import { memoryDeleteByPrefix, memoryDeleteKeys } from './l1';
 
 const TAG_PREFIX = 'arch:__tags__';
 const BROADCAST_CHANNEL = 'cache:invalidate:broadcast';
+export const TAG_INDEX_TTL_SECONDS = 86_400;
 const SCAN_COUNT = 100;
 /**
  * A broadcast is one Pub/Sub message: past this many keys the payload is
@@ -52,11 +53,18 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
   if (tags.length === 0) return;
   const redis = await getRedisClientSafe();
   if (!redis) return;
-
   try {
     const pipeline = redis.multi();
     for (const tag of tags) {
       pipeline.sAdd(`${TAG_PREFIX}:${tag}`, key);
+    }
+    if (typeof (pipeline as { expire?: unknown }).expire === 'function') {
+      for (const tag of tags) {
+        (pipeline as { expire: (k: string, s: number) => void }).expire(
+          `${TAG_PREFIX}:${tag}`,
+          TAG_INDEX_TTL_SECONDS
+        );
+      }
     }
     await pipeline.exec();
   } catch (err) {

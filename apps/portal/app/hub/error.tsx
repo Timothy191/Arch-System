@@ -29,7 +29,7 @@ export default function HubError({ error, reset }: HubErrorProps) {
   const title = getErrorTitle(error);
   const message = getErrorMessage(error);
   // AGENT-TRACE: isAppError narrows to AppError which has `code?`, avoiding `as any`.
-  const appErrorCode = isAppError(error) ? (error as any as { code?: string }).code : undefined;
+  const appErrorCode = isAppError(error) ? error.code : undefined;
 
   return (
     <div className="space-y-6">

@@ -66,7 +66,7 @@ export function ShiftCompilationHeader({
         if (!res.ok) throw new Error('Workflow failed');
         setWorkflowStatus('Aggregating SCADA telemetry in background...');
         setTimeout(() => setWorkflowStatus(null), 5000);
-      } catch (e) {
+      } catch (_e) {
         setWorkflowStatus('Failed to start report compilation');
         setTimeout(() => setWorkflowStatus(null), 5000);
       }

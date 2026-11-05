@@ -113,7 +113,7 @@ export class ModbusTcpClient extends EventEmitter {
 
     const transactionId = response.readUInt16BE(0);
     const protocolId = response.readUInt16BE(2);
-    const length = response.readUInt16BE(4);
+    const _length = response.readUInt16BE(4);
     const unitId = response.readUInt8(6); // Unit ID is 1 byte at offset 6
     const functionCode = response.readUInt8(8);
 

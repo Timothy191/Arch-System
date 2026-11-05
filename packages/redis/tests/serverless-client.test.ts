@@ -152,7 +152,7 @@ describe('ServerlessRedisClient', () => {
       const client = makeClient();
       global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = typeof input === 'string' ? input : String(input);
-        const body = String(init?.body ?? '');
+        const _body = String(init?.body ?? '');
         if (url.endsWith('/pipeline')) {
           // Bare-array envelope, matching Upstash.
           return new Response(

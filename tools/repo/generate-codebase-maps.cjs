@@ -909,8 +909,8 @@ function main() {
     });
   }
 
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(path.join(latestDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  fs.writeFileSync(path.join(latestDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 
   console.log('\n==================================================');
   console.log(`✅ Codebase Maps Synchronized Successfully!`);

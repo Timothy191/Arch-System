@@ -1,6 +1,5 @@
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { BarChart3, ClipboardCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';

@@ -1,4 +1,4 @@
-import type { ActorRefFrom } from 'xstate';
+import type { AnyActorRef } from 'xstate';
 import type { ArchPlugin } from '../types';
 
 // =============================================================================
@@ -30,7 +30,7 @@ export type PluginEvent =
 // =============================================================================
 
 export interface OrchestratorContext {
-  plugins: Map<string, ActorRefFrom<any>>;
+  plugins: Map<string, PluginActor>;
   pluginConfigs: string[];
   isInitialized: boolean;
   healthReport: HealthReport;
@@ -53,7 +53,7 @@ export type OrchestratorEvent =
   | { type: 'ENABLE_PLUGIN'; pluginName: string }
   | { type: 'UNLOAD_ALL' }
   | { type: 'HEALTH_CHECK' }
-  | { type: 'plugin.spawned'; name: string; ref: ActorRefFrom<any> }
+  | { type: 'plugin.spawned'; name: string; ref: PluginActor }
   | { type: 'plugin.stateChanged'; name: string; state: string }
   | { type: 'system.error'; error: string };
 
@@ -69,4 +69,4 @@ export function isRetryableError(error: string): boolean {
   return retryablePatterns.some((pattern) => error.toLowerCase().includes(pattern));
 }
 
-export type PluginActor = ActorRefFrom<any>;
+export type PluginActor = AnyActorRef;

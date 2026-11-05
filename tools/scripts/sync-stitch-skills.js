@@ -30,7 +30,7 @@ mcp_dependencies: []
           await fs.writeFile(skillPath, content, 'utf8');
           syncedCount++;
         }
-      } catch (err) {
+      } catch (_err) {
         // file might not exist, skip
       }
     }

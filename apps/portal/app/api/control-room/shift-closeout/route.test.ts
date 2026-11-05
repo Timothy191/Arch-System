@@ -1,7 +1,6 @@
 /** @jest-environment node */
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
-import { NextRequest } from 'next/server';
 
 jest.mock('next/server', () => {
   return {

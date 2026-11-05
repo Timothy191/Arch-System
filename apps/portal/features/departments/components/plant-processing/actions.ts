@@ -412,7 +412,7 @@ export async function logPlantDelayAction(
       .maybeSingle();
 
     const departmentId = (deptRow as { id?: string } | null)?.id;
-    const employeeId = authContext?.employee?.id ?? user?.id;
+    const _employeeId = authContext?.employee?.id ?? user?.id;
 
     const delayRowPayload = {
       ...(departmentId ? { department_id: departmentId } : {}),

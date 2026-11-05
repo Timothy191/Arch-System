@@ -176,6 +176,8 @@ jobs:
       pull-requests: write
 
     env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       NEXT_TELEMETRY_DISABLED: 1
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
@@ -258,13 +260,19 @@ jobs:
           poetry run deepeval test run tests/
         working-directory: packages/eval
 
+      - name: Run Biome CI
+        run: pnpm turbo run //#lint:ci
+        env:
+          CI: true
+
       - name: Run Turbo Tasks
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            pnpm turbo run lint type-check lint:tokens lint:css build
+            pnpm turbo run //#lint:ci type-check lint:tokens lint:css build
             pnpm turbo run test -- --passWithNoTests
           else
-            pnpm turbo run lint type-check lint:tokens lint:css build --filter=...[origin/main]
+            pnpm turbo run //#lint:ci
+            pnpm turbo run type-check lint:tokens lint:css build --filter=...[origin/main]
             pnpm turbo run test --filter=...[origin/main] -- --passWithNoTests
           fi
           # Coverage thresholds live in apps/portal/jest.config.cjs. Run that
@@ -340,6 +348,8 @@ jobs:
       pull-requests: write
 
     env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       NEXT_TELEMETRY_DISABLED: 1
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
@@ -412,6 +422,8 @@ jobs:
       pull-requests: write
 
     env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       REDIS_URL: redis://localhost:6379
       NEXT_TELEMETRY_DISABLED: 1
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co' }}
@@ -547,7 +559,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Self-Healing CI
-        run: pnpm turbo run lint --filter=...[origin/main] --force
+        run: pnpm turbo run //#lint:ci --force
 
   tier2-check:
     name: Tier 2 Review Policy Check

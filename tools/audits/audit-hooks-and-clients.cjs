@@ -13,7 +13,7 @@ const path = require('node:path');
 const { execSync } = require('node:child_process');
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
-const PORTAL_DIR = path.join(ROOT_DIR, 'apps/portal');
+const _PORTAL_DIR = path.join(ROOT_DIR, 'apps/portal');
 const HOOKS_DIR = path.join(ROOT_DIR, 'libs/shared/hooks/src');
 
 const chalk = {

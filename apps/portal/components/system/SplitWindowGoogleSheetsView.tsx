@@ -2,7 +2,6 @@
 
 import { ExternalLink, FileSpreadsheet, Maximize2 } from 'lucide-react';
 import * as React from 'react';
-import { GOOGLE_DOCS_CREATE_URL } from '~/lib/google-workspace';
 
 const GOOGLE_SHEETS_AUTO_SIGNIN_URL =
   'https://accounts.google.com/AccountChooser?continue=https://docs.google.com/spreadsheets/u/0/';

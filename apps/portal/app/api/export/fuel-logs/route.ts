@@ -169,14 +169,39 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const rows: any[] = [];
-  (data ?? []).forEach((log: any) => {
+  interface FuelLogExportRow {
+    id: string;
+    log_date: string;
+    shift: string;
+    department_id: string;
+    machine_id: string;
+    machine_name: string;
+    machine_type: string;
+    diesel_litres: string;
+  }
+
+  interface FuelLogRelationItem {
+    id: string;
+    diesel_litres?: number | string | null;
+    machine_id: string;
+    machines?: { name?: string | null; machine_type?: string | null } | null;
+  }
+
+  interface DailyLogWithFuel {
+    log_date: string;
+    shift: string;
+    department_id: string;
+    fuel_logs?: FuelLogRelationItem | FuelLogRelationItem[] | null;
+  }
+
+  const rows: FuelLogExportRow[] = [];
+  ((data ?? []) as unknown as DailyLogWithFuel[]).forEach((log) => {
     const fLogs = Array.isArray(log.fuel_logs)
       ? log.fuel_logs
       : log.fuel_logs
         ? [log.fuel_logs]
         : [];
-    fLogs.forEach((fl: any) => {
+    fLogs.forEach((fl) => {
       const machineName = fl.machines?.name ?? 'Unknown';
       const machineType = fl.machines?.machine_type ?? 'Unknown';
       rows.push({

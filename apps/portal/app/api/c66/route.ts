@@ -231,7 +231,9 @@ async function processSingleScan(
   }
 
   const gateLocation =
-    scanRecord.gate_location || (scanRecord as Record<string, any>).gate || defaultSource;
+    scanRecord.gate_location ||
+    (scanRecord as Record<string, string | undefined>).gate ||
+    defaultSource;
   const scanDirection = scanRecord.direction || DEFAULT_DIRECTION;
   const deviceIdentifier = scanRecord.device_id || scanRecord.scanner_id || defaultDeviceId;
   const operatorIdentifier = scanRecord.operator || null;
@@ -245,9 +247,9 @@ async function processSingleScan(
     );
 
   const badgeLookupResponse =
-    typeof (badgeQuery as any).or === 'function'
-      ? await (badgeQuery as any).or(`qr_code.eq.${rawCode},rfid_code.eq.${rawCode}`).maybeSingle()
-      : await (badgeQuery as any).eq('qr_code', rawCode).single();
+    typeof (badgeQuery as { or?: unknown }).or === 'function'
+      ? await badgeQuery.or(`qr_code.eq.${rawCode},rfid_code.eq.${rawCode}`).maybeSingle()
+      : await badgeQuery.eq('qr_code', rawCode).single();
 
   const matchedBadge = badgeLookupResponse?.data;
   const badgeLookupError = badgeLookupResponse?.error;

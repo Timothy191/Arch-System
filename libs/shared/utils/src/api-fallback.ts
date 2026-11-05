@@ -26,7 +26,11 @@ export function createApiResponse(
     httpStatus?: number;
   } = {}
 ): ApiResponse {
-  const { defaultStatus = 'healthy', defaultLatency = 100, httpStatus = 200 } = options;
+  const {
+    defaultStatus = 'healthy',
+    defaultLatency = 100,
+    httpStatus: _httpStatus = 200,
+  } = options;
 
   const services = Object.fromEntries(
     Object.entries(serviceHealth).map(([name, health]) => [name, health])

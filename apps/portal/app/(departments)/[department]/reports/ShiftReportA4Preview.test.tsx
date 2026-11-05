@@ -12,7 +12,7 @@ import {
 jest.mock('@/styles/print-report.css', () => ({}));
 
 jest.mock('@react-pdf/renderer', () => {
-  const ReactLib = require('react');
+  const _ReactLib = require('react');
   return {
     Document: ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="shift-pdf-doc">{children}</div>

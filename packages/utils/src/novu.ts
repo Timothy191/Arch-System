@@ -2,9 +2,9 @@ import { Novu } from '@novu/node';
 
 const logger = {
   // eslint-disable-next-line no-console
-  info: (msg: string, ...args: any[]) => console.log(`[INFO] ${msg}`, ...args),
+  info: (msg: string, ...args: unknown[]) => console.log(`[INFO] ${msg}`, ...args),
   // eslint-disable-next-line no-console
-  error: (msg: string, ...args: any[]) => console.error(`[ERROR] ${msg}`, ...args),
+  error: (msg: string, ...args: unknown[]) => console.error(`[ERROR] ${msg}`, ...args),
 };
 
 // Initialize Novu SDK
@@ -13,13 +13,17 @@ const novu = new Novu(process.env.NOVU_API_KEY || 'dummy_key');
 /**
  * Sends an operational alert and tracks engagement.
  */
-export async function sendOperationalAlert(subscriberId: string, workflowId: string, payload: any) {
+export async function sendOperationalAlert(
+  subscriberId: string,
+  workflowId: string,
+  payload: Record<string, unknown>
+) {
   try {
     const response = await novu.trigger(workflowId, {
       to: {
         subscriberId: subscriberId,
       },
-      payload: payload,
+      payload: payload as Parameters<Novu['trigger']>[1]['payload'],
     });
 
     logger.info(`Notification triggered successfully: ${workflowId}`, {

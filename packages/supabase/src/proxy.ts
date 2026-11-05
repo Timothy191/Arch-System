@@ -57,7 +57,9 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         // First, set cookies on the request for Server Components
         cookiesToSet.forEach(({ name, value }: { name: string; value: string }) => {
           request.cookies.set(name, value);
@@ -70,12 +72,20 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
         // Then, set cookies on the response for the browser
         cookiesToSet.forEach(
-          ({ name, value, options }: { name: string; value: string; options?: any }) => {
+          ({
+            name,
+            value,
+            options,
+          }: {
+            name: string;
+            value: string;
+            options?: Record<string, unknown>;
+          }) => {
             supabaseResponse.cookies.set(name, value, {
               ...options,
               maxAge: undefined,
               expires: undefined,
-              httpOnly: options?.httpOnly ?? false,
+              httpOnly: Boolean(options?.httpOnly),
               secure: process.env.NODE_ENV === 'production',
               sameSite: 'lax',
             });
@@ -142,7 +152,9 @@ export async function createProxyClient(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         cookiesToSet.forEach(({ name, value }: { name: string; value: string }) => {
           request.cookies.set(name, value);
         });

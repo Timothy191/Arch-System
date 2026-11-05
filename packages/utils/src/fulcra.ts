@@ -30,7 +30,7 @@ export class AgentCursorTracker {
   /**
    * Gets the raw latest record
    */
-  static async getLatestRaw(): Promise<any> {
+  static async getLatestRaw(): Promise<unknown> {
     try {
       const { stdout } = await execAsync(`uvx fulcra-api get-records AgentCursor latest`);
       if (!stdout.trim()) return null;
@@ -38,7 +38,7 @@ export class AgentCursorTracker {
       const records = stdout
         .trim()
         .split('\n')
-        .map((r: any) => JSON.parse(r));
+        .map((r: string) => JSON.parse(r));
       return records.length > 0 ? records[0] : null;
     } catch (err) {
       console.error(`[AgentCursor] Failed to get latest record:`, err);
@@ -51,8 +51,10 @@ export class AgentCursorTracker {
    * This is used to build a context-aware system prompt.
    * @param timeRange e.g., "1 day"
    */
-  static async getLifeContext(timeRange: string = '1 day'): Promise<any> {
-    const context: any = {};
+  static async getLifeContext(
+    timeRange: string = '1 day'
+  ): Promise<{ sleep?: unknown[]; location?: unknown }> {
+    const context: { sleep?: unknown[]; location?: unknown } = {};
     try {
       // 1. Fetch recent sleep
       const { stdout: sleepOut } = await execAsync(`uvx fulcra-api sleep-cycles "${timeRange}"`);
@@ -60,7 +62,7 @@ export class AgentCursorTracker {
         context.sleep = sleepOut
           .trim()
           .split('\n')
-          .map((r: any) => JSON.parse(r));
+          .map((r: string) => JSON.parse(r));
       }
 
       // 2. Fetch recent location

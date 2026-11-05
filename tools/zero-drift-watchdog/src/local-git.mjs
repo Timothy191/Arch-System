@@ -1,8 +1,8 @@
 // @ts-check
-import { execFile, execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import { promisify } from 'node:util';
-import { BranchNotFoundError, GitError, GitHubApiError, RateLimitError } from './errors.mjs';
+import { GitError } from './errors.mjs';
 
 const execFileAsync = promisify(execFile);
 

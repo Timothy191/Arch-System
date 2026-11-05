@@ -2,7 +2,6 @@ import {
   mineSearchQuerySchema,
   mineSearchResponseSchema,
   mineSearchResultItemSchema,
-  searchCategoryEnum,
 } from './search.schema';
 
 describe('Search Schemas (Meilisearch Parity)', () => {

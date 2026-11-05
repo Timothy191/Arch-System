@@ -6,9 +6,7 @@ import { describe, it } from 'node:test';
 import {
   evaluateDrift,
   formatDriftReport,
-  IN_FLIGHT_STATES,
   pollVercelDeploymentConvergence,
-  reconcileDrift,
   resolveDrift,
   triggerGitPush,
   triggerVercelDeploy,
@@ -19,8 +17,6 @@ import {
   TimeoutError,
   UncommittedChangesError,
   VercelApiError,
-  VercelAuthError,
-  VercelProjectNotFoundError,
 } from '../../src/errors.mjs';
 
 describe('Unit: Drift Resolution Engine (Tri-State Drift Matrix & Remediation)', () => {

@@ -22,6 +22,7 @@ import { incrementCounter } from './analytics';
 import { cacheGet, cacheSet, memoryDelete } from './cache';
 import { getRedisClient } from './client';
 import { asNumber, sendSafe } from './raw';
+import { bustNegative } from './read-through';
 import { CACHE_TTL_REGISTRY, CacheCategory } from './registry';
 
 const SESSION_TTL_SECONDS = CACHE_TTL_REGISTRY[CacheCategory.AUTH].l2Seconds;
@@ -213,4 +214,29 @@ const SESSION_ABSENT = -2;
 export async function sessionTtl(userId: string, options?: SessionOptions): Promise<number> {
   const redis = await getRedisClient();
   return asNumber(await sendSafe(redis, ['TTL', sessionKey(userId, options)]), SESSION_ABSENT);
+}
+
+export interface UpdateSessionFieldInput extends SessionOptions {
+  userId: string;
+  role?: string;
+  departmentId?: string;
+  accessibleDepartments?: readonly string[];
+}
+
+export async function updateSessionFields(
+  input: UpdateSessionFieldInput
+): Promise<EmployeeRecord | null> {
+  const current = await readSession(input.userId, input);
+  if (!current) return null;
+  const merged: EmployeeRecord = {
+    id: current.id,
+    role: input.role ?? current.role,
+    department_id: input.departmentId ?? current.department_id,
+    accessible_departments: input.accessibleDepartments
+      ? [...input.accessibleDepartments]
+      : current.accessible_departments,
+  };
+  await writeSession({ userId: input.userId, employee: merged, sessionId: input.sessionId });
+  await bustNegative(sessionKey(input.userId, input));
+  return merged;
 }

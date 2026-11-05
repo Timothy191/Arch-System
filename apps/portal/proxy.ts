@@ -10,9 +10,11 @@ import { proxy as handleProxy } from './server/proxy';
  * - API exemptions (/api/c66, /api/health, /api/metrics)
  */
 export async function proxy(request: NextRequest) {
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  request.headers?.set?.('x-nonce', nonce);
+
   const response = await handleProxy(request);
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const cspHeader = `
     frame-src 'self' http://localhost:* http://127.0.0.1:* https://scada.example.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://web.whatsapp.com https://*.whatsapp.com https://calendar.google.com https://docs.google.com https://drive.google.com;
     frame-ancestors 'none';

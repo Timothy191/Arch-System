@@ -2,17 +2,14 @@
 
 import { Badge } from '@repo/ui';
 import { Button } from '@repo/ui/components/ui/button';
-import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Calendar,
   Camera,
   CheckCircle2,
   Clock,
   Edit2,
-  FileBadge,
   Loader2,
   QrCode,
-  Shield,
   Upload,
   User,
   X,

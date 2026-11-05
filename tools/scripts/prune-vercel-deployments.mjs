@@ -77,7 +77,7 @@ async function main() {
   const toDelete = [];
   const protectedDeployments = [];
 
-  for (const [project, list] of Object.entries(byProject)) {
+  for (const [_project, list] of Object.entries(byProject)) {
     // Sort descending by creation time (most recent first)
     list.sort((a, b) => b.createdAt - a.createdAt);
 
@@ -139,7 +139,7 @@ async function main() {
 
   console.log('\n⚡ Starting safe deletion in batches...');
   const BATCH_SIZE = 15;
-  let deletedCount = 0;
+  let _deletedCount = 0;
 
   for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
     const batch = toDelete.slice(i, i + BATCH_SIZE);
@@ -152,7 +152,7 @@ async function main() {
       execSync(`vercel rm ${ids} --safe --yes`, {
         stdio: 'inherit',
       });
-      deletedCount += batch.length;
+      _deletedCount += batch.length;
     } catch (err) {
       console.warn(
         `Warning: Some items in batch may have had active aliases or failed: ${err.message}`

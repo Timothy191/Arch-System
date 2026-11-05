@@ -314,15 +314,20 @@ export class FetchClient {
   }
 
   private async parseHttpError(response: Response, url: string, method: string): Promise<APIError> {
-    let body: any = null;
+    let body: unknown = null;
     let message = `HTTP ${response.status} ${response.statusText}`;
 
     try {
       const contentType = response.headers.get('content-type');
       if (contentType?.includes('application/json')) {
         body = await response.json();
-        if (body && typeof body === 'object' && body.message) {
-          message = body.message;
+        if (
+          body &&
+          typeof body === 'object' &&
+          'message' in body &&
+          typeof (body as { message?: unknown }).message === 'string'
+        ) {
+          message = (body as { message: string }).message;
         }
       } else {
         const text = await response.text();
@@ -476,8 +481,12 @@ export class FetchClient {
             await offlineStorage.updateStatus(req.id, 'failed', `HTTP ${res.status}`);
             failed++;
           }
-        } catch (err: any) {
-          await offlineStorage.updateStatus(req.id, 'failed', err?.message || 'Replay failed');
+        } catch (err: unknown) {
+          await offlineStorage.updateStatus(
+            req.id,
+            'failed',
+            err instanceof Error && err.message ? err.message : 'Replay failed'
+          );
           failed++;
         }
       }

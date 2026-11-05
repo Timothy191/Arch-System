@@ -76,11 +76,11 @@ export function Menu({ children, width, align = 'start', position }: MenuProps) 
 
   if (position) {
     const [pSide, pAlign] = position.split('-');
-    if (pSide && ['top', 'bottom', 'left', 'right'].includes(pSide)) {
-      side = pSide as any;
+    if (pSide === 'top' || pSide === 'bottom' || pSide === 'left' || pSide === 'right') {
+      side = pSide;
     }
-    if (pAlign && ['start', 'center', 'end'].includes(pAlign)) {
-      resolvedAlign = pAlign as any;
+    if (pAlign === 'start' || pAlign === 'center' || pAlign === 'end') {
+      resolvedAlign = pAlign;
     }
   }
 

@@ -5,7 +5,15 @@ const WORKFLOW_QUEUE_NAME = 'n8n-workflow-queue';
 function getRedisConnectionOptions() {
   const redisUrl = process.env.QUEUE_REDIS_URL || process.env.REDIS_URL;
   const insecureTls = process.env.REDIS_TLS_INSECURE === 'true';
-  const options: any = { maxRetriesPerRequest: null, enableOfflineQueue: false, lazyConnect: true };
+  const options: {
+    maxRetriesPerRequest: null;
+    enableOfflineQueue: boolean;
+    lazyConnect: boolean;
+    host?: string;
+    port?: number;
+    password?: string;
+    tls?: { rejectUnauthorized: boolean };
+  } = { maxRetriesPerRequest: null, enableOfflineQueue: false, lazyConnect: true };
 
   if (redisUrl) {
     try {
@@ -63,7 +71,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ jobI
       finishedOn: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
       details: job.data ?? {},
     });
-  } catch (err: any) {
+  } catch (_err: unknown) {
     return NextResponse.json(
       { found: false, queueAvailable: false, jobId, message: 'Lookup failed' },
       { status: 503 }

@@ -2,10 +2,8 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
-  CreditCard,
   FileSpreadsheet,
   LifeBuoy,
-  Plus,
   Printer,
   QrCode,
   ShieldCheck,

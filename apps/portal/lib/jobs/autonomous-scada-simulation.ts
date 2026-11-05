@@ -57,7 +57,7 @@ export const autonomousScadaSimulationFn = inngest.createFunction(
       await Promise.allSettled(operations);
 
       return { success: true, simulated_count: operations.length };
-    } catch (err: any) {
+    } catch (err: unknown) {
       success = false;
       logError(err, { context: 'autonomous_scada_simulation_fatal' });
       throw err;

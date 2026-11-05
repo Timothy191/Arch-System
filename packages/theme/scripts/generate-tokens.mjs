@@ -193,7 +193,7 @@ writeFileSync(OUT, output, 'utf8');
 if (!process.env.VERCEL) {
   try {
     execSync(`npx biome format --write ${OUT}`, { stdio: 'ignore' });
-  } catch (err) {
+  } catch (_err) {
     console.warn(`⚠️ Warning: Could not format ${OUT} with Biome.`);
   }
 }

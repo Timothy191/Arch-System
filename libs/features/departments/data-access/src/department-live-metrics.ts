@@ -17,7 +17,56 @@ export type DepartmentLiveMetricsMap = Record<string, DepartmentMetricOverlay>;
  * Minimal database client interface to decouple from concrete Supabase/ReadReplica client types.
  */
 export interface GenericDbClient {
-  from: (table: string) => any;
+  from: (...args: never[]) => unknown;
+}
+
+interface InternalQueryResult<T> {
+  data?: T | null;
+  count?: number | null;
+}
+
+interface InternalQueryBuilder<T = Record<string, unknown>>
+  extends PromiseLike<InternalQueryResult<T[]>> {
+  select: (
+    columns: string,
+    options?: { count?: 'exact' | 'planned' | 'estimated'; head?: boolean }
+  ) => InternalQueryBuilder<T>;
+  eq: (column: string, value: unknown) => InternalQueryBuilder<T>;
+  is: (column: string, value: unknown) => InternalQueryBuilder<T>;
+  order: (column: string, options?: { ascending?: boolean }) => InternalQueryBuilder<T>;
+  limit: (count: number) => InternalQueryBuilder<T>;
+  maybeSingle: () => Promise<InternalQueryResult<T>>;
+}
+
+interface HourlyLoadsRow {
+  hour_01?: number | null;
+  hour_02?: number | null;
+  hour_03?: number | null;
+  hour_04?: number | null;
+  hour_05?: number | null;
+  hour_06?: number | null;
+  hour_07?: number | null;
+  hour_08?: number | null;
+  hour_09?: number | null;
+  hour_10?: number | null;
+  hour_11?: number | null;
+  hour_12?: number | null;
+  total_loads?: number | null;
+}
+
+interface ProductionLogEntry {
+  coal_tonnes?: number | string | null;
+  waste_tonnes?: number | string | null;
+}
+
+interface DailyLogWithProductionRow {
+  id?: string;
+  shift?: string;
+  production_logs?: ProductionLogEntry | ProductionLogEntry[] | null;
+}
+
+interface MachineActiveRow {
+  active?: boolean | null;
 }
 
 /**
@@ -29,13 +78,14 @@ export async function fetchLiveDepartmentMetrics(
   today: string
 ): Promise<DepartmentLiveMetricsMap> {
   const result: DepartmentLiveMetricsMap = {};
+  const queryTable = <T = Record<string, unknown>>(table: string): InternalQueryBuilder<T> =>
+    (db.from as (tableName: string) => InternalQueryBuilder<T>)(table);
 
   try {
     const [hourlyLoadsRes, productionRes, breakdownsRes, machinesRes, badgesRes] =
       await Promise.all([
         // 1. Control Room Hourly Loads for today
-        db
-          .from('hourly_loads')
+        queryTable<HourlyLoadsRow>('hourly_loads')
           .select(
             'hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads'
           )
@@ -45,25 +95,23 @@ export async function fetchLiveDepartmentMetrics(
           .maybeSingle(),
 
         // 2. Production & Processing Extraction Tonnage
-        db
-          .from('daily_logs')
+        queryTable<DailyLogWithProductionRow>('daily_logs')
           .select('id, shift, production_logs(coal_tonnes, waste_tonnes)')
           .eq('log_date', today)
           .limit(1)
           .maybeSingle(),
 
         // 3. Equipment breakdowns (active)
-        db
-          .from('breakdowns')
+        queryTable('breakdowns')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'active')
           .is('deleted_at', null),
 
         // 4. Engineering Machines
-        db.from('machines').select('active').is('deleted_at', null),
+        queryTable<MachineActiveRow>('machines').select('active').is('deleted_at', null),
 
         // 5. Access Control active badges on-site
-        db.from('badges').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        queryTable('badges').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
     // --- Control Room Overlay ---
@@ -104,11 +152,11 @@ export async function fetchLiveDepartmentMetrics(
           : [];
 
       const totalCoal = prodLogs.reduce(
-        (sum: number, l: any) => sum + (Number(l.coal_tonnes) || 0),
+        (sum: number, l: ProductionLogEntry) => sum + (Number(l.coal_tonnes) || 0),
         0
       );
       const totalWaste = prodLogs.reduce(
-        (sum: number, l: any) => sum + (Number(l.waste_tonnes) || 0),
+        (sum: number, l: ProductionLogEntry) => sum + (Number(l.waste_tonnes) || 0),
         0
       );
       const totalMined = totalCoal + totalWaste;
@@ -155,7 +203,7 @@ export async function fetchLiveDepartmentMetrics(
     const activeBreakdowns = breakdownsRes?.count ?? 0;
     const machinesList = machinesRes?.data ?? [];
     const totalMachines = machinesList.length;
-    const activeMachines = machinesList.filter((m: any) => m.active !== false).length;
+    const activeMachines = machinesList.filter((m: MachineActiveRow) => m.active !== false).length;
     const availabilityRate =
       totalMachines > 0 ? Math.round((activeMachines / totalMachines) * 100) : 98;
 

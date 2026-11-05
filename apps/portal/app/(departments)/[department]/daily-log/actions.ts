@@ -6,7 +6,17 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { triggerPluginHook } from '@/lib/plugins/consumers';
 
-export async function createDailyLog(payload: any) {
+export interface CreateDailyLogPayload {
+  departmentId: string;
+  today?: string;
+  shift: 'day' | 'night';
+  notes: string | null;
+  isProduction?: boolean;
+  actualCoalTonnes?: number;
+  actualWasteTonnes?: number;
+}
+
+export async function createDailyLog(payload: CreateDailyLogPayload) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

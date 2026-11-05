@@ -1,5 +1,12 @@
 version: '3.8'
 
+# NOTE: Production builds in `apps/portal/docker/Dockerfile` already mount BuildKit
+# cache (`--mount=type=cache,id=nextjs,target=/app/apps/portal/.next/cache`).
+# If running `next dev --turbopack` inside a dev container override, mount named
+# volumes for `/app/apps/portal/.next/cache` and `/app/apps/portal/.next/dev/cache`
+# so Turbopack's persistent filesystem cache survives container restarts without
+# paying bind-mount I/O overhead.
+
 services:
   portal:
     build:

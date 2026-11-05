@@ -1,6 +1,5 @@
 import { StatusBadge } from '@repo/ui/components/ui/status-badge';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 describe('StatusBadge', () => {
   it('renders online status correctly with accessible role and label', () => {

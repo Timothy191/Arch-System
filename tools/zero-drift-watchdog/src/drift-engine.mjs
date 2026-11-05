@@ -7,7 +7,6 @@ import {
   VercelApiError,
   VercelAuthError,
   VercelProjectNotFoundError,
-  WatchdogError,
 } from './errors.mjs';
 import {
   discoverGitHubContext,

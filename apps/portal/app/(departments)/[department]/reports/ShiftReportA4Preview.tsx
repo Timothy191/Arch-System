@@ -6,17 +6,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  FileCheck2,
   FileText,
   Layers,
   Loader2,
-  Maximize2,
-  Minimize2,
   Printer,
-  Sparkles,
   Sun,
-  ZoomIn,
-  ZoomOut,
 } from 'lucide-react';
 import React, { useId, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -26,7 +20,6 @@ import {
   buildSiteShiftReports,
   type ExcavatorActivityBlockData,
   type ExecutiveSummaryMetrics,
-  type HaulingMachineRow,
   type SiteShiftReportData,
 } from './shift-report-model';
 

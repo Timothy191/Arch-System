@@ -1,16 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  Activity,
-  CheckCircle2,
-  Lock,
-  Radio,
-  RefreshCw,
-  ShieldAlert,
-  Sliders,
-  Zap,
-} from 'lucide-react';
+import { Activity, RefreshCw, Sliders, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { type PerimeterGate, triggerGatePulse } from '../actions';

@@ -88,6 +88,7 @@
     "prebuild": "node ../../scripts/sync-assets-smart.cjs && node ../../scripts/patch-glass-css.mjs",
     "build": "node scripts/generate-openapi-spec.js && next build",
     "build:analyze": "ANALYZE=true next build",
+    "analyze:turbopack": "next analyze --output --snapshot latest && next analyze export --snapshot latest > ../../.ci-local/bundle-graph.jsonl",
     "dev": "next dev -H 0.0.0.0 --turbopack",
     "dev:turbopack": "next dev -H 0.0.0.0 --turbopack",
     "dev:webpack": "next dev -H 0.0.0.0 --webpack",

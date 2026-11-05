@@ -44,3 +44,4 @@
 - **Agent**: Antigravity
 - **Purpose**: Mock `@repo/redis` in `src/engineering/breakdowns/actions.test.ts` to prevent network timeouts during cache invalidation calls in Jest tests.
 - **Verification**: `pnpm test` and `pnpm agent:verify` ✅ (12/12 PASS).
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

@@ -45,7 +45,7 @@ export default function DepartmentError({ error, reset }: DepartmentErrorProps) 
   const title = getErrorTitle(error);
   const message = getErrorMessage(error);
   const action = getActionLink(error);
-  const appError = isAppError(error) ? (error as any) : null;
+  const appError = isAppError(error) ? error : null;
 
   return (
     <div className="space-y-6">

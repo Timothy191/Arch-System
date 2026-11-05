@@ -5,8 +5,6 @@ import { Button } from '@repo/ui/components/ui/button';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertCircle,
-  Building,
-  Calendar,
   Camera,
   CheckCircle2,
   FileBadge,
@@ -14,7 +12,6 @@ import {
   QrCode,
   RefreshCw,
   Upload,
-  User,
 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState, useTransition } from 'react';
@@ -130,8 +127,8 @@ export function EmployeeProvisioningForm({
 
           onSuccess?.(res.data);
         }
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to provision employee');
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Failed to provision employee');
       }
     });
   };

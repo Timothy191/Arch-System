@@ -1,6 +1,5 @@
 import {
   DEPARTMENTS,
-  type Department,
   type DepartmentLiveMetricsMap,
   fetchLiveDepartmentMetrics,
 } from '@repo/departments/data-access';

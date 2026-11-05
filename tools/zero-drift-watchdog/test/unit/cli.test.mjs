@@ -3,13 +3,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  CLI_OPTIONS,
-  formatConsoleOutput,
-  getHelpText,
-  parseCommandLineArgs,
-  runCli,
-} from '../../src/cli.mjs';
+import { formatConsoleOutput, getHelpText, parseCommandLineArgs, runCli } from '../../src/cli.mjs';
 
 function createMockIo(envOverrides = {}) {
   let stdout = '';

@@ -22,4 +22,11 @@ describe('SpeculationRules', () => {
       '/login*'
     );
   });
+
+  it('forwards an optional CSP nonce attribute to the speculationrules script tag', () => {
+    const { container } = render(<SpeculationRules nonce="arch-nonce-123" />);
+    const scriptEl = container.querySelector('script[type="speculationrules"]');
+    expect(scriptEl).not.toBeNull();
+    expect(scriptEl?.getAttribute('nonce')).toBe('arch-nonce-123');
+  });
 });

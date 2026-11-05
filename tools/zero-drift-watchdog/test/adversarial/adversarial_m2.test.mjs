@@ -7,19 +7,13 @@ import {
   VercelAuthError,
   VercelProjectNotFoundError,
   VercelRateLimitError,
-  WatchdogError,
 } from '../../src/errors.mjs';
 import {
   buildVercelUrl,
-  COMMIT_SHA_REGEX,
-  createVercelHeaders,
   discoverVercelContext,
   extractCommitSha,
   fetchDeployments,
-  fetchProject,
-  IN_FLIGHT_STATES,
   inspectVercelDeployment,
-  resolveDeployHookUrl,
   triggerDeployHook,
 } from '../../src/vercel-inspector.mjs';
 
@@ -28,7 +22,7 @@ import { createMockVercelServer } from '../fixtures/mock-vercel.mjs';
 describe('Empirical Adversarial Stress Test Harness - Milestone 2 (Vercel Inspector)', () => {
   /** @type {ReturnType<typeof createMockVercelServer>} */
   let vc;
-  const testProjectId = 'prj_adversarial_m2';
+  const _testProjectId = 'prj_adversarial_m2';
   const testTeamId = 'team_adversarial_sec';
   const testToken = 'mock-vc-secret-token-12345';
   const shaA = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'; // Serving READY commit

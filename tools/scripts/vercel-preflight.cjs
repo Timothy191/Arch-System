@@ -16,7 +16,7 @@ const PORTAL_DIR = path.join(ROOT_DIR, 'apps/portal');
 // Parse CLI flags
 const args = process.argv.slice(2);
 let targetEnv = 'preview';
-let runBuildCheck = false;
+let _runBuildCheck = false;
 
 for (const arg of args) {
   if (arg === '--prod' || arg === '--production' || arg === '--env=production') {
@@ -24,7 +24,7 @@ for (const arg of args) {
   } else if (arg === '--preview' || arg === '--env=preview') {
     targetEnv = 'preview';
   } else if (arg === '--check-build' || arg === '--verify-build') {
-    runBuildCheck = true;
+    _runBuildCheck = true;
   }
 }
 

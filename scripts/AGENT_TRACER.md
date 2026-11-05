@@ -350,3 +350,4 @@ Remove the external repository requirement on `Arch-Base` (`../Arch-Base`), maki
 - `./scripts/deploy.sh production --dry-run` passed 100% with exit code 0.
 - `./scripts/preflight-checklist.sh` passed 100% with exit code 0 (0 errors).
 - `bash scripts/dev.sh --quick --headless` successfully compiled and started dev server in cloud mode.
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

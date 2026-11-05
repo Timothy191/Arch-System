@@ -1,5 +1,10 @@
 # Shared Data Access Agent Tracer
 
+## 2026-11-05T12:55:00+02:00 - Zero-Any Type Safety in `actions.ts` and `weather-api.ts`
+
+- **Purpose**: Replace `any` usages in `src/actions.ts` and `src/weather-api.ts` with strict TypeScript types under `suspicious.noExplicitAny: "error"`.
+- **Verification**: `pnpm --filter @repo/shared/data-access type-check` & `pnpm biome ci .` ✅.
+
 ## 2026-10-19 - Remove Dead Satellite Monitoring API (`monitoring-api.ts`)
 
 - **Purpose**: Remove unused legacy Satellite Monitoring API (`src/monitoring-api.ts` and `src/monitoring-api.test.ts`) and its re-export from `src/index.ts`.

@@ -1,0 +1,4 @@
+# Least-privilege Redis ACL example
+# Reference in redis.conf via: aclfile /etc/redis/acl/users.acl
+user default off
+user arch_cache on >replace_with_strong_password ~arch:* ~lock:* ~cache:* +@read +@write +@hash +@set +@sortedset +@list +@stream +@hyperloglog +@bitmap +@scripting +@connection +@transaction -keys -flushall -flushdb -config -shutdown -debug -slaveof -replicaof

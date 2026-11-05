@@ -1,20 +1,7 @@
 import { Badge } from '@repo/ui';
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  Activity,
-  Calendar,
-  Camera,
-  CheckCircle2,
-  Database,
-  FileBadge,
-  HardDrive,
-  QrCode,
-  ShieldAlert,
-  ShieldCheck,
-  UserCheck,
-  Users,
-} from 'lucide-react';
+import { Camera, Database, HardDrive, QrCode, ShieldCheck, UserCheck, Users } from 'lucide-react';
 import Image from 'next/image';
 import { connection } from 'next/server';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';

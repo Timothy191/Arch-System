@@ -4,7 +4,7 @@ import { type TriggerN8nOptions, triggerN8nWorkflow } from '@repo/utils/n8n';
 export interface WorkflowJobStatus {
   status: 'pending' | 'running' | 'completed' | 'failed';
   progress: number;
-  result?: any;
+  result?: unknown;
   error?: string;
   updatedAt: string;
 }

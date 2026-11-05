@@ -276,7 +276,7 @@ function loadTokenTracker() {
   if (fs.existsSync(TOKEN_TRACKER_FILE)) {
     try {
       return JSON.parse(fs.readFileSync(TOKEN_TRACKER_FILE, 'utf-8'));
-    } catch (e) {
+    } catch (_e) {
       console.warn('⚠️ Malformed token-tracker.json, starting fresh');
     }
   }
@@ -297,7 +297,7 @@ function loadContextBudget() {
   if (fs.existsSync(CONTEXT_BUDGET_FILE)) {
     try {
       return JSON.parse(fs.readFileSync(CONTEXT_BUDGET_FILE, 'utf-8'));
-    } catch (e) {
+    } catch (_e) {
       console.warn('⚠️ Malformed context-budget.json, using defaults');
     }
   }

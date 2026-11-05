@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     );
 
     return applyCors(req, response);
-  } catch (error) {
+  } catch (_error) {
     return applyCors(
       req,
       NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 })

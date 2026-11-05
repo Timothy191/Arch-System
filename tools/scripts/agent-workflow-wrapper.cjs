@@ -24,7 +24,7 @@ function logWorkflowEntry(entry) {
     try {
       const existing = JSON.parse(fs.readFileSync(WORKFLOW_LOG, 'utf-8'));
       logs.push(...existing);
-    } catch (e) {
+    } catch (_e) {
       console.warn('⚠️ Failed to load workflow log');
     }
   }

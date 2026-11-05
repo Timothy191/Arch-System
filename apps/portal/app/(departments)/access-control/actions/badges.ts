@@ -1,6 +1,5 @@
 'use server';
 
-import { cacheInvalidateTags } from '@repo/redis';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { DatabaseError, ValidationError } from '@/lib/errors/error-classes';

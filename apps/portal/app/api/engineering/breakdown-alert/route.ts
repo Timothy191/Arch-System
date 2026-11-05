@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       equipmentId,
       runId,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: { message: 'Failed to start workflow', code: 'API_ERROR' } },
       { status: 500 }

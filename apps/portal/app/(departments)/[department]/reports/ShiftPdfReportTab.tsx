@@ -1,31 +1,17 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileText,
-  Layers,
-  Loader2,
-  Printer,
-  Sun,
-} from 'lucide-react';
-import { Fragment, useMemo, useState } from 'react';
+import { Calendar, Download, FileText, Layers, Loader2, Printer, Sun } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
 import type { MachineOperationLogItem, PdfSiteGroup } from './reports-types';
 import { A4SheetContainer } from './ShiftReportA4Preview';
 import {
-  buildDetailedMachineRow,
   buildSiteDrillingReports,
-  calculateSiteShiftSummary,
-  type DetailedMachineGroup,
   deduplicateSiteMachines,
   formatDelaySummaryText,
   groupMachinesByType,
-  type SiteDrillReportData,
 } from './shift-report-drilling';
 
 export type { PdfSiteGroup } from './reports-types';

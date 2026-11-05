@@ -11,7 +11,7 @@ const config: StorybookConfig = {
   ],
   addons: ['@storybook/addon-essentials', '@storybook/addon-interactions', '@storybook/addon-a11y'],
   framework: {
-    name: getAbsolutePath('@storybook/react-vite'),
+    name: getAbsolutePath('@storybook/react-vite') as '@storybook/react-vite',
     options: {},
   },
 
@@ -21,7 +21,7 @@ const config: StorybookConfig = {
     }),
 };
 
-function getAbsolutePath(value: string): any {
+function getAbsolutePath(value: string): string {
   return dirname(require.resolve(join(value, 'package.json')));
 }
 

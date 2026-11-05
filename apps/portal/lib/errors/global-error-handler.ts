@@ -7,7 +7,6 @@
  */
 
 import { getAllCircuitBreakerStats, getCircuitBreaker } from './circuit-breaker';
-import { isAppError } from './error-classes';
 
 export interface GlobalErrorHandlerOptions {
   /** Whether to report errors to external service (Sentry, etc.) in production. */
@@ -305,7 +304,7 @@ export function initializeGlobalErrorHandler(options: GlobalErrorHandlerOptions 
 /**
  * Check if global error handler is initialized.
  */
-function isGlobalErrorHandlerInitialized(): boolean {
+function _isGlobalErrorHandlerInitialized(): boolean {
   if (typeof window === 'undefined') return false;
   return (
     (window as unknown as { __globalErrorHandlerInitialized?: boolean })
@@ -316,7 +315,7 @@ function isGlobalErrorHandlerInitialized(): boolean {
 /**
  * Manually report an error to the global handler (for async errors not caught by listeners).
  */
-function reportError(error: Error, context?: Record<string, unknown>): void {
+function _reportError(error: Error, context?: Record<string, unknown>): void {
   if (typeof window === 'undefined') return;
 
   const info: ErrorHandlerInfo = {

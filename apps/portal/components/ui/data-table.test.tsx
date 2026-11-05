@@ -1,6 +1,5 @@
 import { DataTable, type DataTableColumn } from '@repo/ui/components/ui/data-table';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 interface MachineItem {
   id: string;

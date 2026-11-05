@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       message: 'Contractor expiry sweep initiated',
       jobId,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: 'Failed to initiate sweep' },
       { status: 500 }

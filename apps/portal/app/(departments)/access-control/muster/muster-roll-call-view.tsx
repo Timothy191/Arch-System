@@ -4,18 +4,14 @@ import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertCircle,
-  AlertTriangle,
   CheckCircle2,
   Download,
-  Filter,
   HardHat,
   LifeBuoy,
   Printer,
   Radio,
   RefreshCw,
   Search,
-  Shield,
-  ShieldAlert,
   Users,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -38,7 +34,7 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
   const [statusFilter, setStatusFilter] = useState<'all' | 'unaccounted' | 'accounted'>('all');
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const { isOnline } = usePitConnectivity();
-  const { enqueue, queue, isSyncing } = useOfflineQueue();
+  const { enqueue: _enqueue, queue, isSyncing } = useOfflineQueue();
 
   // Bolt Optimization: Aggregate status counts and per-station counts in a single pass O(R) loop.
   // Replaces multiple O(R) .filter calls and O(S * R) station count lookups inside render loops.

@@ -24,7 +24,7 @@ export async function GET(req: Request) {
       let redisConnected = false;
       let redisReadError = false;
       let lastGoodAt: string | null = null;
-      let previousState = 'offline';
+      let _previousState = 'offline';
       let cachedTagCount = 0;
 
       const redis = await getRedisClient().catch(() => null);
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
           if (savedStateStr) {
             const parsed = JSON.parse(savedStateStr);
             lastGoodAt = parsed.lastGoodAt || null;
-            previousState = parsed.state || 'offline';
+            _previousState = parsed.state || 'offline';
           }
         } catch (e) {
           redisConnected = false;

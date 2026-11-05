@@ -21,8 +21,8 @@ import {
 const tracer = trace.getTracer('arch-portal');
 const REFRESH_SPINNER_DURATION_MS = 400;
 
-type ExcavatorActivityRow = ExcavatorActivityViewRow;
-type RegisteredMachineLoadRow = RegisteredMachineLoadViewRow;
+type _ExcavatorActivityRow = ExcavatorActivityViewRow;
+type _RegisteredMachineLoadRow = RegisteredMachineLoadViewRow;
 
 /** Debounce for the rare reconcile that CDC payloads cannot satisfy on their own. */
 const SCADA_RECONCILE_DEBOUNCE_MS = 1000;

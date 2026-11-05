@@ -5,7 +5,7 @@
 
 type AnalyticsEvent = {
   eventName: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   userId?: string;
   departmentId?: string;
 };
@@ -37,7 +37,7 @@ export const analytics = {
   /**
    * Sets the current user context for subsequent events.
    */
-  identify: (userId: string, traits?: Record<string, any>) => {
+  identify: (userId: string, traits?: Record<string, unknown>) => {
     if (typeof window !== 'undefined') {
       fetch('/api/capture/identify', {
         method: 'POST',

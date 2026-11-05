@@ -1,9 +1,8 @@
 'use client';
 
 import { Button } from '@repo/ui/components/ui/button';
-import { GlassCard } from '@repo/ui/GlassCard';
-import { Plus, UserPlus, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { UserPlus, X } from 'lucide-react';
+import { useState } from 'react';
 import type { DepartmentOption, ProvisionedEmployeeResult } from '@/actions/employee-provisioning';
 import { EmployeeProvisioningForm } from './EmployeeProvisioningForm';
 

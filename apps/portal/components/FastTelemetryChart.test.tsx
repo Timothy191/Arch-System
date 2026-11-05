@@ -1,6 +1,5 @@
 import { FastTelemetryChart } from '@repo/ui/components/ui/FastTelemetryChart';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 describe('FastTelemetryChart', () => {
   beforeAll(() => {

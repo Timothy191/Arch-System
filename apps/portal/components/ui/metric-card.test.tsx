@@ -1,6 +1,5 @@
 import { MetricCard } from '@repo/ui/components/ui/metric-card';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 describe('MetricCard', () => {
   it('renders metric title and numeric value', () => {

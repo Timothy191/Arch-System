@@ -31,7 +31,7 @@ try {
 
   console.log('✅ [Pre-Task Hook] Context budget within limits');
   process.exit(0);
-} catch (error) {
+} catch (_error) {
   console.error('❌ [Pre-Task Hook] Context budget exceeded');
   console.error(
     '💡 [Pre-Task Hook] Run `pnpm context:debloat` or `pnpm token:task-budget` to prune and calibrate context'

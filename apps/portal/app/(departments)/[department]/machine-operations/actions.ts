@@ -68,9 +68,15 @@ export async function saveDelayEntriesBatch(payload: {
 
   let engineeringDelayHours = 0;
   if (opRow?.machine_id) {
-    const rawMachine = Array.isArray((opRow as any).machine)
-      ? (opRow as any).machine[0]
-      : (opRow as any).machine;
+    const rawMachineProp = (
+      opRow as {
+        machine?:
+          | { serial_number?: string | null; name?: string | null }
+          | Array<{ serial_number?: string | null; name?: string | null }>
+          | null;
+      }
+    ).machine;
+    const rawMachine = Array.isArray(rawMachineProp) ? rawMachineProp[0] : rawMachineProp;
     const fleetKeys = [opRow.machine_id, rawMachine?.serial_number, rawMachine?.name].filter(
       Boolean
     ) as string[];

@@ -149,7 +149,7 @@ async function main() {
   const contractSchemas = listContractSchemas();
   const openAPIEndpoints = extractOpenAPIEndpoints();
 
-  const validation = validateCoverage(contractSchemas, openAPIEndpoints);
+  const _validation = validateCoverage(contractSchemas, openAPIEndpoints);
 
   console.log('\nValidation complete.');
   console.log('✓ All checks passed.');

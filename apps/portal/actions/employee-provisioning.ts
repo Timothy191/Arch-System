@@ -106,9 +106,9 @@ export async function getProvisioningReferenceData(): Promise<{
     display_name: d.display_name || d.name,
   }));
 
-  const recentPersonnel: ProvisionedEmployeeResult[] = (persRes.data ?? []).map((p: any) => {
+  const recentPersonnel: ProvisionedEmployeeResult[] = (persRes.data ?? []).map((p) => {
     const badge = Array.isArray(p.badges) ? p.badges[0] : p.badges;
-    const dept = p.departments;
+    const dept = Array.isArray(p.departments) ? p.departments[0] : p.departments;
     return {
       id: p.id,
       emp_code: p.emp_code,

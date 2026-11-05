@@ -58,7 +58,7 @@ export async function GET(
     }));
 
     return NextResponse.json(mapped);
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: { message: 'Failed to fetch fleet', code: 'API_ERROR' } },
       { status: 500 }

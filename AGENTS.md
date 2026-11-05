@@ -189,6 +189,14 @@ New focused rule files (one practice per rule) under `.agents/rules/`:
 - `css-modern-features.md` — container queries, OKLCH tokens, content-visibility, reduced-motion, logical properties
 - `image-optimization.md` — dimensions, sizes, priority, blur placeholder, fetchPriority
 - `accessibility-wcag.md` — focus-visible, aria-live, skip link, contrast, reduced motion/transparency
+- `nextjs-eslint-conventions.md` — Next.js integrated ESLint experience: `next lint`, Strict (`next/core-web-vitals`) or Base (`next`) config, `rootDir` for monorepo sub-apps, ESLint cache + `--no-cache`, rule disabling via `rules`, Core Web Vitals rule set, `eslint-config-prettier`, lint-staged `--file`
+- `client-side-data-fetching.md` — TanStack Query standard (`useQuery`/`useSuspenseQuery`), SWR prohibited, query keys mirror server cache tags, Suspense loading states
+- `css-in-js.md` — Tailwind CSS styling standard; CSS-in-JS libraries not adopted; OKLCH tokens only; CSS Modules for scoped styles
+- `debugging.md` — VS Code `launch.json` (server/client/full-stack), `pnpm dev --inspect`, Browser DevTools + React DevTools, `next build --debug-prerender`
+- `revalidation.md` — `cacheTag()`/`cacheLife()` tagging, `updateTag()` in Server Actions, `revalidateTag`/`revalidatePath`, canonical tags in `lib/cache-tags.ts`, dual-tier Next.js + Redis invalidation
+- `isr-cache-components.md` — `cacheComponents` replaces ISR; `generateStaticParams` for known dynamic routes; Partial Prefetching pairs with App Shells; ISR not under static export
+- `internationalization.md` — single locale `en-US`; i18n routing not adopted; `[lang]` + `next/root-params` if adopted; `Accept-Language` + `proxy.ts` redirect
+- `json-ld.md` — native `<script type="application/ld+json">` tag, XSS sanitization (`<` → `\u003c`), `schema-dts` typing, Rich Results Test validation
 
 ### Error handling
 

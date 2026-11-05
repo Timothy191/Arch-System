@@ -259,16 +259,26 @@ const LOCAL_STEPS = {
     wd: 'packages/eval',
     note: 'CI installs poetry with pipx first',
   },
+  'quality :: Run Biome CI': {
+    cmd: pnpm('turbo', 'run', '//#lint:ci'),
+    suite: 'core',
+  },
   'quality :: Run Turbo Tasks': {
     suite: 'full',
     build: (ctx) =>
       ctx.mode === 'pr'
         ? [
-            turboChanged(['lint', 'type-check', 'lint:tokens', 'lint:css', 'build']),
+            pnpm('turbo', 'run', '//#lint:ci'),
+            turboChanged(['type-check', 'lint:tokens', 'lint:css', 'build']),
             turboChanged(['test']),
           ]
-        : [pnpm('lint'), pnpm('type-check'), pnpm('test'), ['pnpm', 'turbo', 'run', 'build']],
-    note: 'expands to lint, type-check, test, build',
+        : [
+            pnpm('turbo', 'run', '//#lint:ci'),
+            pnpm('type-check'),
+            pnpm('test'),
+            ['pnpm', 'turbo', 'run', 'build'],
+          ],
+    note: 'expands to //#lint:ci, type-check, test, build',
   },
   'quality :: Bundle Size Check': {
     cmd: pnpm('bundlesize'),
@@ -327,7 +337,7 @@ const LOCAL_STEPS = {
 
   'self-healing :: Run Self-Healing CI': {
     suite: 'core',
-    build: () => [[...turboChanged(['lint']), '--force']],
+    cmd: pnpm('turbo', 'run', '//#lint:ci', '--force'),
   },
 
   'ga-hardening :: Enforce Node 24 runtime alignment': {

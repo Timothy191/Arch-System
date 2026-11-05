@@ -3,14 +3,7 @@ import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
-import {
-  AlertTriangle,
-  ArrowRight,
-  CircleDot,
-  ClipboardList,
-  TrendingUp,
-  Wrench,
-} from 'lucide-react';
+import { AlertTriangle, ArrowRight, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { withCache } from '@/lib/cache-utils';
 import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';

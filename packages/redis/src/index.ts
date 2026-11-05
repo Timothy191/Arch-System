@@ -27,16 +27,23 @@ export {
   type SampleSummary,
   type UniqueInput,
 } from './analytics';
+export * from './audit';
 export {
+  type CacheHashSetOptions,
+  type CacheSetJitterOptions,
   cacheDelete,
   cacheDeletePattern,
   cacheEvictL1ByPrefix,
   cacheGet,
   cacheGetOrSet,
   cacheGetWithStats,
+  cacheHashGetAll,
+  cacheHashGetField,
+  cacheHashSetFields,
   cacheInvalidatePrefixes,
   cacheInvalidateTags,
   cacheSet,
+  cacheSetWithJitter,
   cacheSetWithTags,
   cacheWrap,
   cacheWriteThroughSupabase,
@@ -56,6 +63,9 @@ export {
   getRedisClient,
   isServerlessRedis,
 } from './client';
+export * from './client-factory';
+export * from './cluster';
+export * from './data-structures';
 export {
   abandonIdempotency,
   acquireLock,
@@ -76,11 +86,20 @@ export {
   tryWithLock,
   withLock,
 } from './locks';
+export * from './metrics';
+export {
+  type PipelineCommand,
+  type PipelineResult,
+  runPipeline,
+} from './pipeline';
 export {
   asNumber,
   asStringOrNull,
+  computeScriptSha1,
   currentTransport,
   detectCapabilities,
+  type EvalScriptInput,
+  evalScript,
   type RedisCapabilities,
   RedisCommandError,
   resetCapabilityCache,
@@ -98,18 +117,25 @@ export {
 export {
   assertDurabilityBoundary,
   buildCacheKey,
+  buildClusterSlotKey,
   CACHE_TTL_REGISTRY,
   CacheCategory,
   type CacheTtlConfig,
   cacheCategoryFromKey,
   clearSupabaseFallbacks,
   DEFAULT_L1_TTL_SECONDS,
+  DEFAULT_L2_TTL_SECONDS,
   type DurabilityPolicy,
   isDurableKey,
+  KEY_DIGEST_HEX_LENGTH,
   l1TtlForKey,
+  MAX_KEY_BYTES,
   MAX_L1_TTL_SECONDS,
   MAX_RECOMMENDED_PAYLOAD_BYTES,
+  MAX_SEGMENT_BYTES,
   MAX_TTL_SECONDS,
+  MIN_HOT_KEY_TTL_SECONDS,
+  normalizeKeySegment,
   registerSupabaseFallback,
   resolveL2TtlSeconds,
   resolveSupabaseFallback,
@@ -133,6 +159,7 @@ export {
   vectorIndexStats,
   vectorKey,
 } from './search';
+export * from './serialization';
 export {
   ServerlessRedisClient,
   type ServerlessRedisConfig,
@@ -148,14 +175,18 @@ export {
   revokeSession,
   sessionTtl,
   touchSession,
+  type UpdateSessionFieldInput,
+  updateSessionFields,
   type WriteSessionInput,
   writeSession,
 } from './session';
 export {
   type CacheStatsSnapshot,
+  collectRedisHealthDiagnostics,
   flushStats,
   getCacheStats,
   persistCacheStatsSnapshot,
+  type RedisHealthDiagnostics,
   recordCacheHit,
   recordCacheMiss,
   recordRedisError,
@@ -196,6 +227,7 @@ export {
 export {
   applyTtlJitter,
   DEFAULT_TTL_JITTER_RATIO,
+  enforceHotKeyTtlFloor,
   shouldEarlyExpire,
   type XFetchWrapper,
 } from './xfetch';

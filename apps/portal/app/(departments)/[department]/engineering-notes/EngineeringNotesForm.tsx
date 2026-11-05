@@ -67,7 +67,7 @@ export function EngineeringNotesForm({
   breakdownDrafts = [],
 }: EngineeringNotesFormProps) {
   const router = useRouter();
-  const supabase = createBrowserSupabaseClient();
+  const _supabase = createBrowserSupabaseClient();
 
   const [formData, setFormData] = useState({
     issueType: '',

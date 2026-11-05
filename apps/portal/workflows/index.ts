@@ -9,7 +9,7 @@ export interface WorkflowDefinition {
   description: string;
   file: string;
   entryFunction: string;
-  handler: (...args: any[]) => Promise<any>;
+  handler: (...args: never[]) => Promise<unknown>;
 }
 
 export const WORKFLOW_REGISTRY: Record<string, WorkflowDefinition> = {

@@ -42,3 +42,4 @@
   - `tools/audits/audit-tailwind-usage.cjs`: Added `checkTailwindPurgeConfig()` verifying `packages/theme/src/tailwind/preset.ts` scans only `.tsx` UI directories, excludes `node_modules`/build/test/story artifacts, and enables `hoverOnlyWhenSupported: true`.
   - `tools/audits/check-css-performance.cjs`: Tightened `BUDGET_KB` from `130` KB to `115` KB.
 - **Verification**: `pnpm audit:tailwind` ✅; `pnpm lint:css-perf` ✅; `pnpm agent:verify` ✅.
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

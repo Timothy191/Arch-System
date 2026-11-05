@@ -35,9 +35,15 @@ export async function GET(
     const result = redisEngine.executeCommand(command, args);
 
     return NextResponse.json({ result });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { success: false, error: { message: err.message || 'Execution error', code: 'API_ERROR' } },
+      {
+        success: false,
+        error: {
+          message: err instanceof Error && err.message ? err.message : 'Execution error',
+          code: 'API_ERROR',
+        },
+      },
       { status: 400 }
     );
   }
@@ -72,9 +78,15 @@ export async function POST(
     const result = redisEngine.executeCommand(command, args);
 
     return NextResponse.json({ result });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { success: false, error: { message: err.message || 'Execution error', code: 'API_ERROR' } },
+      {
+        success: false,
+        error: {
+          message: err instanceof Error && err.message ? err.message : 'Execution error',
+          code: 'API_ERROR',
+        },
+      },
       { status: 400 }
     );
   }

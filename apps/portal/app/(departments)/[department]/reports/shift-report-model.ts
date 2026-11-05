@@ -1,5 +1,5 @@
 import { isRegularMachineExcavatorActivity } from '../hourly-loads/loads-utils';
-import type { MachineOperationLogItem, ShiftReportRow } from './reports-types';
+import type { MachineOperationLogItem } from './reports-types';
 
 export const STANDARD_ALLOWANCE_REFUEL_MINS = 30;
 export const STANDARD_ALLOWANCE_PRESTART_MINS = 15;
@@ -11,7 +11,7 @@ export const DEFAULT_TOPSOIL_BIN_FACTOR = 20.0;
 export const DEFAULT_DISCARD_BIN_FACTOR = 32.0;
 
 export const RIGID_TRUCK_KEYWORDS = Object.freeze(['cat 777', '777', 'rigid', 'hd785']);
-const ADT_TRUCK_KEYWORDS = Object.freeze(['adt', 'b40', 'b30', 'b50', 'bell']);
+const _ADT_TRUCK_KEYWORDS = Object.freeze(['adt', 'b40', 'b30', 'b50', 'bell']);
 
 export interface MaterialBinConfig {
   readonly unit: 'BCM' | 'Tonnes';

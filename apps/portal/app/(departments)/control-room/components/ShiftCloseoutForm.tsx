@@ -105,7 +105,11 @@ export function ShiftCloseoutForm({
     loadOperatorIdentity();
   }, [initialOperatorName]);
 
-  const updateMachine = (id: string, field: keyof MachineTimeAllocationInput, value: any) => {
+  const updateMachine = (
+    id: string,
+    field: keyof MachineTimeAllocationInput,
+    value: MachineTimeAllocationInput[keyof MachineTimeAllocationInput]
+  ) => {
     setMachines((prev) => prev.map((m) => (m.machine_id === id ? { ...m, [field]: value } : m)));
     // Clear error for this machine when edited
     if (validationErrors[id]) {
@@ -320,7 +324,7 @@ export function ShiftCloseoutForm({
                             placeholder="Reason for overrun (>12.0h)..."
                             value={m.overrun_reason || ''}
                             onChange={(e) =>
-                              updateMachine(m.machine_id, 'overrun_reason' as any, e.target.value)
+                              updateMachine(m.machine_id, 'overrun_reason', e.target.value)
                             }
                             className="w-full rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[var(--text-heading)] text-xs placeholder:text-amber-600/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />

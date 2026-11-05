@@ -8,6 +8,7 @@
 
 import { getCacheStats } from '@repo/redis';
 import { registry } from '@repo/utils/observability/metrics';
+import { NextResponse } from 'next/server';
 import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
 
 export async function GET() {
@@ -96,7 +97,7 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
   const promMetrics = await registry.metrics();
   body += promMetrics;
 
-  return new Response(body, {
+  return new NextResponse(body, {
     headers: {
       'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
       'Cache-Control': 'no-store, no-cache, must-revalidate',

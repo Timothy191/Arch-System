@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 import { execSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import StyleDictionary from 'style-dictionary';
@@ -60,7 +59,7 @@ if (!process.env.VERCEL) {
   for (const filePath of generatedFiles) {
     try {
       execSync(`npx biome format --write ${filePath}`, { stdio: 'ignore' });
-    } catch (err) {
+    } catch (_err) {
       console.warn(`⚠️ Warning: Could not format ${filePath} with Biome.`);
     }
   }

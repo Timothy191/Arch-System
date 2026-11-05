@@ -33,7 +33,7 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
           setFleet(data);
           setIsLoading(false);
         }
-      } catch (err) {
+      } catch (_err) {
         if (mounted) setIsLoading(false);
       }
     }
@@ -66,7 +66,7 @@ export function EquipmentDashboard({ departmentId }: { departmentId: string }) {
         );
 
         setTimeout(() => setActionMessage(null), 5000);
-      } catch (err) {
+      } catch (_err) {
         setActionMessage(`Error: Could not trigger workflow.`);
         setTimeout(() => setActionMessage(null), 5000);
       } finally {

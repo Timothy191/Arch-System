@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       let body;
       try {
         body = JSON.parse(rawBody);
-      } catch (e) {
+      } catch (_e) {
         return NextResponse.json(
           { success: false, error: { message: 'Malformed JSON', code: 'API_ERROR' } },
           { status: 400 }

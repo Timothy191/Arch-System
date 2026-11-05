@@ -39,3 +39,5 @@
 - Created `accessibility.spec.ts` - Semantic HTML, ARIA attributes, keyboard navigation, screen reader compatibility, color contrast, form accessibility, table accessibility, motion preferences, touch targets, and automated accessibility checks
 
 **Next agent:** The E2E test suite now has comprehensive coverage across all previously identified gaps. Tests are designed to be resilient and handle various edge cases. Run `pnpm test:e2e` to execute all tests. Some tests may require specific user roles or test data to be fully effective - consider setting up test users with different roles (admin, operator, manager, control-room) for complete coverage.
+
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

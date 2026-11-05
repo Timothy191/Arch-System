@@ -172,11 +172,13 @@ export async function searchLocation(
     return [];
   }
 
-  return data.results.map((result: any) => ({
-    lat: result.latitude,
-    lon: result.longitude,
-    name: `${result.name}, ${result.country}`,
-  }));
+  return data.results.map(
+    (result: { latitude: number; longitude: number; name: string; country: string }) => ({
+      lat: result.latitude,
+      lon: result.longitude,
+      name: `${result.name}, ${result.country}`,
+    })
+  );
 }
 
 /**

@@ -38,18 +38,28 @@ export async function createMiddlewareClient(request: NextRequest) {
         const all = request.cookies.getAll();
         return normalizeSupabaseCookies(all);
       },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         cookiesToSet.forEach(({ name, value }: { name: string; value: string }) =>
           request.cookies.set(name, value)
         );
         supabaseResponse = NextResponse.next({ request });
         cookiesToSet.forEach(
-          ({ name, value, options }: { name: string; value: string; options?: any }) =>
+          ({
+            name,
+            value,
+            options,
+          }: {
+            name: string;
+            value: string;
+            options?: Record<string, unknown>;
+          }) =>
             supabaseResponse.cookies.set(name, value, {
               ...options,
-              maxAge: options?.maxAge ?? 34560000,
-              path: options?.path ?? '/',
-              httpOnly: options?.httpOnly ?? false,
+              maxAge: (options?.maxAge as number | undefined) ?? 34560000,
+              path: (options?.path as string | undefined) ?? '/',
+              httpOnly: Boolean(options?.httpOnly),
               secure: process.env.NODE_ENV === 'production',
               sameSite: 'lax',
             })

@@ -1,3 +1,8 @@
+## [2026-11-05T12:55:00+02:00] Zero-Any Type Narrowing in `TokenBucketStrategy`
+
+- **Summary**: Replaced `as any` cast in `src/strategies/token-bucket.ts` with a narrow `EvalStore` interface for `suspicious.noExplicitAny: "error"` compliance.
+- **Verification**: `pnpm --filter @repo/rate-limiter type-check` & `pnpm biome ci .` ✅.
+
 ## [2026-10-23T09:35:16+02:00] Atomic Fixed Window
 
 - **Agent**: Qoder

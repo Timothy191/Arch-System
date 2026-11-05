@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       shiftId,
       runId,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: { message: 'Failed to start workflow', code: 'API_ERROR' } },
       { status: 500 }

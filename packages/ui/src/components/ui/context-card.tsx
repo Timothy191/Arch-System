@@ -129,8 +129,8 @@ export function ContextCardTrigger({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
       >
-        {React.cloneElement(render as React.ReactElement<any>, {
-          children: (render.props as any)?.children || children,
+        {React.cloneElement(render as React.ReactElement<{ children?: React.ReactNode }>, {
+          children: (render.props as { children?: React.ReactNode })?.children || children,
         })}
         {cardElement}
       </div>

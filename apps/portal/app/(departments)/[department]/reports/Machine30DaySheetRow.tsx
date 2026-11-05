@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, Eye, Save } from 'lucide-react';
-import React, { Fragment, memo } from 'react';
+import { Fragment, memo } from 'react';
 import {
   computeMachineOverviewMetrics,
   MAX_SHIFT_HOURS,

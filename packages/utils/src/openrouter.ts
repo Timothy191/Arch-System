@@ -38,7 +38,7 @@ export type OpenRouterServerToolType =
 
 export interface OpenRouterServerTool {
   type: OpenRouterServerToolType;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
 
 export interface OpenRouterFunctionTool {
@@ -46,7 +46,7 @@ export interface OpenRouterFunctionTool {
   function: {
     name: string;
     description?: string;
-    parameters?: Record<string, any>;
+    parameters?: Record<string, unknown>;
   };
   defer_loading?: boolean;
 }
@@ -62,7 +62,7 @@ export interface OpenRouterMessage {
 
 export interface OpenRouterStopCondition {
   type: 'step_count' | 'spend_cap' | 'tool_name' | string;
-  value: any;
+  value: unknown;
 }
 
 export interface OpenRouterCacheOptions {
@@ -74,7 +74,7 @@ export interface OpenRouterCacheOptions {
 export interface OpenRouterJsonSchema {
   name: string;
   strict?: boolean;
-  schema: Record<string, any>;
+  schema: Record<string, unknown>;
 }
 
 export type OpenRouterResponseFormat =
@@ -99,7 +99,7 @@ export interface OpenRouterPipelineStage {
   name: string;
   guardrail_id?: string;
   summary?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface OpenRouterMetadata {
@@ -128,10 +128,10 @@ export interface OpenRouterChatRequest {
     | 'none'
     | 'required'
     | { type: 'allowed_tools'; tools: string[] }
-    | Record<string, any>;
+    | Record<string, unknown>;
   max_tool_calls?: number; // Outer agent loop step budget (default 30, max 30)
   stop_server_tools_when?: OpenRouterStopCondition[];
-  plugins?: Array<{ id: string; enabled?: boolean; [key: string]: any }>;
+  plugins?: Array<{ id: string; enabled?: boolean; [key: string]: unknown }>;
   provider?: {
     order?: string[];
     allow_fallbacks?: boolean;
@@ -151,7 +151,7 @@ export interface OpenRouterServerToolUseUsage {
   image_generations?: number;
   subagent_runs?: number;
   fusion_runs?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OpenRouterUsage {
@@ -224,7 +224,7 @@ export const OPENROUTER_SERVER_TOOLS = {
     type: 'openrouter:apply_patch',
     parameters,
   }),
-  SHELL: (parameters?: Record<string, any>): OpenRouterServerTool => ({
+  SHELL: (parameters?: Record<string, unknown>): OpenRouterServerTool => ({
     type: 'openrouter:shell',
     parameters,
   }),
@@ -259,7 +259,7 @@ export const OPENROUTER_SERVER_TOOLS = {
     type: 'openrouter:tool_search',
     parameters,
   }),
-  FILES: (parameters?: Record<string, any>): OpenRouterServerTool => ({
+  FILES: (parameters?: Record<string, unknown>): OpenRouterServerTool => ({
     type: 'openrouter:files',
     parameters,
   }),
@@ -467,7 +467,7 @@ export type OpenRouterResponsesContentPart =
   | { type: 'input_text'; text: string }
   | { type: 'input_image'; image_url: string }
   | { type: 'input_file'; file_url?: string; filename?: string }
-  | { type: 'output_text'; text: string; annotations?: any[] };
+  | { type: 'output_text'; text: string; annotations?: unknown[] };
 
 export type OpenRouterResponsesInputItem =
   | {
@@ -522,7 +522,7 @@ export type OpenRouterResponseOutputItem =
       content: Array<{
         type: 'output_text';
         text: string;
-        annotations?: any[];
+        annotations?: unknown[];
       }>;
     }
   | {
@@ -569,7 +569,7 @@ export interface OpenRouterResponseResult {
     id: string;
     call_id: string;
     name: string;
-    arguments: Record<string, any>;
+    arguments: Record<string, unknown>;
   }>;
 }
 
@@ -657,7 +657,7 @@ export async function createResponse(
     id: string;
     call_id: string;
     name: string;
-    arguments: Record<string, any>;
+    arguments: Record<string, unknown>;
   }> = [];
   for (const item of result.output || []) {
     if (item.type === 'function_call') {
@@ -771,13 +771,13 @@ export type JevQuestionDefinition = JevChoiceQuestion | JevScoreQuestion | JevNo
 
 export interface JevDecisionsRequest {
   model?: string;
-  state: string | Record<string, any> | any[];
+  state: string | Record<string, unknown> | unknown[];
   questions: Record<string, JevQuestionDefinition>;
   provider?: {
     order?: string[];
     allow_fallbacks?: boolean;
     data_collection?: 'deny' | 'allow';
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -809,7 +809,7 @@ export interface JevDecisionsResponse {
     prompt_tokens?: number;
     completion_tokens?: number;
     total_tokens?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -827,7 +827,7 @@ export async function createDecision(
   const model = request.model || 'typesafe/jev-1.13';
 
   // Normalize noul criteria if provided as yes/no to true/false
-  const normalizedQuestions: Record<string, any> = {};
+  const normalizedQuestions: Record<string, unknown> = {};
   for (const [key, q] of Object.entries(request.questions)) {
     if (
       q.type === 'noul' &&
@@ -885,7 +885,7 @@ export async function createDecision(
  * Convenience helper to route state/tickets across categories using TypeSafe Jev
  */
 export async function evaluateSystemOneRouting(
-  state: string | Record<string, any>,
+  state: string | Record<string, unknown>,
   options: Record<string, string>,
   instructions: string = 'Select the most appropriate route or category for the given input.'
 ): Promise<{ route: string; confidence?: number; probabilities?: Record<string, number> }> {
@@ -912,7 +912,7 @@ export async function evaluateSystemOneRouting(
  * Convenience helper to evaluate a binary gate (yes/no) using TypeSafe Jev
  */
 export async function evaluateSystemOneGate(
-  state: string | Record<string, any>,
+  state: string | Record<string, unknown>,
   instructions: string,
   criteriaTrue: string,
   criteriaFalse: string
@@ -943,7 +943,7 @@ export async function evaluateSystemOneGate(
  * Convenience helper to evaluate an ordered score/rubric (2-10 levels) using TypeSafe Jev
  */
 export async function evaluateSystemOneScore(
-  state: string | Record<string, any>,
+  state: string | Record<string, unknown>,
   instructions: string,
   rubric: string[]
 ): Promise<{ score: number; confidence?: number }> {
@@ -1056,7 +1056,7 @@ export async function deleteOpenRouterFile(
     throw new Error(`OpenRouter Files API delete error (${res.status}): ${errorText}`);
   }
 
-  const data = (await res.json()) as any;
+  const data = (await res.json()) as { type?: string };
   return {
     success: data.type === 'file_deleted',
     id: fileId,
@@ -1072,7 +1072,7 @@ export async function uploadOpenRouterFileBuffer(
   const apiKey = apiKeyOverride || process.env.OPENROUTER_API_KEY || OPENROUTER_API_KEY;
   if (!apiKey) throw new Error('OPENROUTER_API_KEY is not configured.');
 
-  const blob = new Blob([content as any], { type: mimeType });
+  const blob = new Blob([content as unknown as BlobPart], { type: mimeType });
   const formData = new FormData();
   formData.append('file', blob, filename);
 
@@ -1098,10 +1098,10 @@ export async function uploadOpenRouterFileBuffer(
  * Enforces JSON Schema conforming model outputs with Response Healing and Caching.
  * ============================================================================
  */
-export async function createStructuredOutput<T = any>(options: {
+export async function createStructuredOutput<T = unknown>(options: {
   model: string;
   prompt: string;
-  schema: Record<string, any>;
+  schema: Record<string, unknown>;
   name?: string;
   strict?: boolean;
   systemPrompt?: string;

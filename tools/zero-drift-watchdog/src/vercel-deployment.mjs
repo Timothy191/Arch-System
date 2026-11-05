@@ -10,7 +10,6 @@ import {
   COMMIT_SHA_REGEX,
   DEFAULT_VERCEL_API_URL,
   IN_FLIGHT_STATES,
-  resolveVercelToken,
   VERCEL_DOMAIN_REGEX,
 } from './vercel-context.mjs';
 

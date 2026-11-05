@@ -202,10 +202,10 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     try {
       const res = await createDailyLog(payload);
       logData = { id: res.id };
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError(err);
       toast.error('Failed to save daily log', {
-        description: err.message,
+        description: err instanceof Error ? err.message : undefined,
       });
       setStatus('error');
       return;

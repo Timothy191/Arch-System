@@ -84,7 +84,18 @@ async function loadDrillingDashboardMetrics(
     });
   }
 
-  for (const cr of (controlRoomOps ?? []) as any[]) {
+  interface ControlRoomDrillOp {
+    machine_id: string;
+    shift_type?: string | null;
+    start_smu?: number | null;
+    end_smu?: number | null;
+    hours_worked?: number | null;
+    meters_drilled?: number | null;
+    holes_drilled?: number | null;
+    delay_entries?: Array<{ duration_hours?: number | null; deleted_at?: string | null }> | null;
+  }
+
+  for (const cr of (controlRoomOps ?? []) as unknown as ControlRoomDrillOp[]) {
     const shift = cr.shift_type || 'day';
     const key = `${cr.machine_id}:${shift}`;
     const existing = opsMap.get(key);
@@ -98,10 +109,10 @@ async function loadDrillingDashboardMetrics(
           : (existing?.hours ?? 0);
 
     const delays = Array.isArray(cr.delay_entries)
-      ? cr.delay_entries.filter((d: any) => !d.deleted_at)
+      ? cr.delay_entries.filter((d) => !d.deleted_at)
       : [];
     const crDelayMins = delays.reduce(
-      (sum: number, d: any) => sum + Number(d.duration_hours || 0) * 60,
+      (sum: number, d) => sum + Number(d.duration_hours || 0) * 60,
       0
     );
 

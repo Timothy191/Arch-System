@@ -85,8 +85,8 @@ class PluginOrchestrator {
    */
   public async executeEngine(
     pluginId: string,
-    params?: Record<string, any>
-  ): Promise<Record<string, any>> {
+    params?: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     // Find plugin from XState context
     const snapshot = this.actor.getSnapshot();
     const pluginActor = snapshot.context.plugins.get(pluginId);
@@ -118,15 +118,16 @@ class PluginOrchestrator {
 
     try {
       return await plugin.engine.execute(params);
-    } catch (err: any) {
-      logError(err, {
+    } catch (err: unknown) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      logError(errorObj, {
         context: 'plugin_engine_crash',
         pluginId,
       });
 
-      throw new APIError(`Plugin computational error: ${err.message || err}`, {
+      throw new APIError(`Plugin computational error: ${errorObj.message}`, {
         statusCode: 500,
-        context: { pluginId, originalError: err.message || String(err) },
+        context: { pluginId, originalError: errorObj.message },
         cause: err instanceof Error ? err : undefined,
       });
     }
@@ -136,7 +137,7 @@ class PluginOrchestrator {
    * Sandboxed Lifecycle Event Dispatcher.
    * Triggers plugin background listeners in parallel using parallel settle bounds.
    */
-  public async triggerHook(hookName: keyof PluginHooks, data: any): Promise<void> {
+  public async triggerHook(hookName: keyof PluginHooks, data: unknown): Promise<void> {
     await this.loadAllPlugins();
 
     const snapshot = this.actor.getSnapshot();
@@ -161,8 +162,8 @@ class PluginOrchestrator {
           if (hookFn) {
             await hookFn(data);
           }
-        } catch (err: any) {
-          logError(err, {
+        } catch (err: unknown) {
+          logError(err instanceof Error ? err : new Error(String(err)), {
             context: 'plugin_hook_crash',
             pluginId: plugin.metadata.id,
             hookName,

@@ -48,7 +48,30 @@ function stringify(args: RedisCommand): Array<string | Buffer> {
  * Send one command on any transport. Throws RedisCommandError when neither
  * transport exposes a raw command surface (defensive: a future client swap).
  */
-export async function send(client: SendCapable, command: RedisCommand): Promise<unknown> {
+const DANGEROUS_COMMANDS: Record<string, true> = {
+  KEYS: true,
+  FLUSHALL: true,
+  FLUSHDB: true,
+  CONFIG: true,
+  SHUTDOWN: true,
+  DEBUG: true,
+};
+
+export interface SendOptions {
+  allowDangerous?: boolean;
+}
+
+export async function send(
+  client: SendCapable,
+  command: RedisCommand,
+  options?: SendOptions
+): Promise<unknown> {
+  const cmdName = String(command[0] ?? '').toUpperCase();
+  if (DANGEROUS_COMMANDS[cmdName] && !options?.allowDangerous) {
+    throw new RedisCommandError(cmdName, {
+      message: `Redis command "${cmdName}" is denied at the SDK layer. Pass { allowDangerous: true } to override.`,
+    });
+  }
   const args = stringify(command);
   const raw = client as {
     sendCommand?: (args: Array<string | Buffer>) => Promise<unknown>;
@@ -74,16 +97,13 @@ export async function send(client: SendCapable, command: RedisCommand): Promise<
   });
 }
 
-/**
- * Send a command, returning null instead of throwing. Used by best-effort
- * paths (health probes, counters) that must never break a request.
- */
 export async function sendSafe(
   client: SendCapable,
-  command: RedisCommand
+  command: RedisCommand,
+  options?: SendOptions
 ): Promise<unknown | null> {
   try {
-    return await send(client, command);
+    return await send(client, command, options);
   } catch {
     return null;
   }

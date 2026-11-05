@@ -12,7 +12,6 @@ import {
   Cpu,
   Database,
   Globe,
-  HardDrive,
   Lock,
   Network,
   Radio,

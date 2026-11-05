@@ -34,10 +34,7 @@ import {
   Search,
   ShieldAlert,
   ShieldCheck,
-  User,
-  Users,
   X,
-  XCircle,
   Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
@@ -52,7 +49,7 @@ import type { EmployeeAttendanceSummary } from '../actions/badges';
 // Named constants adhering to code-quality rules
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 50;
-const HUNDRED_PERCENT = 100;
+const _HUNDRED_PERCENT = 100;
 const AUDIO_FREQUENCY_GRANTED = 880;
 const AUDIO_FREQUENCY_DENIED = 220;
 const AUDIO_TONE_DURATION_SECONDS = 0.15;
@@ -183,7 +180,7 @@ export function AccessLogsClient({
   );
   const [lastScanResult, setLastScanResult] = useState<EasyScanFeedback | null>(null);
 
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const barcodeInputRef = useRef<HTMLInputElement>(null);
   const searchInputId = useId();
   const employeeSelectId = useId();

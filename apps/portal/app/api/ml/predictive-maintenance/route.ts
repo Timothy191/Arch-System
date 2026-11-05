@@ -68,9 +68,15 @@ export async function GET() {
     }));
 
     return NextResponse.json({ predictions });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: { message: error.message, code: 'API_ERROR' } },
+      {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Unexpected error',
+          code: 'API_ERROR',
+        },
+      },
       { status: 500 }
     );
   }

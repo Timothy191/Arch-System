@@ -437,11 +437,11 @@ function buildShiftReportPhase2(ctx: ReturnType<typeof buildShiftReportPhase1>):
 } {
   const {
     operations,
-    loads,
+    loads: _loads,
     delays,
-    excavatorAssignments,
-    dozerRolls,
-    breakdowns,
+    excavatorAssignments: _excavatorAssignments,
+    dozerRolls: _dozerRolls,
+    breakdowns: _breakdowns,
     dailyLogs,
     isControlRoom,
     deptId,

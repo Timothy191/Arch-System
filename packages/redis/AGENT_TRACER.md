@@ -142,3 +142,4 @@ normalised for both shapes.
   1. Restructured `cacheWrap` in `src/cache.ts` with pre-lookup and post-lookup `activeMissFetches` single-flight guards and separated `activeBackgroundRefreshes` (`startBackgroundRefresh`).
   2. Added `startL1Sweep` and `stopL1Sweep` in `src/l1.ts` (using `.unref()`) and wired automatic sweep startup in `src/client.ts` (`getRedisClient` / `closeRedis`).
 - **Verification**: `@repo/redis` 13/13 test suites (`146/146 PASS`), `pnpm agent:verify` (`27/27 PASS`).
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

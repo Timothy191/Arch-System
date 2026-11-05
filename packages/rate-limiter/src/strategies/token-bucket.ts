@@ -148,7 +148,7 @@ export class TokenBucketStrategy implements IStrategy {
   }
 }
 
-function tonumberOr(val: any, fallback: number): number {
+function tonumberOr(val: unknown, fallback: number): number {
   const parsed = Number(val);
   return Number.isNaN(parsed) ? fallback : parsed;
 }

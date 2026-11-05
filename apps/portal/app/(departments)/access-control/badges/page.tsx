@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@repo/ui/components/ui/table';
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Plus, QrCode, ShieldOff, UserCheck } from 'lucide-react';
+import { QrCode, ShieldOff, UserCheck } from 'lucide-react';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
 import { EmployeeProvisioningModal } from '@/components/employee/EmployeeProvisioningModal';
 import { getDepartmentContext } from '~/lib/dept-context';

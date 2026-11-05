@@ -2,13 +2,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {
-  VercelApiError,
-  VercelAuthError,
-  VercelProjectNotFoundError,
-  VercelRateLimitError,
-  WatchdogError,
-} from './errors.mjs';
+import { VercelApiError } from './errors.mjs';
 
 export const COMMIT_SHA_REGEX = /^[0-9a-f]{40,64}$/i;
 export const VERCEL_DOMAIN_REGEX = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;

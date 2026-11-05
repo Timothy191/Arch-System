@@ -3,7 +3,6 @@ import path from 'node:path';
 import { render } from '@testing-library/react';
 import React from 'react';
 import {
-  calculateMetricScore,
   calculateRES,
   isReverseProxyPathExempt,
   processSpeedInsightsEvent,

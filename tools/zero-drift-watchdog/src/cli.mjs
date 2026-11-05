@@ -1,10 +1,8 @@
 // @ts-check
 
-import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { evaluateDrift, formatDriftReport, resolveDrift } from './drift-engine.mjs';
-import { GitError, GitHubApiError, VercelApiError, WatchdogError } from './errors.mjs';
 import {
   discoverGitHubContext,
   inspectGitHubRemote,

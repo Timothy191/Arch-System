@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 import LoginLoading from './(auth)/login/loading';
 import DrillingLoading from './(departments)/drilling/loading';
 import AdminLoading from './admin/loading';

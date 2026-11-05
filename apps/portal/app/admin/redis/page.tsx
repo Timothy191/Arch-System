@@ -16,7 +16,7 @@ import {
   Network,
   RefreshCw,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface RedisStats {
   connected: boolean;
@@ -44,7 +44,7 @@ const defaultStats: RedisStats = {
   lastHeartbeat: new Date().toISOString(),
 };
 
-const keySampleData: Record<string, any> = {
+const keySampleData: Record<string, Record<string, unknown>> = {
   shift_001_cache: {
     shiftId: 'shift_001',
     foreman: 'Timothy Oniel',

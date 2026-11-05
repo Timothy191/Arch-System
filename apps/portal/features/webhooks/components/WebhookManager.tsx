@@ -92,8 +92,8 @@ export function WebhookManager() {
         active: true,
       });
       fetchWebhooks();
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to create webhook');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create webhook');
     }
   };
 
@@ -111,8 +111,8 @@ export function WebhookManager() {
         active: true,
       });
       fetchWebhooks();
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to update webhook');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update webhook');
     }
   };
 
@@ -123,8 +123,8 @@ export function WebhookManager() {
       await fetchClient.delete(`/api/webhooks/${id}`);
       toast.success('Webhook deleted successfully');
       fetchWebhooks();
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to delete webhook');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete webhook');
     }
   };
 

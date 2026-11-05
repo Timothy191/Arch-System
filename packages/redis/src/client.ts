@@ -229,7 +229,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
   const attempt = (async () => {
     // cast to any — pnpm may hoist multiple copies of @redis/client types;
     // structural typing via `any` keeps this compatible across all resolutions.
-    const next: RedisClientType = createClient({
+    const next = createClient({
       url: REDIS_URL,
       socket: {
         keepAlive: true,
@@ -243,7 +243,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
           return Math.min(retries * 50, 500);
         },
       },
-    } as any);
+    } as unknown as Parameters<typeof createClient>[0]) as unknown as RedisClientType;
 
     const resetIfCurrent = () => {
       if (client === next) client = null;

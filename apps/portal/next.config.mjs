@@ -222,8 +222,11 @@ const nextConfig = {
   },
   serverExternalPackages: ['@babel/core', '@babel/traverse', 'p-limit'],
   experimental: {
-    // AGENT-TRACE: Next.js 16 persistent Turbopack file-system cache for ~400% faster warm dev startups
+    // AGENT-TRACE: Next.js 16 persistent Turbopack file-system cache for ~400% faster warm dev startups & builds
     turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
+    // AGENT-TRACE: Native Rust React Compiler inside Turbopack (avoids Babel/JS bridge overhead)
+    turbopackRustReactCompiler: true,
     // AGENT-TRACE: React 19 Taint APIs enabled to prevent sensitive database objects/tokens crossing RSC boundary
     taint: true,
     // AGENT-TRACE: Client Router Cache staleTimes under cacheComponents: true to prevent redundant RSC re-fetches on tab navigation

@@ -1,7 +1,4 @@
-import {
-  buildIntegrationToolName,
-  type IntegrationToolDescriptor,
-} from '@repo/contract/schemas/integration.schema';
+import { type IntegrationToolDescriptor } from '@repo/contract/schemas/integration.schema';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import { APIError, DatabaseError, NotFoundError } from '@/lib/errors/error-classes';
 import { logError } from '@/lib/errors/error-logger';
@@ -1011,7 +1008,7 @@ export async function listActiveMcpIntegrations(
   return active;
 }
 
-interface IntegrationToolIndexEntry {
+interface _IntegrationToolIndexEntry {
   installationId: string;
   toolName: string;
   qualifiedName: string;

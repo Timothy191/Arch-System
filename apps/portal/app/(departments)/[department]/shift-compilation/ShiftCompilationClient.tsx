@@ -14,8 +14,7 @@ import {
 import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { cn } from '@repo/ui/lib/utils';
-import { BarChart3, CheckSquare, ClipboardCheck, Users } from 'lucide-react';
-import Link from 'next/link';
+import { CheckSquare, ClipboardCheck, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ControlRoomSubtabs } from '../../control-room/components/ControlRoomSubtabs';

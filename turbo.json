@@ -343,6 +343,31 @@
       "outputs": [],
       "cache": true
     },
+    "//#check": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "$TURBO_ROOT$/biome.json"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "//#check:fix": {
+      "cache": false
+    },
+    "//#lint:ci": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "$TURBO_ROOT$/biome.json"
+      ],
+      "outputs": [],
+      "cache": true
+    },
     "lint:css": {
       "inputs": ["src/**/*.css", "**/*.css", ".stylelintrc.*", "config/tools/.stylelintignore"],
       "outputs": [],

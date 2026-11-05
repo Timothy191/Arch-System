@@ -15,7 +15,7 @@ const MCP_ENV_PATH = path.join(HOME, '.config/mcp-env');
 // Parse flags
 const args = process.argv.slice(2);
 const isCheckOnly = args.includes('--check');
-const isVerbose = args.includes('--verbose') || args.includes('-v');
+const _isVerbose = args.includes('--verbose') || args.includes('-v');
 
 // Load environment variables from ~/.config/mcp-env if present
 if (fs.existsSync(MCP_ENV_PATH)) {
@@ -43,7 +43,7 @@ if (!fs.existsSync(REGISTRY_PATH)) {
 }
 
 const registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
-const requiredServers = registry.requiredServers || [];
+const _requiredServers = registry.requiredServers || [];
 const servers = registry.servers || {};
 
 console.log('========================================================');

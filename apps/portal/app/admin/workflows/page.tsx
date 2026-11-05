@@ -4,7 +4,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import { PageHeader } from '@repo/ui/PageHeader';
 import { Activity, Clock, Pause, Play, Plus, Settings, TrendingUp, Workflow } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface WorkflowItem {
   id: string;

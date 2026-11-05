@@ -369,3 +369,4 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - **Purpose**: Canonical Zod contracts for the new `public.system_logs` table (migration 216) powering the Administration "System Logs" console.
 - **Changes**: `src/schemas/system-log.schema.ts` (level/source/category enums, `createSystemLogEntrySchema` ingest payload, `systemLogEntrySchema` row, `systemLogQuerySchema` filters, `updateSystemLogResolutionSchema` triage); exported via `src/index.ts`.
 - **Verification**: `pnpm turbo run build --filter=@repo/contract` passed.
+- [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.

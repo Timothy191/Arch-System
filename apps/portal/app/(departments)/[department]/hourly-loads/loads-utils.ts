@@ -85,7 +85,7 @@ export function buildHourlyLoadsGroupedMap(loads: HourlyLoad[]): Map<string, Hou
   });
 
   // Sort each group by start_hour ascending
-  for (const [key, group] of map.entries()) {
+  for (const [_key, group] of map.entries()) {
     group.sort((a, b) => (a.start_hour ?? 1) - (b.start_hour ?? 1));
   }
 
@@ -310,9 +310,9 @@ export const OTHER_MATERIAL_SUBCATEGORIES = [
   'Other',
 ] as const;
 
-type CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
-type WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
-type MaterialSubCategory = string;
+type _CoalMaterialSubCategory = (typeof COAL_MATERIAL_SUBCATEGORIES)[number];
+type _WasteMaterialSubCategory = (typeof WASTE_MATERIAL_SUBCATEGORIES)[number];
+type _MaterialSubCategory = string;
 
 export function getMaterialSubCategories(
   category: ExcavatorActivityMaterial,

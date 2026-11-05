@@ -74,7 +74,7 @@ function normalizeScan(raw: unknown): ScanResult {
   return { cursor: 0, keys: [] };
 }
 
-function isRetryableStatus(status: number): boolean {
+function _isRetryableStatus(status: number): boolean {
   return RETRYABLE_STATUS.has(status);
 }
 

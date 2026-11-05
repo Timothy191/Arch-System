@@ -8,7 +8,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 
 export interface ShiftCloseoutResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   code?: string;
 }

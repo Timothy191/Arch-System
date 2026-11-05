@@ -97,15 +97,26 @@ export async function createServerSupabaseClient() {
         const all = cookieStore.getAll();
         return normalizeSupabaseCookies(all);
       },
-      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         try {
           cookiesToSet.forEach(
-            ({ name, value, options }: { name: string; value: string; options?: any }) =>
+            ({
+              name,
+              value,
+              options,
+            }: {
+              name: string;
+              value: string;
+              options?: Record<string, unknown>;
+            }) =>
               cookieStore.set(name, value, {
                 ...options,
-                maxAge: options?.maxAge ?? 34560000,
-                path: options?.path ?? '/',
-                sameSite: options?.sameSite ?? 'lax',
+                maxAge: (options?.maxAge as number | undefined) ?? 34560000,
+                path: (options?.path as string | undefined) ?? '/',
+                sameSite:
+                  (options?.sameSite as 'lax' | 'strict' | 'none' | boolean | undefined) ?? 'lax',
               })
           );
         } catch {

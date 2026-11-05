@@ -34,3 +34,7 @@ export function shouldEarlyExpire(wrapper: XFetchWrapper<unknown>, beta?: number
   const u = Math.max(Math.random(), Number.MIN_VALUE);
   return -b * wrapper.delta * Math.log(u) > ttlRemaining;
 }
+
+export function enforceHotKeyTtlFloor(ttlSeconds: number, floorSeconds = 15): number {
+  return Math.max(floorSeconds, Math.ceil(ttlSeconds));
+}

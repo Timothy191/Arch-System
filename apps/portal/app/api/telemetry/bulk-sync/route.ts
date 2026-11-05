@@ -40,7 +40,7 @@ export async function POST(req: Request) {
             { status: 202 }
           )
         );
-      } catch (error) {
+      } catch (_error) {
         return applyCors(
           req,
           NextResponse.json({ success: false, error: 'Invalid bulk payload' }, { status: 400 })

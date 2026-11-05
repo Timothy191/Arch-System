@@ -28,7 +28,7 @@ jest.mock('@/lib/api/rate-limit-middleware', () => ({
 }));
 
 const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
-const { getRedisClient } = jest.requireMock('@repo/redis');
+const { getRedisClient: _getRedisClient } = jest.requireMock('@repo/redis');
 const { checkRateLimit } = jest.requireMock('@/lib/api/rate-limit-middleware');
 
 const MACHINE_ID = '123e4567-e89b-12d3-a456-426614174000';

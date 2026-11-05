@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
-  value: any;
+  value: unknown;
   defaultExpanded?: boolean;
 }
 
@@ -27,7 +27,7 @@ function JsonNode({
   defaultExpanded,
   isRoot,
 }: {
-  value: any;
+  value: unknown;
   name: string;
   defaultExpanded: boolean;
   isRoot?: boolean;
@@ -82,7 +82,8 @@ function JsonNode({
   const isObject = typeof value === 'object';
 
   if (isArray || isObject) {
-    const keys = Object.keys(value);
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record);
     const isEmpty = keys.length === 0;
 
     return (
@@ -118,12 +119,7 @@ function JsonNode({
         {expanded && !isEmpty && (
           <div className="mt-1 ml-1.5 border-border/50 border-l pl-1.5">
             {keys.map((k) => (
-              <JsonNode
-                key={k}
-                value={value[k as keyof typeof value]}
-                name={k}
-                defaultExpanded={defaultExpanded}
-              />
+              <JsonNode key={k} value={record[k]} name={k} defaultExpanded={defaultExpanded} />
             ))}
           </div>
         )}

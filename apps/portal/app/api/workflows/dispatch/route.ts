@@ -8,7 +8,16 @@ const WORKFLOW_JOB_NAME = 'execute-workflow';
 function getRedisConnectionOptions() {
   const redisUrl = process.env.QUEUE_REDIS_URL || process.env.REDIS_URL;
   const insecureTls = process.env.REDIS_TLS_INSECURE === 'true';
-  const options: any = {
+  const options: {
+    maxRetriesPerRequest: null;
+    enableOfflineQueue: boolean;
+    lazyConnect: boolean;
+    host?: string;
+    port?: number;
+    password?: string;
+    username?: string;
+    tls?: { rejectUnauthorized: boolean };
+  } = {
     maxRetriesPerRequest: null,
     enableOfflineQueue: false,
     lazyConnect: true,
@@ -97,7 +106,7 @@ export async function POST(req: NextRequest) {
       backoff: { type: 'exponential', delay: 5000 },
     });
     return NextResponse.json({ success: true, jobId, queueStatus: 'enqueued', details: jobData });
-  } catch (err: any) {
+  } catch (_err: unknown) {
     return NextResponse.json(
       { success: false, queueStatus: 'unavailable', jobId, message: 'Queue unavailable' },
       { status: 503 }

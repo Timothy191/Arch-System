@@ -337,7 +337,7 @@ export async function compareCommits(context, base, head, options = {}) {
       endpoint: url,
       responseBody: data,
     });
-  } catch (err) {
+  } catch (_err) {
     if (options.fallbackToGh !== false) {
       try {
         const raw = executeGhCli(

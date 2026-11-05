@@ -6,22 +6,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, afterEach, before, describe, it } from 'node:test';
+import { GitError } from '../../src/errors.mjs';
 import {
-  BranchNotFoundError,
-  GitError,
-  GitHubApiError,
-  RateLimitError,
-  WatchdogError,
-} from '../../src/errors.mjs';
-import {
-  discoverGitHubContext,
   getUpstreamStatus,
   inspectGitHubRemote,
   inspectLocalGit,
   isGitRepository,
   parseGitHubRemoteUrl,
   parsePorcelainStatus,
-  parseRenamedPath,
 } from '../../src/git-inspector.mjs';
 
 import { createMockGitRepo } from '../fixtures/mock-git.mjs';
@@ -316,7 +308,7 @@ describe('Empirical Adversarial Stress Test Harness - Milestone 1', () => {
     it('handles detached HEAD state after commit, checkout commit SHA, and subsequent changes', async () => {
       sandbox = createMockGitRepo({ branch: 'main', initialCommit: true });
       const sha1 = sandbox.commitFile('file1.txt', 'version 1');
-      const sha2 = sandbox.commitFile('file2.txt', 'version 2');
+      const _sha2 = sandbox.commitFile('file2.txt', 'version 2');
 
       // Checkout sha1 directly (detached HEAD)
       sandbox.exec(`checkout ${sha1}`);

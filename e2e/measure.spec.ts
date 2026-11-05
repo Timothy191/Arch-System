@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('measure metrics', async ({ page }) => {
   const client = await page.context().newCDPSession(page);

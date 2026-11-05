@@ -67,8 +67,9 @@ export const outboxDrainFn = inngest.createFunction(
               .eq('id', item.id);
 
             processedCount++;
-          } catch (writeErr: any) {
-            logError(writeErr, { context: 'outbox_drain_item_fail', id: item.id });
+          } catch (writeErr: unknown) {
+            const writeError = writeErr instanceof Error ? writeErr : new Error(String(writeErr));
+            logError(writeError, { context: 'outbox_drain_item_fail', id: item.id });
 
             const newAttempts = item.attempts + 1;
             const status = newAttempts >= 5 ? 'failed' : 'pending';
@@ -83,7 +84,7 @@ export const outboxDrainFn = inngest.createFunction(
               .update({
                 status,
                 attempts: newAttempts,
-                last_error: writeErr.message,
+                last_error: writeError.message,
                 next_attempt_at: nextAttemptTime,
               })
               .eq('id', item.id);
@@ -92,9 +93,11 @@ export const outboxDrainFn = inngest.createFunction(
 
         addEvent('outbox_drain_complete', { processed: processedCount, failed: dlqCount });
         return { status: 'ok', processed: processedCount, failed: dlqCount };
-      } catch (err: any) {
+      } catch (err: unknown) {
         success = false;
-        logError(err, { context: 'cron_outbox_drain_fatal' });
+        logError(err instanceof Error ? err : new Error(String(err)), {
+          context: 'cron_outbox_drain_fatal',
+        });
         throw err;
       } finally {
         recordJobExecution('scada-outbox-drain', performance.now() - start, success);

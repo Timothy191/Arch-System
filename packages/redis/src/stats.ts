@@ -17,7 +17,7 @@
  * Set `REDIS_STATS_DISABLED=true` to keep counters purely in-process.
  */
 import { getRedisClient } from './client';
-
+import { asInfoMap, asNumber, sendSafe } from './raw';
 export interface CacheStatsSnapshot {
   xFetchTriggers: number;
   hits: number;
@@ -37,7 +37,7 @@ const XFETCH_LATENCY_LIST_KEY = 'stats:xfetch_latencies';
 
 const LATENCY_BUFFER_SIZE = 1000;
 const FLUSH_INTERVAL_MS = 5000;
-const FLUSH_THRESHOLD = 100;
+const _FLUSH_THRESHOLD = 100;
 const LATENCY_SAMPLE_MAX = 50;
 const COUNTER_FLUSH_THRESHOLD = 500;
 
@@ -357,4 +357,56 @@ export async function persistCacheStatsSnapshot(): Promise<CacheStatsSnapshot> {
     }
   }
   return snapshot;
+}
+
+export interface RedisHealthDiagnostics {
+  usedMemoryBytes: number;
+  usedMemoryRssBytes: number;
+  usedMemoryDatasetBytes: number;
+  memFragmentationRatio: number;
+  maxmemoryBytes: number;
+  maxmemoryPolicy: string;
+  evictedKeysTotal: number;
+  keyspaceHitsTotal: number;
+  keyspaceMissesTotal: number;
+  hitRateRatio: number;
+  replicationRole: string;
+  connectedSlaves: number;
+  masterReplOffset: number;
+  slowlogCount: number;
+}
+
+export async function collectRedisHealthDiagnostics(): Promise<RedisHealthDiagnostics | null> {
+  const redis = await getRedisClient();
+  if (!redis) return null;
+  const [rawMemory, rawStats, rawRepl, rawSlowlog] = await Promise.all([
+    sendSafe(redis, ['INFO', 'memory']),
+    sendSafe(redis, ['INFO', 'stats']),
+    sendSafe(redis, ['INFO', 'replication']),
+    sendSafe(redis, ['SLOWLOG', 'LEN']),
+  ]);
+  const memoryInfo = asInfoMap(rawMemory);
+  const statsInfo = asInfoMap(rawStats);
+  const replInfo = asInfoMap(rawRepl);
+  const keyspaceHitsTotal = asNumber(statsInfo.keyspace_hits);
+  const keyspaceMissesTotal = asNumber(statsInfo.keyspace_misses);
+  const totalLookups = keyspaceHitsTotal + keyspaceMissesTotal;
+  const hitRateRatio =
+    totalLookups > 0 ? Math.round((keyspaceHitsTotal / totalLookups) * 10_000) / 10_000 : 0;
+  return {
+    usedMemoryBytes: asNumber(memoryInfo.used_memory),
+    usedMemoryRssBytes: asNumber(memoryInfo.used_memory_rss),
+    usedMemoryDatasetBytes: asNumber(memoryInfo.used_memory_dataset),
+    memFragmentationRatio: asNumber(memoryInfo.mem_fragmentation_ratio),
+    maxmemoryBytes: asNumber(memoryInfo.maxmemory),
+    maxmemoryPolicy: memoryInfo.maxmemory_policy ?? '',
+    evictedKeysTotal: asNumber(statsInfo.evicted_keys),
+    keyspaceHitsTotal,
+    keyspaceMissesTotal,
+    hitRateRatio,
+    replicationRole: replInfo.role ?? '',
+    connectedSlaves: asNumber(replInfo.connected_slaves),
+    masterReplOffset: asNumber(replInfo.master_repl_offset),
+    slowlogCount: asNumber(rawSlowlog),
+  };
 }

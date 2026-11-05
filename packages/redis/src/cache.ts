@@ -1,22 +1,9 @@
 import { redisCircuitBreaker } from './circuit-breaker';
 import { createRedisSubscriber, getRedisClient } from './client';
 import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
-import {
-  clearMemoryCache,
-  DEFAULT_L1_SWEEP_INTERVAL_MS,
-  memoryDelete,
-  memoryDeleteByPrefix,
-  memoryDeleteKeys,
-  memoryGet,
-  memoryLiveSize,
-  memoryRawSize,
-  memorySet,
-  memorySweep,
-  readMemory,
-  startL1Sweep,
-  stopL1Sweep,
-} from './l1';
+import { memoryDelete, memoryDeleteByPrefix, memoryDeleteKeys, memorySet, readMemory } from './l1';
 import { acquireRefreshLease, releaseRefreshLease } from './locks';
+import { asFieldMap, asStringOrNull, sendSafe } from './raw';
 import {
   l1TtlForKey,
   MAX_RECOMMENDED_PAYLOAD_BYTES,
@@ -307,6 +294,79 @@ export async function cacheSetWithTags<T>(
   await cacheSet(key, value, ttlSeconds);
   if (tags && tags.length > 0) {
     await indexCacheKeyByTags(key, tags);
+  }
+}
+
+export interface CacheSetJitterOptions {
+  ttlSeconds: number;
+  jitterRatio?: number;
+  tags?: readonly string[];
+}
+
+export async function cacheSetWithJitter<T>(
+  key: string,
+  payload: T,
+  options: CacheSetJitterOptions
+): Promise<number> {
+  const jitteredTtlSeconds = applyTtlJitter(
+    resolveL2TtlSeconds(key, options.ttlSeconds),
+    options.jitterRatio
+  );
+  await cacheSetWithTags(
+    key,
+    payload,
+    jitteredTtlSeconds,
+    options.tags ? [...options.tags] : undefined
+  );
+  return jitteredTtlSeconds;
+}
+
+export interface CacheHashSetOptions {
+  key: string;
+  fields: Readonly<Record<string, string | number | boolean>>;
+  ttlSeconds?: number;
+}
+
+export async function cacheHashSetFields(options: CacheHashSetOptions): Promise<boolean> {
+  memoryDelete(options.key);
+  const flatArgs: (string | number)[] = [];
+  for (const [field, fieldValue] of Object.entries(options.fields)) {
+    flatArgs.push(field, String(fieldValue));
+  }
+  try {
+    const redis = await getRedisClientSafe();
+    if (!redis) return false;
+    const hsetReply = await sendSafe(redis, ['HSET', options.key, ...flatArgs]);
+    await sendSafe(redis, [
+      'EXPIRE',
+      options.key,
+      resolveL2TtlSeconds(options.key, options.ttlSeconds),
+    ]);
+    return hsetReply !== null;
+  } catch {
+    return false;
+  }
+}
+
+export async function cacheHashGetField(key: string, field: string): Promise<string | null> {
+  try {
+    const redis = await getRedisClientSafe();
+    if (!redis) return null;
+    const reply = await sendSafe(redis, ['HGET', key, field]);
+    return asStringOrNull(reply);
+  } catch {
+    return null;
+  }
+}
+
+export async function cacheHashGetAll(key: string): Promise<Record<string, string>> {
+  try {
+    const redis = await getRedisClientSafe();
+    if (!redis) return {};
+    const reply = await sendSafe(redis, ['HGETALL', key]);
+    return asFieldMap(reply);
+  } catch {
+    return {};
   }
 }
 

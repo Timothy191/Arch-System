@@ -269,9 +269,9 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       scada_synced: scadaSynced,
       data: telemetryState,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err.message || 'Failed to process drill telemetry' },
+      { error: err instanceof Error ? err.message : 'Failed to process drill telemetry' },
       { status: 500 }
     );
   }

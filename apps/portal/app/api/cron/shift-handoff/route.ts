@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       message: 'Shift handoff generation initiated',
       jobId,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

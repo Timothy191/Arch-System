@@ -110,7 +110,13 @@ export default async function MachineOperationsPage({
     }
     machineBySerialOrId.set(m.name, m.id);
   }
-  for (const b of (activeBreakdowns || []) as Array<Record<string, any>>) {
+  for (const b of (activeBreakdowns || []) as Array<
+    BreakdownDelaySource & {
+      fleet_id?: string | null;
+      status?: string | null;
+      reason?: string | null;
+    }
+  >) {
     const fleetKey = String(b.fleet_id || '');
     const resolvedMachineId = machineBySerialOrId.get(fleetKey) || fleetKey;
     if (!resolvedMachineId) continue;
@@ -155,7 +161,15 @@ export default async function MachineOperationsPage({
 
   const siteMap = new Map((sites || []).map((s) => [s.id, s]));
   const machinesWithSmu = (machines || []).map((m) => {
-    const rawSite = Array.isArray((m as any).site) ? (m as any).site[0] : (m as any).site;
+    const rawSiteProp = (
+      m as {
+        site?:
+          | { name: string; site_code: string }
+          | Array<{ name: string; site_code: string }>
+          | null;
+      }
+    ).site;
+    const rawSite = Array.isArray(rawSiteProp) ? rawSiteProp[0] : rawSiteProp;
     const resolvedSite = rawSite || (m.site_id ? siteMap.get(m.site_id) : null);
     return {
       ...m,
@@ -175,10 +189,10 @@ export default async function MachineOperationsPage({
   // AGENT-TRACE: Calculate total delay hours across all operations + Engineering logged breakdown delays
   const controlRoomDelayHours =
     todayOperations?.reduce((sum, op) => {
-      const operationDelays = (op as any).delay_entries || [];
+      const operationDelays =
+        (op as { delay_entries?: Array<{ duration_hours?: number | null }> }).delay_entries || [];
       return (
-        sum +
-        operationDelays.reduce((delaySum: number, d: any) => delaySum + (d.duration_hours || 0), 0)
+        sum + operationDelays.reduce((delaySum: number, d) => delaySum + (d.duration_hours || 0), 0)
       );
     }, 0) || 0;
   const totalDelayHours = controlRoomDelayHours + totalEngineeringDelayHours;

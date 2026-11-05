@@ -4,7 +4,8 @@
  * Next.js 16 Turbopack & Lazy Loading Architecture Auditor
  *
  * Enforces Next.js 16 Turbopack & Bundling invariants across apps/portal:
- *   1. Monorepo Filesystem Root: apps/portal/next.config.mjs must declare turbopack.root pointing to workspaceRoot.
+ *   1. Monorepo Filesystem Root & Defaults: apps/portal/next.config.mjs must declare turbopack.root,
+ *      keep persistent caching / memory eviction enabled, and apps/portal/package.json dev script must use --turbopack.
  *   2. Server Component SSR Isolation: 'ssr: false' inside next/dynamic() MUST NOT be called in Server Components.
  *   3. Magic Comments Compliance: Prohibits unsupported 'webpackOptional: true' in dynamic imports (must use 'turbopackOptional: true').
  *   4. Heavy Library Chunk Budget: Verifies that heavy libraries (@react-pdf/renderer, exceljs, @xyflow/react)
@@ -22,6 +23,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const PORTAL_APP = path.join(ROOT, 'apps', 'portal');
 const PORTAL_APP_ROUTES = path.join(PORTAL_APP, 'app');
 const NEXT_CONFIG = path.join(PORTAL_APP, 'next.config.mjs');
+const PORTAL_PKG = path.join(PORTAL_APP, 'package.json');
 
 console.log('\n⚡ Initiating Next.js 16 Turbopack & Lazy Loading Audit...\n');
 
@@ -29,12 +31,13 @@ const violations = [];
 const warnings = [];
 let filesScanned = 0;
 
-// ── 1. Monorepo Filesystem Root Audit ───────────────────────────────────────
-console.log('1️⃣  Auditing apps/portal/next.config.mjs for turbopack.root...');
+// ── 1. Monorepo Filesystem Root & Turbopack Defaults Audit ──────────────────
+console.log('1️⃣  Auditing apps/portal/next.config.mjs and package.json for Turbopack defaults...');
 
 if (!fs.existsSync(NEXT_CONFIG)) {
   violations.push('apps/portal/next.config.mjs does not exist.');
 } else {
+  filesScanned += 1;
   const configContent = fs.readFileSync(NEXT_CONFIG, 'utf8');
 
   if (!configContent.includes('turbopack:') || !configContent.includes('root:')) {
@@ -46,6 +49,42 @@ if (!fs.existsSync(NEXT_CONFIG)) {
   if (!configContent.includes('outputFileTracingRoot:')) {
     violations.push(
       'apps/portal/next.config.mjs must specify "outputFileTracingRoot: workspaceRoot" for standalone output tracing.'
+    );
+  }
+
+  if (/turbopackMemoryEviction\s*:\s*false/.test(configContent)) {
+    violations.push(
+      'apps/portal/next.config.mjs must not set "experimental.turbopackMemoryEviction: false".'
+    );
+  }
+
+  if (/persistentCaching\s*:\s*false/.test(configContent)) {
+    violations.push(
+      'apps/portal/next.config.mjs must not set "experimental.turbo.persistentCaching: false".'
+    );
+  }
+
+  if (/turbopackFileSystemCacheForDev\s*:\s*false/.test(configContent)) {
+    violations.push(
+      'apps/portal/next.config.mjs must not disable "experimental.turbopackFileSystemCacheForDev".'
+    );
+  }
+}
+
+if (!fs.existsSync(PORTAL_PKG)) {
+  violations.push('apps/portal/package.json does not exist.');
+} else {
+  filesScanned += 1;
+  const pkgJson = JSON.parse(fs.readFileSync(PORTAL_PKG, 'utf8'));
+  const devScript = pkgJson.scripts?.dev || '';
+
+  if (
+    !devScript.includes('--turbopack') ||
+    devScript.includes('--webpack') ||
+    devScript.includes('--no-turbopack')
+  ) {
+    violations.push(
+      'apps/portal/package.json "scripts.dev" must use "--turbopack" and must not default to "--webpack" or "--no-turbopack".'
     );
   }
 }

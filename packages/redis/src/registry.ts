@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 export const CacheCategory = {
   AUTH: 'auth',
   METRICS: 'metrics',
@@ -55,19 +57,52 @@ export const DEFAULT_L1_TTL_SECONDS = 15;
 /** Absolute ceiling for any L1 entry, to bound memory under long L2 TTLs. */
 export const MAX_L1_TTL_SECONDS = 300;
 
+export const MAX_KEY_BYTES = 256;
+export const MAX_SEGMENT_BYTES = 128;
+export const KEY_DIGEST_HEX_LENGTH = 16;
+export const MIN_HOT_KEY_TTL_SECONDS = 15;
 /** Hard ceiling (24h) to prevent accidental immortal keys. */
 export const MAX_TTL_SECONDS = 86_400;
 export const MAX_RECOMMENDED_PAYLOAD_BYTES = 100 * 1024;
 
-const DEFAULT_L2_TTL_SECONDS = 300;
+export const DEFAULT_L2_TTL_SECONDS = 300;
 const KEY_PREFIX = 'arch:';
+
+export function normalizeKeySegment(rawSegment: string | number): string {
+  const segmentText = String(rawSegment).trim();
+  if (
+    segmentText.startsWith('http://') ||
+    segmentText.startsWith('https://') ||
+    Buffer.byteLength(segmentText, 'utf8') > MAX_SEGMENT_BYTES
+  ) {
+    return `h_${createHash('sha256').update(segmentText).digest('hex').slice(0, KEY_DIGEST_HEX_LENGTH)}`;
+  }
+  return segmentText;
+}
 
 export function buildCacheKey(
   category: CacheCategory,
   ...parts: (string | number | undefined)[]
 ): string {
-  const clean = parts.filter((p): p is string | number => p !== undefined);
-  return `${KEY_PREFIX}${category}:${clean.join(':')}`;
+  const clean = parts
+    .filter((p): p is string | number => p !== undefined)
+    .map((p) => normalizeKeySegment(p));
+  const fullKey = `${KEY_PREFIX}${category}:${clean.join(':')}`;
+  if (Buffer.byteLength(fullKey, 'utf8') > MAX_KEY_BYTES) {
+    return `${KEY_PREFIX}${category}:h_${createHash('sha256').update(fullKey).digest('hex').slice(0, KEY_DIGEST_HEX_LENGTH)}`;
+  }
+  return fullKey;
+}
+
+export function buildClusterSlotKey(
+  slotTag: string,
+  category: CacheCategory,
+  ...parts: (string | number | undefined)[]
+): string {
+  const clean = parts
+    .filter((p): p is string | number => p !== undefined)
+    .map((p) => normalizeKeySegment(p));
+  return `arch:{${normalizeKeySegment(slotTag)}}:${category}:${clean.join(':')}`;
 }
 
 /**

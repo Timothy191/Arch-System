@@ -3,11 +3,7 @@ import type { Breakdown, BreakdownMetrics, Machine } from '@/features/department
 import { BreakdownsDashboard } from '@/features/departments';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
-export default async function BreakdownsPage({
-  params,
-}: {
-  params: Promise<{ department: string }>;
-}) {
+export default async function BreakdownsPage({ params }: PageProps<'/[department]/breakdowns'>) {
   const { department: deptSlug } = await params;
   requireDepartment(deptSlug, 'engineering');
   const { deptId, supabase, today } = await getDepartmentContext({

@@ -2,6 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Activity, Clock } from 'lucide-react';
+import Link from 'next/link';
 import { useMemo } from 'react';
 import type { PlantDelayEntry } from './types';
 
@@ -144,9 +145,9 @@ export function PlantDelaysWrapupSection({ delays, metrics }: PlantDelaysWrapupS
             <p className="text-[var(--text-secondary)] text-sm">No delay events logged yet.</p>
             <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
               Log a delay on the{' '}
-              <a className="text-[var(--accent-blue)] underline" href="/plant-processing/delays">
+              <Link href="/plant-processing/delays" className="text-[var(--accent-blue)] underline">
                 Delays tab
-              </a>
+              </Link>
               .
             </p>
           </div>

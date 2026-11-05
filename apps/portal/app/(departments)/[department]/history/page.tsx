@@ -1,5 +1,6 @@
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
+import Form from 'next/form';
 import Link from 'next/link';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
@@ -40,7 +41,7 @@ export default async function HistoryPage({
 
   const dateFilter = (
     <GlassCard>
-      <form method="GET" className="flex items-end gap-4">
+      <Form action="" className="flex items-end gap-4">
         <div>
           <label className="mb-1 block text-[var(--text-muted)] text-sm">From</label>
           <Input type="date" name="from" defaultValue={from} className="px-4 py-2" />
@@ -55,13 +56,13 @@ export default async function HistoryPage({
         >
           Filter
         </button>
-      </form>
+      </Form>
     </GlassCard>
   );
 
   // ─── Control Room branch ───────────────────────────────────────────────────
   if (isControlRoom) {
-    const [{ data: shiftStatuses }, { data: operations }, { data: loads }, { data: delays }] =
+    const [{ data: shiftStatuses }, { data: operations }, { data: loads }, { data: _delays }] =
       await Promise.all([
         supabase
           .from('shift_status')

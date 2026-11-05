@@ -71,7 +71,7 @@ run_gate 1  "⚙️ " "Type Checking" \
   "Fix TypeScript errors."
 
 run_gate 2  "🧹" "Linting & Formatting" \
-  "pnpm lint" \
+  "pnpm turbo run //#lint:ci" \
   "Fix Biome/ESLint errors."
 
 run_gate 3  "🧪" "Unit Tests" \

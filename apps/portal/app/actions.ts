@@ -118,7 +118,7 @@ export async function generateMonthlyReport(
     }
 
     const doc = React.createElement(ReportTemplate, { data: reportData });
-    const buffer = await pdf(doc as any).toBuffer();
+    const buffer = await pdf(doc as Parameters<typeof pdf>[0]).toBuffer();
 
     const filename = `${deptId}/${user.id}/report-${Date.now()}.pdf`;
 
@@ -147,13 +147,14 @@ export async function generateMonthlyReport(
       err &&
       typeof err === 'object' &&
       'name' in err &&
-      (err as any).name === 'ZodError' &&
+      (err as { name?: unknown }).name === 'ZodError' &&
       'issues' in err &&
-      Array.isArray((err as any).issues)
+      Array.isArray((err as { issues?: unknown }).issues)
     ) {
+      const zodIssues = (err as { issues: Array<{ message: string }> }).issues;
       return {
         success: false,
-        error: (err as any).issues.map((i: any) => i.message).join(', '),
+        error: zodIssues.map((i) => i.message).join(', '),
         code: 'VALIDATION_ERROR',
       };
     }

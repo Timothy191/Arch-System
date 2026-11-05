@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, message: 'Alert logged, no action required' });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 });
   }
 }

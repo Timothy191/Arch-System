@@ -20,7 +20,13 @@ export interface WorkflowStep {
   id: string;
   name: string;
   type: 'transform' | 'redis_set' | 'redis_get' | 'webhook_forward' | 'condition';
-  config: Record<string, any>;
+  config: {
+    attachTimestamp?: boolean;
+    keyPrefix?: string;
+    ttlSeconds?: number;
+    key?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface WorkflowDefinition {
@@ -40,9 +46,9 @@ export interface WorkflowExecution {
   startedAt: string;
   completedAt?: string;
   durationMs?: number;
-  inputData: any;
-  outputData?: any;
-  stepResults: Record<string, any>;
+  inputData: unknown;
+  outputData?: unknown;
+  stepResults: Record<string, unknown>;
   error?: string;
 }
 
@@ -369,7 +375,7 @@ export class ServerlessRedisEngine {
 
   public async executeWorkflow(
     workflowIdOrWebhook: string,
-    inputPayload: any
+    inputPayload: unknown
   ): Promise<WorkflowExecution> {
     const workflow = this.getWorkflow(workflowIdOrWebhook);
     const executionId = `exec-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -398,16 +404,16 @@ export class ServerlessRedisEngine {
       return execution;
     }
 
-    let currentPayload = inputPayload;
+    let currentPayload: unknown = inputPayload;
     try {
       for (const node of workflow.nodes) {
         const stepStart = Date.now();
-        let stepOutput: any;
+        let stepOutput: unknown;
 
         switch (node.type) {
           case 'transform':
             stepOutput = {
-              ...currentPayload,
+              ...(currentPayload && typeof currentPayload === 'object' ? currentPayload : {}),
               ...(node.config.attachTimestamp ? { _processedAt: new Date().toISOString() } : {}),
             };
             break;
@@ -419,7 +425,7 @@ export class ServerlessRedisEngine {
             break;
           }
           case 'redis_get': {
-            const val = this.get(node.config.key);
+            const val = this.get(node.config.key ?? '');
             stepOutput = { key: node.config.key, value: val ? JSON.parse(val) : null };
             break;
           }
@@ -459,7 +465,7 @@ export class ServerlessRedisEngine {
 
   // --- Generic Command Dispatcher ---
 
-  public executeCommand(command: string, args: string[]): any {
+  public executeCommand(command: string, args: string[]): unknown {
     const cmd = command.toUpperCase();
     switch (cmd) {
       case 'PING':

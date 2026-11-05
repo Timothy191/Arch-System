@@ -4,6 +4,7 @@ export class AppError extends Error {
   public statusCode?: number;
   public context?: Record<string, unknown>;
   public cause?: unknown;
+  public digest?: string;
 
   constructor(message: string, code?: string, statusCode?: number);
   constructor(

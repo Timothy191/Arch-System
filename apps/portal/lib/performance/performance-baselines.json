@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-05T12:00:00Z",
+  "baselines": [
+    {
+      "metricId": "portal.startup.time.ms",
+      "baselineValue": 800,
+      "context": {
+        "layer": "application",
+        "kind": "startup"
+      }
+    },
+    {
+      "metricId": "module.load.time.ms",
+      "baselineValue": 150,
+      "context": {
+        "layer": "intelligent-execution",
+        "kind": "module-loading"
+      }
+    },
+    {
+      "metricId": "api.response.time.ms",
+      "baselineValue": 250,
+      "context": {
+        "layer": "application",
+        "kind": "api"
+      }
+    },
+    {
+      "metricId": "cache.lookup.latency.ms",
+      "baselineValue": 2,
+      "context": {
+        "layer": "resource-management",
+        "kind": "cache"
+      }
+    }
+  ]
+}

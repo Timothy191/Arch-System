@@ -63,7 +63,7 @@ export function SitesTab() {
       if (!newBlockSiteId && sitesData && sitesData.length > 0) {
         setNewBlockSiteId(sitesData[0]?.id ?? '');
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to load sites and mine blocks.');
     } finally {
       setLoading(false);
