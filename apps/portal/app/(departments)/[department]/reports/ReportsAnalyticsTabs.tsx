@@ -61,176 +61,135 @@ export function ReportsSubtabsToolbar({
   searchQuery,
   onSearchQueryChange,
 }: ReportsSubtabsToolbarProps) {
+  const activeViewBadge =
+    activeTab === 'shift'
+      ? `${filteredShiftRowsCount} rows`
+      : activeTab === 'day'
+        ? `${dailyAggregatedRowsCount} days`
+        : activeTab === 'machine-30d'
+          ? '30d sheet'
+          : activeTab === 'monthly-summary'
+            ? `${fleetMachinesCount} units`
+            : activeTab === 'archived'
+              ? `${monthlyRollupsCount}m / ${historicalRowsCount}`
+              : `${pdfSiteGroupsCount} site${pdfSiteGroupsCount === 1 ? '' : 's'}`;
+
   return (
     <div className="no-print flex flex-col justify-between gap-4 border-[var(--border-default)] border-b pb-3 md:flex-row md:items-center">
-      <div
-        role="tablist"
-        aria-label="Report Views"
-        className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1.5"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'shift'}
-          onClick={() => onSelectTab('shift')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'shift'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <Clock className="h-4 w-4" />
-          Shift
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'shift'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-2 rounded-xl border border-[var(--border-default)] bg-white px-3 py-1.5 shadow-2xs">
+          <FileText className="h-4 w-4 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
+          <label
+            htmlFor="report-views-select"
+            className="font-bold text-slate-600 text-xs uppercase tracking-wider"
           >
-            {filteredShiftRowsCount}
+            View:
+          </label>
+          <select
+            id="report-views-select"
+            aria-label="Select Report View"
+            data-testid="report-view-dropdown"
+            value={activeTab}
+            onChange={(e) => onSelectTab(e.target.value as ReportSubtab)}
+            className="cursor-pointer bg-transparent pr-2 font-bold text-slate-900 text-sm focus:outline-none"
+          >
+            <option value="shift">Shift ({filteredShiftRowsCount})</option>
+            <option value="day">Day ({dailyAggregatedRowsCount})</option>
+            <option value="machine-30d">30-Day Machine Sheet (30d)</option>
+            <option value="monthly-summary">Monthly Summary ({fleetMachinesCount})</option>
+            <option value="archived">
+              Archived ({monthlyRollupsCount}m / {historicalRowsCount})
+            </option>
+            <option value="pdf-report">
+              PDF Report ({pdfSiteGroupsCount} site{pdfSiteGroupsCount === 1 ? '' : 's'})
+            </option>
+          </select>
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-bold font-mono text-[11px] text-blue-900">
+            {activeViewBadge}
           </span>
-        </button>
+        </div>
 
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'day'}
-          onClick={() => onSelectTab('day')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'day'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <Calendar className="h-4 w-4" />
-          Day
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'day'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+        {/* Accessible tablist for keyboard/AT & unit-test navigation */}
+        <div role="tablist" aria-label="Report Views" className="sr-only">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'shift'}
+            onClick={() => onSelectTab('shift')}
           >
-            {dailyAggregatedRowsCount}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'machine-30d'}
-          onClick={() => onSelectTab('machine-30d')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'machine-30d'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <Wrench className="h-4 w-4" />
-          30-Day Machine Sheet
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'machine-30d'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+            <Clock className="h-4 w-4" />
+            Shift <span>{filteredShiftRowsCount}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'day'}
+            onClick={() => onSelectTab('day')}
           >
-            30d
-          </span>
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'monthly-summary'}
-          onClick={() => onSelectTab('monthly-summary')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'monthly-summary'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <Table2 className="h-4 w-4" />
-          Monthly Summary
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'monthly-summary'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+            <Calendar className="h-4 w-4" />
+            Day <span>{dailyAggregatedRowsCount}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'machine-30d'}
+            onClick={() => onSelectTab('machine-30d')}
           >
-            {fleetMachinesCount}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'archived'}
-          onClick={() => onSelectTab('archived')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'archived'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <Archive className="h-4 w-4" />
-          Archived
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'archived'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+            <Wrench className="h-4 w-4" />
+            30-Day Machine Sheet <span>30d</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'monthly-summary'}
+            onClick={() => onSelectTab('monthly-summary')}
           >
-            {monthlyRollupsCount}m / {historicalRowsCount}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'pdf-report'}
-          onClick={() => onSelectTab('pdf-report')}
-          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-sm transition-all ${
-            activeTab === 'pdf-report'
-              ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <FileText className="h-4 w-4" />
-          PDF Report
-          <span
-            className={`rounded-full px-1.5 py-0.2 text-xs ${
-              activeTab === 'pdf-report'
-                ? 'bg-white/20 text-white'
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-            }`}
+            <Table2 className="h-4 w-4" />
+            Monthly Summary <span>{fleetMachinesCount}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'archived'}
+            onClick={() => onSelectTab('archived')}
           >
-            {pdfSiteGroupsCount} site{pdfSiteGroupsCount === 1 ? '' : 's'}
-          </span>
-        </button>
+            <Archive className="h-4 w-4" />
+            Archived{' '}
+            <span>
+              {monthlyRollupsCount}m / {historicalRowsCount}
+            </span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'pdf-report'}
+            onClick={() => onSelectTab('pdf-report')}
+          >
+            <FileText className="h-4 w-4" />
+            PDF Report{' '}
+            <span>
+              {pdfSiteGroupsCount} site{pdfSiteGroupsCount === 1 ? '' : 's'}
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* Interactive Quick Filters (Shift, Site, Search) */}
+      {/* Interactive Quick Filters (Shift Dropdown, Site Dropdown, Search) */}
       <div className="flex flex-wrap items-center gap-2.5">
         {activeTab !== 'day' && (
-          <div className="inline-flex items-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1">
-            {(['all', 'day', 'night'] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => onShiftFilterChange(s)}
-                className={`rounded-md px-3 py-1 font-medium text-xs transition-colors ${
-                  shiftFilter === s
-                    ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
-                }`}
-              >
-                {s === 'all' ? 'All Shifts' : s === 'day' ? 'Day Shift' : 'Night Shift'}
-              </button>
-            ))}
+          <div className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-2.5 py-1.5 shadow-2xs">
+            <Clock className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
+            <select
+              aria-label="Filter by shift"
+              data-testid="shift-filter-dropdown"
+              value={shiftFilter}
+              onChange={(e) => onShiftFilterChange(e.target.value as 'all' | 'day' | 'night')}
+              className="cursor-pointer bg-transparent font-semibold text-slate-900 text-xs focus:outline-none"
+            >
+              <option value="all">All Shifts</option>
+              <option value="day">Day Shift</option>
+              <option value="night">Night Shift</option>
+            </select>
           </div>
         )}
 

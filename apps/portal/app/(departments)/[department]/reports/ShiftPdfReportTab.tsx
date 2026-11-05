@@ -253,9 +253,13 @@ export function ShiftPdfReportTab({
   }, [activeSiteGroups.length, siteDrillReports.length]);
 
   const zoomScaleStyle = useMemo(() => {
-    if (zoomLevel === '100') return { transform: 'scale(1)', transformOrigin: 'top center' };
-    if (zoomLevel === '75') return { transform: 'scale(0.75)', transformOrigin: 'top center' };
-    return { maxWidth: '100%', width: '100%' };
+    if (zoomLevel === '100') {
+      return { transform: 'scale(1)', transformOrigin: 'top center', width: '210mm' };
+    }
+    if (zoomLevel === '75') {
+      return { transform: 'scale(0.75)', transformOrigin: 'top center', width: '210mm' };
+    }
+    return { width: '210mm', maxWidth: '100%', margin: '0 auto' };
   }, [zoomLevel]);
 
   const handleDownloadShiftPdf = async () => {
@@ -430,24 +434,31 @@ export function ShiftPdfReportTab({
   <meta charset="utf-8" />
   <title>${escapeHtml(departmentName)} Shift Report PDF</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 20px; color: #0f172a; background: #ffffff; }
-    @media print { body { margin: 8mm; } }
+    @page { size: A4 portrait; margin: 10mm; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 16px; color: #0f172a; background: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .a4-sheet { width: 210mm; min-height: 297mm; max-width: 210mm; margin: 0 auto 16px; padding: 12mm 14mm; box-sizing: border-box; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12); page-break-after: always; break-after: page; }
+    @media print {
+      body { padding: 0; background: #ffffff; }
+      .a4-sheet { margin: 0 auto; border: none; border-radius: 0; box-shadow: none; width: 210mm; min-height: 297mm; }
+    }
   </style>
 </head>
 <body>
-  <div style="border-bottom:2px solid #0f172a;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;">
-    <div>
-      <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.08em;">Plantcor Mining Operations · Shift Report PDF</div>
-      <h1 style="margin:4px 0 2px;font-size:20px;">${escapeHtml(departmentName)} — Site-Grouped Shift Report</h1>
-      <div style="font-size:11px;color:#475569;">Period: ${escapeHtml(periodLabel)} · Grouping: Site → 1. Excavators → 2. Machines Grouped by Type → 3. Drilling Report</div>
+  <div class="a4-sheet">
+    <div style="border-bottom:2px solid #0f172a;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.08em;">Plantcor Mining Operations · Shift Report PDF (ISO A4 210 × 297 mm)</div>
+        <h1 style="margin:4px 0 2px;font-size:20px;">${escapeHtml(departmentName)} — Site-Grouped Shift Report</h1>
+        <div style="font-size:11px;color:#475569;">Period: ${escapeHtml(periodLabel)} · Grouping: Site → 1. Excavators → 2. Machines Grouped by Type → 3. Drilling Report</div>
+      </div>
+      <div style="text-align:right;font-size:11px;font-family:monospace;">
+        <div>Generated: ${escapeHtml(todayStr)}</div>
+        <div>Active Shift: ${escapeHtml(currentShift.toUpperCase())}</div>
+      </div>
     </div>
-    <div style="text-align:right;font-size:11px;font-family:monospace;">
-      <div>Generated: ${escapeHtml(todayStr)}</div>
-      <div>Active Shift: ${escapeHtml(currentShift.toUpperCase())}</div>
-    </div>
+    ${siteSectionsHtml || '<p style="padding:24px;text-align:center;color:#64748b;">No shift machine operations recorded for the selected filters.</p>'}
+    ${drillSectionsHtml}
   </div>
-  ${siteSectionsHtml || '<p style="padding:24px;text-align:center;color:#64748b;">No shift machine operations recorded for the selected filters.</p>'}
-  ${drillSectionsHtml}
 </body>
 </html>`;
   }, [activeSiteGroups, siteDrillReports, departmentName, periodLabel, todayStr, currentShift]);
@@ -455,36 +466,53 @@ export function ShiftPdfReportTab({
   return (
     <div className="space-y-6" data-testid="shift-pdf-report-preview">
       {/* PDF Viewer Control Toolbar */}
-      <GlassCard className="no-print p-4">
+      <GlassCard className="no-print border border-slate-200/90 bg-white/95 p-4 shadow-xs">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/10 px-2.5 py-0.5 font-semibold text-[var(--accent-blue)] text-xs">
-                <FileText className="h-3.5 w-3.5" />
+              <span className="gold-steel-border gold-steel-border-slim inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1 font-bold text-blue-950 text-xs shadow-2xs">
+                <FileText className="h-3.5 w-3.5 text-blue-700" />
                 Shift Report — PDF Preview
               </span>
-              <span className="font-mono text-[var(--text-muted)] text-xs">
+              <span className="inline-flex items-center rounded-md border border-slate-300 bg-slate-100 px-2.5 py-0.5 font-bold font-mono text-slate-900 text-xs">
                 {activeSiteGroups.length} Site{activeSiteGroups.length === 1 ? '' : 's'} ·{' '}
                 {pdfDelayTotals.totalMachines} Machine Entries
               </span>
+              <span className="inline-flex items-center rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 font-bold font-mono text-[11px] text-amber-950">
+                ISO A4 · 210 × 297 mm
+              </span>
             </div>
-            <p className="text-[var(--text-secondary)] text-xs">
-              Grouped by Site in mandatory operational sequence:{' '}
-              <strong className="text-[var(--text-heading)]">1. Excavators First</strong> →{' '}
-              <strong className="text-[var(--text-heading)]">2. Roll Over</strong> →{' '}
-              <strong className="text-[var(--text-heading)]">3. Machines Worked on Site</strong>
+            <p className="flex flex-wrap items-center gap-1.5 font-medium text-slate-800 text-xs leading-relaxed">
+              <span className="font-semibold text-slate-900">
+                Grouped by Site in mandatory operational sequence:
+              </span>{' '}
+              <strong className="inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-2 py-0.5 font-bold text-[11px] text-blue-950">
+                1. Excavators First
+              </strong>{' '}
+              <span className="font-bold text-slate-500" aria-hidden="true">
+                →
+              </span>{' '}
+              <strong className="inline-flex items-center rounded border border-amber-200 bg-amber-50/90 px-2 py-0.5 font-bold text-[11px] text-amber-950">
+                2. Roll Over
+              </strong>{' '}
+              <span className="font-bold text-slate-500" aria-hidden="true">
+                →
+              </span>{' '}
+              <strong className="inline-flex items-center rounded border border-emerald-200 bg-emerald-50/90 px-2 py-0.5 font-bold text-[11px] text-emerald-950">
+                3. Machines Worked on Site
+              </strong>
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Shift Date Selector */}
-            <div className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2.5 py-1">
+            <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1 shadow-2xs">
               <Calendar className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
               <select
                 aria-label="Filter PDF by Shift Date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent font-medium text-[var(--text-heading)] text-xs focus:outline-none"
+                className="bg-transparent font-semibold text-slate-900 text-xs focus:outline-none"
               >
                 <option value="all">All Shift Dates ({availableDates.length})</option>
                 {availableDates.map((d, idx) => (
@@ -495,6 +523,70 @@ export function ShiftPdfReportTab({
                 ))}
               </select>
             </div>
+
+            {/* Page Layout & Zoom Selector */}
+            <div className="inline-flex items-center rounded-lg border border-slate-300 bg-slate-100 p-0.5">
+              <button
+                type="button"
+                onClick={() => setPageViewMode('all')}
+                className={`rounded-md px-2.5 py-1 font-semibold text-xs transition-colors ${
+                  pageViewMode === 'all'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                All A4 Sheets ({totalPages})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPageViewMode('single');
+                  setCurrentPage(1);
+                }}
+                className={`rounded-md px-2.5 py-1 font-semibold text-xs transition-colors ${
+                  pageViewMode === 'single'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Single A4 Sheet
+              </button>
+            </div>
+
+            {pageViewMode === 'single' && (
+              <div className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className="rounded px-1.5 py-0.5 font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+                >
+                  ‹
+                </button>
+                <span className="font-bold font-mono text-slate-900">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="rounded px-1.5 py-0.5 font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+
+            <select
+              aria-label="A4 Sheet Zoom Level"
+              value={zoomLevel}
+              onChange={(e) => setZoomLevel(e.target.value as 'fit' | '100' | '75')}
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 font-semibold text-slate-900 text-xs shadow-2xs focus:outline-none"
+            >
+              <option value="fit">A4 Fit (210mm)</option>
+              <option value="100">100% Scale</option>
+              <option value="75">75% Scale</option>
+            </select>
 
             <div className="inline-flex items-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] p-1">
               <button

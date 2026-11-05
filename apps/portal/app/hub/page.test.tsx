@@ -97,7 +97,6 @@ jest.mock('@/features/hub', () => ({
   ToolBanner: () => <div data-testid="tool-banner" />,
   DepartmentReviews: () => <div data-testid="dept-reviews" />,
   CoreOperationalModules: (props: unknown) => mockCoreOperationalModules(props),
-  OperationsCopilot: () => <div data-testid="operations-copilot" />,
 }));
 
 jest.mock('@repo/ui/Logo', () => ({

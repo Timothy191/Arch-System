@@ -261,7 +261,7 @@ export function ShiftReportPdfDocument({
 }: ShiftReportPdfDocumentProps) {
   return (
     <Document title={`${departmentName} — Site-Grouped Shift Report`}>
-      <Page size="A4" orientation="landscape" style={styles.page}>
+      <Page size="A4" orientation="portrait" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <View>

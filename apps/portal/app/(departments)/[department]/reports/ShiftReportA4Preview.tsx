@@ -400,10 +400,13 @@ export interface A4SheetContainerProps {
 export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetContainerProps) {
   return (
     <div
-      className="a4-page-sheet relative flex min-h-[1123px] w-[794px] flex-col justify-between rounded-lg bg-white px-6 py-5 text-[#0f172a] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] transition-shadow [print-color-adjust:exact]"
+      data-a4-sheet="true"
+      className="a4-page-sheet relative box-border flex min-h-[297mm] w-[210mm] max-w-[210mm] shrink-0 flex-col justify-between rounded-md border border-slate-300/90 bg-white px-[14mm] py-[12mm] text-[#0f172a] shadow-[0_12px_32px_-4px_rgba(15,23,42,0.14),0_4px_12px_-2px_rgba(15,23,42,0.08)] transition-shadow [print-color-adjust:exact]"
       style={{
-        width: '794px',
-        minHeight: '1123px',
+        width: '210mm',
+        minHeight: '297mm',
+        maxWidth: '210mm',
+        boxSizing: 'border-box',
         pageBreakAfter: 'always',
         breakAfter: 'page',
       }}
@@ -411,14 +414,14 @@ export function A4SheetContainer({ pageNumber, totalPages, children }: A4SheetCo
       <div className="flex-1">{children}</div>
 
       {/* Strictly Styled Page X of Y Footer */}
-      <div className="mt-3 flex items-center justify-between border-slate-300 border-t pt-2 font-mono text-[10px] text-slate-500">
+      <div className="mt-3 flex items-center justify-between border-slate-300 border-t pt-2 font-mono text-[10px] text-slate-600">
         <div className="flex items-center gap-2">
           <Logo variant="gold" className="h-3.5 w-3.5 shrink-0" />
-          <span className="font-bold text-slate-700 uppercase tracking-wider">Arch-Systems</span>
+          <span className="font-bold text-slate-800 uppercase tracking-wider">Arch-Systems</span>
           <span>·</span>
-          <span>Plantcor Document Control (ISO 9001:2015 Compliant)</span>
+          <span>Plantcor Document Control (ISO 9001:2015 · A4 210×297mm)</span>
         </div>
-        <div className="font-bold text-slate-700">
+        <div className="font-bold text-slate-800">
           Page {pageNumber} of {totalPages}
         </div>
       </div>

@@ -28,6 +28,7 @@ describe('FeedbackWidget', () => {
       'viewBox',
       '22.75 16.625 166.16 166.19'
     );
+    expect(triggerBtn.querySelector('svg')).toHaveClass('rotate-180');
 
     fireEvent.click(triggerBtn);
 

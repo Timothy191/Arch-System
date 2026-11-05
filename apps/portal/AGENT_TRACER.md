@@ -1,3 +1,21 @@
+## 2026-11-05T07:27:00+02:00: Reports Dropdown Selectors, A4 Paper Sizing, Support Logo Rotation & Remove Operations Copilot
+
+- **Phase 1 (Comprehension)**: Address design feedback across `/control-room/reports` (`ShiftPdfReportTab.tsx`, `ReportsAnalyticsTabs.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `print-report.css`, `FeedbackWidget.tsx`) and `/hub` (`page.tsx`):
+  1. Redesign the `Shift Report — PDF Preview` header block in `ShiftPdfReportTab.tsx` with high-contrast badges and dark slate typography for improved readability.
+  2. Convert the `All Shifts | Day Shift | Night Shift` segmented filter buttons in `ReportsAnalyticsTabs.tsx` into a dropdown (`<select aria-label="Filter by shift">`).
+  3. Convert the `Report Views` tab bar in `ReportsAnalyticsTabs.tsx` into a dropdown selector (`<select aria-label="Select Report View">`) while preserving `sr-only` `role="tablist"` accessibility/test compatibility.
+  4. Enforce exact ISO A4 paper dimensions (`210mm × 297mm`) on screen, in print (`@page { size: A4 portrait; }`), and in PDF export (`ShiftReportPdfDocument.tsx`).
+  5. Rotate the Support button's `<Logo />` 180 degrees (`rotate-180`) in `FeedbackWidget.tsx` so its point faces downward.
+  6. Remove the `OperationsCopilot` section from `/hub` (`apps/portal/app/hub/page.tsx` and `apps/portal/features/hub/`).
+- **Phase 2 (Evidence)**: Inspected `ShiftPdfReportTab.tsx`, `ReportsAnalyticsTabs.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `print-report.css`, `FeedbackWidget.tsx`, and `apps/portal/app/hub/page.tsx`.
+- **Phase 3 (Design)**:
+  - Updated `ShiftPdfReportTab.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, and `apps/portal/styles/print-report.css` with high-contrast sequence badges and strict `210mm × 297mm` ISO A4 sheet sizing.
+  - Replaced segmented shift buttons and report view tabs with `<select>` dropdowns in `ReportsAnalyticsTabs.tsx`.
+  - Added `rotate-180` to `<Logo />` in `FeedbackWidget.tsx`.
+  - Removed `OperationsCopilot` from `apps/portal/app/hub/page.tsx`, `apps/portal/features/hub/index.ts`, and deleted `OperationsCopilot.tsx`.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="FeedbackWidget|app/hub/page|ReportsDashboardClient"` (20/20 PASS).
+- **Phase 5 (Contract)**: Modified `ShiftPdfReportTab.tsx`, `ReportsAnalyticsTabs.tsx`, `ShiftReportA4Preview.tsx`, `ShiftReportPdfDocument.tsx`, `ReportsDashboardClient.test.tsx`, `print-report.css`, `FeedbackWidget.tsx`, `FeedbackWidget.test.tsx`, `apps/portal/app/hub/page.tsx`, `apps/portal/app/hub/page.test.tsx`, and `apps/portal/features/hub/index.ts`.
+
 ## 2026-11-05T07:08:00+02:00: Combine Right-Side Taskbar Controls into Single Unified Pill (`nav#navigation`)
 
 - **Phase 1 (Comprehension)**: Combine all right-side taskbar containing elements inside `nav#navigation` (`Return to Hub`, `Notifications`, `System Tray Popover`, `Support`, `SystemClock`, and `ServicesDropdown`) into a single pill-shaped container (`gold-steel-border gold-steel-border-slim rounded-full`).

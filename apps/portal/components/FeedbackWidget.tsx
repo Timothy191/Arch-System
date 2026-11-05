@@ -251,7 +251,7 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
           )}
           title="Feedback & Support"
         >
-          <Logo className="h-3 w-3 shrink-0 text-[var(--accent-blue)]" />
+          <Logo className="h-3 w-3 shrink-0 rotate-180 text-[var(--accent-blue)]" />
           <span className="hidden sm:inline">Support</span>
         </button>
 
@@ -269,7 +269,7 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
           className="liquid-glass-light inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/90 px-3 font-medium text-[var(--text-heading)] text-xs opacity-80 shadow-diffusion-md backdrop-blur-md transition-all hover:opacity-100"
           title="Show Feedback Widget"
         >
-          <Logo className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+          <Logo className="h-3.5 w-3.5 rotate-180 text-[var(--accent-blue)]" />
           <span>Feedback</span>
         </button>
       </div>
@@ -284,7 +284,7 @@ export function FeedbackWidget({ variant = 'header', embedded = false }: Feedbac
           onClick={() => setIsOpen(true)}
           className="liquid-glass-light inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-white/95 px-3.5 font-semibold text-[var(--text-heading)] text-xs shadow-diffusion-md backdrop-blur-md transition-all hover:border-[var(--accent-blue)]/40"
         >
-          <Logo className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+          <Logo className="h-3.5 w-3.5 rotate-180 text-[var(--accent-blue)]" />
           <span>Feedback / Support</span>
         </button>
         <button

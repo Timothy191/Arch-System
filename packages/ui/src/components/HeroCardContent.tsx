@@ -175,6 +175,30 @@ function getHeroTelemetrySeries(
   }
 }
 
+const GRAPH_VIEWBOX_WIDTH = 360;
+const GRAPH_VIEWBOX_HEIGHT = 76;
+const GRAPH_PAD_LEFT = 32;
+const GRAPH_PAD_RIGHT = 8;
+const GRAPH_PAD_TOP = 6;
+const GRAPH_PAD_BOTTOM = 14;
+const GRAPH_MIN_OFFSET = 8;
+const GRAPH_MAX_OFFSET = 4;
+const GRAPH_BAR_HALF_W = 4;
+const GRAPH_BAR_W = 8;
+const GRAPH_BAR_MIN_H = 4;
+const GRAPH_BAR_RX = 2;
+const GRAPH_NODE_ACTIVE_SIZE = 11;
+const GRAPH_NODE_DEFAULT_SIZE = 8;
+const GRAPH_GRID_UPPER_RATIO = 0.28;
+const GRAPH_GRID_LOWER_RATIO = 0.62;
+const X_AXIS_TICKS: readonly { ratio: number; label: string }[] = [
+  { ratio: 0, label: '00:00' },
+  { ratio: 0.25, label: '03:00' },
+  { ratio: 0.5, label: '06:00' },
+  { ratio: 0.75, label: '09:00' },
+  { ratio: 1, label: 'NOW' },
+];
+
 function HeroTelemetryGraph({
   panelName,
   stats,
@@ -183,26 +207,32 @@ function HeroTelemetryGraph({
   stats?: { label: string; value: string };
 }) {
   const series = getHeroTelemetrySeries(panelName, stats);
-  const width = 360;
-  const height = 68;
-  const padX = 6;
-  const padY = 8;
-  const minVal = Math.min(...series.points) - 8;
-  const maxVal = Math.max(...series.points) + 4;
+  const width = GRAPH_VIEWBOX_WIDTH;
+  const height = GRAPH_VIEWBOX_HEIGHT;
+  const plotLeft = GRAPH_PAD_LEFT;
+  const plotRight = width - GRAPH_PAD_RIGHT;
+  const plotTop = GRAPH_PAD_TOP;
+  const plotBottom = height - GRAPH_PAD_BOTTOM;
+  const plotWidth = plotRight - plotLeft;
+  const plotHeight = plotBottom - plotTop;
+  const minVal = Math.min(...series.points) - GRAPH_MIN_OFFSET;
+  const maxVal = Math.max(...series.points) + GRAPH_MAX_OFFSET;
   const range = Math.max(maxVal - minVal, 1);
 
   const coords = series.points.map((pt, i) => {
-    const x = padX + (i / (series.points.length - 1)) * (width - padX * 2);
-    const y = height - padY - ((pt - minVal) / range) * (height - padY * 2);
+    const x = plotLeft + (i / (series.points.length - 1)) * plotWidth;
+    const y = plotBottom - ((pt - minVal) / range) * plotHeight;
     return { x, y, val: pt };
   });
 
   const linePath = coords
     .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
     .join(' ');
-  const firstX = (coords[0]?.x ?? padX).toFixed(1);
-  const lastX = (coords[coords.length - 1]?.x ?? width - padX).toFixed(1);
-  const areaPath = `${linePath} L ${lastX} ${height} L ${firstX} ${height} Z`;
+  const firstX = (coords[0]?.x ?? plotLeft).toFixed(1);
+  const lastX = (coords[coords.length - 1]?.x ?? plotRight).toFixed(1);
+  const areaPath = `${linePath} L ${lastX} ${plotBottom} L ${firstX} ${plotBottom} Z`;
+  const upperGridY = plotTop + plotHeight * GRAPH_GRID_UPPER_RATIO;
+  const lowerGridY = plotTop + plotHeight * GRAPH_GRID_LOWER_RATIO;
 
   return (
     <div
@@ -210,13 +240,13 @@ function HeroTelemetryGraph({
       data-testid={`hero-telemetry-graph-${panelName}`}
     >
       <div
-        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-3 py-2 shadow-2xs backdrop-blur-md"
+        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/95 px-3 py-2 shadow-2xs backdrop-blur-md"
         data-testid={`hero-telemetry-box-${panelName}`}
       >
         <div className="relative z-10 mb-1 flex items-center justify-between gap-2 pb-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
             <span
-              className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green"
               aria-hidden="true"
             />
             <h3 className="truncate font-anurati font-bold text-[var(--text-heading)] text-xs leading-snug tracking-wider sm:text-sm">
@@ -224,11 +254,11 @@ function HeroTelemetryGraph({
             </h3>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-emerald-700">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 font-bold font-mono text-[9px] text-emerald-800">
               <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
               {series.deltaBadge}
             </span>
-            <span className="hidden items-center rounded-full border border-slate-300/60 bg-slate-900/5 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-800 tabular-nums sm:inline-flex">
+            <span className="hidden items-center rounded-full border border-slate-300/80 bg-slate-100 px-1.5 py-0.5 font-bold font-mono text-[9px] text-slate-900 tabular-nums sm:inline-flex">
               {series.currentValue}
             </span>
           </div>
@@ -241,29 +271,19 @@ function HeroTelemetryGraph({
           className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
         />
 
-        {/* Animated scanline effect */}
-        <div
-          className="pointer-events-none absolute inset-0 animate-scanline opacity-30"
-          style={{
-            background:
-              'linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.1) 50%, transparent 100%)',
-          }}
-        />
-
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="relative z-10 h-14 w-full overflow-visible"
+          className="relative z-10 h-16 w-full overflow-visible"
           role="img"
           aria-label={`${series.title} telemetry trend graph`}
         >
           <defs>
             <linearGradient id={series.fillId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={series.strokeColor} stopOpacity="0.32" />
-              <stop offset="100%" stopColor={series.strokeColor} stopOpacity="0.02" />
+              <stop offset="0%" stopColor={series.strokeColor} stopOpacity="0.28" />
+              <stop offset="100%" stopColor={series.strokeColor} stopOpacity="0.03" />
             </linearGradient>
-            {/* Glow filter for neon effect */}
             <filter id={`glow-${series.fillId}`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -271,58 +291,136 @@ function HeroTelemetryGraph({
             </filter>
           </defs>
 
-          {/* Subtle horizontal reference grid lines */}
+          {/* Y-Axis Line & Tick Labels */}
+          <g data-testid="hero-graph-y-axis">
+            <line
+              x1={plotLeft}
+              y1={plotTop}
+              x2={plotLeft}
+              y2={plotBottom}
+              stroke="#64748b"
+              strokeWidth="1"
+            />
+            <line
+              x1={plotLeft - 3}
+              y1={upperGridY}
+              x2={plotLeft}
+              y2={upperGridY}
+              stroke="#64748b"
+              strokeWidth="1"
+            />
+            <line
+              x1={plotLeft - 3}
+              y1={lowerGridY}
+              x2={plotLeft}
+              y2={lowerGridY}
+              stroke="#64748b"
+              strokeWidth="1"
+            />
+            <text
+              x={plotLeft - 4}
+              y={upperGridY + 2.5}
+              textAnchor="end"
+              fill="#0f172a"
+              fontSize="7"
+              fontFamily="monospace"
+              fontWeight="700"
+            >
+              {series.peakValue}
+            </text>
+            <text
+              x={plotLeft - 4}
+              y={lowerGridY + 2.5}
+              textAnchor="end"
+              fill="#1e293b"
+              fontSize="7"
+              fontFamily="monospace"
+              fontWeight="700"
+            >
+              {series.avgValue}
+            </text>
+          </g>
+
+          {/* Horizontal reference grid lines */}
           <line
-            x1={padX}
-            y1={height * 0.25}
-            x2={width - padX}
-            y2={height * 0.25}
-            stroke="currentColor"
-            className="text-slate-200/80"
+            x1={plotLeft}
+            y1={upperGridY}
+            x2={plotRight}
+            y2={upperGridY}
+            stroke="#cbd5e1"
             strokeDasharray="3 3"
             strokeWidth="0.75"
           />
           <line
-            x1={padX}
-            y1={height * 0.6}
-            x2={width - padX}
-            y2={height * 0.6}
-            stroke="currentColor"
-            className="text-slate-200/80"
+            x1={plotLeft}
+            y1={lowerGridY}
+            x2={plotRight}
+            y2={lowerGridY}
+            stroke="#cbd5e1"
             strokeDasharray="3 3"
             strokeWidth="0.75"
           />
 
-          {/* Animated background telemetry bars */}
+          {/* X-Axis Line & Time Ticks */}
+          <g data-testid="hero-graph-x-axis">
+            <line
+              x1={plotLeft}
+              y1={plotBottom}
+              x2={plotRight}
+              y2={plotBottom}
+              stroke="#64748b"
+              strokeWidth="1"
+            />
+            {X_AXIS_TICKS.map((tick) => {
+              const tickX = plotLeft + tick.ratio * plotWidth;
+              const anchor = tick.ratio === 0 ? 'start' : tick.ratio === 1 ? 'end' : 'middle';
+              return (
+                <g key={tick.label}>
+                  <line
+                    x1={tickX}
+                    y1={plotBottom}
+                    x2={tickX}
+                    y2={plotBottom + 2.5}
+                    stroke="#64748b"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={tickX}
+                    y={height - 2}
+                    textAnchor={anchor}
+                    fill="#0f172a"
+                    fontSize="7"
+                    fontFamily="monospace"
+                    fontWeight="700"
+                  >
+                    {tick.label}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Precision telemetry column bars */}
           {coords.map((c, i) => {
-            const barHeight = Math.max(height - padY - c.y, 4);
+            const barHeight = Math.max(plotBottom - c.y, GRAPH_BAR_MIN_H);
             return (
               <rect
                 key={i}
-                x={c.x - 4}
+                x={c.x - GRAPH_BAR_HALF_W}
                 y={c.y}
-                width={8}
+                width={GRAPH_BAR_W}
                 height={barHeight}
-                rx={2}
+                rx={GRAPH_BAR_RX}
                 fill={series.strokeColor}
-                fillOpacity={i === coords.length - 1 ? 0.22 : 0.08}
-                className={i === coords.length - 1 ? 'motion-safe:animate-pulse' : ''}
-                style={{
-                  animationDuration: '2s',
-                  animationDelay: `${i * 0.1}s`,
-                }}
+                fillOpacity={i === coords.length - 1 ? 0.24 : 0.1}
               />
             );
           })}
 
           {/* Shaded area under curve */}
-          <path
-            d={areaPath}
-            fill={`url(#${series.fillId})`}
-            className="motion-safe:animate-telemetry-fade-in"
-          />
+          <path d={areaPath} fill={`url(#${series.fillId})`} />
 
-          {/* Smooth telemetry polyline with glow and draw animation */}
+          {/* Smooth telemetry polyline */}
           <path
             d={linePath}
             fill="none"
@@ -331,13 +429,12 @@ function HeroTelemetryGraph({
             strokeLinecap="round"
             strokeLinejoin="round"
             filter={`url(#glow-${series.fillId})`}
-            className="motion-safe:animate-draw-line"
           />
 
-          {/* Data nodes: Small Arch-System logo icons with pulse */}
+          {/* Data nodes: Small Arch-System logo icons */}
           {coords.map((c, i) => {
             const isLast = i === coords.length - 1;
-            const iconSize = isLast ? 11 : 8;
+            const iconSize = isLast ? GRAPH_NODE_ACTIVE_SIZE : GRAPH_NODE_DEFAULT_SIZE;
             return (
               <svg
                 key={i}
@@ -348,11 +445,6 @@ function HeroTelemetryGraph({
                 viewBox="22.75 16.625 166.16 166.19"
                 aria-hidden="true"
                 data-testid="hero-graph-arch-node"
-                className={isLast ? 'motion-safe:animate-pulse' : ''}
-                style={{
-                  animationDuration: '1.5s',
-                  animationDelay: `${i * 0.05}s`,
-                }}
               >
                 <path
                   d="m 105.8125,16.625 c -7.39687,18.135158 -11.858304,29.997682 -20.09375,47.59375 5.04936,5.35232 11.247211,11.585364 21.3125,18.625 C 96.210077,78.390904 88.828713,73.920352 83.3125,69.28125 72.7727,91.274163 56.259864,122.60209 22.75,182.8125 49.087628,167.60733 69.504089,158.23318 88.53125,154.65625 87.714216,151.1422 87.2497,147.34107 87.28125,143.375 l 0.03125,-0.84375 c 0.417917,-16.87382 9.195665,-29.84979 19.59375,-28.96875 10.39809,0.88104 18.48041,15.28242 18.0625,32.15625 -0.0786,3.17512 -0.43674,6.22955 -1.0625,9.0625 18.82058,3.68164 39.01873,13.03179 65,28.03125 -5.123,-9.4318 -9.69572,-17.93388 -14.0625,-26.03125 -6.87839,-5.33121 -14.05289,-12.2698 -28.6875,-19.78125 10.05899,2.61375 17.2611,5.62932 22.875,9 C 124.63297,63.338161 121.03766,52.354109 105.8125,16.625 z"
@@ -368,13 +460,11 @@ function HeroTelemetryGraph({
           })}
         </svg>
 
-        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[9px] text-slate-500 tabular-nums">
-          <span>00:00 SHIFT START</span>
-          <span>AVG {series.avgValue}</span>
-          <span>PEAK {series.peakValue}</span>
-          <span className="font-semibold text-emerald-700 motion-safe:animate-pulse">
-            LIVE · NOW
-          </span>
+        <div className="relative z-10 flex items-center justify-between border-slate-200 border-t pt-1 font-bold font-mono text-[9.5px] text-slate-900 tabular-nums">
+          <span className="font-bold text-slate-900">00:00 SHIFT START</span>
+          <span className="font-bold text-slate-900">AVG {series.avgValue}</span>
+          <span className="font-bold text-slate-900">PEAK {series.peakValue}</span>
+          <span className="font-extrabold text-emerald-800">LIVE · NOW</span>
         </div>
       </div>
     </div>
@@ -478,41 +568,54 @@ export function HeroOperationalKpiStrip({
   return (
     <div
       className={cn(
-        'liquid-glass-light gold-steel-border gold-steel-border-slim grid grid-cols-1 gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3.5 py-2 shadow-2xs backdrop-blur-md sm:grid-cols-3 sm:gap-3',
+        'liquid-glass-light gold-steel-border gold-steel-border-slim grid grid-cols-1 gap-2 rounded-xl border border-slate-300/90 bg-white/95 px-4 py-2.5 shadow-sm backdrop-blur-md sm:grid-cols-3 sm:gap-0',
         className
       )}
       data-testid={`hero-kpi-strip-${panelName}`}
       aria-label="Operational subsystem indicators"
     >
       {tiles.map((tile, index) => (
-        <div key={tile.label} className="flex min-w-0 items-center justify-between gap-2 py-0.5">
-          <div className="flex min-w-0 items-center gap-2">
-            {index > 0 && (
+        <div
+          key={tile.label}
+          className={cn(
+            'flex min-w-0 items-center justify-between gap-3 py-1',
+            index > 0 && 'sm:border-slate-200/90 sm:border-l sm:pl-4',
+            index < tiles.length - 1 && 'sm:pr-4'
+          )}
+        >
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex items-center gap-1.5">
+              {index > 0 && (
+                <span
+                  aria-hidden="true"
+                  data-testid="hero-kpi-gold-separator"
+                  className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-[10px] text-accent-amber sm:inline-flex"
+                >
+                  |
+                </span>
+              )}
               <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"
                 aria-hidden="true"
-                data-testid="hero-kpi-gold-separator"
-                className="hidden shrink-0 select-none items-center justify-center font-bold font-mono text-accent-amber text-xs drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] sm:inline-flex"
-              >
-                |
+              />
+              <span className="truncate font-bold font-mono text-[10px] text-slate-700 uppercase tracking-wider">
+                {tile.label}
               </span>
-            )}
-            <span className="truncate font-bold font-mono text-[10px] text-slate-900 tracking-wide">
-              {tile.label}
-            </span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
+                {tile.value}
+              </span>
+            </div>
           </div>
-          <div className="flex shrink-0 items-baseline gap-1.5">
-            <span className="font-bold font-mono text-slate-950 text-xs tabular-nums sm:text-[13px]">
-              {tile.value}
-            </span>
-            <span
-              aria-hidden="true"
-              className="select-none font-bold font-mono text-[10px] text-accent-amber"
-            >
-              |
-            </span>
-            <span className="font-mono font-semibold text-[10px] text-[var(--accent-blue)]">
+
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span className="inline-flex items-center rounded-md border border-blue-200/90 bg-blue-50/90 px-2 py-0.5 font-bold font-mono text-[10px] text-blue-950">
               {tile.subtext}
             </span>
+            <div className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">
+              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-accent-amber to-emerald-500" />
+            </div>
           </div>
         </div>
       ))}
@@ -625,19 +728,9 @@ export function HeroCardContent({
               className="relative z-10 mb-1.5 h-px w-full bg-gradient-to-r from-accent-amber/65 via-slate-200 to-transparent"
             />
             <div className="relative">
-              <p className="max-w-[95%] font-medium text-[var(--text-heading)] text-xs leading-relaxed tracking-[0.02em] opacity-80 sm:text-sm">
+              <p className="max-w-[95%] font-medium text-slate-800 text-xs leading-relaxed tracking-[0.01em] sm:text-sm">
                 {assetSubtitle}
               </p>
-              {/* Golden shimmer animation - left to right */}
-              <div className="pointer-events-none absolute -bottom-1.5 left-0 h-px w-full overflow-hidden">
-                <div
-                  className="absolute inset-0 animate-shimmer opacity-60"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)',
-                  }}
-                />
-              </div>
             </div>
           </div>
 

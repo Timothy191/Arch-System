@@ -345,6 +345,11 @@ describe('HeroRotator', () => {
     expect(centralBox).toContainElement(centralTitle);
     expect(drillingBox).toContainElement(drillingTitle);
     expect(productionBox).toContainElement(productionTitle);
+
+    // Assert explicit X and Y axes are rendered on all Hero Card telemetry graphs
+    expect(screen.getAllByTestId('hero-graph-x-axis')).toHaveLength(3);
+    expect(screen.getAllByTestId('hero-graph-y-axis')).toHaveLength(3);
+    expect(screen.getAllByText('00:00 SHIFT START')[0]).toHaveClass('font-bold', 'text-slate-900');
   });
 
   it('renders Plant & Processing slide and Wash Plant Throughput & Recovery telemetry', () => {

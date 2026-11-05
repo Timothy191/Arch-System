@@ -1,5 +1,19 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-05T07:27:00+02:00 - Hero Card Telemetry X/Y Axes, Darkened Strip Font, Corporate KPI Bar & Refined 3D Depth
+
+- **Phase 1 (Comprehension)**: Address design feedback on `/hub` Hero Cards (`HeroCardContent.tsx` and `HeroRotator.tsx`):
+  1. Darken the bottom telemetry strip font (`00:00 SHIFT START`, `AVG`, `PEAK`, `LIVE · NOW`) to `font-bold text-slate-900` and introduce explicit X and Y axes (`hero-graph-x-axis`, `hero-graph-y-axis`) with tick marks and labels on all Hero Card graphs.
+  2. Redesign `HeroOperationalKpiStrip` (`div[aria-label="Operational subsystem indicators"]`) into a corporate-ready 3-column executive telemetry bar with structured status badges and attainment bars.
+  3. Refine the 3D carousel effects and animation style in `HeroRotator.tsx` and `HeroCardContent.tsx` by removing artificial scanline/shimmer/pulsing bar gimmicks and adding realistic elevation shadows, inner specular rim lighting, and damped hardware cubic-bezier transitions.
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/HeroCardContent.tsx`, `packages/ui/src/components/HeroRotator.tsx`, and `libs/features/hub/ui/src/HeroRotator.test.tsx`.
+- **Phase 3 (Design)**:
+  - Added `hero-graph-y-axis` and `hero-graph-x-axis` SVG groups with tick marks and labels, and darkened the bottom telemetry strip in `HeroCardContent.tsx`.
+  - Redesigned `HeroOperationalKpiStrip` with corporate metric cells, status pills, and attainment bars.
+  - Upgraded `HeroRotator.tsx` 3D card elevation shadows, flank masks, and transition physics while removing artificial scanline/shimmer animations.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/hub/ui test -- --testPathPatterns="HeroRotator"` (18/18 PASS).
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/HeroCardContent.tsx` and `packages/ui/src/components/HeroRotator.tsx`.
+
 ## 2026-11-05T07:02:00+02:00 - Auto-Resize MacMenuBar Offset When DepartmentLayout Sidebar Expands
 
 - **Phase 1 (Comprehension)**: Prevent the top fixed `MacMenuBar` (`div.fixed.top-2`) and the `DepartmentLayout` sidebar (`w-60` / `240px`) from overlapping when the sidebar expands (`isPinned || isOpen`).

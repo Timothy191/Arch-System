@@ -112,11 +112,11 @@ function HeroSlide({
     cursorClass = 'cursor-pointer hover:opacity-95';
     maskStyle = {
       maskImage: isLeft
-        ? 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, black 22%)'
-        : 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, black 22%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.88) 18%, black 32%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.88) 18%, black 32%)',
       WebkitMaskImage: isLeft
-        ? 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, black 22%)'
-        : 'linear-gradient(to left, rgba(0,0,0,0.25) 0%, black 22%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.88) 18%, black 32%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.88) 18%, black 32%)',
     };
   } else if (isLeft2 || isRight2) {
     // Secondary left/right preview slides
@@ -126,16 +126,16 @@ function HeroSlide({
       : 'translate3d(85%, 0, -200px) rotateY(-18deg) scale(0.75)';
     opacity = 0.45;
     zIndex = 10;
-    filter = 'blur(1.5px)';
+    filter = 'blur(1px)';
     pointerEvents = 'auto';
     cursorClass = 'cursor-pointer hover:opacity-75';
     maskStyle = {
       maskImage: isLeft
-        ? 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, black 25%)'
-        : 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, black 25%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.2) 0%, black 28%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.2) 0%, black 28%)',
       WebkitMaskImage: isLeft
-        ? 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, black 25%)'
-        : 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, black 25%)',
+        ? 'linear-gradient(to right, rgba(0,0,0,0.2) 0%, black 28%)'
+        : 'linear-gradient(to left, rgba(0,0,0,0.2) 0%, black 28%)',
     };
   } else {
     // Far slides - keep hidden
@@ -158,6 +158,9 @@ function HeroSlide({
   // PERF: far slides are fully transparent; skip mounting their heavy content
   // (SVG glow filters, scanlines, pulses, backdrop blurs) until they rotate in.
   const isInVisibleSlot = isCenter || isLeft1 || isLeft2 || isRight1 || isRight2;
+  const cardElevationShadow = isCenter
+    ? '0 24px 48px -12px rgba(15, 23, 42, 0.2), 0 6px 16px -3px rgba(15, 23, 42, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9)'
+    : '0 14px 28px -8px rgba(15, 23, 42, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.65)';
 
   return (
     <div
@@ -180,7 +183,7 @@ function HeroSlide({
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
         transition:
-          'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
+          'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
         ...maskStyle,
       }}
     >
@@ -188,10 +191,11 @@ function HeroSlide({
         <div
           className={cn(
             'relative h-full w-full select-none overflow-hidden rounded-2xl',
-            'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/20 shadow-window',
-            'transition-[box-shadow,transform] duration-500 ease-mac-decelerate',
-            isCenter ? 'hover:-translate-y-1' : 'pointer-events-none'
+            'liquid-glass-light gold-steel-border gold-steel-border-slim border border-white/40 shadow-window',
+            'transition-[box-shadow,transform] duration-500 ease-out',
+            isCenter ? 'hover:-translate-y-0.5' : 'pointer-events-none'
           )}
+          style={{ boxShadow: cardElevationShadow }}
         >
           <HeroCardContent
             panel={panel}
@@ -360,11 +364,9 @@ export function HeroRotator({
               type="button"
               onClick={prevSlide}
               aria-label="Previous highlight"
-              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-left-4 sm:p-4 lg:-left-6"
+              className="pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-110 hover:text-amber-400 active:scale-95 sm:-left-4 sm:p-4 lg:-left-6"
               style={{
-                animationDuration: '3s',
-                filter:
-                  'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
+                filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}
             >
               <ArchEmblemIcon className="h-8 w-8 -rotate-90 transition-transform duration-300 sm:h-10 sm:w-10" />
@@ -373,12 +375,9 @@ export function HeroRotator({
               type="button"
               onClick={nextSlide}
               aria-label="Next highlight"
-              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-125 hover:text-amber-400 active:scale-95 motion-safe:animate-pulse sm:-right-4 sm:p-4 lg:-right-6"
+              className="pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 border-0 bg-transparent p-3 text-amber-500 shadow-none transition-all duration-300 hover:scale-110 hover:text-amber-400 active:scale-95 sm:-right-4 sm:p-4 lg:-right-6"
               style={{
-                animationDuration: '3s',
-                animationDelay: '1.5s',
-                filter:
-                  'drop-shadow(0 0 8px rgba(212,175,55,0.4)) drop-shadow(0 0 16px rgba(212,175,55,0.2))',
+                filter: 'drop-shadow(0 2px 6px rgba(15,23,42,0.22))',
               }}
             >
               <ArchEmblemIcon className="h-8 w-8 rotate-90 transition-transform duration-300 sm:h-10 sm:w-10" />
@@ -431,19 +430,19 @@ export function HeroRotator({
         </div>
       )}
 
-      {/* Animated Golden Separator between Hero Card selection and Bottom Core Operational Modules panel */}
+      {/* Golden Separator between Hero Card selection and Bottom Core Operational Modules panel */}
       <div
         data-testid="hero-bottom-golden-separator"
         aria-hidden="true"
         className="mx-auto mt-3.5 flex w-[92%] max-w-[1060px] items-center justify-center gap-2.5 sm:w-[88%] lg:w-[82%]"
       >
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber" />
         <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
-          <ArchEmblemIcon className="h-3 w-3 text-accent-amber motion-safe:animate-pulse" />
+        <span className="gold-steel-border gold-steel-border-slim flex h-5 w-5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/95 text-accent-amber shadow-2xs">
+          <ArchEmblemIcon className="h-3 w-3 text-accent-amber" />
         </span>
         <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+        <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber" />
       </div>
     </div>
   );

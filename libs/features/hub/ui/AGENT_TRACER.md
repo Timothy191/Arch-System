@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-05T07:27:00+02:00 - Verify Hero Card Telemetry X/Y Axes & High-Contrast Strip in HeroRotator Tests
+
+- **Purpose**: Add unit test assertions in `HeroRotator.test.tsx` verifying `hero-graph-x-axis`, `hero-graph-y-axis`, and darkened `00:00 SHIFT START` (`font-bold text-slate-900`) across Hero Cards.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Added assertions for X/Y axis groups and high-contrast footer classes.
+- **Verification**: `pnpm --filter @repo/hub/ui test -- --testPathPatterns="HeroRotator"` ✅ (18/18).
+
 ## 2026-11-02T19:20:00+02:00 - Redesign Site Footer Telemetry Strip (`DepartmentReviews.tsx`)
 
 - **Purpose**: Replace the distracting scrolling `<Marquee>` and nested gold-bordered pills in `DepartmentReviews.tsx` with a calm, static, scannable enterprise status telemetry strip (`SCADA Stream`, `Redis L1/L2`, `PostgreSQL RLS`, `Zero-Drift Policy`).

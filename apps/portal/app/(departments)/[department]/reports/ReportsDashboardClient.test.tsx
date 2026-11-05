@@ -218,10 +218,18 @@ describe('ReportsDashboardClient — PDF Report Subtab', () => {
     const pdfTabButton = screen.getByRole('tab', { name: /PDF Report/i });
     expect(pdfTabButton).toBeInTheDocument();
 
-    fireEvent.click(pdfTabButton);
+    // Verify Report View dropdown & Shift Filter dropdown are rendered
+    const viewDropdown = screen.getByTestId('report-view-dropdown');
+    expect(viewDropdown).toHaveValue('shift');
+    const shiftDropdown = screen.getByTestId('shift-filter-dropdown');
+    expect(shiftDropdown).toHaveValue('all');
+
+    fireEvent.change(viewDropdown, { target: { value: 'pdf-report' } });
+    expect(viewDropdown).toHaveValue('pdf-report');
 
     const previewContainer = screen.getByTestId('shift-pdf-report-preview');
     expect(previewContainer).toBeInTheDocument();
+    expect(within(previewContainer).getByText(/ISO A4 · 210 × 297 mm/i)).toBeInTheDocument();
 
     // Verify all required streamlined column headers exist
     expect(
