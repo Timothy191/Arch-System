@@ -3145,3 +3145,150 @@ export function protectEmployeeSecrets(
   return record;
 }
 ```
+
+---
+
+# Section 30: Next.js Rendering Environments, Server Components & Streaming
+
+> **Source**: [Next.js Rendering Fundamentals](https://nextjs.org/docs/14/app/building-your-application/rendering) & [Server Components Guide](https://nextjs.org/docs/14/app/building-your-application/rendering/server-components)  
+> **Key Focus Areas**: Environments (Server vs. Client), Request-Response Lifecycle, Network Boundary, Server Components (benefits, execution, RSC Payload), Server Rendering Strategies (Static, Dynamic, Streaming with React Suspense), Hydration, and Dynamic Routes with Cached Data.
+
+---
+
+## 1. Fundamentals: Environments, Lifecycle & The Network Boundary
+
+### 1.1 Rendering Environments
+
+- **Server**: Cloud runtime (Node.js 24/26 / Vercel Serverless / Fluid Compute) where application logic executes close to the Supabase Postgres database, Redis cluster, and SCADA OPC UA / Modbus gateways. Secrets and service credentials live exclusively here.
+- **Client**: Browser runtime on mining dispatch terminals, field tablets, and mobile devices executing React 19 for interactive state and transitions.
+- **Unidirectional Code Flow**: In Next.js hybrid architecture, response data flows strictly from the server module graph to the client module graph. Interactivity triggers _new_ requests (Server Actions or navigation transitions) rather than mutating server state in-place.
+
+### 1.2 The Network Boundary
+
+- The **Network Boundary** divides the server module graph from the client module graph.
+- Defined by React’s `'use client'` boundary directive: components declaring `'use client'` are packaged into client JavaScript bundles and hydrated in the browser.
+- Components without `'use client'` remain **Server Components** by default: their code, private helpers, and heavy dependencies are executed entirely on the server and never shipped to the browser.
+- **Interleaving**: Server Components can pass rendered children or serializable props across the boundary into Client Components (`<ClientComponent><ServerComponent /></ClientComponent>`).
+
+### 1.3 How Server Components are Rendered
+
+On the server, Next.js orchestrates rendering in chunks:
+
+1. **RSC Payload Generation**: React renders Server Components into the React Server Component (RSC) Payload—a compact streamable representation containing rendered component output, props, and client placeholder references.
+2. **HTML Generation**: Next.js combines the RSC Payload with Client Component instructions to produce initial HTML for instant First Contentful Paint (FCP).
+3. **Client Reconcile & Hydrate**: The browser displays the fast non-interactive HTML shell immediately, parses the RSC Payload to build the virtual DOM, and hydrates (`hydrateRoot`) Client Components for interactivity.
+
+---
+
+## 2. Server Rendering Strategies
+
+```
+                   ┌───────────────────────────────┐
+                   │    Server Rendering Spectrum   │
+                   └──────────────┬────────────────┘
+                                  │
+         ┌────────────────────────┼────────────────────────┐
+         ▼                        ▼                        ▼
+ ┌───────────────┐        ┌───────────────┐        ┌───────────────┐
+ │ Static (SSG)  │        │ Dynamic (SSR) │        │   Streaming   │
+ ├───────────────┤        ├───────────────┤        ├───────────────┤
+ │ Pre-rendered  │        │ Per-request   │        │ Progressive   │
+ │ at build time │        │ execution for │        │ chunks via    │
+ │ or cached     │        │ user-specific │        │ <Suspense> &  │
+ │ across users  │        │ cookies/query │        │ loading.tsx   │
+ └───────────────┘        └───────────────┘        └───────────────┘
+```
+
+### 2.1 Static Rendering
+
+- Routes without dynamic request parameters (`cookies()`, `headers()`, or `searchParams`) and with cached data fetches are pre-rendered at build time or cached at CDN edges.
+- In Next.js 16 under `cacheComponents: true`, static rendering is unified through Cache Components (`'use cache'` + `cacheLife()`).
+
+### 2.2 Dynamic Rendering
+
+- Routes relying on runtime user claims, session cookies (`auth-token`), or URL search parameters run dynamically at request time.
+- **Spectrum Architecture (Dynamic Routes with Cached Data)**: Routes are rarely 100% static or 100% dynamic. In Arch-System, route segments fetch dynamic user session data while sharing cached machine telemetry, department schedules, and layout structures (`cachedRSC`).
+
+### 2.3 Streaming with Suspense
+
+- Rather than blocking an entire page while slow SCADA telemetry or external ERP integrations respond, Streaming splits the response into progressive chunks.
+- Route-level streaming is handled via `loading.tsx` app shell boundaries.
+- Component-level streaming isolates slow data widgets using `<Suspense fallback={<Skeleton />}>`, streaming resolved UI chunks down the active HTTP connection as they become ready.
+
+---
+
+## 3. Arch-System Codebase Audit & Architectural Invariants
+
+| Principle                             | Monorepo Implementation Status | Monorepo Invariant & Location                                                                                                                                                                  |
+| :------------------------------------ | :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Server Components by Default**      | **100% Enforced**              | All route definitions in `apps/portal/app/` are Server Components. `'use client'` is restricted to leaf components (`packages/ui`, interactive forms).                                         |
+| **Network Boundary Separation**       | **Machine-Enforced**           | `tools/repo/policy-compiler.cjs` enforces that `@repo/database` and server data-access modules are never imported across client boundaries.                                                    |
+| **Zero Heavy Dependencies on Client** | **100% Enforced**              | PDF generation (`@react-pdf/renderer`), SQL engines (`kysely`), and crypto libraries run server-side or are dynamically loaded via `Promise.all` inside Server Actions.                        |
+| **Dynamic Routes with Cached Data**   | **100% Adopted**               | `apps/portal/lib/dept-context.ts` uses `React.cache()` for per-request deduplication; `apps/portal/lib/server-cache.ts` provides multi-tier Redis/RSC caching.                                 |
+| **Streaming UI Suspense Skeletons**   | **100% Adopted**               | `ControlRoomWidgets.tsx`, `ShiftCloseoutForm.tsx`, and `MachineOperationsFilterableTable.tsx` use isolated Suspense boundaries.                                                                |
+| **Runtime Selection**                 | **Node.js 24/26 Standard**     | Monorepo uses Node.js server runtime (`nodejs`) for full compatibility with Kysely, Redis clusters, and binary cryptoprocessors. Edge runtime is restricted to lightweight middleware/proxies. |
+
+---
+
+## 4. Production Recipe: Streaming Server Component with Isolated Suspense
+
+```tsx
+// apps/portal/app/(departments)/[department]/reports/StreamingReportView.tsx
+import { Suspense } from 'react';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getDepartmentContext } from '~/lib/dept-context';
+
+async function SlowScadaTelemetryFeed({ deptId }: { deptId: string }) {
+  // Heavy data fetch from industrial telemetry database
+  const { supabase } = await getDepartmentContext({ department: deptId });
+  const { data: telemetry } = await supabase
+    .from('telemetry_records')
+    .select('sensor_id, value, status')
+    .eq('department_id', deptId)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {telemetry?.map((record) => (
+        <GlassCard key={record.sensor_id} className="p-3">
+          <div className="text-xs text-text-muted">{record.sensor_id}</div>
+          <div className="text-lg font-bold">{record.value}</div>
+        </GlassCard>
+      ))}
+    </div>
+  );
+}
+
+export default async function DepartmentReportPage({
+  params,
+}: {
+  params: Promise<{ department: string }>;
+}) {
+  const { department } = await params;
+  const { deptId } = await getDepartmentContext({ department });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight capitalize">
+          {department} Industrial Telemetry
+        </h1>
+      </div>
+
+      {/* Fast static shell renders immediately; slow telemetry streams progressively */}
+      <Suspense
+        fallback={
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-20 animate-pulse rounded-card bg-bg-tertiary" />
+            ))}
+          </div>
+        }
+      >
+        <SlowScadaTelemetryFeed deptId={deptId} />
+      </Suspense>
+    </div>
+  );
+}
+```

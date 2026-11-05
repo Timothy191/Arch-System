@@ -988,3 +988,4 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 - [2026-11-05T11:24:39Z] Added Section 28 (MDX, @next/mdx, remark, rehype & Markdoc ecosystem assessment) to optimization.md, Markdown/MDX heading-aware RAG chunking (findMarkdownHeadingBoundary) to apps/portal/lib/ai/chunking.ts, and trailing newline formatting to tools/scripts/token-tracker.cjs.
   2026-11-05T14:02:00+02:00 root: ignore .pnpm-store in biome.json and .gitignore for Vercel remote builds
   2026-11-05T14:06:00+02:00 docs: add Section 29 Data Fetching Patterns and Best Practices to optimization.md and register agent rule
+  2026-11-05T14:08:00+02:00 docs: add Section 30 Rendering Environments and RSC to optimization.md and register agent rule
