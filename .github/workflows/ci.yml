@@ -281,6 +281,20 @@ jobs:
           # Coverage thresholds live in apps/portal/jest.config.cjs. Run that
           # suite explicitly so --coverage is forwarded to Jest, not Turbo.
           pnpm --filter portal test -- --coverage --passWithNoTests
+
+      - name: Bundle Graph Snapshot (Turbopack)
+        run: |
+          mkdir -p .ci-local
+          pnpm --filter portal exec next analyze --output --snapshot latest
+          pnpm --filter portal exec next analyze export --snapshot latest > .ci-local/bundle-graph.jsonl
+        env:
+          CI: true
+          ANALYZE: true
+
+      - name: Turbo Build Graph
+        run: |
+          mkdir -p .ci-local
+          pnpm turbo run build --graph > .ci-local/turbo-graph.txt 2>&1 || true
         env:
           CI: true
 
