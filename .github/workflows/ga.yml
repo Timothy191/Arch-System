@@ -30,7 +30,7 @@ jobs:
         run: node -v | grep '^v24\.' || (echo "Node 24 required"; exit 1)
 
       - name: Install pnpm
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 9.15.9
           run_install: false
@@ -77,7 +77,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install pnpm
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 9.15.9
           run_install: false
