@@ -310,3 +310,8 @@ input.gold-steel-border:focus {
     background-position: 50% 50%;
   }
 }
+
+.cv-auto-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}

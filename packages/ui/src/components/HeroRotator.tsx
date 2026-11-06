@@ -222,6 +222,7 @@ export function HeroRotator({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
+  const [isDocumentHidden, setIsDocumentHidden] = useState(false);
   const [failedImages, setFailedImages] = useState(new Set<string>());
   const touchStartX = useRef<number | null>(null);
 
@@ -249,10 +250,19 @@ export function HeroRotator({
   }, []);
 
   useEffect(() => {
-    if (total <= 1 || isHovering || isManuallyPaused) return;
+    if (typeof document === 'undefined') return;
+    const handleVisibilityChange = () => {
+      setIsDocumentHidden(document.visibilityState === 'hidden');
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (total <= 1 || isHovering || isManuallyPaused || isDocumentHidden) return;
     const id = setInterval(nextSlide, CONFIG.autoRotateMs);
     return () => clearInterval(id);
-  }, [total, isHovering, isManuallyPaused, nextSlide]);
+  }, [total, isHovering, isManuallyPaused, isDocumentHidden, nextSlide]);
 
   useEffect(() => {
     const activePanel = panels[activeIndex];

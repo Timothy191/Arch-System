@@ -37,7 +37,9 @@ export const SPECULATION_RULES_PAYLOAD = {
           { not: { selector_matches: '[rel~=nofollow], [data-no-speculate]' } },
         ],
       },
-      eagerness: 'moderate',
+      // Two-tier speculation: prerender on pointerdown ('conservative') to avoid wasted
+      // headless-tab RAM on casual cursor sweeps while preserving 0ms navigation on click.
+      eagerness: 'conservative',
     },
   ],
   prefetch: [

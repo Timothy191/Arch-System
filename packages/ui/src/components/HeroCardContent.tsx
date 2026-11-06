@@ -844,24 +844,27 @@ export function HeroCardContent({
             : rawVideoSrc;
 
           return (
-            <video
-              key={resolvedVideoSrc}
-              src={resolvedVideoSrc}
-              poster={posterSrc}
-              aria-label={`${panel.title} visual`}
-              data-testid={`hero-video-${panel.name}`}
-              autoPlay={isActive}
-              loop
-              muted
-              playsInline
-              preload={isActive ? 'metadata' : 'none'}
-              className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
-              onError={() => {
-                if (!failedImages.has(rawVideoSrc)) {
-                  onImageError(rawVideoSrc);
-                }
-              }}
-            />
+            <>
+              {isActive && <link rel="preload" as="image" href={posterSrc} fetchPriority="high" />}
+              <video
+                key={resolvedVideoSrc}
+                src={resolvedVideoSrc}
+                poster={posterSrc}
+                aria-label={`${panel.title} visual`}
+                data-testid={`hero-video-${panel.name}`}
+                autoPlay={isActive}
+                loop
+                muted
+                playsInline
+                preload={isActive ? 'metadata' : 'none'}
+                className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
+                onError={() => {
+                  if (!failedImages.has(rawVideoSrc)) {
+                    onImageError(rawVideoSrc);
+                  }
+                }}
+              />
+            </>
           );
         })()}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />

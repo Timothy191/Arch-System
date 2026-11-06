@@ -8,6 +8,7 @@ import {
   evaluateNoOverlap,
   evaluateRightOf,
   expectGalenLayout,
+  RESPONSIVELY_MINING_VIEWPORTS,
 } from '../helpers/galen-layout';
 
 // AGENT-TRACE: The /login test must run unauthenticated or the auth middleware
@@ -16,7 +17,8 @@ import {
 test.describe('Visual Regression & Galen Spatial Layout Specs', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Galen Spatial Engine - Deterministic Geometry Invariants', async () => {
+  test('Galen Spatial Engine & Responsively Mining Viewports - Deterministic Geometry Invariants', async () => {
+    expect(RESPONSIVELY_MINING_VIEWPORTS).toHaveLength(4);
     const headerRect = { x: 0, y: 0, width: 1280, height: 64 };
     const logoRect = { x: 24, y: 16, width: 140, height: 32 };
     const clockRect = { x: 1120, y: 16, width: 120, height: 32 };

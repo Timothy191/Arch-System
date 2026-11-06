@@ -94,11 +94,18 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   const validCaches = new Set([CACHE_NAME, MEDIA_CACHE_NAME]);
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.filter((name) => !validCaches.has(name)).map((name) => caches.delete(name))
-      );
-    })
+    Promise.all([
+      caches
+        .keys()
+        .then((cacheNames) =>
+          Promise.all(
+            cacheNames.filter((name) => !validCaches.has(name)).map((name) => caches.delete(name))
+          )
+        ),
+      self.registration?.navigationPreload
+        ? self.registration.navigationPreload.enable().catch(() => {})
+        : Promise.resolve(),
+    ])
   );
   self.clients.claim();
 });
@@ -151,18 +158,25 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Network-first for HTML page navigations & Next.js RSC payloads so live deployments
-  // are never shadowed by stale cached pages; fall back to cache only when offline.
+  // are never shadowed by stale cached pages; consume Navigation Preload when available.
   if (isNavigationOrRsc) {
     event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
+      (async () => {
+        try {
+          const preloadResponse =
+            event.request.mode === 'navigate' && event.preloadResponse
+              ? await event.preloadResponse
+              : null;
+          const networkResponse = preloadResponse || (await fetch(event.request));
           if (networkResponse.status === HTTP_OK_STATUS) {
             const copy = networkResponse.clone();
             void putWithCacheBounds(event.request, copy, CACHE_NAME);
           }
           return networkResponse;
-        })
-        .catch(() => caches.match(event.request))
+        } catch {
+          return caches.match(event.request);
+        }
+      })()
     );
     return;
   }

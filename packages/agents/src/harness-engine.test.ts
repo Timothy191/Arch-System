@@ -4,7 +4,10 @@ jest.mock('@babel/core', () => ({ parseSync: () => null, traverse: () => undefin
 
 import {
   AgentRoutineRegistry,
+  auditErasableTypeScript,
+  CrossModuleOutboxLedger,
   evaluateAtomicFeatureCapability,
+  evaluateDomainBusinessRules,
   HARNESS_GEMINI_TIER_MAP,
   IdempotentCallLedger,
   runHarnessDoctor,
@@ -298,6 +301,73 @@ Verify with pnpm test and pnpm agent:verify.
 
       expect(validProposal.approvedForExecution).toBe(true);
       expect(validProposal.violations).toHaveLength(0);
+    });
+  });
+
+  describe('Given DDD DomainBusinessRule & CrossModuleOutboxLedger (kgrzybek/modular-monolith-with-ddd pattern)', () => {
+    it('When evaluating business rules and dispatching cross-department outbox events, Then broken rules are caught and inbox processing is idempotent', () => {
+      const ruleReport = evaluateDomainBusinessRules([
+        {
+          ruleCode: 'SHIFT_CLOSEOUT_UNRESOLVED_BREAKDOWN',
+          message: 'Shift cannot close while critical haul truck breakdown is open',
+          isBroken: () => true,
+        },
+        {
+          ruleCode: 'MACHINE_HOURS_MONOTONIC',
+          message: 'Closing SMR hours must exceed opening SMR hours',
+          isBroken: () => false,
+        },
+      ]);
+
+      expect(ruleReport.passed).toBe(false);
+      expect(ruleReport.brokenRules).toHaveLength(1);
+      expect(ruleReport.brokenRules[0]?.ruleCode).toBe('SHIFT_CLOSEOUT_UNRESOLVED_BREAKDOWN');
+
+      const outboxLedger = new CrossModuleOutboxLedger();
+      outboxLedger.enqueueOutboxEvent({
+        eventId: 'evt-breakdown-101',
+        sourceDepartment: 'control-room',
+        targetDepartment: 'engineering',
+        eventType: 'critical_breakdown_logged',
+        payloadJson: '{"machineId":"CAT-777G-04"}',
+      });
+
+      const receivedEvents: string[] = [];
+      const firstRunCount = outboxLedger.processPendingForDepartment('engineering', (event) => {
+        receivedEvents.push(event.eventId);
+      });
+      expect(firstRunCount).toBe(1);
+      expect(receivedEvents).toEqual(['evt-breakdown-101']);
+
+      // Re-enqueue duplicate event ID and verify idempotent inbox deduplication
+      outboxLedger.enqueueOutboxEvent({
+        eventId: 'evt-breakdown-101',
+        sourceDepartment: 'control-room',
+        targetDepartment: 'engineering',
+        eventType: 'critical_breakdown_logged',
+        payloadJson: '{"machineId":"CAT-777G-04"}',
+      });
+      const replayCount = outboxLedger.processPendingForDepartment('engineering', (event) => {
+        receivedEvents.push(event.eventId);
+      });
+      expect(replayCount).toBe(0);
+      expect(receivedEvents).toHaveLength(1);
+    });
+  });
+
+  describe('Given auditErasableTypeScript (webjsdev/webjs Node 24+ erasable syntax pattern)', () => {
+    it('When source contains runtime enum or namespace, Then it flags non-erasable constructs while passing as-const unions', () => {
+      const nonErasable = auditErasableTypeScript(
+        'export enum ShiftStatus { Open = "OPEN" }\nnamespace Legacy {}'
+      );
+      expect(nonErasable.isErasableCompliant).toBe(false);
+      expect(nonErasable.violations).toHaveLength(2);
+
+      const erasable = auditErasableTypeScript(
+        "export const SHIFT_STATUS = { open: 'OPEN' } as const;\nexport type ShiftStatus = (typeof SHIFT_STATUS)[keyof typeof SHIFT_STATUS];"
+      );
+      expect(erasable.isErasableCompliant).toBe(true);
+      expect(erasable.violations).toHaveLength(0);
     });
   });
 });

@@ -183,6 +183,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
         <link
+          rel="preconnect"
+          href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
+          crossOrigin="anonymous"
+        />
+        <link
           rel="dns-prefetch"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />

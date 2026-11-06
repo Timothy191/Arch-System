@@ -6,14 +6,14 @@ import {
 } from './SpeculationRules';
 
 describe('SpeculationRules', () => {
-  it('renders a <script type="speculationrules"> tag with moderate eagerness for department routes', () => {
+  it('renders a <script type="speculationrules"> tag with two-tier eagerness (conservative prerender, moderate prefetch)', () => {
     const { container } = render(<SpeculationRules />);
     const scriptEl = container.querySelector('script[type="speculationrules"]');
     expect(scriptEl).not.toBeNull();
     expect(scriptEl?.innerHTML).toBe(SPECULATION_RULES_JSON);
 
     const parsed = JSON.parse(scriptEl?.innerHTML ?? '{}');
-    expect(parsed.prerender[0].eagerness).toBe('moderate');
+    expect(parsed.prerender[0].eagerness).toBe('conservative');
     expect(parsed.prefetch[0].eagerness).toBe('moderate');
     expect(SPECULATION_RULES_PAYLOAD.prerender[0].where.and[0].href_matches).toContain(
       '/control-room/*'

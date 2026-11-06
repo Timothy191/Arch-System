@@ -325,3 +325,55 @@ export function expectGalenLayout(subjectLocator: Locator) {
     },
   };
 }
+
+export type MiningViewportProfileId =
+  | 'field-mobile'
+  | 'pit-tablet-portrait'
+  | 'pit-tablet-landscape'
+  | 'control-room-wall';
+
+export interface ResponsivelyViewportProfile {
+  readonly profileId: MiningViewportProfileId;
+  readonly label: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+const VIEWPORT_MOBILE_W = 390;
+const VIEWPORT_MOBILE_H = 844;
+const VIEWPORT_TABLET_PORTRAIT_W = 768;
+const VIEWPORT_TABLET_PORTRAIT_H = 1024;
+const VIEWPORT_TABLET_LANDSCAPE_W = 1024;
+const VIEWPORT_TABLET_LANDSCAPE_H = 768;
+const VIEWPORT_WALL_W = 1920;
+const VIEWPORT_WALL_H = 1080;
+
+/**
+ * Canonical industrial multi-viewport matrix distilled from `responsively-org/responsively-app`.
+ */
+export const RESPONSIVELY_MINING_VIEWPORTS: readonly ResponsivelyViewportProfile[] = [
+  {
+    profileId: 'field-mobile',
+    label: 'Field Operator Handset (390×844)',
+    width: VIEWPORT_MOBILE_W,
+    height: VIEWPORT_MOBILE_H,
+  },
+  {
+    profileId: 'pit-tablet-portrait',
+    label: 'Pit Rugged Tablet Portrait (768×1024)',
+    width: VIEWPORT_TABLET_PORTRAIT_W,
+    height: VIEWPORT_TABLET_PORTRAIT_H,
+  },
+  {
+    profileId: 'pit-tablet-landscape',
+    label: 'Pit Rugged Tablet Landscape (1024×768)',
+    width: VIEWPORT_TABLET_LANDSCAPE_W,
+    height: VIEWPORT_TABLET_LANDSCAPE_H,
+  },
+  {
+    profileId: 'control-room-wall',
+    label: 'Control Room SCADA Wall (1920×1080)',
+    width: VIEWPORT_WALL_W,
+    height: VIEWPORT_WALL_H,
+  },
+];

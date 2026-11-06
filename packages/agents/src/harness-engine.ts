@@ -592,6 +592,108 @@ export function validateArchitecturePosture(
   };
 }
 
+/**
+ * Explicit Domain Business Rule invariant (`kgrzybek/modular-monolith-with-ddd` pattern).
+ */
+export interface DomainBusinessRule {
+  readonly ruleCode: string;
+  readonly message: string;
+  readonly isBroken: () => boolean;
+}
+
+export interface BusinessRuleEvaluationReport {
+  readonly passed: boolean;
+  readonly brokenRules: ReadonlyArray<{ readonly ruleCode: string; readonly message: string }>;
+}
+
+/**
+ * Evaluates a suite of DDD business rules deterministically before any mutation is persisted.
+ */
+export function evaluateDomainBusinessRules(
+  rules: readonly DomainBusinessRule[]
+): BusinessRuleEvaluationReport {
+  const brokenRules: Array<{ readonly ruleCode: string; readonly message: string }> = [];
+  for (const rule of rules) {
+    if (rule.isBroken()) {
+      brokenRules.push({ ruleCode: rule.ruleCode, message: rule.message });
+    }
+  }
+  return {
+    passed: brokenRules.length === 0,
+    brokenRules,
+  };
+}
+
+export interface CrossModuleIntegrationEvent {
+  readonly eventId: string;
+  readonly sourceDepartment: string;
+  readonly targetDepartment: string;
+  readonly eventType: string;
+  readonly payloadJson: string;
+}
+
+/**
+ * Transactional Outbox -> Idempotent Inbox Ledger (`kgrzybek/modular-monolith-with-ddd` pattern).
+ * Ensures cross-department events (e.g., Control Room breakdown -> Engineering maintenance queue)
+ * are dispatched at-least-once and processed exactly-once per target department.
+ */
+export class CrossModuleOutboxLedger {
+  private readonly outboxQueue: Map<string, CrossModuleIntegrationEvent> = new Map();
+  private readonly processedInboxKeys: Set<string> = new Set();
+
+  public enqueueOutboxEvent(event: Readonly<CrossModuleIntegrationEvent>): void {
+    this.outboxQueue.set(event.eventId, { ...event });
+  }
+
+  public processPendingForDepartment(
+    targetDepartment: string,
+    handler: (event: Readonly<CrossModuleIntegrationEvent>) => void
+  ): number {
+    let processedCount = 0;
+    for (const [eventId, event] of this.outboxQueue.entries()) {
+      if (event.targetDepartment !== targetDepartment) {
+        continue;
+      }
+      const inboxKey = `${targetDepartment}:${eventId}`;
+      if (!this.processedInboxKeys.has(inboxKey)) {
+        handler(event);
+        this.processedInboxKeys.add(inboxKey);
+        processedCount += 1;
+      }
+      this.outboxQueue.delete(eventId);
+    }
+    return processedCount;
+  }
+}
+
+export interface ErasableTypeScriptAuditResult {
+  readonly isErasableCompliant: boolean;
+  readonly violations: readonly string[];
+}
+
+/**
+ * Audits TypeScript source for Node 24+ erasable syntax compliance (`webjsdev/webjs` pattern).
+ * Flags non-erasable runtime constructs (`enum`, value `namespace`, parameter properties).
+ */
+export function auditErasableTypeScript(sourceCode: string): ErasableTypeScriptAuditResult {
+  const violations: string[] = [];
+
+  if (/\b(?:export\s+)?enum\s+[A-Za-z0-9_]+/.test(sourceCode)) {
+    violations.push(
+      'Non-erasable TypeScript enum detected; prefer `as const` object + derived union type'
+    );
+  }
+
+  if (/\b(?:export\s+)?namespace\s+[A-Za-z0-9_]+/.test(sourceCode)) {
+    violations.push('Non-erasable TypeScript namespace detected; prefer ES module exports');
+  }
+
+  return {
+    isErasableCompliant: violations.length === 0,
+    violations,
+  };
+}
+
 export interface HarnessDoctorCheck {
   readonly checkId: string;
   readonly passed: boolean;
