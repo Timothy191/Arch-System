@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-06T09:20:00+02:00 - Unify HeroRotator WebP Posters, Hover-Driven Department Prefetch & Sparkline SVG Deduplication
+
+- **Purpose**: Eliminate duplicate `.jpg` + `.webp` downloads on `/hub` by aligning `HeroRotator.tsx` posters to `.webp`, replace eager mount-time RSC prefetching across all 13 `DepartmentCard`s with hover/focus prefetching, and remove 13 duplicate inline `<style>` keyframes in `Sparkline.tsx`.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx` & `HeroRotator.test.tsx`: Switched department poster URLs from `.jpg` to `.webp`.
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Set `prefetch={false}` on `<Link>` and triggered `router.prefetch(route)` on `onMouseEnter` / `onFocus`.
+  - `libs/features/hub/ui/src/Sparkline.tsx`: Removed per-instance `<style>` keyframe injection and `matchMedia` listener in favor of `motion-safe:animate-pulse`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅ (25/25).
+
 ## 2026-11-05T08:16:00+02:00 - Support WebP Department Images with Automatic Fallback
 
 - **Purpose**: Load `.webp` department images in `DepartmentCard.tsx` with automatic fallback to `.jpg` on error, reducing initial image payload and improving Core Web Vitals on `/hub`.

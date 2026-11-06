@@ -29,7 +29,11 @@ export function useTypewriterPlaceholder(
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReducedMotion(query.matches);
+    const update = () => {
+      const isLiteTier =
+        typeof document !== 'undefined' && document.documentElement.dataset.perfTier === 'lite';
+      setReducedMotion(query.matches || isLiteTier);
+    };
     update();
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);

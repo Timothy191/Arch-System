@@ -182,10 +182,16 @@ function DepartmentCard({
           </div>
         )}
 
-        {/* Stretched client-side Link with proper useTransition */}
+        {/* Stretched client-side Link with hover/focus prefetch + useTransition */}
         <Link
           href={route}
-          prefetch={true}
+          prefetch={false}
+          onMouseEnter={() => {
+            router.prefetch(route);
+          }}
+          onFocus={() => {
+            router.prefetch(route);
+          }}
           onClick={(e) => {
             e.preventDefault();
             // Use useTransition for smoother navigation with loading state
@@ -200,7 +206,7 @@ function DepartmentCard({
 
         {/* Liquid glass overlay for 3D depth effect */}
         <div
-          className="absolute inset-0 z-0 rounded-[20px] bg-white/[0.03] opacity-0 backdrop-blur-sm motion-safe:transition-opacity motion-safe:duration-300 motion-safe:group-hover:opacity-100"
+          className="pointer-events-none absolute inset-0 z-0 rounded-[20px] bg-white/[0.03] opacity-0 backdrop-blur-sm motion-safe:transition-opacity motion-safe:duration-300 motion-safe:group-hover:opacity-100"
           aria-hidden="true"
         />
 

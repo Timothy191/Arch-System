@@ -20,6 +20,54 @@ interface CoreOperationalModulesProps {
   canSeeExecutive?: boolean;
 }
 
+interface ModuleSearchInputProps {
+  readonly searchQuery: string;
+  readonly onSearchChange: (nextQuery: string) => void;
+}
+
+function ModuleSearchInput({ searchQuery, onSearchChange }: ModuleSearchInputProps) {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchPlaceholder = useTypewriterPlaceholder(
+    'Search modules... (/)',
+    isSearchFocused || searchQuery.length > 0
+  );
+
+  return (
+    <div className="gold-steel-border gold-steel-border-slim relative min-w-[200px] flex-1 rounded-full sm:w-64 sm:min-w-[240px]">
+      <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-3.5 w-3.5 -translate-y-1/2 text-arch-text-tertiary" />
+      <input
+        id="hub-module-search"
+        type="text"
+        aria-label="Search operational modules"
+        aria-describedby="hub-module-search-hint"
+        placeholder={searchPlaceholder}
+        value={searchQuery}
+        onChange={(e) => onSearchChange(e.target.value)}
+        onFocus={() => setIsSearchFocused(true)}
+        onBlur={() => setIsSearchFocused(false)}
+        className="gold-steel-border gold-steel-border-slim h-8 w-full rounded-full border border-arch-border-subtle bg-white/85 pr-9 pl-9 text-arch-text-primary text-xs shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-amber focus:border-arch-accent-amber/50 focus:outline-none"
+      />
+      <span id="hub-module-search-hint" className="sr-only">
+        Press slash or Command K to focus the module search
+      </span>
+      {searchQuery ? (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => onSearchChange('')}
+          className="absolute top-1/2 right-2.5 -translate-y-1/2 text-arch-text-tertiary text-xs hover:text-arch-text-primary"
+        >
+          ✕
+        </button>
+      ) : (
+        <kbd className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full border border-arch-border-subtle bg-arch-surface-tertiary px-1.5 py-0.5 font-mono text-[10px] text-arch-text-tertiary">
+          /
+        </kbd>
+      )}
+    </div>
+  );
+}
+
 // AGENT-TRACE: Refactored Core Operational Modules component for Hub page with interactive search, category/status filtering, and pinned priority ordering.
 // Business logic extracted to custom hooks for cleaner separation of concerns.
 export function CoreOperationalModules({
@@ -39,12 +87,6 @@ export function CoreOperationalModules({
     activeCount,
     criticalCount,
   } = useDepartmentFilter({ departments, pinnedNames });
-
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchPlaceholder = useTypewriterPlaceholder(
-    'Search modules... (/)',
-    isSearchFocused || searchQuery.length > 0
-  );
 
   // Route clearance notices to the Top Taskbar Bell Notification Center
   useClearanceNotification(clearance);
@@ -124,39 +166,8 @@ export function CoreOperationalModules({
 
         {/* Search & Category Filter Pills */}
         <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-          {/* Quick Search Input */}
-          <div className="gold-steel-border gold-steel-border-slim relative min-w-[200px] flex-1 rounded-full sm:w-64 sm:min-w-[240px]">
-            <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-3.5 w-3.5 -translate-y-1/2 text-arch-text-tertiary" />
-            <input
-              id="hub-module-search"
-              type="text"
-              aria-label="Search operational modules"
-              aria-describedby="hub-module-search-hint"
-              placeholder={searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              className="gold-steel-border gold-steel-border-slim h-8 w-full rounded-full border border-arch-border-subtle bg-white/85 pr-9 pl-9 text-arch-text-primary text-xs shadow-xs transition-all placeholder:text-arch-text-tertiary focus:border-accent-amber focus:border-arch-accent-amber/50 focus:outline-none"
-            />
-            <span id="hub-module-search-hint" className="sr-only">
-              Press slash or Command K to focus the module search
-            </span>
-            {searchQuery ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => setSearchQuery('')}
-                className="absolute top-1/2 right-2.5 -translate-y-1/2 text-arch-text-tertiary text-xs hover:text-arch-text-primary"
-              >
-                ✕
-              </button>
-            ) : (
-              <kbd className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full border border-arch-border-subtle bg-arch-surface-tertiary px-1.5 py-0.5 font-mono text-[10px] text-arch-text-tertiary">
-                /
-              </kbd>
-            )}
-          </div>
+          {/* Quick Search Input (isolated leaf to prevent 28ms typewriter state from re-rendering 13 cards) */}
+          <ModuleSearchInput searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
           {/* Filter Pills */}
           <div

@@ -4,8 +4,29 @@ import * as Popover from '@radix-ui/react-popover';
 import { cn } from '@repo/ui/lib/utils';
 import { useEffect, useState } from 'react';
 
-// AGENT-TRACE: Consolidated clock timer effect and guarded setTime/setTimeStr updates to prevent state update depth recursion in Turbopack.
+const ACTIVE_POPOVER_TICK_MS = 1000;
+const CLOSED_PILL_TICK_MS = 15000;
+
+function formatJohannesburgClockLabel(now: Date): string {
+  const timePart = now.toLocaleTimeString('en-GB', {
+    timeZone: 'Africa/Johannesburg',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const dayPart = now.toLocaleDateString('en-GB', {
+    timeZone: 'Africa/Johannesburg',
+    weekday: 'short',
+  });
+
+  return `${dayPart} ${timePart}`;
+}
+
+// AGENT-TRACE: Consolidated clock timer effect and throttled closed-popover ticks to 15s
+// so the 35-node calendar + analog clock does not re-render every second when closed.
 export function SystemClock({ embedded = false }: { readonly embedded?: boolean } = {}) {
+  const [isOpen, setIsOpen] = useState(false);
   const [timeStr, setTimeStr] = useState<string>('');
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
@@ -13,30 +34,24 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
   useEffect(() => {
     function updateClock() {
       const now = new Date();
-      setTime(now);
-
-      const timePart = now.toLocaleTimeString('en-GB', {
-        timeZone: 'Africa/Johannesburg',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-
-      const dayPart = now.toLocaleDateString('en-GB', {
-        timeZone: 'Africa/Johannesburg',
-        weekday: 'short',
-      });
-
-      const formatted = `${dayPart} ${timePart}`;
+      if (isOpen) {
+        setTime(now);
+      }
+      const formatted = formatJohannesburgClockLabel(now);
       setTimeStr((prev) => (prev === formatted ? prev : formatted));
     }
 
     updateClock();
-    const interval = setInterval(updateClock, 1000);
+    const tickIntervalMs = isOpen ? ACTIVE_POPOVER_TICK_MS : CLOSED_PILL_TICK_MS;
+    const interval = setInterval(updateClock, tickIntervalMs);
     return () => clearInterval(interval);
-  }, []);
+  }, [isOpen]);
 
-  if (!timeStr) return null;
+  if (!timeStr) {
+    return (
+      <span className="inline-block h-4 w-[58px] rounded-full bg-black/5" aria-hidden="true" />
+    );
+  }
 
   // Calendar calculations
   const viewYear = calendarDate.getFullYear();
@@ -78,7 +93,7 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"

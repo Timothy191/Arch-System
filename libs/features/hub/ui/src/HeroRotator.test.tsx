@@ -489,7 +489,7 @@ describe('HeroRotator', () => {
 
     const video = screen.getByTestId('hero-video-availability-utilization');
     expect(video).toHaveAttribute('src', '/images/departments/availability-utilization.mp4');
-    expect(video).toHaveAttribute('poster', '/images/departments/availability-utilization.jpg');
+    expect(video).toHaveAttribute('poster', '/images/departments/availability-utilization.webp');
 
     fireEvent.click(screen.getByLabelText('Next highlight'));
     expect(screen.getByText('Availability Target: 95.0% [95%]')).toBeInTheDocument();

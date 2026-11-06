@@ -1,5 +1,16 @@
 # Agent Tracer - @repo/ui
 
+## 2026-11-06T09:20:00+02:00 - Fix CookieConsent Persistence & SSR Flash, Deduplicate Hero/Logo SVGs & Gate Flank Video Preloading
+
+- **Phase 1 (Comprehension)**: Fix `CookieConsent` appearing on every reload or after clicking "Decline Optional" / `X`, reduce `/hub` SSR HTML SVG bloat, and stop inactive 3D carousel flank slides from auto-playing 4 background MP4 videos simultaneously.
+- **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/{CookieConsent,HeroCardContent,Logo}.tsx`.
+- **Phase 3 (Design)**:
+  - In `CookieConsent.tsx`: Defaulted `showBanner` to `false` until `useEffect` verifies no stored consent exists, and persisted both `'accepted'` and `'declined'` choices to `localStorage` and `document.cookie` (`arch_cookie_consent`).
+  - In `HeroCardContent.tsx`: Deduplicated the 12 Arch emblem `<path>` nodes per telemetry graph via a shared `<symbol>` + `<use>`, gated `<video>` `autoPlay` and `preload` to `isActive`, and switched fallback poster to `.webp`.
+  - In `Logo.tsx`: Replaced per-instance `useId()` `<linearGradient>` `<defs>` with `fill-current text-accent-amber`.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/hub/ui test` (25/25 PASS) and `CoreOperationalModules.test.tsx` (5/5 PASS).
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/{CookieConsent,HeroCardContent,Logo}.tsx`.
+
 ## 2026-11-05T07:40:00+02:00 - Enlarge Hero Bottom Golden Separator, Standardize System Golden Separator & Add Executive Hero Card
 
 - **Phase 1 (Comprehension)**: Address design feedback on `/hub`:

@@ -246,7 +246,6 @@
   /* PERF: static at rest. `background-position` animations are non-composited
      (CPU paint + mask raster every frame); with 250-330 bordered elements per
      page this dropped frame rates to 10-24 FPS. Shimmer only runs on hover. */
-  animation: gold-shimmer 1.5s ease-in-out infinite;
   opacity: 1;
   pointer-events: none;
   z-index: 25;
@@ -266,8 +265,10 @@
   }
 }
 
-/* Preserve shimmer on hover with enhanced visibility */
-.gold-steel-border:hover::before {
+/* Preserve shimmer on hover/focus with enhanced visibility */
+.gold-steel-border:hover::before,
+.gold-steel-border:focus-visible::before {
+  animation: gold-shimmer 1.5s ease-in-out infinite;
   opacity: 1;
 }
 

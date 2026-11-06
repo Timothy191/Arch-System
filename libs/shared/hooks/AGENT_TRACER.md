@@ -100,3 +100,11 @@ Cover previously untested shared hooks requested by the test-suite hardening pas
 1. Added `src/useThrottle.test.ts` for throttled values, leading callback execution, trailing execution, and cancellation.
 2. Added `src/useCopyToClipboard.test.ts` for successful writes, reset behavior, missing clipboard support, and write failures.
 3. Added `src/useMediaQuery.test.ts` for matching snapshots, change subscriptions, cleanup, and missing `matchMedia`.
+
+## 2026-11-06T09:44:00+02:00: Integrate `styled-breakpoints` Media Query Builders (`breakpoints.up / down / between / only`)
+
+- **Phase 1 (Comprehension)**: Provide typed, zero-CSS-in-JS media query string builders (`up`, `down`, `between`, `only`) and reactive breakpoint hooks (`useBreakpointUp`, `useBreakpointDown`, `useBreakpointBetween`) in `@repo/shared/hooks` (`src/useMediaQuery.ts`), distilled from `mg901/styled-breakpoints`.
+- **Phase 2 (Evidence)**: Inspected `libs/shared/hooks/src/useMediaQuery.ts`, `libs/shared/hooks/src/useMediaQuery.test.ts`, and `.agents/rules/css-in-js.md`.
+- **Phase 3 (Design)**: Added `ARCH_BREAKPOINTS_PX` (`xs: 0`, `sm: 640`, `md: 768`, `lg: 1024`, `xl: 1280`, `2xl: 1536`) and `breakpoints` helper with `-0.02px` exclusive upper-bound precision so `up('md')` and `down('md')` never overlap at `768px`.
+- **Phase 4 (Criticism)**: Preserved zero CSS-in-JS dependencies and added `typeof window !== 'undefined'` guards in `useMediaQuery.test.ts`.
+- **Phase 5 (Contract)**: Modified `src/useMediaQuery.ts` and `src/useMediaQuery.test.ts`; verified with `pnpm --filter @repo/shared/hooks test` and `pnpm --filter @repo/shared/hooks type-check`.

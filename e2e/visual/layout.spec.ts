@@ -1,25 +1,63 @@
 import { expect, test } from '@playwright/test';
+import {
+  evaluateAbove,
+  evaluateAlignedHorizontally,
+  evaluateBelow,
+  evaluateInside,
+  evaluateLeftOf,
+  evaluateNoOverlap,
+  evaluateRightOf,
+  expectGalenLayout,
+} from '../helpers/galen-layout';
 
 // AGENT-TRACE: The /login test must run unauthenticated or the auth middleware
 // redirects it to / and the screenshot captures the dashboard instead. The
 // /privacy and /offline tests are public and are left on the project default.
-test.describe('Visual Regression - Layout', () => {
-  // We use test user credentials to bypass auth and check the dashboard
-  // (Assuming typical login handling here, or testing the unauthenticated routes)
-
+test.describe('Visual Regression & Galen Spatial Layout Specs', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Login Page - Visual Check', async ({ page }) => {
+  test('Galen Spatial Engine - Deterministic Geometry Invariants', async () => {
+    const headerRect = { x: 0, y: 0, width: 1280, height: 64 };
+    const logoRect = { x: 24, y: 16, width: 140, height: 32 };
+    const clockRect = { x: 1120, y: 16, width: 120, height: 32 };
+    const heroRect = { x: 24, y: 88, width: 1232, height: 360 };
+
+    expect(evaluateAbove(headerRect, { target: heroRect, gap: { minGapPx: 16 } }).passed).toBe(
+      true
+    );
+    expect(evaluateBelow(heroRect, { target: headerRect, gap: { minGapPx: 16 } }).passed).toBe(
+      true
+    );
+    expect(evaluateInside(logoRect, headerRect).passed).toBe(true);
+    expect(evaluateLeftOf(logoRect, { target: clockRect, gap: { minGapPx: 100 } }).passed).toBe(
+      true
+    );
+    expect(evaluateRightOf(clockRect, { target: logoRect, gap: { minGapPx: 100 } }).passed).toBe(
+      true
+    );
+    expect(
+      evaluateAlignedHorizontally(logoRect, {
+        target: clockRect,
+        alignment: { edge: 'center', tolerancePx: 1 },
+      }).passed
+    ).toBe(true);
+    expect(evaluateNoOverlap(headerRect, heroRect).passed).toBe(true);
+  });
+
+  test('Login Page - Visual & Galen Spatial Check', async ({ page }) => {
     await page.goto('/login');
-    // Wait for animations to settle
     await page.waitForTimeout(1000);
-    // Take snapshot of the full page
+
+    const bodyLocator = page.locator('body');
+    const mainForm = page.locator('form').first();
+    if ((await mainForm.count()) > 0) {
+      await expectGalenLayout(mainForm).toBeInside(bodyLocator);
+    }
+
     await expect(page).toHaveScreenshot('login-page.png', { fullPage: true });
   });
 
   test('Hub Dashboard - Visual Check', async ({ page }) => {
-    // Navigate to a known state (assuming bypass auth for visual tests or testing a public route)
-    // Here we'll check the Privacy page as a static structural test
     await page.goto('/privacy');
     await page.waitForTimeout(500);
     await expect(page).toHaveScreenshot('privacy-page.png', { fullPage: true });

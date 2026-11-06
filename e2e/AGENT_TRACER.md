@@ -41,3 +41,11 @@
 **Next agent:** The E2E test suite now has comprehensive coverage across all previously identified gaps. Tests are designed to be resilient and handle various edge cases. Run `pnpm test:e2e` to execute all tests. Some tests may require specific user roles or test data to be fully effective - consider setting up test users with different roles (admin, operator, manager, control-room) for complete coverage.
 
 - [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.
+
+## 2026-11-06T09:44:00+02:00 - Galen Relational Spatial Layout Engine for Playwright (`e2e/helpers/galen-layout.ts`)
+
+- **Phase 1 (Comprehension)**: Distill the relational layout specification model from `galenframework/galen` (`above`, `below`, `left-of`, `right-of`, `inside`, `aligned horizontally/vertically`, `no-overlap`) into a native TypeScript + Playwright helper without Java/Selenium dependencies.
+- **Phase 2 (Evidence)**: Inspected `e2e/visual/layout.spec.ts` and `e2e/playwright.config.ts`.
+- **Phase 3 (Design)**: Created `e2e/helpers/galen-layout.ts` exporting pure bounding-box evaluators (`evaluateAbove`, `evaluateBelow`, `evaluateLeftOf`, `evaluateRightOf`, `evaluateInside`, `evaluateAlignedHorizontally`, `evaluateAlignedVertically`, `evaluateNoOverlap`) and Playwright's fluent `expectGalenLayout(locator)` assertion builder; wired into `e2e/visual/layout.spec.ts`.
+- **Phase 4 (Criticism)**: Kept all evaluators pure and deterministic with explicit pixel diagnostic messages.
+- **Phase 5 (Contract)**: Created `e2e/helpers/galen-layout.ts` and updated `e2e/visual/layout.spec.ts`.

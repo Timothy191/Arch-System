@@ -476,6 +476,23 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     },
   },
   {
+    id: 'microsoft-sharepoint',
+    name: 'Microsoft SharePoint Online & Graph Data',
+    description:
+      'Microsoft 365 SharePoint connector for document libraries, lists, and site content via Microsoft Graph, plus deep links into SharePoint Online that reuse the browser Microsoft 365 session.',
+    author: 'Microsoft / Plantcor IT',
+    icon_url: null,
+    kind: 'mcp',
+    server_url: 'https://graph.microsoft.com/v1.0',
+    auth_type: 'bearer',
+    verified: true,
+    docs_url: 'https://learn.microsoft.com/graph/api/resources/sharepoint',
+    capabilities: {
+      domains: ['sharepoint-sites', 'document-libraries', 'lists', 'graph-search'],
+      transport: 'streamable-http',
+    },
+  },
+  {
     id: 'sap-pm-erp',
     name: 'SAP S/4HANA Plant Maintenance & Spares ERP',
     description:

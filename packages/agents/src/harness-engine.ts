@@ -361,12 +361,33 @@ export interface AgentRoutine {
   isActive: boolean;
 }
 
+export interface RoutineGoldenFixture {
+  readonly fixtureId: string;
+  readonly sampleInput: string;
+  readonly expectedTokensInOutput: readonly string[];
+}
+
+export interface RoutineCertificationReport {
+  readonly routineId: string;
+  readonly certified: boolean;
+  readonly passRate: number;
+  readonly failedFixtureIds: readonly string[];
+}
+
+export interface CertifyRoutineInput {
+  readonly routineId: string;
+  readonly goldenFixtures: readonly RoutineGoldenFixture[];
+  readonly evaluator: (sampleInput: string) => string;
+}
+
 /**
- * AutoGPT "Otto · Head of AI" Expert Brief & Routine Lifecycle Manager.
+ * AutoGPT "Otto · Head of AI" Expert Brief & Routine Lifecycle Manager,
+ * enhanced with `war851/AI-Governance-Architecture` Golden-Fixture Certification ("Don't train — certify").
  * All expert briefs resolve exclusively to Antigravity Gemini models with zero extra API hops.
  */
 export class AgentRoutineRegistry {
   private readonly routines: Map<string, AgentRoutine> = new Map();
+  private readonly certifiedRoutines: Map<string, RoutineCertificationReport> = new Map();
 
   public createExpertBrief(input: Readonly<CreateExpertBriefInput>): ExpertBrief {
     const tier: AntigravityModelTier = input.modelTier ?? 'flash';
@@ -391,6 +412,184 @@ export class AgentRoutineRegistry {
   public listActiveRoutines(): AgentRoutine[] {
     return Array.from(this.routines.values()).filter((routine) => routine.isActive);
   }
+
+  /**
+   * Certifies a registered routine against golden I/O fixtures (`war851/AI-Governance-Architecture`).
+   */
+  public certifyRoutine(input: Readonly<CertifyRoutineInput>): RoutineCertificationReport {
+    if (input.goldenFixtures.length === 0) {
+      const emptyReport: RoutineCertificationReport = {
+        routineId: input.routineId,
+        certified: false,
+        passRate: 0,
+        failedFixtureIds: ['missing-golden-fixtures'],
+      };
+      this.certifiedRoutines.set(input.routineId, emptyReport);
+      return emptyReport;
+    }
+
+    const failedFixtureIds: string[] = [];
+    for (const fixture of input.goldenFixtures) {
+      const actualOutput = input.evaluator(fixture.sampleInput).toLowerCase();
+      const hasAllExpectedTokens = fixture.expectedTokensInOutput.every((token) =>
+        actualOutput.includes(token.toLowerCase())
+      );
+      if (!hasAllExpectedTokens) {
+        failedFixtureIds.push(fixture.fixtureId);
+      }
+    }
+
+    const passedCount = input.goldenFixtures.length - failedFixtureIds.length;
+    const passRate = passedCount / input.goldenFixtures.length;
+    const report: RoutineCertificationReport = {
+      routineId: input.routineId,
+      certified: failedFixtureIds.length === 0,
+      passRate,
+      failedFixtureIds,
+    };
+
+    this.certifiedRoutines.set(input.routineId, report);
+    return report;
+  }
+
+  public isRoutineCertified(routineId: string): boolean {
+    return this.certifiedRoutines.get(routineId)?.certified ?? false;
+  }
+}
+
+export type AtomicFeatureCapability =
+  | 'db:read'
+  | 'db:write'
+  | 'redis:cache'
+  | 'scada:telemetry'
+  | 'mcp:invoke';
+
+/**
+ * Machine-readable Atomic Feature Contract (`AdrianBesleaga/AIFA` pattern).
+ * Shared across Server Actions, API routes, and AI/MCP clients.
+ */
+export interface AtomicFeatureContract {
+  readonly featureId: string;
+  readonly departmentScope: string;
+  readonly allowedRoles: readonly string[];
+  readonly declaredCapabilities: readonly AtomicFeatureCapability[];
+  readonly cacheTagsToInvalidate: readonly string[];
+  readonly mcpExposed: boolean;
+}
+
+export interface AtomicFeatureInvocation {
+  readonly actorRole: string;
+  readonly requestedCapabilities: readonly AtomicFeatureCapability[];
+  readonly isMcpTransport?: boolean;
+}
+
+export interface AtomicCapabilityVerdict {
+  readonly featureId: string;
+  readonly permitted: boolean;
+  readonly violations: readonly string[];
+}
+
+/**
+ * Evaluates whether an invocation satisfies an AIFA `AtomicFeatureContract`.
+ */
+export function evaluateAtomicFeatureCapability(
+  contract: Readonly<AtomicFeatureContract>,
+  invocation: Readonly<AtomicFeatureInvocation>
+): AtomicCapabilityVerdict {
+  const violations: string[] = [];
+
+  if (!contract.allowedRoles.includes(invocation.actorRole)) {
+    violations.push(
+      `Role '${invocation.actorRole}' is not authorized for feature '${contract.featureId}'`
+    );
+  }
+
+  if (invocation.isMcpTransport && !contract.mcpExposed) {
+    violations.push(`Feature '${contract.featureId}' is not exposed to MCP transport`);
+  }
+
+  for (const capability of invocation.requestedCapabilities) {
+    if (!contract.declaredCapabilities.includes(capability)) {
+      violations.push(
+        `Capability '${capability}' is not declared in feature '${contract.featureId}'`
+      );
+    }
+  }
+
+  if (
+    invocation.requestedCapabilities.includes('db:write') &&
+    contract.cacheTagsToInvalidate.length === 0
+  ) {
+    violations.push(
+      `Feature '${contract.featureId}' performs 'db:write' without declaring cacheTagsToInvalidate`
+    );
+  }
+
+  return {
+    featureId: contract.featureId,
+    permitted: violations.length === 0,
+    violations,
+  };
+}
+
+export interface ArchitectureMutationProposal {
+  readonly proposalId: string;
+  readonly sourceWorkspace: string;
+  readonly targetWorkspaces: readonly string[];
+  readonly touchesDatabaseMigration?: boolean;
+  readonly hasContractZodSchemaUpdate?: boolean;
+  readonly hasRlsInitPlanPolicy?: boolean;
+}
+
+export interface ArchitecturePostureReport {
+  readonly proposalId: string;
+  readonly approvedForExecution: boolean;
+  readonly violations: readonly string[];
+}
+
+const FORBIDDEN_WORKSPACE_EDGES: Readonly<Record<string, readonly string[]>> = {
+  'apps/portal': ['packages/database'],
+  'packages/ui': ['packages/database', 'packages/supabase', 'apps/portal'],
+  'packages/theme': ['packages/ui', 'packages/database', 'packages/supabase', 'apps/portal'],
+  tools: ['packages/supabase', 'apps/portal'],
+};
+
+/**
+ * Proposal-gated deterministic architecture posture validator (`Balchandar/Architect-Studio-X` pattern).
+ * Runs pure-function boundary and contract-parity checks before any multi-file mutation is approved.
+ */
+export function validateArchitecturePosture(
+  proposal: Readonly<ArchitectureMutationProposal>
+): ArchitecturePostureReport {
+  const violations: string[] = [];
+  const forbiddenTargets = FORBIDDEN_WORKSPACE_EDGES[proposal.sourceWorkspace] ?? [];
+
+  for (const targetWorkspace of proposal.targetWorkspaces) {
+    if (forbiddenTargets.includes(targetWorkspace)) {
+      violations.push(
+        `Boundary violation: '${proposal.sourceWorkspace}' cannot depend on '${targetWorkspace}'`
+      );
+    }
+  }
+
+  if (proposal.touchesDatabaseMigration) {
+    if (!proposal.hasContractZodSchemaUpdate) {
+      violations.push(
+        'Contract drift violation: database migration requires a matching Zod schema in @repo/contract'
+      );
+    }
+    if (!proposal.hasRlsInitPlanPolicy) {
+      violations.push(
+        'Security posture violation: database migration requires an RLS InitPlan policy'
+      );
+    }
+  }
+
+  return {
+    proposalId: proposal.proposalId,
+    approvedForExecution: violations.length === 0,
+    violations,
+  };
 }
 
 export interface HarnessDoctorCheck {

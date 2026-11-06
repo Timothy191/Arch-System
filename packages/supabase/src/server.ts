@@ -183,7 +183,9 @@ export interface AuthIdentity {
  * Swallows any error into `null` so callers can treat an unauthenticated
  * request and a transient Supabase error the same way.
  */
-export async function getUserSafely(
+const userIdentityCache = new WeakMap<object, Promise<AuthIdentity | null>>();
+
+async function resolveUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
 ): Promise<AuthIdentity | null> {
   try {
@@ -207,4 +209,19 @@ export async function getUserSafely(
   } catch (_error) {
     return null;
   }
+}
+
+export async function getUserSafely(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
+): Promise<AuthIdentity | null> {
+  if (!supabase || typeof supabase !== 'object') {
+    return null;
+  }
+  const cached = userIdentityCache.get(supabase);
+  if (cached) {
+    return cached;
+  }
+  const pending = resolveUserSafely(supabase);
+  userIdentityCache.set(supabase, pending);
+  return pending;
 }

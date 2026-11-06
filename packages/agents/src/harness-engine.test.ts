@@ -4,11 +4,13 @@ jest.mock('@babel/core', () => ({ parseSync: () => null, traverse: () => undefin
 
 import {
   AgentRoutineRegistry,
+  evaluateAtomicFeatureCapability,
   HARNESS_GEMINI_TIER_MAP,
   IdempotentCallLedger,
   runHarnessDoctor,
   ToolPermissionGate,
   TrajectoryContrastiveStore,
+  validateArchitecturePosture,
 } from './harness-engine';
 import { AgentPillarEnvelope } from './prompt-envelope';
 import { QualityGate } from './quality-gate';
@@ -220,6 +222,82 @@ Verify with pnpm test and pnpm agent:verify.
       expect(prompt).toContain('### 5B. STRUCTURED THINKING MANDATE (STM-0 PROTOCOL)');
       expect(prompt).toContain('MTP-1: PHASE 1 (COMPREHENSION)');
       expect(prompt).toContain('MTP-5: PHASE 5 (EXECUTION CONTRACT)');
+    });
+  });
+
+  describe('Given Golden-Fixture Routine Certification (war851/AI-Governance-Architecture pattern)', () => {
+    it('When a routine passes all golden fixtures, Then isRoutineCertified returns true', () => {
+      const registry = new AgentRoutineRegistry();
+      const report = registry.certifyRoutine({
+        routineId: 'routine-shift-audit',
+        goldenFixtures: [
+          {
+            fixtureId: 'rls-initplan-check',
+            sampleInput: 'CREATE POLICY shift_select ON shifts USING (user_id = auth.uid());',
+            expectedTokensInOutput: ['scalar subquery', '(select auth.uid())'],
+          },
+        ],
+        evaluator: () => 'Wrap auth.uid() in a scalar subquery: (select auth.uid())',
+      });
+
+      expect(report.certified).toBe(true);
+      expect(report.passRate).toBe(1);
+      expect(registry.isRoutineCertified('routine-shift-audit')).toBe(true);
+    });
+  });
+
+  describe('Given AtomicFeatureContract (AdrianBesleaga/AIFA pattern)', () => {
+    it('When an invocation requests undeclared capabilities or lacks cache tags on db:write, Then it rejects with explicit violations', () => {
+      const shiftCloseoutContract = {
+        featureId: 'control-room.shift-closeout',
+        departmentScope: 'control-room',
+        allowedRoles: ['supervisor', 'admin'],
+        declaredCapabilities: ['db:read', 'db:write', 'redis:cache'] as const,
+        cacheTagsToInvalidate: ['dept:control-room:shift_closeout'],
+        mcpExposed: false,
+      };
+
+      const validVerdict = evaluateAtomicFeatureCapability(shiftCloseoutContract, {
+        actorRole: 'supervisor',
+        requestedCapabilities: ['db:write'],
+      });
+      expect(validVerdict.permitted).toBe(true);
+
+      const unauthorizedVerdict = evaluateAtomicFeatureCapability(shiftCloseoutContract, {
+        actorRole: 'viewer',
+        requestedCapabilities: ['scada:telemetry'],
+        isMcpTransport: true,
+      });
+      expect(unauthorizedVerdict.permitted).toBe(false);
+      expect(unauthorizedVerdict.violations).toHaveLength(3);
+    });
+  });
+
+  describe('Given validateArchitecturePosture (Balchandar/Architect-Studio-X pattern)', () => {
+    it('When a proposal violates workspace boundaries or lacks Zod/RLS parity on migrations, Then it blocks execution deterministically', () => {
+      const invalidProposal = validateArchitecturePosture({
+        proposalId: 'prop-invalid-layer',
+        sourceWorkspace: 'packages/ui',
+        targetWorkspaces: ['packages/database', 'packages/theme'],
+        touchesDatabaseMigration: true,
+        hasContractZodSchemaUpdate: false,
+        hasRlsInitPlanPolicy: false,
+      });
+
+      expect(invalidProposal.approvedForExecution).toBe(false);
+      expect(invalidProposal.violations).toHaveLength(3);
+
+      const validProposal = validateArchitecturePosture({
+        proposalId: 'prop-valid-feature',
+        sourceWorkspace: 'apps/portal',
+        targetWorkspaces: ['packages/supabase', 'packages/ui'],
+        touchesDatabaseMigration: true,
+        hasContractZodSchemaUpdate: true,
+        hasRlsInitPlanPolicy: true,
+      });
+
+      expect(validProposal.approvedForExecution).toBe(true);
+      expect(validProposal.violations).toHaveLength(0);
     });
   });
 });

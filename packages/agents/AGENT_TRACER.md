@@ -98,3 +98,14 @@
   2. Implemented `estimateContentBlockTokens`, `estimateMessageTokens`, and `assessContextCompaction` with `COMPACTION_SOFT_THRESHOLD` (85%) and `COMPACTION_CRITICAL_THRESHOLD` (95%) and tail preservation of recent 20 turns.
   3. Added unit tests in `src/token-budget.test.ts` verifying base64 image flat costs and dual-threshold actions (25/25 tests passing).
 - **Handoff**: Multimodal compaction evaluation is ready to be consumed by agents and coordinators.
+
+## 2026-11-06T09:44:00+02:00 - Distill AI Architecture Patterns (`AIFA`, `Architect-Studio-X`, `AI-Governance-Architecture`) into `harness-engine.ts`
+
+- **Phase 1 (Comprehension)**: Integrate high-value zero-dependency AI architecture patterns from `github.com/topics/ai-architecture` (`AdrianBesleaga/AIFA`, `Balchandar/Architect-Studio-X`, and `war851/AI-Governance-Architecture`) into `@repo/agents`.
+- **Phase 2 (Evidence)**: Inspected `packages/agents/src/harness-engine.ts` and `packages/agents/src/harness-engine.test.ts`.
+- **Phase 3 (Design)**:
+  - `AgentRoutineRegistry.certifyRoutine` & `isRoutineCertified` (`war851/AI-Governance-Architecture` "Don't train — certify" golden-fixture certification).
+  - `AtomicFeatureContract` & `evaluateAtomicFeatureCapability` (`AdrianBesleaga/AIFA` AI Atomic Feature Architecture capability & cache-tag verifier).
+  - `ArchitectureMutationProposal` & `validateArchitecturePosture` (`Balchandar/Architect-Studio-X` deterministic workspace boundary and migration/Zod/RLS posture validator).
+- **Phase 4 (Criticism)**: Enforced max 2 positional parameters, `readonly` inputs, zero magic numbers, and zero external runtime dependencies.
+- **Phase 5 (Contract)**: Modified `src/harness-engine.ts` and `src/harness-engine.test.ts`; verified with `pnpm --filter @repo/agents test` and `pnpm --filter @repo/agents type-check`.

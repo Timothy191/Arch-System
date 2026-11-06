@@ -1,18 +1,23 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 
-// AGENT-TRACE: Converted React.lazy → next/dynamic for proper Next.js code
-// splitting, chunk prefetching, and SSR control.
+function WidgetFallback({ width = 'w-[58px]' }: { readonly width?: string }) {
+  return (
+    <span className={`inline-block ${width} h-4 rounded-full bg-black/5`} aria-hidden="true" />
+  );
+}
+
+// AGENT-TRACE: Pass loading placeholders directly to next/dynamic so ssr:false
+// reserves exact width during SSR and hydration (eliminates taskbar-unified-pill CLS).
 const SystemClock = dynamic(
   () => import('@/components/clock/SystemClock').then((m) => ({ default: m.SystemClock })),
-  { ssr: false }
+  { ssr: false, loading: () => <WidgetFallback width="w-[58px]" /> }
 );
 
 const ServicesDropdown = dynamic(
   () => import('@/components/nav/ServicesDropdown').then((m) => ({ default: m.ServicesDropdown })),
-  { ssr: false }
+  { ssr: false, loading: () => <WidgetFallback width="w-5" /> }
 );
 
 /**
@@ -22,12 +27,6 @@ const ServicesDropdown = dynamic(
  * lazy-loaded chunk for the top taskbar header. Support / Feedback is now
  * cleanly merged into SystemTrayPill.
  */
-function WidgetFallback({ width = 'w-14' }: { width?: string }) {
-  return (
-    <div className={`${width} h-4 animate-pulse rounded-full bg-black/5`} aria-hidden="true" />
-  );
-}
-
 export function HeaderWidgets() {
   return (
     <>
@@ -39,9 +38,7 @@ export function HeaderWidgets() {
         |
       </span>
 
-      <Suspense fallback={<WidgetFallback width="w-14" />}>
-        <SystemClock embedded />
-      </Suspense>
+      <SystemClock embedded />
 
       <span
         aria-hidden="true"
@@ -51,9 +48,7 @@ export function HeaderWidgets() {
         |
       </span>
 
-      <Suspense fallback={<WidgetFallback width="w-4" />}>
-        <ServicesDropdown embedded />
-      </Suspense>
+      <ServicesDropdown embedded />
     </>
   );
 }

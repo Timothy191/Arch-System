@@ -9,6 +9,8 @@ interface NonControlRoomSummaryGridClientProps {
   today: string;
 }
 
+const NON_CR_SKELETON_KEYS = ['todays-log', 'active-machines', 'status'] as const;
+
 // AGENT-TRACE: Memoized to prevent re-renders when parent Dashboard re-renders.
 // Props (deptId, today) are stable strings — re-renders only from React Query data updates.
 function NonControlRoomSummaryGridClientBase({
@@ -17,7 +19,22 @@ function NonControlRoomSummaryGridClientBase({
 }: NonControlRoomSummaryGridClientProps) {
   const { data } = useNonControlRoomSummary(deptId, today);
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div
+        className="grid grid-cols-1 gap-4 md:grid-cols-3"
+        aria-busy="true"
+        aria-label="Loading department summary metrics"
+      >
+        {NON_CR_SKELETON_KEYS.map((key) => (
+          <GlassCard key={key} className="min-h-[96px]">
+            <div className="h-4 w-24 animate-pulse rounded bg-slate-200/80" />
+            <div className="mt-2 h-8 w-36 animate-pulse rounded bg-slate-200/80" />
+          </GlassCard>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

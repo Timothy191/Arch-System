@@ -1,3 +1,16 @@
+## 2026-11-06T09:20:00+02:00: Core Web Vitals (LCP, INP, CLS), Cookie Consent Persistence & Adaptive Client-Side System-Scaled Asset Caching
+
+- **Phase 1 (Comprehension)**: Resolve slow loading times on `/hub`, `/control-room`, and `/production` across LCP, INP, CLS, and Cookie Consent persistence, and add adaptive client-side system-scaled asset pre-caching (`high` / `balanced` / `lite` tiers).
+- **Phase 2 (Evidence)**: Inspected Chrome DevTools performance traces and source files across `ControlRoomSummaryGridClient.tsx`, `NonControlRoomSummaryGridClient.tsx`, `HeaderWidgets.tsx`, `SystemClock.tsx`, `CoreOperationalModules.tsx`, `useTypewriterPlaceholder.ts`, `actions.ts`, `ServiceWorkerRegister.tsx`, `ClientProviders.tsx`, `RouteBackground.tsx`, and `public/sw.js`.
+- **Phase 3 (Design)**:
+  - Replaced `if (!data) return null` in `ControlRoomSummaryGridClient.tsx` and `NonControlRoomSummaryGridClient.tsx` with height-matched skeletons to eliminate `0.4518` CLS on `/control-room` and department pages, and deduplicated 40 inline Arch `<svg>` nodes via `<symbol>` + `<use>`.
+  - Added fixed-width `loading` skeletons to `HeaderWidgets.tsx` and `SystemClock.tsx`, and throttled `SystemClock` ticks to 15s when the popover is closed.
+  - Isolated `ModuleSearchInput` in `CoreOperationalModules.tsx` so the 28ms typewriter state loop never re-renders the 13 `DepartmentCard`s.
+  - Wrapped `getProductionDepartmentData()` in `withCache` (`CacheCategory.REPORTS`) in `actions.ts`.
+  - Upgraded `ServiceWorkerRegister.tsx`, `RouteBackground.tsx`, and `public/sw.js` (`arch-portal-media-v1` Cache-First store) to detect client CPU cores, RAM, and network bandwidth and scale background `.webp` image decoding and `.mp4` preview pre-warming to the user's system.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="CoreOperationalModules|ControlRoomPanels|ProductionCommandCenterClient"` (all PASS).
+- **Phase 5 (Contract)**: Modified `ControlRoomSummaryGridClient.tsx`, `NonControlRoomSummaryGridClient.tsx`, `HeaderWidgets.tsx`, `SystemClock.tsx`, `CoreOperationalModules.{tsx,test.tsx}`, `useTypewriterPlaceholder.ts`, `actions.ts`, `ServiceWorkerRegister.tsx`, `ClientProviders.tsx`, `RouteBackground.tsx`, `layout.tsx`, and `public/sw.js`.
+
 ## 2026-11-05T13:00:00+02:00: Apply Remaining Next.js Documentation Conventions & Register Agent Rules
 
 - **Phase 1 (Comprehension)**: Surveyed remaining Next.js docs batch (CSS-in-JS, Debugging, Revalidation, ISR, Internationalization, JSON-LD, Client-side data fetching) against `apps/portal`; confirmed TanStack Query/SWR, Forms/Server Actions, Instant navigation already applied; Route Handlers, CSS/Tailwind, Metadata/OG, Proxy, Partial Prefetching previously converted.

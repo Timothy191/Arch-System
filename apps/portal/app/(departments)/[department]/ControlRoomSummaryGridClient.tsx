@@ -103,6 +103,16 @@ function HeroSummaryGoldenGraph({
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <symbol id={`arch-node-${fillId}`} viewBox="22.75 16.625 166.16 166.19">
+              <path
+                d={ARCH_LOGO_PATH}
+                fill={strokeColor}
+                stroke="#ffffff"
+                strokeWidth="6"
+                paintOrder="stroke"
+                fillRule="evenodd"
+              />
+            </symbol>
           </defs>
 
           <line
@@ -170,15 +180,7 @@ function HeroSummaryGoldenGraph({
                 data-testid="summary-graph-arch-node"
                 className={isLast ? 'motion-safe:animate-pulse' : ''}
               >
-                <path
-                  d={ARCH_LOGO_PATH}
-                  fill={strokeColor}
-                  fillOpacity={isLast ? 1 : 0.9}
-                  stroke="#ffffff"
-                  strokeWidth="6"
-                  paintOrder="stroke"
-                  fillRule="evenodd"
-                />
+                <use href={`#arch-node-${fillId}`} opacity={isLast ? 1 : 0.9} />
               </svg>
             );
           })}
@@ -203,12 +205,49 @@ function buildSparklinePoints(currentRatio: number, invert = false): number[] {
   });
 }
 
+const SUMMARY_SKELETON_CARD_KEYS = [
+  'hours-today',
+  'total-loads',
+  'delay-hours',
+  'machines',
+  'delay-entries',
+] as const;
+
+function ControlRoomSummaryGridSkeleton() {
+  return (
+    <div
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
+      aria-busy="true"
+      aria-label="Loading control room summary metrics"
+    >
+      {SUMMARY_SKELETON_CARD_KEYS.map((cardKey) => (
+        <GlassCard key={cardKey} className="flex min-h-[172px] flex-col justify-between">
+          <div>
+            <div className="h-3.5 w-24 animate-pulse rounded bg-slate-200/80" />
+            <div className="mt-2 h-7 w-16 animate-pulse rounded bg-slate-200/80" />
+            <div className="mt-2 h-px w-full bg-gradient-to-r from-accent-amber/40 via-slate-200 to-transparent" />
+          </div>
+          <div className="mt-auto pt-2">
+            <div className="mb-1.5 flex items-center justify-between">
+              <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/70" />
+              <div className="h-3.5 w-12 animate-pulse rounded-full bg-slate-200/70" />
+            </div>
+            <div className="h-[74px] w-full animate-pulse rounded-xl border border-accent-amber/25 bg-white/70" />
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+  );
+}
+
 // AGENT-TRACE: Memoized to prevent re-renders when parent Dashboard re-renders.
 // Props (deptId, today) are stable strings — re-renders only from React Query data updates.
 function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryGridClientProps) {
   const { data } = useControlRoomSummary(deptId, today);
 
-  if (!data) return null;
+  if (!data) {
+    return <ControlRoomSummaryGridSkeleton />;
+  }
 
   const hoursVal = Math.max(data.totalHours, 0);
   const loadsVal = Math.max(data.totalLoads, 0);

@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/theme
 
+## 2026-11-06T09:20:00+02:00 - Restrict Gold-Steel-Border Shimmer Animation to Hover & Focus-Visible
+
+- **Phase 1 (Comprehension)**: Eliminate 137 continuous non-composited `gold-shimmer` (`background-position`) animations running at rest across `/hub` and department pages.
+- **Phase 2 (Evidence)**: Inspected `packages/theme/src/css/cards.css` lines 246–272 and Chrome DevTools animation trace (`137` non-composited `gold-shimmer` animations at rest).
+- **Phase 3 (Design)**: Removed `animation: gold-shimmer 1.5s ease-in-out infinite;` from `.gold-steel-border::before` at rest and moved it to `.gold-steel-border:hover::before, .gold-steel-border:focus-visible::before` matching the existing `PERF:` comment.
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/theme lint`.
+- **Phase 5 (Contract)**: Modified `packages/theme/src/css/cards.css`.
+
 ## 2026-11-05T11:24:00+02:00 - Optimize Style Dictionary Codegen & Turborepo Output Caching
 
 - **Purpose**: Eliminate redundant `npx biome format --write` call on `variables-generated.css` (which has Biome formatter disabled in `biome.json`) in `sd.config.mjs` and include `src/css/variables-generated.css` in `codegen.outputs` in `turbo.json`.

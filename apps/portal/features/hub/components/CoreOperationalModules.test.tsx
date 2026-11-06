@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom';
 import type { Department } from '@repo/departments/data-access';
-import { render, screen } from '@testing-library/react';
+import { CookieConsent } from '@repo/ui';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { ServiceWorkerRegister } from '@/app/ServiceWorkerRegister';
 import { CoreOperationalModules } from './CoreOperationalModules';
 
 jest.mock('@repo/ui/AnimatedList', () => ({
@@ -85,5 +87,75 @@ describe('CoreOperationalModules', () => {
       'gold-steel-border-slim'
     );
     expect(screen.getByTestId('core-modules-header-separator')).toBeInTheDocument();
+  });
+
+  describe('CookieConsent persistence & zero-flash behavior', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      // biome-ignore lint/suspicious/noDocumentCookie: clearing test cookie state
+      document.cookie = 'arch_cookie_consent=; path=/; max-age=0';
+    });
+
+    it('persists declined state when clicking Decline Optional so popup does not reappear', () => {
+      const { unmount } = render(<CookieConsent />);
+      const declineBtn = screen.getByRole('button', { name: /Decline Optional/i });
+      fireEvent.click(declineBtn);
+
+      expect(localStorage.getItem('cookie_consent')).toBe('declined');
+      expect(document.cookie).toContain('arch_cookie_consent=declined');
+      expect(screen.queryByRole('button', { name: /Accept All/i })).not.toBeInTheDocument();
+
+      unmount();
+      render(<CookieConsent />);
+      expect(screen.queryByRole('button', { name: /Accept All/i })).not.toBeInTheDocument();
+    });
+
+    it('persists accepted state when clicking Accept All', () => {
+      render(<CookieConsent />);
+      const acceptBtn = screen.getByRole('button', { name: /Accept All/i });
+      fireEvent.click(acceptBtn);
+
+      expect(localStorage.getItem('cookie_consent')).toBe('accepted');
+      expect(document.cookie).toContain('arch_cookie_consent=accepted');
+      expect(screen.queryByRole('button', { name: /Accept All/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ServiceWorkerRegister adaptive client-side hardware scaling', () => {
+    const originalHardwareConcurrency = navigator.hardwareConcurrency;
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', {
+        configurable: true,
+        value: originalHardwareConcurrency,
+      });
+      delete document.documentElement.dataset.perfTier;
+    });
+
+    it('assigns lite tier on low-core devices and skips background warmup', () => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', {
+        configurable: true,
+        value: 2,
+      });
+
+      render(<ServiceWorkerRegister />);
+      expect(document.documentElement.dataset.perfTier).toBe('lite');
+    });
+
+    it('assigns high tier on 8+ core / 8GB+ RAM systems', () => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', {
+        configurable: true,
+        value: 12,
+      });
+      Object.defineProperty(navigator, 'deviceMemory', {
+        configurable: true,
+        value: 16,
+      });
+
+      act(() => {
+        render(<ServiceWorkerRegister />);
+      });
+      expect(document.documentElement.dataset.perfTier).toBe('high');
+    });
   });
 });

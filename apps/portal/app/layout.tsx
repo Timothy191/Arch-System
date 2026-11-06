@@ -27,8 +27,14 @@ const HeaderWidgets = dynamic(
   {
     loading: () => (
       <div className="flex items-center gap-1.5" aria-hidden="true">
-        <div className="h-4 w-14 animate-pulse rounded-full bg-black/5" />
-        <div className="h-4 w-4 animate-pulse rounded-full bg-black/5" />
+        <span className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none">
+          |
+        </span>
+        <span className="inline-block h-4 w-[58px] rounded-full bg-black/5" />
+        <span className="select-none font-bold font-mono text-[11px] text-accent-amber leading-none">
+          |
+        </span>
+        <span className="inline-block h-4 w-5 rounded-full bg-black/5" />
       </div>
     ),
   }

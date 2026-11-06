@@ -5,23 +5,62 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 
+const COOKIE_CONSENT_STORAGE_KEY = 'cookie_consent';
+const COOKIE_CONSENT_COOKIE_NAME = 'arch_cookie_consent';
+const COOKIE_MAX_AGE_SECONDS = 31536000;
+
+function readStoredConsent(): string | null {
+  try {
+    const localValue = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
+    if (localValue) {
+      return localValue;
+    }
+  } catch {
+    // Ignore storage access errors in restricted browsing modes
+  }
+
+  if (typeof document !== 'undefined' && document.cookie) {
+    const match = document.cookie
+      .split('; ')
+      .find((entry) => entry.startsWith(`${COOKIE_CONSENT_COOKIE_NAME}=`));
+    if (match) {
+      return match.split('=')[1] ?? null;
+    }
+  }
+
+  return null;
+}
+
+function persistConsentChoice(choice: 'accepted' | 'declined'): void {
+  try {
+    localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, choice);
+  } catch {
+    // Ignore storage access errors in restricted browsing modes
+  }
+
+  if (typeof document !== 'undefined') {
+    // biome-ignore lint/suspicious/noDocumentCookie: intentional first-party consent persistence cookie
+    document.cookie = `${COOKIE_CONSENT_COOKIE_NAME}=${choice}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+  }
+}
+
 export function CookieConsent() {
-  // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the
-  // initial HTML and paints at first paint. Previously it started hidden and only
-  // appeared post-hydration, making it a late-painting LCP candidate (the largest
-  // contentful paint on the login page). The useEffect below hides it on return
-  // visits where consent already exists (brief flash, acceptable tradeoff).
-  const [showBanner, setShowBanner] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    const hasConsented = localStorage.getItem('cookie_consent');
-    if (hasConsented) {
-      setShowBanner(false);
+    const storedChoice = readStoredConsent();
+    if (!storedChoice) {
+      setShowBanner(true);
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem('cookie_consent', 'true');
+    persistConsentChoice('accepted');
+    setShowBanner(false);
+  };
+
+  const declineOptionalCookies = () => {
+    persistConsentChoice('declined');
     setShowBanner(false);
   };
 
@@ -43,7 +82,7 @@ export function CookieConsent() {
       <div className="flex w-full shrink-0 items-center gap-3 sm:w-auto">
         <Button
           type="button"
-          onClick={() => setShowBanner(false)}
+          onClick={declineOptionalCookies}
           variant="ghost"
           className="flex-1 sm:flex-none"
         >
@@ -54,7 +93,7 @@ export function CookieConsent() {
         </Button>
         <Button
           type="button"
-          onClick={() => setShowBanner(false)}
+          onClick={declineOptionalCookies}
           variant="ghost"
           size="icon"
           className="hidden sm:inline-flex"

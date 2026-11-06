@@ -21,21 +21,10 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
           });
         }
       });
-    } else if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-      // Purge legacy cache-first v1 cache so stale HTML/RSC payloads cannot persist
-      if ('caches' in window) {
-        caches.delete('arch-system-offline-v1').catch(() => {});
-      }
-      // Register and immediately check for updated service worker in production
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          registration.update().catch(() => {});
-        })
-        .catch((registrationError) => {
-          // eslint-disable-next-line no-console
-          console.error('SW registration failed: ', registrationError);
-        });
+    } else if (process.env.NODE_ENV === 'production' && 'caches' in window) {
+      // Purge legacy cache-first v1 cache so stale HTML/RSC payloads cannot persist.
+      // Primary /sw.js registration & hardware-scaled asset warmup is handled by ServiceWorkerRegister.
+      caches.delete('arch-system-offline-v1').catch(() => {});
     }
 
     // Initialize offline queue sync listeners with proper cleanup

@@ -42,7 +42,7 @@ export function HeroRotator({
       title: defaultTitle,
       description: defaultDescription,
       category: 'Central Command',
-      image: '/images/departments/overview.jpg',
+      image: '/images/departments/overview.webp',
       video: '/images/departments/overview.mp4',
       stats: { label: 'System Health', value: '100% Optimal' },
       status: 'active',
@@ -97,10 +97,10 @@ export function HeroRotator({
         category: dept.type === 'control_room' ? 'SCADA & Telemetry' : 'Field Operations',
         image:
           dept.name === 'reports'
-            ? '/images/departments/control-room.jpg'
+            ? '/images/departments/control-room.webp'
             : dept.name === 'executive' || dept.name === 'office'
-              ? '/images/departments/overview.jpg'
-              : `/images/departments/${dept.name}.jpg`,
+              ? '/images/departments/overview.webp'
+              : `/images/departments/${dept.name}.webp`,
         video:
           dept.name === 'reports'
             ? '/images/departments/control-room.mp4'

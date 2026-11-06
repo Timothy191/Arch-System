@@ -9,7 +9,11 @@ type NetworkInformation = {
 
 type NavigatorWithConnection = Navigator & {
   connection?: NetworkInformation;
+  deviceMemory?: number;
 };
+
+const LITE_DEVICE_MAX_CORES = 2;
+const LITE_DEVICE_MAX_MEMORY_GB = 2;
 
 type WindowWithIdleCallback = Window & {
   requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
@@ -69,8 +73,16 @@ function RouteBackgroundInner() {
       return;
     }
 
-    // 2. Network connection constraints (Network Information API)
+    // 2. Network & hardware capability constraints (scales background video to user system)
     const nav = navigator as NavigatorWithConnection;
+    if (
+      (typeof nav.hardwareConcurrency === 'number' &&
+        nav.hardwareConcurrency <= LITE_DEVICE_MAX_CORES) ||
+      (typeof nav.deviceMemory === 'number' && nav.deviceMemory <= LITE_DEVICE_MAX_MEMORY_GB) ||
+      document.documentElement.dataset.perfTier === 'lite'
+    ) {
+      return;
+    }
 
     if (nav.connection) {
       if (nav.connection.saveData) {
