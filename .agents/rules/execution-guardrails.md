@@ -58,3 +58,10 @@ Before marking any task complete, autonomously execute:
 
 - Run targeted unit tests first: `pnpm --filter portal test -- --testPathPatterns="<name>"`.
 - Keep dev server active; avoid heavy monorepo builds in interactive sessions.
+
+## Verify-Before-Report (standing user approval)
+
+- Before any check-in/progress/completion report, auto-run live verification without asking:
+  `vercel ls`/`vercel inspect <url>`, `gh pr view <n> --json state,mergedAt`, `gh run list -L 3`,
+  and `curl -s -o /dev/null -w '%{http_code}' <prod-url>/login`.
+- Report only verified state; mark anything unverified as `UNVERIFIED:`.

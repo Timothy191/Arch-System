@@ -14,3 +14,11 @@ paths: ['apps/portal/**/*', 'scripts/dev.sh']
 3. **Autonomous Error Resolution**:
    - Inspect build/runtime stdout logs directly using task management tools rather than assuming failures.
    - When encountering port collisions or zombie Next.js processes, inspect process listeners on port `3000` before respawning.
+
+## Release Pitfalls (main / GitHub / Vercel)
+
+- Untracked file blocks `git checkout main`: `mv <file> /tmp/`, checkout, `mkdir -p <dir> && mv /tmp/<file> <dir>/`. Never delete user files.
+- GitHub Actions jobs failing in seconds with `steps: []` = account billing/runner restriction, not code.
+  Local `pnpm agent:verify` (27 gates, pre-push) is the authoritative gate; admin-bypass push to `main` is expected.
+- Vercel serializes production builds; "Queued" for minutes is normal. Wait via timer, don't redeploy.
+  Remove stale queued previews with `vercel rm <url> --yes`.
