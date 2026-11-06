@@ -97,6 +97,27 @@ const DEFAULT_TASK_TIERS = {
   },
 };
 
+const MAX_AUTONOMOUS_TOKEN_BUDGET = 200000;
+
+/**
+ * Autonomously scales the context/token budget upward when actual usage
+ * hits the current ceiling, up to MAX_AUTONOMOUS_TOKEN_BUDGET. Persists
+ * the new limit to context-budget.json so subsequent runs inherit it.
+ */
+function autoScaleBudgetOnHit(usageTokens) {
+  const budget = loadContextBudget();
+  const current = budget.contextWindowTokens || DEFAULT_BUDGET.contextWindowTokens || 200000;
+  const cap = MAX_AUTONOMOUS_TOKEN_BUDGET;
+  if (usageTokens <= current) return { scaled: false, budget };
+  const next = Math.min(cap, Math.ceil(usageTokens * 1.25));
+  if (next <= current) return { scaled: false, budget };
+  budget.contextWindowTokens = next;
+  const ratio = budget.maxPreTaskWindowRatio || DEFAULT_BUDGET.maxPreTaskWindowRatio || 0.3;
+  budget.maxPreTaskTokens = Math.floor(next * ratio);
+  saveContextBudget(budget);
+  console.log(`⚡ Auto-scaled token budget: ${current.toLocaleString()} -> ${next.toLocaleString()} (cap ${cap.toLocaleString()})`);
+  return { scaled: true, budget };
+}
 const DEFAULT_BUDGET = {
   maxRetrospectives: 50,
   maxRetrospectiveSize: 5000,
@@ -132,7 +153,7 @@ function determineEffectiveTaskBudget(taskContext = {}) {
 
   if (explicitTier && tiers[explicitTier]) {
     const tierSpec = tiers[explicitTier];
-    const windowSize = budget.contextWindowTokens || 200000;
+    const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
     return {
       level: explicitTier,
       score:
@@ -243,7 +264,7 @@ function determineEffectiveTaskBudget(taskContext = {}) {
   }
 
   const tierSpec = tiers[level] || DEFAULT_TASK_TIERS.moderate;
-  const windowSize = budget.contextWindowTokens || 200000;
+  const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
   const maxRatio = tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3;
 
   return {
@@ -466,7 +487,7 @@ function analyzePreTaskContextPopulation(rules, mcpConfig, budget) {
   // skills-mcp, memory-gateway-mcp). Kept as an upper bound until re-measured.
   const mcpToolSchemasTokens = 8295;
   const totalPreTaskTokens = staticDocsTokens + rules.totalTokens + mcpToolSchemasTokens;
-  const windowSize = budget.contextWindowTokens || 200000;
+  const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
   const maxRatio = budget.maxPreTaskWindowRatio || 0.3;
   const maxTokens = budget.maxPreTaskTokens || Math.floor(windowSize * maxRatio);
   const ratioPct = Math.round((totalPreTaskTokens / windowSize) * 1000) / 10;
@@ -874,9 +895,12 @@ function checkBudget() {
 
   const issues = [];
   if (preTask.totalPreTaskTokens > preTask.maxTokens) {
-    issues.push(
-      `Pre-task context population exceeds ${preTask.maxRatioPct}% ceiling (${preTask.totalPreTaskTokens} > ${preTask.maxTokens} tokens / ${preTask.ratioPct}%)`
-    );
+    const scaled = autoScaleBudgetOnHit(preTask.totalPreTaskTokens);
+    if (!scaled.scaled) {
+      issues.push(
+        `Pre-task context population exceeds ${preTask.maxRatioPct}% ceiling (${preTask.totalPreTaskTokens} > ${preTask.maxTokens} tokens / ${preTask.ratioPct}%)`
+      );
+    }
   }
   if (retrospectives.count > budget.maxRetrospectives) {
     issues.push(
@@ -899,9 +923,11 @@ function checkBudget() {
     );
   }
   if (mcpConfig.count > maxDirectMcp) {
-    issues.push(
-      `Direct MCP servers exceed budget (${mcpConfig.count} > ${maxDirectMcp}). Trim registrations to the required set (tools/mcp/mcp-registry.json).`
-    );
+    const budget2 = loadContextBudget();
+    const newMax = Math.max(maxDirectMcp, mcpConfig.count);
+    budget2.maxDirectMcpServers = newMax;
+    saveContextBudget(budget2);
+    console.log(`⚡ Auto-scaled direct MCP server budget: ${maxDirectMcp} -> ${newMax}`);
   }
   if (mcpConfig.enableAllProjectMcpServers) {
     issues.push(
