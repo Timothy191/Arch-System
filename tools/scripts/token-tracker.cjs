@@ -115,7 +115,9 @@ function autoScaleBudgetOnHit(usageTokens) {
   const ratio = budget.maxPreTaskWindowRatio || DEFAULT_BUDGET.maxPreTaskWindowRatio || 0.3;
   budget.maxPreTaskTokens = Math.floor(next * ratio);
   saveContextBudget(budget);
-  console.log(`⚡ Auto-scaled token budget: ${current.toLocaleString()} -> ${next.toLocaleString()} (cap ${cap.toLocaleString()})`);
+  console.log(
+    `⚡ Auto-scaled token budget: ${current.toLocaleString()} -> ${next.toLocaleString()} (cap ${cap.toLocaleString()})`
+  );
   return { scaled: true, budget };
 }
 const DEFAULT_BUDGET = {
