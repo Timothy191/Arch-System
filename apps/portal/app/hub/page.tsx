@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { CoreOperationalModules, HeroBackground, HeroRotator } from '@/features/hub';
+import { OperationsCopilot } from '@/features/hub/components/OperationsCopilot';
 import { withCache } from '@/lib/cache-utils';
 import {
   getAccessibleDepartmentNames,
@@ -300,6 +301,10 @@ export default async function HubPage() {
           </div>
         </section>
       )}
+      {/* Operations Copilot (AI-assisted troubleshooting) */}
+      <section className="animate-fade-up" style={{ animationDelay: '0.4s' }}>
+        <OperationsCopilot />
+      </section>
     </div>
   );
 }

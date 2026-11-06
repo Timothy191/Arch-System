@@ -117,3 +117,4 @@ Add zero-dependency `IndexedDB` (`ArchOfflineFetchDB`) offline storage engine to
 4. **[apps/portal/hooks/useFetchOfflineQueue.ts](file:///home/tim/Documents/Arch-System/apps/portal/hooks/useFetchOfflineQueue.ts)**: Added React hook for UI visibility and queue flushing.
 
 - [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.
+- [2026-11-06T12:04:30+02:00] Removed redundant `src/excel.browser.ts` and `src/parse-excel.ts` files already consolidated into `src/excel.ts`.

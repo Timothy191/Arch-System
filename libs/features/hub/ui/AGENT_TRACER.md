@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-11-06T12:04:30+02:00 - DepartmentCard Loading Overlay Role & Decorative Aria-Hidden Hardening
+
+- **Purpose**: Improve WCAG 2.2 AA semantics on `DepartmentCard.tsx` by adding `role="status"` to the loading overlay (`dept-loading-*`), adding `aria-hidden="true"` to decorative spinner/gradient/status-dot elements, and elevating the pin button (`uiverse-card-pin`) to `z-30`.
+- **Changes**:
+  - `libs/features/hub/ui/src/DepartmentCard.tsx`: Added `role="status"` and `aria-hidden="true"` attributes and updated `uiverse-card-pin` z-index to `z-30`.
+- **Verification**: `pnpm --filter @repo/hub/ui test` ✅ (25/25).
+
 ## 2026-11-06T09:20:00+02:00 - Unify HeroRotator WebP Posters, Hover-Driven Department Prefetch & Sparkline SVG Deduplication
 
 - **Purpose**: Eliminate duplicate `.jpg` + `.webp` downloads on `/hub` by aligning `HeroRotator.tsx` posters to `.webp`, replace eager mount-time RSC prefetching across all 13 `DepartmentCard`s with hover/focus prefetching, and remove 13 duplicate inline `<style>` keyframes in `Sparkline.tsx`.

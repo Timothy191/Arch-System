@@ -318,49 +318,6 @@ export function groupMachinesByType(
   return results;
 }
 
-export interface SiteShiftSummaryStats {
-  readonly totalWorkedHours: number;
-  readonly totalDelayMinutes: number;
-  readonly productionDelayMinutes: number;
-  readonly engineeringDelayMinutes: number;
-  readonly nonSiteDelayMinutes: number;
-  readonly availabilityPercent: number;
-  readonly utilizationPercent: number;
-}
-
-export function calculateSiteShiftSummary(params: {
-  totalHours: number;
-  prodMin: number;
-  engMin: number;
-  natMin: number;
-  nonSiteMin: number;
-}): SiteShiftSummaryStats {
-  const { totalHours, prodMin, engMin, natMin, nonSiteMin } = params;
-  const totalDelayMinutes = prodMin + engMin + natMin + nonSiteMin;
-  const delayHours = totalDelayMinutes / 60;
-  const scheduledHours = Math.max(totalHours + delayHours, 1);
-  const engDelayHours = engMin / 60;
-
-  const availabilityPercent = Math.min(
-    100,
-    Math.max(0, Number((((scheduledHours - engDelayHours) / scheduledHours) * 100).toFixed(1)))
-  );
-  const utilizationPercent = Math.min(
-    100,
-    Math.max(0, Number(((totalHours / scheduledHours) * 100).toFixed(1)))
-  );
-
-  return {
-    totalWorkedHours: Number(totalHours.toFixed(2)),
-    totalDelayMinutes,
-    productionDelayMinutes: prodMin,
-    engineeringDelayMinutes: engMin,
-    nonSiteDelayMinutes: natMin + nonSiteMin,
-    availabilityPercent,
-    utilizationPercent,
-  };
-}
-
 export interface DrillOperationRowData {
   readonly machineId: string;
   readonly startSmr: string;

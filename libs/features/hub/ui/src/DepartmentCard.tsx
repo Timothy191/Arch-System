@@ -176,8 +176,9 @@ function DepartmentCard({
             className="absolute inset-0 z-30 flex animate-fade-in flex-col items-center justify-center gap-2 rounded-[20px] bg-arch-surface-primary/75 backdrop-blur-sm transition-all"
             data-testid={`dept-loading-${department.name}`}
             aria-live="polite"
+            role="status"
           >
-            <Loader2 className="h-6 w-6 animate-spin text-arch-accent-blue" />
+            <Loader2 className="h-6 w-6 animate-spin text-arch-accent-blue" aria-hidden="true" />
             <span className="font-medium text-arch-text-secondary text-xs">Loading...</span>
           </div>
         )}
@@ -244,7 +245,10 @@ function DepartmentCard({
               }}
             />
             {/* Glass gradient overlay to ensure icon bubble contrast */}
-            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-transparent to-black/35" />
+            <div
+              className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-transparent to-black/35"
+              aria-hidden="true"
+            />
           </div>
 
           {/* Save/Pin Button */}
@@ -253,7 +257,7 @@ function DepartmentCard({
             onClick={togglePin}
             aria-pressed={isPinned}
             className={cn(
-              'uiverse-card-pin gold-steel-border gold-steel-border-slim group/pin pointer-events-auto absolute top-2.5 right-2.5 z-20 border border-transparent hover:scale-110 active:scale-95',
+              'uiverse-card-pin gold-steel-border gold-steel-border-slim group/pin pointer-events-auto absolute top-2.5 right-2.5 z-30 border border-transparent hover:scale-110 active:scale-95',
               isPinned
                 ? 'bg-white text-arch-accent-blue shadow-sm'
                 : 'text-arch-text-secondary hover:bg-white/95 hover:text-arch-accent-blue'
@@ -327,6 +331,7 @@ function DepartmentCard({
                       department.status === 'maintenance' && 'bg-accent-amber',
                       department.status === 'alert' && 'bg-accent-red'
                     )}
+                    aria-hidden="true"
                   />
                   <span>{department.status}</span>
                 </span>
