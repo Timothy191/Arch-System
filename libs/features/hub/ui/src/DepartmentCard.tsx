@@ -194,12 +194,12 @@ function DepartmentCard({
           }}
           onClick={(e) => {
             e.preventDefault();
-            // Use useTransition for smoother navigation with loading state
+            // Use useTransition for smoother navigation with loading state.
             startTransition(() => {
               router.push(route);
             });
           }}
-          className="absolute inset-0 z-0 rounded-[20px] focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue"
+          className="absolute inset-0 z-20 rounded-[20px] focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue"
           aria-label={`Open ${department.displayName} department`}
           data-testid={`dept-link-${department.name}`}
         />
@@ -208,6 +208,7 @@ function DepartmentCard({
         <div
           className="pointer-events-none absolute inset-0 z-0 rounded-[20px] bg-white/[0.03] opacity-0 backdrop-blur-sm motion-safe:transition-opacity motion-safe:duration-300 motion-safe:group-hover:opacity-100"
           aria-hidden="true"
+          inert
         />
 
         {/* Banner area with photographic / terrain visual background */}
@@ -243,7 +244,7 @@ function DepartmentCard({
               }}
             />
             {/* Glass gradient overlay to ensure icon bubble contrast */}
-            <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-transparent to-black/35" />
+            <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-transparent to-black/35" />
           </div>
 
           {/* Save/Pin Button */}
