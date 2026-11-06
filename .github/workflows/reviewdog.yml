@@ -19,15 +19,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
           version: 9.15.9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
           cache: pnpm
@@ -36,7 +36,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: ESLint with Reviewdog
-        uses: reviewdog/action-eslint@v1
+        uses: reviewdog/action-eslint@3ee2a450da17e060b9dfa4bffd53976906c6b2b0 # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
@@ -45,7 +45,7 @@ jobs:
           eslint_flags: '--max-warnings 0'
 
       - name: Prettier Check with Reviewdog
-        uses: EPMatt/reviewdog-action-prettier@v1
+        uses: EPMatt/reviewdog-action-prettier@f691104cbeb4b0299df971275444c64be93c03ae # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
@@ -54,7 +54,7 @@ jobs:
           prettier_flags: '--check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"'
 
       - name: Markdown Lint with Reviewdog
-        uses: reviewdog/action-markdownlint@v0
+        uses: reviewdog/action-markdownlint@f8e8c509d6e706db79bb39c1c506c968f1a66b82 # v0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review

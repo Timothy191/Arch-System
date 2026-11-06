@@ -4,11 +4,14 @@ on:
     paths: ['infra/k8s/**']
   pull_request:
     paths: ['infra/k8s/**']
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker://ghcr.io/yannh/kubeconform:latest
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: docker://ghcr.io/yannh/kubeconform:v0.6.7
         with:
           args: -strict -summary infra/k8s

@@ -4,9 +4,12 @@ on:
     paths: ['infra/terraform/**']
   pull_request:
     paths: ['infra/terraform/**']
+permissions:
+  contents: read
+
 jobs:
   tfsec:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: aquasecurity/tfsec-action@v1.0.3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: aquasecurity/tfsec-action@b466648d6e39e7c75324f25d83891162a721f2d6 # v1.0.3

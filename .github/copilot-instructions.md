@@ -67,11 +67,34 @@ Commit both source and generated files in the same atomic change.
 - Named icon imports from `lucide-react` — never `import * as Icons`.
 - Animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Easing: `cubic-bezier(0.16, 1, 0.3, 1)`.
 
-### TypeScript and code style
+### TypeScript, code style, and Canonical 8-Step Security Sequence
 
 - Strict TypeScript. No `any`, no `// @ts-ignore`. Use `unknown` + type guards or Zod at boundaries.
-- Server Actions must call `createServerSupabaseClient()` and validate the user on line one.
+- Every Server Action and protected mutation MUST follow the **Canonical 8-Step Security Sequence**:
+  1. Authenticate the caller (`getAuthenticatedEmployee()` / `createServerSupabaseClient()` + `getUserSafely()`).
+  2. Authorize the requested operation and resource (role + department/tenant).
+  3. Validate all untrusted input (`@repo/contract` Zod `.safeParse()`).
+  4. Apply rate limits (`RateLimiter`).
+  5. Execute the operation (parameterized Kysely/Supabase RPC/mutation).
+  6. Record the audit event (`@repo/logger`).
+  7. Invalidate affected caches (`updateTagInAction` / `updateTag`).
+  8. Return a typed result (before any `redirect()`).
 - Conventional commits enforced by commitlint + Husky. Never bypass hooks (`--no-verify`).
+
+### Agent Permission Tiers & Mandatory Governance (`.agents/rules/mandatory-ai-engineering-governance.md`)
+
+| Tier  | Permission                                                                   |
+| ----- | ---------------------------------------------------------------------------- |
+| One   | Read and research                                                            |
+| Two   | Edit feature code and tests                                                  |
+| Three | Create branches and PRs                                                      |
+| Four  | Modify auth, RLS, migrations and infrastructure with human approval          |
+| Five  | Production deployment and destructive operations with explicit authorization |
+
+- An agent must never grant itself additional permissions.
+- **TDD**: 1. Write failing test → 2. Confirm failure → 3. Implement smallest change → 4. Confirm pass → 5. Refactor → 6. Run regression tests.
+- **No Artificial Completion**: Never fabricate test results, use placeholder mocks in production, disable failing tests, or suppress TypeScript errors.
+- **Independent Code Review**: Substantial PRs require an independent reviewer capable of rejecting changes.
 
 ### Tests
 

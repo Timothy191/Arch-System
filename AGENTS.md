@@ -47,25 +47,23 @@ browser → proxy.ts (Next 16, CSP + x-nonce)
 
 - **RSC-first**: Server Components by default; interactivity in leaf `'use client'` components.
 - **Dual-tier cache**: Next.js Data Cache (`cachedRSC`) + Redis L1/L2 with scoped tags (`scopedTag`, `tagTenant`, `tagDepartment`).
-- **Server Actions**: authenticate → authorize → validate (Zod `@repo/contract`) → rate-limit → mutate → invalidate cache (`updateTagInAction`) → redirect/return.
+- **Server Actions (Canonical 8-Step Security Sequence)**: 1. Authenticate (`getAuthenticatedEmployee`) → 2. Authorize (role + department/resource) → 3. Validate (`@repo/contract` Zod) → 4. Rate-limit (`RateLimiter`) → 5. Execute operation → 6. Record audit event (`logger.info`) → 7. Invalidate affected caches (`updateTagInAction`) → 8. Return typed result (before any `redirect()`).
 - **Live updates**: Supabase Realtime CDC via `useSupabaseRealtime` — no manual polling.
 - **Client cache**: TanStack Query with `localStorage` persistence. SWR is prohibited.
 
 ### Key shared modules
 
-| Module                         | Role                                                                                                                                               |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@repo/contract`               | Canonical Zod schemas + derived TS types — single source of truth for all input validation across frontend/backend                                 |
-| `@repo/supabase`               | Typed DB access (Kysely + Supabase SSR), auth, middleware/proxy clients — the data access boundary                                                 |
-| `@repo/database`               | SQL migration SSoT + generated types                                                                                                               |
-| `@repo/redis`                  | Multi-tier caching (L1/L2), sessions with privilege revocation, distributed locks, streams, vector search, analytics                               |
-| `@repo/errors`                 | `AppError` hierarchy (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `RateLimitError`, `DatabaseError`, etc.) |
-| `@repo/theme`                  | OKLCH design tokens, Style Dictionary codegen, Tailwind preset, CSS vars                                                                           |
-| `@repo/ui`                     | Shared Radix/shadcn primitives — `GlassCard`, `DepartmentLayout`, `KPI`, `Clock`, `PageHeader`, data-table, telemetry-chart                        |
-| `@repo/logger`                 | Structured Pino logging (server/browser/next)                                                                                                      |
-| `@repo/agents`                 | AI coordination engine (coordinator, fleet-runner, specialists, swarm, memory, token-budget)                                                       |
-| `libs/shared/hooks`            | Client React hooks: `useSupabaseRealtime`, `useClientCache` (alias: `useRedisCache`), `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`        |
-| `libs/features/departments/ui` | Domain UI for control-room & engineering (shift closeout, fleet KPI, breakdowns)                                                                   |
+- `@repo/contract`: Canonical Zod schemas + derived TS types (SSoT for frontend/backend input validation).
+- `@repo/supabase`: Typed DB access (Kysely + Supabase SSR), auth, middleware/proxy clients.
+- `@repo/database`: SQL migration SSoT + generated types.
+- `@repo/redis`: L1/L2 caching, sessions with privilege revocation, locks, streams, vector search, analytics.
+- `@repo/errors`: `AppError` hierarchy (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `RateLimitError`, `DatabaseError`).
+- `@repo/theme`: OKLCH design tokens, Style Dictionary codegen, Tailwind preset, CSS vars.
+- `@repo/ui`: Shared Radix/shadcn primitives (`GlassCard`, `DepartmentLayout`, `KPI`, `Clock`, `PageHeader`, data-table, telemetry-chart).
+- `@repo/logger`: Structured Pino logging (server/browser/next).
+- `@repo/agents`: AI coordination engine (coordinator, fleet-runner, specialists, swarm, memory, token-budget).
+- `libs/shared/hooks`: `useSupabaseRealtime`, `useClientCache` (`useRedisCache`), `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`.
+- `libs/features/departments/ui`: Domain UI for control-room & engineering (shift closeout, fleet KPI, breakdowns).
 
 ---
 
@@ -138,13 +136,9 @@ pnpm deps:lint && pnpm knip
 pnpm quality             # release-grade suite (lint → type-check → test → … → verify:gates)
 ```
 
-### Standalone MCP servers (run inside each directory)
+### Standalone MCP servers (run inside each dir)
 
-```bash
-cd skills-mcp && pnpm run build && pnpm test
-cd memory-gateway-mcp && pnpm run build && pnpm test
-cd slim-tooling-mcp && pnpm run build && pnpm test
-```
+`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`: `cd <dir> && pnpm run build && pnpm test`.
 
 ---
 
@@ -204,19 +198,33 @@ Focused rule files under `.agents/rules/`:
 
 All domain/runtime errors extend `AppError` from `@repo/errors`. Use `isAppError(err)` at boundaries to extract status codes safely. Never leak raw DB errors or service-role keys to client components.
 
-### Server Action template
+### Server Action template (Canonical 8-Step Security Sequence)
 
 ```typescript
 'use server';
 
 export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
-  const parsed = shiftCloseoutSchema.safeParse(rawInput);
-  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
+  // 1. Authenticate the caller
   const principal = await getAuthenticatedEmployee();
   if (!principal) throw new AuthError('Unauthorized');
-  // ... rate limit, RPC/query, then invalidate before redirect:
-  await updateTagInAction(`dept:${deptId}:shift_closeout`);
-  return { success: true, data };
+  // 2. Authorize the requested operation and resource
+  if (!principal.accessibleDepartments.includes(rawInput.departmentId)) {
+    throw new ForbiddenError('Insufficient department access');
+  }
+  // 3. Validate all untrusted input
+  const parsed = shiftCloseoutSchema.safeParse(rawInput);
+  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
+  // 4. Apply rate limits -> 5. Execute operation -> 6. Record audit event
+  await rateLimiter.check('shift_closeout', principal.id);
+  const result = await executeShiftCloseoutRpc(parsed.data);
+  logger.info({
+    event: 'shift_closeout_submitted',
+    actorId: principal.id,
+    deptId: parsed.data.departmentId,
+  });
+  // 7. Invalidate affected caches -> 8. Return a typed result (before any redirect)
+  await updateTagInAction(`dept:${parsed.data.departmentId}:shift_closeout`);
+  return { success: true, data: result };
 }
 ```
 
@@ -349,6 +357,24 @@ All non-trivial tasks follow 4 phases (enforced by `pnpm agent:verify`):
 2. **Plan**: Ordered file changes, per-step gate checks, rollback procedure.
 3. **Implement**: Run relevant gates (`type-check`, `lint`, `test`) after each step; never advance on failure.
 4. **Verify**: Re-run all spec acceptance criteria, confirm zero regressions, update `AGENT_TRACER.md`, and use Conventional Commits.
+
+## Agent Permission Tiers, TDD & Mandatory Governance
+
+All agents (Jules, Cursor, GitHub Copilot, Claude Code, Codex, Gemini, and autonomous orchestrators) obey `.agents/rules/mandatory-ai-engineering-governance.md`:
+
+| Tier  | Permission                                                                   |
+| ----- | ---------------------------------------------------------------------------- |
+| One   | Read and research                                                            |
+| Two   | Edit feature code and tests                                                  |
+| Three | Create branches and PRs                                                      |
+| Four  | Modify auth, RLS, migrations and infrastructure with human approval          |
+| Five  | Production deployment and destructive operations with explicit authorization |
+
+An agent must never grant itself additional permissions.
+
+- **A. Test-Driven Development**: 1. Write a failing test → 2. Confirm failure for intended reason → 3. Implement smallest suitable change → 4. Confirm test passes → 5. Refactor without breaking tests → 6. Run regression tests.
+- **B. No Artificial Completion**: Never claim unexecuted tests passed, replace real logic with mocks/placeholders, disable failing tests, suppress TS errors, or alter acceptance criteria to fit incomplete work.
+- **C. Independent Code Review**: Substantial PRs require an independent reviewer agent (`critique-council-reviewer` / `security-quality-gatekeeper`) capable of rejecting changes on security, boundary, test, perf, DB, or a11y grounds.
 
 ---
 

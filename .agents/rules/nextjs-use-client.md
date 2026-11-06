@@ -47,17 +47,18 @@ import { useActionState } from 'react';
 
 ---
 
-## 4. Mandatory 7-Step Server Action Flow
+## 4. Mandatory 8-Step Server Action Flow
 
-All `'use server'` mutations in `apps/portal/actions/` or route action modules are public HTTP endpoints and MUST execute this exact 7-step sequence:
+All `'use server'` mutations in `apps/portal/actions/` or route action modules are public HTTP endpoints and MUST execute this exact 8-step sequence:
 
-1. **Authenticate**: Verify the caller via `getAuthenticatedEmployee()` or `createServerSupabaseClient()` + `getUserSafely()`. Throw `AuthError` (`@repo/errors`) if unauthenticated.
-2. **Authorize**: Check RBAC role and department/tenant access claims. Throw `ForbiddenError` on mismatch.
-3. **Validate**: Parse untrusted inputs at runtime with a canonical Zod schema from `@repo/contract` using `.safeParse()`. Throw `ValidationError` or return a typed error tuple on failure.
-4. **Rate-Limit**: Enforce per-user/IP mutation quotas via `RateLimiter` (`@repo/rate-limiter`). Throw `RateLimitError` when exceeded.
-5. **Mutate**: Execute the parameterized database write or RPC via `@repo/supabase`.
-6. **Dual-Tier Cache Invalidation**: Call `await updateTagInAction(tag)` / `await updateTag(tag)` / `await updateTags(tags)` from `@/lib/server-cache` to purge both the Next.js Data Cache (read-your-writes) and distributed Redis L1/L2 cache tags (`cacheInvalidateTags`).
-7. **Redirect / Return**: Call `redirect()` ONLY AFTER cache invalidation completes (`redirect()` throws a Next.js control-flow exception; any code after it is unreachable).
+1. **Authenticate the caller**: Verify via `getAuthenticatedEmployee()` or `createServerSupabaseClient()` + `getUserSafely()`. Throw `AuthError` (`@repo/errors`) if unauthenticated.
+2. **Authorize the requested operation and resource**: Check RBAC role and department/tenant access claims. Throw `ForbiddenError` on mismatch.
+3. **Validate all untrusted input**: Parse untrusted inputs at runtime with a canonical Zod schema from `@repo/contract` using `.safeParse()`. Throw `ValidationError` on failure.
+4. **Apply rate limits**: Enforce per-user/IP mutation quotas via `RateLimiter` (`@repo/rate-limiter`). Throw `RateLimitError` when exceeded.
+5. **Execute the operation**: Execute the parameterized database write or RPC via `@repo/supabase`.
+6. **Record the audit event**: Emit structured audit telemetry via `@repo/logger`.
+7. **Invalidate affected caches**: Call `await updateTagInAction(tag)` / `await updateTag(tag)` / `await updateTags(tags)` from `@/lib/server-cache` to purge both the Next.js Data Cache and distributed Redis L1/L2 cache tags.
+8. **Return a typed result**: Return the typed result (or call `redirect()` ONLY AFTER cache invalidation completes).
 
 ---
 

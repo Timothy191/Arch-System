@@ -3,10 +3,13 @@ jest.mock('@babel/core', () => ({ parseSync: () => null, traverse: () => undefin
 });
 
 import {
+  AGENT_PERMISSION_TIERS,
   AgentRoutineRegistry,
   auditErasableTypeScript,
+  CANONICAL_SECURITY_SEQUENCE,
   CrossModuleOutboxLedger,
   errResult,
+  evaluateAgentPermissionTier,
   evaluateAtomicFeatureCapability,
   evaluateDomainBusinessRules,
   executeMediatedPipeline,
@@ -17,6 +20,7 @@ import {
   ToolPermissionGate,
   TrajectoryContrastiveStore,
   validateArchitecturePosture,
+  validateCanonicalSecuritySequence,
 } from './harness-engine';
 import { AgentPillarEnvelope } from './prompt-envelope';
 import { QualityGate } from './quality-gate';
@@ -409,6 +413,82 @@ Verify with pnpm test and pnpm agent:verify.
       expect(
         errResult({ failureCode: 'CUSTOM_ERR', failureMessage: 'Example failure' }).isSuccess
       ).toBe(false);
+    });
+  });
+
+  describe('Given Canonical 8-Step Security Sequence & 5-Tier Agent Permission Governance', () => {
+    it('When validating mutation steps, Then authenticate -> authorize -> validate -> rate-limit -> execute -> audit -> invalidate-cache -> return-typed-result is enforced', () => {
+      expect(CANONICAL_SECURITY_SEQUENCE).toHaveLength(8);
+      const validCheck = validateCanonicalSecuritySequence(CANONICAL_SECURITY_SEQUENCE);
+      expect(validCheck.isCompliant).toBe(true);
+
+      const invertedCheck = validateCanonicalSecuritySequence([
+        'validate',
+        'authenticate',
+        'authorize',
+        'rate-limit',
+        'execute',
+        'audit',
+        'invalidate-cache',
+        'return-typed-result',
+      ]);
+      expect(invertedCheck.isCompliant).toBe(false);
+      expect(invertedCheck.violationMessage).toContain('Step 1 must be authenticate');
+
+      const shortCheck = validateCanonicalSecuritySequence(['authenticate', 'authorize']);
+      expect(shortCheck.isCompliant).toBe(false);
+      expect(shortCheck.violationMessage).toContain('Expected 8 security steps');
+    });
+
+    it('When evaluating 5-tier agent permissions, Then self-elevation is blocked and Tiers 4 & 5 require explicit human approval', () => {
+      expect(Object.keys(AGENT_PERMISSION_TIERS)).toHaveLength(5);
+
+      const selfElevationAttempt = evaluateAgentPermissionTier({
+        grantedTier: 2,
+        requestedTier: 3,
+        attemptedSelfGrant: true,
+        hasHumanApproval: false,
+      });
+      expect(selfElevationAttempt.permitted).toBe(false);
+      expect(selfElevationAttempt.denialReason).toContain(
+        'An agent must never grant itself additional permissions'
+      );
+
+      const exceededTierAttempt = evaluateAgentPermissionTier({
+        grantedTier: 2,
+        requestedTier: 3,
+        attemptedSelfGrant: false,
+      });
+      expect(exceededTierAttempt.permitted).toBe(false);
+      expect(exceededTierAttempt.denialReason).toContain('exceeds granted Tier 2');
+
+      const unapprovedTier4 = evaluateAgentPermissionTier({
+        grantedTier: 4,
+        requestedTier: 4,
+        hasHumanApproval: false,
+      });
+      expect(unapprovedTier4.permitted).toBe(false);
+
+      const approvedTier4 = evaluateAgentPermissionTier({
+        grantedTier: 4,
+        requestedTier: 4,
+        hasHumanApproval: true,
+      });
+      expect(approvedTier4.permitted).toBe(true);
+
+      const unapprovedTier5 = evaluateAgentPermissionTier({
+        grantedTier: 5,
+        requestedTier: 5,
+        hasHumanApproval: false,
+      });
+      expect(unapprovedTier5.permitted).toBe(false);
+
+      const approvedTier5 = evaluateAgentPermissionTier({
+        grantedTier: 5,
+        requestedTier: 5,
+        hasHumanApproval: true,
+      });
+      expect(approvedTier5.permitted).toBe(true);
     });
   });
 });

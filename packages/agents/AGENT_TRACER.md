@@ -110,3 +110,4 @@
 - **Phase 4 (Criticism)**: Enforced max 2 positional parameters, `readonly` inputs, zero magic numbers, and zero external runtime dependencies.
 - **Phase 5 (Contract)**: Modified `src/harness-engine.ts` and `src/harness-engine.test.ts`; verified with `pnpm --filter @repo/agents test` and `pnpm --filter @repo/agents type-check`.
 - [2026-11-06T08:34:40Z] Added zero-throw `OperationResult` (`okResult`, `errResult`) and `executeMediatedPipeline` (`rafaelfgx/Architecture` Clean Architecture Result & Mediator pattern) to `src/harness-engine.ts` and `src/harness-engine.test.ts`.
+- [2026-11-06T08:58:50Z] Added `CANONICAL_SECURITY_SEQUENCE`, `validateCanonicalSecuritySequence`, `AGENT_PERMISSION_TIERS`, and `evaluateAgentPermissionTier` to `src/harness-engine.ts` and `src/harness-engine.test.ts` via TDD.

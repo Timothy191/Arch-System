@@ -157,9 +157,18 @@ documentation/         # Tool-written operational center (audit suites write her
 
 ## 5. Architecture — Key Concepts
 
-### Request Flow
+### Request Flow & Canonical 8-Step Security Sequence
 
-`apps/portal/proxy.ts` is the Edge middleware (Next.js 16 renamed `middleware.ts` → `proxy.ts`; there is no `middleware.ts`). It handles session validation, employee role/department resolution, and security headers. Server Actions must call `createServerSupabaseClient()` and validate the user on the first line.
+`apps/portal/proxy.ts` is the Edge middleware (Next.js 16 renamed `middleware.ts` → `proxy.ts`; there is no `middleware.ts`). It handles session validation, employee role/department resolution, and security headers. Every Server Action and protected mutation must follow the **Canonical 8-Step Security Sequence**:
+
+1. Authenticate the caller (`getAuthenticatedEmployee()` / `createServerSupabaseClient()` + `getUserSafely()`).
+2. Authorize the requested operation and resource (role + department/tenant).
+3. Validate all untrusted input (`@repo/contract` Zod `.safeParse()`).
+4. Apply rate limits (`RateLimiter`).
+5. Execute the operation.
+6. Record the audit event (`@repo/logger`).
+7. Invalidate affected caches (`updateTagInAction` / `updateTag`).
+8. Return a typed result (before any `redirect()`).
 
 ### Portal Routing
 
@@ -243,7 +252,19 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 ---
 
-## 9. Agent Governance — Hard Stops
+## 9. Agent Governance — Permission Tiers & Hard Stops
+
+All agents obey `.agents/rules/mandatory-ai-engineering-governance.md`:
+
+| Tier  | Permission                                                                   |
+| ----- | ---------------------------------------------------------------------------- |
+| One   | Read and research                                                            |
+| Two   | Edit feature code and tests                                                  |
+| Three | Create branches and PRs                                                      |
+| Four  | Modify auth, RLS, migrations and infrastructure with human approval          |
+| Five  | Production deployment and destructive operations with explicit authorization |
+
+An agent must never grant itself additional permissions.
 
 These hard stops are **always in force**, with no approval path:
 

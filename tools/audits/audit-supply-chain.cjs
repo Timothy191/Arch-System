@@ -314,6 +314,56 @@ if (isOfflineOrUnreachable) {
   );
 }
 
+// ── 4. GitHub Actions Supply-Chain & Tier 2 Path Audit ───────────────────────
+console.log('4️⃣  Auditing GitHub Actions SHA pinning, Dependabot & Tier 2 path checks...');
+
+const dependabotPath = path.join(ROOT, '.github', 'dependabot.yml');
+if (!fs.existsSync(dependabotPath)) {
+  violations.push('Missing .github/dependabot.yml configuration.');
+} else {
+  const dependabotText = fs.readFileSync(dependabotPath, 'utf8');
+  if (!dependabotText.includes('github-actions')) {
+    violations.push('.github/dependabot.yml must configure package-ecosystem: github-actions.');
+  }
+}
+
+const ciYmlPath = path.join(ROOT, '.github', 'workflows', 'ci.yml');
+if (fs.existsSync(ciYmlPath)) {
+  const ciText = fs.readFileSync(ciYmlPath, 'utf8');
+  if (
+    !ciText.includes("'libs/features/auth/'") ||
+    !ciText.includes("'packages/database/migrations/'")
+  ) {
+    violations.push(
+      '.github/workflows/ci.yml tier2-check must enforce canonical sensitive paths (libs/features/auth/ and packages/database/migrations/).'
+    );
+  }
+}
+
+const workflowFiles = glob.sync('.github/workflows/*.yml', { cwd: ROOT });
+for (const wfRel of workflowFiles) {
+  const wfText = fs.readFileSync(path.join(ROOT, wfRel), 'utf8');
+  if (!/^\s*permissions:/m.test(wfText)) {
+    violations.push(`${wfRel} is missing an explicit least-privilege 'permissions:' block.`);
+  }
+  const usesLines = wfText.match(/^\s*-?\s*uses:\s*([^\s#]+)/gm) || [];
+  for (const line of usesLines) {
+    const ref = line.replace(/^\s*-?\s*uses:\s*/, '').trim();
+    if (ref.startsWith('docker://')) {
+      if (ref.endsWith(':latest')) {
+        violations.push(`${wfRel} uses floating docker :latest tag: ${ref}`);
+      }
+      continue;
+    }
+    if (!/@[0-9a-f]{40}$/.test(ref)) {
+      violations.push(`${wfRel} uses unpinned GitHub Action (must pin to 40-char SHA): ${ref}`);
+    }
+  }
+}
+console.log(
+  `   ✓ Audited ${workflowFiles.length} GitHub workflow files for 40-char SHA pinning & least-privilege permissions.`
+);
+
 // ── Summary Report ──────────────────────────────────────────────────────────
 console.log('\n📊 Supply-Chain Security Audit Summary:');
 console.log(`   • Git-Tracked Files Scanned: ${scannedFilesCount}`);

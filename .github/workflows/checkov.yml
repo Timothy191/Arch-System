@@ -4,12 +4,15 @@ on:
     paths: ['infra/**', 'terraform/**']
   pull_request:
     paths: ['infra/**', 'terraform/**']
+permissions:
+  contents: read
+
 jobs:
   checkov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: bridgecrewio/checkov-action@v12
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: bridgecrewio/checkov-action@45edc9d8856b664db2ec251f5f8632361f0a67aa # v12
         with:
           directory: infra/
           framework: terraform,kubernetes,dockerfile

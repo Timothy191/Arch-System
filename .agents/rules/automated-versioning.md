@@ -1,6 +1,7 @@
 # Automated Versioning Invariants & Release Rules
 
 ## Core Principles
+
 1. **Single Source of Truth (SSoT):**
    - The workspace version lives in root `package.json` and is mirrored to `apps/portal/package.json` and `version.json`.
    - Never hardcode version strings in React components or pages (e.g., `'2.0.0.1'` or `'2.4.1'`). Always import `APP_VERSION` from `@/lib/version`.

@@ -48,17 +48,14 @@ paths:
 - **Images**: `next/image` only — no raw ``. Must have descriptive `alt`, explicit `width`/`height`, prevent CLS.
 - **Optimization**: `pnpm audit:images` — AVIF/WebP, explicit dimensions, restricted `remotePatterns` in `next.config.mjs`.
 
-## 7. Verification
+## 7. Core Design Principles (Mandatory Guardrails)
 
-- `node tools/audits/audit-design-tokens.cjs`
-- `node tools/audits/audit-tailwind-usage.cjs`
-- `node tools/audits/audit-image-optimization.cjs`
-- `pnpm --filter @repo/theme lint:tokens`
-- `pnpm test:a11y`
+- **Visual Hierarchy**: Establish clear focal dominance using the fluid modular scale (`text-fluid-xs` to `text-fluid-4xl`), semantic weight contrast (`text-heading` → `text-body` → `text-secondary` → `text-muted`), and `GlassCard` elevation tiers (`default` → `window` → `spotlight` → `liquid`). Use `tabular-nums` (`font-mono`) for live SCADA/KPI metrics.
+- **Consistency**: Always reuse `@repo/ui` primitives (`GlassCard`, `KPICard`, `DepartmentLayout`, `PageHeader`), multi-slot recipes (`defineSlotRecipe`), and contrast-safe surface pairings (`resolveSurfacePairing`).
+- **Proximity & Grouping**: Group related metrics within `KPIGrid` or `GlassCard` containers (`gap-2` intra-group vs `gap-4`/`gap-6` inter-group). Use `.card-nested-content` for optical concentric inner radii (`max(0px, calc(var(--radius-lg) - 4px))`), and verify spatial non-overlap via `expectGalenLayout` across `RESPONSIVELY_MINING_VIEWPORTS`.
+- **Whitespace & Touch Ergonomics**: Maintain `p-6` (`24px`) primary card breathing room, `60ch–75ch` prose measure, minimum `44×44px` field-tablet touch targets with `≥8px` (`gap-2`) separation, and `.cv-auto-grid` (`content-visibility: auto`) on long below-the-fold grids.
 
----
-
-## 7. Verification Gate
+## 8. Verification Gate
 
 Before completing UI, styling, token, or component tasks, run and pass:
 
@@ -70,6 +67,3 @@ node tools/audits/check-css-performance.cjs
 pnpm --filter @repo/theme lint:tokens
 pnpm test:a11y
 ```
-
-<system>88 lines read from file starting from line 1. Total lines in file: 88. Requested range complete. Effective max_chars: 100000. End of file reached.</system>
-</tool_call>

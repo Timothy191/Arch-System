@@ -764,6 +764,100 @@ export function executeMediatedPipeline<TRequest, TResponse>(
   return okResult(pipeline.handleRequest(pipeline.requestPayload));
 }
 
+export type CanonicalSecurityStep =
+  | 'authenticate'
+  | 'authorize'
+  | 'validate'
+  | 'rate-limit'
+  | 'execute'
+  | 'audit'
+  | 'invalidate-cache'
+  | 'return-typed-result';
+
+/**
+ * Canonical 8-Step Security Sequence for all Server Actions and protected mutations.
+ */
+export const CANONICAL_SECURITY_SEQUENCE: readonly CanonicalSecurityStep[] = [
+  'authenticate',
+  'authorize',
+  'validate',
+  'rate-limit',
+  'execute',
+  'audit',
+  'invalidate-cache',
+  'return-typed-result',
+] as const;
+
+export function validateCanonicalSecuritySequence(steps: readonly string[]): {
+  readonly isCompliant: boolean;
+  readonly violationMessage?: string;
+} {
+  if (steps.length !== CANONICAL_SECURITY_SEQUENCE.length) {
+    return {
+      isCompliant: false,
+      violationMessage: `Expected ${CANONICAL_SECURITY_SEQUENCE.length} security steps, received ${steps.length}`,
+    };
+  }
+  for (let stepIdx = 0; stepIdx < CANONICAL_SECURITY_SEQUENCE.length; stepIdx += 1) {
+    const expectedStep = CANONICAL_SECURITY_SEQUENCE[stepIdx];
+    const actualStep = steps[stepIdx];
+    if (actualStep !== expectedStep) {
+      return {
+        isCompliant: false,
+        violationMessage: `Step ${stepIdx + 1} must be ${expectedStep}, received ${actualStep}`,
+      };
+    }
+  }
+  return { isCompliant: true };
+}
+
+export type AgentPermissionTierNumber = 1 | 2 | 3 | 4 | 5;
+
+const HUMAN_APPROVAL_MIN_TIER = 4;
+
+/**
+ * 5-Tier Autonomous Agent Permission Matrix.
+ */
+export const AGENT_PERMISSION_TIERS: Readonly<Record<AgentPermissionTierNumber, string>> = {
+  1: 'Read and research',
+  2: 'Edit feature code and tests',
+  3: 'Create branches and PRs',
+  4: 'Modify auth, RLS, migrations and infrastructure with human approval',
+  5: 'Production deployment and destructive operations with explicit authorization',
+};
+
+export interface AgentPermissionEvaluationInput {
+  readonly grantedTier: AgentPermissionTierNumber;
+  readonly requestedTier: AgentPermissionTierNumber;
+  readonly attemptedSelfGrant?: boolean;
+  readonly hasHumanApproval?: boolean;
+}
+
+export function evaluateAgentPermissionTier(evaluation: Readonly<AgentPermissionEvaluationInput>): {
+  readonly permitted: boolean;
+  readonly denialReason?: string;
+} {
+  if (evaluation.attemptedSelfGrant) {
+    return {
+      permitted: false,
+      denialReason: 'An agent must never grant itself additional permissions.',
+    };
+  }
+  if (evaluation.requestedTier > evaluation.grantedTier) {
+    return {
+      permitted: false,
+      denialReason: `Requested Tier ${evaluation.requestedTier} exceeds granted Tier ${evaluation.grantedTier}.`,
+    };
+  }
+  if (evaluation.requestedTier >= HUMAN_APPROVAL_MIN_TIER && !evaluation.hasHumanApproval) {
+    return {
+      permitted: false,
+      denialReason: `Tier ${evaluation.requestedTier} (${AGENT_PERMISSION_TIERS[evaluation.requestedTier]}) requires explicit human approval.`,
+    };
+  }
+  return { permitted: true };
+}
+
 export interface HarnessDoctorCheck {
   readonly checkId: string;
   readonly passed: boolean;

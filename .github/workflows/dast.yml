@@ -4,18 +4,21 @@ on:
   push:
     branches: [staging]
   schedule:
-    - cron: "0 0 * * *" # Daily at midnight
+    - cron: '0 0 * * *' # Daily at midnight
+
+permissions:
+  contents: read
 
 jobs:
   dast:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@7c4deb10e6261301961c86d65d54a516394f9aed # v0.14.0
         with:
-          target: "https://staging.arch-system.internal"
-          rules_file_name: ".zap/rules.tsv"
-          cmd_options: "-a"
+          target: 'https://staging.arch-system.internal'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'

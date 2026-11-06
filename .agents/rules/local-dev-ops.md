@@ -1,5 +1,5 @@
 ---
-paths: ["apps/portal/**/*", "scripts/dev.sh"]
+paths: ['apps/portal/**/*', 'scripts/dev.sh']
 ---
 
 # Local Dev Server Operations & Grounded Reasoning

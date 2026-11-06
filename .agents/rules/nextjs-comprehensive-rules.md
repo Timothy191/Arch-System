@@ -23,27 +23,32 @@ paths:
 - Redirect validation: `isValidRedirect()` must `decodeURIComponent` then test against allowlist patterns (`/^\/$/`, `/^\/login/`, `/^\/drilling(\/|$)/`).
 - CSP nonce generated once per request, never double-injected (ClientProviders owns the nonce — don't re-generate in `NextScript`).
 
-## 3. Server Action Lifecycle (order matters)
+## 3. Server Action Lifecycle (Canonical 8-Step Security Sequence)
 
-1. **Authenticate** — `getAuthenticatedEmployee()`
-2. **Authorize** — check role/dept against session claims
-3. **Validate** — `@repo/contract` Zod `.safeParse`; throw `ValidationError`
-4. **Rate-limit** — `rateLimiter.check(...)`
-5. **Mutate** — query via Kysely parameterized queries only
-6. **Cache invalidation** — `await updateTagInAction(tagDepartment(dept, 'scope'))` — **BEFORE** `redirect()`
-7. **Return/Redirect** — `redirect()` throws a control-flow exception; anything after it is unreachable
+1. **Authenticate the caller** — `getAuthenticatedEmployee()`
+2. **Authorize the requested operation and resource** — check role/dept against session claims
+3. **Validate all untrusted input** — `@repo/contract` Zod `.safeParse`; throw `ValidationError`
+4. **Apply rate limits** — `rateLimiter.check(...)`
+5. **Execute the operation** — query via Kysely parameterized queries or typed RPCs only
+6. **Record the audit event** — `logger.info({ event, actorId, deptId })`
+7. **Invalidate affected caches** — `await updateTagInAction(tagDepartment(dept, 'scope'))` — **BEFORE** `redirect()`
+8. **Return a typed result** — return `{ success: true, data }` (or `redirect()` after cache invalidation)
 
 ```typescript
 'use server';
 export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
-  const parsed = shiftCloseoutSchema.safeParse(rawInput);
-  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
   const principal = await getAuthenticatedEmployee();
   if (!principal) throw new AuthError('Unauthorized');
+  if (!principal.accessibleDepartments.includes(rawInput.departmentId)) {
+    throw new ForbiddenError('Insufficient department access');
+  }
+  const parsed = shiftCloseoutSchema.safeParse(rawInput);
+  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
   await rateLimiter.check('shift_closeout', principal.id);
-  await db.shiftCloseout.create({ data: parsed.data });
+  const result = await db.shiftCloseout.create({ data: parsed.data });
+  logger.info({ event: 'shift_closeout_submitted', actorId: principal.id });
   await updateTagInAction(`dept:${principal.dept}:shift_closeout`);
-  redirect('/dashboard');
+  return { success: true, data: result };
 }
 ```
 
