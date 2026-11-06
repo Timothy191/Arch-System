@@ -35,7 +35,7 @@ Never assume that a feature, API, database table, permission or dependency exist
 - **Accessibility**: WCAG 2.2 AA target.
 - **Error handling**: Typed errors, useful logs and no swallowed exceptions.
 - **Documentation**: Update affected engineering documentation.
-- **Git**: Conventional commits and isolated feature branches.
+- **Git & Release Lifecycle**: Always create an isolated branch (`git checkout -b <type>/<scope>`), execute user-provided actions autonomously, never guess or assume (prompt user with 3 options on any uncertainty), and upon verification merge/commit to `main` and push to GitHub (`origin/main`) and Vercel (`pnpm deploy:vercel:prod`).
 - **Verification**: Execute the relevant gates and report actual output.
 
 Mandatory: Strict TypeScript; no `any` or `@ts-ignore`; no artificial placeholders or mock production functionality; no swallowed exceptions; typed error handling; no unnecessary dependencies; no duplicated business logic; no unexplained magic numbers or strings; respect established package boundaries; follow existing design-system and UI conventions.

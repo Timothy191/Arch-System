@@ -219,10 +219,12 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 - Mock at the network boundary (Supabase, Redis), not at function calls.
 - Bugfixes require a reproducing test that fails without the fix.
 
-### Git
+### Git, Branching & Autonomous Release Lifecycle
 
-- Conventional commits (commitlint + Husky enforce them; lint-staged runs on commit, lint + type-check on push). Never use `--no-verify`.
-- One commit per task; no amend/force-push without permission.
+- **Always Branch First**: Create a dedicated feature/task branch (`git checkout -b <type>/<scope>`) before executing any user-provided actions. Perform all requested work autonomously on that branch.
+- **Zero Assumptions & 3-Option Uncertainty Prompt**: Never assume, guess, or invent requirements. If any uncertainty remains after grounded codebase inspection, immediately prompt the user with **exactly 3 clear options** (marking Option 1 `(Recommended)`).
+- **Commit to `main` & Deploy to GitHub + Vercel on Completion**: Upon passing verification gates (`pnpm agent:verify`), merge/commit verified work to `main`, push to GitHub (`git push origin main`), and push the production deployment to Vercel (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
+- **Conventional Commits**: Enforced via commitlint + Husky (lint-staged on commit, lint + type-check on push). Never use `--no-verify`.
 
 ### Agent Tracing
 

@@ -38,12 +38,17 @@ Before modifying any core application logic or schema:
 - **Optimistic Updates**: Local storage queues for intermittent connectivity scenarios.
 - **Operator Usability & Ergonomics**: Clear visual cues, high-contrast light-mode OKLCH tokens, golden structural separators, assistive input auto-formatting, and fail-safe defaults for high-turnover shift operators.
 
-## 4. Complete Information Prerequisite (Research or Prompt User — Zero Guessing)
+## 4. Complete Information Prerequisite & 3-Option Uncertainty Prompt (Zero Guessing)
 
-Never proceed with implementation when required information is missing or ambiguous:
+Never assume, guess, or proceed when required information is missing or ambiguous:
 
 1. **Exhaustive Grounded Research First**: Inspect actual source files, AST call graphs (`ast-grep`, `codemap`), database migrations (`@repo/database`), and Zod contracts (`@repo/contract`), and consult primary documentation (`context7`).
-2. **Prompt the User When Unsure**: If any domain workflow, permission boundary, UI/UX behavior, or acceptance criterion remains ambiguous after research, **STOP and ask the user**. Never invent requirements, silent defaults, or speculative logic.
+2. **Prompt With 3 Options When Uncertain**: At any time when uncertainty or ambiguity arises regarding requirements, architecture, or behavior, **STOP and prompt the user with 3 concrete options** (with Option 1 prefixed `(Recommended)`). Never invent requirements, silent defaults, or speculative logic.
+
+## 4b. Autonomous Branch, Merge to `main`, and GitHub + Vercel Push Lifecycle
+
+1. **Always Create a Branch**: Before mutating files, create a dedicated task branch (`git checkout -b <type>/<scope>`) and execute all user-requested actions autonomously.
+2. **Verify, Commit to `main`, and Deploy**: Once all verification gates pass (`pnpm agent:verify`), merge/commit the verified changes into `main`, push to GitHub (`git push origin main`), and deploy to Vercel Production (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
 
 ## 5. Verification Before Claiming
 
@@ -54,58 +59,17 @@ Never claim a change "works" or is "verified" based solely on static analysis. E
 - For API/Server Action changes: Test authentication, department authorization, idempotency, and controlled error paths
 - For production claims: Require evidence from live preview environments, not just local builds
 
-## 6. Anti-Assumption Mandate (CRITICAL)
+## 6. Anti-Assumption & Grounded Reasoning Mandate (CRITICAL)
 
-**NEVER guess, assume, or speculate about errors or issues.**
+**NEVER guess, assume, or speculate.** All reasoning, claims, and fixes must be grounded in empirical repository evidence:
 
-Before claiming any error, blocker, or issue exists, you **MUST**:
-
-1. **Run the actual verification command** — Do not rely on memory or intuition:
-   - Build errors: Run `pnpm build`, `vercel build`, or `make pipeline`
-   - Runtime errors: Execute the failing code path, run dev server, or run E2E tests
-   - Type errors: Run `pnpm type-check`
-   - Lint errors: Run `pnpm lint`
-   - Dependency errors: Run `pnpm install` or `pnpm audit`
-
-2. **Quote exact error output** — Provide the actual terminal output, log message, or exception trace:
-   - Do not summarize: "I suspect X might be broken" is forbidden
-   - Do not paraphrase: Copy the exact error text
-   - Do not rely on past experience: Each issue must be independently verified
-
-3. **Only propose fixes after evidence** — Follow this sequence:
-   - Reproduce the error and capture the output
-   - Trace to the specific code/configuration causing it
-   - Create a minimal test confirming the issue
-   - Only then implement and verify the fix
-
-**Violations**: Guessing potential issues without running verification commands is a critical failure. Measure twice, claim once.
-
-## Grounded Reasoning Mandate (CRITICAL)
-
-**All reasoning, thoughts, and claims must be grounded in real-world proven data.**
-
-Before building any reasoning, analysis, or proposal, you **MUST**:
-
-1. **Ground premises in actual codebase state**:
-   - Read the actual files before reasoning about their contents
-   - Verify function signatures, types, and imports with AST/tools (codemap, ast-grep)
-   - Check git status to understand current working tree state
-   - Do not reason from memory or assumptions about file structure
-
-2. **Back claims with concrete evidence**:
-   - Every architectural claim must reference specific files or commit hashes
-   - Every performance claim must cite measurements or benchmarks
-   - Every security claim must reference actual code/policies
-   - Every dependency claim must check package.json/lockfile
-
-3. **Label speculative reasoning explicitly**:
-   - If you must reason hypothetically, prefix with: `HYPOTHETICAL: [reasoning]`
-   - Hypothetical reasoning must be followed by empirical verification
-   - Never treat hypothetical scenarios as proven facts
-
-4. **Validate assumptions before building on them**:
-   - List all assumptions at the start of any non-trivial task
-   - Run verification commands to prove or disprove each assumption
-   - Discard assumptions that fail verification before proceeding
-
-**Violations**: Building multi-step reasoning on unverified assumptions is a critical failure. Ground first, reason second.
+1. **Run the actual verification command & quote exact output**:
+   - Build/type/lint/deps: `pnpm build`, `pnpm type-check`, `pnpm lint`, `pnpm install`, `pnpm audit`, or `make pipeline`.
+   - Runtime: Execute the failing code path, dev server, or E2E tests.
+   - Quote the exact terminal output, log message, or exception trace without paraphrasing (`"I suspect X might be broken"` is forbidden).
+2. **Evidence-first fix sequence**: Reproduce the error → trace to specific code/config → create a minimal confirming test → implement and verify the fix.
+3. **Ground premises in actual codebase state**:
+   - Read actual files and verify signatures/imports via AST (`codemap`, `ast-grep`) and `git status`.
+   - Cite specific files, commit hashes, benchmarks, policies, or `package.json`/`pnpm-lock.yaml`.
+   - Prefix any hypothetical reasoning with `HYPOTHETICAL: [reasoning]` and immediately verify empirically.
+   - Validate all assumptions with verification commands at task start and discard any that fail.

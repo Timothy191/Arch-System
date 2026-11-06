@@ -87,13 +87,13 @@ Run from `Arch-System/` unless noted. Root `Makefile` mirrors the important ones
 ### Build / run
 
 ```bash
-pnpm dev                # scripts/dev-system-reimagined.sh (asset sync, Supabase checks, portal on 0.0.0.0:3000)
-pnpm dev:quick          # headless portal only
-pnpm dev:turbo          # turbo dev filtered to portal
-pnpm build              # sync-assets-smart.cjs → patch-glass-css.mjs → turbo run build
-pnpm type-check         # turbo type-check --concurrency=2
-pnpm lint               # turbo run lint (Biome per package)
-pnpm test               # turbo run test
+pnpm dev          # scripts/dev-system-reimagined.sh (asset sync, Supabase checks, portal :3000)
+pnpm dev:quick    # headless portal only
+pnpm dev:turbo    # turbo dev filtered to portal
+pnpm build        # sync-assets-smart.cjs → patch-glass-css.mjs → turbo run build
+pnpm type-check   # turbo type-check --concurrency=2
+pnpm lint         # turbo run lint (Biome per package)
+pnpm test         # turbo run test
 ```
 
 ### Completion gate
@@ -110,33 +110,28 @@ Gates (source of truth: `tools/scripts/agent-verify.sh`):
 21–25: `resilience` → `rollback` → `a11y` → `evidence-integrity` → `tool-perms`
 26–27: `hallucination-controls` → `reproducibility`
 
-### Targeted commands
+### Targeted & policy commands
 
 ```bash
-pnpm --filter portal test -- --testPathPatterns="CommandBar"   # single portal test file
+pnpm --filter portal test -- --testPathPatterns="CommandBar" # single portal test file
 pnpm --filter portal type-check
-pnpm --filter @repo/database test                             # migration rollback-safety + offline-mutation security (node, not jest)
-pnpm --filter @repo/database db:types                         # regenerate Supabase types
-pnpm --filter @repo/theme codegen                             # after editing tokens.json (output committed)
-pnpm --filter @repo/ui storybook                              # :6006 — required for test:a11y
-pnpm test:e2e                                                 # Playwright (auto-starts portal unless BASE_URL set)
-pnpm test:a11y                                                # Storybook + axe
-pnpm audit:compliance                                         # full static invariant sweep
-pnpm policy:check                                             # boundary rules + security checks
-pnpm policy:gen                                               # regenerate policy files + eslint boundaries
-```
-
-### Policies & audits
-
-```bash
-pnpm audit:drift         # @repo/contract Zod schemas vs DB/API surface
-pnpm lint:migrations     # Squawk + new-table RLS check on changed migrations
-pnpm cycles              # dependency-cruiser no-circular over apps/packages/libs
+pnpm --filter @repo/database test                            # migration rollback + offline-mutation security (node)
+pnpm --filter @repo/database db:types                        # regenerate Supabase types
+pnpm --filter @repo/theme codegen                            # after editing tokens.json (output committed)
+pnpm --filter @repo/ui storybook                             # :6006 — required for test:a11y
+pnpm test:e2e                                                # Playwright (auto-starts portal unless BASE_URL set)
+pnpm test:a11y                                               # Storybook + axe
+pnpm audit:compliance                                        # full static invariant sweep
+pnpm policy:check                                            # boundary rules + security checks
+pnpm policy:gen                                              # regenerate policy files + eslint boundaries
+pnpm audit:drift                                             # @repo/contract Zod schemas vs DB/API surface
+pnpm lint:migrations                                         # Squawk + new-table RLS check on changed migrations
+pnpm cycles                                                  # dependency-cruiser no-circular
 pnpm deps:lint && pnpm knip
-pnpm quality             # release-grade suite (lint → type-check → test → … → verify:gates)
+pnpm quality                                                 # release-grade suite
 ```
 
-### Standalone MCP servers (run inside each dir)
+### Standalone MCP servers
 
 `skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`: `cd <dir> && pnpm run build && pnpm test`.
 
@@ -333,15 +328,16 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ---
 
-## Real-World Guardrails (Agent Conduct)
+## Real-World Guardrails & Autonomous Branch-to-Production Lifecycle
 
-All agents MUST follow `.agents/rules/real-world-engineering.md`:
+All agents MUST follow `.agents/rules/real-world-engineering.md` and `.agents/rules/execution-guardrails.md`:
 
+- **Always branch & execute autonomously**: Start every task by creating a dedicated branch (`git checkout -b <type>/<scope>`) and perform all user-requested actions autonomously end-to-end without mid-task interruptions.
+- **Zero guessing / 3-option uncertainty prompt**: Never assume, guess, speculate, or invent defaults. Back every claim with executed commands, file reads, and quoted output (`HYPOTHETICAL:` must be verified empirically). Whenever any uncertainty or ambiguity arises after grounded codebase research, immediately prompt the user (`AskUserQuestion` / `ask_question`) with **3 concrete options** (Option 1 prefixed `(Recommended)`).
+- **Autonomous completion → commit to `main` & push to GitHub + Vercel**: Once all actions and verification gates pass (`pnpm agent:verify`), merge/commit the verified work into `main`, push to GitHub (`git push origin main`), and deploy to Vercel Production (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
 - **Autonomous artifact auto-approval**: All artifacts (`/artifact`) auto-approve unless the user states otherwise; never pause for manual confirmation.
-- **No guessing / grounded reasoning**: Back every claim with executed commands, actual file reads, and quoted output. Label unverified reasoning `HYPOTHETICAL:` and verify empirically.
-- **Prompt when unsure**: Ask the user (`AskUserQuestion`) when requirements or scope are ambiguous instead of inventing defaults.
 - **Real-world industrial viewpoint**: 24/7 SCADA, shift closeout, safety-critical; prefer proven solutions, fault tolerance (RLS initplan, graceful degradation, optimistic queues), and two-layer verification (static + runtime).
-- **Written plan before code**: Non-trivial changes (multi-file, new dependency, schema/API change) require a written plan first.
+- **Written plan before code**: Non-trivial changes require a written plan first.
 
 ---
 
