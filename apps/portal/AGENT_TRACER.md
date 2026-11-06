@@ -48,6 +48,24 @@
   - Added fixed-width `loading` skeletons to `HeaderWidgets.tsx` and `SystemClock.tsx`, and throttled `SystemClock` ticks to 15s when the popover is closed.
   - Isolated `ModuleSearchInput` in `CoreOperationalModules.tsx` so the 28ms typewriter state loop never re-renders the 13 `DepartmentCard`s.
   - Wrapped `getProductionDepartmentData()` in `withCache` (`CacheCategory.REPORTS`) in `actions.ts`.
+
+## 2026-11-06T23:53:00+02:00: Implement Design Feedback Items 1-8 for MachineOperationsForm
+
+- **Phase 1 (Comprehension)**: Reviewed 8 design feedback items from `/control-room/machine-operations` Vercel deployment and mapped each to code changes in `MachineOperationsForm.tsx` and `page.tsx`.
+- **Phase 2 (Evidence)**:
+  - Inspected current `MachineOperationsForm.tsx` structure and dropdown configurations.
+  - Confirmed Supabase database contains machine types (Dozer, Drill Rig, Excavator, Dump Truck, Compactor, Crusher, Loader) with operators and sites.
+- **Phase 3 (Design)**:
+  - Added golden steel-border separator (`gold-steel-border gold-steel-border-slim h-0.5 w-full`) under the "Log Machine Operation" header (line 573).
+  - Grouped machine dropdown into "Logged Today" and "Unlogged" optgroups using `todayOperations` from Supabase and `useMemo` filtering of `machines` array (lines 196-208).
+  - Implemented operator filtering by machine type using `MACHINE_TYPE_OPERATOR_PREFIXES` mapping (Dozer: OP-BD/OP-DZ, Drill Rig: OP-DR/OP-RDT, etc.) and `filteredOperators` useMemo (lines 169-185).
+  - Verified site dropdown auto-fetches from Supabase (`c7da20ef` Brakfontein Pit, `1f554529` Brakfontein Plant, `c7bfe7a7` Extension Pit) — item 4 confirmed via data fetching in `page.tsx` (lines 70-71, 162-179).
+  - Implemented Start SMR auto-population from previous close SMR on machine change (lines 590-591, `min={selectedMachine?.latest_smu ?? 0}` at line 674).
+  - Enforced 12-hour shift limit with breakdown prompts and global delay enforcement (lines 158-159 `maxAllowedShiftHours`, 355-359 validation, 1047-1099 breakdown carry-over card).
+  - Added drill-specific UI for block, meters, and holes fields when Drill Rig is selected (lines 161-163 `isDrillRig`, 361-384 validation, 747-859 drill-specific UI section).
+  - Implemented Dozer rollover auto-calculation using `DOZER_PUSH_FACTOR_BCM_PER_HOUR = 250` constant; displays rollover summary on shift close (lines 165-167 `isDozer`, 862-987 activity type selector, 1004-1044 rollover summary display).
+- **Phase 4 (Criticism)**: Verified with `pnpm --filter portal type-check` (zero errors), `pnpm --filter portal lint` (749 files, no fixes), and `pnpm --filter portal test -- --testPathPatterns="MachineOperations"` (14/14 PASS).
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx` — added golden separator, machine grouping, operator filtering, SMR auto-population, shift limit validation, drill fields, and Dozer rollover logic.
   - Upgraded `ServiceWorkerRegister.tsx`, `RouteBackground.tsx`, and `public/sw.js` (`arch-portal-media-v1` Cache-First store) to detect client CPU cores, RAM, and network bandwidth and scale background `.webp` image decoding and `.mp4` preview pre-warming to the user's system.
 - **Phase 4 (Criticism)**: Verified with `pnpm --filter portal test -- --testPathPatterns="CoreOperationalModules|ControlRoomPanels|ProductionCommandCenterClient"` (all PASS).
 - **Phase 5 (Contract)**: Modified `ControlRoomSummaryGridClient.tsx`, `NonControlRoomSummaryGridClient.tsx`, `HeaderWidgets.tsx`, `SystemClock.tsx`, `CoreOperationalModules.{tsx,test.tsx}`, `useTypewriterPlaceholder.ts`, `actions.ts`, `ServiceWorkerRegister.tsx`, `ClientProviders.tsx`, `RouteBackground.tsx`, `layout.tsx`, and `public/sw.js`.

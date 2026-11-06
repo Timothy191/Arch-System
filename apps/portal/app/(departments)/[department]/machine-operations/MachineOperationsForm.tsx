@@ -166,6 +166,24 @@ export function MachineOperationsForm({
     selectedMachine?.machine_type === 'Dozer' ||
     Boolean(selectedMachine?.machine_type?.toLowerCase().includes('dozer'));
 
+  const MACHINE_TYPE_OPERATOR_PREFIXES: Record<string, readonly string[]> = {
+    Dozer: ['OP-BD', 'OP-DZ'],
+    'Drill Rig': ['OP-DR', 'OP-RDT'],
+    Excavator: ['OP-EX'],
+    'Dump Truck': ['OP-DT', 'OP-G'],
+    Compactor: ['OP-CKN'],
+    Crusher: ['OP-CR'],
+    Loader: ['OP-L'],
+    Other: [],
+  };
+
+  const filteredOperators = useMemo(() => {
+    if (!selectedMachine) return operators;
+    const prefixes = MACHINE_TYPE_OPERATOR_PREFIXES[selectedMachine.machine_type] || [];
+    if (!prefixes || prefixes.length === 0) return operators;
+    return operators.filter((op) => prefixes.some((p) => op.employee_code.startsWith(p)));
+  }, [operators, selectedMachine]);
+
   const DOZER_PUSH_FACTOR_BCM_PER_HOUR = 250;
 
   const availableBlocks = useMemo(() => {
@@ -174,6 +192,21 @@ export function MachineOperationsForm({
     const siteBlocks = mineBlocks.filter((b) => !b.site_id || b.site_id === formData.siteId);
     return siteBlocks.length > 0 ? siteBlocks : mineBlocks;
   }, [mineBlocks, formData.siteId]);
+
+  const loggedMachineIds = useMemo(
+    () => new Set(todayOperations.map((op) => op.machine_id)),
+    [todayOperations]
+  );
+
+  const loggedMachines = useMemo(
+    () => machines.filter((m) => loggedMachineIds.has(m.id)),
+    [machines, loggedMachineIds]
+  );
+
+  const unloggedMachines = useMemo(
+    () => machines.filter((m) => !loggedMachineIds.has(m.id)),
+    [machines, loggedMachineIds]
+  );
 
   // Auto-save to localStorage every 30 seconds
   useEffect(() => {
@@ -538,6 +571,7 @@ export function MachineOperationsForm({
             </span>
           )}
         </div>
+        <div className="gold-steel-border gold-steel-border-slim h-0.5 w-full" />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
@@ -561,12 +595,26 @@ export function MachineOperationsForm({
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select machine...</option>
-              {machines.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.machine_type})
-                  {m.latest_smu != null ? ` — Close SMR: ${m.latest_smu}` : ''}
-                </option>
-              ))}
+              {loggedMachines.length > 0 && (
+                <optgroup label="Logged Today">
+                  {loggedMachines.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({m.machine_type})
+                      {m.latest_smu != null ? ` — Close SMR: ${m.latest_smu}` : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {unloggedMachines.length > 0 && (
+                <optgroup label="Unlogged">
+                  {unloggedMachines.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({m.machine_type})
+                      {m.latest_smu != null ? ` — Close SMR: ${m.latest_smu}` : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
             {errors.machineId && <p className="text-accent-red text-xs">{errors.machineId}</p>}
           </div>
@@ -582,7 +630,7 @@ export function MachineOperationsForm({
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
             >
               <option value="">Select operator...</option>
-              {operators.map((op) => (
+              {filteredOperators.map((op) => (
                 <option key={op.id} value={op.id}>
                   {op.full_name} ({op.employee_code})
                 </option>
