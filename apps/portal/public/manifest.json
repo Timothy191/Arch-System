@@ -71,6 +71,24 @@
       "short_name": "Control",
       "url": "/control-room",
       "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Drilling",
+      "short_name": "Drilling",
+      "url": "/drilling",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Production",
+      "short_name": "Production",
+      "url": "/production",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Engineering",
+      "short_name": "Eng",
+      "url": "/engineering",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ]
 }
