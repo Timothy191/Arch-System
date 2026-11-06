@@ -11,37 +11,38 @@ paths:
 
 # API, Server Action & Data-Fetching Guidelines
 
-## 1. Canonical Zod Contract SSoT (`@repo/contract`)
+## 1. Zod Contract SSoT (`@repo/contract`)
 
-- Validate all incoming API payloads, query parameters, and Server Action inputs against canonical Zod schemas in `packages/contract/src/schemas/*.schema.ts` using `schema.safeParse(rawInput)`.
-- Never trust unvalidated client bodies, `FormData`, headers, or route params; throw or return `ValidationError` (HTTP 400) from `@repo/errors` on failure.
-- Every database table/column and API payload must maintain 1:1 schema parity in `@repo/contract`, verified by `pnpm audit:drift` (`tools/audits/audit-contract-drift.cjs`).
+- Validate all API payloads, query params, and Server Action inputs with `schema.safeParse(rawInput)` against `packages/contract/src/schemas/*.schema.ts`.
+- Never trust unvalidated bodies, `FormData`, headers, or route params; throw/return `ValidationError` (HTTP 400, `@repo/errors`).
+- Every table/column and API payload keeps 1:1 parity in `@repo/contract`, verified by `pnpm audit:drift` (`tools/audits/audit-contract-drift.cjs`).
 
-## 2. Authorization, Tenant RLS & Service-Role Restrictions
+## 2. Authorization, RLS & Service-Role
 
-- **Server Action / Route Handler execution order (Canonical 8-Step Security Sequence)**: **1. Authenticate → 2. Authorize → 3. Validate (`@repo/contract` Zod) → 4. Apply rate limits (`@repo/rate-limiter`) → 5. Execute operation → 6. Record audit event (`@repo/logger`) → 7. Invalidate affected caches (`updateTagInAction` / `updateTag`) → 8. Return typed result (before `redirect()`)**. Never call `redirect()` before cache invalidation (`redirect()` throws a control-flow exception).
-- **Verified identity**: Authenticate on line 1 using `createServerSupabaseClient()` (`@repo/supabase/server`) and `getUserSafely(supabase)` (verifies JWT signature via `auth.getClaims()`). **Never** call `supabase.auth.getSession()` on the server for authorization decisions.
-- **Department & role gating**: Authorize against `public.employees` (`role`, `department_id`, `accessible_departments`) in addition to PostgreSQL RLS.
-- **Service-role isolation**: `@repo/supabase/service-role` (`createServiceRoleClient()`) bypasses all RLS and is strictly restricted to trusted server-only background jobs, webhooks, or admin/transactional workflows after explicit caller RBAC verification. Never import `@repo/supabase/service-role`, `@repo/supabase/server`, `@repo/supabase/kysely`, `@repo/supabase/read-replica`, or `@repo/database` in `'use client'` modules (`audit:data-fetching`, `audit:hooks`).
+- **Canonical 8-Step Sequence**: 1. Authenticate → 2. Authorize → 3. Validate (Zod) → 4. Rate-limit (`@repo/rate-limiter`) → 5. Execute → 6. Audit (`@repo/logger`) → 7. Invalidate (`updateTagInAction`/`updateTag`) → 8. Return typed result. Never `redirect()` before invalidation (it throws a control-flow exception).
+- **Identity**: authenticate first with `createServerSupabaseClient()` (`@repo/supabase/server`) + `getUserSafely(supabase)` (JWT verified via `auth.getClaims()`). **Never** use `supabase.auth.getSession()` server-side for authorization.
+- **Gating**: authorize against `public.employees` (`role`, `department_id`, `accessible_departments`) in addition to RLS.
+- **Service role**: `createServiceRoleClient()` (`@repo/supabase/service-role`) bypasses RLS — only for trusted server-only jobs, webhooks, admin/transactional flows after explicit caller RBAC. Never import `@repo/supabase/service-role`, `/server`, `/kysely`, `/read-replica`, or `@repo/database` in `'use client'` modules (`audit:data-fetching`, `audit:hooks`).
 
-## 3. Data-Fetching, Kysely / RPCs & N+1 Prevention
+## 3. Data-Fetching & N+1 Prevention
 
-- **Parallelize independent queries**: Combine independent reads with `Promise.all` or `Promise.allSettled`; never chain sequential `await supabase...` waterfalls or run queries inside `for`/`while` loops (`audit:data-fetching`). Deduplicate shared per-request lookups with `React.cache()`.
-- **Complex joins & aggregations**: Use Kysely (`createKyselyClient()` from `@repo/supabase/kysely`) or typed PostgreSQL RPCs (`supabase.rpc(...)`) for multi-table joins, CTEs, and aggregations instead of N+1 client/server round-trips. Use `createReadReplicaClient()` (`@repo/supabase/read-replica`) for read-only dashboard/reporting queries.
-- **Live updates via Realtime CDC**: Use `useSupabaseRealtime` (`@repo/shared/hooks`) for live Postgres CDC streaming instead of manual polling loops (`setInterval` + `fetch`). Client-side `swr` is strictly prohibited (`audit:hooks`).
+- **Parallelize** independent reads (`Promise.all`/`Promise.allSettled`); no sequential `await supabase...` waterfalls or queries in loops (`audit:data-fetching`). Dedupe per-request lookups with `React.cache()`.
+- **Joins/aggregations**: Kysely (`createKyselyClient()`, `@repo/supabase/kysely`) or typed RPCs (`supabase.rpc(...)`) instead of N+1 round-trips. Read-only dashboards/reporting: `createReadReplicaClient()` (`@repo/supabase/read-replica`).
+- **Live updates**: `useSupabaseRealtime` (`@repo/shared/hooks`) instead of `setInterval` + `fetch` polling. `swr` is prohibited (`audit:hooks`).
 
-## 4. Standardized Response & `AppError` Envelopes
+## 4. Response & `AppError` Envelopes
 
-- Handle all errors via `isAppError(err)` (`@repo/errors`) and never leak raw Postgres errors or stack traces:
-  ```typescript
-  return NextResponse.json({ success: true, data: result, timestamp: Date.now() });
-  return NextResponse.json(
-    {
-      success: false,
-      error: appError.message,
-      code: appError.code,
-      details: appError.details ?? null,
-    },
-    { status: appError.statusCode || 500 }
-  );
-  ```
+Handle errors via `isAppError(err)`; never leak raw Postgres errors or stack traces.
+
+```typescript
+return NextResponse.json({ success: true, data: result, timestamp: Date.now() });
+return NextResponse.json(
+  {
+    success: false,
+    error: appError.message,
+    code: appError.code,
+    details: appError.details ?? null,
+  },
+  { status: appError.statusCode || 500 }
+);
+```

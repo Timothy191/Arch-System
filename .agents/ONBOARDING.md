@@ -22,9 +22,9 @@ Before executing any file modification, command, or subagent dispatch:
 ## 2. Hard Workspace Invariants (Absolute Rules)
 
 1. **NO ROOT RUNNER:**
-   - `/home/tim/Fork` has **NO root `package.json`**.
+   - `/home/tim/Fork/package.json` is a zero-dependency delegation runner; its `preinstall` hook blocks root installs.
    - **NEVER** run `pnpm install`, `pnpm build`, or `npm test` from `/home/tim/Fork`.
-   - Always run commands scoped inside `Arch-System/`, `arch-system-nest-proxy/`, `redis/`, or `n8n-vercel/`.
+   - Always run commands scoped inside `Arch-System/`, `skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`, or `langgraph-mcp/` (see `.agents/config/federation.json`).
 2. **ZERO EXTERNAL API COSTS:**
    - All LLM inference must use Google Gemini / Antigravity models (`GEMINI_API_KEY`).
    - All embeddings must run locally via `transformers.js` (`all-MiniLM-L6-v2`) in Ruflo.
@@ -68,4 +68,4 @@ Select the matching agent persona card from `.agents/a2a/registry/`:
 - **Code & Migration Review:** `maker-checker-gate.json`
 - **Contract Synchronization:** `contract-sync-agent.json`
 
-For deep monorepo work inside `Arch-System`, refer to the 40+ specialized domain personas under `Arch-System/.agents/a2a/registry/`.
+For deep monorepo work inside `Arch-System`, refer to the 17 A2A persona cards under `Arch-System/.agents/a2a/registry/` and 19 agent definitions under `Arch-System/.agents/agents/`.

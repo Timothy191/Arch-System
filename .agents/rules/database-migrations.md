@@ -11,51 +11,35 @@ paths:
 
 # Database Migration, RLS & Schema Parity Rules
 
-## 1. Immutable Migrations & Canonical Single-Tree SSoT
+## 1. Immutable Migrations
 
-- **Canonical directory**: `packages/database/migrations/NNN_description.sql` (zero-padded 3-digit prefix + `snake_case` slug, e.g., `195_add_fleet_anomaly_indices.sql`).
-- **Symlink guard**: `packages/supabase/migrations` and `packages/database/supabase/migrations` are symlinks to `packages/database/migrations` — **never** write, copy, or create files directly in symlinked paths (`check-migration-drift.mjs`).
-- **Strict immutability**: Never rename, renumber, delete, or mutate an applied migration (`supabase_migrations.schema_migrations` keys on the version prefix). Always create a new forward incremental migration.
+- Canonical: `packages/database/migrations/NNN_description.sql` (3-digit prefix + snake_case, e.g. `195_add_fleet_anomaly_indices.sql`).
+- `packages/supabase/migrations` and `packages/database/supabase/migrations` are symlinks — **never** write there (`check-migration-drift.mjs`).
+- Never rename, renumber, delete, or mutate an applied migration (`supabase_migrations.schema_migrations` keys on prefix); add a new forward migration.
 
-## 2. Mandatory Row Level Security (RLS) & Tenant/Department Isolation
+## 2. Mandatory RLS
 
-- Every newly created table MUST enable RLS in the same migration:
-  ```sql
-  ALTER TABLE public.<table_name> ENABLE ROW LEVEL SECURITY;
-  ```
-  System-only tables that intentionally omit user policies must declare an audited exemption reason (≥8 chars): `-- rls-exempt-table public.<table_name>: <reason>` (or `-- rls-exempt: <reason>`). Never issue `DISABLE ROW LEVEL SECURITY`.
-- Define explicit RLS policies for `SELECT`, `INSERT`, `UPDATE`, and `DELETE` enforcing tenant/department isolation via `public.employees` (`department_id`, `accessible_departments`, and `role IN ('ADMIN', 'EXECUTIVE')`). Wrap `(SELECT auth.uid())` in a scalar subquery for PostgreSQL InitPlan caching:
-  ```sql
-  CREATE POLICY "<table_name>_dept_read" ON public.<table_name>
-    FOR SELECT USING (
-      department_id IN (
-        SELECT e.department_id FROM public.employees e WHERE e.auth_id = (SELECT auth.uid())
-      ) OR EXISTS (
-        SELECT 1 FROM public.employees e
-        WHERE e.auth_id = (SELECT auth.uid()) AND e.role IN ('ADMIN', 'EXECUTIVE')
-      )
-    );
-  ```
-- **Forbidden legacy join tables in RLS**: Never reference `public.employee_departments` (does not exist in production). Always authorize multi-department access via `public.employees.department_id` and `department_id = ANY(e.accessible_departments)` with `e.auth_id = (SELECT auth.uid())`.
-- **`SECURITY DEFINER` RPC hardening**: Always pin `SET search_path = ''` (or `public, pg_temp`), schema-qualify every relation (`public.<table>`), verify `auth.uid()` and department access inside the body, and restrict execution (`REVOKE ALL ON FUNCTION ... FROM PUBLIC, anon; GRANT EXECUTE ... TO authenticated;`).
+- Every new table MUST `ALTER TABLE public.<t> ENABLE ROW LEVEL SECURITY;` in the same migration. System-only exemptions need a reason ≥8 chars: `-- rls-exempt-table public.<t>: <reason>` (or `-- rls-exempt: <reason>`). Never `DISABLE ROW LEVEL SECURITY`.
+- Explicit `SELECT`/`INSERT`/`UPDATE`/`DELETE` policies isolating via `public.employees` (`department_id`, `accessible_departments`, `role IN ('ADMIN', 'EXECUTIVE')`), always `e.auth_id = (SELECT auth.uid())` (scalar subquery for InitPlan caching).
+- Never reference `public.employee_departments` (not in production); use `department_id = ANY(e.accessible_departments)`.
+- `SECURITY DEFINER`: `SET search_path = ''` (or `public, pg_temp`), schema-qualify relations, verify `auth.uid()` + department access in body, `REVOKE ALL ON FUNCTION ... FROM PUBLIC, anon; GRANT EXECUTE ... TO authenticated;`.
 
-## 3. Zero-Downtime DDL & Squawk Linting (`pnpm lint:migrations`)
+## 3. Zero-Downtime DDL (`pnpm lint:migrations`)
 
-- **Expand-and-contract DDL**: Add columns as nullable or with a non-volatile default; never add `NOT NULL` without a default on existing tables, and never drop active columns in the same release as application code removal.
-- **Idempotency & lock safety**: Use `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, and `DROP ... IF EXISTS`. Never run `REFRESH MATERIALIZED VIEW CONCURRENTLY` inside a `DO $$` / `plpgsql` block or transactional migration (schedule via `cron.schedule(...)`).
-- **Verification**: Run `pnpm lint:migrations` (Squawk + RLS policy gate), `node tools/audits/audit-rls-matrix.cjs`, and `pnpm --filter @repo/database test`.
+- Add columns nullable or with non-volatile default; never `NOT NULL` without default on existing tables; never drop active columns in the same release as code removal.
+- Use `IF NOT EXISTS` / `IF EXISTS`. Never `REFRESH MATERIALIZED VIEW CONCURRENTLY` in `DO $$`/plpgsql or transactional migrations (use `cron.schedule(...)`).
+- Verify: `pnpm lint:migrations`, `node tools/audits/audit-rls-matrix.cjs`, `pnpm --filter @repo/database test`.
 
-## 4. Canonical Zod Contract Parity (`@repo/contract`)
+## 4. Zod Contract Parity
 
-- Every table or column added/modified in `packages/database/migrations/` MUST have a matching Zod schema in `packages/contract/src/schemas/*.schema.ts` (and `_registry.ts`).
-- Run `pnpm audit:drift` (`node tools/audits/audit-contract-drift.cjs`) and `pnpm --filter @repo/database db:types` to maintain a 100% Drift Health Index (DHI).
+- Every added/modified table/column MUST have a Zod schema in `packages/contract/src/schemas/*.schema.ts` (and `_registry.ts`).
+- Run `pnpm audit:drift` (`node tools/audits/audit-contract-drift.cjs`) and `pnpm --filter @repo/database db:types` (100% DHI).
 
-## 5. Live PostgreSQL Query Parity & Monotonic Telemetry Guardrails
+## 5. Live Column Parity & Monotonic SMR
 
-- **Live column verification over mocked tests**: Mocked Jest unit tests do not validate PostgREST column names. Whenever writing or modifying `.from('<table>').select(...)`, `.eq(...)`, or `.order(...)` queries (especially on `smr_readings`, `machine_operations`, `hourly_loads`, `fleet`, and `print_jobs`), verify every projected and filtered column against `packages/database/migrations/` and live `information_schema.columns`:
-  - `public.smr_readings` uses `(meter_id, reading, reading_at, recorded_by)` — never `(machine_id, reading_hours, reading_date)`.
-  - `public.hourly_loads` is the canonical production payload table — never query `production_loads`.
-  - `public.print_jobs` uses `(photo_url, queued_at)` — never `(photo_path, created_at)`.
-- **Monotonic SMR odometer & `localStorage` draft clamping**:
-  - Any client form that persists `arch_*_draft_*` state in `localStorage` and tracks cumulative meters (`start_smr` / `end_smr` / `latest_smu`) MUST clamp restored draft baselines to `Math.max(draftStartSmu, selectedMachine.latest_smu)` so stale browser drafts never re-introduce odometer inversions.
-  - Both client forms and Server Actions must enforce `start_smr >= latest_smu` and `end_smr >= start_smr` (with `end_smr - start_smr <= 12.0` per shift) and upsert existing `(department_id, machine_id, shift_date, shift_type)` shift rows rather than issuing blind `.insert()` calls.
+- Mocked Jest does not validate PostgREST columns. Verify every `.select`/`.eq`/`.order` column (esp. `smr_readings`, `machine_operations`, `hourly_loads`, `fleet`, `print_jobs`) against migrations and live `information_schema.columns`:
+  - `smr_readings`: `(meter_id, reading, reading_at, recorded_by)` — never `(machine_id, reading_hours, reading_date)`.
+  - `hourly_loads` is canonical — never `production_loads`.
+  - `print_jobs`: `(photo_url, queued_at)` — never `(photo_path, created_at)`.
+- Forms persisting `arch_*_draft_*` with cumulative meters MUST clamp restored baselines to `Math.max(draftStartSmu, selectedMachine.latest_smu)`.
+- Forms and Server Actions enforce `start_smr >= latest_smu`, `end_smr >= start_smr`, `end_smr - start_smr <= 12.0`, and upsert on `(department_id, machine_id, shift_date, shift_type)` — no blind `.insert()`.

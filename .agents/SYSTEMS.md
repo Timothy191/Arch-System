@@ -3,7 +3,7 @@
 > **Canonical Document:** `.agents/SYSTEMS.md`  
 > **Classification:** Systems Engineering, Agentic Toolchain, Swarm Topology & Memory SSoT  
 > **Target Scope:** Workspace (`/home/tim/Fork`), Portal Monorepo (`Arch-System`), and Federated Services  
-> **Last Updated:** 2026-10-02
+> **Last Updated:** 2026-11-06
 
 ---
 
@@ -42,8 +42,6 @@ flowchart TD
         TurboDAG["Turborepo Monorepo Task DAG (^build, lint, test)"]
         CorpOSDAG["Arch-CorpOS Business Loops DAG (win.sh Adaptive Signal Loops)"]
         InngestDAG["Inngest Durable Event Functions DAG (Step/Saga execution)"]
-        KestraDAG["Kestra YAML Orchestration DAG (Agent binaries & n8n hooks)"]
-        BullMQDAG["NestJS Proxy BullMQ Job Queues"]
     end
 
     subgraph A2A_Swarm ["4. A2A PROTOCOL & AGENT SWARMS"]
@@ -56,9 +54,10 @@ flowchart TD
 
     subgraph FederatedServices ["5. FEDERATED CODEBASE & SERVICES"]
         ArchPortal["Arch-System (Next.js 16, React 19 Portal)"]
-        NestProxy["arch-system-nest-proxy (NestJS 12, BullMQ)"]
-        RedisREST["redis (Next.js 15 Serverless REST Engine)"]
-        N8nEngine["n8n-vercel (Containerized Workflow Engine)"]
+        SkillsMCP["skills-mcp (Skill/Context/Persona Registry MCP)"]
+        MemoryMCP["memory-gateway-mcp (Unified Memory MCP)"]
+        SlimMCP["slim-tooling-mcp (Upstream Proxy & Compactor MCP)"]
+        LangGraphMCP["langgraph-mcp (LangGraph Orchestration MCP, Python)"]
     end
 
     HumanLayer <===> AgentHarness
@@ -113,17 +112,16 @@ The environment unifies agent configuration across all runtimes on the developer
 
 The memory infrastructure spans from instant AST lookup to cross-session vector search and persistent knowledge graphs.
 
-| Tier                   | Component               | Technology                                                        | Storage / Endpoint                    | Scope & Function                                                                                                        |
-| :--------------------- | :---------------------- | :---------------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------- |
-| **Vector RAG**         | Ruflo HNSW Memory       | `@claude-flow/cli`, `transformers.js` (`Xenova/all-MiniLM-L6-v2`) | Local SQLite / Vector DB              | Semantics-based search over architectural patterns, solutions, and subagent trajectory logs. Zero cloud embedding cost. |
-| **Graph RAG**          | Knowledge Graph Memory  | `@modelcontextprotocol/server-memory`                             | Stdio MCP                             | Entity-relation knowledge graph (`create_entities`, `create_relations`, `search_nodes`) mapping cross-project concepts. |
-| **Codebase AST RAG**   | Repowise & ast-grep     | `repowise mcp`, `sg`                                              | `Arch-System` source tree             | Deep AST code intelligence, symbol definitions, circular dependency detection, and change risk scoring.                 |
-| **Library Docs RAG**   | Context7                | `@upstash/context7-mcp`                                           | Upstash Remote / Local MCP            | Real-time version-pinned documentation and type definitions for libraries (React 19, Next.js 16, BullMQ, Tailwind).     |
-| **Ephemeral Skill & Context** | Skills & Context Registry | `skills-mcp` (`dist/index.js`)                                 | Stdio MCP                             | Anti-bloat on-demand skill, context, and persona registry (`acquire_skill`, `acquire_context`, `list_available_personas`). Leased and returned per subtask. |
-| **Public Git RAG**     | DeepWiki                | `https://mcp.deepwiki.com/mcp`                                    | Remote MCP                            | Instant access to public GitHub repository documentation and open-source implementation guides.                         |
-| **Web & LAN RAG**      | Firecrawl Local Scraper | `firecrawl-mcp` wrapper                                           | `http://192.168.0.215:3002/v2/scrape` | High-speed markdown conversion of public documentation, RFCs, and API references without cloud tokens or rate limits.   |
-| **Retrospective SSoT** | Project Memory Base     | JSON / Markdown Files                                             | `.agents/memory_base/`                | Cross-session retrospective logbook, incident post-mortems, and architectural lessons learned.                          |
-
+| Tier                          | Component                 | Technology                                                        | Storage / Endpoint                    | Scope & Function                                                                                                                                            |
+| :---------------------------- | :------------------------ | :---------------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vector RAG**                | Ruflo HNSW Memory         | `@claude-flow/cli`, `transformers.js` (`Xenova/all-MiniLM-L6-v2`) | Local SQLite / Vector DB              | Semantics-based search over architectural patterns, solutions, and subagent trajectory logs. Zero cloud embedding cost.                                     |
+| **Graph RAG**                 | Knowledge Graph Memory    | `@modelcontextprotocol/server-memory`                             | Stdio MCP                             | Entity-relation knowledge graph (`create_entities`, `create_relations`, `search_nodes`) mapping cross-project concepts.                                     |
+| **Codebase AST RAG**          | Repowise & ast-grep       | `repowise mcp`, `sg`                                              | `Arch-System` source tree             | Deep AST code intelligence, symbol definitions, circular dependency detection, and change risk scoring.                                                     |
+| **Library Docs RAG**          | Context7                  | `@upstash/context7-mcp`                                           | Upstash Remote / Local MCP            | Real-time version-pinned documentation and type definitions for libraries (React 19, Next.js 16, Tailwind).                                                 |
+| **Ephemeral Skill & Context** | Skills & Context Registry | `skills-mcp` (`dist/index.js`)                                    | Stdio MCP                             | Anti-bloat on-demand skill, context, and persona registry (`acquire_skill`, `acquire_context`, `list_available_personas`). Leased and returned per subtask. |
+| **Public Git RAG**            | DeepWiki                  | `https://mcp.deepwiki.com/mcp`                                    | Remote MCP                            | Instant access to public GitHub repository documentation and open-source implementation guides.                                                             |
+| **Web & LAN RAG**             | Firecrawl Local Scraper   | `firecrawl-mcp` wrapper                                           | `http://192.168.0.215:3002/v2/scrape` | High-speed markdown conversion of public documentation, RFCs, and API references without cloud tokens or rate limits.                                       |
+| **Retrospective SSoT**        | Project Memory Base       | JSON / Markdown Files                                             | `.agents/memory_base/`                | Cross-session retrospective logbook, incident post-mortems, and architectural lessons learned.                                                              |
 
 ---
 
@@ -179,11 +177,6 @@ graph TD
 
 - Used for high-reliability background business workflows (e.g., atomic shift closeouts, SCADA aggregation).
 - Provides durable step functions, automatic exponential retries, compensation steps (Saga pattern), and state memoization across serverless invocations.
-
-### 3.4 Kestra & BullMQ Queue Pipelines
-
-- **Kestra Orchestration (`kestra/`):** Declarative YAML DAGs connecting n8n webhooks with local machine agent binaries (`/home/tim/.local/bin/agent-*`).
-- **NestJS BullMQ Dispatcher (`arch-system-nest-proxy`):** Redis-backed job queues for distributed background tasks, telemetry stream ingestion, and rate-limited webhooks.
 
 ---
 
@@ -242,8 +235,8 @@ sequenceDiagram
 
 The workspace registers 9 canonical agents in [.agents/a2a/registry/index.json](file:///home/tim/Fork/.agents/a2a/registry/index.json) strictly following the 9 pillars:
 
-| Agent Card                                                                                            | Role & Mode         | Authority Tier | Runtime Model      | Core Purpose                                                                                     |
-| :---------------------------------------------------------------------------------------------------- | :------------------ | :------------- | :----------------- | :----------------------------------------------------------------------------------------------- |
+| Agent Card                                                                                            | Role & Mode         | Authority Tier | Runtime Model            | Core Purpose                                                                                     |
+| :---------------------------------------------------------------------------------------------------- | :------------------ | :------------- | :----------------------- | :----------------------------------------------------------------------------------------------- |
 | **[`core-coordinator.json`](file:///home/tim/Fork/.agents/a2a/registry/core-coordinator.json)**       | Master Coordinator  | L1 Advisor     | `gemini-2.5-flash (low)` | Multi-agent task decomposition, RISEN prompt construction, and context budget allocation.        |
 | **[`federation-auditor.json`](file:///home/tim/Fork/.agents/a2a/registry/federation-auditor.json)**   | Parity Auditor      | L0 Observer    | `gemini-2.5-flash (low)` | Inspects Git HEAD vs Vercel deployments and verifies cross-service CSP allowlists.               |
 | **[`deployment-sentinel.json`](file:///home/tim/Fork/.agents/a2a/registry/deployment-sentinel.json)** | Deployment Sentinel | L3 Executive   | `gemini-2.5-flash (low)` | Preflight checks, scoped Vercel dispatch, post-deploy health probes, and automated rollback.     |
@@ -271,14 +264,15 @@ To balance high-velocity autonomy with industrial plant safety, actions are stri
 
 ## 6. Federated Workspace Wiring & Service Map
 
-The workspace `/home/tim/Fork` coordinates four independent systems:
+The workspace `/home/tim/Fork` coordinates five federated projects (per `.agents/config/federation.json`):
 
 ```
 /home/tim/Fork
 ├── Arch-System/               # Plantcor Mining Portal (Next.js 16 monorepo, Vercel: arch-system)
-├── arch-system-nest-proxy/    # NestJS 12 + BullMQ workflow dispatcher (Vercel: arch-system-nest-proxy)
-├── redis/                     # Next.js 15 Serverless REST Redis engine (Vercel: plantcor-redis-serverless)
-├── n8n-vercel/                # Containerized n8n workflow engine (Vercel: n8n-vercel)
+├── skills-mcp/                # On-demand skill/context/persona registry (stdio MCP)
+├── memory-gateway-mcp/        # Unified multi-tier memory gateway (stdio MCP)
+├── slim-tooling-mcp/          # Upstream MCP proxy & payload compactor (stdio MCP)
+├── langgraph-mcp/             # LangGraph orchestration server (Python, stdio MCP)
 └── .agents/                   # Workspace-level Agent Operating System
     ├── a2a/                   # Agent-to-Agent protocol bus, registry, and schemas
     ├── corpos/                # Signal-driven business loops, authority gates, journal
@@ -290,8 +284,8 @@ The workspace `/home/tim/Fork` coordinates four independent systems:
 
 ### Wiring Contracts
 
-1. **Serverless Redis Client:** `Arch-System/packages/redis/src/serverless-client.ts` communicates with `redis/` over HTTP REST using `SERVERLESS_REDIS_URL` and `REDIS_AUTH_SECRET`.
-2. **Proxy CSP Allowlist:** `apps/portal/proxy.ts` and `next.config.mjs` explicitly allowlist `arch-system-nest-proxy.vercel.app`.
+1. **Redis:** `Arch-System/packages/redis` connects to a local Redis instance (no serverless REST sibling).
+2. **MCP Registration:** `/home/tim/Fork/.mcp.json` registers the four first-party MCP siblings plus workspace utilities.
 3. **Cross-Project Auditing:** `tools/zero-drift-watchdog/bin/federated-audit.mjs` executes automated drift assertions between TypeScript contracts across all siblings.
 4. **Local Web Scraping:** `http://192.168.0.215:3002/v2/scrape` provides free, unauthenticated markdown extraction exclusively for agent intelligence.
 

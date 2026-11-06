@@ -85,7 +85,7 @@ When a broad repository audit is initiated:
 
 ## 4. Message Envelopes & Schema Specifications
 
-All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/](file:///home/timothy/Projects/Arch-System/.a2a/schemas/):
+All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/](file:///home/tim/Fork/Arch-System/.agents/a2a/schemas/):
 
 ### 1. Task Handoff Envelope
 
@@ -163,7 +163,7 @@ All A2A interactions are validated against JSON schemas in [.agents/a2a/schemas/
 
 ## 5. Event Bus & Audit Ledger (`.agents/a2a/bus/`)
 
-All cross-agent events are appended as immutable, single-line JSON records to [.agents/a2a/bus/event-log.jsonl](file:///home/timothy/Projects/Arch-System/.a2a/bus/event-log.jsonl):
+All cross-agent events are appended as immutable, single-line JSON records to [.agents/a2a/bus/event-log.jsonl](file:///home/tim/Fork/Arch-System/.agents/a2a/bus/event-log.jsonl):
 
 ```json
 {

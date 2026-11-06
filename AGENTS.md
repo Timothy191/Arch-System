@@ -170,24 +170,7 @@ pnpm quality                                                 # release-grade sui
 
 ### Agent rules (auto-apply)
 
-Focused rule files under `.agents/rules/`:
-
-- `react-19-patterns.md` — `use()`, `useActionState`, `useOptimistic`, ref-as-prop, Suspense streaming
-- `nextjs-16-caching.md` — `'use cache'` + `cacheLife`, no request APIs in cache, `proxy.ts`, action invalidation order, PPR
-- `postgres-rls-performance.md` — RLS initplan, FK indexes, `security definer` search_path, immutable migrations, partial indexes
-- `css-modern-features.md` — container queries, OKLCH tokens, content-visibility, reduced-motion, logical properties
-- `image-optimization.md` — dimensions, sizes, priority, blur placeholder, fetchPriority
-- `accessibility-wcag.md` — focus-visible, aria-live, skip link, contrast, reduced motion/transparency
-- `nextjs-eslint-conventions.md` — Next.js ESLint conventions, `rootDir`, Core Web Vitals, `eslint-config-prettier`, lint-staged
-- `client-side-data-fetching.md` — TanStack Query (`useQuery`/`useSuspenseQuery`), SWR prohibited, Suspense states
-- `data-fetching-patterns.md` — Server Components first, React `cache()` colocation, `Promise.all` parallelization, streaming Suspense, taint defense
-- `rendering-environments-and-rsc.md` — Server Components by default, leaf `'use client'`, progressive streaming Suspense, Node.js runtime standard
-- `css-in-js.md` — Tailwind CSS + OKLCH tokens standard; CSS-in-JS prohibited; CSS Modules for scoped styles
-- `debugging.md` — VS Code `launch.json`, `pnpm dev --inspect`, DevTools, `next build --debug-prerender`
-- `revalidation.md` — `cacheTag`/`cacheLife`, `updateTag` in Server Actions, `revalidateTag`/`revalidatePath`, dual-tier invalidation
-- `isr-cache-components.md` — `cacheComponents` replaces ISR; `generateStaticParams`; Partial Prefetching + App Shells
-- `internationalization.md` — single locale `en-US`; `[lang]` + `next/root-params` and `proxy.ts` redirect if adopted
-- `json-ld.md` — `<script type="application/ld+json">`, XSS sanitization (`<` → `\u003c`), `schema-dts` typing
+Focused rule files under `.agents/rules/` (each self-describes via frontmatter): `react-19-patterns`, `nextjs-16-caching`, `postgres-rls-performance`, `css-modern-features`, `image-optimization`, `accessibility-wcag`, `nextjs-eslint-conventions`, `client-side-data-fetching` (TanStack Query; SWR prohibited), `data-fetching-patterns`, `rendering-environments-and-rsc`, `css-in-js` (prohibited; Tailwind + OKLCH, CSS Modules), `debugging`, `revalidation`, `isr-cache-components`, `internationalization` (single locale `en-US`), `json-ld` (`<` → `\u003c`).
 
 ### Error handling
 
@@ -337,7 +320,7 @@ All agents MUST follow `.agents/rules/real-world-engineering.md` and `.agents/ru
 - **Autonomous completion → commit to `main` & push to GitHub + Vercel**: Once all actions and verification gates pass (`pnpm agent:verify`), merge/commit the verified work into `main`, push to GitHub (`git push origin main`), and deploy to Vercel Production (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
 - **Autonomous artifact auto-approval**: All artifacts (`/artifact`) auto-approve unless the user states otherwise; never pause for manual confirmation.
 - **Real-world industrial viewpoint**: 24/7 SCADA, shift closeout, safety-critical; prefer proven solutions, fault tolerance (RLS initplan, graceful degradation, optimistic queues), and two-layer verification (static + runtime).
-- **Written plan before code**: Non-trivial changes require a written plan first.
+- **Written plan before code** for non-trivial changes.
 
 ---
 
@@ -356,15 +339,9 @@ All non-trivial tasks follow 4 phases (enforced by `pnpm agent:verify`):
 
 ## Agent Permission Tiers, TDD & Mandatory Governance
 
-All agents (Jules, Cursor, GitHub Copilot, Claude Code, Codex, Gemini, and autonomous orchestrators) obey `.agents/rules/mandatory-ai-engineering-governance.md`:
+All agents (Jules, Cursor, Copilot, Claude Code, Codex, Gemini, orchestrators) obey `.agents/rules/mandatory-ai-engineering-governance.md`:
 
-| Tier  | Permission                                                                   |
-| ----- | ---------------------------------------------------------------------------- |
-| One   | Read and research                                                            |
-| Two   | Edit feature code and tests                                                  |
-| Three | Create branches and PRs                                                      |
-| Four  | Modify auth, RLS, migrations and infrastructure with human approval          |
-| Five  | Production deployment and destructive operations with explicit authorization |
+Tiers: **1** read/research · **2** edit feature code + tests · **3** create branches/PRs · **4** modify auth, RLS, migrations, infra (human approval) · **5** production deploy/destructive ops (explicit authorization).
 
 An agent must never grant itself additional permissions.
 
@@ -376,6 +353,4 @@ An agent must never grant itself additional permissions.
 
 ## References
 
-- [AGENTS.md open format](https://agents.md/) — canonical spec; closest AGENTS.md to edited file wins; explicit user prompts override everything.
-- Nested AGENTS.md supported for monorepos (subproject-specific guidance).
-- Treat as living documentation; update when conventions change.
+- [AGENTS.md open format](https://agents.md/): closest (nested) AGENTS.md to the edited file wins; explicit user prompts override everything. Living doc — update when conventions change.

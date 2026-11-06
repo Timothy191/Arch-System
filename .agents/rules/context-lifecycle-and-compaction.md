@@ -8,50 +8,30 @@ alwaysApply: true
 trigger: always_on
 ---
 
-# Context-First Execution & Auto-Compaction Lifecycle Mandate
+# Context-First Execution & Auto-Compaction
 
-Every agent turn MUST strictly follow this two-phase lifecycle across all conversations and tasks. For full operational checklists, templates, and observation-masking protocols, invoke the [`context-engineering`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) skill (`skill://context-engineering`).
+Every turn MUST follow this lifecycle. Details: [`context-engineering`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) skill.
 
-## Phase 1: Context-First Gate (Pre-Action — After User Sends Message)
+## Phase 1: Context-First Gate
 
-**CRITICAL INVARIANT: DO NOT perform any mutating action, file edit, command execution, or implementation WITHOUT first gathering the required context.**
+**No mutating action, edit, or command before gathering required context.**
 
-Immediately upon receiving a user message:
+1. **Preflight**: Mise Node `v24.15.0`/`v26.8.1`, `pnpm 9.15.9` in `Arch-System/`; `pnpm token:budget-check`; `get_active_leases`. Budget via `pnpm token:task-budget "<prompt>" --files <N> --steps <M>` (`trivial`/`low`: `3.5k–8k`, `<=1` skill; `moderate`: `22k`, `<=2`; `high`/`extreme`: `52k–104k`, `<=3–4` + subagents). On failure: `pnpm context:debloat` / `pnpm token:prune`.
+2. **Funnel**: `list_available_context`/`list_available_skills` + `.agents/memory_base/index.json` → `acquire_context`/`acquire_skill` → `sg`/`rg` → line-range reads → ask user if ambiguous.
+3. **Guards**: Invariants at start and end of context (STM-0 Phase 5). Mark claims disproven by `E2`/`E3` as `[POISONED / SUPERSEDED]`.
+4. Proceed only once context is verified.
 
-1. **Deterministic Preflight & Task-Adaptive Budget Triage**:
-   - Verify workspace toolchain alignment (Mise Node `v24.15.0`/`v26.8.1`, `pnpm 9.15.9` in `Arch-System/`), context budget health (`pnpm token:budget-check`), and active leases (`get_active_leases`).
-   - Autonomously determine the effective token budget from task scope via `pnpm token:task-budget "<prompt>" --files <N> --steps <M>` (`trivial`/`low`: `3.5k–8k` tokens, `<=1` skill; `moderate`: `22k` tokens, `<=2` skills; `high`/`extreme`: `52k–104k` tokens, `<=3–4` skills & subagents). If `pnpm token:budget-check` fails, self-heal via `pnpm context:debloat` / `pnpm token:prune` or rule compaction.
-2. **Gather Required Context via Progressive Disclosure Funnel (Broad → Narrow)**:
-   - **Step 1 — Catalog & Memory Index**: Query `skills-mcp` (`list_available_context`, `list_available_skills`) and `.agents/memory_base/index.json` (~50–200 tokens).
-   - **Step 2 — Ephemeral Leasing**: Lease only relevant slices via `acquire_context` / `acquire_skill`.
-   - **Step 3 — Structural AST Search**: Locate exact symbols and call sites via `ast-grep` (`sg`) and `ripgrep` (`rg`) instead of reading whole files.
-   - **Step 4 — Surgical File Slice Reading**: Read targeted line ranges (`view_file` with `StartLine`/`EndLine`).
-   - **Step 5 — Prompting User**: If requirements, intent, or design trade-offs are underspecified or ambiguous, prompt the user for clarification (`ask_question` or direct text response) before acting.
-3. **Attention U-Curve & Poisoning Guard**:
-   - Place critical invariants and success predicates at the start and end of context (STM-0 Phase 5 Contract) to defeat _lost-in-the-middle_ degradation.
-   - If empirical verification (`E2`/`E3`) disproves an earlier claim or tool output, explicitly mark it `[POISONED / SUPERSEDED]` so downstream reasoning never self-references it.
-4. **Proceed With Task**: Only after the required context is fully gathered and verified in context may you proceed with executing the task.
+## Phase 2: Post-Output Readiness (optimize Tokens-Per-Task)
 
-## Phase 2: Post-Output Auto-Compaction & Context Readiness (After Each Output)
+1. `return_skill` (with `summary`, `learnings`) / `release_context`.
+2. Offload outputs `> 2,000` chars to `<appDataDir>/brain/<conversation-id>/scratch/`, keep `[ObsRef]`.
+3. Before `/compact` or >75% utilization: write `HANDOFF.md`/`RESUME.md` with the 6-section Artifact Trail (Intent, Artifact Trail, Decisions & Rejected Alternatives, Verification Ledger E0–E4, Active Leases, Next Actions). Keep output concise.
 
-**CRITICAL INVARIANT: After each output produced, ready the context window for the next task. Optimize for Tokens-Per-Task (avoiding re-fetching costs), not just Tokens-Per-Request.**
+## Compaction Memory Mandate
 
-Before and upon concluding every turn / output:
+Any agent that compacts MUST, before concluding:
 
-1. **Release Leased Context & Skills**:
-   - Return any dynamically leased skills (`return_skill` with `summary` and `learnings`) or context slices (`release_context`) via `skills-mcp` so they do not bloat subsequent turns.
-2. **Offload & Mask Verbose Observations**:
-   - Offload tool outputs `> 2,000` characters to `<appDataDir>/brain/<conversation-id>/scratch/` and retain only compact `[ObsRef]` summaries in active context.
-   - When operating in `Arch-System`, keep token budgets clean (`pnpm token:budget-check` / `pnpm context:debloat` when thresholds are approached).
-3. **Save-Before-Compact & Anchored Iterative Summarization**:
-   - Before recommending or triggering `/compact` (or when context utilization exceeds 75%), flush volatile state into an anchored handoff artifact (`HANDOFF.md` / `RESUME.md`) using the 6-section **Artifact Trail Checklist** defined in [`context-engineering/SKILL.md`](file:///home/tim/Fork/.agents/skills/context-engineering/SKILL.md) (Session Intent, Artifact Trail with exact file paths & symbols, Key Decisions & Rejected Alternatives, Verification Ledger E0–E4, Active Leases, Immediate Next Actions).
-   - Keep final output concise, structured, and self-contained so the conversation state is clean and ready for the user's next message.
-
-## Compaction Memory Mandate (NEW)
-
-**CRITICAL INVARIANT: Any agent that compacts (summarizes/truncates/offloads context) MUST persist the compacted summary as a memory entry before concluding.**
-
-1. Write the compacted summary to `.agents/memory_base/retrospectives/<id>.json` following the schema in `.agents/memory_base/schema.json` (id, timestamp, taskTag, category, errorSignature, affectedFiles, rootCause, resolution, preventionRule).
-2. Run `pnpm memory:index` to re-index so auto-recall surfaces it.
-3. Verify recall with `node tools/scripts/smart-indexer.cjs --query "<keyword>"`.
-4. Never discard a compaction without a persisted memory entry — the compacted context is otherwise irrecoverable.
+1. Write `.agents/memory_base/retrospectives/<id>.json` per `.agents/memory_base/schema.json` (id, timestamp, taskTag, category, errorSignature, affectedFiles, rootCause, resolution, preventionRule).
+2. `pnpm memory:index`.
+3. Verify: `node tools/scripts/smart-indexer.cjs --query "<keyword>"`.
+4. Never discard a compaction without a persisted entry.

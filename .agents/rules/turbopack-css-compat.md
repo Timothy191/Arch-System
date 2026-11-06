@@ -8,78 +8,32 @@ paths:
   - 'scripts/patch-*.mjs'
 ---
 
-# Rule: Turbopack CSS `@layer` Compatibility & Stylesheet Pipeline
+# Turbopack CSS `@layer` Compatibility
 
-## 1. The Third-Party `@layer base` Problem
+## 1. Third-party `@layer base`
 
-Turbopack (Next.js 16+) processes `node_modules` CSS files in a **standalone PostCSS pass** that does NOT include the application's `@tailwind base` directive. Any third-party package that ships CSS using `@layer base { ... }` fails at build time:
+Turbopack runs `node_modules` CSS in a standalone PostCSS pass without `@tailwind base`, so `@layer base { ... }` fails (`CssSyntaxError: @layer base is used but no matching @tailwind base directive is present.`). Known: `@liqui-design/glass` (patched by `scripts/patch-glass-css.mjs` in `pnpm build` and `postinstall`).
 
-```text
-CssSyntaxError: @layer base is used but no matching @tailwind base directive is present.
-```
+After `pnpm add <pkg>`: `find node_modules/<pkg> -name "*.css" -exec grep -H "@layer" {} + 2>/dev/null`. If found:
 
-**Known affected packages:** `@liqui-design/glass` (patched automatically via `scripts/patch-glass-css.mjs` during `pnpm build` and `postinstall`).
+1. Idempotent `scripts/patch-<pkg>-css.mjs` stripping the wrapper: `content.replace(/@layer base \{\s*\n(.*?)\n\}/gs, (_, inner) => inner)`.
+2. Wire into `Arch-System/package.json` `build` (after `patch-glass-css.mjs`, before `turbo run build`) and `postinstall`.
+3. Add to `transpilePackages` in `apps/portal/next.config.mjs`.
+4. Add `// AGENT-TRACE: <pkg> CSS uses @layer base — patched via scripts/patch-<pkg>-css.mjs` in the consumer.
+5. Run `node scripts/patch-<pkg>-css.mjs` immediately.
 
-### Pre-Install Check for Packages Shipping CSS
+Manual `@import` does not help: entrypoints auto-import their CSS from `node_modules`.
 
-After running `pnpm add <package>`, inspect any bundled CSS files for `@layer` directives:
+## 2. Internal import order
 
-```bash
-find node_modules/<package> -name "*.css" -exec grep -H "@layer" {} + 2>/dev/null
-```
+- `packages/theme/src/css/index.css`: plain `@import "./..."` **without** `layer(...)` (avoids invalid `@media layer()`), order `reset` → `typography` → `variables` → `variables-generated` → `glass` → `animations` → `transitions` → `focus` → components.
+- `packages/ui/src/globals.css`: `@import '@repo/theme/css';` and `@import './accessibility.css';` before `@tailwind base; @tailwind components; @tailwind utilities;`.
+- `@apply`/`@layer components` prohibited in `apps/**/*.{css,scss}` and `libs/**/*.{css,scss}` (see `tailwind-utility-composition.md`).
 
-### Fix Protocol for Third-Party `@layer` CSS
+## 3. Build guardrails
 
-1. **Create an idempotent patch script** at `scripts/patch-<pkg>-css.mjs`:
-   ```js
-   // Strip @layer base { ... } wrapper — safe because unlayered rules
-   // are overridden by Tailwind utilities anyway (see glass.css comment)
-   const patched = content.replace(/@layer base \{\s*\n(.*?)\n\}/gs, (_, inner) => inner);
-   ```
-2. **Wire into `Arch-System/package.json` `build` and `postinstall` scripts**:
-   ```json
-   "build": "node scripts/sync-assets-smart.cjs && node scripts/patch-glass-css.mjs && node scripts/patch-<pkg>-css.mjs && turbo run build"
-   ```
-3. **Add to `transpilePackages` in `apps/portal/next.config.mjs`** alongside workspace UI packages (`@repo/ui`, `@repo/theme`, `@repo/contract`).
-4. **Document with `AGENT-TRACE`** in the consuming component:
-   ```tsx
-   // AGENT-TRACE: <pkg> CSS uses @layer base — patched via scripts/patch-<pkg>-css.mjs
-   // Re-run `node scripts/patch-<pkg>-css.mjs` after pnpm install if build breaks.
-   ```
-5. **Execute immediately** and verify:
-   ```bash
-   node scripts/patch-<pkg>-css.mjs
-   ```
+- `apps/portal/next.config.mjs` must set `turbopack: { root: workspaceRoot }` and `outputFileTracingRoot: workspaceRoot` (`pnpm audit:turbopack`).
+- Purge globs owned by `tailwind-utility-composition.md`; never scan `node_modules` or `.ts` server files.
+- `packages/{theme,ui}/src/**/*.css` ≤115 KB, zero `transition: all` (`pnpm lint:css-perf`).
 
-> **Why not `@import` the CSS manually?** Third-party entrypoints (e.g., `@liqui-design/glass` `index.js`) auto-import `"./glass.css"`, so bundlers always evaluate the file in `node_modules`; stripping the `@layer base` wrapper in-place is the only reliable fix.
-
----
-
-## 2. Internal Stylesheet Import Order & `@layer` Containment
-
-- **Plain `@import` in `@repo/theme/css` (`packages/theme/src/css/index.css`)**: Always use plain `@import "./..."` statements **without** `layer(...)` syntax in `packages/theme/src/css/index.css` (`reset.css` → `typography.css` → `variables.css` → `variables-generated.css` → `glass.css` → `animations.css` → `transitions.css` → `focus.css` → component stylesheets). Bundler/PostCSS pipelines can miscompile `@import "..." layer(...)` when nested `@media` queries are present, producing invalid `@media layer()` blocks.
-- **Canonical Entrypoint Order (`packages/ui/src/globals.css`)**: `@import '@repo/theme/css';` and `@import './accessibility.css';` must precede `@tailwind base; @tailwind components; @tailwind utilities;` so CSS custom properties and accessibility resets are registered before Tailwind layers expand.
-- **`@apply` and `@layer components` Containment (`pnpm audit:tailwind`)**: `@apply` and `@layer components` are strictly prohibited in `apps/**/*.{css,scss}` and `libs/**/*.{css,scss}`. All design-system component layers and `@apply` rules must live exclusively in `packages/theme/**` or `packages/ui/src/globals.css`.
-
----
-
-## 3. Turbopack & CSS Build Guardrails
-
-- **Monorepo Root Resolution (`pnpm audit:turbopack`)**: `apps/portal/next.config.mjs` must declare both `turbopack: { root: workspaceRoot }` and `outputFileTracingRoot: workspaceRoot` so Turbopack resolves hoisted pnpm packages and PostCSS dependencies across the workspace.
-- **Tailwind Purge SSoT (`pnpm audit:tailwind`)**: the `content` globs and `future.hoverOnlyWhenSupported` contract in `packages/theme/src/tailwind/preset.ts` is owned by [`tailwind-utility-composition.md`](tailwind-utility-composition.md) — this rule only adds that Turbopack must never be handed a glob that scans `node_modules` or `.ts` server files.
-- **Source CSS Performance Budget (`pnpm lint:css-perf`)**: Total source CSS across `packages/{theme,ui}/src/**/*.css` must remain **≤115 KB** with zero `transition: all` declarations (`node tools/audits/check-css-performance.cjs`).
-
----
-
-## 4. Reference & Verification
-
-- Patch script: [`scripts/patch-glass-css.mjs`](../../scripts/patch-glass-css.mjs)
-- Consuming component: [`packages/ui/src/components/GlassCard.tsx`](../../packages/ui/src/components/GlassCard.tsx)
-- Theme CSS entrypoint: [`packages/theme/src/css/index.css`](../../packages/theme/src/css/index.css)
-- Global UI stylesheet: [`packages/ui/src/globals.css`](../../packages/ui/src/globals.css)
-- Verify compliance:
-  ```bash
-  node tools/audits/audit-tailwind-usage.cjs
-  node tools/audits/check-css-performance.cjs
-  node tools/audits/audit-turbopack.cjs
-  ```
+Verify: `node tools/audits/audit-tailwind-usage.cjs`, `node tools/audits/check-css-performance.cjs`, `node tools/audits/audit-turbopack.cjs`.

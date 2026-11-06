@@ -28,7 +28,7 @@ pnpm ci:local -- --pr=<number>          # validate a PR in an isolated worktree
 
 ## 3. Boundaries
 
-- `pnpm ci:local` is the CI replay; `pnpm agent:verify` is the 15-step completion gate. Run `agent:verify` before claiming work done, and `ci:local -- --suite=full` when the change touches build, e2e, or infrastructure.
+- `pnpm ci:local` is the CI replay; `pnpm agent:verify` is the 27-gate completion suite. Run `agent:verify` before claiming work done, and `ci:local -- --suite=full` when the change touches build, e2e, or infrastructure.
 - `pnpm test:e2e` auto-starts the portal on :3000 unless `BASE_URL` is set.
 
 ## Output

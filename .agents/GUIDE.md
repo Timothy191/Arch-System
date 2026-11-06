@@ -28,7 +28,7 @@ alwaysApply: true
 | Primary App     | `apps/portal` — Next.js 16, React 19, App Router                                                   |
 | Backend         | Supabase (PostgreSQL + Auth + RLS)                                                                 |
 | Package Manager | pnpm 9.15.9 (pinned via `packageManager` field)                                                    |
-| Node Engine     | >=22 (a `volta` field pins 24.15.0, but Volta is NOT installed — see Environment)                  |
+| Node Engine     | >=24 (a `volta` field pins 24.15.0, but Volta is NOT installed — see Environment)                  |
 | Lint            | Biome + Stylelint + cspell + commitlint                                                            |
 | Testing         | Jest 30 (unit), Playwright (e2e), Storybook a11y, DeepEval (AI)                                    |
 
@@ -121,7 +121,6 @@ packages/*             # agents, contract, database, errors, eval, logger,
                        # rate-limiter, redis, supabase, theme, typescript-config, ui, utils
 libs/features/         # auth/ departments/ hub/
 libs/shared/           # data-access/ hooks/ utils/
-services/integrations/ # Third-party API clients (OpenRouter, Cohere, n8n)
 tools/                 # Audits, policy compiler, swarm orchestrator, scripts
 infra/docker/          # compose.{tools,redis,dashboards,ai-tools}.yml
 e2e/ k6/ tests/       # Playwright, load tests
@@ -137,7 +136,7 @@ documentation/         # Tool-written operational center (audit suites write her
 ├── GUIDE.md              # THIS FILE — unified operational guide
 ├── README.md             # Governance overview
 ├── a2a/                  # Agent-to-Agent protocol (SPEC, registry, bus, schemas)
-├── agents/               # Specialist agent definitions (35+ agent cards)
+├── agents/               # Specialist agent definitions (19 agent cards)
 ├── bin/                  # Agent binary entrypoints
 ├── corpos/               # Arch-CorpOS autonomous business loops
 ├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool, post-tool, worktree)
@@ -147,9 +146,9 @@ documentation/         # Tool-written operational center (audit suites write her
 ├── mcp_config.json       # MCP server configuration
 ├── plans/                # Active planning artifacts
 ├── reports/              # Generated audit reports
-├── rules/                # Permanent engineering rules (21 rule files)
+├── rules/                # Permanent engineering rules (49 rule files)
 ├── run-manifests/        # Reproducibility manifests
-├── skills/               # 60+ agent skills (SKILL.md + scripts + resources)
+├── skills/               # 11 agent skills (SKILL.md + scripts + resources)
 └── skills.json           # Skill registry
 ```
 
@@ -293,9 +292,9 @@ These hard stops are **always in force**, with no approval path:
 | :----------------------------- | :-------------------------------- | :------------------------------------------------------------------------- |
 | **Architecture & Domain SSoT** | `AGENTS.md` (root)                | Full architecture, data flow, personas, invariants, SSoT table             |
 | **skills-mcp Registry**        | `skills-mcp/`                     | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)      |
-| **Engineering Rules**          | `.agents/rules/`                  | 22 permanent rule files covering security, verification, testing, thinking |
-| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 60+ reusable workflow skills (dynamically leased via `acquire_skill`)      |
-| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 35+ specialist agent definitions (queried via `list_available_personas`)   |
+| **Engineering Rules**          | `.agents/rules/`                  | 49 permanent rule files covering security, verification, testing, thinking |
+| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 11 reusable workflow skills (dynamically leased via `acquire_skill`)       |
+| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 19 specialist agent definitions (queried via `list_available_personas`)    |
 | **A2A Protocol**               | `.agents/a2a/SPEC.md`             | Agent-to-Agent communication protocol                                      |
 | **Memory Base**                | `.agents/memory_base/`            | Cross-session error retrospectives and knowledge graph                     |
 | **CorpOS Loops**               | `.agents/corpos/`                 | Autonomous business loop engine                                            |
@@ -369,4 +368,4 @@ Before declaring completion:
 
 This approach is enforced by the `pnpm agent:verify` 27-gate suite — the spec's acceptance criteria must include passing all applicable gates.
 
-Last updated: 2026-10-06
+Last updated: 2026-11-06

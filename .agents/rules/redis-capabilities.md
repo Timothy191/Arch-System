@@ -16,16 +16,14 @@ paths:
 
 ## 1. Capability-Only Façade
 
-| Need                       | Use                                                                                                                       | Never                               |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| L1/L2 cache + X-Fetch      | `cacheWrap` (`cacheGetOrSet`) / `swrCacheWrap` / `cacheGet` / `cacheSet` / `cacheSetWithTags` (`cache.ts`, `adaptive.ts`) | `getRedisClient().get(...)` in apps |
-| Dual-tier tag invalidation | `updateTag` / `updateTagInAction` / `updateTags` (`server-cache.ts`) → `cacheInvalidateTags` / `cacheInvalidatePrefixes`  | `SMEMBERS` + `DEL` or `KEYS *`      |
-| Session state & revocation | `writeSession` / `readSession` / `touchSession` / `revokeSession` / `bumpPrivilegeVersion` (`session.ts`)                 | writing `arch:auth:employee:*` raw  |
-| Streams & consumer groups  | `appendToStream` / `consumeStream` / `ensureConsumerGroup` / `claimIdle` / `moveToDeadLetter` / `readNew` (`streams.ts`)  | bare `XADD` + `XREAD` work queues   |
-| Rate limiting              | `@repo/rate-limiter` (`FixedWindowStrategy`, `SlidingWindowStrategy`, `TokenBucketStrategy`, `RedisStore`, `MemoryStore`) | per-route counters with bare `INCR` |
-| Counters / samples / ranks | `incrementCounter` / `incrWithExpire` / `recordSample` / `addUnique` / `addToLeaderboard` (`analytics.ts`)                | `GET` → parse → `SET`               |
-| Locks & idempotency        | `withLock` / `tryWithLock` / `acquireLock` / `claimIdempotency` / `completeIdempotency` (`locks.ts`)                      | inline `SET NX` or in-memory `Map`  |
-| Vector similarity search   | `ensureVectorIndex` / `upsertVector` / `searchVectors` (`search.ts`) with PostgreSQL `pgvector` fallback                  | `FT.SEARCH` without probing first   |
+- **L1/L2 cache + X-Fetch**: `cacheWrap` (`cacheGetOrSet`) / `swrCacheWrap` / `cacheGet` / `cacheSet` / `cacheSetWithTags` (`cache.ts`, `adaptive.ts`) — never `getRedisClient().get(...)` in apps
+- **Dual-tier tag invalidation**: `updateTag` / `updateTagInAction` / `updateTags` (`server-cache.ts`) → `cacheInvalidateTags` / `cacheInvalidatePrefixes` — never `SMEMBERS` + `DEL` or `KEYS *`
+- **Session state & revocation**: `writeSession` / `readSession` / `touchSession` / `revokeSession` / `bumpPrivilegeVersion` (`session.ts`) — never writing `arch:auth:employee:*` raw
+- **Streams & consumer groups**: `appendToStream` / `consumeStream` / `ensureConsumerGroup` / `claimIdle` / `moveToDeadLetter` / `readNew` (`streams.ts`) — never bare `XADD` + `XREAD` work queues
+- **Rate limiting**: `@repo/rate-limiter` (`FixedWindowStrategy`, `SlidingWindowStrategy`, `TokenBucketStrategy`, `RedisStore`, `MemoryStore`) — never per-route counters with bare `INCR`
+- **Counters / samples / ranks**: `incrementCounter` / `incrWithExpire` / `recordSample` / `addUnique` / `addToLeaderboard` (`analytics.ts`) — never `GET` → parse → `SET`
+- **Locks & idempotency**: `withLock` / `tryWithLock` / `acquireLock` / `claimIdempotency` / `completeIdempotency` (`locks.ts`) — never inline `SET NX` or in-memory `Map`
+- **Vector similarity search**: `ensureVectorIndex` / `upsertVector` / `searchVectors` (`search.ts`) with PostgreSQL `pgvector` fallback — never `FT.SEARCH` without probing first
 
 ## 2. Dual-Transport Parity (TCP Redis 7.4 vs. Upstash HTTP REST)
 

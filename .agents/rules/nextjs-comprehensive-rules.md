@@ -10,101 +10,47 @@ paths:
 
 # Next.js 16 App Router Standards
 
+RSC/`'use client'` boundaries, `proxy.ts`, layout guards, `'use cache'`/`cacheLife()`, scoped tags, and the 8-step Server Action sequence live in `nextjs-use-client.md` (canonical). This file adds the rest.
+
 ## 1. Runtime & Routing
 
-- **RSC default**: Routes/layouts are RSC; `'use client'` strictly on leaf components using hooks or browser APIs. Never declare Client Components `async`.
-- **Runtime**: Use `runtime: 'nodejs'` for routes needing DB, Kysely/Supabase, or Node APIs. Use `runtime: 'edge'` only for static/public routes (homepage, docs). Set at route-group level: `export const runtime = 'nodejs';` in `app/(departments)/[department]/page.tsx`. Edge lacks `fs`, `crypto` is limited.
-- **Route groups**: `(auth)/` for login/reset flows (no business logic). `(departments)/` for department dashboards. Use `[department]` slug — never catch-all `[...all]` for business logic. Invalid slugs → `notFound()`.
-- **Revalidation**: `revalidate = 300` for department dashboards; `revalidate = 0` for frequently-changing data; never gate navigation on auth.
+- `runtime: 'nodejs'` for routes needing DB, Kysely/Supabase, or Node APIs (e.g. `export const runtime = 'nodejs';` in `app/(departments)/[department]/page.tsx`, set at route-group level); `runtime: 'edge'` only for static/public routes (homepage, docs) — Edge lacks `fs`, limited `crypto`.
+- Route groups: `(auth)/` login/reset (no business logic); `(departments)/` dashboards via `[department]` slug — never catch-all `[...all]` for business logic; invalid slugs → `notFound()`.
+- `revalidate = 300` for department dashboards; `revalidate = 0` for frequently-changing data; never gate navigation on auth.
 
-## 2. Proxy & RBAC
+## 2. Proxy & Redirects
 
-- `proxy.ts` → `server/proxy.ts` sets CSP + `x-nonce`; layouts independently re-verify auth and department slugs via `notFound()`.
-- Redirect validation: `isValidRedirect()` must `decodeURIComponent` then test against allowlist patterns (`/^\/$/`, `/^\/login/`, `/^\/drilling(\/|$)/`).
+- `isValidRedirect()` must `decodeURIComponent` then test against allowlist patterns (`/^\/$/`, `/^\/login/`, `/^\/drilling(\/|$)/`).
 - CSP nonce generated once per request, never double-injected (ClientProviders owns the nonce — don't re-generate in `NextScript`).
 
-## 3. Server Action Lifecycle (Canonical 8-Step Security Sequence)
+## 3. Server Actions
 
-1. **Authenticate the caller** — `getAuthenticatedEmployee()`
-2. **Authorize the requested operation and resource** — check role/dept against session claims
-3. **Validate all untrusted input** — `@repo/contract` Zod `.safeParse`; throw `ValidationError`
-4. **Apply rate limits** — `rateLimiter.check(...)`
-5. **Execute the operation** — query via Kysely parameterized queries or typed RPCs only
-6. **Record the audit event** — `logger.info({ event, actorId, deptId })`
-7. **Invalidate affected caches** — `await updateTagInAction(tagDepartment(dept, 'scope'))` — **BEFORE** `redirect()`
-8. **Return a typed result** — return `{ success: true, data }` (or `redirect()` after cache invalidation)
+Follow the 8-step sequence in `nextjs-use-client.md`. Step 5 uses Kysely parameterized queries or typed RPCs only; step 6 `logger.info({ event, actorId, deptId })`; step 7 `await updateTagInAction(tagDepartment(dept, 'scope'))` **BEFORE** `redirect()`; step 8 returns `{ success: true, data }`.
 
-```typescript
-'use server';
-export async function submitShiftCloseout(rawInput: ShiftCloseoutInput) {
-  const principal = await getAuthenticatedEmployee();
-  if (!principal) throw new AuthError('Unauthorized');
-  if (!principal.accessibleDepartments.includes(rawInput.departmentId)) {
-    throw new ForbiddenError('Insufficient department access');
-  }
-  const parsed = shiftCloseoutSchema.safeParse(rawInput);
-  if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
-  await rateLimiter.check('shift_closeout', principal.id);
-  const result = await db.shiftCloseout.create({ data: parsed.data });
-  logger.info({ event: 'shift_closeout_submitted', actorId: principal.id });
-  await updateTagInAction(`dept:${principal.dept}:shift_closeout`);
-  return { success: true, data: result };
-}
-```
+## 4. Caching & Data
 
-## 4. Caching
-
-- `'use cache'` requires named `cacheLife()` profiles — never use cache without one.
-- Parallelize independent reads: `Promise.all`, not sequential `await`.
-- Dual-tier: Next Data Cache (`cachedRSC`) + Redis L1/L2 with scoped tags (`scopedTag`, `tagTenant`, `tagDepartment`).
-- Client: TanStack Query with `localStorage` persistence. **SWR is prohibited.**
-- Live updates: `useSupabaseRealtime` — no manual polling.
+- Parallelize independent reads with `Promise.all`, never sequential `await`.
+- Dual-tier: Next Data Cache (`cachedRSC`) + Redis L1/L2 with scoped tags. Client: TanStack Query + `localStorage` persistence; **SWR is prohibited**. Live updates: `useSupabaseRealtime` — no manual polling.
 
 ## 5. Client Components
 
-- Never `async` on `'use client'` components.
-- Never fetch data in `useEffect` as primary source — use RSC or `useQuery`.
-- SSR-safe hooks: guard `typeof window !== 'undefined'` or defer to `useEffect`; always return cleanup functions for listeners, timers, subscriptions.
+- SSR-safe hooks: guard `typeof window !== 'undefined'` or defer to `useEffect`; always return cleanup for listeners, timers, subscriptions.
 - Never pass un-serializable values (functions, class instances) from Server to Client Components.
-- Ref-as-prop (React 19): `ref?: React.Ref<HTMLElement>` in props — no `forwardRef`.
-- Unwrap streamed promises with `React 19 use(promise)` inside `<Suspense>`.
+- Ref-as-prop (React 19): `ref?: React.Ref<HTMLElement>` — no `forwardRef`. Unwrap streamed promises with `use(promise)` inside `<Suspense>`.
 
-## 6. Layout & Error Boundaries
+## 6. Layouts & Error Boundaries
 
-- Nested layouts: parent handles global UI, child handles department context.
-- `error.tsx` must be `'use client'`; separation of UI error display from async retry logic.
-- Layouts must independently verify auth/dept — never trust parent layout's claims.
+- Nested layouts: parent owns global UI, child owns department context; each independently verifies auth/dept — never trust a parent's claims.
+- `error.tsx` must be `'use client'`; separate UI error display from async retry logic.
 
-## 7. Kysely Query Idempotency
+## 7. Kysely Idempotency
 
-- Never mutate rows read from a query; prefer read-then-write or atomic `ON CONFLICT` updates.
-- Avoid read-then-write race conditions: use atomic SQL (`CASE WHEN ... THEN ... END`).
-- Parameterized queries only: `$1`, `$2` — no string interpolation.
+- Never mutate rows read from a query; avoid read-then-write races — use atomic SQL (`ON CONFLICT`, `CASE WHEN ... THEN ... END`).
+- Parameterized queries only (`$1`, `$2`) — no string interpolation.
 
 ## 8. Style & Forbidden Patterns
 
-- **Light mode only**: canvas `#f3f4f6`, semantic OKLCH tokens from `@repo/theme`. No `dark:` variants, no raw hex/rgb.
-- **Glass surfaces**: `@repo/ui/GlassCard` variants only.
-- **Import via canonical exports**: `@repo/ui/GlassCard`, never `@repo/ui/src/...`.
-- **UI is pure**: `packages/ui` must never import `@repo/database` or `@repo/supabase`.
-- **Images**: `next/image` with explicit `width`/`height` and descriptive `alt`.
-
-## 9. Layout Composition
-
-```tsx
-// ✅ Server Component layout — revalidates + shares fetched session
-export const revalidate = 300;
-export default function DepartmentLayout({ children }: { children: React.ReactNode }) {
-  return <section>{children}</section>;
-}
-```
-
-## 10. Forbidden Patterns (checklist)
-
-- ❌ `import useSWR from 'swr'`
-- ❌ `'use client'; export async function ...`
-- ❌ `useEffect(() => { fetch(...) })` as primary data source
-- ❌ `<div className="dark:bg-black">` — light-mode only
-- ❌ `redirect()` before `updateTagInAction(...)`
-- ❌ `@repo/ui/src/*` imports — use canonical exports
-- ❌ String interpolation in Kysely queries — use `$1, $2` params
+- Light mode only: canvas `#f3f4f6`, OKLCH tokens from `@repo/theme`; no `dark:` variants or raw hex/rgb. Glass via `@repo/ui/GlassCard` variants only.
+- Import canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/*`. `packages/ui` never imports `@repo/database` or `@repo/supabase`.
+- `next/image` with explicit `width`/`height` and descriptive `alt`.
+- ❌ `import useSWR from 'swr'` · ❌ `'use client'; export async function` · ❌ `useEffect` fetch as primary data source · ❌ `dark:` classes · ❌ `redirect()` before `updateTagInAction(...)` · ❌ `@repo/ui/src/*` · ❌ string interpolation in Kysely.

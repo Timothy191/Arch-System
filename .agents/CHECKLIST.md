@@ -12,7 +12,7 @@ Before executing autonomous coding or orchestration tasks, verify that the local
 
 | Tool                     | Expected Path / Command                     | Test Command                   | Verification Criteria                   | Status          |
 | :----------------------- | :------------------------------------------ | :----------------------------- | :-------------------------------------- | :-------------- |
-| **Node.js**              | Mise-managed v24.15.0                        | `node -v`                      | Outputs `v24.15.0`                       | [x] Operational |
+| **Node.js**              | Mise-managed v24.15.0                       | `node -v`                      | Outputs `v24.15.0`                      | [x] Operational |
 | **pnpm**                 | Pinned v9.15.9                              | `pnpm -v`                      | Outputs `9.15.9` (instant, no hang)     | [x] Operational |
 | **ast-grep (`sg`)**      | `/home/tim/.local/share/mise/shims/sg`      | `sg --version`                 | Structural AST search functional        | [x] Operational |
 | **difftastic (`difft`)** | `/usr/bin/difft`                            | `difft --version`              | Syntax-aware diffing functional         | [x] Operational |
@@ -54,16 +54,11 @@ Always run commands **inside each specific project directory**, never at `/home/
   pnpm dev:quick      # Quick headless boot check
   pnpm agent:verify   # Lint, type-check, and unit tests
   ```
-- [ ] **NestJS Proxy (`arch-system-nest-proxy/`):**
+- [ ] **Standalone MCP servers (`skills-mcp/`, `memory-gateway-mcp/`, `slim-tooling-mcp/`):**
   ```bash
-  cd /home/tim/Fork/arch-system-nest-proxy
-  npm run test        # Runs vitest test suite
+  cd /home/tim/Fork/<server> && pnpm run build && pnpm test
   ```
-- [ ] **Serverless Redis REST Engine (`redis/`):**
-  ```bash
-  cd /home/tim/Fork/redis
-  npm run build       # Next.js 15 serverless build
-  ```
+- [ ] **LangGraph MCP (`langgraph-mcp/`, Python):** see `langgraph-mcp/README.md` for its test command.
 - [ ] **Cross-Project Drift Audit:**
   ```bash
   node /home/tim/Fork/Arch-System/tools/zero-drift-watchdog/bin/federated-audit.mjs
