@@ -203,8 +203,11 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       try {
         const d = await getPersonnelDetail(id);
         setDetail(d);
-      } catch {
+      } catch (error) {
         setDetail(null);
+        toast.error(`Failed to load personnel ${id}`, {
+          description: error instanceof Error ? error.message : undefined,
+        });
       } finally {
         setLoadingDetail(false);
       }

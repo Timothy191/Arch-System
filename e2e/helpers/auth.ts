@@ -3,8 +3,9 @@ import path from 'node:path';
 import type { BrowserContext, Page } from '@playwright/test';
 
 const AUTH_FILE = path.resolve(process.cwd(), 'e2e/.auth/user.json');
-const TEST_EMAIL = process.env.TEST_EMAIL || 'admin@plantcormining.co.za';
-const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Yugioh@123#';
+// Credentials are env-only (TEST_EMAIL / TEST_PASSWORD); never hardcode secrets.
+const TEST_EMAIL = process.env.TEST_EMAIL ?? '';
+const TEST_PASSWORD = process.env.TEST_PASSWORD ?? '';
 
 /**
  * Attempt to authenticate via form-based login.
@@ -31,6 +32,11 @@ async function formLogin(page: Page): Promise<boolean> {
     await emailInput.waitFor({ state: 'visible', timeout: 5000 });
   } catch {
     return true;
+  }
+
+  if (!TEST_EMAIL || !TEST_PASSWORD) {
+    console.warn('[e2e/auth] TEST_EMAIL/TEST_PASSWORD not set; skipping form login.');
+    return false;
   }
 
   if (await emailInput.isVisible()) {

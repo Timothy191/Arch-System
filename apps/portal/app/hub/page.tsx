@@ -226,6 +226,7 @@ export default async function HubPage() {
 
   return (
     <div className="w-full space-y-8 sm:space-y-10">
+      <h1 className="sr-only">Arch Systems Operations Hub</h1>
       {/* Light-theme glass hero section */}
       <section
         className="relative w-full animate-fade-up px-4 pt-2 pb-2 motion-reduce:animate-none sm:px-6"
