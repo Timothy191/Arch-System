@@ -246,9 +246,7 @@ test.describe('Edge Case Data Entry Validation', () => {
   });
 
   test.describe('Email input validation', () => {
-    test.beforeEach(async ({ page }) => {
-      await performMockLogin(page, 'admin');
-    });
+    test.use({ storageState: { cookies: [], origins: [] } });
 
     test('accepts valid email formats', async ({ page }) => {
       await page.goto('/login');
@@ -263,6 +261,7 @@ test.describe('Edge Case Data Entry Validation', () => {
       ];
 
       for (const email of validEmails) {
+        await emailInput.clear();
         await emailInput.fill(email);
         const currentValue = await emailInput.inputValue();
         expect(currentValue).toBe(email);
@@ -277,6 +276,7 @@ test.describe('Edge Case Data Entry Validation', () => {
       const invalidEmails = ['invalid', '@example.com', 'user@', 'user@.com'];
 
       for (const email of invalidEmails) {
+        await emailInput.clear();
         await emailInput.fill(email);
         // Browser may or may not validate
         const currentValue = await emailInput.inputValue();
@@ -296,6 +296,8 @@ test.describe('Edge Case Data Entry Validation', () => {
   });
 
   test.describe('Password input validation', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+
     test.beforeEach(async ({ page }) => {
       await page.goto('/login');
     });

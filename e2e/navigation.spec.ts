@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// Project default storageState is authenticated; these specs exercise the logged-out/login flow.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('department navigation', () => {
   test('unauthenticated access to any department redirects to login', async ({ page }) => {
     const departments = ['drilling', 'production', 'engineering', 'control-room', 'access-control'];

@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// Project default storageState is authenticated; these specs exercise the logged-out/login flow.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('daily log data entry (unauthenticated)', () => {
   test('accessing daily-log redirects to login with correct return path', async ({ page }) => {
     await page.goto('/drilling/daily-log');

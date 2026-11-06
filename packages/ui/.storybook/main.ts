@@ -22,6 +22,8 @@ const config: StorybookConfig = {
   viteFinal: async (config) =>
     mergeConfig(config, {
       plugins: [react(), tsconfigPaths()],
+      // next/link (used by MacMenuBar) reads process.env at runtime; the browser has no `process`.
+      define: { 'process.env': '{}' },
     }),
 };
 

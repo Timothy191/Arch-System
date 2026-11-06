@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { TEST_EMAIL, TEST_PASSWORD } from './helpers/credentials';
 
+// Project default storageState is authenticated; these specs exercise the logged-out/login flow.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Accessibility Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
@@ -8,7 +11,7 @@ test.describe('Accessibility Tests', () => {
     await page.fill('input[type="email"]', TEST_EMAIL);
     await page.fill('input[type="password"]', TEST_PASSWORD);
     await page.click('button[type="submit"]');
-    await page.waitForURL('/');
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 20000 });
   });
 
   test('should have skip links for keyboard navigation', async ({ page }) => {

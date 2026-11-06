@@ -210,7 +210,7 @@ test.describe('Session Management', () => {
       await expect(page1).toHaveURL(/.*\/drilling/);
 
       // Second browser instance (should not share session)
-      const context2 = await browser.newContext();
+      const context2 = await browser.newContext({ storageState: { cookies: [], origins: [] } });
       const page2 = await context2.newPage();
       await page2.goto('/production');
 

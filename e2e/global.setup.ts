@@ -27,10 +27,20 @@ setup('authenticate', async ({ page }) => {
   }
 
   // Authenticate via /api/auth/login so Set-Cookie headers populate context cookies directly
-  const loginRes = await page.request.post('/api/auth/login', {
+  // Retry: on a cold dev server the first upstream Supabase call can fail with `fetch failed` (502).
+  const MAX_LOGIN_ATTEMPTS = 3;
+  const RETRY_DELAY_MS = 3000;
+  let loginRes = await page.request.post('/api/auth/login', {
     data: { email: TEST_EMAIL, password: TEST_PASSWORD },
     headers: { 'Content-Type': 'application/json' },
   });
+  for (let attempt = 1; attempt < MAX_LOGIN_ATTEMPTS && loginRes.status() >= 500; attempt++) {
+    await page.waitForTimeout(RETRY_DELAY_MS);
+    loginRes = await page.request.post('/api/auth/login', {
+      data: { email: TEST_EMAIL, password: TEST_PASSWORD },
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   if (!loginRes.ok()) {
     // Fallback to UI form login if API endpoint wasn't used
@@ -49,6 +59,14 @@ setup('authenticate', async ({ page }) => {
 
   // Ensure storage directory exists
   fs.mkdirSync(path.dirname(authFile), { recursive: true });
+
+  // Fail fast: an empty auth state silently turns every authenticated spec into a login-page failure.
+  const cookies = await page.context().cookies();
+  if (!cookies.some((c) => c.name.startsWith('sb-'))) {
+    throw new Error(
+      `E2E setup: login did not yield a Supabase session cookie (last /api/auth/login status ${loginRes.status()})`
+    );
+  }
 
   // Save the state to the designated file.
   await page.context().storageState({ path: authFile });
