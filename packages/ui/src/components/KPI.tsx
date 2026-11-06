@@ -1,20 +1,21 @@
 'use client';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { cn } from '../lib/utils';
+import { cn, defineSlotRecipe, resolveSurfacePairing, type SurfaceTone } from '../lib/utils';
 import { GlassCard } from './GlassCard';
 
-export type KPIColor = 'default' | 'green' | 'blue' | 'red' | 'cyan' | 'indigo' | 'alert';
+export type KPIColor = SurfaceTone;
 
-const colorMap: Record<KPIColor, string> = {
-  default: 'text-[var(--text-heading)]',
-  green: 'text-accent-green',
-  blue: 'text-dept-drilling',
-  red: 'text-[var(--accent-red)]',
-  cyan: 'text-[var(--accent-green)]',
-  indigo: 'text-dept-engineering',
-  alert: 'text-[var(--accent-red)]',
-};
+const kpiSlotRecipe = defineSlotRecipe({
+  slots: ['root', 'headerRow', 'metricValue', 'iconSlot', 'subLabel'] as const,
+  base: {
+    root: 'group relative overflow-hidden',
+    headerRow: 'flex items-start justify-between',
+    metricValue: 'mt-1 font-medium text-fluid-2xl',
+    iconSlot: 'opacity-20 transition-opacity duration-300 group-hover:opacity-40',
+    subLabel: 'mt-1 text-fluid-xs',
+  },
+});
 
 interface KPICardProps {
   label: string;
@@ -32,26 +33,21 @@ export function KPICard({
   sub,
   subColor = 'default',
   icon,
-}: KPICardProps) {
+}: Readonly<KPICardProps>) {
+  const slots = kpiSlotRecipe();
+  const contrastClass = resolveSurfacePairing(color);
+  const subContrastClass = resolveSurfacePairing(subColor);
+
   return (
-    <GlassCard className="group relative overflow-hidden">
-      <div className="flex items-start justify-between">
+    <GlassCard className={slots.root}>
+      <div className={slots.headerRow}>
         <div>
           <p className="system-label">{label}</p>
-          <p className={cn('mt-1 font-medium text-fluid-2xl', colorMap[color])}>{value}</p>
+          <p className={cn(slots.metricValue, contrastClass)}>{value}</p>
         </div>
-        {icon && (
-          <div
-            className={cn(
-              'opacity-20 transition-opacity duration-300 group-hover:opacity-40',
-              colorMap[color]
-            )}
-          >
-            {icon}
-          </div>
-        )}
+        {icon && <div className={cn(slots.iconSlot, contrastClass)}>{icon}</div>}
       </div>
-      {sub && <p className={cn('mt-1 text-fluid-xs', colorMap[subColor])}>{sub}</p>}
+      {sub && <p className={cn(slots.subLabel, subContrastClass)}>{sub}</p>}
     </GlassCard>
   );
 }
@@ -62,7 +58,7 @@ interface KPIGridProps {
   className?: string;
 }
 
-export function KPIGrid({ children, cols = 4, className }: KPIGridProps) {
+export function KPIGrid({ children, cols = 4, className }: Readonly<KPIGridProps>) {
   const [parent] = useAutoAnimate({ duration: 300, easing: 'ease-out' });
   const colClasses: Record<number, string> = {
     2: 'grid grid-cols-2 gap-4',

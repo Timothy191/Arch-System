@@ -315,3 +315,12 @@ input.gold-steel-border:focus {
   content-visibility: auto;
   contain-intrinsic-size: auto 520px;
 }
+
+/* Zero-JS Native Disclosure & Industrial Kbd Badge (markmead/hyperui pattern) */
+.disclosure-native > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.disclosure-native > summary::-webkit-details-marker {
+  display: none;
+}

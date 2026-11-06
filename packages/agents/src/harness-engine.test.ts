@@ -6,10 +6,13 @@ import {
   AgentRoutineRegistry,
   auditErasableTypeScript,
   CrossModuleOutboxLedger,
+  errResult,
   evaluateAtomicFeatureCapability,
   evaluateDomainBusinessRules,
+  executeMediatedPipeline,
   HARNESS_GEMINI_TIER_MAP,
   IdempotentCallLedger,
+  okResult,
   runHarnessDoctor,
   ToolPermissionGate,
   TrajectoryContrastiveStore,
@@ -368,6 +371,44 @@ Verify with pnpm test and pnpm agent:verify.
       );
       expect(erasable.isErasableCompliant).toBe(true);
       expect(erasable.violations).toHaveLength(0);
+    });
+  });
+
+  describe('Given executeMediatedPipeline (rafaelfgx/Architecture Clean Architecture Result & Mediator pattern)', () => {
+    it('When validation or domain rules fail, Then it short-circuits with errResult without throwing', () => {
+      const validationFailure = executeMediatedPipeline({
+        requestName: 'SubmitBlastPattern',
+        requestPayload: { holeCount: 0 },
+        validateRequest: (payload) =>
+          payload.holeCount <= 0 ? ['holeCount must be positive'] : [],
+        handleRequest: (payload) => ({ committedHoles: payload.holeCount }),
+      });
+
+      expect(validationFailure.isSuccess).toBe(false);
+      if (!validationFailure.isSuccess) {
+        expect(validationFailure.failureCode).toBe('VALIDATION_FAILED');
+        expect(validationFailure.failureDetails).toContain('holeCount must be positive');
+      }
+
+      const successOutcome = executeMediatedPipeline({
+        requestName: 'SubmitBlastPattern',
+        requestPayload: { holeCount: 24 },
+        validateRequest: (payload) =>
+          payload.holeCount <= 0 ? ['holeCount must be positive'] : [],
+        domainRules: [
+          {
+            ruleCode: 'BLAST_ZONE_CLEARED',
+            message: 'Blast exclusion zone must be cleared',
+            isBroken: () => false,
+          },
+        ],
+        handleRequest: (payload) => ({ committedHoles: payload.holeCount }),
+      });
+
+      expect(successOutcome).toEqual(okResult({ committedHoles: 24 }));
+      expect(
+        errResult({ failureCode: 'CUSTOM_ERR', failureMessage: 'Example failure' }).isSuccess
+      ).toBe(false);
     });
   });
 });

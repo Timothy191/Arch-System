@@ -694,6 +694,76 @@ export function auditErasableTypeScript(sourceCode: string): ErasableTypeScriptA
   };
 }
 
+/**
+ * Clean Architecture Zero-Throw Result Pattern (`rafaelfgx/Architecture` pattern).
+ * Models expected domain/validation outcomes as a discriminated union rather than throwing exceptions.
+ */
+export type OperationResult<TPayload, TFailureDetails = readonly string[]> =
+  | { readonly isSuccess: true; readonly payload: TPayload }
+  | {
+      readonly isSuccess: false;
+      readonly failureCode: string;
+      readonly failureMessage: string;
+      readonly failureDetails?: TFailureDetails;
+    };
+
+export function okResult<TPayload>(payload: TPayload): OperationResult<TPayload, never> {
+  return { isSuccess: true, payload };
+}
+
+export function errResult<TFailureDetails = readonly string[]>(options: {
+  readonly failureCode: string;
+  readonly failureMessage: string;
+  readonly failureDetails?: TFailureDetails;
+}): OperationResult<never, TFailureDetails> {
+  return {
+    isSuccess: false,
+    failureCode: options.failureCode,
+    failureMessage: options.failureMessage,
+    failureDetails: options.failureDetails,
+  };
+}
+
+export interface MediatedRequestPipeline<TRequest, TResponse> {
+  readonly requestName: string;
+  readonly requestPayload: TRequest;
+  readonly validateRequest?: (requestPayload: TRequest) => readonly string[];
+  readonly domainRules?: readonly DomainBusinessRule[];
+  readonly handleRequest: (requestPayload: TRequest) => TResponse;
+}
+
+/**
+ * Clean Architecture Mediator Pipeline (`rafaelfgx/Architecture` pattern).
+ * Centralizes validation, DDD business rule evaluation, and handler execution in one deterministic flow.
+ */
+export function executeMediatedPipeline<TRequest, TResponse>(
+  pipeline: Readonly<MediatedRequestPipeline<TRequest, TResponse>>
+): OperationResult<TResponse> {
+  if (pipeline.validateRequest) {
+    const validationErrors = pipeline.validateRequest(pipeline.requestPayload);
+    if (validationErrors.length > 0) {
+      return errResult({
+        failureCode: 'VALIDATION_FAILED',
+        failureMessage: `Validation failed for '${pipeline.requestName}'`,
+        failureDetails: validationErrors,
+      });
+    }
+  }
+
+  if (pipeline.domainRules && pipeline.domainRules.length > 0) {
+    const ruleReport = evaluateDomainBusinessRules(pipeline.domainRules);
+    if (!ruleReport.passed) {
+      return errResult({
+        failureCode: 'DOMAIN_RULE_VIOLATION',
+        failureMessage: `Business rules broken in '${pipeline.requestName}'`,
+        failureDetails: ruleReport.brokenRules.map((rule) => `${rule.ruleCode}: ${rule.message}`),
+      });
+    }
+  }
+
+  return okResult(pipeline.handleRequest(pipeline.requestPayload));
+}
+
 export interface HarnessDoctorCheck {
   readonly checkId: string;
   readonly passed: boolean;

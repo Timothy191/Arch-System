@@ -775,3 +775,4 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 
 - 2026-11-02T20:00:00+02:00 — chore(ui): no source changes this pass; tracer appended for audit/CI hygiene alignment (validate-json, .gitlab-ci token-audit job).
 - [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.
+- [2026-11-06T08:34:40Z] Added `defineSlotRecipe` (`chakra-ui/panda` slot variant anatomy) and `resolveSurfacePairing` (`skeletonlabs/skeleton` surface-contrast pairing) in `src/lib/utils.ts` and wired into `src/components/KPI.tsx`.
