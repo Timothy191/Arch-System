@@ -634,7 +634,7 @@ export function HeroOperationalKpiStrip({
           )}
         >
           <div className="flex min-w-0 flex-col gap-0.5">
-            <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5">
+            <div className="gold-steel-border gold-steel-border-slim flex items-center gap-1.5 rounded-full px-2 py-0.5">
               {index > 0 && (
                 <span
                   aria-hidden="true"
@@ -653,7 +653,7 @@ export function HeroOperationalKpiStrip({
               </span>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="gold-steel-border gold-steel-border-slim font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
+              <span className="gold-steel-border gold-steel-border-slim inline-flex items-center rounded-full px-2 py-0.5 font-extrabold font-mono text-slate-950 text-sm tabular-nums tracking-tight">
                 {tile.value}
               </span>
             </div>
