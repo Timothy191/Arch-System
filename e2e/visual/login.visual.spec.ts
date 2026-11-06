@@ -64,17 +64,19 @@ test.describe('login page visual regression', () => {
     });
   });
 
-  test('route background shows through and the card is a light surface', async ({ page }) => {
+  test('route background shows through and the card is a dark obsidian glass surface', async ({
+    page,
+  }) => {
     // The global wallpaper must be mounted rather than covered...
     await expect(page.locator(ROUTE_BG_SELECTOR)).toBeVisible();
 
-    // ...and the login card must remain a light-mode surface on top of it.
+    // ...and the login card renders as a dark industrial obsidian glass surface on top of it.
     const cardBg = await page
       .locator('[data-testid="login-card"]')
       .evaluate((el) => getComputedStyle(el).backgroundColor);
     const luminance = luminanceOf(cardBg);
     expect(luminance, `login card background was ${cardBg}`).not.toBeNull();
-    expect(luminance!).toBeGreaterThan(200);
+    expect(luminance!).toBeLessThan(40);
 
     const opaque = await findOpaqueBackgroundLayers(page, '[data-testid="login-card"]');
     expect(

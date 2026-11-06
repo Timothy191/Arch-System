@@ -1,6 +1,7 @@
 import { workflowDispatchSchema } from '@repo/contract';
 import { Queue } from 'bullmq';
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizeWorkflowRequest } from '@/lib/api/telemetry-auth';
 
 const WORKFLOW_QUEUE_NAME = 'n8n-workflow-queue';
 const WORKFLOW_JOB_NAME = 'execute-workflow';
@@ -50,20 +51,18 @@ function getRedisConnectionOptions() {
 }
 
 let queue: Queue | null = null;
-if (process.env.QUEUE_REDIS_URL || process.env.REDIS_URL || process.env.REDIS_HOST) {
-  queue = new Queue(WORKFLOW_QUEUE_NAME, { connection: getRedisConnectionOptions() });
+function getWorkflowQueue(): Queue | null {
+  if (queue) return queue;
+  if (process.env.QUEUE_REDIS_URL || process.env.REDIS_URL || process.env.REDIS_HOST) {
+    queue = new Queue(WORKFLOW_QUEUE_NAME, { connection: getRedisConnectionOptions() });
+  }
+  return queue;
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.DISPATCH_API_KEY;
-  if (apiKey) {
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader ? authHeader.replace(/^Bearer\s+/i, '') : null;
-    if (token !== apiKey) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    }
-  } else if (process.env.REQUIRE_API_KEY === 'true') {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  const unauthorized = authorizeWorkflowRequest(req);
+  if (unauthorized) {
+    return unauthorized;
   }
 
   const rawPayload = await req.json().catch(() => ({}));
@@ -93,12 +92,13 @@ export async function POST(req: NextRequest) {
     ...(idempotencyKey ? { idempotencyKey } : {}),
   };
 
-  if (!queue) {
+  const activeQueue = getWorkflowQueue();
+  if (!activeQueue) {
     return NextResponse.json({ success: true, jobId, queueStatus: 'simulated', details: jobData });
   }
 
   try {
-    await queue.add(WORKFLOW_JOB_NAME, jobData, {
+    await activeQueue.add(WORKFLOW_JOB_NAME, jobData, {
       jobId,
       removeOnComplete: { age: 3600 },
       removeOnFail: { age: 86400 },

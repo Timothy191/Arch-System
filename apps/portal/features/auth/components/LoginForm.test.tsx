@@ -68,20 +68,21 @@ describe('LoginForm', () => {
     global.fetch = jest.fn();
   });
 
-  it('renders employee ID and password inputs', () => {
+  it('renders employee ID and password inputs and mode switcher', () => {
     render(<LoginForm />);
 
     const emailInput = screen.getByPlaceholderText('username@arch-systems.io');
     const passwordInput = screen.getByPlaceholderText('••••••••');
     expect(emailInput).toBeInTheDocument();
     expect(passwordInput).toBeInTheDocument();
-    expect(emailInput.className).toContain('gold-steel-border');
-    expect(passwordInput.className).toContain('gold-steel-border');
+    expect(emailInput.parentElement?.className).toContain('gold-steel-border');
+    expect(passwordInput.parentElement?.className).toContain('gold-steel-border');
+    expect(screen.getByTestId('auth-mode-switcher')).toBeInTheDocument();
 
     const signInBtn = screen.getByRole('button', { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
-    expect(signInBtn.className).toContain('bg-[var(--accent-blue)]');
-    expect(signInBtn.className).toContain('text-white');
+    expect(signInBtn.className).toContain('bg-amber-500');
+    expect(signInBtn.className).toContain('text-zinc-950');
     expect(signInBtn.className).toContain('rounded-xl');
     expect(signInBtn.className).toContain('gold-steel-border');
   });

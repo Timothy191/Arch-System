@@ -19,8 +19,28 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+const MIN_EMAIL_LENGTH = 3;
+const MAX_EMAIL_LENGTH = 254;
+const MIN_PASSWORD_LENGTH = 11;
+const MAX_PASSWORD_LENGTH = 128;
+const LOCK_ICON_STROKE_WIDTH = 1.5;
+
+type AuthMode = 'credentials' | 'sso';
+
 const LOGIN_INPUT_WRAPPER_CLASS =
-  'gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-lg border border-[var(--accent-blue)]/40 bg-white/70 shadow-diffusion-sm backdrop-blur-md transition-all duration-200 focus-within:border-[var(--accent-blue)] focus-within:ring-2 focus-within:ring-[var(--accent-blue)]/20';
+  'gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/90 shadow-diffusion-sm transition-all duration-200 focus-within:border-amber-500/70 focus-within:ring-2 focus-within:ring-amber-500/15';
+
+const LOGIN_INPUT_CLASS =
+  'w-full rounded-lg bg-transparent py-2.5 pr-9 pl-10 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
+
+const SIGN_IN_BUTTON_CLASS =
+  'group gold-steel-border gold-steel-border-slim flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-xs text-zinc-950 uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-amber-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60';
+
+const MODE_TAB_ACTIVE_CLASS =
+  'flex-1 cursor-pointer rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-mono font-semibold text-[11px] text-amber-300 transition-all';
+
+const MODE_TAB_INACTIVE_CLASS =
+  'flex-1 cursor-pointer rounded-md border border-transparent bg-transparent px-2.5 py-1.5 font-mono font-medium text-[11px] text-zinc-400 transition-all hover:text-zinc-200';
 
 export function LoginForm() {
   const router = useRouter();
@@ -29,6 +49,7 @@ export function LoginForm() {
   const redirectTo =
     isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith('/login') ? rawRedirect : '/';
 
+  const [authMode, setAuthMode] = useState<AuthMode>('credentials');
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -68,30 +89,57 @@ export function LoginForm() {
   }
 
   return (
-    <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-5">
-      {/* Email Field */}
+    <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-4">
+      {/* Authentication Mode Switcher */}
+      <div
+        data-testid="auth-mode-switcher"
+        role="tablist"
+        aria-label="Authentication mode"
+        className="flex items-center gap-1 rounded-lg border border-zinc-800/90 bg-zinc-950/80 p-1"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={authMode === 'credentials'}
+          onClick={() => setAuthMode('credentials')}
+          className={authMode === 'credentials' ? MODE_TAB_ACTIVE_CLASS : MODE_TAB_INACTIVE_CLASS}
+        >
+          Standard Credentials
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={authMode === 'sso'}
+          onClick={() => setAuthMode('sso')}
+          className={authMode === 'sso' ? MODE_TAB_ACTIVE_CLASS : MODE_TAB_INACTIVE_CLASS}
+        >
+          SSO / EMP-ID
+        </button>
+      </div>
+
+      {/* Email / Employee ID Field */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label
             htmlFor="email"
-            className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
+            className="block cursor-pointer select-none font-semibold text-xs text-zinc-300 uppercase tracking-wider"
           >
-            Email Address
+            {authMode === 'sso' ? 'SSO / Employee ID' : 'Email Address'}
           </label>
-          <span className="select-none font-medium text-[10.5px] text-neutral-400">
-            Email or Employee Code
+          <span className="select-none font-mono text-[10.5px] text-zinc-400">
+            {authMode === 'sso' ? 'Enterprise SSO or Badge Code' : 'Email or Employee Code'}
           </span>
         </div>
         <div className={LOGIN_INPUT_WRAPPER_CLASS}>
-          <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-neutral-500" />
+          <Mail className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-400" />
           <input
             id="email"
             name="email"
             type="email"
             required
             autoFocus
-            minLength={3}
-            maxLength={254}
+            minLength={MIN_EMAIL_LENGTH}
+            maxLength={MAX_EMAIL_LENGTH}
             disabled={loading || isRateLimited}
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
@@ -104,7 +152,7 @@ export function LoginForm() {
               }
             }}
             placeholder="username@arch-systems.io"
-            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-9 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
+            className={LOGIN_INPUT_CLASS}
             autoComplete="username"
           />
           {employeeId.length > 0 && !loading && (
@@ -112,7 +160,7 @@ export function LoginForm() {
               type="button"
               onClick={() => setEmployeeId('')}
               aria-label="Clear email address"
-              className="absolute top-1/2 right-1.5 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-neutral-400 transition-colors hover:text-neutral-700"
+              className="absolute top-1/2 right-1.5 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:text-zinc-200"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -125,26 +173,26 @@ export function LoginForm() {
         <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="block cursor-pointer select-none font-semibold text-neutral-600 text-xs uppercase tracking-wider"
+            className="block cursor-pointer select-none font-semibold text-xs text-zinc-300 uppercase tracking-wider"
           >
             Password
           </label>
           <Link
             href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-            className="inline-flex min-h-[32px] select-none items-center py-1 font-medium text-[var(--accent-blue)] text-xs transition-colors hover:text-[var(--accent-blue)]/80 hover:underline"
+            className="inline-flex min-h-[28px] select-none items-center py-0.5 font-medium text-amber-400 text-xs transition-colors hover:text-amber-300 hover:underline"
           >
             Forgot password?
           </Link>
         </div>
         <div className={LOGIN_INPUT_WRAPPER_CLASS}>
-          <Lock className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-neutral-500" />
+          <Lock className="pointer-events-none absolute left-3.5 z-10 h-4 w-4 text-zinc-400" />
           <input
             id="password"
             name="password"
             type={showPassword ? 'text' : 'password'}
             required
-            minLength={11}
-            maxLength={128}
+            minLength={MIN_PASSWORD_LENGTH}
+            maxLength={MAX_PASSWORD_LENGTH}
             disabled={loading || isRateLimited}
             value={password}
             onChange={(e) => {
@@ -155,34 +203,34 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             placeholder="••••••••"
-            className="gold-steel-border gold-steel-border-slim w-full rounded-lg bg-transparent py-3 pr-11 pl-10 text-neutral-900 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-0"
+            className={LOGIN_INPUT_CLASS}
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-neutral-500 transition-colors hover:text-neutral-800 focus:outline-none"
+            className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:text-zinc-200 focus:outline-none"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        <div className="flex items-center justify-between pt-0.5 text-[10.5px] text-neutral-500">
-          <span className="inline-flex items-center gap-1">
+        <div className="flex items-center justify-between pt-0.5 font-mono text-[10.5px] text-zinc-400">
+          <span className="inline-flex items-center gap-1.5">
             <CheckCircle2
               className={
-                password.length > 0 ? 'h-3 w-3 text-emerald-600' : 'h-3 w-3 text-neutral-400'
+                password.length > 0 ? 'h-3.5 w-3.5 text-emerald-400' : 'h-3.5 w-3.5 text-zinc-500'
               }
             />
             <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
           </span>
-          <span className="rounded border border-neutral-300/80 bg-white/60 px-1.5 py-0.2 font-mono text-[10px] text-neutral-600">
+          <kbd className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">
             Enter ↵
-          </span>
+          </kbd>
         </div>
         {passwordError && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-red-600 text-xs"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-red-400 text-xs"
             role="alert"
             aria-live="assertive"
           >
@@ -191,17 +239,17 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-accent-amber text-xs"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-amber-400 text-xs"
             role="alert"
             aria-live="polite"
           >
-            <Lock className="h-3 w-3" strokeWidth={1.5} />
+            <Lock className="h-3 w-3" strokeWidth={LOCK_ICON_STROKE_WIDTH} />
             <span>Caps Lock is on</span>
           </div>
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-accent-amber text-xs"
+            className="mt-1 flex animate-fade-up items-center gap-1.5 text-amber-400 text-xs"
             role="alert"
             aria-live="polite"
           >
@@ -210,12 +258,8 @@ export function LoginForm() {
         )}
       </div>
 
-      {/* Sign In Button */}
-      <button
-        type="submit"
-        disabled={loading || isRateLimited}
-        className="group gold-steel-border gold-steel-border-slim flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[var(--accent-blue)] py-3.5 font-semibold text-white text-xs uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-[var(--accent-blue)]/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      {/* Primary Tactile Sign In CTA */}
+      <button type="submit" disabled={loading || isRateLimited} className={SIGN_IN_BUTTON_CLASS}>
         {loading ? (
           <span className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -229,21 +273,25 @@ export function LoginForm() {
         )}
       </button>
 
-      {/* Enterprise Hardware & Session Security Add-on Strip */}
+      {/* Secondary Action (Visitor QR Code) vs. Passive Telemetry Badge (Audit-Logged RBAC) */}
       <div
         data-testid="enterprise-auth-addons"
-        className="grid grid-cols-2 gap-2 border-[var(--accent-blue)]/15 border-t pt-3.5"
+        className="flex flex-col gap-2.5 border-zinc-800/80 border-t pt-3.5 sm:flex-row sm:items-center sm:justify-between"
       >
         <Link
           href="/access-control/qr-codes"
-          className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600 transition-colors hover:bg-[var(--accent-blue)]/10"
+          className="group inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-2 font-medium text-xs text-zinc-200 transition-all hover:border-amber-500/40 hover:bg-zinc-900 hover:text-amber-300"
         >
-          <KeyRound className="h-3.5 w-3.5 shrink-0 text-[var(--accent-blue)]" />
-          <span className="truncate font-medium">Visitor QR Code</span>
+          <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+          <span>Visitor QR Code</span>
+          <ArrowRight className="h-3 w-3 text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-400" />
         </Link>
-        <div className="flex items-center gap-1.5 rounded-lg border border-[var(--accent-blue)]/20 bg-white/60 px-2.5 py-1.5 text-[10.5px] text-neutral-600">
-          <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-          <span className="truncate font-medium">Audit-Logged RBAC</span>
+        <div
+          aria-label="Security posture: Audit-Logged RBAC"
+          className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono text-[11px] text-zinc-400"
+        >
+          <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+          <span>Audit-Logged RBAC</span>
         </div>
       </div>
     </form>

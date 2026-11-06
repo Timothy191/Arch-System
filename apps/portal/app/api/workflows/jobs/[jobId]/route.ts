@@ -1,7 +1,10 @@
 import { Queue } from 'bullmq';
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizeWorkflowRequest } from '@/lib/api/telemetry-auth';
 
 const WORKFLOW_QUEUE_NAME = 'n8n-workflow-queue';
+const VALID_JOB_ID_PATTERN = /^[\w:-]{1,128}$/;
+
 function getRedisConnectionOptions() {
   const redisUrl = process.env.QUEUE_REDIS_URL || process.env.REDIS_URL;
   const insecureTls = process.env.REDIS_TLS_INSECURE === 'true';
@@ -37,13 +40,30 @@ function getRedisConnectionOptions() {
 }
 
 let queue: Queue | null = null;
-if (process.env.QUEUE_REDIS_URL || process.env.REDIS_URL || process.env.REDIS_HOST) {
-  queue = new Queue(WORKFLOW_QUEUE_NAME, { connection: getRedisConnectionOptions() });
+function getWorkflowQueue(): Queue | null {
+  if (queue) return queue;
+  if (process.env.QUEUE_REDIS_URL || process.env.REDIS_URL || process.env.REDIS_HOST) {
+    queue = new Queue(WORKFLOW_QUEUE_NAME, { connection: getRedisConnectionOptions() });
+  }
+  return queue;
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ jobId: string }> }) {
+  const unauthorized = authorizeWorkflowRequest(req);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const { jobId } = await params;
-  if (!queue) {
+  if (!VALID_JOB_ID_PATTERN.test(jobId)) {
+    return NextResponse.json(
+      { found: false, queueAvailable: false, jobId, message: 'Invalid jobId format' },
+      { status: 400 }
+    );
+  }
+
+  const activeQueue = getWorkflowQueue();
+  if (!activeQueue) {
     return NextResponse.json({
       found: false,
       queueAvailable: false,
@@ -53,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ jobI
   }
 
   try {
-    const job = await queue.getJob(jobId);
+    const job = await activeQueue.getJob(jobId);
     if (!job) {
       return NextResponse.json(
         { found: false, queueAvailable: true, jobId, message: 'Job not found' },

@@ -48,11 +48,9 @@ const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
   'app/api/metrics/route.ts',
   'app/api/queues/process-order/route.ts',
   'app/api/redis-proxy/v1/health/route.ts',
-  'app/api/scada/tags/route.ts',
   'app/api/upload/route.ts',
   'app/api/version/route.ts',
   'app/api/weather/route.ts',
-  'app/api/workflows/jobs/[jobId]/route.ts',
 ]);
 
 const AUTH_GUARD_PATTERNS = [
@@ -61,6 +59,7 @@ const AUTH_GUARD_PATTERNS = [
   /auth\.getClaims/,
   /authorizeIngest/,
   /authorizeTelemetryStream/,
+  /authorizeWorkflowRequest/,
   /authorizeCronRequest/,
   /SCANNER_API_KEY/,
   /verifyToken/,

@@ -1,5 +1,11 @@
 # Agent Tracer
 
+## [2026-11-06T12:48:00+02:00] Tier-1 Industrial Dark Glassmorphism LoginForm Upgrade
+
+- **Purpose**: Elevate `LoginForm.tsx` to dark obsidian tactical glassmorphism with WCAG AA amber accents, recessed `bg-zinc-950/90` inputs, interactive `Standard Credentials` / `SSO / EMP-ID` mode switcher, tactile `bg-amber-500 text-zinc-950` primary CTA, `<kbd>Enter ↵</kbd>` micro-interaction badge, and visual separation between interactive `Visitor QR Code` action and passive `Audit-Logged RBAC` telemetry status.
+- **Changes**: Updated `libs/features/auth/ui/src/LoginForm.tsx`.
+- **Verification**: Jest unit tests and 27-gate `pnpm agent:verify` suite passing.
+
 ## 2026-08-25 - Workspace Dependency Links
 
 **Purpose**: Declare local packages imported by `LoginForm`.

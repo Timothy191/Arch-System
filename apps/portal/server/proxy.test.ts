@@ -449,6 +449,25 @@ describe('proxy', () => {
     expect(csp).not.toContain('connect-src *');
   });
 
+  it('omits unsafe-eval and localhost origins from CSP in production', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'production', configurable: true });
+    try {
+      buildProxyMock();
+      const req = makeRequest('/login', false);
+      const res = await edgeProxy(req);
+
+      const csp = res.headers.get('Content-Security-Policy');
+      expect(csp).toBeDefined();
+      expect(csp).not.toContain("'unsafe-eval'");
+      expect(csp).not.toContain('http://localhost:*');
+      expect(csp).not.toContain('http://127.0.0.1:*');
+      expect(res.headers.get('x-nonce')).toBeTruthy();
+    } finally {
+      Object.defineProperty(process.env, 'NODE_ENV', { value: originalEnv, configurable: true });
+    }
+  });
+
   describe('plant-processing and plant-inventory RBAC isolation', () => {
     it('includes plant-processing and plant-inventory in DEPARTMENT_ROUTES', () => {
       expect(DEPARTMENT_ROUTES).toContain('plant-processing');

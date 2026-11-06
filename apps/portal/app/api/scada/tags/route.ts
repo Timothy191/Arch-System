@@ -35,6 +35,7 @@
 import { getRedisClient } from '@repo/redis';
 import { NextResponse } from 'next/server';
 import { applyCors } from '@/lib/api/cors';
+import { authorizeTelemetryStream } from '@/lib/api/telemetry-auth';
 
 export interface FuxaWebApiTag {
   id: string;
@@ -51,6 +52,11 @@ export interface FuxaWebApiTag {
 // docs/operations/fuxa-integration-plan.md.
 
 export async function GET(req: Request) {
+  const unauthorized = authorizeTelemetryStream(req);
+  if (unauthorized) {
+    return applyCors(req, unauthorized);
+  }
+
   try {
     const redis = await getRedisClient();
 

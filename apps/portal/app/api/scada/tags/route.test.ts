@@ -98,4 +98,31 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
     const json = await res.json();
     expect(json.error.message).toBe('Redis down');
   });
+
+  it('fails closed with 503 in production when telemetry stream secret is not configured', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    delete process.env.TELEMETRY_STREAM_SECRET;
+    delete process.env.TELEMETRY_INGEST_SECRET;
+    delete process.env.TELEMETRY_WEBHOOK_SECRET;
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'production', configurable: true });
+
+    try {
+      const req = new Request('http://localhost:3000/api/scada/tags');
+      const res = await GET(req);
+      expect(res.status).toBe(503);
+    } finally {
+      Object.defineProperty(process.env, 'NODE_ENV', { value: originalEnv, configurable: true });
+    }
+  });
+
+  it('returns 401 when TELEMETRY_STREAM_SECRET is configured and request lacks valid token', async () => {
+    process.env.TELEMETRY_STREAM_SECRET = 'scada-secret-token';
+    try {
+      const req = new Request('http://localhost:3000/api/scada/tags');
+      const res = await GET(req);
+      expect(res.status).toBe(401);
+    } finally {
+      delete process.env.TELEMETRY_STREAM_SECRET;
+    }
+  });
 });
