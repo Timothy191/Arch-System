@@ -1,6 +1,6 @@
 /**
  * Visual regression tests for design system consistency.
- * Validates dark theme tokens, forbidden classes, and cross-page uniformity.
+ * Validates light theme tokens, forbidden classes, and cross-page uniformity.
  *
  * Baseline: npx playwright test e2e/visual --update-snapshots
  */

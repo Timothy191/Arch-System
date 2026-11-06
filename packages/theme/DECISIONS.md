@@ -40,18 +40,13 @@ Components are migrated as they are touched. No hard codemod (155 references in 
 
 ---
 
-## 003 — Light-only `color-scheme: light` as default
+## 003 — Strict light-only `color-scheme: light` invariant
 
-**Decision**: `variables.css` defines only a `:root` (light) token set. Dark mode architecture
-(`[data-theme="dark"]` block) is scaffolded in Phase 3 but ships disabled.
+**Decision**: `variables.css` defines only a `:root` (light) token set (`color-scheme: light`). Dark mode is omitted by architectural invariant.
 
-**Why**: The portal is a mining control-room operational tool. The current requirement is
-light-only (macOS Ventura/Sonoma). The dark mode architecture is being built correctly from the
-start (data-attribute approach, semantic aliases) so it can be enabled without component rewrites
-when the requirement changes.
+**Why**: The portal is an industrial mining control-room operational tool requiring high daylight contrast (macOS Ventura/Sonoma light palette).
 
-**Implication**: Components reference only Tier 2 semantic tokens. When the dark block lands, they
-automatically update. Zero component changes required.
+**Implication**: Components reference only Tier 2 semantic light-mode tokens. No `[data-theme="dark"]` or `prefers-color-scheme: dark` blocks exist.
 
 ---
 
@@ -121,7 +116,7 @@ Three tiers enforced by `scripts/validate-tokens.mjs` and documented inline in `
 | Tier           | Tokens                                                                                                       | Rule                                                                                                                |
 | -------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | **Primitive**  | `--arch0`–`--arch15`                                                                                         | Raw values only. Never referenced in components or `preset.ts` semantic sections.                                   |
-| **Semantic**   | `--bg-primary`, `--text-body`, `--shadow-card`, etc.                                                         | All component and utility references. Auto-updated by dark mode.                                                    |
+| **Semantic**   | `--bg-primary`, `--text-body`, `--shadow-card`, etc.                                                         | All component and utility references (canonical light-mode SSoT).                                                   |
 | **Deprecated** | `--accent-cyan`, `--accent-indigo`, `--accent-violet`, `--accent-alert`, `--accent-blue`, `--accent-emerald` | Map to canonical Tier 2 (`--accent-charcoal`, `--accent-red`, `--accent-green`). Stylelint warns. Migrate on touch. |
 
 ---

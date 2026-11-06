@@ -42,7 +42,7 @@ label[for] {
   cursor: var(--cursor-arch-wait);
 }
 
-/* Custom scrollbar (dark theme) */
+/* Custom scrollbar utility */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

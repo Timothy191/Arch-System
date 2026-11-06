@@ -5,17 +5,12 @@ import { createContext, type ReactNode, useContext, useEffect } from 'react';
 interface ArchThemeContextType {
   theme: 'light';
   resolvedTheme: 'light';
-  setTheme: () => void;
-  toggleTheme: () => void;
 }
-
 const ArchThemeContext = createContext<ArchThemeContextType | undefined>(undefined);
 
 const LIGHT_THEME = {
   theme: 'light' as const,
   resolvedTheme: 'light' as const,
-  setTheme: () => {},
-  toggleTheme: () => {},
 };
 
 /**
@@ -45,9 +40,4 @@ export function useArchTheme() {
     throw new Error('useArchTheme must be used within an ArchThemeProvider');
   }
   return ctx;
-}
-
-/** @deprecated use useArchTheme — light-only stub for legacy imports */
-export function useTheme() {
-  return useArchTheme();
 }

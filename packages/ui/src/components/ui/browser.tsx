@@ -4,7 +4,6 @@ import { cn } from '../../lib/utils';
 
 export interface BrowserProps extends React.HTMLAttributes<HTMLDivElement> {
   address?: string;
-  theme?: 'auto' | 'light' | 'dark';
   aspectRatio?: string;
   children: React.ReactNode;
 }
@@ -19,18 +18,7 @@ function middleTruncate(str: string, maxLength: number = 42): string {
 }
 
 export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
-  (
-    {
-      address = 'https://arch.coal',
-      theme = 'auto',
-      aspectRatio,
-      className,
-      children,
-      style,
-      ...props
-    },
-    ref
-  ) => {
+  ({ address = 'https://arch.coal', aspectRatio, className, children, style, ...props }, ref) => {
     // Format address display
     const cleanAddress = address.replace(/^https?:\/\//, '');
     const truncatedAddress = middleTruncate(cleanAddress);

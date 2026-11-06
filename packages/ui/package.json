@@ -18,7 +18,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
-    "recharts": "^3.8.1",
+    "recharts": "catalog:",
     "sonner": "catalog:",
     "tailwind-merge": "^2.5.4"
   },

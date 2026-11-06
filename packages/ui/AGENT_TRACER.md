@@ -46,9 +46,16 @@
   - Dispatched `arch:sidebar-state-change` custom events and updated `document.documentElement.dataset.sidebarExpanded` in `DepartmentLayout.tsx` whenever `isPinned || isOpen` changes (resetting to `false` on unmount).
   - Subscribed to `arch:sidebar-state-change` in `MacMenuBar.tsx` and applied `left-3 md:left-[252px]` (`transition-[left] duration-300 ease-out`) when the department sidebar is expanded on non-hub routes.
 - **Phase 4 (Criticism)**: Verified with `pnpm --filter @repo/ui lint` and `pnpm --filter @repo/ui type-check`.
-- **Phase 5 (Contract)**: Modified `packages/ui/src/components/DepartmentLayout.tsx` and `packages/ui/src/components/MacMenuBar.tsx`.
 
-## 2026-11-05T06:30:00+02:00 - Unify System Menu Trigger with Gold Emblem Logo
+- **Phase 5 (Contract)**: Modified `packages/ui/src/components/MacSystemMenuDropdown.tsx`.
+
+## 2026-11-06T12:00:00+02:00 - Strict Light-Only Consolidation & Dependency Cleanup
+
+- **Phase 1 (Comprehension)**: Removed `color-scheme: light dark` and the unused `theme` prop from `packages/ui/src/accessibility.css` and `packages/ui/src/components/ui/browser.tsx`.
+- **Phase 2 (Evidence)**: Audited consumers of the removed prop: zero call sites. Verified `pnpm --filter @repo/ui type-check` + `biome check`.
+- **Phase 3 (Design)**: Standardized dependency manifests across the monorepo (`catalog:` protocol, `jest ^30.2.0` alignment), removed unused `lucide-react` in `@repo/theme`, and refreshed `pnpm-lock.yaml`.
+- **Phase 4 (Criticism)**: Confirmed `pnpm audit:tokens` (100%), `pnpm deps:lint` (0 mismatches), `pnpm knip` (0 unused), and `tsc` all pass.
+- **Phase 5 (Contract)**: Modified `packages/ui/src/accessibility.css`, `packages/ui/src/components/ui/browser.tsx`, dependency manifests, lockfile, and tracer.
 
 - **Phase 1 (Comprehension)**: Unify the System Menu trigger button in `MacSystemMenuDropdown` with the sidebar titlebar gold emblem by switching the logo component to `<Logo variant="gold" />`.
 - **Phase 2 (Evidence)**: Inspected `packages/ui/src/components/MacSystemMenuDropdown.tsx` line 84 which rendered `<Logo className="h-7 w-7 scale-110 text-[var(--accent-blue)] drop-shadow-xs" />` instead of the gold radiant gradient.

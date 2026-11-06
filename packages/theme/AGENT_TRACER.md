@@ -78,6 +78,14 @@
   - `packages/theme/src/css/cards.css`: Scoped `position: relative` to `.gold-steel-border:not(.fixed, .absolute, .sticky)`, changed `::before` `border-radius` to `inherit`, added specular highlight `#fff6cc`, and added `.gold-steel-border-slim` (`--gold-border-width: 1.5px`).
 - **Verification**: `pnpm --filter @repo/theme lint:css` ✅; `pnpm agent:verify` ✅.
 
+## 2026-11-06T12:00:00+02:00 - Strict Light-Only Consolidation & Dependency Cleanup
+
+- **Phase 1 (Comprehension)**: Identified and removed all remaining dark-mode code-level artifacts in `@repo/theme` and `@repo/ui` (dark-glass variables/rules, commented `prefers-color-scheme: dark` block, `colorsDark`/`hslDark` aliases, `useTheme`/`Toggle` stubs, `Browser` `theme` prop, `color-scheme: light dark`).
+- **Phase 2 (Evidence)**: Audited consumers: zero external consumers for removable symbols. Verified `pnpm --filter @repo/theme codegen`, `pnpm audit:tokens`, `pnpm deps:lint`, `pnpm knip`, `tsc --noEmit`, and workspace `biome check` all pass.
+- **Phase 3 (Design)**: Migrated 7 catalog-eligible dependencies to `catalog:`, aligned all 15 `jest` consumers to `^30.2.0`, removed unused `lucide-react`, and synchronized `pnpm-lock.yaml`.
+- **Phase 4 (Criticism)**: Compared final state against enforcement docs/rules — no behavior change outside the reported cleanup scope; enforcement checks remain.
+- **Phase 5 (Contract)**: Modified theme/UI CSS, tailwind preset, tokens, theme-provider/theme-toggle, Browser, docs, legacy codemod, and tracers.
+
 ## 2026-10-22T14:10:00Z - IBM Plex Sans Primary Sans-Serif Typeface Alignment
 
 - **Purpose**: Standardize `IBM Plex Sans` as the primary sans-serif typeface in `@repo/theme` tokens and Tailwind preset while preserving `Inter`, `Outfit`, `Anurati`, and `JetBrains Mono` in the font stack.

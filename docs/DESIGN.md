@@ -978,7 +978,7 @@ Add to `.github/workflows/ci.yml` (or equivalent):
 
 ### 5.4 Future‑Proofing
 
-- Ensure all new tokens have dark‑mode variants defined (even if not used) using `[data-theme="dark"]` or `prefers-color-scheme` — just map them to the same values for now, but structure allows easy extension.
+- Ensure all new tokens strictly define light-mode values in `:root` (`color-scheme: light`); never introduce `[data-theme="dark"]` or `prefers-color-scheme: dark` overrides.
 - Consider exporting a `focusMode` React context that applies `opacity-focus-dim` and `blur-focus-dim` to non‑active areas.
 
 ---

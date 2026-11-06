@@ -47,7 +47,7 @@
   /* ═══════════════════════════════════════════════════════════════
        TIER 2 — SEMANTIC ALIASES
        These are the only tokens components and utilities should reference.
-       They map to primitives above and will be redefined in dark mode.
+       They map to the canonical light-mode primitives above.
        ═══════════════════════════════════════════════════════════════ */
 
   /* Canonical brand interactive — electric blue CTA accent */
@@ -211,7 +211,7 @@
      the dark video scrim. The white surface at ~70 % opacity over a
      dark background reads as a muted light gray — similar to macOS
      vibrancy panels over a dark wallpaper.
-     Use these in place of inline dark-glass classes for maintainability. */
+     Use these tokens for translucent glass surfaces over video media. */
   --glass-video-surface: rgba(255, 255, 255, 0.7);
   --glass-video-surface-hover: rgba(255, 255, 255, 0.82);
   --glass-video-surface-strong: rgba(255, 255, 255, 0.9);
@@ -223,15 +223,6 @@
   --text-on-glass-video: rgba(10, 10, 20, 0.92);
   --text-on-glass-video-muted: rgba(10, 10, 20, 0.78);
   --glass-video-radius: 20px;
-
-  /* Dark glass surface — opaque dark card for high-contrast sections
-     like data-heavy dashboards, chart containers, or alert panels. */
-  --dark-glass-surface: rgba(15, 23, 42, 0.75);
-  --dark-glass-surface-hover: rgba(15, 23, 42, 0.85);
-  --dark-glass-border: rgba(255, 255, 255, 0.12);
-  --dark-glass-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  --text-on-dark-glass: rgba(248, 250, 252, 0.95);
-  --text-on-dark-glass-muted: rgba(203, 213, 225, 0.6);
 
   /* Premium Glass Stack — exact spec for the highest-tier surfaces
      (hero panels, drawer headers, command bar backdrop).
@@ -378,21 +369,6 @@
   --lq-danger: #e5484d;
   --lq-danger-text: #c1272c;
   --lq-scrim: rgba(12, 14, 28, 0.32);
-
-  /* Dark mode liqui tokens (commented - system is light-only)
-  @media (prefers-color-scheme: dark) {
-    --lq-text: rgba(245, 246, 255, 0.96);
-    --lq-text-dim: rgba(245, 246, 255, 0.55);
-    --lq-tint: rgba(30, 32, 46, 0.62);
-    --lq-tint-deep: rgba(18, 20, 32, 0.4);
-    --lq-rim-hi: rgba(255, 255, 255, 0.5);
-    --lq-rim-lo: rgba(255, 255, 255, 0.12);
-    --lq-highlight: rgba(255, 255, 255, 0.18);
-    --lq-accent: #6f9dff;
-    --lq-danger: #ff7076;
-    --lq-danger-text: #ff7076;
-    --lq-scrim: rgba(0, 0, 6, 0.48);
-  } */
 
   /* ===== Design System Tokens ===== */
   /* ---- Colors (Base Palette - DESIGN.md lines 20-39) ---- */

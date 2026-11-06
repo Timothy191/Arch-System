@@ -13,8 +13,8 @@
     "@tanstack/react-query": "^5.104.0",
     "idb-keyval": "^6.3.0",
     "react": "catalog:react19",
-    "sonner": "^2.0.8",
-    "zustand": "^5.0.15"
+    "sonner": "catalog:",
+    "zustand": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:react19"

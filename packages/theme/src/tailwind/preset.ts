@@ -179,14 +179,12 @@ const archTheme: Config = {
         'glass-border': withAlpha('--glass-border'),
         'glass-video': withAlpha('--glass-video-surface'),
         'glass-video-hover': withAlpha('--glass-video-surface-hover'),
-        'glass-dark': withAlpha('--dark-glass-surface'),
-        'glass-dark-hover': withAlpha('--dark-glass-surface-hover'),
+
         'text-on-glass': withAlpha('--text-on-glass'),
         'text-on-glass-muted': withAlpha('--text-on-glass-muted'),
         'text-on-glass-video': withAlpha('--text-on-glass-video'),
         'text-on-glass-video-muted': withAlpha('--text-on-glass-video-muted'),
-        'text-on-dark-glass': withAlpha('--text-on-dark-glass'),
-        'text-on-dark-glass-muted': withAlpha('--text-on-dark-glass-muted'),
+
         vibrancy: withAlpha('--vibrancy-surface'),
 
         // Arch semantic namespace — for production-ready theme consistency

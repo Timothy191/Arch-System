@@ -76,7 +76,7 @@ a,
 input,
 select,
 textarea {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 /* WCAG 2.5.5 / 2.5.8 44x44px minimum touch target utility for pit tablets */

@@ -86,9 +86,6 @@ export const colors = {
   },
 } as const;
 
-/** @deprecated light-only — kept for backward compatibility */
-export const colorsDark = { ...colors } as const;
-
 // ═══════════════════════════════════════════════════════════════
 // TIER 3 — DEPRECATED ALIASES
 // @deprecated — Migrate all usages to the canonical accent-* names.
@@ -136,9 +133,6 @@ export const glass = {
 // ═══════════════════════════════════════════════════════════════
 
 export const hsl = tokens.hsl;
-
-/** @deprecated light-only — kept for backward compatibility */
-export const hslDark = { ...hsl } as const;
 
 /** Generate a themer-compatible ColorSet for external tool export */
 export function generateThemerColorSet() {

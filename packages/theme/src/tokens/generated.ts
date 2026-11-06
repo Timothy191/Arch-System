@@ -28,8 +28,6 @@ export const tokens = {
       onGlassMuted: 'var(--text-on-glass-muted)',
       onGlassVideo: 'var(--text-on-glass-video)',
       onGlassVideoMuted: 'var(--text-on-glass-video-muted)',
-      onDarkGlass: 'var(--text-on-dark-glass)',
-      onDarkGlassMuted: 'var(--text-on-dark-glass-muted)',
     },
     accent: {
       blue: 'var(--accent-blue)',
