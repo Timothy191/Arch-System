@@ -14,16 +14,16 @@ import { APP_VERSION } from '@/lib/version';
 const ALERT_ICON_STROKE_WIDTH = 1.5;
 
 const SYSTEM_UNAVAILABLE_CARD_CLASS =
-  'layer-signin-card gold-steel-border gold-steel-border-slim mx-auto w-full max-w-md animate-fade-up space-y-4 rounded-2xl border border-amber-500/30 bg-zinc-950/90 p-8 text-center shadow-window backdrop-blur-xl md:p-10';
+  'layer-signin-card gold-steel-border gold-steel-border-slim mx-auto w-full max-w-md animate-fade-up space-y-4 rounded-2xl border border-amber-500/30 bg-white/90 p-8 text-center shadow-window backdrop-blur-xl md:p-10';
 
 const RETRY_LINK_CLASS =
   'gold-steel-border gold-steel-border-slim mt-4 inline-block rounded-xl bg-amber-500 px-6 py-2.5 font-semibold text-xs text-zinc-950 uppercase tracking-wider shadow-diffusion-sm transition-all hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60';
 
 const LOGIN_COMMAND_PORTAL_CLASS =
-  'layer-signin-card gold-steel-border gold-steel-border-slim w-full animate-fade-up overflow-hidden rounded-2xl border border-amber-500/25 bg-zinc-950/90 shadow-window backdrop-blur-xl lg:grid lg:grid-cols-12';
+  'layer-signin-card gold-steel-border gold-steel-border-slim w-full animate-fade-up overflow-hidden rounded-2xl border border-amber-500/25 bg-white/90 shadow-window backdrop-blur-xl lg:grid lg:grid-cols-12';
 
 const LEFT_TELEMETRY_PANEL_CLASS =
-  'flex flex-col justify-between gap-5 border-amber-500/20 border-b bg-zinc-900/75 p-6 md:p-7 lg:col-span-5 lg:border-r lg:border-b-0';
+  'flex flex-col justify-between gap-5 border-amber-500/30 border-b bg-zinc-50/80 p-6 md:p-7 lg:col-span-5 lg:border-r lg:border-b-0';
 
 const RIGHT_AUTH_PANEL_CLASS = 'flex flex-col justify-between p-6 md:p-7 lg:col-span-7';
 
@@ -93,13 +93,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         {systemUnavailable ? (
           <div data-testid="login-card" className={SYSTEM_UNAVAILABLE_CARD_CLASS}>
             <AlertTriangle
-              className="mx-auto h-10 w-10 text-amber-400"
+              className="mx-auto h-10 w-10 text-amber-700"
               strokeWidth={ALERT_ICON_STROKE_WIDTH}
             />
-            <h1 className="font-display font-semibold text-[var(--text-heading)] text-xl text-zinc-100 tracking-tight">
+            <h1 className="font-display font-semibold text-[var(--text-heading)] text-xl text-zinc-900 tracking-tight">
               System Unavailable
             </h1>
-            <p className="font-sans text-sm text-zinc-400">
+            <p className="font-sans text-sm text-zinc-600">
               Unable to reach authentication services. Please try again shortly or contact IT
               Support.
             </p>
@@ -117,11 +117,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Brand Identity */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3.5">
-                  <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-zinc-950/90 text-amber-400 shadow-diffusion-sm">
-                    <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-amber-400 drop-shadow-sm" />
+                  <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-white/90 text-amber-700 shadow-diffusion-sm">
+                    <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-amber-700 drop-shadow-sm" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-zinc-100 uppercase tracking-[0.18em]">
+                    <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-zinc-900 uppercase tracking-[0.18em]">
                       Arch Systems
                     </h1>
                     <div
@@ -129,16 +129,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                       aria-hidden="true"
                       className="my-2 flex w-56 items-center justify-center gap-2"
                     >
-                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400 to-amber-300 shadow-glow-amber" />
-                      <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-amber-300 bg-amber-400/40 shadow-glow-amber" />
-                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-amber-500/20 via-amber-400 to-amber-300 shadow-glow-amber" />
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-500 to-amber-600 shadow-diffusion-sm" />
+                      <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-amber-600 bg-amber-400/60 shadow-diffusion-sm" />
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-amber-500/20 via-amber-500 to-amber-600 shadow-diffusion-sm" />
                     </div>
-                    <div className="inline-flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono font-semibold text-[10.5px] text-amber-300 uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono font-semibold text-[10.5px] text-amber-800 uppercase tracking-widest">
                       <span>Arch OS v{APP_VERSION}</span>
                     </div>
                   </div>
                 </div>
-                <p className="font-sans text-xs text-zinc-400 leading-relaxed">
+                <p className="font-sans text-xs text-zinc-600 leading-relaxed">
                   Mission-critical SCADA telemetry, autonomous fleet orchestration, and zero-trust
                   shift governance.
                 </p>
@@ -147,26 +147,26 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* System Telemetry & Security Posture Matrix */}
               <div
                 data-testid="login-security-telemetry-pill"
-                className="space-y-2 rounded-xl border border-zinc-800/90 bg-zinc-950/80 p-3.5 font-mono text-[11px] text-zinc-300 shadow-diffusion-sm"
+                className="gold-steel-border gold-steel-border-slim space-y-2 rounded-xl border border-amber-500/40 bg-white/80 p-3.5 font-mono text-[11px] text-zinc-700 shadow-diffusion-sm"
               >
-                <div className="flex items-center justify-between border-zinc-800/80 border-b pb-1.5">
-                  <span className="inline-flex items-center gap-2 text-zinc-200">
+                <div className="flex items-center justify-between border-zinc-200 border-b pb-1.5">
+                  <span className="inline-flex items-center gap-2 text-zinc-800">
                     <span className="h-2 w-2 rounded-full bg-emerald-400" />
                     <span>TLS 1.3 Encrypted</span>
                   </span>
-                  <span className="font-semibold text-[10px] text-emerald-400 uppercase">
+                  <span className="font-semibold text-[10px] text-emerald-700 uppercase">
                     Verified
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-zinc-800/80 border-b pb-1.5">
-                  <span className="text-zinc-300">Zero-Trust RBAC</span>
-                  <span className="font-semibold text-[10px] text-zinc-400 uppercase">
+                <div className="flex items-center justify-between border-zinc-200 border-b pb-1.5">
+                  <span className="text-zinc-700">Zero-Trust RBAC</span>
+                  <span className="font-semibold text-[10px] text-zinc-600 uppercase">
                     Session Guard
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-0.5">
-                  <span className="font-semibold text-amber-400">SCADA Ready</span>
-                  <span className="font-semibold text-[10px] text-amber-300 uppercase">
+                  <span className="font-semibold text-amber-700">SCADA Ready</span>
+                  <span className="font-semibold text-[10px] text-amber-800 uppercase">
                     Telemetry Sync
                   </span>
                 </div>
@@ -175,22 +175,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Integrated Eve Agentic Backend Dock */}
               <div
                 data-testid="eve-agentic-backend-banner"
-                className="rounded-xl border border-amber-500/20 bg-zinc-950/85 p-3.5 shadow-diffusion-sm"
+                className="gold-steel-border gold-steel-border-slim rounded-xl border border-amber-500/40 bg-white/85 p-3.5 shadow-diffusion-sm"
               >
-                <div className="flex flex-wrap items-center gap-2 font-semibold text-[11px] text-zinc-200">
-                  <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">
-                    Powered by
-                  </span>
-                  <EveLogo className="h-3.5 w-auto text-amber-400" />
-                  <span className="text-zinc-600">•</span>
-                  <span className="inline-flex items-center gap-1 text-amber-400">
-                    <Cpu className="h-3.5 w-3.5 shrink-0" />
-                    <span>Fully Intelligent &amp; Agentic Backend</span>
-                  </span>
+                <div className="inline-flex items-center gap-1.5 font-semibold text-[11px] text-amber-800">
+                  <Cpu className="h-3.5 w-3.5 shrink-0" />
+                  <span>Fully Intelligent &amp; Agentic Backend</span>
                 </div>
-                <p className="mt-1.5 font-sans text-[10.5px] text-zinc-400 leading-relaxed">
+                <p className="mt-1.5 font-sans text-[10.5px] text-zinc-600 leading-relaxed">
                   Autonomous Multi-Agent Orchestration &amp; Self-Healing Telemetry
                 </p>
+                <div className="mt-2 flex items-center gap-2 border-zinc-200 border-t pt-2">
+                  <span className="font-mono text-[10px] text-zinc-600 uppercase tracking-wider">
+                    Powered by
+                  </span>
+                  <EveLogo className="h-3.5 w-auto text-amber-700" />
+                </div>
               </div>
             </aside>
 
@@ -198,19 +197,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <section className={RIGHT_AUTH_PANEL_CLASS} aria-label="Operator authentication">
               <div>
                 {/* Header */}
-                <div className="mb-4 border-zinc-800/80 border-b pb-3.5">
-                  <div className="flex items-center justify-between">
-                    <span className="select-none font-mono font-semibold text-[11px] text-amber-400 uppercase tracking-widest">
+                <div className="mb-4 border-zinc-200 border-b pb-3.5">
+                  <div className="flex items-center">
+                    <span className="select-none font-mono font-semibold text-[11px] text-amber-700 uppercase tracking-widest">
                       Welcome Back
                     </span>
-                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono font-semibold text-[10px] text-amber-300">
-                      SSO / EMP-ID
-                    </span>
                   </div>
-                  <h2 className="mt-1 font-display font-semibold text-white text-xl tracking-tight">
+                  <h2 className="mt-1 font-display font-semibold text-xl text-zinc-900 tracking-tight">
                     Sign in to your account
                   </h2>
-                  <p className="mt-0.5 font-sans text-xs text-zinc-400">
+                  <p className="mt-0.5 font-sans text-xs text-zinc-600">
                     Access the mining &amp; operations control panel.
                   </p>
                 </div>
@@ -219,7 +215,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 <Suspense
                   fallback={
                     <div className="flex h-48 items-center justify-center">
-                      <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
+                      <Loader2 className="h-6 w-6 animate-spin text-amber-700" />
                     </div>
                   }
                 >
@@ -230,21 +226,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Compact Footer inside Command Portal */}
               <footer
                 data-testid="login-footer"
-                className="mt-5 flex flex-wrap items-center justify-between gap-2 border-zinc-800/80 border-t pt-3 text-[var(--accent-blue)] text-zinc-400"
+                className="mt-5 flex flex-wrap items-center justify-between gap-2 border-zinc-200 border-t pt-3 text-zinc-700"
               >
-                <div className="inline-flex items-center gap-1.5 font-mono font-semibold text-[10.5px] text-zinc-400 uppercase tracking-wider">
-                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                <div className="inline-flex items-center gap-1.5 font-mono font-semibold text-[10.5px] text-zinc-700 uppercase tracking-wider">
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-700" />
                   <span>Secure industrial access</span>
                 </div>
                 <div className="flex items-center gap-4 font-medium text-xs">
                   <a
-                    className="inline-flex min-h-[28px] items-center px-1 text-zinc-400 transition-colors hover:text-amber-300 hover:underline"
+                    className="inline-flex min-h-[28px] items-center px-1 text-zinc-700 transition-colors hover:text-amber-900 hover:underline"
                     href="/docs"
                   >
                     Security Policy
                   </a>
                   <a
-                    className="inline-flex min-h-[28px] items-center px-1 text-zinc-400 transition-colors hover:text-amber-300 hover:underline"
+                    className="inline-flex min-h-[28px] items-center px-1 text-zinc-700 transition-colors hover:text-amber-900 hover:underline"
                     href="/docs#support"
                   >
                     Support

@@ -78,7 +78,7 @@ describe('LoginPage Server Component', () => {
     expect(logoSvg?.parentElement?.className).toContain('w-12');
 
     const loginFooter = screen.getByTestId('login-footer');
-    expect(loginFooter.className).toContain('text-[var(--accent-blue)]');
+    expect(loginFooter.className).toContain('text-zinc-700');
   });
 
   it('renders the heading with the theme token class and integrated telemetry/eve panels', async () => {

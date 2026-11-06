@@ -15,6 +15,10 @@ const config: StorybookConfig = {
     options: {},
   },
 
+  // react-docgen 7.1 resolves @babel/core 8, whose async-only loadPartialConfig crashes the
+  // storybook:react-docgen-plugin transform (every story 500s). Disable docgen until pinned.
+  typescript: { reactDocgen: false },
+
   viteFinal: async (config) =>
     mergeConfig(config, {
       plugins: [react(), tsconfigPaths()],

@@ -77,7 +77,8 @@ describe('LoginForm', () => {
     expect(passwordInput).toBeInTheDocument();
     expect(emailInput.parentElement?.className).toContain('gold-steel-border');
     expect(passwordInput.parentElement?.className).toContain('gold-steel-border');
-    expect(screen.getByTestId('auth-mode-switcher')).toBeInTheDocument();
+    expect(screen.queryByTestId('auth-mode-switcher')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /SSO/i })).not.toBeInTheDocument();
 
     const signInBtn = screen.getByRole('button', { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();

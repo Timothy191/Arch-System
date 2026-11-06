@@ -36,7 +36,10 @@ export const WithAction: Story = {
     title: 'No results',
     description: 'Try adjusting your search criteria.',
     action: (
-      <button type="button" className="text-blue-500 text-sm hover:underline">
+      <button
+        type="button"
+        className="text-[var(--text-heading)] text-sm underline-offset-2 hover:underline"
+      >
         Clear filters
       </button>
     ),
@@ -49,7 +52,10 @@ export const ErrorState: Story = {
     title: 'Something went wrong',
     description: "We couldn't load the data. Please try again.",
     action: (
-      <button type="button" className="text-blue-500 text-sm hover:underline">
+      <button
+        type="button"
+        className="text-[var(--text-heading)] text-sm underline-offset-2 hover:underline"
+      >
         Retry
       </button>
     ),

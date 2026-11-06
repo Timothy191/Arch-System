@@ -164,7 +164,6 @@ const SystemTrayPillInner = function SystemTrayPillInner({
         <Popover.Trigger asChild>
           <button
             type="button"
-            aria-label="System Tray Popover"
             aria-haspopup="dialog"
             title="System status & options"
             className={cn(
@@ -172,6 +171,7 @@ const SystemTrayPillInner = function SystemTrayPillInner({
               'transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]/50 active:scale-[0.98]'
             )}
           >
+            <span className="sr-only">System tray</span>
             {/* Server health dot */}
             <span className="relative flex h-2 w-2" suppressHydrationWarning>
               {isHealthy && (

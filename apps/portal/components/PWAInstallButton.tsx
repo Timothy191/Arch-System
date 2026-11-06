@@ -160,7 +160,7 @@ export function PWAInstallButton() {
       </div>
       <button
         onClick={handleInstallClick}
-        className="flex items-center gap-2 rounded-md bg-[var(--accent-blue)] px-3 py-2 font-medium text-sm text-white transition-opacity hover:opacity-90"
+        className="flex items-center gap-2 rounded-md bg-[var(--accent-blue)] px-3 py-2 font-semibold text-[var(--text-heading)] text-sm transition-opacity hover:opacity-90"
       >
         <Download className="h-4 w-4" />
         Install

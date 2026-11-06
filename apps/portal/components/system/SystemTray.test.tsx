@@ -266,7 +266,7 @@ describe('SystemTrayPill (Unified Control Room Taskbar)', () => {
     expect(notifBtn).toHaveAttribute('aria-label', 'Notifications');
 
     // 3. System Tray Popover
-    const trayBtn = screen.getByLabelText('System Tray Popover');
+    const trayBtn = screen.getByRole('button', { name: /^System tray/ });
     expect(trayBtn).toBeInTheDocument();
 
     // 4. Support Button

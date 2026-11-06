@@ -36,5 +36,6 @@ export const Disabled: Story = {
 };
 
 export const WithoutLabel: Story = {
-  args: {},
+  // No visible label; an accessible name is still required (WCAG 4.1.2).
+  args: { 'aria-label': 'Select row' },
 };

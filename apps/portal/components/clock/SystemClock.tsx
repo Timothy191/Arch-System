@@ -97,7 +97,6 @@ export function SystemClock({ embedded = false }: { readonly embedded?: boolean 
       <Popover.Trigger asChild>
         <button
           type="button"
-          aria-label="System Clock"
           title="Clock & Calendar"
           className={cn(
             embedded
