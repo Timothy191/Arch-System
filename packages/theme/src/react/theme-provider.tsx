@@ -27,7 +27,7 @@ export function ArchThemeProvider({ children }: { children: ReactNode }) {
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#ffffff');
+      metaThemeColor.setAttribute('content', '#f3f4f6');
     }
   }, []);
 

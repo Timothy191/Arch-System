@@ -663,15 +663,15 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
   return (
     <div className="space-y-6">
       {/* Site Header Banner with Gold Separator */}
-      <div className="flex items-center justify-between rounded-lg border-[#d4af37] border-b-2 bg-slate-900 px-4 py-3 text-white">
+      <div className="flex items-center justify-between rounded-lg border border-slate-200 border-b-2 border-b-[#d4af37] bg-slate-100 px-4 py-3 text-slate-900">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-blue-400" />
+            <Layers className="h-4 w-4 text-blue-700" />
             <h2 className="font-black text-base uppercase tracking-wide">
               SITE: {siteReport.siteName}
             </h2>
           </div>
-          <p className="text-[11px] text-slate-300">
+          <p className="text-[11px] text-slate-600">
             Excavator Loading Blocks · Assigned Haulers · Auto-Derived Aggregations
           </p>
         </div>
@@ -679,12 +679,12 @@ function PageSiteBreakdown({ siteReport }: PageSiteProps) {
         <div className="text-right font-mono text-xs">
           <div>
             Total Material:{' '}
-            <strong className="text-blue-400">
+            <strong className="text-blue-700">
               {siteReport.siteTotals.totalMaterialMoved.toLocaleString()}
             </strong>{' '}
             {siteReport.siteTotals.coalTonnes > siteReport.siteTotals.bcmVolume ? 'Tonnes' : 'BCM'}
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-600">
             {siteReport.siteTotals.totalLoads} Loads · {siteReport.siteTotals.totalHours.toFixed(1)}{' '}
             Operating Hours
           </div>

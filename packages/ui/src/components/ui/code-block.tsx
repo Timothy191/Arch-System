@@ -72,14 +72,14 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
         ref={ref}
         className={cn(
           'overflow-hidden rounded-lg border border-neutral-200',
-          'bg-neutral-950 font-mono text-neutral-100 text-xs shadow-sm',
+          'bg-neutral-50 font-mono text-neutral-900 text-xs shadow-sm',
           className
         )}
         {...props}
       >
         {/* Header Bar */}
         {(filename || tabs || switcher || v0) && (
-          <div className="flex select-none items-center justify-between border-neutral-800 border-b bg-neutral-900/90 px-4 py-2">
+          <div className="flex select-none items-center justify-between border-neutral-200 border-b bg-neutral-100/90 px-4 py-2">
             {/* Left: Filename or Tabs */}
             <div className="flex items-center gap-3">
               {tabs ? (
@@ -92,8 +92,8 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                       className={cn(
                         'rounded px-2.5 py-1 font-medium text-xs transition-colors',
                         tabs.value === opt.value
-                          ? 'bg-neutral-800 text-white shadow-2xs'
-                          : 'text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200'
+                          ? 'bg-white text-neutral-900 shadow-2xs'
+                          : 'text-neutral-600 hover:bg-neutral-200/60 hover:text-neutral-900'
                       )}
                     >
                       {opt.label}
@@ -101,7 +101,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                   ))}
                 </div>
               ) : filename ? (
-                <div className="flex items-center gap-2 font-medium text-neutral-300">
+                <div className="flex items-center gap-2 font-medium text-neutral-700">
                   <Terminal className="h-3.5 w-3.5 text-neutral-500" />
                   <span>{filename}</span>
                 </div>
@@ -114,7 +114,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <select
                   value={switcher.value}
                   onChange={(e) => switcher.onChange(e.target.value)}
-                  className="cursor-pointer rounded border border-neutral-700 bg-neutral-800 px-2 py-0.5 text-neutral-300 text-xs focus:outline-none"
+                  className="cursor-pointer rounded border border-neutral-300 bg-white px-2 py-0.5 text-neutral-700 text-xs focus:outline-none"
                 >
                   {switcher.options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -128,7 +128,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <button
                   type="button"
                   onClick={() => window.open(`https://v0.dev/${v0}`, '_blank')}
-                  className="inline-flex items-center gap-1 rounded border border-neutral-700 bg-neutral-800 px-2 py-0.5 font-medium text-[11px] text-neutral-300 transition-colors hover:bg-neutral-700"
+                  className="inline-flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 font-medium text-[11px] text-neutral-700 transition-colors hover:bg-neutral-100"
                 >
                   <span>Open in v0</span>
                   <ExternalLink className="h-3 w-3" />
@@ -139,10 +139,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 type="button"
                 onClick={handleCopy}
                 aria-label={copied ? 'Copied' : 'Copy code'}
-                className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
+                className="rounded p-1 text-neutral-500 transition-colors hover:bg-neutral-200/70 hover:text-neutral-900"
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
                 ) : (
                   <Copy className="h-3.5 w-3.5" />
                 )}
@@ -159,10 +159,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
               type="button"
               onClick={handleCopy}
               aria-label={copied ? 'Copied' : 'Copy code'}
-              className="absolute top-3 right-3 rounded border border-neutral-800 bg-neutral-900/80 p-1.5 text-neutral-400 transition-colors hover:text-white"
+              className="absolute top-3 right-3 rounded border border-neutral-200 bg-white/90 p-1.5 text-neutral-500 transition-colors hover:text-neutral-900"
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                <Check className="h-3.5 w-3.5 text-emerald-600" />
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}
@@ -181,9 +181,9 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                   key={lineNum}
                   className={cn(
                     '-mx-4 flex items-center px-4 py-0.5 transition-colors',
-                    isHighlighted && 'border-l-2 border-l-blue-400 bg-blue-500/15',
-                    isAdded && 'border-l-2 border-l-emerald-400 bg-emerald-500/15 text-emerald-200',
-                    isRemoved && 'border-l-2 border-l-red-400 bg-red-500/15 text-red-200 opacity-75'
+                    isHighlighted && 'border-l-2 border-l-blue-500 bg-blue-500/10',
+                    isAdded && 'border-l-2 border-l-emerald-600 bg-emerald-500/10 text-emerald-900',
+                    isRemoved && 'border-l-2 border-l-red-600 bg-red-500/10 text-red-900 opacity-75'
                   )}
                 >
                   {!hideLineNumbers && (
@@ -197,12 +197,12 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                   {isAdded ? (
                     <span
                       aria-hidden="true"
-                      className="mr-2 select-none font-bold text-emerald-400"
+                      className="mr-2 select-none font-bold text-emerald-600"
                     >
                       +
                     </span>
                   ) : isRemoved ? (
-                    <span aria-hidden="true" className="mr-2 select-none font-bold text-red-400">
+                    <span aria-hidden="true" className="mr-2 select-none font-bold text-red-600">
                       -
                     </span>
                   ) : null}

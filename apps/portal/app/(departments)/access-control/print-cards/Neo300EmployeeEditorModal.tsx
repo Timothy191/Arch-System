@@ -108,7 +108,7 @@ export function Neo300EmployeeEditorModal({
       <form onSubmit={onSave} className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Photo Upload & Live Portrait Preview (4 cols) */}
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-4 lg:col-span-4">
-          <div className="relative flex h-36 w-28 flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-[var(--border-default)] bg-slate-900 shadow-inner">
+          <div className="relative flex h-36 w-28 flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-[var(--border-default)] bg-[var(--bg-primary)] shadow-inner">
             {formState.photo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -118,8 +118,8 @@ export function Neo300EmployeeEditorModal({
               />
             ) : (
               <>
-                <Camera className="h-7 w-7 text-slate-400" />
-                <span className="mt-1 text-[10px] text-slate-400 uppercase tracking-wider">
+                <Camera className="h-7 w-7 text-[var(--text-muted)]" />
+                <span className="mt-1 text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
                   ID Portrait
                 </span>
               </>

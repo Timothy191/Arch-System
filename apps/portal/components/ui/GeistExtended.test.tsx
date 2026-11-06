@@ -119,7 +119,7 @@ describe('Geist Extended Primitives', () => {
 
     it('renders CodeBlock with filename, line numbers, and copy button', () => {
       const source = `const x = 1;\nconst y = 2;\nconst z = 3;`;
-      render(
+      const { container } = render(
         <CodeBlock filename="example.ts" language="typescript" highlightedLinesNumbers={[2]}>
           {source}
         </CodeBlock>
@@ -128,6 +128,7 @@ describe('Geist Extended Primitives', () => {
       expect(screen.getByText('example.ts')).toBeInTheDocument();
       expect(screen.getByText('const x = 1;')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Copy code' })).toBeInTheDocument();
+      expect(container.firstChild).toHaveClass('bg-neutral-50', 'text-neutral-900');
     });
 
     it('renders diff additions and deletions in CodeBlock', () => {

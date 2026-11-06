@@ -294,39 +294,45 @@ export default function DocsLandingPage() {
         </div>
 
         <Browser address="https://arch.coal/operations/live" className="max-w-5xl shadow-2xl">
-          <div className="flex min-h-[220px] flex-col justify-between bg-neutral-900 p-8 text-white">
+          <div className="flex min-h-[220px] flex-col justify-between bg-[var(--bg-secondary)] p-8 text-[var(--text-heading)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
-                <span className="font-mono text-neutral-400 text-xs uppercase tracking-widest">
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-600" />
+                <span className="font-mono text-[var(--text-muted)] text-xs uppercase tracking-widest">
                   Telemetry Stream · Opencast Mine Sector 7
                 </span>
               </div>
-              <span className="font-mono text-neutral-500 text-xs">12 Active Vehicles</span>
+              <span className="font-mono text-[var(--text-muted)] text-xs">12 Active Vehicles</span>
             </div>
 
             <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
-                <span className="block font-mono text-neutral-400 text-xs">Haul Fleet Output</span>
-                <span className="mt-1 block font-bold text-2xl text-white">4,280 t/h</span>
+              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
+                <span className="block font-mono text-[var(--text-muted)] text-xs">
+                  Haul Fleet Output
+                </span>
+                <span className="mt-1 block font-bold text-2xl text-[var(--text-heading)]">
+                  4,280 t/h
+                </span>
               </div>
-              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
-                <span className="block font-mono text-neutral-400 text-xs">Blast Hole Drills</span>
-                <span className="mt-1 block font-bold text-2xl text-emerald-400">
+              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
+                <span className="block font-mono text-[var(--text-muted)] text-xs">
+                  Blast Hole Drills
+                </span>
+                <span className="mt-1 block font-bold text-2xl text-emerald-700">
                   98.4% Nominal
                 </span>
               </div>
-              <div className="rounded-lg border border-neutral-700/60 bg-neutral-800/80 p-4">
-                <span className="block font-mono text-neutral-400 text-xs">
+              <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-4">
+                <span className="block font-mono text-[var(--text-muted)] text-xs">
                   RFID Gate Verifications
                 </span>
-                <span className="mt-1 block font-bold text-2xl text-blue-400">342 Today</span>
+                <span className="mt-1 block font-bold text-2xl text-blue-700">342 Today</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-neutral-800 border-t pt-3 text-neutral-500 text-xs">
+            <div className="flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-[var(--text-muted)] text-xs">
               <span>Arch Industrial OS v2.4</span>
-              <Link href="/overview" className="text-blue-400 hover:underline">
+              <Link href="/overview" className="text-blue-700 hover:underline">
                 Explore Full Topology &rarr;
               </Link>
             </div>
