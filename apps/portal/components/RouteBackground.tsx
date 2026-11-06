@@ -15,16 +15,10 @@ type NavigatorWithConnection = Navigator & {
 const LITE_DEVICE_MAX_CORES = 2;
 const LITE_DEVICE_MAX_MEMORY_GB = 2;
 
-type WindowWithIdleCallback = Window & {
-  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-  cancelIdleCallback?: (handle: number) => void;
-};
-
 const MOBILE_VIEWPORT_MAX_WIDTH_PX = 767;
 const MOBILE_VIEWPORT_MEDIA_QUERY = `(max-width: ${MOBILE_VIEWPORT_MAX_WIDTH_PX}px)`;
-const VIDEO_IDLE_TIMEOUT_MS = 800;
-const VIDEO_FALLBACK_TIMEOUT_MS = 350;
-const HTML_MEDIA_HAVE_CURRENT_DATA_READY_STATE = 2;
+const HTML_MEDIA_HAVE_METADATA_READY_STATE = 1;
+const AMBIENT_VIDEO_PLAYBACK_RATE = 1.25;
 
 /**
  * RouteBackgroundPoster
@@ -105,36 +99,54 @@ function RouteBackgroundInner() {
     };
     mobileQuery.addEventListener('change', handleViewportChange);
 
-    // 4. Defer video mounting until browser is idle after LCP
-    const loadDeferredVideo = () => {
-      setShouldLoadVideo(true);
-    };
+    // 4. Mount hardware-accelerated faststart video stream immediately on capable devices
+    setShouldLoadVideo(true);
 
-    const idleWindow = window as WindowWithIdleCallback;
-    if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(loadDeferredVideo, {
-        timeout: VIDEO_IDLE_TIMEOUT_MS,
-      });
-      return () => {
-        idleWindow.cancelIdleCallback?.(handle);
-        mobileQuery.removeEventListener('change', handleViewportChange);
-      };
-    }
-
-    const timer = setTimeout(loadDeferredVideo, VIDEO_FALLBACK_TIMEOUT_MS);
     return () => {
-      clearTimeout(timer);
       mobileQuery.removeEventListener('change', handleViewportChange);
     };
   }, []);
 
   useEffect(() => {
-    if (videoRef.current && shouldLoadVideo) {
-      if (videoRef.current.readyState >= HTML_MEDIA_HAVE_CURRENT_DATA_READY_STATE) {
-        setIsVideoLoaded(true);
-      }
-      videoRef.current.play().catch(() => {});
+    const videoEl = videoRef.current;
+    if (!videoEl || !shouldLoadVideo) {
+      return;
     }
+
+    // Imperatively set defaultMuted + muted + playsInline before play() to satisfy strict browser autoplay policies
+    videoEl.defaultMuted = true;
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.playbackRate = AMBIENT_VIDEO_PLAYBACK_RATE;
+
+    if (videoEl.readyState >= HTML_MEDIA_HAVE_METADATA_READY_STATE) {
+      setIsVideoLoaded(true);
+    }
+
+    const startPlayback = () => {
+      videoEl.playbackRate = AMBIENT_VIDEO_PLAYBACK_RATE;
+      videoEl
+        .play()
+        .then(() => {
+          setIsVideoLoaded(true);
+        })
+        .catch(() => {});
+    };
+
+    startPlayback();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        videoEl.pause();
+        return;
+      }
+      startPlayback();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [shouldLoadVideo, isMobileViewport]);
 
   const posterSrc = isMobileViewport
@@ -143,9 +155,15 @@ function RouteBackgroundInner() {
   const webmSrc = isMobileViewport
     ? '/background/video-loop-mobile.webm'
     : '/background/video-loop.webm';
+  const webmCodec = isMobileViewport
+    ? 'video/webm; codecs=vp09.00.31.08'
+    : 'video/webm; codecs=vp09.00.40.08';
   const mp4Src = isMobileViewport
     ? '/background/video-loop-mobile.mp4'
     : '/background/video-loop.mp4';
+  const mp4Codec = isMobileViewport
+    ? 'video/mp4; codecs=avc1.64001f'
+    : 'video/mp4; codecs=avc1.640028';
 
   return (
     <>
@@ -165,22 +183,26 @@ function RouteBackgroundInner() {
             className="route-bg-video h-full w-full object-cover object-center"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
-              transition: 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
               willChange: 'opacity',
             }}
+            onLoadedMetadata={() => setIsVideoLoaded(true)}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
+            onPlaying={() => setIsVideoLoaded(true)}
             onError={() => setIsVideoLoaded(false)}
             autoPlay
             loop
             muted
             playsInline
             disablePictureInPicture
-            preload="auto"
+            preload="metadata"
           >
-            {/* 1. High-performance VP9 hardware-accelerated stream */}
-            <source src={webmSrc} type="video/webm; codecs=vp09.00.41.08" />
-            {/* 2. Universal H.264 MP4 fallback for Safari/iOS */}
+            {/* 1. Zero-copy hardware-accelerated H.264 faststart stream */}
+            <source src={mp4Src} type={mp4Codec} />
+            {/* 2. High-efficiency VP9 Profile 0 stream */}
+            <source src={webmSrc} type={webmCodec} />
+            {/* 3. Universal MP4 fallback */}
             <source src={mp4Src} type="video/mp4" />
           </video>
         </div>

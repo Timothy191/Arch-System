@@ -20,12 +20,16 @@ const RETRY_LINK_CLASS =
   'gold-steel-border gold-steel-border-slim mt-4 inline-block rounded-xl bg-amber-500 px-6 py-2.5 font-semibold text-xs text-zinc-950 uppercase tracking-wider shadow-diffusion-sm transition-all hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60';
 
 const LOGIN_COMMAND_PORTAL_CLASS =
-  'layer-signin-card gold-steel-border gold-steel-border-slim w-full animate-fade-up overflow-hidden rounded-2xl border border-amber-500/25 bg-white/90 shadow-window backdrop-blur-xl lg:grid lg:grid-cols-12';
+  'layer-signin-card liquid-glass-light gold-steel-border gold-steel-border-slim w-full animate-fade-up overflow-hidden rounded-2xl border border-amber-500/25 bg-white/90 shadow-window backdrop-blur-xl lg:grid lg:grid-cols-12';
 
 const LEFT_TELEMETRY_PANEL_CLASS =
-  'flex flex-col justify-between gap-5 border-amber-500/30 border-b bg-zinc-50/80 p-6 md:p-7 lg:col-span-5 lg:border-r lg:border-b-0';
+  'relative isolate flex flex-col justify-between gap-5 overflow-hidden border-amber-500/30 border-b bg-zinc-50/80 p-6 md:p-7 lg:col-span-5 lg:border-r lg:border-b-0';
 
-const RIGHT_AUTH_PANEL_CLASS = 'flex flex-col justify-between p-6 md:p-7 lg:col-span-7';
+const RIGHT_AUTH_PANEL_CLASS =
+  'liquid-glass-light flex flex-col justify-between bg-[var(--material-ultra-thin)] p-6 backdrop-blur-md md:p-7 lg:col-span-7';
+
+const TASKBAR_GOLD_SEPARATOR_CLASS =
+  'select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)]';
 
 export const metadata: Metadata = {
   title: 'Login — Arch Systems',
@@ -114,8 +118,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               className={LEFT_TELEMETRY_PANEL_CLASS}
               aria-label="System telemetry and identity"
             >
+              {/* AI Mining Opencast Coal Mine Video Background */}
+              <div
+                className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+                aria-hidden="true"
+              >
+                <video
+                  data-testid="login-aside-mining-video"
+                  poster="/images/departments/overview.webp"
+                  className="h-full w-full object-cover object-center opacity-40 saturate-125"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  disablePictureInPicture
+                  preload="metadata"
+                >
+                  <source src="/images/departments/overview.mp4" type="video/mp4" />
+                  <source src="/images/departments/plant-inventory.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/60 to-zinc-50/80 backdrop-blur-[1px]" />
+              </div>
+
               {/* Brand Identity */}
-              <div className="space-y-3">
+              <div className="relative z-10 space-y-3">
                 <div className="flex items-center gap-3.5">
                   <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-white/90 text-amber-700 shadow-diffusion-sm">
                     <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-amber-700 drop-shadow-sm" />
@@ -138,7 +164,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                     </div>
                   </div>
                 </div>
-                <p className="font-sans text-xs text-zinc-600 leading-relaxed">
+                <p className="font-sans text-xs text-zinc-700 leading-relaxed">
                   Mission-critical SCADA telemetry, autonomous fleet orchestration, and zero-trust
                   shift governance.
                 </p>
@@ -147,7 +173,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* System Telemetry & Security Posture Matrix */}
               <div
                 data-testid="login-security-telemetry-pill"
-                className="gold-steel-border gold-steel-border-slim space-y-2 rounded-xl border border-amber-500/40 bg-white/80 p-3.5 font-mono text-[11px] text-zinc-700 shadow-diffusion-sm"
+                className="liquid-glass-light gold-steel-border gold-steel-border-slim relative z-10 space-y-2 rounded-xl border border-amber-500/40 bg-white/85 p-3.5 font-mono text-[11px] text-zinc-700 shadow-diffusion-sm backdrop-blur-md"
               >
                 <div className="flex items-center justify-between border-zinc-200 border-b pb-1.5">
                   <span className="inline-flex items-center gap-2 text-zinc-800">
@@ -175,7 +201,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Integrated Eve Agentic Backend Dock */}
               <div
                 data-testid="eve-agentic-backend-banner"
-                className="gold-steel-border gold-steel-border-slim rounded-xl border border-amber-500/40 bg-white/85 p-3.5 shadow-diffusion-sm"
+                className="liquid-glass-light gold-steel-border gold-steel-border-slim relative z-10 rounded-xl border border-amber-500/40 bg-white/85 p-3.5 shadow-diffusion-sm backdrop-blur-md"
               >
                 <div className="inline-flex items-center gap-1.5 font-semibold text-[11px] text-amber-800">
                   <Cpu className="h-3.5 w-3.5 shrink-0" />
@@ -193,17 +219,36 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               </div>
             </aside>
 
-            {/* Right Column: High-Speed Operator Authentication */}
+            {/* Right Column: High-Speed Operator Authentication (Taskbar Effects & Branding) */}
             <section className={RIGHT_AUTH_PANEL_CLASS} aria-label="Operator authentication">
               <div>
-                {/* Header */}
-                <div className="mb-4 border-zinc-200 border-b pb-3.5">
-                  <div className="flex items-center">
-                    <span className="select-none font-mono font-semibold text-[11px] text-amber-700 uppercase tracking-widest">
-                      Welcome Back
+                {/* Header with Taskbar Unified Pill & Branding */}
+                <div className="mb-4 border-zinc-200/80 border-b pb-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div
+                      data-testid="login-taskbar-brand-pill"
+                      className="liquid-glass-light gold-steel-border gold-steel-border-slim inline-flex h-7 items-center gap-1.5 rounded-full border border-white/25 bg-[var(--material-ultra-thin)] px-2.5 shadow-diffusion-sm backdrop-blur-md"
+                    >
+                      <span
+                        className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--accent-green)]"
+                        aria-hidden="true"
+                      />
+                      <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
+                        |
+                      </span>
+                      <span className="select-none font-mono font-semibold text-[11px] text-amber-700 uppercase tracking-widest">
+                        Welcome Back
+                      </span>
+                      <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
+                        |
+                      </span>
+                      <Logo variant="gold" className="h-3 w-3 shrink-0" />
+                    </div>
+                    <span className="rounded-md border border-arch-accent-blue/25 bg-arch-accent-blue/10 px-2 py-0.5 font-mono font-semibold text-[9.5px] text-arch-accent-blue tabular-nums">
+                      Arch OS · v{APP_VERSION}
                     </span>
                   </div>
-                  <h2 className="mt-1 font-display font-semibold text-xl text-zinc-900 tracking-tight">
+                  <h2 className="mt-2 font-display font-semibold text-[var(--text-heading)] text-xl text-zinc-900 tracking-tight">
                     Sign in to your account
                   </h2>
                   <p className="mt-0.5 font-sans text-xs text-zinc-600">
@@ -223,28 +268,39 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 </Suspense>
               </div>
 
-              {/* Compact Footer inside Command Portal */}
+              {/* Compact Taskbar-Styled Footer Pill inside Command Portal */}
               <footer
                 data-testid="login-footer"
-                className="mt-5 flex flex-wrap items-center justify-between gap-2 border-zinc-200 border-t pt-3 text-zinc-700"
+                className="liquid-glass-light gold-steel-border gold-steel-border-slim mt-5 flex flex-wrap items-center justify-between gap-2 rounded-full border border-white/25 bg-[var(--material-ultra-thin)] px-3.5 py-1.5 text-zinc-700 shadow-diffusion-sm backdrop-blur-md"
               >
                 <div className="inline-flex items-center gap-1.5 font-mono font-semibold text-[10.5px] text-zinc-700 uppercase tracking-wider">
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green"
+                    aria-hidden="true"
+                  />
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-700" />
                   <span>Secure industrial access</span>
                 </div>
-                <div className="flex items-center gap-4 font-medium text-xs">
+                <div className="flex items-center gap-2 font-medium text-xs">
                   <a
                     className="inline-flex min-h-[28px] items-center px-1 text-zinc-700 transition-colors hover:text-amber-900 hover:underline"
                     href="/docs"
                   >
                     Security Policy
                   </a>
+                  <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
+                    |
+                  </span>
                   <a
                     className="inline-flex min-h-[28px] items-center px-1 text-zinc-700 transition-colors hover:text-amber-900 hover:underline"
                     href="/docs#support"
                   >
                     Support
                   </a>
+                  <span aria-hidden="true" className={TASKBAR_GOLD_SEPARATOR_CLASS}>
+                    |
+                  </span>
+                  <Logo variant="gold" className="h-3 w-3 shrink-0" />
                 </div>
               </footer>
             </section>

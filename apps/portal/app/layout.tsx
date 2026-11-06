@@ -149,7 +149,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'Arch Portal',
   },
   formatDetection: {
@@ -163,7 +163,8 @@ export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#f5f5f7',
+  themeColor: '#f3f4f6',
+  colorScheme: 'light',
   viewportFit: 'cover',
 };
 

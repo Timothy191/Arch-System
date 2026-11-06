@@ -79,6 +79,15 @@ describe('LoginPage Server Component', () => {
 
     const loginFooter = screen.getByTestId('login-footer');
     expect(loginFooter.className).toContain('text-zinc-700');
+    expect(loginFooter.className).toContain('liquid-glass-light');
+    expect(loginFooter.className).toContain('gold-steel-border');
+
+    const taskbarBrandPill = screen.getByTestId('login-taskbar-brand-pill');
+    expect(taskbarBrandPill).toBeInTheDocument();
+    expect(taskbarBrandPill.className).toContain('liquid-glass-light');
+
+    const asideMiningVideo = screen.getByTestId('login-aside-mining-video');
+    expect(asideMiningVideo).toBeInTheDocument();
   });
 
   it('renders the heading with the theme token class and integrated telemetry/eve panels', async () => {

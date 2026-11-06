@@ -26,13 +26,16 @@ const MAX_PASSWORD_LENGTH = 128;
 const LOCK_ICON_STROKE_WIDTH = 1.5;
 
 const LOGIN_INPUT_WRAPPER_CLASS =
-  'gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-lg border border-zinc-300 bg-white/90 shadow-diffusion-sm transition-all duration-200 focus-within:border-amber-500/70 focus-within:ring-2 focus-within:ring-amber-500/15';
+  'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 hover:bg-white/95 focus-within:border-amber-500/70 focus-within:bg-white/95 focus-within:ring-2 focus-within:ring-amber-500/15';
 
 const LOGIN_INPUT_CLASS =
-  'w-full rounded-lg bg-transparent py-2.5 pr-9 pl-10 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
+  'w-full rounded-xl bg-transparent py-2.5 pr-9 pl-10 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
 
 const SIGN_IN_BUTTON_CLASS =
   'group gold-steel-border gold-steel-border-slim flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-xs text-zinc-950 uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-amber-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60';
+
+const ENTERPRISE_ADDONS_BAR_CLASS =
+  'liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col gap-2 rounded-full border border-white/30 bg-[var(--material-ultra-thin)] px-3 py-1.5 shadow-diffusion-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between';
 
 export function LoginForm() {
   const router = useRouter();
@@ -238,13 +241,10 @@ export function LoginForm() {
       </button>
 
       {/* Secondary Action (Visitor QR Code) vs. Passive Telemetry Badge (Audit-Logged RBAC) */}
-      <div
-        data-testid="enterprise-auth-addons"
-        className="flex flex-col gap-2.5 border-zinc-200 border-t pt-3.5 sm:flex-row sm:items-center sm:justify-between"
-      >
+      <div data-testid="enterprise-auth-addons" className={ENTERPRISE_ADDONS_BAR_CLASS}>
         <Link
           href="/access-control/qr-codes"
-          className="group inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 font-medium text-xs text-zinc-800 transition-all hover:border-amber-500/40 hover:bg-amber-50 hover:text-amber-900"
+          className="group inline-flex items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3 py-1 font-medium text-xs text-zinc-800 transition-all hover:border-amber-500/40 hover:bg-amber-50 hover:text-amber-900"
         >
           <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-700" />
           <span>Visitor QR Code</span>
@@ -254,6 +254,12 @@ export function LoginForm() {
           aria-label="Security posture: Audit-Logged RBAC"
           className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono font-semibold text-[11px] text-zinc-800"
         >
+          <span
+            aria-hidden="true"
+            className="hidden select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] sm:inline"
+          >
+            |
+          </span>
           <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
           <span>Audit-Logged RBAC</span>
         </div>

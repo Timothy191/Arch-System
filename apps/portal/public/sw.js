@@ -21,6 +21,9 @@ const PRECACHE_ASSETS = [
 ];
 
 function isImmutableMediaAsset(urlStr) {
+  if (/\.(?:mp4|webm|m4v|mov)(?:$|\?)/i.test(urlStr)) {
+    return false;
+  }
   return (
     urlStr.includes('/images/departments/') ||
     urlStr.includes('/background/') ||
