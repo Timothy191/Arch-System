@@ -120,11 +120,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   <div className="gold-steel-border gold-steel-border-slim flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-zinc-950/90 text-amber-400 shadow-diffusion-sm">
                     <Logo className="relative z-30 h-14 w-14 shrink-0 scale-110 text-amber-400 drop-shadow-sm" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <h1 className="font-bold font-display text-2xl text-[var(--text-heading)] text-zinc-100 uppercase tracking-[0.18em]">
                       Arch Systems
                     </h1>
-                    <div className="mt-1 inline-flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono font-semibold text-[10.5px] text-amber-300 uppercase tracking-widest">
+                    <div
+                      data-testid="arch-systems-gold-separator"
+                      aria-hidden="true"
+                      className="my-2 flex w-56 items-center justify-center gap-2"
+                    >
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400 to-amber-300 shadow-glow-amber" />
+                      <span className="h-2.5 w-2.5 rotate-45 rounded-[2px] border border-amber-300 bg-amber-400/40 shadow-glow-amber" />
+                      <span className="h-[2px] flex-1 rounded-full bg-gradient-to-l from-amber-500/20 via-amber-400 to-amber-300 shadow-glow-amber" />
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono font-semibold text-[10.5px] text-amber-300 uppercase tracking-widest">
                       <span>Arch OS v{APP_VERSION}</span>
                     </div>
                   </div>

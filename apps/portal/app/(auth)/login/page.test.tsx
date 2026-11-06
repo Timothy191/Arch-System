@@ -88,6 +88,7 @@ describe('LoginPage Server Component', () => {
     const heading = screen.getByRole('heading', { name: 'Arch Systems' });
     expect(heading).toHaveClass('text-[var(--text-heading)]');
     expect(heading).toHaveClass('font-display');
+    expect(screen.getByTestId('arch-systems-gold-separator')).toBeInTheDocument();
     expect(screen.getByTestId('login-security-telemetry-pill')).toBeInTheDocument();
     expect(screen.getByTestId('eve-agentic-backend-banner')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'eve' })).toBeInTheDocument();

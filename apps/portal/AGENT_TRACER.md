@@ -1,3 +1,11 @@
+## 2026-11-06T13:38:00+02:00: Restore Luminous Golden Separator (`arch-systems-gold-separator`) on Login Brand Header
+
+- **Phase 1 (Comprehension)**: Replace the separator between `Arch Systems` and `Arch OS v1.6.2` on `/login` with a luminous metallic Golden Separator (`data-testid="arch-systems-gold-separator"`).
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/(auth)/login/page.tsx` and `apps/portal/app/(auth)/login/page.test.tsx`.
+- **Phase 3 (Design)**: Added `data-testid="arch-systems-gold-separator"` between `Arch Systems` (`h1`) and `Arch OS v{APP_VERSION}` using mirrored metallic amber/gold gradients (`bg-gradient-to-r` / `bg-gradient-to-l from-amber-500/20 via-amber-400 to-amber-300 shadow-glow-amber`) and a central gold diamond emblem (`border-amber-300 bg-amber-400/40 shadow-glow-amber`).
+- **Phase 4 (Criticism)**: Updated `apps/portal/app/(auth)/login/page.test.tsx` to assert `arch-systems-gold-separator` presence.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/(auth)/login/page.tsx`, `apps/portal/app/(auth)/login/page.test.tsx`, and `apps/portal/AGENT_TRACER.md`.
+
 ## 2026-11-06T12:48:00+02:00: Consolidated Tier-1 Industrial Command Portal Login Redesign & API/CSP Security Hardening
 
 - **Phase 1 (Comprehension)**: Complete the 7 Release-Verification & Security Regression Fixes (fail-closed auth on `GET /api/scada/tags`, `GET /api/workflows/jobs/[jobId]`, and `POST /api/workflows/dispatch`; production CSP hardening in `apps/portal/proxy.ts`) and consolidate Prompts 1, 2, & 3 into a unified 2-Column Dark Industrial Command Portal on `/login`.
