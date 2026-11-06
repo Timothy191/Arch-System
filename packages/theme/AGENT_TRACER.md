@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/theme
 
+## 2026-11-06T11:48:00+02:00 - Integrate Global UI Enhancements (`taste-skill` `7b67913`)
+
+- **Phase 1 (Comprehension)**: Integrate the `taste-skill` (`7b67913`) global UI enhancement tokens and utility variants into `@repo/theme`.
+- **Phase 2 (Evidence)**: Inspected `/tmp/taste-skill` commit `7b67913` (`skills/taste-skill/assets/system.css`) and `packages/theme/src/css/cards.css`.
+- **Phase 3 (Design)**: Added fluid typography variables (`--t-h4-fluid`, `--t-large-fluid`, `--t-xlarge-fluid`), icon sizing tokens (`--icon-xs..3xl` & `.icon--*`), expanded motion timing/easing curves (`--dur-fast..page`, `--ease-in..bounce`, `--stagger`), and `.state-error`, `.state-empty`, `.state-loading`, `.skeleton--*`, and `.card--{split,stacked,horizontal}` primitives to `packages/theme/src/css/cards.css`.
+- **Phase 4 (Criticism)**: Used OKLCH semantic variables (`var(--status-critical, var(--color-danger))`, `var(--color-muted)`) to maintain light-mode token compliance.
+- **Phase 5 (Contract)**: Modified `packages/theme/src/css/cards.css`; verified with `pnpm agent:verify`.
+
 ## 2026-11-06T09:20:00+02:00 - Restrict Gold-Steel-Border Shimmer Animation to Hover & Focus-Visible
 
 - **Phase 1 (Comprehension)**: Eliminate 137 continuous non-composited `gold-shimmer` (`background-position`) animations running at rest across `/hub` and department pages.

@@ -324,3 +324,103 @@ input.gold-steel-border:focus {
 .disclosure-native > summary::-webkit-details-marker {
   display: none;
 }
+
+/* Global UI Enhancements (taste-skill 7b67913: fluid scale, icon tokens, motion curves, state & skeleton primitives) */
+:root {
+  --t-large: 20px;
+  --t-xlarge: 22px;
+  --t-h4: 20px;
+  --t-h4-fluid: clamp(18px, 0.86vw + 15.64px, 24px);
+  --t-large-fluid: clamp(18px, 0.86vw + 15.64px, 24px);
+  --t-xlarge-fluid: clamp(20px, 1.29vw + 15.29px, 28px);
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-2xl: 32px;
+  --icon-3xl: 48px;
+  --dur-fast: 120ms;
+  --dur-slow: 300ms;
+  --dur-page: 400ms;
+  --ease-in: cubic-bezier(0.4, 0, 0.7, 0.2);
+  --ease-out: cubic-bezier(0, 0.5, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  --stagger: 60ms;
+}
+
+.icon-xs {
+  width: var(--icon-xs);
+  height: var(--icon-xs);
+}
+.icon-sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.icon-md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+.icon-lg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+.icon-xl {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+}
+.icon-2xl {
+  width: var(--icon-2xl);
+  height: var(--icon-2xl);
+}
+.icon-3xl {
+  width: var(--icon-3xl);
+  height: var(--icon-3xl);
+}
+
+.state-error {
+  border-color: var(--status-critical, var(--color-danger));
+  background: color-mix(in oklab, var(--status-critical, var(--color-danger)) 8%, transparent);
+}
+.state-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-muted);
+}
+.state-loading {
+  position: relative;
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+}
+.skeleton-text {
+  height: 1em;
+  width: 100%;
+}
+.skeleton-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+.skeleton-card {
+  height: 200px;
+}
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+}
+.card-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.card-stacked {
+  display: flex;
+  flex-direction: column;
+}
+.card-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+}
