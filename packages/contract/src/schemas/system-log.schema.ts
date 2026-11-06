@@ -93,3 +93,39 @@ export const updateSystemLogResolutionSchema = z.object({
   resolved: z.boolean(),
 });
 export type UpdateSystemLogResolution = z.infer<typeof updateSystemLogResolutionSchema>;
+
+/**
+ * Payload accepted by POST /api/log (browser logger transport).
+ * Bounds message length and metadata to prevent unbounded log generation (Rule 9).
+ */
+export const clientLogPayloadSchema = z.object({
+  level: z.string().max(20).optional().default('debug'),
+  msg: z.string().trim().min(1).max(2000),
+  timestamp: z.string().max(64).optional(),
+  data: z.unknown().optional(),
+});
+export type ClientLogPayload = z.infer<typeof clientLogPayloadSchema>;
+
+/**
+ * Payload accepted by POST /api/feedback.
+ */
+export const submitFeedbackTypeSchema = z.enum([
+  'bug',
+  'feature',
+  'general',
+  'support',
+  'improvement',
+  'compliment',
+  'other',
+]);
+export type SubmitFeedbackType = z.infer<typeof submitFeedbackTypeSchema>;
+
+export const submitFeedbackSchema = z.object({
+  type: submitFeedbackTypeSchema.default('general'),
+  message: z.string().trim().min(1).max(2000),
+  userEmail: z.string().email().max(320).optional(),
+  pageUrl: z.string().max(2000).optional(),
+  rating: z.number().int().min(1).max(5).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+export type SubmitFeedbackInput = z.infer<typeof submitFeedbackSchema>;

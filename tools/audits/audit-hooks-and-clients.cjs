@@ -114,7 +114,13 @@ console.log(chalk.bold('\n2. Auditing custom hooks SSR hydration safety in libs/
 if (fs.existsSync(HOOKS_DIR)) {
   const hookFiles = fs
     .readdirSync(HOOKS_DIR)
-    .filter((f) => f.startsWith('use') && f.endsWith('.ts'));
+    .filter(
+      (f) =>
+        f.startsWith('use') &&
+        f.endsWith('.ts') &&
+        !f.endsWith('.test.ts') &&
+        !f.endsWith('.spec.ts')
+    );
   let hooksChecked = 0;
 
   for (const hookFile of hookFiles) {

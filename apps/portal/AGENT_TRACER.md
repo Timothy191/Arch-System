@@ -1,3 +1,15 @@
+## 2026-11-06T23:11:00+02:00: Permanent Engineering Rules Hardening (API Validation, Scrape Auth, React 19 Tainting & Zero-Warning Audits)
+
+- **Phase 1 (Comprehension)**: Audit and harden `apps/portal` against `/permanent-engineering-rules` (Rules 1, 4, 8, 9, 10, 12, 23).
+- **Phase 2 (Evidence)**: Inspected `apps/portal/app/api/feedback/route.ts`, `apps/portal/app/api/log/route.ts`, `apps/portal/app/api/metrics/route.ts`, `apps/portal/lib/integrations/crypto.ts`, and `apps/portal/lib/logging/system-logs.ts`.
+- **Phase 3 (Design)**:
+  - Replaced placeholder `TKT-1234` feedback stub in `POST /api/feedback` with `@repo/contract` `submitFeedbackSchema` validation, deterministic `FB-*` reference IDs, and `recordSystemLog` persistence.
+  - Added `clientLogPayloadSchema` validation and reserved Pino key sanitization (`level`, `msg`, `time`, `v`, `pid`, `hostname`, `__proto__`) to `POST /api/log` to prevent unbounded or key-colliding client logs (Rule 9).
+  - Enforced optional `METRICS_SCRAPE_TOKEN` Bearer/query authentication on `GET /api/metrics` for parity with `GET /api/metrics/prometheus`.
+  - Wired React 19 `experimental_taintUniqueValue` and `experimental_taintObjectReference` into `apps/portal/lib/integrations/crypto.ts` and `apps/portal/lib/logging/system-logs.ts` so derived encryption keys, decrypted secrets, and service-role Supabase clients cannot cross the RSC boundary into Client Components (Rule 23).
+- **Phase 4 (Criticism)**: Extended `app/api/feedback/route.test.ts`, `app/api/log/route.test.ts`, and `app/api/metrics/route.test.ts` to verify 400 validation failures, reserved Pino key stripping, and 401 scrape-token enforcement.
+- **Phase 5 (Contract)**: Modified `apps/portal/app/api/feedback/route.ts`, `apps/portal/app/api/log/route.ts`, `apps/portal/app/api/metrics/route.ts`, `apps/portal/lib/integrations/crypto.ts`, `apps/portal/lib/logging/system-logs.ts`, and their unit test suites.
+
 ## 2026-11-06T13:38:00+02:00: Restore Luminous Golden Separator (`arch-systems-gold-separator`) on Login Brand Header
 
 - **Phase 1 (Comprehension)**: Replace the separator between `Arch Systems` and `Arch OS v1.6.2` on `/login` with a luminous metallic Golden Separator (`data-testid="arch-systems-gold-separator"`).

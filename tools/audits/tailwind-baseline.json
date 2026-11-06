@@ -1,16 +1,14 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-02T11:04:38.733Z",
+  "generatedAt": "2026-11-06T21:10:21.641Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
     "duplicateMinUses": 3
   },
   "overBudgetByFile": {
-    "apps/portal/app/(auth)/login/page.tsx": 1,
     "apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx": 1,
     "apps/portal/features/hub/components/CoreOperationalModules.tsx": 3,
-    "libs/features/auth/ui/src/LoginForm.tsx": 1,
     "packages/ui/src/components/ui/dialog.tsx": 1,
     "packages/ui/src/components/ui/dropdown-menu.tsx": 1,
     "packages/ui/src/components/ui/select.tsx": 1
@@ -33,10 +31,6 @@
       "uses": 4
     },
     "bg-[var(--bg-primary)] border border-[var(--border-default)] disabled:cursor-not-allowed disabled:opacity-50 focus:border-[var(--accent-blue)] focus:outline-none px-2 py-1.5 rounded-lg text-[var(--text-heading)] text-sm w-full": {
-      "tokens": 13,
-      "uses": 3
-    },
-    "bg-[var(--bg-primary)] border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] font-medium px-2.5 py-1.5 rounded-lg text-[var(--text-heading)] text-xs w-full": {
       "tokens": 13,
       "uses": 3
     },

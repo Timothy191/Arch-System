@@ -108,4 +108,26 @@ describe('POST /api/log', () => {
       'Failed to parse client log payload'
     );
   });
+
+  it('returns 400 when msg is missing or exceeds bounded length', async () => {
+    const res = await POST(buildRequest({ level: 'error', msg: '' }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ success: false });
+  });
+
+  it('strips reserved Pino keys from client data object', async () => {
+    const req = buildRequest({
+      level: 'info',
+      msg: 'safe log',
+      timestamp: '2026-09-07T00:00:00.000Z',
+      data: { safeKey: 'ok', level: 99, pid: 12345 },
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(serverLogger.info).toHaveBeenCalledWith(
+      { clientTimestamp: '2026-09-07T00:00:00.000Z', safeKey: 'ok' },
+      '[CLIENT] safe log'
+    );
+  });
 });

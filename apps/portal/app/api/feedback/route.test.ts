@@ -40,12 +40,30 @@ describe('POST /api/feedback', () => {
 
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data).toEqual({ success: true, ticketId: 'TKT-1234' });
+    expect(data).toEqual({
+      success: true,
+      ticketId: expect.stringMatching(/^FB-[A-F0-9]{8}$/),
+    });
     expect(serverLogger.info).toHaveBeenCalledWith(
       { userEmail: 'user@example.com', metadata: { browser: 'chrome' } },
       '[FEEDBACK] Type: bug - Something broke'
     );
     expect(serverLogger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when feedback payload fails contract validation', async () => {
+    const response = await POST(
+      buildRequest({
+        type: 'bug',
+        message: '   ',
+      })
+    );
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.success).toBe(false);
+    expect(data.code).toBe('VALIDATION_ERROR');
+    expect(serverLogger.info).not.toHaveBeenCalled();
   });
 
   it('returns 500 when request body is invalid JSON', async () => {

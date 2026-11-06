@@ -1,5 +1,13 @@
 # Contract Package Agent Tracer
 
+## 2026-11-06T23:11:00+02:00: 100% Database Contract Drift Parity (`monthly_machine_snapshots`, `system_logs`) & Client Log / Feedback Schemas
+
+- **Purpose**: Achieve 100.0% Drift Health Index (`104/104` database tables synchronized) and provide canonical Zod validation contracts (`clientLogPayloadSchema`, `submitFeedbackSchema`, `submitFeedbackTypeSchema`) for `POST /api/log` and `POST /api/feedback`.
+- **Changes**:
+  - `packages/contract/src/schemas/system-log.schema.ts`: Added `clientLogPayloadSchema`, `submitFeedbackTypeSchema`, and `submitFeedbackSchema`.
+  - `tools/audits/audit-contract-drift.cjs`: Mapped `monthly_machine_snapshots` and `system_logs` to their canonical schemas in `DOMAIN_MAP`.
+- **Verification**: `pnpm audit:drift` (`DHI: 100%`) and `pnpm --filter portal test` ✅.
+
 ## 2026-11-05T11:24:00+02:00: Synchronize `openapi.generated.json` with `/api/logs` Endpoints
 
 - **Purpose**: Regenerate `openapi.generated.json` with trailing newline and `/api/logs` documentation so `portal#build` is idempotent and does not dirty `packages/contract/openapi.generated.json`.

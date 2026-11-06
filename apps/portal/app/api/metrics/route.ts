@@ -19,7 +19,26 @@ function labelValue(value: string | number): string {
   return `"${escapeLabelValue(String(value))}"`;
 }
 
-export async function GET() {
+const HTTP_UNAUTHORIZED = 401;
+const BEARER_PREFIX_LEN = 7;
+
+export async function GET(req?: Request) {
+  const scrapeToken = process.env.METRICS_SCRAPE_TOKEN;
+  if (scrapeToken) {
+    const authHeader = req?.headers?.get('Authorization') ?? null;
+    const queryToken = req?.url ? new URL(req.url).searchParams.get('token') : null;
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(BEARER_PREFIX_LEN)
+      : queryToken;
+
+    if (token !== scrapeToken) {
+      return new NextResponse('Unauthorized', {
+        status: HTTP_UNAUTHORIZED,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }
+  }
+
   const [cacheStats, observability] = await Promise.all([
     getCacheStats().catch(() => ({
       hits: 0,

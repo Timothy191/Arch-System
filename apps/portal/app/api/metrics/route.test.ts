@@ -63,4 +63,26 @@ describe('GET /api/metrics', () => {
       'portal_db_query_duration_ms_total{table="machines",operation="SELECT"} 125.2'
     );
   });
+
+  it('enforces METRICS_SCRAPE_TOKEN when configured', async () => {
+    const prev = process.env.METRICS_SCRAPE_TOKEN;
+    process.env.METRICS_SCRAPE_TOKEN = 'secret-scrape-token-123';
+    try {
+      const unauthorizedRes = await GET(new Request('http://localhost:3000/api/metrics'));
+      expect(unauthorizedRes.status).toBe(401);
+
+      const authorizedRes = await GET(
+        new Request('http://localhost:3000/api/metrics', {
+          headers: { Authorization: 'Bearer secret-scrape-token-123' },
+        })
+      );
+      expect(authorizedRes.status).toBe(200);
+    } finally {
+      if (prev === undefined) {
+        delete process.env.METRICS_SCRAPE_TOKEN;
+      } else {
+        process.env.METRICS_SCRAPE_TOKEN = prev;
+      }
+    }
+  });
 });

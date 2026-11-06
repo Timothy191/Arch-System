@@ -135,7 +135,12 @@ const DOMAIN_MAP = {
   integration_credentials: ['integrationCredentialsSchema', 'installIntegrationSchema'],
   integration_audit_logs: ['integrationAuditLogsSchema', 'integrationToolCallSchema'],
   machine_types: ['machineTypesSchema', 'machineTypeSchema'],
+  monthly_machine_snapshots: [
+    'monthlyMachineSnapshotSchema',
+    'saveMonthlyMachineSnapshotInputSchema',
+  ],
   production_monthly_targets: ['productionMonthlyTargetsSchema'],
+  system_logs: ['systemLogEntrySchema', 'createSystemLogEntrySchema'],
 };
 
 const coveredTables = [];

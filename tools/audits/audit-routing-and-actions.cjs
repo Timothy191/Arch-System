@@ -91,7 +91,7 @@ const allSourceFiles = glob.sync('**/*.{ts,tsx}', {
 
 for (const file of allSourceFiles) {
   const content = fs.readFileSync(file, 'utf8');
-  const hasUseServer = /['"]use server['"]/.test(content);
+  const hasUseServer = /^\s*['"]use server['"]\s*;?\s*$/m.test(content);
 
   if (hasUseServer) {
     const relPath = path.relative(ROOT, file);

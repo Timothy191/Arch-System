@@ -1,32 +1,58 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
+import * as React from 'react';
 import { APIError } from '@/lib/errors/error-classes';
-
-/**
- * Application-side secret encryption for integration credentials.
- *
- * AES-256-GCM with a key derived from INTEGRATION_ENCRYPTION_KEY via scrypt.
- * Ciphertext layout (base64): 12-byte iv | 16-byte tag | payload. A fresh IV is
- * drawn per encryption, which is the required GCM discipline for a single key.
- *
- * The database only ever stores this ciphertext, so a database dump alone
- * cannot recover connector API keys. Rotation = re-encrypt on credential update.
- */
 
 const IV_LENGTH = 12;
 const AUTH_TAG_LENGTH = 16;
+const MIN_SECRET_LENGTH = 16;
+const DERIVED_KEY_BYTES = 32;
+
+type ReactWithTaint = {
+  experimental_taintObjectReference?: (message: string, object: object) => void;
+  experimental_taintUniqueValue?: (message: string, lifetime: object, value: string) => void;
+};
+
+const taintLifetimeAnchor = Object.freeze({ scope: 'integration_crypto' });
+
+function taintSecretBuffer(buffer: Buffer, message: string): void {
+  const reactTaint = React as unknown as ReactWithTaint;
+  if (typeof reactTaint.experimental_taintObjectReference === 'function') {
+    try {
+      reactTaint.experimental_taintObjectReference(message, buffer);
+    } catch {
+      // Ignore if already tainted or outside RSC context
+    }
+  }
+}
+
+function taintSecretString(secret: string, message: string): void {
+  const reactTaint = React as unknown as ReactWithTaint;
+  if (typeof reactTaint.experimental_taintUniqueValue === 'function') {
+    try {
+      reactTaint.experimental_taintUniqueValue(message, taintLifetimeAnchor, secret);
+    } catch {
+      // Ignore if value is too short or outside RSC context
+    }
+  }
+}
 
 let cachedKey: Buffer | null = null;
 
 function loadKey(): Buffer {
   if (cachedKey) return cachedKey;
   const secret = process.env.INTEGRATION_ENCRYPTION_KEY;
-  if (!secret || secret.length < 16) {
+  if (!secret || secret.length < MIN_SECRET_LENGTH) {
     throw new APIError(
       'INTEGRATION_ENCRYPTION_KEY is missing or too short (>= 16 chars required)',
       { statusCode: 500, context: { component: 'integration_crypto' } }
     );
   }
-  cachedKey = scryptSync(secret, 'arch-integrations-v1', 32);
+  taintSecretString(secret, 'Do not pass INTEGRATION_ENCRYPTION_KEY to a Client Component.');
+  cachedKey = scryptSync(secret, 'arch-integrations-v1', DERIVED_KEY_BYTES);
+  taintSecretBuffer(
+    cachedKey,
+    'Do not pass derived integration encryption key buffer to a Client Component.'
+  );
   return cachedKey;
 }
 
@@ -51,5 +77,7 @@ export function decryptSecret(ciphertext: string): string {
   const payload = raw.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
   const decipher = createDecipheriv('aes-256-gcm', loadKey(), iv);
   decipher.setAuthTag(tag);
-  return Buffer.concat([decipher.update(payload), decipher.final()]).toString('utf8');
+  const decrypted = Buffer.concat([decipher.update(payload), decipher.final()]).toString('utf8');
+  taintSecretString(decrypted, 'Do not pass decrypted integration secret to a Client Component.');
+  return decrypted;
 }

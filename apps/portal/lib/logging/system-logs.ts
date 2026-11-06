@@ -12,6 +12,26 @@
 import type { CreateSystemLogEntry, SystemLogSource } from '@repo/contract';
 import { serverLogger } from '@repo/logger';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
+import * as React from 'react';
+
+type ReactWithTaint = {
+  experimental_taintObjectReference?: (message: string, object: object) => void;
+};
+
+function taintServiceClient<T extends object>(client: T): T {
+  const reactTaint = React as unknown as ReactWithTaint;
+  if (typeof reactTaint.experimental_taintObjectReference === 'function') {
+    try {
+      reactTaint.experimental_taintObjectReference(
+        'Do not pass a Supabase service-role client to a Client Component.',
+        client
+      );
+    } catch {
+      // Ignore outside RSC runtime
+    }
+  }
+  return client;
+}
 
 export interface RecordSystemLogInput extends CreateSystemLogEntry {
   employeeId?: string | null;
@@ -31,7 +51,7 @@ export async function recordSystemLog(input: RecordSystemLogInput): Promise<void
   if (!hasBackend) return;
 
   try {
-    const serviceRole = createServiceRoleClient();
+    const serviceRole = taintServiceClient(createServiceRoleClient());
     const { error } = await serviceRole.from('system_logs').insert({
       level: input.level,
       source: input.source,
