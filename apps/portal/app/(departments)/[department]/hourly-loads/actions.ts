@@ -54,6 +54,12 @@ export async function syncExcavatorActivityFromHourlyLoads(
     skipCacheInvalidation?: boolean;
   }
 ) {
+  if (!serviceClient || typeof serviceClient.from !== 'function') {
+    const principal = await getAuthenticatedEmployee();
+    if (!principal?.employee) {
+      throw new Error('Unauthorized');
+    }
+  }
   const { departmentId, excavatorId, loadDate, shiftType, skipCacheInvalidation } = params;
   if (!excavatorId) return;
 
@@ -205,14 +211,14 @@ function assertDepartmentAccess(
 }
 
 export async function updateMachineSite(machineId: string, siteId: string | null) {
-  // AGENT-TRACE: Validate input parameters with @repo/contract schema
-  const validated = updateMachineSiteSchema.parse({ machineId, siteId });
-
   // Always validate the user at the top
   const principal = await getAuthenticatedEmployee();
   if (!principal?.employee) {
     throw new Error('Unauthorized');
   }
+
+  // AGENT-TRACE: Validate input parameters with @repo/contract schema
+  const validated = updateMachineSiteSchema.parse({ machineId, siteId });
 
   const serviceClient = createServiceRoleClient();
   const { data: machine, error: machineError } = await serviceClient
@@ -266,12 +272,12 @@ export async function updateExcavatorAssignmentConfig(
       shift_type: rawInput.shiftType,
     },
     async () => {
-      const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
-
       const principal = await getAuthenticatedEmployee();
       if (!principal?.employee) {
         throw new Error('Unauthorized');
       }
+
+      const validated = updateExcavatorAssignmentConfigSchema.parse(rawInput);
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',
@@ -405,12 +411,12 @@ export async function quickAddMineBlock(rawInput: QuickAddMineBlockInput) {
       site_id: rawInput.siteId ?? 'unassigned',
     },
     async () => {
-      const validated = quickAddMineBlockSchema.parse(rawInput);
-
       const principal = await getAuthenticatedEmployee();
       if (!principal?.employee) {
         throw new Error('Unauthorized');
       }
+
+      const validated = quickAddMineBlockSchema.parse(rawInput);
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',
@@ -501,6 +507,11 @@ export async function updateHourlyLoadExcavator(
       shift_type: shiftType,
     },
     async () => {
+      const principal = await getAuthenticatedEmployee();
+      if (!principal?.employee) {
+        throw new Error('Unauthorized');
+      }
+
       const validated = updateHourlyLoadExcavatorSchema.parse({
         departmentId,
         machineId,
@@ -508,11 +519,6 @@ export async function updateHourlyLoadExcavator(
         shiftType,
         excavatorId,
       });
-
-      const principal = await getAuthenticatedEmployee();
-      if (!principal?.employee) {
-        throw new Error('Unauthorized');
-      }
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',
@@ -582,12 +588,12 @@ export async function splitMachineHourlyLoad(input: SplitHourlyLoadInput) {
       shift_type: input.shiftType ?? '',
     },
     async () => {
-      const validated = splitHourlyLoadSchema.parse(input);
-
       const principal = await getAuthenticatedEmployee();
       if (!principal?.employee) {
         throw new Error('Unauthorized');
       }
+
+      const validated = splitHourlyLoadSchema.parse(input);
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',
@@ -643,6 +649,11 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
       shift_type: input.shiftType ?? '',
     },
     async (span) => {
+      const principal = await getAuthenticatedEmployee();
+      if (!principal?.employee) {
+        throw new Error('Unauthorized');
+      }
+
       const validated = saveHourlyLoadSchema.parse(input);
       span?.setAttributes?.({
         department_id: validated.departmentId,
@@ -650,11 +661,6 @@ export async function saveHourlyLoad(input: SaveHourlyLoadInput) {
         load_date: validated.loadDate,
         shift_type: validated.shiftType,
       });
-
-      const principal = await getAuthenticatedEmployee();
-      if (!principal?.employee) {
-        throw new Error('Unauthorized');
-      }
       assertDepartmentAccess(principal.employee, validated.departmentId, [
         'admin',
         'operator',

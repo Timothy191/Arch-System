@@ -43,10 +43,6 @@ interface ShiftReportRecord {
 export async function submitShiftReport(
   input: ControlRoomShiftReportInput
 ): Promise<{ success: true; reportId: string }> {
-  // AGENT-TRACE: Validate the full report payload at the boundary — the schema
-  // mirrors the table columns so a valid payload maps 1:1 to a row.
-  const validated = controlRoomShiftReportSchema.parse(input);
-
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -68,6 +64,9 @@ export async function submitShiftReport(
       context: { operation: 'submitShiftReport' },
     });
   }
+
+  // AGENT-TRACE: Validate the full report payload at the boundary after authenticating caller
+  const validated = controlRoomShiftReportSchema.parse(input);
 
   const serviceClient = createServiceRoleClient();
 
@@ -142,8 +141,6 @@ export async function getShiftReport(
   date: string,
   shift: 'day' | 'night'
 ): Promise<ShiftReportRecord | null> {
-  const validated = shiftReportLookupSchema.parse({ departmentId, date, shift });
-
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -154,6 +151,8 @@ export async function getShiftReport(
       context: { operation: 'getShiftReport' },
     });
   }
+
+  const validated = shiftReportLookupSchema.parse({ departmentId, date, shift });
 
   const { data: report, error } = await supabase
     .from('control_room_shift_reports')

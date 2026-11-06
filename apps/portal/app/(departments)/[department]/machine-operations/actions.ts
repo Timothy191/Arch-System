@@ -40,14 +40,6 @@ export async function saveDelayEntriesBatch(payload: {
   machineOperationId: string;
   entries: unknown[];
 }) {
-  const parsed = saveDelayEntriesBatchSchema.safeParse(payload);
-  if (!parsed.success) {
-    throw new ValidationError('Invalid delay entry payload', {
-      context: { issues: parsed.error.issues },
-    });
-  }
-  const { machineOperationId, entries } = parsed.data;
-
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -58,6 +50,14 @@ export async function saveDelayEntriesBatch(payload: {
       context: { action: 'saveDelayEntriesBatch' },
     });
   }
+
+  const parsed = saveDelayEntriesBatchSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new ValidationError('Invalid delay entry payload', {
+      context: { issues: parsed.error.issues },
+    });
+  }
+  const { machineOperationId, entries } = parsed.data;
 
   // Enforce cross-department 12-hour shift cap (Engineering breakdown delay + Control Room delay <= 12.0h)
   const { data: opRow } = await supabase

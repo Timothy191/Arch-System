@@ -17,6 +17,13 @@ export async function upsertDrillOperationAction(
   rawInput: DrillOperationInput
 ): Promise<ActionResult> {
   try {
+    const supabase = await createServerSupabaseClient();
+    const principal = await getAuthenticatedEmployee(supabase);
+
+    if (!principal?.employee) {
+      return { success: false, error: 'Unauthorized access' };
+    }
+
     const parseResult = drillOperationSchema.safeParse(rawInput);
     if (!parseResult.success) {
       const errorMsg = parseResult.error.issues
@@ -26,13 +33,6 @@ export async function upsertDrillOperationAction(
     }
 
     const payload = parseResult.data;
-    const supabase = await createServerSupabaseClient();
-    const principal = await getAuthenticatedEmployee(supabase);
-
-    if (!principal?.employee) {
-      return { success: false, error: 'Unauthorized access' };
-    }
-
     const { user, employee } = principal;
 
     // Verify employee access if not global admin

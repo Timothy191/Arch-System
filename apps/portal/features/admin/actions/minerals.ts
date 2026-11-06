@@ -73,14 +73,14 @@ export async function getMineralRegistry(): Promise<AdminMineralRegistry> {
 }
 
 export async function adminSaveMineralRegistry(rawInput: { waste: string[]; coal: string[] }) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const parseResult = adminMineralRegistrySchema.safeParse(rawInput);
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid mineral data' };
   }
   const config = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 

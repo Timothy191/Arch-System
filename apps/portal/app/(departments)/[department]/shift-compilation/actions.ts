@@ -130,6 +130,14 @@ export async function lockAndSignUnifiedShift(
     },
     async (span) => {
       try {
+        const supabase = await createServerSupabaseClient();
+        const principal = await getAuthenticatedEmployee(supabase);
+        if (!principal) {
+          throw new AuthError('Unauthorized', {
+            context: { operation: 'lockAndSignUnifiedShift' },
+          });
+        }
+
         const validated = lockAndSignShiftSchema.parse(payload);
         const spanAttrs = {
           department_id: validated.departmentId,
@@ -138,14 +146,6 @@ export async function lockAndSignUnifiedShift(
         };
         span?.setAttributes?.(spanAttrs);
         setAttributes(spanAttrs);
-
-        const supabase = await createServerSupabaseClient();
-        const principal = await getAuthenticatedEmployee(supabase);
-        if (!principal) {
-          throw new AuthError('Unauthorized', {
-            context: { operation: 'lockAndSignUnifiedShift' },
-          });
-        }
 
         // 1. Fetch current user employee record (PIN + name fields beyond the
         // helper's common shape — kept here so the auth cache stays small).

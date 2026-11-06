@@ -29,11 +29,6 @@ export async function externalContentIndexing(input: {
   path?: string;
   dirPath?: string;
 }): Promise<{ success: boolean; indexedCount?: number; errors?: string[] }> {
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, errors: parsed.error.issues.map((i) => i.message) };
-  }
-
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -51,6 +46,11 @@ export async function externalContentIndexing(input: {
 
   if (profile?.role !== 'admin') {
     return { success: false, errors: ['Forbidden: admin role required'] };
+  }
+
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, errors: parsed.error.issues.map((i) => i.message) };
   }
 
   let result;

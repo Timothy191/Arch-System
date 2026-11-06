@@ -11,14 +11,14 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function saveMonthlyMachineSnapshotAction(input: SaveMonthlyMachineSnapshotInput) {
-  const parsed = saveMonthlyMachineSnapshotInputSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid snapshot payload');
-  }
-
   const principal = await getAuthenticatedEmployee();
   if (!principal) {
     throw new AuthError('Unauthorized — active employee session required');
+  }
+
+  const parsed = saveMonthlyMachineSnapshotInputSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new ValidationError(parsed.error.issues[0]?.message ?? 'Invalid snapshot payload');
   }
 
   const supabase = await createServerSupabaseClient();

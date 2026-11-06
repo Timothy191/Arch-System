@@ -4,7 +4,12 @@ import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { ConflictError, DatabaseError, ValidationError } from '@/lib/errors/error-classes';
+import {
+  AuthError,
+  ConflictError,
+  DatabaseError,
+  ValidationError,
+} from '@/lib/errors/error-classes';
 
 const provisionEmployeeSchema = z.object({
   first_name: z.string().trim().min(1, 'First name is required').max(100),
@@ -73,6 +78,13 @@ export async function getProvisioningReferenceData(): Promise<{
   recentPersonnel: ProvisionedEmployeeResult[];
 }> {
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new AuthError('Unauthorized: valid session required');
+  }
 
   const [deptRes, persRes] = await Promise.all([
     supabase
@@ -142,6 +154,15 @@ export async function getProvisioningReferenceData(): Promise<{
 export async function provisionNewEmployee(
   rawInput: ProvisionEmployeeInput
 ): Promise<{ success: boolean; data: ProvisionedEmployeeResult; error?: string }> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new AuthError('Unauthorized: valid session required');
+  }
+
   const parseResult = provisionEmployeeSchema.safeParse(rawInput);
   if (!parseResult.success) {
     const issue = parseResult.error.issues[0];
@@ -149,7 +170,6 @@ export async function provisionNewEmployee(
   }
 
   const input = parseResult.data;
-  const supabase = await createServerSupabaseClient();
 
   // Resolve department_id if an area string was passed instead of uuid
   let targetDeptId = input.department_id || null;
@@ -322,6 +342,15 @@ export async function provisionNewEmployee(
 export async function updateEmployeeAction(
   data: UpdateEmployeeInput
 ): Promise<{ success: boolean; data?: ProvisionedEmployeeResult; error?: string }> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new AuthError('Unauthorized: valid session required');
+  }
+
   const parsed = updateEmployeeSchema.safeParse(data);
   if (!parsed.success) {
     const errorMsg = parsed.error.issues.map((e) => e.message).join(', ');
@@ -329,7 +358,6 @@ export async function updateEmployeeAction(
   }
 
   const input = parsed.data;
-  const supabase = await createServerSupabaseClient();
 
   // Resolve department ID if department name / area was passed
   let targetDeptId = input.department_id || null;

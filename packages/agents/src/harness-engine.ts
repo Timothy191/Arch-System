@@ -811,6 +811,84 @@ export function validateCanonicalSecuritySequence(steps: readonly string[]): {
   return { isCompliant: true };
 }
 
+export interface ServerActionSecurityViolation {
+  readonly functionName: string;
+  readonly violationCode: 'MISSING_CALLER_AUTH' | 'VALIDATION_BEFORE_AUTH';
+  readonly message: string;
+}
+
+export interface ServerActionSecurityAuditResult {
+  readonly passed: boolean;
+  readonly violations: readonly ServerActionSecurityViolation[];
+}
+
+const USE_SERVER_DIRECTIVE_REGEX = /^[\s]*['"]use server['"]/m;
+const EXPORTED_ASYNC_FN_REGEX = /export\s+async\s+function\s+([a-zA-Z0-9_]+)/g;
+const CALLER_AUTH_INVOCATION_REGEX =
+  /\b(?:getAuthenticatedEmployee|requireRole|requireDepartment|assertAccessControlRole|assertAccessCardActionsRole|assertAdmin|assertAdminRole|requireAccessControlAuth|requireAdmin|getSessionUser|verifySession|auth\.getUser|auth\.signOut|verify_supervisor_pin|getCurrentEmployee|getAuthenticatedUser|requireUser|assertAuthenticated|checkAuth|verifyAuth|ensureAuthenticated|getCallerContext|requireOperatorOrAdmin|getEmployeeSession|getAuthenticatedControlRoomContext|verifyDepartmentAccess)\b/;
+const INPUT_SCHEMA_PARSE_REGEX =
+  /\b[a-zA-Z0-9_]*Schema\.(?:safeParse|parse)\s*\((?!rpcPayload|data\.)/i;
+const MUTATION_SINK_REGEX = /\.(?:insert|update|upsert|delete)\s*\(|cacheInvalidateTags\s*\(/;
+
+/**
+ * Static Server Action Security Sequence Auditor (Semgrep / SAST statement-order pattern).
+ * Verifies that exported async Server Actions authenticate the caller before validating untrusted input
+ * or executing database/cache mutations.
+ */
+export function auditServerActionSecurityOrder(
+  sourceCode: string
+): ServerActionSecurityAuditResult {
+  if (!USE_SERVER_DIRECTIVE_REGEX.test(sourceCode)) {
+    return { passed: true, violations: [] };
+  }
+
+  const functionSlices: Array<{ readonly functionName: string; readonly startIndex: number }> = [];
+  for (const match of sourceCode.matchAll(EXPORTED_ASYNC_FN_REGEX)) {
+    const fnName = match[1];
+    if (fnName && match.index !== undefined) {
+      functionSlices.push({ functionName: fnName, startIndex: match.index });
+    }
+  }
+
+  const violations: ServerActionSecurityViolation[] = [];
+
+  for (let fnIdx = 0; fnIdx < functionSlices.length; fnIdx += 1) {
+    const currentFn = functionSlices[fnIdx];
+    if (!currentFn) continue;
+    const nextFn = functionSlices[fnIdx + 1];
+    const fnBody = sourceCode.slice(currentFn.startIndex, nextFn?.startIndex ?? sourceCode.length);
+
+    const authMatch = CALLER_AUTH_INVOCATION_REGEX.exec(fnBody);
+    const parseMatch = INPUT_SCHEMA_PARSE_REGEX.exec(fnBody);
+    const hasMutationSink = MUTATION_SINK_REGEX.test(fnBody);
+
+    const authPos = authMatch?.index ?? -1;
+    const parsePos = parseMatch?.index ?? -1;
+
+    if (authPos === -1 && (parsePos !== -1 || hasMutationSink)) {
+      violations.push({
+        functionName: currentFn.functionName,
+        violationCode: 'MISSING_CALLER_AUTH',
+        message: `Server Action "${currentFn.functionName}" executes input validation or mutation without caller authentication.`,
+      });
+      continue;
+    }
+
+    if (authPos !== -1 && parsePos !== -1 && parsePos < authPos) {
+      violations.push({
+        functionName: currentFn.functionName,
+        violationCode: 'VALIDATION_BEFORE_AUTH',
+        message: `Server Action "${currentFn.functionName}" validates untrusted input before authenticating the caller (violates Canonical Step 1 -> Step 3).`,
+      });
+    }
+  }
+
+  return {
+    passed: violations.length === 0,
+    violations,
+  };
+}
+
 export type AgentPermissionTierNumber = 1 | 2 | 3 | 4 | 5;
 
 const HUMAN_APPROVAL_MIN_TIER = 4;

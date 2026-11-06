@@ -142,15 +142,6 @@ export async function getOfficeWorkspaceSnapshot(): Promise<OfficeWorkspaceSnaps
 export async function saveOfficeDocumentAction(
   rawInput: unknown
 ): Promise<SaveOfficeDocumentResult> {
-  const parsedInput = SaveOfficeDocumentSchema.safeParse(rawInput);
-  if (!parsedInput.success) {
-    const validationIssue = parsedInput.error.issues[0];
-    return {
-      status: 'error',
-      message: validationIssue?.message ?? 'Invalid office document payload',
-    };
-  }
-
   const supabase = await createServerSupabaseClient();
   const authResponse = await supabase.auth.getUser();
   const authenticatedUser = authResponse.data?.user ?? null;
@@ -159,6 +150,15 @@ export async function saveOfficeDocumentAction(
     return {
       status: 'error',
       message: 'Unauthorized: active operator session required',
+    };
+  }
+
+  const parsedInput = SaveOfficeDocumentSchema.safeParse(rawInput);
+  if (!parsedInput.success) {
+    const validationIssue = parsedInput.error.issues[0];
+    return {
+      status: 'error',
+      message: validationIssue?.message ?? 'Invalid office document payload',
     };
   }
 

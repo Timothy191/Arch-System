@@ -1,5 +1,16 @@
 # Agent Tracer - @repo/agents
 
+## 2026-11-06T11:32:00+02:00 - STM-0 Metacognitive Phase-Gate Evaluator & Static Server Action Security Sequence Auditor
+
+- **Phase 1 (Comprehension)**: Deep-dive into `structured-thinking` (STM-0) installation across workspace runtimes, identify remaining cognitive and security sequence risks, research proven open-source GitHub methods (`modelcontextprotocol/servers` `sequentialthinking`, `Promptly-Technologies-LLC/mcp-structured-thinking`, `stabgan/steelmind-mcp`, Semgrep Next.js Server Action SAST rules), and implement permanent enforcement.
+- **Phase 2 (Evidence)**: Inspected `.agents/skills/structured-thinking/SKILL.md`, `packages/agents/src/{quality-gate.ts,harness-engine.ts,harness-engine.test.ts}`, `tools/audits/audit-routing-and-actions.cjs`, and 37 `'use server'` modules across `apps/portal`.
+- **Phase 3 (Design)**:
+  - `src/quality-gate.ts`: Implemented `QualityGate.evaluateMetacognitivePhaseGate()` enforcing chronological 5-stage ordering, concrete file/symbol evidence grounding in Phase 2, and executable verification commands in Phase 5, with `thoughtQualityScore` (`0..1`) and revision steering (`needsRevision`, `revisesPhase`, `steeringDirective`).
+  - `src/harness-engine.ts`: Implemented `auditServerActionSecurityOrder()` statically detecting `MISSING_CALLER_AUTH` and `VALIDATION_BEFORE_AUTH` across `'use server'` functions.
+  - `src/harness-engine.test.ts`: Added TDD unit tests for `evaluateMetacognitivePhaseGate` and `auditServerActionSecurityOrder`.
+- **Phase 4 (Criticism)**: Preserved backward compatibility of `QualityGate.validateStructuredThinking()` while adding `evaluateMetacognitivePhaseGate()` for strict anti-rubber-stamp gating.
+- **Phase 5 (Contract)**: Modified `src/{quality-gate.ts,harness-engine.ts,harness-engine.test.ts}`; verified with `pnpm --filter @repo/agents test` (`47/47 PASS`) and `pnpm agent:verify`.
+
 ## 2026-11-02T19:26:00+02:00 - Programmatic STM-0 Structured Thinking Enforcement (`QualityGate`, `ReflectionEngine`, `AgentPillarEnvelope`, `runHarnessDoctor`)
 
 - **Phase 1 (Comprehension)**: Verify and improve the `structured-thinking` (STM-0) mandate across `.agents/rules/structured-thinking-mandate.md`, `.agents/skills/structured-thinking/SKILL.md`, and `@repo/agents` so the 5-phase protocol (Comprehension, Evidence, Design, Criticism, Contract) is programmatically enforced in `QualityGate`, `ReflectionEngine`, `AgentPillarEnvelope`, and `runHarnessDoctor` with zero external API overhead.

@@ -36,9 +36,11 @@ describe('invalidateShiftSheetCache', () => {
   });
 
   it('no-ops when departmentId is not a valid UUID', async () => {
+    mockUser({ id: 'user-1' });
+
     await invalidateShiftSheetCache({ departmentId: 'not-a-uuid' });
 
-    expect(createServerSupabaseClient).not.toHaveBeenCalled();
+    expect(createServerSupabaseClient).toHaveBeenCalledTimes(1);
     expect(cacheInvalidateTags).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
   });

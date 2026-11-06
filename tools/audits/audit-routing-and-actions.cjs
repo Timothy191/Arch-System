@@ -116,7 +116,7 @@ for (const file of allSourceFiles) {
       }
     }
 
-    // Security check: mutation actions should verify caller auth
+    // Security check: mutation actions should verify caller auth and enforce Canonical Step 1 (Auth) before Step 3 (Validation)
     const hasAuthCheck =
       content.includes('auth') ||
       content.includes('getUser') ||
@@ -129,6 +129,41 @@ for (const file of allSourceFiles) {
       warnings.push(
         `${relPath} - Server Action ('use server') does not appear to perform explicit caller authentication check. Verify that this action is protected against unauthorized invocation.`
       );
+    }
+
+    const exportedFnRegex = /export\s+async\s+function\s+([a-zA-Z0-9_]+)/g;
+    const fnSlices = [];
+    for (const fnMatch of content.matchAll(exportedFnRegex)) {
+      if (fnMatch[1] && fnMatch.index !== undefined) {
+        fnSlices.push({ name: fnMatch[1], start: fnMatch.index });
+      }
+    }
+
+    const callerAuthRegex =
+      /\b(?:getAuthenticatedEmployee|requireRole|requireDepartment|assertAccessControlRole|assertAccessCardActionsRole|assertAdmin|assertAdminRole|requireAccessControlAuth|requireAdmin|getSessionUser|verifySession|auth\.getUser|auth\.signOut|verify_supervisor_pin|getCurrentEmployee|getAuthenticatedUser|requireUser|assertAuthenticated|checkAuth|verifyAuth|ensureAuthenticated|getCallerContext|requireOperatorOrAdmin|getEmployeeSession|getAuthenticatedControlRoomContext|verifyDepartmentAccess)\b/;
+    const inputParseRegex = /\b[a-zA-Z0-9_]*Schema\.(?:safeParse|parse)\s*\((?!rpcPayload|data\.)/i;
+    const mutationSinkRegex = /\.(?:insert|update|upsert|delete)\s*\(/;
+
+    for (let idx = 0; idx < fnSlices.length; idx += 1) {
+      const current = fnSlices[idx];
+      const next = fnSlices[idx + 1];
+      const fnBody = content.slice(current.start, next ? next.start : content.length);
+      const authMatch = callerAuthRegex.exec(fnBody);
+      const parseMatch = inputParseRegex.exec(fnBody);
+      const hasMutation = mutationSinkRegex.test(fnBody);
+
+      const authPos = authMatch ? authMatch.index : -1;
+      const parsePos = parseMatch ? parseMatch.index : -1;
+
+      if (authPos === -1 && (parsePos !== -1 || hasMutation)) {
+        violations.push(
+          `${relPath} :: ${current.name}() - Server Action executes input validation or database mutation without caller authentication.`
+        );
+      } else if (authPos !== -1 && parsePos !== -1 && parsePos < authPos) {
+        violations.push(
+          `${relPath} :: ${current.name}() - Server Action validates untrusted input before authenticating the caller (Canonical Security Sequence requires Step 1 Authenticate before Step 3 Validate).`
+        );
+      }
     }
   }
 }

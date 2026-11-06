@@ -51,6 +51,9 @@ export async function adminAddSite(rawInput: {
   site_code?: string;
   active?: boolean;
 }) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const normalizedInput = {
     ...rawInput,
     site_code: rawInput.site_code?.trim() || buildSiteCode(rawInput.name || ''),
@@ -60,9 +63,6 @@ export async function adminAddSite(rawInput: {
     return { error: parseResult.error.issues[0]?.message || 'Invalid site data' };
   }
   const data = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
@@ -119,14 +119,14 @@ export async function adminUpdateSite(
     active?: boolean;
   }
 ) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const parseResult = adminUpdateSiteSchema.safeParse(rawInput);
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid site data' };
   }
   const data = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
@@ -172,6 +172,9 @@ export async function adminAddMineBlock(rawInput: {
   site_id?: string | null;
   active?: boolean;
 }) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const normalizedInput = {
     ...rawInput,
     code: rawInput.code?.trim() || buildBlockCode(rawInput.name || ''),
@@ -181,9 +184,6 @@ export async function adminAddMineBlock(rawInput: {
     return { error: parseResult.error.issues[0]?.message || 'Invalid mine block data' };
   }
   const data = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
@@ -242,14 +242,14 @@ export async function adminUpdateMineBlock(
     active?: boolean;
   }
 ) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const parseResult = adminUpdateMineBlockSchema.safeParse({ id, ...rawInput });
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid mine block data' };
   }
   const data = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 

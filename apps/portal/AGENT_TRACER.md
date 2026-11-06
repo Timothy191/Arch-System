@@ -1,3 +1,13 @@
+## 2026-11-06T11:32:00+02:00: Canonical 8-Step Server Action Security Sequence Remediation (Auth Before Validation)
+
+- **Phase 1 (Comprehension)**: Remediate all 27 Server Action functions across 12 `'use server'` files in `apps/portal` that either validated untrusted input before authenticating the caller or lacked explicit caller authentication.
+- **Phase 2 (Evidence)**: Audited all 37 `'use server'` files in `apps/portal` using `node tools/audits/audit-routing-and-actions.cjs` and AST/source statement-order scanning.
+- **Phase 3 (Design)**:
+  - Added caller authentication (`supabase.auth.getUser()`) to `getProvisioningReferenceData`, `provisionNewEmployee`, and `updateEmployeeAction` in `actions/employee-provisioning.ts`, and `getAuthenticatedEmployee()` guard to `syncExcavatorActivityFromHourlyLoads` in `hourly-loads/actions.ts`.
+  - Moved caller authentication (`getAuthenticatedEmployee`, `supabase.auth.getUser`, `assertAdmin`) to Step 1 (before Zod `.parse()` / `.safeParse()`) across `lib/control-room-shift-report.ts`, `lib/actions/shift-closeout.ts`, `features/departments/components/office/actions.ts`, `features/admin/actions/{sites,targets,minerals}.ts`, `app/(departments)/drilling/drilling-operations/actions.ts`, `app/(departments)/[department]/{shift-compilation,reports,machine-operations,hourly-loads}/actions.ts`, `actions/shift-sheet-cache.ts`, and `actions/external-content-indexing.ts`.
+- **Phase 4 (Criticism)**: Updated `actions/shift-sheet-cache.test.ts` to mock an authenticated user when testing UUID validation after auth.
+- **Phase 5 (Contract)**: Verified with `node tools/audits/audit-routing-and-actions.cjs` (`0 violations`) and `pnpm --filter portal test -- --testPathPatterns="shift-closeout|control-room-shift-report|shift-sheet-cache|hourly-loads/actions"` (`72/72 PASS`).
+
 ## 2026-11-06T09:20:00+02:00: Core Web Vitals (LCP, INP, CLS), Cookie Consent Persistence & Adaptive Client-Side System-Scaled Asset Caching
 
 - **Phase 1 (Comprehension)**: Resolve slow loading times on `/hub`, `/control-room`, and `/production` across LCP, INP, CLS, and Cookie Consent persistence, and add adaptive client-side system-scaled asset pre-caching (`high` / `balanced` / `lite` tiers).

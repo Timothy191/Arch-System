@@ -33,6 +33,17 @@ export interface StructuredThinkingValidationResult {
   readonly remediationDirective?: string;
 }
 
+export interface MetacognitivePhaseGateResult {
+  readonly compliant: boolean;
+  readonly isChronologicalOrder: boolean;
+  readonly hasEvidenceGrounding: boolean;
+  readonly hasVerificationContract: boolean;
+  readonly thoughtQualityScore: number;
+  readonly needsRevision: boolean;
+  readonly revisesPhase?: string;
+  readonly steeringDirective?: string;
+}
+
 const STM_PHASE_PATTERNS: ReadonlyArray<{ readonly phaseId: string; readonly regex: RegExp }> = [
   { phaseId: 'Phase 1 (Comprehension)', regex: /Phase\s*1\b|Comprehension/i },
   { phaseId: 'Phase 2 (Evidence)', regex: /Phase\s*2\b|Evidence/i },
@@ -40,6 +51,15 @@ const STM_PHASE_PATTERNS: ReadonlyArray<{ readonly phaseId: string; readonly reg
   { phaseId: 'Phase 4 (Criticism)', regex: /Phase\s*4\b|Criticism|Critique/i },
   { phaseId: 'Phase 5 (Contract)', regex: /Phase\s*5\b|Contract|Verification/i },
 ];
+
+const EVIDENCE_GROUNDING_REGEX =
+  /(?:[a-zA-Z0-9_-]+\/)+[a-zA-Z0-9_.-]+\.(?:ts|tsx|js|cjs|mjs|json|md|sql|sh)|`[a-zA-Z0-9_./-]+`/i;
+const VERIFICATION_CONTRACT_REGEX = /\b(?:pnpm|node|jest|bash|make|playwright)\b/i;
+const WEIGHT_PHASE_COMPLETENESS = 0.4;
+const WEIGHT_CHRONOLOGICAL_ORDER = 0.2;
+const WEIGHT_EVIDENCE_GROUNDING = 0.2;
+const WEIGHT_VERIFICATION_CONTRACT = 0.2;
+const SCORE_DECIMALS = 2;
 
 export class QualityGate {
   /**
@@ -116,6 +136,104 @@ export class QualityGate {
       detectedFormat: detectedFormat === 'none' ? 'format-c-tracer' : detectedFormat,
       completedPhases,
       missingPhases: [],
+    };
+  }
+
+  /**
+   * Metacognitive Phase-Gate Evaluator (`Promptly-Technologies-LLC/mcp-structured-thinking` +
+   * `stabgan/steelmind-mcp` + `modelcontextprotocol/servers` `sequentialthinking` pattern).
+   * Enforces chronological 5-stage ordering, concrete file/symbol evidence grounding in Phase 2,
+   * and executable verification commands in Phase 5, steering revisions when hollow reasoning is detected.
+   */
+  public static evaluateMetacognitivePhaseGate(
+    thinkingContent: string
+  ): MetacognitivePhaseGateResult {
+    const baseValidation = QualityGate.validateStructuredThinking(thinkingContent);
+    const phaseRatio = baseValidation.completedPhases.length / STM_PHASE_PATTERNS.length;
+
+    const phasePositions = STM_PHASE_PATTERNS.map((pattern) => {
+      const match = pattern.regex.exec(thinkingContent);
+      return match ? match.index : -1;
+    });
+
+    const isChronologicalOrder =
+      phasePositions.every((pos) => pos >= 0) &&
+      phasePositions.every((pos, idx) => idx === 0 || pos > (phasePositions[idx - 1] ?? -1));
+
+    const hasEvidenceGrounding = EVIDENCE_GROUNDING_REGEX.test(thinkingContent);
+    const hasVerificationContract = VERIFICATION_CONTRACT_REGEX.test(thinkingContent);
+
+    const rawScore =
+      phaseRatio * WEIGHT_PHASE_COMPLETENESS +
+      (isChronologicalOrder ? WEIGHT_CHRONOLOGICAL_ORDER : 0) +
+      (hasEvidenceGrounding ? WEIGHT_EVIDENCE_GROUNDING : 0) +
+      (hasVerificationContract ? WEIGHT_VERIFICATION_CONTRACT : 0);
+    const thoughtQualityScore = Number(rawScore.toFixed(SCORE_DECIMALS));
+
+    if (!baseValidation.compliant) {
+      const firstMissing = baseValidation.missingPhases[0] ?? 'Phase 1 (Comprehension)';
+      return {
+        compliant: false,
+        isChronologicalOrder,
+        hasEvidenceGrounding,
+        hasVerificationContract,
+        thoughtQualityScore,
+        needsRevision: true,
+        revisesPhase: firstMissing,
+        steeringDirective:
+          baseValidation.remediationDirective ?? `Complete ${firstMissing} before proceeding.`,
+      };
+    }
+
+    if (!isChronologicalOrder) {
+      return {
+        compliant: false,
+        isChronologicalOrder: false,
+        hasEvidenceGrounding,
+        hasVerificationContract,
+        thoughtQualityScore,
+        needsRevision: true,
+        revisesPhase: 'Phase 1 (Comprehension)',
+        steeringDirective:
+          'STM-0 phases must appear in strict chronological order (Phase 1 -> Phase 2 -> Phase 3 -> Phase 4 -> Phase 5).',
+      };
+    }
+
+    if (!hasEvidenceGrounding) {
+      return {
+        compliant: false,
+        isChronologicalOrder: true,
+        hasEvidenceGrounding: false,
+        hasVerificationContract,
+        thoughtQualityScore,
+        needsRevision: true,
+        revisesPhase: 'Phase 2 (Evidence)',
+        steeringDirective:
+          'Phase 2 (Evidence) lacks concrete repository evidence (file paths, symbols, or command output). Reject rubber-stamp reasoning.',
+      };
+    }
+
+    if (!hasVerificationContract) {
+      return {
+        compliant: false,
+        isChronologicalOrder: true,
+        hasEvidenceGrounding: true,
+        hasVerificationContract: false,
+        thoughtQualityScore,
+        needsRevision: true,
+        revisesPhase: 'Phase 5 (Contract)',
+        steeringDirective:
+          'Phase 5 (Contract) must specify executable verification commands (e.g., pnpm test, pnpm type-check, pnpm agent:verify).',
+      };
+    }
+
+    return {
+      compliant: true,
+      isChronologicalOrder: true,
+      hasEvidenceGrounding: true,
+      hasVerificationContract: true,
+      thoughtQualityScore,
+      needsRevision: false,
     };
   }
 

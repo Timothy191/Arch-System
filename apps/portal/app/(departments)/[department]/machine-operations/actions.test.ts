@@ -29,7 +29,13 @@ describe('saveDelayEntriesBatch', () => {
     jest.clearAllMocks();
   });
 
-  it('rejects invalid payloads with ValidationError before hitting Supabase', async () => {
+  it('rejects invalid payloads with ValidationError after authenticating caller', async () => {
+    createServerSupabaseClient.mockResolvedValue({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u-1' } }, error: null }),
+      },
+    });
+
     await expect(
       saveDelayEntriesBatch({
         machineOperationId: 'bad-id',
@@ -37,7 +43,7 @@ describe('saveDelayEntriesBatch', () => {
       })
     ).rejects.toThrow('Invalid delay entry payload');
 
-    expect(createServerSupabaseClient).not.toHaveBeenCalled();
+    expect(createServerSupabaseClient).toHaveBeenCalledTimes(1);
   });
 
   it('rejects unauthenticated requests with AuthError', async () => {

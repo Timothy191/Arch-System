@@ -6,6 +6,7 @@ import {
   AGENT_PERMISSION_TIERS,
   AgentRoutineRegistry,
   auditErasableTypeScript,
+  auditServerActionSecurityOrder,
   CANONICAL_SECURITY_SEQUENCE,
   CrossModuleOutboxLedger,
   errResult,
@@ -489,6 +490,95 @@ Verify with pnpm test and pnpm agent:verify.
         hasHumanApproval: true,
       });
       expect(approvedTier5.permitted).toBe(true);
+    });
+
+    it('When evaluating STM-0 Metacognitive Phase-Gate (mcp-structured-thinking + steelmind pattern), Then rubber-stamped or out-of-order phases trigger revision steering while grounded thinking passes', () => {
+      const groundedTrace = `<structured-thinking>
+## Phase 1: Situational Comprehension
+Enforce canonical 8-step security sequence across Server Actions in apps/portal.
+## Phase 2: Evidence Gathering
+Inspected apps/portal/lib/control-room-shift-report.ts and packages/agents/src/harness-engine.ts.
+## Phase 3: Solution Design
+Option A: Regex-only check. Option B (Selected): AST/source statement-order analyzer + metacognitive phase gate.
+## Phase 4: Pre-Commit Criticism
+Blast radius includes existing Jest unit tests in apps/portal/actions/shift-sheet-cache.test.ts.
+## Phase 5: Execution Contract
+- Files: packages/agents/src/quality-gate.ts, packages/agents/src/harness-engine.ts
+- Verification: pnpm --filter @repo/agents test && pnpm agent:verify
+</structured-thinking>`;
+
+      const groundedGate = QualityGate.evaluateMetacognitivePhaseGate(groundedTrace);
+      expect(groundedGate.compliant).toBe(true);
+      expect(groundedGate.isChronologicalOrder).toBe(true);
+      expect(groundedGate.hasEvidenceGrounding).toBe(true);
+      expect(groundedGate.hasVerificationContract).toBe(true);
+      expect(groundedGate.needsRevision).toBe(false);
+      expect(groundedGate.thoughtQualityScore).toBeGreaterThanOrEqual(0.9);
+
+      const rubberStampTrace =
+        '<structured-thinking>Phase 1 Phase 2 Phase 3 Phase 4 Phase 5</structured-thinking>';
+      const rubberStampGate = QualityGate.evaluateMetacognitivePhaseGate(rubberStampTrace);
+      expect(rubberStampGate.compliant).toBe(false);
+      expect(rubberStampGate.needsRevision).toBe(true);
+      expect(rubberStampGate.revisesPhase).toBe('Phase 2 (Evidence)');
+      expect(rubberStampGate.steeringDirective).toContain('Evidence');
+
+      const outOfOrderTrace = `<structured-thinking>
+## Phase 2: Evidence Gathering in apps/portal/proxy.ts
+## Phase 1: Situational Comprehension
+## Phase 3: Solution Design Option A vs Option B
+## Phase 4: Pre-Commit Criticism of blast radius
+## Phase 5: Execution Contract via pnpm test
+</structured-thinking>`;
+      const outOfOrderGate = QualityGate.evaluateMetacognitivePhaseGate(outOfOrderTrace);
+      expect(outOfOrderGate.compliant).toBe(false);
+      expect(outOfOrderGate.isChronologicalOrder).toBe(false);
+      expect(outOfOrderGate.needsRevision).toBe(true);
+    });
+
+    it('When auditing Server Action source code for Canonical Security Sequence order, Then pre-auth input validation and missing auth are flagged', () => {
+      const preAuthValidationSource = `'use server';
+export async function submitReport(rawInput: unknown) {
+  const parsed = reportSchema.safeParse(rawInput);
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+  return { success: true, parsed };
+}`;
+      const preAuthReport = auditServerActionSecurityOrder(preAuthValidationSource);
+      expect(preAuthReport.passed).toBe(false);
+      expect(preAuthReport.violations).toEqual([
+        expect.objectContaining({
+          functionName: 'submitReport',
+          violationCode: 'VALIDATION_BEFORE_AUTH',
+        }),
+      ]);
+
+      const missingAuthSource = `'use server';
+export async function mutateWithoutAuth(rawInput: unknown) {
+  const supabase = await createServerSupabaseClient();
+  await supabase.from('sites').delete().eq('id', '1');
+  return { success: true };
+}`;
+      const missingAuthReport = auditServerActionSecurityOrder(missingAuthSource);
+      expect(missingAuthReport.passed).toBe(false);
+      expect(missingAuthReport.violations).toEqual([
+        expect.objectContaining({
+          functionName: 'mutateWithoutAuth',
+          violationCode: 'MISSING_CALLER_AUTH',
+        }),
+      ]);
+
+      const compliantSource = `'use server';
+export async function submitCompliantReport(rawInput: unknown) {
+  const principal = await getAuthenticatedEmployee();
+  if (!principal) throw new Error('Unauthorized');
+  const parsed = reportSchema.safeParse(rawInput);
+  return { success: true, parsed };
+}`;
+      const compliantReport = auditServerActionSecurityOrder(compliantSource);
+      expect(compliantReport.passed).toBe(true);
+      expect(compliantReport.violations).toHaveLength(0);
     });
   });
 });

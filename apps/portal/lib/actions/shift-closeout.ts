@@ -55,7 +55,19 @@ export async function submitShiftCloseout(
   rawInput: ShiftCloseoutInput
 ): Promise<ShiftCloseoutResult> {
   try {
-    // 1. Validate input payload against canonical Zod schema
+    // 1. Instantiate Supabase server client and verify caller authentication first
+    const supabase = await createServerSupabaseClient();
+    if (supabase?.auth?.getUser) {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new AuthError('Unauthorized: active session required for shift closeout.');
+      }
+    }
+
+    // 2. Validate input payload against canonical Zod schema
     const parseResult = shiftCloseoutSchema.safeParse(rawInput);
     if (!parseResult.success) {
       const firstIssue = parseResult.error.issues[0]?.message || 'Invalid shift closeout payload';
@@ -64,7 +76,7 @@ export async function submitShiftCloseout(
 
     const payload = parseResult.data;
 
-    // 2. Rate limiting check (5 attempts per user per minute)
+    // 3. Rate limiting check (5 attempts per user per minute)
     const allowed = await checkRateLimit(payload.supervisorId);
     if (!allowed) {
       throw new RateLimitError(
@@ -74,9 +86,6 @@ export async function submitShiftCloseout(
         }
       );
     }
-
-    // 3. Instantiate Supabase server client
-    const supabase = await createServerSupabaseClient();
 
     // 4. Verify supervisor PIN via pgcrypto SECURITY DEFINER RPC
     const { data: isValidPin, error: rpcError } = await supabase.rpc('verify_supervisor_pin', {

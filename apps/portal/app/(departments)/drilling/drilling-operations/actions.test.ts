@@ -19,6 +19,21 @@ describe('upsertDrillOperationAction', () => {
   });
 
   it('returns validation error when required fields are missing', async () => {
+    createServerSupabaseClient.mockResolvedValue({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
+      },
+      from: jest.fn(() => ({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
+              data: { department_id: '123e4567-e89b-12d3-a456-426614174001', role: 'operator' },
+            }),
+          }),
+        }),
+      })),
+    });
+
     const res = await upsertDrillOperationAction({} as any);
     expect(res.success).toBe(false);
     expect(res.error).toContain('Validation error');

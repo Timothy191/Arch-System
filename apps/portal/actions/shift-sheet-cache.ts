@@ -17,14 +17,14 @@ export async function invalidateShiftSheetCache(input: {
   wroteDozerRolls?: boolean;
   wroteDelayEntries?: boolean;
 }): Promise<void> {
-  const parsed = inputSchema.safeParse(input);
-  if (!parsed.success) return;
-
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
+
+  const parsed = inputSchema.safeParse(input);
+  if (!parsed.success) return;
 
   const tags = ['table:machine_operations', `dept:${parsed.data.departmentId}`];
   if (parsed.data.wroteDozerRolls) tags.push('table:dozer_rolls');

@@ -74,14 +74,14 @@ export async function getOperationalTargets(): Promise<AdminOperationalTargets> 
 }
 
 export async function adminSaveOperationalTargets(rawInput: AdminOperationalTargets) {
+  const auth = await assertAdmin();
+  if ('error' in auth) return { error: auth.error };
+
   const parseResult = adminOperationalTargetsSchema.safeParse(rawInput);
   if (!parseResult.success) {
     return { error: parseResult.error.issues[0]?.message || 'Invalid operational targets data' };
   }
   const config = parseResult.data;
-
-  const auth = await assertAdmin();
-  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
