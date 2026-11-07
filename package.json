@@ -79,6 +79,7 @@
     "review": "bash tools/scripts/kilo-review.sh",
     "agent:swarm": "node tools/scripts/run-swarm.cjs",
     "analyze": "ANALYZE=true pnpm --filter portal build",
+    "analyze:turbopack": "pnpm turbo run analyze:turbopack --filter=portal",
     "bundlesize": "node tools/audits/check-bundle-size.cjs",
     "audit:suite": "node tools/audits/run-audit.cjs",
     "audit:design": "node tools/audits/design-audit.cjs",
