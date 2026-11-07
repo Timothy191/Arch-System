@@ -14,6 +14,34 @@ permissions:
   contents: read
 
 jobs:
+  rust-quality:
+    name: Rust Quality (fmt, check, clippy, test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: tools/swarms-orchestrator
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 1
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052d4f6e1f5b # v1
+        with:
+          toolchain: 1.85.0
+          components: rustfmt, clippy
+          cache: true
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Type check
+        run: cargo check --locked
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+      - name: Test
+        run: cargo test --locked
+
   # Deps Lint job - runs in parallel on coordinator
   deps-lint:
     name: Dependency Lint

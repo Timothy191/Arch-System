@@ -2,7 +2,10 @@
   "name": "@repo/swarms-orchestrator",
   "version": "1.0.0",
   "scripts": {
-    "check-types": "cargo check",
-    "build": "cargo build --release"
+    "check-types": "cargo check --locked",
+    "build": "cargo build --release --locked",
+    "fmt": "cargo fmt --all -- --check",
+    "lint": "cargo clippy --all-targets --all-features --locked -- -D warnings",
+    "test": "cargo test --locked"
   }
 }
