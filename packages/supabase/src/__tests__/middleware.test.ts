@@ -21,8 +21,12 @@ describe('@repo/supabase middleware suite', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Build from a copy so real credential env vars never leak into the test env.
+    const env = { ...originalEnv };
+    delete env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    delete env.SUPABASE_PUBLISHABLE_KEY;
     process.env = {
-      ...originalEnv,
+      ...env,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
     };

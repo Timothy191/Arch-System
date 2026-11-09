@@ -207,8 +207,12 @@ describe('createServerSupabaseClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Build from a copy so real credential env vars never leak into the test env.
+    const env = { ...originalEnv };
+    delete env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    delete env.SUPABASE_PUBLISHABLE_KEY;
     process.env = {
-      ...originalEnv,
+      ...env,
       NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
     };
@@ -253,6 +257,8 @@ describe('createServerSupabaseClient', () => {
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
     };
+    // Prevent real env values from leaking into tests.
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
     const { createServerClient } = require('@supabase/ssr');
 
@@ -383,6 +389,8 @@ describe('createBrowserSupabaseClient', () => {
       NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
     };
+    // Prevent real env values from leaking into tests.
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   });
 
   afterEach(() => {
@@ -411,6 +419,8 @@ describe('createBrowserSupabaseClient', () => {
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
     };
+    // Prevent real env values from leaking into tests.
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
     const { createBrowserClient } = require('@supabase/ssr');
 
@@ -511,8 +521,13 @@ describe('createReadReplicaClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Build from a copy so real credential env vars never leak into the test env.
+    const env = { ...originalEnv };
+    delete env.SUPABASE_READ_REPLICA_URL;
+    delete env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    delete env.SUPABASE_PUBLISHABLE_KEY;
     process.env = {
-      ...originalEnv,
+      ...env,
       NEXT_PUBLIC_SUPABASE_URL: 'https://default.supabase.co',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: 'default-anon-key',
       SUPABASE_SERVICE_KEY: 'server-service-key',
