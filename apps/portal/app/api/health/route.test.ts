@@ -37,6 +37,9 @@ describe('GET /api/health', () => {
 
     const res = await GET();
     expect(res.status).toBe(200);
+    expect(res.headers.get('Server-Timing')).toMatch(
+      /supabase;dur=\d+, redis;dur=\d+, fuxa;dur=\d+, total;dur=\d+/
+    );
     const json = await res.json();
     expect(['healthy', 'degraded']).toContain(json.status);
     expect(json.services.supabase.status).toBe('healthy');
@@ -78,6 +81,9 @@ describe('GET /api/health', () => {
 
     const res = await GET();
     expect(res.status).toBe(200);
+    expect(res.headers.get('Server-Timing')).toMatch(
+      /supabase;dur=\d+, redis;dur=\d+, fuxa;dur=\d+, total;dur=\d+/
+    );
     const json = await res.json();
     expect(json.status).toBe('healthy');
     expect(json.services.supabase.status).toBe('healthy');

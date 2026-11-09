@@ -128,6 +128,17 @@ export async function GET() {
   const dataToReturn = parsed.success ? parsed.data : responsePayload;
 
   const httpStatus = overallStatus === 'unhealthy' ? 503 : 200;
+  const serverTiming = [
+    `supabase;dur=${supabaseLatencyMs}`,
+    `redis;dur=${redisLatencyMs}`,
+    `fuxa;dur=${fuxaLatencyMs}`,
+    `total;dur=${totalLatencyMs}`,
+  ].join(', ');
 
-  return NextResponse.json(dataToReturn, { status: httpStatus });
+  return NextResponse.json(dataToReturn, {
+    status: httpStatus,
+    headers: {
+      'Server-Timing': serverTiming,
+    },
+  });
 }

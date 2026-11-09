@@ -1,5 +1,41 @@
+import { monitorEventLoopDelay, performance } from 'node:perf_hooks';
+import v8 from 'node:v8';
 import { getCacheStats } from '@repo/redis';
 import promClient from 'prom-client';
+
+const NANOSECONDS_PER_MILLISECOND = 1_000_000;
+const EVENT_LOOP_RESOLUTION_MS = 10;
+const ROUNDING_FACTOR = 100;
+
+const eventLoopHistogram = monitorEventLoopDelay({ resolution: EVENT_LOOP_RESOLUTION_MS });
+eventLoopHistogram.enable();
+
+export interface RealLayerRuntimeSnapshot {
+  readonly eventLoopUtilization: number;
+  readonly eventLoopDelayP50Ms: number;
+  readonly eventLoopDelayP95Ms: number;
+  readonly eventLoopDelayP99Ms: number;
+  readonly v8HeapUsedBytes: number;
+  readonly v8HeapLimitBytes: number;
+}
+
+export function collectRealLayerRuntimeSnapshot(): RealLayerRuntimeSnapshot {
+  const elu = performance.eventLoopUtilization();
+  const heap = v8.getHeapStatistics();
+  const toMs = (ns: number): number =>
+    Number.isFinite(ns) && ns > 0
+      ? Math.round((ns / NANOSECONDS_PER_MILLISECOND) * ROUNDING_FACTOR) / ROUNDING_FACTOR
+      : 0;
+
+  return {
+    eventLoopUtilization: Math.round(elu.utilization * 10000) / 10000,
+    eventLoopDelayP50Ms: toMs(eventLoopHistogram.percentile(50)),
+    eventLoopDelayP95Ms: toMs(eventLoopHistogram.percentile(95)),
+    eventLoopDelayP99Ms: toMs(eventLoopHistogram.percentile(99)),
+    v8HeapUsedBytes: heap.used_heap_size,
+    v8HeapLimitBytes: heap.heap_size_limit,
+  };
+}
 
 // AGENT-TRACE: Performance metrics for Control Room operations
 // Uses prom-client for Prometheus-compatible metrics
@@ -182,15 +218,41 @@ const redisCacheLatencyGauge = new promClient.Gauge({
   labelNames: ['quantile'],
 });
 
+const nodeEventLoopUtilizationGauge = new promClient.Gauge({
+  name: 'node_event_loop_utilization_ratio',
+  help: 'Node.js 24 event loop utilization ratio (0.0 to 1.0)',
+});
+
+const nodeEventLoopDelayGauge = new promClient.Gauge({
+  name: 'node_event_loop_delay_ms',
+  help: 'Node.js 24 event loop delay in milliseconds by percentile',
+  labelNames: ['quantile'],
+});
+
+const nodeV8HeapUsedGauge = new promClient.Gauge({
+  name: 'node_v8_heap_used_bytes',
+  help: 'Node.js V8 used heap size in bytes',
+});
+
 register.registerMetric(xFetchTriggersTotal);
 register.registerMetric(xFetchLatency);
 register.registerMetric(redisCacheHitsTotal);
 register.registerMetric(redisCacheMissesTotal);
 register.registerMetric(redisCacheErrorsTotal);
 register.registerMetric(redisCacheLatencyGauge);
+register.registerMetric(nodeEventLoopUtilizationGauge);
+register.registerMetric(nodeEventLoopDelayGauge);
+register.registerMetric(nodeV8HeapUsedGauge);
 
 export async function getMetrics(): Promise<string> {
   try {
+    const runtimeSnapshot = collectRealLayerRuntimeSnapshot();
+    nodeEventLoopUtilizationGauge.set(runtimeSnapshot.eventLoopUtilization);
+    nodeEventLoopDelayGauge.set({ quantile: 'p50' }, runtimeSnapshot.eventLoopDelayP50Ms);
+    nodeEventLoopDelayGauge.set({ quantile: 'p95' }, runtimeSnapshot.eventLoopDelayP95Ms);
+    nodeEventLoopDelayGauge.set({ quantile: 'p99' }, runtimeSnapshot.eventLoopDelayP99Ms);
+    nodeV8HeapUsedGauge.set(runtimeSnapshot.v8HeapUsedBytes);
+
     const stats = await getCacheStats();
     xFetchTriggersTotal.reset();
     xFetchTriggersTotal.inc(stats.xFetchTriggers || 0);

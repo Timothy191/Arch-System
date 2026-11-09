@@ -3,6 +3,10 @@
  */
 
 import {
+  collectRealLayerRuntimeSnapshot,
+  type RealLayerRuntimeSnapshot,
+} from '@/lib/observability/metrics';
+import {
   clearObservabilityMetrics,
   recordDbQuery,
   recordJobExecution,
@@ -62,6 +66,15 @@ describe('GET /api/metrics', () => {
     expect(text).toContain(
       'portal_db_query_duration_ms_total{table="machines",operation="SELECT"} 125.2'
     );
+
+    // 4. Verify unified Control Room & Node 24 real-layer runtime metrics + Server-Timing header
+    const snapshot: RealLayerRuntimeSnapshot = collectRealLayerRuntimeSnapshot();
+    expect(snapshot.v8HeapUsedBytes).toBeGreaterThan(0);
+    expect(text).toContain('node_event_loop_utilization_ratio');
+    expect(text).toContain('node_event_loop_delay_ms{quantile="p95"}');
+    expect(text).toContain('node_v8_heap_used_bytes');
+    expect(text).toContain('control_room_shift_closeout_duration_seconds');
+    expect(res.headers.get('Server-Timing')).toContain('cache;dur=4.5');
   });
 
   it('enforces METRICS_SCRAPE_TOKEN when configured', async () => {

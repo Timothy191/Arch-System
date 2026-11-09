@@ -162,6 +162,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  const startedAt = Date.now();
   const completeness = await getShiftCompleteness(
     supabase,
     parsed.data.deptId,
@@ -169,6 +170,11 @@ export async function GET(req: NextRequest) {
     parsed.data.date,
     parsed.data.shift
   );
+  const queryDurationMs = Date.now() - startedAt;
 
-  return NextResponse.json(completeness);
+  return NextResponse.json(completeness, {
+    headers: {
+      'Server-Timing': `completeness_db;dur=${queryDurationMs}, total;dur=${queryDurationMs}`,
+    },
+  });
 }

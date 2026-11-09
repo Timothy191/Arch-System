@@ -107,7 +107,14 @@ export async function GET(req: Request) {
       }
 
       addEvent('scada_probe_complete', { state: currentState, latencyMs });
-      return applyCors(req, NextResponse.json(payload));
+      return applyCors(
+        req,
+        NextResponse.json(payload, {
+          headers: {
+            'Server-Timing': `redis;dur=${latencyMs}, total;dur=${latencyMs}`,
+          },
+        })
+      );
     } catch (err: unknown) {
       logError(err, { context: 'scada_status_error' });
       return NextResponse.json(
