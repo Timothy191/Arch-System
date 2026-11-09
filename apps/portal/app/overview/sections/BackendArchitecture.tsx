@@ -209,7 +209,7 @@ export default function BackendArchitecture() {
                 Supabase PostgreSQL 17
               </div>
               <div className="mt-1 font-mono text-[10px] text-text-muted">
-                213 Migrations · 100% RLS InitPlan
+                168 Migrations · 100% RLS InitPlan
               </div>
             </div>
             <div className="rounded-xl border-2 border-red-400/70 bg-white p-3 shadow-sm">

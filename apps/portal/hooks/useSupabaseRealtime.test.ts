@@ -118,6 +118,36 @@ describe('useSupabaseRealtime hook', () => {
     expect(result.current.error?.message).toBe('Connection timed out');
   });
 
+  it('should handle CHANNEL_ERROR and invoke onReconnect when recovering to SUBSCRIBED', () => {
+    const onReconnect = jest.fn();
+    const { result } = renderHook(() =>
+      useSupabaseRealtime({
+        supabaseClient: mockSupabaseClient,
+        table: 'breakdowns',
+        onReconnect,
+      })
+    );
+
+    expect(onReconnect).not.toHaveBeenCalled();
+
+    act(() => {
+      capturedStatusCallback('CHANNEL_ERROR', new Error('Realtime topic rejected'));
+    });
+
+    expect(result.current.status).toBe('CHANNEL_ERROR');
+    expect(result.current.isConnected).toBe(false);
+    expect(result.current.error?.message).toBe('Realtime topic rejected');
+
+    act(() => {
+      capturedStatusCallback('SUBSCRIBED');
+    });
+
+    expect(result.current.status).toBe('SUBSCRIBED');
+    expect(result.current.isConnected).toBe(true);
+    expect(result.current.error).toBeNull();
+    expect(onReconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('should handle unmount and cleanup channel', () => {
     const { unmount } = renderHook(() =>
       useSupabaseRealtime({

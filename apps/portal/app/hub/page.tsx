@@ -47,7 +47,7 @@ async function getDashboardCounts(today: string) {
         db.from('machines').select('id', { count: 'exact', head: true }).eq('active', false),
       ]);
       return {
-        incidentCount: 0,
+        incidentCount: breakdowns.count ?? 0,
         breakdownCount: breakdowns.count ?? 0,
         offlineMachineCount: machines.count ?? 0,
       };

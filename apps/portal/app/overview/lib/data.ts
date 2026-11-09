@@ -1466,7 +1466,7 @@ export const GIT_PROVENANCE_METRICS = {
   firstCommitDateFormatted: '26 Sep 2026, 10:00 SAST',
   firstCommitMessage: 'Initial commit: Arch-System codebase',
   totalCommits: 457,
-  totalMigrations: 213,
+  totalMigrations: 168,
   activeConnectorCount: 20,
   calculateTimeWorked(now: Date = new Date()) {
     const startMs = new Date(this.firstCommitTimestamp).getTime();

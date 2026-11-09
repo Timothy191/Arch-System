@@ -789,3 +789,8 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 
 - **Files**: `packages/ui/src/components/GlassCard.tsx`
 - **Action**: Replaced purple/magenta hexes in `colorPresets.aurora` with industrial emerald/cyan/amber palette, removed `animate-window-open` mount animation, and standardized interactive hover lift (`-translate-y-0.5`, `active:scale-[0.985]`).
+
+## 2026-11-09T13:26:50+02:00: Synchronize GlassCard Story CLI Version
+
+- **Files**: `src/components/GlassCard.stories.tsx`.
+- **Summary**: Updated terminal window story version string from `v1.5.1` to `v1.6.2`.

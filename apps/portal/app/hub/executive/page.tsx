@@ -172,7 +172,7 @@ async function getExecutiveData() {
         openBreakdowns,
         activeMachines: activeMachines ?? 0,
         totalMachines: totalMachines ?? 0,
-        openIncidents: 0,
+        openIncidents: openBreakdowns,
         activeEmployees: activeEmployees ?? 0,
         chartData,
       };

@@ -17,7 +17,7 @@ import { assertSafeUrl } from './ssrf-guard';
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const CONNECTION_TTL_MS = 5 * 60 * 1000; // evict idle connections after 5 minutes
-const CLIENT_INFO = { name: 'arch-portal', version: '1.5.1' } as const;
+const CLIENT_INFO = { name: 'arch-portal', version: '1.6.2' } as const;
 
 export interface ManagedInstallation {
   id: string;

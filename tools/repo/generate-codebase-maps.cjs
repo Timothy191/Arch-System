@@ -57,10 +57,17 @@ function getNextLogNumber() {
   return maxLogNum + 1;
 }
 
+function getMigrationCount() {
+  const migrationsDir = path.join(ROOT, 'packages', 'database', 'migrations');
+  if (!fs.existsSync(migrationsDir)) return 168;
+  return fs.readdirSync(migrationsDir).filter((file) => file.endsWith('.sql')).length;
+}
+
 /**
  * Generates comprehensive maps for the workspace.
  */
 function buildCodebaseMaps(dateInfo) {
+  const migrationCount = getMigrationCount();
   return [
     {
       key: 'route-feature',
@@ -147,13 +154,12 @@ Every Server Action strictly adheres to the machine-enforced 7-step execution or
       filename: 'database-schema.md',
       title: 'Database Schema & Topology Map',
       category: 'Database & Security',
-      summary:
-        'Postgres schema topology, 189 migrations, 100% InitPlan RLS policy enforcement, and entity relationships.',
+      summary: `Postgres schema topology, ${migrationCount} migrations, 100% InitPlan RLS policy enforcement, and entity relationships.`,
       content: `# 🔒 Database Schema & Topology Map
 
 **Generated:** \${dateInfo.displayDate}  
 **Engine:** PostgreSQL 17 via Supabase  
-**Migrations SSoT:** \`packages/database/migrations/\` (189 Applied Immutable Migrations)
+**Migrations SSoT:** \`packages/database/migrations/\` (${migrationCount} Applied Immutable Migrations)
 
 ---
 

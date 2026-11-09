@@ -1808,3 +1808,8 @@ AIAssistant chat.
 
 - **Files**: `apps/portal/app/(auth)/login/page.tsx`, `apps/portal/app/(auth)/login/LoginVideoStage.tsx`, `apps/portal/app/(auth)/login/page.test.tsx`, `apps/portal/app/hub/page.tsx`, `apps/portal/features/hub/components/CoreOperationalModules.tsx`, `apps/portal/app/(departments)/[department]/ControlRoomSummaryGridClient.tsx`, `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsKpiStrip.tsx`, `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx`, `apps/portal/app/overview/page.tsx`
 - **Action**: Upgraded typography (`>= 13px` minimum, sentence case), standardized `48px` (`h-12`) form fields and `44px` (`h-11`) search/filter targets, added `32px` background video pause toggle on `/login`, deduplicated version strings, unified `1360px` container edges, and removed entrance fade-up / scanline / decorative pulse animations per Taste-Skill 2.5.
+
+## 2026-11-09T13:26:50+02:00: Real-World Telemetry, Version & Overview Synchronization
+
+- **Files**: `app/api/health/route.ts`, `app/api/health/route.test.ts`, `lib/version.ts`, `lib/integrations/mcp-client-manager.ts`, `app/overview/*`, `app/(departments)/access-control/components/DashboardKPIGrid.tsx`, `app/hub/page.tsx`, `app/hub/executive/page.tsx`, `hooks/useOfflineQueue.test.ts`, `hooks/useSupabaseRealtime.test.ts`.
+- **Summary**: Added independent `FUXA_URL` HTTP probe in `/api/health`, replaced static Access Control KPI trend strings and zero incident counters with live metrics, synchronized `/overview` migration count (`168`) and module count (`13`), and expanded unit tests for offline DLQ and Realtime `CHANNEL_ERROR` recovery.

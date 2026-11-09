@@ -111,7 +111,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: metrics.activeQrCodes.toLocaleString(),
       subtext: 'Across employees, vehicles & equipment',
       icon: QrCode,
-      trend: { direction: 'up', label: '+23 this week' },
+      trend: {
+        direction: metrics.activeQrCodes > 0 ? 'up' : 'neutral',
+        label: `${metrics.activeQrCodes.toLocaleString()} active`,
+      },
       variant: 'success',
       hero: true,
     },
@@ -121,7 +124,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: metrics.expiringSoon.toLocaleString(),
       subtext: 'Require renewal before expiry',
       icon: Clock,
-      trend: { direction: 'up', label: '+12 since yesterday' },
+      trend: {
+        direction: metrics.expiringSoon > 0 ? 'up' : 'neutral',
+        label: metrics.expiringSoon > 0 ? `${metrics.expiringSoon} pending` : 'None expiring',
+      },
       variant: 'warning',
     },
     {
@@ -130,7 +136,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: metrics.deniedToday.toLocaleString(),
       subtext: 'Across all zones — review required',
       icon: ShieldAlert,
-      trend: { direction: 'up', label: '+4 vs. yesterday' },
+      trend: {
+        direction: metrics.deniedToday > 0 ? 'up' : 'neutral',
+        label: metrics.deniedToday > 0 ? `${metrics.deniedToday} blocked` : 'Zero denied',
+      },
       variant: 'danger',
     },
     {
@@ -139,7 +148,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: metrics.accessEventsToday.toLocaleString(),
       subtext: 'Total scans across all entry points',
       icon: ScanLine,
-      trend: { direction: 'neutral', label: 'Normal range' },
+      trend: {
+        direction: metrics.accessEventsToday > 0 ? 'up' : 'neutral',
+        label: `${metrics.accessEventsToday.toLocaleString()} logged`,
+      },
       variant: 'default',
     },
     {
@@ -148,7 +160,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: metrics.expiredAssigned.toLocaleString(),
       subtext: 'Critical — revoke immediately',
       icon: AlertCircle,
-      trend: { direction: 'down', label: 'Down from 7' },
+      trend: {
+        direction: metrics.expiredAssigned > 0 ? 'up' : 'down',
+        label: metrics.expiredAssigned > 0 ? `${metrics.expiredAssigned} active` : 'All cleared',
+      },
       variant: 'danger',
     },
     {
@@ -157,7 +172,10 @@ export default function DashboardKPIGrid({ metrics }: DashboardKPIGridProps) {
       value: `${metrics.entityCoverage}%`,
       subtext: 'Of all registered entities have active QR',
       icon: CheckCircle2,
-      trend: { direction: 'up', label: '+1.3% this month' },
+      trend: {
+        direction: metrics.entityCoverage >= 90 ? 'up' : 'neutral',
+        label: `${metrics.entityCoverage}% covered`,
+      },
       variant: 'success',
     },
   ];

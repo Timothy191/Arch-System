@@ -1026,3 +1026,12 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   2026-11-05T14:08:00+02:00 docs: add Section 30 Rendering Environments and RSC to optimization.md and register agent rule
   2026-11-05T14:18:00+02:00 ci: ignore vercel.json in biome.json to prevent Vercel CLI rewrite format conflict
   2026-11-05T14:20:00+02:00 docs: add Sections 31-33 on Client Components, Styling, and Optimizations to optimization.md
+
+## 2026-11-09T13:26:50+02:00: Real-World 27-Gate & Zero-Mock Data Remediation
+
+- **Scope**: `tools/scripts/agent-verify.sh`, `config/tools/cspell.json`, `tools/repo/generate-codebase-maps.cjs`, `apps/portal`, `packages/ui`, `libs/features/departments/data-access`, `libs/shared/hooks`.
+- **Changes**:
+  - Wired `pnpm lint:styles` (`stylelint`) and `pnpm lint:spelling` (`cspell`) into Gate 2 of `agent-verify.sh` and added domain terms (`unlogged`, `sparklines`, `tensioner`, `faststart`) to `cspell.json`.
+  - Replaced stale `'1.5.1'` fallback versions with `'1.6.2'` and synchronized migration/module counts (`168 Migrations`, `13 Modules`) across `/overview` and `generate-codebase-maps.cjs`.
+  - Replaced cloned Redis status in `/api/health` (`fuxa`), synthetic sparkline prefixes in `department-live-metrics.ts`, static trend strings in `DashboardKPIGrid.tsx`, and hardcoded zero incident counters in `/hub` & `/hub/executive`.
+  - Added Dead-Letter Queue (`deadLetterQueue`) and `MAX_QUEUE_RETRIES = 3` poison-pill protection to `useOfflineQueue.ts`, and `CHANNEL_ERROR` + `onReconnect` recovery to `useSupabaseRealtime.ts`.

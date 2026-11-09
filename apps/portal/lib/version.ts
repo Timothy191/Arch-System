@@ -12,7 +12,7 @@ export const APP_VERSION: string =
   process.env.PORTAL_VERSION ||
   generated.APP_VERSION ||
   packageJson.version ||
-  '1.5.1';
+  '1.6.2';
 
 export const GIT_COMMIT_SHA: string =
   process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || generated.GIT_COMMIT_SHA || 'dev';

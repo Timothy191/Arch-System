@@ -5,6 +5,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { NextResponse } from 'next/server';
 
 const POSTGRES_INSUFFICIENT_PRIVILEGE_CODE = '42501';
+const FUXA_PROBE_TIMEOUT_MS = 2000;
 
 function isAnonLockdownResponse(
   queryError: { readonly code?: string; readonly message?: string } | null
@@ -63,13 +64,39 @@ export async function GET() {
   }
   const redisLatencyMs = Date.now() - redisStart;
 
+  // 3. Fuxa SCADA Check (probe live FUXA_URL when configured; otherwise report Redis bridge state)
+  const fuxaStart = Date.now();
+  let fuxaStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+  let fuxaError: string | undefined;
+  const fuxaUrl = process.env.FUXA_URL || process.env.NEXT_PUBLIC_FUXA_URL;
+
+  if (fuxaUrl) {
+    try {
+      const probeRes = await fetch(`${fuxaUrl.replace(/\/$/, '')}/api/status`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(FUXA_PROBE_TIMEOUT_MS),
+      });
+      if (!probeRes.ok) {
+        fuxaStatus = 'degraded';
+        fuxaError = `Fuxa SCADA HTTP ${probeRes.status}`;
+      }
+    } catch (err) {
+      fuxaStatus = 'degraded';
+      fuxaError = err instanceof Error ? err.message : String(err);
+    }
+  } else {
+    fuxaStatus = redisStatus;
+    fuxaError = redisError;
+  }
+  const fuxaLatencyMs = fuxaUrl ? Date.now() - fuxaStart : redisLatencyMs;
+
   const totalLatencyMs = Date.now() - startedAt;
 
   // Aggregate overall status
   const overallStatus: 'healthy' | 'degraded' | 'unhealthy' =
     supabaseStatus === 'unhealthy'
       ? 'unhealthy'
-      : supabaseStatus === 'degraded' || redisStatus === 'degraded'
+      : supabaseStatus === 'degraded' || redisStatus === 'degraded' || fuxaStatus === 'degraded'
         ? 'degraded'
         : 'healthy';
 
@@ -89,9 +116,9 @@ export async function GET() {
         ...(redisError ? { error: redisError } : {}),
       },
       fuxa: {
-        status: redisStatus,
-        latencyMs: redisLatencyMs,
-        ...(redisError ? { error: redisError } : {}),
+        status: fuxaStatus,
+        latencyMs: fuxaLatencyMs,
+        ...(fuxaError ? { error: fuxaError } : {}),
       },
     },
   };
