@@ -4,6 +4,22 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-09T13:00:00Z] - Resolve Supabase test credential env-leak (@repo/supabase)
+
+- **Action:**
+  - Hardened `packages/supabase/src/__tests__/supabase.test.ts` and `middleware.test.ts` so real Supabase credential env vars (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_READ_REPLICA_URL`) cannot leak into test clients.
+  - Replaced fragile `delete process.env.X` (which caused cross-describe test pollution via the shared `originalEnv` reference) with a robust copy-then-delete pattern: build `process.env` from a copy of `originalEnv`, delete credential keys from the copy, then assign.
+  - Applied to `createServerSupabaseClient`, `createBrowserSupabaseClient`, `createReadReplicaClient`, and `createMiddlewareClient` beforeEach blocks, plus the per-test env overrides.
+- **Verification:**
+  - `pnpm --filter @repo/supabase test` → 34/34 PASS (baseline committed state had 4 failures due to the same leak).
+  - `pnpm --filter @repo/supabase type-check` → PASS
+  - `pnpm --filter @repo/supabase lint` → PASS
+  - `pnpm type-check` (full turbo, 21 packages) → PASS
+  - `pnpm lint` (biome, 1576 files) → PASS
+  - `pnpm policy:check` → PASS
+  - `pnpm audit:drift` → 100% PASS
+- **Note:** Root `pnpm test` gate has 2 pre-existing failures in `apps/portal/.../ControlRoomPanels.test.tsx` (OpenTelemetry span assertions) unrelated to this change; they exist on the clean `main` baseline.
+
 ## [2026-11-09T11:15:00Z] - Verify Tailwind class ordering (useSortedClasses) compliance across monorepo
 
 - **Action:**
