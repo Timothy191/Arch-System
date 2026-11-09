@@ -169,6 +169,7 @@ run_gate 26 "🧠" "AI Output Quality & Hallucination Controls" \
   "Run 'pnpm audit:ai-hallucination' to remove hallucinated imports, unexported @repo/* subpaths, or Next.js 16 boundary drift."
 
 # Assemble machine-readable JSON manifest for Gates 24 & 27 independent verification
+GIT_TREE_HASH=$(git rev-parse "HEAD^{tree}" 2>/dev/null || echo "unknown")
 node -e '
 const fs = require("node:fs");
 const lines = fs.readFileSync(process.argv[1], "utf8").trim().split("\n").filter(Boolean);
@@ -176,10 +177,11 @@ const gates = lines.map((l) => JSON.parse(l));
 const manifest = {
   runId: process.argv[2],
   startedAt: process.argv[3],
+  gitTreeHash: process.argv[5],
   gates,
 };
 fs.writeFileSync(process.argv[4], JSON.stringify(manifest, null, 2) + "\n", "utf8");
-' "${TMP_GATES_NDJSON}" "${RUN_ID}" "${STARTED_AT}" "${EVIDENCE_JSON}"
+' "${TMP_GATES_NDJSON}" "${RUN_ID}" "${STARTED_AT}" "${EVIDENCE_JSON}" "${GIT_TREE_HASH}"
 rm -f "${TMP_GATES_NDJSON}"
 
 echo -n "🔎 24 & 27. Evidence Integrity & Independent Reproducibility... "

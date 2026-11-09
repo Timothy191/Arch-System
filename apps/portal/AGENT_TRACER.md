@@ -1813,3 +1813,8 @@ AIAssistant chat.
 
 - **Files**: `app/api/health/route.ts`, `app/api/health/route.test.ts`, `lib/version.ts`, `lib/integrations/mcp-client-manager.ts`, `app/overview/*`, `app/(departments)/access-control/components/DashboardKPIGrid.tsx`, `app/hub/page.tsx`, `app/hub/executive/page.tsx`, `hooks/useOfflineQueue.test.ts`, `hooks/useSupabaseRealtime.test.ts`.
 - **Summary**: Added independent `FUXA_URL` HTTP probe in `/api/health`, replaced static Access Control KPI trend strings and zero incident counters with live metrics, synchronized `/overview` migration count (`168`) and module count (`13`), and expanded unit tests for offline DLQ and Realtime `CHANNEL_ERROR` recovery.
+
+## 2026-11-09T13:55:00+02:00: Extract GIT_PROVENANCE_METRICS Module
+
+- **Files**: `app/overview/lib/provenance-metrics.ts`, `app/overview/lib/data.ts`.
+- **Summary**: Extracted `GIT_PROVENANCE_METRICS` into a standalone 28-line module and re-exported from `data.ts` to minimize file-read token footprint.

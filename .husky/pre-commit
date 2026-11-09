@@ -1,3 +1,3 @@
-pnpm lint-staged
+pnpm lint-staged --quiet
 node tools/scripts/skills-pre-commit.mjs
 pnpm validate:json

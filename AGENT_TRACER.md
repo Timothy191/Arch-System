@@ -1035,3 +1035,8 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - Replaced stale `'1.5.1'` fallback versions with `'1.6.2'` and synchronized migration/module counts (`168 Migrations`, `13 Modules`) across `/overview` and `generate-codebase-maps.cjs`.
   - Replaced cloned Redis status in `/api/health` (`fuxa`), synthetic sparkline prefixes in `department-live-metrics.ts`, static trend strings in `DashboardKPIGrid.tsx`, and hardcoded zero incident counters in `/hub` & `/hub/executive`.
   - Added Dead-Letter Queue (`deadLetterQueue`) and `MAX_QUEUE_RETRIES = 3` poison-pill protection to `useOfflineQueue.ts`, and `CHANNEL_ERROR` + `onReconnect` recovery to `useSupabaseRealtime.ts`.
+
+## 2026-11-09T13:55:00+02:00: Token Distribution & Context Efficiency Optimizations
+
+- **Files**: `.husky/pre-push`, `.husky/pre-commit`, `tools/scripts/agent-verify.sh`, `apps/portal/app/overview/lib/provenance-metrics.ts`, `apps/portal/app/overview/lib/data.ts`, `docs/specs/token-distribution-optimizations.spec.md`.
+- **Summary**: Added 15-minute verified evidence cache check in `.husky/pre-push` to avoid redundant double execution of all 27 gates during `git push`, enabled `--quiet` on `lint-staged` in `.husky/pre-commit`, and extracted `GIT_PROVENANCE_METRICS` into `provenance-metrics.ts`.
