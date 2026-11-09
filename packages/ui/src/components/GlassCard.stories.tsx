@@ -46,7 +46,7 @@ export const Window: Story = {
       <div className="h-48 w-80 bg-black/90 p-4 font-mono text-green-400 text-sm">
         <p>arch-system login: admin</p>
         <p>password: ********</p>
-        <p className="mt-2">Welcome to Arch-System CLI v1.5.1</p>
+        <p className="mt-2">Welcome to Arch-System CLI v1.6.2</p>
         <p className="animate-pulse">_</p>
       </div>
     ),

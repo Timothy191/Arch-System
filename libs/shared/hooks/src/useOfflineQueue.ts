@@ -5,6 +5,22 @@ import { createJSONStorage, persist, type StateStorage } from 'zustand/middlewar
 
 type Hlc = { wall: number; counter: number; node: string };
 
+const MAX_QUEUE_RETRIES = 3;
+const HTTP_CLIENT_ERROR_MIN = 400;
+const HTTP_SERVER_ERROR_MIN = 500;
+const HTTP_REQUEST_TIMEOUT = 408;
+const HTTP_TOO_MANY_REQUESTS = 429;
+
+function isNonRetryableClientError(status: number | undefined): boolean {
+  if (typeof status !== 'number') return false;
+  return (
+    status >= HTTP_CLIENT_ERROR_MIN &&
+    status < HTTP_SERVER_ERROR_MIN &&
+    status !== HTTP_REQUEST_TIMEOUT &&
+    status !== HTTP_TOO_MANY_REQUESTS
+  );
+}
+
 export interface QueuedRequest {
   id: string;
   url: string;
@@ -13,16 +29,20 @@ export interface QueuedRequest {
   body?: string;
   timestamp: number;
   description: string;
-  hlc: Hlc;
+  hlc?: Hlc;
+  retryCount?: number;
+  lastError?: string;
 }
 
 interface OfflineQueueState {
   queue: QueuedRequest[];
+  deadLetterQueue: QueuedRequest[];
   isOnline: boolean;
   isSyncing: boolean;
   enqueue: (_request: Omit<QueuedRequest, 'id' | 'timestamp' | 'hlc'>) => void;
   dequeue: (_id: string) => void;
   clearQueue: () => void;
+  clearDeadLetterQueue: () => void;
   setOnlineStatus: (_status: boolean) => void;
   sync: () => Promise<void>;
 }
@@ -64,13 +84,16 @@ const idbStorage: StateStorage = {
   },
 };
 
-const compareHlc = (a: Hlc, b: Hlc) =>
-  a.wall - b.wall || a.counter - b.counter || a.node.localeCompare(b.node);
+const compareHlc = (a?: Hlc, b?: Hlc) => {
+  if (!a || !b) return 0;
+  return a.wall - b.wall || a.counter - b.counter || a.node.localeCompare(b.node);
+};
 
 export const useOfflineQueue = create<OfflineQueueState>()(
   persist(
     (set, get) => ({
       queue: [],
+      deadLetterQueue: [],
       isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
       isSyncing: false,
 
@@ -79,7 +102,8 @@ export const useOfflineQueue = create<OfflineQueueState>()(
           ...request,
           id: crypto.randomUUID(),
           timestamp: Date.now(),
-          hlc: { wall: Date.now(), counter: 0, node: 'client' }, // basic hlc
+          hlc: { wall: Date.now(), counter: 0, node: 'client' },
+          retryCount: 0,
         };
         set((state) => ({ queue: [...state.queue, newReq] }));
         if (typeof window !== 'undefined') {
@@ -94,6 +118,8 @@ export const useOfflineQueue = create<OfflineQueueState>()(
       },
 
       clearQueue: () => set({ queue: [] }),
+
+      clearDeadLetterQueue: () => set({ deadLetterQueue: [] }),
 
       setOnlineStatus: (status) => {
         if (get().isOnline === status) return;
@@ -123,11 +149,53 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             if (res.ok) {
               state.dequeue(req.id);
               successCount++;
-            } else {
-              failCount++;
+              continue;
             }
-          } catch (_e) {
+
             failCount++;
+            const nextRetryCount = (req.retryCount ?? 0) + 1;
+            const errorReason =
+              typeof res.status === 'number' ? `HTTP ${res.status}` : 'Sync response not ok';
+
+            if (isNonRetryableClientError(res.status) || nextRetryCount >= MAX_QUEUE_RETRIES) {
+              set((current) => ({
+                queue: current.queue.filter((queued) => queued.id !== req.id),
+                deadLetterQueue: [
+                  ...current.deadLetterQueue,
+                  { ...req, retryCount: nextRetryCount, lastError: errorReason },
+                ],
+              }));
+            } else {
+              set((current) => ({
+                queue: current.queue.map((queued) =>
+                  queued.id === req.id
+                    ? { ...queued, retryCount: nextRetryCount, lastError: errorReason }
+                    : queued
+                ),
+              }));
+            }
+          } catch (err) {
+            failCount++;
+            const nextRetryCount = (req.retryCount ?? 0) + 1;
+            const errorReason = err instanceof Error ? err.message : 'Network error';
+
+            if (nextRetryCount >= MAX_QUEUE_RETRIES) {
+              set((current) => ({
+                queue: current.queue.filter((queued) => queued.id !== req.id),
+                deadLetterQueue: [
+                  ...current.deadLetterQueue,
+                  { ...req, retryCount: nextRetryCount, lastError: errorReason },
+                ],
+              }));
+            } else {
+              set((current) => ({
+                queue: current.queue.map((queued) =>
+                  queued.id === req.id
+                    ? { ...queued, retryCount: nextRetryCount, lastError: errorReason }
+                    : queued
+                ),
+              }));
+            }
           }
         }
 

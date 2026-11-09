@@ -70,9 +70,9 @@ run_gate 1  "⚙️ " "Type Checking" \
   "pnpm type-check" \
   "Fix TypeScript errors."
 
-run_gate 2  "🧹" "Linting & Formatting" \
-  "pnpm turbo run //#lint:ci" \
-  "Fix Biome/ESLint errors."
+run_gate 2  "🧹" "Linting, Styles & Spelling" \
+  "pnpm turbo run //#lint:ci && pnpm lint:styles && pnpm lint:spelling" \
+  "Fix Biome, Stylelint, or CSpell errors."
 
 run_gate 3  "🧪" "Unit Tests" \
   "pnpm test" \

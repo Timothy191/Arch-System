@@ -138,7 +138,7 @@ export async function fetchLiveDepartmentMetrics(
           label: 'Loads',
           value: total > 0 ? `${total.toLocaleString()}` : 'Active',
         },
-        trend: hours.some((h) => h > 0) ? hours : [22, 28, 31, 35, 30, 27, 34, 38, 29, 33, 36, 30],
+        trend: hours,
         status: 'active',
       };
     }
@@ -160,7 +160,8 @@ export async function fetchLiveDepartmentMetrics(
         0
       );
       const totalMined = totalCoal + totalWaste;
-      const yieldPct = totalMined > 0 ? Math.round((totalCoal / totalMined) * 100) : 85;
+      const yieldPct = totalMined > 0 ? Math.round((totalCoal / totalMined) * 100) : 0;
+      const coalSeries = prodLogs.map((l: ProductionLogEntry) => Number(l.coal_tonnes) || 0);
 
       result.production = {
         stats: {
@@ -170,30 +171,28 @@ export async function fetchLiveDepartmentMetrics(
               ? `${totalCoal.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`
               : `${yieldPct}%`,
         },
-        trend: [78, 80, 82, 83, 85, 86, 88, yieldPct],
+        trend: coalSeries.length > 0 ? coalSeries : [totalCoal, totalWaste, totalMined],
         status: 'active',
       };
 
-      const plantYieldPct = totalMined > 0 ? Math.min(98, Math.max(85, yieldPct + 4)) : 91;
       result['plant-processing'] = {
         stats: {
           label: 'Plant Yield',
           value:
-            totalCoal > 0
-              ? `${Math.round(totalCoal * 0.914).toLocaleString(undefined, { maximumFractionDigits: 0 })}t`
-              : `${plantYieldPct}%`,
+            totalMined > 0
+              ? `${yieldPct}%`
+              : `${totalCoal.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
         },
-        trend: [87, 88, 89, 90, 89, 91, 91, plantYieldPct],
+        trend: coalSeries.length > 0 ? coalSeries : [totalCoal, totalMined],
         status: 'active',
       };
 
-      const stockpileTonnes = totalCoal > 0 ? 48200 + Math.round(totalCoal) : 48200;
       result['plant-inventory'] = {
         stats: {
           label: 'Stockpile',
-          value: `${stockpileTonnes.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
+          value: `${Math.round(totalCoal).toLocaleString(undefined, { maximumFractionDigits: 0 })}t`,
         },
-        trend: [42500, 43800, 44600, 45200, 46100, 46900, 47500, stockpileTonnes],
+        trend: coalSeries.length > 0 ? coalSeries : [Math.round(totalCoal)],
         status: 'active',
       };
     }
@@ -205,7 +204,7 @@ export async function fetchLiveDepartmentMetrics(
     const totalMachines = machinesList.length;
     const activeMachines = machinesList.filter((m: MachineActiveRow) => m.active !== false).length;
     const availabilityRate =
-      totalMachines > 0 ? Math.round((activeMachines / totalMachines) * 100) : 98;
+      totalMachines > 0 ? Math.round((activeMachines / totalMachines) * 100) : 0;
 
     result.engineering = {
       stats: {
@@ -213,7 +212,7 @@ export async function fetchLiveDepartmentMetrics(
         value: `${availabilityRate}%`,
       },
       status: activeBreakdowns > 0 ? 'maintenance' : 'active',
-      trend: [95, 96, 96, 97, 98, 98, availabilityRate],
+      trend: [activeMachines, totalMachines, availabilityRate],
     };
 
     // --- Access Control Overlay ---

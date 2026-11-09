@@ -136,6 +136,7 @@ function isValidRedirect(path: string): boolean {
     /^\/control-room(\/|$)/, // Control room department
     /^\/availability-utilization(\/|$)/, // Availability & Utilization department
     /^\/office(\/|$)/, // Office department
+    /^\/database(\/|$)/, // Database department
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
     /^\/overview(\/|$)/, // System Overview topology

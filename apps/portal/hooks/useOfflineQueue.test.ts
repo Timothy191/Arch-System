@@ -33,7 +33,12 @@ function mockFetch(impl: () => Promise<{ ok: boolean }>) {
 describe('useOfflineQueue', () => {
   beforeEach(() => {
     localStorage.clear();
-    useOfflineQueue.setState({ queue: [], isOnline: true, isSyncing: false });
+    useOfflineQueue.setState({
+      queue: [],
+      deadLetterQueue: [],
+      isOnline: true,
+      isSyncing: false,
+    });
     mockToastInfo.mockClear();
     mockToastSuccess.mockClear();
     mockToastError.mockClear();
@@ -126,5 +131,33 @@ describe('useOfflineQueue', () => {
 
     addSpy.mockRestore();
     removeSpy.mockRestore();
+  });
+
+  it('moves non-retryable 4xx poison-pill requests directly to deadLetterQueue', async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 422 }) as unknown as typeof fetch;
+    useOfflineQueue.setState({ queue: [makeRequest({ id: 'poison-1' })], deadLetterQueue: [] });
+
+    await useOfflineQueue.getState().sync();
+
+    expect(useOfflineQueue.getState().queue).toHaveLength(0);
+    expect(useOfflineQueue.getState().deadLetterQueue).toHaveLength(1);
+    expect(useOfflineQueue.getState().deadLetterQueue[0]!.id).toBe('poison-1');
+    expect(useOfflineQueue.getState().deadLetterQueue[0]!.lastError).toBe('HTTP 422');
+  });
+
+  it('moves repeatedly failing requests to deadLetterQueue after reaching max retries', async () => {
+    mockFetch(() => Promise.resolve({ ok: false }));
+    useOfflineQueue.setState({
+      queue: [makeRequest({ id: 'retry-max', retryCount: 2 })],
+      deadLetterQueue: [],
+    });
+
+    await useOfflineQueue.getState().sync();
+
+    expect(useOfflineQueue.getState().queue).toHaveLength(0);
+    expect(useOfflineQueue.getState().deadLetterQueue).toHaveLength(1);
+    expect(useOfflineQueue.getState().deadLetterQueue[0]!.retryCount).toBe(3);
   });
 });

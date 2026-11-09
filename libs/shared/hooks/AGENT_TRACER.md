@@ -108,3 +108,8 @@ Cover previously untested shared hooks requested by the test-suite hardening pas
 - **Phase 3 (Design)**: Added `ARCH_BREAKPOINTS_PX` (`xs: 0`, `sm: 640`, `md: 768`, `lg: 1024`, `xl: 1280`, `2xl: 1536`) and `breakpoints` helper with `-0.02px` exclusive upper-bound precision so `up('md')` and `down('md')` never overlap at `768px`.
 - **Phase 4 (Criticism)**: Preserved zero CSS-in-JS dependencies and added `typeof window !== 'undefined'` guards in `useMediaQuery.test.ts`.
 - **Phase 5 (Contract)**: Modified `src/useMediaQuery.ts` and `src/useMediaQuery.test.ts`; verified with `pnpm --filter @repo/shared/hooks test` and `pnpm --filter @repo/shared/hooks type-check`.
+
+## 2026-11-09T13:26:50+02:00: Poison-Pill Dead-Letter Queue & Realtime CHANNEL_ERROR Resilience
+
+- **Files**: `src/useOfflineQueue.ts`, `src/useSupabaseRealtime.ts`.
+- **Summary**: Added `deadLetterQueue`, `retryCount`, and `MAX_QUEUE_RETRIES = 3` with immediate 4xx poison-pill quarantine to `useOfflineQueue.ts`; added `CHANNEL_ERROR` status handling and `onReconnect` recovery callback to `useSupabaseRealtime.ts`.

@@ -208,6 +208,12 @@
     "zrank",
     "ZRANK",
     "ZREMRANGEBYRANK",
-    "ZREVRANK"
+    "ZREVRANK",
+    "unlogged",
+    "Unlogged",
+    "tensioner",
+    "sparklines",
+    "Sparklines",
+    "faststart"
   ]
 }

@@ -83,4 +83,41 @@ describe('GET /api/health', () => {
     expect(json.services.supabase.status).toBe('healthy');
     expect(json.services.supabase.error).toBeUndefined();
   });
+
+  it('probes FUXA_URL independently when configured and marks fuxa degraded on non-200 response', async () => {
+    const prevFuxaUrl = process.env.FUXA_URL;
+    process.env.FUXA_URL = 'http://fuxa.internal:1881';
+
+    createServerSupabaseClient.mockResolvedValue({
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({ data: [{ id: 'm-1' }], error: null }),
+    });
+
+    getRedisClient.mockResolvedValue({
+      isOpen: true,
+      ping: jest.fn().mockResolvedValue('PONG'),
+    });
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+    }) as any;
+
+    try {
+      const res = await GET();
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.status).toBe('degraded');
+      expect(json.services.redis.status).toBe('healthy');
+      expect(json.services.fuxa.status).toBe('degraded');
+      expect(json.services.fuxa.error).toContain('503');
+    } finally {
+      if (prevFuxaUrl === undefined) {
+        delete process.env.FUXA_URL;
+      } else {
+        process.env.FUXA_URL = prevFuxaUrl;
+      }
+    }
+  });
 });

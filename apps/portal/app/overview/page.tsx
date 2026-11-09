@@ -46,7 +46,7 @@ const OVERVIEW_NAV_ITEMS = [
   {
     value: 'departments',
     label: 'Departments',
-    badge: '8 Modules',
+    badge: '13 Modules',
     icon: Building2,
   },
   {
@@ -58,7 +58,7 @@ const OVERVIEW_NAV_ITEMS = [
   {
     value: 'database',
     label: 'Database Schema',
-    badge: '213 SQL',
+    badge: '168 SQL',
     icon: Database,
   },
   {
@@ -218,7 +218,7 @@ export default function OverviewPage() {
               Architecture & Ops
             </div>
             <div className="truncate font-mono text-[13px] text-[var(--text-muted)] leading-[18px]">
-              8 Modules · 213 Migrations
+              13 Modules · 168 Migrations
             </div>
           </div>
         </div>

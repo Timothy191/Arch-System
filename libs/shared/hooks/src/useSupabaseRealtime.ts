@@ -56,6 +56,8 @@ export interface UseSupabaseRealtimeOptions<T = Record<string, unknown>> {
   onUpdate?: (newRecord: T, oldRecord: Partial<T>) => void;
   /** Callback fired on DELETE events */
   onDelete?: (oldRecord: Partial<T>) => void;
+  /** Callback fired when subscription recovers to SUBSCRIBED after a timeout or channel error */
+  onReconnect?: () => void;
   /** Whether the subscription is enabled, defaults to true */
   enabled?: boolean;
 }
@@ -76,12 +78,14 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
   onInsert,
   onUpdate,
   onDelete,
+  onReconnect,
   enabled = true,
 }: UseSupabaseRealtimeOptions<T>) {
-  const [status, setStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED'>(
-    'CONNECTING'
-  );
+  const [status, setStatus] = useState<
+    'CONNECTING' | 'SUBSCRIBED' | 'TIMED_OUT' | 'CHANNEL_ERROR' | 'CLOSED'
+  >('CONNECTING');
   const [lastError, setLastError] = useState<Error | null>(null);
+  const hadConnectionDropRef = useRef(false);
 
   // Store stable callback references
   const onChangeRef = useRef(onChange);
@@ -92,6 +96,8 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
   onUpdateRef.current = onUpdate;
   const onDeleteRef = useRef(onDelete);
   onDeleteRef.current = onDelete;
+  const onReconnectRef = useRef(onReconnect);
+  onReconnectRef.current = onReconnect;
 
   useEffect(() => {
     if (!enabled || !supabaseClient || !table) {
@@ -155,11 +161,21 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
         if (!isMounted) return;
 
         if (subscriptionStatus === 'SUBSCRIBED') {
+          const recoveredFromDrop = hadConnectionDropRef.current;
+          hadConnectionDropRef.current = false;
           setStatus('SUBSCRIBED');
           setLastError(null);
+          if (recoveredFromDrop) {
+            onReconnectRef.current?.();
+          }
         } else if (subscriptionStatus === 'TIMED_OUT') {
+          hadConnectionDropRef.current = true;
           setStatus('TIMED_OUT');
           setLastError(err || new Error('Realtime subscription timed out'));
+        } else if (subscriptionStatus === 'CHANNEL_ERROR') {
+          hadConnectionDropRef.current = true;
+          setStatus('CHANNEL_ERROR');
+          setLastError(err || new Error('Realtime channel error'));
         } else if (subscriptionStatus === 'CLOSED') {
           setStatus('CLOSED');
         }
