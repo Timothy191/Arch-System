@@ -9,6 +9,10 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const {
+  listMigrationFiles,
+  stripSqlComments: stripComments,
+} = require('../lib/sql-migration-utils.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
@@ -18,31 +22,8 @@ const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
 const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, 'documentation', '03-audit-reports');
 const REPORT_PATH = path.join(REPORT_DIR, 'explain-query-plans-report.md');
 
-/**
- * Reads all migration files in numeric order.
- */
-function listMigrations() {
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error(`Migration directory not found: ${MIGRATIONS_DIR}`);
-    process.exit(2);
-  }
-  return fs
-    .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith('.sql'))
-    .sort();
-}
-
-/**
- * Strips comments from SQL string to prevent regex false positives.
- */
-function stripComments(sql) {
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
-  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
-  return out;
-}
-
 function auditPartitionedTables() {
-  const migrations = listMigrations();
+  const migrations = listMigrationFiles(MIGRATIONS_DIR);
   const partitionedTables = [];
   const compositeFKs = [];
 

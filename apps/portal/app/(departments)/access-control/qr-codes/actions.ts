@@ -1,9 +1,8 @@
 'use server';
 
-import { getAuthenticatedEmployee } from '@repo/supabase';
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
+import { DatabaseError } from '@/lib/errors/error-classes';
+import { assertAccessControlRoleFor } from '../actions/shared';
 
 export type CredentialEntityType = 'personnel' | 'vehicle' | 'coal_truck' | 'visitor' | 'equipment';
 
@@ -28,19 +27,13 @@ export interface EntityOption {
   type: CredentialEntityType;
 }
 
+const QR_MANAGEMENT_ROLES = ['admin', 'access_control'] as const;
+
 async function assertAccessControlRole() {
-  const supabase = await createServerSupabaseClient();
-  const principal = await getAuthenticatedEmployee(supabase);
-  if (!principal?.employee) throw new AuthError('Unauthorized');
-
-  if (!['admin', 'access_control'].includes(principal.employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'qr_management',
-      action: 'assert_role',
-    });
-  }
-
-  return { supabase, user: principal.user, employee: principal.employee };
+  return assertAccessControlRoleFor({
+    allowedRoles: QR_MANAGEMENT_ROLES,
+    resource: 'qr_management',
+  });
 }
 
 /**

@@ -4,6 +4,33 @@
 
 ---
 
+## [2026-11-09T21:25:00+02:00] - Monorepo Shared Function, Component & Hook Consolidation (20 SSoT Clusters Across 5 Tiers)
+
+- **EARS Spec (`docs/specs/shared-function-consolidation.spec.md`)**: Authored formal specification auditing 1,017 production files and defining 20 high-confidence duplication clusters vs. 4 intentional architectural separations (`getCurrentShift`, `normalizeRole`, `escapeHtml`, `usePitConnectivity`).
+- **Tier 1 — Server Actions & API Route Helpers (`apps/portal`)**:
+  - Consolidated 6 duplicated `assertAdmin()` implementations into `apps/portal/features/admin/actions/shared.ts` across `fleet.ts`, `minerals.ts`, `sites.ts`, and `targets.ts`.
+  - Consolidated 3 `assertAccessControlRole()` / `ACCESS_CONTROL_WRITE_ROLES` helpers into `apps/portal/app/(departments)/access-control/actions/shared.ts` across `print-cards/actions.ts` and `qr-codes/actions.ts`.
+  - Extracted `sanitizeCsvCell`, `prepareExportRequest`, `resolveExportDateRange`, `wantsCsv`, `exportDatabaseErrorResponse`, `createCsvExportResponse`, and `resolveDepartmentId` into `apps/portal/lib/api/export-helpers.ts` across `machines/route.ts`, `fuel-logs/route.ts`, and `production/route.ts`.
+  - Unified Redis Proxy timing-safe bearer auth into `authorizeRedisProxyRequest()` in `apps/portal/lib/api/telemetry-auth.ts` across `executions/route.ts` and `workflows/route.ts`.
+  - Extracted BullMQ queue factory & Redis URL parser (`getWorkflowQueue`, `getQueueRedisConnectionOptions`, `WORKFLOW_QUEUE_NAME`) into `apps/portal/lib/workflows/queue.ts` across `dispatch/route.ts` and `jobs/[jobId]/route.ts`.
+- **Tier 2 — UI Components, Sparklines, Error Boundaries & Skeletons (`packages/ui`, `libs/`, `apps/portal`)**:
+  - Exported `ARCH_LOGO_PATH` and `ARCH_LOGO_VIEWBOX` from `packages/ui/src/components/Logo.tsx` and replaced 9 hardcoded 740-char SVG path strings across `HeroRotator.tsx`, `HeroCardContent.tsx`, `DepartmentCard.tsx`, `Sparkline.tsx`, and `AlertPanel.tsx`.
+  - Extracted `GoldenTelemetrySparkline` and `buildSparklinePoints` into `apps/portal/components/telemetry/GoldenTelemetrySparkline.tsx`, eliminating >500 lines of duplicated SVG sparkline code across `ControlRoomSummaryGridClient.tsx`, `ExcavatorActivityTelemetryOverview.tsx`, and `MachineOperationsKpiStrip.tsx`.
+  - Extracted `getErrorTitle`, `getErrorMessage`, and `getActionLink` into `apps/portal/lib/errors/error-display.ts` across `ErrorFallback.tsx`, `app/error.tsx`, `app/hub/error.tsx`, and `app/(departments)/[department]/error.tsx`.
+  - Extracted `DepartmentPageLoadingSkeleton` into `apps/portal/components/skeletons/DepartmentPageLoadingSkeleton.tsx` across 5 department `loading.tsx` routes.
+  - Extracted `openDockedGoogleWindow` into `apps/portal/lib/google-workspace.ts` across `SplitWindowGoogleCalendarView.tsx` and `SplitWindowGoogleDocsView.tsx`.
+- **Tier 3 — Client Hooks, Telemetry & Domain Utilities (`apps/portal`, `libs/shared`, `packages/utils`)**:
+  - Re-exported `apps/portal/lib/observability/client-telemetry.ts` from `@repo/shared/hooks` SSoT; exposed `@repo/utils/hlc` subpath export and delegated `compareHlc` in `useOfflineQueue.ts`.
+  - Extracted `isAdtOrDumpTruck`, `isExcavator`, `isDozer`, and `isDrill` into `apps/portal/lib/control-room/machine-utils.ts` across `machine-operator-scan/route.ts` and `C66MachineOperatorScanner.tsx`.
+  - Created `useFormDraftPersistence<T>` in `libs/shared/hooks/src/useFormDraftPersistence.ts` and refactored `DailyLogForm.tsx`, `DozerRollForm.tsx`, and `ControlRoomChecklistWidget.tsx`.
+- **Tier 4 — Shared Infrastructure Packages (`@repo/supabase`, `@repo/redis`)**:
+  - Consolidated 6 Supabase URL/anon-key/cookie-option resolvers into `packages/supabase/src/config.ts` across `client.ts`, `middleware.ts`, `proxy.ts`, and `server.ts`.
+  - Consolidated `unrefSleep` and `getCircuitGuardedRedisClient` into `packages/redis/src/internal-utils.ts` across `locks.ts`, `streams.ts`, `cache.ts`, and `invalidation.ts`.
+- **Tier 5 — Build, Audit & Governance Scripts (`tools/`)**:
+  - Extracted `getDirSize` (`tools/lib/fs-metrics.cjs`), `getFormattedDate`/`getNextLogNumber` (`tools/lib/versioned-log-dir.cjs`), and `stripSqlComments`/`listMigrationFiles` (`tools/lib/sql-migration-utils.cjs`) across 8 audit/ops/governance scripts.
+
+---
+
 ## [2026-11-09T16:20:00+02:00] - Real-Layer Differential Telemetry Comparator, W3C Server-Timing & Redis Bridge Fix
 
 - **Real-Layer Differential Benchmark (`tools/scripts/real-layer-benchmark.mjs`)**:

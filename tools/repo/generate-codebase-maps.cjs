@@ -11,51 +11,10 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getFormattedDate, getNextLogNumber } = require('../lib/versioned-log-dir.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const MAPS_ROOT = path.join(ROOT, 'codebase-maps');
-
-/**
- * Formats date strings for versioned folder naming and ISO metadata.
- */
-function getFormattedDate() {
-  const now = new Date();
-  const yy = String(now.getFullYear()).slice(-2);
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  return {
-    folderDate: `${yy}-${mm}-${dd}`,
-    isoDate: now.toISOString(),
-    displayDate: `${now.toLocaleString('en-US', { timeZone: 'UTC' })} UTC`,
-  };
-}
-
-/**
- * Determines the next log folder number by inspecting codebase-maps/.
- */
-function getNextLogNumber() {
-  if (!fs.existsSync(MAPS_ROOT)) {
-    fs.mkdirSync(MAPS_ROOT, { recursive: true });
-    return 1;
-  }
-
-  const entries = fs.readdirSync(MAPS_ROOT, { withFileTypes: true });
-  let maxLogNum = 0;
-
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const match = entry.name.match(/^log-(\d+)/i);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (num > maxLogNum) {
-          maxLogNum = num;
-        }
-      }
-    }
-  }
-
-  return maxLogNum + 1;
-}
 
 function getMigrationCount() {
   const migrationsDir = path.join(ROOT, 'packages', 'database', 'migrations');
@@ -847,10 +806,10 @@ function main() {
   if (isLatestOnly) {
     folderName = 'latest';
     targetDir = latestDir;
-    logNum = getNextLogNumber() - 1;
+    logNum = getNextLogNumber(MAPS_ROOT) - 1;
     console.log(`📁 Updating codebase-maps/latest/ directly (fast-refresh)\n`);
   } else {
-    logNum = getNextLogNumber();
+    logNum = getNextLogNumber(MAPS_ROOT);
     folderName = `log-${logNum}(${dateInfo.folderDate})`;
     targetDir = path.join(MAPS_ROOT, folderName);
     fs.mkdirSync(targetDir, { recursive: true });

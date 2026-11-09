@@ -13,6 +13,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getDirSize } = require('../lib/fs-metrics.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const MEMORY_DIR = path.join(ROOT, '.agents', 'memory_base');
@@ -42,22 +43,6 @@ const DEPRECATED_SKILL_PATTERNS = [
   'microsoft-foundry', // External skills, load on demand
   'entra-', // External skills, load on demand
 ];
-
-function getDirSize(dirPath) {
-  let totalSize = 0;
-  if (!fs.existsSync(dirPath)) return totalSize;
-
-  const files = fs.readdirSync(dirPath, { withFileTypes: true });
-  for (const file of files) {
-    const fullPath = path.join(dirPath, file.name);
-    if (file.isDirectory()) {
-      totalSize += getDirSize(fullPath);
-    } else {
-      totalSize += fs.statSync(fullPath).size;
-    }
-  }
-  return totalSize;
-}
 
 function analyzeSkills() {
   if (!fs.existsSync(SKILLS_DIR)) {

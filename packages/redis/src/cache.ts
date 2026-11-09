@@ -1,5 +1,6 @@
 import { redisCircuitBreaker } from './circuit-breaker';
-import { createRedisSubscriber, getRedisClient } from './client';
+import { createRedisSubscriber } from './client';
+import { getCircuitGuardedRedisClient } from './internal-utils';
 import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
 import { memoryDelete, memoryDeleteByPrefix, memoryDeleteKeys, memorySet, readMemory } from './l1';
 import { acquireRefreshLease, releaseRefreshLease } from './locks';
@@ -36,54 +37,44 @@ export {
 let subscriberInitialized = false;
 
 async function getRedisClientSafe() {
-  // Short-circuit when the circuit breaker is open — avoid hitting a known-unhealthy Redis.
-  // In tests where client.ts is partially mocked, redisCircuitBreaker may be undefined.
-  if (!redisCircuitBreaker || redisCircuitBreaker.isOpen()) {
+  const redis = await getCircuitGuardedRedisClient('cache:getRedisClientSafe');
+  if (!redis) {
     return null;
   }
 
-  try {
-    const redis = await getRedisClient();
-    redisCircuitBreaker.recordSuccess();
-
-    if (!subscriberInitialized) {
-      subscriberInitialized = true;
-      createRedisSubscriber()
-        .then((sub) => {
-          sub
-            .subscribe('cache:invalidate:broadcast', (message) => {
-              try {
-                const payload = JSON.parse(message) as {
-                  type?: string;
-                  keys?: string[];
-                  prefixes?: string[];
-                };
-                if (payload.type === 'keys' && Array.isArray(payload.keys)) {
-                  memoryDeleteKeys(payload.keys);
-                } else if (payload.type === 'prefixes' && Array.isArray(payload.prefixes)) {
-                  for (const p of payload.prefixes) {
-                    memoryDeleteByPrefix(p);
-                  }
+  if (!subscriberInitialized) {
+    subscriberInitialized = true;
+    createRedisSubscriber()
+      .then((sub) => {
+        sub
+          .subscribe('cache:invalidate:broadcast', (message) => {
+            try {
+              const payload = JSON.parse(message) as {
+                type?: string;
+                keys?: string[];
+                prefixes?: string[];
+              };
+              if (payload.type === 'keys' && Array.isArray(payload.keys)) {
+                memoryDeleteKeys(payload.keys);
+              } else if (payload.type === 'prefixes' && Array.isArray(payload.prefixes)) {
+                for (const p of payload.prefixes) {
+                  memoryDeleteByPrefix(p);
                 }
-              } catch {
-                // Ignore malformed broadcast messages
               }
-            })
-            .catch(() => {
-              subscriberInitialized = false;
-            });
-        })
-        .catch(() => {
-          subscriberInitialized = false;
-        });
-    }
-
-    return redis;
-  } catch (err) {
-    redisCircuitBreaker?.recordFailure();
-    console.error('[cache:getRedisClientSafe] Redis unavailable:', err);
-    return null;
+            } catch {
+              // Ignore malformed broadcast messages
+            }
+          })
+          .catch(() => {
+            subscriberInitialized = false;
+          });
+      })
+      .catch(() => {
+        subscriberInitialized = false;
+      });
   }
+
+  return redis;
 }
 
 // ------------------------------------------------------------------

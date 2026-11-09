@@ -1,9 +1,8 @@
 'use server';
 
-import { getAuthenticatedEmployee } from '@repo/supabase';
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
+import { DatabaseError } from '@/lib/errors/error-classes';
+import { ACCESS_CONTROL_WRITE_ROLES, assertAccessControlRoleFor } from '../actions/shared';
 
 export interface Neo300Printer {
   id: string;
@@ -70,18 +69,10 @@ export interface CardPrintJob {
 }
 
 async function assertAccessControlRole() {
-  const supabase = await createServerSupabaseClient();
-  const principal = await getAuthenticatedEmployee(supabase);
-  if (!principal?.employee) throw new AuthError('Unauthorized');
-
-  if (!['admin', 'access_control', 'supervisor'].includes(principal.employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'neo300_print',
-      action: 'assert_role',
-    });
-  }
-
-  return { supabase, user: principal.user, employee: principal.employee };
+  return assertAccessControlRoleFor({
+    allowedRoles: ACCESS_CONTROL_WRITE_ROLES,
+    resource: 'neo300_print',
+  });
 }
 
 /**

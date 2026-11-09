@@ -4,6 +4,7 @@ import { serverLogger } from '@repo/logger';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { resolveSupabasePublicConfig } from './config';
 import { normalizeSupabaseCookies } from './cookie-utils';
 
 export { createClient };
@@ -69,24 +70,7 @@ export async function instrumentedFetch(
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  if (!supabaseUrl) {
-    throw new Error(
-      'Missing Supabase URL: set NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) in the environment.'
-    );
-  }
-  // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
-  if (!supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase publishable key: set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or ANON_KEY) in the environment.'
-    );
-  }
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabasePublicConfig();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     global: {
@@ -130,23 +114,7 @@ export async function createServerSupabaseClient() {
 }
 
 export function createBearerSupabaseClient(token: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  if (!supabaseUrl) {
-    throw new Error(
-      'Missing Supabase URL: set NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) in the environment.'
-    );
-  }
-
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
-  if (!supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase publishable key: set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or ANON_KEY) in the environment.'
-    );
-  }
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabasePublicConfig();
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: {

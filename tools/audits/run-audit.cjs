@@ -14,52 +14,11 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getFormattedDate, getNextLogNumber } = require('../lib/versioned-log-dir.cjs');
 const { execSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AUDIT_ROOT = path.join(ROOT, 'documentation', '03-audit-reports');
-
-/**
- * Formats date as YY-MM-DD for folder naming and ISO string for metadata.
- */
-function getFormattedDate() {
-  const now = new Date();
-  const yy = String(now.getFullYear()).slice(-2);
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  return {
-    folderDate: `${yy}-${mm}-${dd}`,
-    isoDate: now.toISOString(),
-    displayDate: `${now.toLocaleString('en-US', { timeZone: 'UTC' })} UTC`,
-  };
-}
-
-/**
- * Scans documentation/03-audit-reports/ directory to determine the next log folder number.
- */
-function getNextLogNumber() {
-  if (!fs.existsSync(AUDIT_ROOT)) {
-    fs.mkdirSync(AUDIT_ROOT, { recursive: true });
-    return 1;
-  }
-
-  const entries = fs.readdirSync(AUDIT_ROOT, { withFileTypes: true });
-  let maxLogNum = 0;
-
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const match = entry.name.match(/^log-(\d+)/i);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (num > maxLogNum) {
-          maxLogNum = num;
-        }
-      }
-    }
-  }
-
-  return maxLogNum + 1;
-}
 
 function runDependencyAudit(args) {
   try {
@@ -94,7 +53,7 @@ function main() {
   console.log('🚀 Starting Arch Systems Operations Audit Suite');
   console.log('==================================================\n');
 
-  const logNum = getNextLogNumber();
+  const logNum = getNextLogNumber(AUDIT_ROOT);
   const dateInfo = getFormattedDate();
   const folderName = `log-${logNum}(${dateInfo.folderDate})`;
   const targetDir = path.join(AUDIT_ROOT, folderName);

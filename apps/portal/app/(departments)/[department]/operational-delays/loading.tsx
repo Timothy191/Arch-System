@@ -1,15 +1,5 @@
-import { GlassSkeleton } from '@repo/ui/components/ui/glass-skeleton';
+import { DepartmentPageLoadingSkeleton } from '@/components/skeletons/DepartmentPageLoadingSkeleton';
 
 export default function OperationalDelaysLoading() {
-  return (
-    <div className="space-y-6">
-      <GlassSkeleton showHeader rows={2} />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <GlassSkeleton rows={2} />
-        <GlassSkeleton rows={2} />
-        <GlassSkeleton rows={2} />
-      </div>
-      <GlassSkeleton className="h-96" rows={1} />
-    </div>
-  );
+  return <DepartmentPageLoadingSkeleton />;
 }

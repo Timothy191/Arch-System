@@ -88,53 +88,26 @@
  *         description: Internal server error
  */
 
-import { exportQuerySchema } from '@repo/contract/schemas/export.schema';
-import { createServerSupabaseClient } from '@repo/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
 import { applyCors } from '@/lib/api/cors';
+import {
+  createCsvExportResponse,
+  exportDatabaseErrorResponse,
+  prepareExportRequest,
+  resolveDepartmentId,
+  resolveExportDateRange,
+  wantsCsv,
+} from '@/lib/api/export-helpers';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
 export const maxDuration = 60;
 
-function sanitizeCsvCell(value: string): string {
-  const dangerous = /^[=+\-@\t\r]/;
-  const sanitized = dangerous.test(value) ? `'${value}` : value;
-  return `"${sanitized.replace(/"/g, '""')}"`;
-}
-
 async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return applyCors(
-      req,
-      NextResponse.json(
-        { success: false, error: { message: 'Unauthorized', code: 'API_ERROR' } },
-        { status: 401 }
-      )
-    );
-  }
-
-  const { searchParams } = req.nextUrl;
-  const params = Object.fromEntries(searchParams.entries());
-  const parsed = exportQuerySchema.safeParse(params);
-  if (!parsed.success) {
-    return applyCors(
-      req,
-      NextResponse.json(
-        { error: 'Invalid query parameters', details: parsed.error.issues },
-        { status: 400 }
-      )
-    );
-  }
-  const { from, to, dept, limit, offset } = parsed.data;
-
-  const fromDate = from ?? new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
-  const toDate = to ?? new Date().toISOString().split('T')[0]!;
-
-  const format = req.headers.get('accept')?.includes('text/csv') ? 'csv' : 'json';
+  const ctx = await prepareExportRequest(req);
+  if (ctx.kind === 'rejected') return ctx.response;
+  const { supabase } = ctx;
+  const { from, to, dept, limit, offset } = ctx.query;
+  const { fromDate, toDate } = resolveExportDateRange({ from, to });
 
   let query = supabase
     .from('daily_logs')
@@ -146,25 +119,11 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     .order('log_date', { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (dept) {
-    const { data: deptRow } = await supabase
-      .from('departments')
-      .select('id')
-      .eq('name', dept)
-      .single();
-    if (deptRow) query = query.eq('department_id', deptRow.id);
-  }
+  const departmentId = await resolveDepartmentId(supabase, dept);
+  if (departmentId) query = query.eq('department_id', departmentId);
 
   const { data, error, count } = await query;
-  if (error) {
-    return applyCors(
-      req,
-      NextResponse.json(
-        { success: false, error: { message: 'Database query failed', code: 'API_ERROR' } },
-        { status: 500 }
-      )
-    );
-  }
+  if (error) return exportDatabaseErrorResponse(req);
 
   type ProdLog = { coal_tonnes: number | null; waste_tonnes: number | null };
   type DailyLogRow = {
@@ -193,21 +152,12 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     };
   });
 
-  if (format === 'csv') {
-    const headers = Object.keys(rows[0] ?? {});
-    const csv = [
-      headers.join(','),
-      ...rows.map((r) =>
-        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r]))).join(',')
-      ),
-    ].join('\n');
-    const response = new NextResponse(csv, {
-      headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="production-${fromDate}-${toDate}.csv"`,
-      },
+  if (wantsCsv(req)) {
+    return createCsvExportResponse(req, {
+      headers: Object.keys(rows[0] ?? {}),
+      rows,
+      filename: `production-${fromDate}-${toDate}.csv`,
     });
-    return applyCors(req, response);
   }
 
   const response = NextResponse.json({

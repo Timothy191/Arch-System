@@ -1,7 +1,11 @@
 'use client';
 
 import { dozerRollSchema } from '@repo/contract/schemas/form.schema';
-import { useOfflineQueue, useUnsavedChangesWarning } from '@repo/shared/hooks';
+import {
+  useFormDraftPersistence,
+  useOfflineQueue,
+  useUnsavedChangesWarning,
+} from '@repo/shared/hooks';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { ShiftToggle } from '@repo/ui/ShiftToggle';
 import { getCurrentShift } from '@repo/utils';
@@ -98,32 +102,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
     shiftType,
   ]);
 
-  const clearDraft = () => {
-    if (typeof window === 'undefined') return;
-    try {
-      localStorage.removeItem(draftKey);
-    } catch {
-      // Ignore cleanup error
-    }
-  };
-
-  useEffect(() => {
-    saveDraft();
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') saveDraft();
-    };
-    window.addEventListener('beforeunload', saveDraft);
-    window.addEventListener('pagehide', saveDraft);
-    window.addEventListener('arch:tab-swap', saveDraft);
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      window.removeEventListener('beforeunload', saveDraft);
-      window.removeEventListener('pagehide', saveDraft);
-      window.removeEventListener('arch:tab-swap', saveDraft);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [saveDraft]);
+  const { clearDraft } = useFormDraftPersistence(draftKey, saveDraft);
 
   const isDirty =
     isOpen && !!(machineId || lengthM || widthM || bladePasses || pushCount || hoursOperated);

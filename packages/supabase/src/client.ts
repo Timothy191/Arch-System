@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { resolveSupabasePublicConfig } from './config';
 import { normalizeSupabaseCookies } from './cookie-utils';
 
 type BrowserSupabaseClient = ReturnType<typeof createBrowserClient>;
@@ -82,33 +83,8 @@ function writeDocumentCookies(cookiesToSet: readonly BrowserCookieToSet[]): void
   }
 }
 
-function readSupabaseEnv() {
-  const envSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  if (!envSupabaseUrl) {
-    throw new Error(
-      'Missing Supabase URL: set NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) in the environment.'
-    );
-  }
-  const supabaseUrl = envSupabaseUrl;
-
-  // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
-  if (!supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase publishable key: set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or ANON_KEY) in the environment.'
-    );
-  }
-
-  return { supabaseUrl, supabaseAnonKey };
-}
-
 export function createBrowserSupabaseClient() {
-  const { supabaseUrl, supabaseAnonKey } = readSupabaseEnv();
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabasePublicConfig();
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,

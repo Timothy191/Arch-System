@@ -14,6 +14,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { stripSqlComments: stripComments } = require('../lib/sql-migration-utils.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
@@ -23,12 +24,6 @@ const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
 const REPORT_DIR = path.join(ROOT, 'documentation', '03-audit-reports');
 
 console.log('\n🔒 Initiating 4-Operation RLS Coverage Matrix Audit...\n');
-
-function stripComments(sql) {
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
-  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
-  return out;
-}
 
 const migrationFiles = fs
   .readdirSync(MIGRATIONS_DIR)

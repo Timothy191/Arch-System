@@ -1,9 +1,8 @@
+import { compareHlc as compareCanonicalHlc, type Hlc } from '@repo/utils/hlc';
 import { del, get, set } from 'idb-keyval';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-
-type Hlc = { wall: number; counter: number; node: string };
 
 const MAX_QUEUE_RETRIES = 3;
 const HTTP_CLIENT_ERROR_MIN = 400;
@@ -84,9 +83,10 @@ const idbStorage: StateStorage = {
   },
 };
 
+/** Legacy queued items may lack an HLC; treat those as concurrent (stable order). */
 const compareHlc = (a?: Hlc, b?: Hlc) => {
   if (!a || !b) return 0;
-  return a.wall - b.wall || a.counter - b.counter || a.node.localeCompare(b.node);
+  return compareCanonicalHlc(a, b);
 };
 
 export const useOfflineQueue = create<OfflineQueueState>()(
