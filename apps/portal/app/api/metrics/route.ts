@@ -9,6 +9,7 @@
 import { getCacheStats } from '@repo/redis';
 import { registry } from '@repo/utils/observability/metrics';
 import { NextResponse } from 'next/server';
+import { getMetrics as getControlRoomAndRuntimeMetrics } from '@/lib/observability/metrics';
 import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
 
 function escapeLabelValue(value: string): string {
@@ -132,14 +133,20 @@ portal_cache_xfetch_triggers_total ${cacheStats.xFetchTriggers ?? 0}
   }
   body += `\n`;
 
-  // 4. Prometheus Registry Metrics (@repo/utils)
-  const promMetrics = await registry.metrics();
-  body += promMetrics;
+  // 4. Prometheus Registry Metrics (@repo/utils + Control Room & Node 24 Runtime)
+  const startedAt = Date.now();
+  const [promMetrics, controlRoomRuntimeMetrics] = await Promise.all([
+    registry.metrics(),
+    getControlRoomAndRuntimeMetrics(),
+  ]);
+  const scrapeDurationMs = Date.now() - startedAt;
+  body += `${promMetrics}\n${controlRoomRuntimeMetrics}`;
 
   return new NextResponse(body, {
     headers: {
       'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Server-Timing': `cache;dur=${cacheStats.avgLatencyMs}, scrape;dur=${scrapeDurationMs}`,
     },
   });
 }

@@ -157,7 +157,11 @@ console.log('5️⃣  Executing Redis Integration Test Suites (@repo/redis & por
 const redisPortalRun = spawnSync('pnpm', ['--filter', 'portal', 'test:integration'], {
   cwd: ROOT,
   encoding: 'utf8',
-  env: { ...process.env, REDIS_INTEGRATION: '1' },
+  env: {
+    ...process.env,
+    REDIS_INTEGRATION: '1',
+    REDIS_URL: process.env.REDIS_INTEGRATION_URL || 'redis://127.0.0.1:6379',
+  },
   timeout: 60000,
 });
 
@@ -173,7 +177,11 @@ if (redisPortalRun.status !== 0) {
 const redisPkgRun = spawnSync('pnpm', ['--filter', '@repo/redis', 'test:integration'], {
   cwd: ROOT,
   encoding: 'utf8',
-  env: { ...process.env, REDIS_INTEGRATION: '1' },
+  env: {
+    ...process.env,
+    REDIS_INTEGRATION: '1',
+    REDIS_URL: process.env.REDIS_INTEGRATION_URL || 'redis://127.0.0.1:6379',
+  },
   timeout: 90000,
 });
 
@@ -182,6 +190,28 @@ if (redisPkgRun.status !== 0) {
   violations.push(`@repo/redis integration suite failed:\n${errOutput}`);
 } else {
   console.log('   ✓ @repo/redis capability & lock integration suite passed.');
+}
+
+// ── 6. Real-Layer Differential Telemetry & Baseline Probe ───────────────────
+console.log('6️⃣  Executing Real-Layer Differential Telemetry & Baseline Probe...');
+
+const realLayerRun = spawnSync(
+  process.execPath,
+  [path.join(ROOT, 'tools', 'scripts', 'real-layer-benchmark.mjs')],
+  {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 30000,
+  }
+);
+
+if (realLayerRun.status !== 0) {
+  const errOutput = (realLayerRun.stderr || realLayerRun.stdout || '').trim();
+  violations.push(`Real-layer differential telemetry probe failed:\n${errOutput}`);
+} else {
+  console.log(
+    '   ✓ Real-layer differential telemetry probe passed (Node 24 ELU/ELD + Live TCP Redis p95 + Server-Timing).'
+  );
 }
 
 // ── Summary Report ──────────────────────────────────────────────────────────

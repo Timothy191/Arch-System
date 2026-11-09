@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-11-09T16:20:00+02:00] - Real-Layer Differential Telemetry Comparator, W3C Server-Timing & Redis Bridge Fix
+
+- **Real-Layer Differential Benchmark (`tools/scripts/real-layer-benchmark.mjs`)**:
+  - Added `pnpm perf:real-layer`, `pnpm perf:baseline`, and `pnpm perf:compare` executing 100-iteration zero-mock probes against Node 24 (`perf_hooks.monitorEventLoopDelay`, `performance.eventLoopUtilization`, `v8.getHeapStatistics`, `crypto.timingSafeEqual`) and live TCP Redis (`PING`, `SET+GET`, `XADD+XRANGE`, `SET NX PX + DEL`).
+  - Uncovered and remediated a real-layer container bridge bottleneck in `infra/redis/redis.conf` (`bind 127.0.0.1` inside Docker container namespace was resetting host `127.0.0.1:6379` bridge connections and forcing remote fallback), reducing live 34-test Redis integration duration from **80.9s → 4.5s (18x faster / -94.4%)** and p95 Redis TCP `PING` to **< 0.9ms**.
+- **Unified Prometheus Registry & W3C `Server-Timing` Headers**:
+  - Merged `getMetrics()` from `apps/portal/lib/observability/metrics.ts` (including new `node_event_loop_utilization_ratio`, `node_event_loop_delay_ms`, and `node_v8_heap_used_bytes` gauges) into `GET /api/metrics`.
+  - Added W3C `Server-Timing` headers to `/api/health`, `/api/metrics`, `/api/control-room/scada-status`, and `/api/control-room/shift-completeness`.
+
+---
+
 ## [2026-11-09T14:50:00+02:00] - Control Room E2E Server Action & Redis Integration Suites, Visual Regression Baselines, Tracer Consolidation & Governance Cadence
 
 - **Control Room Operational Workflow & Telemetry Enhancements**:
