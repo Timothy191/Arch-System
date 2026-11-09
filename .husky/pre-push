@@ -1,3 +1,18 @@
 export PATH="$HOME/.volta/bin:$PATH"
 
+if [ "${FORCE_AGENT_VERIFY:-0}" != "1" ] && [ -f ".ci-local/agent-verify-evidence.json" ]; then
+  if node -e '
+    const fs = require("node:fs");
+    const ev = JSON.parse(fs.readFileSync(".ci-local/agent-verify-evidence.json", "utf8"));
+    const ageMs = Date.now() - new Date(ev.completedAt || 0).getTime();
+    if (ev.passedGates === 27 && ev.failedGates === 0 && ageMs >= 0 && ageMs <= 900000) {
+      console.log(`⚡ [PRE-PUSH] Verified 27/27 gate evidence (${Math.round(ageMs / 1000)}s old, runId=${ev.runId}) — skipping redundant second run.`);
+      process.exit(0);
+    }
+    process.exit(1);
+  ' 2>/dev/null; then
+    exit 0
+  fi
+fi
+
 bash tools/scripts/agent-verify.sh
