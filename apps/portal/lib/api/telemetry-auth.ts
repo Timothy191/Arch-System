@@ -82,3 +82,24 @@ export function authorizeWorkflowRequest(req: Request): NextResponse | null {
 
   return null;
 }
+
+const BEARER_PREFIX = 'Bearer ';
+
+/**
+ * n8n-compatible Redis proxy auth (`X-N8N-API-KEY` or `Authorization`).
+ * Fails closed: an unconfigured secret never authorizes any caller.
+ */
+export function authorizeRedisProxyRequest(req: Request): boolean {
+  const secret = configuredSecret(['REDIS_AUTH_SECRET', 'N8N_API_KEY']);
+  if (!secret) return false;
+
+  const apiKey = req.headers.get('x-n8n-api-key');
+  if (apiKey && secretsMatch(apiKey, secret)) return true;
+
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) return false;
+  const token = authHeader.startsWith(BEARER_PREFIX)
+    ? authHeader.slice(BEARER_PREFIX.length)
+    : authHeader;
+  return secretsMatch(token, secret);
+}

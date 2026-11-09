@@ -2,7 +2,8 @@
 
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import { useEffect } from 'react';
-import { isAppError, isNotFoundError } from '@/lib/errors/error-classes';
+import { isAppError } from '@/lib/errors/error-classes';
+import { getErrorMessage, getErrorTitle } from '@/lib/errors/error-display';
 import { logError } from '@/lib/errors/error-logger';
 
 interface HubErrorProps {
@@ -10,24 +11,16 @@ interface HubErrorProps {
   reset: () => void;
 }
 
-function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return 'Hub not found';
-  if (isAppError(error)) return error.name.replace(/([A-Z])/g, ' $1').trim();
-  return 'Hub Error';
-}
-
-function getErrorMessage(error: Error): string {
-  if (isAppError(error)) return error.message;
-  return error.message || 'Failed to load hub data.';
-}
-
 export default function HubError({ error, reset }: HubErrorProps) {
   useEffect(() => {
     logError(error);
   }, [error]);
 
-  const title = getErrorTitle(error);
-  const message = getErrorMessage(error);
+  const title = getErrorTitle(error, {
+    fallbackTitle: 'Hub Error',
+    notFoundTitle: 'Hub not found',
+  });
+  const message = getErrorMessage(error, 'Failed to load hub data.');
   // AGENT-TRACE: isAppError narrows to AppError which has `code?`, avoiding `as any`.
   const appErrorCode = isAppError(error) ? error.code : undefined;
 

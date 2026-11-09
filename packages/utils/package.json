@@ -21,6 +21,7 @@
     "./client": "./src/client.ts",
     "./crypto-audit": "./src/crypto-audit.ts",
     "./feature-flags": "./src/feature-flags.ts",
+    "./hlc": "./src/hlc.ts",
     "./fetch-client": "./src/fetch-client.ts",
     "./offline-storage": "./src/offline-storage.ts",
     "./inngest": "./src/inngest.ts",

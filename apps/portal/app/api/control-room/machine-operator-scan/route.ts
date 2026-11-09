@@ -8,6 +8,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift, getOperationalToday } from '@repo/utils';
 import { NextResponse } from 'next/server';
 import { CACHE_TAGS } from '@/lib/cache-tags';
+import { isAdtOrDumpTruck, isDozer, isDrill, isExcavator } from '@/lib/control-room/machine-utils';
 import { logError } from '@/lib/errors/error-logger';
 import { revalidateTagInRouteHandler, updateTag } from '@/lib/server-cache';
 
@@ -214,45 +215,6 @@ async function findMachine(
   const bySerial = await queryBy('serial_number', code);
   if (bySerial) return bySerial;
   return queryBy('name', code);
-}
-
-export function isAdtOrDumpTruck(type: string): boolean {
-  const t = type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  if (t.includes('water')) return false;
-  const words = t.split(/\s+/);
-  return (
-    words.includes('adt') || t.includes('dump') || t.includes('truck') || t.includes('articulated')
-  );
-}
-
-export function isExcavator(type: string): boolean {
-  const t = type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  const words = t.split(/\s+/);
-  return words.includes('ex') || t.includes('excavator');
-}
-
-export function isDozer(type: string): boolean {
-  const t = type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  const words = t.split(/\s+/);
-  return words.includes('dz') || t.includes('dozer');
-}
-
-export function isDrill(type: string): boolean {
-  const t = type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  const words = t.split(/\s+/);
-  return words.includes('dr') || t.includes('drill');
 }
 
 export function matchesMachineType(jobTitle: string | null, machineType: string): boolean {

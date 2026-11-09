@@ -4,6 +4,7 @@ import type {
   ControlRoomChecklistItem,
   ControlRoomShiftReportInput,
 } from '@repo/contract/types/control-room.types';
+import { useFormDraftPersistence } from '@repo/shared/hooks';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Activity,
@@ -355,38 +356,12 @@ export function ControlRoomChecklistWidget({
     missedIncidents,
   ]);
 
+  const { clearDraft: clearStoredDraft } = useFormDraftPersistence(draftKey, saveDraft);
+
   const clearDraft = () => {
-    if (typeof window === 'undefined') return;
-    try {
-      localStorage.removeItem(draftKey);
-      setHasRestoredDraft(false);
-    } catch {
-      // Ignore cleanup error
-    }
+    clearStoredDraft();
+    setHasRestoredDraft(false);
   };
-
-  // Flush draft to storage on state changes, window blur, tab swap, or page unload
-  useEffect(() => {
-    saveDraft();
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        saveDraft();
-      }
-    };
-
-    window.addEventListener('beforeunload', saveDraft);
-    window.addEventListener('pagehide', saveDraft);
-    window.addEventListener('arch:tab-swap', saveDraft);
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      window.removeEventListener('beforeunload', saveDraft);
-      window.removeEventListener('pagehide', saveDraft);
-      window.removeEventListener('arch:tab-swap', saveDraft);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [saveDraft]);
 
   // AGENT-TRACE: SLA badges reflect the live editable values so operators see
   // compliance drift as they adjust KPIs before submitting the closeout.

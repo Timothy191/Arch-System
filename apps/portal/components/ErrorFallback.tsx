@@ -3,7 +3,8 @@
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { isAppError, isAuthError, isNotFoundError } from '@/lib/errors/error-classes';
+import { isAppError } from '@/lib/errors/error-classes';
+import { getActionLink, getErrorMessage, getErrorTitle } from '@/lib/errors/error-display';
 import { logError } from '@/lib/errors/error-logger';
 
 interface ErrorFallbackProps {
@@ -13,30 +14,12 @@ interface ErrorFallbackProps {
   showDetails?: boolean;
 }
 
-function getErrorTitle(error: Error, fallback?: string): string {
-  if (isNotFoundError(error)) return 'Not found';
-  if (isAuthError(error)) return 'Access denied';
-  if (isAppError(error)) return error.name.replace(/([A-Z])/g, ' $1').trim();
-  return fallback ?? 'Something went wrong';
-}
-
-function getErrorMessage(error: Error): string {
-  if (isAppError(error)) return error.message;
-  return error.message || 'An unexpected error occurred. Please try again.';
-}
-
-function getActionLink(error: Error): { href: string; label: string } {
-  if (isNotFoundError(error)) return { href: '/', label: 'Back to Hub' };
-  if (isAuthError(error)) return { href: '/login', label: 'Sign in' };
-  return { href: '/', label: 'Back to Hub' };
-}
-
 export function ErrorFallback({ error, reset, title, showDetails = false }: ErrorFallbackProps) {
   useEffect(() => {
     logError(error);
   }, [error]);
 
-  const displayTitle = getErrorTitle(error, title);
+  const displayTitle = getErrorTitle(error, { fallbackTitle: title });
   const message = getErrorMessage(error);
   const action = getActionLink(error);
   const appError = isAppError(error) ? error : null;

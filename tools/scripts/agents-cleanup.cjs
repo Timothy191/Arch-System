@@ -9,6 +9,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getDirSize } = require('../lib/fs-metrics.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AGENTS_DIR = path.join(ROOT, '.agents');
@@ -224,22 +225,6 @@ function analyzeAndCleanup(dryRun = false, aggressive = false) {
     console.log(`Total .agents size: ${(getDirSize(AGENTS_DIR) / 1024).toFixed(1)} KB`);
     console.log(`Archived size: ${(getDirSize(ARCHIVE_DIR) / 1024).toFixed(1)} KB`);
   }
-}
-
-function getDirSize(dirPath) {
-  let totalSize = 0;
-  if (!fs.existsSync(dirPath)) return totalSize;
-
-  const files = fs.readdirSync(dirPath, { withFileTypes: true });
-  for (const file of files) {
-    const fullPath = path.join(dirPath, file.name);
-    if (file.isDirectory()) {
-      totalSize += getDirSize(fullPath);
-    } else {
-      totalSize += fs.statSync(fullPath).size;
-    }
-  }
-  return totalSize;
 }
 
 function main() {

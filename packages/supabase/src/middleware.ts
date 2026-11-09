@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
+import { resolveSupabasePublicConfig } from './config';
 import { normalizeSupabaseCookies } from './cookie-utils';
 
 /**
@@ -12,25 +13,7 @@ import { normalizeSupabaseCookies } from './cookie-utils';
  */
 export async function createMiddlewareClient(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  if (!supabaseUrl) {
-    throw new Error(
-      'Missing Supabase URL: set NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) in the environment.'
-    );
-  }
-  // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
-  if (!supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase publishable key: set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or ANON_KEY) in the environment.'
-    );
-  }
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabasePublicConfig();
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

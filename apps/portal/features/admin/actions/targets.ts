@@ -7,6 +7,7 @@ import {
 import { cacheInvalidateTags } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { assertAdmin } from './shared';
 
 const DEFAULT_OPERATIONAL_TARGETS: AdminOperationalTargets = {
   shift: {
@@ -31,26 +32,6 @@ const DEFAULT_OPERATIONAL_TARGETS: AdminOperationalTargets = {
     smrHoursTarget: 5760,
   },
 };
-
-async function assertAdmin() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized', status: 401 as const };
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, role')
-    .eq('auth_id', user.id)
-    .single();
-
-  if (employee?.role !== 'admin') {
-    return { error: 'Forbidden: admin role required', status: 403 as const };
-  }
-
-  return { supabase, employee };
-}
 
 export async function getOperationalTargets(): Promise<AdminOperationalTargets> {
   try {

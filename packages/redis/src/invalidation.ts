@@ -1,6 +1,6 @@
 import { incrementCounter } from './analytics';
-import { redisCircuitBreaker } from './circuit-breaker';
 import { getRedisClient } from './client';
+import { getCircuitGuardedRedisClient } from './internal-utils';
 import { memoryDeleteByPrefix, memoryDeleteKeys } from './l1';
 
 const TAG_PREFIX = 'arch:__tags__';
@@ -29,21 +29,6 @@ async function broadcast(payload: InvalidationBroadcast): Promise<void> {
   }
 }
 
-async function getRedisClientSafe() {
-  if (!redisCircuitBreaker || redisCircuitBreaker.isOpen()) {
-    return null;
-  }
-  try {
-    const redis = await getRedisClient();
-    redisCircuitBreaker.recordSuccess();
-    return redis;
-  } catch (err) {
-    redisCircuitBreaker?.recordFailure();
-    console.warn('[redis:invalidation:getRedisClientSafe] Redis unavailable:', err);
-    return null;
-  }
-}
-
 /**
  * Associate a cache key with one or more tags in Redis.
  * Tags are stored as Redis Sets under arch:__tags__:<tag>.
@@ -51,7 +36,7 @@ async function getRedisClientSafe() {
  */
 export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<void> {
   if (tags.length === 0) return;
-  const redis = await getRedisClientSafe();
+  const redis = await getCircuitGuardedRedisClient('redis:invalidation:getRedisClientSafe');
   if (!redis) return;
   try {
     const pipeline = redis.multi();
@@ -84,7 +69,7 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
  */
 export async function cacheInvalidateTags(tags: string[]): Promise<number> {
   if (tags.length === 0) return 0;
-  const redis = await getRedisClientSafe();
+  const redis = await getCircuitGuardedRedisClient('redis:invalidation:getRedisClientSafe');
   if (!redis) return 0;
 
   let deleted = 0;
@@ -143,7 +128,7 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
  */
 export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<number> {
   if (prefixes.length === 0) return 0;
-  const redis = await getRedisClientSafe();
+  const redis = await getCircuitGuardedRedisClient('redis:invalidation:getRedisClientSafe');
   if (!redis) return 0;
 
   let deleted = 0;

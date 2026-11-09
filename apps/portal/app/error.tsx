@@ -7,42 +7,12 @@
 // sentry.client.config.ts, so unhandled errors are captured automatically; the
 // structured logger is code-split so it never bloats this boundary's bundle.
 import { useEffect } from 'react';
-import {
-  isAppError,
-  isAuthError,
-  isNotFoundError,
-  isValidationError,
-} from '@/lib/errors/error-classes';
+import { isAppError } from '@/lib/errors/error-classes';
+import { getErrorMessage, getErrorTitle } from '@/lib/errors/error-display';
 
 interface RootErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
-}
-
-/**
- * Get user-friendly error title based on error type
- */
-function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return 'Page not found';
-  if (isAuthError(error)) return 'Access denied';
-  if (isValidationError(error)) return 'Invalid input';
-  if (isAppError(error)) {
-    // Use the error name for other AppErrors
-    return error.name.replace(/([A-Z])/g, ' $1').trim();
-  }
-  return 'Something went wrong';
-}
-
-/**
- * Get user-friendly error message
- */
-function getErrorMessage(error: Error): string {
-  if (isAppError(error)) {
-    // AppError has user-friendly messages
-    return error.message;
-  }
-  // Fallback for generic errors
-  return error.message || 'An unexpected error occurred. Please try again.';
 }
 
 /**
@@ -86,7 +56,10 @@ export default function RootError({ error, reset }: RootErrorProps) {
     ]);
   }, [error]);
 
-  const title = getErrorTitle(error);
+  const title = getErrorTitle(error, {
+    notFoundTitle: 'Page not found',
+    checkValidation: true,
+  });
   const message = getErrorMessage(error);
   const context = getErrorContext(error);
   const isDev = process.env.NODE_ENV === 'development';

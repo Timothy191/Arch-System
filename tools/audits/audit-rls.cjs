@@ -28,6 +28,10 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const {
+  listMigrationFiles,
+  stripSqlComments: stripComments,
+} = require('../lib/sql-migration-utils.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
@@ -55,22 +59,6 @@ const REFERENCE_TABLES = new Set([
 ]);
 
 /**
- * Lists all SQL migration files in packages/database/migrations in numeric order.
- *
- * @returns {string[]} An array of sorted migration file names.
- */
-function listMigrations() {
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error(`Migration directory not found: ${MIGRATIONS_DIR}`);
-    process.exit(2);
-  }
-  return fs
-    .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith('.sql'))
-    .sort(); // zero-padded NNN_... sort gives migration order
-}
-
-/**
  * Reads the content of a migration file.
  *
  * @param {string} file - The file name of the migration.
@@ -78,20 +66,6 @@ function listMigrations() {
  */
 function readMigration(file) {
   return fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf-8');
-}
-
-/**
- * Strips SQL comments (block and inline) from SQL content to prevent false matches.
- *
- * @param {string} sql - Raw SQL text.
- * @returns {string} Clean SQL text without comments.
- */
-function stripComments(sql) {
-  // Block comments.
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
-  // Line comments (only when not inside a string — we approximate).
-  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
-  return out;
 }
 
 // Capture a table name from a CREATE TABLE statement header. Supports:
@@ -392,7 +366,7 @@ function renderReport({
  * @returns {void}
  */
 function main() {
-  const files = listMigrations();
+  const files = listMigrationFiles(MIGRATIONS_DIR);
   const births = buildTableBirths(files);
   const { enabled, policies, tablesWithDeptColumn } = scanMigrations(files);
   const critical = findCriticalTables(births, enabled, files);

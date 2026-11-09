@@ -41,15 +41,11 @@ interface ControlRoomSite {
   name: string;
 }
 
+import { isAdtOrDumpTruck as classifyHaulTruck } from '@/lib/control-room/machine-utils';
+
+/** Client classification keeps water trucks in the ADT group (pre-existing behaviour). */
 export function isAdtOrDumpTruck(type: string): boolean {
-  const t = type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  const words = t.split(/\s+/);
-  return (
-    words.includes('adt') || t.includes('dump') || t.includes('truck') || t.includes('articulated')
-  );
+  return classifyHaulTruck(type, { includeWaterTrucks: true });
 }
 
 export function getOperatorPlaceholder(

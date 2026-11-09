@@ -12,7 +12,7 @@ import type {
   DrillingDailyLogFormValues,
   ProductionDailyLogFormValues,
 } from '@repo/contract/types/form.types';
-import { useOfflineQueue } from '@repo/shared/hooks';
+import { useFormDraftPersistence, useOfflineQueue } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
 import { cn } from '@repo/ui/lib/utils';
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
@@ -121,32 +121,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     };
   }, [draftKey, isDirty, formValues]);
 
-  const clearDraft = () => {
-    if (typeof window === 'undefined') return;
-    try {
-      localStorage.removeItem(draftKey);
-    } catch {
-      // Ignore cleanup error
-    }
-  };
-
-  useEffect(() => {
-    saveDraft();
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') saveDraft();
-    };
-    window.addEventListener('beforeunload', saveDraft);
-    window.addEventListener('pagehide', saveDraft);
-    window.addEventListener('arch:tab-swap', saveDraft);
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      window.removeEventListener('beforeunload', saveDraft);
-      window.removeEventListener('pagehide', saveDraft);
-      window.removeEventListener('arch:tab-swap', saveDraft);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [saveDraft]);
+  const { clearDraft } = useFormDraftPersistence(draftKey, saveDraft);
 
   const shiftValue = watch('shift');
   const holesDrilled = watch('holesDrilled') || 0;

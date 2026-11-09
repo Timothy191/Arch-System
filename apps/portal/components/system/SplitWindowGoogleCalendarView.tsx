@@ -16,12 +16,9 @@ import {
   buildGoogleCalendarEventUrl,
   GOOGLE_CALENDAR_AUTO_SIGNIN_URL,
   getSiteCalendarEmbedUrl,
+  openDockedGoogleWindow,
   SITE_CALENDAR_EMBED_SRC,
 } from '~/lib/google-workspace';
-
-const DOCKED_WINDOW_MIN_WIDTH = 540;
-const DOCKED_WINDOW_MIN_HEIGHT = 780;
-const DOCKED_WINDOW_DIVISOR = 2;
 
 interface ShiftPreset {
   readonly id: string;
@@ -70,22 +67,6 @@ const SHIFT_PRESETS: readonly ShiftPreset[] = [
     iconType: 'safety',
   },
 ];
-
-function openDockedGoogleWindow(url: string) {
-  if (typeof window === 'undefined') return;
-  const halfWidth = Math.max(
-    Math.floor((window.outerWidth || DOCKED_WINDOW_MIN_WIDTH) / DOCKED_WINDOW_DIVISOR),
-    DOCKED_WINDOW_MIN_WIDTH
-  );
-  const height = Math.max(window.outerHeight || DOCKED_WINDOW_MIN_HEIGHT, DOCKED_WINDOW_MIN_HEIGHT);
-  const left = (window.screenX || 0) + halfWidth;
-  const top = window.screenY || 0;
-  window.open(
-    url,
-    'arch_google_calendar_docked',
-    `width=${halfWidth},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`
-  );
-}
 
 export function SplitWindowGoogleCalendarView() {
   const [activeSubTab, setActiveSubTab] = useState<'calendar' | 'event' | 'roster'>('calendar');

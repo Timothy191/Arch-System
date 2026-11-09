@@ -13,6 +13,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getDirSize } = require('../lib/fs-metrics.cjs');
 const { execSync } = require('node:child_process');
 
 // Official Claude Code (Claude Sonnet 4 / 3.7 Sonnet) API Pricing per 1M tokens (USD)
@@ -329,25 +330,6 @@ function loadContextBudget() {
 
 function saveContextBudget(data) {
   fs.writeFileSync(CONTEXT_BUDGET_FILE, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
-}
-
-function getDirSize(dirPath, excludeDirs = []) {
-  let totalSize = 0;
-  if (!fs.existsSync(dirPath)) return totalSize;
-
-  const files = fs.readdirSync(dirPath, { withFileTypes: true });
-  for (const file of files) {
-    const fullPath = path.join(dirPath, file.name);
-    if (file.isDirectory()) {
-      if (excludeDirs.includes(file.name)) {
-        continue;
-      }
-      totalSize += getDirSize(fullPath, excludeDirs);
-    } else {
-      totalSize += fs.statSync(fullPath).size;
-    }
-  }
-  return totalSize;
 }
 
 function getDirTokens(dirPath, excludeDirs = []) {

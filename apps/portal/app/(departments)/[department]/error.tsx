@@ -3,7 +3,8 @@
 import { SecondaryButton } from '@repo/ui/SecondaryButton';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { isAppError, isAuthError, isNotFoundError } from '@/lib/errors/error-classes';
+import { isAppError } from '@/lib/errors/error-classes';
+import { getActionLink, getErrorMessage, getErrorTitle } from '@/lib/errors/error-display';
 import { logError } from '@/lib/errors/error-logger';
 
 interface DepartmentErrorProps {
@@ -11,39 +12,16 @@ interface DepartmentErrorProps {
   reset: () => void;
 }
 
-function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return 'Department not found';
-  if (isAuthError(error)) return 'Access denied';
-  if (isAppError(error)) return error.name.replace(/([A-Z])/g, ' $1').trim();
-  return 'Department Error';
-}
-
-function getErrorMessage(error: Error): string {
-  if (isAppError(error)) return error.message;
-  return error.message || 'Failed to load department data.';
-}
-
-function getActionLink(error: Error): { href: string; label: string } {
-  if (isNotFoundError(error)) {
-    return { href: '/', label: 'Back to Hub' };
-  }
-  if (isAuthError(error)) {
-    return { href: '/login', label: 'Sign in' };
-  }
-  return { href: '/', label: 'Back to Hub' };
-}
-
 export default function DepartmentError({ error, reset }: DepartmentErrorProps) {
   useEffect(() => {
-    if (isAppError(error)) {
-      logError(error);
-    } else {
-      logError(error);
-    }
+    logError(error);
   }, [error]);
 
-  const title = getErrorTitle(error);
-  const message = getErrorMessage(error);
+  const title = getErrorTitle(error, {
+    fallbackTitle: 'Department Error',
+    notFoundTitle: 'Department not found',
+  });
+  const message = getErrorMessage(error, 'Failed to load department data.');
   const action = getActionLink(error);
   const appError = isAppError(error) ? error : null;
 

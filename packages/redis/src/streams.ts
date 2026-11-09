@@ -15,6 +15,7 @@
 
 import { incrementCounter } from './analytics';
 import { getRedisClient } from './client';
+import { unrefSleep as sleep } from './internal-utils';
 import {
   asNumber,
   asStringArray,
@@ -493,13 +494,6 @@ export async function consumeStream(
   }
 
   return { processed, failed, dead };
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    const timer = setTimeout(resolve, ms);
-    (timer as unknown as { unref?: () => void }).unref?.();
-  });
 }
 
 /**

@@ -17,11 +17,9 @@ import {
   GOOGLE_DOCS_AUTO_SIGNIN_URL,
   GOOGLE_DOCS_CREATE_URL,
   GOOGLE_DRIVE_URL,
+  openDockedGoogleWindow,
 } from '~/lib/google-workspace';
 
-const DOCKED_WINDOW_MIN_WIDTH = 540;
-const DOCKED_WINDOW_MIN_HEIGHT = 780;
-const DOCKED_WINDOW_DIVISOR = 2;
 const COPY_FEEDBACK_TIMEOUT_MS = 2000;
 const STORAGE_KEY_DOCS_DRAFT = 'arch_google_docs_scratchpad';
 
@@ -155,22 +153,6 @@ Maintenance Supervisor: _______________________
 `,
   },
 ];
-
-function openDockedGoogleWindow(url: string) {
-  if (typeof window === 'undefined') return;
-  const halfWidth = Math.max(
-    Math.floor((window.outerWidth || DOCKED_WINDOW_MIN_WIDTH) / DOCKED_WINDOW_DIVISOR),
-    DOCKED_WINDOW_MIN_WIDTH
-  );
-  const height = Math.max(window.outerHeight || DOCKED_WINDOW_MIN_HEIGHT, DOCKED_WINDOW_MIN_HEIGHT);
-  const left = (window.screenX || 0) + halfWidth;
-  const top = window.screenY || 0;
-  window.open(
-    url,
-    'arch_google_workspace_docked',
-    `width=${halfWidth},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`
-  );
-}
 
 export function SplitWindowGoogleDocsView() {
   const [activeSubTab, setActiveSubTab] = useState<'scratchpad' | 'templates' | 'web'>(
