@@ -5,7 +5,7 @@ import { GlassCard } from '@repo/ui/GlassCard';
 import { Logo } from '@repo/ui/Logo';
 import { getOperationalToday } from '@repo/utils';
 import { getCurrentShift } from '@repo/utils/client';
-import { ChevronDown, ChevronUp, Clock, Drill, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Drill, Info, Lock, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -272,6 +272,47 @@ export function MachineOperationsForm({
   }, [formData.startSmu, formData.endSmu]);
 
   const hoursWorked = calculateHours();
+
+  // Auto-calculated penetration rate (m/h) for drill rigs
+  const penetrationRate = useMemo(() => {
+    if (!isDrillRig) return null;
+    const meters = Number.parseFloat(formData.metersDrilled);
+    if (!meters || Number.isNaN(meters) || meters <= 0) return null;
+    if (hoursWorked === null || hoursWorked <= 0) return null;
+    return (meters / hoursWorked).toFixed(1);
+  }, [isDrillRig, formData.metersDrilled, hoursWorked]);
+
+  // Locked SMR check: machines on breakdown have opening SMR locked to latest_smu until booked out
+  const isSmrLocked = Boolean(
+    (formData.endsOnBreakdown || selectedMachineEngineeringDelay?.status === 'active') &&
+      selectedMachine?.latest_smu != null
+  );
+
+  // Monitor 06:00 and 18:00 shift transitions for automatic breakdown carryover
+  useEffect(() => {
+    const checkShiftTransition = () => {
+      const activeShift = getCurrentShift();
+      setFormData((prev) => {
+        if (prev.shiftType !== activeShift) {
+          const isCarriedOver =
+            prev.endsOnBreakdown || selectedMachineEngineeringDelay?.status === 'active';
+          return {
+            ...prev,
+            shiftType: activeShift,
+            endsOnBreakdown: isCarriedOver,
+            startSmu:
+              isCarriedOver && selectedMachine?.latest_smu != null
+                ? String(selectedMachine.latest_smu)
+                : prev.startSmu,
+          };
+        }
+        return prev;
+      });
+    };
+
+    const intervalId = setInterval(checkShiftTransition, 15000);
+    return () => clearInterval(intervalId);
+  }, [selectedMachine, selectedMachineEngineeringDelay]);
 
   const handleSmrFieldChange = (field: 'startSmu' | 'endSmu', rawValue: string) => {
     const nextStartStr = field === 'startSmu' ? rawValue : formData.startSmu;
@@ -584,12 +625,25 @@ export function MachineOperationsForm({
               onChange={(e) => {
                 const nextMachineId = e.target.value;
                 const machineObj = machines.find((m) => m.id === nextMachineId);
+                const engDelay = machineObj
+                  ? engineeringDelaysByMachine[machineObj.id] ||
+                    (machineObj.serial_number
+                      ? engineeringDelaysByMachine[machineObj.serial_number]
+                      : null)
+                  : null;
+                const hasActiveBreakdown = engDelay?.status === 'active';
+
                 setFormData((prev) => ({
                   ...prev,
                   machineId: nextMachineId,
                   siteId: prev.siteId || machineObj?.site_id || '',
                   startSmu:
                     machineObj?.latest_smu != null ? String(machineObj.latest_smu) : prev.startSmu,
+                  endsOnBreakdown: hasActiveBreakdown || prev.endsOnBreakdown,
+                  breakdownReason:
+                    hasActiveBreakdown && engDelay?.reasons?.length
+                      ? engDelay.reasons.join(' | ')
+                      : prev.breakdownReason,
                 }));
               }}
               className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
@@ -661,23 +715,46 @@ export function MachineOperationsForm({
 
           {/* Start SMR */}
           <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">
-              Start SMR <span className="text-accent-red">*</span>
-              {selectedMachine?.latest_smu != null && (
-                <span className="ml-2 font-mono text-[11px] text-[var(--accent-blue)]">
-                  (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
+            <div className="flex items-center justify-between">
+              <label className="block text-[var(--text-secondary)] text-sm">
+                Start SMR <span className="text-accent-red">*</span>
+                {selectedMachine?.latest_smu != null && (
+                  <span className="ml-2 font-mono text-[11px] text-[var(--accent-blue)]">
+                    (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
+                  </span>
+                )}
+              </label>
+              {isSmrLocked && (
+                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] text-amber-800">
+                  <Lock className="h-3 w-3" /> Locked on Breakdown
                 </span>
               )}
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              min={selectedMachine?.latest_smu ?? 0}
-              placeholder="e.g. 1420.5"
-              value={formData.startSmu}
-              onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
-              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
-            />
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.1"
+                min={selectedMachine?.latest_smu ?? 0}
+                placeholder="e.g. 1420.5"
+                value={formData.startSmu}
+                readOnly={isSmrLocked}
+                onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
+                className={`w-full rounded-lg border px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:outline-none ${
+                  isSmrLocked
+                    ? 'cursor-not-allowed border-amber-300 bg-amber-50/50 text-neutral-600'
+                    : 'border-[var(--border-default)] bg-[var(--bg-secondary)] focus:border-[var(--accent-blue)]'
+                }`}
+              />
+              {isSmrLocked && (
+                <Lock className="pointer-events-none absolute top-3 right-3 h-4 w-4 text-amber-700" />
+              )}
+            </div>
+            {isSmrLocked && (
+              <p className="text-[11px] text-amber-800">
+                Opening SMR is locked to Stop SMR ({selectedMachine?.latest_smu}h) until breakdown
+                is booked out.
+              </p>
+            )}
             {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
           </div>
 
@@ -766,28 +843,7 @@ export function MachineOperationsForm({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {/* Meters */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
-                  Meters <span className="text-accent-red">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  placeholder="e.g. 185.5"
-                  value={formData.metersDrilled}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
-                  }
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
-                />
-                {errors.metersDrilled && (
-                  <p className="text-accent-red text-xs">{errors.metersDrilled}</p>
-                )}
-              </div>
-
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {/* Site */}
               <div className="space-y-2">
                 <label className="block text-[var(--text-secondary)] text-sm">
@@ -854,6 +910,51 @@ export function MachineOperationsForm({
                 {errors.holesDrilled && (
                   <p className="text-accent-red text-xs">{errors.holesDrilled}</p>
                 )}
+              </div>
+
+              {/* Meters */}
+              <div className="space-y-2">
+                <label className="block text-[var(--text-secondary)] text-sm">
+                  Meters <span className="text-accent-red">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="e.g. 185.5"
+                  value={formData.metersDrilled}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
+                  }
+                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+                />
+                {errors.metersDrilled && (
+                  <p className="text-accent-red text-xs">{errors.metersDrilled}</p>
+                )}
+              </div>
+
+              {/* Penetration Rate (m/h) */}
+              <div className="space-y-2">
+                <label className="block text-[var(--text-secondary)] text-sm">
+                  Penetration Rate
+                </label>
+                <div
+                  className="flex h-[42px] items-center justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
+                  title="Auto-calculated penetration rate (Meters / Operating Hours)"
+                >
+                  <span className="font-semibold text-accent-blue">
+                    {penetrationRate ? `${penetrationRate} m/h` : '— m/h'}
+                  </span>
+                  {penetrationRate ? (
+                    <span className="rounded bg-accent-green/10 px-1.5 py-0.5 font-semibold text-[10px] text-accent-green">
+                      Calc
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-[var(--text-muted)]">
+                      {hoursWorked ? 'Enter meters' : 'Awaiting SMR'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1111,11 +1212,19 @@ export function MachineOperationsForm({
           </button>
         </div>
 
-        {/* Help Text */}
-        <p className="animate-pulse text-neutral-700 text-xs [animation-duration:3s]">
-          <span className="text-[var(--accent-blue)]">Tip:</span> Stop SMR is optional. You can come
-          back and add it later. Hours are calculated automatically.
-        </p>
+        {/* Operational Guidance Callout (Static high-contrast accessible design) */}
+        <div
+          role="note"
+          aria-label="SMR logging guidance"
+          className="flex items-start gap-2.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/5 px-3.5 py-2.5 text-neutral-800 text-xs"
+        >
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
+          <p className="leading-relaxed">
+            <span className="font-semibold text-[var(--accent-blue)]">Operational Tip:</span> Stop
+            SMR is optional at start of shift. You can record operations immediately and add closing
+            SMR later. Shift hours and telemetry calculate automatically.
+          </p>
+        </div>
       </form>
 
       {/* Expandable Delay Entries Section */}

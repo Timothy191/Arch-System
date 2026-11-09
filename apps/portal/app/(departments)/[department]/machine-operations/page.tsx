@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { type BreakdownDelaySource, breakdownShiftDelayHours } from '~/lib/shift-completeness';
+import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
 
 const MachineOperationsForm = dynamic(
   () => import('./MachineOperationsForm').then((m) => m.MachineOperationsForm),
@@ -242,39 +243,16 @@ export default async function MachineOperationsPage({
         </div>
       </GlassCard>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Today&apos;s Hours</p>
-          <p className="mt-1 font-medium text-2xl text-[var(--text-heading)]">
-            {totalHours.toFixed(1)}h
-          </p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Active Machines</p>
-          <p className="mt-1 font-medium text-2xl text-accent-green">{activeMachines}</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Material Moved</p>
-          <p className="mt-1 font-medium text-2xl text-[var(--accent-blue)]">
-            {totalMaterialBCM.toFixed(1)} BCM
-          </p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">BCM/Hour</p>
-          <p className="mt-1 font-medium text-2xl text-accent-blue">{avgBcmPerHour.toFixed(1)}</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">Total Delays</p>
-          <p className="mt-1 font-medium text-2xl text-accent-red">{totalDelayHours.toFixed(1)}h</p>
-          {totalEngineeringDelayHours > 0 && (
-            <p className="mt-0.5 font-mono text-[11px] text-[var(--text-muted)]">
-              CR: {controlRoomDelayHours.toFixed(1)}h + Eng: {totalEngineeringDelayHours.toFixed(1)}
-              h
-            </p>
-          )}
-        </GlassCard>
-      </div>
+      {/* Summary KPI Cards with Telemetry Sparklines */}
+      <MachineOperationsKpiStrip
+        totalHours={totalHours}
+        activeMachines={activeMachines}
+        totalMaterialBCM={totalMaterialBCM}
+        avgBcmPerHour={avgBcmPerHour}
+        totalDelayHours={totalDelayHours}
+        controlRoomDelayHours={controlRoomDelayHours}
+        totalEngineeringDelayHours={totalEngineeringDelayHours}
+      />
 
       {/* Add Operation Form */}
       <div id="machine-operations-form" className="scroll-mt-6">
@@ -332,6 +310,7 @@ export default async function MachineOperationsPage({
           <MachineOperationsFilterableTable
             machines={machinesWithSmu}
             operations={todayOperations || []}
+            todayLoads={todayLoads || []}
             activeBreakdowns={activeBreakdowns || []}
             engineeringDelaysByMachine={engineeringDelaysByMachine}
           />

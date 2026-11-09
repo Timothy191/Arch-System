@@ -7,6 +7,8 @@ import {
   type Breakdown,
   type FilterStatus,
   formatTime,
+  MACHINE_CATEGORY_LABELS,
+  type MachineCategory,
   type MachineItem,
   type MachineOperation,
   type MachineStatusCounts,
@@ -18,7 +20,12 @@ interface MachineOperationsFilterStripProps {
   counts: MachineStatusCounts;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  selectedCategory?: MachineCategory;
+  onCategoryChange?: (category: MachineCategory) => void;
 }
+
+const FILTER_PILL_BASE_CLASSES =
+  'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all';
 
 export function MachineOperationsFilterStrip({
   filterStatus,
@@ -26,49 +33,95 @@ export function MachineOperationsFilterStrip({
   counts,
   searchQuery,
   onSearchQueryChange,
+  selectedCategory = 'all',
+  onCategoryChange,
 }: MachineOperationsFilterStripProps) {
+  const categories: MachineCategory[] = ['all', 'adt', 'excavator', 'drill', 'dozer', 'ancillary'];
+
+  const getCategoryCount = (cat: MachineCategory): number => {
+    switch (cat) {
+      case 'all':
+        return counts.allCategories ?? counts.total;
+      case 'adt':
+        return counts.adt ?? 0;
+      case 'excavator':
+        return counts.excavator ?? 0;
+      case 'drill':
+        return counts.drill ?? 0;
+      case 'dozer':
+        return counts.dozer ?? 0;
+      case 'ancillary':
+        return counts.ancillary ?? 0;
+    }
+  };
+
   return (
-    <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-        <button
-          type="button"
-          onClick={() => onFilterStatusChange('all')}
-          className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-            filterStatus === 'all'
-              ? 'bg-[var(--accent-blue)] text-white shadow-sm'
-              : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          All Machines ({counts.total})
-        </button>
-        <button
-          type="button"
-          onClick={() => onFilterStatusChange('operating')}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-            filterStatus === 'operating'
-              ? 'bg-accent-green text-white shadow-sm'
-              : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
-          Operating ({counts.operating})
-        </button>
-        <button
-          type="button"
-          onClick={() => onFilterStatusChange('standby')}
-          className={`rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
-            filterStatus === 'standby'
-              ? 'bg-[var(--text-heading)] text-white shadow-sm'
-              : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
-          }`}
-        >
-          Standby ({counts.standby})
-        </button>
-        {counts.breakdown > 0 && (
+    <div className="space-y-3">
+      {/* Category Tabs Strip */}
+      {onCategoryChange && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {categories.map((cat) => {
+            const isSelected = selectedCategory === cat;
+            const count = getCategoryCount(cat);
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => onCategoryChange(cat)}
+                className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+                  isSelected
+                    ? 'bg-[var(--accent-blue)] text-white shadow-xs'
+                    : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]'
+                }`}
+              >
+                {MACHINE_CATEGORY_LABELS[cat]} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Status Filter and Search Strip */}
+      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <button
+            type="button"
+            onClick={() => onFilterStatusChange('all')}
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+              filterStatus === 'all'
+                ? 'bg-neutral-800 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            All Machines ({counts.total})
+          </button>
+          <button
+            type="button"
+            onClick={() => onFilterStatusChange('operating')}
+            className={`${FILTER_PILL_BASE_CLASSES} ${
+              filterStatus === 'operating'
+                ? 'bg-accent-green text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-green" />
+            Operating ({counts.operating})
+          </button>
+          <button
+            type="button"
+            onClick={() => onFilterStatusChange('standby')}
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+              filterStatus === 'standby'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            Standby ({counts.standby})
+          </button>
           <button
             type="button"
             onClick={() => onFilterStatusChange('breakdown')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-xs transition-all ${
+            className={`${FILTER_PILL_BASE_CLASSES} ${
               filterStatus === 'breakdown'
                 ? 'bg-accent-red text-white shadow-sm'
                 : 'border border-accent-red/30 bg-accent-red/10 text-accent-red hover:bg-accent-red/20'
@@ -77,22 +130,34 @@ export function MachineOperationsFilterStrip({
             <AlertCircle size={12} />
             Breakdowns ({counts.breakdown})
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={() => onFilterStatusChange('inactive')}
+            className={`${FILTER_PILL_BASE_CLASSES} ${
+              filterStatus === 'inactive'
+                ? 'bg-neutral-600 text-white shadow-sm'
+                : 'border border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
+            }`}
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400" />
+            Inactive ({counts.inactive})
+          </button>
+        </div>
 
-      {/* Search Input */}
-      <div className="relative min-w-[240px]">
-        <Search
-          size={14}
-          className="pointer-events-none absolute top-1/2 left-3.5 z-10 -translate-y-1/2 text-[var(--accent-blue)]"
-        />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
-          placeholder="Search machine, type, or SN..."
-          className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus:outline-none"
-        />
+        {/* Search Input */}
+        <div className="relative min-w-[240px]">
+          <Search
+            size={14}
+            className="pointer-events-none absolute top-1/2 left-3.5 z-10 -translate-y-1/2 text-[var(--accent-blue)]"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.target.value)}
+            placeholder="Search machine, type, or SN..."
+            className="gold-steel-border gold-steel-border-slim h-9 w-full rounded-full border border-accent-amber/60 bg-white/95 py-1.5 pr-4 pl-9 font-medium text-[var(--text-heading)] text-xs shadow-xs ring-1 ring-accent-amber/30 focus:outline-none"
+          />
+        </div>
       </div>
     </div>
   );
@@ -111,7 +176,7 @@ export function FleetMachineCard({
   machine: MachineItem;
   breakdown?: Breakdown;
   operations: MachineOperation[];
-  status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
+  status: 'breakdown' | 'in-progress' | 'operating' | 'standby' | 'inactive';
   totalHours: number;
   loadsByMachine: Map<string, number>;
   breakdownsByFleetId: Map<string, Breakdown>;
@@ -199,6 +264,11 @@ export function FleetMachineCard({
             {status === 'standby' && (
               <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-secondary)] px-2 py-0.5 font-medium text-[var(--text-muted)] text-xs">
                 Standby
+              </span>
+            )}
+            {status === 'inactive' && (
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-neutral-100 px-2 py-0.5 font-medium text-neutral-600 text-xs">
+                Inactive
               </span>
             )}
 
