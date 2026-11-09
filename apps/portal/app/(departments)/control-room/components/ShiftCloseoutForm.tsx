@@ -61,6 +61,49 @@ export function ShiftCloseoutForm({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [operatorName, setOperatorName] = useState<string>(initialOperatorName || '');
+  const [serverCompletenessPct, setServerCompletenessPct] = useState<number | null>(null);
+
+  // Sync server-side shift completeness metric when online
+  useEffect(() => {
+    if (!isOnline || typeof fetch !== 'function') return;
+    let isCancelled = false;
+    const fetchCompleteness = async () => {
+      try {
+        const params = new URLSearchParams({
+          deptId,
+          deptSlug: 'control-room',
+          date: shiftDate,
+          shift: shiftType,
+        });
+        const res = await fetch(`/api/control-room/shift-completeness?${params.toString()}`);
+        if (!res?.ok || isCancelled) return;
+        const body = (await res.json()) as { completenessPercentage?: number };
+        if (!isCancelled && typeof body?.completenessPercentage === 'number') {
+          setServerCompletenessPct(Math.round(body.completenessPercentage));
+        }
+      } catch {
+        // Ignore network errors — local SMR ledger readiness remains authoritative
+      }
+    };
+    void fetchCompleteness();
+    return () => {
+      isCancelled = true;
+    };
+  }, [deptId, shiftDate, shiftType, isOnline]);
+
+  const reconciledMachines = machines.filter((m) => {
+    const operatingHours = m.closing_smr - m.opening_smr;
+    const totalAllocated = operatingHours + m.breakdown_hours + m.delay_hours;
+    const isValidOverrun = totalAllocated <= 12.0 || Boolean(m.overrun_reason?.trim());
+    return (
+      operatingHours >= 0 && totalAllocated >= 12.0 && totalAllocated <= 12.5 && isValidOverrun
+    );
+  });
+  const unreconciledMachines = machines.filter(
+    (m) => !reconciledMachines.some((rec) => rec.machine_id === m.machine_id)
+  );
+  const readinessPct =
+    machines.length > 0 ? Math.round((reconciledMachines.length / machines.length) * 100) : 100;
 
   // Resolve authenticated user session identity
   useEffect(() => {
@@ -267,6 +310,58 @@ export function ShiftCloseoutForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Live Shift Completeness & SMR Readiness Pre-Flight Gate */}
+        <div
+          data-testid="shift-closeout-readiness-banner"
+          className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 p-4"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span className="font-bold text-[var(--text-heading)] text-xs uppercase tracking-wider">
+                Pre-Closeout SMR Readiness Gate
+              </span>
+              <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
+                {reconciledMachines.length} of {machines.length} fleet units reconciled to 12.0h
+                shift target ({readinessPct}%)
+                {serverCompletenessPct !== null
+                  ? ` · Server Shift Completeness: ${serverCompletenessPct}%`
+                  : ''}
+              </p>
+            </div>
+            <span
+              className={`rounded-full px-2.5 py-0.5 font-mono font-semibold text-xs ${
+                unreconciledMachines.length === 0
+                  ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-700'
+                  : 'border border-amber-500/30 bg-amber-500/10 text-amber-700'
+              }`}
+            >
+              {unreconciledMachines.length === 0
+                ? 'READY TO LOCK'
+                : `${unreconciledMachines.length} PENDING`}
+            </span>
+          </div>
+          {unreconciledMachines.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+              <span className="font-medium text-[11px] text-[var(--text-muted)]">
+                Jump to unit:
+              </span>
+              {unreconciledMachines.slice(0, 8).map((unit) => (
+                <button
+                  key={unit.machine_id}
+                  type="button"
+                  onClick={() => {
+                    const inputEl = document.getElementById(`smr-input-${unit.machine_id}`);
+                    inputEl?.focus();
+                  }}
+                  className="cursor-pointer rounded-md border border-amber-500/35 bg-white/90 px-2 py-0.5 font-medium text-[11px] text-[var(--text-heading)] transition-colors hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
+                >
+                  {unit.machine_name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="mb-4 flex gap-4">
           <select
             value={shiftType}
@@ -341,6 +436,7 @@ export function ShiftCloseoutForm({
                     </td>
                     <td className="whitespace-nowrap px-4 py-3.5">
                       <input
+                        id={`smr-input-${m.machine_id}`}
                         type="number"
                         step="0.1"
                         value={m.closing_smr}

@@ -4,7 +4,7 @@
 
 - **Agent Rules**: 49 verified in `.agents/rules/`
 - **Agent Skills**: 8 verified in `.agents/skills/`
-- **Workspace Tracers**: 15 `AGENT_TRACER.md` files active
+- **Workspace Tracers**: 1 consolidated `AGENTS-TRACERRS.md` ledger active
 - **Root Directives**: AGENTS.md, GEMINI.md, CLAUDE.md validated
 
 ## Critical Findings

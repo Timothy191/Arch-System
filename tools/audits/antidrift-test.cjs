@@ -156,6 +156,7 @@ function capabilitySourceRetention() {
       'docs/archive/**',
       'codebase-maps/log-*/**',
       'documentation/08-ultragoal-archives/**',
+      'AGENTS-TRACERRS.md',
       'AGENT_TRACER.md',
       'tools/audits/antidrift-test.cjs',
     ]
@@ -234,6 +235,7 @@ function capabilityConceptStability() {
       'docs/archive/**',
       'codebase-maps/log-*/**',
       'documentation/08-ultragoal-archives/**',
+      'AGENTS-TRACERRS.md',
       'AGENT_TRACER.md',
       'tools/audits/antidrift-test.cjs',
     ]
@@ -391,6 +393,7 @@ function capabilityRepairAccuracy() {
       f.startsWith('documentation/06-archives') ||
       f.startsWith('docs/archive') ||
       f.startsWith('codebase-maps/log-') ||
+      f === 'AGENTS-TRACERRS.md' ||
       f === 'AGENT_TRACER.md' ||
       f === 'tools/audits/antidrift-test.cjs' ||
       f === 'documentation/07-agentic-systems/antidrift-guardian.md'

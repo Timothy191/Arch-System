@@ -65,6 +65,10 @@ describe('DepartmentLayout — Control Room Department & Auto-hide Sidebar', () 
     const shiftOperationsSubtab = screen.getByTestId('dashboard-subtab-shift-operations');
     expect(shiftOperationsSubtab).toBeInTheDocument();
     expect(shiftOperationsSubtab).toHaveAttribute('href', '/control-room/shift-compilation');
+    const shiftCloseoutSubtab = screen.getByTestId('dashboard-subtab-shift-closeout');
+    expect(shiftCloseoutSubtab).toBeInTheDocument();
+    expect(shiftCloseoutSubtab).toHaveAttribute('href', '/control-room/shift-closeout');
+    expect(shiftCloseoutSubtab).toHaveTextContent('Shift Closeout');
 
     // Verify exact ordering (Dashboard at the top with Shift Operations as its sub-tab)
     expect(controlRoomTabs.map((t) => t.label)).toEqual([

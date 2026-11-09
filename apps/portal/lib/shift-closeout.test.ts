@@ -344,6 +344,30 @@ describe('closeShift', () => {
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 
+  it('rejects when Separation of Duties is violated (operator === approving supervisor)', async () => {
+    const hash = await bcrypt.hash('1111', 4);
+    singleQueues.employees = [
+      { data: { id: 'same-emp-1' }, error: null }, // closedBy
+      { data: { id: 'same-emp-1', pin_hash: hash, full_name: 'Self Approver' }, error: null }, // approver
+    ];
+    singleQueues.shift_status = [{ data: null, error: null }];
+
+    const result = await closeShift('d1', '2026-08-17', 'day', 'same-emp-1', '1111');
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain(
+      'Separation of duties violation: Approving supervisor cannot be the submitting operator'
+    );
+    expect(insertCalls).toHaveLength(0);
+  });
+
+  it('rejects when shift is already closed', async () => {
+    singleQueues.shift_status = [{ data: { id: 'ss-closed', status: 'closed' }, error: null }];
+
+    const result = await closeShift('d1', '2026-08-17', 'day', 'appr-1', '1111');
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('Shift is already closed');
+  });
+
   it('closes the shift, audits, and returns the shift status id', async () => {
     const hash = await bcrypt.hash('1111', 4);
     singleQueues.employees = [

@@ -343,13 +343,17 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             const href = tab.name === 'dashboard' ? basePath : `${basePath}/${tab.name}`;
             const hasDashboardSubtabs =
               tab.name === 'dashboard' && department.name === 'control-room';
+            const isShiftCloseoutSubtabActive =
+              hasDashboardSubtabs && pathname === `${basePath}/shift-closeout`;
             const isShiftOperationsSubtabActive =
               hasDashboardSubtabs &&
               (pathname === `${basePath}/shift-compilation` ||
-                pathname === `${basePath}/shift-coverage` ||
-                pathname === `${basePath}/shift-closeout`);
+                pathname === `${basePath}/shift-coverage`);
             const isScadaDashboardSubtabActive =
-              hasDashboardSubtabs && pathname === basePath && !isShiftOperationsSubtabActive;
+              hasDashboardSubtabs &&
+              pathname === basePath &&
+              !isShiftOperationsSubtabActive &&
+              !isShiftCloseoutSubtabActive;
             const isShiftOperationsActive =
               tab.name === 'shift-compilation' &&
               (pathname === `${basePath}/shift-compilation` ||
@@ -358,7 +362,9 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
             const isRouteMatch =
               pathname === href ||
               (tab.name === 'dashboard' &&
-                (pathname === basePath || isShiftOperationsSubtabActive)) ||
+                (pathname === basePath ||
+                  isShiftOperationsSubtabActive ||
+                  isShiftCloseoutSubtabActive)) ||
               isShiftOperationsActive;
             const isPdfReportActive =
               tab.name === 'reports' && isRouteMatch && activeTabParam === 'pdf-report';
@@ -373,7 +379,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               isRouteMatch &&
               !isPdfReportActive &&
               !isWhatsappReportActive &&
-              !isShiftOperationsSubtabActive;
+              !isShiftOperationsSubtabActive &&
+              !isShiftCloseoutSubtabActive;
             const Icon = ICON_MAP[tab.icon];
             return (
               <div key={tab.name} className="space-y-0.5">
@@ -497,6 +504,24 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                         )}
                       />
                       <span>Shift Operations</span>
+                    </Link>
+                    <Link
+                      href={`${basePath}/shift-closeout`}
+                      data-testid="dashboard-subtab-shift-closeout"
+                      className={cn(
+                        SUBTAB_LINK_BASE,
+                        isShiftCloseoutSubtabActive ? SUBTAB_LINK_ACTIVE : SUBTAB_LINK_INACTIVE
+                      )}
+                    >
+                      <CheckSquare
+                        className={cn(
+                          'h-3 w-3 shrink-0 transition-colors',
+                          isShiftCloseoutSubtabActive
+                            ? 'text-[var(--accent-blue)]'
+                            : 'text-[var(--text-heading)] group-hover:text-[var(--accent-blue)]'
+                        )}
+                      />
+                      <span>Shift Closeout</span>
                     </Link>
                   </div>
                 )}

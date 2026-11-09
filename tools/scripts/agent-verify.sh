@@ -147,9 +147,9 @@ run_gate 20 "⛓️ " "Dependency & Supply-Chain Security" \
   "node tools/audits/audit-supply-chain.cjs" \
   "Run 'pnpm audit:supply-chain' to resolve exposed secrets, unsafe lifecycle scripts, or high/critical advisories."
 
-run_gate 21 "📡" "Production Observability & Resilience" \
+run_gate 21 "📡" "Production Observability, Resilience & Redis Integration" \
   "node tools/audits/audit-observability-resilience.cjs" \
-  "Run 'pnpm audit:resilience' to fix health/readiness probes, OpenTelemetry spans, or Redis fallback resilience."
+  "Run 'pnpm audit:resilience' or 'pnpm test:redis:integration' to fix health/readiness probes, OpenTelemetry spans, or Redis integration resilience."
 
 run_gate 22 "🚀" "Build, Deployment & Rollback Verification" \
   "node tools/scripts/vercel-preflight.cjs" \

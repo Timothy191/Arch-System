@@ -108,13 +108,30 @@ export async function submitShiftCloseout(
       });
     }
 
-    // 5. Update shift status to closed in database
+    // 5. Resolve supervisor's department_id when available and update shift status to closed
+    let resolvedDepartmentId = payload.supervisorId;
+    try {
+      const empQuery = supabase
+        .from('employees')
+        .select?.('department_id')
+        ?.eq?.('id', payload.supervisorId)
+        ?.maybeSingle?.();
+      if (empQuery) {
+        const { data: empRow } = await empQuery;
+        if (empRow && typeof (empRow as { department_id?: string }).department_id === 'string') {
+          resolvedDepartmentId = (empRow as { department_id: string }).department_id;
+        }
+      }
+    } catch {
+      // Preserve fallback to payload.supervisorId when employee lookup is unavailable
+    }
+
     // Check if shift entry exists in control_room_shift_reports or shifts table
     const { data: shiftData, error: updateError } = await supabase
       .from('control_room_shift_reports')
       .upsert(
         {
-          department_id: payload.supervisorId, // supervisor department mapping
+          department_id: resolvedDepartmentId,
           report_date: new Date().toISOString().split('T')[0],
           shift_type: 'day',
           operator_name: 'Control Room Operator',

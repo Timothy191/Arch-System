@@ -1,9 +1,8 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Resolve a Chrome/Chromium executable across environments.
- * Priority: explicit GOOGLE_CHROME_SHIM path → system chrome → playwright's bundled chromium.
+/** Resolve a Chrome/Chromium executable across environments.
+ * Priority: explicit GOOGLE_CHROME_SHIM path -> system chrome -> playwright's bundled chromium.
  */
 function resolveChromeExecutable(): string | undefined {
   const candidates = [
@@ -23,9 +22,7 @@ function resolveChromeExecutable(): string | undefined {
 
 const chromeExecutable = resolveChromeExecutable();
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+/** See https://playwright.dev/docs/test-configuration. */
 export default defineConfig({
   testDir: '.',
   snapshotDir: './visual/__snapshots__',
@@ -45,6 +42,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     userAgent: 'Playwright/E2E-Tests',
+    headless: Boolean(process.env.CI),
     extraHTTPHeaders: process.env.VERCEL_AUTOMATION_BYPASS_SECRET
       ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
       : undefined,

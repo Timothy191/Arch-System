@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardCheck } from 'lucide-react';
+import { BarChart3, CheckSquare, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export const CONTROL_ROOM_ACTIVE_SUBTAB_CLASS =
@@ -9,7 +9,7 @@ export const CONTROL_ROOM_INACTIVE_SUBTAB_CLASS =
 
 export interface ControlRoomSubtabsProps {
   readonly departmentSlug?: string;
-  readonly activeTab: 'scada' | 'shift-operations';
+  readonly activeTab: 'scada' | 'shift-operations' | 'shift-closeout';
   readonly borderTop?: boolean;
 }
 
@@ -50,6 +50,18 @@ export function ControlRoomSubtabs({
       >
         <ClipboardCheck className="h-3.5 w-3.5" />
         <span>Shift Operations</span>
+      </Link>
+      <Link
+        href={`/${departmentSlug}/shift-closeout`}
+        aria-current={activeTab === 'shift-closeout' ? 'page' : undefined}
+        className={
+          activeTab === 'shift-closeout'
+            ? CONTROL_ROOM_ACTIVE_SUBTAB_CLASS
+            : CONTROL_ROOM_INACTIVE_SUBTAB_CLASS
+        }
+      >
+        <CheckSquare className="h-3.5 w-3.5" />
+        <span>Shift Closeout</span>
       </Link>
     </div>
   );

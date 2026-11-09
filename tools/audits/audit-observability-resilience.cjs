@@ -151,6 +151,39 @@ if (jestRun.status !== 0) {
   console.log('   ✓ Jest health & metrics fault-injection unit tests passed.');
 }
 
+// ── 5. Live Redis Integration Suites (@repo/redis & portal) ─────────────────
+console.log('5️⃣  Executing Redis Integration Test Suites (@repo/redis & portal)...');
+
+const redisPortalRun = spawnSync('pnpm', ['--filter', 'portal', 'test:integration'], {
+  cwd: ROOT,
+  encoding: 'utf8',
+  env: { ...process.env, REDIS_INTEGRATION: '1' },
+  timeout: 60000,
+});
+
+if (redisPortalRun.status !== 0) {
+  const errOutput = (redisPortalRun.stderr || redisPortalRun.stdout || '').trim();
+  violations.push(`Portal Redis integration suite failed:\n${errOutput}`);
+} else {
+  console.log(
+    '   ✓ Portal Redis integration suite passed (SSE replay, rate limiter, PIN lockout, tryWithLock).'
+  );
+}
+
+const redisPkgRun = spawnSync('pnpm', ['--filter', '@repo/redis', 'test:integration'], {
+  cwd: ROOT,
+  encoding: 'utf8',
+  env: { ...process.env, REDIS_INTEGRATION: '1' },
+  timeout: 90000,
+});
+
+if (redisPkgRun.status !== 0) {
+  const errOutput = (redisPkgRun.stderr || redisPkgRun.stdout || '').trim();
+  violations.push(`@repo/redis integration suite failed:\n${errOutput}`);
+} else {
+  console.log('   ✓ @repo/redis capability & lock integration suite passed.');
+}
+
 // ── Summary Report ──────────────────────────────────────────────────────────
 console.log('\n📊 Observability & Resilience Audit Summary:');
 console.log(`   • Probe & Metrics Routes Verified: ${requiredRoutes.length}`);

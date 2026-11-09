@@ -2,7 +2,7 @@
 
 **Generated:** ${dateInfo.displayDate}  
 **Engine:** PostgreSQL 17 via Supabase  
-**Migrations SSoT:** `packages/database/migrations/` (189 Applied Immutable Migrations)
+**Migrations SSoT:** `packages/database/migrations/` (168 Applied Immutable Migrations)
 
 ---
 

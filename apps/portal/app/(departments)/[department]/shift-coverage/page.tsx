@@ -1,3 +1,4 @@
+import { getCurrentShift } from '@repo/utils';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { ShiftCoverageClient } from './ShiftCoverageClient';
 
@@ -12,8 +13,7 @@ export default async function ShiftCoveragePage({
     department: deptSlug,
   });
 
-  const currentHour = new Date().getHours();
-  const initialShift: 'day' | 'night' = currentHour >= 6 && currentHour < 18 ? 'day' : 'night';
+  const initialShift = getCurrentShift();
 
   return (
     <ShiftCoverageClient

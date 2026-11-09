@@ -26,7 +26,6 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const glob = require('glob');
 const { getActiveSkillDirectories } = require('./active-skill-directories.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -135,36 +134,32 @@ if (fs.existsSync(mcpFile)) {
   }
 }
 
-// ── 4. Audit AGENT_TRACER.md Monorepo Coverage ────────────────────────────────
-console.log('4️⃣  Auditing AGENT_TRACER.md coverage across workspace packages...');
-const workspacePackages = glob.sync('{apps/*,packages/*,libs/features/*,libs/shared/*}', {
-  cwd: ROOT,
-  ignore: ['**/node_modules/**', '**/dist/**', '**/coverage/**'],
-});
-
+// ── 4. Audit Consolidated AGENTS-TRACERRS.md Ledger ───────────────────────────
+console.log('4️⃣  Auditing consolidated AGENTS-TRACERRS.md ledger...');
+const consolidatedTracerFile = path.join(ROOT, 'AGENTS-TRACERRS.md');
 let tracerCount = 0;
-const missingTracers = [];
-workspacePackages.forEach((pkgPath) => {
-  const tracerFile = path.join(ROOT, pkgPath, 'AGENT_TRACER.md');
-  if (fs.existsSync(tracerFile)) {
-    tracerCount++;
-    const content = fs.readFileSync(tracerFile, 'utf8').trim();
-    if (content.length < 30) {
-      warnings.push({
-        file: `${pkgPath}/AGENT_TRACER.md`,
-        type: 'INCOMPLETE_TRACER',
-        description: 'AGENT_TRACER.md exists but has no substantial historical entries.',
-      });
-    }
+if (fs.existsSync(consolidatedTracerFile)) {
+  const content = fs.readFileSync(consolidatedTracerFile, 'utf8').trim();
+  if (content.length < 100) {
+    violations.push({
+      file: 'AGENTS-TRACERRS.md',
+      type: 'INCOMPLETE_TRACER',
+      description: 'AGENTS-TRACERRS.md exists but lacks consolidated historical entries.',
+    });
   } else {
-    // Check if it's a real workspace package containing package.json
-    if (fs.existsSync(path.join(ROOT, pkgPath, 'package.json'))) {
-      missingTracers.push(pkgPath);
-    }
+    tracerCount = 1;
   }
-});
+} else {
+  violations.push({
+    file: 'AGENTS-TRACERRS.md',
+    type: 'MISSING_CONSOLIDATED_TRACER',
+    description: 'Consolidated root AGENTS-TRACERRS.md ledger is missing.',
+  });
+}
 
-console.log(`   ✓ Found ${tracerCount}/${workspacePackages.length} active AGENT_TRACER.md files.`);
+console.log(
+  `   ✓ Verified consolidated AGENTS-TRACERRS.md ledger (${tracerCount} active SSoT file).`
+);
 
 // ── 5. Audit Root Agent Directives ────────────────────────────────────────────
 console.log('5️⃣  Auditing Root Directives (AGENTS.md, GEMINI.md, CLAUDE.md)...');
@@ -223,7 +218,7 @@ const reportMd = `# AI & Agentic Content Audit Report
 
 - **Agent Rules**: ${rulesCount} verified in \`.agents/rules/\`
 - **Agent Skills**: ${skillsCount} verified in \`.agents/skills/\`
-- **Workspace Tracers**: ${tracerCount} \`AGENT_TRACER.md\` files active
+- **Workspace Tracers**: ${tracerCount} consolidated \`AGENTS-TRACERRS.md\` ledger active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
 
 ## Critical Findings

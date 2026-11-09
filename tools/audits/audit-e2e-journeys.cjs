@@ -70,7 +70,11 @@ const requiredJourneys = [
   },
   {
     domain: 'Control Room & Shift Closeout',
-    specs: ['control-room/end-smr.spec.ts', 'control-room/operations.spec.ts'],
+    specs: [
+      'control-room/end-smr.spec.ts',
+      'control-room/operations.spec.ts',
+      'visual/control-room.visual.spec.ts',
+    ],
   },
   {
     domain: 'Access Control & Card Studio',

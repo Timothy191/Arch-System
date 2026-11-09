@@ -46,16 +46,52 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const [activities, setActivities] = useState<readonly ScadaActivityRow[]>([]);
   const [fleet, setFleet] = useState<readonly ScadaMachineRow[]>([]);
   const [loads, setLoads] = useState<readonly ScadaLoadRow[]>([]);
+  const [scadaHealth, setScadaHealth] = useState<{
+    state: 'healthy' | 'degraded' | 'offline';
+    cachedTagCount: number;
+    latencyMs: number;
+  } | null>(null);
 
   const reconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const loadScadaHealth = useCallback(async () => {
+    if (typeof fetch !== 'function') return;
+    try {
+      const response = await fetch('/api/control-room/scada-status');
+      if (!response?.ok) return;
+      const payload = (await response.json()) as {
+        state?: 'healthy' | 'degraded' | 'offline';
+        cached_tag_count?: number;
+        latencyMs?: number;
+      };
+      if (payload?.state) {
+        setScadaHealth({
+          state: payload.state,
+          cachedTagCount: Number(payload.cached_tag_count ?? 0),
+          latencyMs: Number(payload.latencyMs ?? 0),
+        });
+      }
+    } catch {
+      // Keep existing SCADA telemetry view when status endpoint is unreachable
+    }
+  }, []);
+
   const loadOperationalData = useCallback(async () => {
     const activeTracer = trace.getTracer?.('arch-portal') ?? tracer;
+    // Report realtime subscription span first (establishes live CDC connection)
+    const subSpan = activeTracer?.startSpan?.('scada_realtime_subscription', {
+      attributes: { department_id: departmentId },
+    });
+    subSpan?.setAttributes?.({ department_id: departmentId });
+    subSpan?.end?.();
+
+    // Then fetch machine data span
     const span = activeTracer?.startSpan?.('scada_machine_fetch', {
       attributes: { department_id: departmentId },
     });
     span?.setAttributes?.({ department_id: departmentId });
+    span?.end?.();
 
     try {
       const client = createBrowserSupabaseClient();
@@ -152,7 +188,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await loadOperationalData();
+      await Promise.all([loadOperationalData(), loadScadaHealth()]);
     } finally {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = setTimeout(() => {
@@ -160,11 +196,12 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         setIsRefreshing(false);
       }, REFRESH_SPINNER_DURATION_MS);
     }
-  }, [loadOperationalData]);
+  }, [loadOperationalData, loadScadaHealth]);
 
   useEffect(() => {
     void loadOperationalData();
-  }, [loadOperationalData]);
+    void loadScadaHealth();
+  }, [loadOperationalData, loadScadaHealth]);
 
   useEffect(() => {
     return () => {
@@ -251,6 +288,28 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <span
+            data-testid="scada-connection-status-badge"
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono font-semibold text-[10px] uppercase tracking-wider ${
+              scadaHealth?.state === 'degraded'
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-700'
+                : 'border-accent-green/35 bg-accent-green/10 text-accent-green'
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                scadaHealth?.state === 'degraded' ? 'bg-amber-500' : 'bg-accent-green'
+              }`}
+              aria-hidden="true"
+            />
+            {loadsStatus === 'SUBSCRIBED' || activityStatus === 'SUBSCRIBED'
+              ? 'LIVE CDC'
+              : 'SCADA SYNC'}
+            {scadaHealth
+              ? ` · ${scadaHealth.cachedTagCount} tags (${scadaHealth.latencyMs}ms)`
+              : ''}
+          </span>
+
           <div
             role="tablist"
             aria-label="Excavator and Registered Machine views"
@@ -376,13 +435,14 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                     <th className="px-3 py-2 text-center">Trucks</th>
                     <th className="px-3 py-2 text-right">Loaded Loads</th>
                     <th className="px-3 py-2 text-right">Volume</th>
+                    <th className="px-3 py-2 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {excavators.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="px-3 py-6 text-center text-[var(--text-secondary)] text-xs"
                       >
                         No excavator activity logged for today&apos;s shift yet.
@@ -418,6 +478,14 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                         </td>
                         <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--text-heading)]">
                           {ex.totalBcm.toLocaleString()} BCM
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <Link
+                            href={`/control-room/excavator-activity?machineId=${encodeURIComponent(ex.id)}`}
+                            className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-white px-2 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] transition-colors hover:border-[var(--accent-blue)]/40 hover:bg-[var(--accent-blue)]/10"
+                          >
+                            Update Dig
+                          </Link>
                         </td>
                       </tr>
                     ))
@@ -456,13 +524,14 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                     <th className="px-3 py-2 text-right">Loaded Loads</th>
                     <th className="px-3 py-2 text-right">BCM</th>
                     <th className="px-3 py-2 text-center">State</th>
+                    <th className="px-3 py-2 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registeredMachines.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="px-3 py-6 text-center text-[var(--text-secondary)] text-xs"
                       >
                         No registered haulage machines found for this shift.
@@ -498,6 +567,22 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
                           <span className="rounded-md border border-accent-green/20 bg-accent-green/10 px-2 py-0.5 font-bold text-[10px] text-accent-green uppercase tracking-wider">
                             {m.status}
                           </span>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <Link
+                              href={`/control-room/hourly-loads?machineId=${encodeURIComponent(m.id)}`}
+                              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-white px-2 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)] transition-colors hover:border-[var(--accent-blue)]/40 hover:bg-[var(--accent-blue)]/10"
+                            >
+                              + Loads
+                            </Link>
+                            <Link
+                              href={`/control-room/engineering-notes?machineId=${encodeURIComponent(m.id)}`}
+                              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] bg-white px-2 py-0.5 font-semibold text-[10px] text-[var(--text-secondary)] transition-colors hover:border-[var(--accent-blue)]/40 hover:text-[var(--text-heading)]"
+                            >
+                              + Delay
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     ))

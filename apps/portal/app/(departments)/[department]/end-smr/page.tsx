@@ -1,3 +1,4 @@
+import { getFleetOpeningSmrSnapshot } from '~/lib/control-room-fleet-smr';
 import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 import { EndSMRForm } from './EndSMRForm';
 
@@ -8,31 +9,9 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
     department: deptSlug,
   });
 
-  // Fetch machines, latest closing SMRs, and active sites
-  const [
-    { data: machines },
-    { data: previousSMRs },
-    { data: baselineSmrReadings },
-    { data: sites },
-    { data: operators },
-  ] = await Promise.all([
-    supabase
-      .from('machines')
-      .select('id, name, machine_type, active, site_id')
-      .eq('active', true)
-      .order('name'),
-    supabase
-      .from('machine_operations')
-      .select('machine_id, end_smu')
-      .not('end_smu', 'is', null)
-      .order('shift_date', { ascending: false })
-      .order('end_smu', { ascending: false })
-      .limit(500),
-    supabase
-      .from('smr_readings')
-      .select('meter_id, reading')
-      .order('reading_at', { ascending: false })
-      .limit(200),
+  // Fetch machines, latest closing SMRs, and active sites via shared helper
+  const [{ machines, latestSMRMap }, { data: sites }, { data: operators }] = await Promise.all([
+    getFleetOpeningSmrSnapshot(supabase),
     supabase.from('sites').select('id, name').eq('active', true).order('name'),
     supabase
       .from('operators')
@@ -41,30 +20,11 @@ export default async function EndSMRPage({ params }: { params: Promise<{ departm
       .order('full_name'),
   ]);
 
-  const latestSMRMap = new Map<string, number>();
-  (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
-    if (row.end_smu !== null && row.end_smu !== undefined) {
-      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
-      const candidate = Number(row.end_smu);
-      if (candidate > currentMax) {
-        latestSMRMap.set(row.machine_id, candidate);
-      }
-    }
-  });
-  (baselineSmrReadings as Array<{ meter_id: string; reading: number | null }> | null)?.forEach(
-    (row) => {
-      if (row.reading !== null && row.reading !== undefined && row.meter_id) {
-        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
-        const candidate = Number(row.reading);
-        if (candidate > currentMax) {
-          latestSMRMap.set(row.meter_id, candidate);
-        }
-      }
-    }
-  );
-
-  const machinesWithSmu = (machines || []).map((m) => ({
+  const machinesWithSmu = machines.map((m) => ({
     ...m,
+    machine_type: m.machine_type ?? 'Unknown',
+    active: m.active ?? true,
+    site_id: m.site_id ?? null,
     latest_smu: latestSMRMap.get(m.id) ?? null,
   }));
 

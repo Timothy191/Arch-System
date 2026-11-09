@@ -53,6 +53,7 @@ const nextConfig = {
       '**/.claude.local.md',
       '**/.cursorrules',
       '**/REVIEW.md',
+      '**/AGENTS-TRACERRS.md',
       '**/*AGENT_TRACER.md',
       '**/docs/**',
       '**/documentation/**',
@@ -268,6 +269,17 @@ const nextConfig = {
       '@repo/hub/ui',
       '@repo/shared/hooks',
     ],
+  },
+  performance: {
+    // Performance budgets for production builds
+    // These budgets trigger warnings when exceeded and can be enforced via CI
+    hints: isCI ? 'warning' : 'warning',
+    // Max bundle size for JavaScript (including all chunks)
+    maxEntrypointSize: isCI ? 250 * 1024 : 280 * 1024, // 250KB in CI, 280KB locally
+    // Max size for a single chunk
+    maxChunkSize: isCI ? 100 * 1024 : 150 * 1024, // 100KB in CI, 150KB locally
+    // Asset size limit (images, fonts, etc.)
+    assetMaxSize: 500 * 1024, // 500KB for individual assets
   },
   async headers() {
     return [

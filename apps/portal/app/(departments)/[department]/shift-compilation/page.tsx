@@ -1,8 +1,8 @@
-import type { MachineTimeAllocationInput } from '@repo/contract';
 import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
 import { getAuthenticatedEmployee } from '@repo/supabase';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { getCurrentShift } from '@repo/utils';
+import { getFleetOpeningSmrSnapshot } from '~/lib/control-room-fleet-smr';
 import { getDepartmentContext } from '~/lib/dept-context';
 import type { ShiftReportSummary } from '../../control-room/components/SupervisorApprovalPanel';
 import { getMultiSiteShiftReport, getUnifiedShiftReport } from './actions';
@@ -33,27 +33,13 @@ export default async function ShiftCompilationPage({
     { data: compiledReport },
     { data: multiSiteReport },
     principal,
-    { data: machines },
-    { data: previousSMRs },
-    { data: baselineSmrReadings },
+    { closeoutFleet },
     { data: recentReportsData },
   ] = await Promise.all([
     getUnifiedShiftReport(deptId, shiftDate, shiftType),
     getMultiSiteShiftReport(deptId, shiftDate, shiftType),
     getAuthenticatedEmployee(supabase),
-    supabase.from('machines').select('id, name').eq('active', true).order('name'),
-    supabase
-      .from('machine_operations')
-      .select('machine_id, end_smu')
-      .not('end_smu', 'is', null)
-      .order('shift_date', { ascending: false })
-      .order('end_smu', { ascending: false })
-      .limit(500),
-    supabase
-      .from('smr_readings')
-      .select('meter_id, reading')
-      .order('reading_at', { ascending: false })
-      .limit(200),
+    getFleetOpeningSmrSnapshot(supabase),
     supabase
       .from('control_room_shift_reports')
       .select(
@@ -63,43 +49,6 @@ export default async function ShiftCompilationPage({
       .order('created_at', { ascending: false })
       .limit(10),
   ]);
-
-  const latestSMRMap = new Map<string, number>();
-  (previousSMRs as Array<{ machine_id: string; end_smu: number | null }> | null)?.forEach((row) => {
-    if (row.end_smu !== null && row.end_smu !== undefined) {
-      const currentMax = latestSMRMap.get(row.machine_id) ?? 0;
-      const candidate = Number(row.end_smu);
-      if (candidate > currentMax) {
-        latestSMRMap.set(row.machine_id, candidate);
-      }
-    }
-  });
-  (baselineSmrReadings as Array<{ meter_id: string; reading: number | null }> | null)?.forEach(
-    (row) => {
-      if (row.reading !== null && row.reading !== undefined && row.meter_id) {
-        const currentMax = latestSMRMap.get(row.meter_id) ?? 0;
-        const candidate = Number(row.reading);
-        if (candidate > currentMax) {
-          latestSMRMap.set(row.meter_id, candidate);
-        }
-      }
-    }
-  );
-
-  const closeoutFleet: MachineTimeAllocationInput[] =
-    machines && machines.length > 0
-      ? machines.map((m) => {
-          const openingSMR = latestSMRMap.get(m.id) ?? 0;
-          return {
-            machine_id: m.id,
-            machine_name: m.name,
-            opening_smr: openingSMR,
-            closing_smr: openingSMR,
-            breakdown_hours: 0,
-            delay_hours: 0,
-          };
-        })
-      : [];
 
   const recentCloseoutReports: ShiftReportSummary[] = (recentReportsData ?? []).map((r) => ({
     id: r.id,
@@ -148,6 +97,11 @@ export default async function ShiftCompilationPage({
       recentCloseoutReports={recentCloseoutReports}
       currentEmployeeId={principal?.employee?.id}
       currentRole={principal?.employee?.role}
+      initialOperatorName={
+        (principal?.user?.user_metadata?.full_name as string | undefined) ||
+        principal?.user?.email ||
+        undefined
+      }
     />
   );
 }

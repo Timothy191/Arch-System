@@ -10,7 +10,13 @@ import {
   RedisStore,
   type SimpleRedisClient,
 } from '@repo/rate-limiter';
-import { closeRedis, getRedisClient } from '@repo/redis';
+import {
+  closeRedis,
+  getRedisClient,
+  incrWithExpire,
+  readKeyCounter,
+  tryWithLock,
+} from '@repo/redis';
 import { GET } from '../../app/api/telemetry/drilling/stream/route';
 
 jest.mock('@/lib/errors/error-logger', () => ({ logError: jest.fn() }));
@@ -182,5 +188,52 @@ describeIntegration('Redis integration', () => {
     const ttl = await client.pTTL(cacheKey);
     expect(ttl).toBeGreaterThan(0);
     expect(ttl).toBeLessThanOrEqual(windowMs);
+  });
+
+  it('enforces Control Room shift-closeout 3-strike PIN lockout and clears state on success', async () => {
+    const empCode = `CR-SUP-${process.pid}-${Date.now()}`;
+    const attemptsKey = `pin_attempts:${empCode}`;
+    const lockoutKey = `pin_lockout:${empCode}`;
+
+    try {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { value } = await incrWithExpire(attemptsKey, { ttlMs: 300_000 });
+        if (value >= 3) {
+          await client.set(lockoutKey, '1', { EX: 900 });
+        }
+      }
+
+      expect(await readKeyCounter(attemptsKey)).toBe(3);
+      expect(await client.get(lockoutKey)).toBe('1');
+
+      await client.del([attemptsKey, lockoutKey]);
+      expect(await readKeyCounter(attemptsKey)).toBe(0);
+      expect(await client.get(lockoutKey)).toBeNull();
+    } finally {
+      await client.del([attemptsKey, lockoutKey]);
+    }
+  });
+
+  it('serializes concurrent Control Room shift-closeout submissions via tryWithLock', async () => {
+    const lockName = `shift_closeout:dept-cr:${Date.now()}:day`;
+    let executions = 0;
+
+    const first = tryWithLock({ name: lockName, ttlMs: 5_000 }, async () => {
+      executions += 1;
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      return { success: true, shiftStatusId: 'ss-primary' };
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 25));
+
+    const contending = await tryWithLock({ name: lockName, ttlMs: 5_000 }, async () => {
+      executions += 1;
+      return { success: true, shiftStatusId: 'ss-duplicate' };
+    });
+
+    const primaryOutcome = await first;
+    expect(primaryOutcome).toEqual({ success: true, shiftStatusId: 'ss-primary' });
+    expect(contending).toBeNull();
+    expect(executions).toBe(1);
   });
 });

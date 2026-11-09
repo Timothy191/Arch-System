@@ -5,6 +5,7 @@ import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-produ
 import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
 import {
   BreakdownsShiftWidget,
+  ControlRoomChecklistWidget,
   FleetKpiTable,
   MultiSiteShiftReportClient,
   ProductionSummaryCard,
@@ -39,6 +40,7 @@ interface ShiftCompilationClientProps {
   recentCloseoutReports?: ShiftReportSummary[];
   currentEmployeeId?: string;
   currentRole?: string;
+  initialOperatorName?: string;
 }
 
 export function ShiftCompilationClient({
@@ -53,6 +55,7 @@ export function ShiftCompilationClient({
   recentCloseoutReports = [],
   currentEmployeeId,
   currentRole,
+  initialOperatorName,
 }: ShiftCompilationClientProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,6 +63,19 @@ export function ShiftCompilationClient({
     initialSection
   );
   const [activeTab, setActiveTab] = useState<'department' | 'multisite'>('department');
+
+  const handleSectionChange = (section: 'handover' | 'coverage' | 'closeout') => {
+    setActiveSection(section);
+    if (typeof window !== 'undefined') {
+      const nextUrl = new URL(window.location.href);
+      if (section === 'handover') {
+        nextUrl.searchParams.delete('tab');
+      } else {
+        nextUrl.searchParams.set('tab', section);
+      }
+      window.history.replaceState(null, '', nextUrl.toString());
+    }
+  };
 
   const report = initialReport;
   const activeMachines = report.fleet_performance.length;
@@ -108,7 +124,7 @@ export function ShiftCompilationClient({
             type="button"
             role="tab"
             aria-selected={activeSection === 'handover'}
-            onClick={() => setActiveSection('handover')}
+            onClick={() => handleSectionChange('handover')}
             className={cn(
               'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'handover'
@@ -123,7 +139,7 @@ export function ShiftCompilationClient({
             type="button"
             role="tab"
             aria-selected={activeSection === 'coverage'}
-            onClick={() => setActiveSection('coverage')}
+            onClick={() => handleSectionChange('coverage')}
             className={cn(
               'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'coverage'
@@ -138,7 +154,7 @@ export function ShiftCompilationClient({
             type="button"
             role="tab"
             aria-selected={activeSection === 'closeout'}
-            onClick={() => setActiveSection('closeout')}
+            onClick={() => handleSectionChange('closeout')}
             className={cn(
               'inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 font-semibold text-xs transition-all',
               activeSection === 'closeout'
@@ -172,6 +188,14 @@ export function ShiftCompilationClient({
             deptId={departmentId}
             shiftDate={shiftDate}
             initialFleet={closeoutFleet}
+            operatorName={initialOperatorName}
+          />
+          <ControlRoomChecklistWidget
+            departmentId={departmentId}
+            departmentSlug={departmentSlug}
+            date={shiftDate}
+            shift={shiftType}
+            initialOperatorName={initialOperatorName}
           />
         </div>
       ) : (
