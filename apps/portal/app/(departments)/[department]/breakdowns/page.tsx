@@ -31,23 +31,29 @@ export default async function BreakdownsPage({
   ]);
 
   // Compute metrics
+  // Performance Optimization: Calculate total, active, completedToday, and average repair hours in a single pass O(N) loop
+  // instead of multiple array .filter() passes over allBreakdowns, avoiding intermediate array allocations and reducing complexity from 3N to N.
   const allBreakdowns = (breakdowns ?? []) as Breakdown[];
-  const active = allBreakdowns.filter((b) => b.status === 'active').length;
-  const completedToday = allBreakdowns.filter(
-    (b) => b.status === 'completed' && b.date_out === today
-  ).length;
-
-  // Avg repair time for completed breakdowns
+  let active = 0;
+  let completedToday = 0;
   let totalRepairHours = 0;
   let completedCount = 0;
+
   for (const b of allBreakdowns) {
-    if (b.status === 'completed' && b.date_out && b.time_out) {
-      const start = new Date(`${b.date_in}T${b.time_in}`);
-      const end = new Date(`${b.date_out}T${b.time_out}`);
-      const diffHours = (end.getTime() - start.getTime()) / 3600000;
-      if (diffHours > 0) {
-        totalRepairHours += diffHours;
-        completedCount++;
+    if (b.status === 'active') {
+      active++;
+    } else if (b.status === 'completed') {
+      if (b.date_out === today) {
+        completedToday++;
+      }
+      if (b.date_out && b.time_out && b.date_in && b.time_in) {
+        const start = new Date(`${b.date_in}T${b.time_in}`);
+        const end = new Date(`${b.date_out}T${b.time_out}`);
+        const diffHours = (end.getTime() - start.getTime()) / 3600000;
+        if (diffHours > 0) {
+          totalRepairHours += diffHours;
+          completedCount++;
+        }
       }
     }
   }
