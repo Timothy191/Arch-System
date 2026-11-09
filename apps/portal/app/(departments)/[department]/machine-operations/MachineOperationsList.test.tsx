@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MachineOperationsFilterableTable from './MachineOperationsFilterableTable';
 import { MachineOperationsForm } from './MachineOperationsForm';
+import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
 import { MachineOperationsList } from './MachineOperationsList';
 
 jest.mock('next/navigation', () => ({
@@ -464,6 +465,229 @@ describe('MachineOperationsList', () => {
       expect(machineOpsLink.className).toContain('ring-1');
       // Verify the small straight vertical line on the left (w-1 h-5) is removed
       expect(machineOpsLink.querySelector('.h-5.w-1')).toBeNull();
+    });
+  });
+
+  describe('7 Design Feedback Items Verification', () => {
+    // 1. Sites: Head Office & Brakfontein Plant
+    it('supports selecting Head Office and Brakfontein Plant in MachineOperationsForm', () => {
+      const sites = [
+        { id: 'site-ho', name: 'Head Office', site_code: 'HEAD-OFFICE' },
+        { id: 'site-bp', name: 'Brakfontein Plant', site_code: 'BRAK-PLANT' },
+        { id: 'site-pit', name: 'Brakfontein Pit', site_code: 'BRAK-PIT' },
+      ];
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[{ id: 'm-1', name: 'BD-22', machine_type: 'Dozer' }]}
+          operators={[{ id: 'op-1', full_name: 'John Doe', employee_code: 'OP-BD01' }]}
+          sites={sites}
+          todayOperations={[]}
+        />
+      );
+
+      expect(screen.getByRole('option', { name: 'Head Office' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Brakfontein Plant' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Brakfontein Pit' })).toBeInTheDocument();
+    });
+
+    // 2. Tip Readability
+    it('renders static accessible operational guidance callout without animate-pulse', () => {
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={[]}
+          operators={[]}
+          sites={[]}
+          todayOperations={[]}
+        />
+      );
+
+      const callout = screen.getByRole('note', { name: /SMR logging guidance/i });
+      expect(callout).toBeInTheDocument();
+      expect(callout.className).not.toContain('animate-pulse');
+      expect(screen.getByText(/Operational Tip:/i)).toBeInTheDocument();
+      expect(screen.getByText(/Stop SMR is optional at start of shift/i)).toBeInTheDocument();
+    });
+
+    // 3. Drill Rig Fields & Penetration Rate
+    it('renders Holes, Meters, Block, and auto-calculates Penetration Rate for Drill Rigs', () => {
+      const drillMachines = [
+        { id: 'dr-1', name: 'DR-02', machine_type: 'Drill Rig', latest_smu: 2000 },
+      ];
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={drillMachines}
+          operators={[{ id: 'op-dr', full_name: 'Drill Op', employee_code: 'OP-DR01' }]}
+          sites={[{ id: 'site-pit', name: 'Brakfontein Pit', site_code: 'BRAK-PIT' }]}
+          mineBlocks={[
+            { id: 'blk-1', name: 'North Pit Bench 12', code: 'BLK-A1', site_id: 'site-pit' },
+          ]}
+          todayOperations={[]}
+        />
+      );
+
+      // Select drill
+      const selects = screen.getAllByRole('combobox');
+      fireEvent.change(selects[0]!, { target: { value: 'dr-1' } });
+
+      // Verify drilling fields are visible
+      expect(screen.getByText('Drilling Production Metrics')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/e\.g\. 185\.5/i)).toBeInTheDocument(); // Meters
+      expect(screen.getByPlaceholderText(/e\.g\. 24/i)).toBeInTheDocument(); // Holes
+      expect(screen.getByPlaceholderText(/e\.g\. BLK-A1/i)).toBeInTheDocument(); // Block
+      expect(screen.getByText(/Penetration Rate/i)).toBeInTheDocument();
+
+      // Enter start and stop SMR (4 hours worked: 2000 to 2004) and 100 meters
+      const smrInputs = screen.getAllByRole('spinbutton');
+      const startSmuInput = smrInputs[0]!;
+      const endSmuInput = smrInputs[1]!;
+      fireEvent.change(startSmuInput, { target: { value: '2000' } });
+      fireEvent.change(endSmuInput, { target: { value: '2004' } });
+
+      // Enter meters
+      const metersInput = screen.getByPlaceholderText(/e\.g\. 185\.5/i);
+      fireEvent.change(metersInput, { target: { value: '100' } });
+
+      // 100m / 4h = 25.0 m/h
+      expect(screen.getByText('25.0 m/h')).toBeInTheDocument();
+    });
+
+    // 4. Breakdown SMR lock
+    it('locks Start SMR to latest_smu when machine is on active breakdown', () => {
+      const machines = [{ id: 'bd-24', name: 'BD-24', machine_type: 'Dozer', latest_smu: 38003.5 }];
+      const engineeringDelays = {
+        'bd-24': {
+          hours: 6.0,
+          reasons: ['Track tensioner failure'],
+          status: 'active',
+        },
+      };
+
+      render(
+        <MachineOperationsForm
+          departmentId="dept-cr"
+          machines={machines}
+          operators={[{ id: 'op-1', full_name: 'Sam Dozer', employee_code: 'OP-BD01' }]}
+          sites={[{ id: 'site-pit', name: 'Brakfontein Pit', site_code: 'BRAK-PIT' }]}
+          todayOperations={[]}
+          engineeringDelaysByMachine={engineeringDelays}
+        />
+      );
+
+      const machineSelect = screen.getAllByRole('combobox')[0]!;
+      fireEvent.change(machineSelect, { target: { value: 'bd-24' } });
+
+      // Check that startSmu is locked and read-only
+      const startSmuInput = screen.getAllByRole('spinbutton')[0]!;
+      expect(startSmuInput).toHaveAttribute('readonly');
+      expect(startSmuInput).toHaveValue(38003.5);
+      expect(screen.getByText(/Locked on Breakdown/i)).toBeInTheDocument();
+      expect(screen.getByText(/Opening SMR is locked to Stop SMR/i)).toBeInTheDocument();
+    });
+
+    // 5. KPI Strip with Telemetry Sparklines
+    it('renders all 5 KPI panels with telemetry sparklines in MachineOperationsKpiStrip', () => {
+      render(
+        <MachineOperationsKpiStrip
+          totalHours={48.5}
+          activeMachines={12}
+          totalMaterialBCM={3420}
+          avgBcmPerHour={70.5}
+          totalDelayHours={3.2}
+          controlRoomDelayHours={1.2}
+          totalEngineeringDelayHours={2.0}
+        />
+      );
+
+      expect(screen.getByText("Today's Hours")).toBeInTheDocument();
+      expect(screen.getAllByText('48.5h').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('kpi-sparkline-today-hours')).toBeInTheDocument();
+
+      expect(screen.getByText('Active Machines')).toBeInTheDocument();
+      expect(screen.getAllByText('12').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('kpi-sparkline-active-machines')).toBeInTheDocument();
+
+      expect(screen.getByText('Material Moved')).toBeInTheDocument();
+      expect(screen.getAllByText(/3420/).length).toBeGreaterThan(0);
+      expect(screen.getByTestId('kpi-sparkline-material-moved')).toBeInTheDocument();
+
+      expect(screen.getByText('BCM/Hour')).toBeInTheDocument();
+      expect(screen.getAllByText('70.5').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('kpi-sparkline-bcm-rate')).toBeInTheDocument();
+
+      expect(screen.getByText('Total Delays')).toBeInTheDocument();
+      expect(screen.getAllByText('3.2h').length).toBeGreaterThan(0);
+      expect(screen.getByText(/CR: 1\.2h \+ Eng: 2\.0h/i)).toBeInTheDocument();
+      expect(screen.getByTestId('kpi-sparkline-total-delays')).toBeInTheDocument();
+    });
+
+    // 6. Filter Tabs: Breakdown always visible and Inactive
+    it('always renders Breakdown and Inactive filter pills with counts', () => {
+      render(
+        <MachineOperationsFilterableTable
+          machines={[
+            { id: 'm-1', name: 'BD-22', machine_type: 'Dozer', active: true },
+            { id: 'm-2', name: 'DR-02', machine_type: 'Drill Rig', active: false },
+          ]}
+          operations={[]}
+          activeBreakdowns={[]}
+        />
+      );
+
+      // Breakdowns pill is visible even with 0 breakdowns
+      expect(screen.getByRole('button', { name: /Breakdowns \(0\)/i })).toBeInTheDocument();
+      // Inactive pill is visible with count 1
+      expect(screen.getByRole('button', { name: /Inactive \(1\)/i })).toBeInTheDocument();
+    });
+
+    // 7. Grouped Equipment Tables & Column Rationalization
+    it('groups machines by category and renders dedicated tailored columns per category', () => {
+      const mixedFleet = [
+        { id: 'adt-1', name: 'DT-102', machine_type: 'Dump Truck', bin_factor: 28 },
+        { id: 'dr-1', name: 'DR-06', machine_type: 'Drill Rig' },
+        { id: 'dz-1', name: 'BD-22', machine_type: 'Dozer' },
+      ];
+
+      render(
+        <MachineOperationsFilterableTable
+          machines={mixedFleet}
+          operations={[]}
+          todayLoads={[{ machine_id: 'adt-1', shift_type: 'day', total_loads: 15 }]}
+        />
+      );
+
+      // Category section headers are present
+      expect(screen.getByTestId('category-section-adt')).toBeInTheDocument();
+      expect(screen.getByTestId('category-section-drill')).toBeInTheDocument();
+      expect(screen.getByTestId('category-section-dozer')).toBeInTheDocument();
+
+      // ADT section has Loads, Bin Factor, and Total BCM
+      const adtSection = screen.getByTestId('category-section-adt');
+      expect(adtSection).toHaveTextContent('Loads');
+      expect(adtSection).toHaveTextContent('Bin Factor');
+      expect(adtSection).toHaveTextContent('Total BCM');
+      // ADT does NOT have Holes or Meters
+      expect(adtSection).not.toHaveTextContent('Holes');
+      expect(adtSection).not.toHaveTextContent('Meters');
+
+      // Drill section has Holes, Meters, and Penetration Rate
+      const drillSection = screen.getByTestId('category-section-drill');
+      expect(drillSection).toHaveTextContent('Holes');
+      expect(drillSection).toHaveTextContent('Meters');
+      expect(drillSection).toHaveTextContent('Penetration Rate');
+      // Drill does NOT have Loads or Bin Factor
+      expect(drillSection).not.toHaveTextContent('Loads');
+      expect(drillSection).not.toHaveTextContent('Bin Factor');
+
+      // Dozer section has Activity and Rollover (BCM)
+      const dozerSection = screen.getByTestId('category-section-dozer');
+      expect(dozerSection).toHaveTextContent('Activity');
+      expect(dozerSection).toHaveTextContent('Rollover (BCM)');
+      // Dozer does NOT have Holes or Meters
+      expect(dozerSection).not.toHaveTextContent('Holes');
+      expect(dozerSection).not.toHaveTextContent('Meters');
     });
   });
 });

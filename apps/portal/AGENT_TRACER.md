@@ -1,3 +1,23 @@
+## 2026-11-09T11:34:00+02:00: Control Room Machine Operations Design Feedback (7 Deliverables & Telemetry Verification)
+
+- **Phase 1 (Comprehension)**: Address 7 design feedback items on `/control-room/machine-operations`:
+  1. _Sites:_ Ensure "Head Office" (`HEAD-OFFICE`) & "Brakfontein Plant" (`BRAK-PLANT`) are seeded in database and selectable in site dropdowns.
+  2. _Tip Readability:_ Replace distracting `p.animate-pulse.text-neutral-700` with an accessible, high-contrast operational guidance callout box with icon and clear typography.
+  3. _Drill Rig Fields:_ Provide Holes, Meters, Block, and auto-calculated Penetration Rate (`m/h`) with a live calculation badge in `MachineOperationsForm.tsx`.
+  4. _Breakdown Auto-Carryover at 06:00 and 18:00:_ Enforce shift transition auto-carryover and lock opening SMR (`startSmu`) to Stop SMR (`latest_smu`) on breakdown until booked out.
+  5. _KPI Graphs:_ Add telemetry sparkline graphs to each of the 5 KPI panels (`Today's Hours`, `Active Machines`, `Material Moved`, `BCM/Hour`, `Total Delays`) via `MachineOperationsKpiStrip.tsx`.
+  6. _Filter Tabs:_ Ensure `Breakdowns` is always visible with count, and add `Inactive` filter tab.
+  7. _Grouped Equipment Tables & Column Rationalization:_ Group machines by functional category (`Dump Trucks (ADT)`, `Excavators`, `Drill Rigs`, `Dozers`, `Ancillary`) with tailored columns (eliminate Meters/Holes from Dozers and ADTs; add Loads, Bin Factor, and BCM to ADTs; Holes, Meters, and Penetration Rate to Drills; Activity and Rollover BCM to Dozers).
+- **Phase 2 (Evidence)**: Inspected DOM path, computed styles, and component trees in `MachineOperationsForm.tsx`, `MachineOperationsFilterableTable.tsx`, `MachineOperationsSummaryStrip.tsx`, and `page.tsx`.
+- **Phase 3 (Design)**:
+  - Created migration `packages/database/migrations/218_add_head_office_and_ensure_sites.sql` ensuring `HEAD-OFFICE` and `BRAK-PLANT` sites are inserted and active.
+  - Built `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsKpiStrip.tsx` with 5 industrial telemetry sparkline cards featuring gold-steel borders, scanline shimmer, SVG glow paths, Arch logo nodes, and AVG/PEAK/CURRENT readouts.
+  - Replaced pulsing tip in `MachineOperationsForm.tsx` with static, high-contrast operational callout box; added drill rig Penetration Rate computation; added active breakdown detection and SMR lock; and added a 15-second shift-transition monitor for 06:00 and 18:00 boundaries.
+  - Updated `MachineOperationsSummaryStrip.tsx` to keep Breakdowns always visible, add Inactive filter tab, and support category selector tabs.
+  - Refactored `MachineOperationsFilterableTable.tsx` to group equipment by category and render dedicated tables with tailored column schemas.
+- **Phase 4 (Criticism)**: Added comprehensive unit tests in `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsList.test.tsx` verifying all 7 items; verified 100% PASS (21/21 tests); verified `pnpm audit:drift` (100% DHI); verified `pnpm audit:tailwind` within baseline.
+- **Phase 5 (Contract)**: Verified full 27-gate completion suite (`pnpm agent:verify` passed 27/27 gates).
+
 ## 2026-11-06T23:11:00+02:00: Permanent Engineering Rules Hardening (API Validation, Scrape Auth, React 19 Tainting & Zero-Warning Audits)
 
 - **Phase 1 (Comprehension)**: Audit and harden `apps/portal` against `/permanent-engineering-rules` (Rules 1, 4, 8, 9, 10, 12, 23).

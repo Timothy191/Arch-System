@@ -36,7 +36,7 @@ export interface MachineOperation {
   delay_entries?: DelayEntry[];
 }
 
-interface HourlyLoadSummary {
+export interface HourlyLoadSummary {
   machine_id: string;
   shift_type: string;
   total_loads: number;
@@ -61,6 +61,7 @@ export interface MachineItem {
   latest_smu?: number | null;
   bin_factor?: number | null;
   site?: { name: string; site_code?: string } | null;
+  active?: boolean;
 }
 
 export interface MachineOperationsListProps {
@@ -71,13 +72,41 @@ export interface MachineOperationsListProps {
   engineeringDelaysByMachine?: Record<string, { hours: number; reasons: string[]; status: string }>;
 }
 
-export type FilterStatus = 'all' | 'operating' | 'standby' | 'breakdown';
+export type FilterStatus = 'all' | 'operating' | 'standby' | 'breakdown' | 'inactive';
 
-interface MachineWithMeta {
+export type MachineCategory = 'all' | 'adt' | 'excavator' | 'drill' | 'dozer' | 'ancillary';
+
+export function getMachineCategory(machineType: string): MachineCategory {
+  const normalized = (machineType || '').toLowerCase();
+  if (normalized.includes('drill')) return 'drill';
+  if (normalized.includes('dozer')) return 'dozer';
+  if (normalized.includes('excavator') || normalized === 'ex') return 'excavator';
+  if (
+    normalized.includes('dump') ||
+    normalized.includes('adt') ||
+    normalized.includes('truck') ||
+    normalized.includes('haul')
+  ) {
+    return 'adt';
+  }
+  return 'ancillary';
+}
+
+export const MACHINE_CATEGORY_LABELS: Record<MachineCategory, string> = {
+  all: 'All Categories',
+  adt: 'Dump Trucks (ADT)',
+  excavator: 'Excavators',
+  drill: 'Drill Rigs',
+  dozer: 'Dozers',
+  ancillary: 'Ancillary / Other',
+} as const;
+
+export interface MachineWithMeta {
   machine: MachineItem;
   breakdown: Breakdown | undefined;
   operations: MachineOperation[];
-  status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
+  status: 'breakdown' | 'in-progress' | 'operating' | 'standby' | 'inactive';
+  category: MachineCategory;
   totalHours: number;
 }
 
@@ -86,6 +115,14 @@ export interface MachineStatusCounts {
   operating: number;
   standby: number;
   breakdown: number;
+  inactive: number;
+  // Category counts
+  allCategories: number;
+  adt: number;
+  excavator: number;
+  drill: number;
+  dozer: number;
+  ancillary: number;
 }
 
 export function formatTime(timeStr: string): string {
@@ -204,8 +241,10 @@ export function computeMachinesWithMeta(
       }
     }
 
-    let status: 'breakdown' | 'in-progress' | 'operating' | 'standby';
-    if (isBreakdown) {
+    let status: 'breakdown' | 'in-progress' | 'operating' | 'standby' | 'inactive';
+    if (machine.active === false) {
+      status = 'inactive';
+    } else if (isBreakdown) {
       status = 'breakdown';
     } else if (isInProgress) {
       status = 'in-progress';
@@ -220,6 +259,7 @@ export function computeMachinesWithMeta(
       breakdown,
       operations: machineOps,
       status,
+      category: getMachineCategory(machine.machine_type),
       totalHours,
     };
   });
@@ -231,14 +271,41 @@ export function computeMachineStatusCounts(
   let operating = 0;
   let standby = 0;
   let breakdown = 0;
+  let inactive = 0;
+
+  let adt = 0;
+  let excavator = 0;
+  let drill = 0;
+  let dozer = 0;
+  let ancillary = 0;
 
   for (const item of machinesWithMeta) {
     if (item.status === 'breakdown') {
       breakdown++;
     } else if (item.status === 'operating' || item.status === 'in-progress') {
       operating++;
+    } else if (item.status === 'inactive') {
+      inactive++;
     } else {
       standby++;
+    }
+
+    switch (item.category) {
+      case 'adt':
+        adt++;
+        break;
+      case 'excavator':
+        excavator++;
+        break;
+      case 'drill':
+        drill++;
+        break;
+      case 'dozer':
+        dozer++;
+        break;
+      default:
+        ancillary++;
+        break;
     }
   }
 
@@ -247,15 +314,27 @@ export function computeMachineStatusCounts(
     operating,
     standby,
     breakdown,
+    inactive,
+    allCategories: machinesWithMeta.length,
+    adt,
+    excavator,
+    drill,
+    dozer,
+    ancillary,
   };
 }
 
 export function filterMachinesWithMeta(
   machinesWithMeta: MachineWithMeta[],
   filterStatus: FilterStatus,
-  searchQuery: string
+  searchQuery: string,
+  categoryFilter?: MachineCategory
 ): MachineWithMeta[] {
   return machinesWithMeta.filter((item) => {
+    if (categoryFilter && categoryFilter !== 'all' && item.category !== categoryFilter) {
+      return false;
+    }
+
     if (
       filterStatus === 'operating' &&
       item.status !== 'operating' &&
@@ -267,6 +346,9 @@ export function filterMachinesWithMeta(
       return false;
     }
     if (filterStatus === 'breakdown' && item.status !== 'breakdown') {
+      return false;
+    }
+    if (filterStatus === 'inactive' && item.status !== 'inactive') {
       return false;
     }
 
