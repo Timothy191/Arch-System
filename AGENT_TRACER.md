@@ -4,6 +4,14 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-09T11:15:00Z] - Verify Tailwind class ordering (useSortedClasses) compliance across monorepo
+
+- **Action:**
+  - Verified `apps/portal/app/(auth)/login/page.tsx` and `apps/portal/features/hub/components/CoreOperationalModules.tsx` pass `lint/nursery/useSortedClasses` with 0 errors on committed code (both `main` and `feat/frontend-taste-final-product` at `81018fd5`).
+  - Confirmed all 7 previously-flagged FIXABLE errors were resolved in committed code; no working-tree changes remain.
+  - Verified all 11 setup hook scripts (`.agents/hooks/*`, `.qoder/hooks/*`, `.husky/*`) have valid syntax.
+- **Verification:** `pnpm lint` (1575 files, 0 errors PASS), `pnpm --filter portal type-check` (PASS), `pnpm policy:check` (PASS), `pnpm --filter portal test --login` (3 suites, 25 tests PASS).
+
 ## [2026-11-09] - Vercel Deployment Exploration & Local Monorepo Environment Synchronization
 
 - **Action:**
