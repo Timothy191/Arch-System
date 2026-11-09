@@ -52,3 +52,8 @@
 - **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
 - 2026-11-06T21:59:19Z | feat(auth): apply Taskbar liquid-glass-light and gold-steel-border pill styling to LoginForm inputs and enterprise add-ons bar
+
+### [2026-11-09T12:38:00+02:00] LoginForm Taste-Skill 2.5 Ergonomics Upgrade
+
+- **Files**: `libs/features/auth/ui/src/LoginForm.tsx`
+- **Action**: Upgraded email/password inputs to `48px` (`h-12`) with `16px` (`text-base`) input text, raised labels and helper copy to `13px` (`text-[13px]`) sentence case, and standardized primary CTA height (`min-h-12`) and press physics (`active:scale-[0.985]`).

@@ -88,6 +88,10 @@ describe('LoginPage Server Component', () => {
 
     const asideMiningVideo = screen.getByTestId('login-aside-mining-video');
     expect(asideMiningVideo).toBeInTheDocument();
+
+    const videoPauseToggle = screen.getByTestId('login-video-pause-toggle');
+    expect(videoPauseToggle).toBeInTheDocument();
+    expect(videoPauseToggle).toHaveAttribute('aria-label', 'Pause background video');
   });
 
   it('renders the heading with the theme token class and integrated telemetry/eve panels', async () => {

@@ -57,6 +57,15 @@ interface MachineOperation {
   holes_drilled?: number | null;
 }
 
+const FORM_LABEL_CLASS =
+  'block font-medium text-[13px] text-[var(--text-secondary)] leading-[18px]';
+
+const FORM_FIELD_CONTROL_CLASS =
+  'h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
+
+const FORM_DRILL_CONTROL_CLASS =
+  'h-12 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3.5 text-[var(--text-heading)] text-base transition-colors focus:border-[var(--accent-blue)] focus:outline-none';
+
 export interface EngineeringDelaySummary {
   hours: number;
   reasons: string[];
@@ -616,8 +625,8 @@ export function MachineOperationsForm({
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Machine Dropdown */}
-          <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">
+          <div className="space-y-1.5">
+            <label className={FORM_LABEL_CLASS}>
               Machine <span className="text-accent-red">*</span>
             </label>
             <select
@@ -646,7 +655,7 @@ export function MachineOperationsForm({
                       : prev.breakdownReason,
                 }));
               }}
-              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+              className={FORM_FIELD_CONTROL_CLASS}
             >
               <option value="">Select machine...</option>
               {loggedMachines.length > 0 && (
@@ -670,18 +679,20 @@ export function MachineOperationsForm({
                 </optgroup>
               )}
             </select>
-            {errors.machineId && <p className="text-accent-red text-xs">{errors.machineId}</p>}
+            {errors.machineId && (
+              <p className="text-[13px] text-accent-red leading-[18px]">{errors.machineId}</p>
+            )}
           </div>
 
           {/* Operator Dropdown */}
-          <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">
+          <div className="space-y-1.5">
+            <label className={FORM_LABEL_CLASS}>
               Operator <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.operatorId}
               onChange={(e) => setFormData((prev) => ({ ...prev, operatorId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+              className={FORM_FIELD_CONTROL_CLASS}
             >
               <option value="">Select operator...</option>
               {filteredOperators.map((op) => (
@@ -690,18 +701,20 @@ export function MachineOperationsForm({
                 </option>
               ))}
             </select>
-            {errors.operatorId && <p className="text-accent-red text-xs">{errors.operatorId}</p>}
+            {errors.operatorId && (
+              <p className="text-[13px] text-accent-red leading-[18px]">{errors.operatorId}</p>
+            )}
           </div>
 
           {/* Site Dropdown */}
-          <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">
+          <div className="space-y-1.5">
+            <label className={FORM_LABEL_CLASS}>
               Site/Location <span className="text-accent-red">*</span>
             </label>
             <select
               value={formData.siteId}
               onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+              className={FORM_FIELD_CONTROL_CLASS}
             >
               <option value="">Select site...</option>
               {sites.map((s) => (
@@ -710,23 +723,25 @@ export function MachineOperationsForm({
                 </option>
               ))}
             </select>
-            {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
+            {errors.siteId && (
+              <p className="text-[13px] text-accent-red leading-[18px]">{errors.siteId}</p>
+            )}
           </div>
 
           {/* Start SMR */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="block text-[var(--text-secondary)] text-sm">
+              <label className={FORM_LABEL_CLASS}>
                 Start SMR <span className="text-accent-red">*</span>
                 {selectedMachine?.latest_smu != null && (
-                  <span className="ml-2 font-mono text-[11px] text-[var(--accent-blue)]">
+                  <span className="ml-2 font-mono text-[13px] text-[var(--accent-blue)]">
                     (Min: {Number(selectedMachine.latest_smu).toFixed(1)}h)
                   </span>
                 )}
               </label>
               {isSmrLocked && (
-                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] text-amber-800">
-                  <Lock className="h-3 w-3" /> Locked on Breakdown
+                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 font-mono text-[13px] text-amber-800 leading-[18px]">
+                  <Lock className="h-3.5 w-3.5" /> Locked on Breakdown
                 </span>
               )}
             </div>
@@ -739,31 +754,33 @@ export function MachineOperationsForm({
                 value={formData.startSmu}
                 readOnly={isSmrLocked}
                 onChange={(e) => handleSmrFieldChange('startSmu', e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:outline-none ${
+                className={`h-12 w-full rounded-lg border px-3.5 font-mono text-[var(--text-heading)] text-base transition-colors focus:outline-none ${
                   isSmrLocked
                     ? 'cursor-not-allowed border-amber-300 bg-amber-50/50 text-neutral-600'
                     : 'border-[var(--border-default)] bg-[var(--bg-secondary)] focus:border-[var(--accent-blue)]'
                 }`}
               />
               {isSmrLocked && (
-                <Lock className="pointer-events-none absolute top-3 right-3 h-4 w-4 text-amber-700" />
+                <Lock className="pointer-events-none absolute top-3.5 right-3.5 h-4 w-4 text-amber-700" />
               )}
             </div>
             {isSmrLocked && (
-              <p className="text-[11px] text-amber-800">
+              <p className="text-[13px] text-amber-800 leading-[18px]">
                 Opening SMR is locked to Stop SMR ({selectedMachine?.latest_smu}h) until breakdown
                 is booked out.
               </p>
             )}
-            {errors.startSmu && <p className="text-accent-red text-xs">{errors.startSmu}</p>}
+            {errors.startSmu && (
+              <p className="text-[13px] text-accent-red leading-[18px]">{errors.startSmu}</p>
+            )}
           </div>
 
           {/* Stop SMR */}
-          <div className="space-y-2">
-            <label className="block text-[var(--text-secondary)] text-sm">
+          <div className="space-y-1.5">
+            <label className={FORM_LABEL_CLASS}>
               Stop SMR
               {formData.startSmu && !Number.isNaN(Number(formData.startSmu)) && (
-                <span className="ml-2 font-mono text-[11px] text-[var(--text-muted)]">
+                <span className="ml-2 font-mono text-[13px] text-[var(--text-muted)]">
                   (Min: {Number(formData.startSmu).toFixed(1)}h)
                 </span>
               )}
@@ -775,9 +792,11 @@ export function MachineOperationsForm({
               placeholder="e.g. 1431.0"
               value={formData.endSmu}
               onChange={(e) => handleSmrFieldChange('endSmu', e.target.value)}
-              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-secondary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+              className={`${FORM_FIELD_CONTROL_CLASS} font-mono`}
             />
-            {errors.endSmu && <p className="text-accent-red text-xs">{errors.endSmu}</p>}
+            {errors.endSmu && (
+              <p className="text-[13px] text-accent-red leading-[18px]">{errors.endSmu}</p>
+            )}
           </div>
         </div>
 
@@ -845,14 +864,14 @@ export function MachineOperationsForm({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {/* Site */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
+              <div className="space-y-1.5">
+                <label className={FORM_LABEL_CLASS}>
                   Site <span className="text-accent-red">*</span>
                 </label>
                 <select
                   value={formData.siteId}
                   onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+                  className={FORM_DRILL_CONTROL_CLASS}
                 >
                   <option value="">Select site...</option>
                   {sites.map((s) => (
@@ -861,12 +880,14 @@ export function MachineOperationsForm({
                     </option>
                   ))}
                 </select>
-                {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
+                {errors.siteId && (
+                  <p className="text-[13px] text-accent-red leading-[18px]">{errors.siteId}</p>
+                )}
               </div>
 
               {/* Block */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
+              <div className="space-y-1.5">
+                <label className={FORM_LABEL_CLASS}>
                   Block <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -877,7 +898,7 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, blockDrilled: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+                  className={FORM_DRILL_CONTROL_CLASS}
                 />
                 {availableBlocks.length > 0 && (
                   <datalist id="drill-mine-blocks">
@@ -887,13 +908,15 @@ export function MachineOperationsForm({
                   </datalist>
                 )}
                 {errors.blockDrilled && (
-                  <p className="text-accent-red text-xs">{errors.blockDrilled}</p>
+                  <p className="text-[13px] text-accent-red leading-[18px]">
+                    {errors.blockDrilled}
+                  </p>
                 )}
               </div>
 
               {/* Holes */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
+              <div className="space-y-1.5">
+                <label className={FORM_LABEL_CLASS}>
                   Holes <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -905,16 +928,18 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, holesDrilled: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+                  className={`${FORM_DRILL_CONTROL_CLASS} font-mono`}
                 />
                 {errors.holesDrilled && (
-                  <p className="text-accent-red text-xs">{errors.holesDrilled}</p>
+                  <p className="text-[13px] text-accent-red leading-[18px]">
+                    {errors.holesDrilled}
+                  </p>
                 )}
               </div>
 
               {/* Meters */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
+              <div className="space-y-1.5">
+                <label className={FORM_LABEL_CLASS}>
                   Meters <span className="text-accent-red">*</span>
                 </label>
                 <input
@@ -926,31 +951,31 @@ export function MachineOperationsForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, metersDrilled: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2.5 font-mono text-[var(--text-heading)] text-sm transition-colors focus:border-[var(--accent-blue)] focus:outline-none"
+                  className={`${FORM_DRILL_CONTROL_CLASS} font-mono`}
                 />
                 {errors.metersDrilled && (
-                  <p className="text-accent-red text-xs">{errors.metersDrilled}</p>
+                  <p className="text-[13px] text-accent-red leading-[18px]">
+                    {errors.metersDrilled}
+                  </p>
                 )}
               </div>
 
               {/* Penetration Rate (m/h) */}
-              <div className="space-y-2">
-                <label className="block text-[var(--text-secondary)] text-sm">
-                  Penetration Rate
-                </label>
+              <div className="space-y-1.5">
+                <label className={FORM_LABEL_CLASS}>Penetration Rate</label>
                 <div
-                  className="flex h-[42px] items-center justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm"
+                  className="flex h-12 items-center justify-between rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3.5 font-mono text-[var(--text-heading)] text-base"
                   title="Auto-calculated penetration rate (Meters / Operating Hours)"
                 >
                   <span className="font-semibold text-accent-blue">
                     {penetrationRate ? `${penetrationRate} m/h` : '— m/h'}
                   </span>
                   {penetrationRate ? (
-                    <span className="rounded bg-accent-green/10 px-1.5 py-0.5 font-semibold text-[10px] text-accent-green">
+                    <span className="rounded bg-accent-green/10 px-2 py-0.5 font-semibold text-[13px] text-accent-green leading-[18px]">
                       Calc
                     </span>
                   ) : (
-                    <span className="text-[10px] text-[var(--text-muted)]">
+                    <span className="text-[13px] text-[var(--text-muted)] leading-[18px]">
                       {hoursWorked ? 'Enter meters' : 'Awaiting SMR'}
                     </span>
                   )}
@@ -1206,7 +1231,7 @@ export function MachineOperationsForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="min-w-[120px] rounded-lg bg-[var(--accent-blue)] px-6 py-2.5 font-medium text-[var(--bg-secondary)] transition-colors hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
+            className="min-h-12 min-w-[140px] rounded-lg bg-[var(--accent-blue)] px-6 py-3 font-semibold text-[13px] text-[var(--bg-secondary)] transition-all duration-150 hover:-translate-y-px hover:bg-[var(--accent-blue)] active:scale-[0.985] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]"
           >
             {isSubmitting ? 'Saving...' : 'Save Operation'}
           </button>
@@ -1216,7 +1241,7 @@ export function MachineOperationsForm({
         <div
           role="note"
           aria-label="SMR logging guidance"
-          className="flex items-start gap-2.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/5 px-3.5 py-2.5 text-neutral-800 text-xs"
+          className="flex items-start gap-2.5 rounded-lg border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/5 px-3.5 py-2.5 text-[13px] text-neutral-800 leading-[18px]"
         >
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-blue)]" aria-hidden="true" />
           <p className="leading-relaxed">

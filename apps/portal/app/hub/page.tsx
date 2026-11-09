@@ -225,16 +225,10 @@ export default async function HubPage() {
   });
 
   return (
-    <div className="w-full space-y-8 sm:space-y-10">
+    <div className="mx-auto w-full max-w-[1360px] space-y-12 px-6 py-6 sm:px-10">
       <h1 className="sr-only">Arch Systems Operations Hub</h1>
       {/* Light-theme glass hero section */}
-      <section
-        className="relative w-full animate-fade-up px-4 pt-2 pb-2 motion-reduce:animate-none sm:px-6"
-        style={{
-          animationDelay: '0s',
-          animationFillMode: 'both',
-        }}
-      >
+      <section className="relative w-full pt-2 pb-2">
         <HeroBackground />
 
         {/* Heading, 3D Hero Carousel with separate cards, and CTAs */}
@@ -264,10 +258,10 @@ export default async function HubPage() {
       {departments.length === 0 ? (
         <div className="space-y-3 rounded-card border border-arch-border-subtle bg-arch-surface-secondary/40 p-8 text-center sm:p-12">
           <Shield className="mx-auto h-8 w-8 text-accent-amber" />
-          <p className="font-medium text-arch-text-secondary text-sm">
+          <p className="font-medium text-arch-text-secondary text-base">
             No departments assigned to your account.
           </p>
-          <p className="text-arch-text-tertiary text-xs">
+          <p className="text-[13px] text-arch-text-tertiary leading-[18px]">
             Contact your administrator to request department access.
           </p>
         </div>
@@ -287,7 +281,7 @@ export default async function HubPage() {
 
       {/* Plugin-contributed widgets (native ArchPlugin integrations) */}
       {pluginWidgets.length > 0 && (
-        <section className="animate-fade-up space-y-4" style={{ animationDelay: '0.35s' }}>
+        <section className="space-y-4">
           <div className="flex items-center justify-between border-arch-border-subtle border-b pb-3">
             <h2 className="font-semibold text-arch-text-primary text-base tracking-tight sm:text-lg">
               Plugin Widgets
@@ -303,7 +297,7 @@ export default async function HubPage() {
         </section>
       )}
       {/* Operations Copilot (AI-assisted troubleshooting) */}
-      <section className="animate-fade-up" style={{ animationDelay: '0.4s' }}>
+      <section>
         <OperationsCopilot />
       </section>
     </div>

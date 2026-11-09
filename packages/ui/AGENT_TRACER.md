@@ -784,3 +784,8 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - [2026-11-05T10:06:24Z] Enforced Biome 2.5.14 official CI/Turborepo root tasks (//#check, //#check:fix, //#lint:ci), strict rules (noUnusedVariables: error, noUnusedImports: error, domains.types: recommended), Rspack 2.x parity audit, and Turbopack Rust React Compiler + persistent FS cache.
 - [2026-11-06T08:34:40Z] Added `defineSlotRecipe` (`chakra-ui/panda` slot variant anatomy) and `resolveSurfacePairing` (`skeletonlabs/skeleton` surface-contrast pairing) in `src/lib/utils.ts` and wired into `src/components/KPI.tsx`.
 - 2026-11-06T22:05:45Z | fix(ui): convert CodeBlock primitive from dark bg-neutral-950 to light-mode bg-neutral-50 surface
+
+### [2026-11-09T12:38:00+02:00] GlassCard Taste-Skill 2.5 Refinement
+
+- **Files**: `packages/ui/src/components/GlassCard.tsx`
+- **Action**: Replaced purple/magenta hexes in `colorPresets.aurora` with industrial emerald/cyan/amber palette, removed `animate-window-open` mount animation, and standardized interactive hover lift (`-translate-y-0.5`, `active:scale-[0.985]`).

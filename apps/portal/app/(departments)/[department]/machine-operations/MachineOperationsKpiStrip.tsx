@@ -36,6 +36,12 @@ function buildSparklinePoints(targetValue: number, invert = false): number[] {
   });
 }
 
+const KPI_HEADER_LABEL_CLASS =
+  'flex items-center gap-1.5 font-medium text-[13px] text-[var(--text-muted)] leading-[18px]';
+
+const KPI_BADGE_GREEN_CLASS =
+  'inline-flex items-center gap-1 rounded-full border border-accent-green/30 bg-accent-green/10 px-2 py-0.5 font-medium font-mono text-[13px] text-accent-green leading-[18px]';
+
 function TelemetrySparkline({
   id,
   points,
@@ -68,15 +74,7 @@ function TelemetrySparkline({
 
   return (
     <div className="mt-2.5" data-testid={`kpi-sparkline-${id}`}>
-      <div className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/35 bg-white/85 px-2 py-1.5 shadow-2xs backdrop-blur-md">
-        <div
-          className="pointer-events-none absolute inset-0 animate-scanline opacity-25"
-          style={{
-            background:
-              'linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.1) 50%, transparent 100%)',
-          }}
-        />
-
+      <div className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/35 bg-white/90 px-2.5 py-1.5 shadow-2xs">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="relative z-10 h-10 w-full overflow-visible"
@@ -152,7 +150,6 @@ function TelemetrySparkline({
                 height={iconSize}
                 viewBox="22.75 16.625 166.16 166.19"
                 aria-hidden="true"
-                className={isLast ? 'motion-safe:animate-pulse' : ''}
               >
                 <use href={`#arch-node-${fillId}`} opacity={isLast ? 1 : 0.85} />
               </svg>
@@ -160,7 +157,7 @@ function TelemetrySparkline({
           })}
         </svg>
 
-        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[8px] text-[var(--text-secondary)] tabular-nums">
+        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[13px] text-[var(--text-secondary)] tabular-nums leading-[18px]">
           <span>AVG {avgValue}</span>
           <span>PEAK {peakValue}</span>
           <span className="font-semibold text-[var(--accent-blue)]">{currentValue}</span>
@@ -195,12 +192,12 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
       <GlassCard className="flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center justify-between gap-1.5">
-            <p className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+            <p className={KPI_HEADER_LABEL_CLASS}>
               <Clock className="h-3.5 w-3.5 text-[var(--accent-blue)]" aria-hidden="true" />
               Today&apos;s Hours
             </p>
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-accent-green/30 bg-accent-green/10 px-1.5 py-0.5 font-medium font-mono text-[9px] text-accent-green">
-              <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" />
+            <span className={KPI_BADGE_GREEN_CLASS}>
+              <TrendingUp className="h-3 w-3" aria-hidden="true" />
               Live
             </span>
           </div>
@@ -221,13 +218,11 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
       <GlassCard className="flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center justify-between gap-1.5">
-            <p className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+            <p className={KPI_HEADER_LABEL_CLASS}>
               <Activity className="h-3.5 w-3.5 text-accent-green" aria-hidden="true" />
               Active Machines
             </p>
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-accent-green/30 bg-accent-green/10 px-1.5 py-0.5 font-medium font-mono text-[9px] text-accent-green">
-              Fleet
-            </span>
+            <span className={KPI_BADGE_GREEN_CLASS}>Fleet</span>
           </div>
           <p className="mt-1 font-semibold text-2xl text-accent-green tabular-nums">
             {activeMachines}
@@ -247,11 +242,11 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
       <GlassCard className="flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center justify-between gap-1.5">
-            <p className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+            <p className={KPI_HEADER_LABEL_CLASS}>
               <Layers className="h-3.5 w-3.5 text-[var(--accent-blue)]" aria-hidden="true" />
               Material Moved
             </p>
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-medium font-mono text-[9px] text-[var(--accent-blue)]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/10 px-2 py-0.5 font-medium font-mono text-[13px] text-[var(--accent-blue)] leading-[18px]">
               BCM
             </span>
           </div>
@@ -273,11 +268,11 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
       <GlassCard className="flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center justify-between gap-1.5">
-            <p className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+            <p className={KPI_HEADER_LABEL_CLASS}>
               <Gauge className="h-3.5 w-3.5 text-accent-blue" aria-hidden="true" />
               BCM/Hour
             </p>
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-accent-amber/30 bg-accent-amber/10 px-1.5 py-0.5 font-medium font-mono text-[9px] text-accent-amber">
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent-amber/30 bg-accent-amber/10 px-2 py-0.5 font-medium font-mono text-[13px] text-accent-amber leading-[18px]">
               Rate
             </span>
           </div>
@@ -298,11 +293,11 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
       <GlassCard className="flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center justify-between gap-1.5">
-            <p className="flex items-center gap-1.5 font-medium text-[var(--text-muted)] text-xs uppercase tracking-wider">
+            <p className={KPI_HEADER_LABEL_CLASS}>
               <AlertTriangle className="h-3.5 w-3.5 text-accent-red" aria-hidden="true" />
               Total Delays
             </p>
-            <span className="inline-flex items-center gap-0.5 rounded-full border border-accent-red/30 bg-accent-red/10 px-1.5 py-0.5 font-medium font-mono text-[9px] text-accent-red">
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent-red/30 bg-accent-red/10 px-2 py-0.5 font-medium font-mono text-[13px] text-accent-red leading-[18px]">
               Shift
             </span>
           </div>
@@ -310,7 +305,7 @@ export const MachineOperationsKpiStrip = memo(function MachineOperationsKpiStrip
             {totalDelayHours.toFixed(1)}h
           </p>
           {totalEngineeringDelayHours > 0 && (
-            <p className="mt-0.5 font-mono text-[10px] text-[var(--text-muted)]">
+            <p className="mt-0.5 font-mono text-[13px] text-[var(--text-muted)] leading-[18px]">
               CR: {controlRoomDelayHours.toFixed(1)}h + Eng: {totalEngineeringDelayHours.toFixed(1)}
               h
             </p>
