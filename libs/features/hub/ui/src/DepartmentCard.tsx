@@ -110,7 +110,7 @@ interface DepartmentCardProps {
 
 function DepartmentCard({
   department,
-  index,
+  index: _index,
   onPinnedChange,
   isPinned: controlledIsPinned,
 }: DepartmentCardProps) {
@@ -152,34 +152,23 @@ function DepartmentCard({
   const route = department.route || `/${department.name}`;
 
   return (
-    <div
-      style={
-        {
-          animation: `fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.05}s both`,
-          ['--shimmer-delay' as string]: `${-(index * 1.5)}s`,
-        } as React.CSSProperties
-      }
-      className={cn('h-full', department.gridSpan)}
-    >
+    <div className={cn('h-full', department.gridSpan)}>
       <div
-        className="uiverse-card gold-steel-border group interactive-element relative h-full w-full shadow-[0_12px_24px_-6px_rgba(0,0,0,0.08),0_8px_16px_-4px_rgba(0,0,0,0.04),0_0_0_1px_rgba(255,255,255,0.7)_inset,0_1px_2px_rgba(0,0,0,0.04)_inset] outline-none ring-1 ring-black/[0.06] hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.16),0_12px_24px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(255,255,255,0.85)_inset,0_2px_4px_rgba(0,0,0,0.08)_inset] hover:ring-arch-accent-blue/35 motion-safe:animate-subtle-float motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:[transform:perspective(1000px)_rotateX(2deg)_translateZ(4px)]"
+        className="uiverse-card gold-steel-border group interactive-element relative h-full w-full shadow-[0_12px_24px_-6px_rgba(0,0,0,0.08),0_8px_16px_-4px_rgba(0,0,0,0.04),0_0_0_1px_rgba(255,255,255,0.7)_inset,0_1px_2px_rgba(0,0,0,0.04)_inset] outline-none ring-1 ring-black/[0.06] hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.16),0_12px_24px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(255,255,255,0.85)_inset,0_2px_4px_rgba(0,0,0,0.08)_inset] hover:ring-arch-accent-blue/35 motion-safe:transition-[transform,box-shadow] motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:-translate-y-0.5"
         data-testid={`dept-card-${department.name}`}
-        style={{
-          transformStyle: 'preserve-3d',
-          backfaceVisibility: 'hidden',
-          animationDelay: `${index * 50}ms`,
-        }}
       >
         {/* Navigation Loading Overlay */}
         {isNavigating && (
           <div
-            className="absolute inset-0 z-30 flex animate-fade-in flex-col items-center justify-center gap-2 rounded-[20px] bg-arch-surface-primary/75 backdrop-blur-sm transition-all"
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2 rounded-[20px] bg-arch-surface-primary/75 backdrop-blur-sm transition-all"
             data-testid={`dept-loading-${department.name}`}
             aria-live="polite"
             role="status"
           >
             <Loader2 className="h-6 w-6 animate-spin text-arch-accent-blue" aria-hidden="true" />
-            <span className="font-medium text-arch-text-secondary text-xs">Loading...</span>
+            <span className="font-medium text-[13px] text-arch-text-secondary leading-[18px]">
+              Loading...
+            </span>
           </div>
         )}
 
@@ -235,7 +224,7 @@ function DepartmentCard({
               aria-hidden="true"
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
+              className="object-cover object-center opacity-90 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               onError={() => {
                 if (imageExt === 'webp') {
                   setImageExt('jpg');
@@ -315,7 +304,7 @@ function DepartmentCard({
               {department.status && (
                 <span
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold text-[10px] uppercase tracking-[0.05em]',
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium text-[13px] capitalize leading-[18px]',
                     department.status === 'active' &&
                       'border-accent-green/25 bg-accent-green/10 text-accent-green',
                     department.status === 'maintenance' &&
@@ -326,7 +315,7 @@ function DepartmentCard({
                 >
                   <span
                     className={cn(
-                      'h-1.5 w-1.5 animate-pulse rounded-full',
+                      'h-1.5 w-1.5 rounded-full',
                       department.status === 'active' && 'bg-accent-green',
                       department.status === 'maintenance' && 'bg-accent-amber',
                       department.status === 'alert' && 'bg-accent-red'
@@ -342,16 +331,13 @@ function DepartmentCard({
               aria-hidden="true"
               className="my-1.5 flex w-full items-center justify-center gap-2"
             >
-              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber/55 to-accent-amber" />
               <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
               <span className="gold-steel-border gold-steel-border-slim flex h-4.5 w-4.5 items-center justify-center rounded-full border border-accent-amber/45 bg-white/90 text-accent-amber shadow-2xs">
-                <Logo
-                  variant="gold"
-                  className="h-2.5 w-2.5 text-accent-amber motion-safe:animate-pulse"
-                />
+                <Logo variant="gold" className="h-2.5 w-2.5 text-accent-amber" />
               </span>
               <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] border border-accent-amber/80 bg-accent-amber/35" />
-              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber motion-safe:animate-pulse" />
+              <span className="h-[1.5px] flex-1 rounded-full bg-gradient-to-l from-transparent via-accent-amber/55 to-accent-amber" />
             </div>
             <p className="uiverse-card-subtitle">{department.description}</p>
           </div>

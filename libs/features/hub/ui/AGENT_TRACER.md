@@ -277,3 +277,8 @@
 - 2026-10-22T12:14:00+02:00 — feat(hub): align DepartmentCard geometry and spacing with slimmer rectangular uiverse-card
 - 2026-10-23T01:15:00+02:00 — feat(hub): standardize hero department badge icons to gold Arch System Logo and assert gold telemetry graph containers and h3 trend headings
 - 2026-10-31T10:49:31+02:00 — perf(hub/ui): remove the hard-coded inline `fontFamily` on `DepartmentCard`'s department title (`font-anurati`), so the card inherits the theme's `--font-display` instead of pinning a font stack in JSX. Updated the `HeroRotator` test description from "Anurati font" to "display face (font-anurati)" — the assertion on the `font-anurati` class is unchanged and still green (24/24).
+
+### [2026-11-09T12:38:00+02:00] DepartmentCard Taste-Skill 2.5 Micro-Interaction Upgrade
+
+- **Files**: `libs/features/hub/ui/src/DepartmentCard.tsx`
+- **Action**: Removed mount fade-in, continuous float, 3D perspective tilt, and decorative separator pulse; standardized `2px` (`-translate-y-0.5`) card hover lift, `1.03` banner image zoom, and `13px` status badges.

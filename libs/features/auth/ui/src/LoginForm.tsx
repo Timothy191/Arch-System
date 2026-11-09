@@ -29,10 +29,10 @@ const LOGIN_INPUT_WRAPPER_CLASS =
   'liquid-glass-light gold-steel-border gold-steel-border-slim relative flex items-center overflow-hidden rounded-xl border border-white/40 bg-[var(--material-ultra-thin)] shadow-diffusion-sm backdrop-blur-md transition-all duration-200 hover:bg-white/95 focus-within:border-amber-500/70 focus-within:bg-white/95 focus-within:ring-2 focus-within:ring-amber-500/15';
 
 const LOGIN_INPUT_CLASS =
-  'w-full rounded-xl bg-transparent py-2.5 pr-9 pl-10 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
+  'h-12 w-full rounded-xl bg-transparent pr-10 pl-10 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-0';
 
 const SIGN_IN_BUTTON_CLASS =
-  'group gold-steel-border gold-steel-border-slim flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-xs text-zinc-950 uppercase tracking-wider shadow-card transition-all duration-200 hover:bg-amber-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60';
+  'group gold-steel-border gold-steel-border-slim flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-[13px] text-zinc-950 shadow-card transition-all duration-150 hover:-translate-y-px hover:bg-amber-400 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60';
 
 const ENTERPRISE_ADDONS_BAR_CLASS =
   'liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col gap-2 rounded-full border border-white/30 bg-[var(--material-ultra-thin)] px-3 py-1.5 shadow-diffusion-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between';
@@ -89,11 +89,11 @@ export function LoginForm() {
         <div className="flex items-center justify-between">
           <label
             htmlFor="email"
-            className="block cursor-pointer select-none font-semibold text-xs text-zinc-700 uppercase tracking-wider"
+            className="block cursor-pointer select-none font-medium text-[13px] text-zinc-800 leading-[18px]"
           >
             Email Address
           </label>
-          <span className="select-none font-mono text-[10.5px] text-zinc-600">
+          <span className="select-none font-mono text-[13px] text-zinc-600 leading-[18px]">
             Email or Employee Code
           </span>
         </div>
@@ -127,9 +127,9 @@ export function LoginForm() {
               type="button"
               onClick={() => setEmployeeId('')}
               aria-label="Clear email address"
-              className="absolute top-1/2 right-1.5 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-800"
+              className="absolute top-1/2 right-1.5 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-800"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -140,13 +140,13 @@ export function LoginForm() {
         <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="block cursor-pointer select-none font-semibold text-xs text-zinc-700 uppercase tracking-wider"
+            className="block cursor-pointer select-none font-medium text-[13px] text-zinc-800 leading-[18px]"
           >
             Password
           </label>
           <Link
             href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-            className="inline-flex min-h-[28px] select-none items-center py-0.5 font-medium text-amber-700 text-xs transition-colors hover:text-amber-900 hover:underline"
+            className="inline-flex min-h-8 select-none items-center py-0.5 font-medium text-[13px] text-amber-800 leading-[18px] transition-colors hover:text-amber-950 hover:underline"
           >
             Forgot password?
           </Link>
@@ -182,7 +182,7 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        <div className="flex items-center justify-between pt-0.5 font-mono text-[10.5px] text-zinc-600">
+        <div className="flex items-center justify-between pt-0.5 font-mono text-[13px] text-zinc-600 leading-[18px]">
           <span className="inline-flex items-center gap-1.5">
             <CheckCircle2
               className={
@@ -191,13 +191,13 @@ export function LoginForm() {
             />
             <span>{password.length > 0 ? 'Credentials ready' : 'Encrypted session handoff'}</span>
           </span>
-          <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600">
+          <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono text-[13px] text-zinc-600 leading-[18px]">
             Enter ↵
           </kbd>
         </div>
         {passwordError && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-red-700 text-xs"
+            className="mt-1 flex items-center gap-1.5 text-[13px] text-red-700 leading-[18px]"
             role="alert"
             aria-live="assertive"
           >
@@ -206,17 +206,17 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-amber-700 text-xs"
+            className="mt-1 flex items-center gap-1.5 text-[13px] text-amber-800 leading-[18px]"
             role="alert"
             aria-live="polite"
           >
-            <Lock className="h-3 w-3" strokeWidth={LOCK_ICON_STROKE_WIDTH} />
+            <Lock className="h-3.5 w-3.5" strokeWidth={LOCK_ICON_STROKE_WIDTH} />
             <span>Caps Lock is on</span>
           </div>
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="mt-1 flex animate-fade-up items-center gap-1.5 text-amber-700 text-xs"
+            className="mt-1 flex items-center gap-1.5 text-[13px] text-amber-800 leading-[18px]"
             role="alert"
             aria-live="polite"
           >
@@ -244,23 +244,23 @@ export function LoginForm() {
       <div data-testid="enterprise-auth-addons" className={ENTERPRISE_ADDONS_BAR_CLASS}>
         <Link
           href="/access-control/qr-codes"
-          className="group inline-flex items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3 py-1 font-medium text-xs text-zinc-800 transition-all hover:border-amber-500/40 hover:bg-amber-50 hover:text-amber-900"
+          className="group inline-flex min-h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3.5 py-1.5 font-medium text-[13px] text-zinc-800 transition-all hover:bg-amber-50 hover:text-amber-900"
         >
           <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-700" />
           <span>Visitor QR Code</span>
-          <ArrowRight className="h-3 w-3 text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-700" />
+          <ArrowRight className="h-3.5 w-3.5 text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-700" />
         </Link>
         <div
           aria-label="Security posture: Audit-Logged RBAC"
-          className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono font-semibold text-[11px] text-zinc-800"
+          className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono font-semibold text-[13px] text-zinc-800 leading-[18px]"
         >
           <span
             aria-hidden="true"
-            className="hidden select-none font-bold font-mono text-[11px] text-accent-amber leading-none drop-shadow-[0_0_4px_rgba(212,175,55,0.45)] sm:inline"
+            className="hidden select-none font-bold font-mono text-[13px] text-accent-amber leading-none sm:inline"
           >
             |
           </span>
-          <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
+          <Shield className="h-4 w-4 shrink-0 text-emerald-700" />
           <span>Audit-Logged RBAC</span>
         </div>
       </div>

@@ -199,10 +199,10 @@ const colorPresets: Record<string, string[]> = {
     '#44ffcc',
     '#60efff',
     '#88ddff',
-    '#bb99ff',
-    '#dd77ee',
-    '#ff68f0',
-    '#ff55cc',
+    '#10b981',
+    '#34d399',
+    '#06b6d4',
+    '#d4af37',
     '#00ff87',
   ],
   custom: [
@@ -465,14 +465,14 @@ export function GlassCard({
         // Base classes
         'relative isolate overflow-hidden',
         'liquid-glass-light border border-white/20 shadow-window',
-        'group gold-steel-border gold-steel-border-slim animate-window-open rounded-card',
+        'group gold-steel-border gold-steel-border-slim rounded-card',
         hover && 'liquid-glass-interactive',
 
         // CSS based animations to unblock main thread
         hover &&
           !prefersReduced &&
           !isLiquid &&
-          'transition-transform duration-300 ease-glass hover:scale-[1.01] active:scale-[0.995]',
+          'transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.985]',
 
         // Accent colors for hover
         hover && ACCENT_COLORS[accent],

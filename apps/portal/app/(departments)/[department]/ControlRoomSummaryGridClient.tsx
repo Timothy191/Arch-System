@@ -59,32 +59,21 @@ function HeroSummaryGoldenGraph({
     <div className="mt-auto pt-2" data-testid={`summary-golden-graph-${id}`}>
       <div className="mb-1.5 flex items-center justify-between gap-1.5">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span
-            className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent-green"
-            aria-hidden="true"
-          />
-          <span className="truncate font-bold text-[10px] text-[var(--text-heading)] uppercase tracking-wider">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" aria-hidden="true" />
+          <span className="truncate font-semibold text-[13px] text-[var(--text-heading)] leading-[18px]">
             {title}
           </span>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-1.5 py-0.5 font-mono font-semibold text-[9px] text-[var(--text-heading)]">
-          <TrendingUp className="h-2.5 w-2.5 text-[var(--accent-blue)]" aria-hidden="true" />
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent-blue)]/30 bg-[var(--accent-blue)]/15 px-2 py-0.5 font-mono font-semibold text-[13px] text-[var(--text-heading)] leading-[18px]">
+          <TrendingUp className="h-3 w-3 text-[var(--accent-blue)]" aria-hidden="true" />
           {deltaBadge}
         </span>
       </div>
 
       <div
-        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/85 px-2.5 py-1.5 shadow-2xs backdrop-blur-md"
+        className="gold-steel-border gold-steel-border-slim relative overflow-hidden rounded-xl border border-accent-amber/40 bg-white/90 px-2.5 py-1.5 shadow-2xs"
         data-testid={`summary-golden-box-${id}`}
       >
-        <div
-          className="pointer-events-none absolute inset-0 animate-scanline opacity-30"
-          style={{
-            background:
-              'linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.12) 50%, transparent 100%)',
-          }}
-        />
-
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="relative z-10 h-12 w-full overflow-visible"
@@ -148,7 +137,6 @@ function HeroSummaryGoldenGraph({
                 rx={1.5}
                 fill={strokeColor}
                 fillOpacity={i === coords.length - 1 ? 0.26 : 0.1}
-                className={i === coords.length - 1 ? 'motion-safe:animate-pulse' : ''}
               />
             );
           })}
@@ -178,7 +166,6 @@ function HeroSummaryGoldenGraph({
                 viewBox="22.75 16.625 166.16 166.19"
                 aria-hidden="true"
                 data-testid="summary-graph-arch-node"
-                className={isLast ? 'motion-safe:animate-pulse' : ''}
               >
                 <use href={`#arch-node-${fillId}`} opacity={isLast ? 1 : 0.9} />
               </svg>
@@ -186,7 +173,7 @@ function HeroSummaryGoldenGraph({
           })}
         </svg>
 
-        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[8.5px] text-[var(--text-secondary)] tabular-nums">
+        <div className="relative z-10 flex items-center justify-between border-slate-100 border-t pt-1 font-mono text-[13px] text-[var(--text-secondary)] tabular-nums leading-[18px]">
           <span>AVG {avgValue}</span>
           <span>PEAK {peakValue}</span>
           <span className="font-bold text-[var(--accent-blue)]">{currentValue}</span>
@@ -276,7 +263,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Hours Today</p>
             {data.activeOperations > 0 && (
-              <span className="rounded bg-[var(--accent-blue)]/10 px-1.5 py-0.5 font-semibold text-[10px] text-[var(--accent-blue)]">
+              <span className="rounded bg-[var(--accent-blue)]/10 px-2 py-0.5 font-semibold text-[13px] text-[var(--accent-blue)] leading-[18px]">
                 {data.activeOperations} active
               </span>
             )}
@@ -331,7 +318,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Delay Hours</p>
             {data.draftDelayHours > 0 && (
-              <span className="font-medium text-[10px] text-accent-charcoal">
+              <span className="font-medium text-[13px] text-accent-charcoal leading-[18px]">
                 {data.draftDelayHours.toFixed(1)}h draft
               </span>
             )}
@@ -360,7 +347,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
         <div>
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Machines</p>
-            <span className="rounded bg-accent-green/10 px-1.5 py-0.5 font-semibold text-[10px] text-accent-green">
+            <span className="rounded bg-accent-green/10 px-2 py-0.5 font-semibold text-[13px] text-accent-green leading-[18px]">
               Active Fleet
             </span>
           </div>
@@ -387,7 +374,7 @@ function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryG
           <div className="flex items-center justify-between gap-2">
             <p className="system-label">Delay Entries</p>
             {data.committedDelayHours > 0 && (
-              <span className="font-medium text-[10px] text-accent-green">
+              <span className="font-medium text-[13px] text-accent-green leading-[18px]">
                 {data.committedDelayHours.toFixed(1)}h committed
               </span>
             )}
