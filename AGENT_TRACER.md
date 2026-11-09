@@ -4,6 +4,17 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-11-09] - Vercel Deployment Exploration & Local Monorepo Environment Synchronization
+
+- **Action:**
+  - Explored live Vercel deployments, production domain mappings, and project topologies across `arch-system` (`prj_0K3wJh33Iqt92KGcXR0kqpPUvUTR`), `portal` (`prj_9L3hVhwpCrKUBaFJ4sVjYmUFnput`), and `arch-verify` (`prj_iHEkf9hF9WWwCf65PnbODFQWrOOq`) on active team `server-management1`.
+  - Verified live production endpoints at `https://arch-system-kappap.vercel.app`, `https://portal-gamma-kohl.vercel.app`, and `https://arch-verify.vercel.app` running release `v1.6.2` on Node.js 26.x.
+  - Pulled verified production environment variables (`vercel env pull --environment=production`) and synchronized `.env.vercel.prod`, replacing 33 placeholder values (`[SENSITIVE]`) with active configurations (Supabase transaction pooler `DATABASE_POOLER_URL`, Upstash Redis REST endpoints, Sentry DSNs, Cron secrets, Hardware Scanner auth, AI Gateway and WorkOS configs).
+  - Expanded `portal#build`'s `passThroughEnv` in [`turbo.json`](./turbo.json) to cover all 69 server secrets and platform variables injected by Vercel in production, eliminating Turborepo build-time variable warnings.
+  - Documented all 23 production environment variables across AI (Groq, Google AI), Redis (Upstash, Serverless Redis), Authentication (WorkOS, Hardware Scanner), and third-party integrations (Windsor, SixtyFour, Agenty) in [`.env.example`](./.env.example).
+  - Formatted audit reports with Biome and verified complete certification across all 6 preflight tiers (`pnpm deploy:vercel:preflight:prod`).
+- **Verification:** `pnpm deploy:vercel:preflight:prod` (100% PASS), `pnpm type-check` (FULL TURBO PASS), `pnpm lint` (PASS), and `pnpm agent:verify` (27/27 GATES PASSED).
+
 ## [2026-11-05] - Canonical `optimization.md` (Sections 1–27) & Autonomous P0–P2 Optimization Execution
 
 - **Action:**
