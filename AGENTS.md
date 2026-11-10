@@ -99,7 +99,7 @@ pnpm test         # turbo run test
 ### Completion gate
 
 ```bash
-pnpm agent:verify       # tools/scripts/agent-verify.sh — 27-gate suite, fails fast
+pnpm agent:verify       # tools/scripts/agent-verify.sh — 28-gate suite, fails fast
 ```
 
 Gates (source of truth: `tools/scripts/agent-verify.sh`):
@@ -108,7 +108,7 @@ Gates (source of truth: `tools/scripts/agent-verify.sh`):
 11–15: `audit:hooks` → `deps:lint` → `cycles` → `audit:tailwind` → `knip`
 16–20: `auth-matrix` → `migrations` → `perf-load` → `e2e` → `supply-chain`
 21–25: `resilience` → `rollback` → `a11y` → `evidence-integrity` → `tool-perms`
-26–27: `hallucination-controls` → `reproducibility`
+26–28: `hallucination-controls` → `reproducibility` → `code-intelligence`
 
 ### Targeted & policy commands
 
@@ -123,6 +123,9 @@ pnpm test:e2e                                                # Playwright (auto-
 pnpm test:a11y                                               # Storybook + axe
 pnpm audit:compliance                                        # full static invariant sweep
 pnpm policy:check                                            # boundary rules + security checks
+pnpm ci:reindex                                              # rebuild CodeGraph index (parse + backfill ranges)
+pnpm ci:snapshot                                             # record index baseline for drift gate
+pnpm audit:code-intelligence                                 # gate 28 — substrate integrity (exit 0/1)
 pnpm policy:gen                                              # regenerate policy files + eslint boundaries
 pnpm audit:drift                                             # @repo/contract Zod schemas vs DB/API surface
 pnpm lint:migrations                                         # Squawk + new-table RLS check on changed migrations
@@ -258,7 +261,10 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - `packages/ui/src/components/GlassCard.tsx`: Primary light-mode glass surface component.
 - `packages/typescript-config/base.json`: Strict TS base (`strict`, `noUncheckedIndexedAccess`, `NodeNext`).
 - `tools/repo/policy-compiler.cjs`: Boundary/policy SSoT compiler (`pnpm policy:gen` / `policy:check`).
-- `tools/scripts/agent-verify.sh`: 27-gate completion suite (`pnpm agent:verify`).
+- `tools/scripts/agent-verify.sh`: 28-gate completion suite (`pnpm agent:verify`); gate 28 is the Code-Intelligence Substrate Integrity audit.
+- `tools/audits/audit-code-intelligence-drift.cjs`: gate 28 — verifies the CodeGraph index is in sync with the source tree (entity/relation/file counts + `end_line` body-range ratios).
+- `tools/scripts/ci-snapshot.cjs`: records the index baseline into `.agents/memory_base/index-snapshot.json`.
+- `tools/scripts/ci-reindex.cjs`: rebuilds the index (`ts_parse_dir.cjs` → `backfill_ranges.py`).
 - `e2e/playwright.config.ts`: Playwright E2E config (`setup`, `chromium`, `mobile-chrome`, `tablet-chrome`).
 
 ---
@@ -269,6 +275,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - **Package manager**: **pnpm only** (9.15.9 pinned via `packageManager`). Catalogs live in `pnpm-workspace.yaml` (`catalog:` for shared deps, `catalogs.react19` for React 19). Do not use npm, yarn, or bun.
 - **Task runner**: Turborepo 2.x (`turbo.json`). `build` depends on `^build` + `codegen`.
 - **Toolchain mandate**: prefer structural AST search (`ast-grep` / `sg`, `codemap`) over regex `grep`, syntax-aware diffs (`difftastic` / `difft`) over plain `git diff`, and bundle multi-agent context via `repomix` (`pnpm context:pack`). Full matrix: `.agents/SYSTEMS.md`.
+- **Code-Intelligence Substrate**: the CodeGraph SQLite index (`/home/tim/local.db`, outside the git tree) is the single source of truth for structural knowledge — 8,982 entities, 46,000 relations, 779 files, `end_line` body ranges on 75.2% of entities. The TS AST parser, batch parser, range backfiller, and chunker live in `~/.agents/skills/code-intelligence/scripts/` and must never be copied into the repo. The repo holds only enforcement machinery: `tools/scripts/ci-*.cjs`, `tools/audits/audit-code-intelligence-drift.cjs`, `agent-verify.sh` gate 28, the `code-intelligence-substrate` rule, and the `code-intelligence` skill. Before any agent reports indexed/searched/impacted/chunked, run `pnpm audit:code-intelligence` and require `✅ PASS`. **Enforcement is always applied**, not only when an agent remembers: an edit-time hook (`.qoder/hooks/code-intelligence-gate.sh`), a pre-commit hard-block (`pnpm audit:enforcement` → `tools/scripts/check-enforcement-integrity.cjs`), protected-path rules (`.qoder/hooks/protect-paths.sh`), and a totalGates-aware pre-push gate.
 - **Toolchain resolution**: `node` is `/usr/bin/node` (v26.8.1); `pnpm` resolves through mise shim (9.15.9). If a non-login shell lacks `pnpm`, prepend mise installs:
   ```bash
   export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
@@ -305,7 +312,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 - BDD-style naming in shared packages: `describe('Given …')` / `it('When …, Then …')`; portal hooks use `should … when …`.
 - Mock at the **network-client boundary** (Supabase / Redis / `next/cache` / server actions), never internal logic.
-- The 27-gate `pnpm agent:verify` suite is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift`.
+- The 28-gate `pnpm agent:verify` suite is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift` + `pnpm audit:code-intelligence`.
 - `pnpm quality` is the release-grade suite.
 - Redis integration: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` (and portal) in CI `redis-integration` job.
 
@@ -328,7 +335,7 @@ All agents MUST follow `.agents/rules/real-world-engineering.md` and `.agents/ru
 
 Every agent action is scored globally: **+1** (task complete, gates pass with evidence) or **-2** (incorrect, gate broken, reverted, or unverified claim).
 
-- **Score ≥ 0**: Standard verification gates. **Score < 0**: Escalate for human review. **Score ≤ -5**: Mandatory full 27-gate `pnpm agent:verify`.
+- **Score ≥ 0**: Standard verification gates. **Score < 0**: Escalate for human review. **Score ≤ -5**: Mandatory full 28-gate `pnpm agent:verify`.
 
 All non-trivial tasks follow 4 phases (enforced by `pnpm agent:verify`):
 

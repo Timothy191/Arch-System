@@ -4,6 +4,24 @@
 
 ---
 
+## [2026-11-10T10:16:00+02:00] - Two-Stage Compaction Engine (`/compact` vs `/compact/compact`), Bounded `SKILL.state` Spine & Double-Compaction Prefix Cache Guard
+
+- **EARS Spec (`docs/specs/compaction-strategy-improvements.spec.md`)**: Authored formal specification grounded in empirical telemetry across `1,245` model generations (`9.12M` uncached input tokens, `165.48M` cached read tokens, `94.77%` cache hit ratio) and `13` compaction checkpoints in `~/.gemini/antigravity-cli/conversations/999d8f18-0f73-4df3-9fbc-c385c3a91ba6.db`.
+- **`@repo/agents` Compaction Primitives (`packages/agents/src/token-budget.ts` & `token-budget.test.ts`)**:
+  - Added `PROACTIVE_HANDOFF_THRESHOLD = 0.7`, `COMPACTION_IDEMPOTENT_FLOOR = 0.25`, `MIN_TURNS_BETWEEN_COMPACTIONS = 4`, and `MAX_COMPACTION_STATE_CHARS = 4000`.
+  - Upgraded `assessContextCompaction` to emit `shouldPrepareHandoff` and `'prepare_handoff'` at `70%` context utilization before hitting the `85%` soft compaction cliff.
+  - Added `evaluateDoubleCompactionGuard` to prevent redundant LLM prefix cache invalidation on `/compact/compact` or when context fill is `< 25%` (`consolidate_state_spine`).
+  - Added `applyCompactionStatePatch` enforcing a Google/Purdue `SKILL.state` bounded O(1) JSON state spine (`<= 4,000` chars, `null` key deletion).
+  - Added `extractRareNeedlesFromLog` implementing IDF rare-needle (`df <= 2`) and error-line preservation across middle log windows (`14/14` unit tests passing).
+- **Two-Stage Compaction CLI (`tools/scripts/compact-context.cjs`, `pnpm compact`, `pnpm compact:deep`)**:
+  - Created `tools/scripts/compact-context.cjs` reading live `ag-v1` SQLite + JSONL telemetry, extracting the 6-Section Artifact Trail (`Created`, `Modified`, `Inspected [DO NOT RE-READ]`, `Verification Ledger`, `Bounded SKILL.state`), and atomically writing `.handoff/handoff.{md,json}`, `<artifactDir>/HANDOFF.md`, `.remember/now.md`, and `.agents/memory_base/retrospectives/compaction-<id>.json`.
+  - Wired `pnpm compact` (`--mode standard`) and `pnpm compact:deep` (`--mode deep`, executing `retrospective-cleanup.cjs --remove-duplicates`, `smart-indexer.cjs`, and log pruning).
+- **`slim-tooling-mcp` & Antigravity Hook Bridge**:
+  - Upgraded `TokenSavingEngine.truncateWindow` and added `transcript_compact` strategy in `slim-tooling-mcp/src/token-saving-engine.ts` and `src/index.ts` (`4/4` tests passing).
+  - Upgraded `/home/tim/.gemini/config/plugins/token-optimizer/antigravity_hook_bridge.py` (`pre-invocation` and `stop`) and `.agents/hooks/pre-invocation-inject.sh` to automatically persist and re-inject the compact `SKILL.state` spine across `/compact` and `/compact/compact` events.
+
+---
+
 ## [2026-11-10T08:15:00+02:00] - Monorepo Lexical, Spelling, Grammar & File-Naming Governance (`AGENT_TRACER.md` SSoT)
 
 - **EARS Spec (`docs/specs/lexical-and-naming-governance.spec.md`)**: Authored formal specification establishing unified American English (`en-US`) spelling, grammar, identifier, and file-naming enforcement across all agents, hooks, pre-commit checks, and CI verification gates.
@@ -215,3 +233,35 @@
 - **Phase 3 (Design):** Extracted `buildExcavatorMaterialTransition`, `applyExcavatorMaterialState`, `notifyRegularMachineMaterial`, and `adjustPendingMutationCount` in `ExcavatorActivityForm.tsx` (reducing `handleExcavatorMaterialChange` cyclomatic complexity to `3`); raised `DRIFT_HEALTHY_THRESHOLD` to `100`; added `getUserSafely(supabase)` session auth to `/api/sync/fallback` and removed `/withRateLimit/` from `AUTH_GUARD_PATTERNS`; added CSP/HSTS/security-header and `apps/portal/hooks` checks to `audit-hooks-and-clients.cjs`; added WCAG relative luminance contrast computation (`>= 4.5`) to `e2e/accessibility.spec.ts`; wired `AgenticMonitor.tsx` to `/api/ai/metrics`; and ran `pnpm version:sync`.
 - **Phase 4 (Criticism):** Preserved fallback resilience in `AgenticMonitor.tsx` when offline or inside isolated unit tests, and enforced `<= 2` positional parameters on all extracted helpers in `ExcavatorActivityForm.tsx`.
 - **Phase 5 (Contract):** Verified `pnpm lint:agent-rules`, `pnpm audit:compliance`, `pnpm agent:verify` (27/27 gates), fast-forward merge into `main`, and Vercel Production deployment.
+
+### [2026-11-10T09:58:00+02:00] Code-Intelligence Substrate Enforcement Layer — Gate 28, Permanent Rule, Skill, and Memory-Base Prevention
+
+- **Phase 1 (Comprehension):** Governing request: _"add rules, guardrails, and other to ensure this is applied/enforced by all other active agents."_ The CodeGraph index (TS AST parser + SQLite at `/home/tim/local.db`) was built and verified in the prior session but had zero enforcement — any agent could report structural results against a drifted index or a hand-edited DB. Resolved scope: enforcement must be (a) a machine gate in `agent-verify.sh`, (b) a permanent `alwaysApply` rule, (c) a discoverable skill, and (d) a memory-base prevention rule.
+- **Phase 2 (Evidence):**
+  - `tools/scripts/ci-snapshot.cjs` had a real `DB_PATH` bug: `path.resolve(ROOT, "..")` resolved to `/home/tim/Fork/local.db`, one level short of the actual `/home/tim/local.db`. `tools/audits/audit-code-intelligence-drift.cjs` already resolved correctly via `path.resolve(ROOT, "..", "..")`. Confirmed by running `node -e` path resolution against both scripts.
+  - Live index verified: `entities: 8982`, `relations: 46000`, `files: 779`, `ranged: 6752`, `rangedRatio: 0.7517`, `noRangeRatio: 0.2483`.
+  - Gate 28 already present in `agent-verify.sh` at line 171 (after gate 26, before manifest assembly); footer already dynamic (`${TOTAL_GATES}/${TOTAL_GATES}`).
+  - `package.json` already had `audit:code-intelligence`, `ci:snapshot`, `ci:reindex` entries.
+  - Rule-drift audit (`tools/audits/audit-agent-rules-drift.cjs`) confirmed 51 canonical rules, 32 symlinked, my new rule correctly classified as project-only (legal — no mirror copy created).
+- **Phase 3 (Design):**
+  - Fixed `ci-snapshot.cjs` `DB_PATH` to `path.resolve(ROOT, "..", ".."), "local.db"`.
+  - Ran `pnpm ci:snapshot` → wrote `.agents/memory_base/index-snapshot.json` with the exact live counts.
+  - Proved the gate can fail: (1) `CODEGRAPH_DB=/tmp/fake.db` → `❌ FAIL — index DB not found`, exit 1; (2) synthetic `/tmp/fake_drift.db` with 100 entities / 0 relations / 100% no-range → `❌ FAIL — 5 drift condition(s) detected`, exit 1. Both fake DBs deleted afterward.
+  - Wrote `.agents/rules/code-intelligence-substrate.md` (alwaysApply, paths `**/*`): SSoT declaration, the three invariants (end_line ≥50% ranged / ≤45% no-range, counts must match snapshot, DB never hand-edited), the four canonical commands, tooling location contract, and the evidence contract.
+  - Wrote `.agents/skills/code-intelligence/SKILL.md`: Step 0 verify → Step 1 refresh cycle → Step 2 hybrid RRF search → Step 3 TDAD impact → Step 4 AST chunking, with the evidence contract and failure mode.
+  - Added memory-base prevention rule `prevention-20261110-code-intelligence-substrate` (category `TOOLING_GOVERNANCE`) to `.agents/memory_base/index.json`, raising `totalRetrospectives` to 15.
+  - Updated `AGENTS.md`: completion gate 27→28 with the `code-intelligence` gate added to the range list; added `ci:reindex` / `ci:snapshot` / `audit:code-intelligence` to targeted commands; added a Code-Intelligence Substrate bullet to Runtime/Tooling Preferences; added the four new files to Important Files; updated the 27-gate references in Test conventions and Agent Action Scoring to 28.
+- **Phase 4 (Criticism):** Verified gate 28 placement is safe (manifest assembly reads `${TMP_GATES_NDJSON}` which every `run_gate` appends to, so adding gate 28 before that step is fine; the dynamic footer protects against renumbering). Confirmed the `verify-27-gates.cjs` filename is a pre-existing artifact name — renaming it is out of scope and would break existing references. Confirmed `node:sqlite.DatabaseSync` read-only queries are safe against the WAL index; the gate never writes. Confirmed the new rule being project-only is legal per the rule-drift audit and that no mirror symlink was created.
+- **Phase 5 (Contract):** Verified `node tools/audits/audit-code-intelligence-drift.cjs` → `✅ PASS`, exit 0, against the live index (8,982 / 46,000 / 779 / 75.2%). Verified both fail paths produce `❌ FAIL` and exit 1. Verified `.agents/memory_base/index.json` and `index-snapshot.json` parse as valid JSON. Verified `~/.agents/skills/code-intelligence/scripts/` is intact (ts_parse.cjs, ts_parse_dir.cjs, backfill_ranges.py, ts_ast_chunker.py, hybrid_rrf_search.py, tdad_impact_analyzer.py) and the repo contains only enforcement machinery. Verified `git status` shows 0 untracked files attributable to prior sessions; the 4 new untracked files and 4 modified files are this session's enforcement layer.
+
+### [2026-11-10T08:13:45+00:00] Code-Intelligence Enforcement Machinery — Always-Applied Layers
+
+- **Phase 1 (Comprehension):** Governing request: _"ensure the action or creation of the required to enforce the index is always applied."_ Gate 28 existed but only fired when an agent explicitly ran `pnpm agent:verify`. The request asks for machinery that makes the gate fire automatically on every agent action so the index-enforcement requirement is always applied by all active agents. Resolved scope: (a) edit-time hook firing on every `Edit|Write` via the existing `.qoder/hooks/` harness, (b) pre-commit hard-block preventing shipping of a disabled/bypassed enforcement layer, (c) pre-push gate running the full suite, and (d) protected-path rules blocking direct edits to the enforcement SSoT.
+- **Phase 2 (Evidence):** Verified the live state before editing: `node tools/scripts/check-enforcement-integrity.cjs` → `✅ Enforcement SSoT integrity verified.`, EXIT=0 (drift audit passes, snapshot matches live index, edit-time hook registered, pre-push totalGates-aware). Confirmed `.agents/skills/code-intelligence/SKILL.md` and `AGENTS.md` lacked any enforcement-machinery section, and `package.json` had no `audit:enforcement` script.
+- **Phase 3 (Design):**
+  - Added `"audit:enforcement": "node tools/scripts/check-enforcement-integrity.cjs"` to `package.json` scripts (after `audit:code-intelligence`).
+  - Extended the Code-Intelligence Substrate bullet in `AGENTS.md` (Runtime/Tooling Preferences) with the always-applied enforcement layer description and the `pnpm audit:enforcement` reference.
+  - Added an "Enforcement machinery (do not disable)" section to `.agents/skills/code-intelligence/SKILL.md` mirroring the rule file's 4-layer table (edit-time hook, pre-commit guard, protected paths, pre-push gate) plus the SSoT file list and the self-check command.
+  - Appended the ISO-8601 entry to root `AGENT_TRACER.md` (single consolidated ledger; no per-package tracer created).
+- **Phase 4 (Criticism):** Confirmed the edit-time hook remains non-blocking by design (a stale index must not freeze legitimate feature work — the hard block is at pre-commit). Confirmed `check-enforcement-integrity.cjs` runs `execSync` on the audit script with `stdio: "pipe"` and a 60s timeout, so it cannot hang or leak output. Confirmed the `verify-27-gates.cjs` filename is a pre-existing artifact name and was not touched. Confirmed no new files were created outside the enforcement SSoT set.
+- **Phase 5 (Contract):** Re-ran `node tools/scripts/check-enforcement-integrity.cjs` → `✅ Enforcement SSoT integrity verified.`, EXIT=0. Ran `git status` — 0 untracked files attributable to prior sessions; this session's changes are confined to the enforcement SSoT files (`package.json`, `AGENTS.md`, `.agents/skills/code-intelligence/SKILL.md`, `AGENT_TRACER.md`) plus the pre-existing modifications from earlier turns.

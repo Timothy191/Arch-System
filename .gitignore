@@ -233,11 +233,12 @@ vibe-audit.html
 # Compound Engineering local scratch space
 .context/compound-engineering/
 
-# AI tool runtime dirs (crush, mimocode, kilocode, remember)
+# AI tool runtime dirs (crush, mimocode, kilocode, remember, handoff)
 .crush/
 .mimocode/
 .kilocode/
 .remember/
+.handoff/
 
 # DAST / security scan artifacts
 .zap/

@@ -49,6 +49,21 @@ case "$rel" in
     echo "Blocked: $rel is a non-canonical or misspelled agent tracer path. Append entries only to the single root AGENT_TRACER.md file." >&2
     exit 2
     ;;
+  # Code-Intelligence enforcement machinery: the substrate integrity gate, its
+  # snapshot baseline, and the hook that fires it on every edit are SSoT and
+  # must never be disabled, deleted, or bypassed by another agent.
+  tools/audits/audit-code-intelligence-drift.cjs|tools/scripts/ci-snapshot.cjs|tools/scripts/ci-reindex.cjs)
+    echo "Blocked: $rel is part of the Code-Intelligence enforcement SSoT. Do not disable or bypass it; if the substrate has drifted, run 'pnpm ci:reindex && pnpm ci:snapshot && pnpm audit:code-intelligence'." >&2
+    exit 2
+    ;;
+  .agents/memory_base/index-snapshot.json|.agents/rules/code-intelligence-substrate.md|.agents/skills/code-intelligence/SKILL.md)
+    echo "Blocked: $rel is part of the Code-Intelligence enforcement SSoT. Edit the source of truth (the audit script or the reindex pipeline) and regenerate, do not hand-edit the snapshot or the rule." >&2
+    exit 2
+    ;;
+  .qoder/hooks/code-intelligence-gate.sh|.qoder/settings.json)
+    echo "Blocked: $rel wires the Code-Intelligence gate into the edit-time hook chain. Removing or disabling it defeats the enforcement layer; if the gate misbehaves, fix the audit script, not the hook registration." >&2
+    exit 2
+    ;;
 esac
 
 exit 0

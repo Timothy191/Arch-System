@@ -216,6 +216,9 @@
     "tensioner",
     "sparklines",
     "Sparklines",
-    "faststart"
+    "faststart",
+    "backfiller",
+    "codegraph",
+    "pathlib"
   ]
 }

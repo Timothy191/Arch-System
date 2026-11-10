@@ -118,3 +118,16 @@ Before recommending `/compact` to the user, verify your handoff state against th
 - _Artifact Probe_: Can a fresh agent resuming from this summary know every modified file path and function name without running `git status`?
 - _Decision Probe_: Does the summary state _why_ rejected approaches failed so the next turn does not repeat them?
 - _Continuation Probe_: Is the exact next verification command stated explicitly?
+
+## 6. Two-Stage `/compact` vs `/compact/compact` & Double-Compaction Cache Guard
+
+- **Proactive Handoff (`>= 70%`) & `/compact` (`pnpm compact`)**:
+  - Executes `node tools/scripts/compact-context.cjs --mode standard`.
+  - Reads live SQLite (`ag-v1`) + JSONL telemetry and writes `.handoff/handoff.md`, `.handoff/handoff.json`, `<artifactDir>/HANDOFF.md`, and `.remember/now.md`.
+  - Maintains a Google/Purdue `SKILL.state` bounded O(1) JSON spine (`<= 4,000` chars via `applyCompactionStatePatch` in `@repo/agents`).
+  - Tags read-only inspected files with `[DO NOT RE-READ]` to prevent post-compaction re-fetch surges.
+- **Deep Consolidation (`/compact/compact` / `pnpm compact:deep`) & Cache Guard (`< 25%` fill)**:
+  - Executes `node tools/scripts/compact-context.cjs --mode deep` (`evaluateDoubleCompactionGuard` in `@repo/agents`).
+  - When context fill is already `< 25%` (`COMPACTION_IDEMPOTENT_FLOOR = 0.25`) or `/compact/compact` is invoked back-to-back, returns `consolidate_state_spine` to preserve the warm LLM prefix cache (`94.7%` hit ratio) while deduplicating `.agents/memory_base/retrospectives/`, re-indexing `smart-indexer.cjs`, and pruning oversized `.agents/logs/*.jsonl` files.
+- **IDF Needle & Error-Line Preservation (`df <= 2`)**:
+  - Both `extractRareNeedlesFromLog` (`@repo/agents`) and `TokenSavingEngine.truncateWindow` (`slim-tooling-mcp`) preserve error lines and rare identifier tokens (`df <= 2`) from omitted middle log regions.

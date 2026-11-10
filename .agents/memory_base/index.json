@@ -1,7 +1,11 @@
 {
-  "lastUpdated": "2026-11-10T06:15:45.905Z",
-  "totalRetrospectives": 14,
+  "lastUpdated": "2026-11-10T08:20:35.252Z",
+  "totalRetrospectives": 15,
   "entries": [
+    {
+      "id": "compaction-999d8f18",
+      "category": "context-compaction"
+    },
     {
       "id": "consolidated-20261102-ci-billing-json-knip-tokenization",
       "category": "TOOLING_CI",

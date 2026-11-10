@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "a71fdef1",
-  "gitCommitFull": "a71fdef18e0bee6d139cf9725d5804ad6f2b5f4d",
-  "gitBranch": "fix/complete-remaining-audit-gaps",
-  "buildTimestamp": "2026-11-10T07:29:35.866Z",
+  "gitCommit": "73651288",
+  "gitCommitFull": "73651288847beee7b52ac9e5b9902daf61a6c658",
+  "gitBranch": "feat/compact-strategy-improvements",
+  "buildTimestamp": "2026-11-10T08:16:59.092Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

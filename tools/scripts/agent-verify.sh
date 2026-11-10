@@ -168,6 +168,10 @@ run_gate 26 "🧠" "AI Output Quality & Hallucination Controls" \
   "node tools/audits/audit-ai-hallucination.cjs" \
   "Run 'pnpm audit:ai-hallucination' to remove hallucinated imports, unexported @repo/* subpaths, or Next.js 16 boundary drift."
 
+run_gate 28 "🧠" "Code-Intelligence Substrate Integrity" \
+  "node tools/audits/audit-code-intelligence-drift.cjs" \
+  "Run 'pnpm ci:reindex' to rebuild the CodeGraph index, then 'pnpm ci:snapshot' to refresh the baseline."
+
 # Assemble machine-readable JSON manifest for Gates 24 & 27 independent verification
 GIT_TREE_HASH=$(git rev-parse "HEAD^{tree}" 2>/dev/null || echo "unknown")
 node -e '
@@ -195,8 +199,10 @@ fi
 
 READINESS_TIER=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).readinessClassification)' "${EVIDENCE_JSON}")
 
+TOTAL_GATES=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).gates.length)' "${EVIDENCE_JSON}")
+
 echo "========================================================"
-echo "✅ [AGENT VERIFICATION] 27/27 GATES PASSED (100% PASS)"
+echo "✅ [AGENT VERIFICATION] ${TOTAL_GATES}/${TOTAL_GATES} GATES PASSED (100% PASS)"
 echo "📋 Readiness Tier: ${READINESS_TIER}"
 echo "📄 Evidence JSON:  ${EVIDENCE_JSON}"
 echo "📄 JUnit Report:   .ci-local/agent-verify-junit.xml"

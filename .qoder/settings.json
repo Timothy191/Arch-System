@@ -27,6 +27,18 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".qoder/hooks/code-intelligence-gate.sh",
+            "name": "code-intelligence-gate",
+            "statusMessage": "Checking Code-Intelligence substrate integrity",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PreToolUse": [

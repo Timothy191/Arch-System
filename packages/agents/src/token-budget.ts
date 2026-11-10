@@ -427,8 +427,14 @@ export class TokenBudgetAgent {
  * Context compaction & multimodal constants inspired by alphacode_compaction_core.
  */
 export const DEFAULT_CONTEXT_WINDOW_LIMIT = 200_000;
+export const PROACTIVE_HANDOFF_THRESHOLD = 0.7;
 export const COMPACTION_SOFT_THRESHOLD = 0.85;
 export const COMPACTION_CRITICAL_THRESHOLD = 0.95;
+export const COMPACTION_IDEMPOTENT_FLOOR = 0.25;
+export const MIN_TURNS_BETWEEN_COMPACTIONS = 4;
+export const MAX_COMPACTION_STATE_CHARS = 4000;
+export const RARE_NEEDLE_MAX_DOCUMENT_FREQUENCY = 2;
+export const RARE_NEEDLE_MIN_TOKEN_LENGTH = 6;
 export const RECENT_TURNS_TO_PRESERVE = 20;
 export const MINIMUM_TURNS_TO_PRESERVE = 2;
 export const EMERGENCY_TOOL_RESULT_MAX_CHARS = 10_000;
@@ -456,11 +462,55 @@ export interface CompactionAssessment {
   estimatedTokens: number;
   maxContextTokens: number;
   usageRatio: number;
+  shouldPrepareHandoff: boolean;
   shouldCompact: boolean;
   isCritical: boolean;
   turnsToCompactCount: number;
-  action: 'none' | 'soft_compaction' | 'critical_hard_drop';
+  action: 'none' | 'prepare_handoff' | 'soft_compaction' | 'critical_hard_drop';
 }
+
+export interface DoubleCompactionGuardInput {
+  readonly currentTokens: number;
+  readonly maxContextTokens?: number;
+  readonly turnsSinceLastCompaction: number;
+  readonly isDoubleSlashCommand?: boolean;
+  readonly cachedPrefixTokens?: number;
+}
+
+export interface DoubleCompactionGuardVerdict {
+  readonly decision: 'execute_full_compact' | 'consolidate_state_spine';
+  readonly usageRatio: number;
+  readonly avoidedCacheRebuildTokens: number;
+  readonly shouldRunDeepMemorySweep: boolean;
+  readonly reason: string;
+}
+
+export type CompactionStateValue =
+  | string
+  | number
+  | boolean
+  | readonly string[]
+  | Record<string, string | number | boolean>;
+
+export type CompactionStateSpine = Readonly<Record<string, CompactionStateValue>>;
+export type CompactionStatePatch = Readonly<Record<string, CompactionStateValue | null>>;
+
+export interface CompactionStatePatchResult {
+  readonly applied: boolean;
+  readonly nextState: CompactionStateSpine;
+  readonly serializedChars: number;
+  readonly maxAllowedChars: number;
+  readonly rejectionReason?: string;
+}
+
+export interface RareNeedleExtractionOptions {
+  readonly maxNeedles?: number;
+  readonly maxDocumentFrequency?: number;
+}
+
+const DISTINCTIVE_IDENTIFIER_REGEX = /[A-Za-z0-9][A-Za-z0-9._:/@-]{5,}/g;
+const BARE_NUMERIC_TIMESTAMP_REGEX = /^[0-9][0-9:.\-T/]*$/;
+const ERROR_SIGNAL_REGEX = /\b(?:error|fatal|panic|failed|exception|traceback|violation)\b/i;
 
 /**
  * Calculates estimated tokens for a single content block.
@@ -509,7 +559,8 @@ export function estimateMessageTokens(message: ContextMessage): number {
 }
 
 /**
- * Assesses whether a conversation history requires compaction using dual-threshold gating.
+ * Assesses whether a conversation history requires proactive handoff or compaction
+ * using multi-threshold gating (70% handoff, 85% soft compact, 95% critical drop).
  */
 export function assessContextCompaction(
   messages: readonly ContextMessage[],
@@ -522,12 +573,15 @@ export function assessContextCompaction(
   const usageRatio = estimatedTokens / maxContextTokens;
   const isCritical = usageRatio >= COMPACTION_CRITICAL_THRESHOLD;
   const shouldCompact = usageRatio >= COMPACTION_SOFT_THRESHOLD;
+  const shouldPrepareHandoff = usageRatio >= PROACTIVE_HANDOFF_THRESHOLD;
 
   let action: CompactionAssessment['action'] = 'none';
   if (isCritical) {
     action = 'critical_hard_drop';
   } else if (shouldCompact) {
     action = 'soft_compaction';
+  } else if (shouldPrepareHandoff) {
+    action = 'prepare_handoff';
   }
 
   const excessTurns = Math.max(0, messages.length - RECENT_TURNS_TO_PRESERVE);
@@ -537,9 +591,137 @@ export function assessContextCompaction(
     estimatedTokens,
     maxContextTokens,
     usageRatio,
+    shouldPrepareHandoff,
     shouldCompact,
     isCritical,
     turnsToCompactCount,
     action,
   };
+}
+
+/**
+ * Guards against redundant LLM prefix cache invalidation on `/compact/compact`
+ * or back-to-back compactions when context fill is already below COMPACTION_IDEMPOTENT_FLOOR.
+ */
+export function evaluateDoubleCompactionGuard(
+  input: DoubleCompactionGuardInput
+): DoubleCompactionGuardVerdict {
+  const maxContextTokens = input.maxContextTokens ?? DEFAULT_CONTEXT_WINDOW_LIMIT;
+  const usageRatio = maxContextTokens > 0 ? input.currentTokens / maxContextTokens : 0;
+  const cachedPrefixTokens = input.cachedPrefixTokens ?? input.currentTokens;
+  const isBelowIdempotentFloor = usageRatio < COMPACTION_IDEMPOTENT_FLOOR;
+  const isRecentCompaction = input.turnsSinceLastCompaction < MIN_TURNS_BETWEEN_COMPACTIONS;
+
+  if (input.isDoubleSlashCommand || isBelowIdempotentFloor || isRecentCompaction) {
+    return {
+      decision: 'consolidate_state_spine',
+      usageRatio,
+      avoidedCacheRebuildTokens: cachedPrefixTokens,
+      shouldRunDeepMemorySweep: Boolean(input.isDoubleSlashCommand || isBelowIdempotentFloor),
+      reason:
+        'Context is recently compacted or invoked via /compact/compact; consolidating on-disk state spine and retrospectives without invalidating warm LLM prefix cache.',
+    };
+  }
+
+  return {
+    decision: 'execute_full_compact',
+    usageRatio,
+    avoidedCacheRebuildTokens: 0,
+    shouldRunDeepMemorySweep: usageRatio >= PROACTIVE_HANDOFF_THRESHOLD,
+    reason: 'Context fill exceeds idempotent floor and turn interval; full compaction permitted.',
+  };
+}
+
+/**
+ * Applies a Google/Purdue `SKILL.state` bounded O(1) patch to the compaction state spine.
+ * Setting a patch key to `null` deletes the key; total serialized length is capped at 4,000 chars.
+ */
+export function applyCompactionStatePatch(
+  currentState: CompactionStateSpine,
+  patch: CompactionStatePatch
+): CompactionStatePatchResult {
+  const mutableNext: Record<string, CompactionStateValue> = { ...currentState };
+
+  for (const [key, patchEntry] of Object.entries(patch)) {
+    if (patchEntry === null) {
+      delete mutableNext[key];
+    } else {
+      mutableNext[key] = patchEntry;
+    }
+  }
+
+  const serialized = JSON.stringify(mutableNext);
+  if (serialized.length > MAX_COMPACTION_STATE_CHARS) {
+    return {
+      applied: false,
+      nextState: currentState,
+      serializedChars: serialized.length,
+      maxAllowedChars: MAX_COMPACTION_STATE_CHARS,
+      rejectionReason: `Compaction state spine (${serialized.length} chars) exceeds O(1) cap of ${MAX_COMPACTION_STATE_CHARS} chars; prune completed keys with null first.`,
+    };
+  }
+
+  return {
+    applied: true,
+    nextState: mutableNext,
+    serializedChars: serialized.length,
+    maxAllowedChars: MAX_COMPACTION_STATE_CHARS,
+  };
+}
+
+/**
+ * Extracts error lines and rare identifier lines (IDF needle preservation) from verbose log text
+ * so middle-window truncation never drops unique UUIDs, file paths, or error traces.
+ */
+export function extractRareNeedlesFromLog(
+  rawLogText: string,
+  options: RareNeedleExtractionOptions = {}
+): readonly string[] {
+  const maxNeedles = options.maxNeedles ?? 12;
+  const maxDocFreq = options.maxDocumentFrequency ?? RARE_NEEDLE_MAX_DOCUMENT_FREQUENCY;
+  const lines = rawLogText.split('\n');
+  if (lines.length === 0) {
+    return [];
+  }
+
+  const tokenDocFrequency = new Map<string, number>();
+  const perLineTokens: Array<readonly string[]> = [];
+
+  for (const line of lines) {
+    const uniqueTokensInLine = new Set<string>();
+    for (const match of line.matchAll(DISTINCTIVE_IDENTIFIER_REGEX)) {
+      const candidate = match[0];
+      if (!candidate || candidate.length < RARE_NEEDLE_MIN_TOKEN_LENGTH) continue;
+      if (BARE_NUMERIC_TIMESTAMP_REGEX.test(candidate)) continue;
+      if (!/[A-Za-z]/.test(candidate)) continue;
+      uniqueTokensInLine.add(candidate);
+    }
+    const tokenList = Array.from(uniqueTokensInLine);
+    perLineTokens.push(tokenList);
+    for (const token of tokenList) {
+      tokenDocFrequency.set(token, (tokenDocFrequency.get(token) ?? 0) + 1);
+    }
+  }
+
+  const preservedLines: string[] = [];
+  for (let lineIdx = 0; lineIdx < lines.length; lineIdx += 1) {
+    const line = lines[lineIdx] ?? '';
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const isErrorLine = ERROR_SIGNAL_REGEX.test(trimmed);
+    const lineTokens = perLineTokens[lineIdx] ?? [];
+    const hasRareIdentifier = lineTokens.some(
+      (token) => (tokenDocFrequency.get(token) ?? 0) <= maxDocFreq
+    );
+
+    if (isErrorLine || hasRareIdentifier) {
+      preservedLines.push(trimmed);
+      if (preservedLines.length >= maxNeedles) {
+        break;
+      }
+    }
+  }
+
+  return preservedLines;
 }

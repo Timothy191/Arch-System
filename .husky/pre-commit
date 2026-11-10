@@ -1,3 +1,4 @@
 pnpm lint-staged --quiet
 node tools/scripts/skills-pre-commit.mjs
 pnpm validate:json
+node tools/scripts/check-enforcement-integrity.cjs

@@ -1,8 +1,12 @@
 import {
+  applyCompactionStatePatch,
   assessContextCompaction,
   estimateContentBlockTokens,
   estimateMessageTokens,
+  evaluateDoubleCompactionGuard,
+  extractRareNeedlesFromLog,
   FLAT_IMAGE_TOKEN_COST,
+  MAX_COMPACTION_STATE_CHARS,
   TokenBudgetAgent,
 } from './token-budget';
 
@@ -224,6 +228,98 @@ describe('TokenBudgetAgent System', () => {
       expect(compactAssessment.isCritical).toBe(true);
       expect(compactAssessment.action).toBe('critical_hard_drop');
       expect(compactAssessment.turnsToCompactCount).toBe(5); // 25 turns - 20 preserved
+    });
+
+    it('triggers proactive handoff preparation when usage reaches 70% before 85% soft compact', () => {
+      const handoffMessages = Array.from({ length: 18 }, (_, idx) => ({
+        role: (idx % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: 'x'.repeat(160), // 40 tokens per turn * 18 = 720 tokens (72% of 1000)
+      }));
+
+      const assessment = assessContextCompaction(handoffMessages, 1000);
+      expect(assessment.shouldPrepareHandoff).toBe(true);
+      expect(assessment.shouldCompact).toBe(false);
+      expect(assessment.action).toBe('prepare_handoff');
+    });
+
+    it('guards against double compaction (/compact/compact) to preserve prefix cache', () => {
+      const doubleSlashDecision = evaluateDoubleCompactionGuard({
+        currentTokens: 90_000,
+        maxContextTokens: 256_000,
+        turnsSinceLastCompaction: 10,
+        isDoubleSlashCommand: true,
+        cachedPrefixTokens: 180_000,
+      });
+      expect(doubleSlashDecision.decision).toBe('consolidate_state_spine');
+      expect(doubleSlashDecision.shouldRunDeepMemorySweep).toBe(true);
+      expect(doubleSlashDecision.avoidedCacheRebuildTokens).toBe(180_000);
+
+      const postCompactDecision = evaluateDoubleCompactionGuard({
+        currentTokens: 28_000,
+        maxContextTokens: 256_000,
+        turnsSinceLastCompaction: 1,
+        isDoubleSlashCommand: false,
+      });
+      expect(postCompactDecision.decision).toBe('consolidate_state_spine');
+      expect(postCompactDecision.shouldRunDeepMemorySweep).toBe(true);
+
+      const normalCompactDecision = evaluateDoubleCompactionGuard({
+        currentTokens: 195_000,
+        maxContextTokens: 256_000,
+        turnsSinceLastCompaction: 12,
+        isDoubleSlashCommand: false,
+      });
+      expect(normalCompactDecision.decision).toBe('execute_full_compact');
+      expect(normalCompactDecision.avoidedCacheRebuildTokens).toBe(0);
+    });
+
+    it('applies O(1) bounded SKILL.state JSON patches and enforces 4000-char ceiling', () => {
+      const initial = applyCompactionStatePatch(
+        {},
+        {
+          branch: 'feat/compact-strategy-improvements',
+          gateStatus: '28/28 PASS',
+          obsoleteFlag: 'temp-val',
+        }
+      );
+      expect(initial.applied).toBe(true);
+      expect(initial.nextState.branch).toBe('feat/compact-strategy-improvements');
+
+      const deleted = applyCompactionStatePatch(initial.nextState, {
+        obsoleteFlag: null,
+        activeSpec: 'docs/specs/compaction-strategy-improvements.spec.md',
+      });
+      expect(deleted.applied).toBe(true);
+      expect(deleted.nextState.obsoleteFlag).toBeUndefined();
+      expect(deleted.nextState.activeSpec).toBe(
+        'docs/specs/compaction-strategy-improvements.spec.md'
+      );
+
+      const oversized = applyCompactionStatePatch(deleted.nextState, {
+        hugePayload: 'z'.repeat(MAX_COMPACTION_STATE_CHARS + 100),
+      });
+      expect(oversized.applied).toBe(false);
+      expect(oversized.serializedChars).toBeGreaterThan(MAX_COMPACTION_STATE_CHARS);
+      expect(oversized.nextState.hugePayload).toBeUndefined();
+    });
+
+    it('extracts rare identifier needles (df <= 2) and error lines from middle log regions', () => {
+      const fillerLines = Array.from(
+        { length: 20 },
+        () => 'info: standard heartbeat tick status=ok worker=main'
+      );
+      fillerLines[8] = 'info: RareMigrationId_163_shift_closeout_rpc executed on replica';
+      fillerLines[14] = 'ERROR: Fatal constraint failure on constraint_idx_telemetry_pk';
+
+      const preservedLines = extractRareNeedlesFromLog(fillerLines.join('\n'), {
+        maxNeedles: 10,
+      });
+
+      expect(preservedLines.some((line) => line.includes('RareMigrationId_163'))).toBe(true);
+      expect(preservedLines.some((line) => line.includes('ERROR: Fatal constraint'))).toBe(true);
+      expect(
+        preservedLines.some((line) => line.includes('standard heartbeat tick status=ok'))
+      ).toBe(false);
     });
   });
 });
