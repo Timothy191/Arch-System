@@ -307,3 +307,19 @@
   - Aligned `GUIDE.md`: Jest thresholds 30/30 → 27/28, and 27-gate → 28-gate in two places.
 - **Phase 4 (Criticism):** Gate 2 failed on first `agent-verify` run — Biome flagged `0.80` → `0.8` and a duplicate `resolution` key in the retrospective (the schema already required `resolution`, so my edit duplicated it). Both fixed; `pnpm turbo run //#lint:ci` now passes clean. Re-ran the full suite: **28/28 gates PASS**, `gitTreeHash` `b738c23b…` matches the working tree exactly.
 - **Phase 5 (Contract):** Verified `node tools/scripts/check-enforcement-integrity.cjs` → EXIT=0. Verified `pnpm turbo run //#lint:ci` → 1 successful task. Verified `.agents/memory_base/retrospectives/compaction-999d8f18.json` and all edited JSON files parse. Verified `git status` shows 0 untracked files; all 21 modified files are this session's gap-remediation work.
+
+---
+
+## [2026-11-10T11:58:00+02:00] - MCP Server Audit, Upgrade & Breakage Remediation
+
+- **Governing request**: _"Explore and update all MCP which require updating / upgrading."_ Intent: audit every registered MCP server (Arch-System + federated root), verify each against the live npm/remote registry, and fix anything broken or stale.
+- **Phase 1 (Evidence):** Probed every server with real commands — `npm view <pkg> version`, `npm pack` dry-runs, runtime `npx` smoke tests, and HTTP probes for remote endpoints.
+- **Phase 2 (Findings):**
+  - **Two genuine breakages found and fixed:**
+    - `workspace-ripgrep` registered `@modelcontextprotocol/server-ripgrep` → **npm 404** (package unpublished). Replaced with `mcp-ripgrep@0.4.0`, runtime-verified ("Ripgrep MCP Server running").
+    - `redis` registered `redis-mcp-server` via `uvx --from` → **npm 404** (package unpublished). Replaced with `easy-redis-mcp@1.1.4`, runtime-verified ("Redis MCP Server running on stdio"), passing `REDIS_URL` via env.
+  - **One stale version fixed:** `chrome-devtools` was pinned at `1.10.1` while `1.12.0` was live; bumped in `.mcp.json`, `tools/mcp/mcp-registry.json`, and `MCP-SERVERS-REGISTRY.md`.
+  - **Everything else verified current:** `context7` (npm 4.6.0, runtime-verified), `@modelcontextprotocol/server-filesystem` (npm 2.2.0, runtime-verified), `supabase`/`frontend-checklist`/`upstash` remote endpoints (HTTP 200/401 — auth expected, not broken), `codemap` 0.11.7 + `code-index` 1.8.5 (local binaries, not config-driven), `skills-mcp` 0.3.0 (local is _newer_ than npm 0.0.5), `memory-gateway-mcp`/`slim-tooling-mcp`/`langgraph-mcp` (standalone, not on any registry).
+- **Phase 3 (Design):** Edited 5 files: `/home/tim/Fork/.mcp.json`, `/home/tim/Fork/.agents/mcp_config.json`, `/home/tim/Fork/MCP-SERVERS-REGISTRY.md`, `/home/tim/Fork/Arch-System/tools/mcp/mcp-registry.json`, `/home/tim/Fork/Arch-System/.mcp.json`. All JSON re-parsed cleanly.
+- **Phase 4 (Criticism):** Biome `ci` flagged the new `redis` entry in `mcp-registry.json` (multi-line `args` array). Collapsed to a single-line array; `pnpm turbo run //#lint:ci` → 1 successful task, 1611 files checked.
+- **Phase 5 (Contract):** `node tools/scripts/check-enforcement-integrity.cjs` → EXIT=0. `node tools/audits/verify-27-gates.cjs --verify-manifest` → EXIT=0. `pnpm agent:verify` → **28/28 GATES PASSED (100%)**. Committed `2361c005` (Arch-System) and `f6c0b9e` (federated root). Post-commit audit caught one omission: `.agents/mcp_config.json` still referenced the unpublished `@modelcontextprotocol/server-ripgrep`; repaired and committed as `f6c0b9e~1`. Final `git status` clean in both repos.
