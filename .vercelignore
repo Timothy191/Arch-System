@@ -1,4 +1,5 @@
 # Large archives and temp files
+/.ci-local/
 /Arch-System-main (2).zip
 /Arch-System-main/
 /out/
