@@ -45,6 +45,7 @@ flowchart TD
 ---
 
 ## 🔬 Architectural Pre-Flight Research Gate Mandate
+
 - **Rule Source**: Codified in `docs/GEMINI.md` and `docs/AGENTS.md`.
 - **Implementation**: `SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)`.
 - **Benchmark Evaluation Surface**:

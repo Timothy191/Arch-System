@@ -4,7 +4,7 @@
 **Date:** October 1, 2026  
 **Repository:** `Timothy191/Arch-System`  
 **Monorepo Architecture:** pnpm Workspaces + Turborepo 2.x  
-**Primary Application:** `apps/portal` (Next.js 16 App Router / React 19)  
+**Primary Application:** `apps/portal` (Next.js 16 App Router / React 19)
 
 ---
 
@@ -13,6 +13,7 @@
 An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System monorepo was executed. The audit evaluated all components, design tokens, static assets, route screens, dependencies, and architectural patterns.
 
 ### Key Metrics
+
 - **Audited Routes:** 17 routes across 3 route groups in `apps/portal`
 - **Audited Components:** 57 in `packages/ui`, 12 shell components, 24 domain widgets in `libs/features/*/ui`
 - **Design Tokens:** 100+ variables in `packages/theme` (Dual-pipeline: Style Dictionary + CSS Generator)
@@ -24,6 +25,7 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
 ## 2. SYNTHESIS OF AUDIT REPORTS
 
 ### A. Dependencies & Libraries (`ui-dependencies-and-libraries.md`)
+
 - **Core Engine:** React `19.0.0-rc`, Next.js `16.0.0-canary.112`, Framer Motion `11.11.17`, Lucide React `0.460.0`.
 - **Competing / Fragmented Systems:**
   - **Data Tables:** Virtualized `RevoGrid` (`packages/ui/src/components/DataGrid.tsx`) vs Radix/Tailwind standard tables vs `@univerjs` spreadsheet.
@@ -31,6 +33,7 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
   - **Dead 3D Engine:** `three`, `@react-three/fiber`, and `@react-three/drei` (~600KB) are installed and compiled in `libs/features/hub/ui`, but explicitly bypassed by `HeroRotator.tsx` in favor of a 2D Framer Motion rotator.
 
 ### B. Design Tokens & Styling (`ui-design-tokens.md`)
+
 - **The OKLCH Myth:** Repository documentation mandates strict semantic OKLCH tokens (`color-bg-base`, `color-bg-elevated`). In reality, `packages/theme/src/tokens/tokens.json` contains **zero OKLCH tokens** (99% Hex, RGBA, and HSL).
 - **Token Semantic Drift:**
   - `--accent-electric-blue` resolves to `#D4AF37` (Metallic Gold).
@@ -39,6 +42,7 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
 - **Strict Light-Mode Invariant:** Fully enforced across all runtime CSS. Zero `dark:` classes are present in application layouts.
 
 ### C. Branding & Assets (`ui-branding-assets.md`)
+
 - **Brand Identity Confusion:**
   - Primary Operator: Plantcor Mining Operations (Brakfontein Pit).
   - Platform OS: Arch-System / Arch OS.
@@ -50,10 +54,12 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
   - `apps/portal/public/background/global-background.mp4` (11 MB) is preloaded by `RouteBackground.tsx` on every page load.
 
 ### D. Component Inventory (`ui-component-inventory.md`)
+
 - **Active Foundation:** High-quality frosted glass cards (`GlassCard.tsx`), KPI cards (`KPICard.tsx`), and Mac desktop shell (`MacMenuBar.tsx`, `DockNav.tsx`).
 - **Dead / Unused Primitives:** `FluidCanvas.tsx`, `LiquiButton.tsx`, `CyberButton.tsx`, and `ActionConfirmDialog.tsx` in `packages/ui` have zero consumers across all application routes.
 
 ### E. Route & Screen Inventory (`ui-route-screen-inventory.md`)
+
 - **Production-Ready Routes:**
   - `/` (Operations Hub): macOS desktop shell, department dock, quick actions.
   - `/(departments)/control-room`: SCADA telemetry, hourly extraction tracking, atomic shift closeout RPC.
@@ -65,6 +71,7 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
   - `/split-view`: Mocked WhatsApp Web and GitHub console panes.
 
 ### F. Technical Debt & Vulnerabilities (`ui-technical-debt.md`)
+
 - **P0-1 (Security):** `apps/portal/app/admin/page.tsx` hardcodes `timothyoniel558@gmail.com` to bypass RBAC checks.
 - **P0-2 (Functional):** `apps/portal/features/departments/index.tsx` exports 3-line stub `<div>` tags for `BreakdownsDashboard` and `TireManagementDashboard`, masking over 800 lines of fully implemented code in `libs/features/departments/ui`.
 - **P1-1 (Visual):** Missing font asset `/fonts/Anurati-Regular.otf` triggers continuous 404s and font-swapping layout shifts.
@@ -90,6 +97,7 @@ An exhaustive, evidence-based, read-only UI/UX forensic audit of the Arch-System
 ## 4. CANONICAL AUDIT FILE REGISTRY
 
 All detailed forensic documentation is available in `docs/reports/`:
+
 - [`ui-forensic-report.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-forensic-report.md) — Master comprehensive forensic report (33 sections)
 - [`ui-component-inventory.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-component-inventory.md) — 57 components + shell + domain inventory
 - [`ui-design-tokens.md`](file:///home/tim/Fork/Arch-System/docs/reports/ui-design-tokens.md) — Style Dictionary, token compilation, and semantic drift

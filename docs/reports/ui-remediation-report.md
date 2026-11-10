@@ -15,6 +15,7 @@ Following the forensic UI/UX audit documented across `docs/reports/*`, a multi-p
 All remediations strictly followed the **non-destructive minimal-diff policy**, preserving existing production functionality, database schemas, and the invariant light-mode OKLCH design system.
 
 ### Key Verification Metrics
+
 - **Portal Jest Test Suite:** 138 / 138 passed (908 tests passed, 0 failed, 1 skipped)
 - **Agent Suite (`@repo/agents`):** 2 / 2 passed (18 tests passed, 0 failed)
 - **TypeScript Static Analysis:** 0 errors across `apps/portal`, `@repo/agents`, `@repo/theme`, `@repo/utils`, and `@repo/shared/hooks`
@@ -26,9 +27,11 @@ All remediations strictly followed the **non-destructive minimal-diff policy**, 
 ## 2. Token Budget System Implementation
 
 ### 2.1 Problem & Architecture
+
 To govern autonomous agent swarms and multi-step reasoning without exceeding token windows or incurring uncontrolled LLM expenditures, a dynamic **Token Budget Agent** was engineered in `packages/agents`.
 
 ### 2.2 Implemented Features (`packages/agents/src/token-budget.ts`)
+
 1. **Dynamic Task Difficulty Classification:**
    - Empirical categorization: `trivial`, `low`, `moderate`, `high`, and `extreme`.
    - Heuristics evaluate input character length, code snippet density, multi-file scope markers, and contextual complexity.
@@ -54,6 +57,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
 ## 3. P0 Remediation — Security & Core Production Integrity
 
 ### 3.1 P0-1: Admin RBAC Hardcoded Backdoor Removal
+
 - **Vulnerability Found in Audit:**
   Hardcoded administrative bypass granting unrestricted privileges to `timothyoniel558@gmail.com` without database role verification in:
   - `apps/portal/server/proxy.ts` (lines 330–336)
@@ -67,6 +71,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
   - Authored `apps/portal/app/admin/admin-auth.test.ts`: 4 unit tests verifying unauthenticated redirection, non-admin 403 rejection, and authorized admin admission.
 
 ### 3.2 P0-2: Production Department Dashboards Restored
+
 - **Defect Found in Audit:**
   `apps/portal/features/departments/index.tsx` exported stub placeholder `<div>` components for `BreakdownsDashboard`, `TireManagementDashboard`, `ShiftCoverageWidget`, and `BreakdownsTable`, while real, fully-featured implementations were stranded in `@repo/departments/ui`.
 - **Remediation Executed:**
@@ -81,6 +86,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
 ## 4. P1 Remediation — Typography & Token Consistency
 
 ### 4.1 P1-1: Font 404 & Typography Stack Standardization
+
 - **Defect Found in Audit:**
   `packages/theme/src/css/typography.css` defined a `@font-face` rule requesting `/fonts/Anurati-Regular.otf`. The physical font file was missing from public directories, causing browser 404 network errors on every cold page load.
 - **Remediation Executed:**
@@ -98,6 +104,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
 ## 5. P2 Remediation — Media & Industrial Field Optimization
 
 ### 5.1 P2-1: 11 MB Background Video Optimization
+
 - **Defect Found in Audit:**
   `apps/portal/components/RouteBackground.tsx` loaded an uncompressed 11.2 MB video file (`tunnel_03.mp4`) globally with `preload="auto"` across all desktop and mobile viewport resolutions, severely penalizing Largest Contentful Paint (LCP) and exhausting cellular bandwidth on rugged field tablets.
 - **Remediation Executed:**
@@ -113,6 +120,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
   - Next.js Turbopack build succeeded without SSR hydration mismatch.
 
 ### 5.2 P2-2: Split-Window Simulation Transparency
+
 - **Defect Found in Audit:**
   `apps/portal/components/system/SplitWindowLayout.tsx` contained static mocks for external GitHub and WhatsApp services without indicating to operators that the panels were simulated prototypes.
 - **Remediation Executed:**
@@ -124,6 +132,7 @@ To govern autonomous agent swarms and multi-step reasoning without exceeding tok
 ## 6. Pre-Existing Test & Build Fixes
 
 During the verification process, several pre-existing issues were detected and resolved:
+
 1. **Control Room Shift Closeout Test Failure:**
    - `apps/portal/app/api/control-room/shift-closeout/route.ts` contained stray debugging code calling `cookies()` from `next/headers` inside the handler body, throwing `throwForMissingRequestStore` during Jest runs.
    - Removed the stray debug code; restored clean `getAuthenticatedEmployee(supabase)`.
@@ -138,19 +147,19 @@ During the verification process, several pre-existing issues were detected and r
 
 ## 7. Comprehensive Verification Matrix
 
-| Verification Category | Target Package / Workspace | Tool / Command | Result | Details |
-|---|---|---|---|---|
-| **Unit Tests** | `apps/portal` | `pnpm --filter portal test` | `PASS` | 138/138 suites passed (908 tests) |
-| **Unit Tests** | `packages/agents` | `pnpm --filter @repo/agents test` | `PASS` | 2/2 suites passed (18 tests) |
-| **Static Typing** | `apps/portal` | `pnpm --filter portal type-check` | `PASS` | 0 TypeScript errors |
-| **Static Typing** | `packages/agents` | `pnpm --filter @repo/agents type-check` | `PASS` | 0 TypeScript errors |
-| **Static Typing** | `packages/theme` | `pnpm --filter @repo/theme type-check` | `PASS` | 0 TypeScript errors |
-| **Static Typing** | `packages/utils` | `pnpm --filter @repo/utils type-check` | `PASS` | 0 TypeScript errors |
-| **Static Typing** | `@repo/shared/hooks` | `pnpm --filter @repo/shared/hooks type-check` | `PASS` | 0 TypeScript errors |
-| **Token Governance** | `packages/theme` | `pnpm --filter @repo/theme lint:tokens` | `PASS` | 298 tokens validated, 0 drift |
-| **CSS Stylelint** | `packages/theme` | `pnpm --filter @repo/theme lint:css` | `PASS` | Clean syntax, zero errors |
-| **Code Formatting** | Monorepo | `pnpm biome check` | `PASS` | Formatted & organized imports |
-| **Production Build** | `apps/portal` | `pnpm --filter portal build` | `PASS` | 105/105 routes compiled (Turbopack) |
+| Verification Category | Target Package / Workspace | Tool / Command                                | Result | Details                             |
+| --------------------- | -------------------------- | --------------------------------------------- | ------ | ----------------------------------- |
+| **Unit Tests**        | `apps/portal`              | `pnpm --filter portal test`                   | `PASS` | 138/138 suites passed (908 tests)   |
+| **Unit Tests**        | `packages/agents`          | `pnpm --filter @repo/agents test`             | `PASS` | 2/2 suites passed (18 tests)        |
+| **Static Typing**     | `apps/portal`              | `pnpm --filter portal type-check`             | `PASS` | 0 TypeScript errors                 |
+| **Static Typing**     | `packages/agents`          | `pnpm --filter @repo/agents type-check`       | `PASS` | 0 TypeScript errors                 |
+| **Static Typing**     | `packages/theme`           | `pnpm --filter @repo/theme type-check`        | `PASS` | 0 TypeScript errors                 |
+| **Static Typing**     | `packages/utils`           | `pnpm --filter @repo/utils type-check`        | `PASS` | 0 TypeScript errors                 |
+| **Static Typing**     | `@repo/shared/hooks`       | `pnpm --filter @repo/shared/hooks type-check` | `PASS` | 0 TypeScript errors                 |
+| **Token Governance**  | `packages/theme`           | `pnpm --filter @repo/theme lint:tokens`       | `PASS` | 298 tokens validated, 0 drift       |
+| **CSS Stylelint**     | `packages/theme`           | `pnpm --filter @repo/theme lint:css`          | `PASS` | Clean syntax, zero errors           |
+| **Code Formatting**   | Monorepo                   | `pnpm biome check`                            | `PASS` | Formatted & organized imports       |
+| **Production Build**  | `apps/portal`              | `pnpm --filter portal build`                  | `PASS` | 105/105 routes compiled (Turbopack) |
 
 ---
 
@@ -158,10 +167,10 @@ During the verification process, several pre-existing issues were detected and r
 
 1. **Token Color Naming Alignment:**
    - `--accent-electric-blue` resolves to metallic gold (`#D4AF37`) due to a legacy corporate rebrand, while `--accent-electric-blue-subtle` resolves to blue tint (`rgba(0, 122, 255, 0.08)`).
-   - *Recommendation:* Introduce explicit canonical aliases `--color-brand-gold` and `--color-brand-blue` in a scheduled design token major version bump.
+   - _Recommendation:_ Introduce explicit canonical aliases `--color-brand-gold` and `--color-brand-blue` in a scheduled design token major version bump.
 2. **Mac Window Frame Abstraction:**
    - Several portal routes render macOS traffic lights (`MacMenuBar`, `MacTitleBar`).
-   - *Recommendation:* Provide a user toggle or field profile setting to switch between macOS window styling and full-bleed industrial kiosk HUD modes for mounted cab displays.
+   - _Recommendation:_ Provide a user toggle or field profile setting to switch between macOS window styling and full-bleed industrial kiosk HUD modes for mounted cab displays.
 3. **Continuous Drift Monitoring:**
    - Retain `tools/zero-drift-watchdog` in CI/CD pipelines to prevent reintroduction of hardcoded auth bypasses or uncompiled mock stubs.
 

@@ -6,15 +6,15 @@
 
 ### Migration Statistics
 
-| Metric | Value |
-|--------|-------|
-| Total Migrations | 126 files |
-| Version Range | 001 → 175 (with gaps) |
-| Total Lines of Code | 15,345 lines |
-| Total Size | 844 KB |
-| Symlinks Verified | 2/2 intact |
-| Critical Errors | 0 |
-| Warnings | 7 (structural) + 93 (rollback) |
+| Metric              | Value                          |
+| ------------------- | ------------------------------ |
+| Total Migrations    | 126 files                      |
+| Version Range       | 001 → 175 (with gaps)          |
+| Total Lines of Code | 15,345 lines                   |
+| Total Size          | 844 KB                         |
+| Symlinks Verified   | 2/2 intact                     |
+| Critical Errors     | 0                              |
+| Warnings            | 7 (structural) + 93 (rollback) |
 
 ---
 
@@ -23,9 +23,11 @@
 ### Verified Symlinks
 
 1. **Primary Symlink**:
+
    ```
    packages/supabase/migrations -> ../database/migrations
    ```
+
    Status: ✅ Active, resolves correctly
 
 2. **Secondary Symlink**:
@@ -63,20 +65,20 @@ find packages/supabase/migrations -name "*.sql" | wc -l    # 126 (via symlink)
 
 ### Migration Categories
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| Schema Setup | 15 | 001_initial, 002_control_room_tables, 035_fleet_and_equipment |
-| RLS & Security | 18 | 012_rls_refinement, 043_admin_data_lockdown, 057_security_p0_fixes |
-| Performance & Indexes | 22 | 021_missing_indexes, 041_rls_performance_indexes, 096_optimize_rls_initplan |
-| AI & Vector Search | 14 | 009_ai_memory, 030_vector_index_optimization, 064_vector_search_query |
-| Access Control | 12 | 028_access_control_system, 044_access_control_dashboard, 082_badges_rfid |
-| Control Room | 11 | 046_control_room_archiving, 068_delay_entries_table, 097_control_room_shift_reports |
-| Drilling Operations | 5 | 024_drill_operations, 056_drill_operations_v2 |
-| Monitoring & Observability | 8 | 084_pg_stat_statements, 085_performance_monitoring, 092_slo_monitoring |
-| Data Integrity | 6 | 088_data_integrity_issues, 089_shift_integrity_reports, 091_migration_integrity_checks |
-| Partitioning | 4 | 020_partition_time_series, 063_partition_pruning, 072_partition_production_logs |
-| Legacy Hardening | 3 | 166_harden_legacy_migrations, 167_temp_fixes |
-| Miscellaneous | 8 | 093_feature_flags, 098_enable_pg_graphql, 168_integration_platform |
+| Category                   | Count | Examples                                                                               |
+| -------------------------- | ----- | -------------------------------------------------------------------------------------- |
+| Schema Setup               | 15    | 001_initial, 002_control_room_tables, 035_fleet_and_equipment                          |
+| RLS & Security             | 18    | 012_rls_refinement, 043_admin_data_lockdown, 057_security_p0_fixes                     |
+| Performance & Indexes      | 22    | 021_missing_indexes, 041_rls_performance_indexes, 096_optimize_rls_initplan            |
+| AI & Vector Search         | 14    | 009_ai_memory, 030_vector_index_optimization, 064_vector_search_query                  |
+| Access Control             | 12    | 028_access_control_system, 044_access_control_dashboard, 082_badges_rfid               |
+| Control Room               | 11    | 046_control_room_archiving, 068_delay_entries_table, 097_control_room_shift_reports    |
+| Drilling Operations        | 5     | 024_drill_operations, 056_drill_operations_v2                                          |
+| Monitoring & Observability | 8     | 084_pg_stat_statements, 085_performance_monitoring, 092_slo_monitoring                 |
+| Data Integrity             | 6     | 088_data_integrity_issues, 089_shift_integrity_reports, 091_migration_integrity_checks |
+| Partitioning               | 4     | 020_partition_time_series, 063_partition_pruning, 072_partition_production_logs        |
+| Legacy Hardening           | 3     | 166_harden_legacy_migrations, 167_temp_fixes                                           |
+| Miscellaneous              | 8     | 093_feature_flags, 098_enable_pg_graphql, 168_integration_platform                     |
 
 ---
 
@@ -91,10 +93,11 @@ No blocking issues detected.
 From `pnpm --filter @repo/database check-migrations`:
 
 1-6. **Legacy Table References** (166_harden_legacy_migrations.sql):
-   - Relations: `production_summary`, `hourly_production`, `smr_latest_tenant_meter`
-   - Issue: Tables never created but guarded with `to_regclass()`
-   - **Impact**: Legacy compatibility guards, not active errors
-   - **Action**: Document as intentional backward-compat
+
+- Relations: `production_summary`, `hourly_production`, `smr_latest_tenant_meter`
+- Issue: Tables never created but guarded with `to_regclass()`
+- **Impact**: Legacy compatibility guards, not active errors
+- **Action**: Document as intentional backward-compat
 
 7. **Lexicographic Ordering Break**:
    - Problem: `0145_shift_closeout.sql` and `0146_tire_management.sql` sort **before** `014_*` and `015_*`
@@ -106,13 +109,13 @@ From `pnpm --filter @repo/database check-migrations`:
 
 #### Sequence Gaps (5 identified)
 
-| From | To | Gap | Reason |
-|------|-----|-----|--------|
-| 098 | 102 | 099-101 | Emergency hotfixes? |
-| 102 | 145 | 103-144 | Major jump (shift closeout feature) |
-| 146 | 149 | 147-148 | Minor skip |
-| 157 | 159 | 158 | Single skip |
-| 160 | 162 | 161 | Single skip |
+| From | To  | Gap     | Reason                              |
+| ---- | --- | ------- | ----------------------------------- |
+| 098  | 102 | 099-101 | Emergency hotfixes?                 |
+| 102  | 145 | 103-144 | Major jump (shift closeout feature) |
+| 146  | 149 | 147-148 | Minor skip                          |
+| 157  | 159 | 158     | Single skip                         |
+| 160  | 162 | 161     | Single skip                         |
 
 **Note**: Gaps are normal in branching workflows (multiple devs, feature branches). Not an error.
 
@@ -131,11 +134,13 @@ CREATE TABLE IF NOT EXISTS hourly_loads (...);
 ```
 
 **Impact**:
+
 - Cannot safely re-run old migrations
 - Local dev `supabase reset` must drop all before reapply
 - Not a prod issue (migrations run once)
 
 **Affected Files** (examples):
+
 - 004_breakdowns.sql: 4 indexes
 - 007_audit_logs.sql: 4 indexes
 - 020_partition_time_series.sql: 2 tables, 6 indexes
@@ -148,16 +153,20 @@ CREATE TABLE IF NOT EXISTS hourly_loads (...);
 #### Unsafe Operations (2 instances)
 
 1. **UPDATE without WHERE** (026_drill_delays_refinement.sql):
+
    ```sql
    UPDATE drill_operations SET ...
    ```
+
    - **Risk**: Modifies all rows
    - **Mitigation**: Verify script intent, add explicit WHERE if needed
 
 2. **ALTER TYPE RENAME** (061_drop_procedural_memory_type.sql):
+
    ```sql
    ALTER TYPE memory_type RENAME TO memory_type_old;
    ```
+
    - **Risk**: Complex rollback (need matching down.sql)
    - **Status**: Historical migration, already applied
 
@@ -165,14 +174,14 @@ CREATE TABLE IF NOT EXISTS hourly_loads (...);
 
 ## Migration Health Score
 
-| Aspect | Score | Notes |
-|--------|-------|-------|
-| Symlink Integrity | 10/10 | Both symlinks functional |
-| Structural Safety | 9/10 | 0 errors, minor warnings |
-| Rollback Safety | 7/10 | Missing IF NOT EXISTS in 80+ places |
-| Sequence Continuity | 6/10 | 5 gaps (normal for branching) |
-| Naming Consistency | 7/10 | Lexicographic sort issue (0145/0146) |
-| Documentation | 8/10 | Good comments in recent migrations |
+| Aspect              | Score | Notes                                |
+| ------------------- | ----- | ------------------------------------ |
+| Symlink Integrity   | 10/10 | Both symlinks functional             |
+| Structural Safety   | 9/10  | 0 errors, minor warnings             |
+| Rollback Safety     | 7/10  | Missing IF NOT EXISTS in 80+ places  |
+| Sequence Continuity | 6/10  | 5 gaps (normal for branching)        |
+| Naming Consistency  | 7/10  | Lexicographic sort issue (0145/0146) |
+| Documentation       | 8/10  | Good comments in recent migrations   |
 
 **Overall**: 7.8/10 - **Production Ready** with minor technical debt
 
@@ -211,11 +220,13 @@ CREATE TABLE departments (...);
 ```
 
 **Benefits**:
+
 - New devs start from clean slate
 - Faster local setup (`supabase reset` → single file)
 - Preserve 001-175 for historical reference (mark as `_archived/`)
 
 **Risks**:
+
 - Loses incremental history (mitigation: keep originals in `_archived/`)
 - Needs careful testing
 
@@ -234,11 +245,13 @@ New migrations start from 201, building on the snapshot.
 ### Alternative: Keep Current Structure ✅ (Recommended for Now)
 
 **Rationale**:
+
 - System is production-stable
 - 126 files is manageable with good tooling
 - Risk of consolidation > benefit at this stage
 
 **Improvements without consolidation**:
+
 1. Add migration index document (this file serves that purpose)
 2. Group by feature in docs (done above)
 3. Use `pnpm db:migrate:lint` before merging
@@ -302,7 +315,7 @@ CREATE TABLE IF NOT EXISTS your_table (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_your_table_created_at 
+CREATE INDEX IF NOT EXISTS idx_your_table_created_at
   ON your_table(created_at DESC);
 
 -- =====================================================
@@ -350,7 +363,7 @@ COMMIT;
 # Run full migration integrity check
 pnpm --filter @repo/database check-migrations
 
-# Output: 
+# Output:
 # - Drift detection
 # - Rollback safety analysis
 # - Offline mutation security check
@@ -387,25 +400,25 @@ pnpm db:seed
 
 ### Major Milestones
 
-| Version | Name | Description |
-|---------|------|-------------|
-| 001 | initial | Base schema setup |
-| 002 | control_room_tables | Control room core tables |
-| 028 | access_control_system | Access control & badging |
-| 057 | security_p0_fixes | Security hardening wave 1 |
-| 095 | security_linter_hardening | Security hardening wave 2 |
-| 145 | shift_closeout | Atomic shift closeout RPC |
-| 162 | idempotency_and_outbox | Idempotency keys + outbox pattern |
-| 173 | control_room_rpc_security | RPC security + atomic split |
-| 175 | fix_cron_mv_refresh_schedules | Latest (materialized view cron) |
+| Version | Name                          | Description                       |
+| ------- | ----------------------------- | --------------------------------- |
+| 001     | initial                       | Base schema setup                 |
+| 002     | control_room_tables           | Control room core tables          |
+| 028     | access_control_system         | Access control & badging          |
+| 057     | security_p0_fixes             | Security hardening wave 1         |
+| 095     | security_linter_hardening     | Security hardening wave 2         |
+| 145     | shift_closeout                | Atomic shift closeout RPC         |
+| 162     | idempotency_and_outbox        | Idempotency keys + outbox pattern |
+| 173     | control_room_rpc_security     | RPC security + atomic split       |
+| 175     | fix_cron_mv_refresh_schedules | Latest (materialized view cron)   |
 
 ### Schema Evolution
 
-| Period | Migrations | Focus |
-|--------|------------|-------|
-| 001-050 | Foundation | Core tables, RLS, basic features |
-| 051-100 | Growth | Performance tuning, AI/ML, monitoring |
-| 101-150 | Maturity | Security hardening, advanced features |
+| Period  | Migrations   | Focus                                   |
+| ------- | ------------ | --------------------------------------- |
+| 001-050 | Foundation   | Core tables, RLS, basic features        |
+| 051-100 | Growth       | Performance tuning, AI/ML, monitoring   |
+| 101-150 | Maturity     | Security hardening, advanced features   |
 | 151-175 | Optimization | Performance, reliability, observability |
 
 ---
@@ -444,12 +457,14 @@ pnpm db:seed
 **Migration system is production-ready with no critical issues.**
 
 Key strengths:
+
 - ✅ Symlinks intact and verified
 - ✅ Zero critical errors
 - ✅ Automated integrity checking
 - ✅ Good test coverage for migrations
 
 Minor technical debt:
+
 - 93 rollback warnings (mostly missing IF NOT EXISTS)
 - Lexicographic sort quirk (0145/0146)
 - 5 sequence gaps (normal for branching)
@@ -459,4 +474,3 @@ Minor technical debt:
 ---
 
 **Next Steps**: Proceed to Task 3 (Bundle Size Analysis)
-

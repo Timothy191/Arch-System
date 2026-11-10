@@ -449,6 +449,12 @@ describe('Plant & Processing Workspace Components', () => {
         screen.getByRole('table', { name: /Hourly Plant Reports Database/i })
       ).toBeInTheDocument();
       expect(screen.getByText('06:00 - 07:00')).toBeInTheDocument();
+
+      // Verify shared DepartmentFilterToolbar is rendered and filters records
+      expect(screen.getByTestId('department-filter-toolbar')).toBeInTheDocument();
+      const searchInput = screen.getByLabelText('Search logged database records');
+      fireEvent.change(searchInput, { target: { value: '06:00' } });
+      expect(screen.getByText('06:00 - 07:00')).toBeInTheDocument();
     });
   });
 });

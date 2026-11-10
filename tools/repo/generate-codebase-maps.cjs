@@ -99,6 +99,7 @@ sequenceDiagram
 ## 🔒 Security Invariants & Server Action Contract
 
 Every Server Action strictly adheres to the machine-enforced 7-step execution order:
+
 1. **Authenticate**: Verify identity via \`getAuthenticatedEmployee()\`.
 2. **Authorize**: Verify role/department claims against resource requirements.
 3. **Validate**: Parse input payload using canonical Zod schemas from \`@repo/contract\`.

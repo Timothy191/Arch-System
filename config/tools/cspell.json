@@ -28,7 +28,8 @@
     "sb_anon_[A-Za-z0-9_-]+",
     "sb_service_[A-Za-z0-9_-]+",
     "team_[A-Za-z0-9]+",
-    "XVCJ"
+    "XVCJ",
+    "`[0-9a-z_-]{8,16}\\.js`"
   ],
   "words": [
     "fuxa",

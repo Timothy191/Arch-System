@@ -2,18 +2,19 @@
 
 **System:** Arch-System Control Room Suite (`apps/portal`, `libs/features/departments`, `packages/contract`, `packages/database`, `packages/ui`)  
 **Document:** System & Component Architectural Specification  
-**Status:** Ready for Swarm Execution  
+**Status:** Ready for Swarm Execution
 
 ---
 
 ## 1. Architectural Architecture & Route Unification
 
 ### 1.1 Route Shadowing Remediation
-* **Problem:** In Next.js App Router, static folder paths take precedence over parameterized paths.
+
+- **Problem:** In Next.js App Router, static folder paths take precedence over parameterized paths.
   - Path A: `apps/portal/app/(departments)/control-room/page.tsx` (Static)
   - Path B: `apps/portal/app/(departments)/[department]/page.tsx` (Dynamic)
-  When accessing `/control-room`, Next.js routes to Path A, which currently only mounts `<ShiftCloseoutForm>`. The comprehensive dashboard in Path B (`ControlRoomSummaryGridClient`, `ControlRoomWidgets`) is shadowed.
-* **Specification:**
+    When accessing `/control-room`, Next.js routes to Path A, which currently only mounts `<ShiftCloseoutForm>`. The comprehensive dashboard in Path B (`ControlRoomSummaryGridClient`, `ControlRoomWidgets`) is shadowed.
+- **Specification:**
   1. Refactor `apps/portal/app/(departments)/control-room/page.tsx` to render the primary Control Room dashboard.
      - Move the `ShiftCloseoutForm` section to `apps/portal/app/(departments)/control-room/shift-closeout/page.tsx`.
      - In `control-room/page.tsx`, mount:
@@ -36,8 +37,9 @@
   2. Register `/control-room/shift-closeout` and link it prominently from quick actions and the checklist widget.
 
 ### 1.2 Department Navigation Tabs Configuration
-* **Target File:** [`libs/features/departments/data-access/src/departments.ts`](file:///home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.ts#L203-L211)
-* **Specification:** Update `CONTROL_ROOM_TABS` to include all active workflows:
+
+- **Target File:** [`libs/features/departments/data-access/src/departments.ts`](file:///home/tim/Fork/Arch-System/libs/features/departments/data-access/src/departments.ts#L203-L211)
+- **Specification:** Update `CONTROL_ROOM_TABS` to include all active workflows:
   ```typescript
   export const CONTROL_ROOM_TABS = [
     { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
@@ -56,8 +58,10 @@
 ## 2. Shift Handover & SMR Validation Specification
 
 ### 2.1 Dynamic Opening SMR Resolution
-* **Target File:** `apps/portal/app/(departments)/control-room/shift-closeout/page.tsx` & `ShiftCloseoutSection`
-* **Specification:** Replace `opening_smr: 0` with a database query resolving the latest recorded SMR:
+
+- **Target File:** `apps/portal/app/(departments)/control-room/shift-closeout/page.tsx` & `ShiftCloseoutSection`
+- **Specification:** Replace `opening_smr: 0` with a database query resolving the latest recorded SMR:
+
   ```typescript
   // Query latest closing SMR per machine from machine_operations or smr_readings
   const { data: previousSMRs } = await supabase
@@ -88,8 +92,10 @@
   ```
 
 ### 2.2 SMR Schema Tolerance & Overrun Management
-* **Target File:** [`packages/contract/src/schemas/machine-ledger.schema.ts`](file:///home/tim/Fork/Arch-System/packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41)
-* **Specification:**
+
+- **Target File:** [`packages/contract/src/schemas/machine-ledger.schema.ts`](file:///home/tim/Fork/Arch-System/packages/contract/src/schemas/machine-ledger.schema.ts#L33-L41)
+- **Specification:**
+
   ```typescript
   export const machineTimeAllocationSchema = z
     .object({
@@ -112,7 +118,9 @@
       }
 
       const operating_hours = Number((data.closing_smr - data.opening_smr).toFixed(2));
-      const total_allocated = Number((operating_hours + data.breakdown_hours + data.delay_hours).toFixed(2));
+      const total_allocated = Number(
+        (operating_hours + data.breakdown_hours + data.delay_hours).toFixed(2)
+      );
 
       // Standard maximum shift window is 12.0h; allow up to 12.5h with operational tolerance
       if (total_allocated > 12.5) {
@@ -132,8 +140,9 @@
   ```
 
 ### 2.3 SMR Inputs in Machine Operations Form
-* **Target File:** [`MachineOperationsForm.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx)
-* **Specification:**
+
+- **Target File:** [`MachineOperationsForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsForm.tsx>)
+- **Specification:**
   - Add numeric fields for `start_smu` and `end_smu`.
   - Include both in the insert/update payload:
     ```typescript
@@ -157,8 +166,9 @@
 ## 3. UI/UX Laws & Ergonomics Specification
 
 ### 3.1 Persistent Dockable Sidebar (Jakob's & Fitts's Law)
-* **Target File:** [`packages/ui/src/components/DepartmentLayout.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx)
-* **Specification:**
+
+- **Target File:** [`packages/ui/src/components/DepartmentLayout.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentLayout.tsx)
+- **Specification:**
   - Delete mouse proximity detection (`clientX <= 36`) and `w-12` invisible trigger overlay.
   - Implement two explicit states:
     1. **Collapsed (Default):** 64px width icon rail with tooltips on hover.
@@ -168,8 +178,9 @@
   - Content container offset: `ml-16` (64px) when collapsed, `ml-60` (240px) when pinned, preventing any overlap on main workspace tables.
 
 ### 3.2 Stepper Target Enlargement & Direct Input (Fitts's Law & WCAG 2.5.8)
-* **Target File:** [`HourlyLoadsGrid.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870)
-* **Specification:**
+
+- **Target File:** [`HourlyLoadsGrid.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx#L817-L870>)
+- **Specification:**
   - Enlarge the stepper container to $32 \times 32\text{px}$ minimum clickable bounds with hit-slop:
     ```tsx
     <div className="flex items-center gap-1.5 justify-center">
@@ -195,8 +206,9 @@
   - Support keyboard Up/Down arrows to step value when cell is focused.
 
 ### 3.3 Confirmation Dialog on Breakdown Reporting (Norman's Mistake Prevention)
-* **Target File:** [`EquipmentDashboard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173)
-* **Specification:**
+
+- **Target File:** [`EquipmentDashboard.tsx`](file:///home/tim/Fork/Arch-System/libs/features/departments/ui/src/control-room/EquipmentDashboard.tsx#L165-L173)
+- **Specification:**
   - Increase button height: `px-4 py-2 text-xs font-semibold rounded-lg h-10`.
   - Add state `confirmMachine: FleetItem | null`.
   - Clicking "Report Breakdown" opens `AnimatedDialog`:
@@ -205,19 +217,25 @@
     - Confirm button executes mutation; Cancel button closes dialog without dispatch.
 
 ### 3.4 Elimination of Thread-Blocking `alert()` Calls
-* **Target File:** `HourlyLoadsGrid.tsx` (Lines 370, 483, 496, 533, 947, 958)
-* **Specification:** Replace all `alert('...')` with `toast.error('...')` or `toast.warning('...')` from `sonner`.
+
+- **Target File:** `HourlyLoadsGrid.tsx` (Lines 370, 483, 496, 533, 947, 958)
+- **Specification:** Replace all `alert('...')` with `toast.error('...')` or `toast.warning('...')` from `sonner`.
 
 ---
 
 ## 4. Telemetry, Alarms & Safety Persistence Specification
 
 ### 4.1 Live SCADA Integration & Telemetry Health
-* **Target File:** [`ScadaPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ScadaPanel.tsx)
-* **Specification:**
+
+- **Target File:** [`ScadaPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ScadaPanel.tsx)
+- **Specification:**
   - Consume `/api/control-room/scada-status` via React Query:
     ```typescript
-    const { data: status, refetch, isFetching } = useQuery({
+    const {
+      data: status,
+      refetch,
+      isFetching,
+    } = useQuery({
       queryKey: ['scada-status'],
       queryFn: async () => {
         const res = await fetch('/api/control-room/scada-status');
@@ -234,8 +252,9 @@
   - Connect manual refresh button `onClick={() => refetch()}`.
 
 ### 4.2 Alarm Acknowledgement State Machine (ANSI/ISA-18.2)
-* **Target File:** [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx)
-* **Specification:**
+
+- **Target File:** [`AlertPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/AlertPanel.tsx)
+- **Specification:**
   - Style critical alarms with high-contrast banners (`bg-red-600 text-white font-bold`).
   - Add `onAcknowledge(alarmId)` trigger:
     - Prompts for operator note / radio call confirmation.
@@ -243,8 +262,9 @@
     - Updates alarm state to `ACKNOWLEDGED` (steady border, no flashing).
 
 ### 4.3 Safety Checklist Database Persistence
-* **Target File:** [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx)
-* **Specification:**
+
+- **Target File:** [`ControlRoomChecklistWidget.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ControlRoomChecklistWidget.tsx)
+- **Specification:**
   - Fetch shift checklist state from `/api/control-room/shift-checklist?departmentId={deptId}&date={date}&shift={shift}`.
   - On toggle, mutate record in PostgreSQL `control_room_shift_reports`.
   - Wire "Proceed to Shift Closeout" button:
@@ -258,8 +278,9 @@
     ```
 
 ### 4.4 Offline Queueing Logic Fix
-* **Target File:** [`ShiftCloseoutForm.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L94)
-* **Specification:**
+
+- **Target File:** [`ShiftCloseoutForm.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx#L78-L94>)
+- **Specification:**
   ```typescript
   if (isOnline && !isDegraded) {
     try {
@@ -287,11 +308,12 @@
 ## 5. Design Token & Theming Normalization
 
 ### 5.1 Token Deprecation & Replacement Table
-| Old Hardcoded / Legacy Token | Standard CSS Variable Token | Target Files |
-| :--- | :--- | :--- |
-| `bg-white/70`, `bg-white/50` | `bg-[var(--vibrancy-surface)]` | `FleetKpiTable.tsx`, `ProductionSummaryCard.tsx`, `TireAlertsBanner.tsx` |
-| `text-neutral-900`, `text-neutral-950` | `text-[var(--text-heading)]` | All table headers, machine titles, summary values |
-| `text-neutral-500`, `text-neutral-600` | `text-[var(--text-secondary)]` / `text-[var(--text-muted)]` | Subtitles, parameter units, status labels |
-| `border-black/[0.08]`, `border-black/[0.06]` | `border-[var(--border-subtle)]` | Card borders, dividers, table row borders |
-| `bg-neutral-100`, `bg-neutral-50/50` | `bg-[var(--bg-secondary)]` | Table header strips, pill backgrounds |
-| `arch-text-primary`, `arch-brand-blue` | `text-[var(--text-heading)]`, `text-[var(--accent-blue)]` | `EquipmentDashboard.tsx`, `ScadaPanel.tsx` |
+
+| Old Hardcoded / Legacy Token                 | Standard CSS Variable Token                                 | Target Files                                                             |
+| :------------------------------------------- | :---------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `bg-white/70`, `bg-white/50`                 | `bg-[var(--vibrancy-surface)]`                              | `FleetKpiTable.tsx`, `ProductionSummaryCard.tsx`, `TireAlertsBanner.tsx` |
+| `text-neutral-900`, `text-neutral-950`       | `text-[var(--text-heading)]`                                | All table headers, machine titles, summary values                        |
+| `text-neutral-500`, `text-neutral-600`       | `text-[var(--text-secondary)]` / `text-[var(--text-muted)]` | Subtitles, parameter units, status labels                                |
+| `border-black/[0.08]`, `border-black/[0.06]` | `border-[var(--border-subtle)]`                             | Card borders, dividers, table row borders                                |
+| `bg-neutral-100`, `bg-neutral-50/50`         | `bg-[var(--bg-secondary)]`                                  | Table header strips, pill backgrounds                                    |
+| `arch-text-primary`, `arch-brand-blue`       | `text-[var(--text-heading)]`, `text-[var(--accent-blue)]`   | `EquipmentDashboard.tsx`, `ScadaPanel.tsx`                               |

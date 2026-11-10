@@ -71,8 +71,8 @@ run_gate 1  "⚙️ " "Type Checking" \
   "Fix TypeScript errors."
 
 run_gate 2  "🧹" "Linting, Styles & Spelling" \
-  "pnpm turbo run //#lint:ci && pnpm lint:styles && pnpm lint:spelling" \
-  "Fix Biome, Stylelint, or CSpell errors."
+  "pnpm turbo run //#lint:ci && pnpm lint:styles && pnpm lint:spelling && pnpm md:lint" \
+  "Fix Biome, Stylelint, CSpell, or Markdownlint errors."
 
 run_gate 3  "🧪" "Unit Tests" \
   "pnpm test" \
@@ -99,7 +99,7 @@ run_gate 8  "💰" "Context Budget Enforcement" \
   "Run 'pnpm context:debloat' to prune context bloat."
 
 run_gate 9  "📜" "Agent Rule Drift (workspace ↔ project)" \
-  "node tools/audits/audit-agent-rules-drift.cjs && node tools/audits/audit-ssot-duplicates.cjs" \
+  "node tools/audits/audit-agent-rules-drift.cjs && node tools/audits/audit-agentic-content.cjs --check && node tools/audits/audit-ssot-duplicates.cjs" \
   "Run 'node tools/audits/audit-agent-rules-drift.cjs' and sync the diverged rule to BOTH .agents/rules/ trees."
 
 run_gate 10 "🗺️ " "Architecture Maps Parity" \

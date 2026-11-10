@@ -12,8 +12,10 @@ export interface DepartmentFilterToolbarProps {
   readonly searchQuery?: string;
   readonly onSearchChange?: (nextQuery: string) => void;
   readonly searchPlaceholder?: string;
+  readonly searchAriaLabel?: string;
   readonly shiftFilter?: string;
   readonly onShiftFilterChange?: (nextShift: string) => void;
+  readonly shiftAriaLabel?: string;
   readonly shiftOptions?: readonly DepartmentShiftOption[];
   readonly dateFrom?: string;
   readonly dateTo?: string;
@@ -42,8 +44,10 @@ export function DepartmentFilterToolbar(props: DepartmentFilterToolbarProps) {
     searchQuery = '',
     onSearchChange,
     searchPlaceholder = 'Filter records...',
+    searchAriaLabel,
     shiftFilter = 'ALL',
     onShiftFilterChange,
+    shiftAriaLabel = 'Filter by shift',
     shiftOptions = DEFAULT_SHIFT_OPTIONS,
     dateFrom = '',
     dateTo = '',
@@ -66,7 +70,7 @@ export function DepartmentFilterToolbar(props: DepartmentFilterToolbarProps) {
           <input
             type="search"
             data-testid="department-filter-search"
-            aria-label={searchPlaceholder}
+            aria-label={searchAriaLabel ?? searchPlaceholder}
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -77,7 +81,7 @@ export function DepartmentFilterToolbar(props: DepartmentFilterToolbarProps) {
         {onShiftFilterChange && (
           <select
             data-testid="department-filter-shift"
-            aria-label="Filter by shift"
+            aria-label={shiftAriaLabel}
             value={shiftFilter}
             onChange={(event) => onShiftFilterChange(event.target.value)}
             className={INPUT_CLASS}

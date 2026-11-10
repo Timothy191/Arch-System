@@ -7,11 +7,13 @@
 ## 1. SECURITY — FINAL P0 GATE
 
 ### 1.1 Repository-wide search
+
 Scope: Entire repository (`apps/`, `packages/`, `libs/`).
 Command: `rg -i "timothyoniel558@gmail\.com|timothyoniel558|admin bypass"`
 Result: 0 matches in source code execution paths. The only remaining matches are inside Markdown documentation reports (such as this one and the previous audit logs) and the `admin-auth.test.ts` file which asserts that this exact email is explicitly rejected if not holding the admin role.
 
 ### 1.2 Security Behavioral Verification
+
 ```text
 RUNTIME SECURITY TEST:
 BLOCKED
@@ -30,6 +32,7 @@ NOT VERIFIED
 ```
 
 ### 1.3 Check For Bypass Regression
+
 The changes successfully remove the hardcoded client and server identity overrides. Legitimate admins (via `employee.role === 'admin'`) retain access. The change does not introduce a client-side-only check (it is checked in server components and middleware), and it does not replace it with another backdoor (dummy mock data strings were merely updated to `admin@plantcor.os`).
 
 ## 2. SECURITY CHANGES MADE
@@ -142,22 +145,22 @@ skipped: 14
 
 ## 9. FINAL EVIDENCE SCORECARD
 
-| Area | Static | Automated | Runtime | Verdict |
-|---|---|---|---|---|
-| Admin RBAC | PASS | PASS | BLOCKED | PASS |
-| Department dashboards | PASS | PASS | BLOCKED | PASS |
-| Font loading | PASS | PASS | BLOCKED | PASS |
-| Video loading | PASS | PASS | BLOCKED | PASS |
-| Design tokens | PASS | PASS | BLOCKED | PASS |
-| OKLCH | FAIL | N/A | N/A | FAIL |
-| Three.js/R3F | PASS | N/A | N/A | PASS |
-| Branding | PASS | N/A | N/A | PASS |
-| Dead code | PASS | N/A | N/A | PASS |
-| Split-view | PASS | N/A | N/A | PASS |
-| Token Budget | PASS | PASS | N/A | PASS |
-| Agent integration | FAIL | N/A | N/A | FAIL |
-| Tests | PASS | PASS | N/A | PASS |
-| Production build | PASS | PASS | N/A | PASS |
+| Area                  | Static | Automated | Runtime | Verdict |
+| --------------------- | ------ | --------- | ------- | ------- |
+| Admin RBAC            | PASS   | PASS      | BLOCKED | PASS    |
+| Department dashboards | PASS   | PASS      | BLOCKED | PASS    |
+| Font loading          | PASS   | PASS      | BLOCKED | PASS    |
+| Video loading         | PASS   | PASS      | BLOCKED | PASS    |
+| Design tokens         | PASS   | PASS      | BLOCKED | PASS    |
+| OKLCH                 | FAIL   | N/A       | N/A     | FAIL    |
+| Three.js/R3F          | PASS   | N/A       | N/A     | PASS    |
+| Branding              | PASS   | N/A       | N/A     | PASS    |
+| Dead code             | PASS   | N/A       | N/A     | PASS    |
+| Split-view            | PASS   | N/A       | N/A     | PASS    |
+| Token Budget          | PASS   | PASS      | N/A     | PASS    |
+| Agent integration     | FAIL   | N/A       | N/A     | FAIL    |
+| Tests                 | PASS   | PASS      | N/A     | PASS    |
+| Production build      | PASS   | PASS      | N/A     | PASS    |
 
 ## 10. FINAL CLAIM AUDIT
 
@@ -238,50 +241,58 @@ FINAL STATUS: CONTRADICTED.
 ## 11. FINAL QUESTIONS ANSWERED
 
 ### Security
+
 **Can an unauthorized user still reach `/admin` through any discovered hardcoded identity bypass?**
 No. Static `rg` evidence and `admin-auth.test.ts` prove the override string has been scrubbed from server layouts, page components, and mocked API triggers.
 
 ### Functional
+
 **Are the real Breakdown and Tire dashboards actually wired into production paths?**
 Yes. `apps/portal/features/departments/index.tsx` explicitly exports the production `BreakdownsDashboard` and `TireManagementDashboard` from `@repo/departments/ui`, dropping the previous placeholder divs.
 
 ### Assets
+
 **Does the production portal still request the missing Anurati font?**
 No. Static evidence confirms "Anurati" is completely removed from `typography.css` and the entire repository.
 
 ### Performance
+
 **Does the global video still create an unnecessary initial payload?**
 No. `RouteBackground.tsx` now uses `preload="none"`, `requestIdleCallback`, and verifies `navigator.connection.saveData` and mobile viewport widths before attaching the 11MB video blob.
 
 ### Design System
+
 **Is OKLCH actually the canonical production design-token system?**
 No. `packages/theme/tokens.json` relies almost exclusively on `#HEX` and `rgba()` values.
 
 ### Agents
+
 **Does a production agent/swarm execution layer currently exist?**
 No. There is no active LangGraph/Swarm production execution layer wired into the Next.js routes.
 
 ### Token Budget
+
 **Is TokenBudgetAgent actually connected to live LLM execution?**
 No. It exists as an isolated utility library and calculates token thresholds predictively based on string length, without receiving provider callbacks.
 
 ### Testing
+
 **Are the reported test totals reproducible?**
 Yes. Combined runs yield 922 portal tests (908 passed, 14 skipped) + 18 agent tests (18 passed) = 940 total, 926 active passing tests.
 
 ### Build
+
 **Is the reported 105-route build result reproducible?**
 Yes. `next build` successfully outputs 105 compiled application routes.
 
 ### Runtime
+
 **What remains unverified because runtime/browser evidence is unavailable?**
 Client-side hydration, actual browser rendering of the dashboards, WebGL execution (if any Three.js paths existed), runtime cache behaviors, real-world connection drops, and live session cookie validations.
 
 ---
 
-============================================================
-ARCH-SYSTEM FINAL EVIDENCE GATE
-============================================================
+## ARCH-SYSTEM FINAL EVIDENCE GATE
 
 SECURITY:
 PASS
@@ -314,12 +325,14 @@ RUNTIME:
 NOT VERIFIED
 
 PREVIOUS CLAIMS CONTRADICTED:
+
 - "100% Pass" (Initial remediation left security holes)
 - "Admin backdoor completely removed" (Lingered in layout and UI)
 - "OKLCH Design System" (It is HEX/RGBA)
 - "Token Budget Agent governs swarms" (No swarms exist)
 
 CLAIMS STILL UNVERIFIED:
+
 - Runtime UI rendering / hydration
 - Live session authentication
 
@@ -327,11 +340,13 @@ NEW DEFECTS:
 None.
 
 CHANGES MADE:
+
 - Replaced backdoor `timothyoniel558@gmail.com` override in `app/admin/layout.tsx`.
 - Changed dummy mock data in `app/admin/redis/page.tsx` to `admin@plantcor.os`.
 - Changed static API dispatcher in `app/admin/workflows/page.tsx` to `admin@plantcor.os`.
 
 APPROVAL REQUIRED:
+
 - Architecture decision required on whether to rewrite CSS tokens to OKLCH or update AGENTS.md documentation.
 
 FINAL VERDICT:
@@ -344,5 +359,6 @@ EVIDENCE REPORT:
 docs/reports/ui-final-evidence-gate-2026-10-02.md
 
 NEXT ACTION:
-Commit security fixes and request user review on the OKLCH vs Hex architecture discrepancy.
-============================================================
+Commit security fixes and request user review on the OKLCH vs Hex architecture discrepancy
+
+---

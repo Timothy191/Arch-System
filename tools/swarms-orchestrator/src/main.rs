@@ -231,8 +231,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let model_name =
         std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "deepseek-v4.1-flash:cloud".to_string());
-    let ollama_url =
-        std::env::var("OLLAMA_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:11434/v1".to_string());
+    let ollama_url = std::env::var("OLLAMA_BASE_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:11434/v1".to_string());
 
     println!(
         "Initializing Swarms Orchestrator with Ollama model: {}",

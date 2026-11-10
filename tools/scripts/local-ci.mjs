@@ -191,6 +191,31 @@ const turboChanged = (tasks) => {
 
 /** @type {Record<string, {build?: (ctx)=>string[][], cmd?: string[], suite, wd?, needs?, env?, soft?, note?}>} */
 const LOCAL_STEPS = {
+  'rust-quality :: Check formatting': {
+    cmd: ['cargo', 'fmt', '--all', '--', '--check'],
+    suite: 'core',
+    needs: ['cargo'],
+    wd: 'tools/swarms-orchestrator',
+  },
+  'rust-quality :: Type check': {
+    cmd: ['cargo', 'check', '--locked'],
+    suite: 'full',
+    needs: ['cargo'],
+    wd: 'tools/swarms-orchestrator',
+  },
+  'rust-quality :: Clippy': {
+    cmd: ['cargo', 'clippy', '--all-targets', '--all-features', '--locked', '--', '-D', 'warnings'],
+    suite: 'full',
+    needs: ['cargo'],
+    wd: 'tools/swarms-orchestrator',
+  },
+  'rust-quality :: Test': {
+    cmd: ['cargo', 'test', '--locked'],
+    suite: 'full',
+    needs: ['cargo'],
+    wd: 'tools/swarms-orchestrator',
+  },
+
   'deps-lint :: Run syncpack deps lint': { cmd: pnpm('deps:lint'), suite: 'core' },
 
   'security-audit :: Run dependency audit': {
@@ -243,7 +268,6 @@ const LOCAL_STEPS = {
   'md-lint :: Run Markdown Lint': {
     cmd: pnpm('md:lint'),
     suite: 'core',
-    note: 'fails on pre-existing debt (measured 2026-10-23: ~10,900 findings, ~9,570 of them MD013 line-length, mostly AGENT_TRACER.md and temp/ files that the tracer convention writes as single long lines)',
   },
 
   'quality :: Run tflint': {
@@ -284,6 +308,14 @@ const LOCAL_STEPS = {
     cmd: pnpm('bundlesize'),
     suite: 'full',
     note: 'needs a prior build',
+  },
+  'quality :: Bundle Graph Snapshot (Turbopack)': {
+    cmd: pnpm('analyze:turbopack'),
+    suite: 'full',
+  },
+  'quality :: Turbo Build Graph': {
+    cmd: pnpm('turbo:graph'),
+    suite: 'full',
   },
 
   'redis-integration :: Run Redis integration tests': {
@@ -395,7 +427,7 @@ const LOCAL_STEPS = {
 };
 
 const GITHUB_ONLY =
-  /^(actions\/|github\/|pnpm\/|anchore\/|aquasecurity\/|terraform-linters\/|gitleaks\/|netlify\/|vercel\/)/;
+  /^(actions\/|actions-rust-lang\/|github\/|pnpm\/|anchore\/|aquasecurity\/|terraform-linters\/|gitleaks\/|netlify\/|vercel\/)/;
 
 /** Runner plumbing in the workflows: not a check, so never reported as a gap. */
 const CI_PLUMBING = new Set(['ga-hardening :: Get pnpm store directory']);
@@ -406,7 +438,7 @@ const CI_PLUMBING = new Set(['ga-hardening :: Get pnpm store directory']);
  * coverage gaps — only real checks belong in the gap list.
  */
 const RUNNER_BOOTSTRAP =
-  /^(actions\/checkout|pnpm\/action-setup|actions\/setup-|actions\/cache|actions\/upload-artifact|actions\/download-artifact)/;
+  /^(actions\/checkout|pnpm\/action-setup|actions\/setup-|actions-rust-lang\/setup-rust-toolchain|actions\/cache|actions\/upload-artifact|actions\/download-artifact)/;
 
 function classify(job, step) {
   const label = stepLabel(step);

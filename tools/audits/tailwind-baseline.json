@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-06T22:05:46.015Z",
+  "generatedAt": "2026-11-10T07:02:18.529Z",
   "config": {
     "maxUtilitiesPerElement": 20,
     "duplicateMinTokens": 10,
@@ -8,7 +8,7 @@
   },
   "overBudgetByFile": {
     "apps/portal/app/(departments)/control-room/components/ControlRoomQuickNav.tsx": 1,
-    "apps/portal/features/hub/components/CoreOperationalModules.tsx": 3,
+    "apps/portal/features/hub/components/CoreOperationalModules.tsx": 1,
     "packages/ui/src/components/ui/dialog.tsx": 1,
     "packages/ui/src/components/ui/dropdown-menu.tsx": 1,
     "packages/ui/src/components/ui/select.tsx": 1
@@ -64,7 +64,7 @@
     },
     "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-blue)] focus:outline-none px-3 py-2.5 rounded-lg text-[var(--text-heading)] text-sm transition-colors w-full": {
       "tokens": 12,
-      "uses": 14
+      "uses": 11
     },
     "bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-blue)] font-medium px-3 py-2 rounded-lg text-[var(--text-heading)] text-xs w-full": {
       "tokens": 13,

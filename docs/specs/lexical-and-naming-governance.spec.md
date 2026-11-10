@@ -1,8 +1,8 @@
 # Specification: Monorepo Lexical, Spelling, Grammar & File-Naming Governance (`AGENT_TRACER.md`)
 
-**Status:** Approved & In Execution  
+**Status:** Implemented & Verified  
 **Date:** 2026-11-10  
-**Scope:** Root `AGENT_TRACER.md` SSoT rename, CSpell & Markdownlint scope expansion, `.agents/rules/lexical-and-naming-governance.md`, `.qoder/hooks/` & `lint-staged` enforcement, and Gate 2 / Gate 25 verification.
+**Scope:** Root `AGENT_TRACER.md` SSoT rename, CSpell & Markdownlint scope expansion, `.agents/rules/lexical-and-naming-governance.md`, `.qoder/hooks/` & `lint-staged` enforcement, and Gate 2 / Gate 9 / Gate 25 verification.
 
 ---
 
@@ -19,8 +19,8 @@ Eliminate naming and spelling drift across all autonomous agents and repository 
 
 ## 2. EARS Acceptance Criteria
 
-- **WHEN** `pnpm lint:spelling` is executed, **THE SYSTEM SHALL** spell-check `*.md`, `.agents/**/*.md`, `.github/**/*.md`, `apps/**/*.{ts,tsx,js,jsx,md}`, `packages/**/*.{ts,tsx,js,jsx,md}`, `libs/**/*.{ts,tsx,js,jsx,md}`, `docs/**/*.md`, `tools/**/*.{js,cjs,mjs,ts,md}`, and `scripts/**/*.{js,cjs,mjs,ts,md}` (including root `AGENT_TRACER.md`) with **0 unknown words**.
-- **WHEN** `node tools/audits/audit-agentic-content.cjs --check` runs, **THE SYSTEM SHALL** verify that root `AGENT_TRACER.md` exists and is non-empty, and that zero non-canonical root tracer variants or distributed sub-package `*/AGENT_TRACER.md` files exist anywhere in the workspace.
+- **WHEN** `pnpm lint:spelling` and `pnpm md:lint` are executed, **THE SYSTEM SHALL** spell-check and lint `*.md`, `.agents/**/*.md`, `.github/**/*.md`, `apps/**/*.{ts,tsx,js,jsx,md}`, `packages/**/*.{ts,tsx,js,jsx,md}`, `libs/**/*.{ts,tsx,js,jsx,md}`, `docs/**/*.md`, `tools/**/*.{js,cjs,mjs,ts,md}`, and `scripts/**/*.{js,cjs,mjs,ts,md}` (including root `AGENT_TRACER.md`) with **0 unknown words** and **0 markdownlint violations**.
+- **WHEN** `node tools/audits/audit-agentic-content.cjs --check` runs, **THE SYSTEM SHALL** verify that root `AGENT_TRACER.md` exists and is non-empty, that zero non-canonical root tracer variants or distributed sub-package `*/AGENT_TRACER.md` files exist anywhere in the workspace, and that all contract schemas, contract types, and SQL migrations follow canonical file-naming conventions.
 - **WHEN** any agent attempts to write a non-canonical tracer file (`AGENTS_TRACER.md`, `AGENTS-TRACER.md`) or a nested `*/AGENT_TRACER.md` via `Edit|Write`, **THE SYSTEM SHALL** block the write in `.qoder/hooks/protect-paths.sh` with exit code `2` (verified by synthetic probes in Gate 25 `audit-agent-permissions.cjs`).
 - **WHEN** any agent edits or writes a code or Markdown file via `Edit|Write` or stages files for commit (`lint-staged`), **THE SYSTEM SHALL** run Biome/Markdownlint/Prettier and `cspell` on the modified file(s).
 - **WHEN** `pnpm agent:verify` executes all 27 gates, **THE SYSTEM SHALL** pass 27/27 gates with `0` violations.

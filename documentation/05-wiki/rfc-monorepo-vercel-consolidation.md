@@ -8,13 +8,16 @@
 ---
 
 ## 1. Context & Motivation
+
 Currently, four distinct services form the Vercel cloud deployment topology:
+
 1. `Arch-System/apps/portal`: Next.js 16 (Turborepo monorepo)
 2. `arch-system-nest-proxy`: NestJS standalone project
 3. `redis`: Next.js 15 Serverless Redis REST engine standalone project
 4. `n8n-vercel`: Containerized n8n workflow engine standalone project
 
 While all four belong to the same Vercel team (`team_9puAfgXPqVuwIBENr1LmhCxO`), maintaining them across separate git directories creates:
+
 - Divergent dependency versions (e.g. `@types/node`, `typescript`, `@biomejs/biome`)
 - Duplicate environment variable maintenance and secret drift
 - Fragmented CI/CD workflows and multi-repository release overhead
@@ -25,6 +28,7 @@ While all four belong to the same Vercel team (`team_9puAfgXPqVuwIBENr1LmhCxO`),
 ## 2. Proposed Architecture
 
 ### 2.1 Workspace Structure
+
 Consolidate external services into the main monorepo under `apps/` and `tools/`:
 
 ```
@@ -44,7 +48,9 @@ Arch-System/
 ```
 
 ### 2.2 Turborepo Task Pipeline Integration
+
 Update `turbo.json` with dedicated pipeline targets:
+
 ```json
 {
   "tasks": {
@@ -65,6 +71,7 @@ Update `turbo.json` with dedicated pipeline targets:
 ```
 
 ### 2.3 Vercel Project Mapping
+
 In Vercel, each project is configured with a distinct **Root Directory**:
 | Service | Vercel Project Name | Root Directory | Framework Preset | Output Directory |
 |---|---|---|---|---|
@@ -75,6 +82,7 @@ In Vercel, each project is configured with a distinct **Root Directory**:
 ---
 
 ## 3. Migration Phasing & Safety Guarantees
+
 1. **Phase 1**: Symlink verification and import path standardization.
 2. **Phase 2**: Relocate standalone repositories into `apps/nest-proxy` and `apps/serverless-redis`.
 3. **Phase 3**: Update Vercel Project settings (Root Directory = `apps/<name>`) in the Vercel dashboard.
@@ -83,5 +91,6 @@ In Vercel, each project is configured with a distinct **Root Directory**:
 ---
 
 ## 4. Risks & Mitigations
+
 - **Lockfile churn**: Use `pnpm install` with workspace catalog to reconcile package versions.
 - **Vercel Build Root**: Vercel monorepo configuration requires the "Include source files outside of the Root Directory in the Build Step" toggle enabled for cross-package imports (`@repo/contract`, `@repo/redis`).

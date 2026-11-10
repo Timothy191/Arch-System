@@ -164,3 +164,39 @@
 | `tools/`   | 27-Gate Enterprise Verification Suite (`tools/scripts/agent-verify.sh`), `policy-compiler.cjs` boundary enforcement, Zero-Drift Watchdog, and Antidrift Guardian (`antidrift-test.cjs`).      |
 | `e2e/`     | Playwright multi-viewport suite (`chromium`, `mobile-chrome`, `tablet-chrome`), Galen Relational Spatial Layout Engine (`galen-layout.ts`), Control Room SCADA & visual regression baselines. |
 | `scripts/` | `dev-system-reimagined.sh`, operational department seed generators (`ControlRoom@plantcormining.co.za`), and Vercel preflight/deployment automation.                                          |
+
+---
+
+## 2026-11-10 — Code Intelligence: review, gap-fill, and evidence-based verification
+
+**Agent:** main · **Scope:** `~/.agents/skills/code-intelligence/scripts/` + `/home/tim/local.db`
+
+| #   | Action                                                                                                                                                                                                                     | Evidence                                                                                   |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1   | Re-verified all four handoff claims with fresh runs (git status, DB counts, RRF, TDAD, chunking)                                                                                                                           | `git status --porcelain` → 0 untracked; DB → 8,982 entities / 46,000 relations / 779 files |
+| 2   | Found real gap: `ast_chunker.py` has no TS AST path → `.ts/.tsx` falls through to regex fallback                                                                                                                           | `shift-closeout.ts` → 17 chunks, `empQuery` swallowed L114–195 (82 lines)                  |
+| 3   | Found deeper root cause: TS indexer stored `end_line = start_line` for **8,769 of 8,982 entities (97.6%)**                                                                                                                 | `SELECT kind, COUNT(*) ... WHERE end_line=start_line`                                      |
+| 4   | Built `ts_parse.cjs` + `ts_parse_dir.cjs` (node + TypeScript compiler API, repo-resolved `require`, script-kind from extension)                                                                                            | Batch parse: 1,365 files, 9,267 arrow functions                                            |
+| 5   | Built `ts_ast_chunker.py` (real syntactic ranges; comment-inclusive chunk content)                                                                                                                                         | `shift-closeout.ts` → 8 chunks, max 30 lines                                               |
+| 6   | Built `backfill_ranges.py` (2-pass: named `(file,name,start)` then anonymous `(file,kind,start)`)                                                                                                                          | 6,539 `end_line` updates; 8,769 → 2,230 no-range                                           |
+| 7   | Fixed 3 parser bugs found during verification: (a) Python `"""` docstring in `.cjs`, (b) `getJSDocComments` → `node.jsDoc`, (c) `ScriptKind.TS` hardcoded → `.tsx` arrows silently dropped (8 vs 20 in `DailyLogForm.tsx`) | Verified against ground-truth line numbers via `grep`                                      |
+| 8   | Applied to real index after backup; integrity check passes                                                                                                                                                                 | `/home/tim/local.db` 8,982 / 46,000 / 6,752 ranged; `PRAGMA integrity_check` → ok          |
+| 9   | Repo stays git-clean; all new scripts live in the skill dir, outside the repo                                                                                                                                              | `git status --porcelain \| grep -c '^??'` → 0                                              |
+
+**Result:** 6,752/8,982 entities (75.2%) now carry body ranges. Remaining 2,230 are single-line declarations (`const x = 1`, `postMessage() {}`) with no range to capture — not a defect.
+
+**Key lesson:** the bundled chunker's regex fallback and the indexer's missing `end_line` were two symptoms of one root cause (no TS AST path). Fixing the parser surfaced the schema gap; fixing the schema made real chunking possible.
+
+### [2026-11-10T09:02:00+02:00] Evidence-Based Gap Review & Remediation — Markdownlint, Naming Hygiene, `DepartmentFilterToolbar` Adoption & Local CI Parity
+
+- **Phase 1 (Comprehension):** Conducted an empirical review of the monorepo across spelling/markdown governance, SSoT duplicate guards, department toolbar adoption, compliance audit idempotency, and CI/local-CI workflows.
+- **Phase 2 (Evidence):** Identified 6 concrete gaps via executed tool outputs:
+  - `pnpm md:lint` and `pnpm md:fix` in `package.json` omitted `--config config/tools/.markdownlint.json --ignore-path .gitignore`, causing ~10,900 false positives and 38 tracked `.md` formatting violations.
+  - `audit-agentic-content.cjs` lacked recursive sub-package `*/AGENT_TRACER.md` and schema/type/migration file-naming checks, and was not wired into Gate 9.
+  - `DepartmentFilterToolbar` (`@repo/ui/DepartmentFilterToolbar`) was not yet adopted in a department view per `docs/specs/next-steps-ssot-toolbar-telemetry.spec.md` Step 2.
+  - `run-audit.cjs` lacked `--check` mode, causing `pnpm audit:compliance` to dirty `documentation/03-audit-reports/`.
+  - `.github/workflows/ci.yml` pointed `GITLEAKS_CONFIG` at nonexistent `.gitleaks.toml` instead of `config/tools/.gitleaks.toml`, and `local-ci.mjs` left `rust-quality` and graph steps unmapped.
+  - spec headers and session artifacts needed status synchronization.
+- **Phase 3 (Design):** Added `--config config/tools/.markdownlint.json --ignore-path .gitignore` to `md:lint`/`md:fix`, remediated all 38 Markdown files, wired `pnpm md:lint` into Gate 2 and `audit-agentic-content.cjs --check` into Gate 9 of `agent-verify.sh`, adopted `DepartmentFilterToolbar` in `PlantHistoryDatabaseClient.tsx`, added `--check` mode to `run-audit.cjs`, and aligned `ci.yml` + `local-ci.mjs`.
+- **Phase 4 (Criticism):** Added optional `searchAriaLabel` and `shiftAriaLabel` props to `DepartmentFilterToolbar` to preserve existing screen-reader labels and unit test queries in `PlantHistoryDatabaseClient.tsx`.
+- **Phase 5 (Contract):** Verified `pnpm md:lint`, `pnpm lint:spelling`, `pnpm --filter portal test`, `pnpm audit:compliance`, `pnpm ci:local`, and 27/27 gates in `pnpm agent:verify`.

@@ -25,6 +25,7 @@
 ---
 
 ## 🔒 Authentication & Middleware Flow
+
 - **Proxy Delegate**: `middleware.ts` delegates token authentication and RBAC checks to `server/proxy.ts`.
 - **Exempt Routes**: Auth endpoints (`/login`, `/reset-password`) and system check APIs (`/api/c66`).
 - **User Validation**: Server Actions validate credentials at entry via Zod contracts from `@repo/contract`.

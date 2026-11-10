@@ -48,6 +48,7 @@ beneficiation
 BENEFICIATION
 bento
 Berkel
+bigserial
 blks
 Blks
 blobby
@@ -82,6 +83,7 @@ chibi
 Chierichetti
 CHPP
 chromaui
+chunker
 cipe
 cjson
 clickjacking
@@ -241,6 +243,7 @@ holokote
 holoprint
 hostable
 hostnames
+hotfixes
 hotspot
 hotspots
 hrefs
@@ -249,6 +252,7 @@ HSET
 hsts
 huihui
 hydraul
+hyperbrowser
 hyperspectral
 idbdb
 idemp
@@ -480,6 +484,7 @@ qrcode
 quicklook
 qwen
 rauchg
+readlink
 realpath
 realworld
 Reasonix
@@ -490,6 +495,7 @@ recognises
 Redi
 redlock
 referer
+regclass
 regs
 relname
 relrowsecurity

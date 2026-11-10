@@ -6,12 +6,12 @@
 
 ### Coverage Metrics (Portal App)
 
-| Metric       | Current | Threshold | Status |
-|--------------|---------|-----------|--------|
-| Statements   | ~40%+   | 40%       | ✅ PASS |
-| Branches     | 28.58%  | 30%       | ❌ FAIL |
-| Functions    | 25.89%  | 30%       | ❌ FAIL |
-| Lines        | ~40%+   | 40%       | ✅ PASS |
+| Metric     | Current | Threshold | Status  |
+| ---------- | ------- | --------- | ------- |
+| Statements | ~40%+   | 40%       | ✅ PASS |
+| Branches   | 28.58%  | 30%       | ❌ FAIL |
+| Functions  | 25.89%  | 30%       | ❌ FAIL |
+| Lines      | ~40%+   | 40%       | ✅ PASS |
 
 **Test Suite Health**: 145 passed, 1 skipped (146 total), 996 test cases
 
@@ -22,17 +22,20 @@
 ### 🔴 High-Priority Areas (Need 90%+ Coverage)
 
 #### 1. Server Actions (Security Critical)
+
 - `lib/actions/shift-closeout.ts`: **64.15%** statements, **38.23%** branches
   - Missing coverage lines: 37-47, 70, 88-91, 125-154, 174-175
   - **Risk**: Authentication, authorization, validation gaps
   - **Priority**: CRITICAL - handles atomic shift closeout mutations
 
 #### 2. RLS & Auth Helpers
+
 - `lib/employee.ts`: **75%** statements, **50%** branches
   - **Risk**: Employee role resolution, department permissions
   - **Priority**: HIGH
 
 #### 3. Core Business Logic
+
 - `lib/shift-closeout.ts`: **71.75%** statements, **67.74%** branches, **62.5%** functions
   - Missing: Lines 31-44, 68-78, 85-86, 100-110, 123, 153-154, 170, 183-184, 206-208, 216-227, 286, 381-387, 414-415, 456-457
   - **Risk**: Data integrity, shift validation, completeness checks
@@ -43,6 +46,7 @@
   - **Priority**: MEDIUM
 
 #### 4. Rate Limiting & API Security
+
 - `lib/api/rate-limit-middleware.ts`: **77.77%** statements, **74.19%** branches, **70.58%** functions
   - Missing: Lines 19-37, 58-60, 124, 151, 191, 261-269
   - **Risk**: DoS protection gaps
@@ -53,6 +57,7 @@
 ## 🟡 Medium-Priority Gaps
 
 ### Integration & Services
+
 - `lib/integrations/crypto.ts`: **0%** coverage (Lines 15-54)
   - **Note**: Crypto utilities should be 100% tested
   - **Priority**: MEDIUM-HIGH
@@ -64,6 +69,7 @@
   - **Priority**: MEDIUM
 
 ### Background Jobs (Partial Coverage)
+
 - `lib/jobs/autonomous-scada-simulation.ts`: **26.08%** statements
 - `lib/jobs/machine-breakdown-notification.ts`: **33.33%** statements
 - `lib/jobs/outbox-drain.ts`: **15.9%** statements
@@ -73,6 +79,7 @@
 **Note**: Background jobs can tolerate lower coverage but need smoke tests.
 
 ### Observability
+
 - `lib/observability/client-telemetry.ts`: **0%** coverage
 - `lib/observability/metrics.ts`: **0%** coverage
 - `lib/observability/tracing.ts`: **75%** statements, **25%** branches
@@ -82,6 +89,7 @@
 ## ✅ Well-Covered Areas
 
 ### Excellent Coverage (90%+)
+
 - `lib/cache-utils.ts`: **100%**
 - `lib/audit.ts`: **100%**
 - `lib/dept-context.ts`: **100%**
@@ -98,6 +106,7 @@
 - `server/proxy.ts`: **86.92%** (Edge middleware - critical and well-tested)
 
 ### Good Coverage (70-89%)
+
 - `lib/ai/chunking.ts`: **94.26%**
 - `lib/shift-completeness.ts`: **88.29%**
 - `hooks/useFormDraft.ts`: **86.79%**
@@ -109,9 +118,11 @@
 ## Recommended Action Plan
 
 ### Phase 1: Critical Security Coverage (Week 1-2)
+
 **Goal**: Bring Server Actions, Auth, RLS to 90%+
 
 1. **Server Actions**
+
    ```bash
    # Focus test files
    apps/portal/app/(departments)/[department]/hourly-loads/actions.test.ts
@@ -131,6 +142,7 @@
    - Test Redis fallback to memory store
 
 ### Phase 2: Core Business Logic (Week 3-4)
+
 **Goal**: Shift closeout, completeness, SCADA to 85%+
 
 1. **Shift Closeout Pipeline**
@@ -144,6 +156,7 @@
    - Test pit connectivity degradation
 
 ### Phase 3: Integration & Jobs (Week 5-6)
+
 **Goal**: Background jobs to 60%+, integrations to 70%+
 
 1. **Crypto Utilities** (should be 100%)
@@ -156,6 +169,7 @@
    - Validate outbox drain patterns
 
 ### Phase 4: Observability & Monitoring (Week 7-8)
+
 **Goal**: Telemetry to 80%+
 
 1. **OpenTelemetry Integration**
@@ -205,9 +219,11 @@ pnpm --filter portal test -- --coverage --coverageReporters=html
 Current `jest.config.cjs` thresholds are failing. Two options:
 
 ### Option A: Fix Coverage (Recommended)
+
 Bring branches to 30%+ and functions to 30%+ through targeted test additions.
 
 ### Option B: Adjust Thresholds (Tactical)
+
 Temporarily lower thresholds while working toward strategic 90% for critical paths:
 
 ```javascript
@@ -246,6 +262,7 @@ coverageThreshold: {
 ## Monitoring & Automation
 
 ### Set Up Coverage Tracking
+
 ```bash
 # Add to .github/workflows or CI
 pnpm test:coverage
@@ -256,6 +273,7 @@ pnpm bundlesize
 ```
 
 ### Pre-commit Hook
+
 ```bash
 # In .husky/pre-commit
 pnpm turbo run test --filter=...[HEAD] -- --coverage --passWithNoTests
@@ -276,8 +294,8 @@ pnpm turbo run test --filter=...[HEAD] -- --coverage --passWithNoTests
 ---
 
 **Next Steps**:
+
 1. Prioritize Server Actions test expansion
 2. Add auth/employee edge cases
 3. Set up coverage tracking in CI
 4. Document test patterns in `apps/portal/TESTING.md`
-

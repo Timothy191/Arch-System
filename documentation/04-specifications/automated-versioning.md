@@ -1,6 +1,7 @@
 # Specification: Automated Versioning & Build Telemetry
 
 ## Overview
+
 Arch-System implements a single-source-of-truth automated versioning pipeline across its federated Turborepo workspace. The versioning manager (`tools/scripts/version-manager.mjs`) synchronizes root metadata with `apps/portal`, generates build-time telemetry constants, and powers the public health/version API.
 
 ## Architecture
@@ -23,15 +24,16 @@ Arch-System implements a single-source-of-truth automated versioning pipeline ac
 
 ## CLI Commands
 
-| Command | Purpose |
-|---|---|
-| `pnpm version:status` | Inspect current root and portal versions, commit SHA, and sync state. |
-| `pnpm version:sync` | Synchronize versions across all packages and write `version.generated.ts`. |
-| `pnpm version:patch` | Bump patch version (e.g. `1.5.1` -> `1.5.2`) and update build metadata. |
-| `pnpm version:minor` | Bump minor version (e.g. `1.5.1` -> `1.6.0`) for feature releases. |
-| `pnpm version:major` | Bump major version (e.g. `1.5.1` -> `2.0.0`) for milestone overhauls. |
+| Command               | Purpose                                                                    |
+| --------------------- | -------------------------------------------------------------------------- |
+| `pnpm version:status` | Inspect current root and portal versions, commit SHA, and sync state.      |
+| `pnpm version:sync`   | Synchronize versions across all packages and write `version.generated.ts`. |
+| `pnpm version:patch`  | Bump patch version (e.g. `1.5.1` -> `1.5.2`) and update build metadata.    |
+| `pnpm version:minor`  | Bump minor version (e.g. `1.5.1` -> `1.6.0`) for feature releases.         |
+| `pnpm version:major`  | Bump major version (e.g. `1.5.1` -> `2.0.0`) for milestone overhauls.      |
 
 ## API Specification: `GET /api/version`
+
 - **Response Format:** JSON
 - **Headers:** `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`, `X-App-Version: <version>`
 - **Payload Schema:**

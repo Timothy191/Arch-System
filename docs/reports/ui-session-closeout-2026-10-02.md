@@ -21,7 +21,7 @@ This session covered the final verification and closeout of the Arch-System UI F
 
 Status: VERIFIED
 Evidence level: E2
-Findings: The previously lingering hardcoded bypass (`timothyoniel558@gmail.com`) was completely removed from `apps/portal/app/admin/layout.tsx`. All mock API dispatches and UI strings were replaced with generic `admin@plantcor.os` placeholders to prevent accidental backdoors. The test `admin-auth.test.ts` successfully asserts this isolation. 
+Findings: The previously lingering hardcoded bypass (`timothyoniel558@gmail.com`) was completely removed from `apps/portal/app/admin/layout.tsx`. All mock API dispatches and UI strings were replaced with generic `admin@plantcor.os` placeholders to prevent accidental backdoors. The test `admin-auth.test.ts` successfully asserts this isolation.
 Commands: `rg -n -i "timothyoniel558@gmail\.com" .` (0 runtime occurrences)
 Runtime verification: BLOCKED (Headless environment limits interactive browser tests).
 Remaining limitations: Runtime/session tests over the actual database payload couldn't be performed.

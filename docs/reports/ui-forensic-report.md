@@ -53,6 +53,7 @@
 This audit was conducted strictly under **read-only, evidence-first forensic guidelines**. No source code, configuration, or assets were refactored, generated, or deleted. Every finding, claim, and classification is backed by verifiable filesystem evidence, concrete symbol references, and workspace-relative paths.
 
 ### Evidence Classification Legend
+
 - **`VERIFIED`**: Directly confirmed via source code, package manifests, or active runtime call-graphs.
 - **`PARTIALLY VERIFIED`**: Source code exists, but integration is gated, conditional, or disconnected from live routes.
 - **`UNUSED`**: Dependency or component is installed, declared, or exported, but has zero active runtime imports.
@@ -105,31 +106,32 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 
 `apps/portal` contains 17 distinct user-facing routes organized into three route groups: Root Public, Departmental Workspaces (`(departments)`), and Operational Overlays.
 
-| Route | Route Type | Purpose | UI Status | Key Components / Features |
-| :--- | :--- | :--- | :--- | :--- |
-| `/` | RSC / Client Leaf | Operations Hub & Executive Summary | `VERIFIED` | `MacMenuBar`, `DockNav`, `HeroRotator`, `SplitWindowLayout`, Quick Actions |
-| `/login` | Client Component | Secure Terminal Authentication | `VERIFIED` | `LoginForm`, `PinPad`, RFID Badge Reader animation |
-| `/induction` | Client Component | Contractor & Visitor Site Induction | `VERIFIED` | Multi-step induction form, safety video player, quiz, signature pad |
-| `/(departments)/control-room` | RSC + Client Leaves | SCADA Telemetry & Extraction Tracking | `VERIFIED` | Telemetry stream, Delay Logger, Hourly Production Grid, Shift Closeout Modal |
-| `/(departments)/engineering` | RSC + Client Leaves | Equipment Reliability & Breakdowns | `PARTIALLY VERIFIED` | SMR Hours, Breakdown Logging, Critical Equipment Health |
-| `/(departments)/drilling` | RSC + Client Leaves | Drill Rig Penetration & Bit Telemetry | `VERIFIED` | SSE Telemetry Stream, Hole Depth Progress, Bit Wear Meters |
-| `/(departments)/access-control`| RSC + Client Leaves | Badging, Gates, RFID Truck Weighbridge | `VERIFIED` | Visitor QR issuance, RFID Coal Truck gate logs, Badge Printer interface |
-| `/(departments)/safety` | RSC + Client Leaves | Incident Reporting & Environmental Log | `VERIFIED` | Incident triage matrix, PPE inspection checklist, audit trail |
-| `/(departments)/she` | RSC + Client Leaves | Safety, Health & Environment Portal | `VERIFIED` | Duplicate of safety operations with environmental compliance reporting |
-| `/(departments)/training` | RSC + Client Leaves | Operator Certification & Induction | `VERIFIED` | Skill matrix, expiration tracker, training course modules |
-| `/(departments)/hr` | RSC + Client Leaves | Shift Roster & Operator Attendance | `VERIFIED` | Operator assignment grid, fatigue compliance indicators |
-| `/(departments)/processing` | RSC + Client Leaves | Coal Processing Plant & Wash Plant SCADA| `VERIFIED` | Wash plant density, conveyor belt speeds, yield gauges |
-| `/(departments)/security` | RSC + Client Leaves | Perimeter Security & Access Guarding | `VERIFIED` | Guard patrol check-ins, perimeter breach log, CCTV status |
-| `/admin` | RSC + Client Leaf | Monorepo System Administration | `VERIFIED` (Security Risk) | Hardcoded bypass for `timothyoniel558@gmail.com`; System health, DB stats |
-| `/reports` | RSC + Client Leaf | Historical Shift & OPEX Reports | `VERIFIED` | Report generator, PDF export trigger, shift archive |
-| `/chat` | Client Component | Operational Communications & Dispatch | `PARTIALLY VERIFIED` | Mocked dispatch feed and real-time chat interface |
-| `/split-view` | Client Component | Multi-Window Operational Console | `VERIFIED` (Mocked) | Split pane containing mocked WhatsApp Web and mocked GitHub console |
+| Route                           | Route Type          | Purpose                                  | UI Status                  | Key Components / Features                                                    |
+| :------------------------------ | :------------------ | :--------------------------------------- | :------------------------- | :--------------------------------------------------------------------------- |
+| `/`                             | RSC / Client Leaf   | Operations Hub & Executive Summary       | `VERIFIED`                 | `MacMenuBar`, `DockNav`, `HeroRotator`, `SplitWindowLayout`, Quick Actions   |
+| `/login`                        | Client Component    | Secure Terminal Authentication           | `VERIFIED`                 | `LoginForm`, `PinPad`, RFID Badge Reader animation                           |
+| `/induction`                    | Client Component    | Contractor & Visitor Site Induction      | `VERIFIED`                 | Multi-step induction form, safety video player, quiz, signature pad          |
+| `/(departments)/control-room`   | RSC + Client Leaves | SCADA Telemetry & Extraction Tracking    | `VERIFIED`                 | Telemetry stream, Delay Logger, Hourly Production Grid, Shift Closeout Modal |
+| `/(departments)/engineering`    | RSC + Client Leaves | Equipment Reliability & Breakdowns       | `PARTIALLY VERIFIED`       | SMR Hours, Breakdown Logging, Critical Equipment Health                      |
+| `/(departments)/drilling`       | RSC + Client Leaves | Drill Rig Penetration & Bit Telemetry    | `VERIFIED`                 | SSE Telemetry Stream, Hole Depth Progress, Bit Wear Meters                   |
+| `/(departments)/access-control` | RSC + Client Leaves | Badging, Gates, RFID Truck Weighbridge   | `VERIFIED`                 | Visitor QR issuance, RFID Coal Truck gate logs, Badge Printer interface      |
+| `/(departments)/safety`         | RSC + Client Leaves | Incident Reporting & Environmental Log   | `VERIFIED`                 | Incident triage matrix, PPE inspection checklist, audit trail                |
+| `/(departments)/she`            | RSC + Client Leaves | Safety, Health & Environment Portal      | `VERIFIED`                 | Duplicate of safety operations with environmental compliance reporting       |
+| `/(departments)/training`       | RSC + Client Leaves | Operator Certification & Induction       | `VERIFIED`                 | Skill matrix, expiration tracker, training course modules                    |
+| `/(departments)/hr`             | RSC + Client Leaves | Shift Roster & Operator Attendance       | `VERIFIED`                 | Operator assignment grid, fatigue compliance indicators                      |
+| `/(departments)/processing`     | RSC + Client Leaves | Coal Processing Plant & Wash Plant SCADA | `VERIFIED`                 | Wash plant density, conveyor belt speeds, yield gauges                       |
+| `/(departments)/security`       | RSC + Client Leaves | Perimeter Security & Access Guarding     | `VERIFIED`                 | Guard patrol check-ins, perimeter breach log, CCTV status                    |
+| `/admin`                        | RSC + Client Leaf   | Monorepo System Administration           | `VERIFIED` (Security Risk) | Hardcoded bypass for `timothyoniel558@gmail.com`; System health, DB stats    |
+| `/reports`                      | RSC + Client Leaf   | Historical Shift & OPEX Reports          | `VERIFIED`                 | Report generator, PDF export trigger, shift archive                          |
+| `/chat`                         | Client Component    | Operational Communications & Dispatch    | `PARTIALLY VERIFIED`       | Mocked dispatch feed and real-time chat interface                            |
+| `/split-view`                   | Client Component    | Multi-Window Operational Console         | `VERIFIED` (Mocked)        | Split pane containing mocked WhatsApp Web and mocked GitHub console          |
 
 ---
 
 ## 4. DESIGN SYSTEM AUDIT
 
 ### Design Token Architecture
+
 - **Specification vs Reality:** Repository guidelines strictly mandate semantic OKLCH tokens (`color-bg-base`, `color-bg-elevated`). In physical reality:
   - `packages/theme/src/tokens/tokens.json` contains **zero OKLCH tokens**. It is 100% standard hex (`#ffffff`, `#1d1d1f`, `#d4af37`), RGBA, and HSL.
   - `packages/theme/src/tokens/generate-css.ts` generates CSS variables from a TypeScript dictionary that also outputs standard Hex/RGBA (`VERIFIED`).
@@ -140,10 +142,11 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
   - Parallel Compiler: `packages/theme/src/tokens/generate-css.ts` producing `packages/theme/src/css/tokens.generated.css`
 
 ### Token Drift & Semantic Contradictions
+
 1. **The Gold-as-Blue Contradiction:**
    - `--accent-electric-blue` resolves to `#D4AF37` (Metallic Mining Gold).
    - `--accent-electric-blue-subtle` resolves to `rgba(0, 122, 255, 0.08)` (True Royal Blue).
-   - *Impact:* Using primary accent produces industrial gold, but using its subtle background produces electric blue.
+   - _Impact:_ Using primary accent produces industrial gold, but using its subtle background produces electric blue.
 2. **The Orange-as-Charcoal Contradiction:**
    - `--accent-charcoal` compiles to `#ff9500` (Apple Industrial Orange).
    - The TypeScript comment in `generate-css.ts` explicitly documents it as `Apple Charcoal (#1c1c1e)`.
@@ -153,6 +156,7 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 ## 5. BRANDING AUDIT
 
 ### Brand Identity Inconsistency
+
 - **Primary Operational Brand:** Plantcor Mining Operations (Brakfontein Pit).
 - **Platform OS Name:** Arch-System / Arch OS (referencing Arch Linux).
 - **Logo Collisions:**
@@ -167,6 +171,7 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 ## 6. TYPOGRAPHY AUDIT
 
 ### Font Family Hierarchy
+
 1. **Primary UI & Data Body:** `Inter` (sans-serif) loaded via `next/font/google` in `apps/portal/app/layout.tsx` (`VERIFIED`).
 2. **Telemetry, Equipment IDs & Timestamps:** `JetBrains Mono` loaded via `next/font/google` in `apps/portal/app/layout.tsx` (`VERIFIED`).
 3. **Display & Heading Font:** `Anurati` declared in `packages/theme/src/css/typography.css`:
@@ -178,7 +183,12 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
      font-style: normal;
      font-display: swap;
    }
-   h1, h2, h3, h4, h5, h6 {
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   h6 {
      font-family: 'Anurati', sans-serif;
      text-transform: uppercase;
    }
@@ -191,25 +201,28 @@ This audit was conducted strictly under **read-only, evidence-first forensic gui
 ## 7. COLOR SYSTEM AUDIT
 
 ### Light-Mode Industrial Palette Analysis
+
 The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, background luminance > 200). Dark mode classes (`dark:`) are banned by CI gates (`pnpm audit:tokens`).
 
-| Token Variable | Assigned Value | Intended Role | Audited Reality |
-| :--- | :--- | :--- | :--- |
-| `--color-bg-base` | `#ffffff` | Primary app canvas | Clean white card surface |
-| `--color-bg-elevated` | `rgba(255, 255, 255, 0.8)` | Frosted glass surface | Backdrop-blur 20px frosted glass |
-| `--color-text-primary` | `#1d1d1f` | Industrial typography | High-contrast charcoal |
-| `--color-text-secondary` | `#86868b` | Sub-labels, telemetry units| Accessible neutral gray |
-| `--accent-gold` | `#D4AF37` | High-value pit extraction | Metallic gold accent |
-| `--accent-electric-blue`| `#D4AF37` | Core UI interactive action | **Contradiction:** Gold color assigned to blue token |
-| `--accent-charcoal` | `#ff9500` | Secondary neutral surface | **Contradiction:** Bright orange assigned to charcoal token |
-| `--color-border-subtle` | `rgba(0, 0, 0, 0.08)` | Glass card edges | Clean light border |
+| Token Variable           | Assigned Value             | Intended Role               | Audited Reality                                             |
+| :----------------------- | :------------------------- | :-------------------------- | :---------------------------------------------------------- |
+| `--color-bg-base`        | `#ffffff`                  | Primary app canvas          | Clean white card surface                                    |
+| `--color-bg-elevated`    | `rgba(255, 255, 255, 0.8)` | Frosted glass surface       | Backdrop-blur 20px frosted glass                            |
+| `--color-text-primary`   | `#1d1d1f`                  | Industrial typography       | High-contrast charcoal                                      |
+| `--color-text-secondary` | `#86868b`                  | Sub-labels, telemetry units | Accessible neutral gray                                     |
+| `--accent-gold`          | `#D4AF37`                  | High-value pit extraction   | Metallic gold accent                                        |
+| `--accent-electric-blue` | `#D4AF37`                  | Core UI interactive action  | **Contradiction:** Gold color assigned to blue token        |
+| `--accent-charcoal`      | `#ff9500`                  | Secondary neutral surface   | **Contradiction:** Bright orange assigned to charcoal token |
+| `--color-border-subtle`  | `rgba(0, 0, 0, 0.08)`      | Glass card edges            | Clean light border                                          |
 
 ---
 
 ## 8. COMPONENT LIBRARY AUDIT
 
 ### Package Structure: `@repo/ui`
+
 `packages/ui` exposes 57 components across 5 internal categories:
+
 1. **Glass & Layout Primitives:** `GlassCard`, `GlassModal`, `GlassBadge`, `GlassInput`, `GlassSelect`, `GlassSlider`.
 2. **Industrial KPI & Telemetry:** `KPICard`, `KPIGrid`, `ShiftCloseoutModal`, `TelemetryStatusPill`.
 3. **Data Grid & Tables:** `DataGrid`, `Table`, `BadgeCell`, `NumericCell`.
@@ -226,25 +239,26 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 
 ### Dependency Audit Matrix
 
-| Library / Tool | Version | Workspace Location | Role | Usage Status |
-| :--- | :--- | :--- | :--- | :--- |
-| `react` / `react-dom` | `19.0.0-rc-f994737d14` | Root & all packages | Core View Engine | `VERIFIED` |
-| `next` | `16.0.0-canary.112` | `apps/portal` | Meta-framework | `VERIFIED` |
-| `framer-motion` | `11.11.17` | `packages/ui`, `apps/portal` | Motion, Layout animations | `VERIFIED` |
-| `lucide-react` | `0.460.0` | `packages/ui`, `apps/portal` | Iconography | `VERIFIED` |
-| `recharts` | `2.13.3` | `apps/portal`, `libs/features` | Telemetry Data Charts | `VERIFIED` |
-| `@tremor/react` | `3.18.4` | `apps/portal` | Analytical Dashboards | `PARTIALLY VERIFIED` (Legacy overlap) |
-| `@radix-ui/react-*` | Multiple | `packages/ui` | Accessible primitives | `VERIFIED` |
-| `three` / `@react-three/fiber` | `0.170.0` / `8.17.10` | `libs/features/hub/ui` | 3D Pit Excavation Mesh | **`UNUSED`** (Explicitly bypassed) |
-| `@revogrid/react` | `4.14.0` | `packages/ui` | Virtualized Data Table | `VERIFIED` |
-| `@univerjs/*` | `0.4.2` | `apps/portal` | Excel Spreadsheets | `PARTIALLY VERIFIED` (Single route) |
-| `style-dictionary` | `4.1.3` | `packages/theme` | Token Compilation | `VERIFIED` |
+| Library / Tool                 | Version                | Workspace Location             | Role                      | Usage Status                          |
+| :----------------------------- | :--------------------- | :----------------------------- | :------------------------ | :------------------------------------ |
+| `react` / `react-dom`          | `19.0.0-rc-f994737d14` | Root & all packages            | Core View Engine          | `VERIFIED`                            |
+| `next`                         | `16.0.0-canary.112`    | `apps/portal`                  | Meta-framework            | `VERIFIED`                            |
+| `framer-motion`                | `11.11.17`             | `packages/ui`, `apps/portal`   | Motion, Layout animations | `VERIFIED`                            |
+| `lucide-react`                 | `0.460.0`              | `packages/ui`, `apps/portal`   | Iconography               | `VERIFIED`                            |
+| `recharts`                     | `2.13.3`               | `apps/portal`, `libs/features` | Telemetry Data Charts     | `VERIFIED`                            |
+| `@tremor/react`                | `3.18.4`               | `apps/portal`                  | Analytical Dashboards     | `PARTIALLY VERIFIED` (Legacy overlap) |
+| `@radix-ui/react-*`            | Multiple               | `packages/ui`                  | Accessible primitives     | `VERIFIED`                            |
+| `three` / `@react-three/fiber` | `0.170.0` / `8.17.10`  | `libs/features/hub/ui`         | 3D Pit Excavation Mesh    | **`UNUSED`** (Explicitly bypassed)    |
+| `@revogrid/react`              | `4.14.0`               | `packages/ui`                  | Virtualized Data Table    | `VERIFIED`                            |
+| `@univerjs/*`                  | `0.4.2`                | `apps/portal`                  | Excel Spreadsheets        | `PARTIALLY VERIFIED` (Single route)   |
+| `style-dictionary`             | `4.1.3`                | `packages/theme`               | Token Compilation         | `VERIFIED`                            |
 
 ---
 
 ## 10. STYLING ARCHITECTURE
 
 ### CSS Compilation & Ingestion Pipeline
+
 1. `packages/theme/src/tokens/tokens.json` compiles via Style Dictionary into `dist/variables.css`.
 2. `packages/theme/src/tokens/generate-css.ts` generates `src/css/tokens.generated.css`.
 3. `packages/theme/src/css/glass.css` defines frosted glass physical blur utilities (`.glass-base`, `.glass-panel`, `.glass-spotlight`).
@@ -257,6 +271,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 11. THEME SYSTEM
 
 ### Single-Theme Invariant Enforcement
+
 - Arch-System is engineered for extreme outdoor visibility in mining pits under bright sunlight.
 - Dark mode is strictly prohibited by architectural policy.
 - Zero `@media (prefers-color-scheme: dark)` overrides exist in runtime CSS.
@@ -267,6 +282,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 12. RESPONSIVE DESIGN
 
 ### Viewport Targets & Breakpoints
+
 - **Target Baseline:** 1440px x 900px (standard mining control room terminal and supervisor laptop).
 - **Secondary Baseline:** 1080p / 1440p SCADA multi-monitor wall mounts.
 - **Field Tablet Baseline:** 1024px iPad / Rugged Toughbook.
@@ -277,6 +293,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 13. ACCESSIBILITY
 
 ### Accessibility Audit Findings
+
 - **Radix UI Core:** Dropdowns, dialogs, tooltips, and tabs utilize Radix UI primitives, ensuring correct ARIA attributes (`aria-expanded`, `aria-haspopup`, `role="dialog"`).
 - **Color Contrast:** The light-mode palette (`#1d1d1f` on `#ffffff` and `#f3f4f6`) exceeds WCAG AAA standards for body text (contrast ratio > 12:1).
 - **Deficiencies:**
@@ -288,6 +305,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 14. ANIMATION / MOTION SYSTEM
 
 ### Motion Primitives & Hardware Acceleration
+
 - Powered by Framer Motion 11.
 - Physics springs are standardized: `stiffness: 300, damping: 30` for modal entries; `stiffness: 400, damping: 25` for hover feedback.
 - GPU acceleration is explicitly forced using `transform: translateZ(0)` and `will-change: transform` in `packages/theme/src/css/glass.css`.
@@ -297,6 +315,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 15. 3D / VISUAL EFFECTS
 
 ### Three.js Pipeline Audit
+
 - Packages installed in `libs/features/hub/ui/package.json`: `three` (`0.170.0`), `@react-three/fiber` (`8.17.10`), `@react-three/drei` (`9.117.0`).
 - Component `ThreeHeroRotator.tsx` was authored to render an interactive 3D particle mesh of the Brakfontein open-cast pit.
 - **Audited Reality (`UNUSED`):**
@@ -315,6 +334,7 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 16. ICONOGRAPHY
 
 ### Lucide React Implementation
+
 - All UI packages import from `lucide-react`.
 - Standardized icon sizing:
   - Micro: `14px` (table cell badges, status indicators)
@@ -327,16 +347,19 @@ The repository strictly enforces a light-mode invariant (canvas `#f3f4f6`, backg
 ## 17. DATA VISUALIZATION
 
 ### Charting Library Fragmentation
+
 Two competing charting engines exist in the codebase:
+
 1. **Recharts (2.13.3):** Primary engine used in `apps/portal` and `libs/features/departments/ui` for SMR trend lines, hourly extraction bar charts, and drilling penetration graphs.
 2. **Tremor React (3.18.4):** Secondary library installed in `apps/portal/package.json`, used in legacy executive KPI blocks.
-*Recommendation:* Retire Tremor React to standardize 100% on Recharts and reduce client bundle overhead.
+   _Recommendation:_ Retire Tremor React to standardize 100% on Recharts and reduce client bundle overhead.
 
 ---
 
 ## 18. FORMS AND INTERACTION PATTERNS
 
 ### Input Design & Validation
+
 - Standardized on Radix UI + Tailwind glass inputs (`GlassInput.tsx`).
 - Validation: Schema-driven using Zod schemas from `@repo/contract`.
 - Interactive Controls:
@@ -349,7 +372,9 @@ Two competing charting engines exist in the codebase:
 ## 19. NAVIGATION / INFORMATION ARCHITECTURE
 
 ### Operating Desktop Paradigm
+
 Arch-System implements a macOS-inspired desktop paradigm inside the browser:
+
 1. **`MacMenuBar` (Top):** 28px persistent bar displaying site identity, system health status, network latency (ms), and profile controls.
 2. **`DockNav` (Bottom):** Frosted glass floating dock with magnification hover physics, providing 1-click access to departments.
 3. **Workspace Canvas (Center):** Multi-pane draggable and resizable glass cards.
@@ -359,6 +384,7 @@ Arch-System implements a macOS-inspired desktop paradigm inside the browser:
 ## 20. STATE DESIGN
 
 ### Hybrid State Architecture
+
 - **Server State:** Handled via Next.js RSC and `@tanstack/react-query`.
 - **Real-time Telemetry:** Streaming updates delivered via Supabase Realtime CDC channels and WebSocket SSE endpoints (`/api/telemetry/drilling/stream`).
 - **Offline Queuing:** `useOfflineQueue` buffers mutations in `localStorage` (`arch_*_draft_*`) during intermittent network loss.
@@ -368,6 +394,7 @@ Arch-System implements a macOS-inspired desktop paradigm inside the browser:
 ## 21. ROLE / PERMISSION UI
 
 ### Department Access & Guarding
+
 - User roles are resolved during authentication: `OPERATOR`, `ENGINEER`, `SUPERVISOR`, `SECURITY`, `ADMIN`.
 - Navigation dock dynamically filters departmental icons based on active user claims.
 - **Security Vulnerability (`apps/portal/app/admin/page.tsx`):**
@@ -378,7 +405,9 @@ Arch-System implements a macOS-inspired desktop paradigm inside the browser:
 ## 22. ARCHITECTURE / SHARED UI
 
 ### Boundary Invariants
+
 The monorepo enforces strict architectural boundaries:
+
 - `packages/ui` contains zero database, API, or Supabase imports.
 - `packages/theme` contains zero UI component imports.
 - `apps/portal` consumes UI components from `@repo/ui` and domain widgets from `libs/features/*/ui`.
@@ -388,6 +417,7 @@ The monorepo enforces strict architectural boundaries:
 ## 23. UI TECHNICAL DEBT
 
 ### High-Priority Debt Items
+
 1. **Feature Stubs Masking Real Code (`apps/portal/features/departments/index.tsx`):**
    Fully developed production components (`BreakdownsDashboard`, `TireManagementDashboard`, `ShiftCoverageWidget` totaling over 800 lines of code) are bypassed by 3-line stub `<div>` elements.
 2. **Hardcoded Security Bypass (`apps/portal/app/admin/page.tsx`):**
@@ -404,6 +434,7 @@ The monorepo enforces strict architectural boundaries:
 ## 24. UI ASSET INVENTORY
 
 ### Static Asset Summary (`apps/portal/public`)
+
 - **Brand Assets:** `arch-logo.png` (Arch Linux logo), `eve-logo.png` (Vercel logo), `plantcor-logo.png` (Operator logo).
 - **Background Video:** `apps/portal/public/background/global-background.mp4` (11 MB).
 - **Missing Asset:** `apps/portal/public/fonts/Anurati-Regular.otf` (Directory is empty).
@@ -413,6 +444,7 @@ The monorepo enforces strict architectural boundaries:
 ## 25. SCREEN-BY-SCREEN REPORT
 
 ### Comprehensive Screen Audit
+
 - **Operations Hub (`/`):** Fully operational. Renders MacMenuBar, HeroRotator, Quick Action grid, and SplitWindowLayout.
 - **Control Room (`/(departments)/control-room`):** Fully operational. Renders extraction feeds, delay logging modal, and shift closeout trigger.
 - **Engineering (`/(departments)/engineering`):** Degraded. Sub-views for tire wear and equipment breakdowns display stub placeholders instead of the real feature UI.
@@ -440,13 +472,13 @@ The monorepo enforces strict architectural boundaries:
 
 ## 27. UI CONSISTENCY MATRIX
 
-| UI Dimension | Consistency Rating | Evidence & Rationale |
-| :--- | :--- | :--- |
-| **Color Tokens** | Moderate (70%) | Strong light-mode compliance, but gold/blue and charcoal/orange token drift. |
-| **Typography** | Low (40%) | Headings consistently trigger 404 font asset failure. |
-| **Iconography** | High (95%) | 100% standardized on `lucide-react` across all packages. |
-| **Component Surfaces**| High (90%) | Frosted glass cards (`GlassCard`) consistently wrap all screen views. |
-| **Data Tables** | Low (45%) | 3 competing table paradigms (`RevoGrid`, `DataGrid`, `Univer`). |
+| UI Dimension           | Consistency Rating | Evidence & Rationale                                                         |
+| :--------------------- | :----------------- | :--------------------------------------------------------------------------- |
+| **Color Tokens**       | Moderate (70%)     | Strong light-mode compliance, but gold/blue and charcoal/orange token drift. |
+| **Typography**         | Low (40%)          | Headings consistently trigger 404 font asset failure.                        |
+| **Iconography**        | High (95%)         | 100% standardized on `lucide-react` across all packages.                     |
+| **Component Surfaces** | High (90%)         | Frosted glass cards (`GlassCard`) consistently wrap all screen views.        |
+| **Data Tables**        | Low (45%)          | 3 competing table paradigms (`RevoGrid`, `DataGrid`, `Univer`).              |
 
 ---
 
@@ -507,20 +539,24 @@ Arch-System Monorepo UI Architecture
 ## 31. PRIORITIZED FINDINGS
 
 ### P0 — Critical Functional & Security Defects
+
 - **P0-1:** Remove hardcoded email bypass `timothyoniel558@gmail.com` in `apps/portal/app/admin/page.tsx`.
 - **P0-2:** Reconnect real production dashboard implementations in `apps/portal/features/departments/index.tsx` to unmask the real `BreakdownsDashboard` and `TireManagementDashboard`.
 
 ### P1 — Major Visual & Architectural Inconsistencies
+
 - **P1-1:** Resolve font 404 by placing `Anurati-Regular.otf` into `apps/portal/public/fonts/` or remove the CSS declaration.
 - **P1-2:** Fix token semantic drift: rename or re-color `--accent-electric-blue` (currently gold) and `--accent-charcoal` (currently orange).
 - **P1-3:** Resolve brand collision: replace Arch Linux and Vercel logos with official Plantcor mining brand assets.
 
 ### P2 — Performance & Bundle Optimization
+
 - **P2-1:** Remove or conditionally stream the 11 MB `global-background.mp4` video background.
 - **P2-2:** Tree-shake or remove unused Three.js dependencies (~600KB) since `HeroRotator` bypasses 3D for 2D.
 - **P2-3:** Prune unused components in `@repo/ui` (`FluidCanvas`, `LiquiButton`, `CyberButton`).
 
 ### P3 — Minor Cleanup & Normalization
+
 - **P3-1:** Clean up mocked WhatsApp and GitHub panes in `SplitWindowLayout.tsx`.
 - **P3-2:** Deprecate `@tremor/react` in favor of standardizing 100% on `recharts`.
 
@@ -543,6 +579,7 @@ The complete UI/UX forensic audit is recorded across 7 canonical report files lo
 ## 33. FINAL VERIFICATION & AUDIT COMPLETION
 
 ### Audit Completion Summary
+
 - **Repository Inspected:** `Timothy191/Arch-System` (Workspace root).
 - **Applications Inspected:** 1 (`apps/portal`).
 - **Routes Discovered & Audited:** 17 routes across 3 route groups.

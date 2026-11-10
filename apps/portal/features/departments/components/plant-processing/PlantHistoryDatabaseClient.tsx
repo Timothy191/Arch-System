@@ -1,6 +1,10 @@
 'use client';
 
 import {
+  DepartmentFilterToolbar,
+  type DepartmentShiftOption,
+} from '@repo/ui/DepartmentFilterToolbar';
+import {
   AlertTriangle,
   Calendar,
   Check,
@@ -11,7 +15,6 @@ import {
   FileSpreadsheet,
   Layers,
   MessageSquare,
-  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -35,6 +38,12 @@ export type PlantReportGranularity = 'monthly' | 'daily' | 'hourly' | 'whatsapp'
 
 const GRANULARITY_TAB_BTN_BASE =
   'inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-semibold text-xs transition-all';
+
+const PLANT_SHIFT_FILTER_OPTIONS: readonly DepartmentShiftOption[] = [
+  { optionValue: 'ALL', label: 'All Shifts (Day & Night)' },
+  { optionValue: 'day', label: 'Day Shift Only' },
+  { optionValue: 'night', label: 'Night Shift Only' },
+];
 
 const HISTORICAL_DAILY_BASELINE: PlantDailyRollupRecord[] = [
   {
@@ -548,32 +557,20 @@ export function PlantHistoryDatabaseClient({
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {granularity !== 'monthly' && (
-            <select
-              aria-label="Filter database by shift"
-              value={shiftFilter}
-              onChange={(e) => setShiftFilter(e.target.value as 'ALL' | 'day' | 'night')}
-              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 py-2 text-[var(--text-heading)] text-xs"
-            >
-              <option value="ALL">All Shifts (Day &amp; Night)</option>
-              <option value="day">Day Shift Only</option>
-              <option value="night">Night Shift Only</option>
-            </select>
-          )}
-
-          <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
-            <input
-              type="search"
-              aria-label="Search logged database records"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by date, seam, module, or note..."
-              className="min-w-[240px] rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] py-2 pr-3 pl-8 text-[var(--text-heading)] text-xs"
-            />
-          </div>
-        </div>
+        <DepartmentFilterToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Filter by date, seam, module, or note..."
+          searchAriaLabel="Search logged database records"
+          shiftFilter={shiftFilter}
+          onShiftFilterChange={
+            granularity !== 'monthly'
+              ? (nextShift) => setShiftFilter(nextShift as 'ALL' | 'day' | 'night')
+              : undefined
+          }
+          shiftAriaLabel="Filter database by shift"
+          shiftOptions={PLANT_SHIFT_FILTER_OPTIONS}
+        />
       </div>
 
       {/* Report Database Table Container */}

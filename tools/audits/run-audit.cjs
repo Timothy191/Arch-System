@@ -13,12 +13,14 @@
  */
 
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { getFormattedDate, getNextLogNumber } = require('../lib/versioned-log-dir.cjs');
 const { execSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AUDIT_ROOT = path.join(ROOT, 'documentation', '03-audit-reports');
+const CHECK_ONLY = process.argv.includes('--check');
 
 function runDependencyAudit(args) {
   try {
@@ -56,10 +58,16 @@ function main() {
   const logNum = getNextLogNumber(AUDIT_ROOT);
   const dateInfo = getFormattedDate();
   const folderName = `log-${logNum}(${dateInfo.folderDate})`;
-  const targetDir = path.join(AUDIT_ROOT, folderName);
+  const targetDir = CHECK_ONLY
+    ? fs.mkdtempSync(path.join(os.tmpdir(), 'arch-audit-check-'))
+    : path.join(AUDIT_ROOT, folderName);
 
   fs.mkdirSync(targetDir, { recursive: true });
-  console.log(`📁 Audit Log Directory: documentation/03-audit-reports/${folderName}/\n`);
+  if (CHECK_ONLY) {
+    console.log('📁 Audit Mode: --check (in-memory verification, no working-tree writes)\n');
+  } else {
+    console.log(`📁 Audit Log Directory: documentation/03-audit-reports/${folderName}/\n`);
+  }
 
   // 1. Run RLS Audit
   console.log('🔒 Running Row Level Security (RLS) Audit...');
@@ -225,9 +233,10 @@ function main() {
 ---
 
 ## 🛡️ Quality Gate & System Hygiene Compliance
-* **XDG Base Directory**: Compliant (\`$HOME/.config\`, \`$HOME/.cache\`, \`$HOME/.local\`).
-* **Design Palette**: Light-only (OKLCH tokens, glass surfaces, named shadows).
-* **Security & RLS**: All active tables guarded with Postgres RLS policies.
+
+- **XDG Base Directory**: Compliant (\`$HOME/.config\`, \`$HOME/.cache\`, \`$HOME/.local\`).
+- **Design Palette**: Light-only (OKLCH tokens, glass surfaces, named shadows).
+- **Security & RLS**: All active tables guarded with Postgres RLS policies.
 `;
 
   const workspaceAuditDetails =
@@ -249,6 +258,20 @@ function main() {
           .join('\n')
       : '- No low/moderate production dependency advisories.';
   const dependencyDetails = `\n## Dependency Audit Detail\n\nProduction dependencies block deployment for high/critical findings; lower-severity advisories remain visible for review:\n\n${productionAuditDetails}\n\nHigh/critical findings outside the production graph are recorded as workspace-only warnings:\n\n${workspaceAuditDetails}\n`;
+  if (CHECK_ONLY) {
+    fs.rmSync(targetDir, { recursive: true, force: true });
+    console.log('\n==================================================');
+    console.log(
+      `${overallStatus === 'PASS' ? '✅' : overallStatus === 'WARN' ? '⚠️' : '❌'} Audit check completed with ${overallStatus}.`
+    );
+    console.log(`📊 Score: ${score.toFixed(1)}% (${overallStatus})`);
+    console.log('==================================================\n');
+    if (totalCriticals > 0) {
+      process.exit(1);
+    }
+    return;
+  }
+
   fs.writeFileSync(path.join(targetDir, 'results.md'), `${resultsContent}${dependencyDetails}`);
 
   // 5. Generate required-actions.md

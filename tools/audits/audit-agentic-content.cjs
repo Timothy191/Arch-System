@@ -175,6 +175,74 @@ for (const forbiddenName of FORBIDDEN_ROOT_TRACER_NAMES) {
   }
 }
 
+const EXCLUDED_WALK_DIRS = new Set(['node_modules', '.next', 'dist', 'build', '.turbo', '.git']);
+function findNestedTracerFiles(dirPath, found = []) {
+  if (!fs.existsSync(dirPath)) return found;
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      if (EXCLUDED_WALK_DIRS.has(entry.name)) continue;
+      findNestedTracerFiles(path.join(dirPath, entry.name), found);
+    } else if (entry.isFile() && /^AGENTS?[-_]TRACER.*\.md$/i.test(entry.name)) {
+      found.push(path.relative(ROOT, path.join(dirPath, entry.name)).split(path.sep).join('/'));
+    }
+  }
+  return found;
+}
+
+for (const scanSubdir of ['apps', 'packages', 'libs', 'tools', 'scripts']) {
+  for (const nestedTracer of findNestedTracerFiles(path.join(ROOT, scanSubdir))) {
+    violations.push({
+      file: nestedTracer,
+      type: 'DISTRIBUTED_TRACER_FORBIDDEN',
+      description:
+        'Distributed per-package tracer file found. Append exclusively to root AGENT_TRACER.md.',
+    });
+  }
+}
+
+// Enforce canonical file-naming conventions (.agents/rules/lexical-and-naming-governance.md §2)
+const schemasDir = path.join(ROOT, 'packages', 'contract', 'src', 'schemas');
+if (fs.existsSync(schemasDir)) {
+  for (const file of fs.readdirSync(schemasDir)) {
+    if (file === '_registry.ts' || file === 'codemap.md' || file.endsWith('.test.ts')) continue;
+    if (!/^[a-z0-9-]+\.schema\.ts$/.test(file)) {
+      violations.push({
+        file: `packages/contract/src/schemas/${file}`,
+        type: 'INVALID_SCHEMA_FILENAME',
+        description: 'Contract schema files must follow kebab-case.schema.ts naming.',
+      });
+    }
+  }
+}
+
+const typesDir = path.join(ROOT, 'packages', 'contract', 'src', 'types');
+if (fs.existsSync(typesDir)) {
+  for (const file of fs.readdirSync(typesDir)) {
+    if (file === 'codemap.md' || file.endsWith('.test.ts')) continue;
+    if (!/^[a-z0-9-]+\.types\.ts$/.test(file)) {
+      violations.push({
+        file: `packages/contract/src/types/${file}`,
+        type: 'INVALID_TYPES_FILENAME',
+        description: 'Contract type files must follow kebab-case.types.ts naming.',
+      });
+    }
+  }
+}
+
+const migrationsDir = path.join(ROOT, 'packages', 'database', 'migrations');
+if (fs.existsSync(migrationsDir)) {
+  for (const file of fs.readdirSync(migrationsDir)) {
+    if (!file.endsWith('.sql')) continue;
+    if (!/^\d{3}_[a-z0-9_]+\.sql$/.test(file)) {
+      violations.push({
+        file: `packages/database/migrations/${file}`,
+        type: 'INVALID_MIGRATION_FILENAME',
+        description: 'SQL migrations must follow NNN_snake_case.sql naming.',
+      });
+    }
+  }
+}
+
 console.log(`   ✓ Verified consolidated AGENT_TRACER.md ledger (${tracerCount} active SSoT file).`);
 
 // ── 5. Audit Root Agent Directives ────────────────────────────────────────────
