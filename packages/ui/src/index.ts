@@ -14,6 +14,7 @@ export * from './components/EveStatusBar';
 export * from './components/FormFields';
 // Composite & Industrial UI Primitives
 export * from './components/GlassCard';
+export * from './components/GoldenSignalPanel';
 export * from './components/HeroCardContent';
 export * from './components/HeroRotator';
 export * from './components/KPI';
@@ -28,6 +29,7 @@ export * from './components/RedisIcon';
 export * from './components/SecondaryButton';
 export * from './components/ShiftToggle';
 export * from './components/TrustLogos';
+export * from './components/UptimeHeartbeatStrip';
 export * from './components/ui/alert';
 // Motion & Animated Components
 export * from './components/ui/animated-button';

@@ -364,11 +364,12 @@
   - Rebuilt Code-Intelligence index (`pnpm ci:reindex && pnpm ci:snapshot && pnpm audit:code-intelligence` → `✅ PASS`).
   - `pnpm --filter @repo/redis test` → `22/22 suites, 192/192 tests PASS`.
   - `pnpm agent:verify` → **28/28 GATES PASSED (100% PASS)**.
+
 ## [2026-11-10T12:30:00+02:00] - Agent Whiteboard & Intercom System Implementation (`AGENT-INTERCOM-WBS`)
 
-- **Governing request**: _"Assess and determine agents content (.agents/ & similar) then plan how we can setup a Agent talkboard or whiteboard or intercom system so that when multiple agents are coding at once they can talk to one another here ensuring they dont overlap or confuse one another / Autonomously implement the above plan"_
+- **Governing request**: _"Assess and determine agents content (.agents/ & similar) then plan how we can setup an agent intercom or whiteboard system so that when multiple agents are coding at once they can talk to one another here ensuring they dont overlap or confuse one another / Autonomously implement the above plan"_
 - **Phase 1 (Assessment & Architecture):**
-  - Assessed `.agents/`, `.agentsroom/`, and `.agents/a2a/` (A2A protocol specification, event-log.jsonl, schemas, agent registry).
+  - Assessed `.agents/`, agent rooms, and `.agents/a2a/` (A2A protocol specification, event-log.jsonl, schemas, agent registry).
 - **Phase 2 (Implementation):**
   - Created SSoT whiteboard & intercom storage under `.agents/a2a/whiteboard/` (`claims.json`, `canvas.md`, `intercom.jsonl`).
   - Implemented CLI manager `tools/scripts/agent-intercom.cjs` supporting file claim acquisition with TTL, release, intercom message broadcasting, and status listing.
@@ -377,3 +378,21 @@
 - **Phase 3 (Verification):**
   - `node --test tools/scripts/agent-intercom.test.cjs` → `✅ PASS (5/5 unit tests)`.
   - `pnpm agent:verify` → **28/28 GATES PASSED (100% PASS)**.
+
+## [2026-11-10T14:35:00+02:00] - Native Unified Observability & Uptime Layer (`SPEC-NATIVE-OBS-2026-11-10`)
+
+- **Governing request**: _"Reassess and create report of recommended additions (integrate Grafana and Uptime mechanics directly into Arch-System to act as one unified platform with zero additional overhead costs or API keys)"_
+- **Phase 1 (Native Uptime Engine, Alert State Machine & API Route):**
+  - Implemented [`apps/portal/lib/observability/uptime-engine.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/uptime-engine.ts) + [`uptime-engine.test.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/uptime-engine.test.ts) (Uptime Kuma 90-tick ring buffer, p95 latency calculation, and 24h/7d/30d SLA rollups with zero external API keys or polling loops).
+  - Implemented [`apps/portal/lib/observability/alert-evaluator.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/alert-evaluator.ts) + [`alert-evaluator.test.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/observability/alert-evaluator.test.ts) (Grafana stateful `NORMAL -> PENDING -> FIRING -> RESOLVED -> NORMAL` alert state machine with `forDurationMs` grace windows and `recoveryThreshold` hysteresis).
+  - Implemented [`apps/portal/app/api/admin/observability/route.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/admin/observability/route.ts) + [`route.test.ts`](file:///home/tim/Fork/Arch-System/apps/portal/app/api/admin/observability/route.test.ts) authenticating via `getAuthenticatedEmployee()` and returning live 90-tick uptime summaries, Golden Signals, alert rule evaluations, and `@repo/redis` health diagnostics with `Server-Timing` headers.
+- **Phase 2 (`@repo/ui` Light-Mode Primitives):**
+  - Created [`packages/ui/src/components/UptimeHeartbeatStrip.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/UptimeHeartbeatStrip.tsx) and [`packages/ui/src/components/GoldenSignalPanel.tsx`](file:///home/tim/Fork/Arch-System/packages/ui/src/components/GoldenSignalPanel.tsx) and exported them via `packages/ui/src/index.ts` and `packages/ui/package.json`.
+- **Phase 3 (Portal Admin & Control Room Surface Integration):**
+  - Upgraded [`apps/portal/app/admin/redis/page.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/admin/redis/page.tsx) (removed dead external proxy URL and raw `#dc382d` hex classes, wired live `/api/admin/observability` telemetry and 90-tick Uptime Heartbeat Strip).
+  - Upgraded [`apps/portal/app/admin/workflows/page.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/app/admin/workflows/page.tsx) to hydrate live workflow job metrics and SLA % from `/api/admin/observability`.
+  - Added `data-testid="scada-sla-uptime-badge"` to [`apps/portal/features/departments/components/control-room/ScadaPanel.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/features/departments/components/control-room/ScadaPanel.tsx).
+- **Phase 4 (Verification):**
+  - `pnpm --filter @repo/ui type-check && pnpm --filter portal type-check` → `✅ PASS`.
+  - `pnpm --filter portal test -- --testPathPatterns="uptime-engine.test|alert-evaluator.test|api/admin/observability/route.test|ScadaPanel"` → `4/4 suites, 17/17 tests PASS`.
+  - `pnpm audit:tokens && pnpm audit:tailwind && pnpm lint:agent-rules && pnpm policy:check && pnpm audit:drift && pnpm audit:code-intelligence` → `✅ 100% PASS`.

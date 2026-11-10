@@ -56,6 +56,8 @@
     "./EveLogo": "./src/components/EveLogo.tsx",
     "./EveStatusBar": "./src/components/EveStatusBar.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",
+    "./GoldenSignalPanel": "./src/components/GoldenSignalPanel.tsx",
+    "./UptimeHeartbeatStrip": "./src/components/UptimeHeartbeatStrip.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",
     "./SecondaryButton": "./src/components/SecondaryButton.tsx",
     "./DepartmentFilterToolbar": "./src/components/DepartmentFilterToolbar.tsx",

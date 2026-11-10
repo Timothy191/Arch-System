@@ -7,6 +7,12 @@ const { describe, it, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
+
+// Set isolated temporary whiteboard directory before requiring module
+const TEMP_TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-whiteboard-test-'));
+process.env.AGENT_WHITEBOARD_DIR = TEMP_TEST_DIR;
+
 const {
   acquireFileClaim,
   releaseFileClaim,
@@ -14,21 +20,27 @@ const {
   readClaimsData,
 } = require('./agent-intercom.cjs');
 
-const TEST_WHITEBOARD_DIR = path.resolve(__dirname, '../../.agents/a2a/whiteboard');
-const TEST_CLAIMS_FILE = path.join(TEST_WHITEBOARD_DIR, 'claims.json');
-const TEST_INTERCOM_FILE = path.join(TEST_WHITEBOARD_DIR, 'intercom.jsonl');
+const TEST_CLAIMS_FILE = path.join(TEMP_TEST_DIR, 'claims.json');
+const TEST_INTERCOM_FILE = path.join(TEMP_TEST_DIR, 'intercom.jsonl');
 
 describe('Agent Intercom & Whiteboard Concurrency Suite', () => {
   beforeEach(() => {
-    fs.mkdirSync(TEST_WHITEBOARD_DIR, { recursive: true });
-    fs.writeFileSync(TEST_CLAIMS_FILE, JSON.stringify({ activeClaims: [] }, null, 2), 'utf8');
+    fs.mkdirSync(TEMP_TEST_DIR, { recursive: true });
+    fs.writeFileSync(
+      TEST_CLAIMS_FILE,
+      JSON.stringify(
+        { $schema: 'http://json-schema.org/draft-07/schema#', activeClaims: [] },
+        null,
+        2
+      ),
+      'utf8'
+    );
     fs.writeFileSync(TEST_INTERCOM_FILE, '', 'utf8');
   });
 
   afterEach(() => {
     try {
-      fs.writeFileSync(TEST_CLAIMS_FILE, JSON.stringify({ activeClaims: [] }, null, 2), 'utf8');
-      fs.writeFileSync(TEST_INTERCOM_FILE, '', 'utf8');
+      fs.rmSync(TEMP_TEST_DIR, { recursive: true, force: true });
     } catch {
       // ignore
     }
@@ -44,6 +56,7 @@ describe('Agent Intercom & Whiteboard Concurrency Suite', () => {
     assert.strictEqual(store.activeClaims.length, 1);
     assert.strictEqual(store.activeClaims[0].agentId, agentId);
     assert.strictEqual(store.activeClaims[0].filePath, filePath);
+    assert.strictEqual(store.$schema, 'http://json-schema.org/draft-07/schema#');
   });
 
   it('Given a claimed file, when another agent attempts to claim it, then it throws a conflict error', () => {

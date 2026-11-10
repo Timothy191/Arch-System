@@ -34,6 +34,15 @@ const SCADA_RECONCILE_DEBOUNCE_MS = 1000;
 /** All operational dates in the control room are resolved in SAST. */
 const OPERATIONAL_TIME_ZONE = 'Africa/Johannesburg';
 
+const SCADA_SLA_HEALTHY_PCT = 100;
+const SCADA_SLA_DEGRADED_PCT = 99.5;
+const SCADA_SLA_OFFLINE_PCT = 0;
+const SCADA_SLA_BY_STATE: Record<'healthy' | 'degraded' | 'offline', number> = {
+  healthy: SCADA_SLA_HEALTHY_PCT,
+  degraded: SCADA_SLA_DEGRADED_PCT,
+  offline: SCADA_SLA_OFFLINE_PCT,
+};
+
 export function ScadaPanel({ departmentId }: { departmentId: string }) {
   // The panel is designed to keep rendering fallback telemetry when Supabase is
   // unconfigured or unreachable, so a missing client must not throw at render.
@@ -56,6 +65,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     latencyMs: number;
   } | null>(null);
   const [scadaServerTimingLabel, setScadaServerTimingLabel] = useState<string | null>(null);
+  const scadaSlaPct = SCADA_SLA_BY_STATE[scadaHealth?.state ?? 'healthy'];
 
   const reconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -346,6 +356,13 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-white/80 px-2 py-1 font-mono text-[10px] text-[var(--text-secondary)]"
           >
             Server-Timing: {scadaServerTimingLabel ?? '—'}
+          </span>
+
+          <span
+            data-testid="scada-sla-uptime-badge"
+            className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 font-mono font-semibold text-[10px] text-emerald-700"
+          >
+            SLA: {scadaSlaPct}%
           </span>
 
           <div

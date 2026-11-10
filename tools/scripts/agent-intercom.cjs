@@ -11,7 +11,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
-const WHITEBOARD_DIR = path.join(ROOT_DIR, '.agents', 'a2a', 'whiteboard');
+const WHITEBOARD_DIR = process.env.AGENT_WHITEBOARD_DIR
+  ? path.resolve(process.env.AGENT_WHITEBOARD_DIR)
+  : path.join(ROOT_DIR, '.agents', 'a2a', 'whiteboard');
+
 const CLAIMS_FILE = path.join(WHITEBOARD_DIR, 'claims.json');
 const INTERCOM_FILE = path.join(WHITEBOARD_DIR, 'intercom.jsonl');
 const CANVAS_FILE = path.join(WHITEBOARD_DIR, 'canvas.md');
@@ -31,7 +34,15 @@ function ensureWhiteboardStorage() {
     fs.mkdirSync(WHITEBOARD_DIR, { recursive: true });
   }
   if (!fs.existsSync(CLAIMS_FILE)) {
-    fs.writeFileSync(CLAIMS_FILE, JSON.stringify({ activeClaims: [] }, null, 2) + '\n', 'utf8');
+    fs.writeFileSync(
+      CLAIMS_FILE,
+      JSON.stringify(
+        { $schema: 'http://json-schema.org/draft-07/schema#', activeClaims: [] },
+        null,
+        2
+      ) + '\n',
+      'utf8'
+    );
   }
   if (!fs.existsSync(INTERCOM_FILE)) {
     fs.writeFileSync(INTERCOM_FILE, '', 'utf8');
@@ -47,27 +58,34 @@ function ensureWhiteboardStorage() {
 
 /**
  * Reads and parses claims.json.
- * @returns {{ activeClaims: Array<{ agentId: string, filePath: string, acquiredAt: string, expiresAt: string, intent: string }> }}
+ * @returns {{ $schema?: string, activeClaims: Array<{ agentId: string, filePath: string, acquiredAt: string, expiresAt: string, intent: string }> }}
  */
 function readClaimsData() {
   ensureWhiteboardStorage();
   try {
     const rawContent = fs.readFileSync(CLAIMS_FILE, 'utf8');
     const parsed = JSON.parse(rawContent);
-    return { activeClaims: Array.isArray(parsed.activeClaims) ? parsed.activeClaims : [] };
+    return {
+      $schema: parsed.$schema,
+      activeClaims: Array.isArray(parsed.activeClaims) ? parsed.activeClaims : [],
+    };
   } catch (error) {
     throw new Error('Failed to read whiteboard claims file', { cause: error });
   }
 }
 
 /**
- * Writes claims data back to claims.json.
- * @param {{ activeClaims: Array<unknown> }} claimsData
+ * Writes claims data back to claims.json preserving schema reference.
+ * @param {{ $schema?: string, activeClaims: Array<unknown> }} claimsData
  */
 function writeClaimsData(claimsData) {
   ensureWhiteboardStorage();
   try {
-    fs.writeFileSync(CLAIMS_FILE, JSON.stringify(claimsData, null, 2) + '\n', 'utf8');
+    const payload = {
+      $schema: claimsData.$schema || 'http://json-schema.org/draft-07/schema#',
+      activeClaims: claimsData.activeClaims || [],
+    };
+    fs.writeFileSync(CLAIMS_FILE, JSON.stringify(payload, null, 2) + '\n', 'utf8');
   } catch (error) {
     throw new Error('Failed to write whiteboard claims file', { cause: error });
   }
@@ -85,7 +103,7 @@ function pruneExpiredClaims() {
   });
 
   if (validClaims.length !== claimsStore.activeClaims.length) {
-    writeClaimsData({ activeClaims: validClaims });
+    writeClaimsData({ ...claimsStore, activeClaims: validClaims });
   }
 }
 
@@ -157,7 +175,7 @@ function releaseFileClaim(options) {
     return;
   }
 
-  writeClaimsData({ activeClaims: filteredClaims });
+  writeClaimsData({ ...claimsStore, activeClaims: filteredClaims });
   process.stdout.write(`✅ Released claim on ${normalizedPath} for agent ${agentId}\n`);
 }
 
@@ -188,6 +206,15 @@ function broadcastIntercomMessage(options) {
   } catch (error) {
     throw new Error('Failed to append intercom message', { cause: error });
   }
+}
+
+/**
+ * Prints whiteboard canvas content.
+ */
+function displayCanvas() {
+  ensureWhiteboardStorage();
+  const content = fs.readFileSync(CANVAS_FILE, 'utf8');
+  process.stdout.write(content);
 }
 
 /**
@@ -244,6 +271,7 @@ Usage:
   node tools/scripts/agent-intercom.cjs claim <agentId> <filePath> [intent]
   node tools/scripts/agent-intercom.cjs release <agentId> <filePath>
   node tools/scripts/agent-intercom.cjs talk <sender> <content> [recipient] [messageType]
+  node tools/scripts/agent-intercom.cjs canvas
   node tools/scripts/agent-intercom.cjs list
 `);
     process.exit(0);
@@ -263,6 +291,10 @@ Usage:
     case ACTION_TALK: {
       const [, sender, content, recipient, messageType] = args;
       broadcastIntercomMessage({ sender, content, recipient, messageType });
+      break;
+    }
+    case ACTION_CANVAS: {
+      displayCanvas();
       break;
     }
     case ACTION_LIST:

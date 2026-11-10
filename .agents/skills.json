@@ -4,6 +4,7 @@
       "path": ".agents/skills",
       "include_only": [
         "agent-accuracy-enforcement",
+        "agent-intercom-coordination",
         "agents-md",
         "context-engineering",
         "industrial-rca",
