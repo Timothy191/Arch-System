@@ -364,11 +364,12 @@
   - Rebuilt Code-Intelligence index (`pnpm ci:reindex && pnpm ci:snapshot && pnpm audit:code-intelligence` → `✅ PASS`).
   - `pnpm --filter @repo/redis test` → `22/22 suites, 192/192 tests PASS`.
   - `pnpm agent:verify` → **28/28 GATES PASSED (100% PASS)**.
+
 ## [2026-11-10T12:30:00+02:00] - Agent Whiteboard & Intercom System Implementation (`AGENT-INTERCOM-WBS`)
 
-- **Governing request**: _"Assess and determine agents content (.agents/ & similar) then plan how we can setup a Agent talkboard or whiteboard or intercom system so that when multiple agents are coding at once they can talk to one another here ensuring they dont overlap or confuse one another / Autonomously implement the above plan"_
+- **Governing request**: _"Assess and determine agents content (.agents/ & similar) then plan how we can setup an agent intercom or whiteboard system so that when multiple agents are coding at once they can talk to one another here ensuring they dont overlap or confuse one another / Autonomously implement the above plan"_
 - **Phase 1 (Assessment & Architecture):**
-  - Assessed `.agents/`, `.agentsroom/`, and `.agents/a2a/` (A2A protocol specification, event-log.jsonl, schemas, agent registry).
+  - Assessed `.agents/`, agent rooms, and `.agents/a2a/` (A2A protocol specification, event-log.jsonl, schemas, agent registry).
 - **Phase 2 (Implementation):**
   - Created SSoT whiteboard & intercom storage under `.agents/a2a/whiteboard/` (`claims.json`, `canvas.md`, `intercom.jsonl`).
   - Implemented CLI manager `tools/scripts/agent-intercom.cjs` supporting file claim acquisition with TTL, release, intercom message broadcasting, and status listing.

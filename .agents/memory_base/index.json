@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-11-10T10:14:43.139Z",
+  "lastUpdated": "2026-11-10T12:19:52.329Z",
   "totalRetrospectives": 15,
   "entries": [
     {
-      "id": "compaction-999d8f18",
+      "id": "compaction-4621195a",
       "category": "context-compaction",
       "errorSignature": "compaction_decision:execute_full_compact",
       "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
