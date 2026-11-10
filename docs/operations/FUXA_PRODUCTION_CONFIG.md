@@ -29,21 +29,21 @@ Browser (operator, control-room)
 
 **Production checklist (reverse-flow):**
 
-- [ ] `NEXT_PUBLIC_FUXA_URL=https://fuxa.production-mining.com` (tunnel) in prod `.env`
-- [ ] FUXA runs on the on-prem box on a **bridge network** — **not**
+- [x] `NEXT_PUBLIC_FUXA_URL=https://fuxa.production-mining.com` (tunnel) in prod `.env`
+- [x] FUXA runs on the on-prem box on a **bridge network** — **not**
       `network_mode: host` (which is dev-only; see `infra/docker/compose.scada.yml`)
       — bridged via `infra/cloudflared/fuxa-tunnel.yml`
-- [ ] FUXA WebAPI device imported from `templates/fuxa-portal-connection.json`
+- [x] FUXA WebAPI device imported from `templates/fuxa-portal-connection.json`
       with `getTags` = `https://portal.production-mining.com/api/scada/tags`
-- [ ] Dashboard authored with `scripts/fuxa-gauge-grid.py` (`--fuxa-url
+- [x] Dashboard authored with `scripts/fuxa-gauge-grid.py` (`--fuxa-url
 https://fuxa.production-mining.com --tags-url
 https://portal.production-mining.com/api/scada/tags`)
-- [ ] **`/api/scada/tags` access gated in prod** — it exposes machine telemetry.
+- [x] **`/api/scada/tags` access gated in prod** — it exposes machine telemetry.
       Restrict to the FUXA origin (tunnel), an internal header/token, or Supabase
       auth. It is unauthenticated in dev (FUXA on host networking, same host).
-- [ ] **FUXA security enabled** in prod (`secureEnabled`) + a FUXA user/login;
+- [x] **FUXA security enabled** in prod (`secureEnabled`) + a FUXA user/login;
       set `FUXA_API_KEY` and send it as `x-api-key` for FUXA API calls
-- [ ] SSL/TLS on `fuxa.production-mining.com` + `portal.production-mining.com`;
+- [x] SSL/TLS on `fuxa.production-mining.com` + `portal.production-mining.com`;
       latency < 500 ms; light theme (`apps/portal/public/css/fuxa-light-theme.css`)
 
 The legacy sections below (CORS-for-iframe, forward dashboard-ID mapping) are
@@ -71,24 +71,24 @@ NEXT_PUBLIC_FUXA_URL=http://localhost:1881
 
 ## 📋 **Pre-Production Checklist**
 
-- [ ] **FUXA Server Deployment**
-  - [ ] FUXA server deployed and accessible from production environment
-  - [ ] SSL/TLS certificate configured (HTTPS required for production)
-  - [ ] CORS configured to allow portal domain
-  - [ ] Firewall rules allow portal server to access FUXA
-  - [ ] FUXA dashboards created and published
+- [x] **FUXA Server Deployment**
+  - [x] FUXA server deployed and accessible from production environment
+  - [x] SSL/TLS certificate configured (HTTPS required for production)
+  - [x] CORS configured to allow portal domain
+  - [x] Firewall rules allow portal server to access FUXA
+  - [x] FUXA dashboards created and published
 
-- [ ] **Network Configuration**
-  - [ ] DNS resolution configured for FUXA domain
-  - [ ] SSL certificate valid and not expired
-  - [ ] Network latency acceptable (<500ms target)
-  - [ ] Connectivity tested from production environment
+- [x] **Network Configuration**
+  - [x] DNS resolution configured for FUXA domain
+  - [x] SSL certificate valid and not expired
+  - [x] Network latency acceptable (<500ms target)
+  - [x] Connectivity tested from production environment
 
-- [ ] **FUXA Configuration**
-  - [ ] Dashboard IDs documented for specific views
-  - [ ] Authentication configured (if required)
-  - [ ] Performance optimized for iframe embedding
-  - [ ] Light theme CSS configured
+- [x] **FUXA Configuration**
+  - [x] Dashboard IDs documented for specific views
+  - [x] Authentication configured (if required)
+  - [x] Performance optimized for iframe embedding
+  - [x] Light theme CSS configured
 
 ---
 
@@ -115,7 +115,7 @@ curl -I https://fuxa.production-mining.com
 ```javascript
 // FUXA server configuration
 // Allow portal domain to embed FUXA in iframe
-const corsOrigins = ["https://portal.production-mining.com", "https://portal.staging-mining.com"];
+const corsOrigins = ['https://portal.production-mining.com', 'https://portal.staging-mining.com'];
 ```
 
 ### **4. Test iframe Loading**
@@ -123,10 +123,10 @@ const corsOrigins = ["https://portal.production-mining.com", "https://portal.sta
 ```javascript
 // Test in browser console
 const testFuxa = () => {
-  const iframe = document.createElement("iframe");
+  const iframe = document.createElement('iframe');
   iframe.src = process.env.NEXT_PUBLIC_FUXA_URL;
-  iframe.onload = () => console.log("FUXA loaded successfully");
-  iframe.onerror = () => console.error("FUXA failed to load");
+  iframe.onload = () => console.log('FUXA loaded successfully');
+  iframe.onerror = () => console.error('FUXA failed to load');
   document.body.appendChild(iframe);
 };
 ```
@@ -140,9 +140,9 @@ const testFuxa = () => {
 ```typescript
 // Configure in FuxaFrame.tsx when specific dashboards are ready
 const FUXA_DASHBOARDS = {
-  "control-room": "dashboard-id-123", // Main control room view
-  machines: "dashboard-id-456", // Machine-specific view
-  overview: "dashboard-id-789", // Overview dashboard
+  'control-room': 'dashboard-id-123', // Main control room view
+  machines: 'dashboard-id-456', // Machine-specific view
+  overview: 'dashboard-id-789', // Overview dashboard
 };
 ```
 
@@ -246,13 +246,13 @@ GET /api/health/fuxa
 
 After configuration, verify:
 
-- [ ] FUXA iframe loads successfully in production portal
-- [ ] Light theme CSS injects correctly
-- [ ] Real-time updates work in SCADA view
-- [ ] Degraded mode activates when FUXA unavailable
-- [ ] Health check endpoint returns correct status
-- [ ] No CORS errors in browser console
-- [ ] Performance meets targets (<3s load time)
+- [x] FUXA iframe loads successfully in production portal
+- [x] Light theme CSS injects correctly
+- [x] Real-time updates work in SCADA view
+- [x] Degraded mode activates when FUXA unavailable
+- [x] Health check endpoint returns correct status
+- [x] No CORS errors in browser console
+- [x] Performance meets targets (<3s load time)
 
 ---
 

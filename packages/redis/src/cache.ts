@@ -1,7 +1,12 @@
 import { redisCircuitBreaker } from './circuit-breaker';
 import { createRedisSubscriber } from './client';
 import { getCircuitGuardedRedisClient } from './internal-utils';
-import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
+import {
+  cacheInvalidatePrefixes,
+  cacheInvalidateTags,
+  cacheInvalidateTagsBatch,
+  indexCacheKeyByTags,
+} from './invalidation';
 import { memoryDelete, memoryDeleteByPrefix, memoryDeleteKeys, memorySet, readMemory } from './l1';
 import { acquireRefreshLease, releaseRefreshLease } from './locks';
 import { asFieldMap, asStringOrNull, sendSafe } from './raw';
@@ -511,7 +516,7 @@ export async function cacheDeletePattern(pattern: string): Promise<void> {
   }
 }
 
-export { cacheInvalidatePrefixes, cacheInvalidateTags };
+export { cacheInvalidatePrefixes, cacheInvalidateTags, cacheInvalidateTagsBatch };
 
 /**
  * Evict keys from the L1 in-memory cache by prefix.

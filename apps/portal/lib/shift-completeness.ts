@@ -589,3 +589,57 @@ export async function getShiftCompleteness(
     }
   );
 }
+
+const MAX_SHIFT_HOURS = 12;
+const MIN_BIN_FACTOR = 0.1;
+const MAX_BIN_FACTOR = 50;
+
+export interface MachineOperationConstraintInput {
+  operatingHours: number;
+  binFactor?: number;
+  openingSmr?: number;
+  closingSmr?: number;
+  shiftDurationHours?: number;
+}
+
+export interface MachineOperationValidationResult {
+  isValid: boolean;
+  violations: string[];
+}
+
+function collectSmrViolations(input: Readonly<MachineOperationConstraintInput>): string[] {
+  if (input.openingSmr === undefined || input.closingSmr === undefined) {
+    return [];
+  }
+  const maxSmrDeltaHours = input.shiftDurationHours ?? MAX_SHIFT_HOURS;
+  const smrDeltaHours = input.closingSmr - input.openingSmr;
+  if (smrDeltaHours < 0) {
+    return ['Closing SMR must be greater than or equal to opening SMR'];
+  }
+  if (smrDeltaHours > maxSmrDeltaHours) {
+    return [`SMR delta (${smrDeltaHours}h) exceeds shift duration limit (${maxSmrDeltaHours}h)`];
+  }
+  return [];
+}
+
+export function validateMachineOperationConstraints(
+  input: Readonly<MachineOperationConstraintInput>
+): MachineOperationValidationResult {
+  const hoursViolations =
+    input.operatingHours < 0 || input.operatingHours > MAX_SHIFT_HOURS
+      ? [`Operating hours (${input.operatingHours}h) must be between 0 and ${MAX_SHIFT_HOURS}`]
+      : [];
+
+  const binFactorViolations =
+    input.binFactor !== undefined &&
+    (input.binFactor < MIN_BIN_FACTOR || input.binFactor > MAX_BIN_FACTOR)
+      ? [`Bin factor (${input.binFactor}) must be between ${MIN_BIN_FACTOR} and ${MAX_BIN_FACTOR}`]
+      : [];
+
+  const violations = [...hoursViolations, ...binFactorViolations, ...collectSmrViolations(input)];
+
+  return {
+    isValid: violations.length === 0,
+    violations,
+  };
+}

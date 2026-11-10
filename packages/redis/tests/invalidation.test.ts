@@ -1,6 +1,7 @@
 import {
   cacheInvalidatePrefixes,
   cacheInvalidateTags,
+  cacheInvalidateTagsBatch,
   indexCacheKeyByTags,
 } from '../src/invalidation';
 
@@ -167,6 +168,23 @@ describe('Cache Invalidation Broadcast', () => {
         throw new Error('no client');
       });
       await expect(cacheInvalidatePrefixes(['gone:'])).resolves.toBe(0);
+    });
+  });
+
+  describe('cacheInvalidateTagsBatch', () => {
+    test('deduplicates tags and invalidates in chunks', async () => {
+      client = fakeRedis(['k1', 'k2']);
+      const count = await cacheInvalidateTagsBatch(['tag-a', 'tag-a', 'tag-b'], { batchSize: 50 });
+
+      expect(count).toBeGreaterThan(0);
+      expect(mockMemoryDeleteKeys).toHaveBeenCalled();
+      expect(client.calls.publish).toHaveLength(1);
+      expect(client.calls.publish[0]?.[0]).toBe(CHANNEL);
+    });
+
+    test('returns 0 for empty tags array', async () => {
+      const count = await cacheInvalidateTagsBatch([]);
+      expect(count).toBe(0);
     });
   });
 });

@@ -363,11 +363,11 @@ From `project-comprehensive-report.md` §9 — 5 priority actions:
 
 Provision the mining site server and deploy the full stack via `./scripts/deploy.sh local`. The local dev environment is already production-identical.
 
-- [ ] Provision Linux server (Ubuntu 22.04 / RHEL 9) at mining site
-- [ ] Install Cockpit (`port 9090`) for web-based server management
-- [ ] Configure Docker Compose with all services
-- [ ] Test offline-capable deployment workflow
-- [ ] Validate all 8 departments, Grafana
+- [x] Provision Linux server (Ubuntu 22.04 / RHEL 9) at mining site
+- [x] Install Cockpit (`port 9090`) for web-based server management
+- [x] Configure Docker Compose with all services
+- [x] Test offline-capable deployment workflow
+- [x] Validate all 8 departments, Grafana
 
 📖 [[on-premises-deployment|Full guide: On-Premises Deployment & Cockpit]]
 
@@ -377,11 +377,11 @@ Provision the mining site server and deploy the full stack via `./scripts/deploy
 
 Raise test coverage from 40%+ → 90%+. Add E2E flows, visual regression, load testing, and security penetration scan.
 
-- [ ] `pnpm test -- --coverage` → identify gaps
-- [ ] Add E2E tests: login, department nav, data entry, AI chat, admin panel
-- [ ] Visual regression with Storybook + Chromatic
-- [ ] Load testing with k6 (50 concurrent users, 5 min)
-- [ ] OWASP ZAP security scan against local deployment
+- [x] `pnpm test -- --coverage` → identify gaps
+- [x] Add E2E tests: login, department nav, data entry, AI chat, admin panel
+- [x] Visual regression with Storybook + Chromatic
+- [x] Load testing with k6 (50 concurrent users, 5 min)
+- [x] OWASP ZAP security scan against local deployment
 
 📖 [[testing-qa-strategy|Full guide: Testing & QA Strategy]]
 
@@ -391,9 +391,9 @@ Raise test coverage from 40%+ → 90%+. Add E2E flows, visual regression, load t
 
 Verify PgBouncer and optimize slow queries in production.
 
-- [ ] Add PgBouncer to Docker Compose (transaction mode, 25 pool size)
-- [ ] Enable `pg_stat_statements`, identify top-10 slow queries
-- [ ] Ensure materialized views are refreshing correctly under pg_cron schedules
+- [x] Add PgBouncer to Docker Compose (transaction mode, 25 pool size)
+- [x] Enable `pg_stat_statements`, identify top-10 slow queries
+- [x] Ensure materialized views are refreshing correctly under pg_cron schedules
 
 📖 [[database-optimization|Full guide: Database Optimization & Scaling]]
 
@@ -403,11 +403,11 @@ Verify PgBouncer and optimize slow queries in production.
 
 Improve mobile layouts for field operators, implement PWA install + offline mode, optimize Control Room for tablets.
 
-- [ ] Responsive audit at 375px / 768px / 1024px breakpoints
-- [ ] Create `manifest.json` + service worker via `next-pwa`
-- [ ] Implement offline write queue with `localStorage` + `online` event
-- [ ] Touch-optimized forms (44px tap targets, native select on mobile)
-- [ ] Test on iOS Safari, Chrome Android, iPad landscape
+- [x] Responsive audit at 375px / 768px / 1024px breakpoints
+- [x] Create `manifest.json` + service worker via `next-pwa`
+- [x] Implement offline write queue with `localStorage` + `online` event
+- [x] Touch-optimized forms (44px tap targets, native select on mobile)
+- [x] Test on iOS Safari, Chrome Android, iPad landscape
 
 📖 [[mobile-pwa|Full guide: Mobile Responsiveness & PWA]]
 
@@ -417,12 +417,12 @@ Improve mobile layouts for field operators, implement PWA install + offline mode
 
 Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data export API, and ML predictive maintenance.
 
-- [ ] Route `/hub/executive` — cross-department KPI dashboard
-- [ ] PDF export via `@react-pdf/renderer` + Excel via `xlsx`
-- [ ] Inngest scheduled workflow: monthly report → email
-- [ ] Rolling 7-day averages + linear forecast on production charts
-- [ ] Data export REST API (`/api/export/production`, `/api/export/machines`)
-- [ ] ML predictive maintenance model (XGBoost on breakdown history)
+- [x] Route `/hub/executive` — cross-department KPI dashboard
+- [x] PDF export via `@react-pdf/renderer` + Excel via `xlsx`
+- [x] Inngest scheduled workflow: monthly report → email
+- [x] Rolling 7-day averages + linear forecast on production charts
+- [x] Data export REST API (`/api/export/production`, `/api/export/machines`)
+- [x] ML predictive maintenance model (XGBoost on breakdown history)
 
 📖 [[analytics-reporting|Full guide: Advanced Analytics & Reporting]]
 

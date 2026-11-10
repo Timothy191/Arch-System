@@ -305,3 +305,45 @@ export async function mutateCache<T>(
 
   return data;
 }
+
+export interface PredictiveWarmCandidate<T = unknown> {
+  key: string;
+  fetcher: () => Promise<T>;
+  baseTtlSeconds?: number;
+  minFrequency?: number;
+}
+
+const DEFAULT_MIN_WARM_FREQUENCY = 2;
+const DEFAULT_WARM_BASE_TTL_SECONDS = 60;
+
+/**
+ * Predictive cache warming based on key temperature and TinyLFU access frequency.
+ * For candidates with frequency >= minFrequency, refreshes values into cacheSet with adaptive TTL.
+ */
+export async function schedulePredictiveCacheWarm<T = unknown>(
+  candidates: readonly PredictiveWarmCandidate<T>[]
+): Promise<{ warmedKeys: string[]; skippedKeys: string[] }> {
+  const warmedKeys: string[] = [];
+  const skippedKeys: string[] = [];
+
+  for (const candidate of candidates) {
+    const minFrequency = candidate.minFrequency ?? DEFAULT_MIN_WARM_FREQUENCY;
+    const frequency = getKeyFrequency(candidate.key);
+
+    if (frequency >= minFrequency) {
+      try {
+        const freshData = await candidate.fetcher();
+        const baseTtl = candidate.baseTtlSeconds ?? DEFAULT_WARM_BASE_TTL_SECONDS;
+        const adaptiveTtl = computeAdaptiveTtl(candidate.key, { baseTtlSeconds: baseTtl });
+        await cacheSet(candidate.key, freshData, adaptiveTtl);
+        warmedKeys.push(candidate.key);
+      } catch {
+        skippedKeys.push(candidate.key);
+      }
+    } else {
+      skippedKeys.push(candidate.key);
+    }
+  }
+
+  return { warmedKeys, skippedKeys };
+}

@@ -119,6 +119,81 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
   return deleted;
 }
 
+const DEFAULT_TAG_BATCH_SIZE = 100;
+
+/**
+ * Batch invalidate all cache keys associated with multiple tags.
+ * Deduplicates tags, scans tag sets, purges local L1 BEFORE broadcasting,
+ * unlinks keys and tag sets in chunks of batchSize, and emits at most a single broadcast.
+ */
+export async function cacheInvalidateTagsBatch(
+  tags: readonly string[],
+  options?: { batchSize?: number }
+): Promise<number> {
+  if (tags.length === 0) return 0;
+  const redis = await getCircuitGuardedRedisClient('redis:invalidation:getRedisClientSafe');
+  if (!redis) return 0;
+
+  const batchSize = options?.batchSize ?? DEFAULT_TAG_BATCH_SIZE;
+  const uniqueTags = Array.from(new Set(tags));
+  let totalDeleted = 0;
+  const touchedKeys: string[] = [];
+  const tagKeysToDelete: string[] = [];
+
+  try {
+    for (const tag of uniqueTags) {
+      const tagKey = `${TAG_PREFIX}:${tag}`;
+      tagKeysToDelete.push(tagKey);
+
+      const keysForTag: string[] = [];
+      for await (const member of redis.sScanIterator(tagKey, { COUNT: batchSize })) {
+        keysForTag.push(member);
+        if (keysForTag.length >= batchSize) {
+          memoryDeleteKeys(keysForTag);
+          await redis.unlink(keysForTag);
+          if (touchedKeys.length <= BROADCAST_KEY_LIMIT) {
+            touchedKeys.push(...keysForTag);
+          }
+          totalDeleted += keysForTag.length;
+          keysForTag.length = 0;
+        }
+      }
+
+      if (keysForTag.length > 0) {
+        memoryDeleteKeys(keysForTag);
+        await redis.unlink(keysForTag);
+        if (touchedKeys.length <= BROADCAST_KEY_LIMIT) {
+          touchedKeys.push(...keysForTag);
+        }
+        totalDeleted += keysForTag.length;
+      }
+    }
+
+    for (let chunkIndex = 0; chunkIndex < tagKeysToDelete.length; chunkIndex += batchSize) {
+      const tagChunk = tagKeysToDelete.slice(chunkIndex, chunkIndex + batchSize);
+      await redis.unlink(tagChunk);
+    }
+
+    if (totalDeleted > 0) {
+      if (totalDeleted <= BROADCAST_KEY_LIMIT) {
+        await broadcast({ type: 'keys', keys: touchedKeys });
+      } else {
+        await incrementCounter('cache.invalidate.broadcast_skipped', {
+          dimension: uniqueTags.join(','),
+        });
+      }
+    }
+  } catch (err) {
+    console.warn(
+      '[redis:invalidation:cacheInvalidateTagsBatch] Batch tag invalidation failed:',
+      err
+    );
+    await incrementCounter('cache.invalidate.failed', { dimension: 'tags_batch' });
+  }
+
+  return totalDeleted;
+}
+
 /**
  * Invalidate all keys matching the given prefixes.
  * Uses SCAN (not KEYS) to avoid blocking the Redis server.

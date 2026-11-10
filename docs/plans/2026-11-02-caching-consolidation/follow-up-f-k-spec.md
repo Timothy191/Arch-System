@@ -2,7 +2,7 @@
 
 **System:** Arch-System Caching Layer (`@repo/redis`, `apps/portal`, `libs/shared/utils`, `libs/shared/hooks`)  
 **Document:** Technical Specification — Follow-Up Items  
-**Status:** Ready for Implementation  
+**Status:** DONE (2026-11-10)  
 **Date:** 2026-11-02  
 **Related:** `docs/plans/2026-11-02-caching-consolidation/spec.md` (items A–E, completed)
 

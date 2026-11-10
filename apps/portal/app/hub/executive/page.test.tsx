@@ -45,6 +45,9 @@ jest.mock('@repo/redis', () => ({
     AI_MEMORY: 'ai_memory',
     DEPARTMENT: 'dept',
     EQUIPMENT: 'equipment',
+    TELEMETRY: 'telemetry',
+    REPORTS: 'reports',
+    SESSIONS: 'sessions',
   },
 }));
 

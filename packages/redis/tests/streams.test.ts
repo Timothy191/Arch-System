@@ -4,6 +4,7 @@ import {
   claimIdle,
   consumeStream,
   DEFAULT_SCADA_STREAM_MAX_LEN,
+  detectScadaStreamAnomaly,
   ensureConsumerGroup,
   moveToDeadLetter,
   publishScadaTelemetryStream,
@@ -11,6 +12,7 @@ import {
   readNew,
   readPending,
   readStream,
+  resetScadaAnomalyState,
   streamLength,
 } from '../src/streams';
 
@@ -314,5 +316,57 @@ describe('Redis Streams & Consumer Group Primitives', () => {
         'exceeded 3 deliveries',
       ]);
     });
+  });
+});
+
+describe('SCADA Stream Anomaly Detection (Online)', () => {
+  beforeEach(() => {
+    resetScadaAnomalyState();
+  });
+
+  it('calculates online mean, variance and stdDev using Online algorithm', () => {
+    for (let index = 0; index < 4; index++) {
+      const res = detectScadaStreamAnomaly({ tagId: 'press-01', sampleValue: 10 });
+      expect(res.isAnomaly).toBe(false);
+    }
+    const fifth = detectScadaStreamAnomaly({ tagId: 'press-01', sampleValue: 10 });
+    expect(fifth.sampleCount).toBe(5);
+    expect(fifth.mean).toBe(10);
+    expect(fifth.stdDev).toBe(0);
+    expect(fifth.isAnomaly).toBe(false);
+  });
+
+  it('detects an anomaly when z-score threshold is exceeded with minSamples', () => {
+    detectScadaStreamAnomaly({ tagId: 'temp-01', sampleValue: 100 });
+    detectScadaStreamAnomaly({ tagId: 'temp-01', sampleValue: 102 });
+    detectScadaStreamAnomaly({ tagId: 'temp-01', sampleValue: 98 });
+    detectScadaStreamAnomaly({ tagId: 'temp-01', sampleValue: 101 });
+    const baseline = detectScadaStreamAnomaly({ tagId: 'temp-01', sampleValue: 99 });
+    expect(baseline.sampleCount).toBe(5);
+    expect(baseline.isAnomaly).toBe(false);
+
+    const spike = detectScadaStreamAnomaly({
+      tagId: 'temp-01',
+      sampleValue: 1000,
+      zScoreThreshold: 3,
+    });
+    expect(spike.isAnomaly).toBe(true);
+    expect(spike.zScore).toBeGreaterThan(3);
+  });
+
+  it('resets anomaly state per tagId or globally', () => {
+    detectScadaStreamAnomaly({ tagId: 'tag-a', sampleValue: 50 });
+    detectScadaStreamAnomaly({ tagId: 'tag-b', sampleValue: 60 });
+
+    resetScadaAnomalyState('tag-a');
+    const resetA = detectScadaStreamAnomaly({ tagId: 'tag-a', sampleValue: 50 });
+    expect(resetA.sampleCount).toBe(1);
+
+    const checkB = detectScadaStreamAnomaly({ tagId: 'tag-b', sampleValue: 60 });
+    expect(checkB.sampleCount).toBe(2);
+
+    resetScadaAnomalyState();
+    const resetB = detectScadaStreamAnomaly({ tagId: 'tag-b', sampleValue: 60 });
+    expect(resetB.sampleCount).toBe(1);
   });
 });

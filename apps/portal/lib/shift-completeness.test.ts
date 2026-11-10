@@ -4,6 +4,7 @@ import {
   validateBinFactor,
   validateLoadConsistency,
   validateMachineHours,
+  validateMachineOperationConstraints,
   validateShiftDataIntegrity,
 } from './shift-completeness';
 
@@ -480,6 +481,70 @@ describe('Shift Completeness Validation', () => {
           keyParts: ['dept-1', 'control-room', '2026-06-15', 'day'],
         })
       );
+    });
+  });
+
+  describe('validateMachineOperationConstraints', () => {
+    it('When all machine operation constraints are within limits, Then it returns isValid true', () => {
+      const validationResult = validateMachineOperationConstraints({
+        operatingHours: 8.5,
+        binFactor: 40.5,
+        openingSmr: 1200,
+        closingSmr: 1208.5,
+        shiftDurationHours: 12,
+      });
+
+      expect(validationResult.isValid).toBe(true);
+      expect(validationResult.violations).toEqual([]);
+    });
+
+    it('When operatingHours is negative or exceeds 12, Then it reports an operating hours violation', () => {
+      const negativeHoursResult = validateMachineOperationConstraints({
+        operatingHours: -1,
+      });
+      expect(negativeHoursResult.isValid).toBe(false);
+      expect(negativeHoursResult.violations[0]).toContain('Operating hours');
+
+      const excessiveHoursResult = validateMachineOperationConstraints({
+        operatingHours: 13,
+      });
+      expect(excessiveHoursResult.isValid).toBe(false);
+      expect(excessiveHoursResult.violations[0]).toContain('Operating hours');
+    });
+
+    it('When binFactor is outside [0.1, 50], Then it reports a bin factor violation', () => {
+      const lowBinResult = validateMachineOperationConstraints({
+        operatingHours: 8,
+        binFactor: 0.05,
+      });
+      expect(lowBinResult.isValid).toBe(false);
+      expect(lowBinResult.violations[0]).toContain('Bin factor');
+
+      const highBinResult = validateMachineOperationConstraints({
+        operatingHours: 8,
+        binFactor: 55,
+      });
+      expect(highBinResult.isValid).toBe(false);
+      expect(highBinResult.violations[0]).toContain('Bin factor');
+    });
+
+    it('When closingSmr is less than openingSmr or delta exceeds shiftDurationHours, Then it reports SMR violations', () => {
+      const reversedSmrResult = validateMachineOperationConstraints({
+        operatingHours: 8,
+        openingSmr: 1500,
+        closingSmr: 1495,
+      });
+      expect(reversedSmrResult.isValid).toBe(false);
+      expect(reversedSmrResult.violations[0]).toContain('Closing SMR');
+
+      const excessiveDeltaResult = validateMachineOperationConstraints({
+        operatingHours: 8,
+        openingSmr: 1500,
+        closingSmr: 1515,
+        shiftDurationHours: 12,
+      });
+      expect(excessiveDeltaResult.isValid).toBe(false);
+      expect(excessiveDeltaResult.violations[0]).toContain('SMR delta');
     });
   });
 });

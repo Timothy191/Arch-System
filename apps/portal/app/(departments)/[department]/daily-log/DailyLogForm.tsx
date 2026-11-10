@@ -23,6 +23,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { revalidateRSC, speculativeEmbedShiftLog } from '@/app/actions';
 import { logError } from '@/lib/errors/error-logger';
+import {
+  loadDraftFromStorage,
+  removeDraftFromStorage,
+  saveDraftToStorage,
+} from '@/lib/storage/indexeddb-draft-storage';
 import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
 import { createDailyLog } from './actions';
 
@@ -41,6 +46,23 @@ interface DailyLogFormProps {
 type UnifiedFormValues = DailyLogFormValues &
   Partial<DrillingDailyLogFormValues> &
   Partial<ProductionDailyLogFormValues>;
+
+function tryRestoreDraftJson(
+  serializedDraft: string | null,
+  resetForm: (parsedValues: UnifiedFormValues) => void
+): boolean {
+  if (!serializedDraft) return false;
+  try {
+    const parsedDraft = JSON.parse(serializedDraft) as UnifiedFormValues | null;
+    if (parsedDraft && typeof parsedDraft === 'object') {
+      resetForm(parsedDraft);
+      return true;
+    }
+  } catch {
+    // Ignore corrupted draft JSON
+  }
+  return false;
+}
 
 export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLogFormProps) {
   const isDrilling = departmentSlug === 'drilling';
@@ -96,32 +118,32 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     if (typeof window === 'undefined') return;
     try {
       const saved = localStorage.getItem(draftKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') {
-          reset(parsed);
-        }
+      if (tryRestoreDraftJson(saved, reset)) {
+        return;
       }
     } catch {
       // Ignore read error
     }
+    void loadDraftFromStorage(draftKey).then((asyncSaved) => {
+      tryRestoreDraftJson(asyncSaved, reset);
+    });
   }, [draftKey, reset]);
 
   // Save draft on tab switch / unload
   const saveDraft = useMemo(() => {
     return () => {
       if (typeof window === 'undefined') return;
-      try {
-        if (isDirty) {
-          localStorage.setItem(draftKey, JSON.stringify(formValues));
-        }
-      } catch {
-        // Ignore write error
+      if (isDirty) {
+        void saveDraftToStorage(draftKey, JSON.stringify(formValues));
       }
     };
   }, [draftKey, isDirty, formValues]);
 
-  const { clearDraft } = useFormDraftPersistence(draftKey, saveDraft);
+  const { clearDraft: clearHookDraft } = useFormDraftPersistence(draftKey, saveDraft);
+  const clearDraft = () => {
+    clearHookDraft();
+    void removeDraftFromStorage(draftKey);
+  };
 
   const shiftValue = watch('shift');
   const holesDrilled = watch('holesDrilled') || 0;

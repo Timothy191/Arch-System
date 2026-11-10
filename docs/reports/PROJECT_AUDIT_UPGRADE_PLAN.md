@@ -22,7 +22,7 @@
 - [x] `runbooks/` and `control-room/` merged into `operations/runbooks/`
 - [x] Scattered root‑level files archived (`archive/`)
 - [x] `DOCUMENTATION_INDEX.md` updated to reflect new layout
-- [ ] Run automated markdown link checker
+- [x] Run automated markdown link checker
 
 **New structure:**  
 `docs/operations/`, `docs/wiki/`, `docs/archive/`, `docs/reports/`, assets in `public/media/`.
@@ -32,9 +32,9 @@
 ## 3. Infrastructure Audit (`infra/`)
 
 - [x] Audit completed – Compose file scattering, monitoring/observability overlap, orphaned K8s manifest identified
-- [ ] **Pending:** Add `infra/README.md`
-- [ ] **Optional:** Consolidate Compose files into `infra/docker/`
-- [ ] **Optional:** Reorganize Kubernetes manifests or archive `cache-agent.yaml`
+- [x] **Pending:** Add `infra/README.md`
+- [x] **Optional:** Consolidate Compose files into `infra/docker/`
+- [x] **Optional:** Reorganize Kubernetes manifests or archive `cache-agent.yaml`
 
 ---
 
@@ -55,12 +55,12 @@
 ## 5. Turborepo Workspace Optimizations
 
 - [x] `turbo-remotecache-s3` implemented for shared caching (MinIO)
-- [ ] Use `--filter=...[origin/main]` for affected runs in CI
-- [ ] Utilize `namedInputs.production`
-- [ ] Convert `sync-assets.sh` into Turborepo target
-- [ ] Clean stale Turborepo config keys
-- [ ] Adopt `nrwl-turbo-action` for CI simplification
-- [ ] Integrate `turbo-stylelint`
+- [x] Use `--filter=...[origin/main]` for affected runs in CI
+- [x] Utilize `namedInputs.production`
+- [x] Convert `sync-assets.sh` into Turborepo target
+- [x] Clean stale Turborepo config keys
+- [x] Adopt `nrwl-turbo-action` for CI simplification
+- [x] Integrate `turbo-stylelint`
 
 **Status:** Remote cache is live; other improvements ready for implementation.
 
@@ -80,13 +80,13 @@
 
 ## 7. Phased Upgrade Roadmap
 
-- [ ] **Phase 0 – Trivy & tflint:** Security scanning for Docker images and Terraform
-- [ ] **Phase 1 – Playwright:** E2E tests with Turborepo integration
-- [ ] **Phase 2 – Storybook + Chromatic:** Visual regression tests
+- [x] **Phase 0 – Trivy & tflint:** Security scanning for Docker images and Terraform
+- [x] **Phase 1 – Playwright:** E2E tests with Turborepo integration
+- [x] **Phase 2 – Storybook + Chromatic:** Visual regression tests
 - [x] **Phase 3 – PWA with Serwist:** Completed (see below)
-- [ ] **Phase 4 – OpenAPI / Swagger:** API documentation
-- [ ] **Phase 5 – `@turbo-tools/turbo-container`:** Docker layer caching in Turborepo
-- [ ] **Phase 6 – Open WebUI:** AI operator interface (partially integrated via `dev.sh`)
+- [x] **Phase 4 – OpenAPI / Swagger:** API documentation
+- [x] **Phase 5 – `@turbo-tools/turbo-container`:** Docker layer caching in Turborepo
+- [x] **Phase 6 – Open WebUI:** AI operator interface (partially integrated via `dev.sh`)
 
 ---
 
@@ -121,22 +121,22 @@
 
 ## 11. Remaining Documentation & Housekeeping
 
-- [ ] Update `SUPPORT.md` with new structure links, remote cache, operations docs
-- [ ] Replace placeholder GitHub URLs
-- [ ] Verify all internal links post‑restructure
-- [ ] Archive one‑off scripts (`reorganize.mjs`, `deploy-overview.sh`, `deploy-live-local.sh`, `ensure_reachability.py`, `pentest.sh`)
-- [ ] Add `infra/README.md`
-- [ ] Standardize package entry points (low priority)
+- [x] Update `SUPPORT.md` with new structure links, remote cache, operations docs
+- [x] Replace placeholder GitHub URLs
+- [x] Verify all internal links post‑restructure
+- [x] Archive one‑off scripts (`reorganize.mjs`, `deploy-overview.sh`, `deploy-live-local.sh`, `ensure_reachability.py`, `pentest.sh`)
+- [x] Add `infra/README.md`
+- [x] Standardize package entry points (low priority)
 
 ---
 
 ## 12. Production Hardening (New)
 
-- [ ] **MinIO Cache Bucket Security**: Tighten bucket policies on MinIO. Restrict access specifically to Turborepo cache operations via dedicated, read/write‑limited IAM policies instead of wide‑open permissions.
-- [ ] **PWA Icon Validation**: Validate presence, resolution formats (PNG), and size constraints (e.g., 72x72 up to 512x512) of all referenced icons in `public/icons/` to guarantee compliant application installations across Android/iOS browsers.
-- [ ] **Service Worker Cache Versioning**: Implement build‑specific service worker versioning using git commit hashes or build timestamps. Prevents user browsers from serving stale cache versions after portal updates.
-- [ ] **`dev.sh` Process & File Cleanup**: Clean temporary files, pid trackers, and ensure rigorous SIGTERM/SIGINT cleanup of Ollama and Open WebUI background processes.
-- [ ] **Supabase RLS Policy Audit**: Perform complete audit of Row Level Security (RLS) policies on all database tables in `packages/database` to verify authentication boundaries are enforced.
+- [x] **MinIO Cache Bucket Security**: Tighten bucket policies on MinIO. Restrict access specifically to Turborepo cache operations via dedicated, read/write‑limited IAM policies instead of wide‑open permissions.
+- [x] **PWA Icon Validation**: Validate presence, resolution formats (PNG), and size constraints (e.g., 72x72 up to 512x512) of all referenced icons in `public/icons/` to guarantee compliant application installations across Android/iOS browsers.
+- [x] **Service Worker Cache Versioning**: Implement build‑specific service worker versioning using git commit hashes or build timestamps. Prevents user browsers from serving stale cache versions after portal updates.
+- [x] **`dev.sh` Process & File Cleanup**: Clean temporary files, pid trackers, and ensure rigorous SIGTERM/SIGINT cleanup of Ollama and Open WebUI background processes.
+- [x] **Supabase RLS Policy Audit**: Perform complete audit of Row Level Security (RLS) policies on all database tables in `packages/database` to verify authentication boundaries are enforced.
 
 ---
 
@@ -155,14 +155,14 @@
 - [x] Runbooks & control‑room merged
 - [x] Root files archived
 - [x] Index updated
-- [ ] Link checker run
+- [x] Link checker run
 
 ### Infra
 
 - [x] Audit done
-- [ ] `infra/README.md`
-- [ ] Compose consolidation (optional)
-- [ ] K8s manifest archived (optional)
+- [x] `infra/README.md`
+- [x] Compose consolidation (optional)
+- [x] K8s manifest archived (optional)
 
 ### Packages
 
@@ -177,22 +177,22 @@
 ### Turborepo
 
 - [x] Remote cache live
-- [ ] `affected` in CI
-- [ ] `namedInputs.production`
-- [ ] `sync-assets` Turborepo target
-- [ ] Turborepo cleanup
-- [ ] `nrwl-turbo-action`
-- [ ] `turbo-stylelint`
+- [x] `affected` in CI
+- [x] `namedInputs.production`
+- [x] `sync-assets` Turborepo target
+- [x] Turborepo cleanup
+- [x] `nrwl-turbo-action`
+- [x] `turbo-stylelint`
 
 ### CI & Testing
 
-- [ ] Phase 0 – Trivy / tflint
-- [ ] Phase 1 – Playwright
-- [ ] Phase 2 – Storybook / Chromatic
+- [x] Phase 0 – Trivy / tflint
+- [x] Phase 1 – Playwright
+- [x] Phase 2 – Storybook / Chromatic
 - [x] Phase 3 – PWA
-- [ ] Phase 4 – OpenAPI
-- [ ] Phase 5 – Docker caching
-- [ ] Phase 6 – Open WebUI
+- [x] Phase 4 – OpenAPI
+- [x] Phase 5 – Docker caching
+- [x] Phase 6 – Open WebUI
 
 ### PWA
 
@@ -227,20 +227,20 @@
 
 ### Housekeeping
 
-- [ ] `SUPPORT.md` update
-- [ ] Placeholder URLs
-- [ ] Link checker
-- [ ] Script archive
-- [ ] `infra/README.md`
-- [ ] Entry point standardisation (low)
+- [x] `SUPPORT.md` update
+- [x] Placeholder URLs
+- [x] Link checker
+- [x] Script archive
+- [x] `infra/README.md`
+- [x] Entry point standardisation (low)
 
 ### Production Hardening
 
-- [ ] MinIO bucket policies hardened
-- [ ] PWA icons validated in `public/icons/`
-- [ ] SW cache versioning implemented (build hashes)
-- [ ] `dev.sh` cleanup scripts verified
-- [ ] Supabase RLS policies audited
+- [x] MinIO bucket policies hardened
+- [x] PWA icons validated in `public/icons/`
+- [x] SW cache versioning implemented (build hashes)
+- [x] `dev.sh` cleanup scripts verified
+- [x] Supabase RLS policies audited
 
 ---
 

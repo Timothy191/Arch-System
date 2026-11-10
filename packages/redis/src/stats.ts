@@ -27,9 +27,22 @@ export interface CacheStatsSnapshot {
   redisErrors: number;
   avgLatencyMs: number;
   p95LatencyMs: number;
+  l1Evictions: number;
+  l2RoundTrips: number;
+  privilegeVersionChanges: number;
+  avgWriteThroughDelayMs: number;
 }
 
-type CounterKey = 'hits' | 'misses' | 'l1Hits' | 'l2Hits' | 'redisErrors' | 'xFetchTriggers';
+type CounterKey =
+  | 'hits'
+  | 'misses'
+  | 'l1Hits'
+  | 'l2Hits'
+  | 'redisErrors'
+  | 'xFetchTriggers'
+  | 'l1Evictions'
+  | 'l2RoundTrips'
+  | 'privilegeVersionChanges';
 
 const CACHE_HASH_KEY = 'stats:cache';
 const LATENCY_LIST_KEY = 'stats:latencies';
@@ -71,6 +84,9 @@ function emptyDeltas(): Record<CounterKey, number> {
     l2Hits: 0,
     redisErrors: 0,
     xFetchTriggers: 0,
+    l1Evictions: 0,
+    l2RoundTrips: 0,
+    privilegeVersionChanges: 0,
   };
 }
 
@@ -78,6 +94,7 @@ interface PendingFlush {
   deltas: Record<CounterKey, number>;
   latencies: number[];
   xFetchLatencies: number[];
+  writeThroughDelays: number[];
 }
 
 interface StatsState {
@@ -85,6 +102,7 @@ interface StatsState {
   counters: Record<CounterKey, number>;
   latencies: LatencyBuffer;
   xFetchLatencies: LatencyBuffer;
+  writeThroughDelays: LatencyBuffer;
   pending: PendingFlush;
   flushTimer: ReturnType<typeof setInterval> | null;
   flushing: boolean;
@@ -96,7 +114,8 @@ function createState(): StatsState {
     counters: emptyDeltas(),
     latencies: createLatencyBuffer(LATENCY_BUFFER_SIZE),
     xFetchLatencies: createLatencyBuffer(LATENCY_BUFFER_SIZE),
-    pending: { deltas: emptyDeltas(), latencies: [], xFetchLatencies: [] },
+    writeThroughDelays: createLatencyBuffer(LATENCY_BUFFER_SIZE),
+    pending: { deltas: emptyDeltas(), latencies: [], xFetchLatencies: [], writeThroughDelays: [] },
     flushTimer: null,
     flushing: false,
     disabled: process.env.REDIS_STATS_DISABLED === 'true',
@@ -135,6 +154,10 @@ function buildSnapshot(): CacheStatsSnapshot {
     xFetchTriggers: state.counters.xFetchTriggers,
     avgLatencyMs: avg,
     p95LatencyMs: p95,
+    l1Evictions: state.counters.l1Evictions,
+    l2RoundTrips: state.counters.l2RoundTrips,
+    privilegeVersionChanges: state.counters.privilegeVersionChanges,
+    avgWriteThroughDelayMs: summarize(readLatencies(state.writeThroughDelays)).avg,
   };
 }
 
@@ -152,14 +175,20 @@ function pendingTotal(): number {
   return (
     Object.values(p.deltas).reduce((sum, v) => sum + v, 0) +
     p.latencies.length +
-    p.xFetchLatencies.length
+    p.xFetchLatencies.length +
+    p.writeThroughDelays.length
   );
 }
 
 function takePending(): PendingFlush | null {
   if (pendingTotal() === 0) return null;
   const snapshot = state.pending;
-  state.pending = { deltas: emptyDeltas(), latencies: [], xFetchLatencies: [] };
+  state.pending = {
+    deltas: emptyDeltas(),
+    latencies: [],
+    xFetchLatencies: [],
+    writeThroughDelays: [],
+  };
   return snapshot;
 }
 
@@ -169,6 +198,7 @@ function requeue(batch: PendingFlush): void {
   }
   state.pending.latencies.push(...batch.latencies);
   state.pending.xFetchLatencies.push(...batch.xFetchLatencies);
+  state.pending.writeThroughDelays.push(...batch.writeThroughDelays);
 }
 
 function maybeFlush(): void {
@@ -266,6 +296,30 @@ export function recordXFetchTrigger(latencyMs: number): void {
   maybeFlush();
 }
 
+export function recordL1Eviction(): void {
+  state.counters.l1Evictions++;
+  state.pending.deltas.l1Evictions++;
+  maybeFlush();
+}
+
+export function recordL2RoundTrip(): void {
+  state.counters.l2RoundTrips++;
+  state.pending.deltas.l2RoundTrips++;
+  maybeFlush();
+}
+
+export function recordPrivilegeVersionChange(): void {
+  state.counters.privilegeVersionChanges++;
+  state.pending.deltas.privilegeVersionChanges++;
+  maybeFlush();
+}
+
+export function recordWriteThroughDelay(delayMs: number): void {
+  pushLatency(state.writeThroughDelays, delayMs);
+  state.pending.writeThroughDelays.push(delayMs);
+  maybeFlush();
+}
+
 export async function getCacheStats(): Promise<CacheStatsSnapshot> {
   // Fold anything still buffered down before reading the distributed totals.
   await flushStats().catch(() => undefined);
@@ -287,6 +341,10 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
         avgLatencyMs: avg,
         p95LatencyMs: p95,
         xFetchTriggers: read('xFetchTriggers'),
+        l1Evictions: read('l1Evictions'),
+        l2RoundTrips: read('l2RoundTrips'),
+        privilegeVersionChanges: read('privilegeVersionChanges'),
+        avgWriteThroughDelayMs: summarize(readLatencies(state.writeThroughDelays)).avg,
       };
     }
   } catch {
@@ -299,7 +357,13 @@ export function resetCacheStats(): void {
   state.counters = emptyDeltas();
   state.latencies = createLatencyBuffer(LATENCY_BUFFER_SIZE);
   state.xFetchLatencies = createLatencyBuffer(LATENCY_BUFFER_SIZE);
-  state.pending = { deltas: emptyDeltas(), latencies: [], xFetchLatencies: [] };
+  state.writeThroughDelays = createLatencyBuffer(LATENCY_BUFFER_SIZE);
+  state.pending = {
+    deltas: emptyDeltas(),
+    latencies: [],
+    xFetchLatencies: [],
+    writeThroughDelays: [],
+  };
 
   void getRedisClient()
     .then((redis) => {

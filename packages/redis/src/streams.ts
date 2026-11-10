@@ -552,3 +552,86 @@ export async function publishScadaTelemetryStream(
     approx: true,
   });
 }
+
+export interface ScadaAnomalyOptions {
+  tagId: string;
+  sampleValue: number;
+  zScoreThreshold?: number;
+  minSamples?: number;
+}
+
+export interface ScadaAnomalyResult {
+  tagId: string;
+  sampleValue: number;
+  mean: number;
+  stdDev: number;
+  zScore: number;
+  isAnomaly: boolean;
+  sampleCount: number;
+}
+
+const MAX_TRACKED_TAGS = 2000;
+const DEFAULT_Z_SCORE_THRESHOLD = 3;
+const DEFAULT_MIN_ANOMALY_SAMPLES = 5;
+
+interface OnlineStats {
+  sampleCount: number;
+  mean: number;
+  m2: number;
+}
+
+const scadaAnomalyTracker = new Map<string, OnlineStats>();
+
+export function detectScadaStreamAnomaly(options: ScadaAnomalyOptions): ScadaAnomalyResult {
+  const {
+    tagId,
+    sampleValue,
+    zScoreThreshold = DEFAULT_Z_SCORE_THRESHOLD,
+    minSamples = DEFAULT_MIN_ANOMALY_SAMPLES,
+  } = options;
+
+  let tracker = scadaAnomalyTracker.get(tagId);
+  if (!tracker) {
+    if (scadaAnomalyTracker.size >= MAX_TRACKED_TAGS) {
+      const oldestTag = scadaAnomalyTracker.keys().next().value;
+      if (oldestTag) scadaAnomalyTracker.delete(oldestTag);
+    }
+    tracker = { sampleCount: 0, mean: 0, m2: 0 };
+    scadaAnomalyTracker.set(tagId, tracker);
+  }
+
+  const priorMean = tracker.mean;
+  const priorVariance = tracker.sampleCount > 1 ? tracker.m2 / (tracker.sampleCount - 1) : 0;
+  const priorStdDev = Math.sqrt(priorVariance);
+
+  tracker.sampleCount += 1;
+  const delta = sampleValue - tracker.mean;
+  tracker.mean += delta / tracker.sampleCount;
+  const delta2 = sampleValue - tracker.mean;
+  tracker.m2 += delta * delta2;
+
+  const variance = tracker.sampleCount > 1 ? tracker.m2 / (tracker.sampleCount - 1) : 0;
+  const stdDev = Math.sqrt(variance);
+  const referenceStdDev = priorStdDev > 0 ? priorStdDev : stdDev;
+  const referenceMean = priorStdDev > 0 ? priorMean : tracker.mean;
+  const zScore = referenceStdDev > 0 ? (sampleValue - referenceMean) / referenceStdDev : 0;
+  const isAnomaly = tracker.sampleCount >= minSamples && Math.abs(zScore) >= zScoreThreshold;
+
+  return {
+    tagId,
+    sampleValue,
+    mean: Math.round(tracker.mean * 1000) / 1000,
+    stdDev: Math.round(stdDev * 1000) / 1000,
+    zScore: Math.round(zScore * 1000) / 1000,
+    isAnomaly,
+    sampleCount: tracker.sampleCount,
+  };
+}
+
+export function resetScadaAnomalyState(tagId?: string): void {
+  if (tagId) {
+    scadaAnomalyTracker.delete(tagId);
+  } else {
+    scadaAnomalyTracker.clear();
+  }
+}

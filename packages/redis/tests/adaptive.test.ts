@@ -4,6 +4,7 @@ import {
   mutateCache,
   RedisCircuitBreaker,
   recordKeyAccess,
+  schedulePredictiveCacheWarm,
   swrCacheWrap,
 } from '../src/adaptive';
 import { cacheDelete, clearMemoryCache } from '../src/cache';
@@ -170,6 +171,30 @@ describe('Autonomously Adaptive Caching Engine', () => {
 
       const read = await swrCacheWrap(key, async () => ({ count: 99 }));
       expect(read.count).toBe(1);
+    });
+  });
+
+  describe('Predictive Cache Warming', () => {
+    it('warms keys with frequency >= minFrequency and skips others', async () => {
+      const hotKey = track(keyFor('warm-hot'));
+      const coldKey = track(keyFor('warm-cold'));
+
+      recordKeyAccess(hotKey);
+      recordKeyAccess(hotKey);
+      recordKeyAccess(hotKey);
+
+      const hotFetcher = jest.fn(async () => ({ temperature: 'hot' }));
+      const coldFetcher = jest.fn(async () => ({ temperature: 'cold' }));
+
+      const { warmedKeys, skippedKeys } = await schedulePredictiveCacheWarm([
+        { key: hotKey, fetcher: hotFetcher, minFrequency: 2 },
+        { key: coldKey, fetcher: coldFetcher, minFrequency: 2 },
+      ]);
+
+      expect(warmedKeys).toContain(hotKey);
+      expect(skippedKeys).toContain(coldKey);
+      expect(hotFetcher).toHaveBeenCalledTimes(1);
+      expect(coldFetcher).not.toHaveBeenCalled();
     });
   });
 });

@@ -10,7 +10,11 @@ export type MetricName =
   | 'lock_timeout'
   | 'stampede_prevented'
   | 'eviction_observed'
-  | 'ttl_jittered';
+  | 'ttl_jittered'
+  | 'l1_eviction'
+  | 'l2_round_trip'
+  | 'privilege_version_change'
+  | 'write_through_delay_ms';
 
 export function incrementMetric(name: MetricName, labels?: Record<string, string>): void {
   const key = labels ? `${name}:${JSON.stringify(labels)}` : name;

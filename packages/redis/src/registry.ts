@@ -7,6 +7,9 @@ export const CacheCategory = {
   AI_MEMORY: 'ai_memory',
   DEPARTMENT: 'dept',
   EQUIPMENT: 'equipment',
+  TELEMETRY: 'telemetry',
+  REPORTS: 'reports',
+  SESSIONS: 'sessions',
 } as const;
 
 export type CacheCategory = (typeof CacheCategory)[keyof typeof CacheCategory];
@@ -48,6 +51,21 @@ export const CACHE_TTL_REGISTRY: Record<CacheCategory, CacheTtlConfig> = {
   [CacheCategory.EQUIPMENT]: {
     l1Seconds: 30,
     l2Seconds: 300,
+    durabilityPolicy: 'write-through-durable',
+  },
+  [CacheCategory.TELEMETRY]: {
+    l1Seconds: 5,
+    l2Seconds: 60,
+    durabilityPolicy: 'ephemeral-cache',
+  },
+  [CacheCategory.REPORTS]: {
+    l1Seconds: 60,
+    l2Seconds: 900,
+    durabilityPolicy: 'write-through-durable',
+  },
+  [CacheCategory.SESSIONS]: {
+    l1Seconds: 60,
+    l2Seconds: 3600,
     durabilityPolicy: 'write-through-durable',
   },
 };
@@ -182,6 +200,8 @@ const CRITICAL_KEY_PREFIXES = [
   'arch:shift:',
   'arch:dept:',
   'arch:equipment:',
+  'arch:reports:',
+  'arch:sessions:',
   'auth:',
   'shift:',
   'dept:',

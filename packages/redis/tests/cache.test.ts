@@ -1,5 +1,6 @@
 import { cacheWrap, clearMemoryCache } from '../src/cache';
 import { memorySet } from '../src/l1';
+import { CACHE_TTL_REGISTRY, CacheCategory, isDurableKey } from '../src/registry';
 import type { XFetchWrapper } from '../src/xfetch';
 
 // Mock stats and invalidation to avoid side effects
@@ -258,6 +259,36 @@ describe('X-Fetch Cache Wrapper', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
       // cacheWrap caches null results as XFetchWrapper with null value
       expect(mockRedisSetEx).toHaveBeenCalledWith(key, 10, expect.stringContaining('"value":null'));
+    });
+  });
+
+  describe('CacheCategory Registry & Durability', () => {
+    it('registers TELEMETRY, REPORTS, and SESSIONS categories with correct TTLs', () => {
+      expect(CacheCategory.TELEMETRY).toBe('telemetry');
+      expect(CacheCategory.REPORTS).toBe('reports');
+      expect(CacheCategory.SESSIONS).toBe('sessions');
+
+      expect(CACHE_TTL_REGISTRY[CacheCategory.TELEMETRY]).toEqual({
+        l1Seconds: 5,
+        l2Seconds: 60,
+        durabilityPolicy: 'ephemeral-cache',
+      });
+      expect(CACHE_TTL_REGISTRY[CacheCategory.REPORTS]).toEqual({
+        l1Seconds: 60,
+        l2Seconds: 900,
+        durabilityPolicy: 'write-through-durable',
+      });
+      expect(CACHE_TTL_REGISTRY[CacheCategory.SESSIONS]).toEqual({
+        l1Seconds: 60,
+        l2Seconds: 3600,
+        durabilityPolicy: 'write-through-durable',
+      });
+    });
+
+    it('marks arch:reports: and arch:sessions: as durable keys', () => {
+      expect(isDurableKey('arch:reports:monthly')).toBe(true);
+      expect(isDurableKey('arch:sessions:user123')).toBe(true);
+      expect(isDurableKey('arch:telemetry:gauge1')).toBe(false);
     });
   });
 });

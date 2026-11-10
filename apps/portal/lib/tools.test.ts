@@ -16,7 +16,6 @@ jest.mock('next/headers', () => ({
 jest.mock('@/lib/server-cache', () => ({
   cacheLife: jest.fn(),
   cacheTag: jest.fn(),
-  cachedRSC: jest.fn((_keys, fn) => fn()),
 }));
 
 jest.mock('@/lib/cache-utils', () => ({

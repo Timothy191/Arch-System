@@ -19,6 +19,81 @@ export function assertSameSlot(keys: readonly string[]): boolean {
   return true;
 }
 
-// TODO: implement MOVED/ASK redirect following when a cluster-aware client
-// factory is available. Until then, callers MUST co-locate multi-key operations
-// and assertSameSlot is enforced in tests.
+export interface ClusterRedirect {
+  kind: 'MOVED' | 'ASK';
+  slot: number;
+  host: string;
+  port: number;
+  address: string;
+}
+
+const REDIRECT_REGEX = /\b(MOVED|ASK)\s+(\d+)\s+([^:\s]+):(\d+)\b/;
+
+export function parseClusterRedirect(errorOrReply: unknown): ClusterRedirect | null {
+  const message =
+    errorOrReply instanceof Error
+      ? errorOrReply.message
+      : typeof errorOrReply === 'string'
+        ? errorOrReply
+        : errorOrReply && typeof errorOrReply === 'object' && 'message' in errorOrReply
+          ? String((errorOrReply as { message: unknown }).message)
+          : null;
+
+  if (!message) return null;
+  const match = REDIRECT_REGEX.exec(message);
+  if (!match) return null;
+
+  const kind = match[1] as 'MOVED' | 'ASK';
+  const slot = Number.parseInt(match[2] as string, 10);
+  const host = match[3] as string;
+  const port = Number.parseInt(match[4] as string, 10);
+
+  return {
+    kind,
+    slot,
+    host,
+    port,
+    address: `${host}:${port}`,
+  };
+}
+
+export interface ClusterRedirectExecutionOptions<T> {
+  executeNodeCommand: (context: {
+    redirect?: ClusterRedirect;
+    requiresAsking: boolean;
+    attempt: number;
+  }) => Promise<T>;
+  maxRedirects?: number;
+}
+
+const DEFAULT_MAX_CLUSTER_REDIRECTS = 5;
+
+export async function executeWithClusterRedirect<T>(
+  options: ClusterRedirectExecutionOptions<T>
+): Promise<T> {
+  const maxRedirects = options.maxRedirects ?? DEFAULT_MAX_CLUSTER_REDIRECTS;
+  let currentRedirect: ClusterRedirect | undefined;
+  let requiresAsking = false;
+
+  for (let attempt = 0; attempt <= maxRedirects; attempt++) {
+    try {
+      return await options.executeNodeCommand({
+        redirect: currentRedirect,
+        requiresAsking,
+        attempt,
+      });
+    } catch (errorOrReply) {
+      const redirect = parseClusterRedirect(errorOrReply);
+      if (!redirect) {
+        throw errorOrReply;
+      }
+      if (attempt >= maxRedirects) {
+        throw new Error('Cluster redirect limit exceeded');
+      }
+      currentRedirect = redirect;
+      requiresAsking = redirect.kind === 'ASK';
+    }
+  }
+
+  throw new Error('Cluster redirect limit exceeded');
+}
