@@ -87,6 +87,12 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
     const machinesTab = screen.getByRole('tab', { name: /Machines/i });
     fireEvent.click(machinesTab);
     expect(screen.getByText(/Registered Machines with Loaded Loads/i)).toBeInTheDocument();
+
+    // Verify KPI strip totals render properly
+    expect(screen.getByText(/Active Excavators/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 Units/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 Loads/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loaded Volume/i)).toBeInTheDocument();
   });
 
   it('renders Shift, Daily, and Monthly Operational Target Graphs in AlertPanel', async () => {

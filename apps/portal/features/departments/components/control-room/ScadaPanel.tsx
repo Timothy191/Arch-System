@@ -261,9 +261,28 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     [activities, fleet, loads]
   );
 
-  const totalExcavatorLoads = excavators.reduce((sum, e) => sum + e.loadedLoads, 0);
-  const totalMachineLoads = registeredMachines.reduce((sum, m) => sum + m.loadedLoads, 0);
-  const totalVolumeBcm = registeredMachines.reduce((sum, m) => sum + m.totalBcm, 0);
+  // Performance optimization: Consolidate machine loads & volume into a single-pass loop
+  // and memoize summary totals to avoid 3 separate .reduce() traversals on every render pass
+  // (e.g. view tab toggles, timer ticks, and parent re-renders).
+  const { totalExcavatorLoads, totalMachineLoads, totalVolumeBcm } = useMemo(() => {
+    let exLoads = 0;
+    for (const ex of excavators) {
+      exLoads += ex.loadedLoads;
+    }
+
+    let mLoads = 0;
+    let volBcm = 0;
+    for (const m of registeredMachines) {
+      mLoads += m.loadedLoads;
+      volBcm += m.totalBcm;
+    }
+
+    return {
+      totalExcavatorLoads: exLoads,
+      totalMachineLoads: mLoads,
+      totalVolumeBcm: volBcm,
+    };
+  }, [excavators, registeredMachines]);
 
   return (
     <GlassCard
