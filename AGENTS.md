@@ -236,7 +236,7 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 - **Boundaries & imports**: see layering table; import via canonical exports (`@repo/ui/GlassCard`), never `@repo/ui/src/...`.
 - **Strict TypeScript**: no `any`, no `@ts-ignore`.
 - **Immutable migrations & contract parity**: never rename/renumber applied migrations; every table/column needs a Zod schema in `packages/contract/src/schemas/`.
-- **Commits**: Conventional Commits (`config/tools/commitlint.config.mjs`); never print/commit `.env*`; append ISO-8601 entries to modified packages' `AGENT_TRACER.md`.
+- **Commits**: Conventional Commits (`config/tools/commitlint.config.mjs`); never print/commit `.env*`; append ISO-8601 entries to root `AGENT_TRACER.md` (single consolidated ledger; never create per-package tracer files or non-canonical root tracer variants).
 
 ---
 

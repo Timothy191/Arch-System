@@ -79,16 +79,16 @@ function extractExports(src) {
 }
 
 function extractImports(src) {
-  const froms = new Set();
+  const importSpecifiers = new Set();
   for (const re of [/from\s+['"]([^'"]+)['"]/g, /import\s+['"]([^'"]+)['"]/g]) {
     let m;
     while ((m = re.exec(src))) {
       const spec = m[1];
       if (!spec.startsWith('.')) continue;
-      froms.add(path.basename(spec) || spec);
+      importSpecifiers.add(path.basename(spec) || spec);
     }
   }
-  return [...froms];
+  return [...importSpecifiers];
 }
 
 function extractDbTables(src) {

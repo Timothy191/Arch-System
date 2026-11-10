@@ -49,7 +49,7 @@ Before marking any task complete, autonomously execute:
 - **RLS Isolation**: RLS must be enabled on every table, consulting `(SELECT auth.uid())` and `public.employees`.
 - **Architectural Boundaries**: `tools/repo/policy-compiler.cjs` is SSoT — UI packages pure presentation, apps route via `@repo/supabase`.
 - **Tooling Drift**: If `pnpm policy:check` fails on generated files, run `pnpm policy:gen` to regenerate.
-- **Agent Tracing**: Modified packages must append ISO 8601 entries to `AGENT_TRACER.md`.
+- **Agent Tracing**: Append ISO 8601 entries to the single root `AGENT_TRACER.md` ledger (never create per-package tracer files or non-canonical root tracer variants).
 - **Token & Bug Telemetry**: Record sessions via `pnpm token:record -- --agent <name> --input <n> --output <n> --bugs <n>` (or `pnpm agent:hook:post-task`).
 - **System Overview (`/overview`) Parity**: When adding migrations, routes, quality gates, or updating expenditure telemetry, keep `apps/portal/app/overview/` (`lib/data.ts`, `DatabaseSchema.tsx`, `TechStack.tsx`, `SystemArchitecture.tsx`, `OverviewHeaderVisuals.tsx`, `agentic-monitor-data.ts`) synchronized (`213` migrations, `27/27` gates, `PROJECT_MILESTONES` summing to `LIFETIME_METRICS` in `en-US` period format `R 5,000.00`).
 - **Backlog Zero & Anti-Bloat Leases**: Complete outstanding tasks before new work; use `skills-mcp` acquire/return for dynamic context leasing.

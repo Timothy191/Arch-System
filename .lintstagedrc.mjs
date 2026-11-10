@@ -90,10 +90,16 @@ export default {
     for (const batch of chunk(filtered, 20)) {
       commands.push(`pnpm biome check --write ${batch.join(' ')}`);
     }
+    const spellFiles = files.filter((f) => !f.endsWith('database.types.ts'));
+    for (const batch of chunk(spellFiles, 20)) {
+      commands.push(
+        `cspell --config config/tools/cspell.json --no-progress --gitignore --no-must-find-files ${batch.join(' ')}`
+      );
+    }
     return commands;
   },
 
-  // Markdown → markdownlint then prettier
+  // Markdown → markdownlint then prettier then cspell
   '*.md': (files) => {
     const filtered = files.filter((f) => f.endsWith('.md'));
     if (filtered.length === 0) return [];
@@ -103,6 +109,9 @@ export default {
         `markdownlint --config config/tools/.markdownlint.json --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist' ${batch.join(' ')}`
       );
       commands.push(`prettier --write ${batch.join(' ')}`);
+      commands.push(
+        `cspell --config config/tools/cspell.json --no-progress --gitignore --no-must-find-files ${batch.join(' ')}`
+      );
     }
     return commands;
   },

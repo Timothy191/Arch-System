@@ -20,13 +20,14 @@
     "*.tsbuildinfo",
     "*.lock",
     ".prisma/**",
-    "**/AGENT_TRACER*.md",
-    "docs/archive/**"
+    "docs/archive/**",
+    "**/zero-drift-watchdog/test/adversarial/**"
   ],
   "ignoreRegExpList": [
-    "sb_publishable_[A-Za-z0-9_]+",
-    "sb_anon_[A-Za-z0-9_]+",
-    "sb_service_[A-Za-z0-9_]+",
+    "sb_publishable_[A-Za-z0-9_-]+",
+    "sb_anon_[A-Za-z0-9_-]+",
+    "sb_service_[A-Za-z0-9_-]+",
+    "team_[A-Za-z0-9]+",
     "XVCJ"
   ],
   "words": [

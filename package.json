@@ -224,7 +224,7 @@
     "lint:fix": "turbo run lint -- --fix",
     "lint:css-perf": "node tools/audits/check-css-performance.cjs",
     "lint:styles": "stylelint '**/*.{css,scss}' --ignore-path config/tools/.stylelintignore --ignore-path .gitignore",
-    "lint:spelling": "cspell \"apps/**/*.{ts,tsx,js,jsx,md}\" \"packages/**/*.{ts,tsx,js,jsx,md}\" \"libs/**/*.{ts,tsx,js,jsx,md}\" \"docs/**/*.md\" --config config/tools/cspell.json --no-progress --gitignore",
+    "lint:spelling": "cspell \"*.md\" \".agents/**/*.md\" \".github/**/*.md\" \"apps/**/*.{ts,tsx,js,jsx,md}\" \"packages/**/*.{ts,tsx,js,jsx,md}\" \"libs/**/*.{ts,tsx,js,jsx,md}\" \"docs/**/*.md\" \"tools/**/*.{js,cjs,mjs,ts,md}\" \"scripts/**/*.{js,cjs,mjs,ts,md}\" --config config/tools/cspell.json --no-progress --gitignore",
     "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "md:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "monitor": "bash scripts/monitor-hud.sh",

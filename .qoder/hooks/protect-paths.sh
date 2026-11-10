@@ -45,6 +45,10 @@ case "$rel" in
     echo "Blocked: $rel is generated from the live schema. Change the migration and run pnpm --filter @repo/database db:types. Hand-written types belong in packages/supabase/src/manual-types.ts." >&2
     exit 2
     ;;
+  *TRACERR*|AGENTS_TRACER.md|AGENTS-TRACER.md|*/AGENT_TRACER.md|*/AGENTS_TRACER.md|*/AGENTS-TRACER.md)
+    echo "Blocked: $rel is a non-canonical or misspelled agent tracer path. Append entries only to the single root AGENT_TRACER.md file." >&2
+    exit 2
+    ;;
 esac
 
 exit 0

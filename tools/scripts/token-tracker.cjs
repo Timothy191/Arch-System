@@ -597,9 +597,7 @@ function collectGitAndRepoMetrics() {
     ? fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).length
     : 136;
 
-  const tracerFile = fs.existsSync(path.join(ROOT, 'AGENTS-TRACERRS.md'))
-    ? path.join(ROOT, 'AGENTS-TRACERRS.md')
-    : path.join(ROOT, 'AGENT_TRACER.md');
+  const tracerFile = path.join(ROOT, 'AGENT_TRACER.md');
   const tracerMilestones = fs.existsSync(tracerFile)
     ? (fs.readFileSync(tracerFile, 'utf-8').match(/^## \[/gm) || []).length
     : 12;

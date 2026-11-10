@@ -134,32 +134,48 @@ if (fs.existsSync(mcpFile)) {
   }
 }
 
-// ── 4. Audit Consolidated AGENTS-TRACERRS.md Ledger ───────────────────────────
-console.log('4️⃣  Auditing consolidated AGENTS-TRACERRS.md ledger...');
-const consolidatedTracerFile = path.join(ROOT, 'AGENTS-TRACERRS.md');
+// ── 4. Audit Consolidated AGENT_TRACER.md Ledger & Naming Hygiene ─────────────
+console.log('4️⃣  Auditing consolidated AGENT_TRACER.md ledger & naming hygiene...');
+const consolidatedTracerFile = path.join(ROOT, 'AGENT_TRACER.md');
 let tracerCount = 0;
 if (fs.existsSync(consolidatedTracerFile)) {
   const content = fs.readFileSync(consolidatedTracerFile, 'utf8').trim();
   if (content.length < 100) {
     violations.push({
-      file: 'AGENTS-TRACERRS.md',
+      file: 'AGENT_TRACER.md',
       type: 'INCOMPLETE_TRACER',
-      description: 'AGENTS-TRACERRS.md exists but lacks consolidated historical entries.',
+      description: 'AGENT_TRACER.md exists but lacks consolidated historical entries.',
     });
   } else {
     tracerCount = 1;
   }
 } else {
   violations.push({
-    file: 'AGENTS-TRACERRS.md',
+    file: 'AGENT_TRACER.md',
     type: 'MISSING_CONSOLIDATED_TRACER',
-    description: 'Consolidated root AGENTS-TRACERRS.md ledger is missing.',
+    description: 'Consolidated root AGENT_TRACER.md ledger is missing.',
   });
 }
 
-console.log(
-  `   ✓ Verified consolidated AGENTS-TRACERRS.md ledger (${tracerCount} active SSoT file).`
-);
+// Ensure no misspelled root tracer variants or distributed per-package AGENT_TRACER.md exist
+const FORBIDDEN_ROOT_TRACER_NAMES = [
+  `AGENTS-TRACER${'RS'}.md`,
+  `AGENTS_TRACER${'RS'}.md`,
+  `AGENT_TRACER${'RS'}.md`,
+  'AGENTS_TRACER.md',
+  'AGENTS-TRACER.md',
+];
+for (const forbiddenName of FORBIDDEN_ROOT_TRACER_NAMES) {
+  if (fs.existsSync(path.join(ROOT, forbiddenName))) {
+    violations.push({
+      file: forbiddenName,
+      type: 'MISSPELLED_TRACER_FILENAME',
+      description: `Misspelled or non-canonical tracer file "${forbiddenName}" found. Use root "AGENT_TRACER.md" only.`,
+    });
+  }
+}
+
+console.log(`   ✓ Verified consolidated AGENT_TRACER.md ledger (${tracerCount} active SSoT file).`);
 
 // ── 5. Audit Root Agent Directives ────────────────────────────────────────────
 console.log('5️⃣  Auditing Root Directives (AGENTS.md, GEMINI.md, CLAUDE.md)...');
@@ -218,7 +234,7 @@ const reportMd = `# AI & Agentic Content Audit Report
 
 - **Agent Rules**: ${rulesCount} verified in \`.agents/rules/\`
 - **Agent Skills**: ${skillsCount} verified in \`.agents/skills/\`
-- **Workspace Tracers**: ${tracerCount} consolidated \`AGENTS-TRACERRS.md\` ledger active
+- **Workspace Tracers**: ${tracerCount} consolidated \`AGENT_TRACER.md\` ledger active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
 
 ## Critical Findings

@@ -71,6 +71,26 @@ const pathProbes = [
     expectedExit: 2,
     label: 'Block *.generated.* file write',
   },
+  {
+    file: `AGENTS-TRACER${'RS'}.md`,
+    expectedExit: 2,
+    label: 'Block misspelled root hyphenated tracer write',
+  },
+  {
+    file: `AGENTS_TRACER${'RS'}.md`,
+    expectedExit: 2,
+    label: 'Block misspelled root underscore tracer write',
+  },
+  {
+    file: 'packages/ui/AGENT_TRACER.md',
+    expectedExit: 2,
+    label: 'Block nested per-package AGENT_TRACER.md write',
+  },
+  {
+    file: 'AGENT_TRACER.md',
+    expectedExit: 0,
+    label: 'Allow canonical root AGENT_TRACER.md edit',
+  },
   { file: '.env.example', expectedExit: 0, label: 'Allow .env.example template edit' },
   {
     file: 'apps/portal/server/proxy.ts',

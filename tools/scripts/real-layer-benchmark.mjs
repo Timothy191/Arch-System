@@ -284,7 +284,7 @@ function verifyServerTimingInstrumentation() {
 }
 
 function collectRepoAndGateFootprint() {
-  const tracerPath = path.join(ROOT, 'AGENTS-TRACERRS.md');
+  const tracerPath = path.join(ROOT, 'AGENT_TRACER.md');
   const tracerBytes = fs.existsSync(tracerPath) ? fs.statSync(tracerPath).size : 0;
 
   const evidencePath = path.join(CI_LOCAL_DIR, 'agent-verify-evidence.json');

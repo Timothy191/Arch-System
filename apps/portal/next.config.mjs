@@ -53,7 +53,7 @@ const nextConfig = {
       '**/.claude.local.md',
       '**/.cursorrules',
       '**/REVIEW.md',
-      '**/AGENTS-TRACERRS.md',
+      '**/AGENT_TRACER.md',
       '**/*AGENT_TRACER.md',
       '**/docs/**',
       '**/documentation/**',

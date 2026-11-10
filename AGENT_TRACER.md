@@ -1,6 +1,20 @@
-# Arch-System Consolidated Agent Tracer Ledger (`AGENTS-TRACERRS.md`)
+# Arch-System Consolidated Agent Tracer Ledger (`AGENT_TRACER.md`)
 
 > **Single Source of Truth (SSoT)**: Consolidated from 24 distributed `AGENT_TRACER.md` files (`root`, `apps/portal`, `packages/*`, `libs/*`, `tools`, `e2e`, `scripts`, `docs/archive`) to eliminate context fragmentation and enforce a single immutable audit ledger across the monorepo.
+
+---
+
+## [2026-11-10T08:15:00+02:00] - Monorepo Lexical, Spelling, Grammar & File-Naming Governance (`AGENT_TRACER.md` SSoT)
+
+- **EARS Spec (`docs/specs/lexical-and-naming-governance.spec.md`)**: Authored formal specification establishing unified American English (`en-US`) spelling, grammar, identifier, and file-naming enforcement across all agents, hooks, pre-commit checks, and CI verification gates.
+- **Canonical Root `AGENT_TRACER.md` Restoration**:
+  - Renamed root ledger to canonical `AGENT_TRACER.md` via `git mv`, updated all references in `AGENTS.md`, `.agents/rules/execution-guardrails.md`, `.agents/rules/general-best-practices.md`, `apps/portal/next.config.mjs`, `tools/audits/audit-agentic-content.cjs`, `tools/audits/antidrift-test.cjs`, `tools/scripts/real-layer-benchmark.mjs`, `tools/scripts/token-tracker.cjs`, and `documentation/03-audit-reports/agentic-audit-report.md`.
+  - Removed the `"**/AGENT_TRACER*.md"` exclusion blind spot from `config/tools/cspell.json` so `AGENT_TRACER.md` is continuously spell-checked on every edit and gate run.
+- **4-Layer Forced Lexical & Naming Governance**:
+  - **Layer 1 (Expanded `pnpm lint:spelling`)**: Expanded `package.json` `lint:spelling` to audit `1,926` files across `*.md`, `.agents/**/*.md`, `.github/**/*.md`, `apps/`, `packages/`, `libs/`, `docs/`, `tools/`, and `scripts/` with `0` issues; fixed the `importSpecifiers` identifier typo in `tools/scripts/generate-codemaps.mjs`.
+  - **Layer 2 (Always-Apply Agent Rule)**: Created `.agents/rules/lexical-and-naming-governance.md` (`alwaysApply: true`) and symlinked `../.agents/rules/lexical-and-naming-governance.md` (`32/32` workspace rules synced in Gate 9).
+  - **Layer 3 (PostToolUse & Pre-Commit Hooks)**: Updated `.qoder/hooks/auto-format.sh` and `.lintstagedrc.mjs` to run Biome, Markdownlint, Prettier, and `cspell` automatically on modified/staged files.
+  - **Layer 4 (PreToolUse Path Guard & Gate 25 Probes)**: Updated `.qoder/hooks/protect-paths.sh` and `tools/audits/audit-agent-permissions.cjs` (11 synthetic probes) to block creation of misspelled root tracer files or nested `*/AGENT_TRACER.md` files with exit code `2`.
 
 ---
 
