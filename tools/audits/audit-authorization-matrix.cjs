@@ -55,6 +55,8 @@ const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
 
 const AUTH_GUARD_PATTERNS = [
   /getAuthenticatedEmployee/,
+  /getUserSafely/,
+  /prepareExportRequest/,
   /auth\.getUser/,
   /auth\.getClaims/,
   /authorizeIngest/,
@@ -69,7 +71,6 @@ const AUTH_GUARD_PATTERNS = [
   /WEBHOOK_SECRET/,
   /REDIS_AUTH_SECRET/,
   /N8N_API_KEY/,
-  /withRateLimit/,
 ];
 
 // ── 1. Audit Proxy Module-Level Authorization Matrix ────────────────────────

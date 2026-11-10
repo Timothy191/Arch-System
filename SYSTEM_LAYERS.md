@@ -17,7 +17,8 @@ This layer is responsible for the visual presentation and client-side interactio
 
 This layer handles the server-side logic, routing, and data fetching orchestrations.
 
-- **Next.js Server Actions (`apps/portal/actions` & Server Components)**: Following the canonical 8-step security sequence, server actions manage authentication, authorization, rate-limiting, validation, rate-limiting, execution, audit logging, cache invalidation, and typed result return.
+- **Next.js Server Actions (`apps/portal/actions` & Server Components)**: Following the canonical 8-step security sequence:
+  1. Authenticate the caller → 2. Authorize the requested operation → 3. Validate all untrusted input → 4. Apply rate limits → 5. Execute operation → 6. Record audit event → 7. Invalidate affected caches → 8. Return typed result (before any redirect()).
 - **`apps/portal/server/proxy.ts`**: The request proxy handling Next 16 routing, CSP, nonces, and Supabase auth claims verification.
 - **`libs/features/auth/data-access`**: Shared authentication data access patterns.
 - **`libs/features/departments/data-access`**: Shared department data access patterns.

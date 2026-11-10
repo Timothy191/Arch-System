@@ -200,3 +200,18 @@
 - **Phase 3 (Design):** Added `--config config/tools/.markdownlint.json --ignore-path .gitignore` to `md:lint`/`md:fix`, remediated all 38 Markdown files, wired `pnpm md:lint` into Gate 2 and `audit-agentic-content.cjs --check` into Gate 9 of `agent-verify.sh`, adopted `DepartmentFilterToolbar` in `PlantHistoryDatabaseClient.tsx`, added `--check` mode to `run-audit.cjs`, and aligned `ci.yml` + `local-ci.mjs`.
 - **Phase 4 (Criticism):** Added optional `searchAriaLabel` and `shiftAriaLabel` props to `DepartmentFilterToolbar` to preserve existing screen-reader labels and unit test queries in `PlantHistoryDatabaseClient.tsx`.
 - **Phase 5 (Contract):** Verified `pnpm md:lint`, `pnpm lint:spelling`, `pnpm --filter portal test`, `pnpm audit:compliance`, `pnpm ci:local`, and 27/27 gates in `pnpm agent:verify`.
+
+### [2026-11-10T09:28:00+02:00] Complete Forensic Gap Closure — Complexity Hotspot (`03-complexity-hotspot-refactor`), 100% Contract Drift Threshold, Auth Guard Hardening, Gate 11 Security Headers & Live AI Telemetry
+
+- **Phase 1 (Comprehension):** Audited all remaining open items across `docs/specs/03-complexity-hotspot-refactor.md` (`Status: PARTIAL`) and the 27-Gate Forensic Report (`real_world_27_gates_audit.md`).
+- **Phase 2 (Evidence):**
+  - `docs/specs/03-complexity-hotspot-refactor.md` remained `PARTIAL` with `handleExcavatorMaterialChange` in `ExcavatorActivityForm.tsx` at cyclomatic complexity `15` (`> 8`).
+  - Gate 5 (`tools/audits/audit-contract-drift.cjs:32`) set `DRIFT_HEALTHY_THRESHOLD = 80` despite 100% contract schema coverage across all 104 database tables.
+  - Gate 16 (`tools/audits/audit-authorization-matrix.cjs:72`) included `/withRateLimit/` in `AUTH_GUARD_PATTERNS`, allowing rate-limiting alone to satisfy authentication checks, and `apps/portal/app/api/sync/fallback/route.ts` did not verify session authentication prior to claiming Redis idempotency keys.
+  - Gate 11 (`tools/audits/audit-hooks-and-clients.cjs`) did not verify HTTP security headers in `apps/portal/proxy.ts` / `apps/portal/next.config.mjs` or scan `apps/portal/hooks`.
+  - `e2e/accessibility.spec.ts` (`'should have sufficient color contrast'`) only checked element count (`expect(count).toBeGreaterThan(0)`).
+  - `apps/portal/app/overview/sections/AgenticMonitor.tsx` ran a no-op `setTimeout` in `handleRefresh` without fetching `/api/ai/metrics`.
+  - `version.json` and `apps/portal/lib/version.generated.ts` required synchronization via `pnpm version:sync`.
+- **Phase 3 (Design):** Extracted `buildExcavatorMaterialTransition`, `applyExcavatorMaterialState`, `notifyRegularMachineMaterial`, and `adjustPendingMutationCount` in `ExcavatorActivityForm.tsx` (reducing `handleExcavatorMaterialChange` cyclomatic complexity to `3`); raised `DRIFT_HEALTHY_THRESHOLD` to `100`; added `getUserSafely(supabase)` session auth to `/api/sync/fallback` and removed `/withRateLimit/` from `AUTH_GUARD_PATTERNS`; added CSP/HSTS/security-header and `apps/portal/hooks` checks to `audit-hooks-and-clients.cjs`; added WCAG relative luminance contrast computation (`>= 4.5`) to `e2e/accessibility.spec.ts`; wired `AgenticMonitor.tsx` to `/api/ai/metrics`; and ran `pnpm version:sync`.
+- **Phase 4 (Criticism):** Preserved fallback resilience in `AgenticMonitor.tsx` when offline or inside isolated unit tests, and enforced `<= 2` positional parameters on all extracted helpers in `ExcavatorActivityForm.tsx`.
+- **Phase 5 (Contract):** Verified `pnpm lint:agent-rules`, `pnpm audit:compliance`, `pnpm agent:verify` (27/27 gates), fast-forward merge into `main`, and Vercel Production deployment.

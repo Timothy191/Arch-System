@@ -5,6 +5,7 @@ import {
   type IdempotencyClaim,
   readIdempotencyResult,
 } from '@repo/redis';
+import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
@@ -89,8 +90,18 @@ async function dispatch(action: string, payload: unknown): Promise<ReplayResult>
 const MAX_QUEUE_ID_LENGTH = 200;
 const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;
+const HTTP_UNAUTHORIZED = 401;
 
 async function replay(req: NextRequest): Promise<NextResponse> {
+  const supabase = await createServerSupabaseClient();
+  const user = await getUserSafely(supabase);
+  if (!user) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } },
+      { status: HTTP_UNAUTHORIZED }
+    );
+  }
+
   const queueId = req.headers.get('x-idempotency-key');
   if (!queueId || queueId.length > MAX_QUEUE_ID_LENGTH) {
     return badRequest('Missing or malformed x-idempotency-key');

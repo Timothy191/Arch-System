@@ -1,7 +1,7 @@
 'use client';
 
 import { Activity, Bot, Bug, Clock, Coins, RefreshCw, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AgenticMonitorSpendAndFeed } from './AgenticMonitorSpendAndFeed';
 import {
   AGENT_SYSTEM_BREAKDOWN,
@@ -25,17 +25,86 @@ function formatZarCurrency(amount: number): string {
   });
 }
 
+interface LiveAiMetricsOverlay {
+  readonly tokensUsed?: number;
+  readonly tokensCached?: number;
+  readonly usdCost?: number;
+  readonly zarCost?: number;
+  readonly zarSaved?: number;
+  readonly totalCommits?: number;
+  readonly bugsFixed?: number;
+  readonly cacheHitRatio?: number;
+}
+
 export default function AgenticMonitor() {
   const [scope, setScope] = useState<'all-time' | 'session'>('all-time');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
   const [exchangeRate] = useState<number>(DEFAULT_USD_TO_ZAR_RATE); // USD to ZAR
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [liveOverlay, setLiveOverlay] = useState<LiveAiMetricsOverlay | null>(null);
 
-  const currentMetrics = scope === 'all-time' ? LIFETIME_METRICS : SESSION_METRICS;
+  const baseMetrics = scope === 'all-time' ? LIFETIME_METRICS : SESSION_METRICS;
+  const currentMetrics = liveOverlay ? { ...baseMetrics, ...liveOverlay } : baseMetrics;
+
+  const fetchLiveMetrics = useCallback(async (targetScope: 'all-time' | 'session') => {
+    setRefreshing(true);
+    try {
+      const response = await fetch(`/api/ai/metrics?scope=${targetScope}`, {
+        cache: 'no-store',
+      });
+      if (response.ok) {
+        const payload = (await response.json()) as {
+          readonly metrics?: {
+            readonly buildTelemetry?: {
+              readonly totalTokens?: number;
+              readonly cacheReadTokens?: number;
+              readonly avgUsage?: {
+                readonly cacheHitRatePct?: number;
+              };
+              readonly claudeCodeCost?: {
+                readonly totalCostUSD?: number;
+                readonly totalCostZAR?: number;
+                readonly cacheSavingsZAR?: number;
+              };
+              readonly engineeringVelocity?: {
+                readonly totalCommits?: number;
+                readonly bugsResolved?: number;
+              };
+            };
+          };
+        };
+        const bt = payload.metrics?.buildTelemetry;
+        if (targetScope === 'all-time' && bt && typeof bt.totalTokens === 'number') {
+          setLiveOverlay({
+            tokensUsed: bt.totalTokens,
+            tokensCached: bt.cacheReadTokens ?? LIFETIME_METRICS.tokensCached,
+            usdCost: bt.claudeCodeCost?.totalCostUSD ?? LIFETIME_METRICS.usdCost,
+            zarCost: bt.claudeCodeCost?.totalCostZAR ?? LIFETIME_METRICS.zarCost,
+            zarSaved: bt.claudeCodeCost?.cacheSavingsZAR ?? LIFETIME_METRICS.zarSaved,
+            totalCommits: bt.engineeringVelocity?.totalCommits ?? LIFETIME_METRICS.totalCommits,
+            bugsFixed: bt.engineeringVelocity?.bugsResolved ?? LIFETIME_METRICS.bugsFixed,
+            cacheHitRatio:
+              bt.avgUsage?.cacheHitRatePct !== undefined
+                ? bt.avgUsage.cacheHitRatePct / PERCENT_MULTIPLIER
+                : LIFETIME_METRICS.cacheHitRatio,
+          });
+        } else {
+          setLiveOverlay(null);
+        }
+      }
+    } catch {
+      // Preserve static baseline when offline or in isolated unit test environment
+    } finally {
+      setTimeout(() => setRefreshing(false), REFRESH_SPINNER_DURATION_MS);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchLiveMetrics(scope);
+  }, [scope, fetchLiveMetrics]);
 
   const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), REFRESH_SPINNER_DURATION_MS);
+    void fetchLiveMetrics(scope);
   };
 
   const filteredFeed =

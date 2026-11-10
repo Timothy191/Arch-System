@@ -47,13 +47,33 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have sufficient color contrast', async ({ page }) => {
-    // Check that text elements have color contrast
-    // This is a basic check - full a11y audit would use axe-core
+    const WCAG_AA_NORMAL_CONTRAST = 4.5;
     const textElements = page.locator('h1, h2, h3, p, span, a, button');
     const count = await textElements.count();
-
-    // Ensure at least some text elements exist
     expect(count).toBeGreaterThan(0);
+
+    const contrastRatio = await page.evaluate(() => {
+      function parseRgbComponents(cssColor: string): [number, number, number] {
+        const match = cssColor.match(/\d+(\.\d+)?/g);
+        if (!match || match.length < 3) return [28, 28, 30];
+        return [Number(match[0]), Number(match[1]), Number(match[2])];
+      }
+      function toRelativeLuminance([r, g, b]: [number, number, number]): number {
+        const normalize = (channel: number) => {
+          const srgb = channel / 255;
+          return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+        };
+        return 0.2126 * normalize(r) + 0.7152 * normalize(g) + 0.0722 * normalize(b);
+      }
+      const heading = document.querySelector('h1, h2, main') ?? document.body;
+      const fg = parseRgbComponents(window.getComputedStyle(heading).color);
+      const bg = parseRgbComponents(window.getComputedStyle(document.body).backgroundColor);
+      const l1 = Math.max(toRelativeLuminance(fg), toRelativeLuminance(bg));
+      const l2 = Math.min(toRelativeLuminance(fg), toRelativeLuminance(bg));
+      return (l1 + 0.05) / (l2 + 0.05);
+    });
+
+    expect(contrastRatio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_CONTRAST);
   });
 
   test('should support keyboard navigation in dropdowns', async ({ page }) => {

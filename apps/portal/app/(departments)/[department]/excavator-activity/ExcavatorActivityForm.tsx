@@ -114,12 +114,63 @@ const GOLDEN_SEPARATOR_CLASS =
 
 function resolveNextSubCategory(
   newMaterial: ExcavatorActivityMaterial,
-  prevSubCategory: string,
-  mineralRegistry: ExcavatorActivityFormProps['mineralRegistry']
+  context: {
+    readonly prevSubCategory: string;
+    readonly mineralRegistry: ExcavatorActivityFormProps['mineralRegistry'];
+  }
 ): string {
-  return isValidSubCategoryForMaterial(newMaterial, prevSubCategory, mineralRegistry)
-    ? prevSubCategory
+  return isValidSubCategoryForMaterial(
+    newMaterial,
+    context.prevSubCategory,
+    context.mineralRegistry
+  )
+    ? context.prevSubCategory
     : '';
+}
+
+interface ExcavatorMaterialTransitionInput {
+  readonly excavatorId: string;
+  readonly newMaterial: ExcavatorActivityMaterial;
+  readonly excavatorMaterials: Record<string, ExcavatorActivityMaterial>;
+  readonly excavatorMaterialSubCategories: Record<string, string>;
+  readonly excavatorSites: Record<string, string>;
+  readonly excavatorBlocks: Record<string, string>;
+  readonly mineralRegistry: ExcavatorActivityFormProps['mineralRegistry'];
+}
+
+function buildExcavatorMaterialTransition(input: ExcavatorMaterialTransitionInput) {
+  const prevMaterial = input.excavatorMaterials[input.excavatorId] ?? 'Waste';
+  const prevSubCategory = input.excavatorMaterialSubCategories[input.excavatorId] ?? '';
+  const nextSubCategory = resolveNextSubCategory(input.newMaterial, {
+    prevSubCategory,
+    mineralRegistry: input.mineralRegistry,
+  });
+  return {
+    prevMaterial,
+    prevSubCategory,
+    nextSubCategory,
+    currentSiteId: input.excavatorSites[input.excavatorId] || null,
+    currentBlockId: input.excavatorBlocks[input.excavatorId] || null,
+    nextFormattedMaterial: formatExcavatorMaterial(input.newMaterial, nextSubCategory || null),
+    prevFormattedMaterial: formatExcavatorMaterial(prevMaterial, prevSubCategory || null),
+  };
+}
+
+function notifyRegularMachineMaterial(
+  excavators: readonly ExcavatorMachine[],
+  target: { readonly excavatorId: string; readonly newMaterial: ExcavatorActivityMaterial }
+): void {
+  if (!isRegularMachineExcavatorActivity(target.newMaterial)) return;
+  const machineName = excavators.find((e) => e.id === target.excavatorId)?.name ?? 'Excavator';
+  toast.success(`${machineName} set to ${target.newMaterial} (logged as regular machine).`);
+}
+
+function adjustPendingMutationCount(
+  counts: Record<string, number>,
+  adjustment: { readonly excavatorId: string; readonly delta: 1 | -1 }
+): void {
+  const current = counts[adjustment.excavatorId] ?? 0;
+  counts[adjustment.excavatorId] = Math.max(0, current + adjustment.delta);
 }
 
 function updateLoadsMaterial(
@@ -613,30 +664,52 @@ export function ExcavatorActivityForm({
     ]
   );
 
+  const applyExcavatorMaterialState = useCallback(
+    (
+      excavatorId: string,
+      snapshot: {
+        readonly material: ExcavatorActivityMaterial;
+        readonly subCategory: string;
+        readonly formattedMaterial: string;
+      }
+    ) => {
+      setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: snapshot.material }));
+      setExcavatorMaterialSubCategories((prev) => ({
+        ...prev,
+        [excavatorId]: snapshot.subCategory,
+      }));
+      setActivitiesState((prev) =>
+        upsertOptimisticActivity(prev, excavatorId, selectedShift, {
+          material_type: snapshot.formattedMaterial,
+        })
+      );
+      setLoadsState((prev) =>
+        updateLoadsMaterial(prev, excavatorId, selectedShift, snapshot.material)
+      );
+    },
+    [selectedShift, upsertOptimisticActivity]
+  );
+
   // Handle excavator material change (Waste / Coal / Plant / Other)
   const handleExcavatorMaterialChange = useCallback(
     async (excavatorId: string, newMaterial: ExcavatorActivityMaterial) => {
-      const prevMaterial = excavatorMaterials[excavatorId] ?? 'Waste';
-      if (newMaterial === prevMaterial) return;
+      const transition = buildExcavatorMaterialTransition({
+        excavatorId,
+        newMaterial,
+        excavatorMaterials,
+        excavatorMaterialSubCategories,
+        excavatorSites,
+        excavatorBlocks,
+        mineralRegistry,
+      });
+      if (newMaterial === transition.prevMaterial) return;
 
-      const prevSubCategory = excavatorMaterialSubCategories[excavatorId] ?? '';
-      const nextSubCategory = resolveNextSubCategory(newMaterial, prevSubCategory, mineralRegistry);
-
-      const currentSiteId = excavatorSites[excavatorId] || null;
-      const currentBlockId = excavatorBlocks[excavatorId] || null;
-      const nextFormattedMaterial = formatExcavatorMaterial(newMaterial, nextSubCategory || null);
-      const prevFormattedMaterial = formatExcavatorMaterial(prevMaterial, prevSubCategory || null);
-
-      pendingMutationCountRef.current[excavatorId] =
-        (pendingMutationCountRef.current[excavatorId] ?? 0) + 1;
-      setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: newMaterial }));
-      setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: nextSubCategory }));
-      setActivitiesState((prev) =>
-        upsertOptimisticActivity(prev, excavatorId, selectedShift, {
-          material_type: nextFormattedMaterial,
-        })
-      );
-      setLoadsState((prev) => updateLoadsMaterial(prev, excavatorId, selectedShift, newMaterial));
+      adjustPendingMutationCount(pendingMutationCountRef.current, { excavatorId, delta: 1 });
+      applyExcavatorMaterialState(excavatorId, {
+        material: newMaterial,
+        subCategory: transition.nextSubCategory,
+        formattedMaterial: transition.nextFormattedMaterial,
+      });
 
       try {
         await updateExcavatorAssignmentConfig({
@@ -644,37 +717,25 @@ export function ExcavatorActivityForm({
           excavatorId,
           loadDate: effectiveToday,
           shiftType: selectedShift,
-          siteId: currentSiteId,
-          blockMinedId: currentBlockId,
+          siteId: transition.currentSiteId,
+          blockMinedId: transition.currentBlockId,
           materialType: newMaterial,
-          materialSubCategory: nextSubCategory || null,
+          materialSubCategory: transition.nextSubCategory,
         });
-        if (isRegularMachineExcavatorActivity(newMaterial)) {
-          toast.success(
-            `${excavators.find((e) => e.id === excavatorId)?.name ?? 'Excavator'} set to ${newMaterial} (logged as regular machine).`
-          );
-        }
+        notifyRegularMachineMaterial(excavators, { excavatorId, newMaterial });
         startTransition(() => {
           router.refresh();
         });
       } catch (err) {
         logError(err, { context: 'update_excavator_material' });
-        setExcavatorMaterials((prev) => ({ ...prev, [excavatorId]: prevMaterial }));
-        setExcavatorMaterialSubCategories((prev) => ({ ...prev, [excavatorId]: prevSubCategory }));
-        setActivitiesState((prev) =>
-          upsertOptimisticActivity(prev, excavatorId, selectedShift, {
-            material_type: prevFormattedMaterial,
-          })
-        );
-        setLoadsState((prev) =>
-          updateLoadsMaterial(prev, excavatorId, selectedShift, prevMaterial)
-        );
+        applyExcavatorMaterialState(excavatorId, {
+          material: transition.prevMaterial,
+          subCategory: transition.prevSubCategory,
+          formattedMaterial: transition.prevFormattedMaterial,
+        });
         toast.error('Failed to update excavator material.');
       } finally {
-        pendingMutationCountRef.current[excavatorId] = Math.max(
-          0,
-          (pendingMutationCountRef.current[excavatorId] ?? 1) - 1
-        );
+        adjustPendingMutationCount(pendingMutationCountRef.current, { excavatorId, delta: -1 });
       }
     },
     [
@@ -687,7 +748,7 @@ export function ExcavatorActivityForm({
       effectiveToday,
       selectedShift,
       mineralRegistry,
-      upsertOptimisticActivity,
+      applyExcavatorMaterialState,
       router,
     ]
   );

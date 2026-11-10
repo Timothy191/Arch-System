@@ -224,6 +224,7 @@
     "lint:fix": "turbo run lint -- --fix",
     "lint:css-perf": "node tools/audits/check-css-performance.cjs",
     "lint:styles": "stylelint '**/*.{css,scss}' --ignore-path config/tools/.stylelintignore --ignore-path .gitignore",
+    "lint:agent-rules": "node tools/audits/audit-agent-rules-drift.cjs && node tools/audits/audit-agentic-content.cjs --check && node tools/audits/audit-ssot-duplicates.cjs",
     "lint:spelling": "cspell \"*.md\" \".agents/**/*.md\" \".github/**/*.md\" \"apps/**/*.{ts,tsx,js,jsx,md}\" \"packages/**/*.{ts,tsx,js,jsx,md}\" \"libs/**/*.{ts,tsx,js,jsx,md}\" \"docs/**/*.md\" \"tools/**/*.{js,cjs,mjs,ts,md}\" \"scripts/**/*.{js,cjs,mjs,ts,md}\" --config config/tools/cspell.json --no-progress --gitignore",
     "md:fix": "markdownlint --config config/tools/.markdownlint.json --ignore-path .gitignore --fix \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "md:lint": "markdownlint --config config/tools/.markdownlint.json --ignore-path .gitignore \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",

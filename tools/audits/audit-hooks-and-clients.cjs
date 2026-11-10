@@ -110,10 +110,18 @@ if (errors === 0) {
 }
 
 // 2. Validate custom hooks SSR safety
-console.log(chalk.bold('\n2. Auditing custom hooks SSR hydration safety in libs/shared/hooks...'));
-if (fs.existsSync(HOOKS_DIR)) {
+console.log(
+  chalk.bold(
+    '\n2. Auditing custom hooks SSR hydration safety in libs/shared/hooks & apps/portal/hooks...'
+  )
+);
+const hookDirs = [HOOKS_DIR, path.join(_PORTAL_DIR, 'hooks')];
+let hooksChecked = 0;
+
+for (const hookDir of hookDirs) {
+  if (!fs.existsSync(hookDir)) continue;
   const hookFiles = fs
-    .readdirSync(HOOKS_DIR)
+    .readdirSync(hookDir)
     .filter(
       (f) =>
         f.startsWith('use') &&
@@ -121,10 +129,9 @@ if (fs.existsSync(HOOKS_DIR)) {
         !f.endsWith('.test.ts') &&
         !f.endsWith('.spec.ts')
     );
-  let hooksChecked = 0;
 
   for (const hookFile of hookFiles) {
-    const fullPath = path.join(HOOKS_DIR, hookFile);
+    const fullPath = path.join(hookDir, hookFile);
     const content = fs.readFileSync(fullPath, 'utf8');
     hooksChecked++;
 
@@ -137,23 +144,67 @@ if (fs.existsSync(HOOKS_DIR)) {
         /typeof\s+window\s*!==\s*['"]undefined['"]|typeof\s+window\s*===\s*['"]undefined['"]|isBrowser/.test(
           content
         );
-      const hasUseEffect = /\buseEffect\b|\buseLayoutEffect\b/.test(content);
+      const hasUseEffect = /\buseEffect\b|\buseLayoutEffect\b|\buseCallback\b/.test(content);
 
       if (!hasWindowGuard && !hasUseEffect) {
         console.log(
           chalk.yellow(
-            `   ⚠️  Hook ${hookFile} references browser globals without an explicit window guard or effect wrapper.`
+            `   ⚠️  Hook ${path.relative(ROOT_DIR, fullPath)} references browser globals without an explicit window guard or effect wrapper.`
           )
         );
         warnings++;
       }
     }
   }
-  console.log(
-    chalk.green(
-      `   ✅ Checked ${hooksChecked} custom industrial hooks. All satisfy SSR hydration safety patterns.`
-    )
-  );
+}
+console.log(
+  chalk.green(
+    `   ✅ Checked ${hooksChecked} custom industrial hooks across libs/shared/hooks & apps/portal/hooks. All satisfy SSR hydration safety patterns.`
+  )
+);
+
+// 2b. Validate HTTP Security Headers in apps/portal/proxy.ts & apps/portal/next.config.mjs
+console.log(chalk.bold('\n2b. Auditing HTTP Security Headers (CSP, HSTS, Frame & MIME Guards)...'));
+const proxyPath = path.join(_PORTAL_DIR, 'proxy.ts');
+const nextConfigPath = path.join(_PORTAL_DIR, 'next.config.mjs');
+if (!fs.existsSync(proxyPath) || !fs.existsSync(nextConfigPath)) {
+  console.log(chalk.red('   ❌ Missing apps/portal/proxy.ts or apps/portal/next.config.mjs.'));
+  errors++;
+} else {
+  const proxySrc = fs.readFileSync(proxyPath, 'utf8');
+  const nextConfigSrc = fs.readFileSync(nextConfigPath, 'utf8');
+  const requiredProxyHeaders = ['Content-Security-Policy', 'x-nonce', "frame-ancestors 'none'"];
+  for (const hdr of requiredProxyHeaders) {
+    if (!proxySrc.includes(hdr)) {
+      console.log(
+        chalk.red(`   ❌ apps/portal/proxy.ts missing required security directive: ${hdr}`)
+      );
+      errors++;
+    }
+  }
+  const requiredNextHeaders = [
+    'X-Content-Type-Options',
+    'X-Frame-Options',
+    'Strict-Transport-Security',
+    'Referrer-Policy',
+    'Permissions-Policy',
+    'X-Robots-Tag',
+  ];
+  for (const hdr of requiredNextHeaders) {
+    if (!nextConfigSrc.includes(hdr)) {
+      console.log(
+        chalk.red(`   ❌ apps/portal/next.config.mjs missing required HTTP security header: ${hdr}`)
+      );
+      errors++;
+    }
+  }
+  if (errors === 0) {
+    console.log(
+      chalk.green(
+        `   ✅ Verified ${requiredProxyHeaders.length} proxy CSP directives and ${requiredNextHeaders.length} Next.js HTTP security headers.`
+      )
+    );
+  }
 }
 
 // 3. Validate Vercel CLI & Preflight

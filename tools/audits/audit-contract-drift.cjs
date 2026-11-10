@@ -29,7 +29,7 @@ const shouldWrite = process.argv.slice(2).some((a) => WRITE_FLAGS.has(a));
 
 // Minimum Drift Health Index for a passing audit. Single source of truth for both
 // the telemetry `status` field and the process exit code, so they cannot disagree.
-const DRIFT_HEALTHY_THRESHOLD = 80;
+const DRIFT_HEALTHY_THRESHOLD = 100;
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
