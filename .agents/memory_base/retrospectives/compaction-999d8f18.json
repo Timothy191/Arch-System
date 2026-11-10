@@ -1,12 +1,10 @@
 {
   "id": "compaction-999d8f18",
-  "timestamp": "2026-11-10T09:52:34.160Z",
+  "timestamp": "2026-11-10T10:14:42.416Z",
   "taskTag": "compaction-standard-999d8f18",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
   "affectedFiles": [
-    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/drilling/machine-telemetry/loading.tsx\"",
-    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/client-telemetry.ts\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/lib/control-room/machine-utils.ts\"",
     "\"/home/tim/Fork/Arch-System/libs/shared/hooks/src/useFormDraftPersistence.ts\"",
     "\"/home/tim/Fork/Arch-System/apps/portal/features/admin/actions/shared.ts\"",
@@ -19,16 +17,18 @@
     "\"/home/tim/Fork/Arch-System/docs/specs/next-steps-ssot-toolbar-telemetry.spec.md\"",
     "\"/home/tim/Fork/Arch-System/tools/audits/audit-ssot-duplicates.cjs\"",
     "\"/home/tim/Fork/Arch-System/packages/ui/src/components/DepartmentFilterToolbar.tsx\"",
-    "\"/home/tim/Fork/Arch-System/apps/portal/components/ui/DepartmentFilterToolbar.test.tsx\""
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/ui/DepartmentFilterToolbar.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/server-timing-client.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/observability/server-timing-client.test.ts\""
   ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (421 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (396 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 88184,
-    "cacheHitRatio": 0.9473,
+    "latestInputTokens": 189225,
+    "cacheHitRatio": 0.9477,
     "checkpointCount": 14,
     "avoidedCacheRebuildTokens": 0
   }
