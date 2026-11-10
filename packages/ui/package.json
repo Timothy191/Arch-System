@@ -58,6 +58,8 @@
     "./GlassCard": "./src/components/GlassCard.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",
     "./SecondaryButton": "./src/components/SecondaryButton.tsx",
+    "./DepartmentFilterToolbar": "./src/components/DepartmentFilterToolbar.tsx",
+    "./components/DepartmentFilterToolbar": "./src/components/DepartmentFilterToolbar.tsx",
     "./Input": "./src/components/Input.tsx",
     "./KPI": "./src/components/KPI.tsx",
     "./Clock": "./src/components/Clock.tsx",

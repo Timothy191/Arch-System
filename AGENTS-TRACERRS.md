@@ -4,6 +4,19 @@
 
 ---
 
+## [2026-11-10T07:16:00+02:00] - SSoT Duplicate Regression Guard, Shared `DepartmentFilterToolbar` & Control Room `Server-Timing` Telemetry
+
+- **EARS Spec (`docs/specs/next-steps-ssot-toolbar-telemetry.spec.md`)**: Authored specification for automated SSoT duplicate-declaration prevention, shared `@repo/ui` department filter toolbar, and live W3C `Server-Timing` badge integration in Control Room SCADA telemetry.
+- **Step 1 — Automated Duplicate-Symbol Regression Guard (`tools/audits/audit-ssot-duplicates.cjs`)**:
+  - Created `tools/audits/audit-ssot-duplicates.cjs` (`pnpm audit:ssot-duplicates`, wired into `pnpm audit:compliance` and Gate 9 of `tools/scripts/agent-verify.sh`) verifying across `1,032` source files that all `20` canonical SSoT functions, components, hooks, and constants are declared exclusively in their canonical modules (`0` duplicates).
+- **Step 2 — Shared `DepartmentFilterToolbar` Primitive (`@repo/ui`)**:
+  - Created `packages/ui/src/components/DepartmentFilterToolbar.tsx` (`@repo/ui/DepartmentFilterToolbar`), exported from `packages/ui/src/index.ts` and `packages/ui/package.json`, with unit test coverage in `apps/portal/components/ui/DepartmentFilterToolbar.test.tsx` (`apps/portal/jest.config.cjs`).
+- **Step 3 — Live Control Room W3C `Server-Timing` Telemetry Strip**:
+  - Created `apps/portal/lib/observability/server-timing-client.ts` (`parseServerTimingHeader`, `formatServerTimingSummary`) and `apps/portal/lib/observability/server-timing-client.test.ts`.
+  - Updated `apps/portal/features/departments/components/control-room/ScadaPanel.tsx` and `ControlRoomPanels.test.tsx` to parse the `Server-Timing` HTTP response header from `/api/control-room/scada-status` and render `data-testid="scada-server-timing-badge"`.
+
+---
+
 ## [2026-11-09T21:25:00+02:00] - Monorepo Shared Function, Component & Hook Consolidation (20 SSoT Clusters Across 5 Tiers)
 
 - **EARS Spec (`docs/specs/shared-function-consolidation.spec.md`)**: Authored formal specification auditing 1,017 production files and defining 20 high-confidence duplication clusters vs. 4 intentional architectural separations (`getCurrentShift`, `normalizeRole`, `escapeHtml`, `usePitConnectivity`).

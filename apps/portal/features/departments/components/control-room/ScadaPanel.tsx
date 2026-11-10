@@ -9,6 +9,10 @@ import { ArrowUpRight, Pickaxe, RefreshCw, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  formatServerTimingSummary,
+  parseServerTimingHeader,
+} from '@/lib/observability/server-timing-client';
+import {
   deriveScadaPanelRows,
   type ExcavatorActivityViewRow,
   mergeScadaRows,
@@ -51,6 +55,7 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     cachedTagCount: number;
     latencyMs: number;
   } | null>(null);
+  const [scadaServerTimingLabel, setScadaServerTimingLabel] = useState<string | null>(null);
 
   const reconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,6 +65,13 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
     try {
       const response = await fetch('/api/control-room/scada-status');
       if (!response?.ok) return;
+      const rawServerTiming =
+        response.headers?.get?.('server-timing') ??
+        response.headers?.get?.('Server-Timing') ??
+        null;
+      const parsedMetrics = parseServerTimingHeader(rawServerTiming);
+      setScadaServerTimingLabel(formatServerTimingSummary(parsedMetrics));
+
       const payload = (await response.json()) as {
         state?: 'healthy' | 'degraded' | 'offline';
         cached_tag_count?: number;
@@ -327,6 +339,13 @@ export function ScadaPanel({ departmentId }: { departmentId: string }) {
             {scadaHealth
               ? ` · ${scadaHealth.cachedTagCount} tags (${scadaHealth.latencyMs}ms)`
               : ''}
+          </span>
+
+          <span
+            data-testid="scada-server-timing-badge"
+            className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-white/80 px-2 py-1 font-mono text-[10px] text-[var(--text-secondary)]"
+          >
+            Server-Timing: {scadaServerTimingLabel ?? '—'}
           </span>
 
           <div

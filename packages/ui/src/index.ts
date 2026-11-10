@@ -5,6 +5,7 @@ export * from './components/BorderBox';
 export { Checklist, type ChecklistProps } from './components/Checkbox';
 export * from './components/Clock';
 export * from './components/CookieConsent';
+export * from './components/DepartmentFilterToolbar';
 export * from './components/DepartmentLayout';
 export * from './components/Divider';
 export * from './components/EmptyState';

@@ -75,6 +75,7 @@ describe('Control Room Redesigned Panels & Summary Golden Graphs', () => {
 
     expect(screen.getByTestId('scada-excavator-machines-panel')).toBeInTheDocument();
     expect(screen.getByTestId('scada-connection-status-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('scada-server-timing-badge')).toBeInTheDocument();
     expect(screen.getByText(/Excavator Activity & Registered Fleet Loads/i)).toBeInTheDocument();
     expect(screen.getByText(/Excavator Activity \(Active Dig Faces\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Registered Machines with Loaded Loads/i)).toBeInTheDocument();

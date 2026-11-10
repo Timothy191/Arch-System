@@ -55,6 +55,8 @@ module.exports = {
     '^@repo/ui/Divider$': '<rootDir>/../../packages/ui/src/components/Divider.tsx',
     '^@repo/ui/BorderBox$': '<rootDir>/../../packages/ui/src/components/BorderBox.tsx',
     '^@repo/ui/GlassCard$': '<rootDir>/../../packages/ui/src/components/GlassCard.tsx',
+    '^@repo/ui/DepartmentFilterToolbar$':
+      '<rootDir>/../../packages/ui/src/components/DepartmentFilterToolbar.tsx',
     '^@repo/ui/Pagination$': '<rootDir>/../../packages/ui/src/components/ui/pagination.tsx',
     '^@repo/ui/SecondaryButton$': '<rootDir>/../../packages/ui/src/components/SecondaryButton.tsx',
     '^@repo/ui/AcknowledgeButton$':

@@ -99,7 +99,7 @@ run_gate 8  "💰" "Context Budget Enforcement" \
   "Run 'pnpm context:debloat' to prune context bloat."
 
 run_gate 9  "📜" "Agent Rule Drift (workspace ↔ project)" \
-  "node tools/audits/audit-agent-rules-drift.cjs" \
+  "node tools/audits/audit-agent-rules-drift.cjs && node tools/audits/audit-ssot-duplicates.cjs" \
   "Run 'node tools/audits/audit-agent-rules-drift.cjs' and sync the diverged rule to BOTH .agents/rules/ trees."
 
 run_gate 10 "🗺️ " "Architecture Maps Parity" \
