@@ -32,6 +32,7 @@
   - Refactored `apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx` to extract shared `SMR_INPUT_BASE` utility constants, named domain thresholds (`SHIFT_TARGET_HOURS = 12.0`, `MAX_ALLOCATED_HOURS = 12.5`), and a single-options-object `updateMachine({ machineId, field, allocationValue })` helper.
   - Merged PR #223 (`bolt-memoize-scada-panel-totals-13702220800461324242`) consolidating `ScadaPanel.tsx` summary totals (`totalExcavatorLoads`, `totalMachineLoads`, `totalVolumeBcm`) into a memoized single-pass loop with unit test assertions in `ControlRoomPanels.test.tsx`.
   - Integrated `analyze:turbopack` (`portal#analyze:turbopack`) into `package.json` and `turbo.json` and synchronized active local/remote branches onto `main`.
+  - Updated `tools/scripts/prune-vercel-deployments.mjs` to dynamically resolve `orgId` from `.vercel/project.json` and protect in-progress Production builds, pruning 173 stale deployments and synchronizing `.agents/memory_base/index.json`.
 
 ---
 

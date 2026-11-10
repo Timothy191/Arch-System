@@ -8,8 +8,24 @@
  */
 
 import { execSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const TEAM_ID = 'team_9puAfgXPqVuwIBENr1LmhCxO';
+function resolveVercelTeamId() {
+  if (process.env.VERCEL_ORG_ID) return process.env.VERCEL_ORG_ID;
+  const projectJsonPath = resolve(process.cwd(), '.vercel/project.json');
+  if (existsSync(projectJsonPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(projectJsonPath, 'utf8'));
+      if (parsed.orgId) return parsed.orgId;
+    } catch {
+      // Fall through to default team ID
+    }
+  }
+  return 'team_uW3uV9UOCqr95WZcfih4H6sp';
+}
+
+const TEAM_ID = resolveVercelTeamId();
 const DRY_RUN =
   process.argv.includes('--dry-run') ||
   (!process.argv.includes('--execute') && !process.argv.includes('--yes'));
@@ -91,6 +107,14 @@ async function main() {
 
       if (isErrorOrCanceled) {
         toDelete.push({ ...dep, reason: `Failed state: ${dep.state}` });
+        continue;
+      }
+
+      if (
+        isProduction &&
+        (dep.state === 'BUILDING' || dep.state === 'QUEUED' || dep.state === 'INITIALIZING')
+      ) {
+        protectedDeployments.push({ ...dep, reason: `In-Progress Production (${dep.state})` });
         continue;
       }
 
