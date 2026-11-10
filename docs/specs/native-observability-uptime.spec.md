@@ -1,7 +1,7 @@
 # EARS Specification: Native Unified Observability & Uptime Layer (`SPEC-NATIVE-OBS-2026-11-10`)
 
 - **Spec ID**: `SPEC-NATIVE-OBS-2026-11-10`
-- **Status**: `IN_PROGRESS`
+- **Status**: `DONE (2026-11-10)`
 - **Date**: `2026-11-10`
 - **Branch**: `feat/native-observability-uptime`
 

@@ -1,0 +1,19 @@
+{
+  "id": "compaction-c8ddbc2f",
+  "timestamp": "2026-11-10T12:27:10.704Z",
+  "taskTag": "compaction-standard-c8ddbc2f",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (328 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 93827,
+    "cacheHitRatio": 0.9008,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

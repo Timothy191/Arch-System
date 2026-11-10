@@ -1,9 +1,9 @@
 {
-  "capturedAt": "2026-11-10T12:01:33.764Z",
+  "capturedAt": "2026-11-10T12:35:14.955Z",
   "db": "/home/tim/local.db",
   "entities": 8990,
   "relations": 46128,
   "files": 781,
-  "ranged": 6769,
-  "rangedRatio": 0.7529
+  "ranged": 6770,
+  "rangedRatio": 0.7531
 }
