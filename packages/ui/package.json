@@ -105,6 +105,7 @@
     "build-storybook": "storybook build -o dist/storybook",
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "lint:css": "stylelint 'src/**/*.css'",
     "storybook": "storybook dev -p 6006",
     "test-storybook": "test-storybook",

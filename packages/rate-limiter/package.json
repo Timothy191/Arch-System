@@ -20,6 +20,7 @@
     "clean": "rm -rf dist .turbo",
     "dev": "tsc --watch",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests"
   },

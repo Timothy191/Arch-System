@@ -59,6 +59,9 @@ jobs:
       - name: Full monorepo Turbo build and quality gates
         run: pnpm turbo run lint type-check test build
 
+      - name: Vercel Build, Deployment & Rollback Preflight (gate 22)
+        run: node tools/scripts/vercel-preflight.cjs --env=ci
+
   eval-gates:
     name: Autonomous Agent Quality Gate (DeepEval)
     runs-on: ubuntu-latest

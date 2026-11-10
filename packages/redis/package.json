@@ -27,6 +27,7 @@
     "clean": "rm -rf dist .turbo",
     "dev": "tsc --watch",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "type-check": "tsc --noEmit",
     "test": "jest tests --passWithNoTests --runInBand",
     "test:integration": "jest --config jest.integration.config.cjs --runInBand"

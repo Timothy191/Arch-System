@@ -4,6 +4,26 @@
 
 ---
 
+## [2026-11-10T11:30:00+02:00] - Monorepo Tooling Optimization, Knip Duplicate Elimination & Pipeline Hardening
+
+- **Knip Duplicate Export Remediation**:
+  - Eliminated duplicate named + default export in `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsFilterableTable.tsx` by removing redundant `export default`.
+  - Updated `apps/portal/app/(departments)/[department]/machine-operations/page.tsx` dynamic import from `.then((m) => m.default)` to `.then((m) => m.MachineOperationsFilterableTable)`.
+  - Updated `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsList.test.tsx` to use named import `{ MachineOperationsFilterableTable }` (`21/21` tests passing; `pnpm knip` reporting zero issues).
+- **Turborepo & Package Pipeline Alignment (`turbo.json`)**:
+  - Defined explicit `"lint:ci"` task in `turbo.json` with cached inputs (`$TURBO_DEFAULT$`, `!README.md`, `!**/*AGENT_TRACER.md`, `!**/codemap.md`, `$TURBO_ROOT$/biome.json`, `.eslintrc.*`).
+  - Added `"lint:ci": "biome ci ."` across `apps/portal`, `@repo/agents`, `@repo/contract`, `@repo/errors`, `@repo/logger`, `@repo/rate-limiter`, `@repo/redis`, `@repo/supabase`, `@repo/theme`, `@repo/ui`, `@repo/utils` (`12/12` packages pass `pnpm turbo run lint:ci`).
+- **Dynamic Verification Suite Sizing (Gate 24/27)**:
+  - Updated `tools/audits/verify-27-gates.cjs` to dynamically count `run_gate` invocations in `tools/scripts/agent-verify.sh` rather than checking against a brittle hardcoded number, keeping the evidence manifest validation honest as gates expand.
+  - Documented the 28-Gate enterprise suite architecture in `agent-verify.sh`.
+- **Token Budget Threshold Calibration & CI Preflight (Gate 22)**:
+  - Aligned `@repo/agents` compaction thresholds (`COMPACTION_SOFT_THRESHOLD = 0.8`, `COMPACTION_CRITICAL_THRESHOLD = 0.92`) and ensured `warningTriggered = true` is reported on breach when `enforceHardCap` is disabled (`52/52` tests passing).
+  - Wired Gate 22 (`tools/scripts/vercel-preflight.cjs --env=ci`) into `.github/workflows/deploy.yml` and `ga.yml` before staging and production deployments.
+  - Added `ENOSPC` and `inotify` to `config/tools/cspell.json`.
+- **Verification Completion**: Full 28-gate suite (`pnpm agent:verify`) passed with 100% compliance.
+
+---
+
 ## [2026-11-10T10:16:00+02:00] - Two-Stage Compaction Engine (`/compact` vs `/compact/compact`), Bounded `SKILL.state` Spine & Double-Compaction Prefix Cache Guard
 
 - **EARS Spec (`docs/specs/compaction-strategy-improvements.spec.md`)**: Authored formal specification grounded in empirical telemetry across `1,245` model generations (`9.12M` uncached input tokens, `165.48M` cached read tokens, `94.77%` cache hit ratio) and `13` compaction checkpoints in `~/.gemini/antigravity-cli/conversations/999d8f18-0f73-4df3-9fbc-c385c3a91ba6.db`.
@@ -265,3 +285,25 @@
   - Appended the ISO-8601 entry to root `AGENT_TRACER.md` (single consolidated ledger; no per-package tracer created).
 - **Phase 4 (Criticism):** Confirmed the edit-time hook remains non-blocking by design (a stale index must not freeze legitimate feature work — the hard block is at pre-commit). Confirmed `check-enforcement-integrity.cjs` runs `execSync` on the audit script with `stdio: "pipe"` and a 60s timeout, so it cannot hang or leak output. Confirmed the `verify-27-gates.cjs` filename is a pre-existing artifact name and was not touched. Confirmed no new files were created outside the enforcement SSoT set.
 - **Phase 5 (Contract):** Re-ran `node tools/scripts/check-enforcement-integrity.cjs` → `✅ Enforcement SSoT integrity verified.`, EXIT=0. Ran `git status` — 0 untracked files attributable to prior sessions; this session's changes are confined to the enforcement SSoT files (`package.json`, `AGENTS.md`, `.agents/skills/code-intelligence/SKILL.md`, `AGENT_TRACER.md`) plus the pre-existing modifications from earlier turns.
+
+### [2026-11-10T08:54:17+00:00] Evidence-Based Gap Review & Remediation — Production Blockers, CI/Agent-Verify Drift, and Doc Hygiene
+
+- **Phase 1 (Comprehension):** Governing request: _"Scan for untracked content and determine actions so we can move on / Review and fill gaps use evidence-based workflow."_ Five parallel explore agents audited MCP wiring, the 28-gate suite, enforcement machinery, CI/deploy wiring, and codebase health. The enforcement-machinery docs work from the 08:13 entry was already complete; this entry covers the gaps the agents found and the fixes applied.
+- **Phase 2 (Evidence):**
+  - **MCP wiring**: `codemap` MCP server alive but boots in watch-only mode (`ENOSPC` on inotify instances); `chrome-devtools-mcp` pinned at 1.10.1 (latest 1.12.0); `ast-grep`/`sg` shim exists but no version installed; `global-toolchain.md` rule referenced by `SYSTEMS.md` does not exist.
+  - **Gate suite**: evidence JSON + JUnit were **stale** — recorded 27 gates with `gitTreeHash` `73f991d` while the working tree was `a1d35ae`; gate 28 was added after the last run. `turbo.json` had no `lint:ci` task despite gate 2 referencing `pnpm turbo run //#lint:ci`. `verify-27-gates.cjs:64` hardcoded a magic `23` minimum-gate floor.
+  - **Enforcement machinery**: `check-enforcement-integrity.cjs` (4 checks) proven to fail under all 4 injected faults in a sandbox; hook wiring, protected paths, pre-commit, and pre-push all correct.
+  - **CI/deploy**: 15 of 28 gates have no CI coverage; `vercel-preflight.cjs` unmapped in `local-ci.mjs LOCAL_STEPS`; all four Vercel deploy scripts orphaned from CI; no `full`-suite `local-ci` report exists.
+  - **Codebase health**: `recordUsage` left `warningTriggered=false` while `breached=true` when `enforceHardCap=false`; spec REQ-1 mandated soft 80% / critical 92% but code had 0.85 / 0.95; retrospective `compaction-999d8f18.json` had non-canonical `status: "success"`.
+- **Phase 3 (Design):**
+  - Fixed `recordUsage` to always set `warningTriggered=true` on overrun, and added a regression test for `enforceHardCap: false` (15/15 pass).
+  - Aligned `COMPACTION_SOFT_THRESHOLD` to `0.8` and `COMPACTION_CRITICAL_THRESHOLD` to `0.92`, and added an 84% soft-compaction assertion that distinguishes the new thresholds from the old ones.
+  - Removed the non-canonical `status` field from `compaction-999d8f18.json` (schema has no `status` property; nothing consumes it).
+  - Updated `agent-verify.sh` header/banner/stage comment from 27→28 gates with an explicit numbering note for gates 24/27.
+  - Replaced the magic `23` floor in `verify-27-gates.cjs` with a dynamic count of `run_gate` invocations in `agent-verify.sh`.
+  - Added `lint:ci` to `turbo.json` and to all 11 package `package.json` files (root `lint` already delegated via `//#lint:ci`).
+  - Added `vercel-preflight.cjs` to `local-ci.mjs LOCAL_STEPS` (`quality :: Build, Deployment & Rollback Verification`) and wired it into `ga.yml` and `deploy.yml`.
+  - Fixed `SYSTEMS.md` doc drift: removed the dangling `global-toolchain.md` reference, corrected `difftastic` → `difft`, noted `ast-grep`/`sg` availability is verified by gates 7 and 28.
+  - Aligned `GUIDE.md`: Jest thresholds 30/30 → 27/28, and 27-gate → 28-gate in two places.
+- **Phase 4 (Criticism):** Gate 2 failed on first `agent-verify` run — Biome flagged `0.80` → `0.8` and a duplicate `resolution` key in the retrospective (the schema already required `resolution`, so my edit duplicated it). Both fixed; `pnpm turbo run //#lint:ci` now passes clean. Re-ran the full suite: **28/28 gates PASS**, `gitTreeHash` `b738c23b…` matches the working tree exactly.
+- **Phase 5 (Contract):** Verified `node tools/scripts/check-enforcement-integrity.cjs` → EXIT=0. Verified `pnpm turbo run //#lint:ci` → 1 successful task. Verified `.agents/memory_base/retrospectives/compaction-999d8f18.json` and all edited JSON files parse. Verified `git status` shows 0 untracked files; all 21 modified files are this session's gap-remediation work.

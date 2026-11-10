@@ -1,10 +1,16 @@
 #!/bin/bash
-# Autonomous Agent Real-World Verification Gate (27-Gate Enterprise Suite)
+# Autonomous Agent Real-World Verification Gate (28-Gate Enterprise Suite)
 # Preserves the foundational 15 static/architectural gates and expands with
-# Gates 16-27 covering authorization matrices, database migration integrity,
+# Gates 16-28 covering authorization matrices, database migration integrity,
 # performance/load budgets, E2E user journeys, supply-chain security,
 # observability/resilience, deployment preflight, accessibility, evidence
-# integrity (JSON + JUnit), and AI agent governance/hallucination controls.
+# integrity (JSON + JUnit), AI agent governance/hallucination controls, and
+# Code-Intelligence Substrate Integrity.
+#
+# Numbering note: gates 24 and 27 are not run_gate invocations — they are
+# self-recorded by tools/audits/verify-27-gates.cjs during the evidence-integrity
+# epilogue (see that script's hasGate24 / hasGate27 guards). The manifest footer
+# is dynamic (${TOTAL_GATES}/${TOTAL_GATES}) so it tracks the real count.
 
 set -uo pipefail
 
@@ -62,7 +68,7 @@ run_gate() {
 }
 
 echo "========================================================"
-echo "🔍 [AGENT VERIFICATION] Starting 27-Gate Quality & Runtime Suite..."
+echo "🔍 [AGENT VERIFICATION] Starting 28-Gate Quality & Runtime Suite..."
 echo "========================================================"
 
 # ── Stage 1: Foundational Static, Boundary & Architecture Gates (1–15) ────────
@@ -159,7 +165,10 @@ run_gate 23 "♿" "Accessibility & Frontend Regression" \
   "node tools/audits/check-html-meta-tags.cjs && node tools/audits/audit-design-tokens.cjs && node tools/audits/audit-image-optimization.cjs" \
   "Fix HTML meta/landmark tags, light-mode OKLCH token violations, or image optimization regressions."
 
-# ── Stage 3: AI Agent Governance, Hallucination & Evidence Gates (24–27) ─────
+# ── Stage 3: AI Agent Governance, Hallucination & Evidence Gates (25–28) ─────
+# Gates 24 and 27 are meta-gates: they verify the manifest produced by the run_gate
+# loop above, so they cannot be run_gate invocations. They are self-recorded by
+# tools/audits/verify-27-gates.cjs during the evidence-integrity epilogue below.
 run_gate 25 "🛡️ " "Agent Execution & Tool Permissions" \
   "node tools/audits/audit-agent-permissions.cjs" \
   "Run 'pnpm audit:agent-permissions' to fix .qoder hook bindings or path/commit guard scripts."

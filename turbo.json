@@ -337,6 +337,19 @@
       "outputs": [],
       "cache": true
     },
+    "lint:ci": {
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!README.md",
+        "!**/*AGENT_TRACER.md",
+        "!**/codemap.md",
+        "$TURBO_ROOT$/biome.json",
+        ".eslintrc.*"
+      ],
+      "outputs": [],
+      "cache": true
+    },
     "format:check": {
       "dependsOn": ["transit"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/biome.json"],

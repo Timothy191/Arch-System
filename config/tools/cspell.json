@@ -219,6 +219,8 @@
     "faststart",
     "backfiller",
     "codegraph",
-    "pathlib"
+    "pathlib",
+    "ENOSPC",
+    "inotify"
   ]
 }

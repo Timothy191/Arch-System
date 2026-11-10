@@ -310,6 +310,12 @@ jobs:
           # suite explicitly so --coverage is forwarded to Jest, not Turbo.
           pnpm --filter portal test -- --coverage --passWithNoTests
 
+      # Gate 28 (Agent Verification Suite): the full 28-gate completion suite runs only
+      # on main pushes (not PRs) so it does not slow the fast-fail PR path.
+      - name: Run Agent Verification Suite (gate 28)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm agent:verify
+
       - name: Bundle Graph Snapshot (Turbopack)
         run: |
           mkdir -p .ci-local

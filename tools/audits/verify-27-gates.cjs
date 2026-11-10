@@ -61,9 +61,21 @@ if (!fs.existsSync(manifestPath)) {
 
 if (manifest) {
   const gates = Array.isArray(manifest.gates) ? manifest.gates : [];
-  if (gates.length < 23) {
+  // The minimum-gate floor must track the real suite size, not a hardcoded
+  // number. Count run_gate invocations in agent-verify.sh so adding or
+  // removing a gate keeps this check honest.
+  let expectedRunGates = 26; // fallback if the script cannot be read
+  try {
+    const scriptPath = path.join(ROOT, 'tools', 'scripts', 'agent-verify.sh');
+    const scriptSrc = fs.readFileSync(scriptPath, 'utf8');
+    const matches = scriptSrc.match(/^run_gate \d+/gm);
+    if (matches && matches.length > 0) expectedRunGates = matches.length;
+  } catch {
+    // keep fallback
+  }
+  if (gates.length < expectedRunGates) {
     violations.push(
-      `Expected at least 23 preceding gates in evidence manifest before Gate 24/27 check, found ${gates.length}`
+      `Expected at least ${expectedRunGates} run_gate records in evidence manifest (counted from agent-verify.sh), found ${gates.length}`
     );
   }
 

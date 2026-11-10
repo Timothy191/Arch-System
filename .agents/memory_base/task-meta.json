@@ -1,0 +1,42 @@
+{
+  "task": "Update agent-verify.sh to integrate Code-Intelligence Substrate Integrity",
+  "status": "completed",
+  "timestamp": "2026-11-10T08:00:00.000Z",
+  "filesUpdated": [
+    "tools/scripts/agent-verify.sh",
+    ".qoder/hooks/code-intelligence-gate.sh",
+    ".qoder/settings.json"
+  ],
+  "gatesAdded": [
+    {
+      "id": 28,
+      "name": "Code-Intelligence Substrate Integrity",
+      "description": "Verify CodeGraph index health and baseline alignment"
+    }
+  ],
+  "gateTotal": 28,
+  "readinessTier": "production",
+  "testCoverage": {
+    "passed": 14,
+    "total": 14,
+    "percentage": "100%"
+  },
+  "verification": {
+    "ciReindex": "pnpm ci:reindex",
+    "ciSnapshot": "pnpm ci:snapshot",
+    "auditCodeIntelligence": "pnpm audit:code-intelligence"
+  },
+  "artifacts": [
+    {
+      "path": ".ci-local/agent-verify-evidence.json",
+      "type": "json",
+      "size": "~12KB"
+    },
+    {
+      "path": ".ci-local/agent-verify-junit.xml",
+      "type": "xml",
+      "size": "~30KB"
+    }
+  ],
+  "currentProgress": "All 28 gates implemented, code-intelligence substrate integrity gate added as gate 28"
+}

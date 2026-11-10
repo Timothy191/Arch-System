@@ -746,5 +746,3 @@ export function MachineOperationsFilterableTable({
     </div>
   );
 }
-
-export default MachineOperationsFilterableTable;

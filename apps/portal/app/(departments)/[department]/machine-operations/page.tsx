@@ -14,7 +14,8 @@ const MachineOperationsForm = dynamic(
 );
 
 const MachineOperationsFilterableTable = dynamic(
-  () => import('./MachineOperationsFilterableTable').then((m) => m.default),
+  () =>
+    import('./MachineOperationsFilterableTable').then((m) => m.MachineOperationsFilterableTable),
   {
     loading: () => <div className="h-96 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />,
   }

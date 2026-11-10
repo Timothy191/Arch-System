@@ -369,6 +369,11 @@ export class TokenBudgetAgent {
     if (roleBudget.consumed.totalTokens > roleBudget.allocatedTokens) {
       roleBudget.status = 'breached';
       breached = true;
+      // An overrun always crosses the warning threshold — the caller must see
+      // warningTriggered=true alongside breached=true, never the contradictory
+      // (breached, !warningTriggered) pair that the old code produced when
+      // enforceHardCap was false.
+      warningTriggered = true;
       if (this.config.enforceHardCap) {
         // Can dip into reserve margin if available
         const overrun = roleBudget.consumed.totalTokens - roleBudget.allocatedTokens;
@@ -377,7 +382,6 @@ export class TokenBudgetAgent {
           roleBudget.allocatedTokens += overrun;
           roleBudget.status = 'warning';
           breached = false;
-          warningTriggered = true;
         }
       }
     } else if (roleUsagePercent >= this.config.warningThresholdPercent) {
@@ -428,8 +432,12 @@ export class TokenBudgetAgent {
  */
 export const DEFAULT_CONTEXT_WINDOW_LIMIT = 200_000;
 export const PROACTIVE_HANDOFF_THRESHOLD = 0.7;
-export const COMPACTION_SOFT_THRESHOLD = 0.85;
-export const COMPACTION_CRITICAL_THRESHOLD = 0.95;
+// REQ-1 (docs/specs/compaction-strategy-improvements.spec.md): soft compaction at 80%
+// and critical hard drop at 92%. The previous 0.85 / 0.95 values left too little headroom
+// in a 256k window and let a single multi-file read push usage into an unannounced
+// auto-compaction.
+export const COMPACTION_SOFT_THRESHOLD = 0.8;
+export const COMPACTION_CRITICAL_THRESHOLD = 0.92;
 export const COMPACTION_IDEMPOTENT_FLOOR = 0.25;
 export const MIN_TURNS_BETWEEN_COMPACTIONS = 4;
 export const MAX_COMPACTION_STATE_CHARS = 4000;

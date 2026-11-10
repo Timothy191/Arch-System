@@ -29,6 +29,7 @@
     "codegen": "node sd.config.mjs && node scripts/generate-tokens.mjs",
     "dev": "node sd.config.mjs --watch",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "lint:fix": "biome check --write .",
     "lint:css": "stylelint 'src/css/**/*.css'",
     "lint:tokens": "node scripts/validate-tokens.mjs",

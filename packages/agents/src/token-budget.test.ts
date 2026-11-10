@@ -145,6 +145,32 @@ describe('TokenBudgetAgent System', () => {
       }
     });
 
+    it('flags warning alongside breached when enforceHardCap is false and the role overruns', () => {
+      const agentNoCap = new TokenBudgetAgent({
+        enforceHardCap: false,
+        warningThresholdPercent: 80,
+      });
+      const plan = agentNoCap.createBudgetPlan(
+        {
+          prompt: 'Trivial task',
+          domain: 'general',
+        },
+        ['primary-agent']
+      );
+
+      const allocated = plan.roleAllocations['primary-agent']?.allocatedTokens ?? 1000;
+
+      // Overrun by 100 tokens with hard cap disabled — reserve margin cannot absorb it.
+      const result = agentNoCap.recordUsage(plan.taskId, 'primary-agent', {
+        promptTokens: allocated,
+        completionTokens: 100,
+      });
+
+      expect(result.breached).toBe(true);
+      expect(result.warningTriggered).toBe(true);
+      expect(result.roleBudget.status).toBe('breached');
+    });
+
     it('supports dynamic token reallocation between roles', () => {
       const plan = agent.createBudgetPlan(
         {
@@ -156,12 +182,33 @@ describe('TokenBudgetAgent System', () => {
 
       const initialCoordinator = plan.roleAllocations.coordinator?.allocatedTokens ?? 0;
       const initialSpecialist = plan.roleAllocations.specialist?.allocatedTokens ?? 0;
+      const initialTotal = initialCoordinator + initialSpecialist;
 
-      const success = agent.reallocateTokens(plan.taskId, 'coordinator', 'specialist', 500);
+      // The transfer is capped at the source role's unconsumed balance, so the
+      // assertion must be derived from the actual budget rather than a hardcoded
+      // amount — otherwise any role-weight change silently breaks the test.
+      const requestedAmount = 500;
+      const expectedTransfer = Math.min(requestedAmount, Math.max(0, initialCoordinator));
+
+      const success = agent.reallocateTokens(
+        plan.taskId,
+        'coordinator',
+        'specialist',
+        requestedAmount
+      );
 
       expect(success).toBe(true);
-      expect(plan.roleAllocations.coordinator?.allocatedTokens).toBe(initialCoordinator - 500);
-      expect(plan.roleAllocations.specialist?.allocatedTokens).toBe(initialSpecialist + 500);
+      expect(plan.roleAllocations.coordinator?.allocatedTokens).toBe(
+        initialCoordinator - expectedTransfer
+      );
+      expect(plan.roleAllocations.specialist?.allocatedTokens).toBe(
+        initialSpecialist + expectedTransfer
+      );
+      // Invariant: total allocation across roles is preserved by reallocation.
+      expect(
+        (plan.roleAllocations.coordinator?.allocatedTokens ?? 0) +
+          (plan.roleAllocations.specialist?.allocatedTokens ?? 0)
+      ).toBe(initialTotal);
     });
   });
 
@@ -207,7 +254,7 @@ describe('TokenBudgetAgent System', () => {
       expect(estimateMessageTokens(message)).toBe(2 + FLAT_IMAGE_TOKEN_COST);
     });
 
-    it('triggers soft compaction when usage exceeds 85% and critical hard drop at 95%', () => {
+    it('triggers soft compaction when usage exceeds 80% and critical hard drop at 92%', () => {
       const safeMessages = [
         { role: 'user' as const, content: 'Hello' },
         { role: 'assistant' as const, content: 'Hi there' },
@@ -217,7 +264,20 @@ describe('TokenBudgetAgent System', () => {
       expect(safeAssessment.isCritical).toBe(false);
       expect(safeAssessment.action).toBe('none');
 
-      // Create messages exceeding 850 tokens (85% of 1000 limit)
+      // 21 turns * 40 tokens = 840 tokens (84% of 1000 limit) — above the 80% soft
+      // threshold but below the 92% critical threshold, so this must compact without
+      // triggering a critical hard drop. This assertion is what pins the thresholds
+      // to the spec values (0.80 / 0.92) rather than the old 0.85 / 0.95.
+      const softMessages = Array.from({ length: 21 }, (_, idx) => ({
+        role: (idx % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: 'x'.repeat(160), // 40 tokens per turn * 21 = 840 tokens
+      }));
+      const softAssessment = assessContextCompaction(softMessages, 1000);
+      expect(softAssessment.shouldCompact).toBe(true);
+      expect(softAssessment.isCritical).toBe(false);
+      expect(softAssessment.action).toBe('soft_compaction');
+
+      // Create messages exceeding 920 tokens (92% of 1000 limit)
       const heavyMessages = Array.from({ length: 25 }, (_, idx) => ({
         role: (idx % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
         content: 'x'.repeat(160), // 40 tokens per turn * 25 = 1000 tokens

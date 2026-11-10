@@ -87,7 +87,7 @@ pnpm audit:perf               # Headless Lighthouse performance and speed index 
 pnpm turbo run test --filter=...[HEAD~1]   # Only tests affected by last commit
 ```
 
-Jest coverage thresholds (portal, global): lines 40%, branches 30%, functions 30%, statements 40%.
+Jest coverage thresholds (portal, global): lines 40%, branches 27%, functions 28%, statements 40% (per `AGENTS.md` — canonical).
 
 ### Database & Migrations
 
@@ -321,7 +321,7 @@ The score is used to:
 
 - **Score ≥ 0**: Normal operation — proceed with standard verification gates
 - **Score < 0**: Escalate — require human review before next task execution
-- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (27-gate suite) before any further action
+- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (28-gate suite) before any further action
 
 Agents must log each action's outcome and score in the session context before concluding work.
 
@@ -366,6 +366,6 @@ Before declaring completion:
 3. Update `AGENT_TRACER.md` for affected packages
 4. Commit with a conventional commit message
 
-This approach is enforced by the `pnpm agent:verify` 27-gate suite — the spec's acceptance criteria must include passing all applicable gates.
+This approach is enforced by the `pnpm agent:verify` 28-gate suite — the spec's acceptance criteria must include passing all applicable gates.
 
 Last updated: 2026-11-06

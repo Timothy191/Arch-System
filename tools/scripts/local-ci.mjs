@@ -317,6 +317,16 @@ const LOCAL_STEPS = {
     cmd: pnpm('turbo:graph'),
     suite: 'full',
   },
+  'quality :: Build, Deployment & Rollback Verification': {
+    cmd: pnpm('audit:vercel'),
+    suite: 'full',
+    note: 'gate 22 — vercel-preflight.cjs; previously unmapped in LOCAL_STEPS',
+  },
+  'quality :: Run Agent Verification Suite (gate 28)': {
+    cmd: pnpm('agent:verify'),
+    suite: 'full',
+    note: 'gate 28 — the 28-gate completion suite; runs the full local-ci matrix end-to-end',
+  },
 
   'redis-integration :: Run Redis integration tests': {
     cmd: pnpm('--filter', 'portal', 'test:integration'),

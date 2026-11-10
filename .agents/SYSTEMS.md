@@ -95,11 +95,12 @@ The environment unifies agent configuration across all runtimes on the developer
    - Implements closed-loop loop-engineering (`cobusgreyling/loop-engineering`):
      $$\text{Sense (Perception)} \longrightarrow \text{Plan (Diagnosis)} \longrightarrow \text{Act (Remediation)} \longrightarrow \text{Evaluate (Critic)} \longrightarrow \text{Self-Correct}$$
    - Uses CDP, Puppeteer, Lighthouse CLI, and Playwright (`@axe-core/playwright`) to verify Speed Index, contrast ratios ($\ge 4.5:1$), touch targets ($\ge 44\times 44\text{px}$), and ARIA compliance.
-3. **Global Toolchain Mandate (`global-toolchain.md`):**
+3. **Global Toolchain Mandate:**
    - Prioritizes AST structural search (`ast-grep` / `sg`) over regex `grep`.
-   - Uses syntax-aware diffing (`difftastic` / `difft`) over standard `git diff`.
+   - Uses syntax-aware diffing (`difft` — the binary is `difft`, not `difftastic`) over standard `git diff`.
    - Packages codebase context for LLM multi-agents via `repomix`.
    - Formats configuration using `jq` and `yq`.
+   - Toolchain availability is verified by gate 7 (`pnpm mcp:verify`) and gate 28; `ast-grep`/`sg` is installed via mise and `which sg` must resolve before any AST mandate is claimed.
 4. **Ruflo & Gemini Orchestration (`ruflo-gemini-orchestration.md`):**
    - Multi-agent coordination and vector memory ledger powered by `@claude-flow/cli`.
    - Zero third-party API costs: Models are executed via Google Gemini / Antigravity; embeddings run locally via `transformers.js`.

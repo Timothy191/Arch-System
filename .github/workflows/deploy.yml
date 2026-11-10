@@ -71,6 +71,11 @@ jobs:
       - name: Build
         run: pnpm turbo run build --filter=portal
 
+      # Gate 22 (Build, Deployment & Rollback Verification): the repo-local
+      # Vercel preflight audit must pass before any deploy job is eligible to run.
+      - name: Vercel Preflight (gate 22)
+        run: node tools/scripts/vercel-preflight.cjs --env=ci
+
   # ── Deploy to Staging ───────────────────────────────────
   deploy-staging:
     name: Deploy to Staging
@@ -97,12 +102,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Option 1: Vercel Deployment
+      # Option 1: Vercel Deployment — routed through the repo-local deploy wrapper so the
+      # preflight audit (gate 22) and .vercel/project.json linkage run before the deploy.
       - name: Deploy to Vercel (Staging)
         if: vars.DEPLOY_TARGET == 'vercel'
         run: |
-          pnpm dlx vercel --token=${{ secrets.VERCEL_TOKEN }} --target=staging
+          pnpm deploy:vercel:preview
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
@@ -193,8 +200,9 @@ jobs:
       - name: Deploy to Vercel (Production)
         if: vars.DEPLOY_TARGET == 'vercel'
         run: |
-          pnpm dlx vercel --token=${{ secrets.VERCEL_TOKEN }} --prod
+          pnpm deploy:vercel:prod
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 

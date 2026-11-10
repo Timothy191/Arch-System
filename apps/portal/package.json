@@ -93,6 +93,7 @@
     "dev:turbopack": "next dev -H 0.0.0.0 --turbopack",
     "dev:webpack": "next dev -H 0.0.0.0 --webpack",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "start": "next start -H 0.0.0.0",
     "test": "jest --passWithNoTests --runInBand",
     "test:integration": "jest --config jest.integration.config.cjs --runInBand",

@@ -37,6 +37,7 @@
     "build": "tsc",
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "openapi:generate": "SPEC_FILE=./openapi.generated.json node scripts/generate-openapi-types.js",

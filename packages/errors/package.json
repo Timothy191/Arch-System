@@ -9,6 +9,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "biome check .",
+    "lint:ci": "biome ci .",
     "test": "jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },

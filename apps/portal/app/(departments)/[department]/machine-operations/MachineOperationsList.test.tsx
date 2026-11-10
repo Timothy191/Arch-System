@@ -1,7 +1,7 @@
 import { DepartmentLayout } from '@repo/ui/DepartmentLayout';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import MachineOperationsFilterableTable from './MachineOperationsFilterableTable';
+import { MachineOperationsFilterableTable } from './MachineOperationsFilterableTable';
 import { MachineOperationsForm } from './MachineOperationsForm';
 import { MachineOperationsKpiStrip } from './MachineOperationsKpiStrip';
 import { MachineOperationsList } from './MachineOperationsList';

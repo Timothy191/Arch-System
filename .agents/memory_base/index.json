@@ -1,10 +1,12 @@
 {
-  "lastUpdated": "2026-11-10T08:20:35.252Z",
+  "lastUpdated": "2026-11-10T09:30:48.862Z",
   "totalRetrospectives": 15,
   "entries": [
     {
       "id": "compaction-999d8f18",
-      "category": "context-compaction"
+      "category": "context-compaction",
+      "errorSignature": "compaction_decision:execute_full_compact",
+      "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
     },
     {
       "id": "consolidated-20261102-ci-billing-json-knip-tokenization",
