@@ -247,6 +247,12 @@
       ],
       "cache": true
     },
+    "portal#analyze:turbopack": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "next.config.*", "scripts/**"],
+      "outputs": ["../../.ci-local/bundle-graph.jsonl", ".next/analyze/**"],
+      "cache": false
+    },
     "portal#test:integration": {
       "cache": false,
       "passThroughEnv": [

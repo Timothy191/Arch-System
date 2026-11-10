@@ -28,6 +28,9 @@
   - Consolidated `unrefSleep` and `getCircuitGuardedRedisClient` into `packages/redis/src/internal-utils.ts` across `locks.ts`, `streams.ts`, `cache.ts`, and `invalidation.ts`.
 - **Tier 5 — Build, Audit & Governance Scripts (`tools/`)**:
   - Extracted `getDirSize` (`tools/lib/fs-metrics.cjs`), `getFormattedDate`/`getNextLogNumber` (`tools/lib/versioned-log-dir.cjs`), and `stripSqlComments`/`listMigrationFiles` (`tools/lib/sql-migration-utils.cjs`) across 8 audit/ops/governance scripts.
+- **Control Room `ShiftCloseoutForm` & Turbopack Analysis Synchronization**:
+  - Refactored `apps/portal/app/(departments)/control-room/components/ShiftCloseoutForm.tsx` to extract shared `SMR_INPUT_BASE` utility constants, named domain thresholds (`SHIFT_TARGET_HOURS = 12.0`, `MAX_ALLOCATED_HOURS = 12.5`), and a single-options-object `updateMachine({ machineId, field, allocationValue })` helper.
+  - Integrated `analyze:turbopack` (`portal#analyze:turbopack`) into `package.json` and `turbo.json` and synchronized active local/remote branches onto `main`.
 
 ---
 

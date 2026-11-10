@@ -1,13 +1,26 @@
 'use client';
 
-import { MachineTimeAllocationInput, shiftCloseoutPayloadSchema } from '@repo/contract';
+import { type MachineTimeAllocationInput, shiftCloseoutPayloadSchema } from '@repo/contract';
 import { useOfflineQueue, usePitConnectivity } from '@repo/shared/hooks';
 import { createBrowserSupabaseClient } from '@repo/supabase/client';
-import { GlassCard } from '@repo/ui/components/GlassCard';
+import { GlassCard } from '@repo/ui/GlassCard';
 import { getCurrentShift } from '@repo/utils/client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ZodError } from 'zod';
+
+const MAX_PENDING_UNITS_TO_SHOW = 8;
+const SHIFT_TARGET_HOURS = 12.0;
+const MAX_ALLOCATED_HOURS = 12.5;
+const OVERRUN_REASON_PLACEHOLDER = `Reason for overrun (>${SHIFT_TARGET_HOURS}h)...`;
+
+// Shared input className chain (16 utilities, repeated 3× at lines 450/470/490)
+const SMR_INPUT_BASE =
+  'min-h-[44px] rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]';
+const SMR_INPUT_WIDTH = 'w-24';
+const SMR_INPUT_WIDTH_NARROW = 'w-20';
+const SMR_INPUT_ERROR = 'border-red-500 focus:ring-red-500';
+const SMR_INPUT_DEFAULT = 'border-[var(--border-default)]';
 
 interface CloseoutChecklistItem {
   id: string;
@@ -23,7 +36,7 @@ const DEFAULT_CLOSEOUT_CHECKLIST: CloseoutChecklistItem[] = [
   },
   {
     id: 'chk-smr-reconciled',
-    label: 'All active fleet SMR readings, breakdowns, and delays reconciled to 12.0h',
+    label: `All active fleet SMR readings, breakdowns, and delays reconciled to ${SHIFT_TARGET_HOURS}h`,
     status: 'completed',
   },
   {
@@ -148,17 +161,23 @@ export function ShiftCloseoutForm({
     loadOperatorIdentity();
   }, [initialOperatorName]);
 
-  const updateMachine = (
-    id: string,
-    field: keyof MachineTimeAllocationInput,
-    value: MachineTimeAllocationInput[keyof MachineTimeAllocationInput]
-  ) => {
-    setMachines((prev) => prev.map((m) => (m.machine_id === id ? { ...m, [field]: value } : m)));
+  const updateMachine = ({
+    machineId,
+    field,
+    allocationValue,
+  }: {
+    machineId: string;
+    field: keyof MachineTimeAllocationInput;
+    allocationValue: MachineTimeAllocationInput[keyof MachineTimeAllocationInput];
+  }) => {
+    setMachines((prev) =>
+      prev.map((m) => (m.machine_id === machineId ? { ...m, [field]: allocationValue } : m))
+    );
     // Clear error for this machine when edited
-    if (validationErrors[id]) {
+    if (validationErrors[machineId]) {
       setValidationErrors((prev) => {
         const newErrs = { ...prev };
-        delete newErrs[id];
+        delete newErrs[machineId];
         return newErrs;
       });
     }
@@ -279,8 +298,8 @@ export function ShiftCloseoutForm({
             Shift Production & SMR Ledger
           </h2>
           <p className="mt-1 text-[var(--text-secondary)] text-sm">
-            Every machine must be accounted for. Operating SMR + Breakdowns + Delays cannot exceed
-            12.5 hours (overrun reason required beyond 12.0h).
+            Every machine must be accounted for. Operating SMR + Breakdowns + Delays cannot exceed $
+            {MAX_ALLOCATED_HOURS} hours (overrun reason required beyond ${SHIFT_TARGET_HOURS}h).
           </p>
           <p className="mt-1 text-[var(--text-muted)] text-xs">
             Logged Operator:{' '}
@@ -321,8 +340,8 @@ export function ShiftCloseoutForm({
                 Pre-Closeout SMR Readiness Gate
               </span>
               <p className="mt-0.5 text-[var(--text-secondary)] text-xs">
-                {reconciledMachines.length} of {machines.length} fleet units reconciled to 12.0h
-                shift target ({readinessPct}%)
+                {reconciledMachines.length} of {machines.length} fleet units reconciled to $
+                {SHIFT_TARGET_HOURS}h shift target ({readinessPct}%)
                 {serverCompletenessPct !== null
                   ? ` · Server Shift Completeness: ${serverCompletenessPct}%`
                   : ''}
@@ -345,7 +364,7 @@ export function ShiftCloseoutForm({
               <span className="font-medium text-[11px] text-[var(--text-muted)]">
                 Jump to unit:
               </span>
-              {unreconciledMachines.slice(0, 8).map((unit) => (
+              {unreconciledMachines.slice(0, MAX_PENDING_UNITS_TO_SHOW).map((unit) => (
                 <button
                   key={unit.machine_id}
                   type="button"
@@ -412,19 +431,24 @@ export function ShiftCloseoutForm({
                   >
                     <td className="whitespace-nowrap px-4 py-3.5 font-medium text-[var(--text-heading)] text-sm">
                       {m.machine_name}
-                      {totalAllocated > 12.0 && totalAllocated <= 12.5 && (
-                        <div className="mt-1.5 max-w-xs">
-                          <input
-                            type="text"
-                            placeholder="Reason for overrun (>12.0h)..."
-                            value={m.overrun_reason || ''}
-                            onChange={(e) =>
-                              updateMachine(m.machine_id, 'overrun_reason', e.target.value)
-                            }
-                            className="w-full rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[var(--text-heading)] text-xs placeholder:text-amber-600/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                          />
-                        </div>
-                      )}
+                      {totalAllocated > SHIFT_TARGET_HOURS &&
+                        totalAllocated <= MAX_ALLOCATED_HOURS && (
+                          <div className="mt-1.5 max-w-xs">
+                            <input
+                              type="text"
+                              placeholder={OVERRUN_REASON_PLACEHOLDER}
+                              value={m.overrun_reason || ''}
+                              onChange={(e) =>
+                                updateMachine({
+                                  machineId: m.machine_id,
+                                  field: 'overrun_reason',
+                                  allocationValue: e.target.value,
+                                })
+                              }
+                              className="w-full rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[var(--text-heading)] text-xs placeholder:text-amber-600/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                            />
+                          </div>
+                        )}
                       {isError && (
                         <div className="mt-1 max-w-xs whitespace-normal font-normal text-red-600 text-xs">
                           {validationErrors[m.machine_id]}
@@ -441,16 +465,14 @@ export function ShiftCloseoutForm({
                         step="0.1"
                         value={m.closing_smr}
                         onChange={(e) =>
-                          updateMachine(
-                            m.machine_id,
-                            'closing_smr',
-                            parseFloat(e.target.value) || m.opening_smr
-                          )
+                          updateMachine({
+                            machineId: m.machine_id,
+                            field: 'closing_smr',
+                            allocationValue: parseFloat(e.target.value) || m.opening_smr,
+                          })
                         }
-                        className={`min-h-[44px] w-24 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
-                          isError
-                            ? 'border-red-500 focus:ring-red-500'
-                            : 'border-[var(--border-default)]'
+                        className={`${SMR_INPUT_BASE} ${SMR_INPUT_WIDTH} ${
+                          isError ? SMR_INPUT_ERROR : SMR_INPUT_DEFAULT
                         }`}
                       />
                     </td>
@@ -461,16 +483,14 @@ export function ShiftCloseoutForm({
                         min="0"
                         value={m.breakdown_hours}
                         onChange={(e) =>
-                          updateMachine(
-                            m.machine_id,
-                            'breakdown_hours',
-                            parseFloat(e.target.value) || 0
-                          )
+                          updateMachine({
+                            machineId: m.machine_id,
+                            field: 'breakdown_hours',
+                            allocationValue: parseFloat(e.target.value) || 0,
+                          })
                         }
-                        className={`min-h-[44px] w-20 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
-                          isError
-                            ? 'border-red-500 focus:ring-red-500'
-                            : 'border-[var(--border-default)]'
+                        className={`${SMR_INPUT_BASE} ${SMR_INPUT_WIDTH_NARROW} ${
+                          isError ? SMR_INPUT_ERROR : SMR_INPUT_DEFAULT
                         }`}
                       />
                     </td>
@@ -481,32 +501,30 @@ export function ShiftCloseoutForm({
                         min="0"
                         value={m.delay_hours}
                         onChange={(e) =>
-                          updateMachine(
-                            m.machine_id,
-                            'delay_hours',
-                            parseFloat(e.target.value) || 0
-                          )
+                          updateMachine({
+                            machineId: m.machine_id,
+                            field: 'delay_hours',
+                            allocationValue: parseFloat(e.target.value) || 0,
+                          })
                         }
-                        className={`min-h-[44px] w-20 rounded-lg border bg-[var(--bg-secondary)] px-3 py-2 font-mono text-[var(--text-heading)] text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] ${
-                          isError
-                            ? 'border-red-500 focus:ring-red-500'
-                            : 'border-[var(--border-default)]'
+                        className={`${SMR_INPUT_BASE} ${SMR_INPUT_WIDTH_NARROW} ${
+                          isError ? SMR_INPUT_ERROR : SMR_INPUT_DEFAULT
                         }`}
                       />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3.5 text-right font-medium font-mono text-sm">
                       <span
                         className={
-                          totalAllocated > 12.5
+                          totalAllocated > MAX_ALLOCATED_HOURS
                             ? 'font-bold text-red-600'
-                            : totalAllocated > 12.0
+                            : totalAllocated > SHIFT_TARGET_HOURS
                               ? 'font-bold text-amber-500'
-                              : totalAllocated < 12.0
+                              : totalAllocated < SHIFT_TARGET_HOURS
                                 ? 'text-amber-600'
                                 : 'text-emerald-600'
                         }
                       >
-                        {totalAllocated.toFixed(1)} / 12.0 h
+                        {totalAllocated.toFixed(1)} / {SHIFT_TARGET_HOURS} h
                       </span>
                     </td>
                   </tr>
@@ -521,18 +539,18 @@ export function ShiftCloseoutForm({
             Shift Handover Verification &amp; Notes
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {checklistItems.map((item) => (
+            {checklistItems.map((checklistItem) => (
               <label
-                key={item.id}
+                key={checklistItem.id}
                 className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-[var(--border-subtle)] bg-white/70 p-2.5 text-[var(--text-heading)] text-xs"
               >
                 <input
                   type="checkbox"
-                  checked={item.status === 'completed'}
+                  checked={checklistItem.status === 'completed'}
                   onChange={(e) =>
                     setChecklistItems((prev) =>
                       prev.map((chk) =>
-                        chk.id === item.id
+                        chk.id === checklistItem.id
                           ? { ...chk, status: e.target.checked ? 'completed' : 'pending' }
                           : chk
                       )
@@ -540,7 +558,7 @@ export function ShiftCloseoutForm({
                   }
                   className="mt-0.5 h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-blue)]"
                 />
-                <span>{item.label}</span>
+                <span>{checklistItem.label}</span>
               </label>
             ))}
           </div>
