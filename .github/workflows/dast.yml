@@ -2,7 +2,7 @@ name: Staging DAST Scan
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
   schedule:
     - cron: '0 0 * * *' # Daily at midnight
 

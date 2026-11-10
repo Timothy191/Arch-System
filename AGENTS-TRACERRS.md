@@ -14,6 +14,10 @@
 - **Step 3 — Live Control Room W3C `Server-Timing` Telemetry Strip**:
   - Created `apps/portal/lib/observability/server-timing-client.ts` (`parseServerTimingHeader`, `formatServerTimingSummary`) and `apps/portal/lib/observability/server-timing-client.test.ts`.
   - Updated `apps/portal/features/departments/components/control-room/ScadaPanel.tsx` and `ControlRoomPanels.test.tsx` to parse the `Server-Timing` HTTP response header from `/api/control-room/scada-status` and render `data-testid="scada-server-timing-badge"`.
+- **Step 4 — Branch Triggers, GitHub Ruleset `#26682077` & CI Artifacts Standardization**:
+  - Standardized `.github/workflows/ci.yml`, `deploy.yml`, `reviewdog.yml`, and `dast.yml` branch triggers to `branches: [main]`, removing nonexistent `master` and `staging` refs.
+  - Upgraded `.github/workflows/scorecard.yml`, `test-report.yml`, and `theme-ci.yml` to `actions/upload-artifact@v6` (`b7c566a772e6b6bfb58ed0dc250532a479d7789f`) with `retention-days: 14`.
+  - Synchronized GitHub Ruleset `#26682077` (`main-branch-protection`) and Classic Branch Protection required status checks (`Quality Gates (Lint, Type Check, Build & Test)`, `Policy Check`, `Dead Code Detection`, `Dependency Lint`, `Security Audit`, `Tier 2 Review Policy Check`) with live `.github/workflows/ci.yml` job names and enabled `delete_branch_on_merge: true`.
 
 ---
 

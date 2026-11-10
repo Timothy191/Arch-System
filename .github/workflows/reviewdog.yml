@@ -2,7 +2,7 @@ name: Reviewdog
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

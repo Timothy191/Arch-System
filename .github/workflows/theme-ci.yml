@@ -78,3 +78,4 @@ jobs:
         with:
           name: playwright-screenshots
           path: e2e/visual/__snapshots__/
+          retention-days: 14
