@@ -2,20 +2,24 @@
 
 > **Canonical Document:** `.agents/ONBOARDING.md`  
 > **Target Audience:** All AI Agents (Antigravity, Cursor, Codex, OpenCode, Claude Code, Subagents)  
-> **Governing SSoT:** `/home/tim/Fork/AGENTS.md` and `.agents/SYSTEMS.md`
+> **Governing SSoT:** `/home/tim/Fork/Arch-System/AGENTS.md` and `.agents/SYSTEMS.md`
 
 ---
 
-## 1. Mandatory Reading & Orientation Order
+## 1. Lean Orientation & Context-Budget Invariant
 
-Before executing any file modification, command, or subagent dispatch:
+> [!IMPORTANT]
+> **DO NOT eager-read full documentation files into context.**
+> Reading full `AGENTS.md`, `SYSTEMS.md`, and `GUIDE.md` consumes ~27,000 tokens before any work begins.
+> Query specific line ranges or symbols on demand using `read_file` (with `StartLine`/`EndLine`), structural search (`codemap` / `ast-grep`), or dynamic skills (`skills-mcp`).
 
-1. **[Fork/AGENTS.md](file:///home/tim/Fork/AGENTS.md)** — Core workspace architecture, independent project boundaries, and Vercel project mappings.
-2. **[.agents/SYSTEMS.md](file:///home/tim/Fork/.agents/SYSTEMS.md)** — Canonical systems specification (Harness, RAG, DAG Pipelines, A2A Protocol, Authority Matrix).
-3. **[.agents/GUIDE.md](file:///home/tim/Fork/.agents/GUIDE.md)** — Operational commands, conventions, debugging, and environment gotchas.
-4. **Target Project Guide:**
-   - For portal work: **[Arch-System/.agents/GUIDE.md](file:///home/tim/Fork/Arch-System/.agents/GUIDE.md)** and **[Arch-System/AGENTS.md](file:///home/tim/Fork/Arch-System/AGENTS.md)**.
-   - For sibling services: Project-specific `README.md` and `package.json`.
+### Fast Architecture Summary (Zero Turn Overhead)
+
+- **Project:** Arch-System (Plantcor / Arch OS) industrial mining-operations portal.
+- **Stack:** Next.js 16 App Router + React 19, Turborepo 2.x, pnpm 9.15.9, Supabase Postgres/Realtime CDC, Redis L1/L2.
+- **Governing SSoT:** [`AGENTS.md`](file:///home/tim/Fork/Arch-System/AGENTS.md) — query target sections on demand.
+- **Toolchain Mandate:** Node ≥ 24, commands run inside `Arch-System/` with mise path.
+- **Verification Gate:** `pnpm agent:verify` (28 gates).
 
 ---
 
@@ -47,8 +51,8 @@ sequenceDiagram
     participant Registry as A2A Registry (.agents/a2a/registry)
     participant Project as Scoped Project Dir
 
-    Agent->>Env: Read /home/tim/Fork/AGENTS.md & .agents/SYSTEMS.md
-    Agent->>Env: Verify toolchain via .agents/CHECKLIST.md
+    Agent->>Env: Inspect task scope & query target rules on-demand
+    Agent->>Env: Verify toolchain via .agents/CHECKLIST.md (on-demand)
     Agent->>Registry: Load assigned Persona Card (e.g. core-coordinator.json)
     Agent->>Project: cd into specific project directory
     Agent->>Project: Execute work within scoped worktree/branch

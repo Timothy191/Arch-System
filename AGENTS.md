@@ -271,93 +271,53 @@ Runtime clients use factory helpers: `createServerSupabaseClient()` (`@repo/supa
 
 ## Runtime/Tooling Preferences
 
-- **Node.js**: `engines` require `>=24`; `.node-version` and `.nvmrc` pin major `24`. Node 26.8.1 also present (supplies pnpm).
-- **Package manager**: **pnpm only** (9.15.9 pinned via `packageManager`). Catalogs live in `pnpm-workspace.yaml` (`catalog:` for shared deps, `catalogs.react19` for React 19). Do not use npm, yarn, or bun.
-- **Task runner**: Turborepo 2.x (`turbo.json`). `build` depends on `^build` + `codegen`.
-- **Toolchain mandate**: prefer structural AST search (`ast-grep` / `sg`, `codemap`) over regex `grep`, syntax-aware diffs (`difftastic` / `difft`) over plain `git diff`, and bundle multi-agent context via `repomix` (`pnpm context:pack`). Full matrix: `.agents/SYSTEMS.md`.
-- **Code-Intelligence Substrate**: the CodeGraph SQLite index (`/home/tim/local.db`, outside the git tree) is the single source of truth for structural knowledge — 8,982 entities, 46,000 relations, 779 files, `end_line` body ranges on 75.2% of entities. The TS AST parser, batch parser, range backfiller, and chunker live in `~/.agents/skills/code-intelligence/scripts/` and must never be copied into the repo. The repo holds only enforcement machinery: `tools/scripts/ci-*.cjs`, `tools/audits/audit-code-intelligence-drift.cjs`, `agent-verify.sh` gate 28, the `code-intelligence-substrate` rule, and the `code-intelligence` skill. Before any agent reports indexed/searched/impacted/chunked, run `pnpm audit:code-intelligence` and require `✅ PASS`. **Enforcement is always applied**, not only when an agent remembers: an edit-time hook (`.qoder/hooks/code-intelligence-gate.sh`), a pre-commit hard-block (`pnpm audit:enforcement` → `tools/scripts/check-enforcement-integrity.cjs`), protected-path rules (`.qoder/hooks/protect-paths.sh`), and a totalGates-aware pre-push gate.
-- **Toolchain resolution**: `node` is `/usr/bin/node` (v26.8.1); `pnpm` resolves through mise shim (9.15.9). If a non-login shell lacks `pnpm`, prepend mise installs:
+- **Node.js & pnpm**: Node `>=24` pinned via `.node-version`/`.nvmrc`. **pnpm 9.15.9 only** (`packageManager`). Shared deps catalog in `pnpm-workspace.yaml`. Turborepo 2.x runner.
+- **Toolchain Mandate**: Prefer structural AST search (`ast-grep`/`codemap`), syntax-aware diffs (`difftastic`), and context bundling (`repomix`). See `.agents/SYSTEMS.md`.
+- **Code-Intelligence Substrate**: SQLite index (`/home/tim/local.db`) SSoT for structural knowledge (8,982 entities, 46k relations, 779 files, 75.2% ranged). Scripts live in `~/.agents/skills/code-intelligence/scripts/`. Enforced via Gate 28 (`pnpm audit:code-intelligence`), edit-time hook, pre-commit block, and pre-push gate.
+- **Toolchain resolution**: Prepend mise shim if pnpm missing in non-login shell:
   ```bash
   export PATH="/home/tim/.local/share/mise/installs/node/24.15.0/bin:/home/tim/.local/share/mise/installs/node/26.8.1/bin:$PATH"
   ```
-- **Root install is blocked on purpose** — `pnpm install` at `/home/tim/Fork` exits 1 via `preinstall` hook. Install inside `Arch-System/` (or each standalone MCP server).
-- **Env files**: `Arch-System/.env` (create from `.env.example`), `Arch-System/apps/portal/.env` (template at `apps/portal/env/.env.example`), `Arch-System/.env.tools`. Server-side Supabase/DB keys must never reach the client.
-- **MCP registration**: `.mcp.json` at root registers 7 lean stdio servers (4 first-party + 3 workspace); `Arch-System/.mcp.json` registers 4 core servers (`supabase`, `codemap`, `chrome-devtools`, `context7`). Standalone MCP servers (`skills-mcp`, `memory-gateway-mcp`, `slim-tooling-mcp`, `langgraph-mcp`) have own lockfiles — build/test from their own dirs.
+- **Root install blocked**: Never run `pnpm install` in `Fork/` (blocked by preinstall). Run inside `Arch-System/`.
+- **Env files**: `Arch-System/.env`, `apps/portal/.env`, `.env.tools`. DB keys never reach the client.
+- **MCP servers**: Local `.mcp.json` registers `supabase`, `codemap`, `chrome-devtools`, `context7`. Standalone MCP servers built in own dirs.
 
 ---
 
 ## Testing & QA
 
-### Unit / component
+### Suites
 
-- **Jest 30 + `@swc/jest`**, co-located `*.test.ts(x)`. Portal: `apps/portal/jest.config.cjs` (`jsdom`, `setupFilesAfterEnv: ['<rootDir>/setupTests.ts']`, `@repo/*` mapped straight to `src/` so no package build needed). Packages and `libs/` use their own `jest.config.js` with `testEnvironment: 'node'`.
-- Portal coverage thresholds: lines 40, branches 27, functions 28, statements 40.
-- `@repo/database`'s `test` is **Node scripts, not Jest** (`migration-rollback-safety.mjs`, `offline-mutations-security.mjs`).
-- `packages/ui` has **no Jest suite** — a11y coverage is Storybook only.
-- `@repo/eval` runs pytest via Poetry/uv and **skips silently** if neither installed.
-
-### E2E
-
-- **Playwright** at `e2e/` (`playwright.config.ts`, `testDir: '.'`, `snapshotDir: './visual/__snapshots__'`).
-- Projects: `setup` → `chromium`, `mobile-chrome`, `tablet-chrome`; auth state persisted to `e2e/.auth/user.json`.
-- `pnpm test:e2e` auto-starts `pnpm --filter portal dev` on `:3000` unless `BASE_URL` is set; needs seeded local Supabase.
-- Visual diffs allow `maxDiffPixelRatio: 0.02`. `pnpm test:e2e:visual` targets `theme.smoke` grep.
-
-### Accessibility
-
-- Storybook + axe: `packages/ui/.storybook/`; `pnpm test:a11y` runs `pnpm --filter @repo/ui test-storybook:a11y` (start `pnpm --filter @repo/ui storybook` on `:6006` first).
-- Playwright a11y specs: `e2e/accessibility.spec.ts`, `e2e/visual/accessibility.spec.ts`.
-
-### Test conventions
-
-- BDD-style naming in shared packages: `describe('Given …')` / `it('When …, Then …')`; portal hooks use `should … when …`.
-- Mock at the **network-client boundary** (Supabase / Redis / `next/cache` / server actions), never internal logic.
-- The 28-gate `pnpm agent:verify` suite is the completion criterion. Cheapest gate: `pnpm type-check` + `pnpm lint` + `pnpm policy:check` + `pnpm audit:drift` + `pnpm audit:code-intelligence`.
-- `pnpm quality` is the release-grade suite.
-- Redis integration: `REDIS_INTEGRATION=1 pnpm --filter @repo/redis test:integration` (and portal) in CI `redis-integration` job.
+- **Unit/Component**: Jest 30 + `@swc/jest` (`*.test.ts(x)`). Portal coverage floors: lines 40, branches 27, functions 28, statements 40. `@repo/database` uses Node test scripts (`migration-rollback-safety.mjs`, `offline-mutations-security.mjs`). `@repo/ui` tested via Storybook.
+- **E2E**: Playwright at `e2e/` (`pnpm test:e2e`). Visual regression allows `maxDiffPixelRatio: 0.02` (`pnpm test:e2e:visual`).
+- **Accessibility**: Storybook + axe (`pnpm test:a11y` via Storybook on `:6006`).
+- **Completion Criteria**: 28-gate `pnpm agent:verify`. Cheapest quick gate: `pnpm type-check && pnpm lint && pnpm policy:check && pnpm audit:drift && pnpm audit:code-intelligence`. Release suite: `pnpm quality`.
+- **Conventions**: BDD naming (`describe('Given …')` / `it('When …, Then …')`). Mock at network-client boundaries only, never internal logic.
 
 ---
 
-## Real-World Guardrails & Autonomous Branch-to-Production Lifecycle
+## Real-World Guardrails & Autonomous Lifecycle
 
-All agents MUST follow `.agents/rules/real-world-engineering.md` and `.agents/rules/execution-guardrails.md`:
+Enforced by `.agents/rules/real-world-engineering.md` and `.agents/rules/execution-guardrails.md`:
 
-- **Always branch & execute autonomously**: Start every task by creating a dedicated branch (`git checkout -b <type>/<scope>`) and perform all user-requested actions autonomously end-to-end without mid-task interruptions.
-- **Zero guessing / 3-option uncertainty prompt**: Never assume, guess, speculate, or invent defaults. Back every claim with executed commands, file reads, and quoted output (`HYPOTHETICAL:` must be verified empirically). Whenever any uncertainty or ambiguity arises after grounded codebase research, immediately prompt the user (`AskUserQuestion` / `ask_question`) with **3 concrete options** (Option 1 prefixed `(Recommended)`).
-- **Autonomous completion → commit to `main` & push to GitHub + Vercel**: Once all actions and verification gates pass (`pnpm agent:verify`), merge/commit the verified work into `main`, push to GitHub (`git push origin main`), and deploy to Vercel Production (`pnpm deploy:vercel:prod` / `vercel --prod --yes`).
-- **Autonomous artifact auto-approval**: All artifacts (`/artifact`) auto-approve unless the user states otherwise; never pause for manual confirmation.
-- **Real-world industrial viewpoint**: 24/7 SCADA, shift closeout, safety-critical; prefer proven solutions, fault tolerance (RLS initplan, graceful degradation, optimistic queues), and two-layer verification (static + runtime).
-- **Written plan before code** for non-trivial changes.
+- **Always branch & execute autonomously**: Create branch (`git checkout -b <type>/<scope>`) and complete tasks end-to-end without mid-task stops.
+- **Zero guessing / 3-option prompt**: Back all claims with executed evidence. When uncertain, prompt the user with **3 concrete options** (Option 1 `(Recommended)`).
+- **Autonomous completion**: Merge to `main`, push to GitHub (`git push origin main`), deploy to Vercel (`pnpm deploy:vercel:prod`).
+- **Autonomous artifact auto-approval**: Artifacts auto-approve unless user states otherwise.
+- **Industrial reality**: 24/7 SCADA, shift closeout, safety-critical; RLS initplan optimization, graceful degradation, optimistic queues.
+- **Written plan before code**: Mandatory for non-trivial changes.
 
 ---
 
-## Agent Action Scoring & Spec-Based Execution
+## Agent Action Scoring & Mandatory Governance
 
-Every agent action is scored globally: **+1** (task complete, gates pass with evidence) or **-2** (incorrect, gate broken, reverted, or unverified claim).
-
-- **Score ≥ 0**: Standard verification gates. **Score < 0**: Escalate for human review. **Score ≤ -5**: Mandatory full 28-gate `pnpm agent:verify`.
-
-All non-trivial tasks follow 4 phases (enforced by `pnpm agent:verify`):
-
-1. **Write Spec**: Objective, Scope, Acceptance Criteria, Constraints, Risks/Rollback.
-2. **Plan**: Ordered file changes, per-step gate checks, rollback procedure.
-3. **Implement**: Run relevant gates (`type-check`, `lint`, `test`) after each step; never advance on failure.
-4. **Verify**: Re-run all spec acceptance criteria, confirm zero regressions, update `AGENT_TRACER.md`, and use Conventional Commits.
-
-## Agent Permission Tiers, TDD & Mandatory Governance
-
-All agents (Jules, Cursor, Copilot, Claude Code, Codex, Gemini, orchestrators) obey `.agents/rules/mandatory-ai-engineering-governance.md`:
-
-Tiers: **1** read/research · **2** edit feature code + tests · **3** create branches/PRs · **4** modify auth, RLS, migrations, infra (human approval) · **5** production deploy/destructive ops (explicit authorization).
-
-An agent must never grant itself additional permissions.
-
-- **A. Test-Driven Development**: 1. Write a failing test → 2. Confirm failure for intended reason → 3. Implement smallest suitable change → 4. Confirm test passes → 5. Refactor without breaking tests → 6. Run regression tests.
-- **B. No Artificial Completion**: Never claim unexecuted tests passed, replace real logic with mocks/placeholders, disable failing tests, suppress TS errors, or alter acceptance criteria to fit incomplete work.
-- **C. Independent Code Review**: Substantial PRs require an independent reviewer agent (`critique-council-reviewer` / `security-quality-gatekeeper`) capable of rejecting changes on security, boundary, test, perf, DB, or a11y grounds.
+- **Action Scoring**: **+1** (task complete, gates pass) or **-2** (broken gate, unverified claim). Score < 0 escalates; Score ≤ -5 requires full 28-gate verify.
+- **4 Execution Phases**: 1. Spec → 2. Plan → 3. Implement (gate after each step) → 4. Verify (zero regressions, update `AGENT_TRACER.md`).
+- **Permission Tiers**: 1 read/research · 2 feature code + tests · 3 branches/PRs · 4 auth/RLS/migrations/infra · 5 production deploy/destructive.
+- **Mandatory Rules**: Test-Driven Development (failing test first), No Artificial Completion (no placeholder claims), Independent Code Review for substantial PRs (`critique-council-reviewer` / `security-quality-gatekeeper`).
 
 ---
 
 ## References
 
-- [AGENTS.md open format](https://agents.md/): closest (nested) AGENTS.md to the edited file wins; explicit user prompts override everything. Living doc — update when conventions change.
+- [AGENTS.md open format](https://agents.md/): closest AGENTS.md wins. Living doc — update when conventions change.

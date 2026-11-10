@@ -323,3 +323,27 @@
 - **Phase 3 (Design):** Edited 5 files: `/home/tim/Fork/.mcp.json`, `/home/tim/Fork/.agents/mcp_config.json`, `/home/tim/Fork/MCP-SERVERS-REGISTRY.md`, `/home/tim/Fork/Arch-System/tools/mcp/mcp-registry.json`, `/home/tim/Fork/Arch-System/.mcp.json`. All JSON re-parsed cleanly.
 - **Phase 4 (Criticism):** Biome `ci` flagged the new `redis` entry in `mcp-registry.json` (multi-line `args` array). Collapsed to a single-line array; `pnpm turbo run //#lint:ci` → 1 successful task, 1611 files checked.
 - **Phase 5 (Contract):** `node tools/scripts/check-enforcement-integrity.cjs` → EXIT=0. `node tools/audits/verify-27-gates.cjs --verify-manifest` → EXIT=0. `pnpm agent:verify` → **28/28 GATES PASSED (100%)**. Committed `2361c005` (Arch-System) and `f6c0b9e` (federated root). Post-commit audit caught one omission: `.agents/mcp_config.json` still referenced the unpublished `@modelcontextprotocol/server-ripgrep`; repaired and committed as `f6c0b9e~1`. Final `git status` clean in both repos.
+
+---
+
+## [2026-11-10T12:06:00+02:00] - Agent Onboarding Context Reduction & Directives Optimization
+
+- **Governing request**: _"Identify when i onboard new agent the context is filled up fast explore and determine where this is occurring" / "Approved path"_
+- **Phase 1 (Comprehension & Root Cause Analysis):**
+  - Traced context explosion on new agent start & onboarding:
+    1. Static baseline: `GEMINI.md` (symlinked to 27.5 KB `AGENTS.md`) auto-injected into `<user_rules>` in every prompt (~7,162 tokens) plus 57 skills, 24 subagents, 11 MCP servers = ~16,000–17,000 token Turn 1 baseline.
+    2. Onboarding loop: `.agents/ONBOARDING.md` prescribed eager reading of `Fork/AGENTS.md` (32.6 KB), `SYSTEMS.md` (22.4 KB), `GUIDE.md` (20.5 KB), and `Arch-System/AGENTS.md` (27.2 KB) — dumping 102 KB (~27,000 tokens) into context on Turn 1-4, duplicating `AGENTS.md` which was already in `<user_rules>`.
+    3. Total context by Turn 4 hit 45,000–52,000 tokens, breaching task budgets.
+- **Phase 2 (Evidence & Implementation):**
+  - Replaced `GEMINI.md` symlink with high-density, concise operational directive (2,992 bytes / ~780 tokens) pointing to `AGENTS.md` as SSoT, cutting prompt injection by ~6,400 tokens (91% reduction). Symlinked `CLAUDE.md` and `.cursorrules` to `GEMINI.md`.
+  - Streamlined `Arch-System/AGENTS.md` (22,650 bytes) by pruning duplicated rule paragraphs, ensuring total root instructions size (25.0 KB) remains strictly under `maxRootInstructionsSize` (27.5 KB).
+  - Updated `Arch-System/.agents/ONBOARDING.md`, `Fork/.agents/ONBOARDING.md`, and `Fork/.agents/skills/workspace-onboard/SKILL.md` from eager full-file reads to on-demand symbol/line leasing (`read_file` with ranges, `codemap`, `skills-mcp`).
+  - Removed duplicate `context7_context7` MCP registration directory in `~/.gemini/antigravity-cli/mcp/`.
+- **Phase 3 (Criticism & Formatting):**
+  - Fixed heading blank lines in `GEMINI.md` and `AGENTS.md` flagged by `markdownlint` (MD022/MD032).
+- **Phase 4 (Contract & Verification):**
+  - `pnpm token:budget-check` → `✅ All budgets within limits` (Root Directives: 25.0 KB / 26.9 KB).
+  - `node tools/audits/audit-agentic-content.cjs` → `✅ 0 Critical Violations. Score: 100.0%`.
+  - `bash tools/audits/skill-spector.sh` → `✅ Passed: 0 vulnerabilities`.
+  - `pnpm mcp:verify` → `✅ 100% PASS. All MCP servers registered`.
+  - `pnpm agent:verify` → **28/28 GATES PASSED (100% PASS)**.
