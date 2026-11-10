@@ -59,15 +59,13 @@
       "description": "Redis cache inspection and key-value operations",
       "required": false,
       "category": "cloud_infrastructure",
-      "command": "uvx",
-      "args": [
-        "--from",
-        "redis-mcp-server",
-        "redis-mcp-server",
-        "--url",
-        "redis://127.0.0.1:6379/0"
-      ],
-      "type": "stdio"
+      "command": "npx",
+      "args": ["-y", "easy-redis-mcp@1.1.4"],
+      "type": "stdio",
+      "env": {
+        "REDIS_URL": "redis://127.0.0.1:6379/0"
+      },
+      "note": "easy-redis-mcp — the redis-mcp-server package referenced here previously was unpublished from npm (404); uvx fallback also removed"
     },
     "code-index": {
       "name": "code-index",
