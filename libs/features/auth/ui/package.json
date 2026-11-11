@@ -10,6 +10,7 @@
   "dependencies": {
     "lucide-react": "catalog:",
     "next": "^16.4.1",
+    "qrcode.react": "^4.2.0",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "sonner": "catalog:"

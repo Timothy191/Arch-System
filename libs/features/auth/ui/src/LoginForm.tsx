@@ -5,6 +5,7 @@ import { isValidPageRedirect } from '@repo/auth/utils';
 import {
   ArrowRight,
   CheckCircle2,
+  Copy,
   Eye,
   EyeOff,
   KeyRound,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -49,6 +51,22 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [isVisitorRequestOpen, setIsVisitorRequestOpen] = useState(false);
+  const [managerName, setManagerName] = useState('');
+  const [visitorName, setVisitorName] = useState('');
+  const [visitorCompany, setVisitorCompany] = useState('');
+  const [visitReason, setVisitReason] = useState('');
+  const [copyStatus, setCopyStatus] = useState('');
+
+  const visitorRequest = JSON.stringify({
+    managerName,
+    visitorName,
+    company: visitorCompany,
+    reason: visitReason,
+  });
+  const hasVisitorDetails = [managerName, visitorName, visitorCompany, visitReason].every((field) =>
+    field.trim()
+  );
 
   const { login, loading, rateLimitCountdown } = useLogin();
   const isRateLimited = rateLimitCountdown !== null && rateLimitCountdown > 0;
@@ -242,14 +260,17 @@ export function LoginForm() {
 
       {/* Secondary Action (Visitor QR Code) vs. Passive Telemetry Badge (Audit-Logged RBAC) */}
       <div data-testid="enterprise-auth-addons" className={ENTERPRISE_ADDONS_BAR_CLASS}>
-        <Link
-          href="/access-control/qr-codes"
-          className="group inline-flex min-h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3.5 py-1.5 font-medium text-[13px] text-zinc-800 transition-all hover:bg-amber-50 hover:text-amber-900"
+        <button
+          type="button"
+          onClick={() => setIsVisitorRequestOpen((isOpen) => !isOpen)}
+          aria-expanded={isVisitorRequestOpen}
+          aria-controls="visitor-qr-request"
+          className="group inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3.5 py-1.5 font-medium text-[13px] text-zinc-800 transition-all hover:bg-amber-50 hover:text-amber-900"
         >
           <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-700" />
           <span>Visitor QR Code</span>
           <ArrowRight className="h-3.5 w-3.5 text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-700" />
-        </Link>
+        </button>
         <div
           aria-label="Security posture: Audit-Logged RBAC"
           className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono font-semibold text-[13px] text-zinc-800 leading-[18px]"
@@ -264,6 +285,105 @@ export function LoginForm() {
           <span>Audit-Logged RBAC</span>
         </div>
       </div>
+
+      {isVisitorRequestOpen && (
+        <section
+          id="visitor-qr-request"
+          aria-labelledby="visitor-qr-title"
+          className="space-y-4 rounded-2xl border border-amber-500/25 bg-white/95 p-4 shadow-diffusion-sm"
+        >
+          <div>
+            <h3 id="visitor-qr-title" className="font-semibold text-sm text-zinc-900">
+              Create a visitor pass
+            </h3>
+            <p className="mt-1 text-xs text-zinc-600">
+              Enter the visit details to generate a QR code for the visitor.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-1 font-medium text-xs text-zinc-700">
+              Manager name
+              <input
+                value={managerName}
+                onChange={(event) => setManagerName(event.target.value)}
+                maxLength={120}
+                autoComplete="name"
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                placeholder="Manager hosting the visit"
+              />
+            </label>
+            <label className="space-y-1 font-medium text-xs text-zinc-700">
+              Visitor name
+              <input
+                value={visitorName}
+                onChange={(event) => setVisitorName(event.target.value)}
+                maxLength={120}
+                autoComplete="off"
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                placeholder="Visitor full name"
+              />
+            </label>
+            <label className="space-y-1 font-medium text-xs text-zinc-700">
+              Company
+              <input
+                value={visitorCompany}
+                onChange={(event) => setVisitorCompany(event.target.value)}
+                maxLength={160}
+                autoComplete="organization"
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                placeholder="Visitor company"
+              />
+            </label>
+            <label className="space-y-1 font-medium text-xs text-zinc-700">
+              Reason for visit
+              <input
+                value={visitReason}
+                onChange={(event) => setVisitReason(event.target.value)}
+                maxLength={240}
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                placeholder="Meeting, delivery, site work…"
+              />
+            </label>
+          </div>
+          {hasVisitorDetails && (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <QRCodeSVG
+                value={visitorRequest}
+                id="visitor-qr-code"
+                size={192}
+                level="M"
+                marginSize={2}
+                title={`Visitor pass for ${visitorName}`}
+                className="h-48 w-48 rounded bg-white p-2"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const qrCode = document.querySelector('#visitor-qr-code');
+                    if (!(qrCode instanceof SVGElement)) {
+                      throw new Error('QR code is unavailable');
+                    }
+                    await navigator.clipboard.writeText(qrCode.outerHTML);
+                    setCopyStatus(
+                      'QR code copied as SVG. Paste it into a supported document or editor.'
+                    );
+                  } catch {
+                    setCopyStatus('Clipboard unavailable. You can scan the QR code directly.');
+                  }
+                }}
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-semibold text-sm text-zinc-950 hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2"
+              >
+                <Copy className="h-4 w-4" aria-hidden="true" />
+                Copy QR code
+              </button>
+              <p className="text-center text-xs text-zinc-600" role="status" aria-live="polite">
+                {copyStatus || 'Scan the QR to read the visitor pass details.'}
+              </p>
+            </div>
+          )}
+        </section>
+      )}
     </form>
   );
 }
