@@ -4,6 +4,19 @@
 
 ---
 
+## [2026-11-12T00:51:00+02:00] - Login Visitor QR Code Pre-Registration Popup & `/api/auth/visitor-request` Endpoint
+
+- **Phase 1 (Comprehension)**: Replaced the `/login` `"Visitor QR Code"` full-page navigation link (`href="/access-control/qr-codes"`, which redirected unauthenticated visitors back to `/login`) with an inline light-mode popup modal (`RequestVisitorModal`) that submits a pre-registered visitor pass request without authenticating or leaving `/login`.
+- **Phase 2 (Evidence)**: Verified live Supabase `visitors` and `badges` column sets (`packages/supabase/src/database.types.ts`, migrations `028`/`034`/`177`), `apps/portal/app/api/c66/route.ts` turnstile status check (`status !== 'Checked In'` denies gate entry until security check-in), and `apps/portal/lib/api/rate-limit-config.ts` `/api/auth/*` rate-limit policy.
+- **Phase 3 (Design)**:
+  - Added `visitorPassRequestSchema` and `VisitorPassRequestInput` in `packages/contract/src/schemas/access-control.schema.ts` and exported from `packages/contract/src/index.ts`.
+  - Implemented `POST /api/auth/visitor-request` (`apps/portal/app/api/auth/visitor-request/route.ts`) enforcing `application/json`, `withBodyLimit` (16 KB), production Origin/Referer CSRF validation, `withRateLimit`, `409 Conflict` guard preventing tamper/badge issuance for already `Checked In` on-site visitors, idempotent repeat `id_number` badge reuse, `Pre-Registered` visitor persistence, 24-hour `VIS-*` badge issuance, and `revalidateTag('access-control', 'max')`.
+  - Upgraded `libs/features/auth/ui/src/LoginForm.tsx` and `libs/features/auth/ui/src/RequestVisitorModal.tsx` with a discriminated-union submission state (`form` | `submitting` | `issued`), sibling portal dialog outside `<form data-testid="login-form">`, and SVG QR rendering via `apps/portal/features/auth/components/VisitorQrBadge.tsx` (`qr-code-styling`).
+- **Phase 4 (Criticism)**: Prevented nested HTML `<form>` submission bubbling via React Portal, capped Tailwind utility chains below 20 tokens per element, preserved C66 physical gate security (`Pre-Registered` status denied until gate check-in; `Checked In` records rejected with `409`), enforced trimmed non-empty contract fields, and handled legacy `visitors.name`/`purpose` column parity.
+- **Phase 5 (Contract & Verification)**: Verified `27/27` unit tests across `LoginForm.test.tsx`, `visitor-request/route.test.ts`, and `app/(auth)/login/page.test.tsx`, Biome formatting/linting, CodeGraph snapshot parity, and repository verification gates.
+
+---
+
 ## [2026-11-10T11:30:00+02:00] - Monorepo Tooling Optimization, Knip Duplicate Elimination & Pipeline Hardening
 
 - **Knip Duplicate Export Remediation**:

@@ -196,3 +196,43 @@ export const plantDelaysSchema = z.object({
 });
 
 export type PlantDelayInput = z.infer<typeof plantDelaysSchema>;
+
+const MAX_VISITOR_NAME_LENGTH = 100;
+const MAX_VISITOR_COMPANY_LENGTH = 150;
+const MAX_VISITOR_HOST_LENGTH = 150;
+const MAX_VISITOR_REASON_LENGTH = 300;
+const MAX_VISITOR_ID_NUMBER_LENGTH = 50;
+
+const trimmedRequiredText = z.string().trim().min(1, 'Must not be empty');
+
+export const visitorPassRequestSchema = z.object({
+  first_name: trimmedRequiredText.max(
+    MAX_VISITOR_NAME_LENGTH,
+    'First name must be 100 characters or less'
+  ),
+  surname: trimmedRequiredText.max(
+    MAX_VISITOR_NAME_LENGTH,
+    'Surname must be 100 characters or less'
+  ),
+  company: trimmedRequiredText.max(
+    MAX_VISITOR_COMPANY_LENGTH,
+    'Company must be 150 characters or less'
+  ),
+  visiting: trimmedRequiredText.max(
+    MAX_VISITOR_HOST_LENGTH,
+    'Person or department visiting must be 150 characters or less'
+  ),
+  reason_for_entry: trimmedRequiredText.max(
+    MAX_VISITOR_REASON_LENGTH,
+    'Reason for visit must be 300 characters or less'
+  ),
+  id_number: z
+    .string()
+    .trim()
+    .max(MAX_VISITOR_ID_NUMBER_LENGTH, 'ID or Passport number must be 50 characters or less')
+    .optional()
+    .nullable()
+    .transform((rawIdNumber) => (rawIdNumber && rawIdNumber.length > 0 ? rawIdNumber : null)),
+});
+
+export type VisitorPassRequestInput = z.infer<typeof visitorPassRequestSchema>;

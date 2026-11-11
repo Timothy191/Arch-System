@@ -34,6 +34,8 @@ export {
   plantHourlyLogsSchema,
   plantInventoryItemsSchema,
   plantInventoryUsageSchema,
+  type VisitorPassRequestInput,
+  visitorPassRequestSchema,
 } from './schemas/access-control.schema';
 export {
   type AdminOperationalTargets,

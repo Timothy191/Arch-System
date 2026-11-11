@@ -94,6 +94,118 @@ describe('LoginForm', () => {
     expect(screen.queryByLabelText(/remember this device/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
     expect(screen.getByText(/Audit-Logged RBAC/i)).toBeInTheDocument();
+
+    const visitorTrigger = screen.getByRole('button', { name: /Visitor QR Code/i });
+    expect(visitorTrigger).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Visitor QR Code/i })).not.toBeInTheDocument();
+  });
+
+  it('opens the quick Visitor Request popup without navigating or logging in, and displays a pending VIS-* QR code on submit', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      json: jest.fn().mockResolvedValue({
+        success: true,
+        pass: {
+          qrCode: 'VIS-749201',
+          visitorId: 'vis-001',
+          fullName: 'Sipho Dlamini',
+          company: 'Komatsu SA',
+          visiting: 'Engineering Workshop',
+          status: 'Pre-Registered',
+          expiresAt: '2026-11-13T00:00:00.000Z',
+        },
+      }),
+    });
+
+    render(<LoginForm />);
+
+    const visitorTrigger = screen.getByRole('button', { name: /Visitor QR Code/i });
+    fireEvent.click(visitorTrigger);
+
+    const dialog = screen.getByRole('dialog', { name: /Request Visitor Pass/i });
+    expect(dialog).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/First Name/i), {
+      target: { value: 'Sipho' },
+    });
+    fireEvent.change(screen.getByLabelText(/Surname/i), {
+      target: { value: 'Dlamini' },
+    });
+    fireEvent.change(screen.getByLabelText(/Company/i), {
+      target: { value: 'Komatsu SA' },
+    });
+    fireEvent.change(screen.getByLabelText(/Person \/ Department Visiting/i), {
+      target: { value: 'Engineering Workshop' },
+    });
+    fireEvent.change(screen.getByLabelText(/Reason for Visit/i), {
+      target: { value: 'Excavator bucket inspection' },
+    });
+
+    fireEvent.submit(screen.getByTestId('visitor-request-form'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/auth/visitor-request',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            first_name: 'Sipho',
+            surname: 'Dlamini',
+            company: 'Komatsu SA',
+            visiting: 'Engineering Workshop',
+            reason_for_entry: 'Excavator bucket inspection',
+            id_number: null,
+          }),
+        })
+      );
+    });
+
+    // Must NOT have triggered operator login or navigation
+    expect(mockPush).not.toHaveBeenCalled();
+
+    // Displays pending VIS-* QR code and Pre-Registered badge inside popup
+    await waitFor(() => {
+      expect(screen.getByText('VIS-749201')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Pre-Registered/i)).toBeInTheDocument();
+
+    // Closing popup returns cleanly to login view
+    fireEvent.click(screen.getByRole('button', { name: /^Done$/i }));
+    expect(screen.queryByRole('dialog', { name: /Request Visitor Pass/i })).not.toBeInTheDocument();
+  });
+
+  it('shows inline error in the Visitor Request popup when submission fails', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      json: jest.fn().mockResolvedValue({
+        success: false,
+        error: 'Too many visitor pass requests. Please try again shortly.',
+      }),
+    });
+
+    render(<LoginForm />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Visitor QR Code/i }));
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Sipho' } });
+    fireEvent.change(screen.getByLabelText(/Surname/i), { target: { value: 'Dlamini' } });
+    fireEvent.change(screen.getByLabelText(/Company/i), { target: { value: 'Komatsu SA' } });
+    fireEvent.change(screen.getByLabelText(/Person \/ Department Visiting/i), {
+      target: { value: 'Control Room' },
+    });
+    fireEvent.change(screen.getByLabelText(/Reason for Visit/i), {
+      target: { value: 'Audit' },
+    });
+
+    fireEvent.submit(screen.getByTestId('visitor-request-form'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Too many visitor pass requests\. Please try again shortly\./i)
+      ).toBeInTheDocument();
+    });
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('accepts a short password and lets the server validate it', async () => {
