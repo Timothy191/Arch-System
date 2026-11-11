@@ -25,7 +25,11 @@ function getDirSize(dirPath, excludeDirs = []) {
       totalSize += getDirSize(fullPath, excludeDirs);
       continue;
     }
-    totalSize += fs.statSync(fullPath).size;
+    try {
+      totalSize += fs.statSync(fullPath).size;
+    } catch (error) {
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error;
+    }
   }
   return totalSize;
 }

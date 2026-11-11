@@ -39,6 +39,9 @@ const SIGN_IN_BUTTON_CLASS =
 const ENTERPRISE_ADDONS_BAR_CLASS =
   'liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col gap-2 rounded-full border border-white/30 bg-[var(--material-ultra-thin)] px-3 py-1.5 shadow-diffusion-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between';
 
+const VISITOR_FIELD_INPUT_CLASS =
+  'h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20';
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -308,7 +311,7 @@ export function LoginForm() {
                 onChange={(event) => setManagerName(event.target.value)}
                 maxLength={120}
                 autoComplete="name"
-                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className={VISITOR_FIELD_INPUT_CLASS}
                 placeholder="Manager hosting the visit"
               />
             </label>
@@ -319,7 +322,7 @@ export function LoginForm() {
                 onChange={(event) => setVisitorName(event.target.value)}
                 maxLength={120}
                 autoComplete="off"
-                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className={VISITOR_FIELD_INPUT_CLASS}
                 placeholder="Visitor full name"
               />
             </label>
@@ -330,7 +333,7 @@ export function LoginForm() {
                 onChange={(event) => setVisitorCompany(event.target.value)}
                 maxLength={160}
                 autoComplete="organization"
-                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className={VISITOR_FIELD_INPUT_CLASS}
                 placeholder="Visitor company"
               />
             </label>
@@ -340,7 +343,7 @@ export function LoginForm() {
                 value={visitReason}
                 onChange={(event) => setVisitReason(event.target.value)}
                 maxLength={240}
-                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className={VISITOR_FIELD_INPUT_CLASS}
                 placeholder="Meeting, delivery, site work…"
               />
             </label>
