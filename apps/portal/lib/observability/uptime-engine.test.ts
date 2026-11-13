@@ -1,7 +1,11 @@
 import {
+  CRITICAL_LATENCY_THRESHOLD_MS,
   DEGRADED_LATENCY_THRESHOLD_MS,
+  evaluateSloBudgetState,
   FULL_SLA_PCT,
   getAllUptimeSummaries,
+  getOverallSla24hPct,
+  getUptimeSummariesByTarget,
   getUptimeTargetSummary,
   MAX_HEARTBEAT_TICKS,
   recordHeartbeatTick,
@@ -113,5 +117,20 @@ describe('Given the native Uptime Engine ring buffer and SLA calculator', () => 
     resetUptimeEngineState('redis');
     expect(getUptimeTargetSummary('redis').ticks).toHaveLength(0);
     expect(getUptimeTargetSummary('supabase').ticks).toHaveLength(1);
+  });
+
+  it('When evaluateSloBudgetState, getUptimeSummariesByTarget, and getOverallSla24hPct are invoked, Then budget states and keyed rollups are returned accurately', () => {
+    expect(evaluateSloBudgetState(FAST_LATENCY_MS)).toBe('HEALTHY');
+    expect(evaluateSloBudgetState(DEGRADED_LATENCY_THRESHOLD_MS)).toBe('DEGRADED');
+    expect(evaluateSloBudgetState(CRITICAL_LATENCY_THRESHOLD_MS)).toBe('CRITICAL');
+    expect(evaluateSloBudgetState(FAILED_LATENCY_MS)).toBe('CRITICAL');
+
+    recordHeartbeatTick({ targetId: 'redis', latencyMs: FAST_LATENCY_MS });
+    recordHeartbeatTick({ targetId: 'fuxa_scada', latencyMs: FAILED_LATENCY_MS });
+
+    const byTarget = getUptimeSummariesByTarget();
+    expect(byTarget.redis.sloBudgetState).toBe('HEALTHY');
+    expect(byTarget.fuxa_scada.sloBudgetState).toBe('CRITICAL');
+    expect(getOverallSla24hPct()).toBe(EXPECTED_PARTIAL_SLA_PCT);
   });
 });

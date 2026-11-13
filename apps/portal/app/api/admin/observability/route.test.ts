@@ -34,7 +34,9 @@ const MOCK_USED_MEMORY_BYTES = 16_777_216;
 const MOCK_HIT_RATE_RATIO = 0.9589;
 const MOCK_JOB_DURATION_MS = 145;
 const EXPECTED_UPTIME_TARGETS = 4;
-const EXPECTED_ALERT_COUNT = 3;
+const EXPECTED_ALERT_COUNT = 4;
+const EXPECTED_GOLDEN_SIGNAL_COUNT = 4;
+const EXPECTED_FULL_SLA_PCT = 100;
 
 describe('Given GET /api/admin/observability', () => {
   beforeEach(() => {
@@ -101,7 +103,10 @@ describe('Given GET /api/admin/observability', () => {
 
     expect(response.status).toBe(HTTP_OK);
     expect(response.headers.get('Server-Timing')).toContain('cache;dur=');
+    expect(payload.overallSla24hPct).toBe(EXPECTED_FULL_SLA_PCT);
     expect(payload.uptime).toHaveLength(EXPECTED_UPTIME_TARGETS);
+    expect(payload.uptimeByTarget.redis.targetId).toBe('redis');
+    expect(payload.goldenSignals).toHaveLength(EXPECTED_GOLDEN_SIGNAL_COUNT);
     expect(payload.alerts).toHaveLength(EXPECTED_ALERT_COUNT);
     expect(payload.redis.stats.hits).toBe(MOCK_HITS);
     expect(payload.redis.diagnostics?.usedMemoryBytes).toBe(MOCK_USED_MEMORY_BYTES);

@@ -348,7 +348,11 @@ export async function updateExcavatorAssignmentConfig(
         } else if (!existingActivity.site_id && excavatorSiteId) {
           patch.site_id = excavatorSiteId;
         }
-        if (validated.blockMinedId !== undefined) patch.block_mined_id = validated.blockMinedId;
+        if (regularMachineMode) {
+          patch.block_mined_id = null;
+        } else if (validated.blockMinedId !== undefined) {
+          patch.block_mined_id = validated.blockMinedId;
+        }
         if (validated.materialType !== undefined || validated.materialSubCategory !== undefined) {
           patch.material_type = formattedActivityMaterial;
           if (regularMachineMode) {
@@ -369,7 +373,7 @@ export async function updateExcavatorAssignmentConfig(
           activity_date: validated.loadDate,
           shift_type: validated.shiftType,
           site_id: validated.siteId !== undefined ? validated.siteId : excavatorSiteId,
-          block_mined_id: validated.blockMinedId ?? null,
+          block_mined_id: regularMachineMode ? null : (validated.blockMinedId ?? null),
           material_type: formattedActivityMaterial,
           notes: regularMachineMode
             ? `Regular machine activity (${formattedActivityMaterial})`

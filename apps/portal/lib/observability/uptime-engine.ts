@@ -2,6 +2,8 @@ export type UptimeTargetId = 'supabase' | 'redis' | 'fuxa_scada' | 'portal_runti
 
 export type HeartbeatStatus = 'UP' | 'DEGRADED' | 'DOWN';
 
+export type SloBudgetState = 'HEALTHY' | 'DEGRADED' | 'CRITICAL';
+
 export interface HeartbeatTick {
   readonly status: HeartbeatStatus;
   readonly latencyMs: number;
@@ -12,6 +14,7 @@ export interface UptimeTargetSummary {
   readonly targetId: UptimeTargetId;
   readonly label: string;
   readonly currentStatus: HeartbeatStatus;
+  readonly sloBudgetState: SloBudgetState;
   readonly p95LatencyMs: number;
   readonly sla24hPct: number;
   readonly sla7dPct: number;
@@ -28,10 +31,20 @@ export interface RecordHeartbeatInput {
 
 export const MAX_HEARTBEAT_TICKS = 90;
 export const DEGRADED_LATENCY_THRESHOLD_MS = 500;
+export const CRITICAL_LATENCY_THRESHOLD_MS = 1500;
 export const FULL_SLA_PCT = 100;
 export const DEGRADED_WEIGHT = 0.5;
 export const P95_QUANTILE = 0.95;
 export const ROUNDING_FACTOR = 100;
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+const DAYS_IN_WEEK = 7;
+const DAYS_IN_MONTH = 30;
+export const WINDOW_24H_MS = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
+export const WINDOW_7D_MS = WINDOW_24H_MS * DAYS_IN_WEEK;
+export const WINDOW_30D_MS = WINDOW_24H_MS * DAYS_IN_MONTH;
 
 const TARGET_LABEL_MAP: Readonly<Record<UptimeTargetId, string>> = {
   supabase: 'Supabase Cloud (Postgres & Auth)',
@@ -61,12 +74,31 @@ function classifyHeartbeatStatus(latencyMs: number): HeartbeatStatus {
   return 'UP';
 }
 
+export function evaluateSloBudgetState(p95LatencyMs: number): SloBudgetState {
+  if (p95LatencyMs < 0 || p95LatencyMs >= CRITICAL_LATENCY_THRESHOLD_MS) return 'CRITICAL';
+  if (p95LatencyMs >= DEGRADED_LATENCY_THRESHOLD_MS) return 'DEGRADED';
+  return 'HEALTHY';
+}
+
 function computeSlaPercentage(ticks: readonly HeartbeatTick[]): number {
   if (ticks.length === 0) return FULL_SLA_PCT;
 
   const weightedSum = ticks.reduce((sum, tick) => sum + STATUS_WEIGHT_MAP[tick.status], 0);
   const rawPct = (weightedSum / ticks.length) * FULL_SLA_PCT;
   return Math.round(rawPct * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+}
+
+function filterTicksWithinWindow(
+  ticks: readonly HeartbeatTick[],
+  windowMs: number
+): readonly HeartbeatTick[] {
+  if (ticks.length === 0) return ticks;
+  const nowMs = Date.now();
+  const matching = ticks.filter((tick) => {
+    const parsedMs = Date.parse(tick.checkedAt);
+    return Number.isNaN(parsedMs) || nowMs - parsedMs <= windowMs;
+  });
+  return matching.length > 0 ? matching : ticks;
 }
 
 function computeP95LatencyMs(ticks: readonly HeartbeatTick[]): number {
@@ -100,22 +132,43 @@ export function getUptimeTargetSummary(targetId: UptimeTargetId): UptimeTargetSu
   const ticks = heartbeatRingByTarget.get(targetId) ?? [];
   const latestTick = ticks[ticks.length - 1];
   const currentStatus: HeartbeatStatus = latestTick ? latestTick.status : 'UP';
-  const slaPct = computeSlaPercentage(ticks);
+  const p95LatencyMs = computeP95LatencyMs(ticks);
+  const sloBudgetState: SloBudgetState =
+    currentStatus === 'DOWN' ? 'CRITICAL' : evaluateSloBudgetState(p95LatencyMs);
 
   return {
     targetId,
     label: TARGET_LABEL_MAP[targetId],
     currentStatus,
-    p95LatencyMs: computeP95LatencyMs(ticks),
-    sla24hPct: slaPct,
-    sla7dPct: slaPct,
-    sla30dPct: slaPct,
+    sloBudgetState,
+    p95LatencyMs,
+    sla24hPct: computeSlaPercentage(filterTicksWithinWindow(ticks, WINDOW_24H_MS)),
+    sla7dPct: computeSlaPercentage(filterTicksWithinWindow(ticks, WINDOW_7D_MS)),
+    sla30dPct: computeSlaPercentage(filterTicksWithinWindow(ticks, WINDOW_30D_MS)),
     ticks,
   };
 }
 
 export function getAllUptimeSummaries(): readonly UptimeTargetSummary[] {
   return ALL_TARGET_IDS.map((targetId) => getUptimeTargetSummary(targetId));
+}
+
+export function getUptimeSummariesByTarget(): Readonly<
+  Record<UptimeTargetId, UptimeTargetSummary>
+> {
+  return {
+    supabase: getUptimeTargetSummary('supabase'),
+    redis: getUptimeTargetSummary('redis'),
+    fuxa_scada: getUptimeTargetSummary('fuxa_scada'),
+    portal_runtime: getUptimeTargetSummary('portal_runtime'),
+  };
+}
+
+export function getOverallSla24hPct(): number {
+  const summaries = getAllUptimeSummaries();
+  if (summaries.length === 0) return FULL_SLA_PCT;
+  const sum = summaries.reduce((acc, summary) => acc + summary.sla24hPct, 0);
+  return Math.round((sum / summaries.length) * ROUNDING_FACTOR) / ROUNDING_FACTOR;
 }
 
 export function resetUptimeEngineState(targetId?: UptimeTargetId): void {

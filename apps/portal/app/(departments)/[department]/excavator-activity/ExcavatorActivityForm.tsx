@@ -1021,7 +1021,9 @@ export function ExcavatorActivityForm({
               </div>
 
               {/* Site, Block Mined / Area (+ Quick Add) & Material Sub-Category Selectors */}
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <div
+                className={`grid grid-cols-1 gap-2.5 ${isRegularMachine ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}
+              >
                 <div className="space-y-1">
                   <label className="block font-medium text-[11px] text-[var(--text-muted)]">
                     Site / Location
@@ -1043,78 +1045,85 @@ export function ExcavatorActivityForm({
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                      Block Mined / Area
-                    </label>
+                {!isRegularMachine && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <label className="block font-medium text-[11px] text-[var(--text-muted)]">
+                        Block Mined / Area
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <select
+                        value={currentBlockId}
+                        onChange={(e) =>
+                          handleExcavatorBlockChange(excavator.id, e.target.value || null)
+                        }
+                        aria-label={`Select Block Mined / Area for ${excavator.name}`}
+                        className={SELECT_FIELD_CLASS}
+                      >
+                        <option value="">Select block / area...</option>
+                        {availableBlocks.map((mb) => (
+                          <option key={mb.id} value={mb.id}>
+                            {mb.name} ({mb.code})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isQuickAddOpen) {
+                            setQuickAddExcavatorId(null);
+                          } else {
+                            setQuickAddExcavatorId(excavator.id);
+                            setQuickBlockName('');
+                            setQuickBlockCode('');
+                          }
+                        }}
+                        aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
+                        title="Quick add Block (auto-configures format & BLK code)"
+                        data-testid={`quick-add-block-btn-${excavator.name}`}
+                        className="gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-accent-amber/40 bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-amber/15"
+                      >
+                        {isQuickAddOpen ? (
+                          <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                        ) : (
+                          <Plus className="h-3.5 w-3.5 text-accent-amber" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                )}
+
+                {!isRegularMachine && (
+                  <div className="space-y-1">
+                    <label className="block font-medium text-[11px] text-[var(--text-muted)]">
+                      {isRegularMachine
+                        ? `Activity (${currentMaterial})`
+                        : `Material (${currentMaterial})`}
+                    </label>
                     <select
-                      value={currentBlockId}
+                      value={currentSubCategory}
                       onChange={(e) =>
-                        handleExcavatorBlockChange(excavator.id, e.target.value || null)
+                        handleExcavatorMaterialSubCategoryChange(
+                          excavator.id,
+                          e.target.value || null
+                        )
                       }
-                      aria-label={`Select Block Mined / Area for ${excavator.name}`}
+                      aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
                       className={SELECT_FIELD_CLASS}
                     >
-                      <option value="">Select block / area...</option>
-                      {availableBlocks.map((mb) => (
-                        <option key={mb.id} value={mb.id}>
-                          {mb.name} ({mb.code})
+                      <option value="">
+                        Select {currentMaterial.toLowerCase()}{' '}
+                        {isRegularMachine ? 'activity...' : 'material...'}
+                      </option>
+                      {materialSubCategories.map((subCat) => (
+                        <option key={subCat} value={subCat}>
+                          {subCat}
                         </option>
                       ))}
                     </select>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isQuickAddOpen) {
-                          setQuickAddExcavatorId(null);
-                        } else {
-                          setQuickAddExcavatorId(excavator.id);
-                          setQuickBlockName('');
-                          setQuickBlockCode('');
-                        }
-                      }}
-                      aria-label={`Quick add Block Mined / Area for ${excavator.name}`}
-                      title="Quick add Block (auto-configures format & BLK code)"
-                      data-testid={`quick-add-block-btn-${excavator.name}`}
-                      className="gold-steel-border gold-steel-border-slim inline-flex h-[31px] w-[31px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-accent-amber/40 bg-[var(--bg-primary)] text-[var(--text-heading)] shadow-2xs transition-colors hover:bg-accent-amber/15"
-                    >
-                      {isQuickAddOpen ? (
-                        <X className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                      ) : (
-                        <Plus className="h-3.5 w-3.5 text-accent-amber" />
-                      )}
-                    </button>
                   </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block font-medium text-[11px] text-[var(--text-muted)]">
-                    {isRegularMachine
-                      ? `Activity (${currentMaterial})`
-                      : `Material (${currentMaterial})`}
-                  </label>
-                  <select
-                    value={currentSubCategory}
-                    onChange={(e) =>
-                      handleExcavatorMaterialSubCategoryChange(excavator.id, e.target.value || null)
-                    }
-                    aria-label={`Select ${currentMaterial} material sub-category for ${excavator.name}`}
-                    className={SELECT_FIELD_CLASS}
-                  >
-                    <option value="">
-                      Select {currentMaterial.toLowerCase()}{' '}
-                      {isRegularMachine ? 'activity...' : 'material...'}
-                    </option>
-                    {materialSubCategories.map((subCat) => (
-                      <option key={subCat} value={subCat}>
-                        {subCat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                )}
               </div>
 
               {/* Inline Quick Add Block Drawer with Auto-Formatter */}
