@@ -11,7 +11,6 @@ import {
   Loader2,
   Lock,
   Mail,
-  Shield,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -36,10 +35,10 @@ const SIGN_IN_BUTTON_CLASS =
   'group gold-steel-border gold-steel-border-slim flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-[13px] text-zinc-950 shadow-card transition-all duration-150 hover:-translate-y-px hover:bg-amber-400 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60';
 
 const ENTERPRISE_ADDONS_BAR_CLASS =
-  'liquid-glass-light gold-steel-border gold-steel-border-slim flex flex-col gap-2 rounded-full border border-white/30 bg-[var(--material-ultra-thin)] px-3 py-1.5 shadow-diffusion-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between';
+  'liquid-glass-light gold-steel-border gold-steel-border-slim flex rounded-full border border-white/30 bg-[var(--material-ultra-thin)] p-1.5 shadow-diffusion-sm backdrop-blur-md';
 
 const VISITOR_QR_TRIGGER_CLASS =
-  'group inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-3.5 py-1.5 font-medium text-[13px] text-zinc-800 transition-all hover:bg-amber-50 hover:text-amber-900';
+  'group inline-flex min-h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white/80 px-4 py-1.5 font-medium text-[13px] text-zinc-800 transition-all hover:bg-amber-50 hover:text-amber-900';
 
 export interface LoginFormProps {
   readonly renderQrCode?: (qrCode: string) => ReactNode;
@@ -253,7 +252,7 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
           )}
         </button>
 
-        {/* Secondary Action (Visitor QR Code Popup) vs. Passive Telemetry Badge (Audit-Logged RBAC) */}
+        {/* Full-panel Visitor QR Code action */}
         <div data-testid="enterprise-auth-addons" className={ENTERPRISE_ADDONS_BAR_CLASS}>
           <button
             type="button"
@@ -266,19 +265,6 @@ export function LoginForm({ renderQrCode }: LoginFormProps = {}) {
             <span>Visitor QR Code</span>
             <ArrowRight className="h-3.5 w-3.5 text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-700" />
           </button>
-          <div
-            aria-label="Security posture: Audit-Logged RBAC"
-            className="inline-flex select-none items-center justify-center gap-1.5 px-2 py-1 font-mono font-semibold text-[13px] text-zinc-800 leading-[18px]"
-          >
-            <span
-              aria-hidden="true"
-              className="hidden select-none font-bold font-mono text-[13px] text-accent-amber leading-none sm:inline"
-            >
-              |
-            </span>
-            <Shield className="h-4 w-4 shrink-0 text-emerald-700" />
-            <span>Audit-Logged RBAC</span>
-          </div>
         </div>
       </form>
 

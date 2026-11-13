@@ -88,15 +88,16 @@ describe('LoginForm', () => {
     expect(signInBtn.className).toContain('gold-steel-border');
   });
 
-  it('does not render the dead remember-me checkbox and renders enterprise auth add-ons', () => {
+  it('does not render the dead remember-me checkbox and dedicates the entire add-ons panel to Visitor QR Code', () => {
     render(<LoginForm />);
 
     expect(screen.queryByLabelText(/remember this device/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('enterprise-auth-addons')).toBeInTheDocument();
-    expect(screen.getByText(/Audit-Logged RBAC/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Audit-Logged RBAC/i)).not.toBeInTheDocument();
 
     const visitorTrigger = screen.getByRole('button', { name: /Visitor QR Code/i });
     expect(visitorTrigger).toBeInTheDocument();
+    expect(visitorTrigger.className).toContain('w-full');
     expect(screen.queryByRole('link', { name: /Visitor QR Code/i })).not.toBeInTheDocument();
   });
 
@@ -126,16 +127,16 @@ describe('LoginForm', () => {
     const dialog = screen.getByRole('dialog', { name: /Request Visitor Pass/i });
     expect(dialog).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/First Name/i), {
+    fireEvent.change(screen.getByLabelText(/Visitor Name/i), {
       target: { value: 'Sipho' },
     });
-    fireEvent.change(screen.getByLabelText(/Surname/i), {
+    fireEvent.change(screen.getByLabelText(/Visitor Surname/i), {
       target: { value: 'Dlamini' },
     });
-    fireEvent.change(screen.getByLabelText(/Company/i), {
+    fireEvent.change(screen.getByLabelText(/Visitor Company/i), {
       target: { value: 'Komatsu SA' },
     });
-    fireEvent.change(screen.getByLabelText(/Person \/ Department Visiting/i), {
+    fireEvent.change(screen.getByLabelText(/Person Being Visited/i), {
       target: { value: 'Engineering Workshop' },
     });
     fireEvent.change(screen.getByLabelText(/Reason for Visit/i), {
@@ -188,10 +189,12 @@ describe('LoginForm', () => {
     render(<LoginForm />);
 
     fireEvent.click(screen.getByRole('button', { name: /Visitor QR Code/i }));
-    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Sipho' } });
-    fireEvent.change(screen.getByLabelText(/Surname/i), { target: { value: 'Dlamini' } });
-    fireEvent.change(screen.getByLabelText(/Company/i), { target: { value: 'Komatsu SA' } });
-    fireEvent.change(screen.getByLabelText(/Person \/ Department Visiting/i), {
+    fireEvent.change(screen.getByLabelText(/Visitor Name/i), { target: { value: 'Sipho' } });
+    fireEvent.change(screen.getByLabelText(/Visitor Surname/i), { target: { value: 'Dlamini' } });
+    fireEvent.change(screen.getByLabelText(/Visitor Company/i), {
+      target: { value: 'Komatsu SA' },
+    });
+    fireEvent.change(screen.getByLabelText(/Person Being Visited/i), {
       target: { value: 'Control Room' },
     });
     fireEvent.change(screen.getByLabelText(/Reason for Visit/i), {

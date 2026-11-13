@@ -1,6 +1,6 @@
 {
   "id": "compaction-cc2db21b",
-  "timestamp": "2026-11-11T23:26:58.148Z",
+  "timestamp": "2026-11-13T05:09:39.936Z",
   "taskTag": "compaction-standard-cc2db21b",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
@@ -11,8 +11,8 @@
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 77619,
-    "cacheHitRatio": 0.6589,
+    "latestInputTokens": 87972,
+    "cacheHitRatio": 0.7384,
     "checkpointCount": 0,
     "avoidedCacheRebuildTokens": 0
   }

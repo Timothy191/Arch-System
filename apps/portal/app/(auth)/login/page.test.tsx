@@ -89,12 +89,10 @@ describe('LoginPage Server Component', () => {
     const asideMiningVideo = screen.getByTestId('login-aside-mining-video');
     expect(asideMiningVideo).toBeInTheDocument();
 
-    const videoPauseToggle = screen.getByTestId('login-video-pause-toggle');
-    expect(videoPauseToggle).toBeInTheDocument();
-    expect(videoPauseToggle).toHaveAttribute('aria-label', 'Pause background video');
+    expect(screen.queryByTestId('login-video-pause-toggle')).not.toBeInTheDocument();
   });
 
-  it('renders the heading with the theme token class and integrated telemetry/eve panels', async () => {
+  it('renders the heading with the theme token class and eve banner without telemetry pill', async () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
@@ -102,7 +100,7 @@ describe('LoginPage Server Component', () => {
     expect(heading).toHaveClass('text-[var(--text-heading)]');
     expect(heading).toHaveClass('font-display');
     expect(screen.getByTestId('arch-systems-gold-separator')).toBeInTheDocument();
-    expect(screen.getByTestId('login-security-telemetry-pill')).toBeInTheDocument();
+    expect(screen.queryByTestId('login-security-telemetry-pill')).not.toBeInTheDocument();
     expect(screen.getByTestId('eve-agentic-backend-banner')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'eve' })).toBeInTheDocument();
     expect(screen.getByText(/Fully Intelligent & Agentic Backend/i)).toBeInTheDocument();

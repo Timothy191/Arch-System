@@ -151,28 +151,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 </p>
               </div>
 
-              {/* System Telemetry & Security Posture Matrix */}
-              <div
-                data-testid="login-security-telemetry-pill"
-                className="relative z-10 space-y-2 rounded-xl border border-black/[0.08] bg-white/90 p-3.5 font-mono text-[13px] text-zinc-700 leading-[18px]"
-              >
-                <div className="flex items-center justify-between border-zinc-200 border-b pb-1.5">
-                  <span className="inline-flex items-center gap-2 text-zinc-800">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>TLS 1.3 Encrypted</span>
-                  </span>
-                  <span className="font-semibold text-[13px] text-emerald-700">Verified</span>
-                </div>
-                <div className="flex items-center justify-between border-zinc-200 border-b pb-1.5">
-                  <span className="text-zinc-700">Zero-Trust RBAC</span>
-                  <span className="font-semibold text-[13px] text-zinc-600">Session Guard</span>
-                </div>
-                <div className="flex items-center justify-between pt-0.5">
-                  <span className="font-semibold text-amber-800">SCADA Ready</span>
-                  <span className="font-semibold text-[13px] text-amber-800">Telemetry Sync</span>
-                </div>
-              </div>
-
               {/* Integrated Eve Agentic Backend Dock */}
               <div
                 data-testid="eve-agentic-backend-banner"

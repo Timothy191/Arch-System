@@ -389,7 +389,7 @@ export function RequestVisitorModal({ isOpen, onClose, renderQrCode }: RequestVi
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <label htmlFor="visitor-first-name" className={LABEL_CLASS}>
-                    First Name <span className="text-amber-700">*</span>
+                    Visitor Name <span className="text-amber-700">*</span>
                   </label>
                   <div className={INPUT_WRAPPER_CLASS}>
                     <User className="pointer-events-none absolute left-3 h-4 w-4 text-zinc-500" />
@@ -412,7 +412,7 @@ export function RequestVisitorModal({ isOpen, onClose, renderQrCode }: RequestVi
 
                 <div className="space-y-1">
                   <label htmlFor="visitor-surname" className={LABEL_CLASS}>
-                    Surname <span className="text-amber-700">*</span>
+                    Visitor Surname <span className="text-amber-700">*</span>
                   </label>
                   <div className={INPUT_WRAPPER_CLASS}>
                     <User className="pointer-events-none absolute left-3 h-4 w-4 text-zinc-500" />
@@ -436,7 +436,7 @@ export function RequestVisitorModal({ isOpen, onClose, renderQrCode }: RequestVi
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <label htmlFor="visitor-company" className={LABEL_CLASS}>
-                    Company / Organization <span className="text-amber-700">*</span>
+                    Visitor Company <span className="text-amber-700">*</span>
                   </label>
                   <div className={INPUT_WRAPPER_CLASS}>
                     <Building2 className="pointer-events-none absolute left-3 h-4 w-4 text-zinc-500" />
@@ -480,7 +480,7 @@ export function RequestVisitorModal({ isOpen, onClose, renderQrCode }: RequestVi
 
               <div className="space-y-1">
                 <label htmlFor="visitor-visiting" className={LABEL_CLASS}>
-                  Person / Department Visiting <span className="text-amber-700">*</span>
+                  Person Being Visited <span className="text-amber-700">*</span>
                 </label>
                 <div className={INPUT_WRAPPER_CLASS}>
                   <Users className="pointer-events-none absolute left-3 h-4 w-4 text-zinc-500" />
