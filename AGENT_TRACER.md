@@ -409,3 +409,17 @@
   - `pnpm --filter @repo/ui type-check && pnpm --filter portal type-check` → `✅ PASS`.
   - `pnpm --filter portal test -- --testPathPatterns="uptime-engine.test|alert-evaluator.test|api/admin/observability/route.test|ScadaPanel"` → `4/4 suites, 17/17 tests PASS`.
   - `pnpm audit:tokens && pnpm audit:tailwind && pnpm lint:agent-rules && pnpm policy:check && pnpm audit:drift && pnpm audit:code-intelligence` → `✅ 100% PASS`.
+
+## [2026-11-13T19:11:00+02:00] - Cloud Supabase Stability Verification, Migration 218 Sync & Kysely Pooler Hardening
+
+- **Governing request**: _"Confirm the Cloud Based Database stability"_ / _"/goal Approved once safe to do so"_
+- **Phase 1 (Cloud Supabase Live Diagnostics):**
+  - Verified hosted PostgreSQL 17.6 (`aws-1-eu-west-1`, 90.4 days uptime, 99.999% buffer cache hit ratio, 0 deadlocks, 132/132 `public` tables with RLS enabled), Auth `v2.197.0`, PostgREST (`10/10` sequential & concurrent probes), Realtime WebSockets (`3/3`), and all 3 Supavisor nodes (`:6543` and `:5432`).
+- **Phase 2 (Migration 218 Sync & Kysely Hardening):**
+  - Pushed pending migration [`218_add_head_office_and_ensure_sites.sql`](file:///home/tim/Fork/Arch-System/packages/database/migrations/218_add_head_office_and_ensure_sites.sql) to Cloud Supabase (`168/168` migrations in sync; `HEAD-OFFICE` and canonical sites active).
+  - Hardened [`packages/supabase/src/kysely.ts`](file:///home/tim/Fork/Arch-System/packages/supabase/src/kysely.ts) with `resolveKyselyPoolOptions()`, `15_000 ms` connection timeout, TCP keepalive (`10_000 ms`), automatic `?pgbouncer=true` enforcement on Supabase `:6543/` URLs, and aligned `KyselyDatabase` (`daily_logs`, `machines`, `hourly_loads`, `production_logs`, `sites`) with generated [`database.types.ts`](file:///home/tim/Fork/Arch-System/packages/supabase/src/database.types.ts).
+  - Added TDD unit tests + compile-time schema parity assertions in [`packages/supabase/src/__tests__/supabase.test.ts`](file:///home/tim/Fork/Arch-System/packages/supabase/src/__tests__/supabase.test.ts).
+- **Phase 3 (Verification):**
+  - `pnpm --filter @repo/supabase type-check && pnpm --filter @repo/supabase lint && pnpm --filter @repo/supabase test` → `39/39` tests PASS.
+  - Live 5-way concurrent Kysely probe against Supavisor `:6543/?pgbouncer=true` → `5/5` queries succeeded (`2,875 ms` cold-burst wall time, `0` errors).
+  - `pnpm ci:reindex && pnpm ci:snapshot` → CodeGraph snapshot updated (`8,990` entities, `781` files, `75.37%` ranged).

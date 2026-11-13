@@ -20,7 +20,8 @@ jest.mock('@repo/logger', () => ({
 }));
 
 import { createBrowserSupabaseClient } from '../client';
-import { resolvePooledDatabaseUrl } from '../kysely';
+import type { Database } from '../database.types';
+import { type KyselyDatabase, resolveKyselyPoolOptions, resolvePooledDatabaseUrl } from '../kysely';
 import { createReadReplicaClient } from '../read-replica';
 import { createServerSupabaseClient, getUserSafely, instrumentedFetch } from '../server';
 
@@ -513,6 +514,99 @@ describe('resolvePooledDatabaseUrl', () => {
     });
 
     expect(resolved).toBe('postgresql://postgres:postgres@localhost:5432/postgres');
+  });
+
+  test('appends pgbouncer=true when Supabase port 6543 pooler URL omits pgbouncer parameter', () => {
+    const barePoolerUrl = resolvePooledDatabaseUrl({
+      NODE_ENV: 'production',
+      DATABASE_POOLER_URL:
+        'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres',
+    });
+    const queryPoolerUrl = resolvePooledDatabaseUrl({
+      NODE_ENV: 'production',
+      DATABASE_POOLER_URL:
+        'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?connect_timeout=15',
+    });
+
+    expect(barePoolerUrl).toBe(
+      'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true'
+    );
+    expect(queryPoolerUrl).toBe(
+      'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?connect_timeout=15&pgbouncer=true'
+    );
+  });
+});
+
+describe('resolveKyselyPoolOptions', () => {
+  test('configures serverless pool limits, 15s connect timeout, TCP keepalive, and pgbouncer flag', () => {
+    const options = resolveKyselyPoolOptions({
+      VERCEL: '1',
+      DATABASE_POOLER_URL:
+        'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres',
+    });
+
+    expect(options).toEqual({
+      connectionString:
+        'postgresql://postgres.ref:pass@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true',
+      max: 3,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 15_000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
+    });
+  });
+
+  test('configures default local pool limits with 15s connect timeout and TCP keepalive', () => {
+    const options = resolveKyselyPoolOptions({
+      NODE_ENV: 'development',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres',
+    });
+
+    expect(options).toEqual({
+      connectionString: 'postgresql://postgres:postgres@localhost:5432/postgres',
+      max: 10,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 15_000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
+    });
+  });
+
+  test('throws when no Postgres connection string is configured', () => {
+    expect(() => resolveKyselyPoolOptions({})).toThrow(/Missing DATABASE_URL/);
+  });
+
+  test('aligns KyselyDatabase columns with generated Supabase schema types', () => {
+    type MachineParity =
+      keyof KyselyDatabase['machines'] extends keyof Database['public']['Tables']['machines']['Row']
+        ? true
+        : never;
+    type DailyLogParity =
+      keyof KyselyDatabase['daily_logs'] extends keyof Database['public']['Tables']['daily_logs']['Row']
+        ? true
+        : never;
+    type HourlyLoadParity =
+      keyof KyselyDatabase['hourly_loads'] extends keyof Database['public']['Tables']['hourly_loads']['Row']
+        ? true
+        : never;
+    type ProductionLogParity =
+      keyof KyselyDatabase['production_logs'] extends keyof Database['public']['Tables']['production_logs']['Row']
+        ? true
+        : never;
+    type SiteParity =
+      keyof KyselyDatabase['sites'] extends keyof Database['public']['Tables']['sites']['Row']
+        ? true
+        : never;
+
+    const schemaParity: readonly [
+      MachineParity,
+      DailyLogParity,
+      HourlyLoadParity,
+      ProductionLogParity,
+      SiteParity,
+    ] = [true, true, true, true, true];
+
+    expect(schemaParity).toEqual([true, true, true, true, true]);
   });
 });
 
