@@ -33,6 +33,7 @@ import {
   type HourlyMaterial,
   type HourlyShift,
   isHourEditable,
+  isRegularMachineExcavatorActivity,
   parseExcavatorMaterial,
   sumHourlyTotal,
 } from './loads-utils';
@@ -876,11 +877,18 @@ function HourlyLoadsGrid({
                             } transition-colors`}
                           >
                             <option value="">Select Excavator</option>
-                            {excavators.map((excavator) => (
-                              <option key={excavator.id} value={excavator.id}>
-                                {excavator.name}
-                              </option>
-                            ))}
+                            {excavators
+                              .filter(
+                                (excavator) =>
+                                  !isRegularMachineExcavatorActivity(
+                                    excavatorMaterials[excavator.id]
+                                  )
+                              )
+                              .map((excavator) => (
+                                <option key={excavator.id} value={excavator.id}>
+                                  {excavator.name}
+                                </option>
+                              ))}
                           </select>
                         </td>
 

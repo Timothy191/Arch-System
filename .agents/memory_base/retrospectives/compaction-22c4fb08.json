@@ -1,0 +1,35 @@
+{
+  "id": "compaction-22c4fb08",
+  "timestamp": "2026-11-11T23:00:49.027Z",
+  "taskTag": "compaction-standard-22c4fb08",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/.gemini/antigravity-cli/brain/22c4fb08-f860-4344-a52e-24d7adc1d0c5/implementation_plan.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/auth/visitor-request/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/auth/visitor-request/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/auth/ui/src/RequestVisitorModal.tsx\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/auth/ui/src/LoginForm.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/auth/components/VisitorQrBadge.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/auth/components/LoginForm.tsx\"",
+    "\"/home/tim/Fork/Arch-System/packages/contract/src/schemas/access-control.schema.ts\"",
+    "\"/home/tim/Fork/Arch-System/packages/contract/src/index.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/features/auth/components/LoginForm.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/libs/features/auth/ui/src/RequestVisitorModal.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/admin/observability/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/AGENT_TRACER.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/auth/visitor-request/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/auth/visitor-request/route.test.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (447 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 245000,
+    "cacheHitRatio": 0.9222,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}
