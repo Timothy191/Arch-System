@@ -42,6 +42,14 @@ are void.
 pnpm ci:reindex && pnpm ci:snapshot && pnpm audit:code-intelligence
 ```
 
+Or use the diff-aware refresh & agentic context pack helpers:
+
+```bash
+pnpm ci:reindex:diff
+pnpm ci:context <symbol-or-file>
+pnpm ci:impact <file-path>
+```
+
 `ci:reindex` runs `ts_parse_dir.cjs` (batch TS/TSX AST parse) → `backfill_ranges.py`
 (merge `end_line` ranges into the SQLite index). `ci:snapshot` records the new baseline
 into `.agents/memory_base/index-snapshot.json`.

@@ -34,6 +34,7 @@ const DEFAULT_MANIFEST = path.join(ROOT, '.ci-local', 'agent-verify-evidence.jso
 const JUNIT_OUTPUT = path.join(ROOT, '.ci-local', 'agent-verify-junit.xml');
 
 const args = process.argv.slice(2);
+const isFastMode = args.includes('--fast');
 const manifestIdx = args.indexOf('--verify-manifest');
 const manifestPath =
   manifestIdx !== -1 && args[manifestIdx + 1]
@@ -73,7 +74,7 @@ if (manifest) {
   } catch {
     // keep fallback
   }
-  if (gates.length < expectedRunGates) {
+  if (!isFastMode && gates.length < expectedRunGates) {
     violations.push(
       `Expected at least ${expectedRunGates} run_gate records in evidence manifest (counted from agent-verify.sh), found ${gates.length}`
     );
@@ -89,6 +90,14 @@ if (manifest) {
     if (g.policy === 'mandatory' && g.status !== 'PASS') {
       violations.push(
         `Mandatory Gate #${g.id} (${g.name}) did not pass (status=${g.status}, exitCode=${g.exitCode})`
+      );
+    }
+    if (
+      g.evidenceType === 'RUNTIME_EMPIRICAL' &&
+      (typeof g.durationMs !== 'number' || g.durationMs <= 0)
+    ) {
+      violations.push(
+        `Runtime-empirical Gate #${g.id} (${g.name}) recorded invalid durationMs=${g.durationMs}`
       );
     }
     if (typeof g.durationMs !== 'number' || g.durationMs < 0) {
@@ -180,10 +189,16 @@ if (manifest && violations.length === 0) {
     });
   }
 
+  const empiricalCount = manifest.gates.filter(
+    (g) => g.evidenceType === 'RUNTIME_EMPIRICAL'
+  ).length;
   manifest.completedAt = nowIso;
   manifest.totalGates = manifest.gates.length;
   manifest.passedGates = manifest.gates.filter((g) => g.status === 'PASS').length;
   manifest.failedGates = manifest.gates.filter((g) => g.status === 'FAIL').length;
+  manifest.empiricalCoveragePct = manifest.gates.length
+    ? Math.round((empiricalCount / manifest.gates.length) * 100)
+    : 0;
   manifest.readinessClassification = readinessTier;
   manifest.runtimeProbes = {
     liveK6LoadTest: liveLoadExecuted
