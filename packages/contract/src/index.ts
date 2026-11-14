@@ -239,6 +239,28 @@ export type {
   ToolRiskClass,
   UpdateInstallation,
 } from './schemas/integration.schema';
+export {
+  type AnomalySeverity,
+  anomalySeveritySchema,
+  type FailureModeCategory,
+  type ForecastPoint,
+  failureModeCategorySchema,
+  forecastPointSchema,
+  type GroundedCopilotResponse,
+  groundedCopilotResponseSchema,
+  type MaintenanceRiskLevel,
+  maintenanceRiskLevelSchema,
+  type PredictiveMaintenancePrediction,
+  type ProductionForecastResult,
+  predictiveMaintenancePredictionSchema,
+  productionForecastResultSchema,
+  type ShiftHandoverBrief,
+  shiftHandoverBriefSchema,
+  type TelemetryAnomalyAlert,
+  type TelemetryMetricName,
+  telemetryAnomalyAlertSchema,
+  telemetryMetricNameSchema,
+} from './schemas/intelligence.schema';
 export type {
   MachineCapabilities,
   MachineOperatorScanRequest,

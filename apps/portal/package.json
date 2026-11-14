@@ -21,6 +21,7 @@
     "@repo/departments/ui": "workspace:*",
     "@repo/errors": "1.0.0",
     "@repo/hub/ui": "workspace:*",
+    "@repo/intelligence": "1.0.0",
     "@repo/logger": "1.0.0",
     "@repo/rate-limiter": "1.0.0",
     "@repo/redis": "1.0.0",

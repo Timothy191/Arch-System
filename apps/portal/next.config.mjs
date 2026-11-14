@@ -104,6 +104,7 @@ const nextConfig = {
     '@repo/contract',
     '@repo/errors',
     '@repo/agents',
+    '@repo/intelligence',
     '@repo/auth/ui',
     '@repo/auth/data-access',
     '@repo/auth/utils',

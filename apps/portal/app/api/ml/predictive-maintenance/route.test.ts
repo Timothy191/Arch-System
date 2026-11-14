@@ -115,21 +115,19 @@ describe('GET /api/ml/predictive-maintenance', () => {
 
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({
-      predictions: [
-        {
-          machine_id: 'machine-1',
-          machine_name: 'Excavator A',
-          type: 'excavator',
-          risk_level: 'HIGH',
-          confidence: 0.85,
-          reason:
-            'Machine has experienced 3 breakdowns in the last 30 days. Model (mock) predicts an 85% chance of critical failure within 72 hours.',
-          recommended_action:
-            'Schedule immediate preventative maintenance and check hydraulic systems.',
-        },
-      ],
+    const body = await res.json();
+    expect(body.predictions).toHaveLength(1);
+    expect(body.predictions[0]).toMatchObject({
+      machine_id: 'machine-1',
+      machine_name: 'Excavator A',
+      type: 'excavator',
+      risk_level: 'MEDIUM',
+      risk_score: 45,
+      failure_mode: 'RECURRING_GENERAL',
+      confidence: 0.67,
     });
+    expect(body.predictions[0].reason).toContain('3 breakdown(s) in last 30d');
+    expect(body.predictions[0].fmea_rpn).toBeGreaterThan(0);
   });
 
   it('returns empty predictions when machine details query returns no data', async () => {

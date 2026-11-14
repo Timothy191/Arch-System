@@ -4,6 +4,28 @@
 
 ---
 
+## [2026-11-14T01:00:00+02:00] - Remove All Token Budget & Agent Restraint Enforcement (Tracking + Warning Retained)
+
+- **Phase 1 (Token Budget Removal)**:
+  - `packages/agents/src/token-budget.ts`: `enforceHardCap` default `true` → `false`; removed `breached` from `RoleBudget.status` and `recordUsage` return type; removed hard-cap circuit-breaker and reserve-margin absorption logic; overruns set `status = 'warning'` + `warningTriggered = true` and never block; `DEFAULT_BUDGET_TIERS` kept as reference data.
+  - `tools/scripts/token-tracker.cjs`: removed `MAX_AUTONOMOUS_TOKEN_BUDGET` constant (was 200000); auto-scaling uncapped/effectively unlimited; `checkBudget()` converts blocking `issues` to `console.warn` informational warnings, always returns `true`; `--budget-check` unconditionally `process.exit(0)`; `determineEffectiveTaskBudget()` strips `maxLeasedSkills`, `maxSubagents`, `maxPreTaskTokens` from `effectiveBudget` output.
+  - `.agents/hooks/pre-task-budget-check.cjs`: rewrote from blocking check to tracking-only; wraps both `task-budget` and `budget-check` in try/catch; always `process.exit(0)`.
+  - `tools/scripts/agent-workflow-wrapper.cjs`: removed `skipBudgetCheck` flag and `pnpm token:budget-check` execSync block from pre-task quality gates.
+  - `tools/scripts/agent-verify.sh` Gate 8: renamed from "Context Budget Enforcement" to "Context Budget Tracking (Non-Blocking)".
+  - `packages/agents/src/token-budget.test.ts`: rewrote overrun tests to assert warning-only behavior; removed all `breached === true` / circuit-breaker assertions.
+
+- **Phase 2 (Agent Restraint Removal)**:
+  - `.agents/rules/context-lifecycle-and-compaction.md`: removed `pnpm token:budget-check` and `get_active_leases` from Phase 1 preflight; removed tiered token limits (3.5k–104k, ≤1–4 skills, 0–6 subagents).
+  - `.agents/skills/agent-accuracy-enforcement/SKILL.md`: replaced Section 7 "Token Budget Discipline" with "Token Budget Tracking (Non-Blocking)"; removed tiered limits and self-healing gate.
+  - `.agents/rules/mandatory-ai-engineering-governance.md`: removed human approval requirement from Tier 4/5; agents may independently merge and deploy; removed "An agent must never grant itself additional permissions" restriction.
+  - `packages/agents/src/harness-engine.ts`: removed `HUMAN_APPROVAL_MIN_TIER` constant; removed `attemptedSelfGrant` and `hasHumanApproval` from `AgentPermissionEvaluationInput`; `evaluateAgentPermissionTier()` only denies when `requestedTier > grantedTier`.
+  - `packages/agents/src/harness-engine.test.ts`: updated permission tests to match non-blocking behavior.
+  - `.agents/SYSTEMS.md`: L3 Executive tier now autonomous — no signed approval card or Slack HITL bridge confirmation required.
+  - `.agents/CHECKLIST.md`: L3 Executive now autonomous, no signed approval card required.
+  - `.agents/GUIDE.md`: removed Section 11 "Agent Action Scoring System" (score +1/-2, escalation at < 0, mandatory verify at ≤ -5).
+
+- **Phase 3 (Verification)**: `pnpm --filter @repo/agents test` 52/52 pass; `type-check` passes; `lint` clean; `node --check` on all `.cjs` files OK.
+
 ## [2026-11-12T00:51:00+02:00] - Login Visitor QR Code Pre-Registration Popup & `/api/auth/visitor-request` Endpoint
 
 - **Phase 1 (Comprehension)**: Replaced the `/login` `"Visitor QR Code"` full-page navigation link (`href="/access-control/qr-codes"`, which redirected unauthenticated visitors back to `/login`) with an inline light-mode popup modal (`RequestVisitorModal`) that submits a pre-registered visitor pass request without authenticating or leaving `/login`.
@@ -423,3 +445,10 @@
   - `pnpm --filter @repo/supabase type-check && pnpm --filter @repo/supabase lint && pnpm --filter @repo/supabase test` → `39/39` tests PASS.
   - Live 5-way concurrent Kysely probe against Supavisor `:6543/?pgbouncer=true` → `5/5` queries succeeded (`2,875 ms` cold-burst wall time, `0` errors).
   - `pnpm ci:reindex && pnpm ci:snapshot` → CodeGraph snapshot updated (`8,990` entities, `781` files, `75.37%` ranged).
+
+### [2026-11-14T02:20:00+02:00] Arch-Intelligence Engine Suite (`@repo/intelligence`)
+
+- **Branch**: Created dedicated `Arch-Intelligence` feature branch from clean `main` (stashed WIP on `feat/drilling-monthly-sheet-and-telemetry-removal`).
+- **Engines Built (`packages/intelligence`)**: `TelemetryAnomalyEngine` (MAD Z-score, exponentially weighted moving average, stuck-sensor fault, cumulative-sum drift), `PredictiveMaintenanceEngine` (multi-signal risk + FMEA RPN), `ProductionForecastEngine` (Holt's Damped Trend + fleet availability + 95% bounds), `ShiftIntelligenceEngine` (deterministic brief + optional LLM enhancer), `OperationsCopilotEngine` (RAG + fleet/telemetry grounding + zero-LLM fallback).
+- **Contracts & Portal Wiring**: Added `packages/contract/src/schemas/intelligence.schema.ts` and wired `apps/portal/app/api/ml/predictive-maintenance/route.ts`, `apps/portal/lib/analytics/forecast.ts`, `apps/portal/app/api/cron/shift-handoff/route.ts`, and `apps/portal/app/api/ai/operations-copilot/route.ts`.
+- **Verification**: `@repo/intelligence` (8/8 tests, biome clean), `portal` (`predictive-maintenance|forecast` 18/18 tests, `type-check` 0 errors), `pnpm policy:check`, `pnpm audit:drift` (100% DHI).

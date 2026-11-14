@@ -46,7 +46,9 @@
       "@repo/redis": ["../../packages/redis/src/index.ts"],
       "@repo/redis/*": ["../../packages/redis/src/*"],
       "@repo/errors": ["../../packages/errors/src/index.ts"],
-      "@repo/errors/*": ["../../packages/errors/src/*"]
+      "@repo/errors/*": ["../../packages/errors/src/*"],
+      "@repo/intelligence": ["../../packages/intelligence/src/index.ts"],
+      "@repo/intelligence/*": ["../../packages/intelligence/src/*"]
     }
   },
   "include": [
