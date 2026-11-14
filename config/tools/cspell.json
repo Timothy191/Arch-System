@@ -21,7 +21,8 @@
     "*.lock",
     ".prisma/**",
     "docs/archive/**",
-    "**/zero-drift-watchdog/test/adversarial/**"
+    "**/zero-drift-watchdog/test/adversarial/**",
+    "apps/portal/lib/version.generated.ts"
   ],
   "ignoreRegExpList": [
     "sb_publishable_[A-Za-z0-9_-]+",
