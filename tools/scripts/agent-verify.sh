@@ -52,7 +52,8 @@ run_gate() {
     sha256=$(sha256sum "${tmp_out}" | awk '{print $1}')
     rm -f "${tmp_out}"
     echo "✅ PASS (${duration_ms}ms)"
-    local safe_cmd="${cmd//\"/\\\"}"
+    local safe_cmd="${cmd//\\/\\\\}"
+    safe_cmd="${safe_cmd//\"/\\\"}"
     printf '{"id":%d,"name":"%s","command":"%s","policy":"%s","evidenceType":"%s","status":"PASS","exitCode":0,"durationMs":%d,"outputSha256":"%s"}\n' \
       "${id}" "${name}" "${safe_cmd}" "${policy}" "${evidence_type}" "${duration_ms}" "${sha256}" >> "${TMP_GATES_NDJSON}"
   else
@@ -66,7 +67,8 @@ run_gate() {
     echo "AGENT DIRECTIVE: ${directive}"
     tail -n 25 "${tmp_out}" || true
     rm -f "${tmp_out}"
-    local safe_cmd="${cmd//\"/\\\"}"
+    local safe_cmd="${cmd//\\/\\\\}"
+    safe_cmd="${safe_cmd//\"/\\\"}"
     printf '{"id":%d,"name":"%s","command":"%s","policy":"%s","evidenceType":"%s","status":"FAIL","exitCode":%d,"durationMs":%d,"outputSha256":"%s"}\n' \
       "${id}" "${name}" "${safe_cmd}" "${policy}" "${evidence_type}" "${exit_code}" "${duration_ms}" "${sha256}" >> "${TMP_GATES_NDJSON}"
     exit 1
