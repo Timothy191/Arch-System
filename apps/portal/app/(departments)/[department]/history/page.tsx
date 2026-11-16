@@ -1,11 +1,196 @@
+import { CacheCategory } from '@repo/redis';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Input } from '@repo/ui/Input';
 import Form from 'next/form';
 import Link from 'next/link';
+import { withCache } from '@/lib/cache-utils';
+import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
 import { PlantHistoryDatabaseClient } from '~/features/departments/components/plant-processing/PlantHistoryDatabaseClient';
 import { getDepartmentContext } from '~/lib/dept-context';
+
+const DEFAULT_HISTORY_WINDOW_DAYS = 30;
+const MS_PER_DAY = 86_400_000;
+const MINUTES_PER_HOUR = 60;
+const CONTROL_ROOM_DEPT_TYPE = 'control_room';
+const EMPTY_TABLE_COL_SPAN_CONTROL_ROOM = 7;
+const EMPTY_TABLE_COL_SPAN_STANDARD = 4;
+
+interface CloserProfile {
+  readonly full_name: string | null;
+}
+
+interface ControlRoomShiftStatusRow {
+  readonly shift_date: string;
+  readonly shift_type: string;
+  readonly status: string;
+  readonly closed_at: string | null;
+  readonly closer: CloserProfile | CloserProfile[] | null;
+}
+
+interface ControlRoomOperationRow {
+  readonly shift_date: string;
+  readonly shift_type: string;
+  readonly hours_worked: number | null;
+  readonly delay_entries?: ReadonlyArray<{
+    readonly duration_hours: number | null;
+    readonly deleted_at: string | null;
+  }> | null;
+}
+
+interface DailyLogHistoryRow {
+  readonly id: string;
+  readonly log_date: string;
+  readonly shift: string;
+  readonly notes: string | null;
+  readonly created_at: string;
+}
+
+type CachedDepartmentHistoryPayload =
+  | {
+      readonly kind: 'control_room';
+      readonly shiftStatuses: ControlRoomShiftStatusRow[];
+      readonly hoursByShift: Record<string, number>;
+      readonly delayMinutesByShift: Record<string, number>;
+      readonly loadsByShift: Record<string, number>;
+    }
+  | {
+      readonly kind: 'standard';
+      readonly logs: DailyLogHistoryRow[];
+    };
+
+interface LoadDepartmentHistoryOptions {
+  readonly deptId: string;
+  readonly isControlRoom: boolean;
+  readonly from: string;
+  readonly to: string;
+}
+
+interface GetCachedDepartmentHistoryOptions extends LoadDepartmentHistoryOptions {
+  readonly deptSlug: string;
+}
+
+function buildShiftKey(shiftDate: string, shiftType: string): string {
+  return `${shiftDate}|${shiftType}`;
+}
+
+async function loadDepartmentHistory({
+  deptId,
+  isControlRoom,
+  from,
+  to,
+}: LoadDepartmentHistoryOptions): Promise<CachedDepartmentHistoryPayload> {
+  const db = await createReadReplicaClient();
+
+  if (isControlRoom) {
+    const [{ data: shiftStatuses }, { data: operations }, { data: loads }] = await Promise.all([
+      db
+        .from('shift_status')
+        .select(
+          'shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)'
+        )
+        .eq('department_id', deptId)
+        .gte('shift_date', from)
+        .lte('shift_date', to)
+        .order('shift_date', { ascending: false }),
+      db
+        .from('machine_operations')
+        .select(
+          'shift_date, shift_type, hours_worked, delay_entries:delay_entries(duration_hours, deleted_at)'
+        )
+        .eq('department_id', deptId)
+        .gte('shift_date', from)
+        .lte('shift_date', to),
+      db
+        .from('hourly_loads')
+        .select('load_date, shift_type, total_loads')
+        .eq('department_id', deptId)
+        .gte('load_date', from)
+        .lte('load_date', to),
+    ]);
+
+    const hoursByShift: Record<string, number> = {};
+    const delayMinutesByShift: Record<string, number> = {};
+    for (const operation of (operations ?? []) as unknown as ControlRoomOperationRow[]) {
+      const shiftKey = buildShiftKey(operation.shift_date, operation.shift_type);
+      hoursByShift[shiftKey] = (hoursByShift[shiftKey] ?? 0) + (operation.hours_worked || 0);
+      const delayEntries = operation.delay_entries ?? [];
+      const delayMinutes = delayEntries
+        .filter((entry) => !entry.deleted_at)
+        .reduce((sum, entry) => sum + (Number(entry.duration_hours) || 0) * MINUTES_PER_HOUR, 0);
+      delayMinutesByShift[shiftKey] = (delayMinutesByShift[shiftKey] ?? 0) + delayMinutes;
+    }
+
+    const loadsByShift: Record<string, number> = {};
+    for (const loadRow of loads ?? []) {
+      const shiftKey = buildShiftKey(loadRow.load_date, loadRow.shift_type);
+      loadsByShift[shiftKey] = (loadsByShift[shiftKey] ?? 0) + (loadRow.total_loads || 0);
+    }
+
+    return {
+      kind: 'control_room',
+      shiftStatuses: (shiftStatuses ?? []) as ControlRoomShiftStatusRow[],
+      hoursByShift,
+      delayMinutesByShift,
+      loadsByShift,
+    };
+  }
+
+  const { data: logs } = await db
+    .from('daily_logs')
+    .select('id, log_date, shift, notes, created_at')
+    .eq('department_id', deptId)
+    .gte('log_date', from)
+    .lte('log_date', to)
+    .order('log_date', { ascending: false })
+    .returns<DailyLogHistoryRow[]>();
+
+  return {
+    kind: 'standard',
+    logs: logs ?? [],
+  };
+}
+
+/**
+ * Dual-tier cached department history query.
+ * Route params, searchParams, and date-range defaults stay outside `'use cache'`.
+ */
+async function getCachedDepartmentHistory({
+  deptId,
+  deptSlug,
+  isControlRoom,
+  from,
+  to,
+}: GetCachedDepartmentHistoryOptions): Promise<CachedDepartmentHistoryPayload> {
+  'use cache';
+
+  const historyTag = tagDepartment(deptSlug, 'history');
+  const cacheTags = [
+    historyTag,
+    'table:daily_logs',
+    'table:machine_operations',
+    ...(isControlRoom ? ['table:hourly_loads', 'table:delay_entries', 'table:shift_status'] : []),
+  ];
+
+  cacheLife('reports');
+
+  cacheTag(historyTag);
+  cacheTag('table:daily_logs');
+  cacheTag('table:machine_operations');
+  if (isControlRoom) {
+    cacheTag('table:hourly_loads');
+    cacheTag('table:delay_entries');
+    cacheTag('table:shift_status');
+  }
+
+  return withCache(() => loadDepartmentHistory({ deptId, isControlRoom, from, to }), {
+    category: CacheCategory.METRICS,
+    keyParts: ['dept-history-v1', deptId, isControlRoom ? 'cr' : 'std', from, to],
+    tags: cacheTags,
+  });
+}
 
 export default async function HistoryPage({
   params,
@@ -16,7 +201,7 @@ export default async function HistoryPage({
 }) {
   const { department: deptSlug } = await params;
   const { from: fromParam, to: toParam } = await searchParams;
-  const { dept, deptId, supabase, today } = await getDepartmentContext({
+  const { dept, deptId, today } = await getDepartmentContext({
     department: deptSlug,
   });
 
@@ -34,10 +219,22 @@ export default async function HistoryPage({
       />
     );
   }
-  const to = toParam || new Date().toISOString().split('T')[0];
-  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
-  const isControlRoom = dept.type === 'control_room';
+  const defaultFrom =
+    new Date(new Date(`${today}T00:00:00Z`).getTime() - DEFAULT_HISTORY_WINDOW_DAYS * MS_PER_DAY)
+      .toISOString()
+      .split('T')[0] ?? today;
+  const to = toParam || today;
+  const from = fromParam || defaultFrom;
+
+  const isControlRoom = dept.type === CONTROL_ROOM_DEPT_TYPE;
+  const historyResult = await getCachedDepartmentHistory({
+    deptId,
+    deptSlug,
+    isControlRoom,
+    from,
+    to,
+  });
 
   const dateFilter = (
     <GlassCard>
@@ -61,61 +258,8 @@ export default async function HistoryPage({
   );
 
   // ─── Control Room branch ───────────────────────────────────────────────────
-  if (isControlRoom) {
-    const [{ data: shiftStatuses }, { data: operations }, { data: loads }, { data: _delays }] =
-      await Promise.all([
-        supabase
-          .from('shift_status')
-          .select(
-            'shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)'
-          )
-          .eq('department_id', deptId)
-          .gte('shift_date', from)
-          .lte('shift_date', to)
-          .order('shift_date', { ascending: false }),
-        supabase
-          .from('machine_operations')
-          .select(
-            'shift_date, shift_type, hours_worked, delay_entries:delay_entries(duration_hours, deleted_at)'
-          )
-          .eq('department_id', deptId)
-          .gte('shift_date', from)
-          .lte('shift_date', to),
-        supabase
-          .from('hourly_loads')
-          .select('load_date, shift_type, total_loads')
-          .eq('department_id', deptId)
-          .gte('load_date', from)
-          .lte('load_date', to),
-        // operational_delays is deprecated in favor of delay_entries on machine_operations
-        Promise.resolve({ data: [] }),
-      ]);
-
-    type ShiftKey = string;
-    const keyOf = (date: string, shift: string): ShiftKey => `${date}|${shift}`;
-
-    const hoursMap = new Map<ShiftKey, number>();
-    const delayMap = new Map<ShiftKey, number>();
-    operations?.forEach((o) => {
-      const k = keyOf(o.shift_date, o.shift_type);
-      hoursMap.set(k, (hoursMap.get(k) || 0) + (o.hours_worked || 0));
-      const delays =
-        (
-          o as unknown as {
-            delay_entries?: Array<{ duration_hours: number | null; deleted_at: string | null }>;
-          }
-        ).delay_entries || [];
-      const delayMin = delays
-        .filter((d) => !d.deleted_at)
-        .reduce((sum, d) => sum + (Number(d.duration_hours) || 0) * 60, 0);
-      delayMap.set(k, (delayMap.get(k) || 0) + delayMin);
-    });
-
-    const loadsMap = new Map<ShiftKey, number>();
-    loads?.forEach((l) => {
-      const k = keyOf(l.load_date, l.shift_type);
-      loadsMap.set(k, (loadsMap.get(k) || 0) + (l.total_loads || 0));
-    });
+  if (historyResult.kind === 'control_room') {
+    const { shiftStatuses, hoursByShift, delayMinutesByShift, loadsByShift } = historyResult;
 
     return (
       <div className="space-y-6">
@@ -156,11 +300,11 @@ export default async function HistoryPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
-                {shiftStatuses?.map((ss) => {
-                  const k = keyOf(ss.shift_date, ss.shift_type);
+                {shiftStatuses.map((ss) => {
+                  const shiftKey = buildShiftKey(ss.shift_date, ss.shift_type);
                   const closer = Array.isArray(ss.closer) ? ss.closer[0] : ss.closer;
                   return (
-                    <tr key={k} className="transition-colors hover:bg-[var(--bg-tertiary)]">
+                    <tr key={shiftKey} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                       <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
                         {ss.shift_date}
                       </td>
@@ -190,13 +334,13 @@ export default async function HistoryPage({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right text-[var(--text-muted)] text-sm">
-                        {(hoursMap.get(k) || 0).toFixed(1)}
+                        {(hoursByShift[shiftKey] ?? 0).toFixed(1)}
                       </td>
                       <td className="px-6 py-4 text-right text-[var(--accent-blue)] text-sm">
-                        {(loadsMap.get(k) || 0).toLocaleString()}
+                        {(loadsByShift[shiftKey] ?? 0).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right text-accent-blue text-sm">
-                        {delayMap.get(k) || 0}
+                        {delayMinutesByShift[shiftKey] ?? 0}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-xs">
                         {closer?.full_name || '—'}
@@ -209,10 +353,10 @@ export default async function HistoryPage({
                     </tr>
                   );
                 })}
-                {(!shiftStatuses || shiftStatuses.length === 0) && (
+                {shiftStatuses.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={EMPTY_TABLE_COL_SPAN_CONTROL_ROOM}
                       className="px-6 py-12 text-center text-[var(--text-muted)] text-sm"
                     >
                       No shift records found for the selected date range.
@@ -228,22 +372,7 @@ export default async function HistoryPage({
   }
 
   // ─── Generic department branch ────────────────────────────────────────────
-  const { data: logs } = await supabase
-    .from('daily_logs')
-    .select('id, log_date, shift, notes, created_at')
-    .eq('department_id', deptId)
-    .gte('log_date', from)
-    .lte('log_date', to)
-    .order('log_date', { ascending: false })
-    .returns<
-      {
-        id: string;
-        log_date: string;
-        shift: string;
-        notes: string | null;
-        created_at: string;
-      }[]
-    >();
+  const { logs } = historyResult;
 
   return (
     <div className="space-y-6">
@@ -292,7 +421,7 @@ export default async function HistoryPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
-              {logs?.map((log) => (
+              {logs.map((log) => (
                 <tr key={log.id} className="transition-colors hover:bg-[var(--bg-tertiary)]">
                   <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{log.log_date}</td>
                   <td className="px-6 py-4">
@@ -314,10 +443,10 @@ export default async function HistoryPage({
                   </td>
                 </tr>
               ))}
-              {(!logs || logs.length === 0) && (
+              {logs.length === 0 && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={EMPTY_TABLE_COL_SPAN_STANDARD}
                     className="px-6 py-12 text-center text-[var(--text-muted)] text-sm"
                   >
                     No logs found for the selected date range.

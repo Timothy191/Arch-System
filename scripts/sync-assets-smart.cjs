@@ -29,6 +29,35 @@ const WEBP_BANNER_WIDTH = 768;
 const WEBP_BANNER_HEIGHT = 432;
 const WEBP_BANNER_QUALITY = 76;
 const WEBP_BANNER_EFFORT = 6;
+const WEBP_BANNER_SUFFIX = '.webp';
+
+const MAX_WEBP_CARD_BYTES = 45 * 1024;
+const WEBP_CARD_WIDTH = 480;
+const WEBP_CARD_HEIGHT = 270;
+const WEBP_CARD_QUALITY = 74;
+const WEBP_CARD_EFFORT = 6;
+const WEBP_CARD_SUFFIX = '-card.webp';
+
+const JPG_EXTENSION = '.jpg';
+
+const DEPARTMENT_WEBP_DERIVATIVES = [
+  {
+    suffix: WEBP_BANNER_SUFFIX,
+    width: WEBP_BANNER_WIDTH,
+    height: WEBP_BANNER_HEIGHT,
+    quality: WEBP_BANNER_QUALITY,
+    effort: WEBP_BANNER_EFFORT,
+    maxBytes: MAX_WEBP_BANNER_BYTES,
+  },
+  {
+    suffix: WEBP_CARD_SUFFIX,
+    width: WEBP_CARD_WIDTH,
+    height: WEBP_CARD_HEIGHT,
+    quality: WEBP_CARD_QUALITY,
+    effort: WEBP_CARD_EFFORT,
+    maxBytes: MAX_WEBP_CARD_BYTES,
+  },
+];
 
 function resolveSharp() {
   try {
@@ -43,33 +72,56 @@ function resolveSharp() {
   }
 }
 
+async function shouldRegenerateWebp({ sharp, outputPath, width, height, maxBytes }) {
+  if (!existsSync(outputPath)) return true;
+  if (statSync(outputPath).size > maxBytes) return true;
+  const meta = await sharp(outputPath).metadata();
+  return meta.width !== width || meta.height !== height;
+}
+
+async function ensureSingleWebpDerivative(options) {
+  const { sharp, sourcePath, outputPath, width, height, quality, effort, maxBytes } = options;
+  const needsOptimization = await shouldRegenerateWebp({
+    sharp,
+    outputPath,
+    width,
+    height,
+    maxBytes,
+  });
+  if (!needsOptimization) return;
+
+  await sharp(sourcePath)
+    .resize({ width, height, fit: 'cover' })
+    .webp({
+      quality,
+      effort,
+      smartSubsampling: true,
+    })
+    .toFile(outputPath);
+}
+
 async function ensureOptimizedDepartmentWebpBanners() {
   if (!existsSync(DEPT_IMAGES_DIR)) return;
   const sharp = resolveSharp();
   if (!sharp) return;
 
-  const jpgFiles = readdirSync(DEPT_IMAGES_DIR).filter((file) => file.endsWith('.jpg'));
+  const jpgFiles = readdirSync(DEPT_IMAGES_DIR).filter((file) => file.endsWith(JPG_EXTENSION));
   for (const jpgFile of jpgFiles) {
-    const baseName = jpgFile.slice(0, -4);
-    const jpgPath = path.join(DEPT_IMAGES_DIR, jpgFile);
-    const webpPath = path.join(DEPT_IMAGES_DIR, `${baseName}.webp`);
-    let needsOptimization =
-      !existsSync(webpPath) || statSync(webpPath).size > MAX_WEBP_BANNER_BYTES;
-    if (!needsOptimization && existsSync(webpPath)) {
-      const meta = await sharp(webpPath).metadata();
-      needsOptimization = meta.width !== WEBP_BANNER_WIDTH || meta.height !== WEBP_BANNER_HEIGHT;
+    const baseName = path.basename(jpgFile, JPG_EXTENSION);
+    const sourcePath = path.join(DEPT_IMAGES_DIR, jpgFile);
+    for (const derivative of DEPARTMENT_WEBP_DERIVATIVES) {
+      const outputPath = path.join(DEPT_IMAGES_DIR, `${baseName}${derivative.suffix}`);
+      await ensureSingleWebpDerivative({
+        sharp,
+        sourcePath,
+        outputPath,
+        width: derivative.width,
+        height: derivative.height,
+        quality: derivative.quality,
+        effort: derivative.effort,
+        maxBytes: derivative.maxBytes,
+      });
     }
-
-    if (!needsOptimization) continue;
-
-    await sharp(jpgPath)
-      .resize({ width: WEBP_BANNER_WIDTH, height: WEBP_BANNER_HEIGHT, fit: 'cover' })
-      .webp({
-        quality: WEBP_BANNER_QUALITY,
-        effort: WEBP_BANNER_EFFORT,
-        smartSubsampling: true,
-      })
-      .toFile(webpPath);
   }
 }
 
@@ -92,16 +144,6 @@ function getAssetsChecksum(dir) {
     .map((f) => getFileHash(f))
     .join('');
   return createHash('sha256').update(combined).digest('hex');
-}
-
-// Always ensure automated versioning and build metadata are synchronized
-try {
-  const versionManager = path.join(REPO_ROOT, 'tools/scripts/version-manager.mjs');
-  if (existsSync(versionManager)) {
-    execSync(`node "${versionManager}" sync`, { stdio: 'inherit' });
-  }
-} catch (verErr) {
-  console.warn('⚠️  Warning: Version sync failed:', verErr.message);
 }
 
 async function main() {
@@ -148,4 +190,20 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  // Always ensure automated versioning and build metadata are synchronized
+  try {
+    const versionManager = path.join(REPO_ROOT, 'tools/scripts/version-manager.mjs');
+    if (existsSync(versionManager)) {
+      execSync(`node "${versionManager}" sync`, { stdio: 'inherit' });
+    }
+  } catch (verErr) {
+    console.warn('⚠️  Warning: Version sync failed:', verErr.message);
+  }
+
+  main();
+}
+
+module.exports = {
+  ensureOptimizedDepartmentWebpBanners,
+};

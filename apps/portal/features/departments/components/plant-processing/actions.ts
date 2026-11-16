@@ -1,9 +1,13 @@
 'use server';
 
-import { cacheInvalidateTags } from '@repo/redis';
+import { CacheCategory } from '@repo/redis';
 import { getAuthenticatedEmployee } from '@repo/supabase';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { createServerSupabaseClient } from '@repo/supabase/server';
+import { getOperationalToday } from '@repo/utils';
 import { revalidatePath } from 'next/cache';
+import { withCache } from '@/lib/cache-utils';
+import { tagDepartment, updateTags } from '@/lib/server-cache';
 import {
   buildDefaultHourlyRows,
   buildInitialPlantDelays,
@@ -71,16 +75,37 @@ function fromPlantTable(supabase: unknown, table: string): UntypedPlantTable {
   return (supabase as { from: (t: string) => UntypedPlantTable }).from(table);
 }
 
-type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+type PlantReadClient =
+  | Awaited<ReturnType<typeof createServerSupabaseClient>>
+  | Awaited<ReturnType<typeof createReadReplicaClient>>;
 
 interface PlantQueryResult {
   data: unknown[] | null;
   error: { message: string } | null;
 }
 
-const EMPTY_QUERY_RESULT: PlantQueryResult = { data: null, error: null };
+interface SharedPlantWorkspacePayload {
+  readonly departmentId: string | null;
+  readonly sheetRows: unknown[] | null;
+  readonly delayRows: unknown[] | null;
+}
 
-async function lookupPlantDepartmentId(supabase: ServerSupabaseClient): Promise<string | null> {
+const EMPTY_QUERY_RESULT: PlantQueryResult = { data: null, error: null };
+const PLANT_HOURLY_LOGS_LIMIT = 10;
+const PLANT_DELAYS_LIMIT = 25;
+const MIN_NIGHT_ROM_FEED_TONNES = 320;
+const NIGHT_FEED_VARIANCE_STEP_TONNES = 12;
+const NIGHT_FEED_VARIANCE_CYCLE = 3;
+const NIGHT_CLEAN_COAL_YIELD_RATIO = 0.908;
+const PLANT_BASE_TAGS = ['plant-processing', 'department:plant-processing'] as const;
+const PLANT_WORKSPACE_TAG = tagDepartment('plant-processing', 'workspace');
+const PLANT_WORKSPACE_CACHE_TAGS = [
+  PLANT_WORKSPACE_TAG,
+  'table:plant_hourly_logs',
+  'table:plant_delays',
+];
+
+async function lookupPlantDepartmentId(supabase: PlantReadClient): Promise<string | null> {
   try {
     const { data: deptRow } = await supabase
       .from('departments')
@@ -93,34 +118,51 @@ async function lookupPlantDepartmentId(supabase: ServerSupabaseClient): Promise<
   }
 }
 
-export async function getPlantProcessingWorkspaceData(
-  dateStr?: string
-): Promise<PlantWorkspaceData> {
-  const supabase = await createServerSupabaseClient();
-  const currentDate = dateStr || new Date().toISOString().split('T')[0]!;
-
-  // PERF: every lookup below is independent. They used to run as a sequential
-  // waterfall (getUser → getAuthenticatedEmployee (getUser again) → departments
-  // → sheets/delays), costing ~4 cross-region round-trips per page switch.
-  const [authEmployee, departmentId, sheetsResult, delaysResult] = await Promise.all([
-    getAuthenticatedEmployee(supabase).catch(() => null),
-    lookupPlantDepartmentId(supabase),
+async function loadSharedPlantWorkspacePayload(): Promise<SharedPlantWorkspacePayload> {
+  const readClient = await createReadReplicaClient();
+  const [departmentId, sheetsResult, delaysResult] = await Promise.all([
+    lookupPlantDepartmentId(readClient),
     Promise.resolve(
-      fromPlantTable(supabase, 'plant_hourly_logs')
+      fromPlantTable(readClient, 'plant_hourly_logs')
         .select('id, operation_date, shift, module_id, operator_name, rows, updated_at')
         .order('operation_date', { ascending: false })
-        .limit(10)
+        .limit(PLANT_HOURLY_LOGS_LIMIT)
     ).catch((): PlantQueryResult => EMPTY_QUERY_RESULT),
     Promise.resolve(
-      fromPlantTable(supabase, 'plant_delays')
+      fromPlantTable(readClient, 'plant_delays')
         .select(
           'id, delay_date, shift, circuit, category, impact_type, start_time, end_time, duration_minutes, reason, corrective_action, logged_by, status'
         )
         .order('created_at', { ascending: false })
-        .limit(25)
+        .limit(PLANT_DELAYS_LIMIT)
     ).catch((): PlantQueryResult => EMPTY_QUERY_RESULT),
   ]);
 
+  return {
+    departmentId,
+    sheetRows: sheetsResult.data,
+    delayRows: delaysResult.data,
+  };
+}
+
+export async function getPlantProcessingWorkspaceData(
+  dateStr?: string
+): Promise<PlantWorkspaceData> {
+  const supabase = await createServerSupabaseClient();
+  const currentDate = dateStr || getOperationalToday();
+
+  // Auth stays outside withCache so per-user operator identity is never cached across users,
+  // while the shared read-only department + logs + delays queries hit Redis L1/L2 via withCache.
+  const [authEmployee, sharedPayload] = await Promise.all([
+    getAuthenticatedEmployee(supabase).catch(() => null),
+    withCache(() => loadSharedPlantWorkspacePayload(), {
+      category: CacheCategory.METRICS,
+      keyParts: ['plant-processing', 'workspace-v1', currentDate],
+      tags: PLANT_WORKSPACE_CACHE_TAGS,
+    }),
+  ]);
+
+  const { departmentId, sheetRows, delayRows } = sharedPayload;
   const operatorLabel = authEmployee?.user?.email?.split('@')[0] || 'Plant Control Operator';
 
   const defaultDaySheet: PlantHourlySheetRecord = {
@@ -138,8 +180,11 @@ export async function getPlantProcessingWorkspaceData(
   const prevDate = prevDateObj.toISOString().split('T')[0]!;
 
   const prevNightRows = buildDefaultHourlyRows('night').map((row, idx) => {
-    const romFeedTonnes = Math.max(320, row.romFeedTonnes - (idx % 3) * 12);
-    const cleanCoalTonnes = Math.round(romFeedTonnes * 0.908);
+    const romFeedTonnes = Math.max(
+      MIN_NIGHT_ROM_FEED_TONNES,
+      row.romFeedTonnes - (idx % NIGHT_FEED_VARIANCE_CYCLE) * NIGHT_FEED_VARIANCE_STEP_TONNES
+    );
+    const cleanCoalTonnes = Math.round(romFeedTonnes * NIGHT_CLEAN_COAL_YIELD_RATIO);
     const discardTonnes = Math.max(0, romFeedTonnes - cleanCoalTonnes);
     return {
       ...row,
@@ -164,12 +209,9 @@ export async function getPlantProcessingWorkspaceData(
   const initialDelays: PlantDelayEntry[] = buildInitialPlantDelays(currentDate);
 
   try {
-    const dbSheets = sheetsResult.data;
-    const dbDelays = delaysResult.data;
-
-    if (dbSheets && dbSheets.length > 0) {
+    if (sheetRows && sheetRows.length > 0) {
       const persistedSheets: PlantHourlySheetRecord[] = (
-        dbSheets as Array<{
+        sheetRows as Array<{
           id: string;
           operation_date: string;
           shift: PlantShiftType;
@@ -201,9 +243,9 @@ export async function getPlantProcessingWorkspaceData(
       }
     }
 
-    if (dbDelays && dbDelays.length > 0) {
+    if (delayRows && delayRows.length > 0) {
       const mappedDelays: PlantDelayEntry[] = (
-        dbDelays as Array<{
+        delayRows as Array<{
           id: string;
           delay_date: string | null;
           shift: PlantShiftType | null;
@@ -339,9 +381,12 @@ export async function savePlantHourlySheetAction(
       }
     }
 
-    await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(
-      () => undefined
-    );
+    await updateTags([
+      ...PLANT_BASE_TAGS,
+      ...PLANT_WORKSPACE_CACHE_TAGS,
+      'table:daily_logs',
+      'table:production_logs',
+    ]).catch(() => undefined);
     revalidatePath('/plant-processing');
     revalidatePath('/plant-processing/hourly-sheet');
     revalidatePath('/plant-processing/history');
@@ -441,9 +486,7 @@ export async function logPlantDelayAction(
       await fromPlantTable(supabase, 'plant_delays').insert(delayRowPayload);
     }
 
-    await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(
-      () => undefined
-    );
+    await updateTags([...PLANT_BASE_TAGS, ...PLANT_WORKSPACE_CACHE_TAGS]).catch(() => undefined);
     revalidatePath('/plant-processing/delays');
     revalidatePath('/plant-processing/history');
   } catch {
@@ -508,7 +551,7 @@ export async function quickAddPlantEquipmentAction(
       ...(departmentId ? { department_id: departmentId } : {}),
     });
 
-    await cacheInvalidateTags(['plant-processing', 'department:plant-processing']).catch(
+    await updateTags([...PLANT_BASE_TAGS, ...PLANT_WORKSPACE_CACHE_TAGS, 'table:machines']).catch(
       () => undefined
     );
     revalidatePath('/plant-processing/delays');

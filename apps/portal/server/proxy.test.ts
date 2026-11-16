@@ -4,7 +4,13 @@
 
 import { NextRequest } from 'next/server';
 import { proxy as edgeProxy } from '../proxy';
-import { DEPARTMENT_ROUTES, isTokenExpiredError, normalizeRole, proxy } from './proxy';
+import {
+  clearProxyPrefetchCache,
+  DEPARTMENT_ROUTES,
+  isTokenExpiredError,
+  normalizeRole,
+  proxy,
+} from './proxy';
 
 jest.mock('@repo/supabase/middleware', () => ({
   createMiddlewareClient: jest.fn(),
@@ -30,6 +36,11 @@ jest.mock('@repo/redis/session', () => ({
 
 const { createMiddlewareClient } = jest.requireMock('@repo/supabase/middleware');
 const { cacheGet } = jest.requireMock('@repo/redis/cache');
+const { readSession, revokeSession } = jest.requireMock('@repo/redis/session');
+
+const SESSION_BUDGET_ADVANCE_MS = 150;
+const PREFETCH_CACHE_TTL_MS = 10_000;
+const PREFETCH_CACHE_MAX_ENTRIES = 256;
 
 function buildProxyMock(
   overrides: { user?: unknown; employee?: unknown; deptData?: unknown } = {}
@@ -151,7 +162,11 @@ describe('isTokenExpiredError', () => {
 });
 
 describe('proxy', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearProxyPrefetchCache();
+    (readSession as jest.Mock).mockResolvedValue(null);
+  });
 
   it('passes through static file requests', async () => {
     buildProxyMock();
@@ -571,6 +586,203 @@ describe('proxy', () => {
           sameSite: 'lax',
         })
       );
+    });
+  });
+
+  describe('session read budget cleanup and prefetch L1 cache', () => {
+    it('clears the session read budget timer on fast Redis hits without leaking handles', async () => {
+      jest.useFakeTimers();
+      const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      try {
+        (readSession as jest.Mock).mockResolvedValueOnce({
+          id: 'emp-1',
+          role: 'admin',
+          department_id: 'dept-uuid-1',
+          accessible_departments: [],
+        });
+        buildProxyMock();
+
+        const res = await proxy(makeRequest('/admin'));
+        expect(res.status).not.toBe(307);
+        expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+        expect(clearTimeoutSpy).toHaveBeenCalledWith(setTimeoutSpy.mock.results[0]?.value);
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        setTimeoutSpy.mockRestore();
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it('clears the session read budget timer when Redis exceeds the 150ms budget', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      try {
+        (readSession as jest.Mock).mockImplementationOnce(() => new Promise(() => undefined));
+        buildProxyMock({
+          employee: {
+            id: 'emp-fallback',
+            role: 'admin',
+            department_id: 'dept-uuid-1',
+            accessible_departments: [],
+          },
+        });
+
+        const proxyPromise = proxy(makeRequest('/admin'));
+        await jest.advanceTimersByTimeAsync(SESSION_BUDGET_ADVANCE_MS);
+        const res = await proxyPromise;
+
+        expect(res.status).not.toBe(307);
+        expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it('skips redundant readSession calls on next-router-prefetch and purpose=prefetch after navigation', async () => {
+      const adminEmployee = {
+        id: 'emp-1',
+        role: 'admin',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      (readSession as jest.Mock).mockResolvedValue(adminEmployee);
+      buildProxyMock({ employee: adminEmployee });
+
+      const navigationRes = await proxy(makeRequest('/admin'));
+      expect(navigationRes.status).not.toBe(307);
+      expect(readSession).toHaveBeenCalledTimes(1);
+
+      const nextPrefetchReq = makeRequest('/overview');
+      nextPrefetchReq.headers.set('next-router-prefetch', '1');
+      const nextPrefetchRes = await proxy(nextPrefetchReq);
+      expect(nextPrefetchRes.status).not.toBe(307);
+      expect(readSession).toHaveBeenCalledTimes(1);
+
+      const purposePrefetchReq = makeRequest('/hub');
+      purposePrefetchReq.headers.set('purpose', 'prefetch');
+      const purposePrefetchRes = await proxy(purposePrefetchReq);
+      expect(purposePrefetchRes.status).not.toBe(307);
+      expect(readSession).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls readSession directly on full non-prefetch navigation even when cached in prefetch L1', async () => {
+      const initialAdmin = {
+        id: 'emp-1',
+        role: 'admin',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      const downgradedOperator = {
+        id: 'emp-1',
+        role: 'operator',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      (readSession as jest.Mock)
+        .mockResolvedValueOnce(initialAdmin)
+        .mockResolvedValueOnce(downgradedOperator);
+      buildProxyMock({ employee: downgradedOperator });
+
+      const firstRes = await proxy(makeRequest('/admin'));
+      expect(firstRes.status).not.toBe(307);
+      expect(readSession).toHaveBeenCalledTimes(1);
+
+      const secondRes = await proxy(makeRequest('/admin'));
+      expect(readSession).toHaveBeenCalledTimes(2);
+      expect(secondRes.status).toBe(307);
+      expect(secondRes.headers.get('location')).toContain('unauthorized_department');
+    });
+
+    it('evicts stale prefetch L1 entries after TTL expires and re-queries readSession', async () => {
+      jest.useFakeTimers();
+      try {
+        const adminEmployee = {
+          id: 'emp-1',
+          role: 'admin',
+          department_id: 'dept-uuid-1',
+          accessible_departments: [],
+        };
+        (readSession as jest.Mock).mockResolvedValue(adminEmployee);
+        buildProxyMock({ employee: adminEmployee });
+
+        await proxy(makeRequest('/admin'));
+        expect(readSession).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(PREFETCH_CACHE_TTL_MS);
+
+        const expiredPrefetchReq = makeRequest('/overview');
+        expiredPrefetchReq.headers.set('next-router-prefetch', '1');
+        await proxy(expiredPrefetchReq);
+        expect(readSession).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('evicts prefetch L1 cache entry on signOut and revokeSession', async () => {
+      const adminEmployee = {
+        id: 'emp-1',
+        role: 'admin',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      (readSession as jest.Mock).mockResolvedValue(adminEmployee);
+      const { supabase } = buildProxyMock({ employee: adminEmployee });
+
+      await proxy(makeRequest('/admin'));
+      expect(readSession).toHaveBeenCalledTimes(1);
+
+      supabase.auth.getClaims.mockResolvedValueOnce({
+        data: { claims: { sub: 'auth-1' } },
+        error: { message: 'Invalid Refresh Token' },
+      });
+      const signOutRes = await proxy(makeRequest('/admin'));
+      expect(signOutRes.status).toBe(307);
+      expect(revokeSession).toHaveBeenCalledWith('auth-1', { reason: 'logout' });
+
+      const postSignOutPrefetch = makeRequest('/overview');
+      postSignOutPrefetch.headers.set('next-router-prefetch', '1');
+      await proxy(postSignOutPrefetch);
+      expect(readSession).toHaveBeenCalledTimes(2);
+    });
+
+    it('bounds prefetch L1 cache to 256 entries by evicting the oldest user key', async () => {
+      const adminEmployee = {
+        id: 'emp-bounded',
+        role: 'admin',
+        department_id: 'dept-uuid-1',
+        accessible_departments: [],
+      };
+      (readSession as jest.Mock).mockResolvedValue(adminEmployee);
+      const { supabase } = buildProxyMock({ employee: adminEmployee });
+
+      for (let index = 0; index <= PREFETCH_CACHE_MAX_ENTRIES; index += 1) {
+        supabase.auth.getClaims.mockResolvedValueOnce({
+          data: { claims: { sub: `auth-${index}` } },
+        });
+        await proxy(makeRequest('/overview'));
+      }
+      expect(readSession).toHaveBeenCalledTimes(PREFETCH_CACHE_MAX_ENTRIES + 1);
+
+      supabase.auth.getClaims.mockResolvedValueOnce({
+        data: { claims: { sub: `auth-${PREFETCH_CACHE_MAX_ENTRIES}` } },
+      });
+      const newestPrefetch = makeRequest('/overview');
+      newestPrefetch.headers.set('next-router-prefetch', '1');
+      await proxy(newestPrefetch);
+      expect(readSession).toHaveBeenCalledTimes(PREFETCH_CACHE_MAX_ENTRIES + 1);
+
+      supabase.auth.getClaims.mockResolvedValueOnce({
+        data: { claims: { sub: 'auth-0' } },
+      });
+      const evictedPrefetch = makeRequest('/overview');
+      evictedPrefetch.headers.set('next-router-prefetch', '1');
+      await proxy(evictedPrefetch);
+      expect(readSession).toHaveBeenCalledTimes(PREFETCH_CACHE_MAX_ENTRIES + 2);
     });
   });
 });

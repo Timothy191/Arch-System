@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "regions": ["dub1"],
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm type-check && pnpm lint && pnpm test && pnpm turbo run build --filter=portal...",
   "outputDirectory": "apps/portal/.next",

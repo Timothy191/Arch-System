@@ -48,6 +48,70 @@ function safeRecordJob(name: string, success: boolean): void {
  */
 const SESSION_READ_BUDGET_MS = 150;
 const AUTH_COOKIE_MAX_AGE_SECONDS = 34560000;
+const MAX_PREFETCH_SESSION_CACHE_ENTRIES = 256;
+const PREFETCH_SESSION_TTL_MS = 10_000;
+const NEXT_ROUTER_PREFETCH_HEADER = 'next-router-prefetch';
+const NEXT_ROUTER_PREFETCH_VALUE = '1';
+const PURPOSE_HEADER = 'purpose';
+const PREFETCH_PURPOSE_VALUE = 'prefetch';
+
+interface PrefetchSessionEntry {
+  employee: EmployeeRecord;
+  expiresAt: number;
+}
+
+interface ResolveEmployeeSessionOptions {
+  client: MiddlewareClient;
+  userId: string;
+  isPrefetchRequest: boolean;
+}
+
+interface SyncPrefetchSessionOptions {
+  userId: string;
+  employee: EmployeeRecord | null;
+}
+
+const sessionPrefetchL1 = new Map<string, PrefetchSessionEntry>();
+
+/** Clears the in-process proxy prefetch L1 session cache for test isolation. */
+export function clearProxyPrefetchCache(): void {
+  sessionPrefetchL1.clear();
+}
+
+function isRouterPrefetchRequest(request: NextRequest): boolean {
+  return (
+    request.headers.get(NEXT_ROUTER_PREFETCH_HEADER) === NEXT_ROUTER_PREFETCH_VALUE ||
+    request.headers.get(PURPOSE_HEADER) === PREFETCH_PURPOSE_VALUE
+  );
+}
+
+function getPrefetchSessionEntry(userId: string): EmployeeRecord | null {
+  const entry = sessionPrefetchL1.get(userId);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    sessionPrefetchL1.delete(userId);
+    return null;
+  }
+  return entry.employee;
+}
+
+function syncPrefetchSessionEntry({ userId, employee }: SyncPrefetchSessionOptions): void {
+  if (!employee) {
+    sessionPrefetchL1.delete(userId);
+    return;
+  }
+  sessionPrefetchL1.delete(userId);
+  if (sessionPrefetchL1.size >= MAX_PREFETCH_SESSION_CACHE_ENTRIES) {
+    const oldestUserId = sessionPrefetchL1.keys().next().value;
+    if (oldestUserId !== undefined) {
+      sessionPrefetchL1.delete(oldestUserId);
+    }
+  }
+  sessionPrefetchL1.set(userId, {
+    employee,
+    expiresAt: Date.now() + PREFETCH_SESSION_TTL_MS,
+  });
+}
 
 /**
  * Re-emits verified Supabase auth session cookies (`sb-*-auth-token*`) with
@@ -305,6 +369,9 @@ async function handleLoginRoute(request: NextRequest): Promise<NextResponse> {
 
   if (shouldSignOut) {
     safeRecordJob('auth.middleware.signout', false);
+    if (sessionUser?.id) {
+      sessionPrefetchL1.delete(sessionUser.id);
+    }
     await client.supabase.auth.signOut();
     return client.response;
   }
@@ -326,28 +393,42 @@ async function handleLoginRoute(request: NextRequest): Promise<NextResponse> {
   return client.response;
 }
 
-async function resolveEmployeeSession(
-  client: MiddlewareClient,
-  userId: string
-): Promise<EmployeeRecord | null> {
+async function resolveEmployeeSession({
+  client,
+  userId,
+  isPrefetchRequest,
+}: ResolveEmployeeSessionOptions): Promise<EmployeeRecord | null> {
+  if (isPrefetchRequest) {
+    const cachedEmployee = getPrefetchSessionEntry(userId);
+    if (cachedEmployee) {
+      return cachedEmployee;
+    }
+  }
+
   let employee: EmployeeRecord | null = null;
+  let budgetTimer: ReturnType<typeof setTimeout> | undefined;
   try {
-    employee = await Promise.race([
-      readSession(userId),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), SESSION_READ_BUDGET_MS)),
-    ]);
+    const budgetPromise = new Promise<null>((resolve) => {
+      budgetTimer = setTimeout(() => resolve(null), SESSION_READ_BUDGET_MS);
+      budgetTimer?.unref?.();
+    });
+    employee = await Promise.race([readSession(userId), budgetPromise]);
   } catch {
     // Redis offline or too slow — fall through to direct DB fetch
     employee = null;
+  } finally {
+    if (budgetTimer !== undefined) {
+      clearTimeout(budgetTimer);
+    }
   }
 
   if (!employee?.id) {
-    const { data } = await client.supabase
+    const { data: employeeRow } = await client.supabase
       .from('employees')
       .select('id, role, department_id, accessible_departments')
       .eq('auth_id', userId)
       .single();
-    employee = (data as EmployeeRecord | null) ?? null;
+    employee = (employeeRow as EmployeeRecord | null) ?? null;
     if (employee) {
       await writeSession({ userId, employee }).catch(() => undefined);
     }
@@ -356,6 +437,7 @@ async function resolveEmployeeSession(
     void touchSession(userId).catch(() => undefined);
   }
 
+  syncPrefetchSessionEntry({ userId, employee });
   return employee;
 }
 
@@ -459,6 +541,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     await client.supabase.auth.signOut();
     if (user?.id) {
       const signedOut = user.id;
+      sessionPrefetchL1.delete(signedOut);
       await revokeSession(signedOut, { reason: 'logout' }).catch(() => {
         cacheEvictL1ByPrefix(`arch:auth:employee:${signedOut}`);
       });
@@ -476,7 +559,12 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return redirectResponse;
   }
 
-  const employee = await resolveEmployeeSession(client, user.id);
+  const isPrefetchRequest = isRouterPrefetchRequest(request);
+  const employee = await resolveEmployeeSession({
+    client,
+    userId: user.id,
+    isPrefetchRequest,
+  });
   const accessDeniedResponse = await enforceRouteAccess(request, client, pathname, employee);
   if (accessDeniedResponse) {
     return accessDeniedResponse;

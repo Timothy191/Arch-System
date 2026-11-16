@@ -4,20 +4,100 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { ErrorBoundary } from '~/components/ErrorBoundary';
-import { OfficeWorkspaceClient } from '~/features/departments/components/office/OfficeWorkspaceClient';
-import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getPlantProcessingWorkspaceData } from '~/features/departments/components/plant-processing/actions';
-import { PlantHourlySheetClient } from '~/features/departments/components/plant-processing/PlantHourlySheetClient';
-import {
-  MonthlyProductionTargetBanner,
-  ProductionDashboard,
-} from '~/features/departments/components/production/ProductionDashboard';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { ControlRoomQuickNav } from '../control-room/components/ControlRoomQuickNav';
 import { ControlRoomSubtabs } from '../control-room/components/ControlRoomSubtabs';
-import { ControlRoomSummaryGridClient } from './ControlRoomSummaryGridClient';
-import { NonControlRoomSummaryGridClient } from './NonControlRoomSummaryGridClient';
-import ReportsPage from './reports/page';
+
+function WorkspaceSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="h-32 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-96 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+    </div>
+  );
+}
+
+function TargetBannerSkeleton() {
+  return <div className="h-20 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />;
+}
+
+function ControlRoomSummaryGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+    </div>
+  );
+}
+
+function NonControlRoomSummaryGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+      <div className="h-28 animate-pulse rounded-2xl bg-[var(--bg-tertiary)]" />
+    </div>
+  );
+}
+
+const OfficeWorkspaceClient = dynamic(
+  () =>
+    import('~/features/departments/components/office/OfficeWorkspaceClient').then(
+      (mod) => mod.OfficeWorkspaceClient
+    ),
+  { loading: () => <WorkspaceSkeleton /> }
+);
+
+const PlantInventoryWorkspaceClient = dynamic(
+  () =>
+    import('~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient').then(
+      (mod) => mod.PlantInventoryWorkspaceClient
+    ),
+  { loading: () => <WorkspaceSkeleton /> }
+);
+
+const PlantHourlySheetClient = dynamic(
+  () =>
+    import('~/features/departments/components/plant-processing/PlantHourlySheetClient').then(
+      (mod) => mod.PlantHourlySheetClient
+    ),
+  { loading: () => <WorkspaceSkeleton /> }
+);
+
+const ProductionDashboard = dynamic(
+  () =>
+    import('~/features/departments/components/production/ProductionDashboard').then(
+      (mod) => mod.ProductionDashboard
+    ),
+  { loading: () => <WorkspaceSkeleton /> }
+);
+
+const MonthlyProductionTargetBanner = dynamic(
+  () =>
+    import('~/features/departments/components/production/ProductionDashboard').then(
+      (mod) => mod.MonthlyProductionTargetBanner
+    ),
+  { loading: () => <TargetBannerSkeleton /> }
+);
+
+const ControlRoomSummaryGridClient = dynamic(
+  () => import('./ControlRoomSummaryGridClient').then((mod) => mod.ControlRoomSummaryGridClient),
+  { loading: () => <ControlRoomSummaryGridSkeleton /> }
+);
+
+const NonControlRoomSummaryGridClient = dynamic(
+  () =>
+    import('./NonControlRoomSummaryGridClient').then((mod) => mod.NonControlRoomSummaryGridClient),
+  { loading: () => <NonControlRoomSummaryGridSkeleton /> }
+);
+
+const ReportsPage = dynamic(() => import('./reports/page'), {
+  loading: () => <WorkspaceSkeleton />,
+});
 
 // AGENT-TRACE: ControlRoomWidgets consolidated dynamic island — co-locates all control-room
 // specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage) to prevent

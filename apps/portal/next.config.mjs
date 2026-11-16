@@ -1,26 +1,32 @@
-import { createRequire } from 'node:module';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import withBundleAnalyzer from '@next/bundle-analyzer';
-import { withSentryConfig } from '@sentry/nextjs';
-import { withWorkflow } from 'workflow/next';
+import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
+import { withWorkflow } from "workflow/next";
 
 const require = createRequire(import.meta.url);
-const { version: PORTAL_VERSION } = require('./package.json');
+const { version: PORTAL_VERSION } = require("./package.json");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Root includes both Arch-System and Arch-Base so Turbopack allows cross-repo symlinked packages
-const workspaceRoot = path.resolve(__dirname, '../..');
+const workspaceRoot = path.resolve(__dirname, "../..");
 
-const isProduction = process.env.NODE_ENV === 'production';
-const isCI = process.env.CI === 'true';
+const isProduction = process.env.NODE_ENV === "production";
+const isCI = process.env.CI === "true";
 // next build always sets NODE_ENV=production, so we use CI to distinguish local builds
-const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === 'true';
+const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 
 // Build-time environment validation (Rule P8 / Quality gates)
-if (isProduction && !process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.IGNORE_ENV_VALIDATION) {
-  console.warn('⚠️  WARNING: NEXT_PUBLIC_SUPABASE_URL is not set at build time.');
+if (
+  isProduction &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.IGNORE_ENV_VALIDATION
+) {
+  console.warn(
+    "⚠️  WARNING: NEXT_PUBLIC_SUPABASE_URL is not set at build time."
+  );
 }
 
 /** @type {import('next').NextConfig} */
@@ -35,37 +41,37 @@ const nextConfig = {
   // can't handle. Until Turbopack improves deduplication or inngest is excluded from the client
   outputFileTracingRoot: workspaceRoot,
   outputFileTracingExcludes: {
-    '*': [
-      '**/.agents/**',
-      '**/.gemini/**',
-      '**/.palabre/**',
-      '**/.swarm/**',
-      '**/.remember/**',
-      '**/.claude/**',
-      '**/.cursor/**',
-      '**/.omg/**',
-      '**/.kiro/**',
-      '**/.junie/**',
-      '**/.ori/**',
-      '**/AGENTS.md',
-      '**/CLAUDE.md',
-      '**/GEMINI.md',
-      '**/.claude.local.md',
-      '**/.cursorrules',
-      '**/REVIEW.md',
-      '**/AGENT_TRACER.md',
-      '**/*AGENT_TRACER.md',
-      '**/docs/**',
-      '**/documentation/**',
-      '**/tests/**',
-      '**/e2e/**',
-      '**/k6/**',
-      '**/playwright-report/**',
-      '**/coverage/**',
-      '**/tools/**',
-      '**/scripts/**',
-      '**/.github/**',
-      '**/.mcp.json*',
+    "*": [
+      "**/.agents/**",
+      "**/.gemini/**",
+      "**/.palabre/**",
+      "**/.swarm/**",
+      "**/.remember/**",
+      "**/.claude/**",
+      "**/.cursor/**",
+      "**/.omg/**",
+      "**/.kiro/**",
+      "**/.junie/**",
+      "**/.ori/**",
+      "**/AGENTS.md",
+      "**/CLAUDE.md",
+      "**/GEMINI.md",
+      "**/.claude.local.md",
+      "**/.cursorrules",
+      "**/REVIEW.md",
+      "**/AGENT_TRACER.md",
+      "**/*AGENT_TRACER.md",
+      "**/docs/**",
+      "**/documentation/**",
+      "**/tests/**",
+      "**/e2e/**",
+      "**/k6/**",
+      "**/playwright-report/**",
+      "**/coverage/**",
+      "**/tools/**",
+      "**/scripts/**",
+      "**/.github/**",
+      "**/.mcp.json*",
     ],
   },
   turbopack: {
@@ -73,7 +79,7 @@ const nextConfig = {
   },
   // AGENT-TRACE: On Vercel, omit standalone output so Next.js uses native Vercel lambda tracing.
   // In Docker/self-hosted environments, produce standalone output.
-  output: process.env.VERCEL ? undefined : 'standalone',
+  output: process.env.VERCEL ? undefined : "standalone",
   env: {
     PORTAL_VERSION,
     NEXT_PUBLIC_PORTAL_VERSION: PORTAL_VERSION,
@@ -81,13 +87,13 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/hub',
+        source: "/",
+        destination: "/hub",
         permanent: false,
       },
       {
-        source: '/drilling/machine-telemetry',
-        destination: '/drilling/drilling-operations',
+        source: "/drilling/machine-telemetry",
+        destination: "/drilling/drilling-operations",
         permanent: false,
       },
     ];
@@ -96,29 +102,30 @@ const nextConfig = {
     // !! DANGER !!
     // Only allow skipping type checks in local development!
     // Never skip type checking in CI.
-    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true' && process.env.CI !== 'true',
+    ignoreBuildErrors:
+      process.env.SKIP_TYPE_CHECK === "true" && process.env.CI !== "true",
   },
   transpilePackages: [
-    '@repo/ui',
-    '@repo/supabase',
-    '@repo/utils',
-    '@repo/redis',
-    '@repo/theme',
-    '@repo/rate-limiter',
-    '@repo/logger',
-    '@repo/contract',
-    '@repo/errors',
-    '@repo/agents',
-    '@repo/intelligence',
-    '@repo/auth/ui',
-    '@repo/auth/data-access',
-    '@repo/auth/utils',
-    '@repo/shared/data-access',
-    '@repo/shared/utils',
-    '@repo/shared/hooks',
-    '@repo/departments/ui',
-    '@repo/departments/data-access',
-    '@repo/hub/ui',
+    "@repo/ui",
+    "@repo/supabase",
+    "@repo/utils",
+    "@repo/redis",
+    "@repo/theme",
+    "@repo/rate-limiter",
+    "@repo/logger",
+    "@repo/contract",
+    "@repo/errors",
+    "@repo/agents",
+    "@repo/intelligence",
+    "@repo/auth/ui",
+    "@repo/auth/data-access",
+    "@repo/auth/utils",
+    "@repo/shared/data-access",
+    "@repo/shared/utils",
+    "@repo/shared/hooks",
+    "@repo/departments/ui",
+    "@repo/departments/data-access",
+    "@repo/hub/ui",
   ],
   images: {
     // DECISION (measured 2026-11): image optimization stays OFF at the Vercel layer.
@@ -130,48 +137,48 @@ const nextConfig = {
     // Vercel transformation billing resumes on every unique width. The alternative, cheaper path is
     // pre-generating AVIF/WebP derivatives with sharp (already in the lockfile) at build time.
     unoptimized: true,
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 14400,
     qualities: [75],
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+    contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Allowlist for the local asset roots that next/image may touch. Inert while
     // `unoptimized: true`, but prevents arbitrary-path optimization (and the 400s that
     // follow) the moment a loader is wired up.
     localPatterns: [
-      { pathname: '/images/**', search: '' },
-      { pathname: '/background/**', search: '' },
-      { pathname: '/error-pages/**', search: '' },
-      { pathname: '/icons/**', search: '' },
-      { pathname: '/logo.svg', search: '' },
-      { pathname: '/whatsapp-logo.jpeg', search: '' },
+      { pathname: "/images/**", search: "" },
+      { pathname: "/background/**", search: "" },
+      { pathname: "/error-pages/**", search: "" },
+      { pathname: "/icons/**", search: "" },
+      { pathname: "/logo.svg", search: "" },
+      { pathname: "/whatsapp-logo.jpeg", search: "" },
     ],
     remotePatterns: [
-      { protocol: 'https', hostname: '*.supabase.co' },
-      { protocol: 'https', hostname: '*.supabase.in' },
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: '*.whatsapp.net' },
-      { protocol: 'https', hostname: '*.whatsapp.com' },
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "*.supabase.in" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "*.whatsapp.net" },
+      { protocol: "https", hostname: "*.whatsapp.com" },
     ],
   },
   compiler: {
     // AGENT-TRACE: In production, strip console.warn and console.info to reduce bundle size
     // and prevent sensitive data leakage. Keep console.error for Sentry error capture.
     removeConsole: isProduction && {
-      exclude: ['error'],
+      exclude: ["error"],
     },
   },
   reactStrictMode: true,
   webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.performance = {
-        hints: dev ? false : 'warning',
+        hints: dev ? false : "warning",
         maxAssetSize: 1024000, // 1 MB
         maxEntrypointSize: 2048000, // 2 MB
         assetFilter: (assetFilename) =>
-          !assetFilename.includes('exceljs') &&
-          (assetFilename.endsWith('.js') || assetFilename.endsWith('.css')),
+          !assetFilename.includes("exceljs") &&
+          (assetFilename.endsWith(".js") || assetFilename.endsWith(".css")),
       };
     }
     return config;
@@ -225,9 +232,16 @@ const nextConfig = {
       fullUrl: !isProduction,
       hmrRefreshes: !isProduction,
     },
-    browserToTerminal: 'warn',
+    browserToTerminal: "warn",
   },
-  serverExternalPackages: ['@babel/core', '@babel/traverse', 'p-limit'],
+  serverExternalPackages: [
+    "@babel/core",
+    "@babel/traverse",
+    "p-limit",
+    "pg",
+    "pino",
+    "pino-pretty",
+  ],
   experimental: {
     // AGENT-TRACE: Next.js 16 persistent Turbopack file-system cache for ~400% faster warm dev startups & builds
     turbopackFileSystemCacheForDev: true,
@@ -243,43 +257,45 @@ const nextConfig = {
     },
     // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
     optimizePackageImports: [
-      'lucide-react',
-      'framer-motion',
-      '@tremor/react',
-      '@xyflow/react',
-      'clsx',
-      'tailwind-merge',
-      'date-fns',
-      'recharts',
-      'sonner',
-      '@radix-ui/react-tabs',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-select',
-      '@radix-ui/react-tooltip',
-      '@radix-ui/react-popover',
-      '@radix-ui/react-avatar',
-      '@radix-ui/react-checkbox',
-      '@radix-ui/react-label',
-      '@radix-ui/react-progress',
-      '@radix-ui/react-scroll-area',
-      '@radix-ui/react-separator',
-      '@radix-ui/react-slot',
-      '@radix-ui/react-switch',
-      '@repo/ui',
-      '@repo/theme',
-      '@repo/contract',
-      '@repo/utils',
-      '@repo/departments/ui',
-      '@repo/departments/data-access',
-      '@repo/hub/ui',
-      '@repo/shared/hooks',
+      "lucide-react",
+      "framer-motion",
+      "@tremor/react",
+      "@xyflow/react",
+      "clsx",
+      "tailwind-merge",
+      "date-fns",
+      "recharts",
+      "sonner",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-checkbox",
+      "@radix-ui/react-label",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@repo/ui",
+      "@repo/theme",
+      "@repo/contract",
+      "@repo/utils",
+      "@repo/departments/ui",
+      "@repo/departments/data-access",
+      "@repo/hub/ui",
+      "@repo/shared/hooks",
+      "@univerjs/presets",
+      "@univerjs/preset-sheets-core",
     ],
   },
   performance: {
     // Performance budgets for production builds
     // These budgets trigger warnings when exceeded and can be enforced via CI
-    hints: isCI ? 'warning' : 'warning',
+    hints: isCI ? "warning" : "warning",
     // Max bundle size for JavaScript (including all chunks)
     maxEntrypointSize: isCI ? 250 * 1024 : 280 * 1024, // 250KB in CI, 280KB locally
     // Max size for a single chunk
@@ -290,47 +306,47 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           {
             // AGENT-TRACE: Belt-and-braces crawl refusal. The `robots` metadata directive and
             // `app/robots.ts` only cover rendered routes and the robots probe; this header also
             // covers static assets, API responses, and error pages served without a React render.
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow, noarchive, nosnippet',
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet",
           },
           {
-            key: 'Permissions-Policy',
+            key: "Permissions-Policy",
             value:
-              'camera=(), microphone=(), geolocation=(), clipboard-write=(self), clipboard-read=(self)',
+              "camera=(), microphone=(), geolocation=(), clipboard-write=(self), clipboard-read=(self)",
           },
           ...(isProduction
             ? [
                 {
-                  key: 'Content-Security-Policy',
+                  key: "Content-Security-Policy",
                   value:
                     "default-src 'self'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; media-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://calendar.google.com https://docs.google.com https://drive.google.com; frame-ancestors 'none';",
                 },
               ]
             : [
                 {
-                  key: 'Content-Security-Policy-Report-Only',
+                  key: "Content-Security-Policy-Report-Only",
                   value:
                     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.whatsapp.net https://*.whatsapp.com https://res.cloudinary.com; media-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://us.cloud.langfuse.com https://*.r2.cloudflarestorage.com https://api.open-meteo.com wss://*.web.whatsapp.com https://*.whatsapp.com https://arch-system-nest-proxy.vercel.app wss://arch-system-nest-proxy.vercel.app https://plantcor-redis-serverless.vercel.app https://n8n-vercel-alpha.vercel.app https://va.vercel-scripts.com; frame-src 'self' http://localhost:* https://*.ngrok-free.app https://*.whatsapp.com https://web.whatsapp.com https://arch-system-nest-proxy.vercel.app https://n8n-vercel-alpha.vercel.app https://calendar.google.com https://docs.google.com https://drive.google.com; frame-ancestors 'none'; report-uri /api/csp-violations;",
                 },
@@ -342,100 +358,106 @@ const nextConfig = {
       ...(isProduction
         ? [
             {
-              source: '/manifest.webmanifest',
+              source: "/manifest.webmanifest",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
                 },
               ],
             },
             {
-              source: '/manifest.json',
+              source: "/manifest.json",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
                 },
               ],
             },
             {
-              source: '/images/:path*',
+              source: "/images/:path*",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
                 },
               ],
             },
             {
-              source: '/background/:path*',
+              source: "/background/:path*",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
                 },
               ],
             },
             {
-              source: '/icons/:path*',
+              source: "/icons/:path*",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
                 },
               ],
             },
             {
-              source: '/sw.js',
+              source: "/sw.js",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=0, must-revalidate',
+                  key: "Cache-Control",
+                  value: "public, max-age=0, must-revalidate",
                 },
               ],
             },
             {
-              source: '/workbox-:hash.js',
+              source: "/workbox-:hash.js",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=0, must-revalidate',
+                  key: "Cache-Control",
+                  value: "public, max-age=0, must-revalidate",
                 },
               ],
             },
             {
-              source: '/login',
+              source: "/login",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'private, no-store, max-age=0, must-revalidate',
+                  key: "Cache-Control",
+                  value: "private, no-store, max-age=0, must-revalidate",
                 },
               ],
             },
             {
-              source: '/api/health',
+              source: "/api/health",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=60, s-maxage=60, stale-while-revalidate=600',
+                  key: "Cache-Control",
+                  value:
+                    "public, max-age=60, s-maxage=60, stale-while-revalidate=600",
                 },
               ],
             },
             {
-              source: '/api/auth/:path*',
-              headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+              source: "/api/auth/:path*",
+              headers: [{ key: "Cache-Control", value: "private, no-store" }],
             },
             {
-              source: '/api/ai/:path*',
-              headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+              source: "/api/ai/:path*",
+              headers: [{ key: "Cache-Control", value: "private, no-store" }],
             },
             {
-              source: '/error-pages/:path*',
+              source: "/error-pages/:path*",
               headers: [
                 {
-                  key: 'Cache-Control',
-                  value: 'public, max-age=31536000, immutable',
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
                 },
               ],
             },
@@ -452,7 +474,7 @@ const nextConfig = {
 const pwaConfig = nextConfig;
 
 const analyzedConfig = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === "true",
 })(pwaConfig);
 
 const workflowConfig = withWorkflow(analyzedConfig);
@@ -465,7 +487,7 @@ export default enableHeavyPlugins
       silent: !isCI,
       dryRun: !isCI,
       widenClientFileUpload: isCI,
-      tunnelRoute: '/api/sentry-proxy',
+      tunnelRoute: "/api/sentry-proxy",
       hideSourceMaps: true,
     })
   : workflowConfig;

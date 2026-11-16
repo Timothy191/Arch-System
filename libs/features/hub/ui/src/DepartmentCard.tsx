@@ -101,6 +101,36 @@ const COLOR_MAP: Record<
   indigo: GOLD_BADGE_CONFIG,
 };
 
+export type CardBannerVariant = 'card-webp' | 'webp' | 'jpg' | 'fallback';
+
+const DEPARTMENT_BANNER_BASE_PATH = '/images/departments';
+const FALLBACK_BANNER_SRC = '/images/departments/overview.jpg';
+
+const DEPARTMENT_BANNER_ALIASES: Record<string, string> = {
+  executive: 'overview',
+  office: 'overview',
+  reports: 'control-room',
+};
+
+const BANNER_SUFFIX_BY_VARIANT: Record<Exclude<CardBannerVariant, 'fallback'>, string> = {
+  'card-webp': '-card.webp',
+  webp: '.webp',
+  jpg: '.jpg',
+};
+
+const NEXT_BANNER_VARIANT: Record<CardBannerVariant, CardBannerVariant> = {
+  'card-webp': 'webp',
+  webp: 'jpg',
+  jpg: 'fallback',
+  fallback: 'fallback',
+};
+
+function resolveDepartmentBannerSrc(departmentName: string, variant: CardBannerVariant): string {
+  if (variant === 'fallback') return FALLBACK_BANNER_SRC;
+  const bannerSlug = DEPARTMENT_BANNER_ALIASES[departmentName] ?? departmentName;
+  return `${DEPARTMENT_BANNER_BASE_PATH}/${bannerSlug}${BANNER_SUFFIX_BY_VARIANT[variant]}`;
+}
+
 interface DepartmentCardProps {
   department: Department;
   index: number;
@@ -117,8 +147,7 @@ function DepartmentCard({
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [uncontrolledIsPinned, setUncontrolledIsPinned] = useState(false);
-  const [imageExt, setImageExt] = useState<'webp' | 'jpg'>('webp');
-  const [imageError, setImageError] = useState(false);
+  const [bannerVariant, setBannerVariant] = useState<CardBannerVariant>('card-webp');
 
   const isPinned = controlledIsPinned ?? uncontrolledIsPinned;
 
@@ -211,26 +240,14 @@ function DepartmentCard({
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
           <div className="absolute inset-0 z-0 overflow-hidden rounded-t-[18px]">
             <Image
-              src={
-                imageError
-                  ? '/images/departments/overview.jpg'
-                  : department.name === 'executive' || department.name === 'office'
-                    ? `/images/departments/overview.${imageExt}`
-                    : department.name === 'reports'
-                      ? `/images/departments/control-room.${imageExt}`
-                      : `/images/departments/${department.name}.${imageExt}`
-              }
+              src={resolveDepartmentBannerSrc(department.name, bannerVariant)}
               alt=""
               aria-hidden="true"
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover object-center opacity-90 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               onError={() => {
-                if (imageExt === 'webp') {
-                  setImageExt('jpg');
-                } else if (!imageError) {
-                  setImageError(true);
-                }
+                setBannerVariant((previousVariant) => NEXT_BANNER_VARIANT[previousVariant]);
               }}
             />
             {/* Glass gradient overlay to ensure icon bubble contrast */}

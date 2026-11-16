@@ -37,20 +37,23 @@ const BALANCED_TIER_CONCURRENCY = 2;
 const IDLE_WARMUP_TIMEOUT_MS = 2500;
 const FALLBACK_WARMUP_DELAY_MS = 1800;
 const HTTP_OK_STATUS = 200;
+const HUB_ROUTE_PATH = '/hub';
+const HUB_ROUTE_PREFIX = '/hub/';
+const DOCUMENT_HIDDEN_STATE = 'hidden';
 
 const DEPARTMENT_WEBP_ASSETS: readonly string[] = [
   '/background/global-background-poster.webp',
-  '/images/departments/overview.webp',
-  '/images/departments/admin.webp',
-  '/images/departments/access-control.webp',
-  '/images/departments/production.webp',
-  '/images/departments/drilling.webp',
-  '/images/departments/plant-processing.webp',
-  '/images/departments/plant-inventory.webp',
-  '/images/departments/engineering.webp',
-  '/images/departments/control-room.webp',
-  '/images/departments/availability-utilization.webp',
-  '/images/departments/database.webp',
+  '/images/departments/overview-card.webp',
+  '/images/departments/admin-card.webp',
+  '/images/departments/access-control-card.webp',
+  '/images/departments/production-card.webp',
+  '/images/departments/drilling-card.webp',
+  '/images/departments/plant-processing-card.webp',
+  '/images/departments/plant-inventory-card.webp',
+  '/images/departments/engineering-card.webp',
+  '/images/departments/control-room-card.webp',
+  '/images/departments/availability-utilization-card.webp',
+  '/images/departments/database-card.webp',
 ];
 
 const HIGH_TIER_PREVIEW_VIDEOS: readonly string[] = [
@@ -59,6 +62,10 @@ const HIGH_TIER_PREVIEW_VIDEOS: readonly string[] = [
   '/images/departments/production.mp4',
   '/images/departments/drilling.mp4',
 ];
+
+export function shouldWarmPreviewVideos(pathname: string): boolean {
+  return pathname === HUB_ROUTE_PATH || pathname.startsWith(HUB_ROUTE_PREFIX);
+}
 
 function isConstrainedConnection(connection?: NetworkConnectionLike): boolean {
   if (!connection) return false;
@@ -191,11 +198,19 @@ export function ServiceWorkerRegister() {
       return;
     }
 
+    let isCancelled = false;
+
     const startAdaptiveAssetWarmup = () => {
+      if (isCancelled) return;
       const concurrency = perfTier === 'high' ? HIGH_TIER_CONCURRENCY : BALANCED_TIER_CONCURRENCY;
       notifyServiceWorkerPrewarm(DEPARTMENT_WEBP_ASSETS);
       void warmAssetsWithConcurrency(DEPARTMENT_WEBP_ASSETS, concurrency).then(() => {
-        if (perfTier === 'high') {
+        if (isCancelled) return;
+        if (
+          perfTier === 'high' &&
+          shouldWarmPreviewVideos(window.location.pathname) &&
+          document.visibilityState !== DOCUMENT_HIDDEN_STATE
+        ) {
           void warmHighTierVideoPreviews(HIGH_TIER_PREVIEW_VIDEOS);
         }
       });
@@ -207,12 +222,16 @@ export function ServiceWorkerRegister() {
         timeout: IDLE_WARMUP_TIMEOUT_MS,
       });
       return () => {
+        isCancelled = true;
         idleWin.cancelIdleCallback?.(idleHandle);
       };
     }
 
     const fallbackTimer = setTimeout(startAdaptiveAssetWarmup, FALLBACK_WARMUP_DELAY_MS);
-    return () => clearTimeout(fallbackTimer);
+    return () => {
+      isCancelled = true;
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return null;

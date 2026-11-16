@@ -1,8 +1,65 @@
+import { CacheCategory } from '@repo/redis';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
 import { GlassCard } from '@repo/ui/GlassCard';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { withCache } from '@/lib/cache-utils';
+import { cacheLife, cacheTag, tagDepartment } from '@/lib/server-cache';
 import { PlantInventoryWorkspaceClient } from '~/features/departments/components/plant-inventory/PlantInventoryWorkspaceClient';
 import { getDepartmentContext } from '~/lib/dept-context';
+
+const DRILL_RIG_MACHINE_TYPE = 'Drill Rig';
+
+interface MachineSiteSummary {
+  readonly name: string | null;
+  readonly site_code: string | null;
+}
+
+interface DepartmentMachineRow {
+  readonly id: string;
+  readonly name: string;
+  readonly machine_type: string;
+  readonly serial_number: string | null;
+  readonly bin_factor: number | null;
+  readonly active: boolean;
+  readonly created_at: string;
+  readonly site: MachineSiteSummary | MachineSiteSummary[] | null;
+}
+
+async function loadDepartmentMachines(deptSlug: string): Promise<DepartmentMachineRow[]> {
+  const db = await createReadReplicaClient();
+  let machinesQuery = db
+    .from('machines')
+    .select(
+      'id, name, machine_type, serial_number, bin_factor, active, created_at, site:sites(name, site_code)'
+    );
+  if (deptSlug === 'drilling') {
+    machinesQuery = machinesQuery.eq('machine_type', DRILL_RIG_MACHINE_TYPE);
+  }
+  const { data: machines } = await machinesQuery.order('name');
+  return (machines ?? []) as DepartmentMachineRow[];
+}
+
+/**
+ * Dual-tier cached department machine fleet list.
+ * Route params, redirects, and context resolution remain outside `'use cache'`.
+ */
+async function getCachedDepartmentMachines(deptSlug: string): Promise<DepartmentMachineRow[]> {
+  'use cache';
+
+  const machinesTag = tagDepartment(deptSlug, 'machines');
+
+  cacheLife('departments');
+
+  cacheTag(machinesTag);
+  cacheTag('table:machines');
+
+  return withCache(() => loadDepartmentMachines(deptSlug), {
+    category: CacheCategory.EQUIPMENT,
+    keyParts: ['machines-list-v1', deptSlug],
+    tags: [machinesTag, 'table:machines'],
+  });
+}
 
 export default async function MachinesPage({
   params,
@@ -13,23 +70,16 @@ export default async function MachinesPage({
   if (deptSlug === 'plant-processing') {
     redirect('/plant-processing/delays');
   }
-  const { supabase, today } = await getDepartmentContext({
+  const { today } = await getDepartmentContext({
     department: deptSlug,
   });
   if (deptSlug === 'plant-inventory') {
     return <PlantInventoryWorkspaceClient mode="item-list" today={today} />;
   }
-  let machinesQuery = supabase
-    .from('machines')
-    .select(
-      'id, name, machine_type, serial_number, bin_factor, active, created_at, site:sites(name, site_code)'
-    );
-  if (deptSlug === 'drilling') {
-    machinesQuery = machinesQuery.eq('machine_type', 'Drill Rig');
-  }
-  const { data: machines } = await machinesQuery.order('name');
 
-  const activeCount = machines?.filter((m) => m.active).length || 0;
+  const machines = await getCachedDepartmentMachines(deptSlug);
+
+  const activeCount = machines.filter((m) => m.active).length;
 
   return (
     <div className="space-y-6">

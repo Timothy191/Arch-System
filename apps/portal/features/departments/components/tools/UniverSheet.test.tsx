@@ -33,6 +33,10 @@ jest.mock('@univerjs/preset-sheets-core/lib/index.css', () => ({}), {
 });
 
 describe('UniverSheet', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders a container div', () => {
     const { container } = render(<UniverSheet id="test-sheet" />);
     const div = container.querySelector('#test-sheet');
@@ -58,7 +62,29 @@ describe('UniverSheet', () => {
     });
   });
 
-  it('disposes the univerAPI on unmount', () => {
+  it('disposes the univerAPI on unmount', async () => {
+    const { createUniver } = jest.requireMock('@univerjs/presets');
+    const dispose = jest.fn();
+
+    createUniver.mockReturnValue({
+      univerAPI: {
+        createWorkbook: jest.fn(),
+        dispose,
+      },
+    });
+
+    const { unmount } = render(<UniverSheet />);
+
+    await waitFor(() => {
+      expect(createUniver).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    expect(dispose).toHaveBeenCalled();
+  });
+
+  it('does not create a Univer instance if unmounted before dynamic imports resolve', async () => {
     const { createUniver } = jest.requireMock('@univerjs/presets');
     const dispose = jest.fn();
 
@@ -72,6 +98,9 @@ describe('UniverSheet', () => {
     const { unmount } = render(<UniverSheet />);
     unmount();
 
-    expect(dispose).toHaveBeenCalled();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(createUniver).not.toHaveBeenCalled();
+    expect(dispose).not.toHaveBeenCalled();
   });
 });

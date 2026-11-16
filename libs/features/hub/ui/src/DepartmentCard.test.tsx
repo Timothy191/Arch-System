@@ -41,6 +41,17 @@ const mockDepartment: Department = {
   ],
 };
 
+const NEXT_IMAGE_PROXY_PREFIX = '/_next/image';
+const TEST_ORIGIN = 'http://localhost';
+
+function extractBannerSrc(img: HTMLImageElement): string {
+  const rawSrc = img.getAttribute('src') ?? '';
+  if (!rawSrc) return rawSrc;
+  const parsedUrl = new URL(rawSrc, TEST_ORIGIN);
+  if (parsedUrl.pathname !== NEXT_IMAGE_PROXY_PREFIX) return rawSrc;
+  return parsedUrl.searchParams.get('url') ?? rawSrc;
+}
+
 describe('DepartmentCard', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -142,5 +153,56 @@ describe('DepartmentCard', () => {
     expect(iconBubble?.style.height).toBe('2rem');
     const bubbleLogo = iconBubble?.querySelector('svg');
     expect(bubbleLogo).toHaveClass('h-5', 'w-5');
+  });
+
+  it('renders -card.webp banner initially and steps down through fallback variants on error', () => {
+    const { container } = render(<DepartmentCard department={mockDepartment} index={0} />);
+    const bannerImg = container.querySelector(
+      '.uiverse-card-banner img'
+    ) as HTMLImageElement | null;
+    expect(bannerImg).not.toBeNull();
+    if (!bannerImg) return;
+
+    expect(extractBannerSrc(bannerImg)).toBe('/images/departments/drilling-card.webp');
+
+    fireEvent.error(bannerImg);
+    expect(extractBannerSrc(bannerImg)).toBe('/images/departments/drilling.webp');
+
+    fireEvent.error(bannerImg);
+    expect(extractBannerSrc(bannerImg)).toBe('/images/departments/drilling.jpg');
+
+    fireEvent.error(bannerImg);
+    expect(extractBannerSrc(bannerImg)).toBe('/images/departments/overview.jpg');
+
+    fireEvent.error(bannerImg);
+    expect(extractBannerSrc(bannerImg)).toBe('/images/departments/overview.jpg');
+  });
+
+  it('resolves aliased department banners to -card.webp initially', () => {
+    const executiveDept: Department = {
+      ...mockDepartment,
+      name: 'executive',
+      displayName: 'Executive Hub',
+      route: '/executive',
+    };
+    const { container: execContainer } = render(
+      <DepartmentCard department={executiveDept} index={0} />
+    );
+    const execImg = execContainer.querySelector('.uiverse-card-banner img') as HTMLImageElement;
+    expect(extractBannerSrc(execImg)).toBe('/images/departments/overview-card.webp');
+
+    const reportsDept: Department = {
+      ...mockDepartment,
+      name: 'reports',
+      displayName: 'Reports',
+      route: '/reports',
+    };
+    const { container: reportsContainer } = render(
+      <DepartmentCard department={reportsDept} index={1} />
+    );
+    const reportsImg = reportsContainer.querySelector(
+      '.uiverse-card-banner img'
+    ) as HTMLImageElement;
+    expect(extractBannerSrc(reportsImg)).toBe('/images/departments/control-room-card.webp');
   });
 });

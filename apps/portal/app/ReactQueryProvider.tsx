@@ -1,11 +1,11 @@
 'use client';
 
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { type ReactNode, useEffect, useState } from 'react';
 
 import {
+  createAsyncQueryCachePersister,
   getQueryCacheMetrics,
   inspectPersistedCacheHit,
   purgePersistedQueryCache,
@@ -15,6 +15,7 @@ import {
   QUERY_STALE_TIMES,
   recordCacheRehydrateResult,
   resolveQueryStaleTime,
+  shouldPersistQueryKey,
   subscribeQueryCacheCrossTab,
 } from '@/lib/query-cache';
 
@@ -55,16 +56,17 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
     const didHitPersistedSnapshot = inspectPersistedCacheHit();
     recordCacheRehydrateResult(didHitPersistedSnapshot);
 
-    const storagePersister = createSyncStoragePersister({
-      storage: window.localStorage,
-      key: QUERY_CACHE_STORAGE_KEY,
-    });
+    const queryCachePersister = createAsyncQueryCachePersister(QUERY_CACHE_STORAGE_KEY);
 
-    const [, restorePromise] = persistQueryClient({
+    const [unsubscribePersist, restorePromise] = persistQueryClient({
       queryClient,
-      persister: storagePersister,
+      persister: queryCachePersister,
       buster: QUERY_CACHE_BUSTER,
       maxAge: QUERY_CACHE_MAX_AGE_MS,
+      dehydrateOptions: {
+        shouldDehydrateQuery: (query) =>
+          query.state.status === 'success' && shouldPersistQueryKey(query.queryKey),
+      },
     });
 
     void restorePromise;
@@ -74,6 +76,7 @@ export function ReactQueryProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      unsubscribePersist();
       unsubscribeCrossTab();
     };
   }, [queryClient]);
