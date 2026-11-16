@@ -73,7 +73,7 @@ jobs:
           fi
 
       - name: Run Kilo Code Reviewer
-        uses: Kilo-Org/kilocode/github@54de37a85dfef8feb828382d8a71f84139857121 # v1
+        uses: Kilo-Org/kilocode/github@aa2e165e801561ecbe5ba93905008ac6827321f7 # v1
         env:
           KILO_TOKEN: ${{ secrets.KILO_TOKEN || secrets.KILO_API_KEY }}
           KILO_API_KEY: ${{ secrets.KILO_API_KEY || secrets.KILO_TOKEN }}

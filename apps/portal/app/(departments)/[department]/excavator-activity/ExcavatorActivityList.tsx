@@ -1,7 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { isRegularMachineExcavatorActivity } from '../hourly-loads/loads-utils';
 
 const SHIFT_HOURS = 12;
@@ -44,7 +44,7 @@ interface ExcavatorActivityListProps {
   todayAssignments: DumperAssignment[];
 }
 
-export function ExcavatorActivityList({
+export const ExcavatorActivityList = memo(function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
@@ -52,8 +52,7 @@ export function ExcavatorActivityList({
   // Replaces O(A * D) nested array filtering across activities and sites with O(1) Map lookups.
   const assignmentsByActivityId = useMemo(() => {
     const map = new Map<string, DumperAssignment[]>();
-    for (let i = 0; i < todayAssignments.length; i++) {
-      const assignment = todayAssignments[i]!;
+    for (const assignment of todayAssignments) {
       const list = map.get(assignment.excavator_activity_id);
       if (list) {
         list.push(assignment);
@@ -64,19 +63,47 @@ export function ExcavatorActivityList({
     return map;
   }, [todayAssignments]);
 
-  // Bolt Optimization: Group activities by site_id and memoize results.
-  // Avoids re-grouping and sorting site arrays on un-related parent re-renders.
+  // Bolt Optimization: Group activities and pre-aggregate shift operations and site totals in useMemo.
+  // Consolidates site grouping, shift splitting, and assignment metric rollups into a single pass,
+  // completely eliminating per-render .flatMap(), multiple .reduce(), and .filter() calls in JSX.
   const siteEntries = useMemo(() => {
-    const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
+    interface SiteGroup {
+      siteName: string;
+      dayOps: ExcavatorActivity[];
+      nightOps: ExcavatorActivity[];
+      siteBcm: number;
+      siteLoads: number;
+    }
+    const siteMap = new Map<string, SiteGroup>();
 
-    for (let i = 0; i < todayActivity.length; i++) {
-      const activity = todayActivity[i]!;
+    for (const activity of todayActivity) {
       const siteKey = activity.site_id ?? '__none__';
       const siteName = activity.site?.name ?? 'No Site Assigned';
-      if (!siteMap.has(siteKey)) {
-        siteMap.set(siteKey, { siteName, activities: [] });
+      let siteGroup = siteMap.get(siteKey);
+      if (!siteGroup) {
+        siteGroup = {
+          siteName,
+          dayOps: [],
+          nightOps: [],
+          siteBcm: 0,
+          siteLoads: 0,
+        };
+        siteMap.set(siteKey, siteGroup);
       }
-      siteMap.get(siteKey)!.activities.push(activity);
+
+      if (activity.shift_type === 'day') {
+        siteGroup.dayOps.push(activity);
+      } else {
+        siteGroup.nightOps.push(activity);
+      }
+
+      const assignments = assignmentsByActivityId.get(activity.id);
+      if (assignments) {
+        for (const assignment of assignments) {
+          siteGroup.siteBcm += assignment.total_bcm || 0;
+          siteGroup.siteLoads += assignment.total_loads || 0;
+        }
+      }
     }
 
     // Put "No Site Assigned" last
@@ -85,83 +112,74 @@ export function ExcavatorActivityList({
       if (b === '__none__') return -1;
       return 0;
     });
-  }, [todayActivity]);
+  }, [todayActivity, assignmentsByActivityId]);
 
   return (
     <div className="space-y-6">
       <h3 className="font-medium text-[var(--text-heading)] text-lg">Today&apos;s Activity</h3>
 
-      {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) => assignmentsByActivityId.get(a.id) || []);
-        const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
-        const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
+      {siteEntries.map(([siteKey, { siteName, dayOps, nightOps, siteBcm, siteLoads }]) => (
+        <div key={siteKey} className="space-y-3">
+          {/* Site header */}
+          <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-2">
+            <h4 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-base">
+              <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-blue)]" />
+              {siteName}
+            </h4>
+            <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs">
+              {siteBcm > 0 && (
+                <span className="font-medium text-accent-green">{siteBcm.toFixed(1)} BCM</span>
+              )}
+              {siteLoads > 0 && (
+                <span className="font-medium text-[var(--accent-blue)]">
+                  {siteLoads.toLocaleString()} loads
+                </span>
+              )}
+            </div>
+          </div>
 
-        const dayOps = activities.filter((a) => a.shift_type === 'day');
-        const nightOps = activities.filter((a) => a.shift_type === 'night');
-
-        return (
-          <div key={siteKey} className="space-y-3">
-            {/* Site header */}
-            <div className="flex items-center justify-between border-[var(--border-default)] border-b pb-2">
-              <h4 className="flex items-center gap-2 font-medium text-[var(--text-heading)] text-base">
-                <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-blue)]" />
-                {siteName}
-              </h4>
-              <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs">
-                {siteBcm > 0 && (
-                  <span className="font-medium text-accent-green">{siteBcm.toFixed(1)} BCM</span>
-                )}
-                {siteLoads > 0 && (
-                  <span className="font-medium text-[var(--accent-blue)]">
-                    {siteLoads.toLocaleString()} loads
-                  </span>
-                )}
+          {/* Day shift */}
+          {dayOps.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="ml-4 flex items-center gap-1.5 font-medium text-accent-blue text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-blue" />
+                Day Shift
+              </h5>
+              <div className="space-y-2">
+                {dayOps.map((activity) => (
+                  <ActivityCard
+                    key={activity.id}
+                    activity={activity}
+                    assignments={assignmentsByActivityId.get(activity.id) || []}
+                  />
+                ))}
               </div>
             </div>
+          )}
 
-            {/* Day shift */}
-            {dayOps.length > 0 && (
+          {/* Night shift */}
+          {nightOps.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="ml-4 flex items-center gap-1.5 font-medium text-indigo-400 text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                Night Shift
+              </h5>
               <div className="space-y-2">
-                <h5 className="ml-4 flex items-center gap-1.5 font-medium text-accent-blue text-xs">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent-blue" />
-                  Day Shift
-                </h5>
-                <div className="space-y-2">
-                  {dayOps.map((activity) => (
-                    <ActivityCard
-                      key={activity.id}
-                      activity={activity}
-                      assignments={assignmentsByActivityId.get(activity.id) || []}
-                    />
-                  ))}
-                </div>
+                {nightOps.map((activity) => (
+                  <ActivityCard
+                    key={activity.id}
+                    activity={activity}
+                    assignments={assignmentsByActivityId.get(activity.id) || []}
+                  />
+                ))}
               </div>
-            )}
-
-            {/* Night shift */}
-            {nightOps.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="ml-4 flex items-center gap-1.5 font-medium text-indigo-400 text-xs">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                  Night Shift
-                </h5>
-                <div className="space-y-2">
-                  {nightOps.map((activity) => (
-                    <ActivityCard
-                      key={activity.id}
-                      activity={activity}
-                      assignments={assignmentsByActivityId.get(activity.id) || []}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
-}
+});
 
 const SHIFT_BADGE_CLASSES: Record<ExcavatorActivity['shift_type'], string> = {
   day: 'bg-accent-blue/20 text-accent-blue',
@@ -174,8 +192,13 @@ const SHIFT_LABELS: Record<ExcavatorActivity['shift_type'], string> = {
 };
 
 function computeActivityMetrics(assignments: DumperAssignment[]) {
-  const totalBcm = assignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
-  const totalLoads = assignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
+  // Bolt Optimization: Single-pass accumulation of BCM and loads to avoid multiple array iterations.
+  let totalBcm = 0;
+  let totalLoads = 0;
+  for (const assignment of assignments) {
+    totalBcm += assignment.total_bcm || 0;
+    totalLoads += assignment.total_loads || 0;
+  }
   const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
   const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
   const estimatedScoopMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
@@ -365,7 +388,7 @@ function ActivityNotes({ notes }: { notes: string | null }) {
   );
 }
 
-function ActivityCard({
+const ActivityCard = memo(function ActivityCard({
   activity,
   assignments,
 }: {
@@ -396,4 +419,4 @@ function ActivityCard({
       </div>
     </GlassCard>
   );
-}
+});
