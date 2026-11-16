@@ -281,7 +281,7 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     server_url: 'https://arch-system-nest-proxy.vercel.app/api/mcp',
     auth_type: 'bearer',
     verified: true,
-    docs_url: '/drilling/machine-telemetry',
+    docs_url: '/drilling/drilling-operations',
     capabilities: {
       domains: ['modbus-tcp', 'pit-viper-351', 'plc-registers', 'scada-ingest'],
       federated_service: 'arch-system-nest-proxy',
@@ -435,7 +435,7 @@ const CURATED_INTEGRATION_CATALOG: CatalogRecord[] = [
     server_url: 'https://lsp.arch-system.internal/iec61131',
     auth_type: 'none',
     verified: true,
-    docs_url: '/drilling/machine-telemetry',
+    docs_url: '/drilling/drilling-operations',
     capabilities: {
       domains: ['lsp', 'iec-61131-3', 'modbus-registers', 'plc-ladder'],
       transport: 'jsonrpc-lsp',

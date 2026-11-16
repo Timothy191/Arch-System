@@ -137,7 +137,6 @@ describe('DEPARTMENTS registry', () => {
     expect(tabs.map((t) => t.name)).toEqual([
       'dashboard',
       'drilling-operations',
-      'machine-telemetry',
       'daily-log',
       'machines',
       'history',

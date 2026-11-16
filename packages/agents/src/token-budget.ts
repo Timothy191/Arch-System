@@ -39,12 +39,12 @@ export interface RoleBudget {
     completionTokens: number;
     totalTokens: number;
   };
-  status: 'within_budget' | 'warning' | 'breached';
+  status: 'within_budget' | 'warning';
 }
 
 export interface TokenBudgetConfig {
   warningThresholdPercent?: number; // default: 80%
-  enforceHardCap?: boolean; // default: true
+  enforceHardCap?: boolean; // default: false (non-enforcement)
   customTiers?: Partial<
     Record<
       TaskDifficulty,
@@ -131,7 +131,7 @@ export class TokenBudgetAgent {
   constructor(config: TokenBudgetConfig = {}) {
     this.config = {
       warningThresholdPercent: config.warningThresholdPercent ?? 80,
-      enforceHardCap: config.enforceHardCap ?? true,
+      enforceHardCap: config.enforceHardCap ?? false,
       customTiers: config.customTiers || {},
     };
 
@@ -328,7 +328,6 @@ export class TokenBudgetAgent {
     plan: TokenBudgetPlan;
     roleBudget: RoleBudget;
     warningTriggered: boolean;
-    breached: boolean;
     remainingTokens: number;
   } {
     const plan = this.activePlans.get(taskId);
@@ -361,29 +360,15 @@ export class TokenBudgetAgent {
 
     plan.remainingTokens = Math.max(0, plan.remainingTokens - totalTokens);
 
-    // Evaluate role status against warning threshold and cap
+    // Evaluate role status against warning threshold. Budget overruns are
+    // tracked and warned on but never enforced: an agent is never stopped
+    // by a budget limit, circuit-breaker, or reserve-margin absorption.
     const roleUsagePercent = (roleBudget.consumed.totalTokens / roleBudget.allocatedTokens) * 100;
     let warningTriggered = false;
-    let breached = false;
 
     if (roleBudget.consumed.totalTokens > roleBudget.allocatedTokens) {
-      roleBudget.status = 'breached';
-      breached = true;
-      // An overrun always crosses the warning threshold — the caller must see
-      // warningTriggered=true alongside breached=true, never the contradictory
-      // (breached, !warningTriggered) pair that the old code produced when
-      // enforceHardCap was false.
+      roleBudget.status = 'warning';
       warningTriggered = true;
-      if (this.config.enforceHardCap) {
-        // Can dip into reserve margin if available
-        const overrun = roleBudget.consumed.totalTokens - roleBudget.allocatedTokens;
-        if (plan.reserveMargin >= overrun) {
-          plan.reserveMargin -= overrun;
-          roleBudget.allocatedTokens += overrun;
-          roleBudget.status = 'warning';
-          breached = false;
-        }
-      }
     } else if (roleUsagePercent >= this.config.warningThresholdPercent) {
       roleBudget.status = 'warning';
       warningTriggered = true;
@@ -395,7 +380,6 @@ export class TokenBudgetAgent {
       plan,
       roleBudget,
       warningTriggered,
-      breached,
       remainingTokens: plan.remainingTokens,
     };
   }

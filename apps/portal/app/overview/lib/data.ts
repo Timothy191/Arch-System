@@ -89,11 +89,6 @@ export const DEPARTMENTS = [
         description: 'Rig shift logs & blast pattern tracking',
       },
       {
-        path: '/drilling/machine-telemetry',
-        name: 'Machine Telemetry',
-        description: 'Real-time Pit Viper down-hole telemetry',
-      },
-      {
         path: '/drilling/daily-log',
         name: 'Daily Log',
         description: 'Submit shift logs',

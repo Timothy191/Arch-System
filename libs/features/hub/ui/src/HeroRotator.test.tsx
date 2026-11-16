@@ -48,7 +48,7 @@ const mockDepartments: Department[] = [
     stats: { label: 'Depth', value: '1,240m' },
     actions: [
       { label: 'View Logs', href: '/drilling/drilling-operations' },
-      { label: 'Telemetry', href: '/drilling/machine-telemetry' },
+      { label: 'Reports', href: '/drilling/reports' },
     ],
   },
   {

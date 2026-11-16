@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "6a526049",
-  "gitCommitFull": "6a5260490e41a5863f182bd60506e833b95dcc59",
-  "gitBranch": "main",
-  "buildTimestamp": "2026-11-10T09:39:13.846Z",
+  "gitCommit": "17a5a7c0",
+  "gitCommitFull": "17a5a7c0978d69ccc97ef2dd33107695a8da5abf",
+  "gitBranch": "chore/e2e-playwright-165-upgrade",
+  "buildTimestamp": "2026-11-16T04:09:32.369Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

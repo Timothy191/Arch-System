@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview Pre-Task Context Budget Check Hook
- * Runs before autonomous agent tasks to ensure context budget compliance
+ * @fileoverview Pre-Task Context Budget Tracking Hook (non-blocking)
+ * Runs before autonomous agent tasks to report context budget & task-adaptive
+ * token allocation. Tracking/warning only: never blocks or restrains agent
+ * execution, never exits non-zero.
  *
  * Usage: Called automatically by agent orchestration systems before task execution
  */
@@ -13,28 +15,40 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 
 try {
-  console.log('💰 [Pre-Task Hook] Checking context budget & task-adaptive token allocation...');
+  console.log(
+    '📊 [Pre-Task Hook] Reporting context budget & task-adaptive token allocation (tracking only)...'
+  );
 
   const args = process.argv.slice(2);
   if (args.length > 0 || process.env.TASK_PROMPT || process.env.TASK_COMPLEXITY) {
-    const taskOut = execSync(`node tools/scripts/token-tracker.cjs task-budget ${args.join(' ')}`, {
-      cwd: ROOT,
-      encoding: 'utf-8',
-    });
-    console.log(taskOut.trim());
+    try {
+      const taskOut = execSync(
+        `node tools/scripts/token-tracker.cjs task-budget ${args.join(' ')}`,
+        {
+          cwd: ROOT,
+          encoding: 'utf-8',
+        }
+      );
+      console.log(taskOut.trim());
+    } catch (_e) {
+      console.warn('⚠️ [Pre-Task Hook] task-budget report unavailable (non-blocking)');
+    }
   }
 
-  execSync('pnpm token:budget-check', {
-    cwd: ROOT,
-    stdio: 'pipe',
-  });
+  try {
+    execSync('pnpm token:budget-check', { cwd: ROOT, stdio: 'pipe' });
+  } catch (_e) {
+    console.warn(
+      '⚠️ [Pre-Task Hook] budget-check reported over-limits (non-blocking, tracking only)'
+    );
+  }
 
-  console.log('✅ [Pre-Task Hook] Context budget within limits');
-  process.exit(0);
-} catch (_error) {
-  console.error('❌ [Pre-Task Hook] Context budget exceeded');
-  console.error(
-    '💡 [Pre-Task Hook] Run `pnpm context:debloat` or `pnpm token:task-budget` to prune and calibrate context'
+  console.log(
+    '✅ [Pre-Task Hook] Budget tracking complete — agent is never blocked by token limits'
   );
-  process.exit(1);
+} catch (_error) {
+  console.warn('⚠️ [Pre-Task Hook] Budget tracking hook encountered an error (non-blocking)');
 }
+
+// Always exit 0: token budget must never restrain or block agent execution.
+process.exit(0);

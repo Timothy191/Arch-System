@@ -23,7 +23,7 @@ This layer handles the server-side logic, routing, and data fetching orchestrati
 - **`libs/features/auth/data-access`**: Shared authentication data access patterns.
 - **`libs/features/departments/data-access`**: Shared department data access patterns.
 - **`libs/shared/data-access`**: Universal edge telemetry circuit breaker and weather API client.
-- **`libs/shared/hooks`**: `useSupabaseRealtime`, `useClientCache`, `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`.
+- **`libs/shared/hooks`**: `useSupabaseRealtime`, `useRedisCache`, `useOfflineQueue`, `useDebounce`, `useWorkflowStatus`.
 
 ## 3. Domain & Shared Logic Layer
 
@@ -55,6 +55,7 @@ This layer provides cross-cutting infrastructural concerns like logging and erro
 This layer manages AI integrations and agentic workflows.
 
 - **`packages/agents`**: Houses the AI coordination engine and specialist modules.
+- **`packages/intelligence`**: Operational mining intelligence engines — telemetry anomaly detection, predictive maintenance FMEA, production forecasting, shift handover synthesis, and the grounded operations copilot.
 - **`packages/eval`**: Contains an LLM evaluation suite using DeepEval for testing AI service quality.
 
 ## 7. Tooling & Testing

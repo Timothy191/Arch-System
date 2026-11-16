@@ -117,7 +117,7 @@ describe('TokenBudgetAgent System', () => {
       expect(result.remainingTokens).toBeLessThan(plan.totalBudget);
     });
 
-    it('enforces circuit-breaker or dips into reserve margin upon budget overrun', () => {
+    it('warns on budget overrun but never blocks or circuit-breaks', () => {
       const plan = agent.createBudgetPlan(
         {
           prompt: 'Trivial task',
@@ -129,23 +129,20 @@ describe('TokenBudgetAgent System', () => {
       const allocated = plan.roleAllocations['primary-agent']?.allocatedTokens ?? 1000;
       const initialReserve = plan.reserveMargin;
 
-      // Overrun by 100 tokens
+      // Overrun by 100 tokens — tracked and warned on, never blocked.
       const result = agent.recordUsage(plan.taskId, 'primary-agent', {
         promptTokens: allocated,
         completionTokens: 100,
       });
 
-      if (initialReserve >= 100) {
-        // Reserve buffer absorbed the overrun
-        expect(result.roleBudget.status).toBe('warning');
-        expect(plan.reserveMargin).toBe(initialReserve - 100);
-      } else {
-        expect(result.breached).toBe(true);
-        expect(result.roleBudget.status).toBe('breached');
-      }
+      expect(result.roleBudget.status).toBe('warning');
+      expect(result.warningTriggered).toBe(true);
+      expect(result.remainingTokens).toBeLessThan(plan.totalBudget);
+      // Reserve margin is never absorbed as a hard cap.
+      expect(plan.reserveMargin).toBe(initialReserve);
     });
 
-    it('flags warning alongside breached when enforceHardCap is false and the role overruns', () => {
+    it('warns on overrun when enforceHardCap is false, never breaches', () => {
       const agentNoCap = new TokenBudgetAgent({
         enforceHardCap: false,
         warningThresholdPercent: 80,
@@ -160,15 +157,15 @@ describe('TokenBudgetAgent System', () => {
 
       const allocated = plan.roleAllocations['primary-agent']?.allocatedTokens ?? 1000;
 
-      // Overrun by 100 tokens with hard cap disabled — reserve margin cannot absorb it.
+      // Overrun by 100 tokens with hard cap disabled — warning only, never blocked.
       const result = agentNoCap.recordUsage(plan.taskId, 'primary-agent', {
         promptTokens: allocated,
         completionTokens: 100,
       });
 
-      expect(result.breached).toBe(true);
+      expect(result.roleBudget.status).toBe('warning');
       expect(result.warningTriggered).toBe(true);
-      expect(result.roleBudget.status).toBe('breached');
+      expect(result.remainingTokens).toBeLessThan(plan.totalBudget);
     });
 
     it('supports dynamic token reallocation between roles', () => {

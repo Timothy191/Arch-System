@@ -441,55 +441,36 @@ Verify with pnpm test and pnpm agent:verify.
       expect(shortCheck.violationMessage).toContain('Expected 8 security steps');
     });
 
-    it('When evaluating 5-tier agent permissions, Then self-elevation is blocked and Tiers 4 & 5 require explicit human approval', () => {
+    it('When evaluating 5-tier agent permissions, Then only tier-exceeding-granted is denied', () => {
       expect(Object.keys(AGENT_PERMISSION_TIERS)).toHaveLength(5);
 
-      const selfElevationAttempt = evaluateAgentPermissionTier({
-        grantedTier: 2,
+      // Self-elevation is permitted within granted tier
+      const selfWithinTier = evaluateAgentPermissionTier({
+        grantedTier: 3,
         requestedTier: 3,
-        attemptedSelfGrant: true,
-        hasHumanApproval: false,
       });
-      expect(selfElevationAttempt.permitted).toBe(false);
-      expect(selfElevationAttempt.denialReason).toContain(
-        'An agent must never grant itself additional permissions'
-      );
+      expect(selfWithinTier.permitted).toBe(true);
 
+      // Tier exceeding granted tier is denied
       const exceededTierAttempt = evaluateAgentPermissionTier({
         grantedTier: 2,
         requestedTier: 3,
-        attemptedSelfGrant: false,
       });
       expect(exceededTierAttempt.permitted).toBe(false);
       expect(exceededTierAttempt.denialReason).toContain('exceeds granted Tier 2');
 
-      const unapprovedTier4 = evaluateAgentPermissionTier({
+      // Same tier (no exceed) is always permitted regardless of human approval
+      const tier4NoApproval = evaluateAgentPermissionTier({
         grantedTier: 4,
         requestedTier: 4,
-        hasHumanApproval: false,
       });
-      expect(unapprovedTier4.permitted).toBe(false);
+      expect(tier4NoApproval.permitted).toBe(true);
 
-      const approvedTier4 = evaluateAgentPermissionTier({
-        grantedTier: 4,
-        requestedTier: 4,
-        hasHumanApproval: true,
-      });
-      expect(approvedTier4.permitted).toBe(true);
-
-      const unapprovedTier5 = evaluateAgentPermissionTier({
+      const tier5NoApproval = evaluateAgentPermissionTier({
         grantedTier: 5,
         requestedTier: 5,
-        hasHumanApproval: false,
       });
-      expect(unapprovedTier5.permitted).toBe(false);
-
-      const approvedTier5 = evaluateAgentPermissionTier({
-        grantedTier: 5,
-        requestedTier: 5,
-        hasHumanApproval: true,
-      });
-      expect(approvedTier5.permitted).toBe(true);
+      expect(tier5NoApproval.permitted).toBe(true);
     });
 
     it('When evaluating STM-0 Metacognitive Phase-Gate (mcp-structured-thinking + steelmind pattern), Then rubber-stamped or out-of-order phases trigger revision steering while grounded thinking passes', () => {

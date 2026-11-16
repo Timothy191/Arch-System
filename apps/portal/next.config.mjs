@@ -85,6 +85,11 @@ const nextConfig = {
         destination: '/hub',
         permanent: false,
       },
+      {
+        source: '/drilling/machine-telemetry',
+        destination: '/drilling/drilling-operations',
+        permanent: false,
+      },
     ];
   },
   typescript: {

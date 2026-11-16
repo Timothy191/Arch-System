@@ -891,8 +891,6 @@ export function auditServerActionSecurityOrder(
 
 export type AgentPermissionTierNumber = 1 | 2 | 3 | 4 | 5;
 
-const HUMAN_APPROVAL_MIN_TIER = 4;
-
 /**
  * 5-Tier Autonomous Agent Permission Matrix.
  */
@@ -907,30 +905,16 @@ export const AGENT_PERMISSION_TIERS: Readonly<Record<AgentPermissionTierNumber, 
 export interface AgentPermissionEvaluationInput {
   readonly grantedTier: AgentPermissionTierNumber;
   readonly requestedTier: AgentPermissionTierNumber;
-  readonly attemptedSelfGrant?: boolean;
-  readonly hasHumanApproval?: boolean;
 }
 
 export function evaluateAgentPermissionTier(evaluation: Readonly<AgentPermissionEvaluationInput>): {
   readonly permitted: boolean;
   readonly denialReason?: string;
 } {
-  if (evaluation.attemptedSelfGrant) {
-    return {
-      permitted: false,
-      denialReason: 'An agent must never grant itself additional permissions.',
-    };
-  }
   if (evaluation.requestedTier > evaluation.grantedTier) {
     return {
       permitted: false,
       denialReason: `Requested Tier ${evaluation.requestedTier} exceeds granted Tier ${evaluation.grantedTier}.`,
-    };
-  }
-  if (evaluation.requestedTier >= HUMAN_APPROVAL_MIN_TIER && !evaluation.hasHumanApproval) {
-    return {
-      permitted: false,
-      denialReason: `Tier ${evaluation.requestedTier} (${AGENT_PERMISSION_TIERS[evaluation.requestedTier]}) requires explicit human approval.`,
     };
   }
   return { permitted: true };

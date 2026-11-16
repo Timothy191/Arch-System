@@ -1,19 +1,30 @@
 {
   "id": "compaction-1e6ae04c",
-  "timestamp": "2026-11-13T16:45:06.556Z",
+  "timestamp": "2026-11-14T01:01:33.396Z",
   "taskTag": "compaction-standard-1e6ae04c",
   "category": "context-compaction",
   "errorSignature": "compaction_decision:execute_full_compact",
-  "affectedFiles": [],
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/redis-proxy/v1/[...command]/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/packages/supabase/src/__tests__/supabase.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/packages/supabase/src/kysely.ts\"",
+    "\"/home/tim/Fork/Arch-System/AGENT_TRACER.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/api/telemetry-auth.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/redis-engine.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/redis-proxy/v1/[...command]/route.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/api/redis-proxy/v1/health/route.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/redis-engine.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/.ci-local/worktrees/backend-hardening/AGENT_TRACER.md\""
+  ],
   "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
-  "resolution": "Persisted bounded SKILL.state (286 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "resolution": "Persisted bounded SKILL.state (422 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
   "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
   "metrics": {
     "mode": "standard",
     "decision": "execute_full_compact",
-    "latestInputTokens": 0,
-    "cacheHitRatio": 0,
-    "checkpointCount": 0,
+    "latestInputTokens": 231652,
+    "cacheHitRatio": 0.8692,
+    "checkpointCount": 3,
     "avoidedCacheRebuildTokens": 0
   }
 }

@@ -1,3 +1,4 @@
+/* cspell:words DBSIZE */
 import { ServerlessRedisEngine } from './redis-engine';
 
 describe('ServerlessRedisEngine', () => {
@@ -120,5 +121,37 @@ describe('ServerlessRedisEngine', () => {
     const logged = engine.getExecution(execution.id);
     expect(logged).not.toBeNull();
     expect(logged?.id).toBe(execution.id);
+  });
+
+  test('executeCommand handles DBSIZE and XRANGE with default or COUNT bounds', () => {
+    engine.set('site:1:status', 'active');
+    expect(engine.executeCommand('DBSIZE', [])).toBe(1);
+
+    engine.xadd('telemetry_stream', '*', { temp: '70' });
+    engine.xadd('telemetry_stream', '*', { temp: '72' });
+    expect(engine.executeCommand('DBSIZE', [])).toBe(2);
+
+    const allEntries = engine.executeCommand('XRANGE', ['telemetry_stream']) as Array<{
+      data: Record<string, string>;
+    }>;
+    expect(allEntries).toHaveLength(2);
+
+    const limitedWithCount = engine.executeCommand('XRANGE', [
+      'telemetry_stream',
+      '-',
+      '+',
+      'COUNT',
+      '1',
+    ]) as Array<{ data: Record<string, string> }>;
+    expect(limitedWithCount).toHaveLength(1);
+    expect(limitedWithCount[0]?.data.temp).toBe('70');
+
+    const limitedLegacy = engine.executeCommand('XRANGE', [
+      'telemetry_stream',
+      '-',
+      '+',
+      '1',
+    ]) as Array<{ data: Record<string, string> }>;
+    expect(limitedLegacy).toHaveLength(1);
   });
 });

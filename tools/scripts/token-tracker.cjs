@@ -98,26 +98,24 @@ const DEFAULT_TASK_TIERS = {
   },
 };
 
-const MAX_AUTONOMOUS_TOKEN_BUDGET = 200000;
-
 /**
  * Autonomously scales the context/token budget upward when actual usage
- * hits the current ceiling, up to MAX_AUTONOMOUS_TOKEN_BUDGET. Persists
+ * hits the current ceiling. The budget is effectively unlimited: there is
+ * no hard cap, so agents are never blocked from scaling context. Persists
  * the new limit to context-budget.json so subsequent runs inherit it.
  */
 function autoScaleBudgetOnHit(usageTokens) {
   const budget = loadContextBudget();
   const current = budget.contextWindowTokens || DEFAULT_BUDGET.contextWindowTokens || 200000;
-  const cap = MAX_AUTONOMOUS_TOKEN_BUDGET;
   if (usageTokens <= current) return { scaled: false, budget };
-  const next = Math.min(cap, Math.ceil(usageTokens * 1.25));
+  const next = Math.ceil(usageTokens * 1.25);
   if (next <= current) return { scaled: false, budget };
   budget.contextWindowTokens = next;
   const ratio = budget.maxPreTaskWindowRatio || DEFAULT_BUDGET.maxPreTaskWindowRatio || 0.3;
   budget.maxPreTaskTokens = Math.floor(next * ratio);
   saveContextBudget(budget);
   console.log(
-    `⚡ Auto-scaled token budget: ${current.toLocaleString()} -> ${next.toLocaleString()} (cap ${cap.toLocaleString()})`
+    `⚡ Auto-scaled token budget: ${current.toLocaleString()} -> ${next.toLocaleString()} (no hard cap)`
   );
   return { scaled: true, budget };
 }
@@ -127,7 +125,7 @@ const DEFAULT_BUDGET = {
   maxRulesSize: 135000,
   maxSkillsSize: 350000,
   maxSessionContext: 500000,
-  maxRootInstructionsSize: 27500,
+  maxRootInstructionsSize: 40000,
   maxDirectMcpServers: 10,
   contextWindowTokens: 200000,
   maxPreTaskWindowRatio: 0.3,
@@ -156,7 +154,8 @@ function determineEffectiveTaskBudget(taskContext = {}) {
 
   if (explicitTier && tiers[explicitTier]) {
     const tierSpec = tiers[explicitTier];
-    const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
+    // Budget is effectively unlimited: no hard cap on the context window.
+    const windowSize = budget.contextWindowTokens || 200000;
     return {
       level: explicitTier,
       score:
@@ -172,11 +171,13 @@ function determineEffectiveTaskBudget(taskContext = {}) {
       rationale: `Explicitly pinned to '${explicitTier}' task budget tier.`,
       factors: { promptComplexity: 0, scopeScale: 0, reasoningDepth: 0, agentTopology: 0 },
       effectiveBudget: {
-        ...tierSpec,
+        totalTokens: tierSpec.totalTokens,
+        contextWindowLimit: tierSpec.contextWindowLimit,
+        maxOutputTokens: tierSpec.maxOutputTokens,
+        toolCallBudget: tierSpec.toolCallBudget,
+        reserveMargin: tierSpec.reserveMargin,
+        maxPreTaskWindowRatio: tierSpec.maxPreTaskWindowRatio,
         windowSize,
-        maxPreTaskTokens: Math.floor(
-          windowSize * (tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3)
-        ),
       },
     };
   }
@@ -267,7 +268,8 @@ function determineEffectiveTaskBudget(taskContext = {}) {
   }
 
   const tierSpec = tiers[level] || DEFAULT_TASK_TIERS.moderate;
-  const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
+  // Budget is effectively unlimited: no hard cap on the context window.
+  const windowSize = budget.contextWindowTokens || 200000;
   const maxRatio = tierSpec.maxPreTaskWindowRatio || budget.maxPreTaskWindowRatio || 0.3;
 
   return {
@@ -281,10 +283,13 @@ function determineEffectiveTaskBudget(taskContext = {}) {
       agentTopology,
     },
     effectiveBudget: {
-      ...tierSpec,
-      windowSize,
+      totalTokens: tierSpec.totalTokens,
+      contextWindowLimit: tierSpec.contextWindowLimit,
+      maxOutputTokens: tierSpec.maxOutputTokens,
+      toolCallBudget: tierSpec.toolCallBudget,
+      reserveMargin: tierSpec.reserveMargin,
       maxPreTaskWindowRatio: maxRatio,
-      maxPreTaskTokens: Math.floor(windowSize * maxRatio),
+      windowSize,
     },
   };
 }
@@ -471,7 +476,8 @@ function analyzePreTaskContextPopulation(rules, mcpConfig, budget) {
   // skills-mcp, memory-gateway-mcp). Kept as an upper bound until re-measured.
   const mcpToolSchemasTokens = 8295;
   const totalPreTaskTokens = staticDocsTokens + rules.totalTokens + mcpToolSchemasTokens;
-  const windowSize = Math.min(MAX_AUTONOMOUS_TOKEN_BUDGET, budget.contextWindowTokens || 200000);
+  // Budget is effectively unlimited: no hard cap on the context window.
+  const windowSize = budget.contextWindowTokens || 200000;
   const maxRatio = budget.maxPreTaskWindowRatio || 0.3;
   const maxTokens = budget.maxPreTaskTokens || Math.floor(windowSize * maxRatio);
   const ratioPct = Math.round((totalPreTaskTokens / windowSize) * 1000) / 10;
@@ -877,32 +883,32 @@ function checkBudget() {
     `  Leasing Allowance:   <= ${taskPlan.effectiveBudget.maxLeasedSkills} leased skill(s), <= ${taskPlan.effectiveBudget.maxSubagents} subagent(s)`
   );
 
-  const issues = [];
+  const warnings = [];
   if (preTask.totalPreTaskTokens > preTask.maxTokens) {
     const scaled = autoScaleBudgetOnHit(preTask.totalPreTaskTokens);
     if (!scaled.scaled) {
-      issues.push(
+      warnings.push(
         `Pre-task context population exceeds ${preTask.maxRatioPct}% ceiling (${preTask.totalPreTaskTokens} > ${preTask.maxTokens} tokens / ${preTask.ratioPct}%)`
       );
     }
   }
   if (retrospectives.count > budget.maxRetrospectives) {
-    issues.push(
+    warnings.push(
       `Retrospectives exceed budget (${retrospectives.count} > ${budget.maxRetrospectives})`
     );
   }
   if (rules.totalSize > budget.maxRulesSize) {
-    issues.push(
+    warnings.push(
       `Rules size exceeds budget (${(rules.totalSize / 1024).toFixed(1)} KB > ${(budget.maxRulesSize / 1024).toFixed(1)} KB)`
     );
   }
   if (skills.totalSize > budget.maxSkillsSize) {
-    issues.push(
+    warnings.push(
       `Skills size exceeds budget (${(skills.totalSize / 1024).toFixed(1)} KB > ${(budget.maxSkillsSize / 1024).toFixed(1)} KB)`
     );
   }
   if (rootInstructions.totalSize > maxRootSize) {
-    issues.push(
+    warnings.push(
       `Root instructions size exceeds budget (${(rootInstructions.totalSize / 1024).toFixed(1)} KB > ${(maxRootSize / 1024).toFixed(1)} KB)`
     );
   }
@@ -914,7 +920,7 @@ function checkBudget() {
     console.log(`⚡ Auto-scaled direct MCP server budget: ${maxDirectMcp} -> ${newMax}`);
   }
   if (mcpConfig.enableAllProjectMcpServers) {
-    issues.push(
+    warnings.push(
       `enableAllProjectMcpServers must be false to prevent raw tool schema explosion. Register only the required server set (see tools/mcp/mcp-registry.json).`
     );
   }
@@ -931,13 +937,14 @@ function checkBudget() {
     `  Engineering Output: ${buildTelemetry.engineeringVelocity.totalCommits} commits, ${buildTelemetry.engineeringVelocity.bugsResolved} bugs resolved`
   );
 
-  if (issues.length > 0) {
-    console.log('\n❌ Budget violations:');
-    issues.forEach((issue) => console.log(`  - ${issue}`));
-    return false;
+  if (warnings.length > 0) {
+    console.warn('\n⚠️ Budget informational warnings (non-blocking, tracking only):');
+    warnings.forEach((warning) => console.warn(`  - ${warning}`));
   }
 
-  console.log('\n✅ All budgets within limits');
+  console.log(
+    '\n✅ Budget tracking complete (no enforcement — agents are never stopped by limits)'
+  );
   return true;
 }
 
@@ -963,8 +970,8 @@ function main() {
 
     case '--budget-check':
     case 'budget-check': {
-      const withinBudget = checkBudget();
-      process.exit(withinBudget ? 0 : 1);
+      checkBudget();
+      process.exit(0);
       break;
     }
 

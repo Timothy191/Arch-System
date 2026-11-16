@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizeRedisProxyRequest as isAuthorized } from '@/lib/api/telemetry-auth';
 import { redisEngine } from '@/lib/redis-engine';
 
-function verifyToken(req: NextRequest): boolean {
-  const secret = process.env.REDIS_AUTH_SECRET;
-  if (!secret) return false;
-  const authHeader = req.headers.get('authorization') || req.headers.get('x-redis-token');
-  if (!authHeader) return false;
-  const token = authHeader.replace(/^Bearer\s+/i, '');
-  return token === secret;
-}
+const HTTP_BAD_REQUEST_STATUS = 400;
+const HTTP_UNAUTHORIZED_STATUS = 401;
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ command: string[] }> }
 ) {
-  if (!verifyToken(req)) {
+  if (!isAuthorized(req)) {
     return NextResponse.json(
       {
         success: false,
         error: { message: 'Unauthorized: Invalid Redis token', code: 'API_ERROR' },
       },
-      { status: 401 }
+      { status: HTTP_UNAUTHORIZED_STATUS }
     );
   }
 
@@ -44,7 +39,7 @@ export async function GET(
           code: 'API_ERROR',
         },
       },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST_STATUS }
     );
   }
 }
@@ -53,13 +48,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ command: string[] }> }
 ) {
-  if (!verifyToken(req)) {
+  if (!isAuthorized(req)) {
     return NextResponse.json(
       {
         success: false,
         error: { message: 'Unauthorized: Invalid Redis token', code: 'API_ERROR' },
       },
-      { status: 401 }
+      { status: HTTP_UNAUTHORIZED_STATUS }
     );
   }
 
@@ -74,7 +69,9 @@ export async function POST(
     }
 
     const command = segments?.[0] || body.command || 'PING';
-    const args = segments?.slice(1).map(decodeURIComponent) || body.args || [];
+    const urlArgs =
+      segments && segments.length > 1 ? segments.slice(1).map(decodeURIComponent) : null;
+    const args = urlArgs ?? (Array.isArray(body.args) ? body.args : []);
     const result = redisEngine.executeCommand(command, args);
 
     return NextResponse.json({ result });
@@ -87,7 +84,7 @@ export async function POST(
           code: 'API_ERROR',
         },
       },
-      { status: 400 }
+      { status: HTTP_BAD_REQUEST_STATUS }
     );
   }
 }

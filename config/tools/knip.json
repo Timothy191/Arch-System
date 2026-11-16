@@ -24,7 +24,6 @@
     "vite-tsconfig-paths",
     "squawk-cli",
     "gpt-tokenizer",
-    "axe-playwright",
     "^@repo/.*"
   ],
   "ignoreBinaries": [

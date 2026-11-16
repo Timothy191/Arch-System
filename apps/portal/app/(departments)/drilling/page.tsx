@@ -4,7 +4,6 @@ import { BorderBox } from '@repo/ui/BorderBox';
 import { Divider } from '@repo/ui/Divider';
 import { GlassCard } from '@repo/ui/GlassCard';
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   ClipboardList,
@@ -333,35 +332,6 @@ export default async function DrillingDashboardPage() {
                 <span className="text-[var(--text-muted)]">Today&apos;s Compiled Shifts</span>
                 <span className="font-mono font-semibold text-accent-green">
                   {loggedShifts} Active Records
-                </span>
-              </div>
-            </GlassCard>
-          </BorderBox>
-        </Link>
-
-        <Link href="/drilling/machine-telemetry" className="group h-full">
-          <BorderBox variant="thick-transparent" className="h-full border-0 p-0">
-            <GlassCard className="h-full cursor-pointer transition-colors hover:bg-[var(--bg-secondary)]">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">
-                    <Activity className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-heading)] text-base">
-                      Machine Telemetry
-                    </h3>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Engine RPM, hydraulic pressure, bit depth, and penetration rate
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--text-heading)]" />
-              </div>
-              <div className="mt-4 flex items-center justify-between border-[var(--border-default)] border-t pt-3 text-xs">
-                <span className="text-[var(--text-muted)]">Monitored Drill Fleet</span>
-                <span className="font-mono font-semibold text-[var(--accent-blue)]">
-                  {machineCount} Rigs Online
                 </span>
               </div>
             </GlassCard>

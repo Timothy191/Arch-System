@@ -125,3 +125,4 @@
 
 # Biome vcs.useIgnoreFile needs .gitignore in uploads
 !.gitignore
+!pnpm-lock.yaml

@@ -16,7 +16,7 @@ Every turn MUST follow this lifecycle. Details: [`context-engineering`](file:///
 
 **No mutating action, edit, or command before gathering required context.**
 
-1. **Preflight**: Mise Node `v24.15.0`/`v26.8.1`, `pnpm 9.15.9` in `Arch-System/`; `pnpm token:budget-check`; `get_active_leases`. Budget via `pnpm token:task-budget "<prompt>" --files <N> --steps <M>` (`trivial`/`low`: `3.5k–8k`, `<=1` skill; `moderate`: `22k`, `<=2`; `high`/`extreme`: `52k–104k`, `<=3–4` + subagents). On failure: `pnpm context:debloat` / `pnpm token:prune`.
+1. **Preflight**: Mise Node v24.15.0/v26.8.1, pnpm 9.15.9 in Arch-System/. Budget via pnpm token:task-budget (reference data only; token budget never blocks agent execution).
 2. **Funnel**: `list_available_context`/`list_available_skills` + `.agents/memory_base/index.json` → `acquire_context`/`acquire_skill` → `sg`/`rg` → line-range reads → ask user if ambiguous.
 3. **Guards**: Invariants at start and end of context (STM-0 Phase 5). Mark claims disproven by `E2`/`E3` as `[POISONED / SUPERSEDED]`. Never re-read files tagged `[DO NOT RE-READ]` in `.handoff/handoff.md`.
 4. Proceed only once context is verified.

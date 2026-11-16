@@ -3,6 +3,10 @@
  * Engineered for Vercel Edge & Serverless Functions
  * Incorporates n8n-compatible workflow execution, streams, and hash structures
  */
+/* cspell:words dbsize DBSIZE xrange */
+
+const DEFAULT_XRANGE_COUNT = 100;
+const XRANGE_OPTION_START_INDEX = 3;
 
 export interface RedisEntry {
   value: string;
@@ -169,8 +173,13 @@ export class ServerlessRedisEngine {
     return this.purgeIfExpired(key) ? 0 : 1;
   }
 
+  public dbsize(): number {
+    return this.store.size + this.hashes.size + this.sets.size + this.streams.size;
+  }
+
   public keys(pattern: string): string[] {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    const regex = new RegExp(`^${escapedPattern}$`);
     const matching = new Set<string>();
     for (const key of this.store.keys()) {
       if (!this.purgeIfExpired(key) && regex.test(key)) {
@@ -465,6 +474,17 @@ export class ServerlessRedisEngine {
 
   // --- Generic Command Dispatcher ---
 
+  private resolveXrangeCount(args: readonly string[]): number {
+    const countFlagIndex = args.findIndex(
+      (arg, idx) => idx >= XRANGE_OPTION_START_INDEX && arg.toUpperCase() === 'COUNT'
+    );
+    const rawCount =
+      countFlagIndex !== -1 ? args[countFlagIndex + 1] : args[XRANGE_OPTION_START_INDEX];
+    if (!rawCount) return DEFAULT_XRANGE_COUNT;
+    const parsed = parseInt(rawCount, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_XRANGE_COUNT;
+  }
+
   public executeCommand(command: string, args: string[]): unknown {
     const cmd = command.toUpperCase();
     switch (cmd) {
@@ -482,6 +502,8 @@ export class ServerlessRedisEngine {
         return this.exists(args[0] ?? '');
       case 'KEYS':
         return this.keys(args[0] || '*');
+      case 'DBSIZE':
+        return this.dbsize();
       case 'INCR':
         return this.incr(args[0] ?? '');
       case 'DECR':
@@ -508,10 +530,10 @@ export class ServerlessRedisEngine {
         return this.xadd(args[0] ?? '', args[1] ?? '*', JSON.parse(args[2] || '{}'));
       case 'XRANGE':
         return this.xrange(
-          args[0] ?? '-',
-          args[1] ?? '+',
-          args[2] ?? '100',
-          args[3] ? parseInt(args[3], 10) : undefined
+          args[0] ?? '',
+          args[1] ?? '-',
+          args[2] ?? '+',
+          this.resolveXrangeCount(args)
         );
       case 'XLEN':
         return this.xlen(args[0] ?? '');

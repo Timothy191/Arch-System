@@ -1,14 +1,32 @@
 import { getUserSafely } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
+import { getDaysInMonthCount } from '~/app/(departments)/[department]/reports/machine-activity-helpers';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { DrillingOperationsTable, type DrillOpRow } from './DrillingOperationsTable';
 
-async function getDrillingOpsData() {
+const MONTH_PREFIX_LENGTH = 7;
+const DAY_PAD_LENGTH = 2;
+const MINUTES_PER_HOUR = 60;
+const MONTH_FORMAT_REGEX = /^\d{4}-\d{2}$/;
+
+interface GetDrillingOpsOptions {
+  readonly selectedMonth?: string;
+}
+
+async function getDrillingOpsData({ selectedMonth }: GetDrillingOpsOptions = {}) {
   const { deptId, supabase, today } = await getDepartmentContext({
     department: 'drilling',
   });
   const user = await getUserSafely(supabase);
   if (!user) redirect('/login');
+
+  const resolvedMonth =
+    selectedMonth && MONTH_FORMAT_REGEX.test(selectedMonth)
+      ? selectedMonth
+      : today.slice(0, MONTH_PREFIX_LENGTH);
+  const daysCount = getDaysInMonthCount(resolvedMonth);
+  const monthStart = `${resolvedMonth}-01`;
+  const monthEnd = `${resolvedMonth}-${String(daysCount).padStart(DAY_PAD_LENGTH, '0')}`;
 
   const [{ data: drills }, { data: drillOps }, { data: employees }, { data: fleetOperators }] =
     await Promise.all([
@@ -24,7 +42,8 @@ async function getDrillingOpsData() {
           'id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, holes, meters_drilled, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, non_productional_delays, production_delays, engineering_delays, comments, notes, status'
         )
         .eq('department_id', deptId)
-        .eq('operation_date', today),
+        .gte('operation_date', monthStart)
+        .lte('operation_date', monthEnd),
       supabase
         .from('employees')
         .select('id, full_name')
@@ -51,7 +70,7 @@ async function getDrillingOpsData() {
 
   const drillIds = (drills ?? []).map((d) => d.id);
 
-  // Fetch Control Room machine_operations for Drill Rigs today as primary SSoT
+  // Fetch Control Room machine_operations for Drill Rigs across the selected month as primary SSoT
   const { data: controlRoomOps } =
     drillIds.length > 0
       ? await supabase
@@ -60,21 +79,23 @@ async function getDrillingOpsData() {
             'id, machine_id, shift_type, shift_date, start_smu, end_smu, hours_worked, block_drilled, meters_drilled, holes_drilled, operator:operators(full_name), site:sites(name), delay_entries:delay_entries(duration_hours, deleted_at, delay_category:delay_categories(name))'
           )
           .in('machine_id', drillIds)
-          .eq('shift_date', today)
+          .gte('shift_date', monthStart)
+          .lte('shift_date', monthEnd)
           .order('created_at', { ascending: false })
       : { data: [] };
 
-  // Merge Control Room operations + synced drill_operations keyed by `${machine_id}:${shift_type}`
+  // Merge Control Room operations + synced drill_operations keyed by `${machine_id}:${opDate}:${shift}`
   const mergedMap = new Map<string, DrillOpRow>();
 
   for (const op of drillOps ?? []) {
     const shift = (op.shift_type === 'night' ? 'night' : 'day') as 'day' | 'night';
-    const key = `${op.machine_id}:${shift}`;
+    const opDate = op.operation_date ?? today;
+    const key = `${op.machine_id}:${opDate}:${shift}`;
     mergedMap.set(key, {
       id: op.id,
       machine_id: op.machine_id,
       shift_type: shift,
-      operation_date: op.operation_date,
+      operation_date: opDate,
       open_hours: op.open_hours != null ? Number(op.open_hours) : null,
       close_hours: op.close_hours != null ? Number(op.close_hours) : null,
       total_hours: op.total_hours != null ? Number(op.total_hours) : null,
@@ -120,7 +141,8 @@ async function getDrillingOpsData() {
 
   for (const cr of (controlRoomOps ?? []) as unknown as ControlRoomOpRow[]) {
     const shift = (cr.shift_type === 'night' ? 'night' : 'day') as 'day' | 'night';
-    const key = `${cr.machine_id}:${shift}`;
+    const opDate = cr.shift_date ?? today;
+    const key = `${cr.machine_id}:${opDate}:${shift}`;
     const existing = mergedMap.get(key);
 
     const delays = Array.isArray(cr.delay_entries)
@@ -128,14 +150,13 @@ async function getDrillingOpsData() {
       : [];
     const extMin = delays
       .filter((d) => d.delay_category?.name === 'External')
-      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * MINUTES_PER_HOUR, 0);
     const prodMin = delays
       .filter((d) => d.delay_category?.name === 'Production')
-      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * MINUTES_PER_HOUR, 0);
     const engMin = delays
       .filter((d) => d.delay_category?.name === 'Engineering')
-      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * 60, 0);
-
+      .reduce((s: number, d) => s + Number(d.duration_hours || 0) * MINUTES_PER_HOUR, 0);
     const startSmu = cr.start_smu != null ? Number(cr.start_smu) : (existing?.open_hours ?? null);
     const endSmu = cr.end_smu != null ? Number(cr.end_smu) : (existing?.close_hours ?? null);
     const totalHours =
@@ -149,7 +170,7 @@ async function getDrillingOpsData() {
       id: existing?.id ?? cr.id,
       machine_id: cr.machine_id,
       shift_type: shift,
-      operation_date: cr.shift_date ?? today,
+      operation_date: opDate,
       open_hours: startSmu,
       close_hours: endSmu,
       total_hours: totalHours,
@@ -173,11 +194,27 @@ async function getDrillingOpsData() {
     ops: Array.from(mergedMap.values()),
     operators: operators ?? [],
     deptId,
+    selectedMonth: resolvedMonth,
   };
 }
 
-export default async function DrillingOperationsPage() {
-  const { drills, ops, operators, deptId } = await getDrillingOpsData();
+interface DrillingOperationsPageProps {
+  readonly searchParams?: Promise<{
+    readonly month?: string;
+    readonly machineId?: string;
+  }>;
+}
+
+export default async function DrillingOperationsPage({
+  searchParams,
+}: DrillingOperationsPageProps = {}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const requestedMonth = resolvedSearchParams?.month;
+  const machineId = resolvedSearchParams?.machineId;
+
+  const { drills, ops, operators, deptId, selectedMonth } = await getDrillingOpsData({
+    selectedMonth: requestedMonth,
+  });
 
   return (
     <div className="space-y-6">
@@ -198,6 +235,8 @@ export default async function DrillingOperationsPage() {
         drills={drills}
         operators={operators}
         initialOps={ops}
+        initialMonth={selectedMonth}
+        initialMachineId={machineId}
       />
     </div>
   );

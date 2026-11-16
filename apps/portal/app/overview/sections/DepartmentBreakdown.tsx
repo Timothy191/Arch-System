@@ -50,7 +50,6 @@ const routeIcons: Record<string, React.ReactNode> = {
   Integrations: <Server className="h-4 w-4" />,
   'AI Metrics': <Bot className="h-4 w-4" />,
   'Drilling Operations': <Pickaxe className="h-4 w-4" />,
-  'Machine Telemetry': <Activity className="h-4 w-4" />,
   'Muster Station': <LifeBuoy className="h-4 w-4" />,
   'Print Cards': <Printer className="h-4 w-4" />,
   'QR Codes': <QrCode className="h-4 w-4" />,

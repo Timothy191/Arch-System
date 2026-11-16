@@ -28,7 +28,7 @@ catalog:
   '@supabase/ssr': ^0.5.2
   kysely: ^0.28.17
   pg: ^8.13.1
-  '@opentelemetry/api': ^1.9.1
+  '@opentelemetry/api': 1.9.1
 catalogs:
   react19:
     react: ^19.2.7

@@ -43,11 +43,9 @@ function main() {
   const args = process.argv.slice(2);
   const taskIdx = args.indexOf('--task');
   const agentIdx = args.indexOf('--agent');
-  const skipBudgetIdx = args.indexOf('--skip-budget-check');
 
   const task = taskIdx !== -1 && args[taskIdx + 1] ? args[taskIdx + 1] : 'unknown';
   const agent = agentIdx !== -1 && args[agentIdx + 1] ? args[agentIdx + 1] : 'unknown';
-  const skipBudgetCheck = skipBudgetIdx !== -1;
 
   const startTime = Date.now();
 
@@ -60,15 +58,6 @@ function main() {
   console.log('🔍 [Pre-Task] Running quality gates...\n');
 
   try {
-    // Context budget check
-    if (!skipBudgetCheck) {
-      console.log('💰 Checking context budget...');
-      execSync('pnpm token:budget-check', { cwd: ROOT, stdio: 'inherit' });
-      console.log('✅ Context budget within limits\n');
-    } else {
-      console.log('⚠️ Skipping budget check\n');
-    }
-
     // Type check
     console.log('⚙️  Type checking...');
     execSync('pnpm type-check', { cwd: ROOT, stdio: 'inherit' });

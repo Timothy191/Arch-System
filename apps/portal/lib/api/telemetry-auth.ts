@@ -1,12 +1,20 @@
 import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 
+interface AuthorizeOptions {
+  readonly req: Request;
+  readonly secret: string | null;
+  readonly label: string;
+}
+
+function configuredSecrets(names: readonly string[]): readonly string[] {
+  return names
+    .map((name) => process.env[name])
+    .filter((value): value is string => Boolean(value && value.trim().length > 0));
+}
+
 function configuredSecret(names: readonly string[]): string | null {
-  for (const name of names) {
-    const value = process.env[name];
-    if (value && value.trim().length > 0) return value;
-  }
-  return null;
+  return configuredSecrets(names)[0] ?? null;
 }
 
 function secretsMatch(provided: string, expected: string): boolean {
@@ -14,6 +22,16 @@ function secretsMatch(provided: string, expected: string): boolean {
   const expectedBuffer = Buffer.from(expected);
   if (providedBuffer.length !== expectedBuffer.length) return false;
   return timingSafeEqual(providedBuffer, expectedBuffer);
+}
+
+function matchesAnySecret(provided: string, expectedList: readonly string[]): boolean {
+  let matched = false;
+  for (const expected of expectedList) {
+    if (secretsMatch(provided, expected)) {
+      matched = true;
+    }
+  }
+  return matched;
 }
 
 function readProvidedSecret(req: Request): string | null {
@@ -27,7 +45,7 @@ function readProvidedSecret(req: Request): string | null {
  * or observe the values SCADA views consume. In non-production an unconfigured
  * secret is tolerated so local development keeps working; production fails closed.
  */
-function authorize(req: Request, secret: string | null, label: string): NextResponse | null {
+function authorize({ req, secret, label }: AuthorizeOptions): NextResponse | null {
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
       return NextResponse.json({ error: `${label} is not configured.` }, { status: 503 });
@@ -44,23 +62,23 @@ function authorize(req: Request, secret: string | null, label: string): NextResp
 }
 
 export function authorizeIngest(req: Request): NextResponse | null {
-  return authorize(
+  return authorize({
     req,
-    configuredSecret(['TELEMETRY_INGEST_SECRET', 'TELEMETRY_WEBHOOK_SECRET']),
-    'Telemetry ingest'
-  );
+    secret: configuredSecret(['TELEMETRY_INGEST_SECRET', 'TELEMETRY_WEBHOOK_SECRET']),
+    label: 'Telemetry ingest',
+  });
 }
 
 export function authorizeTelemetryStream(req: Request): NextResponse | null {
-  return authorize(
+  return authorize({
     req,
-    configuredSecret([
+    secret: configuredSecret([
       'TELEMETRY_STREAM_SECRET',
       'TELEMETRY_INGEST_SECRET',
       'TELEMETRY_WEBHOOK_SECRET',
     ]),
-    'Telemetry stream'
-  );
+    label: 'Telemetry stream',
+  });
 }
 
 export function authorizeWorkflowRequest(req: Request): NextResponse | null {
@@ -86,20 +104,23 @@ export function authorizeWorkflowRequest(req: Request): NextResponse | null {
 const BEARER_PREFIX = 'Bearer ';
 
 /**
- * n8n-compatible Redis proxy auth (`X-N8N-API-KEY` or `Authorization`).
+ * n8n-compatible Redis proxy auth (`X-N8N-API-KEY`, `x-redis-token`, or `Authorization`).
  * Fails closed: an unconfigured secret never authorizes any caller.
  */
 export function authorizeRedisProxyRequest(req: Request): boolean {
-  const secret = configuredSecret(['REDIS_AUTH_SECRET', 'N8N_API_KEY']);
-  if (!secret) return false;
+  const acceptedSecrets = configuredSecrets(['REDIS_AUTH_SECRET', 'N8N_API_KEY']);
+  if (acceptedSecrets.length === 0) return false;
 
   const apiKey = req.headers.get('x-n8n-api-key');
-  if (apiKey && secretsMatch(apiKey, secret)) return true;
+  if (apiKey && matchesAnySecret(apiKey, acceptedSecrets)) return true;
+
+  const redisToken = req.headers.get('x-redis-token');
+  if (redisToken && matchesAnySecret(redisToken, acceptedSecrets)) return true;
 
   const authHeader = req.headers.get('authorization');
   if (!authHeader) return false;
   const token = authHeader.startsWith(BEARER_PREFIX)
     ? authHeader.slice(BEARER_PREFIX.length)
     : authHeader;
-  return secretsMatch(token, secret);
+  return matchesAnySecret(token, acceptedSecrets);
 }

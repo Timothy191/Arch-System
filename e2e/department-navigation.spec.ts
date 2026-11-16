@@ -107,9 +107,9 @@ test.describe('Department Navigation E2E', () => {
       await expect(page).toHaveURL(/.*\/drilling\/daily-log/);
       await expect(page.locator('body')).toBeVisible();
 
-      // Navigation to machine telemetry tab
-      await page.goto('/drilling/machine-telemetry');
-      await expect(page).toHaveURL(/.*\/drilling\/machine-telemetry/);
+      // Navigation to drilling operations tab
+      await page.goto('/drilling/drilling-operations');
+      await expect(page).toHaveURL(/.*\/drilling\/drilling-operations/);
       await expect(page.locator('body')).toBeVisible();
     });
 

@@ -37,7 +37,7 @@ const mockDepartment: Department = {
   trend: [10, 20, 15, 30, 25],
   actions: [
     { label: 'Daily Logs', href: '/drilling/daily-log' },
-    { label: 'Telemetry', href: '/drilling/machine-telemetry' },
+    { label: 'Reports', href: '/drilling/reports' },
   ],
 };
 

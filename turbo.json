@@ -435,6 +435,9 @@
       "outputs": ["coverage/**"],
       "cache": true
     },
+    "@repo/intelligence#type-check": {
+      "dependsOn": ["^build"]
+    },
     "type-check": {
       "dependsOn": ["transit"],
       "inputs": [

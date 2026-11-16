@@ -302,29 +302,6 @@ These hard stops are **always in force**, with no approval path:
 
 ---
 
-## 11. Agent Action Scoring System (Global Scope)
-
-Every agent action taken in this repository is scored against a running tally that is global in scope — it accumulates across all agents, sessions, and tasks:
-
-| Outcome           | Points | Criteria                                                                 |
-| ----------------- | ------ | ------------------------------------------------------------------------ |
-| Successful action | +1     | Task complete, all relevant gates pass, verified with evidence           |
-| Wrong action      | -2     | Implementation incorrect, gate broken, change reverted, claim unverified |
-
-The score is used to:
-
-1. **Inform risk assessment** — higher-risk actions require more verification before execution
-2. **Prioritize gate selection** — lower scores trigger the full verification suite (`pnpm agent:verify`)
-3. **Guide escalation decisions** — negative scores require human review before proceeding
-
-### Score Consequences
-
-- **Score ≥ 0**: Normal operation — proceed with standard verification gates
-- **Score < 0**: Escalate — require human review before next task execution
-- **Score ≤ -5**: Mandatory full `pnpm agent:verify` (28-gate suite) before any further action
-
-Agents must log each action's outcome and score in the session context before concluding work.
-
 ---
 
 ## 12. Spec-Based Foundational Approach to Tasks

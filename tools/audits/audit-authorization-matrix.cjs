@@ -47,7 +47,6 @@ const PUBLIC_OR_EXEMPT_API_ROUTES = new Set([
   'app/api/metrics/prometheus/route.ts',
   'app/api/metrics/route.ts',
   'app/api/queues/process-order/route.ts',
-  'app/api/redis-proxy/v1/health/route.ts',
   'app/api/upload/route.ts',
   'app/api/version/route.ts',
   'app/api/weather/route.ts',

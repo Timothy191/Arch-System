@@ -98,7 +98,7 @@ export const DEPARTMENTS: Department[] = [
     trend: [1180, 1195, 1205, 1210, 1220, 1235, 1240, 1245],
     actions: [
       { label: 'View Logs', href: '/drilling/drilling-operations' },
-      { label: 'Telemetry', href: '/drilling/machine-telemetry' },
+      { label: 'Reports', href: '/drilling/reports' },
     ],
   },
   {
@@ -339,8 +339,8 @@ export const ENGINEERING_TABS = [
 ] as const;
 
 /**
- * Drilling specific tabs — rig operations and telemetry lead, followed by the
- * same operational set every other department exposes (Daily Log, Machines,
+ * Drilling specific tabs — rig operations lead, followed by the same
+ * operational set every other department exposes (Daily Log, Machines,
  * History, Reports, Tools). Drilling used to expose only four entries, which
  * left it as the only department without the shared operational pages even
  * though `app/(departments)/[department]/{daily-log,machines,history,tools}`
@@ -349,7 +349,6 @@ export const ENGINEERING_TABS = [
 export const DRILLING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'drilling-operations', label: 'Drilling Operations', icon: 'Drill' },
-  { name: 'machine-telemetry', label: 'Machine Telemetry', icon: 'Activity' },
   { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
   { name: 'machines', label: 'Machines', icon: 'Cpu' },
   { name: 'history', label: 'History', icon: 'History' },
