@@ -16,16 +16,11 @@
     "bash": "restricted"
   },
   "scope": {
-    "include_paths": [
-      ".agents/corpos/storage/**",
-      ".agents/memory_base/**",
-      ".agents/a2a/bus/**",
-      "tools/audits/**"
-    ],
+    "include_paths": [".agents/memory_base/**", ".agents/a2a/bus/**", "tools/audits/**"],
     "exclude_paths": ["node_modules/**", ".git/**"]
   },
   "runbook": [
-    "Phase 1: Ingest health signals and active corpos loop ticks",
+    "Phase 1: Ingest health signals from agent-verify and audit:compliance runs",
     "Phase 2: Assert memory index consistency in .agents/memory_base/index.json",
     "Phase 3: Execute compound bash AST security checks against all script files",
     "Phase 4: Run antidrift and contract verification suites",

@@ -49,8 +49,7 @@ test.describe('card-actions page', () => {
     await page.goto(CARD_ACTIONS_URL);
     const searchInput = page.getByRole('textbox', { name: 'Search personnel' });
     await searchInput.fill('John');
-    // Brief wait for debounced search
-    await page.waitForTimeout(500);
+    // Debounced search: assertions below auto-wait for the results to appear.
     // Check that results section appears (either a list or "no results" message)
     await expect(
       page.locator("[data-testid='search-results']").or(page.getByText(/no results|no employees/i))
@@ -84,7 +83,6 @@ test.describe('card-actions page', () => {
     await page.goto(CARD_ACTIONS_URL);
     const searchInput = page.getByRole('textbox', { name: 'Search personnel' });
     await searchInput.fill('John');
-    await page.waitForTimeout(500);
 
     const firstResult = page.locator("[data-testid='search-results'] button").first();
     try {
@@ -104,10 +102,13 @@ test.describe('card-actions page', () => {
     await page.goto(CARD_ACTIONS_URL);
     const searchInput = page.getByRole('textbox', { name: 'Search personnel' });
     await searchInput.fill('John');
-    await page.waitForTimeout(500);
 
     const firstResult = page.locator("[data-testid='search-results'] button").first();
     try {
+      await firstResult.waitFor({ state: 'visible', timeout: 5000 });
+      await firstResult.click();
+
+      // Print Card button lives inside the detail panel
       await firstResult.waitFor({ state: 'visible', timeout: 5000 });
       await firstResult.click();
 

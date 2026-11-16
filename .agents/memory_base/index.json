@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-11-16T04:09:34.198Z",
+  "lastUpdated": "2026-11-16T12:40:44.042Z",
   "totalRetrospectives": 16,
   "entries": [
     {
-      "id": "compaction-15e8fe5f",
+      "id": "compaction-05a185a7",
       "category": "context-compaction",
       "errorSignature": "compaction_decision:execute_full_compact",
       "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."
     },
     {
-      "id": "compaction-9b896ec8",
+      "id": "compaction-0670e5cc",
       "category": "context-compaction",
       "errorSignature": "compaction_decision:consolidate_state_spine",
       "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache."

@@ -22,15 +22,26 @@ export const options = {
 };
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
-const SUPABASE_URL = __ENV.SUPABASE_URL || 'https://mrwhtxbhrzyttlsyuofc.supabase.co';
-const SUPABASE_ANON_KEY =
-  __ENV.SUPABASE_ANON_KEY || 'sb_publishable_xusUcCYxZKn7zosSmoW6iQ_5qVl03XT';
+// Publishable Supabase URL/anon key are env-only; k6 aborts with an actionable
+// error when unset rather than silently hitting a wrong project.
+const SUPABASE_URL = requireEnvK6('SUPABASE_URL');
+const SUPABASE_ANON_KEY = requireEnvK6('SUPABASE_ANON_KEY');
 
 // Credentials come from the environment only — never a committed literal.
 // NOTE: this is a k6 script, so it must use __ENV, not process.env.
-// Supply with: k6 run -e TEST_PASSWORD=... e2e/load/shift-closeout-storm.js
-const TEST_EMAIL = __ENV.TEST_EMAIL || 'admin@plantcormining.os';
-const TEST_PASSWORD = __ENV.TEST_PASSWORD;
+// Supply with: k6 run -e SUPABASE_URL=... -e SUPABASE_ANON_KEY=... -e TEST_EMAIL=... -e TEST_PASSWORD=... e2e/load/shift-closeout-storm.js
+const TEST_EMAIL = requireEnvK6('TEST_EMAIL');
+const TEST_PASSWORD = requireEnvK6('TEST_PASSWORD');
+
+function requireEnvK6(name) {
+  const raw = __ENV[name];
+  if (!raw) {
+    throw new Error(
+      `k6 load test: environment variable ${name} is not set. Supply it via -e ${name}=...`
+    );
+  }
+  return raw;
+}
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

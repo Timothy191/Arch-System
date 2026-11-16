@@ -19,6 +19,6 @@ paths: ['apps/portal/**/*', 'scripts/dev.sh']
 
 - Untracked file blocks `git checkout main`: `mv <file> /tmp/`, checkout, `mkdir -p <dir> && mv /tmp/<file> <dir>/`. Never delete user files.
 - GitHub Actions jobs failing in seconds with `steps: []` = account billing/runner restriction, not code.
-  Local `pnpm agent:verify` (27 gates, pre-push) is the authoritative gate; admin-bypass push to `main` is expected.
+  Local `pnpm agent:verify` (28 gates, pre-push) is the authoritative gate; admin-bypass push to `main` is expected.
 - Vercel serializes production builds; "Queued" for minutes is normal. Wait via timer, don't redeploy.
   Remove stale queued previews with `vercel rm <url> --yes`.

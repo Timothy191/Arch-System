@@ -52,18 +52,16 @@ All agent behavioral rules, operational guides, subagent definitions, protocol s
 ```
 .agents/
 ├── GUIDE.md              # Unified operational guide (commands, conventions, debugging)
-├── README.md             # Governance overview & Win Loop specification
-├── a2a/                  # Agent-to-Agent protocol (SPEC, 35+ registry cards, schemas, bus)
-├── agents/               # 40+ specialist subagent persona definitions
-├── bin/                  # Central execution binaries (corpos)
-├── corpos/               # Arch-CorpOS business loop engine & 7 department blueprints
-│   └── departments/      # executive, finance, engineering, control-room, compliance-safety, access-control, drilling
-├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool guard, post-tool tracer)
-├── memory_base/          # Cross-session memory (schema, index, error retrospectives)
-├── mcp_config.json       # Fully populated MCP server configuration (10 context servers)
-├── rules/                # 17 permanent engineering rules (including STM-0 structured thinking)
-├── skills/               # 60+ reusable workflow skills
-└── run-manifests/        # Reproducibility manifests
+├── README.md             # Governance overview & 28-gate verification
+├── SYSTEMS.md            # Federated systems & A2A architecture specification
+├── a2a/                  # Agent-to-Agent protocol (SPEC, 18 registry cards, schemas, bus)
+├── agents/               # 19 specialist subagent persona definitions (18 local + 1 symlinked)
+├── bin/                  # Autonomous runner entrypoints (ralph, ralph.cjs)
+├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool guard, post-tool tracer, budget)
+├── memory_base/          # Cross-session memory (index, error retrospectives)
+├── mcp_config.json       # MCP server configuration (6 context servers)
+├── rules/                # 50 permanent engineering rules (including STM-0 structured thinking)
+└── skills/               # 10 local (+ 3 symlinked) reusable workflow skills
 ```
 
 ### The 7 Mining Operational Departments
@@ -81,6 +79,6 @@ All agent behavioral rules, operational guides, subagent definitions, protocol s
 ### Mandatory Root Entry Points
 
 - **`AGENTS.md`** (Root): Primary Single Source of Truth (SSoT) for architecture, domain, personas, and invariants.
-- **`CLAUDE.md`** (Root): Symlink → `AGENTS.md`, pointing Claude Code agents at the canonical guide and `.agents/rules/`.
-- **`GEMINI.md`** (Root): Symlink → `AGENTS.md`, pointing Gemini/Antigravity agents at the same canonical guide.
-- **`.cursorrules`** (Root): Symlink → `AGENTS.md`, pointing Cursor IDE agents at the canonical guide.
+- **`GEMINI.md`** (Root): Compact operational summary of `AGENTS.md` for Gemini/Antigravity agents.
+- **`CLAUDE.md`** (Root): Symlink → `GEMINI.md`, pointing Claude Code agents at the operational guide and `.agents/rules/`.
+- **`.cursorrules`** (Root): Symlink → `GEMINI.md`, pointing Cursor IDE agents at the operational guide.

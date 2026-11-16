@@ -64,7 +64,9 @@ export {
   closeRedis,
   createRedisSubscriber,
   getRedisClient,
+  getRedisStackClient,
   isServerlessRedis,
+  resolveRedisStackUrl,
 } from './client';
 export * from './client-factory';
 export * from './cluster';

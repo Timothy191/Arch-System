@@ -344,11 +344,11 @@ export interface RedisCapabilities {
 
 /** Five minutes: long enough to amortise the probe, short enough to notice a module load. */
 const CAPABILITY_TTL_MS = 300_000;
-let cachedCapabilities: RedisCapabilities | null = null;
+const capabilityCache = new Map<string, RedisCapabilities>();
 
 /** Test hook: force the next caller to re-probe. */
 export function resetCapabilityCache(): void {
-  cachedCapabilities = null;
+  capabilityCache.clear();
 }
 
 function commandExistsFlags(reply: unknown, names: readonly string[]): Map<string, boolean> {
@@ -377,16 +377,24 @@ function searchModulePresent(reply: unknown): boolean {
  * whether the RediSearch module is loaded. Callers use this to choose between
  * the Redis path and a Postgres/pgvector fallback instead of throwing.
  */
+export interface DetectCapabilitiesOptions {
+  force?: boolean;
+  cacheKey?: string;
+  transport?: RedisTransport;
+}
+
 export async function detectCapabilities(
   client?: SendCapable,
-  options?: { force?: boolean }
+  options?: DetectCapabilitiesOptions
 ): Promise<RedisCapabilities> {
-  if (cachedCapabilities && !options?.force) {
-    if (Date.now() - cachedCapabilities.probedAt < CAPABILITY_TTL_MS) return cachedCapabilities;
+  const cacheKey = options?.cacheKey ?? 'default';
+  const cached = capabilityCache.get(cacheKey);
+  if (cached && !options?.force) {
+    if (Date.now() - cached.probedAt < CAPABILITY_TTL_MS) return cached;
   }
 
   const redis = client ?? (await getRedisClient());
-  const transport = currentTransport();
+  const transport = options?.transport ?? currentTransport();
   const probedAt = Date.now();
 
   const probeCommands = ['EVAL', 'XADD', 'PFADD', 'ZADD', 'GETEX'] as const;
@@ -400,7 +408,7 @@ export async function detectCapabilities(
   const has = (name: string): boolean => flags.get(name) ?? true;
   const version = asInfoMap(info).redis_version;
 
-  cachedCapabilities = {
+  const result: RedisCapabilities = {
     transport,
     // REST transports may not implement COMMAND; assume the family is available
     // and let the first real call prove it rather than disabling it up front.
@@ -413,6 +421,7 @@ export async function detectCapabilities(
     ...(version ? { redisVersion: version } : {}),
     probedAt,
   };
+  capabilityCache.set(cacheKey, result);
 
-  return cachedCapabilities;
+  return result;
 }

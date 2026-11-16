@@ -22,7 +22,8 @@
     ".prisma/**",
     "docs/archive/**",
     "**/zero-drift-watchdog/test/adversarial/**",
-    "apps/portal/lib/version.generated.ts"
+    "apps/portal/lib/version.generated.ts",
+    "**/*.generated.ts"
   ],
   "ignoreRegExpList": [
     "sb_publishable_[A-Za-z0-9_-]+",
@@ -222,6 +223,18 @@
     "codegraph",
     "pathlib",
     "ENOSPC",
-    "inotify"
+    "inotify",
+    "Subpages",
+    "subpages",
+    "lintsinghua",
+    "ripwire",
+    "millionco",
+    "ryanmcdermott",
+    "codiumai",
+    "Codium",
+    "TOCTOU",
+    "speculationrules",
+    "pragent",
+    "commitable"
   ]
 }

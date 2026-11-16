@@ -21,6 +21,7 @@
     "tslib",
     "vitepress",
     "swagger-jsdoc",
+    "@axe-core/playwright",
     "vite-tsconfig-paths",
     "squawk-cli",
     "gpt-tokenizer",
@@ -53,15 +54,13 @@
     "e2e/helpers/**",
     "config/tools/**",
     "services/integrations/**",
-    "scripts/autonomous-ui-delegator.mjs",
-    "scripts/codemods/remove-dark-classes.cjs",
     "scripts/sync-integrations-mcp.mjs",
     "scripts/sync-mcp-config.js",
     "scripts/test-langfuse-tracing.mjs",
     "scripts/validate-mcp-servers.js",
     "scripts/video-generator/render-videos.mjs",
-    "scripts/verify-c66-database.mjs",
-    "scripts/seeds/seed-access-logs.mjs"
+    "scripts/seeds/seed-access-logs.mjs",
+    "e2e/playwright.config.ts"
   ],
   "workspaces": {
     ".": {
@@ -150,20 +149,13 @@
       "ignore": ["supabase/migrations/**"],
       "ignoreDependencies": ["supabase"]
     },
-    "packages/eslint-config": {
-      "entry": ["*.js"],
-      "project": ["*.js"],
-      "ignoreDependencies": ["eslint-import-resolver-typescript"]
-    },
     "packages/supabase": {
       "entry": [
         "src/index.ts",
         "src/server.ts",
         "src/client.ts",
         "src/middleware.ts",
-        "src/service-role.ts",
-        "src/seed.ts",
-        ".eslintrc.{js,cjs}"
+        "src/service-role.ts"
       ],
       "project": ["src/**/*.ts"],
       "ignore": ["src/database.types.ts"]
@@ -209,9 +201,49 @@
       "ignoreDependencies": ["@babel/preset-typescript"]
     },
     "libs/shared/hooks": {
-      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"],
       "ignoreDependencies": ["@testing-library/react", "jsdom"]
+    },
+    "packages/intelligence": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/logger": {
+      "entry": ["src/index.ts", "src/server.ts", "src/browser.ts", "src/next.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "libs/features/auth/data-access": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/features/auth/ui": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/features/auth/utils": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/features/departments/data-access": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/features/departments/ui": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/features/hub/ui": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/shared/data-access": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/shared/utils": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
     }
   },
   "rules": {

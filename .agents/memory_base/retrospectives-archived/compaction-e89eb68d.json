@@ -1,0 +1,35 @@
+{
+  "id": "compaction-e89eb68d",
+  "timestamp": "2026-11-16T08:40:08.330Z",
+  "taskTag": "compaction-standard-e89eb68d",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/actions/muster.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/nav/MenuIdentity.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/actions/muster.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/muster/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/reports/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/print-cards/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/qr-codes/page.tsx\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/test-departments.mjs\"",
+    "\"/home/tim/Fork/Arch-System/AGENT_TRACER.md\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/actions/muster.test.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/page.test.tsx\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/validate-json.mjs\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/components/nav/MenuIdentity.tsx\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (425 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 458861,
+    "cacheHitRatio": 0.8625,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

@@ -89,14 +89,34 @@ export function SettingsTab() {
           </form>
         </GlassCard>
 
-        <GlassCard className="flex flex-col items-center justify-center p-12 text-center">
-          <SettingsIcon className="mb-4 h-16 w-16 text-[var(--text-muted)]" />
-          <h3 className="mb-2 font-medium text-[var(--text-heading)] text-xl">
-            More Settings Coming Soon
-          </h3>
-          <p className="max-w-md text-[var(--text-muted)]">
-            Additional application-wide preferences and integrations will be available here.
-          </p>
+        <GlassCard className="flex flex-col gap-4 p-6">
+          <div className="flex items-center gap-3 border-[var(--border-default)] border-b pb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent-blue)]/10">
+              <SettingsIcon className="h-5 w-5 text-[var(--accent-blue)]" />
+            </div>
+            <div>
+              <h3 className="font-medium text-[var(--text-heading)]">Runtime & Deployment</h3>
+              <p className="text-[var(--text-muted)] text-sm">
+                Current portal runtime and deployment metadata
+              </p>
+            </div>
+          </div>
+          <dl className="grid grid-cols-1 gap-3 text-sm">
+            <div className="flex items-center justify-between">
+              <dt className="text-[var(--text-muted)]">Environment</dt>
+              <dd className="font-mono text-[var(--text-heading)]">
+                {process.env.NODE_ENV ?? 'development'}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-[var(--text-muted)]">Application</dt>
+              <dd className="font-mono text-[var(--text-heading)]">Arch-System Portal</dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-[var(--text-muted)]">Admin API</dt>
+              <dd className="font-mono text-[var(--text-heading)]">/api/admin/data/[table]</dd>
+            </div>
+          </dl>
         </GlassCard>
       </div>
     </div>

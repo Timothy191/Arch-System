@@ -7,10 +7,16 @@ export const adminDataQuerySchema = z.object({
   order_dir: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-export const adminDataUpdateSchema = z.object({
-  id: z.string().min(1, 'Record id is required'),
-  data: z.record(z.string(), z.unknown()),
-});
+export const adminDataInsertSchema = z
+  .record(z.string(), z.unknown())
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'Insert payload must contain at least one field'
+  );
+
+export const adminDataUpdateSchema = z
+  .object({ id: z.string().min(1, 'Record id is required') })
+  .passthrough();
 
 export const adminDataDeleteSchema = z.object({
   id: z.string().min(1, 'Record id is required'),

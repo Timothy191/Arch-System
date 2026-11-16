@@ -12,8 +12,8 @@ import {
 
 const InputSchema = z.object({
   source: z.enum(['url', 'github', 'local-docs']),
-  sourceId: z.string().min(1),
-  userId: z.string().min(1),
+  sourceId: z.string().optional(),
+  userId: z.string().optional(),
   owner: z.string().optional(),
   repo: z.string().optional(),
   path: z.string().optional(),
@@ -38,13 +38,13 @@ export async function externalContentIndexing(input: {
   }
 
   // Check admin role
-  const { data: profile } = await supabase
-    .from('profiles')
+  const { data: callerEmployee } = await supabase
+    .from('employees')
     .select('role')
-    .eq('id', user.id)
+    .eq('auth_id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
+  if (callerEmployee?.role !== 'admin') {
     return { success: false, errors: ['Forbidden: admin role required'] };
   }
 
@@ -53,38 +53,45 @@ export async function externalContentIndexing(input: {
     return { success: false, errors: parsed.error.issues.map((i) => i.message) };
   }
 
-  let result;
-  switch (parsed.data.source) {
-    case 'url':
-      if (!parsed.data.sourceId) {
-        return { success: false, errors: ['sourceId required for URL indexing'] };
-      }
-      result = await fetchAndIndexUrl(parsed.data.sourceId, user.id);
-      break;
-    case 'github':
-      if (!parsed.data.owner || !parsed.data.repo) {
-        return {
-          success: false,
-          errors: ['owner and repo required for GitHub indexing'],
-        };
-      }
-      result = await fetchAndIndexGitHubRepo(
-        parsed.data.owner,
-        parsed.data.repo,
-        parsed.data.path ?? '',
-        user.id
-      );
-      break;
-    case 'local-docs':
-      if (!parsed.data.dirPath) {
-        return { success: false, errors: ['dirPath required for local docs indexing'] };
-      }
-      result = await indexLocalDocs(parsed.data.dirPath, user.id);
-      break;
+  let result: { indexedCount: number; erroredCount: number; errors: string[] };
+  try {
+    switch (parsed.data.source) {
+      case 'url':
+        if (!parsed.data.sourceId) {
+          return { success: false, errors: ['sourceId required for URL indexing'] };
+        }
+        result = await fetchAndIndexUrl(parsed.data.sourceId, user.id);
+        break;
+      case 'github':
+        if (!parsed.data.owner || !parsed.data.repo) {
+          return {
+            success: false,
+            errors: ['owner and repo required for GitHub indexing'],
+          };
+        }
+        result = await fetchAndIndexGitHubRepo(
+          parsed.data.owner,
+          parsed.data.repo,
+          parsed.data.path ?? '',
+          user.id
+        );
+        break;
+      case 'local-docs':
+        if (!parsed.data.dirPath) {
+          return { success: false, errors: ['dirPath required for local docs indexing'] };
+        }
+        result = await indexLocalDocs(parsed.data.dirPath, user.id);
+        break;
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, indexedCount: 0, errors: [message] };
   }
 
-  if (result.erroredCount > 0 && result.indexedCount === 0) {
-    return { success: false, indexedCount: result.indexedCount, errors: result.errors };
+  const safeResult = result ?? { indexedCount: 0, erroredCount: 0, errors: [] };
+
+  if (safeResult.erroredCount > 0 && safeResult.indexedCount === 0) {
+    return { success: false, indexedCount: safeResult.indexedCount, errors: safeResult.errors };
   }
 
   await cacheInvalidateTags(['memory_embeddings']);
@@ -92,7 +99,7 @@ export async function externalContentIndexing(input: {
 
   return {
     success: true,
-    indexedCount: result.indexedCount,
-    errors: result.errors.length > 0 ? result.errors : undefined,
+    indexedCount: safeResult.indexedCount,
+    errors: safeResult.errors.length > 0 ? safeResult.errors : undefined,
   };
 }

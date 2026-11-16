@@ -62,7 +62,7 @@ The portal dev server binds `0.0.0.0:3000` (field-terminal LAN access).
 ### Build & Quality
 
 ```bash
-pnpm build            # sync-assets + generate-openapi-spec + turbo run build
+pnpm build            # sync-assets-smart.cjs + patch-glass-css.mjs + turbo run build
 pnpm type-check       # tsc --noEmit across workspace
 pnpm lint             # turbo run lint (Biome in portal)
 pnpm quality          # Full gate: lint+type-check+test+tokens+css, then styles,
@@ -109,6 +109,8 @@ pnpm mcp:verify       # Verify all 7 agent runtimes have required MCP servers re
 pnpm mcp:onboard      # Provision and synchronize missing MCP server configurations
 pnpm verify:gates     # 4-gate reality enforcement (ARWR, tests, modernization, strict TS)
 pnpm audit:compliance # Full compliance audit suite
+pnpm audit:react-doctor # React 19 & Next.js 16 health diagnostics (score + blocking boundary checks)
+pnpm audit:deep       # DeepAudit 4-agent security & architecture suite (auto-triggered on "Audit" prompts)
 ```
 
 ---
@@ -133,22 +135,23 @@ documentation/         # Tool-written operational center (audit suites write her
 
 ```
 .agents/
+├── CHECKLIST.md          # Toolchain & MCP readiness checklist
 ├── GUIDE.md              # THIS FILE — unified operational guide
-├── README.md             # Governance overview
+├── INDEX.md              # Directory index for lean navigation
+├── ONBOARDING.md         # Agent onboarding playbook
+├── README.md             # Governance overview & 28-gate verification
+├── SYSTEMS.md            # Federated systems & A2A architecture spec
 ├── a2a/                  # Agent-to-Agent protocol (SPEC, registry, bus, schemas)
-├── agents/               # Specialist agent definitions (19 agent cards)
-├── bin/                  # Agent binary entrypoints
-├── corpos/               # Arch-CorpOS autonomous business loops
-├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool, post-tool, worktree)
+├── agents/               # Specialist agent definitions (18 local + 1 symlinked)
+├── bin/                  # Agent binary entrypoints (ralph, ralph.cjs)
+├── context/              # Context injection templates
+├── hooks/                # Lifecycle hooks (pre-invocation, pre-tool, post-tool, worktree, budget)
 ├── hooks.json            # Hook registry
-├── loops/                # Background watchdog loops
-├── memory_base/          # Cross-session memory (retrospectives, knowledge graph)
-├── mcp_config.json       # MCP server configuration
-├── plans/                # Active planning artifacts
-├── reports/              # Generated audit reports
-├── rules/                # Permanent engineering rules (49 rule files)
-├── run-manifests/        # Reproducibility manifests
-├── skills/               # 11 agent skills (SKILL.md + scripts + resources)
+├── mcp_config.json       # MCP server configuration (6 servers)
+├── memory_base/          # Cross-session memory (retrospectives, index)
+├── references/           # Infrastructure references (vercel-infrastructure.md)
+├── rules/                # Permanent engineering rules (50 rule files)
+├── skills/               # 11 local skills (+ 3 federated symlinks)
 └── skills.json           # Skill registry
 ```
 
@@ -227,7 +230,7 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 ### Agent Tracing
 
-- Read the affected package's `AGENT_TRACER.md` before editing; update it after changes.
+- Read root `AGENT_TRACER.md` before editing; append ISO-8601 entries to root `AGENT_TRACER.md` after changes (never create per-package `*/AGENT_TRACER.md` files).
 - Add `// AGENT-TRACE:` breadcrumbs for non-obvious logic.
 - Instrument new service paths with OpenTelemetry / prom-client where applicable.
 
@@ -237,7 +240,7 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 - **Type errors after migration**: regenerate types (`pnpm --filter @repo/database db:types`).
 - **RLS issues**: `pnpm audit:rls`.
-- **Design violations**: `pnpm audit:design` or `pnpm lint:tokens`.
+- **Design violations**: `pnpm audit:design` or `pnpm audit:tokens`.
 - **Jest can't resolve a workspace import**: add it to `moduleNameMapper` (§ Testing gotchas).
 - **Policy drift failure**: run `pnpm policy:gen`, inspect the diff, commit generated files with the source change.
 - **Cache issues**: `pnpm clean:caches` (`status:caches` to inspect).
@@ -247,7 +250,7 @@ App Router groups: `(auth)/`, `(departments)/[department]/`, `hub/`, `admin/`, `
 
 ## 8. Environment Files
 
-- Portal env: `apps/portal/.env` (copy from `apps/portal/env/.env.example`).
+- Portal env: `apps/portal/.env` (copy from `apps/portal/.env.example`).
 - Root `.env` is tooling (Docker, monitoring, AI providers); `.env.tools` for the tools stack.
 - Full reference: `docs/ENVIRONMENT_FILES_GUIDE.md`.
 
@@ -288,23 +291,21 @@ These hard stops are **always in force**, with no approval path:
 
 ## 10. Cross-References
 
-| Resource                       | Location                          | Purpose                                                                    |
-| :----------------------------- | :-------------------------------- | :------------------------------------------------------------------------- |
-| **Architecture & Domain SSoT** | `AGENTS.md` (root)                | Full architecture, data flow, personas, invariants, SSoT table             |
-| **skills-mcp Registry**        | `skills-mcp/`                     | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)      |
-| **Engineering Rules**          | `.agents/rules/`                  | 49 permanent rule files covering security, verification, testing, thinking |
-| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 11 reusable workflow skills (dynamically leased via `acquire_skill`)       |
-| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 19 specialist agent definitions (queried via `list_available_personas`)    |
-| **A2A Protocol**               | `.agents/a2a/SPEC.md`             | Agent-to-Agent communication protocol                                      |
-| **Memory Base**                | `.agents/memory_base/`            | Cross-session error retrospectives and knowledge graph                     |
-| **CorpOS Loops**               | `.agents/corpos/`                 | Autonomous business loop engine                                            |
-| **Lifecycle Hooks**            | `.agents/hooks/`                  | Pre/post tool guards and tracing                                           |
+| Resource                       | Location                          | Purpose                                                                           |
+| :----------------------------- | :-------------------------------- | :-------------------------------------------------------------------------------- |
+| **Architecture & Domain SSoT** | `AGENTS.md` (root)                | Full architecture, data flow, personas, invariants, SSoT table                    |
+| **skills-mcp Registry**        | `skills-mcp/`                     | Anti-bloat on-demand skill, context, and persona registry (MCP stdio)             |
+| **Engineering Rules**          | `.agents/rules/`                  | 50 permanent rule files covering security, verification, testing, thinking        |
+| **Agent Skills**               | `skills-mcp/` / `.agents/skills/` | 10 local (+ 3 symlinked) workflow skills (dynamically leased via `acquire_skill`) |
+| **Agent Cards & Personas**     | `skills-mcp/` / `.agents/agents/` | 19 specialist agent definitions (18 local + 1 symlinked)                          |
+| **A2A Protocol**               | `.agents/a2a/SPEC.md`             | Agent-to-Agent communication protocol & 18 registry cards                         |
+| **Memory Base**                | `.agents/memory_base/`            | Cross-session error retrospectives and index                                      |
+| **Swarm & Ralph Runners**      | `.agents/bin/` / `tools/scripts/` | `ralph.cjs` autonomous runner & `pnpm agent:swarm`                                |
+| **Lifecycle Hooks**            | `.agents/hooks/`                  | Pre/post tool guards, budget checks, and tracing                                  |
 
 ---
 
----
-
-## 12. Spec-Based Foundational Approach to Tasks
+## 11. Spec-Based Foundational Approach to Tasks
 
 All non-trivial tasks (multi-file changes, new dependencies, schema/API changes, or behavioral changes) MUST follow a spec-based foundational approach:
 

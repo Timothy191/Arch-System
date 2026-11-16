@@ -1,5 +1,6 @@
 module.exports = {
   testEnvironment: 'jsdom',
+  setupFiles: ['<rootDir>/setupFiles.ts'],
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
@@ -55,6 +56,7 @@ module.exports = {
     '^@repo/ui/Divider$': '<rootDir>/../../packages/ui/src/components/Divider.tsx',
     '^@repo/ui/BorderBox$': '<rootDir>/../../packages/ui/src/components/BorderBox.tsx',
     '^@repo/ui/GlassCard$': '<rootDir>/../../packages/ui/src/components/GlassCard.tsx',
+    '^@repo/ui/AnimeStagger$': '<rootDir>/../../packages/ui/src/components/motion/AnimeStagger.tsx',
     '^@repo/ui/DepartmentFilterToolbar$':
       '<rootDir>/../../packages/ui/src/components/DepartmentFilterToolbar.tsx',
     '^@repo/ui/Pagination$': '<rootDir>/../../packages/ui/src/components/ui/pagination.tsx',
@@ -86,7 +88,6 @@ module.exports = {
     '^@repo/shared/data-access$': '<rootDir>/../../libs/shared/data-access/src/index.ts',
     '^@repo/shared/utils$': '<rootDir>/../../libs/shared/utils/src/index.ts',
     '^@repo/shared/hooks$': '<rootDir>/../../libs/shared/hooks/src/index.ts',
-    '^@repo/ui/DataGrid$': '<rootDir>/../../packages/ui/src/components/ui/data-grid.tsx',
     '^@repo/ui/AnimatedList$': '<rootDir>/../../packages/ui/src/components/ui/animated-list.tsx',
     '^@repo/ui/EmptyState$': '<rootDir>/../../packages/ui/src/components/EmptyState.tsx',
     '^@repo/ui/Marquee$': '<rootDir>/../../packages/ui/src/components/ui/marquee.tsx',

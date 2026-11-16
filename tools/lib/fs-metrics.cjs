@@ -20,6 +20,7 @@ function getDirSize(dirPath, excludeDirs = []) {
   let totalSize = 0;
   for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
     const fullPath = path.join(dirPath, entry.name);
+    if (entry.isSymbolicLink()) continue;
     if (entry.isDirectory()) {
       if (excludeDirs.includes(entry.name)) continue;
       totalSize += getDirSize(fullPath, excludeDirs);

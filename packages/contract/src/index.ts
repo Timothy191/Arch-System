@@ -41,6 +41,7 @@ export {
   type AdminOperationalTargets,
   adminAddSiteSchema,
   adminDataDeleteSchema,
+  adminDataInsertSchema,
   adminDataQuerySchema,
   adminDataUpdateSchema,
   adminOperationalTargetsSchema,

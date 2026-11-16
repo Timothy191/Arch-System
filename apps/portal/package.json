@@ -30,7 +30,6 @@
     "@repo/shared/utils": "workspace:*",
     "@repo/supabase": "1.0.0",
     "@repo/theme": "1.0.0",
-    "@repo/typescript-config": "1.0.0",
     "@repo/ui": "1.0.0",
     "@repo/utils": "1.0.0",
     "@sentry/nextjs": "catalog:",
@@ -82,7 +81,8 @@
     "jest-environment-jsdom": "^30.2.0",
     "tailwindcss": "catalog:",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "jsdom": "^26.1.0"
   },
   "private": true,
   "scripts": {

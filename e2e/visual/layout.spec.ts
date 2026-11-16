@@ -48,7 +48,7 @@ test.describe('Visual Regression & Galen Spatial Layout Specs', () => {
 
   test('Login Page - Visual & Galen Spatial Check', async ({ page }) => {
     await page.goto('/login');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     const bodyLocator = page.locator('body');
     const mainForm = page.locator('form').first();
@@ -61,13 +61,13 @@ test.describe('Visual Regression & Galen Spatial Layout Specs', () => {
 
   test('Hub Dashboard - Visual Check', async ({ page }) => {
     await page.goto('/privacy');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveScreenshot('privacy-page.png', { fullPage: true });
   });
 
   test('Offline Fallback - Visual Check', async ({ page }) => {
     await page.goto('/offline');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveScreenshot('offline-page.png', { fullPage: true });
   });
 });

@@ -1,9 +1,9 @@
 {
   "version": "1.6.2",
-  "gitCommit": "78f07ce0",
-  "gitCommitFull": "78f07ce07ae0d9cf2382ab098ba639d3a9a0b4e4",
-  "gitBranch": "chore/antigravity-workspace",
-  "buildTimestamp": "2026-11-16T05:11:53.835Z",
+  "gitCommit": "bfcebe30",
+  "gitCommitFull": "bfcebe309152deb5bda22154f2f545a544d50f44",
+  "gitBranch": "main",
+  "buildTimestamp": "2026-11-16T12:09:35.525Z",
   "releaseName": "Arch OS v1.6.2 // Industrial Command",
   "systemCodename": "Industrial Telemetry Bus"
 }

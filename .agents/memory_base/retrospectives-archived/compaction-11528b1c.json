@@ -1,0 +1,35 @@
+{
+  "id": "compaction-11528b1c",
+  "timestamp": "2026-11-16T12:10:24.780Z",
+  "taskTag": "compaction-standard-11528b1c",
+  "category": "context-compaction",
+  "errorSignature": "compaction_decision:execute_full_compact",
+  "affectedFiles": [
+    "\"/home/tim/Fork/Arch-System/.agents/a2a/registry/spec-driven-implementer.json\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/ai-metrics-types.ts\"",
+    "\"/home/tim/Fork/Arch-System/apps/portal/lib/ai/vector-indexes.ts\"",
+    "\"/home/tim/Fork/Arch-System/.agents/rules/code-intelligence-substrate.md\"",
+    "\"/home/tim/Fork/Arch-System/.claude/settings.local.json\"",
+    "\"/home/tim/Fork/Arch-System/tools/lib/fs-metrics.cjs\"",
+    "\"/home/tim/Fork/Arch-System/.claude/settings.json\"",
+    "\"/home/tim/Fork/Arch-System/tools/scripts/agent-verify.sh\"",
+    "\"/home/tim/Fork/Arch-System/.cursor/rules/004-monorepo-dependencies.mdc\"",
+    "\"/home/tim/Fork/Arch-System/.qoder/skills/ci-local/SKILL.md\"",
+    "\"/home/tim/Fork/Arch-System/.github/workflows/reviewdog.yml\"",
+    "\"/home/tim/Fork/Arch-System/.github/workflows/antigravity-agent.yml\"",
+    "\"/home/tim/Fork/Arch-System/.gemini/sandbox.Dockerfile\"",
+    "\"/home/tim/Fork/Arch-System/mise.toml\"",
+    "\"/home/tim/Fork/Arch-System/libs/shared/utils/src/env.ts\""
+  ],
+  "rootCause": "Context fill exceeds 25% floor and turn spacing; full compaction + handoff spine enabled.",
+  "resolution": "Persisted bounded SKILL.state (421 chars) and 6-Section Artifact Trail to .handoff/handoff.{md,json}",
+  "preventionRule": "Always persist .handoff/handoff.{md,json} at >= 70% fill and route /compact/compact (< 25% fill) through consolidate_state_spine to preserve warm LLM prefix cache.",
+  "metrics": {
+    "mode": "standard",
+    "decision": "execute_full_compact",
+    "latestInputTokens": 364790,
+    "cacheHitRatio": 0.9455,
+    "checkpointCount": 0,
+    "avoidedCacheRebuildTokens": 0
+  }
+}

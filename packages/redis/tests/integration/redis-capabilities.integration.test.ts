@@ -631,7 +631,7 @@ describeIntegration('@repo/redis against a real server', () => {
 
       expect(matches.map((match) => match.id)).toEqual(['runway', 'taxiway']);
       expect(matches[1]!.fields.content).toBe('near the runway');
-      expect(Number(matches[0]!.fields.score)).toBeLessThan(Number(matches[1]!.fields.score));
+      expect(matches[0]!.score).toBeLessThan(matches[1]!.score);
       expect((await vectorIndexStats(spec.indexName)).numDocs).toBeGreaterThanOrEqual(3);
 
       expect(await dropVectorIndex(spec.indexName)).toBe(true);

@@ -1,11 +1,20 @@
 'use server';
 
-import { AuthError, DatabaseError } from '@repo/errors';
+import { AuthError, DatabaseError, RateLimitError } from '@repo/errors';
+import { FixedWindowStrategy, MemoryStore, RateLimiter } from '@repo/rate-limiter';
 import { cacheInvalidateTags, revokeSession } from '@repo/redis';
 import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 type AdminSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+const adminMutationLimiter = new RateLimiter({
+  store: new MemoryStore(),
+  strategy: new FixedWindowStrategy(),
+  limit: 30,
+  windowMs: 60_000,
+  keyPrefix: 'ratelimit:admin-mutation:',
+});
 
 /**
  * A role or department change must not wait out the session TTL. Bumping the
@@ -176,6 +185,11 @@ export async function createDepartment(payload: Record<string, unknown>) {
     throw new AuthError('Forbidden: admin role required', {
       context: { action: 'createDepartment', userId: user.id },
     });
+  }
+
+  const rateLimit = await adminMutationLimiter.check(user.id);
+  if (!rateLimit.allowed) {
+    throw new RateLimitError('Rate limit exceeded', { context: { action: 'createDepartment' } });
   }
 
   const { error } = await supabase.from('departments').insert(payload);
@@ -369,6 +383,11 @@ export async function upsertEmployeeAdmin(
 
   if (callerEmployee?.role !== 'admin') {
     return { success: false, error: 'Forbidden: admin role required' };
+  }
+
+  const rateLimit = await adminMutationLimiter.check(user.id);
+  if (!rateLimit.allowed) {
+    return { success: false, error: 'Rate limit exceeded' };
   }
 
   const resolvedFullName =

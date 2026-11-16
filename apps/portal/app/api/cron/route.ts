@@ -39,6 +39,11 @@ export const REGISTERED_VERCEL_CRONS: readonly CronScheduleDescriptor[] = [
     schedule: '0 7 * * *',
     description: 'Daily autonomous executive and operations research briefing dispatch',
   },
+  {
+    path: '/api/cron/webhook-deliveries',
+    schedule: '*/5 * * * *',
+    description: 'Process queued webhook deliveries from database triggers',
+  },
 ] as const;
 
 export async function GET(req: Request): Promise<NextResponse> {

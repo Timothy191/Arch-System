@@ -112,7 +112,7 @@ pnpm deps:lint
 ### Policy & Quality Gates
 
 ```bash
-# Compile architectural rules into ESLint boundaries
+# Compile architectural boundary & security rules (tools/repo/policy/*)
 pnpm policy:gen
 
 # Verify architectural rules and security checks in CI
@@ -198,13 +198,9 @@ under test.
 
 ### Database & Migrations
 
+> Normal development targets **cloud-hosted Supabase** exclusively; do not start a local Supabase container stack unless explicitly running local migration replay tests.
+
 ```bash
-# Start local Supabase container stack (migrations live in @repo/database/migrations)
-pnpm --filter @repo/database supabase:start
-
-# Reset local database and re-apply all migrations cleanly
-pnpm --filter @repo/database supabase:reset
-
 # Generate TypeScript database types (src/database.types.ts)
 pnpm --filter @repo/supabase supabase:gen-types
 

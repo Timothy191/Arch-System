@@ -32,7 +32,7 @@ flowchart TD
     subgraph MemoryRAG ["2. MULTI-TIER RAG & MEMORY BASE"]
         RufloVector["Ruflo HNSW Vector Memory (Local transformers.js)"]
         KGMemory["Knowledge Graph Memory (Entities / Relations)"]
-        AST_RAG["Codebase AST RAG (repowise / ast-grep)"]
+        AST_RAG["Codebase AST RAG (codemap / CodeGraph / ast-grep)"]
         DocRAG["Live Documentation RAG (context7 / deepwiki)"]
         ScrapeRAG["LAN Zero-Cost Web Scraper (Firecrawl @ 192.168.0.215:3002)"]
         RepoRetros["Project Memory Base (memory_base/retrospectives)"]
@@ -40,7 +40,7 @@ flowchart TD
 
     subgraph DAGWorkflows ["3. DAG PIPELINE & WORKFLOW ENGINES"]
         TurboDAG["Turborepo Monorepo Task DAG (^build, lint, test)"]
-        CorpOSDAG["Arch-CorpOS Business Loops DAG (win.sh Adaptive Signal Loops)"]
+        VerifyDAG["28-Gate Verification DAG (pnpm agent:verify)"]
         InngestDAG["Inngest Durable Event Functions DAG (Step/Saga execution)"]
     end
 
@@ -113,16 +113,16 @@ The environment unifies agent configuration across all runtimes on the developer
 
 The memory infrastructure spans from instant AST lookup to cross-session vector search and persistent knowledge graphs.
 
-| Tier                          | Component                 | Technology                                                        | Storage / Endpoint                    | Scope & Function                                                                                                                                            |
-| :---------------------------- | :------------------------ | :---------------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vector RAG**                | Ruflo HNSW Memory         | `@claude-flow/cli`, `transformers.js` (`Xenova/all-MiniLM-L6-v2`) | Local SQLite / Vector DB              | Semantics-based search over architectural patterns, solutions, and subagent trajectory logs. Zero cloud embedding cost.                                     |
-| **Graph RAG**                 | Knowledge Graph Memory    | `@modelcontextprotocol/server-memory`                             | Stdio MCP                             | Entity-relation knowledge graph (`create_entities`, `create_relations`, `search_nodes`) mapping cross-project concepts.                                     |
-| **Codebase AST RAG**          | Repowise & ast-grep       | `repowise mcp`, `sg`                                              | `Arch-System` source tree             | Deep AST code intelligence, symbol definitions, circular dependency detection, and change risk scoring.                                                     |
-| **Library Docs RAG**          | Context7                  | `@upstash/context7-mcp`                                           | Upstash Remote / Local MCP            | Real-time version-pinned documentation and type definitions for libraries (React 19, Next.js 16, Tailwind).                                                 |
-| **Ephemeral Skill & Context** | Skills & Context Registry | `skills-mcp` (`dist/index.js`)                                    | Stdio MCP                             | Anti-bloat on-demand skill, context, and persona registry (`acquire_skill`, `acquire_context`, `list_available_personas`). Leased and returned per subtask. |
-| **Public Git RAG**            | DeepWiki                  | `https://mcp.deepwiki.com/mcp`                                    | Remote MCP                            | Instant access to public GitHub repository documentation and open-source implementation guides.                                                             |
-| **Web & LAN RAG**             | Firecrawl Local Scraper   | `firecrawl-mcp` wrapper                                           | `http://192.168.0.215:3002/v2/scrape` | High-speed markdown conversion of public documentation, RFCs, and API references without cloud tokens or rate limits.                                       |
-| **Retrospective SSoT**        | Project Memory Base       | JSON / Markdown Files                                             | `.agents/memory_base/`                | Cross-session retrospective logbook, incident post-mortems, and architectural lessons learned.                                                              |
+| Tier                          | Component                     | Technology                                                        | Storage / Endpoint                    | Scope & Function                                                                                                                                            |
+| :---------------------------- | :---------------------------- | :---------------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vector RAG**                | Ruflo HNSW Memory             | `@claude-flow/cli`, `transformers.js` (`Xenova/all-MiniLM-L6-v2`) | Local SQLite / Vector DB              | Semantics-based search over architectural patterns, solutions, and subagent trajectory logs. Zero cloud embedding cost.                                     |
+| **Graph RAG**                 | Knowledge Graph Memory        | `@modelcontextprotocol/server-memory`                             | Stdio MCP                             | Entity-relation knowledge graph (`create_entities`, `create_relations`, `search_nodes`) mapping cross-project concepts.                                     |
+| **Codebase AST RAG**          | Codemap, CodeGraph & ast-grep | `codemap mcp`, `sg`, `ci:reindex`                                 | `Arch-System` source tree             | Deep AST code intelligence, symbol definitions, circular dependency detection, and TDAD impact analysis.                                                    |
+| **Library Docs RAG**          | Context7                      | `@upstash/context7-mcp`                                           | Upstash Remote / Local MCP            | Real-time version-pinned documentation and type definitions for libraries (React 19, Next.js 16, Tailwind).                                                 |
+| **Ephemeral Skill & Context** | Skills & Context Registry     | `skills-mcp` (`dist/index.js`)                                    | Stdio MCP                             | Anti-bloat on-demand skill, context, and persona registry (`acquire_skill`, `acquire_context`, `list_available_personas`). Leased and returned per subtask. |
+| **Public Git RAG**            | DeepWiki                      | `https://mcp.deepwiki.com/mcp`                                    | Remote MCP                            | Instant access to public GitHub repository documentation and open-source implementation guides.                                                             |
+| **Web & LAN RAG**             | Firecrawl Local Scraper       | `firecrawl-mcp` wrapper                                           | `http://192.168.0.215:3002/v2/scrape` | High-speed markdown conversion of public documentation, RFCs, and API references without cloud tokens or rate limits.                                       |
+| **Retrospective SSoT**        | Project Memory Base           | JSON / Markdown Files                                             | `.agents/memory_base/`                | Cross-session retrospective logbook, incident post-mortems, and architectural lessons learned.                                                              |
 
 ---
 
@@ -139,12 +139,11 @@ graph TD
         T_Redis --> T_Portal["apps/portal (Next.js 16 Build)"]
     end
 
-    subgraph CorpOSBusinessDAG ["Arch-CorpOS Business Loop DAG (win.sh)"]
-        C_Signal["1. Telemetry / Git Signal"] --> C_Brief["2. Synthesize Markdown Brief"]
-        C_Brief --> C_Worktree["3. Isolated Worktree Mutation"]
-        C_Worktree --> C_Gate["4. Quality Gate & Jest Assertions"]
-        C_Gate --> C_Outcome["5. Generate Impact Outcome Card"]
-        C_Outcome --> C_Journal["6. Commit to journal.jsonl"]
+    subgraph VerifyGateDAG ["28-Gate Verification & Ralph Loop DAG"]
+        V_Policy["1. Policy & Boundary Check"] --> V_Types["2. TypeScript & Contract Drift"]
+        V_Types --> V_Lint["3. Biome, Stylelint & Token Audits"]
+        V_Lint --> V_Test["4. Jest & Migration RLS Tests"]
+        V_Test --> V_Evidence["5. Emit .ci-local/agent-verify-evidence.json"]
     end
 
     subgraph InngestEventDAG ["Inngest Durable Function DAG"]
@@ -161,18 +160,14 @@ graph TD
 - Enforces topological execution order (`^build`, `^lint`, `^test`).
 - Hashes source inputs, environment variables, and downstream package dependencies for deterministic caching.
 
-### 3.2 Arch-CorpOS Autonomous Business Loops DAG (`.agents/corpos/`)
+### 3.2 Autonomous Verification & Ralph Loop DAG (`pnpm agent:verify` / `.agents/bin/ralph.cjs`)
 
-- Combines concepts from `win.sh`, `SafetyMP/CorpOS`, and `ai-company`.
-- Replaces rigid cron jobs with signal-driven, adaptive loops.
+- Enforces fail-fast 28-gate verification (`tools/scripts/agent-verify.sh`) and cryptographic evidence generation (`.ci-local/agent-verify-evidence.json`).
 - **Workflow:**
-  1. **Signal Intake:** Monitors SCADA anomaly thresholds, git commit triggers, or test regressions.
-  2. **Brief First:** Compiles `briefs/<tick_id>.md` detailing scope, necessity, and safety budget.
-  3. **Worktree Isolation:** Executes code modifications within a temporary Git worktree (`storage/worktrees/`).
-  4. **Quality Gate:** Automated AST lint, type-check, and regression tests.
-  5. **Outcome Evaluation:** Produces `outcomes/<tick_id>.md` measuring metric deltas.
-  6. **Append-Only Journal:** Logs execution metadata to `journal.jsonl`.
-  7. **Adaptive Scheduling:** Dynamically expands or contracts the next tick interval based on system health.
+  1. **Preflight & Policy:** Runs `pnpm policy:check`, `pnpm audit:drift`, and `pnpm audit:compliance`.
+  2. **Static & Token Audits:** Validates Biome formatting, Stylelint, OKLCH tokens, Tailwind composition, and RSC/caching invariants.
+  3. **Tests & RLS:** Executes Jest unit tests and `@repo/database` migration/RLS safety checks.
+  4. **Evidence Receipt:** Writes signed gate timings and SHA-256 hashes to `.ci-local/agent-verify-evidence.json`.
 
 ### 3.3 Inngest Durable Execution DAG (`packages/utils/inngest`)
 
@@ -232,21 +227,9 @@ sequenceDiagram
 - Uses distributed claims (`claims_claim`, `claims_release`, `claims_handoff`) to guarantee that only one agent modifies a given package, route, or schema at a time.
 - Employs swarm consensus (`hive-mind_consensus`) to resolve architectural conflicts between specialist subagents.
 
-### 4.3 Canonical Workspace Agent Registry (`.agents/a2a/registry/`)
+### 4.3 Canonical Monorepo Agent Registry (`Arch-System/.agents/a2a/registry/`)
 
-The workspace registers 9 canonical agents in [.agents/a2a/registry/index.json](file:///home/tim/Fork/.agents/a2a/registry/index.json) strictly following the 9 pillars:
-
-| Agent Card                                                                                            | Role & Mode         | Authority Tier | Runtime Model            | Core Purpose                                                                                     |
-| :---------------------------------------------------------------------------------------------------- | :------------------ | :------------- | :----------------------- | :----------------------------------------------------------------------------------------------- |
-| **[`core-coordinator.json`](file:///home/tim/Fork/.agents/a2a/registry/core-coordinator.json)**       | Master Coordinator  | L1 Advisor     | `gemini-2.5-flash (low)` | Multi-agent task decomposition, RISEN prompt construction, and context budget allocation.        |
-| **[`federation-auditor.json`](file:///home/tim/Fork/.agents/a2a/registry/federation-auditor.json)**   | Parity Auditor      | L0 Observer    | `gemini-2.5-flash (low)` | Inspects Git HEAD vs Vercel deployments and verifies cross-service CSP allowlists.               |
-| **[`deployment-sentinel.json`](file:///home/tim/Fork/.agents/a2a/registry/deployment-sentinel.json)** | Deployment Sentinel | L3 Executive   | `gemini-2.5-flash (low)` | Preflight checks, scoped Vercel dispatch, post-deploy health probes, and automated rollback.     |
-| **[`maker-checker-gate.json`](file:///home/tim/Fork/.agents/a2a/registry/maker-checker-gate.json)**   | Dual-Mind Checker   | L1 Advisor     | `gemini-2.5-flash (low)` | Independent AST review, anti-mock invariant verification, and static quality scoring ($\ge 90$). |
-| **[`contract-sync-agent.json`](file:///home/tim/Fork/.agents/a2a/registry/contract-sync-agent.json)** | Contract Specialist | L2 Operator    | `gemini-2.5-flash (low)` | Synchronizes Zod contracts and DTOs between `@repo/contract`, proxy, and redis engine.           |
-| **[`memory-curator.json`](file:///home/tim/Fork/.agents/a2a/registry/memory-curator.json)**           | Memory Curator      | L1 Advisor     | `gemini-2.5-flash (low)` | Retrospective indexing, Knowledge Graph sync, and local Ruflo HNSW vector curation.              |
-| **[`rag-librarian.json`](file:///home/tim/Fork/.agents/a2a/registry/rag-librarian.json)**             | RAG Librarian       | L0 Observer    | `gemini-2.5-flash (low)` | Context7, DeepWiki, and local unauthenticated Firecrawl scraper (`192.168.0.215:3002`).          |
-| **[`hitl-bridge.json`](file:///home/tim/Fork/.agents/a2a/registry/hitl-bridge.json)**                 | HITL Sentinel       | L3 Executive   | `gemini-2.5-flash (low)` | Authority matrix gatekeeper, approval cards in `storage/approvals/`, and Slack review channel.   |
-| **[`swarm-consensus.json`](file:///home/tim/Fork/.agents/a2a/registry/swarm-consensus.json)**         | Swarm Coordinator   | L1 Advisor     | `gemini-2.5-flash (low)` | Ruflo claims lock management (`claims_claim`), file contention avoidance, and hive-mind voting.  |
+`Arch-System/.agents/a2a/registry/` registers 18 specialist agent cards following the 9-pillar A2A schema (`core-coordinator.json`, `autonomous-orchestrator.json`, `autonomous-watchdog-supervisor.json`, `critique-council-reviewer.json`, `database-architect.json`, `ui-engineer.json`, `realtime-telemetry-engineer.json`, `resilience-field-engineer.json`, `security-quality-gatekeeper.json`, `system-simplifier.json`, `telemetry-codebase-architect.json`, `spec-breakdown-architect.json`, `spec-driven-implementer.json`, `ai-memory-curator.json`, `smart-indexer-agent.json`, `research-specialist.json`, `github-workflow-specialist.json`, `responder-orchestrator.json`). For parent federated workspace cards, see `/home/tim/Fork/.agents/a2a/registry/index.json`.
 
 ---
 
@@ -276,7 +259,7 @@ The workspace `/home/tim/Fork` coordinates five federated projects (per `.agents
 ├── langgraph-mcp/             # LangGraph orchestration server (Python, stdio MCP)
 └── .agents/                   # Workspace-level Agent Operating System
     ├── a2a/                   # Agent-to-Agent protocol bus, registry, and schemas
-    ├── corpos/                # Signal-driven business loops, authority gates, journal
+    ├── hooks/                 # Pre/post tool guards, budget checks, and tracing
     ├── memory_base/           # Cross-project retrospectives and index
     ├── rules/                 # Permanent cross-repo engineering mandates
     ├── skills/                # Federation audit, contract sync, deployment skills
@@ -285,7 +268,7 @@ The workspace `/home/tim/Fork` coordinates five federated projects (per `.agents
 
 ### Wiring Contracts
 
-1. **Redis:** `Arch-System/packages/redis` connects to a local Redis instance (no serverless REST sibling).
+1. **Redis:** `Arch-System/packages/redis` connects to local TCP Redis in development and serverless REST-compatible Redis in production.
 2. **MCP Registration:** `/home/tim/Fork/.mcp.json` registers the four first-party MCP siblings plus workspace utilities.
 3. **Cross-Project Auditing:** `tools/zero-drift-watchdog/bin/federated-audit.mjs` executes automated drift assertions between TypeScript contracts across all siblings.
 4. **Local Web Scraping:** `http://192.168.0.215:3002/v2/scrape` provides free, unauthenticated markdown extraction exclusively for agent intelligence.

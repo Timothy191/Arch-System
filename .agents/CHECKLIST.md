@@ -12,7 +12,7 @@ Before executing autonomous coding or orchestration tasks, verify that the local
 
 | Tool                     | Expected Path / Command                     | Test Command                   | Verification Criteria                   | Status          |
 | :----------------------- | :------------------------------------------ | :----------------------------- | :-------------------------------------- | :-------------- |
-| **Node.js**              | Mise-managed v24.15.0                       | `node -v`                      | Outputs `v24.15.0`                      | [x] Operational |
+| **Node.js**              | Mise-managed `>=24.0.0` (24.15.0 / 26.8.1)  | `node -v`                      | Outputs `v24+` (e.g., `v26.8.1`)        | [x] Operational |
 | **pnpm**                 | Pinned v9.15.9                              | `pnpm -v`                      | Outputs `9.15.9` (instant, no hang)     | [x] Operational |
 | **ast-grep (`sg`)**      | `/home/tim/.local/share/mise/shims/sg`      | `sg --version`                 | Structural AST search functional        | [x] Operational |
 | **difftastic (`difft`)** | `/usr/bin/difft`                            | `difft --version`              | Syntax-aware diffing functional         | [x] Operational |
@@ -33,9 +33,10 @@ Verify that core MCP servers respond correctly:
   curl -s http://192.168.0.215:3002/ | jq .
   # Must return {"message": "Firecrawl API", ...}
   ```
-- [x] **Repowise AST Codebase Intelligence:**
+- [x] **Codemap & CodeGraph AST Codebase Intelligence:**
   ```bash
-  /home/tim/.local/bin/repowise mcp /home/tim/Fork/Arch-System
+  /home/tim/.local/bin/codemap mcp --root /home/tim/Fork/Arch-System
+  pnpm audit:code-intelligence
   ```
 - [x] **Persistent Knowledge Graph (`memory`):**
       Registered in `~/.gemini/antigravity-cli/mcp/mcp.json` and `~/.cursor/mcp.json`.

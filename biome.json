@@ -26,7 +26,8 @@
       "!**/.junie",
       "!**/.pnpm-store",
       "!**/vercel.json",
-      "!**/app/.well-known/workflow"
+      "!**/app/.well-known/workflow",
+      "!**/.agents/memory_base"
     ]
   },
   "overrides": [

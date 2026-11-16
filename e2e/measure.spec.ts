@@ -54,7 +54,8 @@ test('measure metrics', async ({ page }) => {
   }
 
   await client.send('HeapProfiler.collectGarbage');
-  await page.waitForTimeout(1000);
+  // Give the browser one paint frame to report post-GC heap metrics.
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve(null))));
   const metrics3 = await client.send('Performance.getMetrics');
   const jsHeap3 = metrics3.metrics.find((m) => m.name === 'JSHeapUsedSize').value;
   console.log('Final Memory after navigations:', jsHeap3 / 1024 / 1024, 'MB');
