@@ -3,6 +3,39 @@
 import { revalidatePath } from 'next/cache';
 import { assertAccessControlRole } from './shared';
 
+const MUSTER_PERSONNEL_LIMIT = 100;
+const MUSTER_VISITORS_LIMIT = 50;
+const MUSTER_RECENT_LOGS_LIMIT = 50;
+const MUSTER_EVENTS_LIMIT = 100;
+
+interface MusterEventRow {
+  readonly personnel_id: string | null;
+  readonly badge_code: string | null;
+  readonly muster_point: string | null;
+  readonly status: string;
+  readonly recorded_at: string | null;
+}
+
+async function fetchRecentMusterEvents(
+  supabase: Awaited<ReturnType<typeof assertAccessControlRole>>['supabase']
+): Promise<readonly MusterEventRow[]> {
+  try {
+    const { data, error } = await supabase
+      .from('muster_events')
+      .select('personnel_id, badge_code, muster_point, status, recorded_at')
+      .order('recorded_at', { ascending: false })
+      .limit(MUSTER_EVENTS_LIMIT);
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as MusterEventRow[];
+  } catch {
+    return [];
+  }
+}
+
 export interface MusterPersonnelRecord {
   id: string;
   entityType: 'personnel' | 'visitor';
@@ -38,60 +71,34 @@ export interface MusterSummary {
 export async function getMusterRollCall(deptId: string): Promise<MusterSummary> {
   const { supabase } = await assertAccessControlRole();
 
-  const [personnelRes, visitorsRes, logsRes, musterEventsRes] = await Promise.all([
+  const [personnelRes, visitorsRes, logsRes, musterEvents] = await Promise.all([
     supabase
       .from('personnel')
       .select(
         'id, first_name, surname, emp_code, job_title, induction_expiry, medical_expiry, status'
       )
       .eq('department_id', deptId)
-      .limit(100),
+      .limit(MUSTER_PERSONNEL_LIMIT),
     supabase
       .from('visitors')
       .select('id, first_name, surname, company, reason_for_entry, status, check_in_time')
       .eq('department_id', deptId)
       .eq('status', 'Checked In')
-      .limit(50),
+      .limit(MUSTER_VISITORS_LIMIT),
     supabase
       .from('access_logs')
       .select('gate_location, scanned_at, access_granted, badge_id')
       .eq('department_id', deptId)
       .order('scanned_at', { ascending: false })
-      .limit(50),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            order: (
-              c: string,
-              opts: { ascending: boolean }
-            ) => {
-              limit: (n: number) => Promise<{
-                data: Array<{
-                  personnel_id: string | null;
-                  badge_code: string | null;
-                  muster_point: string | null;
-                  status: string;
-                  recorded_at: string | null;
-                }> | null;
-              }>;
-            };
-          };
-        };
-      }
-    )
-      .from('muster_events')
-      .select('personnel_id, badge_code, muster_point, status, recorded_at')
-      .order('recorded_at', { ascending: false })
-      .limit(100)
-      .catch(() => ({ data: null })),
+      .limit(MUSTER_RECENT_LOGS_LIMIT),
+    fetchRecentMusterEvents(supabase),
   ]);
 
   const persistedMusterMap = new Map<
     string,
     { status: MusterPersonnelRecord['status']; station: string | null; checkedOffAt: string | null }
   >();
-  for (const ev of musterEventsRes.data ?? []) {
+  for (const ev of musterEvents) {
     const key = ev.personnel_id || ev.badge_code;
     if (!key || persistedMusterMap.has(key)) continue;
     const mappedStatus: MusterPersonnelRecord['status'] =
@@ -249,19 +256,11 @@ export async function markPersonnelMusterStatus(payload: {
   const { supabase, user } = await assertAccessControlRole({ requireWrite: true });
 
   try {
-    const musterTable = (
-      supabase as unknown as {
-        from: (t: string) => {
-          insert: (v: Record<string, unknown>) => Promise<unknown>;
-        };
-      }
-    ).from('muster_events');
-
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       payload.entityId
     );
 
-    await musterTable.insert({
+    await supabase.from('muster_events').insert({
       personnel_id: isUuid ? payload.entityId : null,
       badge_code: payload.entityId,
       full_name: payload.entityId,

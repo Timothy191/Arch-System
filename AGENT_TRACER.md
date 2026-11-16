@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-11-16T08:38:00+02:00] - Resolve `/access-control` RSC Crash (React Error #441) & Dynamic Prerender Bailouts
+
+- **Root Cause**:
+  - `getMusterRollCall` in `apps/portal/app/(departments)/access-control/actions/muster.ts` chained `.catch(() => ({ data: null }))` directly on a `@supabase/postgrest-js` `PostgrestBuilder` query (`muster_events`). Because Postgrest builders implement `.then()` without `.catch()`, every RSC render of `/access-control` and `/access-control/muster` threw `TypeError: ...limit(...).catch is not a function` (`digest: '92936287'`), surfaced in production as Minified React error `#441`.
+  - Under Next.js 16 `cacheComponents: true`, the 5 non-`searchParams` `/access-control` RSC pages (`/access-control`, `/access-control/muster`, `/access-control/reports`, `/access-control/print-cards`, `/access-control/qr-codes`) hit `new Date()` / `Date.now()` (`getOperationalToday()`, `@supabase/auth-js`) and aborted Redis/Supabase `fetch()` calls during prerendering.
+- **Fixes Applied**:
+  - Replaced the `.catch()` chain on `muster_events` with `fetchRecentMusterEvents(supabase)` wrapped in `try/catch`, extracted named query-limit constants, and removed the unsafe `as unknown as` builder casts in [`muster.ts`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/actions/muster.ts>).
+  - Added `await connection()` from `next/server` in [`page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/page.tsx>), [`muster/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/muster/page.tsx>), [`reports/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/reports/page.tsx>), [`print-cards/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/print-cards/page.tsx>), and [`qr-codes/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/qr-codes/page.tsx>) to defer rendering cleanly to request time under `access-control/loading.tsx`.
+  - Added unit test coverage in [`muster.test.ts`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/actions/muster.test.ts>) (using a strict PostgREST-like thenable without `.catch()`) and [`page.test.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/page.test.tsx>), and registered both suites in [`test-departments.mjs`](file:///home/tim/Fork/Arch-System/tools/scripts/test-departments.mjs).
+  - Guarded [`validate-json.mjs`](file:///home/tim/Fork/Arch-System/tools/scripts/validate-json.mjs) with `fs.existsSync(f)` so unstaged working-tree deletions in `.agents/memory_base/` do not fail pre-commit validation with `ENOENT`.
+
 ## [2026-11-16T07:42:00+02:00] - Enforce Biome Formatting on `next.config.mjs` & Isolate `.mjs` Lint-Staged Rule
 
 - **Root Cause**: During commit hook execution on `e1672f66`, `.lintstagedrc.mjs` matched `apps/portal/next.config.mjs` in both the Biome JS/TS rule and the Prettier rule; hoisted `prettier@2.8.8` failed to parse ESM `prettier.config.mjs` and rewrote single quotes to double quotes, causing Vercel's `biome ci .` gate to fail with `BUILD_ERROR`.
@@ -15,7 +26,6 @@
 ## [2026-11-14T01:00:00+02:00] - Remove All Token Budget & Agent Restraint Enforcement (Tracking + Warning Retained)
 
 - **Phase 1 (Token Budget Removal)**:
-
   - `packages/agents/src/token-budget.ts`: `enforceHardCap` default `true` → `false`; removed `breached` from `RoleBudget.status` and `recordUsage` return type; removed hard-cap circuit-breaker and reserve-margin absorption logic; overruns set `status = 'warning'` + `warningTriggered = true` and never block; `DEFAULT_BUDGET_TIERS` kept as reference data.
   - `tools/scripts/token-tracker.cjs`: removed `MAX_AUTONOMOUS_TOKEN_BUDGET` constant (was 200000); auto-scaling uncapped/effectively unlimited; `checkBudget()` converts blocking `issues` to `console.warn` informational warnings, always returns `true`; `--budget-check` unconditionally `process.exit(0)`; `determineEffectiveTaskBudget()` strips `maxLeasedSkills`, `maxSubagents`, `maxPreTaskTokens` from `effectiveBudget` output.
   - `.agents/hooks/pre-task-budget-check.cjs`: rewrote from blocking check to tracking-only; wraps both `task-budget` and `budget-check` in try/catch; always `process.exit(0)`.
@@ -24,7 +34,6 @@
   - `packages/agents/src/token-budget.test.ts`: rewrote overrun tests to assert warning-only behavior; removed all `breached === true` / circuit-breaker assertions.
 
 - **Phase 2 (Agent Restraint Removal)**:
-
   - `.agents/rules/context-lifecycle-and-compaction.md`: removed `pnpm token:budget-check` and `get_active_leases` from Phase 1 preflight; removed tiered token limits (3.5k–104k, ≤1–4 skills, 0–6 subagents).
   - `.agents/skills/agent-accuracy-enforcement/SKILL.md`: replaced Section 7 "Token Budget Discipline" with "Token Budget Tracking (Non-Blocking)"; removed tiered limits and self-healing gate.
   - `.agents/rules/mandatory-ai-engineering-governance.md`: removed human approval requirement from Tier 4/5; agents may independently merge and deploy; removed "An agent must never grant itself additional permissions" restriction.

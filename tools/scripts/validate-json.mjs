@@ -15,7 +15,7 @@ function stripJsonComments(text) {
 const jsonFiles = execSync('git ls-files "*.json"', { encoding: 'utf8' })
   .split('\n')
   .filter(Boolean)
-  .filter((f) => !f.includes('node_modules'));
+  .filter((f) => !f.includes('node_modules') && fs.existsSync(f));
 
 // Also cover JSONC-style configs used by TS/Next.js toolchains.
 const jsoncFiles = execSync('git ls-files "*.jsonc" "tsconfig*.json" "jsconfig*.json"', {
@@ -23,7 +23,7 @@ const jsoncFiles = execSync('git ls-files "*.jsonc" "tsconfig*.json" "jsconfig*.
 })
   .split('\n')
   .filter(Boolean)
-  .filter((f) => !f.includes('node_modules'));
+  .filter((f) => !f.includes('node_modules') && fs.existsSync(f));
 
 let failed = 0;
 let total = 0;

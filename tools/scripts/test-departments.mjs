@@ -53,6 +53,8 @@ const DEPARTMENT_MATRIX = [
     entryFile: 'apps/portal/app/(departments)/access-control/page.tsx',
     proxyPattern: '/access-control',
     portalTests: [
+      'app/(departments)/access-control/page.test.tsx',
+      'app/(departments)/access-control/actions/muster.test.ts',
       'app/(departments)/access-control/access-logs/access-logs.test.tsx',
       'app/(departments)/access-control/card-actions/actions.test.ts',
       'app/(departments)/access-control/components/DashboardEntityStatus.test.tsx',

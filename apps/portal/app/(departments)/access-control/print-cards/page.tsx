@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import {
   getDepartmentsForCardStudio,
   getEmployeeCardProfiles,
@@ -7,6 +8,7 @@ import {
 import { Neo300PrintStudio } from './neo300-print-studio';
 
 export default async function PrintCardsPage() {
+  await connection();
   const [printer, employees, jobs, departments] = await Promise.all([
     getNeo300PrinterStatus(),
     getEmployeeCardProfiles(),

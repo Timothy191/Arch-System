@@ -1,6 +1,7 @@
 import { Skeleton } from '@repo/ui/components/ui/skeleton';
 import { Divider } from '@repo/ui/Divider';
 import nextDynamic from 'next/dynamic';
+import { connection } from 'next/server';
 import { getDepartmentContext } from '~/lib/dept-context';
 import {
   getAccessControlMetrics,
@@ -29,6 +30,7 @@ const DashboardEntityStatus = nextDynamic(() => import('./components/DashboardEn
 });
 
 export default async function AccessControlDashboardPage() {
+  await connection();
   const { deptId, today } = await getDepartmentContext({
     department: 'access-control',
   });
