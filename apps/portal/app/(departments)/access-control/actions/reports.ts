@@ -65,13 +65,50 @@ export async function getAccessReportsData(
   ]);
 
   const logs = logsRes.data ?? [];
-  const hasRealLogs = logs.length > 0;
-  const totalEvents = hasRealLogs ? logs.length : 624;
-  const deniedEvents = hasRealLogs
-    ? logs.filter((l: { access_granted: boolean }) => !l.access_granted).length
-    : 18;
+  const totalEvents = logs.length;
+  const deniedEvents = logs.filter((l: { access_granted: boolean }) => !l.access_granted).length;
   const grantedEvents = Math.max(0, totalEvents - deniedEvents);
-  const complianceRate = totalEvents > 0 ? Math.round((grantedEvents / totalEvents) * 100) : 100;
+  const complianceRate = totalEvents > 0 ? Math.round((grantedEvents / totalEvents) * 100) : 0;
+
+  // Denial taxonomy: group real denial reasons from access logs
+  const denialCounts: Record<string, number> = {};
+  for (const l of logs) {
+    if (!l.access_granted && l.denial_reason) {
+      denialCounts[l.denial_reason] = (denialCounts[l.denial_reason] ?? 0) + 1;
+    }
+  }
+  const denialTaxonomy = Object.entries(denialCounts)
+    .map(([reason, count]) => ({
+      reason,
+      count,
+      percentage: totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Gate traffic: group real access logs by gate location
+  const gateStats: Record<string, { inbound: number; outbound: number; lastSeen: string }> = {};
+  for (const l of logs) {
+    if (!gateStats[l.gate_location]) {
+      gateStats[l.gate_location] = { inbound: 0, outbound: 0, lastSeen: l.scanned_at };
+    }
+    if (l.direction === 'IN') gateStats[l.gate_location].inbound += 1;
+    if (l.direction === 'OUT') gateStats[l.gate_location].outbound += 1;
+    if (l.scanned_at > gateStats[l.gate_location].lastSeen) {
+      gateStats[l.gate_location].lastSeen = l.scanned_at;
+    }
+  }
+  const gateTraffic = Object.entries(gateStats)
+    .map(([gateName, stats]) => ({
+      gateName,
+      inbound: stats.inbound,
+      outbound: stats.outbound,
+      peakHour: stats.lastSeen,
+    }))
+    .sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
+
+  // Active credentials from real badge data
+  const activeCredentials = badgesRes.data?.filter((b: { is_active: boolean }) => b.is_active)
+    .length ?? 0;
 
   return {
     summary: {
@@ -79,42 +116,14 @@ export async function getAccessReportsData(
       grantedCount: grantedEvents,
       deniedCount: deniedEvents,
       complianceRate,
-      activeCredentials: badgesRes.data?.length ?? 142,
-      contractorHoursLogged: 1420.5,
+      activeCredentials,
+      contractorHoursLogged: 0,
     },
-    denialTaxonomy: [
-      { reason: 'Expired Safety Induction (DMRE Mandate)', count: 8, percentage: 44 },
-      { reason: 'Breathalyzer Interlock Fail (> 0.000‰ BAC)', count: 4, percentage: 22 },
-      { reason: 'Anti-Passback Sequence Violation', count: 3, percentage: 17 },
-      { reason: 'Unauthorized Zone Access Attempt', count: 2, percentage: 11 },
-      { reason: 'Revoked / Blacklisted Credential', count: 1, percentage: 6 },
+    denialTaxonomy: denialTaxonomy.length > 0 ? denialTaxonomy : [
+      { reason: 'No denials recorded', count: 0, percentage: 0 },
     ],
-    gateTraffic: [
-      {
-        gateName: 'Main North Inbound Boom',
-        inbound: 342,
-        outbound: 28,
-        peakHour: '05:30 - 06:30',
-      },
-      {
-        gateName: 'Main South Outbound Boom',
-        inbound: 12,
-        outbound: 318,
-        peakHour: '17:30 - 18:30',
-      },
-      {
-        gateName: 'Pit Alpha Turnstiles 1-4',
-        inbound: 284,
-        outbound: 198,
-        peakHour: '06:00 - 07:00',
-      },
-      { gateName: 'ROM Weighbridge RFID', inbound: 86, outbound: 84, peakHour: '11:00 - 12:00' },
-      {
-        gateName: 'Explosives Magazine Bunker',
-        inbound: 14,
-        outbound: 14,
-        peakHour: '09:00 - 10:00',
-      },
+    gateTraffic: gateTraffic.length > 0 ? gateTraffic : [
+      { gateName: 'No traffic recorded', inbound: 0, outbound: 0, peakHour: '—' },
     ],
     recentAudits: logs
       .slice(0, 15)

@@ -236,3 +236,39 @@ export const visitorPassRequestSchema = z.object({
 });
 
 export type VisitorPassRequestInput = z.infer<typeof visitorPassRequestSchema>;
+
+const GATE_ID_LENGTH = 64;
+const GATE_REASON_LENGTH = 256;
+const SCANNER_ID_LENGTH = 64;
+
+export const gatePulseSchema = z.object({
+  gateId: nonEmptyString.max(GATE_ID_LENGTH, 'Gate ID must be 64 characters or less'),
+  reason: nonEmptyString.max(GATE_REASON_LENGTH, 'Pulse reason must be 256 characters or less'),
+  scannerId: nonEmptyString.max(SCANNER_ID_LENGTH, 'Scanner ID must be 64 characters or less').optional().nullable(),
+});
+
+export type GatePulseInput = z.infer<typeof gatePulseSchema>;
+
+export const gateDenialSchema = z.object({
+  gateId: nonEmptyString.max(GATE_ID_LENGTH, 'Gate ID must be 64 characters or less'),
+  badgeId: uuidSchema,
+  reason: nonEmptyString.max(GATE_REASON_LENGTH, 'Denial reason must be 256 characters or less'),
+});
+
+export type GateDenialInput = z.infer<typeof gateDenialSchema>;
+
+export const musterStatusSchema = z.object({
+  entityId: z.string().trim().min(1, 'Entity ID cannot be empty'),
+  status: z.enum(['accounted', 'unaccounted', 'evacuated']),
+  station: z.string().max(150, 'Station name must be 150 characters or less').optional().nullable(),
+});
+
+export type MusterStatusInput = z.infer<typeof musterStatusSchema>;
+
+export const printCardRequestSchema = z.object({
+  personnelId: uuidSchema,
+  templateId: uuidSchema.optional().nullable(),
+  printCopies: z.number().int().min(1).max(5).default(1),
+});
+
+export type PrintCardRequestInput = z.infer<typeof printCardRequestSchema>;

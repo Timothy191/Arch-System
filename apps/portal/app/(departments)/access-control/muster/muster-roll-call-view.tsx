@@ -91,16 +91,44 @@ export function MusterRollCallView({ initialSummary }: MusterRollCallViewProps) 
       )
     );
 
+    const musterPayload = {
+      entityId: record.id,
+      status: nextStatus === 'accounted' ? 'accounted' : 'unaccounted',
+      station: nextStatus === 'accounted' ? (record.station || 'Muster Point Alpha') : undefined,
+    };
+
     try {
       setIsUpdating(record.id);
-      await markPersonnelMusterStatus({
-        entityId: record.id,
-        status: nextStatus === 'accounted' ? 'accounted' : 'unaccounted',
-        station: nextStatus === 'accounted' ? record.station || 'Muster Point Alpha' : undefined,
-      });
-      toast.success(
-        `${record.name} marked as ${nextStatus === 'accounted' ? 'ACCOUNTED (SAFE)' : 'UNACCOUNTED'}`
-      );
+
+      if (isOnline) {
+        // Online: call server action directly
+        await markPersonnelMusterStatus(musterPayload);
+        toast.success(
+          `${record.name} marked as ${nextStatus === 'accounted' ? 'ACCOUNTED (SAFE)' : 'UNACCOUNTED'}`
+        );
+      } else {
+        // Offline: persist to IndexedDB via offline queue for replay on reconnect
+        await enqueue({
+          url: '/api/access-control/muster',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            personnel_id: musterPayload.entityId,
+            entityId: musterPayload.entityId,
+            status: musterPayload.status,
+            station: musterPayload.station,
+            muster_point: musterPayload.station,
+            full_name: record.name,
+            entityName: record.name,
+            name: record.name,
+            badge_code: record.id,
+          }),
+          description: `Muster ${nextStatus}: ${record.name}`,
+        });
+        toast.info(
+          `${record.name} marked as ${nextStatus === 'accounted' ? 'ACCOUNTED (SAFE)' : 'UNACCOUNTED'} — saved offline, will sync when connection returns`
+        );
+      }
     } catch {
       // Revert on failure
       setRecords((prev) =>

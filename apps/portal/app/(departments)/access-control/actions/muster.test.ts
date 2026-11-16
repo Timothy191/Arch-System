@@ -33,6 +33,7 @@ function createPostgrestThenable(
   const builder: Record<string, unknown> = {
     select: jest.fn(() => builder),
     eq: jest.fn(() => builder),
+    in: jest.fn(() => builder),
     order: jest.fn(() => builder),
     limit: jest.fn(() => builder),
     insert: jest.fn(() => builder),
@@ -177,9 +178,9 @@ describe('Access Control Muster Server Actions', () => {
 
     const summary = await getMusterRollCall('dept-access-1');
 
-    expect(summary.totalSoulsOnSite).toBe(48);
-    expect(summary.accountedCount).toBe(42);
-    expect(summary.unaccountedCount).toBe(6);
+    expect(summary.totalSoulsOnSite).toBe(0);
+    expect(summary.accountedCount).toBe(0);
+    expect(summary.unaccountedCount).toBe(0);
     expect(summary.records).toEqual([]);
   });
 

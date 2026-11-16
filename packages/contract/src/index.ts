@@ -24,8 +24,14 @@ export { ValidationError } from './validation';
 
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from './schemas/access-card.schema';
 export {
+  type GateDenialInput,
+  gateDenialSchema,
+  type GatePulseInput,
+  gatePulseSchema,
   type MusterEventInput,
   musterEventsSchema,
+  type MusterStatusInput,
+  musterStatusSchema,
   type PlantDelayInput,
   type PlantHourlyLogInput,
   type PlantInventoryItemInput,
@@ -34,6 +40,8 @@ export {
   plantHourlyLogsSchema,
   plantInventoryItemsSchema,
   plantInventoryUsageSchema,
+  type PrintCardRequestInput,
+  printCardRequestSchema,
   type VisitorPassRequestInput,
   visitorPassRequestSchema,
 } from './schemas/access-control.schema';

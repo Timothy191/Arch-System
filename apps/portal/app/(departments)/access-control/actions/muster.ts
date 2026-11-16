@@ -3,13 +3,13 @@
 import { cacheInvalidateTags } from '@repo/redis';
 import { revalidatePath } from 'next/cache';
 import { assertAccessControlRole } from './shared';
+import { musterStatusSchema, type MusterStatusInput } from '@repo/contract';
+import { DatabaseError } from '@/lib/errors/error-classes';
 
 const MUSTER_PERSONNEL_LIMIT = 100;
 const MUSTER_VISITORS_LIMIT = 50;
 const MUSTER_RECENT_LOGS_LIMIT = 50;
 const MUSTER_EVENTS_LIMIT = 100;
-const FALLBACK_EMPTY_TOTAL_SOULS = 48;
-const FALLBACK_EMPTY_ACCOUNTED_SOULS = 42;
 
 interface MusterEventRow {
   readonly personnel_id: string | null;
@@ -37,6 +37,20 @@ async function fetchRecentMusterEvents(
   } catch {
     return [];
   }
+}
+
+function formatRelativeTime(isoTimestamp: string): string {
+  const now = new Date();
+  const then = new Date(isoTimestamp);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMs / 3_600_000);
+  const diffDays = Math.floor(diffMs / 86_400_000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min${diffMins === 1 ? '' : 's'} ago`;
+  if (diffHours < 24) return `${diffHours} hr${diffHours === 1 ? '' : 's'} ago`;
+  return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
 }
 
 export interface MusterPersonnelRecord {
@@ -132,6 +146,39 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
   const visitorsList = visitorsRes.data ?? [];
   const recentLogs = logsRes.data ?? [];
 
+  // Resolve last-seen gate/time per entity from recent access logs.
+  // access_logs.badge_id → badges.id → badges.personnel_id / badges.visitor_id
+  const lastSeenByEntity = new Map<
+    string,
+    { lastSeenTime: string; lastSeenGate: string }
+  >();
+  const badgeIdsInLogs = [...new Set(recentLogs.map((l) => l.badge_id).filter(Boolean))] as string[];
+
+  if (badgeIdsInLogs.length > 0) {
+    const { data: badgeRows } = await supabase
+      .from('badges')
+      .select('id, personnel_id, visitor_id')
+      .in('id', badgeIdsInLogs);
+
+    const badgeById = new Map<string, { id: string; personnel_id: string | null; visitor_id: string | null } | undefined>();
+    for (const b of (badgeRows ?? [])) {
+      badgeById.set(b.id, b);
+    }
+
+    // recentLogs is already ordered by scanned_at desc, so first occurrence per badge is the latest
+    for (const log of recentLogs) {
+      if (!log.badge_id) continue;
+      const badge = badgeById.get(log.badge_id);
+      if (!badge) continue;
+      const entityId = badge.personnel_id ?? badge.visitor_id;
+      if (!entityId || lastSeenByEntity.has(entityId)) continue;
+      lastSeenByEntity.set(entityId, {
+        lastSeenTime: formatRelativeTime(log.scanned_at),
+        lastSeenGate: log.gate_location,
+      });
+    }
+  }
+
   // Default muster stations
   const stations = [
     {
@@ -163,20 +210,15 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     const isMedicalValid = p.medical_expiry ? new Date(p.medical_expiry) > now : true;
 
     const persisted = persistedMusterMap.get(p.id) ?? persistedMusterMap.get(p.emp_code);
-    const isAccounted = persisted ? persisted.status === 'accounted' : index % 4 !== 0;
-    const targetSt = stations[index % stations.length] ?? stations[0]!;
-    const assignedStation = persisted ? persisted.station : isAccounted ? targetSt.name : null;
+    const isAccounted = persisted ? persisted.status === 'accounted' : true;
+    const assignedStation = persisted ? persisted.station : isAccounted ? stations[0]!.name : null;
     if (isAccounted && assignedStation) {
-      const matchedStation = stations.find((st) => st.name === assignedStation) ?? targetSt;
+      const matchedStation = stations.find((st) => st.name === assignedStation) ?? stations[0]!;
       matchedStation.count += 1;
     }
 
-    const assignedZone =
-      index % 3 === 0
-        ? 'Pit Alpha (Bench 04)'
-        : index % 3 === 1
-          ? 'Processing Plant'
-          : 'Workshop Bay 2';
+    const lastSeen = lastSeenByEntity.get(p.id);
+    const assignedZone = p.department_id ? 'Assigned Zone' : 'Unassigned';
 
     records.push({
       id: p.id,
@@ -185,9 +227,8 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       company: 'Plantcor Operations',
       roleOrPurpose: p.job_title ?? 'Mining Technician',
       assignedZone,
-      lastSeenTime: '12m ago',
-      lastSeenGate:
-        recentLogs[index % (recentLogs.length || 1)]?.gate_location ?? 'Pit Alpha Turnstiles',
+      lastSeenTime: lastSeen?.lastSeenTime ?? 'No recent scan',
+      lastSeenGate: lastSeen?.lastSeenGate ?? '—',
       status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
       station: assignedStation,
       checkedOffAt: persisted
@@ -208,13 +249,14 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
   for (const v of visitorsList) {
     const visitorFullName = `${v.first_name} ${v.surname}`;
     const persisted = persistedMusterMap.get(v.id) ?? persistedMusterMap.get(visitorFullName);
-    const isAccounted = persisted ? persisted.status === 'accounted' : index % 3 !== 0;
-    const stCharlie = stations[2] ?? stations[0]!;
-    const assignedStation = persisted ? persisted.station : isAccounted ? stCharlie.name : null;
+    const isAccounted = persisted ? persisted.status === 'accounted' : true;
+    const assignedStation = persisted ? persisted.station : isAccounted ? stations[0]!.name : null;
     if (isAccounted && assignedStation) {
-      const matchedStation = stations.find((st) => st.name === assignedStation) ?? stCharlie;
+      const matchedStation = stations.find((st) => st.name === assignedStation) ?? stations[0]!;
       matchedStation.count += 1;
     }
+
+    const lastSeen = lastSeenByEntity.get(v.id);
 
     records.push({
       id: v.id,
@@ -223,8 +265,8 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
       company: v.company ?? 'Contractor / Third Party',
       roleOrPurpose: v.reason_for_entry ?? 'Site Visit',
       assignedZone: 'Administration Complex',
-      lastSeenTime: '25m ago',
-      lastSeenGate: 'Main Gate',
+      lastSeenTime: lastSeen?.lastSeenTime ?? 'No recent scan',
+      lastSeenGate: lastSeen?.lastSeenGate ?? '—',
       status: persisted ? persisted.status : isAccounted ? 'accounted' : 'unaccounted',
       station: assignedStation,
       checkedOffAt: persisted
@@ -242,12 +284,9 @@ export async function getMusterRollCall(deptId: string): Promise<MusterSummary> 
     index++;
   }
 
-  const hasRecords = records.length > 0;
-  const totalSouls = hasRecords ? records.length : FALLBACK_EMPTY_TOTAL_SOULS;
-  const accounted = hasRecords
-    ? records.filter((r) => r.status === 'accounted').length
-    : FALLBACK_EMPTY_ACCOUNTED_SOULS;
-  const evacuated = hasRecords ? records.filter((r) => r.status === 'evacuated').length : 0;
+  const totalSouls = records.length;
+  const accounted = records.filter((r) => r.status === 'accounted').length;
+  const evacuated = records.filter((r) => r.status === 'evacuated').length;
   const unaccounted = Math.max(0, totalSouls - accounted - evacuated);
 
   return {
@@ -266,19 +305,26 @@ export async function markPersonnelMusterStatus(payload: {
   status: 'accounted' | 'unaccounted' | 'evacuated';
   station?: string;
 }): Promise<{ success: boolean }> {
+  const parsed = musterStatusSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new DatabaseError('Invalid muster status input', {
+      context: { issues: parsed.error.issues },
+    });
+  }
+
   const { supabase, user } = await assertAccessControlRole({ requireWrite: true });
 
   try {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      payload.entityId
+      parsed.data.entityId
     );
 
     await supabase.from('muster_events').insert({
-      personnel_id: isUuid ? payload.entityId : null,
-      badge_code: payload.entityId,
-      full_name: payload.entityId,
-      muster_point: payload.station ?? 'Primary Assembly Point A',
-      status: payload.status === 'unaccounted' ? 'missing' : payload.status,
+      personnel_id: isUuid ? parsed.data.entityId : null,
+      badge_code: parsed.data.entityId,
+      full_name: parsed.data.entityId,
+      muster_point: parsed.data.station ?? 'Primary Assembly Point A',
+      status: parsed.data.status === 'unaccounted' ? 'missing' : parsed.data.status,
       recorded_by: user?.id ?? null,
     });
   } catch {

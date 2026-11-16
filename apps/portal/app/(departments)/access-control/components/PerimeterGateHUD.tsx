@@ -1,34 +1,78 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
-import { Activity, RefreshCw, Sliders, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { Activity, RefreshCw, Sliders, Zap, WifiOff } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { useSupabaseRealtime } from '@repo/shared/hooks';
 import { type PerimeterGate, triggerGatePulse } from '../actions';
+
+const GATE_LOCATION_TO_ID: Record<string, string> = {
+  'Main Gate': 'GATE-01-NORTH',
+  'Main Gate Exit': 'GATE-02-SOUTH',
+  Turnstile: 'TURN-01-04-PIT',
+  'ROM Weighbridge': 'WEIGH-03-ROM',
+  'Explosives Magazine': 'VAULT-05-MAG',
+};
 
 interface PerimeterGateHUDProps {
   initialGates: PerimeterGate[];
 }
 
 export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
-  const [gates] = useState<PerimeterGate[]>(initialGates);
+  const [gates, setGates] = useState<PerimeterGate[]>(initialGates);
   const [pulsingGateId, setPulsingGateId] = useState<string | null>(null);
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
-  const handlePulse = async (gate: PerimeterGate) => {
-    try {
-      setPulsingGateId(gate.id);
-      const res = await triggerGatePulse(
-        gate.name,
-        `Authorized remote pulse from SOC Terminal (Gate: ${gate.id})`
-      );
-      toast.success(res.message);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to pulse gate barrier';
-      toast.error(message);
-    } finally {
-      setPulsingGateId(null);
-    }
-  };
+  // Realtime CDC subscription: stream new access_logs inserts into the gate HUD
+  const { status: realtimeStatus, error: realtimeError } = useSupabaseRealtime({
+    supabaseClient: supabase,
+    table: 'access_logs',
+    event: 'INSERT',
+    onInsert: useCallback(
+      (record: Record<string, unknown>) => {
+        const gateLocation = record.gate_location as string | undefined;
+        const gateId = GATE_LOCATION_TO_ID[gateLocation ?? ''];
+        if (!gateId) return;
+
+        const badgeId = record.badge_id as string | undefined;
+        setGates((current) =>
+          current.map((g) => {
+            if (g.id !== gateId) return g;
+            return {
+              ...g,
+              cycleCountToday: g.cycleCountToday + 1,
+              lastEventTime: 'Just now',
+              lastEntityPassed: badgeId ? `Badge ${badgeId.slice(0, 8)}` : 'Unknown badge',
+            };
+          })
+        );
+      },
+      []
+    ),
+  });
+
+  const handlePulse = useCallback(
+    async (gate: PerimeterGate) => {
+      try {
+        setPulsingGateId(gate.id);
+        const res = await triggerGatePulse(
+          gate.name,
+          `Authorized remote pulse from SOC Terminal (Gate: ${gate.id})`
+        );
+        toast.success(res.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to pulse gate barrier';
+        toast.error(message);
+      } finally {
+        setPulsingGateId(null);
+      }
+    },
+    []
+  );
+
+  const isRealtimeConnected = realtimeStatus === 'SUBSCRIBED';
 
   return (
     <GlassCard variant="window" className="p-5">
@@ -52,8 +96,20 @@ export function PerimeterGateHUD({ initialGates }: PerimeterGateHUDProps) {
         </div>
 
         <div className="flex items-center gap-2 font-mono text-[var(--text-secondary)] text-xs">
-          <Activity className="h-3.5 w-3.5 animate-pulse text-emerald-500" />
-          <span>Polling: 1,000ms • SCADA Gateway</span>
+          {isRealtimeConnected ? (
+            <>
+              <Activity className="h-3.5 w-3.5 animate-pulse text-emerald-500" />
+              <span>Realtime CDC • Supabase</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="h-3.5 w-3.5 text-red-500" />
+              <span>
+                Realtime {realtimeStatus.toLowerCase()}{' '}
+                {realtimeError ? `— ${realtimeError.message}` : ''}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
