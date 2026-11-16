@@ -44,7 +44,7 @@ async function getEmployeeBaseRecord(
 
   return withCache(
     async () => {
-      const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList ?? []);
       const query = db
         .from('employees')
         .select('full_name, role, employee_code, accessible_departments')
@@ -90,7 +90,7 @@ export async function getAccessibleDepartmentNames(
       const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
       if (accessibleDeptIds.length === 0) return [];
 
-      const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList ?? []);
       const { data: deptData, error: deptError } = await db
         .from('departments')
         .select('name')
@@ -171,7 +171,7 @@ export async function getEmployeeClearance(
         };
       }
 
-      const db = await createReadReplicaClient(cookieList);
+      const db = await createReadReplicaClient(cookieList ?? []);
       const { data: personnel } = await db
         .from('personnel')
         .select('emp_code, induction_expiry, medical_expiry')

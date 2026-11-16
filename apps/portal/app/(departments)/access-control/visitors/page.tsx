@@ -11,6 +11,7 @@ import {
 import { EmptyState } from '@repo/ui/EmptyState';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { Clock, Inbox } from 'lucide-react';
+import { connection } from 'next/server';
 import { getDepartmentContext } from '~/lib/dept-context';
 import { getVisitorsForDepartment } from '../actions';
 import { VisitorForm } from './visitor-form';
@@ -20,6 +21,7 @@ export default async function VisitorsPage({
 }: {
   searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
+  await connection();
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10);
   const pageSize = parseInt(params.pageSize || '50', 10);

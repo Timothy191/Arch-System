@@ -1,4 +1,5 @@
 import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
+import { connection } from 'next/server';
 import {
   getAccessLogsWithFilters,
   getEmployeeAttendanceSummary,
@@ -50,6 +51,7 @@ export default async function AccessLogsPage({
     dateRange?: string;
   }>;
 }) {
+  await connection();
   const params = await searchParams;
   const page = parseInt(params.page || String(DEFAULT_PAGE), 10);
   const pageSize = parseInt(params.pageSize || String(DEFAULT_PAGE_SIZE), 10);

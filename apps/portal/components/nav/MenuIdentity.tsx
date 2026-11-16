@@ -1,6 +1,7 @@
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
 import { Avatar } from '@repo/ui/components/ui/avatar';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { getEmployeeIdentity } from '@/lib/hub-departments';
 import { formatDisplayNameFromEmail, formatRoleLabel, getInitials } from '~/lib/profile';
 
@@ -13,6 +14,7 @@ import { formatDisplayNameFromEmail, formatRoleLabel, getInitials } from '~/lib/
  * first and the identity resolves behind it.
  */
 export async function MenuIdentity() {
+  await connection();
   const supabase = await createServerSupabaseClient();
   const identity = await getUserSafely(supabase);
 

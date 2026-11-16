@@ -11,6 +11,7 @@ import {
 } from '@repo/ui/components/ui/table';
 import { GlassCard } from '@repo/ui/GlassCard';
 import { QrCode, ShieldOff, UserCheck } from 'lucide-react';
+import { connection } from 'next/server';
 import { getProvisioningReferenceData } from '@/actions/employee-provisioning';
 import { EmployeeProvisioningModal } from '@/components/employee/EmployeeProvisioningModal';
 import { getDepartmentContext } from '~/lib/dept-context';
@@ -34,6 +35,7 @@ export default async function BadgesPage({
 }: {
   searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
+  await connection();
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10);
   const pageSize = parseInt(params.pageSize || '50', 10);

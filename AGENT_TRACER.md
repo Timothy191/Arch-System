@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-11-16T09:53:00+02:00] - Opt `MenuIdentity`, `searchParams` Access-Control Sub-Pages, & `hub-departments` Out of Runtime-Prefetch Prerendering
+
+- **Root Cause**:
+  - Live Vercel production logs after commit `36a950be` confirmed zero `TypeError: ...catch is not a function` crashes (`#441` resolved), but still surfaced `blocking-prerender-current-time` (`Date.now()` in `@supabase/auth-js` `_recoverAndRefresh`) on `/access-control*` routes plus `cookies() can't be read inside "use cache"` in `apps/portal/lib/hub-departments.ts`.
+  - Under `partialPrefetching: true`, Next.js executes Runtime Prefetches where `MenuIdentity` (`RootLayout` `<Suspense>` boundary) and the 3 `searchParams`-reading `/access-control` sub-pages (`visitors`, `badges`, `access-logs`) ran `createServerSupabaseClient()` before `await connection()`, and `hub-departments.ts` `'use cache'` helpers called `createReadReplicaClient(cookieList)` with `undefined`.
+- **Fixes Applied**:
+  - Added `await connection()` before `createServerSupabaseClient()` in [`MenuIdentity.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/components/nav/MenuIdentity.tsx) and in [`visitors/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/visitors/page.tsx>), [`badges/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/badges/page.tsx>), and [`access-logs/page.tsx`](<file:///home/tim/Fork/Arch-System/apps/portal/app/(departments)/access-control/access-logs/page.tsx>).
+  - Passed `cookieList ?? []` to `createReadReplicaClient(...)` inside `'use cache'` helpers in [`hub-departments.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/hub-departments.ts) so omitted `cookieList` never triggers `await cookies()` inside a cached scope.
+  - Added [`MenuIdentity.test.tsx`](file:///home/tim/Fork/Arch-System/apps/portal/components/nav/MenuIdentity.test.tsx) and updated [`hub-departments.test.ts`](file:///home/tim/Fork/Arch-System/apps/portal/lib/hub-departments.test.ts) to assert `connection()` ordering and `[]` cookie pass-through.
+  - Updated [`.lintstagedrc.mjs`](file:///home/tim/Fork/Arch-System/.lintstagedrc.mjs) to pass `--no-errors-on-unmatched` to Biome so Biome-ignored staged files (such as `.agents/memory_base/index-snapshot.json`) do not fail pre-commit hooks.
+
 ## [2026-11-16T08:38:00+02:00] - Resolve `/access-control` RSC Crash (React Error #441) & Dynamic Prerender Bailouts
 
 - **Root Cause**:

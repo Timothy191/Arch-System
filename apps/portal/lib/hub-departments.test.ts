@@ -348,6 +348,7 @@ describe('hub-departments', () => {
 
       const identity = await getEmployeeIdentity('user-jane');
       expect(identity).toEqual({ fullName: 'Jane Doe', role: 'manager' });
+      expect(createReadReplicaClient).toHaveBeenCalledWith([]);
     });
 
     it('returns null fields when employee row is missing', async () => {
@@ -365,6 +366,7 @@ describe('hub-departments', () => {
 
       const identity = await getEmployeeIdentity('user-none');
       expect(identity).toEqual({ fullName: null, role: null });
+      expect(createReadReplicaClient).toHaveBeenCalledWith([]);
     });
   });
 });

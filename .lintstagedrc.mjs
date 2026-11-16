@@ -88,7 +88,7 @@ export default {
     ];
     // Process in chunks of 20 to keep memory low
     for (const batch of chunk(filtered, 20)) {
-      commands.push(`pnpm biome check --write ${batch.join(' ')}`);
+      commands.push(`pnpm biome check --write --no-errors-on-unmatched ${batch.join(' ')}`);
     }
     const spellFiles = files.filter((f) => !f.endsWith('database.types.ts'));
     for (const batch of chunk(spellFiles, 20)) {
@@ -128,7 +128,7 @@ export default {
     if (filtered.length === 0) return [];
     const commands = [];
     for (const batch of chunk(filtered, 30)) {
-      commands.push(`pnpm biome check --write ${batch.join(' ')}`);
+      commands.push(`pnpm biome check --write --no-errors-on-unmatched ${batch.join(' ')}`);
     }
     return commands;
   },
