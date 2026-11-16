@@ -9,7 +9,7 @@
  * that produced it.
  */
 
-import type { CreateSystemLogEntry, SystemLogSource } from '@repo/contract';
+import type { CreateSystemLogEntry } from '@repo/contract';
 import { serverLogger } from '@repo/logger';
 import { createServiceRoleClient } from '@repo/supabase/service-role';
 import * as React from 'react';
@@ -27,95 +27,97 @@ function taintServiceClient<T extends object>(client: T): T {
         client
       );
     } catch {
-      // Ignore outside RSC runtime
+      // taint not available in this runtime; ignore
     }
   }
   return client;
 }
 
-export interface RecordSystemLogInput extends CreateSystemLogEntry {
-  employeeId?: string | null;
-  departmentId?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-}
-
-export async function recordSystemLog(input: RecordSystemLogInput): Promise<void> {
-  // Skip silently when no Supabase backend is configured (local dev, tests) —
-  // missing telemetry infrastructure is not itself a warn-worthy event.
-  const hasBackend =
-    (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-    (process.env.SUPABASE_SECRET_KEY ??
-      process.env.SUPABASE_SERVICE_ROLE_KEY ??
-      process.env.SUPABASE_SERVICE_KEY);
-  if (!hasBackend) return;
-
-  try {
-    const serviceRole = taintServiceClient(createServiceRoleClient());
-    const { error } = await serviceRole.from('system_logs').insert({
-      level: input.level,
-      source: input.source,
-      category: input.category,
-      message: input.message.slice(0, 2000),
-      stack: input.stack ?? null,
-      context: input.context ?? {},
-      url: input.url ?? null,
-      method: input.method ?? null,
-      employee_id: input.employeeId ?? null,
-      department_id: input.departmentId ?? null,
-      ip_address: input.ipAddress ?? null,
-      user_agent: input.userAgent ?? null,
-    });
-
-    if (error) {
-      serverLogger.warn(
-        { err: error.message, source: input.source, category: input.category },
-        'Failed to persist system log entry'
-      );
-    }
-  } catch (persistError) {
-    serverLogger.warn(
-      {
-        err: persistError instanceof Error ? persistError.message : String(persistError),
-        source: input.source,
-      },
-      'System log persistence unavailable'
-    );
-  }
-}
-
 /**
- * Convenience wrapper for caught errors: extracts message/stack and records
- * them under the given source/category.
+ * Maps optional camelCase identity fields from the entry to snake_case
+ * DB columns. These are derived server-side but may be provided by
+ * callers (e.g. API routes with authenticated sessions).
  */
-export async function recordCaughtError(
-  error: unknown,
-  meta: {
-    source: SystemLogSource;
-    category?: string;
-    url?: string;
-    method?: string;
-    context?: Record<string, unknown>;
+function mapIdentityFields(
+  entry: CreateSystemLogEntry & {
+    employeeId?: string | null;
+    departmentId?: string | null;
+  }
+): {
+  employee_id: string | null;
+  department_id: string | null;
+} {
+  const employeeId = entry.employeeId ?? null;
+  const departmentId = entry.departmentId ?? null;
+  return { employee_id: employeeId, department_id: departmentId };
+}
+
+export async function recordSystemLog(
+  entry: CreateSystemLogEntry & {
+    traceId?: string;
+    requestId?: string;
     employeeId?: string | null;
     departmentId?: string | null;
     ipAddress?: string | null;
-    userAgent?: string | null;
   }
 ): Promise<void> {
-  const isError = error instanceof Error;
-  const plain = (error ?? {}) as Record<string, unknown>;
-  await recordSystemLog({
-    level: 'error',
-    source: meta.source,
-    category: meta.category ?? 'runtime',
-    message: isError ? error.message : String(plain.message ?? error),
-    stack: isError ? error.stack : (plain.stack as string | undefined),
-    context: { ...(meta.context ?? {}), errorName: isError ? error.name : undefined },
-    url: meta.url,
-    method: meta.method,
-    employeeId: meta.employeeId,
-    departmentId: meta.departmentId,
-    ipAddress: meta.ipAddress,
-    userAgent: meta.userAgent,
-  });
+  try {
+    const supabase = taintServiceClient(createServiceRoleClient());
+
+    // Map identity fields (employee_id, department_id) from the entry.
+    // These are derived server-side but may be supplied by callers with
+    // authenticated sessions. If not provided, they default to null in the DB.
+    const { employee_id, department_id } = mapIdentityFields(entry);
+
+    // Build the insert payload mapping camelCase to snake_case.
+    // Identity fields (employee_id, department_id, ip_address, user_agent)
+    // are derived server-side and are intentionally NOT client-settable.
+    // They are set here from the entry if provided, otherwise null.
+    const payload: Record<string, unknown> = {
+      level: entry.level,
+      source: entry.source,
+      category: entry.category ?? 'general',
+      message: entry.message,
+      stack: entry.stack ?? null,
+      context: entry.context ?? {},
+      url: entry.url ?? null,
+      method: entry.method ?? null,
+      employee_id,
+      department_id,
+      ip_address: entry.ipAddress ?? null,
+      user_agent: null,
+      resolved: false,
+      resolved_at: null,
+      resolved_by: null,
+      created_at: new Date().toISOString(),
+    };
+
+    // Inject traceId and requestId if provided
+    if (entry.traceId !== undefined) {
+      payload.trace_id = entry.traceId;
+    }
+    if (entry.requestId !== undefined) {
+      payload.request_id = entry.requestId;
+    }
+
+    const { error } = await supabase.from('system_logs').insert(payload);
+
+    if (error) {
+      // Telemetry must not crash the request that produced the error
+      await serverLogger.error(
+        { context: 'system_log_insert_failed' },
+        `system_log_insert_failed: ${error.message}`
+      );
+    }
+  } catch (err) {
+    // Never throw from telemetry
+    try {
+      await serverLogger.error(
+        { context: 'record_system_log_unexpected_error' },
+        `record_system_log_unexpected_error: ${err instanceof Error ? err.message : String(err)}`
+      );
+    } catch {
+      // best-effort only
+    }
+  }
 }

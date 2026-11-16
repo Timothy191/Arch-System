@@ -148,14 +148,14 @@ async function handlePost(request: NextRequest) {
 
   // Identity is derived from the session/request — never trusted from the body.
   const principal = await getAuthenticatedEmployee().catch(() => null);
+  const ipAddress = getClientIp(request);
   const entry = parsed.data;
 
   await recordSystemLog({
     ...entry,
     employeeId: principal?.employee?.id ?? null,
     departmentId: principal?.employee?.department_id ?? null,
-    ipAddress: getClientIp(request),
-    userAgent: request.headers.get('user-agent')?.slice(0, 500) ?? null,
+    ipAddress,
   });
 
   // 201 even when persistence silently failed — telemetry must not break clients.
