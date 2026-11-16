@@ -4,6 +4,14 @@
 
 ---
 
+## [2026-11-16T07:42:00+02:00] - Enforce Biome Formatting on `next.config.mjs` & Isolate `.mjs` Lint-Staged Rule
+
+- **Root Cause**: During commit hook execution on `e1672f66`, `.lintstagedrc.mjs` matched `apps/portal/next.config.mjs` in both the Biome JS/TS rule and the Prettier rule; hoisted `prettier@2.8.8` failed to parse ESM `prettier.config.mjs` and rewrote single quotes to double quotes, causing Vercel's `biome ci .` gate to fail with `BUILD_ERROR`.
+- **Fixes Applied**:
+  - Updated [`apps/portal/next.config.mjs`](file:///home/tim/Fork/Arch-System/apps/portal/next.config.mjs) via `biome check --write` to conform to workspace Biome formatting (`singleQuote`, `100`-column width).
+  - Removed `*.mjs` from `PRETTIER_GLOBS` and the Prettier task block in [`.lintstagedrc.mjs`](file:///home/tim/Fork/Arch-System/.lintstagedrc.mjs) so Biome exclusively owns `.mjs` formatting without Prettier `2.8.8` overlap.
+  - Added `"!**/app/.well-known/workflow"` to `files.includes` in [`biome.json`](file:///home/tim/Fork/Arch-System/biome.json) so generated `workflow/next` build artifacts do not trip local `biome ci .` runs after `next build`.
+
 ## [2026-11-14T01:00:00+02:00] - Remove All Token Budget & Agent Restraint Enforcement (Tracking + Warning Retained)
 
 - **Phase 1 (Token Budget Removal)**:

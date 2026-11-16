@@ -25,7 +25,8 @@
       "!**/.ci-local",
       "!**/.junie",
       "!**/.pnpm-store",
-      "!**/vercel.json"
+      "!**/vercel.json",
+      "!**/app/.well-known/workflow"
     ]
   },
   "overrides": [

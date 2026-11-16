@@ -8,7 +8,7 @@
  * 4. Run specialized tools (stylelint, theme lint, project tags) where appropriate.
  */
 
-const PRETTIER_GLOBS = ['*.json', '*.css', '*.mjs', '*.yaml', '*.yml'];
+const PRETTIER_GLOBS = ['*.css', '*.yaml', '*.yml'];
 
 const ESLINT_GLOBS = ['*.js', '*.jsx', '*.ts', '*.tsx', '*.cjs', '*.mjs'];
 
@@ -116,8 +116,25 @@ export default {
     return commands;
   },
 
-  // JSON / CSS / MJS / YAML / SQL / TOML → prettier only (excluding package.json which has syncpack)
-  '*.{json,css,mjs,yaml,yml}': (files) => {
+  // Non-package JSON → Biome (matches root biome.json formatting; skips vercel.json & generated files)
+  '*.json': (files) => {
+    const filtered = files.filter(
+      (f) =>
+        f.endsWith('.json') &&
+        !f.endsWith('package.json') &&
+        !f.endsWith('vercel.json') &&
+        !f.includes('.generated.')
+    );
+    if (filtered.length === 0) return [];
+    const commands = [];
+    for (const batch of chunk(filtered, 30)) {
+      commands.push(`pnpm biome check --write ${batch.join(' ')}`);
+    }
+    return commands;
+  },
+
+  // YAML → prettier only (.mjs and .json are owned by Biome; CSS is handled above)
+  '*.{css,yaml,yml}': (files) => {
     const filtered = files.filter(
       (f) =>
         matchesAny(f, PRETTIER_GLOBS) &&
