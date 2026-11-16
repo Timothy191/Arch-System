@@ -16,6 +16,7 @@ import { Printer, QrCode, ShieldOff, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { QRCodeSection } from '../card-actions/qr-section';
 import { revokeBadgeCredential } from '../qr-codes/actions';
 
 export interface ResolvedDepartmentBadge {
@@ -160,23 +161,20 @@ export function BadgesRegistryClient({
                 : 'Select a badge from the registry to securely display its scannable matrix code for physical printing or mobile sync.'}
             </p>
 
-            <div className="mt-4 flex h-48 w-48 items-center justify-center rounded-xl bg-[var(--bg-secondary)] p-3 shadow-card transition-[box-shadow] duration-500 group-hover:shadow-[var(--accent-blue)]/10">
-              {selectedBadge ? (
-                <div className="flex h-full w-full flex-col items-center justify-center space-y-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-primary)] p-3">
-                  <QrCode className="h-20 w-20 text-[var(--text-heading)]" />
-                  <span className="max-w-full truncate font-mono font-semibold text-[var(--accent-blue)] text-xs">
-                    {selectedBadge.qr_code}
-                  </span>
-                  <span className="max-w-full truncate text-[var(--text-muted)] text-xs">
-                    {selectedBadge.entity_name}
-                  </span>
-                </div>
-              ) : (
+            {selectedBadge ? (
+              <div className="mt-4 flex flex-col items-center space-y-2">
+                <QRCodeSection data={selectedBadge.qr_code} size={148} />
+                <span className="max-w-full truncate text-[var(--text-muted)] text-xs">
+                  {selectedBadge.entity_name}
+                </span>
+              </div>
+            ) : (
+              <div className="mt-4 flex h-48 w-48 items-center justify-center rounded-xl bg-[var(--bg-secondary)] p-3 shadow-card">
                 <div className="flex h-full w-full items-center justify-center rounded-lg border-2 border-[var(--border-subtle)] border-dashed bg-[var(--bg-tertiary)]">
                   <span className="font-medium text-[var(--text-muted)] text-xs">Select Badge</span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="mt-6 grid w-full grid-cols-2 gap-3">
               <Button
